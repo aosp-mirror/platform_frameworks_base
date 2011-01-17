@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
-
 import android.graphics.Bitmap;
+import android.media.videoeditor.MediaArtistNativeHelper.ClipSettings;
+import android.media.videoeditor.MediaArtistNativeHelper.Properties;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 
 /**
@@ -27,7 +31,10 @@ import android.view.SurfaceHolder;
  * {@hide}
  */
 public class MediaVideoItem extends MediaItem {
-    // Instance variables
+
+    /**
+     *  Instance variables
+     */
     private final int mWidth;
     private final int mHeight;
     private final int mAspectRatio;
@@ -41,13 +48,16 @@ public class MediaVideoItem extends MediaItem {
     private final int mAudioType;
     private final int mAudioChannels;
     private final int mAudioSamplingFrequency;
-
     private long mBeginBoundaryTimeMs;
     private long mEndBoundaryTimeMs;
     private int mVolumePercentage;
     private boolean mMuted;
     private String mAudioWaveformFilename;
-    // The audio waveform data
+    private MediaArtistNativeHelper mMANativeHelper;
+    private VideoEditorImpl mVideoEditor;
+    /**
+     *  The audio waveform data
+     */
     private SoftReference<WaveformData> mWaveformData;
 
     /**
@@ -68,10 +78,12 @@ public class MediaVideoItem extends MediaItem {
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    public MediaVideoItem(VideoEditor editor, String mediaItemId, String filename,
+    public MediaVideoItem(VideoEditor editor, String mediaItemId,
+            String filename,
             int renderingMode)
-        throws IOException {
-        this(editor, mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
+    throws IOException {
+        this(editor, mediaItemId, filename, renderingMode, 0, END_OF_FILE,
+                100, false, null);
     }
 
     /**
@@ -92,27 +104,59 @@ public class MediaVideoItem extends MediaItem {
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    MediaVideoItem(VideoEditor editor, String mediaItemId, String filename, int renderingMode,
+    MediaVideoItem(VideoEditor editor, String mediaItemId, String filename,
+            int renderingMode,
             long beginMs, long endMs, int volumePercent, boolean muted,
             String audioWaveformFilename)  throws IOException {
         super(editor, mediaItemId, filename, renderingMode);
-        // TODO: Set these variables correctly
-        mWidth = 1080;
-        mHeight = 720;
-        mAspectRatio = MediaProperties.ASPECT_RATIO_3_2;
-        mFileType = MediaProperties.FILE_MP4;
-        mVideoType = MediaProperties.VCODEC_H264BP;
-        // Do we have predefined values for this variable?
-        mVideoProfile = 0;
-        // Can video and audio duration be different?
-        mDurationMs = 10000;
-        mVideoBitrate = 800000;
-        mAudioBitrate = 30000;
-        mFps = 30;
-        mAudioType = MediaProperties.ACODEC_AAC_LC;
-        mAudioChannels = 2;
-        mAudioSamplingFrequency = 16000;
+        if (editor instanceof VideoEditorImpl) {
+            mMANativeHelper = ((VideoEditorImpl)editor).getNativeContext();
+            mVideoEditor = ((VideoEditorImpl)editor);
+        }
+        Properties properties = null;
+        try {
+             properties = mMANativeHelper.getMediaProperties(filename);
+        } catch ( Exception e) {
+            throw new IllegalArgumentException("Unsupported file or file not found");
+        }
+        switch (mMANativeHelper.getFileType(properties.fileType)) {
+            case MediaProperties.FILE_3GP:
+                break;
+            case MediaProperties.FILE_MP4:
+                break;
 
+            default:
+                throw new IllegalArgumentException("Unsupported Input File Type");
+        }
+
+        switch (mMANativeHelper.getVideoCodecType(properties.videoFormat)) {
+            case MediaProperties.VCODEC_H263:
+                break;
+            case MediaProperties.VCODEC_H264BP:
+                break;
+            case MediaProperties.VCODEC_H264MP:
+                break;
+            case MediaProperties.VCODEC_MPEG4:
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported Video Codec Format in Input File");
+        }
+
+        mWidth = properties.width;
+        mHeight = properties.height;
+        mAspectRatio = mMANativeHelper.getAspectRatio(properties.width,
+                properties.height);
+        mFileType = mMANativeHelper.getFileType(properties.fileType);
+        mVideoType = mMANativeHelper.getVideoCodecType(properties.videoFormat);
+        mVideoProfile = 0;
+        mDurationMs = properties.videoDuration;
+        mVideoBitrate = properties.videoBitrate;
+        mAudioBitrate = properties.audioBitrate;
+        mFps = (int)properties.averageFrameRate;
+        mAudioType = mMANativeHelper.getAudioCodecType(properties.audioFormat);
+        mAudioChannels = properties.audioChannels;
+        mAudioSamplingFrequency =  properties.audioSamplingFrequency;
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs == END_OF_FILE ? mDurationMs : endMs;
         mVolumePercentage = volumePercent;
@@ -120,7 +164,8 @@ public class MediaVideoItem extends MediaItem {
         mAudioWaveformFilename = audioWaveformFilename;
         if (audioWaveformFilename != null) {
             mWaveformData =
-                new SoftReference<WaveformData>(new WaveformData(audioWaveformFilename));
+                new SoftReference<WaveformData>(
+                        new WaveformData(audioWaveformFilename));
         } else {
             mWaveformData = null;
         }
@@ -143,10 +188,17 @@ public class MediaVideoItem extends MediaItem {
      */
     public void setExtractBoundaries(long beginMs, long endMs) {
         if (beginMs > mDurationMs) {
-            throw new IllegalArgumentException("Invalid start time");
+            throw new IllegalArgumentException("setExtractBoundaries: Invalid start time");
         }
         if (endMs > mDurationMs) {
-            throw new IllegalArgumentException("Invalid end time");
+            throw new IllegalArgumentException("setExtractBoundaries: Invalid end time");
+        }
+        if ((endMs != -1) && (beginMs >= endMs) ) {
+            throw new IllegalArgumentException("setExtractBoundaries: Start time is greater than end time");
+        }
+
+        if ((beginMs < 0) || ((endMs != -1) && (endMs < 0))) {
+            throw new IllegalArgumentException("setExtractBoundaries: Start time or end time is negative");
         }
 
         if (beginMs != mBeginBoundaryTimeMs) {
@@ -163,12 +215,14 @@ public class MediaVideoItem extends MediaItem {
 
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
-
+        mMANativeHelper.setGeneratePreview(true);
         adjustTransitions();
-
-        // Note that the start and duration of any effects and overlays are
-        // not adjusted nor are they automatically removed if they fall
-        // outside the new boundaries.
+        mVideoEditor.updateTimelineDuration();
+        /**
+         *  Note that the start and duration of any effects and overlays are
+         *  not adjusted nor are they automatically removed if they fall
+         *  outside the new boundaries.
+         */
     }
 
     /**
@@ -201,16 +255,45 @@ public class MediaVideoItem extends MediaItem {
      */
     @Override
     public Bitmap getThumbnail(int width, int height, long timeMs) {
-        return null;
+        if (timeMs > mDurationMs)
+        {
+            throw new IllegalArgumentException("Time Exceeds duration");
+        }
+        if (timeMs < 0)
+        {
+            throw new IllegalArgumentException("Invalid Time duration");
+        }
+        if ((width <=0) || (height <= 0))
+        {
+            throw new IllegalArgumentException("Invalid Dimensions");
+        }
+        return mMANativeHelper.getPixels(super.getFilename(),
+                width, height,timeMs);
     }
 
     /*
      * {@inheritDoc}
      */
     @Override
-    public Bitmap[] getThumbnailList(int width, int height, long startMs, long endMs,
-            int thumbnailCount) throws IOException {
-        return null;
+    public Bitmap[] getThumbnailList(int width, int height, long startMs,
+            long endMs, int thumbnailCount) throws IOException {
+        if (startMs > endMs) {
+            throw new IllegalArgumentException("Start time is greater than end time");
+        }
+        if (endMs > mDurationMs) {
+            throw new IllegalArgumentException("End time is greater than file duration");
+        }
+        if ((height <= 0) || (width <= 0)) {
+            throw new IllegalArgumentException("Invalid dimension");
+        }
+        if (startMs == endMs) {
+            Bitmap[] bitmap = new Bitmap[1];
+            bitmap[0] = mMANativeHelper.getPixels(super.getFilename(),
+                    width, height,startMs);
+            return bitmap;
+        }
+        return mMANativeHelper.getPixelsList(super.getFilename(), width,
+                height,startMs,endMs,thumbnailCount);
     }
 
     /*
@@ -218,7 +301,9 @@ public class MediaVideoItem extends MediaItem {
      */
     @Override
     void invalidateTransitions(long startTimeMs, long durationMs) {
-        // Check if the item overlaps with the beginning and end transitions
+        /**
+         *  Check if the item overlaps with the beginning and end transitions
+         */
         if (mBeginTransition != null) {
             if (isOverlapping(startTimeMs, durationMs,
                     mBeginBoundaryTimeMs, mBeginTransition.getDuration())) {
@@ -239,31 +324,39 @@ public class MediaVideoItem extends MediaItem {
      * {@inheritDoc}
      */
     @Override
-    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs, long newStartTimeMs,
+    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs,
+            long newStartTimeMs,
             long newDurationMs) {
-        // Check if the item overlaps with the beginning and end transitions
+        /**
+         *  Check if the item overlaps with the beginning and end transitions
+         */
         if (mBeginTransition != null) {
             final long transitionDurationMs = mBeginTransition.getDuration();
-            // If the start time has changed and if the old or the new item
-            // overlaps with the begin transition, invalidate the transition.
-            if (oldStartTimeMs != newStartTimeMs &&
+            /**
+             *  If the start time has changed and if the old or the new item
+             *  overlaps with the begin transition, invalidate the transition.
+             */
+            if (((oldStartTimeMs != newStartTimeMs)
+                    || (oldDurationMs != newDurationMs) )&&
                     (isOverlapping(oldStartTimeMs, oldDurationMs,
                             mBeginBoundaryTimeMs, transitionDurationMs) ||
-                    isOverlapping(newStartTimeMs, newDurationMs,
-                            mBeginBoundaryTimeMs, transitionDurationMs))) {
+                            isOverlapping(newStartTimeMs, newDurationMs,
+                                    mBeginBoundaryTimeMs, transitionDurationMs))) {
                 mBeginTransition.invalidate();
             }
         }
 
         if (mEndTransition != null) {
             final long transitionDurationMs = mEndTransition.getDuration();
-            // If the start time + duration has changed and if the old or the new
-            // item overlaps the end transition, invalidate the transition/
+            /**
+             *  If the start time + duration has changed and if the old or the new
+             *  item overlaps the end transition, invalidate the transition
+             */
             if (oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs &&
                     (isOverlapping(oldStartTimeMs, oldDurationMs,
                             mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs) ||
-                    isOverlapping(newStartTimeMs, newDurationMs,
-                            mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs))) {
+                            isOverlapping(newStartTimeMs, newDurationMs,
+                                    mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs))) {
                 mEndTransition.invalidate();
             }
         }
@@ -333,8 +426,28 @@ public class MediaVideoItem extends MediaItem {
      *             media item duration
      */
     public long renderFrame(SurfaceHolder surfaceHolder, long timeMs) {
-        return timeMs;
+        if (surfaceHolder == null) {
+            throw new IllegalArgumentException("Surface Holder is null");
+        }
+
+        if (timeMs > mDurationMs || timeMs < 0) {
+            throw new IllegalArgumentException("requested time not correct");
+        }
+
+        Surface surface = surfaceHolder.getSurface();
+        if (surface == null) {
+            throw new RuntimeException("Surface could not be retrieved from Surface holder");
+        }
+
+        if (mFilename != null) {
+            return mMANativeHelper.renderMediaItemPreviewFrame(surface,
+                    mFilename,timeMs,mWidth,mHeight);
+        }
+        else {
+            return 0;
+        }
     }
+
 
     /**
      * This API allows to generate a file containing the sample volume levels of
@@ -349,9 +462,59 @@ public class MediaVideoItem extends MediaItem {
      *             Audio track
      */
     public void extractAudioWaveform(ExtractAudioWaveformProgressListener listener)
-            throws IOException {
-        // TODO: Set mAudioWaveformFilename at the end once the export is complete
-        mWaveformData = new SoftReference<WaveformData>(new WaveformData(mAudioWaveformFilename));
+    throws IOException {
+        int frameDuration = 0;
+        int sampleCount = 0;
+        final String projectPath = mMANativeHelper.getProjectPath();
+        /**
+         *  Waveform file does not exist
+         */
+        if (mAudioWaveformFilename == null ) {
+            /**
+             * Since audioWaveformFilename will not be supplied,it is  generated
+             */
+            String mAudioWaveFileName = null;
+
+            mAudioWaveFileName =
+                String.format(projectPath + "/" + "audioWaveformFile-"+ getId() + ".dat");
+            /**
+             * Logic to get frame duration = (no. of frames per sample * 1000)/
+             * sampling frequency
+             */
+            if ( mMANativeHelper.getAudioCodecType(mAudioType) ==
+                MediaProperties.ACODEC_AMRNB ) {
+                frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AMRNB*1000)/
+                MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                sampleCount = MediaProperties.SAMPLES_PER_FRAME_AMRNB;
+            }
+            else if ( mMANativeHelper.getAudioCodecType(mAudioType) ==
+                MediaProperties.ACODEC_AMRWB ) {
+                frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AMRWB * 1000)/
+                MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                sampleCount = MediaProperties.SAMPLES_PER_FRAME_AMRWB;
+            }
+            else if ( mMANativeHelper.getAudioCodecType(mAudioType) ==
+                MediaProperties.ACODEC_AAC_LC ) {
+                frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AAC * 1000)/
+                MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                sampleCount = MediaProperties.SAMPLES_PER_FRAME_AAC;
+            }
+
+            mMANativeHelper.generateAudioGraph( getId(),
+                    mFilename,
+                    mAudioWaveFileName,
+                    frameDuration,
+                    MediaProperties.DEFAULT_CHANNEL_COUNT,
+                    sampleCount,
+                    listener,
+                    true);
+            /**
+             * Record the generated file name
+             */
+            mAudioWaveformFilename = mAudioWaveFileName;
+        }
+        mWaveformData =
+            new SoftReference<WaveformData>(new WaveformData(mAudioWaveformFilename));
     }
 
     /**
@@ -370,6 +533,16 @@ public class MediaVideoItem extends MediaItem {
     }
 
     /**
+     * Invalidate the AudioWaveform File
+     */
+    void invalidate() {
+        if (mAudioWaveformFilename != null) {
+            new File(mAudioWaveformFilename).delete();
+            mAudioWaveformFilename = null;
+        }
+    }
+
+    /**
      * @return The waveform data
      */
     public WaveformData getWaveformData() throws IOException {
@@ -381,7 +554,11 @@ public class MediaVideoItem extends MediaItem {
         if (waveformData != null) {
             return waveformData;
         } else if (mAudioWaveformFilename != null) {
-            waveformData = new WaveformData(mAudioWaveformFilename);
+            try {
+                waveformData = new WaveformData(mAudioWaveformFilename);
+            } catch(IOException e) {
+                throw e;
+            }
             mWaveformData = new SoftReference<WaveformData>(waveformData);
             return waveformData;
         } else {
@@ -397,6 +574,10 @@ public class MediaVideoItem extends MediaItem {
      * @throws UsupportedOperationException if volume value is not supported
      */
     public void setVolume(int volumePercent) {
+        if ((volumePercent <0) || (volumePercent >100)) {
+            throw new IllegalArgumentException("Invalid volume");
+        }
+
         mVolumePercentage = volumePercent;
     }
 
@@ -415,6 +596,13 @@ public class MediaVideoItem extends MediaItem {
      */
     public void setMute(boolean muted) {
         mMuted = muted;
+        if (mBeginTransition != null) {
+            mBeginTransition.invalidate();
+        }
+        if (mEndTransition != null) {
+            mEndTransition.invalidate();
+        }
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -479,4 +667,20 @@ public class MediaVideoItem extends MediaItem {
     public int getAudioSamplingFrequency() {
         return mAudioSamplingFrequency;
     }
+
+    /**
+     * @return The Video media item properties in ClipSettings class object
+     * {@link android.media.videoeditor.MediaArtistNativeHelper.ClipSettings}
+     */
+    ClipSettings getVideoClipProperties() {
+        ClipSettings clipSettings = new ClipSettings();
+        clipSettings.clipPath = getFilename();
+        clipSettings.fileType = mMANativeHelper.getMediaItemFileType(getFileType());
+        clipSettings.beginCutTime = (int)getBoundaryBeginTime();
+        clipSettings.endCutTime = (int)getBoundaryEndTime();
+        clipSettings.mediaRendering = mMANativeHelper.getMediaItemRenderingMode(getRenderingMode());
+
+        return clipSettings;
+    }
+
 }

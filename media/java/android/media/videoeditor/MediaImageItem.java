@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 
-package android.media.videoeditor;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+package android.media.videoeditor;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import java.util.ArrayList;
+import android.media.videoeditor.MediaArtistNativeHelper.ClipSettings;
+import android.media.videoeditor.MediaArtistNativeHelper.EditSettings;
+import android.media.videoeditor.MediaArtistNativeHelper.FileType;
+import android.media.videoeditor.MediaArtistNativeHelper.Properties;
 import android.util.Log;
 import android.util.Pair;
+
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.lang.Math;
+import java.util.List;
 
 /**
  * This class represents an image item on the storyboard. Note that images are
@@ -37,18 +48,31 @@ import android.util.Pair;
  * {@hide}
  */
 public class MediaImageItem extends MediaItem {
-    // Logging
+    /**
+     *  Logging
+     */
     private static final String TAG = "MediaImageItem";
 
-    // The resize paint
+    /**
+     *  The resize paint
+     */
     private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-    // Instance variables
+    /**
+     *  Instance variables
+     */
     private final int mWidth;
     private final int mHeight;
     private final int mAspectRatio;
     private long mDurationMs;
     private int mScaledWidth, mScaledHeight;
+    private String mScaledFilename;
+    private final VideoEditorImpl mVideoEditor;
+    private String mDecodedFilename;
+    private int mGeneratedClipHeight;
+    private int mGeneratedClipWidth;
+
+    private final MediaArtistNativeHelper mMANativeHelper;
 
     /**
      * This class cannot be instantiated by using the default constructor
@@ -69,12 +93,34 @@ public class MediaImageItem extends MediaItem {
      *
      * @throws IOException
      */
-    public MediaImageItem(VideoEditor editor, String mediaItemId, String filename, long durationMs,
-            int renderingMode)
-            throws IOException {
+    public MediaImageItem(VideoEditor editor, String mediaItemId,
+                         String filename, long durationMs,
+                         int renderingMode) throws IOException {
+
         super(editor, mediaItemId, filename, renderingMode);
 
-        // Determine the dimensions of the image
+        mMANativeHelper = ((VideoEditorImpl)editor).getNativeContext();
+        mVideoEditor = ((VideoEditorImpl)editor);
+        try {
+            final Properties properties =
+                                   mMANativeHelper.getMediaProperties(filename);
+
+            switch (mMANativeHelper.getFileType(properties.fileType)) {
+                case MediaProperties.FILE_JPEG:
+                    break;
+                case MediaProperties.FILE_PNG:
+                    break;
+
+                default:
+                throw new IllegalArgumentException("Unsupported Input File Type");
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unsupported file or file not found");
+        }
+
+        /**
+         *  Determine the dimensions of the image
+         */
         final BitmapFactory.Options dbo = new BitmapFactory.Options();
         dbo.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filename, dbo);
@@ -82,25 +128,124 @@ public class MediaImageItem extends MediaItem {
         mWidth = dbo.outWidth;
         mHeight = dbo.outHeight;
         mDurationMs = durationMs;
+        mDecodedFilename = String.format(mMANativeHelper.getProjectPath() +
+                "/" + "decoded" + getId()+ ".rgb");
+        final FileOutputStream fl = new FileOutputStream(mDecodedFilename);
+        final DataOutputStream dos = new DataOutputStream(fl);
+        try {
+            mAspectRatio = mMANativeHelper.getAspectRatio(mWidth, mHeight);
+        } catch(IllegalArgumentException e) {
+            throw new IllegalArgumentException ("Null width and height");
+        }
+        mGeneratedClipHeight = 0;
+        mGeneratedClipWidth = 0;
 
-        // TODO: Determine the aspect ratio from the width and height
-        mAspectRatio = MediaProperties.ASPECT_RATIO_4_3;
-
-        // Images are stored in memory scaled to the maximum resolution to
-        // save memory.
+        /**
+         *  Images are stored in memory scaled to the maximum resolution to
+         *  save memory.
+         */
         final Pair<Integer, Integer>[] resolutions =
             MediaProperties.getSupportedResolutions(mAspectRatio);
-        // Get the highest resolution
+        /**
+         *  Get the highest resolution
+         */
         final Pair<Integer, Integer> maxResolution = resolutions[resolutions.length - 1];
         if (mHeight > maxResolution.second) {
-            // We need to scale the image
-            scaleImage(filename, maxResolution.first, maxResolution.second);
-            mScaledWidth = maxResolution.first;
-            mScaledHeight = maxResolution.second;
+            /**
+             *  We need to scale the image
+             */
+            final Bitmap scaledImage = scaleImage(filename, maxResolution.first,
+                                                          maxResolution.second);
+            mScaledFilename = String.format(mMANativeHelper.getProjectPath() +
+                    "/" + "scaled" + getId()+ ".JPG");
+            if (!((new File(mScaledFilename)).exists())) {
+                super.mRegenerateClip = true;
+                final FileOutputStream f1 = new FileOutputStream(mScaledFilename);
+                scaledImage.compress(Bitmap.CompressFormat.JPEG, 50,f1);
+                f1.close();
+            }
+            mScaledWidth = scaledImage.getWidth();
+            mScaledHeight = scaledImage.getHeight();
+
+            int mNewWidth = 0;
+            int mNewHeight = 0;
+            if ((mScaledWidth % 2 ) != 0) {
+                mNewWidth = mScaledWidth - 1;
+            }
+            else {
+                mNewWidth = mScaledWidth;
+            }
+            if ((mScaledHeight % 2 ) != 0) {
+                mNewHeight = mScaledHeight - 1;
+            }
+            else {
+                mNewHeight = mScaledHeight;
+            }
+            final int [] framingBuffer = new int[mNewWidth];
+            final ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
+            IntBuffer intBuffer;
+
+            final byte[] array = byteBuffer.array();
+            int tmp = 0;
+            while (tmp < mNewHeight) {
+                scaledImage.getPixels(framingBuffer,0,mScaledWidth,0,
+                                                               tmp,mNewWidth,1);
+                intBuffer = byteBuffer.asIntBuffer();
+                intBuffer.put(framingBuffer,0,mNewWidth);
+                dos.write(array);
+                tmp += 1;
+            }
+            mScaledWidth = mNewWidth;
+            mScaledHeight = mNewHeight;
+            scaledImage.recycle();
         } else {
-            mScaledWidth = mWidth;
-            mScaledHeight = mHeight;
+            final Bitmap scaledImage = BitmapFactory.decodeFile(filename);
+            mScaledFilename = String.format(mMANativeHelper.getProjectPath()
+                                + "/" + "scaled" + getId()+ ".JPG");
+            if (!((new File(mScaledFilename)).exists())) {
+                super.mRegenerateClip = true;
+                FileOutputStream f1 = new FileOutputStream(mScaledFilename);
+                scaledImage.compress(Bitmap.CompressFormat.JPEG, 50,f1);
+                f1.close();
+            }
+            mScaledWidth = scaledImage.getWidth();
+            mScaledHeight = scaledImage.getHeight();
+
+            int mNewWidth = 0;
+            int mNewheight = 0;
+            if ((mScaledWidth % 2 ) != 0) {
+                mNewWidth = mScaledWidth - 1;
+            }
+            else {
+                mNewWidth = mScaledWidth;
+            }
+            if ((mScaledHeight % 2 ) != 0) {
+                mNewheight = mScaledHeight - 1;
+            }
+            else {
+                mNewheight = mScaledHeight;
+            }
+            Bitmap imageBitmap = BitmapFactory.decodeFile(mScaledFilename);
+            final int [] framingBuffer = new int[mNewWidth];
+            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
+            IntBuffer intBuffer;
+
+            byte[] array = byteBuffer.array();
+            int tmp = 0;
+            while (tmp < mNewheight) {
+                imageBitmap.getPixels(framingBuffer,0,mScaledWidth,0,
+                                                               tmp,mNewWidth,1);
+                intBuffer = byteBuffer.asIntBuffer();
+                intBuffer.put(framingBuffer,0,mNewWidth);
+                dos.write(array);
+                tmp += 1;
+            }
+            mScaledWidth = mNewWidth;
+            mScaledHeight = mNewheight;
+            imageBitmap.recycle();
         }
+        fl.close();
+        System.gc();
     }
 
     /*
@@ -108,13 +253,43 @@ public class MediaImageItem extends MediaItem {
      */
     @Override
     public int getFileType() {
-        if (mFilename.endsWith(".jpg") || mFilename.endsWith(".jpeg")) {
+        if (mFilename.endsWith(".jpg") || mFilename.endsWith(".jpeg")
+                || mFilename.endsWith(".JPG") || mFilename.endsWith(".JPEG")) {
             return MediaProperties.FILE_JPEG;
-        } else if (mFilename.endsWith(".png")) {
+        } else if (mFilename.endsWith(".png") || mFilename.endsWith(".PNG")) {
             return MediaProperties.FILE_PNG;
         } else {
             return MediaProperties.FILE_UNSUPPORTED;
         }
+    }
+
+    /**
+     * @return The scaled image file name
+     */
+    String getScaledImageFileName() {
+        return mScaledFilename;
+    }
+
+    /**
+     * @return The generated Kenburns clip height.
+     */
+    int getGeneratedClipHeight() {
+        return mGeneratedClipHeight;
+    }
+
+    /**
+     * @return The generated Kenburns clip width.
+     */
+    int getGeneratedClipWidth() {
+        return mGeneratedClipWidth;
+    }
+
+    /**
+     * @return The file name of image which is decoded and stored
+     * in rgb format
+     */
+    String getDecodedImageFileName() {
+        return mDecodedFilename;
     }
 
     /*
@@ -167,16 +342,18 @@ public class MediaImageItem extends MediaItem {
             return;
         }
 
-        // Invalidate the end transitions if necessary.
-        // This invalidation is necessary for the case in which an effect or
-        // an overlay is overlapping with the end transition
-        // (before the duration is changed) and it no longer overlaps with the
-        // transition after the duration is increased.
-
-        // The beginning transition does not need to be invalidated at this time
-        // because an effect or an overlay overlaps with the beginning
-        // transition, the begin transition is unaffected by a media item
-        // duration change.
+        /**
+         * Invalidate the end transitions if necessary.
+         * This invalidation is necessary for the case in which an effect or
+         * an overlay is overlapping with the end transition
+         * (before the duration is changed) and it no longer overlaps with the
+         * transition after the duration is increased.
+         *
+         * The beginning transition does not need to be invalidated at this time
+         * because an effect or an overlay overlaps with the beginning
+         * transition, the begin transition is unaffected by a media item
+         * duration change.
+         */
         invalidateEndTransition();
 
         mDurationMs = durationMs;
@@ -185,105 +362,28 @@ public class MediaImageItem extends MediaItem {
         final List<Overlay> adjustedOverlays = adjustOverlays();
         final List<Effect> adjustedEffects = adjustEffects();
 
-        // Invalidate the beginning and end transitions after adjustments.
-        // This invalidation is necessary for the case in which an effect or
-        // an overlay was not overlapping with the beginning or end transitions
-        // before the setDuration reduces the duration of the media item and
-        // causes an overlap of the beginning and/or end transition with the
-        // effect.
+        /**
+         * Invalidate the beginning and end transitions after adjustments.
+         * This invalidation is necessary for the case in which an effect or
+         * an overlay was not overlapping with the beginning or end transitions
+         * before the setDuration reduces the duration of the media item and
+         * causes an overlap of the beginning and/or end transition with the
+         * effect.
+         */
         invalidateBeginTransition(adjustedEffects, adjustedOverlays);
         invalidateEndTransition();
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    public long getDuration() {
-        return mDurationMs;
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    public long getTimelineDuration() {
-        return mDurationMs;
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    public Bitmap getThumbnail(int width, int height, long timeMs) throws IOException {
-        return scaleImage(mFilename, width, height);
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    public Bitmap[] getThumbnailList(int width, int height, long startMs, long endMs,
-            int thumbnailCount) throws IOException {
-        final Bitmap thumbnail = scaleImage(mFilename, width, height);
-        final Bitmap[] thumbnailArray = new Bitmap[thumbnailCount];
-        for (int i = 0; i < thumbnailCount; i++) {
-            thumbnailArray[i] = thumbnail;
+        if (getGeneratedImageClip() != null) {
+            /*
+             *  Delete the file
+             */
+            new File(getGeneratedImageClip()).delete();
+            /*
+             *  Invalidate the filename
+             */
+            setGeneratedImageClip(null);
+            super.setRegenerateClip(true);
         }
-        return thumbnailArray;
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    void invalidateTransitions(long startTimeMs, long durationMs) {
-        // Check if the item overlaps with the beginning and end transitions
-        if (mBeginTransition != null) {
-            if (isOverlapping(startTimeMs, durationMs, 0, mBeginTransition.getDuration())) {
-                mBeginTransition.invalidate();
-            }
-        }
-
-        if (mEndTransition != null) {
-            final long transitionDurationMs = mEndTransition.getDuration();
-            if (isOverlapping(startTimeMs, durationMs,
-                    getDuration() - transitionDurationMs, transitionDurationMs)) {
-                mEndTransition.invalidate();
-            }
-        }
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    @Override
-    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs, long newStartTimeMs,
-            long newDurationMs) {
-        // Check if the item overlaps with the beginning and end transitions
-        if (mBeginTransition != null) {
-            final long transitionDurationMs = mBeginTransition.getDuration();
-            // If the start time has changed and if the old or the new item
-            // overlaps with the begin transition, invalidate the transition.
-            if (oldStartTimeMs != newStartTimeMs &&
-                    (isOverlapping(oldStartTimeMs, oldDurationMs, 0, transitionDurationMs) ||
-                    isOverlapping(newStartTimeMs, newDurationMs, 0, transitionDurationMs))) {
-                mBeginTransition.invalidate();
-            }
-        }
-
-        if (mEndTransition != null) {
-            final long transitionDurationMs = mEndTransition.getDuration();
-            // If the start time + duration has changed and if the old or the new
-            // item overlaps the end transition, invalidate the transition/
-            if (oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs &&
-                    (isOverlapping(oldStartTimeMs, oldDurationMs,
-                            mDurationMs - transitionDurationMs, transitionDurationMs) ||
-                    isOverlapping(newStartTimeMs, newDurationMs,
-                            mDurationMs - transitionDurationMs, transitionDurationMs))) {
-                mEndTransition.invalidate();
-            }
-        }
+        mVideoEditor.updateTimelineDuration();
     }
 
     /**
@@ -297,10 +397,14 @@ public class MediaImageItem extends MediaItem {
         if (mBeginTransition != null && mBeginTransition.isGenerated()) {
             final long transitionDurationMs = mBeginTransition.getDuration();
 
-            // The begin transition must be invalidated if it overlaps with
-            // an effect.
+            /**
+             *  The begin transition must be invalidated if it overlaps with
+             *  an effect.
+             */
             for (Effect effect : effects) {
-                // Check if the effect overlaps with the begin transition
+                /**
+                 *  Check if the effect overlaps with the begin transition
+                 */
                 if (effect.getStartTime() < transitionDurationMs) {
                     mBeginTransition.invalidate();
                     break;
@@ -308,10 +412,14 @@ public class MediaImageItem extends MediaItem {
             }
 
             if (mBeginTransition.isGenerated()) {
-                // The end transition must be invalidated if it overlaps with
-                // an overlay.
+                /**
+                 *  The end transition must be invalidated if it overlaps with
+                 *  an overlay.
+                 */
                 for (Overlay overlay : overlays) {
-                    // Check if the overlay overlaps with the end transition
+                    /**
+                     *  Check if the overlay overlaps with the end transition
+                     */
                     if (overlay.getStartTime() < transitionDurationMs) {
                         mBeginTransition.invalidate();
                         break;
@@ -329,26 +437,34 @@ public class MediaImageItem extends MediaItem {
         if (mEndTransition != null && mEndTransition.isGenerated()) {
             final long transitionDurationMs = mEndTransition.getDuration();
 
-            // The end transition must be invalidated if it overlaps with
-            // an effect.
+            /**
+             *  The end transition must be invalidated if it overlaps with
+             *  an effect.
+             */
             final List<Effect> effects = getAllEffects();
             for (Effect effect : effects) {
-                // Check if the effect overlaps with the end transition
+                /**
+                 *  Check if the effect overlaps with the end transition
+                 */
                 if (effect.getStartTime() + effect.getDuration() >
-                            mDurationMs - transitionDurationMs) {
+                mDurationMs - transitionDurationMs) {
                     mEndTransition.invalidate();
                     break;
                 }
             }
 
             if (mEndTransition.isGenerated()) {
-                // The end transition must be invalidated if it overlaps with
-                // an overlay.
+                /**
+                 *  The end transition must be invalidated if it overlaps with
+                 *  an overlay.
+                 */
                 final List<Overlay> overlays = getAllOverlays();
                 for (Overlay overlay : overlays) {
-                    // Check if the overlay overlaps with the end transition
+                    /**
+                     *  Check if the overlay overlaps with the end transition
+                     */
                     if (overlay.getStartTime() + overlay.getDuration() >
-                                mDurationMs - transitionDurationMs) {
+                    mDurationMs - transitionDurationMs) {
                         mEndTransition.invalidate();
                         break;
                     }
@@ -366,7 +482,9 @@ public class MediaImageItem extends MediaItem {
         final List<Effect> adjustedEffects = new ArrayList<Effect>();
         final List<Effect> effects = getAllEffects();
         for (Effect effect : effects) {
-            // Adjust the start time if necessary
+            /**
+             *  Adjust the start time if necessary
+             */
             final long effectStartTimeMs;
             if (effect.getStartTime() > getDuration()) {
                 effectStartTimeMs = 0;
@@ -374,7 +492,9 @@ public class MediaImageItem extends MediaItem {
                 effectStartTimeMs = effect.getStartTime();
             }
 
-            // Adjust the duration if necessary
+            /**
+             *  Adjust the duration if necessary
+             */
             final long effectDurationMs;
             if (effectStartTimeMs + effect.getDuration() > getDuration()) {
                 effectDurationMs = getDuration() - effectStartTimeMs;
@@ -401,7 +521,9 @@ public class MediaImageItem extends MediaItem {
         final List<Overlay> adjustedOverlays = new ArrayList<Overlay>();
         final List<Overlay> overlays = getAllOverlays();
         for (Overlay overlay : overlays) {
-            // Adjust the start time if necessary
+            /**
+             *  Adjust the start time if necessary
+             */
             final long overlayStartTimeMs;
             if (overlay.getStartTime() > getDuration()) {
                 overlayStartTimeMs = 0;
@@ -409,7 +531,9 @@ public class MediaImageItem extends MediaItem {
                 overlayStartTimeMs = overlay.getStartTime();
             }
 
-            // Adjust the duration if necessary
+            /**
+             *  Adjust the duration if necessary
+             */
             final long overlayDurationMs;
             if (overlayStartTimeMs + overlay.getDuration() > getDuration()) {
                 overlayDurationMs = getDuration() - overlayStartTimeMs;
@@ -427,6 +551,409 @@ public class MediaImageItem extends MediaItem {
         return adjustedOverlays;
     }
 
+
+    /**
+     * This function sets the Ken Burn effect generated clip
+     * name.
+     *
+     * @param generatedFilePath The name of the generated clip
+     */
+    @Override
+    void setGeneratedImageClip(String generatedFilePath) {
+        super.setGeneratedImageClip(generatedFilePath);
+
+
+        // set the Kenburns clip width and height
+        mGeneratedClipHeight = getScaledHeight();
+        switch (mVideoEditor.getAspectRatio()) {
+            case MediaProperties.ASPECT_RATIO_3_2:
+                if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                    mGeneratedClipWidth = 720;
+                else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
+                    mGeneratedClipWidth = 1080;
+                break;
+            case MediaProperties.ASPECT_RATIO_16_9:
+                if (mGeneratedClipHeight == MediaProperties.HEIGHT_360)
+                    mGeneratedClipWidth = 640;
+                else if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                    mGeneratedClipWidth = 854;
+                else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
+                    mGeneratedClipWidth = 1280;
+                break;
+            case MediaProperties.ASPECT_RATIO_4_3:
+                if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                    mGeneratedClipWidth = 640;
+                if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
+                    mGeneratedClipWidth = 960;
+                break;
+            case MediaProperties.ASPECT_RATIO_5_3:
+                if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                    mGeneratedClipWidth = 800;
+                break;
+            case MediaProperties.ASPECT_RATIO_11_9:
+                if (mGeneratedClipHeight == MediaProperties.HEIGHT_144)
+                    mGeneratedClipWidth = 176;
+                break;
+        }
+    }
+
+    /**
+     * @return The name of the image clip
+     * generated with ken burns effect.
+     */
+    @Override
+    String getGeneratedImageClip() {
+        return super.getGeneratedImageClip();
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    public long getDuration() {
+        return mDurationMs;
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    public long getTimelineDuration() {
+        return mDurationMs;
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    public Bitmap getThumbnail(int width, int height, long timeMs) throws IOException {
+        if (getGeneratedImageClip() != null) {
+            return mMANativeHelper.getPixels(getGeneratedImageClip(),
+                width, height,timeMs);
+        } else {
+            return scaleImage(mFilename, width, height);
+        }
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    public Bitmap[] getThumbnailList(int width, int height, long startMs, long endMs,
+        int thumbnailCount) throws IOException {
+        //KenBurns was not applied on this.
+        if (getGeneratedImageClip() == null) {
+            final Bitmap thumbnail = scaleImage(mFilename, width, height);
+            final Bitmap[] thumbnailArray = new Bitmap[thumbnailCount];
+            for (int i = 0; i < thumbnailCount; i++) {
+                thumbnailArray[i] = thumbnail;
+            }
+            return thumbnailArray;
+
+
+        }
+        else {
+            if (startMs > endMs) {
+                throw new IllegalArgumentException("Start time is greater than end time");
+            }
+            if (endMs > mDurationMs) {
+                throw new IllegalArgumentException("End time is greater than file duration");
+            }
+            if (startMs == endMs) {
+                Bitmap[] bitmap = new Bitmap[1];
+                bitmap[0] = mMANativeHelper.getPixels(getGeneratedImageClip(),
+                    width, height,startMs);
+                return bitmap;
+            }
+            return mMANativeHelper.getPixelsList(getGeneratedImageClip(), width,
+                height,startMs,endMs,thumbnailCount);
+        }
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    void invalidateTransitions(long startTimeMs, long durationMs) {
+        /**
+         *  Check if the item overlaps with the beginning and end transitions
+         */
+        if (mBeginTransition != null) {
+            if (isOverlapping(startTimeMs, durationMs, 0, mBeginTransition.getDuration())) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long transitionDurationMs = mEndTransition.getDuration();
+            if (isOverlapping(startTimeMs, durationMs,
+                    getDuration() - transitionDurationMs, transitionDurationMs)) {
+                mEndTransition.invalidate();
+            }
+        }
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    @Override
+    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs, long newStartTimeMs,
+            long newDurationMs) {
+        /**
+         *  Check if the item overlaps with the beginning and end transitions
+         */
+        if (mBeginTransition != null) {
+            final long transitionDurationMs = mBeginTransition.getDuration();
+            /**
+             *  If the start time has changed and if the old or the new item
+             *  overlaps with the begin transition, invalidate the transition.
+             */
+            if (((oldStartTimeMs != newStartTimeMs)
+                    || (oldDurationMs != newDurationMs) )&&
+                    (isOverlapping(oldStartTimeMs, oldDurationMs, 0, transitionDurationMs) ||
+                    isOverlapping(newStartTimeMs, newDurationMs, 0,
+                    transitionDurationMs))) {
+                mBeginTransition.invalidate();
+            }
+        }
+
+        if (mEndTransition != null) {
+            final long transitionDurationMs = mEndTransition.getDuration();
+            /**
+             *  If the start time + duration has changed and if the old or the new
+             *  item overlaps the end transition, invalidate the transition
+             */
+            if (oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs &&
+                    (isOverlapping(oldStartTimeMs, oldDurationMs,
+                    mDurationMs - transitionDurationMs, transitionDurationMs) ||
+                    isOverlapping(newStartTimeMs, newDurationMs,
+                    mDurationMs - transitionDurationMs, transitionDurationMs))) {
+                mEndTransition.invalidate();
+            }
+        }
+    }
+
+    /**
+     * This function invalidates the rgb image clip,ken burns effect clip,
+     * and scaled image clip
+     */
+    void invalidate() {
+        if (getGeneratedImageClip() != null) {
+            new File(getGeneratedImageClip()).delete();
+            setGeneratedImageClip(null);
+            setRegenerateClip(true);
+        }
+        if (mScaledFilename != null) {
+            new File(mScaledFilename).delete();
+            mScaledFilename = null;
+        }
+        if (mDecodedFilename != null) {
+            new File(mDecodedFilename).delete();
+            mDecodedFilename = null;
+        }
+    }
+
+    /**
+     * @param KenBurnEffect object.
+     * @return an Object of {@link ClipSettings} with Ken Burn settings
+     * needed to generate the clip
+     */
+    private ClipSettings getKenBurns(EffectKenBurns effectKB) {
+        int PanZoomXa;
+        int PanZoomXb;
+        int width = 0, height = 0;
+        Rect start = new Rect();
+        Rect end = new Rect();
+        ClipSettings clipSettings = null;
+        clipSettings = new ClipSettings();
+        /**
+         *  image:
+        ---------------------------------------
+       |    Xa                                  |
+       | Ya ---------------                     |
+       |    |                |                  |
+       |    |                |                  |
+       |     ---------------    Xb       ratioB |
+       |        ratioA           -------        |
+       |                  Yb    |        |      |
+       |                        |        |      |
+       |                         -------        |
+        ---------------------------------------
+         */
+
+        effectKB.getKenBurnsSettings(start, end);
+        width = getWidth();
+        height = getHeight();
+        if ((start.left < 0) || (start.left > width) || (start.right < 0) || (start.right > width)
+                || (start.top < 0) || (start.top > height) || (start.bottom < 0)
+                || (start.bottom > height) || (end.left < 0) || (end.left > width)
+                || (end.right < 0) || (end.right > width) || (end.top < 0) || (end.top > height)
+                || (end.bottom < 0) || (end.bottom > height)) {
+            throw new IllegalArgumentException("Illegal arguments for KebBurns");
+        }
+
+        if (((width - (start.right - start.left) == 0) || (height - (start.bottom - start.top) == 0))
+                && ((width - (end.right - end.left) == 0) || (height - (end.bottom - end.top) == 0))) {
+            setRegenerateClip(false);
+            clipSettings.clipPath = getDecodedImageFileName();
+            clipSettings.fileType = FileType.JPG;
+            clipSettings.beginCutTime = 0;
+            clipSettings.endCutTime = (int)getTimelineDuration();
+            clipSettings.beginCutPercent = 0;
+            clipSettings.endCutPercent = 0;
+            clipSettings.panZoomEnabled = false;
+            clipSettings.panZoomPercentStart = 0;
+            clipSettings.panZoomTopLeftXStart = 0;
+            clipSettings.panZoomTopLeftYStart = 0;
+            clipSettings.panZoomPercentEnd = 0;
+            clipSettings.panZoomTopLeftXEnd = 0;
+            clipSettings.panZoomTopLeftYEnd = 0;
+            clipSettings.mediaRendering = mMANativeHelper
+            .getMediaItemRenderingMode(getRenderingMode());
+
+            clipSettings.rgbWidth = getScaledWidth();
+            clipSettings.rgbHeight = getScaledHeight();
+
+            return clipSettings;
+        }
+
+        PanZoomXa = (100 * start.width()) / width;
+        PanZoomXb = (100 * end.width()) / width;
+
+        clipSettings.clipPath = getDecodedImageFileName();
+        clipSettings.fileType = mMANativeHelper.getMediaItemFileType(getFileType());
+        clipSettings.beginCutTime = 0;
+        clipSettings.endCutTime = (int)getTimelineDuration();
+        clipSettings.beginCutPercent = 0;
+        clipSettings.endCutPercent = 0;
+        clipSettings.panZoomEnabled = true;
+        clipSettings.panZoomPercentStart = PanZoomXa;
+        clipSettings.panZoomTopLeftXStart = (start.left * 100) / width;
+        clipSettings.panZoomTopLeftYStart = (start.top * 100) / height;
+        clipSettings.panZoomPercentEnd = PanZoomXb;
+        clipSettings.panZoomTopLeftXEnd = (end.left * 100) / width;
+        clipSettings.panZoomTopLeftYEnd = (end.top * 100) / height;
+        clipSettings.mediaRendering
+            = mMANativeHelper.getMediaItemRenderingMode(getRenderingMode());
+
+        clipSettings.rgbWidth = getScaledWidth();
+        clipSettings.rgbHeight = getScaledHeight();
+
+        return clipSettings;
+    }
+
+
+    /**
+     * @param KenBurnEffect object.
+     * @return an Object of {@link ClipSettings} with Ken Burns
+     * generated clip name
+     */
+    ClipSettings generateKenburnsClip(EffectKenBurns effectKB) {
+        EditSettings editSettings = new EditSettings();
+        editSettings.clipSettingsArray = new ClipSettings[1];
+        String output = null;
+        ClipSettings clipSettings = new ClipSettings();
+        initClipSettings(clipSettings);
+        editSettings.clipSettingsArray[0] = getKenBurns(effectKB);
+        if ((getGeneratedImageClip() == null) && (getRegenerateClip())) {
+            output = mMANativeHelper.generateKenBurnsClip(editSettings, this);
+            setGeneratedImageClip(output);
+            setRegenerateClip(false);
+            clipSettings.clipPath = output;
+            clipSettings.fileType = FileType.THREE_GPP;
+
+            mGeneratedClipHeight = getScaledHeight();
+            switch (mVideoEditor.getAspectRatio()) {
+                case MediaProperties.ASPECT_RATIO_3_2:
+                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                        mGeneratedClipWidth = 720;
+                    else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
+                        mGeneratedClipWidth = 1080;
+                    break;
+                case MediaProperties.ASPECT_RATIO_16_9:
+                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_360)
+                        mGeneratedClipWidth = 640;
+                    else if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                        mGeneratedClipWidth = 854;
+                    else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
+                        mGeneratedClipWidth = 1280;
+                    break;
+                case MediaProperties.ASPECT_RATIO_4_3:
+                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                        mGeneratedClipWidth = 640;
+                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
+                        mGeneratedClipWidth = 960;
+                    break;
+                case MediaProperties.ASPECT_RATIO_5_3:
+                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
+                        mGeneratedClipWidth = 800;
+                    break;
+                case MediaProperties.ASPECT_RATIO_11_9:
+                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_144)
+                        mGeneratedClipWidth = 176;
+                    break;
+            }
+
+        } else {
+            if (getGeneratedImageClip() == null) {
+                clipSettings.clipPath = getDecodedImageFileName();
+                clipSettings.fileType = FileType.JPG;
+
+                clipSettings.rgbWidth = getScaledWidth();
+                clipSettings.rgbHeight = getScaledHeight();
+
+            } else {
+                clipSettings.clipPath = getGeneratedImageClip();
+                clipSettings.fileType = FileType.THREE_GPP;
+            }
+        }
+        clipSettings.mediaRendering = mMANativeHelper.getMediaItemRenderingMode(getRenderingMode());
+        clipSettings.beginCutTime = 0;
+        clipSettings.endCutTime = (int)getTimelineDuration();
+
+        return clipSettings;
+    }
+
+    /**
+     * @return an Object of {@link ClipSettings} with Image Clip
+     * properties data populated.If the image has Ken Burns effect applied,
+     * then file path contains generated image clip name with Ken Burns effect
+     */
+    ClipSettings getImageClipProperties() {
+        ClipSettings clipSettings = new ClipSettings();
+        List<Effect> effects = null;
+        EffectKenBurns effectKB = null;
+        boolean effectKBPresent = false;
+
+        effects = getAllEffects();
+        for (Effect effect : effects) {
+            if (effect instanceof EffectKenBurns) {
+                effectKB = (EffectKenBurns)effect;
+                effectKBPresent = true;
+                break;
+            }
+        }
+
+        if (effectKBPresent) {
+            clipSettings = generateKenburnsClip(effectKB);
+        } else {
+            /**
+             * Init the clip settings object
+             */
+            initClipSettings(clipSettings);
+            clipSettings.clipPath = getDecodedImageFileName();
+            clipSettings.fileType = FileType.JPG;
+            clipSettings.beginCutTime = 0;
+            clipSettings.endCutTime = (int)getTimelineDuration();
+            clipSettings.mediaRendering = mMANativeHelper
+                .getMediaItemRenderingMode(getRenderingMode());
+            clipSettings.rgbWidth = getScaledWidth();
+            clipSettings.rgbHeight = getScaledHeight();
+
+        }
+        return clipSettings;
+    }
+
     /**
      * Resize a bitmap to the specified width and height
      *
@@ -436,7 +963,8 @@ public class MediaImageItem extends MediaItem {
      *
      * @return The resized bitmap
      */
-    private Bitmap scaleImage(String filename, int width, int height) throws IOException {
+    private Bitmap scaleImage(String filename, int width, int height)
+    throws IOException {
         final BitmapFactory.Options dbo = new BitmapFactory.Options();
         dbo.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filename, dbo);
@@ -453,15 +981,20 @@ public class MediaImageItem extends MediaItem {
         if (nativeWidth > width || nativeHeight > height) {
             float dx = ((float)nativeWidth) / ((float)width);
             float dy = ((float)nativeHeight) / ((float)height);
+
             if (dx > dy) {
                 bitmapWidth = width;
-                bitmapHeight = nativeHeight / dx;
+                bitmapHeight = Math.round(nativeHeight / dx);
             } else {
-                bitmapWidth = nativeWidth / dy;
+                bitmapWidth = Math.round(nativeWidth / dy);
                 bitmapHeight = height;
             }
-            // Create the bitmap from file
+
+            /**
+             *  Create the bitmap from file
+             */
             if (nativeWidth / bitmapWidth > 1) {
+
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inSampleSize = nativeWidth / (int)bitmapWidth;
                 srcBitmap = BitmapFactory.decodeFile(filename, options);
@@ -472,6 +1005,7 @@ public class MediaImageItem extends MediaItem {
             bitmapWidth = width;
             bitmapHeight = height;
             srcBitmap = BitmapFactory.decodeFile(filename);
+
         }
 
         if (srcBitmap == null) {
@@ -479,13 +1013,20 @@ public class MediaImageItem extends MediaItem {
             throw new IOException("Cannot decode file: " + mFilename);
         }
 
-        // Create the canvas bitmap
-        final Bitmap bitmap = Bitmap.createBitmap((int)bitmapWidth, (int)bitmapHeight,
-                Bitmap.Config.ARGB_8888);
+        /**
+         *  Create the canvas bitmap
+         */
+        final Bitmap bitmap = Bitmap.createBitmap((int)bitmapWidth,
+                                                  (int)bitmapHeight,
+                                                  Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(bitmap);
-        canvas.drawBitmap(srcBitmap, new Rect(0, 0, srcBitmap.getWidth(), srcBitmap.getHeight()),
-                new Rect(0, 0, (int)bitmapWidth, (int)bitmapHeight), sResizePaint);
-        // Release the source bitmap
+        canvas.drawBitmap(srcBitmap, new Rect(0, 0, srcBitmap.getWidth(),
+                                              srcBitmap.getHeight()),
+                                              new Rect(0, 0, (int)bitmapWidth,
+                                              (int)bitmapHeight), sResizePaint);
+        /**
+         *  Release the source bitmap
+         */
         srcBitmap.recycle();
         return bitmap;
     }

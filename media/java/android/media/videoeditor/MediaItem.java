@@ -14,25 +14,40 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 import android.graphics.Bitmap;
+import android.media.videoeditor.MediaArtistNativeHelper.ClipSettings;
+import android.media.videoeditor.MediaArtistNativeHelper.FileType;
+import android.media.videoeditor.MediaArtistNativeHelper.MediaRendering;
 
 /**
  * This abstract class describes the base class for any MediaItem. Objects are
  * defined with a file path as a source data.
  * {@hide}
-s */
+ */
 public abstract class MediaItem {
-    // A constant which can be used to specify the end of the file (instead of
-    // providing the actual duration of the media item).
+    /**
+     *  A constant which can be used to specify the end of the file (instead of
+     *  providing the actual duration of the media item).
+     */
     public final static int END_OF_FILE = -1;
 
-    // Rendering modes
+    /**
+     *  Rendering modes
+     */
     /**
      * When using the RENDERING_MODE_BLACK_BORDER rendering mode video frames
      * are resized by preserving the aspect ratio until the movie matches one of
@@ -50,30 +65,54 @@ public abstract class MediaItem {
 
     /**
      * When using the RENDERING_MODE_CROPPING rendering mode video frames are
-     * scaled horizontally or vertically by preserving the original aspect
-     * ratio of the media item.
+     * scaled horizontally or vertically by preserving the original aspect ratio
+     * of the media item.
      */
     public static final int RENDERING_MODE_CROPPING = 2;
 
-
-    // The unique id of the MediaItem
+    /**
+     *  The unique id of the MediaItem
+     */
     private final String mUniqueId;
 
-    // The name of the file associated with the MediaItem
+    /**
+     *  The name of the file associated with the MediaItem
+     */
     protected final String mFilename;
 
-    // List of effects
+    /**
+     *  List of effects
+     */
     private final List<Effect> mEffects;
 
-    // List of overlays
+    /**
+     *  List of overlays
+     */
     private final List<Overlay> mOverlays;
 
-    // The rendering mode
+    /**
+     *  The rendering mode
+     */
     private int mRenderingMode;
 
-    // Beginning and end transitions
+    private final MediaArtistNativeHelper mMANativeHelper;
+
+    private final String mProjectPath;
+
+    /**
+     *  Beginning and end transitions
+     */
     protected Transition mBeginTransition;
+
     protected Transition mEndTransition;
+
+    protected String mGeneratedImageClip;
+
+    protected boolean mRegenerateClip;
+
+    private boolean mBlankFrameGenerated = false;
+
+    private String mBlankFrameFilename = null;
 
     /**
      * Constructor
@@ -82,14 +121,16 @@ public abstract class MediaItem {
      * @param mediaItemId The MediaItem id
      * @param filename name of the media file.
      * @param renderingMode The rendering mode
-     *
      * @throws IOException if file is not found
-     * @throws IllegalArgumentException if a capability such as file format is not
-     *             supported the exception object contains the unsupported
+     * @throws IllegalArgumentException if a capability such as file format is
+     *             not supported the exception object contains the unsupported
      *             capability
      */
     protected MediaItem(VideoEditor editor, String mediaItemId, String filename,
-            int renderingMode) throws IOException {
+                        int renderingMode) throws IOException {
+        if (filename == null) {
+            throw new IllegalArgumentException("MediaItem : filename is null");
+        }
         mUniqueId = mediaItemId;
         mFilename = filename;
         mRenderingMode = renderingMode;
@@ -97,6 +138,10 @@ public abstract class MediaItem {
         mOverlays = new ArrayList<Overlay>();
         mBeginTransition = null;
         mEndTransition = null;
+        mMANativeHelper = ((VideoEditorImpl)editor).getNativeContext();
+        mProjectPath = editor.getPath();
+        mRegenerateClip = false;
+        mGeneratedImageClip = null;
     }
 
     /**
@@ -122,6 +167,15 @@ public abstract class MediaItem {
      *            {@link #RENDERING_MODE_STRETCH}
      */
     public void setRenderingMode(int renderingMode) {
+        switch (renderingMode) {
+            case RENDERING_MODE_BLACK_BORDER:
+            case RENDERING_MODE_STRETCH:
+            case RENDERING_MODE_CROPPING:
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid Rendering Mode");
+        }
         mRenderingMode = renderingMode;
         if (mBeginTransition != null) {
             mBeginTransition.invalidate();
@@ -130,6 +184,7 @@ public abstract class MediaItem {
         if (mEndTransition != null) {
             mEndTransition.invalidate();
         }
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -169,7 +224,7 @@ public abstract class MediaItem {
 
     /**
      * @return The timeline duration. This is the actual duration in the
-     *      timeline (trimmed duration)
+     *         timeline (trimmed duration)
      */
     public abstract long getTimelineDuration();
 
@@ -197,8 +252,8 @@ public abstract class MediaItem {
      * Get aspect ratio of the source media item.
      *
      * @return the aspect ratio as described in MediaProperties.
-     *  MediaProperties.ASPECT_RATIO_UNDEFINED if aspect ratio is not
-     *  supported as in MediaProperties
+     *         MediaProperties.ASPECT_RATIO_UNDEFINED if aspect ratio is not
+     *         supported as in MediaProperties
      */
     public abstract int getAspectRatio();
 
@@ -220,6 +275,11 @@ public abstract class MediaItem {
      *      added.
      */
     public void addEffect(Effect effect) {
+
+        if (effect == null) {
+            throw new IllegalArgumentException("NULL effect cannot be applied");
+        }
+
         if (effect.getMediaItem() != this) {
             throw new IllegalArgumentException("Media item mismatch");
         }
@@ -230,11 +290,18 @@ public abstract class MediaItem {
 
         if (effect.getStartTime() + effect.getDuration() > getDuration()) {
             throw new IllegalArgumentException(
-                    "Effect start time + effect duration > media clip duration");
+            "Effect start time + effect duration > media clip duration");
         }
 
         mEffects.add(effect);
+
         invalidateTransitions(effect.getStartTime(), effect.getDuration());
+        if (mMANativeHelper != null) {
+            if (effect instanceof EffectKenBurns) {
+                mRegenerateClip = true;
+            }
+            mMANativeHelper.setGeneratePreview(true);
+        }
     }
 
     /**
@@ -253,18 +320,51 @@ public abstract class MediaItem {
             if (effect.getId().equals(effectId)) {
                 mEffects.remove(effect);
                 invalidateTransitions(effect.getStartTime(), effect.getDuration());
+                if (mMANativeHelper != null) {
+                    if (effect instanceof EffectKenBurns) {
+                        if (mGeneratedImageClip != null) {
+                            /**
+                             *  Delete the file
+                             */
+                            new File(mGeneratedImageClip).delete();
+                            /**
+                             *  Invalidate the filename
+                             */
+                            mGeneratedImageClip = null;
+                        }
+                        mRegenerateClip = false;
+                    }
+                    mMANativeHelper.setGeneratePreview(true);
+                }
                 return effect;
             }
         }
-
         return null;
+    }
+
+    /**
+     * Set the filepath of the generated image clip when the effect is added.
+     *
+     * @param The filepath of the generated image clip.
+     */
+    void setGeneratedImageClip(String generatedFilePath) {
+        mGeneratedImageClip = generatedFilePath;
+    }
+
+    /**
+     * Get the filepath of the generated image clip when the effect is added.
+     *
+     * @return The filepath of the generated image clip (null if it does not
+     *         exist)
+     */
+    String getGeneratedImageClip() {
+        return mGeneratedImageClip;
     }
 
     /**
      * Find the effect with the specified id
      *
      * @param effectId The effect id
-     *
      * @return The effect with the specified id (null if it does not exist)
      */
     public Effect getEffect(String effectId) {
@@ -273,14 +373,14 @@ public abstract class MediaItem {
                 return effect;
             }
         }
-
         return null;
     }
 
     /**
      * Get the list of effects.
      *
-     * @return the effects list. If no effects exist an empty list will be returned.
+     * @return the effects list. If no effects exist an empty list will be
+     *         returned.
      */
     public List<Effect> getAllEffects() {
         return mEffects;
@@ -292,11 +392,17 @@ public abstract class MediaItem {
      *
      * @param overlay The overlay to add
      * @throws IllegalStateException if a preview or an export is in progress or
-     *             if the overlay id is not unique across all the overlays
-     *             added or if the bitmap is not specified or if the dimensions of
-     *             the bitmap do not match the dimensions of the media item
+     *             if the overlay id is not unique across all the overlays added
+     *             or if the bitmap is not specified or if the dimensions of the
+     *             bitmap do not match the dimensions of the media item
+     * @throws FileNotFoundException, IOException if overlay could not be saved
+     *             to project path
      */
-    public void addOverlay(Overlay overlay) {
+    public void addOverlay(Overlay overlay) throws FileNotFoundException, IOException {
+        if (overlay == null) {
+            throw new IllegalArgumentException("NULL Overlay cannot be applied");
+        }
+
         if (overlay.getMediaItem() != this) {
             throw new IllegalArgumentException("Media item mismatch");
         }
@@ -307,7 +413,7 @@ public abstract class MediaItem {
 
         if (overlay.getStartTime() + overlay.getDuration() > getDuration()) {
             throw new IllegalArgumentException(
-                    "Overlay start time + overlay duration > media clip duration");
+            "Overlay start time + overlay duration > media clip duration");
         }
 
         if (overlay instanceof OverlayFrame) {
@@ -316,6 +422,8 @@ public abstract class MediaItem {
             if (bitmap == null) {
                 throw new IllegalArgumentException("Overlay bitmap not specified");
             }
+
+            ((OverlayFrame)overlay).save(mProjectPath);
 
             final int scaledWidth, scaledHeight;
             if (this instanceof MediaVideoItem) {
@@ -326,11 +434,13 @@ public abstract class MediaItem {
                 scaledHeight = ((MediaImageItem)this).getScaledHeight();
             }
 
-            // The dimensions of the overlay bitmap must be the same as the
-            // media item dimensions
+            /**
+             * The dimensions of the overlay bitmap must be the same as the
+             * media item dimensions
+             */
             if (bitmap.getWidth() != scaledWidth || bitmap.getHeight() != scaledHeight) {
                 throw new IllegalArgumentException(
-                        "Bitmap dimensions must match media item dimensions");
+                "Bitmap dimensions must match media item dimensions");
             }
         } else {
             throw new IllegalArgumentException("Overlay not supported");
@@ -338,6 +448,25 @@ public abstract class MediaItem {
 
         mOverlays.add(overlay);
         invalidateTransitions(overlay.getStartTime(), overlay.getDuration());
+        if (mMANativeHelper != null) {
+            mMANativeHelper.setGeneratePreview(true);
+        }
+    }
+
+    /**
+     * @param flag The flag to indicate if regeneration of clip is true or
+     *            false.
+     */
+    void setRegenerateClip(boolean flag) {
+        mRegenerateClip = flag;
+    }
+
+    /**
+     * @return flag The flag to indicate if regeneration of clip is true or
+     *         false.
+     */
+    boolean getRegenerateClip() {
+        return mRegenerateClip;
     }
 
     /**
@@ -355,6 +484,9 @@ public abstract class MediaItem {
         for (Overlay overlay : mOverlays) {
             if (overlay.getId().equals(overlayId)) {
                 mOverlays.remove(overlay);
+                if (mMANativeHelper != null) {
+                    mMANativeHelper.setGeneratePreview(true);
+                }
                 if (overlay instanceof OverlayFrame) {
                     ((OverlayFrame)overlay).invalidate();
                 }
@@ -362,7 +494,6 @@ public abstract class MediaItem {
                 return overlay;
             }
         }
-
         return null;
     }
 
@@ -390,7 +521,7 @@ public abstract class MediaItem {
      * this method will still provide the full list of overlays.
      *
      * @return The list of overlays. If no overlays exist an empty list will
-     *  be returned.
+     *         be returned.
      */
     public List<Overlay> getAllOverlays() {
         return mOverlays;
@@ -409,7 +540,8 @@ public abstract class MediaItem {
      * @throws IOException if a file error occurs
      * @throws IllegalArgumentException if time is out of video duration
      */
-    public abstract Bitmap getThumbnail(int width, int height, long timeMs) throws IOException;
+    public abstract Bitmap getThumbnail(int width, int height, long timeMs)
+                                        throws IOException;
 
     /**
      * Get the array of Bitmap thumbnails between start and end.
@@ -424,8 +556,10 @@ public abstract class MediaItem {
      *
      * @throws IOException if a file error occurs
      */
-    public abstract Bitmap[] getThumbnailList(int width, int height, long startMs, long endMs,
-            int thumbnailCount) throws IOException;
+    public abstract Bitmap[] getThumbnailList(int width, int height,
+                                              long startMs, long endMs,
+                                              int thumbnailCount)
+                                              throws IOException;
 
     /*
      * {@inheritDoc}
@@ -474,25 +608,26 @@ public abstract class MediaItem {
      * @param durationMs1 Item 1 duration
      * @param startTimeMs2 Item 2 start time
      * @param durationMs2 Item 2 end time
-     *
      * @return true if the two items overlap
      */
     protected boolean isOverlapping(long startTimeMs1, long durationMs1,
-            long startTimeMs2, long durationMs2) {
-       if (startTimeMs1 + durationMs1 <= startTimeMs2) {
-           return false;
-       } else if (startTimeMs1 >= startTimeMs2 + durationMs2) {
-           return false;
-       }
+                                    long startTimeMs2, long durationMs2) {
+        if (startTimeMs1 + durationMs1 <= startTimeMs2) {
+            return false;
+        } else if (startTimeMs1 >= startTimeMs2 + durationMs2) {
+            return false;
+        }
 
-       return true;
+        return true;
     }
 
     /**
      * Adjust the duration transitions.
      */
     protected void adjustTransitions() {
-        // Check if the duration of transitions need to be adjusted
+        /**
+         *  Check if the duration of transitions need to be adjusted
+         */
         if (mBeginTransition != null) {
             final long maxDurationMs = mBeginTransition.getMaximumDuration();
             if (mBeginTransition.getDuration() > maxDurationMs) {
@@ -507,4 +642,134 @@ public abstract class MediaItem {
             }
         }
     }
+
+    /**
+     * @return MediaArtistNativeHleper context
+     */
+    MediaArtistNativeHelper getNativeContext() {
+        return mMANativeHelper;
+    }
+
+    /**
+     * Initialises ClipSettings fields to default value
+     *
+     * @param ClipSettings object
+     *{@link android.media.videoeditor.MediaArtistNativeHelper.ClipSettings}
+     */
+    void initClipSettings(ClipSettings clipSettings) {
+        clipSettings.clipPath = null;
+        clipSettings.clipDecodedPath = null;
+        clipSettings.clipOriginalPath = null;
+        clipSettings.fileType = 0;
+        clipSettings.endCutTime = 0;
+        clipSettings.beginCutTime = 0;
+        clipSettings.beginCutPercent = 0;
+        clipSettings.endCutPercent = 0;
+        clipSettings.panZoomEnabled = false;
+        clipSettings.panZoomPercentStart = 0;
+        clipSettings.panZoomTopLeftXStart = 0;
+        clipSettings.panZoomTopLeftYStart = 0;
+        clipSettings.panZoomPercentEnd = 0;
+        clipSettings.panZoomTopLeftXEnd = 0;
+        clipSettings.panZoomTopLeftYEnd = 0;
+        clipSettings.mediaRendering = 0;
+        clipSettings.rgbWidth = 0;
+        clipSettings.rgbHeight = 0;
+    }
+
+    /**
+     * @return ClipSettings object with populated data
+     *{@link android.media.videoeditor.MediaArtistNativeHelper.ClipSettings}
+     */
+    ClipSettings getClipSettings() {
+        MediaVideoItem mVI = null;
+        MediaImageItem mII = null;
+        ClipSettings clipSettings = new ClipSettings();
+        initClipSettings(clipSettings);
+        if (this instanceof MediaVideoItem) {
+            mVI = (MediaVideoItem)this;
+            clipSettings.clipPath = mVI.getFilename();
+            clipSettings.fileType = mMANativeHelper.getMediaItemFileType(mVI.
+                                                                 getFileType());
+            clipSettings.beginCutTime = (int)mVI.getBoundaryBeginTime();
+            clipSettings.endCutTime = (int)mVI.getBoundaryEndTime();
+            clipSettings.mediaRendering = mMANativeHelper.
+                                          getMediaItemRenderingMode(mVI
+                                          .getRenderingMode());
+        } else if (this instanceof MediaImageItem) {
+            mII = (MediaImageItem)this;
+            clipSettings = mII.getImageClipProperties();
+        }
+        return clipSettings;
+    }
+
+    /**
+     * Generates a black frame to be used for generating
+     * begin transition at first media item in storyboard
+     * or end transition at last media item in storyboard
+     *
+     * @param ClipSettings object
+     *{@link android.media.videoeditor.MediaArtistNativeHelper.ClipSettings}
+     */
+    void generateBlankFrame(ClipSettings clipSettings) {
+        if (!mBlankFrameGenerated) {
+            int mWidth = 64;
+            int mHeight = 64;
+            mBlankFrameFilename = String.format(mProjectPath + "/" + "ghost.rgb");
+            FileOutputStream fl = null;
+            try {
+                 fl = new FileOutputStream(mBlankFrameFilename);
+            } catch (IOException e) {
+                /* catch IO exception */
+            }
+            final DataOutputStream dos = new DataOutputStream(fl);
+
+            final int [] framingBuffer = new int[mWidth];
+
+            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
+            IntBuffer intBuffer;
+
+            byte[] array = byteBuffer.array();
+            int tmp = 0;
+            while(tmp < mHeight) {
+                intBuffer = byteBuffer.asIntBuffer();
+                intBuffer.put(framingBuffer,0,mWidth);
+                try {
+                    dos.write(array);
+                } catch (IOException e) {
+                    /* catch file write error */
+                }
+                tmp += 1;
+            }
+
+            try {
+                fl.close();
+            } catch (IOException e) {
+                /* file close error */
+            }
+            mBlankFrameGenerated = true;
+        }
+
+        clipSettings.clipPath = mBlankFrameFilename;
+        clipSettings.fileType = FileType.JPG;
+        clipSettings.beginCutTime = 0;
+        clipSettings.endCutTime = 0;
+        clipSettings.mediaRendering = MediaRendering.RESIZING;
+
+        clipSettings.rgbWidth = 64;
+        clipSettings.rgbHeight = 64;
+    }
+
+    /**
+     * Invalidates the blank frame generated
+     */
+    void invalidateBlankFrame() {
+        if (mBlankFrameFilename != null) {
+            if (new File(mBlankFrameFilename).exists()) {
+                new File(mBlankFrameFilename).delete();
+                mBlankFrameFilename = null;
+            }
+        }
+    }
+
 }
