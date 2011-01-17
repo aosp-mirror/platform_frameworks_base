@@ -2057,7 +2057,7 @@
 
     <!-- Window title -->
     <style name="WindowTitleBackground.Holo">
-        <item name="android:background">@android:drawable/title_bar</item>
+        <item name="android:background">@null</item>
     </style>
 
     <style name="WindowTitle.Holo">
