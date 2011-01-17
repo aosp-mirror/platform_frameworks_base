@@ -4493,6 +4493,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Pass a generic motion event down to the focused view.
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     */
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        return onGenericMotionEvent(event);
+    }
+
+    /**
      * Called when the window containing this view gains or loses window focus.
      * ViewGroups should override to route to their children.
      *
@@ -4990,6 +5000,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled, false otherwise.
      */
     public boolean onTrackballEvent(MotionEvent event) {
+        return false;
+    }
+
+    /**
+     * Implement this method to handle generic motion events.
+     * <p>
+     * Generic motion events are dispatched to the focused view to describe
+     * the motions of input devices such as joysticks.  The
+     * {@link MotionEvent#getSource() source} of the motion event specifies
+     * the class of input that was received.  Implementations of this method
+     * must examine the bits in the source before processing the event.
+     * The following code example shows how this is done.
+     * </p>
+     * <code>
+     * public boolean onGenericMotionEvent(MotionEvent event) {
+     *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+     *         float x = event.getX();
+     *         float y = event.getY();
+     *         // process the joystick motion
+     *         return true;
+     *     }
+     *     return super.onGenericMotionEvent(event);
+     * }
+     * </code>
+     *
+     * @param event The generic motion event being processed.
+     *
+     * @return Return true if you have consumed the event, false if you haven't.
+     * The default implementation always returns false.
+     */
+    public boolean onGenericMotionEvent(MotionEvent event) {
         return false;
     }
 

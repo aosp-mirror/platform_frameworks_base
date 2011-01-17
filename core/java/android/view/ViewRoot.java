@@ -128,6 +128,11 @@ public final class ViewRoot extends Handler implements ViewParent,
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
     final TrackballAxis mTrackballAxisY = new TrackballAxis();
 
+    int mLastJoystickXDirection;
+    int mLastJoystickYDirection;
+    int mLastJoystickXKeyCode;
+    int mLastJoystickYKeyCode;
+
     final int[] mTmpLocation = new int[2];
 
     final TypedValue mTmpValue = new TypedValue();
@@ -1888,6 +1893,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int CLOSE_SYSTEM_DIALOGS = 1014;
     public final static int DISPATCH_DRAG_EVENT = 1015;
     public final static int DISPATCH_DRAG_LOCATION_EVENT = 1016;
+    public final static int DISPATCH_GENERIC_MOTION = 1017;
 
     @Override
     public void handleMessage(Message msg) {
@@ -1923,6 +1929,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             break;
         case DISPATCH_TRACKBALL:
             deliverTrackballEvent((MotionEvent) msg.obj, msg.arg1 != 0);
+            break;
+        case DISPATCH_GENERIC_MOTION:
+            deliverGenericMotionEvent((MotionEvent) msg.obj, msg.arg1 != 0);
             break;
         case DISPATCH_APP_VISIBILITY:
             handleAppVisibility(msg.arg1 != 0);
@@ -2427,6 +2436,102 @@ public final class ViewRoot extends Handler implements ViewParent,
         event.recycle();
         if (sendDone) {
             finishInputEvent(handled);
+        }
+    }
+
+    private void deliverGenericMotionEvent(MotionEvent event, boolean sendDone) {
+        final int source = event.getSource();
+        final boolean isJoystick = (source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
+
+        // If there is no view, then the event will not be handled.
+        if (mView == null || !mAdded) {
+            if (isJoystick) {
+                updateJoystickDirection(event, false);
+            }
+            finishGenericMotionEvent(event, sendDone, false);
+            return;
+        }
+
+        // Deliver the event to the view.
+        if (mView.dispatchGenericMotionEvent(event)) {
+            ensureTouchMode(false);
+            if (isJoystick) {
+                updateJoystickDirection(event, false);
+            }
+            finishGenericMotionEvent(event, sendDone, true);
+            return;
+        }
+
+        if (isJoystick) {
+            // Translate the joystick event into DPAD keys and try to deliver those.
+            updateJoystickDirection(event, true);
+            finishGenericMotionEvent(event, sendDone, true);
+        } else {
+            finishGenericMotionEvent(event, sendDone, false);
+        }
+    }
+
+    private void finishGenericMotionEvent(MotionEvent event, boolean sendDone, boolean handled) {
+        event.recycle();
+        if (sendDone) {
+            finishInputEvent(handled);
+        }
+    }
+
+    private void updateJoystickDirection(MotionEvent event, boolean synthesizeNewKeys) {
+        final long time = event.getEventTime();
+        final int metaState = event.getMetaState();
+        final int deviceId = event.getDeviceId();
+        final int source = event.getSource();
+        final int xDirection = joystickAxisValueToDirection(event.getX());
+        final int yDirection = joystickAxisValueToDirection(event.getY());
+
+        if (xDirection != mLastJoystickXDirection) {
+            if (mLastJoystickXKeyCode != 0) {
+                deliverKeyEvent(new KeyEvent(time, time,
+                        KeyEvent.ACTION_UP, mLastJoystickXKeyCode, 0, metaState,
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+                mLastJoystickXKeyCode = 0;
+            }
+
+            mLastJoystickXDirection = xDirection;
+
+            if (xDirection != 0 && synthesizeNewKeys) {
+                mLastJoystickXKeyCode = xDirection > 0
+                        ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
+                deliverKeyEvent(new KeyEvent(time, time,
+                        KeyEvent.ACTION_DOWN, mLastJoystickXKeyCode, 0, metaState,
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+            }
+        }
+
+        if (yDirection != mLastJoystickYDirection) {
+            if (mLastJoystickYKeyCode != 0) {
+                deliverKeyEvent(new KeyEvent(time, time,
+                        KeyEvent.ACTION_UP, mLastJoystickYKeyCode, 0, metaState,
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+                mLastJoystickYKeyCode = 0;
+            }
+
+            mLastJoystickYDirection = yDirection;
+
+            if (yDirection != 0 && synthesizeNewKeys) {
+                mLastJoystickYKeyCode = yDirection > 0
+                        ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
+                deliverKeyEvent(new KeyEvent(time, time,
+                        KeyEvent.ACTION_DOWN, mLastJoystickYKeyCode, 0, metaState,
+                        deviceId, 0, KeyEvent.FLAG_FALLBACK, source), false);
+            }
+        }
+    }
+
+    private static int joystickAxisValueToDirection(float value) {
+        if (value >= 0.5f) {
+            return 1;
+        } else if (value <= -0.5f) {
+            return -1;
+        } else {
+            return 0;
         }
     }
 
@@ -3063,11 +3168,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         } else if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
             dispatchTrackball(event, sendDone);
         } else {
-            // TODO
-            Log.v(TAG, "Dropping unsupported motion event (unimplemented): " + event);
-            if (sendDone) {
-                finishInputEvent(false);
-            }
+            dispatchGenericMotion(event, sendDone);
         }
     }
 
@@ -3092,7 +3193,14 @@ public final class ViewRoot extends Handler implements ViewParent,
         msg.arg1 = sendDone ? 1 : 0;
         sendMessageAtTime(msg, event.getEventTime());
     }
-    
+
+    private void dispatchGenericMotion(MotionEvent event, boolean sendDone) {
+        Message msg = obtainMessage(DISPATCH_GENERIC_MOTION);
+        msg.obj = event;
+        msg.arg1 = sendDone ? 1 : 0;
+        sendMessageAtTime(msg, event.getEventTime());
+    }
+
     public void dispatchAppVisibility(boolean visible) {
         Message msg = obtainMessage(DISPATCH_APP_VISIBILITY);
         msg.arg1 = visible ? 1 : 0;

@@ -1279,6 +1279,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return mDecor.superDispatchTrackballEvent(event);
     }
 
+    @Override
+    public boolean superDispatchGenericMotionEvent(MotionEvent event) {
+        return mDecor.superDispatchGenericMotionEvent(event);
+    }
+
     /**
      * A key was pressed down and not handled by anything else in the window.
      *
@@ -1692,6 +1697,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     .dispatchTrackballEvent(ev);
         }
 
+        @Override
+        public boolean dispatchGenericMotionEvent(MotionEvent ev) {
+            final Callback cb = getCallback();
+            return cb != null && mFeatureId < 0 ? cb.dispatchGenericMotionEvent(ev) : super
+                    .dispatchGenericMotionEvent(ev);
+        }
+
         public boolean superDispatchKeyEvent(KeyEvent event) {
             return super.dispatchKeyEvent(event);
         }
@@ -1706,6 +1718,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         public boolean superDispatchTrackballEvent(MotionEvent event) {
             return super.dispatchTrackballEvent(event);
+        }
+
+        public boolean superDispatchGenericMotionEvent(MotionEvent event) {
+            return super.dispatchGenericMotionEvent(event);
         }
 
         @Override

@@ -533,8 +533,40 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: App switch key.
      * Should bring up the application switcher dialog. */
     public static final int KEYCODE_APP_SWITCH      = 187;
+    /** Key code constant: Generic Game Pad Button #1.*/
+    public static final int KEYCODE_BUTTON_1        = 188;
+    /** Key code constant: Generic Game Pad Button #2.*/
+    public static final int KEYCODE_BUTTON_2        = 189;
+    /** Key code constant: Generic Game Pad Button #3.*/
+    public static final int KEYCODE_BUTTON_3        = 190;
+    /** Key code constant: Generic Game Pad Button #4.*/
+    public static final int KEYCODE_BUTTON_4        = 191;
+    /** Key code constant: Generic Game Pad Button #5.*/
+    public static final int KEYCODE_BUTTON_5        = 192;
+    /** Key code constant: Generic Game Pad Button #6.*/
+    public static final int KEYCODE_BUTTON_6        = 193;
+    /** Key code constant: Generic Game Pad Button #7.*/
+    public static final int KEYCODE_BUTTON_7        = 194;
+    /** Key code constant: Generic Game Pad Button #8.*/
+    public static final int KEYCODE_BUTTON_8        = 195;
+    /** Key code constant: Generic Game Pad Button #9.*/
+    public static final int KEYCODE_BUTTON_9        = 196;
+    /** Key code constant: Generic Game Pad Button #10.*/
+    public static final int KEYCODE_BUTTON_10       = 197;
+    /** Key code constant: Generic Game Pad Button #11.*/
+    public static final int KEYCODE_BUTTON_11       = 198;
+    /** Key code constant: Generic Game Pad Button #12.*/
+    public static final int KEYCODE_BUTTON_12       = 199;
+    /** Key code constant: Generic Game Pad Button #13.*/
+    public static final int KEYCODE_BUTTON_13       = 200;
+    /** Key code constant: Generic Game Pad Button #14.*/
+    public static final int KEYCODE_BUTTON_14       = 201;
+    /** Key code constant: Generic Game Pad Button #15.*/
+    public static final int KEYCODE_BUTTON_15       = 202;
+    /** Key code constant: Generic Game Pad Button #16.*/
+    public static final int KEYCODE_BUTTON_16       = 203;
 
-    private static final int LAST_KEYCODE           = KEYCODE_APP_SWITCH;
+    private static final int LAST_KEYCODE           = KEYCODE_BUTTON_16;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -741,6 +773,22 @@ public class KeyEvent extends InputEvent implements Parcelable {
         "KEYCODE_PROG_YELLOW",
         "KEYCODE_PROG_BLUE",
         "KEYCODE_APP_SWITCH",
+        "KEYCODE_BUTTON_1",
+        "KEYCODE_BUTTON_2",
+        "KEYCODE_BUTTON_3",
+        "KEYCODE_BUTTON_4",
+        "KEYCODE_BUTTON_5",
+        "KEYCODE_BUTTON_6",
+        "KEYCODE_BUTTON_7",
+        "KEYCODE_BUTTON_8",
+        "KEYCODE_BUTTON_9",
+        "KEYCODE_BUTTON_10",
+        "KEYCODE_BUTTON_11",
+        "KEYCODE_BUTTON_12",
+        "KEYCODE_BUTTON_13",
+        "KEYCODE_BUTTON_14",
+        "KEYCODE_BUTTON_15",
+        "KEYCODE_BUTTON_16",
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.

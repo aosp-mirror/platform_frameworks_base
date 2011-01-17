@@ -231,6 +231,22 @@ enum {
     AKEYCODE_PROG_YELLOW     = 185,
     AKEYCODE_PROG_BLUE       = 186,
     AKEYCODE_APP_SWITCH      = 187,
+    AKEYCODE_BUTTON_1        = 188,
+    AKEYCODE_BUTTON_2        = 189,
+    AKEYCODE_BUTTON_3        = 190,
+    AKEYCODE_BUTTON_4        = 191,
+    AKEYCODE_BUTTON_5        = 192,
+    AKEYCODE_BUTTON_6        = 193,
+    AKEYCODE_BUTTON_7        = 194,
+    AKEYCODE_BUTTON_8        = 195,
+    AKEYCODE_BUTTON_9        = 196,
+    AKEYCODE_BUTTON_10       = 197,
+    AKEYCODE_BUTTON_11       = 198,
+    AKEYCODE_BUTTON_12       = 199,
+    AKEYCODE_BUTTON_13       = 200,
+    AKEYCODE_BUTTON_14       = 201,
+    AKEYCODE_BUTTON_15       = 202,
+    AKEYCODE_BUTTON_16       = 203,
 
     // NOTE: If you add a new keycode here you must also add it to several other files.
     //       Refer to frameworks/base/core/java/android/view/KeyEvent.java for the full list.

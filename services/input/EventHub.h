@@ -85,7 +85,7 @@ struct RawAbsoluteAxisInfo {
     int32_t flat;      // center flat position, eg. flat == 8 means center is between -8 and 8
     int32_t fuzz;      // error tolerance, eg. fuzz == 4 means value is +/- 4 due to noise
 
-    inline int32_t getRange() { return maxValue - minValue; }
+    inline int32_t getRange() const { return maxValue - minValue; }
 
     inline void clear() {
         valid = false;
@@ -100,7 +100,7 @@ struct RawAbsoluteAxisInfo {
  * Input device classes.
  */
 enum {
-    /* The input device is a keyboard. */
+    /* The input device is a keyboard or has buttons. */
     INPUT_DEVICE_CLASS_KEYBOARD      = 0x00000001,
 
     /* The input device is an alpha-numeric keyboard (not just a dial pad). */
@@ -123,6 +123,9 @@ enum {
 
     /* The input device has switches. */
     INPUT_DEVICE_CLASS_SWITCH        = 0x00000080,
+
+    /* The input device is a joystick (implies gamepad, has joystick absolute axes). */
+    INPUT_DEVICE_CLASS_JOYSTICK      = 0x00000100,
 };
 
 /*

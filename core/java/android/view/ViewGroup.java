@@ -1124,6 +1124,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
+            return super.dispatchGenericMotionEvent(event);
+        } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
+            return mFocused.dispatchGenericMotionEvent(event);
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (!onFilterTouchEventForSecurity(ev)) {
             return false;

@@ -98,7 +98,16 @@ public final class InputDevice implements Parcelable {
      * Use {@link #getMotionRange} to query the range of positions.
      */
     public static final int SOURCE_CLASS_POSITION = 0x00000008;
-    
+
+    /**
+     * The input source is a joystick.
+     *
+     * A {@link MotionEvent} should be interpreted as absolute joystick movements.
+     *
+     * Use {@link #getMotionRange} to query the range of positions.
+     */
+    public static final int SOURCE_CLASS_JOYSTICK = 0x00000010;
+
     /**
      * The input source is unknown.
      */
@@ -117,7 +126,15 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_BUTTON
      */
     public static final int SOURCE_DPAD = 0x00000200 | SOURCE_CLASS_BUTTON;
-    
+
+    /**
+     * The input source is a game pad.
+     * (It may also be a {@link #SOURCE_JOYSTICK}).
+     *
+     * @see #SOURCE_CLASS_BUTTON
+     */
+    public static final int SOURCE_GAMEPAD = 0x00000400 | SOURCE_CLASS_BUTTON;
+
     /**
      * The input source is a touch screen pointing device.
      * 
@@ -148,7 +165,15 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_POSITION
      */
     public static final int SOURCE_TOUCHPAD = 0x00100000 | SOURCE_CLASS_POSITION;
-    
+
+    /**
+     * The input source is a joystick.
+     * (It may also be a {@link #SOURCE_GAMEPAD}).
+     *
+     * @see #SOURCE_CLASS_JOYSTICK
+     */
+    public static final int SOURCE_JOYSTICK = 0x01000000 | SOURCE_CLASS_JOYSTICK;
+
     /**
      * A special input source constant that is used when filtering input devices
      * to match devices that provide any type of input source.

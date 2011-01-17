@@ -185,6 +185,18 @@ public abstract class Window {
         public boolean dispatchTrackballEvent(MotionEvent event);
 
         /**
+         * Called to process generic motion events.  At the very least your
+         * implementation must call
+         * {@link android.view.Window#superDispatchGenericMotionEvent} to do the
+         * standard processing.
+         *
+         * @param event The generic motion event.
+         *
+         * @return boolean Return true if this event was consumed.
+         */
+        public boolean dispatchGenericMotionEvent(MotionEvent event);
+
+        /**
          * Called to process population of {@link AccessibilityEvent}s.
          *
          * @param event The event.
@@ -1062,6 +1074,14 @@ public abstract class Window {
      */
     public abstract boolean superDispatchTrackballEvent(MotionEvent event);
     
+    /**
+     * Used by custom windows, such as Dialog, to pass the generic motion event
+     * further down the view hierarchy. Application developers should
+     * not need to implement or call this.
+     *
+     */
+    public abstract boolean superDispatchGenericMotionEvent(MotionEvent event);
+
     /**
      * Retrieve the top-level window decor view (containing the standard
      * window frame/decorations and the client's content inside of that), which
