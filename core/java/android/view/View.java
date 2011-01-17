@@ -7905,7 +7905,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
         }
         
-        if (layerType == mLayerType) return;
+        if (layerType == mLayerType) {
+            if (layerType != LAYER_TYPE_NONE && paint != mLayerPaint) {
+                mLayerPaint = paint == null ? new Paint() : paint;
+                if (mParent instanceof ViewGroup) {
+                    ((ViewGroup) mParent).invalidate();
+                }
+                invalidate();
+            }
+            return;
+        }
 
         // Destroy any previous software drawing cache if needed
         switch (mLayerType) {
@@ -7931,9 +7940,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         mLayerType = layerType;
-        mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : paint;
+        mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : (paint == null ? new Paint() : paint);
 
-        // TODO: Make sure we invalidate the parent's display list
+        if (mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).invalidate();
+        }
         invalidate();
     }
 
