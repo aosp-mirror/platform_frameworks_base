@@ -84,7 +84,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     private boolean mDestroyed;
     
     private native int loadNativeCode(String path, String funcname, MessageQueue queue,
-            String internalDataPath, String externalDataPath, int sdkVersion,
+            String internalDataPath, String obbPath, String externalDataPath, int sdkVersion,
             AssetManager assetMgr, byte[] savedState);
     private native void unloadNativeCode(int handle);
     
@@ -191,7 +191,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
                 ? savedInstanceState.getByteArray(KEY_NATIVE_SAVED_STATE) : null;
 
         mNativeHandle = loadNativeCode(path, funcname, Looper.myQueue(),
-                 getFilesDir().toString(),
+                 getFilesDir().toString(), getObbDir().toString(),
                  Environment.getExternalStorageAppFilesDirectory(ai.packageName).toString(),
                  Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
         

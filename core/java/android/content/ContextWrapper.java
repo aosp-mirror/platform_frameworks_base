@@ -191,6 +191,11 @@ public class ContextWrapper extends Context {
     }
     
     @Override
+    public File getObbDir() {
+        return mBase.getObbDir();
+    }
+    
+    @Override
     public File getCacheDir() {
         return mBase.getCacheDir();
     }

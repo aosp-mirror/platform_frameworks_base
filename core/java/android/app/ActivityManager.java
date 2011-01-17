@@ -122,6 +122,8 @@ public class ActivityManager {
         /**
          * Thumbnail representation of the task's last state.  Must
          * use {@link ActivityManager#TASKS_GET_THUMBNAILS} to have this set.
+         * @hide -- this is not scalable, need to have a separate API to get
+         * the bitmap.
          */
         public Bitmap thumbnail;
 
@@ -203,6 +205,7 @@ public class ActivityManager {
     /**
      * Flag for use with {@link #getRecentTasks}: also return the thumbnail
      * bitmap (if available) for each recent task.
+     * @hide
      */
     public static final int TASKS_GET_THUMBNAILS = 0x0001000;
     
@@ -214,8 +217,7 @@ public class ActivityManager {
      * actual number returned may be smaller, depending on how many tasks the
      * user has started and the maximum number the system can remember.
      * @param flags Information about what to return.  May be any combination
-     * of {@link #RECENT_WITH_EXCLUDED}, {@link #RECENT_IGNORE_UNAVAILABLE},
-     * and {@link #TASKS_GET_THUMBNAILS}.
+     * of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
      * 
      * @return Returns a list of RecentTaskInfo records describing each of
      * the recent tasks.
@@ -261,8 +263,8 @@ public class ActivityManager {
         public ComponentName topActivity;
 
         /**
-         * Thumbnail representation of the task's current state.  Must
-         * use {@link ActivityManager#TASKS_GET_THUMBNAILS} to have this set.
+         * Thumbnail representation of the task's current state.  Currently
+         * always null.
          */
         public Bitmap thumbnail;
 

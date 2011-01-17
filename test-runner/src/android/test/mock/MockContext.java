@@ -164,6 +164,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public File getObbDir() {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
     public File getCacheDir() {
         throw new UnsupportedOperationException();
     }
