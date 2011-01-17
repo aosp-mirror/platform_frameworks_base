@@ -668,7 +668,8 @@ public class PhoneStatusBarPolicy {
             if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
                 iconLevel = getEvdoLevel();
                 if (false) {
-                    Slog.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
+                    Slog.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level="
+                            + getCdmaLevel());
                 }
             } else {
                 iconLevel = getCdmaLevel();

@@ -596,7 +596,7 @@ public class TabletStatusBar extends StatusBar implements
             // TODO: immersive mode popups for tablet
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
-            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive;"
+            Slog.w(TAG, "Notification has fullScreenIntent and activity is not immersive;"
                     + " sending fullScreenIntent");
             try {
                 notification.notification.fullScreenIntent.send();
@@ -732,28 +732,28 @@ public class TabletStatusBar extends StatusBar implements
         // act accordingly
         if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
             boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
-            Slog.d(TAG, "DISABLE_CLOCK: " + (show ? "no" : "yes"));
+            Slog.i(TAG, "DISABLE_CLOCK: " + (show ? "no" : "yes"));
             showClock(show);
         }
         if ((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
             boolean show = (state & StatusBarManager.DISABLE_SYSTEM_INFO) == 0;
-            Slog.d(TAG, "DISABLE_SYSTEM_INFO: " + (show ? "no" : "yes"));
+            Slog.i(TAG, "DISABLE_SYSTEM_INFO: " + (show ? "no" : "yes"));
             mNotificationTrigger.setVisibility(show ? View.VISIBLE : View.GONE);
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
-                Slog.d(TAG, "DISABLE_EXPAND: yes");
+                Slog.i(TAG, "DISABLE_EXPAND: yes");
                 animateCollapse();
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
+                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
                 // synchronize with current shadow state
                 mNotificationIconArea.setVisibility(View.GONE);
                 mTicker.halt();
             } else {
-                Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: no");
+                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: no");
                 // synchronize with current shadow state
                 mNotificationIconArea.setVisibility(View.VISIBLE);
             }
@@ -764,11 +764,11 @@ public class TabletStatusBar extends StatusBar implements
         }
         if ((diff & StatusBarManager.DISABLE_NAVIGATION) != 0) {
             if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
-                Slog.d(TAG, "DISABLE_NAVIGATION: yes");
+                Slog.i(TAG, "DISABLE_NAVIGATION: yes");
                 mNavigationArea.setVisibility(View.GONE);
                 mInputMethodSwitchButton.setScreenLocked(true);
             } else {
-                Slog.d(TAG, "DISABLE_NAVIGATION: no");
+                Slog.i(TAG, "DISABLE_NAVIGATION: no");
                 mNavigationArea.setVisibility(View.VISIBLE);
                 mInputMethodSwitchButton.setScreenLocked(false);
             }

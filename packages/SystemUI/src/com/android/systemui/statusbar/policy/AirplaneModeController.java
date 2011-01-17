@@ -55,7 +55,6 @@ public class AirplaneModeController extends BroadcastReceiver
     }
 
     public void onCheckedChanged(CompoundButton view, boolean checked) {
-        Slog.d(TAG, "onCheckedChanged checked=" + checked + " mAirplaneMode=" + mAirplaneMode);
         if (checked != mAirplaneMode) {
             mAirplaneMode = checked;
             unsafe(checked);

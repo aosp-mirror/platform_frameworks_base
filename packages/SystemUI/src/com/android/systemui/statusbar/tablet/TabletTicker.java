@@ -111,7 +111,6 @@ public class TabletTicker
 
     public void remove(IBinder key, boolean advance) {
         if (mCurrentKey == key) {
-            Slog.d(TAG, "removed current");
             // Showing now
             if (advance) {
                 removeMessages(MSG_ADVANCE);
@@ -121,7 +120,6 @@ public class TabletTicker
             // In the queue
             for (int i=0; i<QUEUE_LENGTH; i++) {
                 if (mKeys[i] == key) {
-                    Slog.d(TAG, "removed from queue: " + i);
                     for (; i<QUEUE_LENGTH-1; i++) {
                         mKeys[i] = mKeys[i+1];
                         mQueue[i] = mQueue[i+1];
