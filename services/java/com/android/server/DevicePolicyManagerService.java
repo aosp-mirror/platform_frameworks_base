@@ -145,6 +145,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int maximumFailedPasswordsForWipe = 0;
         long passwordExpirationTimeout = 0L;
         long passwordExpirationDate = 0L;
+        boolean encryptionRequested = false;
 
         // TODO: review implementation decisions with frameworks team
         boolean specifiesGlobalProxy = false;
@@ -242,6 +243,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, "value", Long.toString(passwordExpirationDate));
                 out.endTag(null, "password-expiration-date");
             }
+            if (encryptionRequested) {
+                out.startTag(null, "encryption-requested");
+                out.attribute(null, "value", Boolean.toString(encryptionRequested));
+                out.endTag(null, "encryption-requested");
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -290,7 +296,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     maximumFailedPasswordsForWipe = Integer.parseInt(
                             parser.getAttributeValue(null, "value"));
                 } else if ("specifies-global-proxy".equals(tag)) {
-                    specifiesGlobalProxy = Boolean.getBoolean(
+                    specifiesGlobalProxy = Boolean.parseBoolean(
                             parser.getAttributeValue(null, "value"));
                 } else if ("global-proxy-spec".equals(tag)) {
                     globalProxySpec =
@@ -303,6 +309,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, "value"));
                 } else if ("password-expiration-date".equals(tag)) {
                     passwordExpirationDate = Long.parseLong(
+                            parser.getAttributeValue(null, "value"));
+                } else if ("encryption-requested".equals(tag)) {
+                    encryptionRequested = Boolean.parseBoolean(
                             parser.getAttributeValue(null, "value"));
                 } else {
                     Slog.w(TAG, "Unknown admin tag: " + tag);
@@ -356,6 +365,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.print(prefix); pw.print("globalProxyEclusionList=");
                         pw.println(globalProxyExclusionList);
             }
+            pw.print(prefix); pw.print("encryptionRequested=");
+                    pw.println(encryptionRequested);
         }
     }
 
@@ -1823,7 +1834,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Set the storage encryption request.
+     * Set the storage encryption request for a single admin.  Returns the new total request
+     * status (for all admins).
      */
     public int setStorageEncryption(ComponentName who, boolean encrypt) {
         synchronized (this) {
@@ -1834,27 +1846,92 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_ENCRYPTED_STORAGE);
 
-            // TODO: (1) Record the value for the admin so it's sticky
-            // TODO: (2) Compute "max" for all admins (if any admin requests encryption, then
-            //           we enable it.
-            // TODO: (3) Work with filesystem / mount service to start/stop encryption
-            return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+            // Quick exit:  If the filesystem does not support encryption, we can exit early.
+            if (!isEncryptionSupported()) {
+                return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+            }
+
+            // (1) Record the value for the admin so it's sticky
+            if (ap.encryptionRequested != encrypt) {
+                ap.encryptionRequested = encrypt;
+                saveSettingsLocked();
+            }
+
+            // (2) Compute "max" for all admins
+            boolean newRequested = false;
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                newRequested |= mAdminList.get(i).encryptionRequested;
+            }
+
+            // Notify OS of new request
+            setEncryptionRequested(newRequested);
+
+            // Return the new global request status
+            return newRequested
+                    ? DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE
+                    : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
         }
     }
 
     /**
-     * Get the current storage encryption status for a given storage domain.
+     * Get the current storage encryption request status for a given admin, or aggregate of all
+     * active admins.
      */
-    public int getStorageEncryption(ComponentName who) {
+    public boolean getStorageEncryption(ComponentName who) {
         synchronized (this) {
             // Check for permissions if a particular caller is specified
             if (who != null) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_ENCRYPTED_STORAGE);
+                // When checking for a single caller, status is based on caller's request
+                ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                        DeviceAdminInfo.USES_ENCRYPTED_STORAGE);
+                return ap.encryptionRequested;
             }
 
-            // TODO: Work with filesystem / mount service to query encryption status
-            return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+            // If no particular caller is specified, return the aggregate set of requests.
+            // This is short circuited by returning true on the first hit.
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                if (mAdminList.get(i).encryptionRequested) {
+                    return true;
+                }
+            }
+            return false;
         }
+    }
+
+    /**
+     * Get the current encryption status of the device.
+     */
+    public int getStorageEncryptionStatus() {
+        return getEncryptionStatus();
+    }
+
+    /**
+     * Hook to low-levels:  This should report if the filesystem supports encrypted storage.
+     */
+    private boolean isEncryptionSupported() {
+        // Note, this can be implemented as
+        //   return getEncryptionStatus() != DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+        // But is provided as a separate internal method if there's a faster way to do a
+        // simple check for supported-or-not.
+        return getEncryptionStatus() != DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+    }
+
+    /**
+     * Hook to low-levels:  Reporting the current status of encryption.
+     * @return A value such as {@link DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED} or
+     * {@link DevicePolicyManager#ENCRYPTION_STATUS_INACTIVE} or
+     * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
+     */
+    private int getEncryptionStatus() {
+        return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+    }
+
+    /**
+     * Hook to low-levels:  If needed, record the new admin setting for encryption.
+     */
+    private void setEncryptionRequested(boolean encrypt) {
     }
 
     @Override
