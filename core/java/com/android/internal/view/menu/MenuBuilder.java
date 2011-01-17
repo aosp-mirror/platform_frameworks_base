@@ -27,9 +27,10 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TypedValue;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -38,8 +39,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 
@@ -164,6 +165,10 @@ public class MenuBuilder implements Menu {
      */
     private int mMaxActionItems;
     /**
+     * The total width limit in pixels for all action items within a menu
+     */
+    private int mActionWidthLimit;
+    /**
      * Whether or not the items (or any one item's action state) has changed since it was
      * last fetched.
      */
@@ -207,6 +212,11 @@ public class MenuBuilder implements Menu {
     private boolean mPreventDispatchingItemsChanged = false;
     
     private boolean mOptionalIconsVisible = false;
+
+    private ViewGroup mMeasureActionButtonParent;
+
+    // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
+    private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
 
     private static int getAlertDialogTheme(Context context) {
         TypedValue outValue = new TypedValue();
@@ -1035,6 +1045,44 @@ public class MenuBuilder implements Menu {
         return mVisibleItems;
     }
     
+    /**
+     * @return A fake action button parent view for obtaining child views.
+     */
+    private ViewGroup getMeasureActionButtonParent() {
+        if (mMeasureActionButtonParent == null) {
+            mMeasureActionButtonParent = (ViewGroup) mMenuTypes[TYPE_ACTION_BUTTON].getInflater()
+                    .inflate(LAYOUT_RES_FOR_TYPE[TYPE_ACTION_BUTTON], null, false);
+        }
+        return mMeasureActionButtonParent;
+    }
+
+    /**
+     * This method determines which menu items get to be 'action items' that will appear
+     * in an action bar and which items should be 'overflow items' in a secondary menu.
+     * The rules are as follows:
+     *
+     * <p>Items are considered for inclusion in the order specified within the menu.
+     * There is a limit of mMaxActionItems as a total count, optionally including the overflow
+     * menu button itself. This is a soft limit; if an item shares a group ID with an item
+     * previously included as an action item, the new item will stay with its group and become
+     * an action item itself even if it breaks the max item count limit. This is done to
+     * limit the conceptual complexity of the items presented within an action bar. Only a few
+     * unrelated concepts should be presented to the user in this space, and groups are treated
+     * as a single concept.
+     *
+     * <p>There is also a hard limit of consumed measurable space: mActionWidthLimit. This
+     * limit may be broken by a single item that exceeds the remaining space, but no further
+     * items may be added. If an item that is part of a group cannot fit within the remaining
+     * measured width, the entire group will be demoted to overflow. This is done to ensure room
+     * for navigation and other affordances in the action bar as well as reduce general UI clutter.
+     *
+     * <p>The space freed by demoting a full group cannot be consumed by future menu items.
+     * Once items begin to overflow, all future items become overflow items as well. This is
+     * to avoid inadvertent reordering that may break the app's intended design.
+     *
+     * @param reserveActionOverflow true if an overflow button should consume one space
+     *                              in the available item count
+     */
     private void flagActionItems(boolean reserveActionOverflow) {
         if (reserveActionOverflow != mReserveActionOverflow) {
             mReserveActionOverflow = reserveActionOverflow;
@@ -1048,9 +1096,13 @@ public class MenuBuilder implements Menu {
         final ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
         final int itemsSize = visibleItems.size();
         int maxActions = mMaxActionItems;
+        int widthLimit = mActionWidthLimit;
+        final int querySpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        final ViewGroup parent = getMeasureActionButtonParent();
 
         int requiredItems = 0;
         int requestedItems = 0;
+        int firstActionWidth = 0;
         boolean hasOverflow = false;
         for (int i = 0; i < itemsSize; i++) {
             MenuItemImpl item = visibleItems.get(i);
@@ -1070,12 +1122,68 @@ public class MenuBuilder implements Menu {
         }
         maxActions -= requiredItems;
 
+        final SparseBooleanArray seenGroups = mActionButtonGroups;
+        seenGroups.clear();
+
         // Flag as many more requested items as will fit.
         for (int i = 0; i < itemsSize; i++) {
             MenuItemImpl item = visibleItems.get(i);
-            if (item.requestsActionButton()) {
-                item.setIsActionButton(maxActions > 0);
+
+            if (item.requiresActionButton()) {
+                View v = item.getActionView();
+                if (v == null) {
+                    v = item.getItemView(TYPE_ACTION_BUTTON, parent);
+                }
+                v.measure(querySpec, querySpec);
+                final int measuredWidth = v.getMeasuredWidth();
+                widthLimit -= measuredWidth;
+                if (firstActionWidth == 0) {
+                    firstActionWidth = measuredWidth;
+                }
+                final int groupId = item.getGroupId();
+                if (groupId != 0) {
+                    seenGroups.put(groupId, true);
+                }
+            } else if (item.requestsActionButton()) {
+                // Items in a group with other items that already have an action slot
+                // can break the max actions rule, but not the width limit.
+                final int groupId = item.getGroupId();
+                final boolean inGroup = seenGroups.get(groupId);
+                boolean isAction = (maxActions > 0 || inGroup) && widthLimit > 0;
                 maxActions--;
+
+                if (isAction) {
+                    View v = item.getActionView();
+                    if (v == null) {
+                        v = item.getItemView(TYPE_ACTION_BUTTON, parent);
+                    }
+                    v.measure(querySpec, querySpec);
+                    final int measuredWidth = v.getMeasuredWidth();
+                    widthLimit -= measuredWidth;
+                    if (firstActionWidth == 0) {
+                        firstActionWidth = measuredWidth;
+                    }
+
+                    // Did this push the entire first item past halfway?
+                    if (widthLimit + firstActionWidth <= 0) {
+                        isAction = false;
+                    }
+                }
+
+                if (isAction && groupId != 0) {
+                    seenGroups.put(groupId, true);
+                } else if (inGroup) {
+                    // We broke the width limit. Demote the whole group, they all overflow now.
+                    seenGroups.put(groupId, false);
+                    for (int j = 0; j < i; j++) {
+                        MenuItemImpl areYouMyGroupie = visibleItems.get(j);
+                        if (areYouMyGroupie.getGroupId() == groupId) {
+                            areYouMyGroupie.setIsActionButton(false);
+                        }
+                    }
+                }
+
+                item.setIsActionButton(isAction);
             }
         }
 
@@ -1105,6 +1213,11 @@ public class MenuBuilder implements Menu {
     
     void setMaxActionItems(int maxActionItems) {
         mMaxActionItems = maxActionItems;
+        mIsActionItemsStale = true;
+    }
+
+    void setActionWidthLimit(int widthLimit) {
+        mActionWidthLimit = widthLimit;
         mIsActionItemsStale = true;
     }
 
