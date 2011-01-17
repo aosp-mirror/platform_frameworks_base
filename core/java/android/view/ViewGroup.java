@@ -2398,16 +2398,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 layerType != LAYER_TYPE_NONE) {
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
-                        if (layerType != LAYER_TYPE_NONE && child.mLayerPaint != null) {
+                        if (layerType != LAYER_TYPE_NONE) {
                             child.mLayerPaint.setAlpha(multipliedAlpha);
                         } else {
                             canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct,
                                     multipliedAlpha, layerFlags);
-                            layerSaved = true;
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
-                        if (layerType != LAYER_TYPE_NONE && child.mLayerPaint != null) {
+                        if (layerType != LAYER_TYPE_NONE) {
                             child.mLayerPaint.setAlpha(255);
                         }
                         child.mPrivateFlags |= ALPHA_SET;
@@ -2433,7 +2432,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (hasNoCache) {
             boolean layerRendered = false;
-            if (!layerSaved && layerType == LAYER_TYPE_HARDWARE) {
+            if (layerType == LAYER_TYPE_HARDWARE) {
                 final HardwareLayer layer = child.getHardwareLayer(canvas);
                 if (layer != null && layer.isValid()) {
                     ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, child.mLayerPaint);
@@ -2465,7 +2464,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.mPrivateFlags &= ~DIRTY_MASK;
             Paint cachePaint;
 
-            if (layerType == LAYER_TYPE_NONE || child.mLayerPaint == null) {
+            if (layerType == LAYER_TYPE_NONE) {
                 cachePaint = mCachePaint;
                 if (alpha < 1.0f) {
                     cachePaint.setAlpha((int) (alpha * 255));
@@ -2476,9 +2475,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
             } else {
                 cachePaint = child.mLayerPaint;
-                if (alpha < 1.0f) {
-                    cachePaint.setAlpha((int) (alpha * 255));
-                }
+                cachePaint.setAlpha((int) (alpha * 255));
             }
             canvas.drawBitmap(cache, 0.0f, 0.0f, cachePaint);
         }

@@ -38,6 +38,8 @@ public class ViewLayersActivity2 extends Activity {
         setupList(R.id.list1);
         setupList(R.id.list2);
         setupList(R.id.list3);
+        
+        findViewById(R.id.list1).setAlpha(0.7f);
     }
 
     private void setupList(int listId) {
