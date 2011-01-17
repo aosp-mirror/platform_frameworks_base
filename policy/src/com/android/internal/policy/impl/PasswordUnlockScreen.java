@@ -109,22 +109,21 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this, false);
+        // TODO: re-enable on phones with keyboards
+        boolean isPhysicalKbShowing = false;
+        //mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
         if (mKeyboardViewAlpha == null || !mIsAlpha) {
             mKeyboardHelper.setKeyboardMode(mIsAlpha ?
                     PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
                     : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
-            mKeyboardView.setVisibility(
-                    mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
-                    ? View.INVISIBLE : View.VISIBLE);
+            mKeyboardView.setVisibility(isPhysicalKbShowing ? View.INVISIBLE : View.VISIBLE);
         } else {
             mKeyboardHelperAlpha = new PasswordEntryKeyboardHelper(context, mKeyboardViewAlpha,
                     this, false);
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
             mKeyboardHelperAlpha.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
             mKeyboardView.setVisibility(View.GONE);
-            mKeyboardViewAlpha.setVisibility(
-                    mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
-                    ? View.INVISIBLE : View.VISIBLE);
+            mKeyboardViewAlpha.setVisibility(isPhysicalKbShowing ? View.INVISIBLE : View.VISIBLE);
             mPasswordEntry.setWidth(mKeyboardViewAlpha.getLayoutParams().width);
         }
 
