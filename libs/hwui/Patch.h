@@ -70,11 +70,11 @@ private:
 
     void generateRow(TextureVertex*& vertex, float y1, float y2,
             float v1, float v2, float stretchX, float width, float bitmapWidth,
-            uint32_t& quadCount);
-    bool generateQuad(TextureVertex*& vertex,
+            uint32_t& quadCount, bool isStretch);
+    void generateQuad(TextureVertex*& vertex,
             float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2,
-            uint32_t& quadCount);
+            uint32_t& quadCount, bool isStretch);
 }; // struct Patch
 
 }; // namespace uirenderer
