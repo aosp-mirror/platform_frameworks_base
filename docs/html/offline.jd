@@ -2,48 +2,59 @@ home=true
 page.title=Welcome
 @jd:body
 
+<style type="text/css">
+#qv h2 {
+  font-size:1.5em;
+  font-weight:bold;
+  margin:12px 0 .5em 0;
+  padding:5px;
+  color:#7BB026;
+  border:none;
+}
+#qv ul li {
+  padding: 0 5px 1em 0;
+}
+</style>
 <div id="mainBodyFluid">
 
 <h1>Welcome to the Android SDK!</h1>
 
-<img src="{@docRoot}assets/images/home/sdk-large.png" style="float:right; margin:-2em 3em 3em;" />
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Get Started</h2>
+  <ul>
+    <li>Create a <a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a>
+application</li>
+    <li>Read <a href="{@docRoot}resources/browser.html?tag=sample">Sample Code</a>,
+especially <a href="{@docRoot}resources/samples/ApiDemos/index.html">API Demos</a></li>
+    <li>Read the <a href="{@docRoot}guide/topics/fundamentals/index.html">Application
+Fundamentals</a></li>
+    <li>Read the <a href="{@docRoot}guide/developing/index.html">Overview</a> for using the SDK
+tools</li>
+  </ul>
+</div>
+</div>
 
-<h3>If you've downloaded the Android SDK for the first time...</h3>
+<h3>If you've downloaded the Android SDK for the first time</h3>
 
-<p>Follow the online guide to 
-<a href="{@docRoot}sdk/installing.html">Installing 
-the Android SDK</a>, which will help you setup your development environment
-(including the Android Development Tools plugin for Eclipse) 
-so you can start developing Android apps.</p>
+<p>Follow the guide to <a href="{@docRoot}sdk/installing.html">Installing the Android SDK</a>, which
+will help you setup your development environment.</p>
 
-<p>Once your environment is setup, look at the
-<a href="{@docRoot}sdk/installing.html#NextSteps">Next
-Steps</a> for some suggestions on how to begin learning about Android.</p>
-
-<h3>If you've just installed new SDK components using the <em>SDK and AVD Manager</em>...</h3>
+<h3>If you've installed new SDK components using the SDK and AVD Manager</h3>
 
 <p>There's no additional setup.</p>
 
-<p>Newly installed Android platforms are automatically saved in the 
-<code><em>&lt;sdk_dir>/</em>platforms/</code> directory of your existing SDK;
-new add-ons are saved in the <code><em>&lt;sdk_dir>/</em>add-ons/</code>
-directory; and new documentation is saved in the existing
-<code><em>&lt;sdk_dir>/</em>docs/</code> directory (old docs are replaced).</p>
+<p>New Android platforms are saved in the <code>&lt;sdk>/platforms/</code> directory of
+your existing SDK and new add-ons are saved in the <code>&lt;sdk>/add-ons/</code> directory.</p>
 
 
-<hr style="margin:2em 0;" />
+<div class="note">
+<p><strong>Note:</strong> You are currently viewing the offline version of the Android developer
+documentation. Because some features such as search and videos are network-based, not everything
+will work if you are not connected to the Internet. Additionally, the online version may contain
+more recently updated documents.</p>
 
-<p>Note that you are currently viewing a local, offline version of the
-Android developer documentation. The offline documentation offers almost all the same
-content and features as the online documentation. Because some features
-such as search and videos are network-based, not everything will work if you
-are not connected to the Internet.</p>
-
-<p>For the most current documentation and a fully-functional experience, please visit:</p>
-<p style="margin-left:2em;">
-<a href="http://developer.android.com">http://developer.android.com</a></strong>.
+<p>For the latest documentation, please visit
+<b><a href="http://developer.android.com">developer.android.com</a></b>.
 </p>
-
-
-
 </div>
