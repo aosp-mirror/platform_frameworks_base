@@ -23,6 +23,7 @@ jclass gOptions_class;
 jfieldID gOptions_justBoundsFieldID;
 jfieldID gOptions_sampleSizeFieldID;
 jfieldID gOptions_configFieldID;
+jfieldID gOptions_mutableFieldID;
 jfieldID gOptions_ditherFieldID;
 jfieldID gOptions_purgeableFieldID;
 jfieldID gOptions_shareableFieldID;
@@ -179,6 +180,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
     bool doDither = true;
+    bool isMutable = false;
     bool isPurgeable = forcePurgeable ||
                         (allowPurgeable && optionsPurgeable(env, options));
     bool preferQualityOverSpeed = false;
@@ -196,6 +198,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefConfig = GraphicsJNI::getNativeBitmapConfig(env, jconfig);
+        isMutable = env->GetBooleanField(options, gOptions_mutableFieldID);
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
         preferQualityOverSpeed = env->GetBooleanField(options,
                 gOptions_preferQualityOverSpeedFieldID);
@@ -306,15 +309,19 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         // already have a pixelref installed.
         pr = bitmap->pixelRef();
     }
-    // promise we will never change our pixels (great for sharing and pictures)
-    pr->setImmutable();
+
+    if (!isMutable) {
+        // promise we will never change our pixels (great for sharing and pictures)
+        pr->setImmutable();
+    }
 
     if (javaBitmap != NULL) {
         // If a java bitmap was passed in for reuse, pass it back
         return javaBitmap;
     }
     // now create the java bitmap
-    return GraphicsJNI::createBitmap(env, bitmap, javaAllocator.getStorageObj(), false, ninePatchChunk);
+    return GraphicsJNI::createBitmap(env, bitmap, javaAllocator.getStorageObj(),
+            isMutable, ninePatchChunk);
 }
 
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz,
@@ -572,6 +579,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_sampleSizeFieldID = getFieldIDCheck(env, gOptions_class, "inSampleSize", "I");
     gOptions_configFieldID = getFieldIDCheck(env, gOptions_class, "inPreferredConfig",
             "Landroid/graphics/Bitmap$Config;");
+    gOptions_mutableFieldID = getFieldIDCheck(env, gOptions_class, "inMutable", "Z");
     gOptions_ditherFieldID = getFieldIDCheck(env, gOptions_class, "inDither", "Z");
     gOptions_purgeableFieldID = getFieldIDCheck(env, gOptions_class, "inPurgeable", "Z");
     gOptions_shareableFieldID = getFieldIDCheck(env, gOptions_class, "inInputShareable", "Z");

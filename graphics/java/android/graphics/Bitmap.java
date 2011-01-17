@@ -53,6 +53,7 @@ public final class Bitmap implements Parcelable {
      */
     public byte[] mBuffer;
 
+    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"}) // Keep to finalize native resources
     private final BitmapFinalizer mFinalizer;
 
     private final boolean mIsMutable;
