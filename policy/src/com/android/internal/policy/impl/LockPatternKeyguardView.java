@@ -495,8 +495,10 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     public void cleanUp() {
         ((KeyguardScreen) mLockScreen).onPause();
         ((KeyguardScreen) mLockScreen).cleanUp();
+        this.removeView(mLockScreen);
         ((KeyguardScreen) mUnlockScreen).onPause();
         ((KeyguardScreen) mUnlockScreen).cleanUp();
+        this.removeView(mUnlockScreen);
     }
 
     private boolean isSecure() {
