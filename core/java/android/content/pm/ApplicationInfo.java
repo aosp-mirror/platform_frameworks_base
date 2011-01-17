@@ -281,9 +281,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Value for {@link #flags}: Set to true if the application has been
      * installed using the forward lock option.
      *
+     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
+     * 
      * {@hide}
      */
-    public static final int FLAG_FORWARD_LOCK = 1<<30;
+    public static final int FLAG_FORWARD_LOCK = 1<<29;
 
     /**
      * Value for {@link #flags}: set to <code>true</code> if the application
@@ -296,7 +298,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
-    public static final int FLAG_CANT_SAVE_STATE = 1<<29;
+    public static final int FLAG_CANT_SAVE_STATE = 1<<28;
 
     /**
      * Flags associated with the application.  Any combination of
