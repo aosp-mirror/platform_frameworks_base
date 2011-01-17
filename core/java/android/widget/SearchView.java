@@ -83,6 +83,7 @@ public class SearchView extends LinearLayout {
     private CursorAdapter mSuggestionsAdapter;
     private View mSearchButton;
     private View mSubmitButton;
+    private View mSubmitArea;
     private ImageView mCloseButton;
     private View mSearchEditFrame;
     private View mVoiceButton;
@@ -92,6 +93,7 @@ public class SearchView extends LinearLayout {
     private boolean mQueryRefinement;
     private boolean mClearingFocus;
     private int mMaxWidth;
+    private boolean mVoiceButtonEnabled;
 
     private SearchableInfo mSearchable;
 
@@ -187,6 +189,7 @@ public class SearchView extends LinearLayout {
         mQueryTextView.setSearchView(this);
 
         mSearchEditFrame = findViewById(R.id.search_edit_frame);
+        mSubmitArea = findViewById(R.id.submit_area);
         mSubmitButton = findViewById(R.id.search_go_btn);
         mCloseButton = (ImageView) findViewById(R.id.search_close_btn);
         mVoiceButton = findViewById(R.id.search_voice_btn);
@@ -248,6 +251,8 @@ public class SearchView extends LinearLayout {
         if (mSearchable != null) {
             updateSearchAutoComplete();
         }
+        // Cache the voice search capability
+        mVoiceButtonEnabled = hasVoiceSearch();
         updateViewsVisibility(mIconifiedByDefault);
     }
 
@@ -513,18 +518,55 @@ public class SearchView extends LinearLayout {
         mIconified = collapsed;
         // Visibility of views that are visible when collapsed
         final int visCollapsed = collapsed ? VISIBLE : GONE;
-        // Visibility of views that are visible when expanded
-        final int visExpanded = collapsed ? GONE : VISIBLE;
         // Is there text in the query
         final boolean hasText = !TextUtils.isEmpty(mQueryTextView.getText());
 
         mSearchButton.setVisibility(visCollapsed);
-        mSubmitButton.setVisibility(mSubmitButtonEnabled && hasText ? visExpanded : GONE);
-        mSearchEditFrame.setVisibility(visExpanded);
+        updateSubmitButton(hasText);
+        mSearchEditFrame.setVisibility(collapsed ? GONE : VISIBLE);
         updateCloseButton();
         updateVoiceButton(!hasText);
+        updateSubmitArea();
         requestLayout();
-        invalidate();
+    }
+
+    private boolean hasVoiceSearch() {
+        if (mSearchable != null && mSearchable.getVoiceSearchEnabled()) {
+            Intent testIntent = null;
+            if (mSearchable.getVoiceSearchLaunchWebSearch()) {
+                testIntent = mVoiceWebSearchIntent;
+            } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
+                testIntent = mVoiceAppSearchIntent;
+            }
+            if (testIntent != null) {
+                ResolveInfo ri = getContext().getPackageManager().resolveActivity(testIntent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+                return ri != null;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSubmitAreaEnabled() {
+        return (mSubmitButtonEnabled || mVoiceButtonEnabled) && !isIconified();
+    }
+
+    private void updateSubmitButton(boolean hasText) {
+        mSubmitButton.setVisibility(
+                isSubmitAreaEnabled() ? (hasText ? VISIBLE : INVISIBLE) : GONE);
+    }
+
+    private void updateSubmitArea() {
+        int visibility = GONE;
+        if (isSubmitAreaEnabled()) {
+            if (mSubmitButton.getVisibility() == VISIBLE
+                    || mVoiceButton.getVisibility() == VISIBLE) {
+                visibility = VISIBLE;
+            } else {
+                visibility = INVISIBLE;
+            }
+        }
+        mSubmitArea.setVisibility(visibility);
     }
 
     private void updateCloseButton() {
@@ -790,22 +832,14 @@ public class SearchView extends LinearLayout {
      * be visible - i.e., if the user has typed a query, remove the voice button.
      */
     private void updateVoiceButton(boolean empty) {
-        int visibility = View.GONE;
-        if (mSearchable != null && mSearchable.getVoiceSearchEnabled() && empty
-                && !isIconified()) {
-            Intent testIntent = null;
-            if (mSearchable.getVoiceSearchLaunchWebSearch()) {
-                testIntent = mVoiceWebSearchIntent;
-            } else if (mSearchable.getVoiceSearchLaunchRecognizer()) {
-                testIntent = mVoiceAppSearchIntent;
-            }
-            if (testIntent != null) {
-                ResolveInfo ri = getContext().getPackageManager().resolveActivity(testIntent,
-                        PackageManager.MATCH_DEFAULT_ONLY);
-                if (ri != null) {
-                    visibility = View.VISIBLE;
-                }
-            }
+        // If the voice button is to be visible, show it
+        // Else, make it gone if the submit button is enabled, otherwise invisible to
+        // avoid losing the real-estate
+        int visibility = mSubmitButtonEnabled ? GONE : INVISIBLE;
+
+        if (mVoiceButtonEnabled && !isIconified() && empty) {
+            visibility = VISIBLE;
+            mSubmitButton.setVisibility(GONE);
         }
         mVoiceButton.setVisibility(visibility);
     }
@@ -825,12 +859,11 @@ public class SearchView extends LinearLayout {
         CharSequence text = mQueryTextView.getText();
         boolean hasText = !TextUtils.isEmpty(text);
         if (isSubmitButtonEnabled()) {
-            mSubmitButton.setVisibility(hasText ? VISIBLE : GONE);
-            requestLayout();
-            invalidate();
+            updateSubmitButton(hasText);
         }
         updateVoiceButton(!hasText);
         updateCloseButton();
+        updateSubmitArea();
         if (mOnQueryChangeListener != null) {
             mOnQueryChangeListener.onQueryTextChanged(newText.toString());
         }
