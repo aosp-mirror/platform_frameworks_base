@@ -285,7 +285,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @see #Preference(Context, AttributeSet, int)
      */
     public Preference(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, com.android.internal.R.attr.preferenceStyle);
     }
 
     /**

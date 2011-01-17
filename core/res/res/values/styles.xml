@@ -889,17 +889,61 @@
         <item name="android:positiveButtonText">@android:string/ok</item>
         <item name="android:negativeButtonText">@android:string/cancel</item>
     </style>
-    
+
     <style name="Preference.DialogPreference.YesNoPreference">
         <item name="android:positiveButtonText">@android:string/yes</item>
         <item name="android:negativeButtonText">@android:string/no</item>
     </style>
-    
+
     <style name="Preference.DialogPreference.EditTextPreference">
         <item name="android:dialogLayout">@android:layout/preference_dialog_edittext</item>
     </style>
-    
+
     <style name="Preference.RingtonePreference">
+        <item name="android:ringtoneType">ringtone</item>
+        <item name="android:showSilent">true</item>
+        <item name="android:showDefault">true</item>
+    </style>
+
+    <style name="Preference.Holo">
+        <item name="android:layout">@android:layout/preference_holo</item>
+    </style>
+
+    <style name="Preference.Holo.Information">
+        <item name="android:layout">@android:layout/preference_information_holo</item>
+        <item name="android:enabled">false</item>
+        <item name="android:shouldDisableView">false</item>
+    </style>
+
+    <style name="Preference.Holo.Category">
+        <item name="android:layout">@android:layout/preference_category_holo</item>
+        <!-- The title should not dim if the category is disabled, instead only the preference children should dim. -->
+        <item name="android:shouldDisableView">false</item>
+        <item name="android:selectable">false</item>
+    </style>
+
+    <style name="Preference.Holo.CheckBoxPreference">
+        <item name="android:widgetLayout">@android:layout/preference_widget_checkbox</item>
+    </style>
+
+    <style name="Preference.Holo.PreferenceScreen">
+    </style>
+
+    <style name="Preference.Holo.DialogPreference">
+        <item name="android:positiveButtonText">@android:string/ok</item>
+        <item name="android:negativeButtonText">@android:string/cancel</item>
+    </style>
+
+    <style name="Preference.Holo.DialogPreference.YesNoPreference">
+        <item name="android:positiveButtonText">@android:string/yes</item>
+        <item name="android:negativeButtonText">@android:string/no</item>
+    </style>
+
+    <style name="Preference.Holo.DialogPreference.EditTextPreference">
+        <item name="android:dialogLayout">@android:layout/preference_dialog_edittext</item>
+    </style>
+
+    <style name="Preference.Holo.RingtonePreference">
         <item name="android:ringtoneType">ringtone</item>
         <item name="android:showSilent">true</item>
         <item name="android:showDefault">true</item>
