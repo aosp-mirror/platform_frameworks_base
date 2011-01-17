@@ -27,6 +27,7 @@
 
 #include "Rect.h"
 #include "SkiaColorFilter.h"
+#include "Vertex.h"
 
 namespace android {
 namespace uirenderer {
@@ -41,6 +42,14 @@ namespace uirenderer {
 struct Layer {
     Layer(const uint32_t layerWidth, const uint32_t layerHeight):
             width(layerWidth), height(layerHeight) {
+        mesh = NULL;
+        meshIndices = NULL;
+        meshElementCount = 0;
+    }
+
+    ~Layer() {
+        if (mesh) delete mesh;
+        if (meshIndices) delete meshIndices;
     }
 
     /**
@@ -99,6 +108,13 @@ struct Layer {
      * Color filter used to draw this layer. Optional.
      */
     SkiaColorFilter* colorFilter;
+
+    /**
+     * If the layer can be rendered as a mesh, this is non-null.
+     */
+    TextureVertex* mesh;
+    uint16_t* meshIndices;
+    GLsizei meshElementCount;
 }; // struct Layer
 
 }; // namespace uirenderer

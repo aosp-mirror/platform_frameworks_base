@@ -615,6 +615,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         const float alpha = layer->alpha / 255.0f;
         const float texX = 1.0f / float(layer->width);
         const float texY = 1.0f / float(layer->height);
+        const float height = rect.getHeight();
 
         TextureVertex* mesh = mCaches.getRegionMesh();
         GLsizei numQuads = 0;
@@ -636,9 +637,9 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             const android::Rect* r = &rects[i];
 
             const float u1 = r->left * texX;
-            const float v1 = (rect.getHeight() - r->top) * texY;
+            const float v1 = (height - r->top) * texY;
             const float u2 = r->right * texX;
-            const float v2 = (rect.getHeight() - r->bottom) * texY;
+            const float v2 = (height - r->bottom) * texY;
 
             // TODO: Reject quads outside of the clip
             TextureVertex::set(mesh++, r->left, r->top, u1, v1);
@@ -694,10 +695,10 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
         const float right, const float bottom, const mat4 transform) {
 #if RENDER_LAYERS_AS_REGIONS
-    if ((mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region) {
+    if (hasLayer()) {
         Rect bounds(left, top, right, bottom);
         transform.mapRect(bounds);
-        dirtyLayerUnchecked(bounds, mSnapshot->region);
+        dirtyLayerUnchecked(bounds, getRegion());
     }
 #endif
 }
@@ -705,9 +706,9 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
         const float right, const float bottom) {
 #if RENDER_LAYERS_AS_REGIONS
-    if ((mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region) {
+    if (hasLayer()) {
         Rect bounds(left, top, right, bottom);
-        dirtyLayerUnchecked(bounds, mSnapshot->region);
+        dirtyLayerUnchecked(bounds, getRegion());
     }
 #endif
 }
@@ -1419,24 +1420,20 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
 #if RENDER_LAYERS_AS_REGIONS
-    bool hasLayer = (mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region;
+    bool hasActiveLayer = hasLayer();
 #else
-    bool hasLayer = false;
+    bool hasActiveLayer = false;
 #endif
 
     mCaches.unbindMeshBuffer();
     if (fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
-            hasLayer ? &bounds : NULL)) {
+            hasActiveLayer ? &bounds : NULL)) {
 #if RENDER_LAYERS_AS_REGIONS
-        if (hasLayer) {
+        if (hasActiveLayer) {
             if (!pureTranslate) {
                 mSnapshot->transform->mapRect(bounds);
             }
-            bounds.intersect(*mSnapshot->clipRect);
-            bounds.snapToPixelBoundaries();
-
-            android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
-            mSnapshot->region->orSelf(dirty);
+            dirtyLayerUnchecked(bounds, getRegion());
         }
 #endif
     }
@@ -1501,8 +1498,36 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     layer->alpha = alpha;
     layer->mode = mode;
 
+
+#if RENDER_LAYERS_AS_REGIONS
+    if (layer->region.isRect()) {
+        const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
+        composeLayerRect(layer, r);
+    } else if (!layer->region.isEmpty() && layer->mesh) {
+        const Rect& rect = layer->layer;
+
+        setupDraw();
+        setupDrawWithTexture();
+        setupDrawColor(alpha, alpha, alpha, alpha);
+        setupDrawColorFilter();
+        setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
+        setupDrawProgram();
+        setupDrawDirtyRegionsDisabled();
+        setupDrawPureColorUniforms();
+        setupDrawColorFilterUniforms();
+        setupDrawTexture(layer->texture);
+        setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
+        setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
+
+        glDrawElements(GL_TRIANGLES, layer->meshElementCount,
+                GL_UNSIGNED_SHORT, layer->meshIndices);
+
+        finishDrawTexture();
+    }
+#else
     const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
     composeLayerRect(layer, r);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

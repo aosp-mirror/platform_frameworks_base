@@ -29,6 +29,10 @@ namespace uirenderer {
 void LayerRenderer::prepare(bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
+#if RENDER_LAYERS_AS_REGIONS
+    mLayer->region.clear();
+#endif
+
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &mPreviousFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
@@ -39,11 +43,97 @@ void LayerRenderer::finish() {
     OpenGLRenderer::finish();
     glBindFramebuffer(GL_FRAMEBUFFER, mPreviousFbo);
 
+    generateMesh();
+
     LAYER_RENDERER_LOGD("Finished rendering into layer, fbo = %d", mLayer->mFbo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Static functions
+// Dirty region tracking
+///////////////////////////////////////////////////////////////////////////////
+
+bool LayerRenderer::hasLayer() {
+    return true;
+}
+
+Region* LayerRenderer::getRegion() {
+#if RENDER_LAYERS_AS_REGIONS
+    if (getSnapshot()->flags & Snapshot::kFlagFboTarget) {
+        return OpenGLRenderer::getRegion();
+    }
+    return &mLayer->region;
+#else
+    return OpenGLRenderer::getRegion();
+#endif
+}
+
+void LayerRenderer::generateMesh() {
+#if RENDER_LAYERS_AS_REGIONS
+    if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
+        if (mLayer->mesh) {
+            delete mLayer->mesh;
+            delete mLayer->meshIndices;
+
+            mLayer->mesh = NULL;
+            mLayer->meshIndices = NULL;
+            mLayer->meshElementCount = 0;
+        }
+        return;
+    }
+
+    size_t count;
+    const android::Rect* rects = mLayer->region.getArray(&count);
+
+    GLsizei elementCount = count * 6;
+
+    if (mLayer->mesh && mLayer->meshElementCount < elementCount) {
+        delete mLayer->mesh;
+        delete mLayer->meshIndices;
+
+        mLayer->mesh = NULL;
+        mLayer->meshIndices = NULL;
+    }
+
+    if (!mLayer->mesh) {
+        mLayer->mesh = new TextureVertex[count * 4];
+        mLayer->meshIndices = new uint16_t[elementCount];
+        mLayer->meshElementCount = elementCount;
+    }
+
+    const float texX = 1.0f / float(mLayer->width);
+    const float texY = 1.0f / float(mLayer->height);
+    const float height = mLayer->layer.getHeight();
+
+    TextureVertex* mesh = mLayer->mesh;
+    uint16_t* indices = mLayer->meshIndices;
+
+    for (size_t i = 0; i < count; i++) {
+        const android::Rect* r = &rects[i];
+
+        const float u1 = r->left * texX;
+        const float v1 = (height - r->top) * texY;
+        const float u2 = r->right * texX;
+        const float v2 = (height - r->bottom) * texY;
+
+        TextureVertex::set(mesh++, r->left, r->top, u1, v1);
+        TextureVertex::set(mesh++, r->right, r->top, u2, v1);
+        TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
+        TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
+
+        uint16_t quad = i * 4;
+        int index = i * 6;
+        indices[index    ] = quad;       // top-left
+        indices[index + 1] = quad + 1;   // top-right
+        indices[index + 2] = quad + 2;   // bottom-left
+        indices[index + 3] = quad + 2;   // bottom-left
+        indices[index + 4] = quad + 1;   // top-right
+        indices[index + 5] = quad + 3;   // bottom-right
+    }
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Layers management
 ///////////////////////////////////////////////////////////////////////////////
 
 Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
