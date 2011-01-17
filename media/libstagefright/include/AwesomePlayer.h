@@ -100,6 +100,7 @@ struct AwesomePlayer {
 
 private:
     friend struct AwesomeEvent;
+    friend struct PreviewPlayer;
 
     enum {
         PLAYING             = 1,
