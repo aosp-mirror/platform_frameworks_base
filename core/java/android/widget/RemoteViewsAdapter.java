@@ -33,8 +33,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.View.MeasureSpec;
 
 import com.android.internal.widget.IRemoteViewsFactory;
 
@@ -760,11 +760,12 @@ public class RemoteViewsAdapter extends BaseAdapter {
             synchronized (mCache) {
                 // Queue up other indices to be preloaded based on this position
                 mCache.queuePositionsToBePreloadedFromRequestedPosition(position);
-
-                RemoteViewsFrameLayout layout = (RemoteViewsFrameLayout) convertView;
                 View convertViewChild = null;
                 int convertViewTypeId = 0;
-                if (convertView != null) {
+                RemoteViewsFrameLayout layout = null;
+
+                if (convertView instanceof RemoteViewsFrameLayout) {
+                    layout = (RemoteViewsFrameLayout) convertView;
                     convertViewChild = layout.getChildAt(0);
                     convertViewTypeId = getConvertViewTypeId(convertViewChild);
                 }
@@ -777,17 +778,17 @@ public class RemoteViewsAdapter extends BaseAdapter {
                     int typeId = mCache.getMetaDataAt(position).typeId;
 
                     // Reuse the convert view where possible
-                    if (convertView != null) {
+                    if (layout != null) {
                         if (convertViewTypeId == typeId) {
                             rv.reapply(context, convertViewChild);
-                            return convertView;
+                            return layout;
                         }
                     }
 
                     // Otherwise, create a new view to be returned
                     View newView = rv.apply(context, parent);
                     newView.setTagInternal(com.android.internal.R.id.rowTypeId, new Integer(typeId));
-                    if (convertView != null) {
+                    if (layout != null) {
                         layout.removeAllViews();
                     } else {
                         layout = new RemoteViewsFrameLayout(context);
