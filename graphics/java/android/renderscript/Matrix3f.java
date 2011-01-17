@@ -26,28 +26,61 @@ import android.util.Log;
  **/
 public class Matrix3f {
 
+    /**
+    * Creates a new identity 3x3 matrix
+    */
     public Matrix3f() {
         mMat = new float[9];
         loadIdentity();
     }
 
+    /**
+    * Creates a new matrix and sets its values from the given
+    * parameter
+    *
+    * @param dataArray values to set the matrix to, must be 9
+    *                  floats long
+    */
     public Matrix3f(float[] dataArray) {
         mMat = new float[9];
         System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
     }
 
+    /**
+    * Return a reference to the internal array representing matrix
+    * values. Modifying this array will also change the matrix
+    *
+    * @return internal array representing the matrix
+    */
     public float[] getArray() {
         return mMat;
     }
 
+    /**
+    * Returns the value for a given row and column
+    *
+    * @param i row of the value to return
+    * @param j column of the value to return
+    *
+    * @return value in the ith row and jth column
+    */
     public float get(int i, int j) {
         return mMat[i*3 + j];
     }
 
+    /**
+    * Sets the value for a given row and column
+    *
+    * @param i row of the value to set
+    * @param j column of the value to set
+    */
     public void set(int i, int j, float v) {
         mMat[i*3 + j] = v;
     }
 
+    /**
+    * Sets the matrix values to identity
+    */
     public void loadIdentity() {
         mMat[0] = 1;
         mMat[1] = 0;
@@ -62,10 +95,24 @@ public class Matrix3f {
         mMat[8] = 1;
     }
 
+    /**
+    * Sets the values of the matrix to those of the parameter
+    *
+    * @param src matrix to load the values from
+    */
     public void load(Matrix3f src) {
         System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
+    /**
+    * Sets current values to be a rotation matrix of certain angle
+    * about a given axis
+    *
+    * @param rot angle of rotation
+    * @param x rotation axis x
+    * @param y rotation axis y
+    * @param z rotation axis z
+    */
     public void loadRotate(float rot, float x, float y, float z) {
         float c, s;
         rot *= (float)(java.lang.Math.PI / 180.0f);
@@ -97,7 +144,13 @@ public class Matrix3f {
         mMat[8] = z*z*nc +  c;
     }
 
+    /**
+    * Makes the upper 2x2 a rotation matrix of the given angle
+    *
+    * @param rot rotation angle
+    */
     public void loadRotate(float rot) {
+        loadIdentity();
         float c, s;
         rot *= (float)(java.lang.Math.PI / 180.0f);
         c = (float)java.lang.Math.cos(rot);
@@ -108,12 +161,25 @@ public class Matrix3f {
         mMat[4] = c;
     }
 
+    /**
+    * Makes the upper 2x2 a scale matrix of given dimensions
+    *
+    * @param x scale component x
+    * @param y scale component y
+    */
     public void loadScale(float x, float y) {
         loadIdentity();
         mMat[0] = x;
         mMat[4] = y;
     }
 
+    /**
+    * Sets current values to be a scale matrix of given dimensions
+    *
+    * @param x scale component x
+    * @param y scale component y
+    * @param z scale component z
+    */
     public void loadScale(float x, float y, float z) {
         loadIdentity();
         mMat[0] = x;
@@ -121,12 +187,26 @@ public class Matrix3f {
         mMat[8] = z;
     }
 
+    /**
+    * Sets current values to be a translation matrix of given
+    * dimensions
+    *
+    * @param x translation component x
+    * @param y translation component y
+    */
     public void loadTranslate(float x, float y) {
         loadIdentity();
         mMat[6] = x;
         mMat[7] = y;
     }
 
+    /**
+    * Sets current values to be the result of multiplying two given
+    * matrices
+    *
+    * @param lhs left hand side matrix
+    * @param rhs right hand side matrix
+    */
     public void loadMultiply(Matrix3f lhs, Matrix3f rhs) {
         for (int i=0 ; i<3 ; i++) {
             float ri0 = 0;
@@ -144,36 +224,87 @@ public class Matrix3f {
         }
     }
 
+    /**
+    * Post-multiplies the current matrix by a given parameter
+    *
+    * @param rhs right hand side to multiply by
+    */
     public void multiply(Matrix3f rhs) {
         Matrix3f tmp = new Matrix3f();
         tmp.loadMultiply(this, rhs);
         load(tmp);
     }
+
+    /**
+    * Modifies the current matrix by post-multiplying it with a
+    * rotation matrix of certain angle about a given axis
+    *
+    * @param rot angle of rotation
+    * @param x rotation axis x
+    * @param y rotation axis y
+    * @param z rotation axis z
+    */
     public void rotate(float rot, float x, float y, float z) {
         Matrix3f tmp = new Matrix3f();
         tmp.loadRotate(rot, x, y, z);
         multiply(tmp);
     }
+
+    /**
+    * Modifies the upper 2x2 of the current matrix by
+    * post-multiplying it with a rotation matrix of given angle
+    *
+    * @param rot angle of rotation
+    */
     public void rotate(float rot) {
         Matrix3f tmp = new Matrix3f();
         tmp.loadRotate(rot);
         multiply(tmp);
     }
+
+    /**
+    * Modifies the upper 2x2 of the current matrix by
+    * post-multiplying it with a scale matrix of given dimensions
+    *
+    * @param x scale component x
+    * @param y scale component y
+    */
     public void scale(float x, float y) {
         Matrix3f tmp = new Matrix3f();
         tmp.loadScale(x, y);
         multiply(tmp);
     }
+
+    /**
+    * Modifies the current matrix by post-multiplying it with a
+    * scale matrix of given dimensions
+    *
+    * @param x scale component x
+    * @param y scale component y
+    * @param z scale component z
+    */
     public void scale(float x, float y, float z) {
         Matrix3f tmp = new Matrix3f();
         tmp.loadScale(x, y, z);
         multiply(tmp);
     }
+
+    /**
+    * Modifies the current matrix by post-multiplying it with a
+    * translation matrix of given dimensions
+    *
+    * @param x translation component x
+    * @param y translation component y
+    */
     public void translate(float x, float y) {
         Matrix3f tmp = new Matrix3f();
         tmp.loadTranslate(x, y);
         multiply(tmp);
     }
+
+    /**
+    * Sets the current matrix to its transpose
+    */
     public void transpose() {
         for(int i = 0; i < 2; ++i) {
             for(int j = i + 1; j < 3; ++j) {

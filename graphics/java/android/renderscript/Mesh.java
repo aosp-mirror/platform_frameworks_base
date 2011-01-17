@@ -46,11 +46,32 @@ public class Mesh extends BaseObj {
     *
     **/
     public enum Primitive {
+        /**
+        * Vertex data will be rendered as a series of points
+        */
         POINT (0),
+        /**
+        * Vertex pairs will be rendered as lines
+        */
         LINE (1),
+        /**
+        * Vertex data will be rendered as a connected line strip
+        */
         LINE_STRIP (2),
+        /**
+        * Vertices will be rendered as individual triangles
+        */
         TRIANGLE (3),
+        /**
+        * Vertices will be rendered as a connected triangle strip
+        * defined by the first three vertices with each additional
+        * triangle defined by a new vertex
+        */
         TRIANGLE_STRIP (4),
+        /**
+        * Vertices will be rendered as a sequence of triangles that all
+        * share first vertex as the origin
+        */
         TRIANGLE_FAN (5);
 
         int mID;
