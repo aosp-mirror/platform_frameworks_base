@@ -36,8 +36,6 @@ public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
 
     /**
-     * @hide
-     *
      * Only intended for use by the generated derived classes.
      *
      * @param id
@@ -48,8 +46,6 @@ public class ScriptC extends Script {
     }
 
     /**
-     * @hide
-     *
      * Only intended for use by the generated derived classes.
      *
      *
