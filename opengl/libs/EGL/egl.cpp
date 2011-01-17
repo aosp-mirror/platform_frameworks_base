@@ -1473,6 +1473,29 @@ EGLint eglGetError(void)
     return result;
 }
 
+// Note: Similar implementations of these functions also exist in
+// gl2.cpp and gl.cpp, and are used by applications that call the
+// exported entry points directly.
+typedef void (GL_APIENTRYP PFNGLEGLIMAGETARGETTEXTURE2DOESPROC) (GLenum target, GLeglImageOES image);
+typedef void (GL_APIENTRYP PFNGLEGLIMAGETARGETRENDERBUFFERSTORAGEOESPROC) (GLenum target, GLeglImageOES image);
+
+static PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES_impl = NULL;
+static PFNGLEGLIMAGETARGETRENDERBUFFERSTORAGEOESPROC glEGLImageTargetRenderbufferStorageOES_impl = NULL;
+
+static void glEGLImageTargetTexture2DOES_wrapper(GLenum target, GLeglImageOES image)
+{
+    GLeglImageOES implImage =
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    glEGLImageTargetTexture2DOES_impl(target, implImage);
+}
+
+static void glEGLImageTargetRenderbufferStorageOES_wrapper(GLenum target, GLeglImageOES image)
+{
+    GLeglImageOES implImage =
+        (GLeglImageOES)egl_get_image_for_current_context((EGLImageKHR)image);
+    glEGLImageTargetRenderbufferStorageOES_impl(target, implImage);
+}
+
 __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 {
     // eglGetProcAddress() could be the very first function called
@@ -1533,6 +1556,16 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
             }
             if (found) {
                 addr = gExtensionForwarders[slot];
+
+                if (!strcmp(procname, "glEGLImageTargetTexture2DOES")) {
+                    glEGLImageTargetTexture2DOES_impl = (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)addr;
+                    addr = (__eglMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES_wrapper;
+                }
+                if (!strcmp(procname, "glEGLImageTargetRenderbufferStorageOES")) {
+                    glEGLImageTargetRenderbufferStorageOES_impl = (PFNGLEGLIMAGETARGETRENDERBUFFERSTORAGEOESPROC)addr;
+                    addr = (__eglMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES_wrapper;
+                }
+
                 gGLExtentionMap.add(name, addr);
                 gGLExtentionSlot++;
             }
