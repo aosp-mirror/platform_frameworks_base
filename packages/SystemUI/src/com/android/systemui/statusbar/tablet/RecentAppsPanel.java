@@ -297,7 +297,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
 
     private Drawable getFullResDefaultActivityIcon() {
         return getFullResIcon(Resources.getSystem(),
-                com.android.internal.R.drawable.sym_def_app_icon);
+                com.android.internal.R.mipmap.sym_def_app_icon);
     }
 
     private Drawable getFullResIcon(Resources resources, int iconId) {
