@@ -165,8 +165,13 @@ public class DefaultContainerService extends IntentService {
         }
 
         @Override
-        public long calculateDirectorySize(String directory) throws RemoteException {
-            return MeasurementUtils.measureDirectory(directory);
+        public long calculateDirectorySize(String path) throws RemoteException {
+            final File directory = new File(path);
+            if (directory.exists() && directory.isDirectory()) {
+                return MeasurementUtils.measureDirectory(path);
+            } else {
+                return 0L;
+            }
         }
     };
 

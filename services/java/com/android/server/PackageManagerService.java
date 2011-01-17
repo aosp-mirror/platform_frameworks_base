@@ -4806,6 +4806,74 @@ class PackageManagerService extends IPackageManager.Stub {
         abstract void handleReturnCode();
     }
 
+    class MeasureParams extends HandlerParams {
+        private final PackageStats mStats;
+        private boolean mSuccess;
+
+        private final IPackageStatsObserver mObserver;
+
+        public MeasureParams(PackageStats stats, boolean success,
+                IPackageStatsObserver observer) {
+            mObserver = observer;
+            mStats = stats;
+            mSuccess = success;
+        }
+
+        @Override
+        void handleStartCopy() throws RemoteException {
+            final boolean mounted;
+
+            if (Environment.isExternalStorageEmulated()) {
+                mounted = true;
+            } else {
+                final String status = Environment.getExternalStorageState();
+
+                mounted = status.equals(Environment.MEDIA_MOUNTED)
+                        || status.equals(Environment.MEDIA_MOUNTED_READ_ONLY);
+            }
+
+            if (mounted) {
+                final File externalCacheDir = Environment
+                        .getExternalStorageAppCacheDirectory(mStats.packageName);
+                final long externalCacheSize = mContainerService
+                        .calculateDirectorySize(externalCacheDir.getPath());
+                mStats.externalCacheSize = externalCacheSize;
+
+                final File externalDataDir = Environment
+                        .getExternalStorageAppDataDirectory(mStats.packageName);
+                long externalDataSize = mContainerService.calculateDirectorySize(externalDataDir
+                        .getPath());
+
+                if (externalCacheDir.getParentFile().equals(externalDataDir)) {
+                    externalDataSize -= externalCacheSize;
+                }
+                mStats.externalDataSize = externalDataSize;
+
+                final File externalMediaDir = Environment
+                        .getExternalStorageAppMediaDirectory(mStats.packageName);
+                mStats.externalMediaSize = mContainerService
+                        .calculateDirectorySize(externalCacheDir.getPath());
+            }
+        }
+
+        @Override
+        void handleReturnCode() {
+            if (mObserver != null) {
+                try {
+                    mObserver.onGetStatsCompleted(mStats, mSuccess);
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Observer no longer exists.");
+                }
+            }
+        }
+
+        @Override
+        void handleServiceError() {
+            Slog.e(TAG, "Could not measure application " + mStats.packageName
+                            + " external storage");
+        }
+    }
+
     class InstallParams extends HandlerParams {
         final IPackageInstallObserver observer;
         int flags;
@@ -6619,18 +6687,16 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
-                PackageStats lStats = new PackageStats(packageName);
-                final boolean succeded;
+                PackageStats stats = new PackageStats(packageName);
+
+                final boolean success;
                 synchronized (mInstallLock) {
-                    succeded = getPackageSizeInfoLI(packageName, lStats);
+                    success = getPackageSizeInfoLI(packageName, stats);
                 }
-                if(observer != null) {
-                    try {
-                        observer.onGetStatsCompleted(lStats, succeded);
-                    } catch (RemoteException e) {
-                        Log.i(TAG, "Observer no longer exists.");
-                    }
-                } //end if observer
+
+                Message msg = mHandler.obtainMessage(INIT_COPY);
+                msg.obj = new MeasureParams(stats, success, observer);
+                mHandler.sendMessage(msg);
             } //end run
         });
     }
