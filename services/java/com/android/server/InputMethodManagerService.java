@@ -2540,16 +2540,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
             for (Pair<String, ArrayList<String>> enabledIme: enabledImes) {
                 if (enabledIme.first.equals(imeId)) {
-                    final ArrayList<String> enabledSubtypes = enabledIme.second;
-                    if (enabledSubtypes.size() == 0) {
-                        // If there are no enabled subtypes, applicable subtypes are enabled
-                        // implicitly.
+                    final ArrayList<String> explicitlyEnabledSubtypes = enabledIme.second;
+                    if (explicitlyEnabledSubtypes.size() == 0) {
+                        // If there are no explicitly enabled subtypes, applicable subtypes are
+                        // enabled implicitly.
                         InputMethodInfo ime = mMethodMap.get(imeId);
                         // If IME is enabled and no subtypes are enabled, applicable subtypes
                         // are enabled implicitly, so needs to treat them to be enabled.
                         if (ime != null && ime.getSubtypes().size() > 0) {
                             List<InputMethodSubtype> implicitlySelectedSubtypes =
-                                getApplicableSubtypesLocked(mRes, ime.getSubtypes());
+                                    getApplicableSubtypesLocked(mRes, ime.getSubtypes());
                             if (implicitlySelectedSubtypes != null) {
                                 final int N = implicitlySelectedSubtypes.size();
                                 for (int i = 0; i < N; ++i) {
@@ -2561,7 +2561,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             }
                         }
                     } else {
-                        for (String s: enabledSubtypes) {
+                        for (String s: explicitlyEnabledSubtypes) {
                             if (s.equals(subtypeHashCode)) {
                                 // If both imeId and subtypeId are enabled, return subtypeId.
                                 return s;
