@@ -4853,6 +4853,11 @@ class PackageManagerService extends IPackageManager.Stub {
                         .getExternalStorageAppMediaDirectory(mStats.packageName);
                 mStats.externalMediaSize = mContainerService
                         .calculateDirectorySize(externalCacheDir.getPath());
+
+                final File externalObbDir = Environment
+                        .getExternalStorageAppObbDirectory(mStats.packageName);
+                mStats.externalObbSize = mContainerService.calculateDirectorySize(externalObbDir
+                        .getPath());
             }
         }
 
