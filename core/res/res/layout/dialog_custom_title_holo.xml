@@ -23,10 +23,19 @@ This is an custom layout for a dialog.
     android:fitsSystemWindows="true">
     <FrameLayout android:id="@android:id/title_container"
         android:layout_width="match_parent"
-        android:layout_height="24dip"
+        android:layout_height="60dip"
         android:layout_weight="0"
+        android:gravity="center_vertical|left"
         style="?android:attr/windowTitleBackgroundStyle">
     </FrameLayout>
+    <ImageView android:id="@+id/titleDivider"
+            android:layout_width="match_parent"
+            android:layout_height="4dip"
+            android:scaleType="fitXY"
+            android:gravity="fill_horizontal"
+            android:paddingLeft="16dip"
+            android:paddingRight="16dip"
+            android:src="@android:drawable/divider_strong_holo" />
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -34,10 +43,6 @@ This is an custom layout for a dialog.
         android:foreground="?android:attr/windowContentOverlay">
         <FrameLayout android:id="@android:id/content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="6dip"
-            android:paddingBottom="10dip"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip" />
+            android:layout_height="match_parent" />
     </FrameLayout>
 </LinearLayout>
