@@ -47,7 +47,6 @@ public class KeyButtonView extends ImageView {
     int mRepeat;
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
-            Slog.d("KeyButtonView", "longpress");
             if (isPressed()) {
                 mLongPressed = true;
                 mRepeat++;

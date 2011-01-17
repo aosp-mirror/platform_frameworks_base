@@ -269,7 +269,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 // fully closed, no animation necessary
             } else if (mVisible) {
                 if (DEBUG) {
-                    Slog.d(TAG, "panelHeight not zero but trying to open; scheduling an anim to open fully");
+                    Slog.d(TAG, "panelHeight not zero but trying to open; scheduling an anim"
+                            + " to open fully");
                 }
                 startAnimation(true);
             }

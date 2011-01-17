@@ -73,12 +73,10 @@ public class HeightReceiver extends BroadcastReceiver {
     private void setPlugged(boolean plugged) {
         final Resources res = mContext.getResources();
 
-        Slog.d(TAG, "plugged=" + plugged);
         int height = -1;
         if (plugged) {
             final DisplayMetrics metrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(metrics);
-            Slog.d(TAG, "metrics=" + metrics);
             height = metrics.heightPixels - 720;
         }
 
@@ -87,7 +85,8 @@ public class HeightReceiver extends BroadcastReceiver {
         if (height < minHeight) {
             height = minHeight;
         }
-        Slog.d(TAG, "using height=" + height + " old=" + mHeight);
+        Slog.i(TAG, "Resizing status bar plugged=" + plugged + " height="
+                + height + " old=" + mHeight);
         mHeight = height;
 
         final int N = mListeners.size();
