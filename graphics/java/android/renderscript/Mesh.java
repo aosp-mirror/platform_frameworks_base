@@ -733,14 +733,14 @@ public class Mesh extends BaseObj {
 
             Mesh sm = smb.create();
 
-            sm.getVertexAllocation(0).copyFrom(mVtxData);
+            sm.getVertexAllocation(0).copy1DRangeFromUnchecked(0, mVtxCount / floatCount, mVtxData);
             if(uploadToBufferObject) {
                 if (uploadToBufferObject) {
                     sm.getVertexAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
                 }
             }
 
-            sm.getIndexSetAllocation(0).copyFrom(mIndexData);
+            sm.getIndexSetAllocation(0).copy1DRangeFromUnchecked(0, mIndexCount, mIndexData);
             if (uploadToBufferObject) {
                 sm.getIndexSetAllocation(0).syncAll(Allocation.USAGE_SCRIPT);
             }
