@@ -20,7 +20,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -44,6 +43,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     private MenuBuilder mMenu;
 
     private int mMaxItems;
+    private int mWidthLimit;
     private boolean mReserveOverflow;
     private OverflowMenuButton mOverflowButton;
     private MenuPopupHelper mOverflowPopup;
@@ -91,6 +91,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int screen = res.getConfiguration().screenLayout;
         mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
                 Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        mWidthLimit = res.getDisplayMetrics().widthPixels / 2;
         
         TypedArray a = context.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
         mDivider = a.getDrawable(com.android.internal.R.styleable.Theme_dividerVertical);
@@ -108,6 +109,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
                 Configuration.SCREENLAYOUT_SIZE_XLARGE;
         mMaxItems = getMaxActionButtons();
+        mWidthLimit = getResources().getDisplayMetrics().widthPixels / 2;
         if (mMenu != null) {
             mMenu.setMaxActionItems(mMaxItems);
             updateChildren(false);
@@ -172,6 +174,19 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     public void initialize(MenuBuilder menu, int menuType) {
+        int width = mWidthLimit;
+        if (mReserveOverflow) {
+            if (mOverflowButton == null) {
+                OverflowMenuButton button = new OverflowMenuButton(mContext);
+                mOverflowButton = button;
+            }
+            final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            mOverflowButton.measure(spec, spec);
+            width -= mOverflowButton.getMeasuredWidth();
+        }
+
+        menu.setActionWidthLimit(width);
+
         menu.setMaxActionItems(mMaxItems);
         mMenu = menu;
         updateChildren(true);
@@ -219,9 +234,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 if (itemCount > 0) {
                     addView(makeDividerView(), makeDividerLayoutParams());
                 }
-                OverflowMenuButton button = new OverflowMenuButton(mContext);
-                addView(button);
-                mOverflowButton = button;
+                if (mOverflowButton == null) {
+                    OverflowMenuButton button = new OverflowMenuButton(mContext);
+                    mOverflowButton = button;
+                }
+                addView(mOverflowButton);
             } else {
                 mOverflowButton = null;
             }
