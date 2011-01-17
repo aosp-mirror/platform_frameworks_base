@@ -754,7 +754,7 @@ public class NumberPicker extends LinearLayout {
             return;
         }
         mCurrentScrollOffset += y;
-        while (mCurrentScrollOffset - mInitialScrollOffset > mSelectorElementHeight) {
+        while (mCurrentScrollOffset - mInitialScrollOffset >= mSelectorElementHeight) {
             mCurrentScrollOffset -= mSelectorElementHeight;
             decrementSelectorIndices(selectorIndices);
             changeCurrent(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX]);
@@ -762,7 +762,7 @@ public class NumberPicker extends LinearLayout {
                 mCurrentScrollOffset = mInitialScrollOffset;
             }
         }
-        while (mCurrentScrollOffset - mInitialScrollOffset < -mSelectorElementHeight) {
+        while (mCurrentScrollOffset - mInitialScrollOffset <= -mSelectorElementHeight) {
             mCurrentScrollOffset += mSelectorElementHeight;
             incrementScrollSelectorIndices(selectorIndices);
             changeCurrent(selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX]);
@@ -1147,8 +1147,8 @@ public class NumberPicker extends LinearLayout {
             postAdjustScrollerCommand(0);
             tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_IDLE);
         } else {
-            showInputControls();
             updateInputTextView();
+            showInputControls();
         }
     }
 
@@ -1537,8 +1537,8 @@ public class NumberPicker extends LinearLayout {
         public void run() {
             mPreviousScrollerY = 0;
             if (mInitialScrollOffset == mCurrentScrollOffset) {
-                showInputControls();
                 updateInputTextView();
+                showInputControls();
                 return;
             }
             // adjust to the closest value
