@@ -516,6 +516,13 @@ public abstract class Context {
     public abstract File getExternalFilesDir(String type);
 
     /**
+     * Return the directory where this application's OBB files (if there
+     * are any) can be found.  Note if the application does not have any OBB
+     * files, this directory may not exist.
+     */
+    public abstract File getObbDir();
+
+    /**
      * Returns the absolute path to the application specific cache directory
      * on the filesystem. These files will be ones that get deleted first when the
      * device runs low on storage.
