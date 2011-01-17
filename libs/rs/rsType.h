@@ -44,11 +44,13 @@ public:
     uint32_t getLODDimX(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mX;}
     uint32_t getLODDimY(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mY;}
     uint32_t getLODDimZ(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mZ;}
-    uint32_t getLODOffset(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mOffset;}
 
+    uint32_t getLODOffset(uint32_t lod) const {rsAssert(lod < mLODCount); return mLODs[lod].mOffset;}
     uint32_t getLODOffset(uint32_t lod, uint32_t x) const;
     uint32_t getLODOffset(uint32_t lod, uint32_t x, uint32_t y) const;
     uint32_t getLODOffset(uint32_t lod, uint32_t x, uint32_t y, uint32_t z) const;
+
+    uint32_t getLODFaceOffset(uint32_t lod, RsAllocationCubemapFace face, uint32_t x, uint32_t y) const;
 
     uint32_t getLODCount() const {return mLODCount;}
     bool getIsNp2() const;
