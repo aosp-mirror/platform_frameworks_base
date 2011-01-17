@@ -23,6 +23,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -632,7 +634,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     private class DropdownPopup extends ListPopupWindow implements SpinnerPopup {
         private CharSequence mHintText;
         private int mPopupMaxWidth;
-        
+        private Rect mTempRect = new Rect();
+
         public DropdownPopup(Context context, AttributeSet attrs, int defStyleRes) {
             super(context, attrs, 0, defStyleRes);
             
@@ -699,6 +702,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                 itemView.measure(widthMeasureSpec, heightMeasureSpec);
                 width = Math.max(width, itemView.getMeasuredWidth());
             }
+
+            // Add background padding to measured width
+            Drawable popupBackground = getBackground();
+            if (popupBackground != null) {
+                popupBackground.getPadding(mTempRect);
+                width += mTempRect.left + mTempRect.right;
+            }
+
             return width;
         }
 
