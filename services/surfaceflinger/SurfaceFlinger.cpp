@@ -2132,6 +2132,9 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     sh = (!sh) ? hw_h : sh;
     const size_t size = sw * sh * 4;
 
+    LOGD("screenshot: sw=%d, sh=%d, minZ=%d, maxZ=%d",
+            sw, sh, minLayerZ, maxLayerZ);
+
     // make sure to clear all GL error flags
     while ( glGetError() != GL_NO_ERROR ) ;
 
@@ -2146,6 +2149,9 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
             GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, tname);
 
     GLenum status = glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+
+    LOGD("screenshot: FBO created, status=0x%x", status);
+
     if (status == GL_FRAMEBUFFER_COMPLETE_OES) {
 
         // invert everything, b/c glReadPixel() below will invert the FB
@@ -2161,6 +2167,8 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         glClearColor(0,0,0,1);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        LOGD("screenshot: glClear() issued");
+
         const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
         const size_t count = layers.size();
         for (size_t i=0 ; i<count ; ++i) {
@@ -2170,6 +2178,8 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
                 layer->drawForSreenShot();
             }
         }
+
+        LOGD("screenshot: All layers rendered");
 
         // XXX: this is needed on tegra
         glScissor(0, 0, sw, sh);
@@ -2185,6 +2195,10 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
                     new MemoryHeapBase(size, 0, "screen-capture") );
             void* const ptr = base->getBase();
             if (ptr) {
+
+                LOGD("screenshot: about to call glReadPixels(0,0,%d,%d,...,%p)",
+                        sw, sh, ptr);
+
                 // capture the screen with glReadPixels()
                 glReadPixels(0, 0, sw, sh, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
                 if (glGetError() == GL_NO_ERROR) {
@@ -2197,24 +2211,31 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
             } else {
                 result = NO_MEMORY;
             }
+
+            LOGD("screenshot: glReadPixels() returned %s", strerror(result));
+
         }
         glEnable(GL_SCISSOR_TEST);
         glViewport(0, 0, hw_w, hw_h);
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
-
-
     } else {
         result = BAD_VALUE;
     }
+
+    LOGD("screenshot: about to release FBO resources");
 
     // release FBO resources
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
     glDeleteRenderbuffersOES(1, &tname);
     glDeleteFramebuffersOES(1, &name);
 
+    LOGD("screenshot: about to call compositionComplete()");
+
     hw.compositionComplete();
+
+    LOGD("screenshot: result = %s", strerror(result));
 
     return result;
 }
