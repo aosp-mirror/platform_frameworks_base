@@ -211,7 +211,7 @@ public class ExpandableListView extends ListView {
                 .getDimensionPixelSize(com.android.internal.R.styleable.ExpandableListView_indicatorLeft, 0);
         mIndicatorRight = a
                 .getDimensionPixelSize(com.android.internal.R.styleable.ExpandableListView_indicatorRight, 0);
-        if (mIndicatorRight == 0) {
+        if (mIndicatorRight == 0 && mGroupIndicator != null) {
             mIndicatorRight = mIndicatorLeft + mGroupIndicator.getIntrinsicWidth();
         }
         mChildIndicatorLeft = a.getDimensionPixelSize(
@@ -1022,8 +1022,11 @@ public class ExpandableListView extends ListView {
      */
     public void setGroupIndicator(Drawable groupIndicator) {
         mGroupIndicator = groupIndicator;
+        if (mIndicatorRight == 0 && mGroupIndicator != null) {
+            mIndicatorRight = mIndicatorLeft + mGroupIndicator.getIntrinsicWidth();
+        }
     }
-    
+
     /**
      * Sets the drawing bounds for the indicators (at minimum, the group indicator
      * is affected by this; the child indicator is affected by this if the
