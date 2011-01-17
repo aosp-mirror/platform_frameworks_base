@@ -65,6 +65,7 @@ public:
     bool reachedEOS(status_t *finalStatus);
 
 private:
+    friend class VideoEditorAudioPlayer;
     sp<MediaSource> mSource;
     AudioTrack *mAudioTrack;
 
