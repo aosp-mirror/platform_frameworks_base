@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.graphics.Region;
 import android.view.InputChannel;
 
 /**
@@ -39,23 +40,14 @@ public final class InputWindow {
     // Dispatching timeout.
     public long dispatchingTimeoutNanos;
 
-    // Window frame area.
+    // Window frame.
     public int frameLeft;
     public int frameTop;
     public int frameRight;
     public int frameBottom;
 
-    // Window visible frame area.
-    public int visibleFrameLeft;
-    public int visibleFrameTop;
-    public int visibleFrameRight;
-    public int visibleFrameBottom;
-
-    // Window touchable area.
-    public int touchableAreaLeft;
-    public int touchableAreaTop;
-    public int touchableAreaRight;
-    public int touchableAreaBottom;
+    // Window touchable region.
+    public final Region touchableRegion = new Region();
 
     // Window is visible.
     public boolean visible;

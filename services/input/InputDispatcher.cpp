@@ -154,6 +154,24 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
     return true;
 }
 
+static void dumpRegion(String8& dump, const SkRegion& region) {
+    if (region.isEmpty()) {
+        dump.append("<empty>");
+        return;
+    }
+
+    bool first = true;
+    for (SkRegion::Iterator it(region); !it.done(); it.next()) {
+        if (first) {
+            first = false;
+        } else {
+            dump.append("|");
+        }
+        const SkIRect& rect = it.rect();
+        dump.appendFormat("[%d,%d][%d,%d]", rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
+    }
+}
+
 
 // --- InputDispatcher ---
 
@@ -495,7 +513,7 @@ const InputWindow* InputDispatcher::findTouchedWindowAtLocked(int32_t x, int32_t
             if (!(flags & InputWindow::FLAG_NOT_TOUCHABLE)) {
                 bool isTouchModal = (flags & (InputWindow::FLAG_NOT_FOCUSABLE
                         | InputWindow::FLAG_NOT_TOUCH_MODAL)) == 0;
-                if (isTouchModal || window->touchableAreaContainsPoint(x, y)) {
+                if (isTouchModal || window->touchableRegionContainsPoint(x, y)) {
                     // Found window.
                     return window;
                 }
@@ -1188,7 +1206,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                 if (! (flags & InputWindow::FLAG_NOT_TOUCHABLE)) {
                     bool isTouchModal = (flags & (InputWindow::FLAG_NOT_FOCUSABLE
                             | InputWindow::FLAG_NOT_TOUCH_MODAL)) == 0;
-                    if (isTouchModal || window->touchableAreaContainsPoint(x, y)) {
+                    if (isTouchModal || window->touchableRegionContainsPoint(x, y)) {
                         if (! screenWasOff || flags & InputWindow::FLAG_TOUCHABLE_WHEN_WAKING) {
                             newTouchedWindow = window;
                         }
@@ -2884,9 +2902,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
             dump.appendFormat(INDENT2 "%d: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
                     "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
                     "frame=[%d,%d][%d,%d], "
-                    "visibleFrame=[%d,%d][%d,%d], "
-                    "touchableArea=[%d,%d][%d,%d], "
-                    "ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
+                    "touchableRegion=",
                     i, window.name.string(),
                     toString(window.paused),
                     toString(window.hasFocus),
@@ -2896,11 +2912,9 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
                     window.layoutParamsFlags, window.layoutParamsType,
                     window.layer,
                     window.frameLeft, window.frameTop,
-                    window.frameRight, window.frameBottom,
-                    window.visibleFrameLeft, window.visibleFrameTop,
-                    window.visibleFrameRight, window.visibleFrameBottom,
-                    window.touchableAreaLeft, window.touchableAreaTop,
-                    window.touchableAreaRight, window.touchableAreaBottom,
+                    window.frameRight, window.frameBottom);
+            dumpRegion(dump, window.touchableRegion);
+            dump.appendFormat(", ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
                     window.ownerPid, window.ownerUid,
                     window.dispatchingTimeout / 1000000.0);
         }
