@@ -40,6 +40,10 @@ public:
     enum { MIN_BUFFER_SLOTS = 3 };
     enum { NUM_BUFFER_SLOTS = 32 };
 
+    struct FrameAvailableListener : public virtual RefBase {
+        virtual void onFrameAvailable() = 0;
+    };
+
     // tex indicates the name OpenGL texture to which images are to be streamed.
     // This texture name cannot be changed once the SurfaceTexture is created.
     SurfaceTexture(GLuint tex);
@@ -92,6 +96,10 @@ public:
     // directly to OpenGL ES via the glLoadMatrixf or glUniformMatrix4fv
     // functions.
     void getTransformMatrix(float mtx[16]);
+
+    // setFrameAvailableListener sets the listener object that will be notified
+    // when a new frame becomes available.
+    void setFrameAvailableListener(const sp<FrameAvailableListener>& l);
 
 private:
 
@@ -194,6 +202,11 @@ private:
     // properly handle the case where SurfaceFlinger no longer holds a reference
     // to a buffer, but other processes do.
     Vector<sp<GraphicBuffer> > mAllocdBuffers;
+
+    // mFrameAvailableListener is the listener object that will be called when a
+    // new frame becomes available. If it is not NULL it will be called from
+    // queueBuffer.
+    sp<FrameAvailableListener> mFrameAvailableListener;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the

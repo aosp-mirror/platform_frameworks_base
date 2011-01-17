@@ -16,6 +16,11 @@
 
 package android.graphics;
 
+import java.lang.ref.WeakReference;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
  *
@@ -31,6 +36,9 @@ package android.graphics;
  * OES_EGL_image_external OpenGL ES extension.  This limits how the texture may be used.
  */
 public class SurfaceTexture {
+
+    private EventHandler mEventHandler;
+    private OnFrameAvailableListener mOnFrameAvailableListener;
 
     @SuppressWarnings("unused")
     private int mSurfaceTexture;
@@ -59,7 +67,15 @@ public class SurfaceTexture {
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      */
     public SurfaceTexture(int texName) {
-        init(texName);
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(looper);
+        } else {
+            mEventHandler = null;
+        }
+        nativeInit(texName, new WeakReference<SurfaceTexture>(this));
     }
 
     /**
@@ -69,7 +85,7 @@ public class SurfaceTexture {
      * thread invoking the callback.
      */
     public void setOnFrameAvailableListener(OnFrameAvailableListener l) {
-        // TODO: Implement this!
+        mOnFrameAvailableListener = l;
     }
 
     /**
@@ -77,8 +93,9 @@ public class SurfaceTexture {
      * called while the OpenGL ES context that owns the texture is bound to the thread.  It will
      * implicitly bind its texture to the GL_TEXTURE_EXTERNAL_OES texture target.
      */
-    public native void updateTexImage();
-
+    public void updateTexImage() {
+        nativeUpdateTexImage();
+    }
 
     /**
      * Retrieve the 4x4 texture coordinate transform matrix associated with the texture image set by
@@ -99,12 +116,48 @@ public class SurfaceTexture {
         if (mtx.length != 16) {
             throw new IllegalArgumentException();
         }
-        getTransformMatrixImpl(mtx);
+        nativeGetTransformMatrix(mtx);
     }
 
-    private native void getTransformMatrixImpl(float[] mtx);
+    protected void finalize() throws Throwable {
+        try {
+            nativeFinalize();
+        } finally {
+            super.finalize();
+        }
+    }
 
-    private native void init(int texName);
+    private class EventHandler extends Handler {
+        public EventHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (mOnFrameAvailableListener != null) {
+                mOnFrameAvailableListener.onFrameAvailable(SurfaceTexture.this);
+            }
+            return;
+        }
+    }
+
+    private static void postEventFromNative(Object selfRef) {
+        WeakReference weakSelf = (WeakReference)selfRef;
+        SurfaceTexture st = (SurfaceTexture)weakSelf.get();
+        if (st == null) {
+            return;
+        }
+
+        if (st.mEventHandler != null) {
+            Message m = st.mEventHandler.obtainMessage();
+            st.mEventHandler.sendMessage(m);
+        }
+    }
+
+    private native void nativeInit(int texName, Object weakSelf);
+    private native void nativeFinalize();
+    private native void nativeGetTransformMatrix(float[] mtx);
+    private native void nativeUpdateTexImage();
 
     /*
      * We use a class initializer to allow the native code to cache some
