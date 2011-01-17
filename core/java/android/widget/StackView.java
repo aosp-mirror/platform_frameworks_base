@@ -208,15 +208,12 @@ public class StackView extends AdapterViewAnimator {
             }
         }
 
-        if (fromIndex == -1 && toIndex == NUM_ACTIVE_VIEWS -1) {
+        if (fromIndex == -1 && toIndex == getNumActiveViews() -1) {
             // Fade item in
             if (view.getAlpha() == 1) {
                 view.setAlpha(0);
             }
-            view.setScaleX(1 - PERSPECTIVE_SCALE_FACTOR);
-            view.setScaleY(1 - PERSPECTIVE_SCALE_FACTOR);
-            view.setTranslationX(mPerspectiveShiftX);
-            view.setTranslationY(0);
+            transformViewAtIndex(toIndex, view, false);
             view.setVisibility(VISIBLE);
 
             alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
