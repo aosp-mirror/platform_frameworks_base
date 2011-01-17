@@ -191,9 +191,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int APPLICATION_PANEL_SUBLAYER = 1;
     static final int APPLICATION_SUB_PANEL_SUBLAYER = 2;
     
-    // Debugging: set this to have the system act like there is no hard keyboard.
-    static final boolean KEYBOARD_ALWAYS_HIDDEN = false;
-    
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
     static public final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
@@ -914,38 +911,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     private int determineHiddenState(int mode, int hiddenValue, int visibleValue) {
-        if (KEYBOARD_ALWAYS_HIDDEN) {
-            return hiddenValue;
-        }
-        if (mLidOpen == LID_ABSENT) {
-            return visibleValue;
-        }
-
-        switch (mode) {
-            case 1:
-                return mLidOpen == LID_OPEN ? visibleValue : hiddenValue;
-            case 2:
-                return mLidOpen == LID_OPEN ? hiddenValue : visibleValue;
+        if (mLidOpen != LID_ABSENT) {
+            switch (mode) {
+                case 1:
+                    return mLidOpen == LID_OPEN ? visibleValue : hiddenValue;
+                case 2:
+                    return mLidOpen == LID_OPEN ? hiddenValue : visibleValue;
+            }
         }
         return visibleValue;
     }
-    
+
     /** {@inheritDoc} */
     public void adjustConfigurationLw(Configuration config) {
         readLidState();
+
         mPowerManager.setKeyboardVisibility(mLidOpen == LID_OPEN);
-        config.hardKeyboardHidden = determineHiddenState(
-                mLidKeyboardAccessibility, Configuration.HARDKEYBOARDHIDDEN_YES,
-                Configuration.HARDKEYBOARDHIDDEN_NO);
-        config.navigationHidden = determineHiddenState(
-                mLidNavigationAccessibility, Configuration.NAVIGATIONHIDDEN_YES,
-                Configuration.NAVIGATIONHIDDEN_NO);
-        config.keyboardHidden = (config.hardKeyboardHidden
-                        == Configuration.HARDKEYBOARDHIDDEN_NO || mHasSoftInput)
-                ? Configuration.KEYBOARDHIDDEN_NO
-                : Configuration.KEYBOARDHIDDEN_YES;
+
+        if (config.keyboard == Configuration.KEYBOARD_NOKEYS) {
+            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_YES;
+        } else {
+            config.hardKeyboardHidden = determineHiddenState(mLidKeyboardAccessibility,
+                    Configuration.HARDKEYBOARDHIDDEN_YES, Configuration.HARDKEYBOARDHIDDEN_NO);
+        }
+
+        if (config.navigation == Configuration.NAVIGATION_NONAV) {
+            config.navigationHidden = Configuration.NAVIGATIONHIDDEN_YES;
+        } else {
+            config.navigationHidden = determineHiddenState(mLidNavigationAccessibility,
+                    Configuration.NAVIGATIONHIDDEN_YES, Configuration.NAVIGATIONHIDDEN_NO);
+        }
+
+        if (mHasSoftInput || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO) {
+            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+        } else {
+            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_YES;
+        }
     }
-    
+
     /** {@inheritDoc} */
     public int windowTypeToLayerLw(int type) {
         if (type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW) {
