@@ -618,7 +618,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                     Slog.w(TAG, "Failed to get share availability");
                 }
                 /*
-                 * Now that we've done our initialization, release 
+                 * Now that we've done our initialization, release
                  * the hounds!
                  */
                 mReady = true;
@@ -1237,7 +1237,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         waitForReady();
         return doGetVolumeShared(Environment.getExternalStorageDirectory().getPath(), "ums");
     }
-    
+
     /**
      * @return state of the volume at the specified mount point
      */
@@ -1407,7 +1407,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
 
         return rc;
     }
-   
+
     public int mountSecureContainer(String id, String key, int ownerUid) {
         validatePermission(android.Manifest.permission.ASEC_MOUNT_UNMOUNT);
         waitForReady();
@@ -1495,7 +1495,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
 
         synchronized (mAsecMountSet) {
             /*
-             * Because a mounted container has active internal state which cannot be 
+             * Because a mounted container has active internal state which cannot be
              * changed while active, we must ensure both ids are not currently mounted.
              */
             if (mAsecMountSet.contains(oldId) || mAsecMountSet.contains(newId)) {
@@ -1644,13 +1644,30 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
 
         try {
-            mConnector.doCommand(String.format("cryptfs checkpw %s", password));
+            ArrayList<String> rsp = mConnector.doCommand("cryptfs checkpw " + password);
+            String []tok = rsp.get(0).split(" ");
+
+            if (tok == null || tok.length != 2) {
+                return -1;
+            }
+
+            int code = Integer.parseInt(tok[1]);
+
+            if (code == 0) {
+                // Decrypt was successful. Post a delayed message before restarting in order
+                // to let the UI to clear itself
+                mHandler.postDelayed(new Runnable() {
+                    public void run() {
+                        mConnector.doCommand(String.format("cryptfs restart"));
+                    }
+                }, 2000); // 2 seconds
+            }
+
+            return code;
         } catch (NativeDaemonConnectorException e) {
             // Decryption failed
             return e.getCode();
         }
-
-        return 0;
     }
 
     public int encryptStorage(String password) {
@@ -1667,7 +1684,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
 
         try {
-            mConnector.doCommand(String.format("cryptfs enablecrypto wipe %s", password));
+            mConnector.doCommand(String.format("cryptfs enablecrypto inplace %s", password));
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
