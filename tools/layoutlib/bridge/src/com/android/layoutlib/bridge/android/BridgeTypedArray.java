@@ -19,6 +19,7 @@ package com.android.layoutlib.bridge.android;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
+import com.android.ide.common.resources.ResourceResolver;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
@@ -633,11 +634,11 @@ public final class BridgeTypedArray extends TypedArray {
             // if this is a framework id
             if (mPlatformFile || value.startsWith("@android") || value.startsWith("@+android")) {
                 // look for idName in the android R classes
-                return mContext.getFrameworkResourceValue(BridgeConstants.RES_ID, idName, defValue);
+                return mContext.getFrameworkResourceValue(ResourceResolver.RES_ID, idName, defValue);
             }
 
             // look for idName in the project R class.
-            return mContext.getProjectResourceValue(BridgeConstants.RES_ID, idName, defValue);
+            return mContext.getProjectResourceValue(ResourceResolver.RES_ID, idName, defValue);
         }
 
         // not a direct id valid reference? resolve it
@@ -682,7 +683,7 @@ public final class BridgeTypedArray extends TypedArray {
 
         ResourceValue value = mResourceData[index];
         String stringValue = value.getValue();
-        if (stringValue == null || BridgeConstants.REFERENCE_NULL.equals(stringValue)) {
+        if (stringValue == null || ResourceResolver.REFERENCE_NULL.equals(stringValue)) {
             return null;
         }
 
