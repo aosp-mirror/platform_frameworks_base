@@ -143,7 +143,6 @@ public class ShirtPocket extends ImageView {
                 hideWindow();
                 return true;
             } else if (action == MotionEvent.ACTION_DOWN) {
-                Slog.d(TAG, "ACTION_DOWN");
                 final ClipData clip = mClipping;
                 if (clip != null) {
                     final Bitmap icon = clip.getIcon();
