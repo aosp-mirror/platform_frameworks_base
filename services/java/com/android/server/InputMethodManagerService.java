@@ -2049,8 +2049,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         for (int i = 0; i < N; ++i) {
             InputMethodSubtype subtype = subtypes.get(i);
             final String subtypeLocale = subtype.getLocale();
-            // An applicable subtype should match "mode".
-            if (subtypes.get(i).getMode().equalsIgnoreCase(mode)) {
+            // An applicable subtype should match "mode". If mode is null, mode will be ignored,
+            // and all subtypes with all modes can be candidates.
+            if (mode == null || subtypes.get(i).getMode().equalsIgnoreCase(mode)) {
                 if (firstMatchedModeSubtype == null) {
                     firstMatchedModeSubtype = subtype;
                 }
@@ -2175,11 +2176,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     InputMethodInfo imi = mMethodMap.get(lastInputMethodId);
                     if (imi != null) {
                         // If there are no selected subtypes, the framework will try to find
-                        // the most applicable subtype from all subtypes whose mode is
-                        // SUBTYPE_MODE_KEYBOARD. This is an exceptional case, so we will hardcode
-                        // the mode.
-                        mCurrentSubtype = findLastResortApplicableSubtypeLocked(
-                                mRes, imi.getSubtypes(), SUBTYPE_MODE_KEYBOARD, null, true);
+                        // the most applicable subtype from explicitly or implicitly enabled
+                        // subtypes.
+                        List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypes =
+                                getEnabledInputMethodSubtypeList(imi, true);
+                        // If there is only one explicitly or implicitly enabled subtype,
+                        // just returns it.
+                        if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
+                            mCurrentSubtype = explicitlyOrImplicitlyEnabledSubtypes.get(0);
+                        } else if (explicitlyOrImplicitlyEnabledSubtypes.size() > 1) {
+                            mCurrentSubtype = findLastResortApplicableSubtypeLocked(
+                                    mRes, explicitlyOrImplicitlyEnabledSubtypes,
+                                    SUBTYPE_MODE_KEYBOARD, null, true);
+                            if (mCurrentSubtype == null) {
+                                mCurrentSubtype = findLastResortApplicableSubtypeLocked(
+                                        mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null,
+                                        true);
+                            }
+                        }
                     }
                 } else {
                     mCurrentSubtype =
