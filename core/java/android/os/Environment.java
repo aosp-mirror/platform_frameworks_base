@@ -107,6 +107,10 @@ public class Environment {
             = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
                     "Android"), "media");
 
+    private static final File EXTERNAL_STORAGE_ANDROID_OBB_DIRECTORY
+            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
+                    "Android"), "obb");
+
     private static final File DOWNLOAD_CACHE_DIRECTORY
             = getDirectory("DOWNLOAD_CACHE", "/cache");
 
@@ -301,6 +305,14 @@ public class Environment {
      */
     public static File getExternalStorageAppMediaDirectory(String packageName) {
         return new File(EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY, packageName);
+    }
+    
+    /**
+     * Generates the raw path to an application's OBB files
+     * @hide
+     */
+    public static File getExternalStorageAppObbDirectory(String packageName) {
+        return new File(EXTERNAL_STORAGE_ANDROID_OBB_DIRECTORY, packageName);
     }
     
     /**

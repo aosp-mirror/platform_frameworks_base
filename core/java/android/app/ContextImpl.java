@@ -153,6 +153,7 @@ class ContextImpl extends Context {
     private File mPreferencesDir;
     private File mFilesDir;
     private File mCacheDir;
+    private File mObbDir;
     private File mExternalFilesDir;
     private File mExternalCacheDir;
 
@@ -643,6 +644,17 @@ class ContextImpl extends Context {
                 }
             }
             return dir;
+        }
+    }
+
+    @Override
+    public File getObbDir() {
+        synchronized (mSync) {
+            if (mObbDir == null) {
+                mObbDir = Environment.getExternalStorageAppObbDirectory(
+                        getPackageName());
+            }
+            return mObbDir;
         }
     }
 
