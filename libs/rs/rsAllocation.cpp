@@ -212,6 +212,7 @@ void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
     GLenum target = (GLenum)getGLTarget();
+    rsAssert(mTextureID);
     glBindTexture(target, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     GLenum t = GL_TEXTURE_2D;
