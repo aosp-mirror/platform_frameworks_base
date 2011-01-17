@@ -218,7 +218,7 @@ public class DialogFragment extends Fragment
      * {@link FragmentTransaction#add(Fragment, String) FragmentTransaction.add}.
      */
     public void show(FragmentManager manager, String tag) {
-        FragmentTransaction ft = manager.openTransaction();
+        FragmentTransaction ft = manager.beginTransaction();
         ft.add(this, tag);
         ft.commit();
     }
@@ -260,7 +260,7 @@ public class DialogFragment extends Fragment
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
             mBackStackId = -1;
         } else {
-            FragmentTransaction ft = getFragmentManager().openTransaction();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.remove(this);
             if (allowStateLoss) {
                 ft.commitAllowingStateLoss();

@@ -492,7 +492,7 @@ public class ActionBarImpl extends ActionBar {
             return;
         }
 
-        final FragmentTransaction trans = mActivity.getFragmentManager().openTransaction()
+        final FragmentTransaction trans = mActivity.getFragmentManager().beginTransaction()
                 .disallowAddToBackStack();
 
         if (mSelectedTab == tab) {
