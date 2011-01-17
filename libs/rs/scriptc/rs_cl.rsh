@@ -449,57 +449,87 @@ extern float __attribute__((overloadable)) trunc(float);
 DEF_FUNC_1(trunc)
 
 // Int ops (partial), 6.11.3
-extern uint __attribute__((overloadable)) abs(int);
-extern ushort __attribute__((overloadable)) abs(short);
-extern uchar __attribute__((overloadable)) abs(char);
 
-extern uint __attribute__((overloadable)) clz(uint);
-extern int __attribute__((overloadable)) clz(int);
-extern ushort __attribute__((overloadable)) clz(ushort);
-extern short __attribute__((overloadable)) clz(short);
-extern uchar __attribute__((overloadable)) clz(uchar);
-extern char __attribute__((overloadable)) clz(char);
-
-static uint __attribute__((overloadable)) min(uint v1, uint v2) {
-    return v1 < v2 ? v1 : v2;
-}
-static int __attribute__((overloadable)) min(int v1, int v2) {
-    return v1 < v2 ? v1 : v2;
-}
-static ushort __attribute__((overloadable)) min(ushort v1, ushort v2) {
-    return v1 < v2 ? v1 : v2;
-}
-static short __attribute__((overloadable)) min(short v1, short v2) {
-    return v1 < v2 ? v1 : v2;
-}
-static uchar __attribute__((overloadable)) min(uchar v1, uchar v2) {
-    return v1 < v2 ? v1 : v2;
-}
-static char __attribute__((overloadable)) min(char v1, char v2) {
-    return v1 < v2 ? v1 : v2;
+#define DEF_RIFUNC_1(typeout, typein, fnc)                          \
+extern typeout __attribute__((overloadable)) fnc(typein);           \
+static typeout##2 __attribute__((overloadable)) fnc(typein##2 v) {  \
+    typeout##2 r;                                                   \
+    r.x = fnc(v.x);                                                 \
+    r.y = fnc(v.y);                                                 \
+    return r;                                                       \
+}                                                                   \
+static typeout##3 __attribute__((overloadable)) fnc(typein##3 v) {  \
+    typeout##3 r;                                                   \
+    r.x = fnc(v.x);                                                 \
+    r.y = fnc(v.y);                                                 \
+    r.z = fnc(v.z);                                                 \
+    return r;                                                       \
+}                                                                   \
+static typeout##4 __attribute__((overloadable)) fnc(typein##4 v) {  \
+    typeout##4 r;                                                   \
+    r.x = fnc(v.x);                                                 \
+    r.y = fnc(v.y);                                                 \
+    r.z = fnc(v.z);                                                 \
+    r.w = fnc(v.w);                                                 \
+    return r;                                                       \
 }
 
-static uint __attribute__((overloadable)) max(uint v1, uint v2) {
-    return v1 > v2 ? v1 : v2;
-}
-static int __attribute__((overloadable)) max(int v1, int v2) {
-    return v1 > v2 ? v1 : v2;
-}
-static ushort __attribute__((overloadable)) max(ushort v1, ushort v2) {
-    return v1 > v2 ? v1 : v2;
-}
-static short __attribute__((overloadable)) max(short v1, short v2) {
-    return v1 > v2 ? v1 : v2;
-}
-static uchar __attribute__((overloadable)) max(uchar v1, uchar v2) {
-    return v1 > v2 ? v1 : v2;
-}
-static char __attribute__((overloadable)) max(char v1, char v2) {
-    return v1 > v2 ? v1 : v2;
-}
+#define DEF_UIFUNC_1(fnc)           \
+DEF_RIFUNC_1(uchar, char, fnc)      \
+DEF_RIFUNC_1(ushort, short, fnc)    \
+DEF_RIFUNC_1(uint, int, fnc)
 
+#define DEF_IFUNC_1(fnc)            \
+DEF_RIFUNC_1(uchar, uchar, fnc)     \
+DEF_RIFUNC_1(char, char, fnc)       \
+DEF_RIFUNC_1(ushort, ushort, fnc)   \
+DEF_RIFUNC_1(short, short, fnc)     \
+DEF_RIFUNC_1(uint, uint, fnc)       \
+DEF_RIFUNC_1(int, int, fnc)
 
+#define DEF_RIFUNC_2(type, fnc, body)                                       \
+static type __attribute__((overloadable)) fnc(type v1, type v2) {           \
+    return body;                                                            \
+}                                                                           \
+static type##2 __attribute__((overloadable)) fnc(type##2 v1, type##2 v2) {  \
+    type##2 r;                                                              \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    return r;                                                               \
+}                                                                           \
+static type##3 __attribute__((overloadable)) fnc(type##3 v1, type##3 v2) {  \
+    type##3 r;                                                              \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    r.z = fnc(v1.z, v2.z);                                                  \
+    return r;                                                               \
+}                                                                           \
+static type##4 __attribute__((overloadable)) fnc(type##4 v1, type##4 v2) {  \
+    type##4 r;                                                              \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    r.z = fnc(v1.z, v2.z);                                                  \
+    r.w = fnc(v1.w, v2.w);                                                  \
+    return r;                                                               \
+}                                                                           \
 
+#define DEF_IFUNC_2(fnc, body)  \
+DEF_RIFUNC_2(uchar, fnc, body)  \
+DEF_RIFUNC_2(char, fnc, body)   \
+DEF_RIFUNC_2(ushort, fnc, body) \
+DEF_RIFUNC_2(short, fnc, body)  \
+DEF_RIFUNC_2(uint, fnc, body)   \
+DEF_RIFUNC_2(int, fnc, body)    \
+DEF_RIFUNC_2(float, fnc, body)
+
+DEF_UIFUNC_1(abs)
+DEF_IFUNC_1(clz)
+
+DEF_IFUNC_2(min, (v1 < v2 ? v1 : v2))
+DEF_FUNC_2F(min)
+
+DEF_IFUNC_2(max, (v1 > v2 ? v1 : v2))
+DEF_FUNC_2F(max)
 
 // 6.11.4
 
@@ -553,98 +583,6 @@ static float __attribute__((overloadable)) degrees(float radians) {
     return radians * (180.f / M_PI);
 }
 DEF_FUNC_1(degrees)
-
-static float __attribute__((overloadable)) max(float v1, float v2) {
-    return v1 > v2 ? v1 : v2;
-}
-static float2 __attribute__((overloadable)) max(float2 v1, float2 v2) {
-    float2 r;
-    r.x = v1.x > v2.x ? v1.x : v2.x;
-    r.y = v1.y > v2.y ? v1.y : v2.y;
-    return r;
-}
-static float3 __attribute__((overloadable)) max(float3 v1, float3 v2) {
-    float3 r;
-    r.x = v1.x > v2.x ? v1.x : v2.x;
-    r.y = v1.y > v2.y ? v1.y : v2.y;
-    r.z = v1.z > v2.z ? v1.z : v2.z;
-    return r;
-}
-static float4 __attribute__((overloadable)) max(float4 v1, float4 v2) {
-    float4 r;
-    r.x = v1.x > v2.x ? v1.x : v2.x;
-    r.y = v1.y > v2.y ? v1.y : v2.y;
-    r.z = v1.z > v2.z ? v1.z : v2.z;
-    r.w = v1.w > v2.w ? v1.w : v2.w;
-    return r;
-}
-static float2 __attribute__((overloadable)) max(float2 v1, float v2) {
-    float2 r;
-    r.x = v1.x > v2 ? v1.x : v2;
-    r.y = v1.y > v2 ? v1.y : v2;
-    return r;
-}
-static float3 __attribute__((overloadable)) max(float3 v1, float v2) {
-    float3 r;
-    r.x = v1.x > v2 ? v1.x : v2;
-    r.y = v1.y > v2 ? v1.y : v2;
-    r.z = v1.z > v2 ? v1.z : v2;
-    return r;
-}
-static float4 __attribute__((overloadable)) max(float4 v1, float v2) {
-    float4 r;
-    r.x = v1.x > v2 ? v1.x : v2;
-    r.y = v1.y > v2 ? v1.y : v2;
-    r.z = v1.z > v2 ? v1.z : v2;
-    r.w = v1.w > v2 ? v1.w : v2;
-    return r;
-}
-
-static float __attribute__((overloadable)) min(float v1, float v2) {
-    return v1 < v2 ? v1 : v2;
-}
-static float2 __attribute__((overloadable)) min(float2 v1, float2 v2) {
-    float2 r;
-    r.x = v1.x < v2.x ? v1.x : v2.x;
-    r.y = v1.y < v2.y ? v1.y : v2.y;
-    return r;
-}
-static float3 __attribute__((overloadable)) min(float3 v1, float3 v2) {
-    float3 r;
-    r.x = v1.x < v2.x ? v1.x : v2.x;
-    r.y = v1.y < v2.y ? v1.y : v2.y;
-    r.z = v1.z < v2.z ? v1.z : v2.z;
-    return r;
-}
-static float4 __attribute__((overloadable)) min(float4 v1, float4 v2) {
-    float4 r;
-    r.x = v1.x < v2.x ? v1.x : v2.x;
-    r.y = v1.y < v2.y ? v1.y : v2.y;
-    r.z = v1.z < v2.z ? v1.z : v2.z;
-    r.w = v1.w < v2.w ? v1.w : v2.w;
-    return r;
-}
-static float2 __attribute__((overloadable)) min(float2 v1, float v2) {
-    float2 r;
-    r.x = v1.x < v2 ? v1.x : v2;
-    r.y = v1.y < v2 ? v1.y : v2;
-    return r;
-}
-static float3 __attribute__((overloadable)) min(float3 v1, float v2) {
-    float3 r;
-    r.x = v1.x < v2 ? v1.x : v2;
-    r.y = v1.y < v2 ? v1.y : v2;
-    r.z = v1.z < v2 ? v1.z : v2;
-    return r;
-}
-static float4 __attribute__((overloadable)) min(float4 v1, float v2) {
-    float4 r;
-    r.x = v1.x < v2 ? v1.x : v2;
-    r.y = v1.y < v2 ? v1.y : v2;
-    r.z = v1.z < v2 ? v1.z : v2;
-    r.w = v1.w < v2 ? v1.w : v2;
-    return r;
-}
 
 static float __attribute__((overloadable)) mix(float start, float stop, float amount) {
     return start + (stop - start) * amount;
@@ -810,5 +748,10 @@ static float4 __attribute__((overloadable)) normalize(float4 v) {
 #undef DEF_FUNC_1_RI
 #undef DEF_FUNC_2
 #undef DEF_FUNC_2F
+#undef DEF_RIFUNC_1
+#undef DEF_UIFUNC_1
+#undef DEF_IFUNC_1
+#undef DEF_RIFUNC_2
+#undef DEF_IFUNC_2
 
 #endif
