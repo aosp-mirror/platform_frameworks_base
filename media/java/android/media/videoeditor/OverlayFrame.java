@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 import java.io.File;
@@ -25,15 +26,24 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
 
+import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
  * This class is used to overlay an image on top of a media item.
  * {@hide}
  */
 public class OverlayFrame extends Overlay {
-    // Instance variables
+    /**
+     *  Instance variables
+     */
     private Bitmap mBitmap;
     private String mFilename;
+    private String mBitmapFileName;
+
+    private int mOFWidth;
+    private int mOFHeight;
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -58,11 +68,12 @@ public class OverlayFrame extends Overlay {
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    public OverlayFrame(MediaItem mediaItem, String overlayId, Bitmap bitmap, long startTimeMs,
-            long durationMs) {
+    public OverlayFrame(MediaItem mediaItem, String overlayId, Bitmap bitmap,
+                        long startTimeMs,long durationMs) {
         super(mediaItem, overlayId, startTimeMs, durationMs);
         mBitmap = bitmap;
         mFilename = null;
+        mBitmapFileName = null;
     }
 
     /**
@@ -78,14 +89,17 @@ public class OverlayFrame extends Overlay {
      * @throws IllegalArgumentException if the file type is not PNG or the
      *      startTimeMs and durationMs are incorrect.
      */
-    OverlayFrame(MediaItem mediaItem, String overlayId, String filename, long startTimeMs,
-            long durationMs) {
+    OverlayFrame(MediaItem mediaItem, String overlayId, String filename,
+                 long startTimeMs,long durationMs) {
         super(mediaItem, overlayId, startTimeMs, durationMs);
-        mFilename = filename;
-        mBitmap = BitmapFactory.decodeFile(mFilename);
+        mBitmapFileName = filename;
+        mBitmap = BitmapFactory.decodeFile(mBitmapFileName);
+        mFilename = null;
     }
 
     /**
+     * Get the overlay bitmap.
+     *
      * @return Get the overlay bitmap
      */
     public Bitmap getBitmap() {
@@ -93,18 +107,34 @@ public class OverlayFrame extends Overlay {
     }
 
     /**
-     * @param bitmap The overlay bitmap
+     * Get the overlay bitmap.
+     *
+     * @return Get the overlay bitmap as png file.
+     */
+    String getBitmapImageFileName() {
+        return mBitmapFileName;
+    }
+    /**
+     * Set the overlay bitmap.
+     *
+     * @param bitmap The overlay bitmap.
      */
     public void setBitmap(Bitmap bitmap) {
         mBitmap = bitmap;
         if (mFilename != null) {
-            // Delete the file
+            /**
+             *  Delete the file
+             */
             new File(mFilename).delete();
-            // Invalidate the filename
+            /**
+             *  Invalidate the filename
+             */
             mFilename = null;
         }
 
-        // Invalidate the transitions if necessary
+        /**
+         *  Invalidate the transitions if necessary
+         */
         getMediaItem().invalidateTransitions(mStartTimeMs, mDurationMs);
     }
 
@@ -115,6 +145,12 @@ public class OverlayFrame extends Overlay {
         return mFilename;
     }
 
+    /*
+     * Set the file name of this overlay
+     */
+    void setFilename(String filename) {
+        mFilename = filename;
+    }
     /**
      * Save the overlay to the project folder
      *
@@ -129,21 +165,84 @@ public class OverlayFrame extends Overlay {
             return mFilename;
         }
 
-        mFilename = path + "/" + getId() + ".png";
-        // Save the image to a local file
-        final FileOutputStream out = new FileOutputStream(mFilename);
-        mBitmap.compress(CompressFormat.PNG, 100, out);
-        out.flush();
-        out.close();
+        // Create the compressed PNG file
+        mBitmapFileName = path + "/" + "Overlay" + getId() + ".png";
+        if (!(new File(mBitmapFileName).exists())) {
+            final FileOutputStream out = new FileOutputStream (mBitmapFileName);
+            mBitmap.compress(CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+        }
+
+        mOFWidth = mBitmap.getWidth();
+        mOFHeight = mBitmap.getHeight();
+
+        mFilename = path + "/" + "Overlay" + getId() + ".rgb";
+        if (!(new File(mFilename).exists())) {
+            /**
+             * Save the image to a file ; as a rgb
+             */
+            final FileOutputStream fl = new FileOutputStream(mFilename);
+            final DataOutputStream dos = new DataOutputStream(fl);
+
+            /**
+             * populate the rgb file with bitmap data
+             */
+            final int [] framingBuffer = new int[mOFWidth];
+            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
+            IntBuffer intBuffer;
+
+            byte[] array = byteBuffer.array();
+            int tmp = 0;
+            while(tmp < mOFHeight) {
+                mBitmap.getPixels(framingBuffer,0,mOFWidth,0,tmp,mOFWidth,1);
+                intBuffer = byteBuffer.asIntBuffer();
+                intBuffer.put(framingBuffer,0,mOFWidth);
+                dos.write(array);
+                tmp += 1;
+            }
+            fl.flush();
+            fl.close();
+        }
         return mFilename;
     }
 
+    /**
+     * Get the OverlayFrame Height
+     */
+     int getOverlayFrameHeight() {
+         return mOFHeight;
+     }
+
+     /**
+     * Get the OverlayFrame Width
+     */
+     int getOverlayFrameWidth() {
+         return mOFWidth;
+     }
+
+    /*
+     * Set the OverlayFrame Height
+     */
+     void setOverlayFrameHeight(int height) {
+         mOFHeight = height;
+     }
+
+    /*
+     * Set the OverlayFrame Width
+     */
+     void setOverlayFrameWidth(int width) {
+         mOFWidth = width;
+     }
     /**
      * Delete the overlay file
      */
     void invalidate() {
         if (mFilename != null) {
             new File(mFilename).delete();
+            mFilename = null;
+            mBitmap.recycle();
+            mBitmap = null;
         }
     }
 }

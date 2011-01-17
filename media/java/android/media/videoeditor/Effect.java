@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 /**
  * This is the super class for all effects. An effect can only be applied to a
- * single media item. If one wants to apply the same effect to multiple media
- * items, multiple @{MediaItem.addEffect(Effect)} call must be invoked on each
- * of the MediaItem objects.
+ * single media item.
  * {@hide}
  */
 public abstract class Effect {
-    // Instance variables
+    /**
+     *  Instance variables
+     */
     private final String mUniqueId;
-    // The effect owner
+    /**
+     *  The effect owner
+     */
     private final MediaItem mMediaItem;
+
     protected long mDurationMs;
-    // The start time of the effect relative to the media item timeline
+    /**
+     *  The start time of the effect relative to the beginning
+     *  of the media item
+     */
     protected long mStartTimeMs;
 
     /**
@@ -52,11 +59,15 @@ public abstract class Effect {
      *            is applied
      * @param durationMs The effect duration in milliseconds
      */
-    public Effect(MediaItem mediaItem, String effectId, long startTimeMs, long durationMs) {
+    public Effect(MediaItem mediaItem, String effectId, long startTimeMs,
+                  long durationMs) {
         if (mediaItem == null) {
             throw new IllegalArgumentException("Media item cannot be null");
         }
 
+        if ((startTimeMs < 0) || (durationMs < 0)) {
+             throw new IllegalArgumentException("Invalid start time Or/And Duration");
+        }
         if (startTimeMs + durationMs > mediaItem.getDuration()) {
             throw new IllegalArgumentException("Invalid start time and duration");
         }
@@ -68,6 +79,8 @@ public abstract class Effect {
     }
 
     /**
+     * Get the id of the effect.
+     *
      * @return The id of the effect
      */
     public String getId() {
@@ -81,6 +94,10 @@ public abstract class Effect {
      * @param durationMs of the effect in milliseconds
      */
     public void setDuration(long durationMs) {
+        if (durationMs <0) {
+            throw new IllegalArgumentException("Invalid duration");
+        }
+
         if (mStartTimeMs + durationMs > mMediaItem.getDuration()) {
             throw new IllegalArgumentException("Duration is too large");
         }
@@ -88,7 +105,8 @@ public abstract class Effect {
         final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs,
+                                         mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -115,10 +133,13 @@ public abstract class Effect {
         final long oldStartTimeMs = mStartTimeMs;
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs, mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs,
+                                         mStartTimeMs, mDurationMs);
     }
 
     /**
+     * Get the start time of the effect
+     *
      * @return The start time in milliseconds
      */
     public long getStartTime() {
@@ -142,10 +163,13 @@ public abstract class Effect {
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs,
+                                         mStartTimeMs, mDurationMs);
     }
 
     /**
+     * Get the media item owner.
+     *
      * @return The media item owner
      */
     public MediaItem getMediaItem() {

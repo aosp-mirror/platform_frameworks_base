@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+
+import android.media.videoeditor.MediaArtistNativeHelper.Properties;
 
 /**
  * This class allows to handle an audio track. This audio file is mixed with the
@@ -25,7 +29,12 @@ import java.lang.ref.SoftReference;
  * {@hide}
  */
 public class AudioTrack {
-    // Instance variables
+
+    /**
+     *  Instance variables
+     *  Private object for calling native methods via MediaArtistNativeHelper
+     */
+    private final MediaArtistNativeHelper mMANativeHelper;
     private final String mUniqueId;
     private final String mFilename;
     private long mStartTimeMs;
@@ -35,21 +44,27 @@ public class AudioTrack {
     private long mEndBoundaryTimeMs;
     private boolean mLoop;
     private boolean mMuted;
-
     private final long mDurationMs;
     private final int mAudioChannels;
     private final int mAudioType;
     private final int mAudioBitrate;
     private final int mAudioSamplingFrequency;
 
-    // Ducking variables
+    /**
+     *  Ducking variables
+     */
     private int mDuckingThreshold;
     private int mDuckedTrackVolume;
     private boolean mIsDuckingEnabled;
 
-    // The audio waveform filename
+    /**
+     *  The audio waveform filename
+     */
     private String mAudioWaveformFilename;
-    // The audio waveform data
+
+    /**
+     *  The audio waveform data
+     */
     private SoftReference<WaveformData> mWaveformData;
 
     /**
@@ -70,43 +85,12 @@ public class AudioTrack {
      *
      * @throws IOException if file is not found
      * @throws IllegalArgumentException if file format is not supported or if
-     *             the codec is not supported
+     *         the codec is not supported or if editor is not of type
+     *         VideoEditorImpl.
      */
-    public AudioTrack(VideoEditor editor, String audioTrackId, String filename)
-            throws IOException {
-        mUniqueId = audioTrackId;
-        mFilename = filename;
-        mStartTimeMs = 0;
-        // TODO: This value represents to the duration of the audio file
-        mDurationMs = 300000;
-        // TODO: This value needs to be read from the audio track of the source
-        // file
-        mAudioChannels = 2;
-        mAudioType = MediaProperties.ACODEC_AAC_LC;
-        mAudioBitrate = 128000;
-        mAudioSamplingFrequency = 44100;
-
-        mTimelineDurationMs = mDurationMs;
-        mVolumePercent = 100;
-
-        // Play the entire audio track
-        mBeginBoundaryTimeMs = 0;
-        mEndBoundaryTimeMs = mDurationMs;
-
-        // By default loop is disabled
-        mLoop = false;
-
-        // By default the audio track is not muted
-        mMuted = false;
-
-        // Ducking is enabled by default
-        mDuckingThreshold = 0;
-        mDuckedTrackVolume = 0;
-        mIsDuckingEnabled = false;
-
-        // The audio waveform file is generated later
-        mAudioWaveformFilename = null;
-        mWaveformData = null;
+    public AudioTrack(VideoEditor editor, String audioTrackId, String filename) throws IOException {
+        this(editor, audioTrackId, filename, 0, 0, MediaItem.END_OF_FILE, false, 100, false, false,
+                0, 0, null);
     }
 
     /**
@@ -114,43 +98,82 @@ public class AudioTrack {
      *
      * @param editor The video editor reference
      * @param audioTrackId The audio track id
-     * @param filename The audio filename
+     * @param filename The audio filename. In case file contains Audio and Video,
+     *         only the Audio stream will be used as Audio Track.
      * @param startTimeMs the start time in milliseconds (relative to the
-     *              timeline)
+     *         timeline)
      * @param beginMs start time in the audio track in milliseconds (relative to
-     *            the beginning of the audio track)
+     *         the beginning of the audio track)
      * @param endMs end time in the audio track in milliseconds (relative to the
-     *            beginning of the audio track)
+     *         beginning of the audio track)
      * @param loop true to loop the audio track
      * @param volume The volume in percentage
      * @param muted true if the audio track is muted
      * @param threshold Ducking will be activated when the relative energy in
-     *      the media items audio signal goes above this value. The valid
-     *      range of values is 0 to 100.
-     * @param duckedTrackVolume The relative volume of the audio track when ducking
-     *      is active. The valid range of values is 0 to 100.
+     *         the media items audio signal goes above this value. The valid
+     *         range of values is 0 to 90.
+     * @param duckedTrackVolume The relative volume of the audio track when
+     *         ducking is active. The valid range of values is 0 to 100.
      * @param audioWaveformFilename The name of the waveform file
      *
      * @throws IOException if file is not found
+     * @throws IllegalArgumentException if file format is not supported or if
+     *             the codec is not supported or if editor is not of type
+     *             VideoEditorImpl.
      */
-    AudioTrack(VideoEditor editor, String audioTrackId, String filename, long startTimeMs,
-            long beginMs, long endMs, boolean loop, int volume, boolean muted,
-            boolean duckingEnabled, int duckThreshold, int duckedTrackVolume,
+    AudioTrack(VideoEditor editor, String audioTrackId, String filename,
+               long startTimeMs,long beginMs, long endMs, boolean loop,
+               int volume, boolean muted,boolean duckingEnabled,
+               int duckThreshold, int duckedTrackVolume,
             String audioWaveformFilename) throws IOException {
+        Properties properties = null;
+        File file = new File(filename);
+        if (!file.exists()) {
+            throw new IOException(filename + " not found ! ");
+        }
+
+        if (editor instanceof VideoEditorImpl) {
+            mMANativeHelper = ((VideoEditorImpl)editor).getNativeContext();
+        } else {
+            throw new IllegalArgumentException("editor is not of type VideoEditorImpl");
+        }
+        try {
+          properties = mMANativeHelper.getMediaProperties(filename);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unsupported file or file not found");
+        }
+        switch (mMANativeHelper.getFileType(properties.fileType)) {
+            case MediaProperties.FILE_3GP:
+            case MediaProperties.FILE_MP4:
+            case MediaProperties.FILE_MP3:
+                break;
+
+            default: {
+                throw new IllegalArgumentException("Unsupported input file type");
+            }
+        }
+        switch (mMANativeHelper.getAudioCodecType(properties.audioFormat)) {
+            case MediaProperties.ACODEC_AMRNB:
+            case MediaProperties.ACODEC_AMRWB:
+            case MediaProperties.ACODEC_AAC_LC:
+            case MediaProperties.ACODEC_MP3:
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported Audio Codec Format in Input File");
+        }
+
+        if (endMs == MediaItem.END_OF_FILE) {
+            endMs = properties.audioDuration;
+        }
+
         mUniqueId = audioTrackId;
         mFilename = filename;
         mStartTimeMs = startTimeMs;
-
-        // TODO: This value represents to the duration of the audio file
-        mDurationMs = 300000;
-
-        // TODO: This value needs to be read from the audio track of the source
-        // file
-        mAudioChannels = 2;
-        mAudioType = MediaProperties.ACODEC_AAC_LC;
-        mAudioBitrate = 128000;
-        mAudioSamplingFrequency = 44100;
-
+        mDurationMs = properties.audioDuration;
+        mAudioChannels = properties.audioChannels;
+        mAudioBitrate = properties.audioBitrate;
+        mAudioSamplingFrequency = properties.audioSamplingFrequency;
+        mAudioType = properties.audioFormat;
         mTimelineDurationMs = endMs - beginMs;
         mVolumePercent = volume;
 
@@ -159,7 +182,6 @@ public class AudioTrack {
 
         mLoop = loop;
         mMuted = muted;
-
         mIsDuckingEnabled = duckingEnabled;
         mDuckingThreshold = duckThreshold;
         mDuckedTrackVolume = duckedTrackVolume;
@@ -174,6 +196,8 @@ public class AudioTrack {
     }
 
     /**
+     * Get the id of the audio track
+     *
      * @return The id of the audio track
      */
     public String getId() {
@@ -181,7 +205,7 @@ public class AudioTrack {
     }
 
     /**
-     * Get the filename source for this audio track.
+     * Get the filename for this audio track source.
      *
      * @return The filename as an absolute file name
      */
@@ -190,6 +214,8 @@ public class AudioTrack {
     }
 
     /**
+     * Get the number of audio channels in the source of this audio track
+     *
      * @return The number of audio channels in the source of this audio track
      */
     public int getAudioChannels() {
@@ -197,13 +223,18 @@ public class AudioTrack {
     }
 
     /**
+     * Get the audio codec of the source of this audio track
+     *
      * @return The audio codec of the source of this audio track
+     * {@link android.media.videoeditor.MediaProperties}
      */
     public int getAudioType() {
         return mAudioType;
     }
 
     /**
+     * Get the audio sample frequency of the audio track
+     *
      * @return The audio sample frequency of the audio track
      */
     public int getAudioSamplingFrequency() {
@@ -211,6 +242,8 @@ public class AudioTrack {
     }
 
     /**
+     * Get the audio bitrate of the audio track
+     *
      * @return The audio bitrate of the audio track
      */
     public int getAudioBitrate() {
@@ -222,15 +255,26 @@ public class AudioTrack {
      * original audio source file.
      *
      * @param volumePercent Percentage of the volume to apply. If it is set to
-     *            0, then volume becomes mute. It it is set to 100, then volume
-     *            is same as original volume. It it is set to 200, then volume
-     *            is doubled (provided that volume amplification is supported)
+     *         0, then volume becomes mute. It it is set to 100, then volume
+     *         is same as original volume. It it is set to 200, then volume
+     *         is doubled (provided that volume amplification is supported)
      *
      * @throws UnsupportedOperationException if volume amplification is
-     *             requested and is not supported.
+     *         requested and is not supported.
      */
     public void setVolume(int volumePercent) {
+        if (volumePercent > MediaProperties.AUDIO_MAX_VOLUME_PERCENT) {
+            throw new IllegalArgumentException("Volume set exceeds maximum allowed value");
+        }
+
+         if (volumePercent < 0) {
+            throw new IllegalArgumentException("Invalid Volume ");
+        }
         mVolumePercent = volumePercent;
+        /**
+         *  Force update of preview settings
+         */
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -244,27 +288,26 @@ public class AudioTrack {
     }
 
     /**
-     * @param muted true to mute the audio track
+     * Mute/Unmute the audio track
+     *
+     * @param muted true to mute the audio track. SetMute(true) will make
+     *         the volume of this Audio Track to 0.
      */
     public void setMute(boolean muted) {
         mMuted = muted;
+        /**
+         *  Force update of preview settings
+         */
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
+     * Check if the audio track is muted
+     *
      * @return true if the audio track is muted
      */
     public boolean isMuted() {
         return mMuted;
-    }
-
-    /**
-     * Set the start time of this audio track relative to the storyboard
-     * timeline. Default value is 0.
-     *
-     * @param startTimeMs the start time in milliseconds
-     */
-    public void setStartTime(long startTimeMs) {
-        mStartTimeMs = startTimeMs;
     }
 
     /**
@@ -273,19 +316,25 @@ public class AudioTrack {
      *
      * @return The start time in milliseconds
      */
+
     public long getStartTime() {
         return mStartTimeMs;
     }
 
     /**
-     * @return The duration in milliseconds. This value represents the audio
-     *         track duration (not looped)
+     * Get the audio track duration
+     *
+     * @return The duration in milliseconds. This value represents actual audio
+     *         track duration. This value is not effected by 'enableLoop' or
+     *         'setExtractBoundaries'.
      */
     public long getDuration() {
         return mDurationMs;
     }
 
     /**
+     * Get the audio track timeline duration
+     *
      * @return The timeline duration as defined by the begin and end boundaries
      */
     public long getTimelineDuration() {
@@ -296,9 +345,9 @@ public class AudioTrack {
      * Sets the start and end marks for trimming an audio track
      *
      * @param beginMs start time in the audio track in milliseconds (relative to
-     *            the beginning of the audio track)
+     *         the beginning of the audio track)
      * @param endMs end time in the audio track in milliseconds (relative to the
-     *            beginning of the audio track)
+     *         beginning of the audio track)
      */
     public void setExtractBoundaries(long beginMs, long endMs) {
         if (beginMs > mDurationMs) {
@@ -307,14 +356,26 @@ public class AudioTrack {
         if (endMs > mDurationMs) {
             throw new IllegalArgumentException("Invalid end time");
         }
+        if (beginMs < 0) {
+            throw new IllegalArgumentException("Invalid start time; is < 0");
+        }
+        if (endMs < 0) {
+            throw new IllegalArgumentException("Invalid end time; is < 0");
+        }
 
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
 
         mTimelineDurationMs = mEndBoundaryTimeMs - mBeginBoundaryTimeMs;
+        /**
+         *  Force update of preview settings
+         */
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
+     * Get the boundary begin time
+     *
      * @return The boundary begin time
      */
     public long getBoundaryBeginTime() {
@@ -322,6 +383,8 @@ public class AudioTrack {
     }
 
     /**
+     * Get the boundary end time
+     *
      * @return The boundary end time
      */
     public long getBoundaryEndTime() {
@@ -335,17 +398,31 @@ public class AudioTrack {
      * mEndBoundaryTimeMs are looped.
      */
     public void enableLoop() {
-        mLoop = true;
+        if (!mLoop) {
+            mLoop = true;
+            /**
+             *  Force update of preview settings
+             */
+            mMANativeHelper.setGeneratePreview(true);
+        }
     }
 
     /**
      * Disable the loop mode
      */
     public void disableLoop() {
-        mLoop = false;
+        if (mLoop) {
+            mLoop = false;
+            /**
+             *  Force update of preview settings
+             */
+            mMANativeHelper.setGeneratePreview(true);
+        }
     }
 
     /**
+     * Check if looping is enabled
+     *
      * @return true if looping is enabled
      */
     public boolean isLooping() {
@@ -356,18 +433,24 @@ public class AudioTrack {
      * Disable the audio duck effect
      */
     public void disableDucking() {
-        mIsDuckingEnabled = false;
+        if (mIsDuckingEnabled) {
+            mIsDuckingEnabled = false;
+            /**
+             *  Force update of preview settings
+             */
+            mMANativeHelper.setGeneratePreview(true);
+        }
     }
 
     /**
      * Enable ducking by specifying the required parameters
      *
      * @param threshold Ducking will be activated when the energy in
-     *      the media items audio signal goes above this value. The valid
-     *      range of values is 0db to 90dB. 0dB is equivalent to disabling
-     *      ducking.
+     *         the media items audio signal goes above this value. The valid
+     *         range of values is 0db to 90dB. 0dB is equivalent to disabling
+     *         ducking.
      * @param duckedTrackVolume The relative volume of the audio track when ducking
-     *      is active. The valid range of values is 0 to 100.
+     *         is active. The valid range of values is 0 to 100.
      */
     public void enableDucking(int threshold, int duckedTrackVolume) {
         if (threshold < 0 || threshold > 90) {
@@ -382,9 +465,15 @@ public class AudioTrack {
         mDuckingThreshold = threshold;
         mDuckedTrackVolume = duckedTrackVolume;
         mIsDuckingEnabled = true;
+        /**
+         *  Force update of preview settings
+         */
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
+     * Check if ducking is enabled
+     *
      * @return true if ducking is enabled
      */
     public boolean isDuckingEnabled() {
@@ -392,6 +481,8 @@ public class AudioTrack {
     }
 
     /**
+     * Get the ducking threshold.
+     *
      * @return The ducking threshold
      */
     public int getDuckingThreshhold() {
@@ -399,6 +490,8 @@ public class AudioTrack {
     }
 
     /**
+     * Get the ducked track volume.
+     *
      * @return The ducked track volume
      */
     public int getDuckedTrackVolume() {
@@ -414,25 +507,79 @@ public class AudioTrack {
      *
      * @throws IOException if the output file cannot be created
      * @throws IllegalArgumentException if the audio file does not have a valid
-     *             audio track
+     *         audio track
+     * @throws IllegalStateException if the codec type is unsupported
      */
     public void extractAudioWaveform(ExtractAudioWaveformProgressListener listener)
-            throws IOException {
-        // TODO: Set mAudioWaveformFilename at the end once the extract is
-        // complete
+    throws IOException {
+        if (mAudioWaveformFilename == null) {
+            /**
+             *  AudioWaveformFilename is generated
+             */
+            final String projectPath = mMANativeHelper.getProjectPath();
+            final String audioWaveFilename = String.format(projectPath + "/audioWaveformFile-"
+                    + getId() + ".dat");
+
+            /**
+             * Logic to get frame duration = (no. of frames per sample * 1000)/
+             * sampling frequency
+             */
+            final int frameDuration;
+            final int sampleCount;
+            final int codecType = mMANativeHelper.getAudioCodecType(mAudioType);
+            switch (codecType) {
+                case MediaProperties.ACODEC_AMRNB: {
+                    frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AMRNB * 1000)
+                    / MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                    sampleCount = MediaProperties.SAMPLES_PER_FRAME_AMRNB;
+                    break;
+                }
+
+                case MediaProperties.ACODEC_AMRWB: {
+                    frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AMRWB * 1000)
+                    / MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                    sampleCount = MediaProperties.SAMPLES_PER_FRAME_AMRWB;
+                    break;
+                }
+
+                case MediaProperties.ACODEC_AAC_LC: {
+                    frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AAC * 1000)
+                    / MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                    sampleCount = MediaProperties.SAMPLES_PER_FRAME_AAC;
+                    break;
+                }
+
+                case MediaProperties.ACODEC_MP3: {
+                    frameDuration = (MediaProperties.SAMPLES_PER_FRAME_MP3 * 1000)
+                    / MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
+                    sampleCount = MediaProperties.SAMPLES_PER_FRAME_MP3;
+                    break;
+                }
+
+                default: {
+                    throw new IllegalStateException("Unsupported codec type: "
+                                                                   + codecType);
+                }
+            }
+
+            mMANativeHelper.generateAudioGraph( mUniqueId,
+                    mFilename,
+                    audioWaveFilename,
+                    frameDuration,
+                    MediaProperties.DEFAULT_CHANNEL_COUNT,
+                    sampleCount,
+                    listener,
+                    false);
+            /**
+             *  Record the generated file name
+             */
+            mAudioWaveformFilename = audioWaveFilename;
+        }
         mWaveformData = new SoftReference<WaveformData>(new WaveformData(mAudioWaveformFilename));
     }
 
     /**
      * Get the audio waveform file name if extractAudioWaveform was successful.
-     * The file format is as following:
-     * <ul>
-     * <li>first 4 bytes provide the number of samples for each value, as
-     * big-endian signed</li>
-     * <li>4 following bytes is the total number of values in the file, as
-     * big-endian signed</li>
-     * <li>then, all values follow as bytes</li>
-     * </ul>
      *
      * @return the name of the file, null if the file does not exist
      */
@@ -441,7 +588,22 @@ public class AudioTrack {
     }
 
     /**
+     * Delete the waveform file
+     */
+    void invalidate() {
+        if (mAudioWaveformFilename != null) {
+            new File(mAudioWaveformFilename).delete();
+            mAudioWaveformFilename = null;
+            mWaveformData = null;
+        }
+    }
+
+    /**
+     * Get the audio waveform data.
+     *
      * @return The waveform data
+     *
+     * @throws IOException if the waveform file cannot be found
      */
     public WaveformData getWaveformData() throws IOException {
         if (mWaveformData == null) {
@@ -452,7 +614,11 @@ public class AudioTrack {
         if (waveformData != null) {
             return waveformData;
         } else if (mAudioWaveformFilename != null) {
-            waveformData = new WaveformData(mAudioWaveformFilename);
+            try {
+                waveformData = new WaveformData(mAudioWaveformFilename);
+            } catch (IOException e) {
+                throw e;
+            }
             mWaveformData = new SoftReference<WaveformData>(waveformData);
             return waveformData;
         } else {

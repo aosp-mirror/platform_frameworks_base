@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 import java.io.IOException;
@@ -25,8 +26,8 @@ import android.view.SurfaceHolder;
 /**
  * This is the interface implemented by classes which provide video editing
  * functionality. The VideoEditor implementation class manages all input and
- * output files. Unless specifically mentioned, methods are blocking. A
- * typical editing session may consist of the following sequence of operations:
+ * output files. Unless specifically mentioned, methods are blocking. A typical
+ * editing session may consist of the following sequence of operations:
  *
  * <ul>
  *  <li>Add a set of MediaItems</li>
@@ -51,17 +52,21 @@ import android.view.SurfaceHolder;
  * {@hide}
  */
 public interface VideoEditor {
-    // The file name of the project thumbnail
+    /**
+     *  The file name of the project thumbnail
+     */
     public static final String THUMBNAIL_FILENAME = "thumbnail.jpg";
 
-    // Use this value instead of the specific end of the storyboard timeline
-    // value.
+    /**
+     *  Use this value instead of the specific end of the storyboard timeline
+     *  value.
+     */
     public final static int DURATION_OF_STORYBOARD = -1;
 
     /**
      * This listener interface is used by the VideoEditor to emit preview
-     * progress notifications. This callback should be invoked after the
-     * number of frames specified by
+     * progress notifications. This callback should be invoked after the number
+     * of frames specified by
      * {@link #startPreview(SurfaceHolder surfaceHolder, long fromMs,
      *           int callbackAfterFrameCount, PreviewProgressListener listener)}
      */
@@ -72,7 +77,7 @@ public interface VideoEditor {
          *
          * @param videoEditor The VideoEditor instance
          * @param timeMs The current preview position (expressed in milliseconds
-         *            since the beginning of the storyboard timeline).
+         *        since the beginning of the storyboard timeline).
          * @param end true if the end of the timeline was reached
          */
         public void onProgress(VideoEditor videoEditor, long timeMs, boolean end);
@@ -81,7 +86,8 @@ public interface VideoEditor {
     /**
      * This listener interface is used by the VideoEditor to emit export status
      * notifications.
-     * {@link #export(String filename, ExportProgressListener listener, int height, int bitrate)}
+     * {@link #export(String filename, ExportProgressListener listener,
+     *                int height, int bitrate)}
      */
     public interface ExportProgressListener {
         /**
@@ -90,31 +96,28 @@ public interface VideoEditor {
          *
          * @param videoEditor The VideoEditor instance
          * @param filename The name of the file which is in the process of being
-         *            exported.
-         * @param progress The progress in %. At the beginning of the export, this
-         *            value is set to 0; at the end, the value is set to 100.
+         *        exported.
+         * @param progress The progress in %. At the beginning of the export,
+         *        this value is set to 0; at the end, the value is set to 100.
          */
-        public void onProgress(VideoEditor videoEditor, String filename, int progress);
+        public void onProgress(VideoEditor videoEditor, String filename,
+                              int progress);
     }
 
-    /**
-     * This listener interface is used by the VideoEditor to emit export status
-     * notifications.
-     * {@link #generatePreview(MediaProcessingProgressListener listener)}
-     */
     public interface MediaProcessingProgressListener {
-        // Values used for the action parameter
+        /**
+         *  Values used for the action parameter
+         */
         public static final int ACTION_ENCODE = 1;
         public static final int ACTION_DECODE = 2;
 
         /**
          * This method notifies the listener of the progress status of
-         * processing a media object such as a Transition, AudioTrack or a
-         * media image item (when Ken Burns effect is applied).
+         * processing a media object such as a Transition, AudioTrack & Kenburns
          * This method may be called maximum 100 times for one operation.
          *
-         * @param object The object that is being processed such as a
-         *          Transition or AudioTrack
+         * @param object The object that is being processed such as a Transition
+         *               or AudioTrack
          * @param action The type of processing being performed
          * @param progress The progress in %. At the beginning of the operation,
          *          this value is set to 0; at the end, the value is set to 100.
@@ -124,7 +127,7 @@ public interface VideoEditor {
 
     /**
      * @return The path where the VideoEditor stores all files related to the
-     * project
+     *         project
      */
     public String getPath();
 
@@ -147,6 +150,8 @@ public interface VideoEditor {
      * state is saved.
      * Pending audio waveform generations must be allowed to complete.
      * Pending export operations must be allowed to continue.
+     *
+     * @throws IOException if the internal state cannot be saved to project file
      */
     public void save() throws IOException;
 
@@ -164,28 +169,29 @@ public interface VideoEditor {
      *
      * @param filename The output file name (including the full path)
      * @param height The height of the output video file. The supported values
-     *            for height are described in the MediaProperties class, for
-     *            example: HEIGHT_480. The width will be automatically computed
-     *            according to the aspect ratio provided by
-     *            {@link #setAspectRatio(int)}
+     *        for height are described in the MediaProperties class, for
+     *        example: HEIGHT_480. The width will be automatically computed
+     *        according to the aspect ratio provided by
+     *        {@link #setAspectRatio(int)}
      * @param bitrate The bitrate of the output video file. This is approximate
-     *            value for the output movie. Supported bitrate values are
-     *            described in the MediaProperties class for example:
-     *            BITRATE_384K
+     *        value for the output movie. Supported bitrate values are
+     *        described in the MediaProperties class for example: BITRATE_384K
      * @param listener The listener for progress notifications. Use null if
-     *            export progress notifications are not needed.
+     *        export progress notifications are not needed.
+     *
      * @throws IllegalArgumentException if height or bitrate are not supported
-     *             or if the audio or video codecs are not supported
+     *        or if the audio or video codecs are not supported
      * @throws IOException if output file cannot be created
      * @throws IllegalStateException if a preview or an export is in progress or
-     *             if no MediaItem has been added
+     *        if no MediaItem has been added
      * @throws CancellationException if export is canceled by calling
-     *             {@link #cancelExport()}
+     *        {@link #cancelExport()}
      * @throws UnsupportOperationException if multiple simultaneous export() are
-     *             not allowed
+     *        not allowed
      */
-    public void export(String filename, int height, int bitrate, ExportProgressListener listener)
-            throws IOException;
+    public void export(String filename, int height, int bitrate,
+                       ExportProgressListener listener)
+    throws IOException;
 
     /**
      * Create the output movie based on all media items added and the applied
@@ -198,42 +204,43 @@ public interface VideoEditor {
      *
      * @param filename The output file name (including the full path)
      * @param height The height of the output video file. The supported values
-     *            for height are described in the MediaProperties class, for
-     *            example: HEIGHT_480. The width will be automatically computed
-     *            according to the aspect ratio provided by
-     *            {@link #setAspectRatio(int)}
+     *        for height are described in the MediaProperties class, for
+     *        example: HEIGHT_480. The width will be automatically computed
+     *        according to the aspect ratio provided by
+     *        {@link #setAspectRatio(int)}
      * @param bitrate The bitrate of the output video file. This is approximate
-     *            value for the output movie. Supported bitrate values are
-     *            described in the MediaProperties class for example:
-     *            BITRATE_384K
+     *        value for the output movie. Supported bitrate values are
+     *        described in the MediaProperties class for example: BITRATE_384K
      * @param audioCodec The audio codec to be used for the export. The audio
-     *            codec values are defined in the MediaProperties class (e.g.
-     *            ACODEC_AAC_LC). Note that not all audio codec types are
-     *            supported for export purposes.
+     *        codec values are defined in the MediaProperties class (e.g.
+     *        ACODEC_AAC_LC). Note that not all audio codec types are
+     *        supported for export purposes.
      * @param videoCodec The video codec to be used for the export. The video
-     *            codec values are defined in the MediaProperties class (e.g.
-     *            VCODEC_H264BP). Note that not all video codec types are
-     *            supported for export purposes.
+     *        codec values are defined in the MediaProperties class (e.g.
+     *        VCODEC_H264BP). Note that not all video codec types are
+     *        supported for export purposes.
      * @param listener The listener for progress notifications. Use null if
-     *            export progress notifications are not needed.
+     *        export progress notifications are not needed.
+     *
      * @throws IllegalArgumentException if height or bitrate are not supported
-     *             or if the audio or video codecs are not supported
+     *        or if the audio or video codecs are not supported
      * @throws IOException if output file cannot be created
      * @throws IllegalStateException if a preview or an export is in progress or
-     *             if no MediaItem has been added
-     * @throws CancellationException if export is canceled by calling
-     *             {@link #cancelExport()}
+     *        if no MediaItem has been added
+     * @throws CancellationException if export is cancelled by calling
+     *        {@link #cancelExport()}
      * @throws UnsupportOperationException if multiple simultaneous export() are
-     *             not allowed
+     *        not allowed
      */
-    public void export(String filename, int height, int bitrate, int audioCodec, int videoCodec,
-            ExportProgressListener listener) throws IOException;
+    public void export(String filename, int height, int bitrate, int audioCodec,
+                       int videoCodec, ExportProgressListener listener)
+                           throws IOException;
 
     /**
-     * Cancel the running export operation. This method blocks until the
-     * export is canceled and the exported file (if any) is deleted. If the
-     * export completed by the time this method is invoked, the export file
-     * will be deleted.
+     * Cancel the running export operation. This method blocks until the export
+     * is cancelled and the exported file (if any) is deleted. If the export
+     * completed by the time this method is invoked, the export file will be
+     * deleted.
      *
      * @param filename The filename which identifies the export operation to be
      *            canceled.
@@ -244,9 +251,10 @@ public interface VideoEditor {
      * Add a media item at the end of the storyboard.
      *
      * @param mediaItem The media item object to add
+     *
      * @throws IllegalStateException if a preview or an export is in progress or
-     *             if the media item id is not unique across all the media items
-     *             added.
+     *        if the media item id is not unique across all the media items
+     *        added.
      */
     public void addMediaItem(MediaItem mediaItem);
 
@@ -255,13 +263,13 @@ public interface VideoEditor {
      *
      * @param mediaItem The media item object to insert
      * @param afterMediaItemId Insert the mediaItem after the media item
-     *            identified by this id. If this parameter is null, the media
-     *            item is inserted at the beginning of the timeline.
+     *        identified by this id. If this parameter is null, the media
+     *        item is inserted at the beginning of the timeline.
      *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if media item with the specified id does
-     *             not exist (null is a valid value) or if the media item id is
-     *             not unique across all the media items added.
+     *        not exist (null is a valid value) or if the media item id is
+     *        not unique across all the media items added.
      */
     public void insertMediaItem(MediaItem mediaItem, String afterMediaItemId);
 
@@ -272,14 +280,14 @@ public interface VideoEditor {
      * becomes the first media item in the storyboard timeline.
      *
      * @param mediaItemId The id of the media item to move
-     * @param afterMediaItemId Move the media item identified by mediaItemId after
-     *          the media item identified by this parameter. If this parameter
-     *          is null, the media item is moved at the beginning of the
-     *          timeline.
+     * @param afterMediaItemId Move the media item identified by mediaItemId
+     *        after the media item identified by this parameter. If this
+     *        parameter is null, the media item is moved at the beginning of
+     *        the timeline.
      *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if one of media item ids is invalid
-     *          (null is a valid value)
+     *        (null is a valid value)
      */
     public void moveMediaItem(String mediaItemId, String afterMediaItemId);
 
@@ -289,24 +297,22 @@ public interface VideoEditor {
      * removed from the storyboard. If the extraction of the audio waveform is
      * in progress, the extraction is canceled and the file is deleted.
      *
-     * Effects and overlays associated with the media item will also be
-     * removed.
+     * Effects and overlays associated with the media item will also be removed.
      *
-     * Note: The project thumbnail is regenerated if the media item which
-     * is removed is the first media item in the storyboard or if the
-     * media item is the only one in the storyboard. If the
-     * media item is the only one in the storyboard, the project thumbnail
-     * will be set to a black frame and the aspect ratio will revert to the
-     * default aspect ratio, and this method is equivalent to
-     * removeAllMediaItems() in this case.
+     * Note: The project thumbnail is regenerated if the media item which is
+     * removed is the first media item in the storyboard or if the media item is
+     * the only one in the storyboard. If the media item is the only one in the
+     * storyboard, the project thumbnail will be set to a black frame and the
+     * aspect ratio will revert to the default aspect ratio and this method is
+     * equivalent to removeAllMediaItems() in this case.
      *
      * @param mediaItemId The unique id of the media item to be removed
      *
      * @return The media item that was removed
      *
      * @throws IllegalStateException if a preview or an export is in progress
-     * @throws IllegalArgumentException if media item with the specified id
-     *          does not exist
+     * @throws IllegalArgumentException if media item with the specified id does
+     *        not exist
      */
     public MediaItem removeMediaItem(String mediaItemId);
 
@@ -329,7 +335,7 @@ public interface VideoEditor {
      * accessible, this method will still provide the full list of media items.
      *
      * @return The list of media items. If no media item exist an empty list
-     *          will be returned.
+     *        will be returned.
      */
     public List<MediaItem> getAllMediaItems();
 
@@ -360,9 +366,9 @@ public interface VideoEditor {
      *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if the transition duration is larger
-     *              than the smallest duration of the two media item files or
-     *              if the two media items specified in the transition are not
-     *              adjacent
+     *        than the smallest duration of the two media item files or if
+     *        the two media items specified in the transition are not
+     *        adjacent
      */
     public void addTransition(Transition transition);
 
@@ -372,9 +378,10 @@ public interface VideoEditor {
      * @param transitionId The id of the transition to be removed
      *
      * @return The transition that was removed
+     *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if transition with the specified id does
-     *             not exist
+     *        not exist
      */
     public Transition removeTransition(String transitionId);
 
@@ -382,7 +389,7 @@ public interface VideoEditor {
      * Get the list of transitions
      *
      * @return The list of transitions. If no transitions exist an empty list
-     *  will be returned.
+     *        will be returned.
      */
     public List<Transition> getAllTransitions();
 
@@ -401,10 +408,11 @@ public interface VideoEditor {
      * one audio track)
      *
      * @param audioTrack The AudioTrack to add
+     *
      * @throws UnsupportedOperationException if the implementation supports a
-     *             limited number of audio tracks.
+     *        limited number of audio tracks.
      * @throws IllegalArgumentException if media item is not unique across all
-     *             the audio tracks already added.
+     *        the audio tracks already added.
      */
     public void addAudioTrack(AudioTrack audioTrack);
 
@@ -415,14 +423,15 @@ public interface VideoEditor {
      *
      * @param audioTrack The audio track object to insert
      * @param afterAudioTrackId Insert the audio track after the audio track
-     *            identified by this parameter. If this parameter is null the
-     *            audio track is added at the beginning of the timeline.
+     *        identified by this parameter. If this parameter is null the
+     *        audio track is added at the beginning of the timeline.
+     *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if media item with the specified id does
-     *             not exist (null is a valid value). if media item is not
-     *             unique across all the audio tracks already added.
+     *        not exist (null is a valid value). if media item is not unique
+     *        across all the audio tracks already added.
      * @throws UnsupportedOperationException if the implementation supports a
-     *             limited number of audio tracks
+     *        limited number of audio tracks
      */
     public void insertAudioTrack(AudioTrack audioTrack, String afterAudioTrackId);
 
@@ -431,12 +440,13 @@ public interface VideoEditor {
      *
      * @param audioTrackId The id of the AudioTrack to move
      * @param afterAudioTrackId Move the AudioTrack identified by audioTrackId
-     *            after the AudioTrack identified by this parameter. If this
-     *            parameter is null the audio track is added at the beginning of
-     *            the timeline.
+     *        after the AudioTrack identified by this parameter. If this
+     *        parameter is null the audio track is added at the beginning of
+     *        the timeline.
+     *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if one of media item ids is invalid
-     *             (null is a valid value)
+     *        (null is a valid value)
      */
     public void moveAudioTrack(String audioTrackId, String afterAudioTrackId);
 
@@ -453,13 +463,14 @@ public interface VideoEditor {
     public AudioTrack removeAudioTrack(String audioTrackId);
 
     /**
-     * Get the list of AudioTracks in order in which they appear in the storyboard.
+     * Get the list of AudioTracks in order in which they appear in the
+     * storyboard.
      *
      * Note that if any AudioTrack source files are not accessible anymore,
      * this method will still provide the full list of audio tracks.
      *
      * @return The list of AudioTracks. If no audio tracks exist an empty list
-     *  will be returned.
+     *        will be returned.
      */
     public List<AudioTrack> getAllAudioTracks();
 
@@ -478,9 +489,9 @@ public interface VideoEditor {
      * The default aspect ratio is ASPECTRATIO_16_9 (16:9).
      *
      * @param aspectRatio to apply. If aspectRatio is the same as the current
-     *            aspect ratio, then this function just returns. The supported
-     *            aspect ratio are defined in the MediaProperties class for
-     *            example: ASPECTRATIO_16_9
+     *        aspect ratio, then this function just returns. The supported
+     *        aspect ratio are defined in the MediaProperties class for
+     *        example: ASPECTRATIO_16_9
      *
      * @throws IllegalStateException if a preview or an export is in progress
      * @throws IllegalArgumentException if aspect ratio is not supported
@@ -508,24 +519,22 @@ public interface VideoEditor {
      * @param surfaceHolder SurfaceHolder used by the application
      * @param timeMs time corresponding to the frame to display
      *
-     * @return The accurate time stamp of the frame that is rendered
-     * .
-     * @throws IllegalStateException if a preview or an export is already
-     *             in progress
+     * @return The accurate time stamp of the frame that is rendered.
+     *
+     * @throws IllegalStateException if a preview or an export is already in
+     *        progress
      * @throws IllegalArgumentException if time is negative or beyond the
-     *             preview duration
+     *        preview duration
      */
     public long renderPreviewFrame(SurfaceHolder surfaceHolder, long timeMs);
 
     /**
-     * This method must be called after the aspect ratio of the project changes
-     * and before startPreview is called. Note that this method may block for
-     * an extensive period of time.
-     *
-     * @param listener The listener interface which will be used to notify
-     *  the caller of the progress of each storyboard item being processed.
+     * This method must be called after any changes made to the storyboard
+     * and before startPreview is called. Note that this method may block for an
+     * extensive period of time.
      */
     public void generatePreview(MediaProcessingProgressListener listener);
+
 
     /**
      * Start the preview of all the storyboard items applied on all MediaItems
@@ -538,27 +547,29 @@ public interface VideoEditor {
      *
      * @param surfaceHolder SurfaceHolder where the preview is rendered.
      * @param fromMs The time (relative to the timeline) at which the preview
-     *            will start
+     *        will start
      * @param toMs The time (relative to the timeline) at which the preview will
-     *            stop. Use -1 to play to the end of the timeline
+     *        stop. Use -1 to play to the end of the timeline
      * @param loop true if the preview should be looped once it reaches the end
      * @param callbackAfterFrameCount The listener interface should be invoked
-     *            after the number of frames specified by this parameter.
+     *        after the number of frames specified by this parameter.
      * @param listener The listener which will be notified of the preview
-     *            progress
+     *        progress
+     *
      * @throws IllegalArgumentException if fromMs is beyond the preview duration
      * @throws IllegalStateException if a preview or an export is already in
-     *             progress
+     *        progress
      */
-    public void startPreview(SurfaceHolder surfaceHolder, long fromMs, long toMs, boolean loop,
-            int callbackAfterFrameCount, PreviewProgressListener listener);
+    public void startPreview(SurfaceHolder surfaceHolder, long fromMs, long toMs,
+                             boolean loop,int callbackAfterFrameCount,
+                             PreviewProgressListener listener);
 
     /**
      * Stop the current preview. This method blocks until ongoing preview is
      * stopped. Ignored if there is no preview running.
      *
      * @return The accurate current time when stop is effective expressed in
-     *          milliseconds
+     *        milliseconds
      */
     public long stopPreview();
 }

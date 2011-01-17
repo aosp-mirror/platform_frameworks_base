@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package android.media.videoeditor;
 
 /**
@@ -61,12 +60,25 @@ public class TransitionSliding extends Transition {
      * @throws IllegalArgumentException if behavior is not supported.
      */
     public TransitionSliding(String transitionId, MediaItem afterMediaItem,
-            MediaItem beforeMediaItem, long durationMs, int behavior, int direction) {
+            MediaItem beforeMediaItem, long durationMs, int behavior,
+            int direction) {
         super(transitionId, afterMediaItem, beforeMediaItem, durationMs, behavior);
+        switch (direction) {
+            case DIRECTION_RIGHT_OUT_LEFT_IN:
+            case DIRECTION_LEFT_OUT_RIGHT_IN:
+            case DIRECTION_TOP_OUT_BOTTOM_IN:
+            case DIRECTION_BOTTOM_OUT_TOP_IN:
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid direction");
+        }
         mSlidingDirection = direction;
     }
 
     /**
+     * Get the sliding direction.
+     *
      * @return The sliding direction
      */
     public int getDirection() {
@@ -78,5 +90,6 @@ public class TransitionSliding extends Transition {
      */
     @Override
     void generate() {
+        super.generate();
     }
 }

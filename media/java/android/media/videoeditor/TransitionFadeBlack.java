@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package android.media.videoeditor;
 
 
@@ -42,7 +43,7 @@ public class TransitionFadeBlack extends Transition {
      *      this media item
      * @param durationMs duration of the transition
      * @param behavior behavior is one of the behavior defined in Transition
-     *            class
+     *      class
      *
      * @throws IllegalArgumentException if behavior is not supported.
      */
@@ -56,5 +57,6 @@ public class TransitionFadeBlack extends Transition {
      */
     @Override
     void generate() {
+        super.generate();
     }
 }
