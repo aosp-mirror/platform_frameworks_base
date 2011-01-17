@@ -24,9 +24,8 @@ namespace android {
 
 // --- InputWindow ---
 
-bool InputWindow::touchableAreaContainsPoint(int32_t x, int32_t y) const {
-    return x >= touchableAreaLeft && x <= touchableAreaRight
-            && y >= touchableAreaTop && y <= touchableAreaBottom;
+bool InputWindow::touchableRegionContainsPoint(int32_t x, int32_t y) const {
+    return touchableRegion.contains(x, y);
 }
 
 bool InputWindow::frameContainsPoint(int32_t x, int32_t y) const {

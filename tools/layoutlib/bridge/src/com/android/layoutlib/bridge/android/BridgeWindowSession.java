@@ -102,7 +102,7 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     public void setInsets(IWindow window, int touchable, Rect contentInsets,
-            Rect visibleInsets) {
+            Rect visibleInsets, Region touchableRegion) {
         // pass for now.
     }
 
