@@ -39,12 +39,34 @@ public class InterfaceConfiguration implements Parcelable {
     public String toString() {
         StringBuffer str = new StringBuffer();
 
-        str.append("ipddress "); str.append(addr.toString());
-        str.append(" netmask "); str.append(mask.toString());
+        str.append("ipddress ");
+        str.append((addr != null) ? addr.toString() : "NULL");
+        str.append(" netmask ");
+        str.append((mask != null) ? mask.toString() : "NULL");
         str.append(" flags ").append(interfaceFlags);
         str.append(" hwaddr ").append(hwAddr);
 
         return str.toString();
+    }
+
+    /**
+     * This function determines if the interface is up and has a valid IP
+     * configuration (IP address has a non zero octet).
+     *
+     * Note: It is supposed to be quick and hence should not initiate
+     * any network activity
+     */
+    public boolean isActive() {
+        try {
+            if(interfaceFlags.contains("up")) {
+                for (byte b : addr.getAddress()) {
+                    if (b != 0) return true;
+                }
+            }
+        } catch (NullPointerException e) {
+            return false;
+        }
+        return false;
     }
 
     /** Implement the Parcelable interface {@hide} */
