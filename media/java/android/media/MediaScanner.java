@@ -1177,7 +1177,8 @@ public class MediaScanner
             long lastModifiedSeconds = file.lastModified() / 1000;
 
             // always scan the file, so we can return the content://media Uri for existing files
-            return mClient.doScanFile(path, mimeType, lastModifiedSeconds, file.length(),false, true);
+            return mClient.doScanFile(path, mimeType, lastModifiedSeconds, file.length(),
+                    false, true);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             return null;
@@ -1185,17 +1186,30 @@ public class MediaScanner
     }
 
     public void scanMtpFile(String path, String volumeName, int objectHandle, int format) {
+        initialize(volumeName);
         MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(path);
         int fileType = (mediaFileType == null ? 0 : mediaFileType.fileType);
+        File file = new File(path);
+        long lastModifiedSeconds = file.lastModified() / 1000;
 
         if (!MediaFile.isAudioFileType(fileType) && !MediaFile.isVideoFileType(fileType) &&
             !MediaFile.isImageFileType(fileType) && !MediaFile.isPlayListFileType(fileType)) {
-            // nothing to do
+
+            // no need to use the media scanner, but we need to update last modified and file size
+            ContentValues values = new ContentValues();
+            values.put(Files.FileColumns.SIZE, file.length());
+            values.put(Files.FileColumns.DATE_MODIFIED, lastModifiedSeconds);
+            try {
+                String[] whereArgs = new String[] {  Integer.toString(objectHandle) };
+                mMediaProvider.update(Files.getMtpObjectsUri(volumeName), values, "_id=?",
+                        whereArgs);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in scanMtpFile", e);
+            }
             return;
         }
 
         mMtpObjectHandle = objectHandle;
-        initialize(volumeName);
         try {
             if (MediaFile.isPlayListFileType(fileType)) {
                 // build file cache so we can look up tracks in the playlist
@@ -1212,11 +1226,6 @@ public class MediaScanner
             } else {
                 // MTP will create a file entry for us so we don't want to do it in prescan
                 prescan(path, false);
-
-                File file = new File(path);
-
-                // lastModified is in milliseconds on Files.
-                long lastModifiedSeconds = file.lastModified() / 1000;
 
                 // always scan the file, so we can return the content://media Uri for existing files
                 mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(),
