@@ -411,7 +411,13 @@ public class InputManager {
             return mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_filterJumpyTouchEvents);
         }
-        
+
+        @SuppressWarnings("unused")
+        public int getVirtualKeyQuietTimeMillis() {
+            return mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_virtualKeyQuietTimeMillis);
+        }
+
         @SuppressWarnings("unused")
         public VirtualKeyDefinition[] getVirtualKeyDefinitions(String deviceName) {
             ArrayList<VirtualKeyDefinition> keys = new ArrayList<VirtualKeyDefinition>();
