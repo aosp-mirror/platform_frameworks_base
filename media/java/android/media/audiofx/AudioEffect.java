@@ -150,7 +150,7 @@ public class AudioEffect {
      */
     public static final int ERROR = -1;
     /**
-     * Internal opreation status. Not returned by any method.
+     * Internal operation status. Not returned by any method.
      */
     public static final int ALREADY_EXISTS = -2;
     /**
