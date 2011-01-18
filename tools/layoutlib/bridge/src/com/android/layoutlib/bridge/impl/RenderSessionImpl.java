@@ -172,7 +172,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getProjectCallback());
+                mParams.getProjectCallback(), mParams.getTargetSdkVersion());
 
 
         setUp();
