@@ -1629,6 +1629,11 @@ public class WebSettings {
     /* package */ synchronized void setPrivateBrowsingEnabled(boolean flag) {
         if (mPrivateBrowsingEnabled != flag) {
             mPrivateBrowsingEnabled = flag;
+
+            // AutoFill is dependant on private browsing being enabled so
+            // reset it to take account of the new value of mPrivateBrowsingEnabled.
+            setAutoFillEnabled(mAutoFillEnabled);
+
             postSync();
         }
     }
@@ -1644,8 +1649,10 @@ public class WebSettings {
      * @hide
      */
     public synchronized void setAutoFillEnabled(boolean enabled) {
-        if (mAutoFillEnabled != enabled) {
-            mAutoFillEnabled = enabled;
+        // AutoFill is always disabled in private browsing mode.
+        boolean autoFillEnabled = enabled && !mPrivateBrowsingEnabled;
+        if (mAutoFillEnabled != autoFillEnabled) {
+            mAutoFillEnabled = autoFillEnabled;
             postSync();
         }
     }
