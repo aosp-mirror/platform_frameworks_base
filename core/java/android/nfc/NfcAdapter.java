@@ -436,7 +436,7 @@ public final class NfcAdapter {
         }
         try {
             ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
-                    new ForegroundDispatchPausedListener());
+                    mForegroundDispatchListener);
             sService.enableForegroundDispatch(activity.getComponentName(), intent, filters);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
@@ -453,15 +453,17 @@ public final class NfcAdapter {
      * <p>This method must be called from the main thread.
      */
     public void disableForegroundDispatch(Activity activity) {
+        ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
+                mForegroundDispatchListener);
         disableForegroundDispatchInternal(activity, false);
     }
 
-    class ForegroundDispatchPausedListener implements OnActivityPausedListener {
+    OnActivityPausedListener mForegroundDispatchListener = new OnActivityPausedListener() {
         @Override
         public void onPaused(Activity activity) {
             disableForegroundDispatchInternal(activity, true);
         }
-    }
+    };
 
     void disableForegroundDispatchInternal(Activity activity, boolean force) {
         try {
@@ -488,7 +490,7 @@ public final class NfcAdapter {
         }
         try {
             ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
-                    new ForegroundDispatchPausedListener());
+                    mForegroundNdefPushListener);
             sService.enableForegroundNdefPush(activity.getComponentName(), msg);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
@@ -504,18 +506,20 @@ public final class NfcAdapter {
      *
      * <p>This method must be called from the main thread.
      */
-    public void disableNdefPushDispatch(Activity activity) {
-        disableForegroundDispatchInternal(activity, false);
+    public void disableForegroundNdefPush(Activity activity) {
+        ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
+                mForegroundNdefPushListener);
+        disableForegroundNdefPushInternal(activity, false);
     }
 
-    class ForegroundNdefPushPausedListener implements OnActivityPausedListener {
+    OnActivityPausedListener mForegroundNdefPushListener = new OnActivityPausedListener() {
         @Override
         public void onPaused(Activity activity) {
-            disableNdefPushDispatchInternal(activity, true);
+            disableForegroundNdefPushInternal(activity, true);
         }
-    }
+    };
 
-    void disableNdefPushDispatchInternal(Activity activity, boolean force) {
+    void disableForegroundNdefPushInternal(Activity activity, boolean force) {
         try {
             sService.disableForegroundNdefPush(activity.getComponentName());
             if (!force && !activity.isResumed()) {

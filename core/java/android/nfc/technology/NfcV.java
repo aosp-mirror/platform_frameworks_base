@@ -21,8 +21,10 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import java.io.IOException;
+
 /**
- * A low-level connection to a {@link Tag} using the NFC-V technology, also known as
+ * A low-level connection to a {@link Tag} using NFC vicinity technology, also known as
  * ISO15693.
  *
  * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
@@ -45,6 +47,7 @@ public final class NfcV extends BasicTagTechnology {
     private byte mRespFlags;
     private byte mDsfId;
 
+    /** @hide */
     public NfcV(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.NFC_V);
@@ -58,5 +61,20 @@ public final class NfcV extends BasicTagTechnology {
 
     public byte getDsfId() {
         return mDsfId;
+    }
+
+    /**
+     * Send data to a tag and receive the response.
+     * <p>
+     * This method will block until the response is received. It can be canceled
+     * with {@link #close}.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param data bytes to send
+     * @return bytes received in response
+     * @throws IOException if the target is lost or connection closed
+     */
+    public byte[] transceive(byte[] data) throws IOException {
+        return transceive(data, true);
     }
 }
