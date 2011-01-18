@@ -1965,23 +1965,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // behind it.
             return false;
         }
-        if (mStatusBar != null && mStatusBar.isVisibleLw()) {
-            Rect rect = new Rect(mStatusBar.getShownFrameLw());
-            for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
-                WindowState w = mStatusBarPanels.get(i);
-                if (w.isVisibleLw()) {
-                    rect.union(w.getShownFrameLw());
+        if (false) {
+            // Don't do this on the tablet, since the system bar never completely
+            // covers the screen, and with all its transparency this will
+            // incorrectly think it does cover it when it doesn't.  We'll revisit
+            // this later when we re-do the phone status bar.
+            if (mStatusBar != null && mStatusBar.isVisibleLw()) {
+                Rect rect = new Rect(mStatusBar.getShownFrameLw());
+                for (int i=mStatusBarPanels.size()-1; i>=0; i--) {
+                    WindowState w = mStatusBarPanels.get(i);
+                    if (w.isVisibleLw()) {
+                        rect.union(w.getShownFrameLw());
+                    }
                 }
-            }
-            final int insetw = mRestrictedScreenWidth/10;
-            final int inseth = mRestrictedScreenHeight/10;
-            if (rect.contains(insetw, inseth, mRestrictedScreenWidth-insetw,
-                        mRestrictedScreenHeight-inseth)) {
-                // All of the status bar windows put together cover the
-                // screen, so the app can't be seen.  (Note this test doesn't
-                // work if the rects of these windows are at off offsets or
-                // sizes, causing gaps in the rect union we have computed.)
-                return false;
+                final int insetw = mRestrictedScreenWidth/10;
+                final int inseth = mRestrictedScreenHeight/10;
+                if (rect.contains(insetw, inseth, mRestrictedScreenWidth-insetw,
+                            mRestrictedScreenHeight-inseth)) {
+                    // All of the status bar windows put together cover the
+                    // screen, so the app can't be seen.  (Note this test doesn't
+                    // work if the rects of these windows are at off offsets or
+                    // sizes, causing gaps in the rect union we have computed.)
+                    return false;
+                }
             }
         }
         return true;
