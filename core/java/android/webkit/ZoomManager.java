@@ -147,13 +147,13 @@ class ZoomManager {
      */
     private float mInitialScale;
 
-    private static float MINIMUM_SCALE_INCREMENT = 0.01f;
+    private static float MINIMUM_SCALE_INCREMENT = 0.007f;
 
     /*
      *  The touch points could be changed even the fingers stop moving.
      *  We use the following to filter out the zooming jitters.
      */
-    private static float MINIMUM_SCALE_WITHOUT_JITTER = 0.05f;
+    private static float MINIMUM_SCALE_WITHOUT_JITTER = 0.007f;
 
     /*
      * The following member variables are only to be used for animating zoom. If
