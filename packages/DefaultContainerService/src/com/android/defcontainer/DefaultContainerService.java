@@ -190,6 +190,7 @@ public class DefaultContainerService extends IntentService {
                 while ((pkg=pm.nextPackageToClean(pkg)) != null) {
                     eraseFiles(Environment.getExternalStorageAppDataDirectory(pkg));
                     eraseFiles(Environment.getExternalStorageAppMediaDirectory(pkg));
+                    eraseFiles(Environment.getExternalStorageAppObbDirectory(pkg));
                 }
             } catch (RemoteException e) {
             }
