@@ -471,45 +471,42 @@ void ScriptCState::runCompiler(Context *rsc,
                                ScriptC *s,
                                const char *resName,
                                const char *cacheDir) {
-    {
-        s->mBccScript = bccCreateScript();
+    s->mBccScript = bccCreateScript();
 
-        s->mEnviroment.mIsThreadable = true;
+    s->mEnviroment.mIsThreadable = true;
 
-        bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
+    bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
 
-        if (bccReadBC(s->mBccScript,
-                      resName,
-                      s->mEnviroment.mScriptText,
-                      s->mEnviroment.mScriptTextLength, 0) != 0) {
-            LOGE("bcc: FAILS to read bitcode");
-            // Handle Fatal Error
-        }
+    if (bccReadBC(s->mBccScript,
+                  resName,
+                  s->mEnviroment.mScriptText,
+                  s->mEnviroment.mScriptTextLength, 0) != 0) {
+        LOGE("bcc: FAILS to read bitcode");
+        // Handle Fatal Error
+    }
 
 #if 1
-        if (bccLinkBC(s->mBccScript,
-                      resName,
-                      NULL /*rs_runtime_lib_bc*/,
-                      1 /*rs_runtime_lib_bc_size*/
-                        /*"1" means skip buffer here, and let libbcc decide*/,
-                      0) != 0) {
-            LOGE("bcc: FAILS to link bitcode");
-            // Handle Fatal Error
-        }
-#endif
-        char *cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
-
-        if (bccPrepareExecutable(s->mBccScript, cachePath, 0) != 0) {
-            LOGE("bcc: FAILS to prepare executable");
-            // Handle Fatal Error
-        }
-
-        free(cachePath);
-
-        s->mProgram.mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(s->mBccScript, "root"));
-        s->mProgram.mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(s->mBccScript, "init"));
+    if (bccLinkBC(s->mBccScript,
+                  resName,
+                  NULL /*rs_runtime_lib_bc*/,
+                  1 /*rs_runtime_lib_bc_size*/
+                    /*"1" means skip buffer here, and let libbcc decide*/,
+                  0) != 0) {
+        LOGE("bcc: FAILS to link bitcode");
+        // Handle Fatal Error
     }
-    LOGV("%p ScriptCState::runCompiler root %p,  init %p", rsc, s->mProgram.mRoot, s->mProgram.mInit);
+#endif
+    char *cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
+
+    if (bccPrepareExecutable(s->mBccScript, cachePath, 0) != 0) {
+        LOGE("bcc: FAILS to prepare executable");
+        // Handle Fatal Error
+    }
+
+    free(cachePath);
+
+    s->mProgram.mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(s->mBccScript, "root"));
+    s->mProgram.mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(s->mBccScript, "init"));
 
     if (s->mProgram.mInit) {
         s->mProgram.mInit();
@@ -537,66 +534,62 @@ void ScriptCState::runCompiler(Context *rsc,
     s->mEnviroment.mFragmentStore.set(rsc->getDefaultProgramStore());
     s->mEnviroment.mRaster.set(rsc->getDefaultProgramRaster());
 
-    if (s->mProgram.mRoot) {
-        const static int pragmaMax = 16;
-        size_t pragmaCount = bccGetPragmaCount(s->mBccScript);
-        char const *keys[pragmaMax];
-        char const *values[pragmaMax];
-        bccGetPragmaList(s->mBccScript, pragmaMax, keys, values);
+    const static int pragmaMax = 16;
+    size_t pragmaCount = bccGetPragmaCount(s->mBccScript);
+    char const *keys[pragmaMax];
+    char const *values[pragmaMax];
+    bccGetPragmaList(s->mBccScript, pragmaMax, keys, values);
 
-        for (size_t i=0; i < pragmaCount; ++i) {
-            //LOGE("pragma %s %s", keys[i], values[i]);
-            if (!strcmp(keys[i], "version")) {
+    for (size_t i=0; i < pragmaCount; ++i) {
+        //LOGE("pragma %s %s", keys[i], values[i]);
+        if (!strcmp(keys[i], "version")) {
+            // TODO: Verify that version is correct
+            continue;
+        }
+
+        if (!strcmp(keys[i], "stateVertex")) {
+            if (!strcmp(values[i], "default")) {
                 continue;
             }
-
-            if (!strcmp(keys[i], "stateVertex")) {
-                if (!strcmp(values[i], "default")) {
-                    continue;
-                }
-                if (!strcmp(values[i], "parent")) {
-                    s->mEnviroment.mVertex.clear();
-                    continue;
-                }
-                LOGE("Unreconized value %s passed to stateVertex", values[i]);
+            if (!strcmp(values[i], "parent")) {
+                s->mEnviroment.mVertex.clear();
+                continue;
             }
-
-            if (!strcmp(keys[i], "stateRaster")) {
-                if (!strcmp(values[i], "default")) {
-                    continue;
-                }
-                if (!strcmp(values[i], "parent")) {
-                    s->mEnviroment.mRaster.clear();
-                    continue;
-                }
-                LOGE("Unreconized value %s passed to stateRaster", values[i]);
-            }
-
-            if (!strcmp(keys[i], "stateFragment")) {
-                if (!strcmp(values[i], "default")) {
-                    continue;
-                }
-                if (!strcmp(values[i], "parent")) {
-                    s->mEnviroment.mFragment.clear();
-                    continue;
-                }
-                LOGE("Unreconized value %s passed to stateFragment", values[i]);
-            }
-
-            if (!strcmp(keys[i], "stateStore")) {
-                if (!strcmp(values[i], "default")) {
-                    continue;
-                }
-                if (!strcmp(values[i], "parent")) {
-                    s->mEnviroment.mFragmentStore.clear();
-                    continue;
-                }
-                LOGE("Unreconized value %s passed to stateStore", values[i]);
-            }
+            LOGE("Unreconized value %s passed to stateVertex", values[i]);
         }
-    } else {
-        LOGE("bcc: FAILS to prepare executable");
-        // Handle Fatal Error
+
+        if (!strcmp(keys[i], "stateRaster")) {
+            if (!strcmp(values[i], "default")) {
+                continue;
+            }
+            if (!strcmp(values[i], "parent")) {
+                s->mEnviroment.mRaster.clear();
+                continue;
+            }
+            LOGE("Unreconized value %s passed to stateRaster", values[i]);
+        }
+
+        if (!strcmp(keys[i], "stateFragment")) {
+            if (!strcmp(values[i], "default")) {
+                continue;
+            }
+            if (!strcmp(values[i], "parent")) {
+                s->mEnviroment.mFragment.clear();
+                continue;
+            }
+            LOGE("Unreconized value %s passed to stateFragment", values[i]);
+        }
+
+        if (!strcmp(keys[i], "stateStore")) {
+            if (!strcmp(values[i], "default")) {
+                continue;
+            }
+            if (!strcmp(values[i], "parent")) {
+                s->mEnviroment.mFragmentStore.clear();
+                continue;
+            }
+            LOGE("Unreconized value %s passed to stateStore", values[i]);
+        }
     }
 }
 
