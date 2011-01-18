@@ -110,11 +110,16 @@ public abstract class FragmentTransaction {
     public static final int TRANSIT_FRAGMENT_OPEN = 1 | TRANSIT_ENTER_MASK;
     /** Fragment is being removed from the stack */
     public static final int TRANSIT_FRAGMENT_CLOSE = 2 | TRANSIT_EXIT_MASK;
-    /** Fragment is being added in a 'next' operation*/
-    public static final int TRANSIT_FRAGMENT_NEXT = 3 | TRANSIT_ENTER_MASK;
-    /** Fragment is being removed in a 'previous' operation */
-    public static final int TRANSIT_FRAGMENT_PREV = 4 | TRANSIT_EXIT_MASK;
+    /** Fragment should simply fade in or out; that is, no strong navigation associated
+     * with it except that it is appearing or disappearing for some reason. */
+    public static final int TRANSIT_FRAGMENT_FADE = 3 | TRANSIT_ENTER_MASK;
 
+    // Temp compat.
+    @Deprecated
+    public static final int TRANSIT_FRAGMENT_NEXT = TRANSIT_FRAGMENT_FADE;
+    @Deprecated
+    public static final int TRANSIT_FRAGMENT_PREV = TRANSIT_FRAGMENT_FADE;
+    
     /**
      * Set specific animation resources to run for the fragments that are
      * entering and exiting in this transaction.

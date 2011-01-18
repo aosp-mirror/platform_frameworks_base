@@ -140,7 +140,7 @@ public class ClipboardService extends IClipboard.Stub {
     public boolean hasClipboardText() {
         synchronized (this) {
             if (mPrimaryClip != null) {
-                CharSequence text = mPrimaryClip.getItem(0).getText();
+                CharSequence text = mPrimaryClip.getItemAt(0).getText();
                 return text != null && text.length() > 0;
             }
             return false;
@@ -175,7 +175,7 @@ public class ClipboardService extends IClipboard.Stub {
     private final void checkDataOwnerLocked(ClipData data, int uid) {
         final int N = data.getItemCount();
         for (int i=0; i<N; i++) {
-            checkItemOwnerLocked(data.getItem(i), uid);
+            checkItemOwnerLocked(data.getItemAt(i), uid);
         }
     }
 
@@ -214,7 +214,7 @@ public class ClipboardService extends IClipboard.Stub {
         if (mPrimaryClip != null && !mActivePermissionOwners.contains(pkg)) {
             final int N = mPrimaryClip.getItemCount();
             for (int i=0; i<N; i++) {
-                grantItemLocked(mPrimaryClip.getItem(i), pkg);
+                grantItemLocked(mPrimaryClip.getItemAt(i), pkg);
             }
             mActivePermissionOwners.add(pkg);
         }
@@ -249,7 +249,7 @@ public class ClipboardService extends IClipboard.Stub {
         }
         final int N = mPrimaryClip.getItemCount();
         for (int i=0; i<N; i++) {
-            revokeItemLocked(mPrimaryClip.getItem(i));
+            revokeItemLocked(mPrimaryClip.getItemAt(i));
         }
     }
 }

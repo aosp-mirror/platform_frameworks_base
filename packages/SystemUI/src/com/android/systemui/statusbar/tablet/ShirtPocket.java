@@ -120,7 +120,7 @@ public class ShirtPocket extends ImageView {
                 mAltText.setVisibility(View.VISIBLE);
                 if (mClipping.getItemCount() > 0) {
                     // TODO: figure out how to visualize every kind of ClipData!
-                    mAltText.setText(mClipping.getItem(0).coerceToText(getContext()));
+                    mAltText.setText(mClipping.getItemAt(0).coerceToText(getContext()));
                 }
             }
         }

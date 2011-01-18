@@ -40,6 +40,8 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 
 /**
+ * @hide -- not yet ready to support, should be provided just as a static lib.
+ * 
  * A read-only content provider which extracts data out of an XML document.
  *
  * <p>A XPath-like selection pattern is used to select some nodes in the XML document. Each such

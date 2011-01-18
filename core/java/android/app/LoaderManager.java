@@ -159,14 +159,6 @@ public abstract class LoaderManager {
     public abstract void destroyLoader(int id);
 
     /**
-     * @deprecated Renamed to {@link #destroyLoader}.
-     */
-    @Deprecated
-    public void stopLoader(int id) {
-        destroyLoader(id);
-    }
-
-    /**
      * Return the Loader with the given id or null if no matching Loader
      * is found.
      */
