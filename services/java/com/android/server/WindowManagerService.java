@@ -3031,7 +3031,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
-        if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: params package="
+        if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: layout params pkg="
                 + (lp != null ? lp.packageName : null)
                 + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
         if (lp != null && lp.windowAnimations != 0) {
@@ -3052,7 +3052,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private AttributeCache.Entry getCachedAnimations(String packageName, int resId) {
-        if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: params package="
+        if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: package="
                 + packageName + " resId=0x" + Integer.toHexString(resId));
         if (packageName != null) {
             if ((resId&0xFF000000) == 0x01000000) {
@@ -9957,8 +9957,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         // The top-most window will supply the layout params,
                         // and we will determine it below.
                         LayoutParams animLp = null;
-                        AppWindowToken animToken = null;
                         int bestAnimLayer = -1;
+                        boolean fullscreenAnim = false;
 
                         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                                 "New wallpaper target=" + mWallpaperTarget
@@ -10000,11 +10000,18 @@ public class WindowManagerService extends IWindowManager.Stub
                                     // window, we will always use its anim.
                                     if ((ws.mAttrs.flags&FLAG_COMPATIBLE_WINDOW) != 0) {
                                         animLp = ws.mAttrs;
-                                        animToken = ws.mAppToken;
                                         bestAnimLayer = Integer.MAX_VALUE;
-                                    } else if (ws.mLayer > bestAnimLayer) {
+                                    } else if (!fullscreenAnim || ws.mLayer > bestAnimLayer) {
                                         animLp = ws.mAttrs;
-                                        animToken = ws.mAppToken;
+                                        bestAnimLayer = ws.mLayer;
+                                    }
+                                    fullscreenAnim = true;
+                                }
+                            } else if (!fullscreenAnim) {
+                                WindowState ws = wtoken.findMainWindow();
+                                if (ws != null) {
+                                    if (ws.mLayer > bestAnimLayer) {
+                                        animLp = ws.mAttrs;
                                         bestAnimLayer = ws.mLayer;
                                     }
                                 }
