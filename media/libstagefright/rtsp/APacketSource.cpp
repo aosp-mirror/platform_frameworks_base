@@ -373,7 +373,17 @@ static bool ExtractDimensionsFromVOLHeader(
         br.skipBits(2);  // chroma_format
         br.skipBits(1);  // low_delay
         if (br.getBits(1)) {  // vbv_parameters
-            TRESPASS();
+            br.skipBits(15);  // first_half_bit_rate
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(15);  // latter_half_bit_rate
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(15);  // first_half_vbv_buffer_size
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(3);  // latter_half_vbv_buffer_size
+            br.skipBits(11);  // first_half_vbv_occupancy
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(15);  // latter_half_vbv_occupancy
+            CHECK(br.getBits(1));  // marker_bit
         }
     }
     unsigned video_object_layer_shape = br.getBits(2);
