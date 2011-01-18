@@ -67,8 +67,10 @@ import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
+import android.widget.TabHost.TabSpec;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -918,7 +920,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
     /**
      * Returns the top screen offset. This depends on whether the current theme defines the user
      * of the title and status bars.
-     * @param resolver The {@link ResourceResolver}
+     * @param resolver The {@link RenderResources}
      * @param metrics The display metrics
      * @return the pixel height offset
      */
@@ -1047,28 +1049,36 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         // now process the content of the framelayout and dynamically create tabs for it.
         final int count = content.getChildCount();
 
-        if (count == 0) {
-            throw new PostInflateException(
-                    "The FrameLayout for the TabHost has no content. Rendering failed.\n");
-        }
-
         // this must be called before addTab() so that the TabHost searches its TabWidget
         // and FrameLayout.
         tabHost.setup();
 
-        // for each child of the framelayout, add a new TabSpec
-        for (int i = 0 ; i < count ; i++) {
-            View child = content.getChildAt(i);
-            String tabSpec = String.format("tab_spec%d", i+1);
-            int id = child.getId();
-            String[] resource = projectCallback.resolveResourceValue(id);
-            String name;
-            if (resource != null) {
-                name = resource[0]; // 0 is resource name, 1 is resource type.
-            } else {
-                name = String.format("Tab %d", i+1); // default name if id is unresolved.
+        if (count == 0) {
+            // Create a dummy child to get a single tab
+            TabSpec spec = tabHost.newTabSpec("tag").setIndicator("Tab Label",
+                    tabHost.getResources().getDrawable(android.R.drawable.ic_menu_info_details))
+                    .setContent(new TabHost.TabContentFactory() {
+                        public View createTabContent(String tag) {
+                            return new LinearLayout(mContext);
+                        }
+                    });
+            tabHost.addTab(spec);
+            return;
+        } else {
+            // for each child of the framelayout, add a new TabSpec
+            for (int i = 0 ; i < count ; i++) {
+                View child = content.getChildAt(i);
+                String tabSpec = String.format("tab_spec%d", i+1);
+                int id = child.getId();
+                String[] resource = projectCallback.resolveResourceValue(id);
+                String name;
+                if (resource != null) {
+                    name = resource[0]; // 0 is resource name, 1 is resource type.
+                } else {
+                    name = String.format("Tab %d", i+1); // default name if id is unresolved.
+                }
+                tabHost.addTab(tabHost.newTabSpec(tabSpec).setIndicator(name).setContent(id));
             }
-            tabHost.addTab(tabHost.newTabSpec(tabSpec).setIndicator(name).setContent(id));
         }
     }
 
