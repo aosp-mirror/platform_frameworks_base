@@ -374,15 +374,17 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void translate(float dx, float dy) {
-        nTranslate(mRenderer, dx, dy);
+        if (dx != 0.0f || dy != 0.0f) nTranslate(mRenderer, dx, dy);
     }
     
     private native void nTranslate(int renderer, float dx, float dy);
 
     @Override
     public void skew(float sx, float sy) {
-        throw new UnsupportedOperationException();
+        nSkew(mRenderer, sx, sy);
     }
+
+    private native void nSkew(int renderer, float sx, float sy);
 
     @Override
     public void rotate(float degrees) {

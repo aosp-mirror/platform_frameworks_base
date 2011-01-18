@@ -84,6 +84,7 @@ public:
     virtual void translate(float dx, float dy);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
+    virtual void skew(float sx, float sy);
 
     const float* getMatrix() const;
     void getMatrix(SkMatrix* matrix);

@@ -213,6 +213,11 @@ static void android_view_GLES20Canvas_scale(JNIEnv* env, jobject canvas,
     renderer->scale(sx, sy);
 }
 
+static void android_view_GLES20Canvas_skew(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat sx, jfloat sy) {
+    renderer->skew(sx, sy);
+}
+
 static void android_view_GLES20Canvas_setMatrix(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkMatrix* matrix) {
     renderer->setMatrix(matrix);
@@ -550,6 +555,7 @@ static JNINativeMethod gMethods[] = {
     { "nTranslate",         "(IFF)V",          (void*) android_view_GLES20Canvas_translate },
     { "nRotate",            "(IF)V",           (void*) android_view_GLES20Canvas_rotate },
     { "nScale",             "(IFF)V",          (void*) android_view_GLES20Canvas_scale },
+    { "nSkew",              "(IFF)V",          (void*) android_view_GLES20Canvas_skew },
 
     { "nSetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_setMatrix },
     { "nGetMatrix",         "(I)I",            (void*) android_view_GLES20Canvas_getNativeMatrix },
