@@ -796,18 +796,21 @@ public class RemoteViews implements Parcelable, Filter {
                     if (this.value != null) {
                         final Bitmap b = (Bitmap) this.value;
                         final Bitmap.Config c = b.getConfig();
+                        // If we don't know, be pessimistic and assume 4
                         int bpp = 4;
-                        switch (c) {
-                        case ALPHA_8:
-                            bpp = 1;
-                            break;
-                        case RGB_565:
-                        case ARGB_4444:
-                            bpp = 2;
-                            break;
-                        case ARGB_8888:
-                            bpp = 4;
-                            break;
+                        if (c != null) {
+                            switch (c) {
+                            case ALPHA_8:
+                                bpp = 1;
+                                break;
+                            case RGB_565:
+                            case ARGB_4444:
+                                bpp = 2;
+                                break;
+                            case ARGB_8888:
+                                bpp = 4;
+                                break;
+                            }
                         }
                         counter.bitmapIncrement(b.getWidth() * b.getHeight() * bpp);
                     }
