@@ -175,7 +175,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     @Deprecated
     public void onCancelled(D data) {
     }
-    
+
     void executePendingTask() {
         if (mCancellingTask == null && mTask != null) {
             if (mTask.waiting) {
@@ -245,6 +245,8 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      * thread would cause a deadlock.
      * <p>
      * Use for testing only.  <b>Never</b> call this from a UI thread.
+     *
+     * @hide
      */
     public void waitForLoader() {
         LoadTask task = mTask;
