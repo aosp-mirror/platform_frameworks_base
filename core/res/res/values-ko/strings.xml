@@ -490,6 +490,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 전체 프록시만 유효합니다."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"비밀번호 만료 설정"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"화면 잠금 비밀번호를 변경해야 하는 기간 변경"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -905,6 +909,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
     <string name="select_input_method" msgid="6865512749462072765">"입력 방법 선택"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"가능한 원인"</u></string>

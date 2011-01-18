@@ -487,6 +487,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nastavite globalni strežnik proxy naprave, ki bo v uporabi, ko je pravilnik omogočen. Samo skrbnik prve naprave lahko nastavi veljaven globalni strežnik proxy."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Nastavitev poteka gesla"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Nastavite, koliko časa prej je treba spremeniti geslo za odklepanje zaslona"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Začetna stran"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
@@ -900,6 +904,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"iskanje in odpravljanje napak USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Izberite, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Izbiranje načina vnosa"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidati"</u></string>
@@ -997,8 +1003,7 @@
     <string name="media_unknown_state" msgid="729192782197290385">"Neznano stanje zunanjih nosilcev podatkov."</string>
     <string name="share" msgid="1778686618230011964">"Deli z dr."</string>
     <string name="find" msgid="4808270900322985960">"Najdi"</string>
-    <!-- no translation found for websearch (4337157977400211589) -->
-    <skip />
+    <string name="websearch" msgid="4337157977400211589">"Spletno iskanje"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
     <!-- no translation found for gpsNotifTitle (5446858717157416839) -->

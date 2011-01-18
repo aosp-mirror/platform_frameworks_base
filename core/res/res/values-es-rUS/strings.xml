@@ -489,6 +489,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Configuración del proxy global de dispositivo que se utilizará mientras se habilita la política. Sólo la primera administración de dispositivo configura el proxy global efectivo."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Establecer la caducidad de la contraseña"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Verifica cuánto tiempo antes debes cambiar la contraseña de la pantalla de bloqueo"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -809,8 +813,8 @@
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
     <string name="loading" msgid="1760724998928255250">"Cargando..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"Encendido"</string>
-    <string name="capital_off" msgid="6815870386972805832">"APAGADO"</string>
+    <string name="capital_on" msgid="1544682755514494298">"Sí"</string>
+    <string name="capital_off" msgid="6815870386972805832">"No"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar la acción mediante"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de manera predeterminada en esta acción."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar la predeterminación en Configuración de la página principal &gt; Aplicaciones &gt; Administrar aplicaciones."</string>
@@ -904,6 +908,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración de USB conectada"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccionar para desactivar la depuración de USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Seleccionar método de entrada"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>

@@ -490,6 +490,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域 Proxy，只有第一個裝置管理員所設定的全域 Proxy 具有效力。"</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"設定密碼到期日"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"控制螢幕鎖定密碼的使用期限"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
     <item msgid="869923650527136615">"行動電話"</item>
@@ -905,6 +909,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 偵錯模式已啟用"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"選取以停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="6865512749462072765">"選取輸入方式"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
