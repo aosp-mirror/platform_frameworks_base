@@ -543,8 +543,11 @@ void ScriptCState::runCompiler(Context *rsc,
     for (size_t i=0; i < pragmaCount; ++i) {
         //LOGE("pragma %s %s", keys[i], values[i]);
         if (!strcmp(keys[i], "version")) {
-            // TODO: Verify that version is correct
-            continue;
+            if (!strcmp(values[i], "1")) {
+                continue;
+            }
+            LOGE("Invalid version pragma value: %s\n", values[i]);
+            // Handle Fatal Error
         }
 
         if (!strcmp(keys[i], "stateVertex")) {
@@ -555,7 +558,8 @@ void ScriptCState::runCompiler(Context *rsc,
                 s->mEnviroment.mVertex.clear();
                 continue;
             }
-            LOGE("Unreconized value %s passed to stateVertex", values[i]);
+            LOGE("Unrecognized value %s passed to stateVertex", values[i]);
+            // Handle Fatal Error
         }
 
         if (!strcmp(keys[i], "stateRaster")) {
@@ -566,7 +570,8 @@ void ScriptCState::runCompiler(Context *rsc,
                 s->mEnviroment.mRaster.clear();
                 continue;
             }
-            LOGE("Unreconized value %s passed to stateRaster", values[i]);
+            LOGE("Unrecognized value %s passed to stateRaster", values[i]);
+            // Handle Fatal Error
         }
 
         if (!strcmp(keys[i], "stateFragment")) {
@@ -577,7 +582,8 @@ void ScriptCState::runCompiler(Context *rsc,
                 s->mEnviroment.mFragment.clear();
                 continue;
             }
-            LOGE("Unreconized value %s passed to stateFragment", values[i]);
+            LOGE("Unrecognized value %s passed to stateFragment", values[i]);
+            // Handle Fatal Error
         }
 
         if (!strcmp(keys[i], "stateStore")) {
@@ -588,7 +594,8 @@ void ScriptCState::runCompiler(Context *rsc,
                 s->mEnviroment.mFragmentStore.clear();
                 continue;
             }
-            LOGE("Unreconized value %s passed to stateStore", values[i]);
+            LOGE("Unrecognized value %s passed to stateStore", values[i]);
+            // Handle Fatal Error
         }
     }
 }
