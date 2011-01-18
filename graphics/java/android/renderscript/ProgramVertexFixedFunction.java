@@ -229,7 +229,7 @@ public class ProgramVertexFixedFunction extends ProgramVertex {
             for(int i = 0; i < 16; i ++) {
                 mIOBuffer.addF32(m.mMat[i]);
             }
-            mAlloc.copyFrom(mIOBuffer.getData());
+            mAlloc.setFromFieldPacker(0, mIOBuffer);
         }
 
         /**

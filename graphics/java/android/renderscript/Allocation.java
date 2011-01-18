@@ -121,6 +121,58 @@ public class Allocation extends BaseObj {
         mType = t;
     }
 
+    private void validateIsInt32() {
+        if ((mType.mElement.mType == Element.DataType.SIGNED_32) ||
+            (mType.mElement.mType == Element.DataType.UNSIGNED_32)) {
+            return;
+        }
+        throw new RSIllegalArgumentException(
+            "32 bit integer source does not match allocation type " + mType.mElement.mType);
+    }
+
+    private void validateIsInt16() {
+        if ((mType.mElement.mType == Element.DataType.SIGNED_16) ||
+            (mType.mElement.mType == Element.DataType.UNSIGNED_16)) {
+            return;
+        }
+        throw new RSIllegalArgumentException(
+            "16 bit integer source does not match allocation type " + mType.mElement.mType);
+    }
+
+    private void validateIsInt8() {
+        if ((mType.mElement.mType == Element.DataType.SIGNED_8) ||
+            (mType.mElement.mType == Element.DataType.UNSIGNED_8)) {
+            return;
+        }
+        throw new RSIllegalArgumentException(
+            "8 bit integer source does not match allocation type " + mType.mElement.mType);
+    }
+
+    private void validateIsFloat32() {
+        if (mType.mElement.mType == Element.DataType.FLOAT_32) {
+            return;
+        }
+        throw new RSIllegalArgumentException(
+            "32 bit float source does not match allocation type " + mType.mElement.mType);
+    }
+
+    private void validateIsObject() {
+        if ((mType.mElement.mType == Element.DataType.RS_ELEMENT) ||
+            (mType.mElement.mType == Element.DataType.RS_TYPE) ||
+            (mType.mElement.mType == Element.DataType.RS_ALLOCATION) ||
+            (mType.mElement.mType == Element.DataType.RS_SAMPLER) ||
+            (mType.mElement.mType == Element.DataType.RS_SCRIPT) ||
+            (mType.mElement.mType == Element.DataType.RS_MESH) ||
+            (mType.mElement.mType == Element.DataType.RS_PROGRAM_FRAGMENT) ||
+            (mType.mElement.mType == Element.DataType.RS_PROGRAM_VERTEX) ||
+            (mType.mElement.mType == Element.DataType.RS_PROGRAM_RASTER) ||
+            (mType.mElement.mType == Element.DataType.RS_PROGRAM_STORE)) {
+            return;
+        }
+        throw new RSIllegalArgumentException(
+            "Object source does not match allocation type " + mType.mElement.mType);
+    }
+
     @Override
     void updateFromNative() {
         super.updateFromNative();
@@ -151,6 +203,7 @@ public class Allocation extends BaseObj {
 
     public void copyFrom(BaseObj[] d) {
         mRS.validate();
+        validateIsObject();
         if (d.length != mType.getCount()) {
             throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
                                                  mType.getCount() + ", array length = " + d.length);
@@ -258,7 +311,6 @@ public class Allocation extends BaseObj {
         mRS.nAllocationData1D(getID(), xoff, 0, count, data, data.length);
     }
 
-
     /**
      * This is only intended to be used by auto-generate code reflected from the
      * renderscript script files.
@@ -317,25 +369,42 @@ public class Allocation extends BaseObj {
         mRS.nAllocationGenerateMipmaps(getID());
     }
 
-    public void copy1DRangeFrom(int off, int count, int[] d) {
+    void copy1DRangeFromUnchecked(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    public void copy1DRangeFrom(int off, int count, short[] d) {
+    void copy1DRangeFromUnchecked(int off, int count, short[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    public void copy1DRangeFrom(int off, int count, byte[] d) {
+    void copy1DRangeFromUnchecked(int off, int count, byte[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    public void copy1DRangeFrom(int off, int count, float[] d) {
+    void copy1DRangeFromUnchecked(int off, int count, float[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
+    }
+
+    public void copy1DRangeFrom(int off, int count, int[] d) {
+        validateIsInt32();
+        copy1DRangeFromUnchecked(off, count, d);
+    }
+    public void copy1DRangeFrom(int off, int count, short[] d) {
+        validateIsInt16();
+        copy1DRangeFromUnchecked(off, count, d);
+    }
+    public void copy1DRangeFrom(int off, int count, byte[] d) {
+        validateIsInt8();
+        copy1DRangeFromUnchecked(off, count, d);
+    }
+    public void copy1DRangeFrom(int off, int count, float[] d) {
+        validateIsFloat32();
+        copy1DRangeFromUnchecked(off, count, d);
     }
 
     private void validate2DRange(int xoff, int yoff, int w, int h) {
@@ -411,21 +480,25 @@ public class Allocation extends BaseObj {
     }
 
     public void copyTo(byte[] d) {
+        validateIsInt8();
         mRS.validate();
         mRS.nAllocationRead(getID(), d);
     }
 
     public void copyTo(short[] d) {
+        validateIsInt16();
         mRS.validate();
         mRS.nAllocationRead(getID(), d);
     }
 
     public void copyTo(int[] d) {
+        validateIsInt32();
         mRS.validate();
         mRS.nAllocationRead(getID(), d);
     }
 
     public void copyTo(float[] d) {
+        validateIsFloat32();
         mRS.validate();
         mRS.nAllocationRead(getID(), d);
     }

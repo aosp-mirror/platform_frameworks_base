@@ -280,9 +280,10 @@ public class ProgramFragmentFixedFunction extends ProgramFragment {
             pf.mTextureCount = MAX_TEXTURE;
             if (!mVaryingColorEnable) {
                 Allocation constantData = Allocation.createTyped(mRS,constType);
-                float[] data = new float[4];
-                data[0] = data[1] = data[2] = data[3] = 1.0f;
-                constantData.copyFrom(data);
+                FieldPacker fp = new FieldPacker(16);
+                Float4 f4 = new Float4(1.f, 1.f, 1.f, 1.f);
+                fp.addF32(f4);
+                constantData.setFromFieldPacker(0, fp);
                 pf.bindConstants(constantData, 0);
             }
             return pf;
