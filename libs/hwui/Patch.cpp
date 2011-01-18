@@ -154,8 +154,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     float y1 = 0.0f;
     float v1 = 0.0f;
 
-    uint32_t i = 0;
-    for ( ; i < mYCount; i++) {
+    for (uint32_t i = 0; i < mYCount; i++) {
         float stepY = mYDivs[i];
 
         float y2 = 0.0f;
@@ -167,8 +166,10 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         }
         float v2 = fmax(0.0f, stepY - 0.5f) / bitmapHeight;
 
-        generateRow(vertex, y1, y2, v1, v2, stretchX, right - left,
-                bitmapWidth, quadCount, i & 1);
+        if (stepY > 0.0f) {
+            generateRow(vertex, y1, y2, v1, v2, stretchX, right - left,
+                    bitmapWidth, quadCount);
+        }
 
         y1 = y2;
         v1 = (stepY + 0.5f) / bitmapHeight;
@@ -177,7 +178,7 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     }
 
     generateRow(vertex, y1, bottom - top, v1, 1.0f, stretchX, right - left,
-            bitmapWidth, quadCount, i & 1);
+            bitmapWidth, quadCount);
 
     if (verticesCount > 0) {
         Caches::getInstance().bindMeshBuffer(meshBuffer);
@@ -195,15 +196,14 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
 }
 
 void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, float v2,
-        float stretchX, float width, float bitmapWidth, uint32_t& quadCount, bool isStretch) {
+        float stretchX, float width, float bitmapWidth, uint32_t& quadCount) {
     float previousStepX = 0.0f;
 
     float x1 = 0.0f;
     float u1 = 0.0f;
 
     // Generate the row quad by quad
-    uint32_t i = 0;
-    for ( ; i < mXCount; i++) {
+    for (uint32_t i = 0; i < mXCount; i++) {
         float stepX = mXDivs[i];
 
         float x2 = 0.0f;
@@ -215,7 +215,9 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         }
         float u2 = fmax(0.0f, stepX - 0.5f) / bitmapWidth;
 
-        generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount, isStretch || (i & 1));
+        if (stepX > 0.0f) {
+            generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount);
+        }
 
         x1 = x2;
         u1 = (stepX + 0.5f) / bitmapWidth;
@@ -223,19 +225,16 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         previousStepX = stepX;
     }
 
-    generateQuad(vertex, x1, y1, width, y2, u1, v1, 1.0f, v2, quadCount, isStretch || (i & 1));
+    generateQuad(vertex, x1, y1, width, y2, u1, v1, 1.0f, v2, quadCount);
 }
 
 void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
-            float u1, float v1, float u2, float v2, uint32_t& quadCount, bool isStretch) {
+            float u1, float v1, float u2, float v2, uint32_t& quadCount) {
     const uint32_t oldQuadCount = quadCount;
-    const bool valid = isStretch || (x2 - x1 > 0.9999f && y2 - y1 > 0.9999f);
-    if (valid) {
-        quadCount++;
-    }
+    quadCount++;
 
     // Skip degenerate and transparent (empty) quads
-    if (!valid || ((mColorKey >> oldQuadCount) & 0x1) == 1) {
+    if ((mColorKey >> oldQuadCount) & 0x1) {
 #if DEBUG_PATCHES_EMPTY_VERTICES
         PATCH_LOGD("    quad %d (empty)", oldQuadCount);
         PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.2f, %.2f", x1, y1, u1, v1);
