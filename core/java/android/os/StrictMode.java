@@ -34,6 +34,7 @@ import dalvik.system.CloseGuard;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -166,13 +167,19 @@ public final class StrictMode {
      * Note, a "VM_" bit, not thread.
      * @hide
      */
-    public static final int DETECT_VM_CURSOR_LEAKS = 0x200;  // for ProcessPolicy
+    public static final int DETECT_VM_CURSOR_LEAKS = 0x200;  // for VmPolicy
 
     /**
      * Note, a "VM_" bit, not thread.
      * @hide
      */
-    public static final int DETECT_VM_CLOSABLE_LEAKS = 0x400;  // for ProcessPolicy
+    public static final int DETECT_VM_CLOSABLE_LEAKS = 0x400;  // for VmPolicy
+
+    /**
+     * Note, a "VM_" bit, not thread.
+     * @hide
+     */
+    public static final int DETECT_VM_ACTIVITY_LEAKS = 0x800;  // for VmPolicy
 
     /**
      * @hide
@@ -232,10 +239,18 @@ public final class StrictMode {
             PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER |
             PENALTY_DEATH_ON_NETWORK | PENALTY_FLASH;
 
+
+    // TODO: wrap in some ImmutableHashMap thing.
+    // Note: must be before static initialization of sVmPolicy.
+    private static final HashMap<Class, Integer> EMPTY_CLASS_LIMIT_MAP = new HashMap<Class, Integer>();
+
     /**
      * The current VmPolicy in effect.
+     *
+     * TODO: these are redundant (mask is in VmPolicy).  Should remove sVmPolicyMask.
      */
     private static volatile int sVmPolicyMask = 0;
+    private static volatile VmPolicy sVmPolicy = VmPolicy.LAX;
 
     /**
      * The number of threads trying to do an async dropbox write.
@@ -481,12 +496,19 @@ public final class StrictMode {
         /**
          * The default, lax policy which doesn't catch anything.
          */
-        public static final VmPolicy LAX = new VmPolicy(0);
+        public static final VmPolicy LAX = new VmPolicy(0, EMPTY_CLASS_LIMIT_MAP);
 
         final int mask;
 
-        private VmPolicy(int mask) {
+        // Map from class to max number of allowed instances in memory.
+        final HashMap<Class, Integer> classInstanceLimit;
+
+        private VmPolicy(int mask, HashMap<Class, Integer> classInstanceLimit) {
+            if (classInstanceLimit == null) {
+                throw new NullPointerException("classInstanceLimit == null");
+            }
             this.mask = mask;
+            this.classInstanceLimit = classInstanceLimit;
         }
 
         @Override
@@ -516,6 +538,49 @@ public final class StrictMode {
         public static final class Builder {
             private int mMask;
 
+            private HashMap<Class, Integer> mClassInstanceLimit;  // null until needed
+            private boolean mClassInstanceLimitNeedCow = false;  // need copy-on-write
+
+            public Builder() {
+                mMask = 0;
+            }
+
+            /**
+             * Build upon an existing VmPolicy.
+             */
+            public Builder(VmPolicy base) {
+                mMask = base.mask;
+                mClassInstanceLimitNeedCow = true;
+                mClassInstanceLimit = base.classInstanceLimit;
+            }
+
+            /**
+             * Set an upper bound on how many instances of a class can be in memory
+             * at once.  Helps to prevent object leaks.
+             */
+            public Builder setClassInstanceLimit(Class klass, int instanceLimit) {
+                if (klass == null) {
+                    throw new NullPointerException("klass == null");
+                }
+                if (mClassInstanceLimitNeedCow) {
+                    if (mClassInstanceLimit.containsKey(klass) &&
+                        mClassInstanceLimit.get(klass) == instanceLimit) {
+                        // no-op; don't break COW
+                        return this;
+                    }
+                    mClassInstanceLimitNeedCow = false;
+                    mClassInstanceLimit = (HashMap<Class, Integer>) mClassInstanceLimit.clone();
+                } else if (mClassInstanceLimit == null) {
+                    mClassInstanceLimit = new HashMap<Class, Integer>();
+                }
+                mClassInstanceLimit.put(klass, instanceLimit);
+                return this;
+            }
+
+            private Builder detectActivityLeaks() {
+                return enable(DETECT_VM_ACTIVITY_LEAKS);
+            }
+
             /**
              * Detect everything that's potentially suspect.
              *
@@ -524,7 +589,8 @@ public final class StrictMode {
              * likely expand in future releases.
              */
             public Builder detectAll() {
-                return enable(DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS);
+                return enable(DETECT_VM_ACTIVITY_LEAKS |
+                        DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS);
             }
 
             /**
@@ -598,7 +664,8 @@ public final class StrictMode {
                               PENALTY_DROPBOX | PENALTY_DIALOG)) == 0) {
                     penaltyLog();
                 }
-                return new VmPolicy(mMask);
+                return new VmPolicy(mMask,
+                        mClassInstanceLimit != null ? mClassInstanceLimit : EMPTY_CLASS_LIMIT_MAP);
             }
         }
     }
@@ -829,9 +896,7 @@ public final class StrictMode {
         if (IS_USER_BUILD) {
             setCloseGuardEnabled(false);
         } else {
-            sVmPolicyMask = StrictMode.DETECT_VM_CURSOR_LEAKS |
-                    StrictMode.DETECT_VM_CLOSABLE_LEAKS |
-                    StrictMode.PENALTY_DROPBOX;
+            setVmPolicy(new VmPolicy.Builder().detectAll().penaltyDropBox().build());
             setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
         }
         return true;
@@ -1289,6 +1354,7 @@ public final class StrictMode {
      * @param policy the policy to put into place
      */
     public static void setVmPolicy(final VmPolicy policy) {
+        sVmPolicy = policy;
         sVmPolicyMask = policy.mask;
         setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
     }
@@ -1297,7 +1363,7 @@ public final class StrictMode {
      * Gets the current VM policy.
      */
     public static VmPolicy getVmPolicy() {
-        return new VmPolicy(sVmPolicyMask);
+        return sVmPolicy;
     }
 
     /**
@@ -1649,6 +1715,20 @@ public final class StrictMode {
             return;
         }
         ((AndroidBlockGuardPolicy) policy).onWriteToDisk();
+    }
+
+    /**
+     * @hide
+     */
+    public static void noteActivityClass(Class klass) {
+        if ((sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
+            return;
+        }
+        if (sVmPolicy.classInstanceLimit.containsKey(klass)) {
+            return;
+        }
+        // Note: capping at 2, not 1, to give some breathing room.
+        setVmPolicy(new VmPolicy.Builder(sVmPolicy).setClassInstanceLimit(klass, 2).build());
     }
 
     /**
