@@ -188,6 +188,12 @@ public class InputMethodButton extends ImageView {
                 Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY, ID_IME_BUTTON_VISIBILITY_AUTO);
     }
 
+    public void setIconImage(int resId) {
+        if (mIcon != null) {
+            mIcon.setImageResource(resId);
+        }
+    }
+
     public void setIMEButtonVisible(IBinder token, boolean keyboardVisible) {
         mToken = token;
         mKeyboardVisible = keyboardVisible;

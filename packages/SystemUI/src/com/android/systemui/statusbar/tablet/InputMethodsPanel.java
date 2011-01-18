@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.tablet;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -53,11 +52,12 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
                     new HashMap<InputMethodInfo, List<InputMethodSubtype>>();
     private final HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>> mRadioViewAndImiMap =
             new HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>>();
-    private final PackageManager mPackageManager;
 
     private Context mContext;
     private IBinder mToken;
+    private InputMethodButton mInputMethodSwitchButton;
     private LinearLayout mInputMethodMenuList;
+    private PackageManager mPackageManager;
     private String mEnabledInputMethodAndSubtypesCacheStr;
     private View mConfigureImeShortcut;
 
@@ -69,7 +69,6 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         super(context, attrs, defStyle);
         mContext = context;
         mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        mPackageManager = context.getPackageManager();
     }
 
     @Override
@@ -90,8 +89,17 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
-        if (visibility == View.VISIBLE && changedView == this) {
-            updateUiElements();
+        if (changedView == this) {
+            if (visibility == View.VISIBLE) {
+                updateUiElements();
+                if (mInputMethodSwitchButton != null) {
+                    mInputMethodSwitchButton.setIconImage(R.drawable.ic_sysbar_ime_pressed);
+                }
+            } else {
+                if (mInputMethodSwitchButton != null) {
+                    mInputMethodSwitchButton.setIconImage(R.drawable.ic_sysbar_ime);
+                }
+            }
         }
     }
 
@@ -180,6 +188,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         // TODO: Reuse subtype views.
         mInputMethodMenuList.removeAllViews();
         mRadioViewAndImiMap.clear();
+        mPackageManager = mContext.getPackageManager();
+
         HashMap<InputMethodInfo, List<InputMethodSubtype>> enabledIMIs
                 = getEnabledInputMethodAndSubtypeList();
         // TODO: Sort by alphabet and mode.
@@ -198,8 +208,12 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         updateRadioButtons();
     }
 
-    public void setIMEToken(IBinder token) {
+    public void setImeToken(IBinder token) {
         mToken = token;
+    }
+
+    public void setImeSwitchButton(InputMethodButton imb) {
+        mInputMethodSwitchButton = imb;
     }
 
     private void setInputMethodAndSubtype(InputMethodInfo imi, InputMethodSubtype subtype) {
@@ -308,6 +322,10 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
 
     private CharSequence getSubtypeName(InputMethodInfo imi, InputMethodSubtype subtype) {
         if (imi == null || subtype == null) return null;
+        if (DEBUG) {
+            Log.d(TAG, "Get text from: " + imi.getPackageName() + subtype.getNameResId()
+                    + imi.getServiceInfo().applicationInfo);
+        }
         // TODO: Change the language of subtype name according to subtype's locale.
         return mPackageManager.getText(
                 imi.getPackageName(), subtype.getNameResId(), imi.getServiceInfo().applicationInfo);
