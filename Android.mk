@@ -366,7 +366,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
     -since ./frameworks/base/api/9.xml 9 \
-    -since ./frameworks/base/api/current.xml HC \
+    -since ./frameworks/base/api/current.xml Honeycomb \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -436,15 +436,14 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=2.3
+framework_docs_SDK_VERSION:=3.0
   # release version (ie "Release x")  (full releases only)
-framework_docs_SDK_REL_ID:=1
+framework_docs_SDK_REL_ID:=Preview
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
 		-hdf sdk.rel.id $(framework_docs_SDK_REL_ID) \
 		-hdf sdk.preview true \
-		-hdf sdk.preview.version Honeycomb
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
