@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -551,12 +552,12 @@ class ZoomManager {
          * If the double tap was on a plugin then either zoom to maximize the
          * plugin on the screen or scale to overview mode.
          */
-        ViewManager.ChildView plugin = mWebView.mViewManager.hitTest(mAnchorX, mAnchorY);
-        if (plugin != null) {
-            if (mWebView.isPluginFitOnScreen(plugin)) {
+        Rect pluginBounds = mWebView.getPluginBounds(mAnchorX, mAnchorY);
+        if (pluginBounds != null) {
+            if (mWebView.isRectFitOnScreen(pluginBounds)) {
                 zoomToOverview();
             } else {
-                mWebView.centerFitRect(plugin.x, plugin.y, plugin.width, plugin.height);
+                mWebView.centerFitRect(pluginBounds);
             }
             return;
         }
