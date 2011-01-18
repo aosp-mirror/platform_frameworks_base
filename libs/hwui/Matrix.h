@@ -72,6 +72,7 @@ public:
 
     void loadTranslate(float x, float y, float z);
     void loadScale(float sx, float sy, float sz);
+    void loadSkew(float sx, float sy);
     void loadRotate(float angle, float x, float y, float z);
     void loadMultiply(const Matrix4& u, const Matrix4& v);
 
@@ -94,6 +95,12 @@ public:
     void scale(float sx, float sy, float sz) {
         Matrix4 u;
         u.loadScale(sx, sy, sz);
+        multiply(u);
+    }
+
+    void skew(float sx, float sy) {
+        Matrix4 u;
+        u.loadSkew(sx, sy);
         multiply(u);
     }
 

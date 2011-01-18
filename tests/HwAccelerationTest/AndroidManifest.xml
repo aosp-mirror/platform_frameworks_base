@@ -166,6 +166,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+                android:name="BitmapsSkewActivity"
+                android:label="_BitmapsSkew">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
                 android:name="BitmapsAlphaActivity"

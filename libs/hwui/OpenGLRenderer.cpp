@@ -766,6 +766,10 @@ void OpenGLRenderer::scale(float sx, float sy) {
     mSnapshot->transform->scale(sx, sy, 1.0f);
 }
 
+void OpenGLRenderer::skew(float sx, float sy) {
+    mSnapshot->transform->skew(sx, sy);
+}
+
 void OpenGLRenderer::setMatrix(SkMatrix* matrix) {
     mSnapshot->transform->load(*matrix);
 }

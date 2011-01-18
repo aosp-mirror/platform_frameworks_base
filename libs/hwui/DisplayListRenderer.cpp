@@ -268,6 +268,10 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
                 renderer.scale(getFloat(), getFloat());
             }
             break;
+            case Skew: {
+                renderer.skew(getFloat(), getFloat());
+            }
+            break;
             case SetMatrix: {
                 renderer.setMatrix(getMatrix());
             }
@@ -506,6 +510,12 @@ void DisplayListRenderer::scale(float sx, float sy) {
     addOp(DisplayList::Scale);
     addPoint(sx, sy);
     OpenGLRenderer::scale(sx, sy);
+}
+
+void DisplayListRenderer::skew(float sx, float sy) {
+    addOp(DisplayList::Skew);
+    addPoint(sx, sy);
+    OpenGLRenderer::skew(sx, sy);
 }
 
 void DisplayListRenderer::setMatrix(SkMatrix* matrix) {
