@@ -114,12 +114,6 @@ public abstract class FragmentTransaction {
      * with it except that it is appearing or disappearing for some reason. */
     public static final int TRANSIT_FRAGMENT_FADE = 3 | TRANSIT_ENTER_MASK;
 
-    // Temp compat.
-    @Deprecated
-    public static final int TRANSIT_FRAGMENT_NEXT = TRANSIT_FRAGMENT_FADE;
-    @Deprecated
-    public static final int TRANSIT_FRAGMENT_PREV = TRANSIT_FRAGMENT_FADE;
-    
     /**
      * Set specific animation resources to run for the fragments that are
      * entering and exiting in this transaction.
