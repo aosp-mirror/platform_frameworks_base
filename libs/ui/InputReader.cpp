@@ -198,7 +198,7 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
         const sp<InputReaderPolicyInterface>& policy,
         const sp<InputDispatcherInterface>& dispatcher) :
         mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher),
-        mGlobalMetaState(0) {
+        mGlobalMetaState(0), mDisableVirtualKeysTimeout(-1) {
     configureExcludedDevices();
     updateGlobalMetaState();
     updateInputConfiguration();
@@ -451,6 +451,24 @@ void InputReader::updateInputConfiguration() {
         mInputConfiguration.keyboard = keyboardConfig;
         mInputConfiguration.navigation = navigationConfig;
     } // release state lock
+}
+
+void InputReader::disableVirtualKeysUntil(nsecs_t time) {
+    mDisableVirtualKeysTimeout = time;
+}
+
+bool InputReader::shouldDropVirtualKey(nsecs_t now,
+        InputDevice* device, int32_t keyCode, int32_t scanCode) {
+    if (now < mDisableVirtualKeysTimeout) {
+        LOGI("Dropping virtual key from device %s because virtual keys are "
+                "temporarily disabled for the next %0.3fms.  keyCode=%d, scanCode=%d",
+                device->getName().string(),
+                (mDisableVirtualKeysTimeout - now) * 0.000001,
+                keyCode, scanCode);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void InputReader::getInputConfiguration(InputConfiguration* outConfiguration) {
@@ -937,6 +955,11 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
                 keyCode = mLocked.keyDowns.itemAt(keyDownIndex).keyCode;
             } else {
                 // key down
+                if ((policyFlags & POLICY_FLAG_VIRTUAL)
+                        && mContext->shouldDropVirtualKey(when, getDevice(), keyCode, scanCode)) {
+                    return;
+                }
+
                 mLocked.keyDowns.push();
                 KeyDown& keyDown = mLocked.keyDowns.editTop();
                 keyDown.keyCode = keyCode;
@@ -1340,6 +1363,7 @@ void TouchInputMapper::configureParameters() {
     mParameters.useBadTouchFilter = getPolicy()->filterTouchEvents();
     mParameters.useAveragingTouchFilter = getPolicy()->filterTouchEvents();
     mParameters.useJumpyTouchFilter = getPolicy()->filterJumpyTouchEvents();
+    mParameters.virtualKeyQuietTime = getPolicy()->getVirtualKeyQuietTime();
 }
 
 void TouchInputMapper::dumpParameters(String8& dump) {
@@ -2060,6 +2084,7 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
 
     TouchResult touchResult = consumeOffScreenTouches(when, policyFlags);
     if (touchResult == DISPATCH_TOUCH) {
+        detectGestures(when);
         dispatchTouches(when, policyFlags);
     }
 
@@ -2145,6 +2170,11 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
                     if (mCurrentTouch.pointerCount == 1) {
                         const VirtualKey* virtualKey = findVirtualKeyHitLocked(x, y);
                         if (virtualKey) {
+                            if (mContext->shouldDropVirtualKey(when, getDevice(),
+                                    virtualKey->keyCode, virtualKey->scanCode)) {
+                                return DROP_STROKE;
+                            }
+
                             mLocked.currentVirtualKey.down = true;
                             mLocked.currentVirtualKey.downTime = when;
                             mLocked.currentVirtualKey.keyCode = virtualKey->keyCode;
@@ -2180,6 +2210,26 @@ TouchInputMapper::TouchResult TouchInputMapper::consumeOffScreenTouches(
     getDispatcher()->notifyKey(when, getDeviceId(), AINPUT_SOURCE_KEYBOARD, policyFlags,
             keyEventAction, keyEventFlags, keyCode, scanCode, metaState, downTime);
     return touchResult;
+}
+
+void TouchInputMapper::detectGestures(nsecs_t when) {
+    // Disable all virtual key touches that happen within a short time interval of the
+    // most recent touch.  The idea is to filter out stray virtual key presses when
+    // interacting with the touch screen.
+    //
+    // Problems we're trying to solve:
+    //
+    // 1. While scrolling a list or dragging the window shade, the user swipes down into a
+    //    virtual key area that is implemented by a separate touch panel and accidentally
+    //    triggers a virtual key.
+    //
+    // 2. While typing in the on screen keyboard, the user taps slightly outside the screen
+    //    area and accidentally triggers a virtual key.  This often happens when virtual keys
+    //    are layed out below the screen near to where the on screen keyboard's space bar
+    //    is displayed.
+    if (mParameters.virtualKeyQuietTime > 0 && mCurrentTouch.pointerCount != 0) {
+        mContext->disableVirtualKeysUntil(when + mParameters.virtualKeyQuietTime);
+    }
 }
 
 void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {

@@ -55,6 +55,7 @@ static struct {
     jmethodID checkInjectEventsPermission;
     jmethodID filterTouchEvents;
     jmethodID filterJumpyTouchEvents;
+    jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getVirtualKeyDefinitions;
     jmethodID getInputDeviceCalibration;
     jmethodID getExcludedDeviceNames;
@@ -183,6 +184,7 @@ public:
             int32_t* width, int32_t* height, int32_t* orientation);
     virtual bool filterTouchEvents();
     virtual bool filterJumpyTouchEvents();
+    virtual nsecs_t getVirtualKeyQuietTime();
     virtual void getVirtualKeyDefinitions(const String8& deviceName,
             Vector<VirtualKeyDefinition>& outVirtualKeyDefinitions);
     virtual void getInputDeviceCalibration(const String8& deviceName,
@@ -233,6 +235,7 @@ private:
     // Cached filtering policies.
     int32_t mFilterTouchEvents;
     int32_t mFilterJumpyTouchEvents;
+    nsecs_t mVirtualKeyQuietTime;
 
     // Cached throttling policy.
     int32_t mMaxEventsPerSecond;
@@ -264,7 +267,7 @@ private:
 // ----------------------------------------------------------------------------
 
 NativeInputManager::NativeInputManager(jobject callbacksObj) :
-    mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1),
+    mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1), mVirtualKeyQuietTime(-1),
     mMaxEventsPerSecond(-1),
     mDisplayWidth(-1), mDisplayHeight(-1), mDisplayOrientation(ROTATION_0) {
     JNIEnv* env = jniEnv();
@@ -449,6 +452,24 @@ bool NativeInputManager::filterJumpyTouchEvents() {
         mFilterJumpyTouchEvents = result ? 1 : 0;
     }
     return mFilterJumpyTouchEvents;
+}
+
+nsecs_t NativeInputManager::getVirtualKeyQuietTime() {
+    if (mVirtualKeyQuietTime < 0) {
+        JNIEnv* env = jniEnv();
+
+        jint result = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.getVirtualKeyQuietTimeMillis);
+        if (checkAndClearExceptionFromCallback(env, "getVirtualKeyQuietTimeMillis")) {
+            result = 0;
+        }
+        if (result < 0) {
+            result = 0;
+        }
+
+        mVirtualKeyQuietTime = milliseconds_to_nanoseconds(result);
+    }
+    return mVirtualKeyQuietTime;
 }
 
 void NativeInputManager::getVirtualKeyDefinitions(const String8& deviceName,
@@ -1350,6 +1371,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.filterJumpyTouchEvents, gCallbacksClassInfo.clazz,
             "filterJumpyTouchEvents", "()Z");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyQuietTimeMillis, gCallbacksClassInfo.clazz,
+            "getVirtualKeyQuietTimeMillis", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyDefinitions, gCallbacksClassInfo.clazz,
             "getVirtualKeyDefinitions",
