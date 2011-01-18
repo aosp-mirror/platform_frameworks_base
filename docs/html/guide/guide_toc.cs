@@ -58,6 +58,9 @@
             <span class="zh-TW" style="display:none">應用程式基本原理</span>
 
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
+            <span class="en">Fragments</span>
+          </a> <span class="new">new!</span></li>
     </ul>
     <ul>
       <li class="toggle-list">
@@ -199,9 +202,6 @@
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/topics/fragments/index.html">
-            <span class="en">Fragments</span>
-          </a> <span class="new">new!</span></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
                <span class="en">Graphics</span>
