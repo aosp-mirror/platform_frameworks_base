@@ -35,18 +35,20 @@
         </a></li>
 
     </ul>
-  </li><?cs
-  /if ?>
-  <?cs
+  </li>
+  <?cs /if ?><?cs
   if:sdk.preview ?>
-  <li><h2>Android Preview SDK</h2></li>
+  <li><h2>Android 3.0 Preview SDK</h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/preview/features.html">Introduction
-to Honeycomb</a></li>
-<!--
-      <li><a href="<?cs var:toroot ?>sdk/preview/installing.html">Getting
-Started</a></li>
--->
+      <li><a href="<?cs var:toroot ?>sdk/preview/start.html">Getting Started</a> <span class="new">new!</span></li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>sdk/preview/platform.html">
+        <span class="en">Android 3.0 Platform</span></a> <span class="new">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/preview/highlights.html">Platform Highlights</a></li> 
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/honeycomb/changes.html">API Differences Report &raquo;</a></li>
+        </ul>
+      </li>
     </ul>
   </li><?cs
   /if ?>
