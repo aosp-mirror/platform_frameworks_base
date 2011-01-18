@@ -45,6 +45,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -858,6 +859,7 @@ public class Activity extends ContextThemeWrapper
             mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
                     ? mLastNonConfigurationInstances.fragments : null);
         }
+        StrictMode.noteActivityClass(this.getClass());
         mFragments.dispatchCreate();
         mCalled = true;
     }
