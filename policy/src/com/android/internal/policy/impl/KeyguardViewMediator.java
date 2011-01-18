@@ -123,7 +123,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     /**
      * The default amount of time we stay awake (used for all key input)
      */
-    protected static final int AWAKE_INTERVAL_DEFAULT_MS = 5000;
+    protected static final int AWAKE_INTERVAL_DEFAULT_MS = 10000;
 
 
     /**
