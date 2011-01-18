@@ -487,6 +487,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะเปิดการใช้งานนโยบาย เฉพาะผู้ดูแลอุปกรณ์คนแรกเท่านั้นที่ตั้งค่าพร็อกซีส่วนกลางที่มีผลบังคับ"</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"ตั้งค่าการหมดอายุของรหัสผ่าน"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"ควบคุมระยะเวลาก่อนที่จะต้องเปลี่ยนรหัสผ่านการล็อกหน้าจอ"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -900,6 +904,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"เลือกเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>
     <string name="select_input_method" msgid="6865512749462072765">"เลือกวิธีป้อนข้อมูล"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ตัวเลือก"</u></string>

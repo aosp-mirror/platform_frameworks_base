@@ -490,6 +490,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el primer administrador de dispositivos define el servidor proxy global efectivo."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Definir caducidad contraseña"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Permite controlar cuándo se debe cambiar la contraseña de bloqueo de la pantalla."</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>
@@ -501,7 +505,7 @@
     <item msgid="9192514806975898961">"Personalizar"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Personal"</item>
+    <item msgid="8073994352956129127">"Casa"</item>
     <item msgid="7084237356602625604">"Trabajo"</item>
     <item msgid="1112044410659011023">"Otra"</item>
     <item msgid="2374913952870110618">"Personalizar"</item>
@@ -810,8 +814,8 @@
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
     <string name="loading" msgid="1760724998928255250">"Cargando…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"Activado"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Desconectado"</string>
+    <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
+    <string name="capital_off" msgid="6815870386972805832">"NO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de forma predeterminada para esta acción"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar valores predeterminados en la página de configuración de la pantalla de inicio del teléfono &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
@@ -905,6 +909,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Dispositivo de depuración USB conectado"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccionar para inhabilitar la depuración USB"</string>
     <string name="select_input_method" msgid="6865512749462072765">"Seleccionar método de introducción de texto"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
