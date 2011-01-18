@@ -2642,6 +2642,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         setPressed(true);
                         layoutChildren();
                         positionSelector(mMotionPosition, child);
+                        refreshDrawableState();
 
                         final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
                         final boolean longClickable = isLongClickable();
