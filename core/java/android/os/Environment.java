@@ -20,21 +20,18 @@ import java.io.File;
 
 import android.content.res.Resources;
 import android.os.storage.IMountService;
+import android.util.Log;
 
 /**
  * Provides access to environment variables.
  */
 public class Environment {
+    private static final String TAG = "Environment";
 
     private static final File ROOT_DIRECTORY
             = getDirectory("ANDROID_ROOT", "/system");
 
     private static final String SYSTEM_PROPERTY_EFS_ENABLED = "persist.security.efs.enabled";
-
-    private static class MountServiceHolder {
-        static IMountService mSingleton = IMountService.Stub.asInterface(ServiceManager
-                .getService("mount"));
-    }
 
     private static final Object mLock = new Object();
 
@@ -401,7 +398,9 @@ public class Environment {
      */
     public static String getExternalStorageState() {
         try {
-            return MountServiceHolder.mSingleton.getVolumeState(getExternalStorageDirectory()
+            IMountService mountService = IMountService.Stub.asInterface(ServiceManager
+                    .getService("mount"));
+            return mountService.getVolumeState(getExternalStorageDirectory()
                     .toString());
         } catch (Exception rex) {
             return Environment.MEDIA_REMOVED;
@@ -433,12 +432,14 @@ public class Environment {
                 if (mIsExternalStorageEmulated == null) {
                     boolean externalStorageEmulated;
                     try {
-                        externalStorageEmulated =
-                                MountServiceHolder.mSingleton.isExternalStorageEmulated();
+                        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
+                                .getService("mount"));
+                        externalStorageEmulated = mountService.isExternalStorageEmulated();
+                        mIsExternalStorageEmulated = Boolean.valueOf(externalStorageEmulated);
                     } catch (Exception e) {
-                        externalStorageEmulated = false;
+                        Log.e(TAG, "couldn't talk to MountService", e);
+                        return false;
                     }
-                    mIsExternalStorageEmulated = Boolean.valueOf(externalStorageEmulated);
                 }
             }
         }
