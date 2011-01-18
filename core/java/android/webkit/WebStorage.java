@@ -75,23 +75,23 @@ public final class WebStorage {
     private Handler mHandler = null;
     private Handler mUIHandler = null;
 
-    static class Origin {
-        String mOrigin = null;
-        long mQuota = 0;
-        long mUsage = 0;
+    public static class Origin {
+        private String mOrigin = null;
+        private long mQuota = 0;
+        private long mUsage = 0;
 
-        public Origin(String origin, long quota, long usage) {
+        private Origin(String origin, long quota, long usage) {
             mOrigin = origin;
             mQuota = quota;
             mUsage = usage;
         }
 
-        public Origin(String origin, long quota) {
+        private Origin(String origin, long quota) {
             mOrigin = origin;
             mQuota = quota;
         }
 
-        public Origin(String origin) {
+        private Origin(String origin) {
             mOrigin = origin;
         }
 
