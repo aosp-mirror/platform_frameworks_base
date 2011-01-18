@@ -166,6 +166,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private int mTitleColor = 0;
 
+    private boolean mAlwaysReadCloseOnTouchAttr = false;
+    
     private ContextMenuBuilder mContextMenu;
     private MenuDialogHelper mContextMenuHelper;
     private ActionButtonSubmenu mActionButtonPopup;
@@ -2326,6 +2328,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             addFlags(WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY);
         }
         
+        if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
+                >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            if (!hasSetCloseOnTouchOutside()) {
+                if (a.getBoolean(
+                        com.android.internal.R.styleable.Window_windowCloseOnTouchOutside,
+                        false)) {
+                    setCloseOnTouchOutside(true);
+                }
+            }
+        }
+        
         WindowManager.LayoutParams params = getAttributes();
 
         if (!hasSoftInputMode()) {
@@ -2477,6 +2490,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mDecor.finishChanging();
 
         return contentParent;
+    }
+
+    /** @hide */
+    public void alwaysReadCloseOnTouchAttr() {
+        mAlwaysReadCloseOnTouchAttr = true;
     }
 
     private void installDecor() {

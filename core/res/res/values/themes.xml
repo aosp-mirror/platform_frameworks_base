@@ -138,6 +138,7 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">false</item>
+        <item name="windowCloseOnTouchOutside">false</item>
 
         <!-- Dialog attributes -->
         <item name="alertDialogStyle">@android:style/AlertDialog</item>
@@ -506,6 +507,7 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
         
@@ -547,6 +549,7 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
     <!-- Default theme for alert dialog windows, which is used by the
@@ -687,6 +690,7 @@
         <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="textAppearance">@style/TextAppearance.Theme.Dialog.AppError</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
     
     <!-- Special theme for the recent apps dialog, to allow customization
@@ -696,6 +700,7 @@
         <item name="windowBackground">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.RecentApplications</item>
         <item name="android:textColor">@android:color/secondary_text_nofocus</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
     <!-- Default theme for window that looks like a toast. -->
@@ -703,6 +708,7 @@
         <item name="android:windowBackground">@android:drawable/toast_frame</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Toast</item>
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
     <!-- Default theme with an Action Bar. -->
@@ -1291,6 +1297,7 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
 
@@ -1331,6 +1338,7 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
     <!-- Holo theme for alert dialog windows, which is used by the
@@ -1377,6 +1385,7 @@
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
 
         <item name="android:colorBackgroundCacheHint">@null</item>
 

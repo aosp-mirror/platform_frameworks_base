@@ -1806,6 +1806,14 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Sets whether this activity is finished when touched outside its window's
+     * bounds.
+     */
+    public void setFinishOnTouchOutside(boolean finish) {
+        mWindow.setCloseOnTouchOutside(finish);
+    }
+    
+    /**
      * Use with {@link #setDefaultKeyMode} to turn off default handling of
      * keys.
      * 
@@ -2061,6 +2069,11 @@ public class Activity extends ContextThemeWrapper
      * The default implementation always returns false.
      */
     public boolean onTouchEvent(MotionEvent event) {
+        if (mWindow.shouldCloseOnTouch(this, event)) {
+            finish();
+            return true;
+        }
+        
         return false;
     }
     

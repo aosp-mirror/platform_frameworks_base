@@ -41,7 +41,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -90,12 +89,6 @@ public class Dialog implements DialogInterface, Window.Callback,
     private Message mDismissMessage;
     private Message mShowMessage;
 
-    /**
-     * Whether to cancel the dialog when a touch is received outside of the
-     * window's bounds.
-     */
-    private boolean mCanceledOnTouchOutside = false;
-    
     private OnKeyListener mOnKeyListener;
 
     private boolean mCreated = false;
@@ -597,8 +590,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      *         happens outside of the window bounds.
      */
     public boolean onTouchEvent(MotionEvent event) {
-        if (mCancelable && mCanceledOnTouchOutside && event.getAction() == MotionEvent.ACTION_DOWN
-                && isOutOfBounds(event) && mDecor != null && mShowing) {
+        if (mCancelable && mShowing && mWindow.shouldCloseOnTouch(mContext, event)) {
             cancel();
             return true;
         }
@@ -606,16 +598,6 @@ public class Dialog implements DialogInterface, Window.Callback,
         return false;
     }
 
-    private boolean isOutOfBounds(MotionEvent event) {
-        final int x = (int) event.getX();
-        final int y = (int) event.getY();
-        final int slop = ViewConfiguration.get(mContext).getScaledWindowTouchSlop();
-        final View decorView = getWindow().getDecorView();
-        return (x < -slop) || (y < -slop)
-                || (x > (decorView.getWidth()+slop))
-                || (y > (decorView.getHeight()+slop));
-    }
-    
     /**
      * Called when the trackball was moved and not handled by any of the
      * views inside of the activity.  So, for example, if the trackball moves
@@ -1021,7 +1003,7 @@ public class Dialog implements DialogInterface, Window.Callback,
             mCancelable = true;
         }
         
-        mCanceledOnTouchOutside = cancel;
+        mWindow.setCloseOnTouchOutside(cancel);
     }
     
     /**
