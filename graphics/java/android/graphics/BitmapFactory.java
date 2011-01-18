@@ -556,11 +556,22 @@ public class BitmapFactory {
      * @return the decoded bitmap, or null
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
-        Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
-        if (bm == null && opts != null && opts.inBitmap != null) {
-            throw new IllegalArgumentException("Problem decoding into existing bitmap");
+        if (nativeIsSeekable(fd)) {
+            Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
+            if (bm == null && opts != null && opts.inBitmap != null) {
+                throw new IllegalArgumentException("Problem decoding into existing bitmap");
+            }
+            return finishDecode(bm, outPadding, opts);
+        } else {
+            FileInputStream fis = new FileInputStream(fd);
+            try {
+                return decodeStream(fis, outPadding, opts);
+            } finally {
+                try {
+                    fis.close();
+                } catch (Throwable t) {/* ignore */}
+            }
         }
-        return finishDecode(bm, outPadding, opts);
     }
 
     /**
@@ -607,4 +618,5 @@ public class BitmapFactory {
     private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts);
     private static native byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad);
+    private static native boolean nativeIsSeekable(FileDescriptor fd);
 }

@@ -510,6 +510,11 @@ static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
     }
 }
 
+static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
+    jint descriptor = env->GetIntField(fileDescriptor, gFileDescriptor_descriptor);
+    return ::lseek64(descriptor, 0, SEEK_CUR) != -1 ? JNI_TRUE : JNI_FALSE;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static JNINativeMethod gMethods[] = {
@@ -539,6 +544,11 @@ static JNINativeMethod gMethods[] = {
     },
 
     {   "nativeSetDefaultConfig", "(I)V", (void*)nativeSetDefaultConfig },
+
+    {   "nativeIsSeekable",
+        "(Ljava/io/FileDescriptor;)Z",
+        (void*)nativeIsSeekable
+    },
 };
 
 static JNINativeMethod gOptionsMethods[] = {
