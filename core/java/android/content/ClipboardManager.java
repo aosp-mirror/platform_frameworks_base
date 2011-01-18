@@ -170,7 +170,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     public CharSequence getText() {
         ClipData clip = getPrimaryClip();
         if (clip != null && clip.getItemCount() > 0) {
-            return clip.getItem(0).coerceToText(mContext);
+            return clip.getItemAt(0).coerceToText(mContext);
         }
         return null;
     }
@@ -181,7 +181,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * primary clip.  It has no label or icon.
      */
     public void setText(CharSequence text) {
-        setPrimaryClip(ClipData.newPlainText(null, null, text));
+        setPrimaryClip(ClipData.newPlainText(null, text));
     }
 
     /**

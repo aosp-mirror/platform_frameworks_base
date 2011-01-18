@@ -1045,9 +1045,7 @@ public abstract class PreferenceActivity extends ListActivity implements
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
         Fragment f = Fragment.instantiate(this, fragmentName, args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.setTransition(direction == 0 ? FragmentTransaction.TRANSIT_NONE
-                : direction > 0 ? FragmentTransaction.TRANSIT_FRAGMENT_NEXT
-                        : FragmentTransaction.TRANSIT_FRAGMENT_PREV);
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(com.android.internal.R.id.prefs, f);
         transaction.commit();
     }
@@ -1142,7 +1140,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.addToBackStack(BACK_STACK_PREFS);
         } else {
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_NEXT);
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         }
         transaction.commit();
     }

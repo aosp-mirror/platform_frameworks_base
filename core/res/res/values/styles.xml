@@ -85,10 +85,8 @@
         <item name="fragmentOpenExitAnimation">@animator/fragment_open_exit</item>
         <item name="fragmentCloseEnterAnimation">@animator/fragment_close_enter</item>
         <item name="fragmentCloseExitAnimation">@animator/fragment_close_exit</item>
-        <item name="fragmentNextEnterAnimation">@animator/fragment_next_enter</item>
-        <item name="fragmentNextExitAnimation">@animator/fragment_next_exit</item>
-        <item name="fragmentPrevEnterAnimation">@animator/fragment_prev_enter</item>
-        <item name="fragmentPrevExitAnimation">@animator/fragment_prev_exit</item>
+        <item name="fragmentFadeEnterAnimation">@animator/fragment_fade_enter</item>
+        <item name="fragmentFadeExitAnimation">@animator/fragment_fade_exit</item>
     </style>
 
     <!-- Standard animations for a non-full-screen window or activity. -->

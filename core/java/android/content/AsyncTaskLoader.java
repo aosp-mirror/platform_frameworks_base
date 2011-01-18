@@ -168,9 +168,14 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      * Called if the task was canceled before it was completed.  Gives the class a chance
      * to properly dispose of the result.
      */
-    public void onCancelled(D data) {
+    public void onCanceled(D data) {
+        onCancelled(data);
     }
 
+    @Deprecated
+    public void onCancelled(D data) {
+    }
+    
     void executePendingTask() {
         if (mCancellingTask == null && mTask != null) {
             if (mTask.waiting) {
@@ -195,7 +200,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
     }
 
     void dispatchOnCancelled(LoadTask task, D data) {
-        onCancelled(data);
+        onCanceled(data);
         if (mCancellingTask == task) {
             if (DEBUG) Slog.v(TAG, "Cancelled task is now canceled!");
             mLastLoadCompleteTime = SystemClock.uptimeMillis();

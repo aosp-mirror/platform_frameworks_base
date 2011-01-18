@@ -295,7 +295,7 @@ public class DialogFragment extends Fragment
     /**
      * Return the current value of {@link #setCancelable(boolean)}.
      */
-    public boolean getCancelable() {
+    public boolean isCancelable() {
         return mCancelable;
     }
 

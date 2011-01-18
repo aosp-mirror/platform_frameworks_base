@@ -49,7 +49,7 @@ public abstract class FragmentManager {
      * Representation of an entry on the fragment back stack, as created
      * with {@link FragmentTransaction#addToBackStack(String)
      * FragmentTransaction.addToBackStack()}.  Entries can later be
-     * retrieved with {@link FragmentManager#getBackStackEntry(int)
+     * retrieved with {@link FragmentManager#getBackStackEntryAt(int)
      * FragmentManager.getBackStackEntry()}.
      *
      * <p>Note that you should never hold on to a BackStackEntry object;
@@ -63,6 +63,18 @@ public abstract class FragmentManager {
          * instances.
          */
         public int getId();
+
+        /**
+         * Return the full bread crumb title resource identifier for the entry,
+         * or 0 if it does not have one.
+         */
+        public int getBreadCrumbTitleRes();
+
+        /**
+         * Return the short bread crumb title resource identifier for the entry,
+         * or 0 if it does not have one.
+         */
+        public int getBreadCrumbShortTitleRes();
 
         /**
          * Return the full bread crumb title for the entry, or null if it
@@ -102,7 +114,8 @@ public abstract class FragmentManager {
      */
     public abstract FragmentTransaction beginTransaction();
 
-    /** Old API */
+    /** @deprecated Old API */
+    @Deprecated
     public FragmentTransaction openTransaction() {
         return beginTransaction();
     }
@@ -153,7 +166,9 @@ public abstract class FragmentManager {
 
     /**
      * Pop the top state off the back stack.  Returns true if there was one
-     * to pop, else false.
+     * to pop, else false.  This function is asynchronous -- it enqueues the
+     * request to pop, but the action will not be performed until the application
+     * returns to its event loop.
      */
     public abstract void popBackStack();
 
@@ -168,6 +183,10 @@ public abstract class FragmentManager {
     /**
      * Pop the last fragment transition from the manager's fragment
      * back stack.  If there is nothing to pop, false is returned.
+     * This function is asynchronous -- it enqueues the
+     * request to pop, but the action will not be performed until the application
+     * returns to its event loop.
+     * 
      * @param name If non-null, this is the name of a previous back state
      * to look for; if found, all states up to that state will be popped.  The
      * {@link #POP_BACK_STACK_INCLUSIVE} flag can be used to control whether
@@ -186,6 +205,10 @@ public abstract class FragmentManager {
 
     /**
      * Pop all back stack states up to the one with the given identifier.
+     * This function is asynchronous -- it enqueues the
+     * request to pop, but the action will not be performed until the application
+     * returns to its event loop.
+     * 
      * @param id Identifier of the stated to be popped. If no identifier exists,
      * false is returned.
      * The identifier is the number returned by
@@ -207,14 +230,24 @@ public abstract class FragmentManager {
     /**
      * Return the number of entries currently in the back stack.
      */
-    public abstract int countBackStackEntries();
+    public abstract int getBackStackEntryCount();
 
+    @Deprecated
+    public int countBackStackEntries() {
+        return getBackStackEntryCount();
+    }
+    
     /**
      * Return the BackStackEntry at index <var>index</var> in the back stack;
      * entries start index 0 being the bottom of the stack.
      */
-    public abstract BackStackEntry getBackStackEntry(int index);
+    public abstract BackStackEntry getBackStackEntryAt(int index);
 
+    @Deprecated
+    public BackStackEntry getBackStackEntry(int index) {
+        return getBackStackEntryAt(index);
+    }
+    
     /**
      * Add a new listener for changes to the fragment back stack.
      */
@@ -416,12 +449,12 @@ final class FragmentManagerImpl extends FragmentManager {
     }
 
     @Override
-    public int countBackStackEntries() {
+    public int getBackStackEntryCount() {
         return mBackStack != null ? mBackStack.size() : 0;
     }
 
     @Override
-    public BackStackEntry getBackStackEntry(int index) {
+    public BackStackEntry getBackStackEntryAt(int index) {
         return mBackStack.get(index);
     }
 
@@ -1678,11 +1711,8 @@ final class FragmentManagerImpl extends FragmentManager {
             case FragmentTransaction.TRANSIT_FRAGMENT_CLOSE:
                 rev = FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
                 break;
-            case FragmentTransaction.TRANSIT_FRAGMENT_NEXT:
-                rev = FragmentTransaction.TRANSIT_FRAGMENT_PREV;
-                break;
-            case FragmentTransaction.TRANSIT_FRAGMENT_PREV:
-                rev = FragmentTransaction.TRANSIT_FRAGMENT_NEXT;
+            case FragmentTransaction.TRANSIT_FRAGMENT_FADE:
+                rev = FragmentTransaction.TRANSIT_FRAGMENT_FADE;
                 break;
         }
         return rev;
@@ -1702,15 +1732,10 @@ final class FragmentManagerImpl extends FragmentManager {
                     ? com.android.internal.R.styleable.FragmentAnimation_fragmentCloseEnterAnimation
                     : com.android.internal.R.styleable.FragmentAnimation_fragmentCloseExitAnimation;
                 break;
-            case FragmentTransaction.TRANSIT_FRAGMENT_NEXT:
+            case FragmentTransaction.TRANSIT_FRAGMENT_FADE:
                 animAttr = enter
-                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentNextEnterAnimation
-                    : com.android.internal.R.styleable.FragmentAnimation_fragmentNextExitAnimation;
-                break;
-            case FragmentTransaction.TRANSIT_FRAGMENT_PREV:
-                animAttr = enter
-                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentPrevEnterAnimation
-                    : com.android.internal.R.styleable.FragmentAnimation_fragmentPrevExitAnimation;
+                    ? com.android.internal.R.styleable.FragmentAnimation_fragmentFadeEnterAnimation
+                    : com.android.internal.R.styleable.FragmentAnimation_fragmentFadeExitAnimation;
                 break;
         }
         return animAttr;
