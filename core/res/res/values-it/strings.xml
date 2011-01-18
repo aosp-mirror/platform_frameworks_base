@@ -490,6 +490,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale effettivo è impostabile solo dal primo amministratore del dispositivo."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Imposta scadenza password"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Stabilisci la scadenza della password di blocco dello schermo"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
@@ -905,6 +909,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleziona per disattivare il debug USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Seleziona metodo di inserimento"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidati"</u></string>

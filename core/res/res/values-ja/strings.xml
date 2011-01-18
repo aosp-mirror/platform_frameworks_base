@@ -490,6 +490,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"パスワードの有効期限の設定"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"画面ロックパスワードの変更が必要になるまでの期間を指定します"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>
@@ -905,6 +909,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
     <string name="select_input_method" msgid="6865512749462072765">"入力方法の選択"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候補"</u></string>
@@ -969,7 +975,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"ファイルが選択されていません"</string>
     <string name="reset" msgid="2448168080964209908">"リセット"</string>
     <string name="submit" msgid="1602335572089911941">"送信"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モードを有効にする"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モードになっています"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"運転モードを終了するには選択してください。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"テザリングまたはアクセスポイントが有効です"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"タップして設定する"</string>

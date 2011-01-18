@@ -487,6 +487,10 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Setel proxy global perangkat yang akandigunakan ketika kebijakan diaktifkan. Hanya admin perangkat pertama yang menyetel procy global yang berlaku."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Setel kedaluwarsa sandi"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Kontrol berapa lama sebelum sandi penguncian layar perlu diubah"</string>
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>
     <item msgid="869923650527136615">"Seluler"</item>
@@ -900,6 +904,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB terhubung"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Pilih untuk menonaktifkan debugging USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Pilih metode masukan"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
