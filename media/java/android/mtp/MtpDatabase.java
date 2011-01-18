@@ -205,6 +205,7 @@ public class MtpDatabase {
                 values.put(Audio.Playlists.DATA, path);
                 values.put(Audio.Playlists.NAME, name);
                 values.put(Files.FileColumns.FORMAT, format);
+                values.put(Files.FileColumns.DATE_MODIFIED, System.currentTimeMillis() / 1000);
                 values.put(MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, handle);
                 try {
                     Uri uri = mMediaProvider.insert(Audio.Playlists.EXTERNAL_CONTENT_URI, values);
