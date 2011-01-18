@@ -1244,7 +1244,9 @@ status_t StagefrightRecorder::setupVideoEncoder(
     // Use software codec for time lapse
     uint32_t encoder_flags = 0;
     if (mCaptureTimeLapse) {
-        encoder_flags |= OMXCodec::kPreferSoftwareCodecs;
+        // Do not use software encoder for timelapse for now
+        // It is _very_ slow and the preview appears sluggish
+        //encoder_flags |= OMXCodec::kPreferSoftwareCodecs;
     } else if (mIsMetaDataStoredInVideoBuffers) {
         encoder_flags |= OMXCodec::kHardwareCodecsOnly;
         encoder_flags |= OMXCodec::kStoreMetaDataInVideoBuffers;
