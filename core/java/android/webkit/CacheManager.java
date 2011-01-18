@@ -45,6 +45,8 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
  * are attached, as appropriate, to the request for revalidation of content. The
  * class also manages the cache size.
  *
+ * CacheManager may only be used if your activity contains a WebView.
+ *
  * @deprecated Access to the HTTP cache will be removed in a future release.
  */
 @Deprecated
