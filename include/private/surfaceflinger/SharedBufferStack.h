@@ -105,7 +105,7 @@ public:
     volatile int32_t head;      // server's current front buffer
     volatile int32_t available; // number of dequeue-able buffers
     volatile int32_t queued;    // number of buffers waiting for post
-    volatile int32_t inUse;     // buffer currently in use by SF
+    volatile int32_t reserved1;
     volatile status_t status;   // surface's status code
 
     // not part of the conditions
@@ -275,7 +275,6 @@ public:
             int32_t identity);
 
     ssize_t retireAndLock();
-    status_t unlock(int buffer);
     void setStatus(status_t status);
     status_t reallocateAll();
     status_t reallocateAllExcept(int buffer);
@@ -346,11 +345,6 @@ private:
     int mNumBuffers;
     BufferList mBufferList;
 
-    struct UnlockUpdate : public UpdateBase {
-        const int lockedBuffer;
-        inline UnlockUpdate(SharedBufferBase* sbb, int lockedBuffer);
-        inline ssize_t operator()();
-    };
 
     struct RetireUpdate : public UpdateBase {
         const int numBuffers;

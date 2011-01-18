@@ -682,22 +682,6 @@ void Layer::unlockPageFlip(
     }
 }
 
-void Layer::finishPageFlip()
-{
-    ClientRef::Access sharedClient(mUserClientRef);
-    SharedBufferServer* lcblk(sharedClient.get());
-    if (lcblk) {
-        int buf = mBufferManager.getActiveBufferIndex();
-        if (buf >= 0) {
-            status_t err = lcblk->unlock( buf );
-            LOGE_IF(err!=NO_ERROR,
-                    "layer %p, buffer=%d wasn't locked!",
-                    this, buf);
-        }
-    }
-}
-
-
 void Layer::dump(String8& result, char* buffer, size_t SIZE) const
 {
     LayerBaseClient::dump(result, buffer, SIZE);
