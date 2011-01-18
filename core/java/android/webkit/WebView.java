@@ -6724,50 +6724,59 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Returns true if x/y in content coordinates corresponds to a plugin.
+     * Returns plugin bounds if x/y in content coordinates corresponds to a
+     * plugin. Otherwise a NULL rectangle is returned.
      */
-    boolean isPluginAt(int x, int y) {
-        return nativePointInNavCache(x, y, mNavSlop) &&
-                nativeCacheHitIsPlugin();
+    Rect getPluginBounds(int x, int y) {
+        if (nativePointInNavCache(x, y, mNavSlop) && nativeCacheHitIsPlugin()) {
+            return nativeCacheHitNodeBounds();
+        } else {
+            return null;
+        }
     }
 
     /*
-     * Return true if the view (Plugin) is fully visible and maximized inside
-     * the WebView.
+     * Return true if the rect (e.g. plugin) is fully visible and maximized
+     * inside the WebView.
      */
-    boolean isPluginFitOnScreen(ViewManager.ChildView view) {
+    boolean isRectFitOnScreen(Rect rect) {
+        final int rectWidth = rect.width();
+        final int rectHeight = rect.height();
         final int viewWidth = getViewWidth();
         final int viewHeight = getViewHeightWithTitle();
-        float scale = Math.min((float) viewWidth / view.width, (float) viewHeight / view.height);
+        float scale = Math.min((float) viewWidth / rectWidth, (float) viewHeight / rectHeight);
         scale = mZoomManager.computeScaleWithLimits(scale);
         return !mZoomManager.willScaleTriggerZoom(scale)
-                && contentToViewX(view.x) >= mScrollX
-                && contentToViewX(view.x + view.width) <= mScrollX + viewWidth
-                && contentToViewY(view.y) >= mScrollY
-                && contentToViewY(view.y + view.height) <= mScrollY + viewHeight;
+                && contentToViewX(rect.left) >= mScrollX
+                && contentToViewX(rect.right) <= mScrollX + viewWidth
+                && contentToViewY(rect.top) >= mScrollY
+                && contentToViewY(rect.bottom) <= mScrollY + viewHeight;
     }
 
     /*
      * Maximize and center the rectangle, specified in the document coordinate
      * space, inside the WebView. If the zoom doesn't need to be changed, do an
      * animated scroll to center it. If the zoom needs to be changed, find the
-     * zoom center and do a smooth zoom transition.
+     * zoom center and do a smooth zoom transition. The rect is in document
+     * coordinates
      */
-    void centerFitRect(int docX, int docY, int docWidth, int docHeight) {
-        int viewWidth = getViewWidth();
-        int viewHeight = getViewHeightWithTitle();
-        float scale = Math.min((float) viewWidth / docWidth, (float) viewHeight
-                / docHeight);
+    void centerFitRect(Rect rect) {
+        final int rectWidth = rect.width();
+        final int rectHeight = rect.height();
+        final int viewWidth = getViewWidth();
+        final int viewHeight = getViewHeightWithTitle();
+        float scale = Math.min((float) viewWidth / rectWidth, (float) viewHeight
+                / rectHeight);
         scale = mZoomManager.computeScaleWithLimits(scale);
         if (!mZoomManager.willScaleTriggerZoom(scale)) {
-            pinScrollTo(contentToViewX(docX + docWidth / 2) - viewWidth / 2,
-                    contentToViewY(docY + docHeight / 2) - viewHeight / 2,
+            pinScrollTo(contentToViewX(rect.left + rectWidth / 2) - viewWidth / 2,
+                    contentToViewY(rect.top + rectHeight / 2) - viewHeight / 2,
                     true, 0);
         } else {
             float actualScale = mZoomManager.getScale();
-            float oldScreenX = docX * actualScale - mScrollX;
-            float rectViewX = docX * scale;
-            float rectViewWidth = docWidth * scale;
+            float oldScreenX = rect.left * actualScale - mScrollX;
+            float rectViewX = rect.left * scale;
+            float rectViewWidth = rectWidth * scale;
             float newMaxWidth = mContentWidth * scale;
             float newScreenX = (viewWidth - rectViewWidth) / 2;
             // pin the newX to the WebView
@@ -6778,10 +6787,10 @@ public class WebView extends AbsoluteLayout
             }
             float zoomCenterX = (oldScreenX * scale - newScreenX * actualScale)
                     / (scale - actualScale);
-            float oldScreenY = docY * actualScale + getTitleHeight()
+            float oldScreenY = rect.top * actualScale + getTitleHeight()
                     - mScrollY;
-            float rectViewY = docY * scale + getTitleHeight();
-            float rectViewHeight = docHeight * scale;
+            float rectViewY = rect.top * scale + getTitleHeight();
+            float rectViewHeight = rectHeight * scale;
             float newMaxHeight = mContentHeight * scale + getTitleHeight();
             float newScreenY = (viewHeight - rectViewHeight) / 2;
             // pin the newY to the WebView
@@ -7514,8 +7523,7 @@ public class WebView extends AbsoluteLayout
                     break;
 
                 case CENTER_FIT_RECT:
-                    Rect r = (Rect)msg.obj;
-                    centerFitRect(r.left, r.top, r.width(), r.height());
+                    centerFitRect((Rect)msg.obj);
                     break;
 
                 case SET_SCROLLBAR_MODES:
