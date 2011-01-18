@@ -4407,10 +4407,19 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
     }
-    
+
+    /**
+     * Check if the external storage media is available. This is true if there
+     * is a mounted external storage medium or if the external storage is
+     * emulated.
+     */
+    private boolean isExternalMediaAvailable() {
+        return mMediaMounted || Environment.isExternalStorageEmulated();
+    }
+
     public String nextPackageToClean(String lastPackage) {
         synchronized (mPackages) {
-            if (!mMediaMounted) {
+            if (!isExternalMediaAvailable()) {
                 // If the external storage is no longer mounted at this point,
                 // the caller may not have been able to delete all of this
                 // packages files and can not delete any more.  Bail.
@@ -4430,7 +4439,7 @@ class PackageManagerService extends IPackageManager.Stub {
     
     void startCleaningPackages() {
         synchronized (mPackages) {
-            if (!mMediaMounted) {
+            if (!isExternalMediaAvailable()) {
                 return;
             }
             if (mSettings.mPackagesToBeCleaned.size() <= 0) {
