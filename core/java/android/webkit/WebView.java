@@ -1037,7 +1037,7 @@ public class WebView extends AbsoluteLayout
         String host = proxyProperties.getHost();
         int port = proxyProperties.getPort();
         if (port != 0)
-            host += ": " + port;
+            host += ":" + port;
 
         // TODO: Handle exclusion list
         // The plan is to make an AndroidProxyResolver, and handle the blacklist
