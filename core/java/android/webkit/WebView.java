@@ -6723,6 +6723,14 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Returns true if x/y in content coordinates corresponds to a plugin.
+     */
+    boolean isPluginAt(int x, int y) {
+        return nativePointInNavCache(x, y, mNavSlop) &&
+                nativeCacheHitIsPlugin();
+    }
+
     /*
      * Return true if the view (Plugin) is fully visible and maximized inside
      * the WebView.
@@ -8150,6 +8158,7 @@ public class WebView extends AbsoluteLayout
     }
 
     private native int nativeCacheHitFramePointer();
+    private native boolean  nativeCacheHitIsPlugin();
     private native Rect nativeCacheHitNodeBounds();
     private native int nativeCacheHitNodePointer();
     /* package */ native void nativeClearCursor();
