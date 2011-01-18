@@ -114,7 +114,7 @@ public abstract class FragmentManager {
      */
     public abstract FragmentTransaction beginTransaction();
 
-    /** @deprecated Old API */
+    /** @hide -- remove once prebuilts are in. */
     @Deprecated
     public FragmentTransaction openTransaction() {
         return beginTransaction();
@@ -232,22 +232,12 @@ public abstract class FragmentManager {
      */
     public abstract int getBackStackEntryCount();
 
-    @Deprecated
-    public int countBackStackEntries() {
-        return getBackStackEntryCount();
-    }
-    
     /**
      * Return the BackStackEntry at index <var>index</var> in the back stack;
      * entries start index 0 being the bottom of the stack.
      */
     public abstract BackStackEntry getBackStackEntryAt(int index);
 
-    @Deprecated
-    public BackStackEntry getBackStackEntry(int index) {
-        return getBackStackEntryAt(index);
-    }
-    
     /**
      * Add a new listener for changes to the fragment back stack.
      */
