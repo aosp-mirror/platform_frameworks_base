@@ -78,6 +78,12 @@ public:
      */
     virtual bool filterJumpyTouchEvents() = 0;
 
+    /* Gets the amount of time to disable virtual keys after the screen is touched
+     * in order to filter out accidental virtual key presses due to swiping gestures
+     * or taps near the edge of the display.  May be 0 to disable the feature.
+     */
+    virtual nsecs_t getVirtualKeyQuietTime() = 0;
+
     /* Gets the excluded device names for the platform. */
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) = 0;
 
@@ -146,6 +152,10 @@ public:
 
     virtual void updateGlobalMetaState() = 0;
     virtual int32_t getGlobalMetaState() = 0;
+
+    virtual void disableVirtualKeysUntil(nsecs_t time) = 0;
+    virtual bool shouldDropVirtualKey(nsecs_t now,
+            InputDevice* device, int32_t keyCode, int32_t scanCode) = 0;
 
     virtual InputReaderPolicyInterface* getPolicy() = 0;
     virtual InputDispatcherInterface* getDispatcher() = 0;
@@ -233,6 +243,11 @@ private:
 
     InputConfiguration mInputConfiguration;
     void updateInputConfiguration();
+
+    nsecs_t mDisableVirtualKeysTimeout;
+    virtual void disableVirtualKeysUntil(nsecs_t time);
+    virtual bool shouldDropVirtualKey(nsecs_t now,
+            InputDevice* device, int32_t keyCode, int32_t scanCode);
 
     // state queries
     typedef int32_t (InputDevice::*GetStateFunc)(uint32_t sourceMask, int32_t code);
@@ -603,6 +618,7 @@ protected:
         bool useBadTouchFilter;
         bool useJumpyTouchFilter;
         bool useAveragingTouchFilter;
+        nsecs_t virtualKeyQuietTime;
     } mParameters;
 
     // Immutable calibration parameters in parsed form.
@@ -839,6 +855,7 @@ private:
     void dispatchTouch(nsecs_t when, uint32_t policyFlags, TouchData* touch,
             BitSet32 idBits, uint32_t changedId, uint32_t pointerCount,
             int32_t motionEventAction);
+    void detectGestures(nsecs_t when);
 
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
     const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
