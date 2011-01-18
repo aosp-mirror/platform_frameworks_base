@@ -26,28 +26,61 @@ import android.util.Log;
  **/
 public class Matrix4f {
 
+    /**
+    * Creates a new identity 4x4 matrix
+    */
     public Matrix4f() {
         mMat = new float[16];
         loadIdentity();
     }
 
+    /**
+    * Creates a new matrix and sets its values from the given
+    * parameter
+    *
+    * @param dataArray values to set the matrix to, must be 16
+    *                  floats long
+    */
     public Matrix4f(float[] dataArray) {
         mMat = new float[16];
         System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
     }
 
+    /**
+    * Return a reference to the internal array representing matrix
+    * values. Modifying this array will also change the matrix
+    *
+    * @return internal array representing the matrix
+    */
     public float[] getArray() {
         return mMat;
     }
 
+    /**
+    * Returns the value for a given row and column
+    *
+    * @param i row of the value to return
+    * @param j column of the value to return
+    *
+    * @return value in the ith row and jth column
+    */
     public float get(int i, int j) {
         return mMat[i*4 + j];
     }
 
+    /**
+    * Sets the value for a given row and column
+    *
+    * @param i row of the value to set
+    * @param j column of the value to set
+    */
     public void set(int i, int j, float v) {
         mMat[i*4 + j] = v;
     }
 
+    /**
+    * Sets the matrix values to identity
+    */
     public void loadIdentity() {
         mMat[0] = 1;
         mMat[1] = 0;
@@ -70,10 +103,24 @@ public class Matrix4f {
         mMat[15] = 1;
     }
 
+    /**
+    * Sets the values of the matrix to those of the parameter
+    *
+    * @param src matrix to load the values from
+    */
     public void load(Matrix4f src) {
         System.arraycopy(src.getArray(), 0, mMat, 0, mMat.length);
     }
 
+    /**
+    * Sets current values to be a rotation matrix of certain angle
+    * about a given axis
+    *
+    * @param rot angle of rotation
+    * @param x rotation axis x
+    * @param y rotation axis y
+    * @param z rotation axis z
+    */
     public void loadRotate(float rot, float x, float y, float z) {
         float c, s;
         mMat[3] = 0;
@@ -112,6 +159,13 @@ public class Matrix4f {
         mMat[10] = z*z*nc +  c;
     }
 
+    /**
+    * Sets current values to be a scale matrix of given dimensions
+    *
+    * @param x scale component x
+    * @param y scale component y
+    * @param z scale component z
+    */
     public void loadScale(float x, float y, float z) {
         loadIdentity();
         mMat[0] = x;
@@ -119,6 +173,14 @@ public class Matrix4f {
         mMat[10] = z;
     }
 
+    /**
+    * Sets current values to be a translation matrix of given
+    * dimensions
+    *
+    * @param x translation component x
+    * @param y translation component y
+    * @param z translation component z
+    */
     public void loadTranslate(float x, float y, float z) {
         loadIdentity();
         mMat[12] = x;
@@ -126,6 +188,13 @@ public class Matrix4f {
         mMat[14] = z;
     }
 
+    /**
+    * Sets current values to be the result of multiplying two given
+    * matrices
+    *
+    * @param lhs left hand side matrix
+    * @param rhs right hand side matrix
+    */
     public void loadMultiply(Matrix4f lhs, Matrix4f rhs) {
         for (int i=0 ; i<4 ; i++) {
             float ri0 = 0;
@@ -146,6 +215,16 @@ public class Matrix4f {
         }
     }
 
+    /**
+    * Set current values to be an orthographic projection matrix
+    *
+    * @param l location of the left vertical clipping plane
+    * @param r location of the right vertical clipping plane
+    * @param b location of the bottom horizontal clipping plane
+    * @param t location of the top horizontal clipping plane
+    * @param n location of the near clipping plane
+    * @param f location of the far clipping plane
+    */
     public void loadOrtho(float l, float r, float b, float t, float n, float f) {
         loadIdentity();
         mMat[0] = 2 / (r - l);
@@ -156,10 +235,31 @@ public class Matrix4f {
         mMat[14]= -(f + n) / (f - n);
     }
 
+    /**
+    * Set current values to be an orthographic projection matrix
+    * with the right and bottom clipping planes set to the given
+    * values. Left and top clipping planes are set to 0. Near and
+    * far are set to -1, 1 respectively
+    *
+    * @param w location of the right vertical clipping plane
+    * @param h location of the bottom horizontal clipping plane
+    *
+    */
     public void loadOrthoWindow(int w, int h) {
         loadOrtho(0,w, h,0, -1,1);
     }
 
+    /**
+    * Sets current values to be a perspective projection matrix
+    *
+    * @param l location of the left vertical clipping plane
+    * @param r location of the right vertical clipping plane
+    * @param b location of the bottom horizontal clipping plane
+    * @param t location of the top horizontal clipping plane
+    * @param n location of the near clipping plane, must be positive
+    * @param f location of the far clipping plane, must be positive
+    *
+    */
     public void loadFrustum(float l, float r, float b, float t, float n, float f) {
         loadIdentity();
         mMat[0] = 2 * n / (r - l);
@@ -172,6 +272,14 @@ public class Matrix4f {
         mMat[15]= 0;
     }
 
+    /**
+    * Sets current values to be a perspective projection matrix
+    *
+    * @param fovy vertical field of view angle in degrees
+    * @param aspect aspect ratio of the screen
+    * @param near near cliping plane, must be positive
+    * @param far far clipping plane, must be positive
+    */
     public void loadPerspective(float fovy, float aspect, float near, float far) {
         float top = near * (float)Math.tan((float) (fovy * Math.PI / 360.0f));
         float bottom = -top;
@@ -180,6 +288,14 @@ public class Matrix4f {
         loadFrustum(left, right, bottom, top, near, far);
     }
 
+    /**
+    * Helper function to set the current values to a perspective
+    * projection matrix with aspect ratio defined by the parameters
+    * and (near, far), (bottom, top) mapping to (-1, 1) at z = 0
+    *
+    * @param w screen width
+    * @param h screen height
+    */
     public void loadProjectionNormalized(int w, int h) {
         // range -1,1 in the narrow axis at z = 0.
         Matrix4f m1 = new Matrix4f();
@@ -205,22 +321,53 @@ public class Matrix4f {
         load(m1);
     }
 
-
+    /**
+    * Post-multiplies the current matrix by a given parameter
+    *
+    * @param rhs right hand side to multiply by
+    */
     public void multiply(Matrix4f rhs) {
         Matrix4f tmp = new Matrix4f();
         tmp.loadMultiply(this, rhs);
         load(tmp);
     }
+    /**
+    * Modifies the current matrix by post-multiplying it with a
+    * rotation matrix of certain angle about a given axis
+    *
+    * @param rot angle of rotation
+    * @param x rotation axis x
+    * @param y rotation axis y
+    * @param z rotation axis z
+    */
     public void rotate(float rot, float x, float y, float z) {
         Matrix4f tmp = new Matrix4f();
         tmp.loadRotate(rot, x, y, z);
         multiply(tmp);
     }
+
+    /**
+    * Modifies the current matrix by post-multiplying it with a
+    * scale matrix of given dimensions
+    *
+    * @param x scale component x
+    * @param y scale component y
+    * @param z scale component z
+    */
     public void scale(float x, float y, float z) {
         Matrix4f tmp = new Matrix4f();
         tmp.loadScale(x, y, z);
         multiply(tmp);
     }
+
+    /**
+    * Modifies the current matrix by post-multiplying it with a
+    * translation matrix of given dimensions
+    *
+    * @param x translation component x
+    * @param y translation component y
+    * @param z translation component z
+    */
     public void translate(float x, float y, float z) {
         Matrix4f tmp = new Matrix4f();
         tmp.loadTranslate(x, y, z);
@@ -245,6 +392,9 @@ public class Matrix4f {
         return cofactor;
     }
 
+    /**
+    * Sets the current matrix to its inverse
+    */
     public boolean inverse() {
 
         Matrix4f result = new Matrix4f();
@@ -271,6 +421,9 @@ public class Matrix4f {
         return true;
     }
 
+    /**
+    * Sets the current matrix to its inverse transpose
+    */
     public boolean inverseTranspose() {
 
         Matrix4f result = new Matrix4f();
@@ -296,6 +449,9 @@ public class Matrix4f {
         return true;
     }
 
+    /**
+    * Sets the current matrix to its transpose
+    */
     public void transpose() {
         for(int i = 0; i < 3; ++i) {
             for(int j = i + 1; j < 4; ++j) {
@@ -308,8 +464,3 @@ public class Matrix4f {
 
     final float[] mMat;
 }
-
-
-
-
-
