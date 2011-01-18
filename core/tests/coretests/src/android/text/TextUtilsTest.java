@@ -255,6 +255,23 @@ public class TextUtilsTest extends TestCase {
         assertEquals("Foo Bar", tokens[0].getAddress());
     }
 
+    @SmallTest
+    public void testRfc822FindToken() {
+        Rfc822Tokenizer tokenizer = new Rfc822Tokenizer();
+        //                0           1         2           3         4
+        //                0 1234 56789012345678901234 5678 90123456789012345
+        String address = "\"Foo\" <foo@google.com>, \"Bar\" <bar@google.com>";
+        assertEquals(0, tokenizer.findTokenStart(address, 21));
+        assertEquals(22, tokenizer.findTokenEnd(address, 21));
+        assertEquals(24, tokenizer.findTokenStart(address, 25));
+        assertEquals(46, tokenizer.findTokenEnd(address, 25));
+    }
+
+    @SmallTest
+    public void testRfc822FindTokenWithError() {
+        assertEquals(9, new Rfc822Tokenizer().findTokenEnd("\"Foo Bar\\", 0));
+    }
+
     @LargeTest
     public void testEllipsize() {
         CharSequence s1 = "The quick brown fox jumps over \u00FEhe lazy dog.";
