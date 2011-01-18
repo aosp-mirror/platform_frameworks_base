@@ -204,13 +204,13 @@ public class FragmentBreadCrumbs extends ViewGroup
 
     void updateCrumbs() {
         FragmentManager fm = mActivity.getFragmentManager();
-        int numEntries = fm.countBackStackEntries();
+        int numEntries = fm.getBackStackEntryCount();
         int numPreEntries = getPreEntryCount();
         int numViews = mContainer.getChildCount();
         for (int i = 0; i < numEntries + numPreEntries; i++) {
             BackStackEntry bse = i < numPreEntries
                     ? getPreEntry(i)
-                    : fm.getBackStackEntry(i - numPreEntries);
+                    : fm.getBackStackEntryAt(i - numPreEntries);
             if (i < numViews) {
                 View v = mContainer.getChildAt(i);
                 Object tag = v.getTag();

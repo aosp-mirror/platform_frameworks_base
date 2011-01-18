@@ -42,9 +42,9 @@ import java.util.ArrayList;
  * {@link ClipDescription#getMimeType(int) getDescription().getMimeType(int)}
  * must return correct MIME type(s) describing the data in the clip.  For help
  * in correctly constructing a clip with the correct MIME type, use
- * {@link #newPlainText(CharSequence, Bitmap, CharSequence)},
- * {@link #newUri(ContentResolver, CharSequence, Bitmap, Uri)}, and
- * {@link #newIntent(CharSequence, Bitmap, Intent)}.
+ * {@link #newPlainText(CharSequence, CharSequence)},
+ * {@link #newUri(ContentResolver, CharSequence, Uri)}, and
+ * {@link #newIntent(CharSequence, Intent)}.
  *
  * <p>Each Item instance can be one of three main classes of data: a simple
  * CharSequence of text, a single Intent object, or a Uri.  See {@link Item}
@@ -70,7 +70,7 @@ import java.util.ArrayList;
  * "content:" URIs.  A content URI allows the recipient of a ClippedData item
  * to interact closely with the ContentProvider holding the data in order to
  * negotiate the transfer of that data.  The clip must also be filled in with
- * the available MIME types; {@link #newUri(ContentResolver, CharSequence, Bitmap, Uri)}
+ * the available MIME types; {@link #newUri(ContentResolver, CharSequence, Uri)}
  * will take care of correctly doing this.
  *
  * <p>For example, here is the paste function of a simple NotePad application.
@@ -321,16 +321,14 @@ public class ClipData implements Parcelable {
      *
      * @param label Label to show to the user describing this clip.
      * @param mimeTypes An array of MIME types this data is available as.
-     * @param icon Bitmap providing the user with an iconing representation of
-     * the clip.
      * @param item The contents of the first item in the clip.
      */
-    public ClipData(CharSequence label, String[] mimeTypes, Bitmap icon, Item item) {
+    public ClipData(CharSequence label, String[] mimeTypes, Item item) {
         mClipDescription = new ClipDescription(label, mimeTypes);
         if (item == null) {
             throw new NullPointerException("item is null");
         }
-        mIcon = icon;
+        mIcon = null;
         mItems.add(item);
     }
 
@@ -338,16 +336,14 @@ public class ClipData implements Parcelable {
      * Create a new clip.
      *
      * @param description The ClipDescription describing the clip contents.
-     * @param icon Bitmap providing the user with an iconing representation of
-     * the clip.
      * @param item The contents of the first item in the clip.
      */
-    public ClipData(ClipDescription description, Bitmap icon, Item item) {
+    public ClipData(ClipDescription description, Item item) {
         mClipDescription = description;
         if (item == null) {
             throw new NullPointerException("item is null");
         }
-        mIcon = icon;
+        mIcon = null;
         mItems.add(item);
     }
 
@@ -356,13 +352,17 @@ public class ClipData implements Parcelable {
      * {@link ClipDescription#MIMETYPE_TEXT_PLAIN}.
      *
      * @param label User-visible label for the clip data.
-     * @param icon Iconic representation of the clip data.
      * @param text The actual text in the clip.
      * @return Returns a new ClipData containing the specified data.
      */
-    static public ClipData newPlainText(CharSequence label, Bitmap icon, CharSequence text) {
+    static public ClipData newPlainText(CharSequence label, CharSequence text) {
         Item item = new Item(text);
-        return new ClipData(label, MIMETYPES_TEXT_PLAIN, icon, item);
+        return new ClipData(label, MIMETYPES_TEXT_PLAIN, item);
+    }
+
+    @Deprecated
+    static public ClipData newPlainText(CharSequence label, Bitmap icon, CharSequence text) {
+        return newPlainText(label, text);
     }
 
     /**
@@ -370,15 +370,19 @@ public class ClipData implements Parcelable {
      * {@link ClipDescription#MIMETYPE_TEXT_INTENT}.
      *
      * @param label User-visible label for the clip data.
-     * @param icon Iconic representation of the clip data.
      * @param intent The actual Intent in the clip.
      * @return Returns a new ClipData containing the specified data.
      */
-    static public ClipData newIntent(CharSequence label, Bitmap icon, Intent intent) {
+    static public ClipData newIntent(CharSequence label, Intent intent) {
         Item item = new Item(intent);
-        return new ClipData(label, MIMETYPES_TEXT_INTENT, icon, item);
+        return new ClipData(label, MIMETYPES_TEXT_INTENT, item);
     }
 
+    @Deprecated
+    static public ClipData newIntent(CharSequence label, Bitmap icon, Intent intent) {
+        return newIntent(label, intent);
+    }
+    
     /**
      * Create a new ClipData holding a URI.  If the URI is a content: URI,
      * this will query the content provider for the MIME type of its data and
@@ -387,12 +391,11 @@ public class ClipData implements Parcelable {
      *
      * @param resolver ContentResolver used to get information about the URI.
      * @param label User-visible label for the clip data.
-     * @param icon Iconic representation of the clip data.
      * @param uri The URI in the clip.
      * @return Returns a new ClipData containing the specified data.
      */
     static public ClipData newUri(ContentResolver resolver, CharSequence label,
-            Bitmap icon, Uri uri) {
+            Uri uri) {
         Item item = new Item(uri);
         String[] mimeTypes = null;
         if ("content".equals(uri.getScheme())) {
@@ -417,26 +420,36 @@ public class ClipData implements Parcelable {
         if (mimeTypes == null) {
             mimeTypes = MIMETYPES_TEXT_URILIST;
         }
-        return new ClipData(label, mimeTypes, icon, item);
+        return new ClipData(label, mimeTypes, item);
     }
 
+    @Deprecated
+    static public ClipData newUri(ContentResolver resolver, CharSequence label,
+            Bitmap icon, Uri uri) {
+        return newUri(resolver, label, uri);
+    }
+    
     /**
      * Create a new ClipData holding an URI with MIME type
      * {@link ClipDescription#MIMETYPE_TEXT_URILIST}.
-     * Unlike {@link #newUri(ContentResolver, CharSequence, Bitmap, Uri)}, nothing
+     * Unlike {@link #newUri(ContentResolver, CharSequence, Uri)}, nothing
      * is inferred about the URI -- if it is a content: URI holding a bitmap,
      * the reported type will still be uri-list.  Use this with care!
      *
      * @param label User-visible label for the clip data.
-     * @param icon Iconic representation of the clip data.
      * @param uri The URI in the clip.
      * @return Returns a new ClipData containing the specified data.
      */
-    static public ClipData newRawUri(CharSequence label, Bitmap icon, Uri uri) {
+    static public ClipData newRawUri(CharSequence label, Uri uri) {
         Item item = new Item(uri);
-        return new ClipData(label, MIMETYPES_TEXT_URILIST, icon, item);
+        return new ClipData(label, MIMETYPES_TEXT_URILIST, item);
     }
 
+    @Deprecated
+    static public ClipData newRawUri(CharSequence label, Bitmap icon, Uri uri) {
+        return newRawUri(label, uri);
+    }
+    
     /**
      * Return the {@link ClipDescription} associated with this data, describing
      * what it contains.
@@ -445,6 +458,9 @@ public class ClipData implements Parcelable {
         return mClipDescription;
     }
     
+    /**
+     * Add a new Item to the overall ClipData container.
+     */
     public void addItem(Item item) {
         if (item == null) {
             throw new NullPointerException("item is null");
@@ -452,18 +468,31 @@ public class ClipData implements Parcelable {
         mItems.add(item);
     }
 
+    /** @hide */
     public Bitmap getIcon() {
         return mIcon;
     }
 
+    /**
+     * Return the number of items in the clip data.
+     */
     public int getItemCount() {
         return mItems.size();
     }
 
-    public Item getItem(int index) {
+    /**
+     * Return a single item inside of the clip data.  The index can range
+     * from 0 to {@link #getItemCount()}-1.
+     */
+    public Item getItemAt(int index) {
         return mItems.get(index);
     }
 
+    @Deprecated
+    public Item getItem(int index) {
+        return getItemAt(index);
+    }
+    
     @Override
     public int describeContents() {
         return 0;

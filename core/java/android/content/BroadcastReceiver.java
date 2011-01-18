@@ -170,6 +170,16 @@ public abstract class BroadcastReceiver {
      * State for a result that is pending for a broadcast receiver.  Returned
      * by {@link BroadcastReceiver#goAsync() goAsync()}
      * while in {@link BroadcastReceiver#onReceive BroadcastReceiver.onReceive()}.
+     * This allows you to return from onReceive() without having the broadcast
+     * terminate; you must call {@link #finish()} once you are done with the
+     * broadcast.  This allows you to process the broadcast off of the main
+     * thread of your app.
+     * 
+     * <p>Note on threading: the state inside of this class is not itself
+     * thread-safe, however you can use it from any thread if you properly
+     * sure that you do not have races.  Typically this means you will hand
+     * the entire object to another thread, which will be solely responsible
+     * for setting any results and finally calling {@link #finish()}.
      */
     public static class PendingResult {
         /** @hide */

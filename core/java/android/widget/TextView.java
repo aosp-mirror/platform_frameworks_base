@@ -7942,7 +7942,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     for (int i=0; i<urls.length; i++) {
                         Uri uri = Uri.parse(urls[0].getURL());
                         if (clip == null) {
-                            clip = ClipData.newRawUri(null, null, uri);
+                            clip = ClipData.newRawUri(null, uri);
                         } else {
                             clip.addItem(new ClipData.Item(uri));
                         }
@@ -7976,15 +7976,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_CUT:
-                setPrimaryClip(ClipData.newPlainText(null, null,
-                        mTransformed.subSequence(min, max)));
+                setPrimaryClip(ClipData.newPlainText(null, mTransformed.subSequence(min, max)));
                 ((Editable) mText).delete(min, max);
                 stopSelectionActionMode();
                 return true;
 
             case ID_COPY:
-                setPrimaryClip(ClipData.newPlainText(null, null,
-                        mTransformed.subSequence(min, max)));
+                setPrimaryClip(ClipData.newPlainText(null, mTransformed.subSequence(min, max)));
                 stopSelectionActionMode();
                 return true;
         }
@@ -8105,7 +8103,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int start = getSelectionStart();
                 final int end = getSelectionEnd();
                 CharSequence selectedText = mTransformed.subSequence(start, end);
-                ClipData data = ClipData.newPlainText(null, null, selectedText);
+                ClipData data = ClipData.newPlainText(null, selectedText);
                 DragLocalState localState = new DragLocalState(this, start, end);
                 startDrag(data, getTextThumbnailBuilder(selectedText), localState, 0);
                 stopSelectionActionMode();
@@ -8257,7 +8255,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (clip != null) {
             boolean didfirst = false;
             for (int i=0; i<clip.getItemCount(); i++) {
-                CharSequence paste = clip.getItem(i).coerceToText(getContext());
+                CharSequence paste = clip.getItemAt(i).coerceToText(getContext());
                 if (paste != null) {
                     if (!didfirst) {
                         long minMax = prepareSpacesAroundPaste(min, max, paste);
@@ -9300,7 +9298,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ClipData clipData = event.getClipData();
         final int itemCount = clipData.getItemCount();
         for (int i=0; i < itemCount; i++) {
-            Item item = clipData.getItem(i);
+            Item item = clipData.getItemAt(i);
             content.append(item.coerceToText(TextView.this.mContext));
         }
 
