@@ -319,7 +319,7 @@ of {@link android.app.FragmentTransaction} from your {@link android.app.Activity
 
 <pre>
 FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()}
-FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#openTransaction()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
 </pre>
 
 <p>You can then add a fragment using the {@link
@@ -406,7 +406,7 @@ android.app.FragmentManager} like this:</p>
 
 <pre>
 FragmentManager fragmentManager = {@link android.app.Activity#getFragmentManager()};
-FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#openTransaction()};
+FragmentTransaction fragmentTransaction = fragmentManager.{@link android.app.FragmentManager#beginTransaction()};
 </pre>
 
 <p>Each transaction is a set of changes that you want to perform at the same time. You can set
@@ -428,7 +428,7 @@ state in the back stack:</p>
 <pre>
 // Create new fragment and transaction
 Fragment newFragment = new ExampleFragment();
-FragmentTransaction transaction = getFragmentManager().openTransaction();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
 // Replace whatever is in the fragment_container view with this fragment,
 // and add the transaction to the back stack
