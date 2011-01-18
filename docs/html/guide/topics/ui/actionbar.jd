@@ -53,7 +53,7 @@ href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">Options Menu</a> as "act
 items"&mdash;providing instant access to key user actions. (Menu items not appearing as action
 items are placed in the Overflow Menu, revealed by a drop-down in the Action Bar.)</li>
   <li>Provide tabs for navigating between <a
-href="{@docRoot}guide/topics/fragments/index.html">fragments</a>.</li>
+href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>.</li>
   <li>Provide drop-down navigation items.</li>
   <li>Provide interactive "action views" in place of action items.</li>
   <li>Use the application logo as a "return home" or "up" navigation action.</li>
@@ -432,7 +432,7 @@ tab.</p>
 the state of each fragment as necessary, so when the user switches fragments with the tabs,
 then returns to a previous fragment, it appears the way they left. For information about saving
 the state of your fragment, see the <a
-href="{@docRoot}guide/topics/fragments/index.html">Fragments</a> developer guide.</p>
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
 
 
 
