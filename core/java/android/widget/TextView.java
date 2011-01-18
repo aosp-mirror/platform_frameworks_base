@@ -7931,9 +7931,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             max = Math.max(0, Math.max(selStart, selEnd));
         }
 
-        ClipboardManager clipboard = (ClipboardManager)getContext()
-                .getSystemService(Context.CLIPBOARD_SERVICE);
-
         switch (id) {
             case ID_COPY_URL:
                 URLSpan[] urls = ((Spanned) mText).getSpans(min, max, URLSpan.class);
@@ -8402,7 +8399,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          */
         public void updatePosition(HandleView handle, int x, int y);
 
+        public void updateOffset(HandleView handle, int offset);
+
         public void updatePosition();
+
+        public int getCurrentOffset(HandleView handle);
 
         /**
          * This method is called by {@link #onTouchEvent(MotionEvent)} and gives the controller
@@ -8420,7 +8421,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class PastePopupMenu implements OnClickListener {
-        private PopupWindow mContainer;
+        private final PopupWindow mContainer;
         private int mPositionX;
         private int mPositionY;
         private View mPasteView, mNoPasteView;
@@ -8519,12 +8520,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class HandleView extends View {
-        private boolean mPositionOnTop = false;
         private Drawable mDrawable;
-        private PopupWindow mContainer;
+        private final PopupWindow mContainer;
         private int mPositionX;
         private int mPositionY;
-        private CursorController mController;
+        private final CursorController mController;
         private boolean mIsDragging;
         private float mTouchToWindowOffsetX;
         private float mTouchToWindowOffsetY;
@@ -8540,6 +8540,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private boolean mIsInsertionHandle = false;
         private PastePopupMenu mPastePopupWindow;
         private Runnable mLongPressCallback;
+
+        // Touch-up filter: number of previous positions remembered
+        private static final int HISTORY_SIZE = 5;
+        private static final int TOUCH_UP_FILTER_DELAY = 150;
+        private final long[] mPreviousOffsetsTimes = new long[HISTORY_SIZE];
+        private final int[] mPreviousOffsets = new int[HISTORY_SIZE];
+        private int mPreviousOffsetIndex = 0;
+        private int mNumberPreviousOffsets = 0;
+
+        public void startTouchUpFilter(int offset) {
+            mNumberPreviousOffsets = 0;
+            addPositionToTouchUpFilter(offset);
+        }
+
+        public void addPositionToTouchUpFilter(int offset) {
+            if (mNumberPreviousOffsets > 0 &&
+                    mPreviousOffsets[mPreviousOffsetIndex] == offset) {
+                // Make sure only actual changes of position are recorded.
+                return;
+            }
+
+            mPreviousOffsetIndex = (mPreviousOffsetIndex + 1) % HISTORY_SIZE;
+            mPreviousOffsets[mPreviousOffsetIndex] = offset;
+            mPreviousOffsetsTimes[mPreviousOffsetIndex] = SystemClock.uptimeMillis();
+            mNumberPreviousOffsets++;
+        }
+
+        public void filterOnTouchUp() {
+            final long now = SystemClock.uptimeMillis();
+            int i = 0;
+            int index = 0;
+            final int iMax = Math.min(mNumberPreviousOffsets, HISTORY_SIZE);
+            while (i < iMax) {
+                index = (mPreviousOffsetIndex - i + HISTORY_SIZE) % HISTORY_SIZE;
+                if ((now - mPreviousOffsetsTimes[index]) >= TOUCH_UP_FILTER_DELAY) break;
+                i++;
+            }
+
+            mController.updateOffset(this, mPreviousOffsets[index]);
+        }
 
         public static final int LEFT = 0;
         public static final int CENTER = 1;
@@ -8736,20 +8776,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         protected void onDraw(Canvas c) {
             mDrawable.setBounds(0, 0, mRight - mLeft, mBottom - mTop);
-            if (mPositionOnTop) {
-                c.save();
-                c.rotate(180, (mRight - mLeft) / 2, (mBottom - mTop) / 2);
-                mDrawable.draw(c);
-                c.restore();
-            } else {
-                mDrawable.draw(c);
-            }
+            mDrawable.draw(c);
         }
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
             switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
+                startTouchUpFilter(mController.getCurrentOffset(this));
                 mDownPositionX = ev.getRawX();
                 mDownPositionY = ev.getRawY();
                 mTouchToWindowOffsetX = mDownPositionX - mPositionX;
@@ -8806,6 +8840,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                     }
                 }
+                filterOnTouchUp();
                 mIsDragging = false;
                 break;
 
@@ -8823,6 +8858,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         void positionAtCursor(final int offset, boolean bottom) {
+            addPositionToTouchUpFilter(offset);
             final int width = mDrawable.getIntrinsicWidth();
             final int height = mDrawable.getIntrinsicHeight();
             final int line = mLayout.getLineForOffset(offset);
@@ -8938,10 +8974,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int offset = getHysteresisOffset(x, y, previousOffset);
 
             if (offset != previousOffset) {
-                Selection.setSelection((Spannable) mText, offset);
-                updatePosition();
+                updateOffset(handle, offset);
             }
             hideDelayed();
+        }
+
+        public void updateOffset(HandleView handle, int offset) {
+            Selection.setSelection((Spannable) mText, offset);
+            updatePosition();
         }
 
         public void updatePosition() {
@@ -8955,6 +8995,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             getHandle().positionAtCursor(offset, true);
+        }
+
+        public int getCurrentOffset(HandleView handle) {
+            return getSelectionStart();
         }
 
         public boolean onTouchEvent(MotionEvent ev) {
@@ -9067,6 +9111,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updatePosition();
         }
 
+        public void updateOffset(HandleView handle, int offset) {
+            int start = getSelectionStart();
+            int end = getSelectionEnd();
+
+            if (mStartHandle == handle) {
+                start = offset;
+            } else {
+                end = offset;
+            }
+
+            Selection.setSelection((Spannable) mText, start, end);
+            updatePosition();
+        }
+
         public void updatePosition() {
             if (!isShowing()) {
                 return;
@@ -9085,6 +9143,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // The handles have been created since the controller isShowing().
             mStartHandle.positionAtCursor(selectionStart, true);
             mEndHandle.positionAtCursor(selectionEnd, true);
+        }
+
+        public int getCurrentOffset(HandleView handle) {
+            return mStartHandle == handle ? getSelectionStart() : getSelectionEnd();
         }
 
         public boolean onTouchEvent(MotionEvent event) {
