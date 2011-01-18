@@ -360,11 +360,6 @@ public class ClipData implements Parcelable {
         return new ClipData(label, MIMETYPES_TEXT_PLAIN, item);
     }
 
-    @Deprecated
-    static public ClipData newPlainText(CharSequence label, Bitmap icon, CharSequence text) {
-        return newPlainText(label, text);
-    }
-
     /**
      * Create a new ClipData holding an Intent with MIME type
      * {@link ClipDescription#MIMETYPE_TEXT_INTENT}.
@@ -378,11 +373,6 @@ public class ClipData implements Parcelable {
         return new ClipData(label, MIMETYPES_TEXT_INTENT, item);
     }
 
-    @Deprecated
-    static public ClipData newIntent(CharSequence label, Bitmap icon, Intent intent) {
-        return newIntent(label, intent);
-    }
-    
     /**
      * Create a new ClipData holding a URI.  If the URI is a content: URI,
      * this will query the content provider for the MIME type of its data and
@@ -423,12 +413,6 @@ public class ClipData implements Parcelable {
         return new ClipData(label, mimeTypes, item);
     }
 
-    @Deprecated
-    static public ClipData newUri(ContentResolver resolver, CharSequence label,
-            Bitmap icon, Uri uri) {
-        return newUri(resolver, label, uri);
-    }
-    
     /**
      * Create a new ClipData holding an URI with MIME type
      * {@link ClipDescription#MIMETYPE_TEXT_URILIST}.
@@ -445,11 +429,6 @@ public class ClipData implements Parcelable {
         return new ClipData(label, MIMETYPES_TEXT_URILIST, item);
     }
 
-    @Deprecated
-    static public ClipData newRawUri(CharSequence label, Bitmap icon, Uri uri) {
-        return newRawUri(label, uri);
-    }
-    
     /**
      * Return the {@link ClipDescription} associated with this data, describing
      * what it contains.
@@ -488,11 +467,6 @@ public class ClipData implements Parcelable {
         return mItems.get(index);
     }
 
-    @Deprecated
-    public Item getItem(int index) {
-        return getItemAt(index);
-    }
-    
     @Override
     public int describeContents() {
         return 0;
