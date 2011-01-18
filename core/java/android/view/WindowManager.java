@@ -1050,14 +1050,6 @@ public interface WindowManager extends ViewManager {
                 gravity = o.gravity;
                 changes |= LAYOUT_CHANGED;
             }
-            if (horizontalMargin != o.horizontalMargin) {
-                horizontalMargin = o.horizontalMargin;
-                changes |= LAYOUT_CHANGED;
-            }
-            if (verticalMargin != o.verticalMargin) {
-                verticalMargin = o.verticalMargin;
-                changes |= LAYOUT_CHANGED;
-            }
             if (format != o.format) {
                 format = o.format;
                 changes |= FORMAT_CHANGED;
