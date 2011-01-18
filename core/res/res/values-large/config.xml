@@ -22,4 +22,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- see comment in values/config.xml -->
     <dimen name="config_prefDialogWidth">440dp</dimen>
+    <!-- see comment in values/config.xml -->
+    <bool name="config_closeDialogWhenTouchOutside">true</bool>
 </resources>

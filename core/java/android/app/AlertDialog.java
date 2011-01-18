@@ -64,11 +64,13 @@ public class AlertDialog extends Dialog implements DialogInterface {
 
     protected AlertDialog(Context context, int theme) {
         super(context, theme == 0 ? getDefaultDialogTheme(context) : theme);
+        mWindow.alwaysReadCloseOnTouchAttr();
         mAlert = new AlertController(context, this, getWindow());
     }
 
     protected AlertDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
         super(context, getDefaultDialogTheme(context));
+        mWindow.alwaysReadCloseOnTouchAttr();
         setCancelable(cancelable);
         setOnCancelListener(cancelListener);
         mAlert = new AlertController(context, this, getWindow());
@@ -79,25 +81,6 @@ public class AlertDialog extends Dialog implements DialogInterface {
         context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
                 outValue, true);
         return outValue.resourceId;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        if (mCancelable) {
-            final View decor = mWindow.getDecorView();
-            final int width = decor.getWidth();
-            final int height = decor.getHeight();
-            final float x = ev.getX();
-            final float y = ev.getY();
-
-            if (mCancelable && (x < 0 || x > width || y < 0 || y > height)
-                    &&  mDecor != null && isShowing()) {
-                cancel();
-                return true;
-            }
-        }
-
-        return super.onTouchEvent(ev);
     }
 
     /**
