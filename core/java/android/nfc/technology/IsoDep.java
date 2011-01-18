@@ -46,6 +46,7 @@ public final class IsoDep extends BasicTagTechnology {
     private byte[] mHiLayerResponse = null;
     private byte[] mHistBytes = null;
 
+    /** @hide */
     public IsoDep(NfcAdapter adapter, Tag tag, Bundle extras)
             throws RemoteException {
         super(adapter, tag, TagTechnology.ISO_DEP);
@@ -56,16 +57,31 @@ public final class IsoDep extends BasicTagTechnology {
     }
 
     /**
-     * 3A only
+     * Return the historical bytes if the tag is using {@link NfcA}, null otherwise.
      */
     public byte[] getHistoricalBytes() {
         return mHistBytes;
     }
 
     /**
-     * 3B only
+     * Return the hi layer response bytes if the tag is using {@link NfcB}, null otherwise.
      */
     public byte[] getHiLayerResponse() {
         return mHiLayerResponse;
+    }
+
+    /**
+     * Send data to a tag and receive the response.
+     * <p>
+     * This method will block until the response is received. It can be canceled
+     * with {@link #close}.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param data bytes to send
+     * @return bytes received in response
+     * @throws IOException if the target is lost or connection closed
+     */
+    public byte[] transceive(byte[] data) throws IOException {
+        return transceive(data, true);
     }
 }

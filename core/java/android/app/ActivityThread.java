@@ -1439,6 +1439,16 @@ public final class ActivityThread {
         }
     }
 
+    public void unregisterOnActivityPausedListener(Activity activity,
+            OnActivityPausedListener listener) {
+        synchronized (mOnPauseListeners) {
+            ArrayList<OnActivityPausedListener> list = mOnPauseListeners.get(activity);
+            if (list != null) {
+                list.remove(listener);
+            }
+        }
+    }
+
     public final ActivityInfo resolveActivityInfo(Intent intent) {
         ActivityInfo aInfo = intent.resolveActivityInfo(
                 mInitialApplication.getPackageManager(), PackageManager.GET_SHARED_LIBRARY_FILES);

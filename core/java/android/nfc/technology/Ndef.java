@@ -100,15 +100,6 @@ public final class Ndef extends BasicTagTechnology {
     }
 
     /**
-     * Get optional extra NDEF messages.
-     * Some tags may contain extra NDEF messages, but not all
-     * implementations will be able to read them.
-     */
-    public NdefMessage[] getExtraNdefMessage() throws IOException, FormatException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Get NDEF tag type.
      * <p>Returns one of {@link #NFC_FORUM_TYPE_1}, {@link #NFC_FORUM_TYPE_2},
      * {@link #NFC_FORUM_TYPE_3}, {@link #NFC_FORUM_TYPE_4},
@@ -208,22 +199,6 @@ public final class Ndef extends BasicTagTechnology {
     }
 
     /**
-     * Attempt to write extra NDEF messages.
-     * Implementations may be able to write extra NDEF
-     * message after the first primary message, but it is not
-     * guaranteed. Even if it can be written, other implementations
-     * may not be able to read NDEF messages after the primary message.
-     * It is recommended to use additional NDEF records instead.
-     *
-     * @throws IOException
-     */
-    public void writeExtraNdefMessage(int i, NdefMessage msg) throws IOException, FormatException {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Indicates whether a tag can be made read-only with
      * {@link #makeReadonly()}
      */
@@ -262,12 +237,5 @@ public final class Ndef extends BasicTagTechnology {
             Log.e(TAG, "NFC service dead", e);
             return false;
         }
-    }
-
-    @Override
-    public byte[] transceive(byte[] data) {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
     }
 }
