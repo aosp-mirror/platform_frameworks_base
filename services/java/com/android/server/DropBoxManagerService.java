@@ -97,10 +97,18 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     // Ensure that all log entries have a unique timestamp
     private long mLastTimestamp = 0;
 
+    private volatile boolean mBooted = false;
+
     /** Receives events that might indicate a need to clean up files. */
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent != null && Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+                mBooted = true;
+                return;
+            }
+
+            // Else, for ACTION_DEVICE_STORAGE_LOW:
             mCachedQuotaUptimeMillis = 0;  // Force a re-check of quota size
 
             // Run the initialization in the background (not this main thread).
@@ -132,7 +140,11 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
         // Set up intent receivers
         mContext = context;
         mContentResolver = context.getContentResolver();
-        context.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_DEVICE_STORAGE_LOW);
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        context.registerReceiver(mReceiver, filter);
 
         mContentResolver.registerContentObserver(
             Settings.Secure.CONTENT_URI, true,
@@ -224,6 +236,9 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
             Intent dropboxIntent = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TAG, tag);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TIME, time);
+            if (!mBooted) {
+                dropboxIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            }
             mContext.sendBroadcast(dropboxIntent, android.Manifest.permission.READ_LOGS);
 
         } catch (IOException e) {
