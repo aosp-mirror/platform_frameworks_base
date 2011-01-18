@@ -362,6 +362,15 @@
              pointer will go until that pointers go up thereby enabling touches
              with multiple pointers to be split across multiple windows. -->
         <attr name="windowEnableSplitTouch" format="boolean" />
+        
+        <!-- Control whether a container should automatically close itself if
+             the user touches outside of it.  This only applies to activities
+             and dialogs.
+             
+             <p>Note: this attribute will only be respected for applications
+             that are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
+             or later. -->
+        <attr name="windowCloseOnTouchOutside" format="boolean" />
 
         <!-- ============ -->
         <!-- Alert Dialog styles -->
@@ -1342,6 +1351,7 @@
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
         <attr name="windowEnableSplitTouch" />
+        <attr name="windowCloseOnTouchOutside" />
         <!-- The minimum width the window is allowed to be, along the major
              axis of the screen.  That is, when in landscape.  Can be either
              an absolute dimension or a fraction of the screen size in that
