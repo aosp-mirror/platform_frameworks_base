@@ -70,6 +70,9 @@
     <string name="def_lock_sound" translatable="false">/system/media/audio/ui/Lock.ogg</string>
     <string name="def_unlock_sound" translatable="false">/system/media/audio/ui/Unlock.ogg</string>
 
+    <!-- Notifications use ringer volume -->
+    <bool name="def_notifications_use_ring_volume">true</bool>
+
     <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
     <bool name="def_vibrate_in_silent">true</bool>
 </resources>
