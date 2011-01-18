@@ -178,6 +178,24 @@ void Matrix4::loadScale(float sx, float sy, float sz) {
     data[kScaleZ] = sz;
 }
 
+void Matrix4::loadSkew(float sx, float sy) {
+    loadIdentity();
+
+    data[kScaleX]       = 1.0f;
+    data[kSkewX]        = sx;
+    data[kTranslateX]   = 0.0f;
+
+    data[kSkewY]        = sy;
+    data[kScaleY]       = 1.0f;
+    data[kTranslateY]   = 0.0f;
+
+    data[kPerspective0] = 0.0f;
+    data[kPerspective1] = 0.0f;
+    data[kPerspective2] = 1.0f;
+
+    mSimpleMatrix = false;
+}
+
 void Matrix4::loadRotate(float angle, float x, float y, float z) {
     data[kPerspective0]  = 0.0f;
     data[kPerspective1]  = 0.0f;
