@@ -98,6 +98,7 @@ public:
         Translate,
         Rotate,
         Scale,
+        Skew,
         SetMatrix,
         ConcatMatrix,
         ClipRect,
@@ -250,6 +251,7 @@ public:
     void translate(float dx, float dy);
     void rotate(float degrees);
     void scale(float sx, float sy);
+    void skew(float sx, float sy);
 
     void setMatrix(SkMatrix* matrix);
     void concatMatrix(SkMatrix* matrix);
