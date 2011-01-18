@@ -46,7 +46,13 @@ public class FileA3D extends BaseObj {
     **/
     public enum EntryType {
 
+        /**
+        * Unknown or or invalid object, nothing will be loaded
+        **/
         UNKNOWN (0),
+        /**
+        * Renderscript Mesh object
+        **/
         MESH (1);
 
         int mID;
@@ -74,14 +80,20 @@ public class FileA3D extends BaseObj {
         BaseObj mLoadedObj;
 
         /**
+        * Returns the name of a renderscript object the index entry
+        * describes
+        *
         * @return name of a renderscript object the index entry
-        *         describes
+        * describes
+        *
         */
         public String getName() {
             return mName;
         }
 
         /**
+        * Returns the type of a renderscript object the index entry
+        * describes
         * @return type of a renderscript object the index entry
         *         describes
         */
@@ -90,7 +102,8 @@ public class FileA3D extends BaseObj {
         }
 
         /**
-        * @return renderscript object described by the entry
+        * Used to load the object described by the index entry
+        * @return base renderscript object described by the entry
         */
         public BaseObj getObject() {
             mRS.validate();
@@ -99,6 +112,9 @@ public class FileA3D extends BaseObj {
         }
 
         /**
+        * Used to load the mesh described by the index entry, object
+        * described by the index entry must be a renderscript mesh
+        *
         * @return renderscript mesh object described by the entry
         */
         public Mesh getMesh() {
@@ -166,7 +182,9 @@ public class FileA3D extends BaseObj {
     }
 
     /**
-    * @return the numberof objects stored inside a FileA3D
+    * Returns the number of objects stored inside the a3d file
+    *
+    * @return the number of objects stored inside the a3d file
     */
     public int getIndexEntryCount() {
         if(mFileEntries == null) {
@@ -180,6 +198,8 @@ public class FileA3D extends BaseObj {
     * FileA3D
     *
     * @param index number of the entry from the list to return
+    *
+    * @return entry in the a3d file described by the index
     */
     public IndexEntry getIndexEntry(int index) {
         if(getIndexEntryCount() == 0 || index < 0 || index >= mFileEntries.length) {
@@ -195,6 +215,7 @@ public class FileA3D extends BaseObj {
     * @param mgr asset manager used to load asset
     * @param path location of the file to load
     *
+    * @return a3d file containing renderscript objects
     */
     static public FileA3D createFromAsset(RenderScript rs, AssetManager mgr, String path) {
         rs.validate();
@@ -214,6 +235,7 @@ public class FileA3D extends BaseObj {
     * @param rs Context to which the object will belong.
     * @param path location of the file to load
     *
+    * @return a3d file containing renderscript objects
     */
     static public FileA3D createFromFile(RenderScript rs, String path) {
         int fileId = rs.nFileA3DCreateFromFile(path);
@@ -232,6 +254,7 @@ public class FileA3D extends BaseObj {
     * @param rs Context to which the object will belong.
     * @param path location of the file to load
     *
+    * @return a3d file containing renderscript objects
     */
     static public FileA3D createFromFile(RenderScript rs, File path) {
         return createFromFile(rs, path.getAbsolutePath());
@@ -244,6 +267,7 @@ public class FileA3D extends BaseObj {
     * @param res resource manager used for loading
     * @param id resource to create FileA3D from
     *
+    * @return a3d file containing renderscript objects
     */
     static public FileA3D createFromResource(RenderScript rs, Resources res, int id) {
 
