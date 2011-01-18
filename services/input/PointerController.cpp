@@ -310,8 +310,16 @@ void PointerController::setDisplayOrientation(int32_t orientation) {
 void PointerController::setPointerIcon(const SkBitmap* bitmap, float hotSpotX, float hotSpotY) {
     AutoMutex _l(mLock);
 
-    delete mLocked.iconBitmap;
-    mLocked.iconBitmap = bitmap ? new SkBitmap(*bitmap) : NULL;
+    if (mLocked.iconBitmap) {
+        delete mLocked.iconBitmap;
+        mLocked.iconBitmap = NULL;
+    }
+
+    if (bitmap) {
+        mLocked.iconBitmap = new SkBitmap();
+        bitmap->copyTo(mLocked.iconBitmap, SkBitmap::kARGB_8888_Config);
+    }
+
     mLocked.iconHotSpotX = hotSpotX;
     mLocked.iconHotSpotY = hotSpotY;
     mLocked.drawn = false;
