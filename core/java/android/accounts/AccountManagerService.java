@@ -1019,6 +1019,10 @@ public class AccountManagerService
             AccountAuthenticatorResponse response, String authTokenType, String authTokenLabel) {
 
         Intent intent = new Intent(mContext, GrantCredentialsPermissionActivity.class);
+        // See FLAT_ACTIVITY_NEW_TASK docs for limitations and benefits of the flag.
+        // Since it was set in Eclair+ we can't change it without breaking apps using
+        // the intent from a non-Activity context.
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addCategory(
                 String.valueOf(getCredentialPermissionNotificationId(account, authTokenType, uid)));
 
