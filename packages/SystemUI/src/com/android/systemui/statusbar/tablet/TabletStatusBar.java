@@ -272,6 +272,7 @@ public class TabletStatusBar extends StatusBar implements
         mInputMethodsPanel.setVisibility(View.GONE);
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
+        mInputMethodsPanel.setImeSwitchButton(mInputMethodSwitchButton);
         mStatusBarView.setIgnoreChildren(3, mInputMethodSwitchButton, mInputMethodsPanel);
         lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -853,7 +854,7 @@ public class TabletStatusBar extends StatusBar implements
         if (oldVisibility != mInputMethodSwitchButton.getVisibility()) {
             updateNotificationIcons();
         }
-        mInputMethodsPanel.setIMEToken(token);
+        mInputMethodsPanel.setImeToken(token);
         mBackButton.setImageResource(
                 visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
         if (FAKE_SPACE_BAR) {
