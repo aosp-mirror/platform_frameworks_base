@@ -80,6 +80,7 @@ public final class BridgeContext extends Activity {
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
     private final RenderResources mRenderResources;
+    private final ApplicationInfo mApplicationInfo;
 
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
@@ -112,10 +113,12 @@ public final class BridgeContext extends Activity {
      * value is the resource value.
      * @param styleInheritanceMap
      * @param projectCallback
+     * @param targetSdkVersion the targetSdkVersion of the application.
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
             RenderResources renderResources,
-            IProjectCallback projectCallback) {
+            IProjectCallback projectCallback,
+            int targetSdkVersion) {
         mProjectKey = projectKey;
         mMetrics = metrics;
         mProjectCallback = projectCallback;
@@ -124,6 +127,9 @@ public final class BridgeContext extends Activity {
 
         mFragments.mCurState = Fragment.CREATED;
         mFragments.mActivity = this;
+
+        mApplicationInfo = new ApplicationInfo();
+        mApplicationInfo.targetSdkVersion = targetSdkVersion;
     }
 
     /**
@@ -836,7 +842,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public ApplicationInfo getApplicationInfo() {
-        return new ApplicationInfo();
+        return mApplicationInfo;
     }
 
     @Override
