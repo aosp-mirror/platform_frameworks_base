@@ -100,17 +100,27 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
                 || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
 
+        // TODO: re-enable on phones with keyboards
+        final boolean isPhysicalKbShowing = false;
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
         mKeyboardViewAlpha = (PasswordEntryKeyboardView) findViewById(R.id.keyboardAlpha);
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
+        mPasswordEntry.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                if (mIsAlpha && !isPhysicalKbShowing) {
+                    mKeyboardViewAlpha.setVisibility(
+                            mKeyboardViewAlpha.getVisibility() == View.VISIBLE
+                            ? View.GONE : View.VISIBLE);
+                    mCallback.pokeWakelock();
+                }
+            }
+        });
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this, false);
-        // TODO: re-enable on phones with keyboards
-        boolean isPhysicalKbShowing = false;
         //mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
         if (mKeyboardViewAlpha == null || !mIsAlpha) {
             mKeyboardHelper.setKeyboardMode(mIsAlpha ?
@@ -123,24 +133,21 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
             mKeyboardHelperAlpha.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
             mKeyboardView.setVisibility(View.GONE);
-            mKeyboardViewAlpha.setVisibility(isPhysicalKbShowing ? View.INVISIBLE : View.VISIBLE);
             mPasswordEntry.setWidth(mKeyboardViewAlpha.getLayoutParams().width);
         }
 
-        mPasswordEntry.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_lock_idle_lock, 0,
-                0, 0);
         mPasswordEntry.requestFocus();
 
         // This allows keyboards with overlapping qwerty/numeric keys to choose just the
         // numeric keys.
         if (mIsAlpha) {
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
-            mStatusView.setHelpMessage(R.string.keyguard_password_enter_password_code,
-                    StatusView.LOCK_ICON);
+            // mStatusView.setHelpMessage(R.string.keyguard_password_enter_password_code,
+            //      StatusView.LOCK_ICON);
         } else {
             mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
-            mStatusView.setHelpMessage(R.string.keyguard_password_enter_pin_code,
-                    StatusView.LOCK_ICON);
+            //mStatusView.setHelpMessage(R.string.keyguard_password_enter_pin_code,
+            //      StatusView.LOCK_ICON);
         }
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
