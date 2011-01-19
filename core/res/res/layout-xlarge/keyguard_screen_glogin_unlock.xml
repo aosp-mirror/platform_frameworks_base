@@ -100,6 +100,16 @@
                 android:text="@android:string/lockscreen_glogin_submit_button"
                 />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ok"
+                android:layout_marginTop="50dip"
+                android:text="@android:string/lockscreen_glogin_account_recovery_hint"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:gravity="center_horizontal"
+                />
+
         </RelativeLayout>
     </ScrollView>
 
