@@ -150,6 +150,9 @@ private:
     AudioPlayer *mAudioPlayer;
     int64_t mDurationUs;
 
+    int32_t mDisplayWidth;
+    int32_t mDisplayHeight;
+
     uint32_t mFlags;
     uint32_t mExtractorFlags;
     uint32_t mSinceLastDropped;
