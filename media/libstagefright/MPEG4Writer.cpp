@@ -590,6 +590,7 @@ status_t MPEG4Writer::stop() {
 
     status_t err = OK;
     int64_t maxDurationUs = 0;
+    int64_t minDurationUs = 0x7fffffffffffffffLL;
     for (List<Track *>::iterator it = mTracks.begin();
          it != mTracks.end(); ++it) {
         status_t status = (*it)->stop();
@@ -601,6 +602,14 @@ status_t MPEG4Writer::stop() {
         if (durationUs > maxDurationUs) {
             maxDurationUs = durationUs;
         }
+        if (durationUs < minDurationUs) {
+            minDurationUs = durationUs;
+        }
+    }
+
+    if (mTracks.size() > 1) {
+        LOGD("Duration from tracks range is [%lld, %lld] us",
+            minDurationUs, maxDurationUs);
     }
 
     stopWriterThread();
