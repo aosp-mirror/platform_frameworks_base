@@ -30,6 +30,7 @@ import com.android.internal.os.RuntimeInit;
 
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
+import dalvik.system.VMDebug;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -180,6 +181,15 @@ public final class StrictMode {
      * @hide
      */
     public static final int DETECT_VM_ACTIVITY_LEAKS = 0x800;  // for VmPolicy
+
+    /**
+     * @hide
+     */
+    private static final int DETECT_VM_INSTANCE_LEAKS = 0x1000;  // for VmPolicy
+
+    private static final int ALL_VM_DETECT_BITS =
+            DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS |
+            DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS;
 
     /**
      * @hide
@@ -573,11 +583,15 @@ public final class StrictMode {
                 } else if (mClassInstanceLimit == null) {
                     mClassInstanceLimit = new HashMap<Class, Integer>();
                 }
+                mMask |= DETECT_VM_INSTANCE_LEAKS;
                 mClassInstanceLimit.put(klass, instanceLimit);
                 return this;
             }
 
-            private Builder detectActivityLeaks() {
+            /**
+             * Detect leaks of {@link android.app.Activity} subclasses.
+             */
+            public Builder detectActivityLeaks() {
                 return enable(DETECT_VM_ACTIVITY_LEAKS);
             }
 
@@ -585,8 +599,8 @@ public final class StrictMode {
              * Detect everything that's potentially suspect.
              *
              * <p>In the Honeycomb release this includes leaks of
-             * SQLite cursors and other closable objects but will
-             * likely expand in future releases.
+             * SQLite cursors, Activities, and other closable objects
+             * but will likely expand in future releases.
              */
             public Builder detectAll() {
                 return enable(DETECT_VM_ACTIVITY_LEAKS |
@@ -1347,6 +1361,41 @@ public final class StrictMode {
     }
 
     /**
+     * @hide
+     */
+    public static void conditionallyCheckInstanceCounts() {
+        VmPolicy policy = getVmPolicy();
+        if (policy.classInstanceLimit.size() == 0) {
+            return;
+        }
+        Runtime.getRuntime().gc();
+        // Note: classInstanceLimit is immutable, so this is lock-free
+        for (Class klass : policy.classInstanceLimit.keySet()) {
+            int limit = policy.classInstanceLimit.get(klass);
+            long instances = VMDebug.countInstancesOfClass(klass, false);
+            if (instances <= limit) {
+                continue;
+            }
+            Throwable tr = new InstanceCountViolation(klass, instances, limit);
+            onVmPolicyViolation(tr.getMessage(), tr);
+        }
+    }
+
+    private static long sLastInstanceCountCheckMillis = 0;
+    private static boolean sIsIdlerRegistered = false;  // guarded by sProcessIdleHandler
+    private static final MessageQueue.IdleHandler sProcessIdleHandler =
+            new MessageQueue.IdleHandler() {
+                public boolean queueIdle() {
+                    long now = SystemClock.uptimeMillis();
+                    if (now - sLastInstanceCountCheckMillis > 30 * 1000) {
+                        sLastInstanceCountCheckMillis = now;
+                        conditionallyCheckInstanceCounts();
+                    }
+                    return true;
+                }
+            };
+
+    /**
      * Sets the policy for what actions in the VM process (on any
      * thread) should be detected, as well as the penalty if such
      * actions occur.
@@ -1357,6 +1406,19 @@ public final class StrictMode {
         sVmPolicy = policy;
         sVmPolicyMask = policy.mask;
         setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
+
+        Looper looper = Looper.getMainLooper();
+        if (looper != null) {
+            MessageQueue mq = looper.mQueue;
+            synchronized (sProcessIdleHandler) {
+                if (policy.classInstanceLimit.size() == 0) {
+                    mq.removeIdleHandler(sProcessIdleHandler);
+                } else if (!sIsIdlerRegistered) {
+                    mq.addIdleHandler(sProcessIdleHandler);
+                    sIsIdlerRegistered = true;
+                }
+            }
+        }
     }
 
     /**
@@ -1406,19 +1468,39 @@ public final class StrictMode {
         onVmPolicyViolation(message, originStack);
     }
 
+    // Map from VM violation fingerprint to uptime millis.
+    private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<Integer, Long>();
+
     /**
      * @hide
      */
     public static void onVmPolicyViolation(String message, Throwable originStack) {
-        if ((sVmPolicyMask & PENALTY_LOG) != 0) {
+        final boolean penaltyDropbox = (sVmPolicyMask & PENALTY_DROPBOX) != 0;
+        final boolean penaltyDeath = (sVmPolicyMask & PENALTY_DEATH) != 0;
+        final boolean penaltyLog = (sVmPolicyMask & PENALTY_LOG) != 0;
+        final ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
+
+        final Integer fingerprint = info.hashCode();
+        final long now = SystemClock.uptimeMillis();
+        long lastViolationTime = 0;
+        long timeSinceLastViolationMillis = Long.MAX_VALUE;
+        synchronized (sLastVmViolationTime) {
+            if (sLastVmViolationTime.containsKey(fingerprint)) {
+                lastViolationTime = sLastVmViolationTime.get(fingerprint);
+                timeSinceLastViolationMillis = now - lastViolationTime;
+            }
+            if (timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
+                sLastVmViolationTime.put(fingerprint, now);
+            }
+        }
+
+        Log.d(TAG, "Time since last vm violation: " + timeSinceLastViolationMillis);
+
+        if (penaltyLog && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
             Log.e(TAG, message, originStack);
         }
 
-        boolean penaltyDropbox = (sVmPolicyMask & PENALTY_DROPBOX) != 0;
-        boolean penaltyDeath = (sVmPolicyMask & PENALTY_DEATH) != 0;
-
-        int violationMaskSubset = PENALTY_DROPBOX | DETECT_VM_CURSOR_LEAKS;
-        ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
+        int violationMaskSubset = PENALTY_DROPBOX | (ALL_VM_DETECT_BITS & sVmPolicyMask);
 
         if (penaltyDropbox && !penaltyDeath) {
             // Common case for userdebug/eng builds.  If no death and
@@ -1428,7 +1510,7 @@ public final class StrictMode {
             return;
         }
 
-        if (penaltyDropbox) {
+        if (penaltyDropbox && lastViolationTime == 0) {
             // The violationMask, passed to ActivityManager, is a
             // subset of the original StrictMode policy bitmask, with
             // only the bit violated and penalty bits to be executed
@@ -1786,6 +1868,12 @@ public final class StrictMode {
         public String broadcastIntentAction;
 
         /**
+         * If this is a instance count violation, the number of instances in memory,
+         * else -1.
+         */
+        public long numInstances = -1;
+
+        /**
          * Create an uninitialized instance of ViolationInfo
          */
         public ViolationInfo() {
@@ -1806,6 +1894,9 @@ public final class StrictMode {
                 broadcastIntentAction = broadcastIntent.getAction();
             }
             ThreadSpanState state = sThisThreadSpanState.get();
+            if (tr instanceof InstanceCountViolation) {
+                this.numInstances = ((InstanceCountViolation) tr).mInstances;
+            }
             synchronized (state) {
                 int spanActiveCount = state.mActiveSize;
                 if (spanActiveCount > MAX_SPAN_TAGS) {
@@ -1867,6 +1958,7 @@ public final class StrictMode {
             violationNumThisLoop = in.readInt();
             numAnimationsRunning = in.readInt();
             violationUptimeMillis = in.readLong();
+            numInstances = in.readLong();
             broadcastIntentAction = in.readString();
             tags = in.readStringArray();
         }
@@ -1881,6 +1973,7 @@ public final class StrictMode {
             dest.writeInt(violationNumThisLoop);
             dest.writeInt(numAnimationsRunning);
             dest.writeLong(violationUptimeMillis);
+            dest.writeLong(numInstances);
             dest.writeString(broadcastIntentAction);
             dest.writeStringArray(tags);
         }
@@ -1894,6 +1987,9 @@ public final class StrictMode {
             pw.println(prefix + "policy: " + policy);
             if (durationMillis != -1) {
                 pw.println(prefix + "durationMillis: " + durationMillis);
+            }
+            if (numInstances != -1) {
+                pw.println(prefix + "numInstances: " + numInstances);
             }
             if (violationNumThisLoop != 0) {
                 pw.println(prefix + "violationNumThisLoop: " + violationNumThisLoop);
@@ -1913,5 +2009,30 @@ public final class StrictMode {
             }
         }
 
+    }
+
+    // Dummy throwable, for now, since we don't know when or where the
+    // leaked instances came from.  We might in the future, but for
+    // now we suppress the stack trace because it's useless and/or
+    // misleading.
+    private static class InstanceCountViolation extends Throwable {
+        final Class mClass;
+        final long mInstances;
+        final int mLimit;
+
+        private static final StackTraceElement[] FAKE_STACK = new StackTraceElement[1];
+        static {
+            FAKE_STACK[0] = new StackTraceElement("android.os.StrictMode", "setClassInstanceLimit",
+                                                  "StrictMode.java", 1);
+        }
+
+        public InstanceCountViolation(Class klass, long instances, int limit) {
+            // Note: now including instances here, otherwise signatures would all be different.
+            super(klass.toString() + "; limit=" + limit);
+            setStackTrace(FAKE_STACK);
+            mClass = klass;
+            mInstances = instances;
+            mLimit = limit;
+        }
     }
 }
