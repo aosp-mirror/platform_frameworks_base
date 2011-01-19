@@ -438,8 +438,7 @@ rinse_repeat:
 
     if (mSeqNumber < firstSeqNumberInPlaylist
             || mSeqNumber > lastSeqNumberInPlaylist) {
-        if (mSeqNumber < firstSeqNumberInPlaylist
-                && mPrevBandwidthIndex != (ssize_t)bandwidthIndex) {
+        if (mPrevBandwidthIndex != (ssize_t)bandwidthIndex) {
             // Go back to the previous bandwidth.
 
             LOGI("new bandwidth does not have the sequence number "
