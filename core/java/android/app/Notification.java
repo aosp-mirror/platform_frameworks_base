@@ -34,6 +34,9 @@ import java.text.NumberFormat;
  * A class that represents how a persistent notification is to be presented to
  * the user using the {@link android.app.NotificationManager}.
  *
+ * <p>The {@link Notification.Builder Notification.Builder} has been added to make it
+ * easier to construct Notifications.</p>
+ *
  * <p>For a guide to creating notifications, see the
  * <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">Creating Status 
  * Bar Notifications</a> document in the Dev Guide.</p>
@@ -119,15 +122,8 @@ public class Notification implements Parcelable
 
     /**
      * An intent to launch instead of posting the notification to the status bar.
-     * Only for use with extremely high-priority notifications demanding the user's
-     * <strong>immediate</strong> attention, such as an incoming phone call or
-     * alarm clock that the user has explicitly set to a particular time.
-     * If this facility is used for something else, please give the user an option
-     * to turn it off and use a normal notification, as this can be extremely
-     * disruptive.
-     * 
-     * <p>Use with {@link #FLAG_HIGH_PRIORITY} to ensure that this notification
-     * will reach the user even when other notifications are suppressed.
+     *
+     * @see Notification.Builder#setFullScreenIntent
      */
     public PendingIntent fullScreenIntent;
 
@@ -278,7 +274,7 @@ public class Notification implements Parcelable
     /**
      * Bit to be bitwise-ored into the {@link #flags} field that should be
      * set if the notification should be canceled when it is clicked by the
-     * user. 
+     * user.  On tablets, the 
      */
     public static final int FLAG_AUTO_CANCEL        = 0x00000010;
 
@@ -618,6 +614,10 @@ public class Notification implements Parcelable
         return sb.toString();
     }
 
+    /**
+     * Builder class for {@link Notification} objects.  Allows easier control over
+     * all the flags, as well as help constructing the typical notification layouts.
+     */
     public static class Builder {
         private Context mContext;
 
@@ -644,6 +644,16 @@ public class Notification implements Parcelable
         private int mDefaults;
         private int mFlags;
 
+        /**
+         * Constructor.
+         *
+         * Automatically sets the when field to {@link System#currentTimeMillis()
+         * System.currentTimeMllis()} and the audio stream to the {@link #STREAM_DEFAULT}.
+         *
+         * @param context A {@link Context} that will be used to construct the
+         *      RemoteViews. The Context will not be held past the lifetime of this
+         *      Builder object.
+         */
         public Builder(Context context) {
             mContext = context;
 
@@ -652,96 +662,192 @@ public class Notification implements Parcelable
             mAudioStreamType = STREAM_DEFAULT;
         }
 
+        /**
+         * Set the time that the event occurred.  Notifications in the panel are
+         * sorted by this time.
+         */
         public Builder setWhen(long when) {
             mWhen = when;
             return this;
         }
 
+        /**
+         * Set the small icon to use in the notification layouts.  Different classes of devices
+         * may return different sizes.  See the UX guidelines for more information on how to
+         * design these icons.
+         *
+         * @param icon A resource ID in the application's package of the drawble to use.
+         */
         public Builder setSmallIcon(int icon) {
             mSmallIcon = icon;
             return this;
         }
 
+        /**
+         * A variant of {@link #setSmallIcon(int) setSmallIcon(int)} that takes an additional
+         * level parameter for when the icon is a {@link android.graphics.drawable.LevelListDrawable
+         * LevelListDrawable}.
+         *
+         * @param icon A resource ID in the application's package of the drawble to use.
+         * @param level The level to use for the icon.
+         *
+         * @see android.graphics.drawable.LevelListDrawable
+         */
         public Builder setSmallIcon(int icon, int level) {
             mSmallIcon = icon;
             mSmallIconLevel = level;
             return this;
         }
 
+        /**
+         * Set the title (first row) of the notification, in a standard notification.
+         */
         public Builder setContentTitle(CharSequence title) {
             mContentTitle = title;
             return this;
         }
 
+        /**
+         * Set the text (second row) of the notification, in a standard notification.
+         */
         public Builder setContentText(CharSequence text) {
             mContentText = text;
             return this;
         }
 
+        /**
+         * Set the large number at the right-hand side of the notification.  This is
+         * equivalent to setContentInfo, although it might show the number in a different
+         * font size for readability.
+         */
         public Builder setNumber(int number) {
             mNumber = number;
             return this;
         }
 
+        /**
+         * Set the large text at the right-hand side of the notification.
+         */
         public Builder setContentInfo(CharSequence info) {
             mContentInfo = info;
             return this;
         }
 
+        /**
+         * Supply a custom RemoteViews to use instead of the standard one.
+         */
         public Builder setContent(RemoteViews views) {
             mContentView = views;
             return this;
         }
 
+        /**
+         * Supply a {@link PendingIntent} to send when the notification is clicked.
+         * If you do not supply an intent, you can now add PendingIntents to individual
+         * views to be launched when clicked by calling {@link RemoteViews#setOnClickPendingIntent
+         * RemoteViews.setOnClickPendingIntent(int,PendingIntent)}.
+         */
         public Builder setContentIntent(PendingIntent intent) {
             mContentIntent = intent;
             return this;
         }
 
+        /**
+         * Supply a {@link PendingIntent} to send when the notification is cleared by the user
+         * directly from the notification panel.  For example, this intent is sent when the user
+         * clicks the "Clear all" button, or the individual "X" buttons on notifications.  This
+         * intent is not sent when the application calls {@link NotificationManager#cancel
+         * NotificationManager.cancel(int)}.
+         */
         public Builder setDeleteIntent(PendingIntent intent) {
             mDeleteIntent = intent;
             return this;
         }
 
+        /**
+         * An intent to launch instead of posting the notification to the status bar.
+         * Only for use with extremely high-priority notifications demanding the user's
+         * <strong>immediate</strong> attention, such as an incoming phone call or
+         * alarm clock that the user has explicitly set to a particular time.
+         * If this facility is used for something else, please give the user an option
+         * to turn it off and use a normal notification, as this can be extremely
+         * disruptive.
+         *
+         * @param intent The pending intent to launch.
+         * @param highPriority Passing true will cause this notification to be sent
+         *          even if other notifications are suppressed.
+         */
         public Builder setFullScreenIntent(PendingIntent intent, boolean highPriority) {
             mFullScreenIntent = intent;
             setFlag(FLAG_HIGH_PRIORITY, highPriority);
             return this;
         }
 
+        /**
+         * Set the text that is displayed in the status bar when the notification first
+         * arrives.
+         */
         public Builder setTicker(CharSequence tickerText) {
             mTickerText = tickerText;
             return this;
         }
 
+        /**
+         * Set the text that is displayed in the status bar when the notification first
+         * arrives, and also a RemoteViews object that may be displayed instead on some
+         * devices.
+         */
         public Builder setTicker(CharSequence tickerText, RemoteViews views) {
             mTickerText = tickerText;
             mTickerView = views;
             return this;
         }
 
+        /**
+         * Set the large icon that is shown in the ticker and notification.
+         */
         public Builder setLargeIcon(Bitmap icon) {
             mLargeIcon = icon;
             return this;
         }
 
+        /**
+         * Set the sound to play.  It will play on the default stream.
+         */
         public Builder setSound(Uri sound) {
             mSound = sound;
             mAudioStreamType = STREAM_DEFAULT;
             return this;
         }
 
+        /**
+         * Set the sound to play.  It will play on the stream you supply.
+         *
+         * @see #STREAM_DEFAULT
+         * @see AudioManager for the <code>STREAM_</code> constants.
+         */
         public Builder setSound(Uri sound, int streamType) {
             mSound = sound;
             mAudioStreamType = streamType;
             return this;
         }
 
+        /**
+         * Set the vibration pattern to use.
+         *
+         * @see android.os.Vibrator for a discussion of the <code>pattern</code>
+         * parameter.
+         */
         public Builder setVibrate(long[] pattern) {
             mVibrate = pattern;
             return this;
         }
 
+        /**
+         * Set the argb value that you would like the LED on the device to blnk, as well as the
+         * rate.  The rate is specified in terms of the number of milliseconds to be on
+         * and then the number of milliseconds to be off.
+         */
         public Builder setLights(int argb, int onMs, int offMs) {
             mLedArgb = argb;
             mLedOnMs = onMs;
@@ -749,21 +855,51 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * Set whether this is an ongoing notification.
+         *
+         * <p>Ongoing notifications differ from regular notifications in the following ways:
+         * <ul>
+         *   <li>Ongoing notifications are sorted above the regular notifications in the
+         *   notification panel.</li>
+         *   <li>Ongoing notifications do not have an 'X' close button, and are not affected
+         *   by the "Clear all" button.
+         * </ul>
+         */
         public Builder setOngoing(boolean ongoing) {
             setFlag(FLAG_ONGOING_EVENT, ongoing);
             return this;
         }
 
+        /**
+         * Set this flag if you would only like the sound, vibrate
+         * and ticker to be played if the notification is not already showing.
+         */
         public Builder setOnlyAlertOnce(boolean onlyAlertOnce) {
             setFlag(FLAG_ONLY_ALERT_ONCE, onlyAlertOnce);
             return this;
         }
 
+        /**
+         * Setting this flag will make it so the notification is automatically
+         * canceled when the user clicks it in the panel.  The PendingIntent
+         * set with {@link #setDeleteIntent} will be broadcast when the notification
+         * is canceled.
+         */
         public Builder setAutoCancel(boolean autoCancel) {
             setFlag(FLAG_AUTO_CANCEL, autoCancel);
             return this;
         }
 
+        /**
+         * Set the default notification options that will be used.
+         * <p>
+         * The value should be one or more of the following fields combined with
+         * bitwise-or:
+         * {@link #DEFAULT_SOUND}, {@link #DEFAULT_VIBRATE}, {@link #DEFAULT_LIGHTS}.
+         * <p>
+         * For all default values, use {@link #DEFAULT_ALL}.
+         */
         public Builder setDefaults(int defaults) {
             mDefaults = defaults;
             return this;
@@ -834,6 +970,10 @@ public class Notification implements Parcelable
             }
         }
 
+        /**
+         * Combine all of the options that have been set and return a new {@link Notification}
+         * object.
+         */
         public Notification getNotification() {
             Notification n = new Notification();
             n.when = mWhen;
