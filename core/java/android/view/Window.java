@@ -807,8 +807,11 @@ public abstract class Window {
     }
     
     /** @hide */
-    public boolean hasSetCloseOnTouchOutside() {
-        return mSetCloseOnTouchOutside;
+    public void setCloseOnTouchOutsideIfNotSet(boolean close) {
+        if (!mSetCloseOnTouchOutside) {
+            mCloseOnTouchOutside = close;
+            mSetCloseOnTouchOutside = true;
+        }
     }
     
     /** @hide */

@@ -82,8 +82,7 @@
     <dimen name="config_prefDialogWidth">0px</dimen>
     
     <!-- Whether dialogs should close automatically when the user touches outside
-         of them.  This should not normally be modified; the default value will
-         pick the correct behavior depending on the screen size. -->
+         of them.  This should not normally be modified. -->
     <bool name="config_closeDialogWhenTouchOutside">false</bool>
     
     <!-- The duration (in milliseconds) that the radio will scan for a signal
