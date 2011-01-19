@@ -748,9 +748,9 @@ class BluetoothEventLoop {
         }
     }
 
-    private void onInputDeviceConnectionResult(String path, boolean result) {
+    private void onInputDeviceConnectionResult(String path, int result) {
         // Success case gets handled by Property Change signal
-        if (!result) {
+        if (result != BluetoothInputDevice.INPUT_OPERATION_SUCCESS) {
             String address = mBluetoothService.getAddressFromObjectPath(path);
             if (address == null) return;
 
@@ -758,9 +758,18 @@ class BluetoothEventLoop {
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
             int state = mBluetoothService.getInputDeviceState(device);
             if (state == BluetoothInputDevice.STATE_CONNECTING) {
-                connected = false;
+                if (result == BluetoothInputDevice.INPUT_CONNECT_FAILED_ALREADY_CONNECTED) {
+                    connected = true;
+                } else {
+                    connected = false;
+                }
             } else if (state == BluetoothInputDevice.STATE_DISCONNECTING) {
-                connected = true;
+                if (result == BluetoothInputDevice.INPUT_DISCONNECT_FAILED_NOT_CONNECTED) {
+                    connected = false;
+                } else {
+                    // There is no better way to handle this, this shouldn't happen
+                    connected = true;
+                }
             } else {
                 Log.e(TAG, "Error onInputDeviceConnectionResult. State is:" + state);
             }
@@ -768,10 +777,10 @@ class BluetoothEventLoop {
         }
     }
 
-    private void onPanDeviceConnectionResult(String path, boolean result) {
+    private void onPanDeviceConnectionResult(String path, int result) {
         log ("onPanDeviceConnectionResult " + path + " " + result);
         // Success case gets handled by Property Change signal
-        if (!result) {
+        if (result != BluetoothPan.PAN_OPERATION_SUCCESS) {
             String address = mBluetoothService.getAddressFromObjectPath(path);
             if (address == null) return;
 
@@ -779,9 +788,18 @@ class BluetoothEventLoop {
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
             int state = mBluetoothService.getPanDeviceState(device);
             if (state == BluetoothPan.STATE_CONNECTING) {
-                connected = false;
+                if (result == BluetoothPan.PAN_CONNECT_FAILED_ALREADY_CONNECTED) {
+                    connected = true;
+                } else {
+                    connected = false;
+                }
             } else if (state == BluetoothPan.STATE_DISCONNECTING) {
-                connected = true;
+                if (result == BluetoothPan.PAN_DISCONNECT_FAILED_NOT_CONNECTED) {
+                    connected = false;
+                } else {
+                    // There is no better way to handle this, this shouldn't happen
+                    connected = true;
+                }
             } else {
                 Log.e(TAG, "Error onPanDeviceConnectionResult. State is: "
                         + state + " result: "+ result);
