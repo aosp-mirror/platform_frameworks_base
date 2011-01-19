@@ -38,6 +38,7 @@ namespace android {
 #ifdef HAVE_BLUETOOTH
 #define BLUEZ_DBUS_BASE_PATH      "/org/bluez"
 #define BLUEZ_DBUS_BASE_IFC       "org.bluez"
+#define BLUEZ_ERROR_IFC           "org.bluez.Error"
 
 // It would be nicer to retrieve this from bluez using GetDefaultAdapter,
 // but this is only possible when the adapter is up (and hcid is running).
@@ -170,6 +171,30 @@ int get_bdaddr(const char *str, bdaddr_t *ba);
 void get_bdaddr_as_string(const bdaddr_t *ba, char *str);
 
 bool debug_no_encrypt();
+
+
+// Result codes from Bluez DBus calls
+#define BOND_RESULT_ERROR                      -1
+#define BOND_RESULT_SUCCESS                     0
+#define BOND_RESULT_AUTH_FAILED                 1
+#define BOND_RESULT_AUTH_REJECTED               2
+#define BOND_RESULT_AUTH_CANCELED               3
+#define BOND_RESULT_REMOTE_DEVICE_DOWN          4
+#define BOND_RESULT_DISCOVERY_IN_PROGRESS       5
+#define BOND_RESULT_AUTH_TIMEOUT                6
+#define BOND_RESULT_REPEATED_ATTEMPTS           7
+
+#define PAN_DISCONNECT_FAILED_NOT_CONNECTED  1000
+#define PAN_CONNECT_FAILED_ALREADY_CONNECTED 1001
+#define PAN_CONNECT_FAILED_ATTEMPT_FAILED    1002
+#define PAN_OPERATION_GENERIC_FAILURE        1003
+#define PAN_OPERATION_SUCCESS                1004
+
+#define INPUT_DISCONNECT_FAILED_NOT_CONNECTED  5000
+#define INPUT_CONNECT_FAILED_ALREADY_CONNECTED 5001
+#define INPUT_CONNECT_FAILED_ATTEMPT_FAILED    5002
+#define INPUT_OPERATION_GENERIC_FAILURE        5003
+#define INPUT_OPERATION_SUCCESS                5004
 
 #endif
 } /* namespace android */

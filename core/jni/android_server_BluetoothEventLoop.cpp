@@ -134,11 +134,11 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
     method_onInputDevicePropertyChanged = env->GetMethodID(clazz, "onInputDevicePropertyChanged",
                                                "(Ljava/lang/String;[Ljava/lang/String;)V");
     method_onInputDeviceConnectionResult = env->GetMethodID(clazz, "onInputDeviceConnectionResult",
-                                               "(Ljava/lang/String;Z)V");
+                                               "(Ljava/lang/String;I)V");
     method_onPanDevicePropertyChanged = env->GetMethodID(clazz, "onPanDevicePropertyChanged",
                                                "(Ljava/lang/String;[Ljava/lang/String;)V");
     method_onPanDeviceConnectionResult = env->GetMethodID(clazz, "onPanDeviceConnectionResult",
-                                               "(Ljava/lang/String;Z)V");
+                                               "(Ljava/lang/String;I)V");
     method_onRequestOobData = env->GetMethodID(clazz, "onRequestOobData",
                                                "(Ljava/lang/String;I)V");
 
@@ -1227,16 +1227,6 @@ success:
 
 
 #ifdef HAVE_BLUETOOTH
-//TODO: Unify result codes in a header
-#define BOND_RESULT_ERROR -1000
-#define BOND_RESULT_SUCCESS 0
-#define BOND_RESULT_AUTH_FAILED 1
-#define BOND_RESULT_AUTH_REJECTED 2
-#define BOND_RESULT_AUTH_CANCELED 3
-#define BOND_RESULT_REMOTE_DEVICE_DOWN 4
-#define BOND_RESULT_DISCOVERY_IN_PROGRESS 5
-#define BOND_RESULT_AUTH_TIMEOUT 6
-#define BOND_RESULT_REPEATED_ATTEMPTS 7
 
 void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
     LOGV(__FUNCTION__);
@@ -1406,11 +1396,25 @@ void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
     JNIEnv *env;
     nat->vm->GetEnv((void**)&env, nat->envVer);
 
-    bool result = JNI_TRUE;
+    jint result = INPUT_OPERATION_SUCCESS;
     if (dbus_set_error_from_message(&err, msg)) {
+        if (!strcmp(err.name, BLUEZ_ERROR_IFC ".ConnectionAttemptFailed")) {
+            result = INPUT_CONNECT_FAILED_ATTEMPT_FAILED;
+        } else if (!strcmp(err.name, BLUEZ_ERROR_IFC ".AlreadyConnected")) {
+            result = INPUT_CONNECT_FAILED_ALREADY_CONNECTED;
+        } else if (!strcmp(err.name, BLUEZ_ERROR_IFC ".Failed")) {
+            // TODO():This is flaky, need to change Bluez to add new error codes
+            if (!strcmp(err.message, "Transport endpoint is not connected")) {
+              result = INPUT_DISCONNECT_FAILED_NOT_CONNECTED;
+            } else {
+              result = INPUT_OPERATION_GENERIC_FAILURE;
+            }
+        } else {
+            result = INPUT_OPERATION_GENERIC_FAILURE;
+        }
         LOG_AND_FREE_DBUS_ERROR(&err);
-        result = JNI_FALSE;
     }
+
     LOGV("... Device Path = %s, result = %d", path, result);
     jstring jPath = env->NewStringUTF(path);
     env->CallVoidMethod(nat->me,
@@ -1431,11 +1435,25 @@ void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
     JNIEnv *env;
     nat->vm->GetEnv((void**)&env, nat->envVer);
 
-    bool result = JNI_TRUE;
+    jint result = PAN_OPERATION_SUCCESS;
     if (dbus_set_error_from_message(&err, msg)) {
+        if (!strcmp(err.name, BLUEZ_ERROR_IFC ".ConnectionAttemptFailed")) {
+            result = PAN_CONNECT_FAILED_ATTEMPT_FAILED;
+        } else if (!strcmp(err.name, BLUEZ_ERROR_IFC ".Failed")) {
+            // TODO():This is flaky, need to change Bluez to add new error codes
+            if (!strcmp(err.message, "Device already connected")) {
+                result = PAN_CONNECT_FAILED_ALREADY_CONNECTED;
+            } else if (!strcmp(err.message, "Device not connected")) {
+                result = PAN_DISCONNECT_FAILED_NOT_CONNECTED;
+            } else {
+                result = PAN_OPERATION_GENERIC_FAILURE;
+            }
+        } else {
+            result = PAN_OPERATION_GENERIC_FAILURE;
+        }
         LOG_AND_FREE_DBUS_ERROR(&err);
-        result = JNI_FALSE;
     }
+
     LOGV("... Pan Device Path = %s, result = %d", path, result);
     jstring jPath = env->NewStringUTF(path);
     env->CallVoidMethod(nat->me,
