@@ -493,8 +493,14 @@ rinse_repeat:
 
     CHECK(buffer != NULL);
 
-    CHECK_EQ((status_t)OK,
-             decryptBuffer(mSeqNumber - firstSeqNumberInPlaylist, buffer));
+    err = decryptBuffer(mSeqNumber - firstSeqNumberInPlaylist, buffer);
+
+    if (err != OK) {
+        LOGE("decryptBuffer failed w/ error %d", err);
+
+        mDataSource->queueEOS(err);
+        return;
+    }
 
     if (buffer->size() == 0 || buffer->data()[0] != 0x47) {
         // Not a transport stream???
