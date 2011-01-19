@@ -2001,6 +2001,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
 
                 if (mActionModeView != null) {
+                    mActionModeView.killMode();
                     mode = new StandaloneActionMode(getContext(), mActionModeView, wrappedCallback);
                     if (callback.onCreateActionMode(mode, mode.getMenu())) {
                         mode.invalidate();
