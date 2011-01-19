@@ -249,7 +249,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * Authenticate the entire sector that the given block resides in.
      * <p>This requires a that the tag be connected.
      */
-    public boolean authenticateBlock(int block, byte[] key, boolean keyA) throws TagLostException {
+    public boolean authenticateBlock(int block, byte[] key, boolean keyA) throws IOException {
         checkConnected();
 
         byte[] cmd = new byte[12];
@@ -287,7 +287,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * Authenticate for a given sector.
      * <p>This requires a that the tag be connected.
      */
-    public boolean authenticateSector(int sector, byte[] key, boolean keyA) throws TagLostException {
+    public boolean authenticateSector(int sector, byte[] key, boolean keyA) throws IOException {
         checkConnected();
 
         byte addr = (byte) ((firstBlockInSector(sector)) & 0xff);
