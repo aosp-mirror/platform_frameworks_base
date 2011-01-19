@@ -3060,7 +3060,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 if (uid == pkgUid || checkComponentPermission(
                         android.Manifest.permission.CLEAR_APP_USER_DATA,
-                        pid, uid, -1)
+                        pid, uid, -1, true)
                         == PackageManager.PERMISSION_GRANTED) {
                     forceStopPackageLocked(packageName, pkgUid);
                 } else {
@@ -4151,7 +4151,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * This can be called with or without the global lock held.
      */
     int checkComponentPermission(String permission, int pid, int uid,
-            int reqUid) {
+            int owningUid, boolean exported) {
         // We might be performing an operation on behalf of an indirect binder
         // invocation, e.g. via {@link #openContentUri}.  Check and adjust the
         // client identity accordingly before proceeding.
@@ -4168,9 +4168,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             !Process.supportsProcesses()) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        // If the target requires a specific UID, always fail for others.
-        if (reqUid >= 0 && uid != reqUid) {
-            Slog.w(TAG, "Permission denied: checkComponentPermission() reqUid=" + reqUid);
+        // If there is a uid that owns whatever is being accessed, it has
+        // blanket access to it regardless of the permissions it requires.
+        if (owningUid >= 0 && uid == owningUid) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // If the target is not exported, then nobody else can get to it.
+        if (!exported) {
+            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid);
             return PackageManager.PERMISSION_DENIED;
         }
         if (permission == null) {
@@ -4199,7 +4204,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
         }
-        return checkComponentPermission(permission, pid, uid, -1);
+        return checkComponentPermission(permission, pid, uid, -1, true);
     }
 
     /**
@@ -5322,12 +5327,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         final int callingPid = (r != null) ? r.pid : Binder.getCallingPid();
         final int callingUid = (r != null) ? r.info.uid : Binder.getCallingUid();
         if (checkComponentPermission(cpi.readPermission, callingPid, callingUid,
-                cpi.exported ? -1 : cpi.applicationInfo.uid)
+                cpi.applicationInfo.uid, cpi.exported)
                 == PackageManager.PERMISSION_GRANTED) {
             return null;
         }
         if (checkComponentPermission(cpi.writePermission, callingPid, callingUid,
-                cpi.exported ? -1 : cpi.applicationInfo.uid)
+                cpi.applicationInfo.uid, cpi.exported)
                 == PackageManager.PERMISSION_GRANTED) {
             return null;
         }
@@ -5339,12 +5344,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 i--;
                 PathPermission pp = pps[i];
                 if (checkComponentPermission(pp.getReadPermission(), callingPid, callingUid,
-                        cpi.exported ? -1 : cpi.applicationInfo.uid)
+                        cpi.applicationInfo.uid, cpi.exported)
                         == PackageManager.PERMISSION_GRANTED) {
                     return null;
                 }
                 if (checkComponentPermission(pp.getWritePermission(), callingPid, callingUid,
-                        cpi.exported ? -1 : cpi.applicationInfo.uid)
+                        cpi.applicationInfo.uid, cpi.exported)
                         == PackageManager.PERMISSION_GRANTED) {
                     return null;
                 }
@@ -5360,10 +5365,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        String msg = "Permission Denial: opening provider " + cpi.name
-                + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
-                + ", uid=" + callingUid + ") requires "
-                + cpi.readPermission + " or " + cpi.writePermission;
+        String msg;
+        if (!cpi.exported) {
+            msg = "Permission Denial: opening provider " + cpi.name
+                    + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ") that is not exported from uid "
+                    + cpi.applicationInfo.uid;
+        } else {
+            msg = "Permission Denial: opening provider " + cpi.name
+                    + " from " + (r != null ? r : "(null)") + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ") requires "
+                    + cpi.readPermission + " or " + cpi.writePermission;
+        }
         Slog.w(TAG, msg);
         return msg;
     }
@@ -5953,7 +5966,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             
         final int perm = checkComponentPermission(
                 android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
-                callingUid, -1);
+                callingUid, -1, true);
         if (perm == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
@@ -8892,8 +8905,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             int callingPid = Binder.getCallingPid();
             int callingUid = Binder.getCallingUid();
             if (checkComponentPermission(r.permission,
-                    callingPid, callingUid, r.exported ? -1 : r.appInfo.uid)
+                    callingPid, callingUid, r.appInfo.uid, r.exported)
                     != PackageManager.PERMISSION_GRANTED) {
+                if (!r.exported) {
+                    Slog.w(TAG, "Permission Denial: Accessing service " + r.name
+                            + " from pid=" + callingPid
+                            + ", uid=" + callingUid
+                            + " that is not exported from uid " + r.appInfo.uid);
+                    return new ServiceLookupResult(null, "not exported from uid "
+                            + r.appInfo.uid);
+                }
                 Slog.w(TAG, "Permission Denial: Accessing service " + r.name
                         + " from pid=" + callingPid
                         + ", uid=" + callingUid
@@ -8975,11 +8996,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (r != null) {
             if (checkComponentPermission(r.permission,
-                    callingPid, callingUid, r.exported ? -1 : r.appInfo.uid)
+                    callingPid, callingUid, r.appInfo.uid, r.exported)
                     != PackageManager.PERMISSION_GRANTED) {
+                if (!r.exported) {
+                    Slog.w(TAG, "Permission Denial: Accessing service " + r.name
+                            + " from pid=" + callingPid
+                            + ", uid=" + callingUid
+                            + " that is not exported from uid " + r.appInfo.uid);
+                    return new ServiceLookupResult(null, "not exported from uid "
+                            + r.appInfo.uid);
+                }
                 Slog.w(TAG, "Permission Denial: Accessing service " + r.name
-                        + " from pid=" + Binder.getCallingPid()
-                        + ", uid=" + Binder.getCallingUid()
+                        + " from pid=" + callingPid
+                        + ", uid=" + callingUid
                         + " requires " + r.permission);
                 return new ServiceLookupResult(null, r.permission);
             }
@@ -10479,7 +10508,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 || uidRemoved) {
             if (checkComponentPermission(
                     android.Manifest.permission.BROADCAST_PACKAGE_REMOVED,
-                    callingPid, callingUid, -1)
+                    callingPid, callingUid, -1, true)
                     == PackageManager.PERMISSION_GRANTED) {
                 if (uidRemoved) {
                     final Bundle intentExtras = intent.getExtras();
@@ -11147,7 +11176,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean skip = false;
         if (filter.requiredPermission != null) {
             int perm = checkComponentPermission(filter.requiredPermission,
-                    r.callingPid, r.callingUid, -1);
+                    r.callingPid, r.callingUid, -1, true);
             if (perm != PackageManager.PERMISSION_GRANTED) {
                 Slog.w(TAG, "Permission Denial: broadcasting "
                         + r.intent.toString()
@@ -11160,7 +11189,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (r.requiredPermission != null) {
             int perm = checkComponentPermission(r.requiredPermission,
-                    filter.receiverList.pid, filter.receiverList.uid, -1);
+                    filter.receiverList.pid, filter.receiverList.uid, -1, true);
             if (perm != PackageManager.PERMISSION_GRANTED) {
                 Slog.w(TAG, "Permission Denial: receiving "
                         + r.intent.toString()
@@ -11426,17 +11455,26 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             boolean skip = false;
             int perm = checkComponentPermission(info.activityInfo.permission,
-                    r.callingPid, r.callingUid,
-                    info.activityInfo.exported
-                            ? -1 : info.activityInfo.applicationInfo.uid);
+                    r.callingPid, r.callingUid, info.activityInfo.applicationInfo.uid,
+                    info.activityInfo.exported);
             if (perm != PackageManager.PERMISSION_GRANTED) {
-                Slog.w(TAG, "Permission Denial: broadcasting "
-                        + r.intent.toString()
-                        + " from " + r.callerPackage + " (pid=" + r.callingPid
-                        + ", uid=" + r.callingUid + ")"
-                        + " requires " + info.activityInfo.permission
-                        + " due to receiver " + info.activityInfo.packageName
-                        + "/" + info.activityInfo.name);
+                if (!info.activityInfo.exported) {
+                    Slog.w(TAG, "Permission Denial: broadcasting "
+                            + r.intent.toString()
+                            + " from " + r.callerPackage + " (pid=" + r.callingPid
+                            + ", uid=" + r.callingUid + ")"
+                            + " is not exported from uid " + info.activityInfo.applicationInfo.uid
+                            + " due to receiver " + info.activityInfo.packageName
+                            + "/" + info.activityInfo.name);
+                } else {
+                    Slog.w(TAG, "Permission Denial: broadcasting "
+                            + r.intent.toString()
+                            + " from " + r.callerPackage + " (pid=" + r.callingPid
+                            + ", uid=" + r.callingUid + ")"
+                            + " requires " + info.activityInfo.permission
+                            + " due to receiver " + info.activityInfo.packageName
+                            + "/" + info.activityInfo.name);
+                }
                 skip = true;
             }
             if (r.callingUid != Process.SYSTEM_UID &&
