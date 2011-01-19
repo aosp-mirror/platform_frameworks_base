@@ -30,8 +30,10 @@ namespace android {
 // The following keys map to int32_t data unless indicated otherwise.
 enum {
     kKeyMIMEType          = 'mime',  // cstring
-    kKeyWidth             = 'widt',  // int32_t
-    kKeyHeight            = 'heig',  // int32_t
+    kKeyWidth             = 'widt',  // int32_t, image pixel
+    kKeyHeight            = 'heig',  // int32_t, image pixel
+    kKeyDisplayWidth      = 'dWid',  // int32_t, display/presentation
+    kKeyDisplayHeight     = 'dHgt',  // int32_t, display/presentation
 
     // a rectangle, if absent assumed to be (0, 0, width - 1, height - 1)
     kKeyCropRect          = 'crop',

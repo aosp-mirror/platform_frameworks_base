@@ -165,6 +165,8 @@ AwesomePlayer::AwesomePlayer()
       mTimeSource(NULL),
       mVideoRendererIsPreview(false),
       mAudioPlayer(NULL),
+      mDisplayWidth(0),
+      mDisplayHeight(0),
       mFlags(0),
       mExtractorFlags(0),
       mVideoBuffer(NULL),
@@ -329,6 +331,18 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         if (!haveVideo && !strncasecmp(mime, "video/", 6)) {
             setVideoSource(extractor->getTrack(i));
             haveVideo = true;
+
+            // Set the presentation/display size
+            int32_t displayWidth, displayHeight;
+            bool success = meta->findInt32(kKeyDisplayWidth, &displayWidth);
+            if (success) {
+                success = meta->findInt32(kKeyDisplayHeight, &displayHeight);
+            }
+            if (success) {
+                mDisplayWidth = displayWidth;
+                mDisplayHeight = displayHeight;
+            }
+
         } else if (!haveAudio && !strncasecmp(mime, "audio/", 6)) {
             setAudioSource(extractor->getTrack(i));
             haveAudio = true;
@@ -370,6 +384,8 @@ void AwesomePlayer::reset() {
 
 void AwesomePlayer::reset_l() {
     LOGI("reset_l");
+    mDisplayWidth = 0;
+    mDisplayHeight = 0;
 
     if (mDecryptHandle != NULL) {
             mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
@@ -862,6 +878,12 @@ void AwesomePlayer::notifyVideoSize_l() {
 
     int32_t usableWidth = cropRight - cropLeft + 1;
     int32_t usableHeight = cropBottom - cropTop + 1;
+    if (mDisplayWidth != 0) {
+        usableWidth = mDisplayWidth;
+    }
+    if (mDisplayHeight != 0) {
+        usableHeight = mDisplayHeight;
+    }
 
     int32_t rotationDegrees;
     if (!mVideoTrack->getFormat()->findInt32(
