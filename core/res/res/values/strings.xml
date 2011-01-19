@@ -1784,6 +1784,8 @@
     <string name="lockscreen_glogin_submit_button">Sign in</string>
     <!-- Displayed to the user when unlocking the phone with a username and password fails. -->
     <string name="lockscreen_glogin_invalid_input">Invalid username or password.</string>
+    <!-- Hint displayed on account unlock screen to advise the user on how to recover the account. -->
+    <string name="lockscreen_glogin_account_recovery_hint">Forgot your username or password\?\nVisit <b>google.com/accounts/recovery</b></string>
 
     <!-- Displayed in a progress dialog while a username and password are being checked. -->
     <string name="lockscreen_glogin_checking_password">Checking...</string>
