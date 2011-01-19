@@ -290,6 +290,12 @@
         <!-- CalendarView style-->
         <item name="calendarViewStyle">@style/Widget.CalendarView</item>
 
+        <!-- TimePicker style -->
+        <item name="timePickerStyle">@style/Widget.TimePicker</item>
+
+        <!-- DatePicker style -->
+        <item name="datePickerStyle">@style/Widget.DatePicker</item>
+
         <item name="fastScrollThumbDrawable">@android:drawable/scrollbar_handle_accelerated_anim2</item>
         <item name="fastScrollTrackDrawable">@null</item>
         <item name="fastScrollPreviewBackgroundRight">@android:drawable/menu_submenu_background</item>
@@ -978,9 +984,16 @@
         <item name="numberPickerUpButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerUpButton</item>
         <item name="numberPickerDownButtonStyle">@style/Widget.Holo.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.Holo.EditText.NumberPickerInputText</item>
+        <item name="numberPickerStyle">@style/Widget.Holo.NumberPicker</item>
 
         <!-- CalendarView style-->
         <item name="calendarViewStyle">@style/Widget.Holo.CalendarView</item>
+
+        <!-- TimePicker style -->
+        <item name="timePickerStyle">@style/Widget.Holo.TimePicker</item>
+
+        <!-- DatePicker style -->
+        <item name="datePickerStyle">@style/Widget.Holo.DatePicker</item>
 
         <item name="fastScrollThumbDrawable">@android:drawable/fastscroll_thumb_holo</item>
         <item name="fastScrollPreviewBackgroundLeft">@android:drawable/fastscroll_label_left_holo_dark</item>
@@ -1002,6 +1015,7 @@
         <item name="colorBackgroundCacheHint">@android:drawable/background_cache_hint_selector_holo_light</item>
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
+
 
         <!-- Text styles -->
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
@@ -1236,9 +1250,16 @@
         <item name="numberPickerUpButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerUpButton</item>
         <item name="numberPickerDownButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerDownButton</item>
         <item name="numberPickerInputTextStyle">@style/Widget.Holo.Light.EditText.NumberPickerInputText</item>
+        <item name="numberPickerStyle">@style/Widget.Holo.Light.NumberPicker</item>
 
         <!-- CalendarView style-->
         <item name="calendarViewStyle">@style/Widget.Holo.Light.CalendarView</item>
+
+        <!-- TimePicker style -->
+        <item name="timePickerStyle">@style/Widget.Holo.Light.TimePicker</item>
+
+        <!-- DatePicker style -->
+        <item name="datePickerStyle">@style/Widget.Holo.Light.DatePicker</item>
 
         <item name="fastScrollThumbDrawable">@android:drawable/fastscroll_thumb_holo</item>
         <item name="fastScrollPreviewBackgroundLeft">@android:drawable/fastscroll_label_left_holo_light</item>
