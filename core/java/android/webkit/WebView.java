@@ -408,10 +408,13 @@ public class WebView extends AbsoluteLayout
     PluginFullScreenHolder mFullScreenHolder;
 
     /**
-     * Position of the last touch event.
+     * Position of the last touch event in pixels.
+     * Use integer to prevent loss of dragging delta calculation accuracy;
+     * which was done in float and converted to integer, and resulted in gradual
+     * and compounding touch position and view dragging mismatch.
      */
-    private float mLastTouchX;
-    private float mLastTouchY;
+    private int mLastTouchX;
+    private int mLastTouchY;
 
     /**
      * Time of the last touch event.
@@ -2218,8 +2221,8 @@ public class WebView extends AbsoluteLayout
         if (type == HitTestResult.UNKNOWN_TYPE
                 || type == HitTestResult.SRC_ANCHOR_TYPE) {
             // Now check to see if it is an image.
-            int contentX = viewToContentX((int) mLastTouchX + mScrollX);
-            int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+            int contentX = viewToContentX(mLastTouchX + mScrollX);
+            int contentY = viewToContentY(mLastTouchY + mScrollY);
             String text = nativeImageURI(contentX, contentY);
             if (text != null) {
                 result.setType(type == HitTestResult.UNKNOWN_TYPE ?
@@ -2256,8 +2259,8 @@ public class WebView extends AbsoluteLayout
         if (hrefMsg == null) {
             return;
         }
-        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
-        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + mScrollX);
+        int contentY = viewToContentY(mLastTouchY + mScrollY);
         mWebViewCore.sendMessage(EventHub.REQUEST_CURSOR_HREF,
                 contentX, contentY, hrefMsg);
     }
@@ -2271,8 +2274,8 @@ public class WebView extends AbsoluteLayout
      */
     public void requestImageRef(Message msg) {
         if (0 == mNativeClass) return; // client isn't initialized
-        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
-        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + mScrollX);
+        int contentY = viewToContentY(mLastTouchY + mScrollY);
         String ref = nativeImageURI(contentX, contentY);
         Bundle data = msg.getData();
         data.putString("url", ref);
@@ -3856,8 +3859,8 @@ public class WebView extends AbsoluteLayout
      * @hide pending API council approval
      */
     public boolean selectText() {
-        int x = viewToContentX((int) mLastTouchX + mScrollX);
-        int y = viewToContentY((int) mLastTouchY + mScrollY);
+        int x = viewToContentX(mLastTouchX + mScrollX);
+        int y = viewToContentY(mLastTouchY + mScrollY);
         return selectText(x, y);
     }
 
@@ -4858,8 +4861,8 @@ public class WebView extends AbsoluteLayout
             mSelectX = contentToViewX(rect.left);
             mSelectY = contentToViewY(rect.top);
         } else if (mLastTouchY > getVisibleTitleHeight()) {
-            mSelectX = mScrollX + (int) mLastTouchX;
-            mSelectY = mScrollY + (int) mLastTouchY;
+            mSelectX = mScrollX + mLastTouchX;
+            mSelectY = mScrollY + mLastTouchY;
         } else {
             mSelectX = mScrollX + getViewWidth() / 2;
             mSelectY = mScrollY + getViewHeightWithTitle() / 2;
@@ -5357,7 +5360,7 @@ public class WebView extends AbsoluteLayout
             return true;
         }
 
-        return handleTouchEventCommon(ev, ev.getX(), ev.getY());
+        return handleTouchEventCommon(ev, Math.round(ev.getX()), Math.round(ev.getY()));
     }
 
     /*
@@ -5365,7 +5368,7 @@ public class WebView extends AbsoluteLayout
      * (x, y) denotes current focus point, which is the touch point for single touch
      * and the middle point for multi-touch.
      */
-    private boolean handleTouchEventCommon(MotionEvent ev, float x, float y) {
+    private boolean handleTouchEventCommon(MotionEvent ev, int x, int y) {
         int action = ev.getAction();
         long eventTime = ev.getEventTime();
 
@@ -5377,12 +5380,10 @@ public class WebView extends AbsoluteLayout
         x = Math.min(x, getViewWidth() - 1);
         y = Math.min(y, getViewHeightWithTitle() - 1);
 
-        float fDeltaX = mLastTouchX - x;
-        float fDeltaY = mLastTouchY - y;
-        int deltaX = (int) fDeltaX;
-        int deltaY = (int) fDeltaY;
-        int contentX = viewToContentX((int) x + mScrollX);
-        int contentY = viewToContentY((int) y + mScrollY);
+        int deltaX = mLastTouchX - x;
+        int deltaY = mLastTouchY - y;
+        int contentX = viewToContentX(x + mScrollX);
+        int contentY = viewToContentY(y + mScrollY);
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -5607,8 +5608,6 @@ public class WebView extends AbsoluteLayout
                     mTouchMode = TOUCH_DRAG_MODE;
                     mLastTouchX = x;
                     mLastTouchY = y;
-                    fDeltaX = 0.0f;
-                    fDeltaY = 0.0f;
                     deltaX = 0;
                     deltaY = 0;
 
@@ -5619,9 +5618,7 @@ public class WebView extends AbsoluteLayout
                 // do pan
                 boolean done = false;
                 boolean keepScrollBarsVisible = false;
-                if (Math.abs(fDeltaX) < 1.0f && Math.abs(fDeltaY) < 1.0f) {
-                    mLastTouchX = x;
-                    mLastTouchY = y;
+                if (deltaX == 0 && deltaY == 0) {
                     keepScrollBarsVisible = done = true;
                 } else {
                     if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
@@ -5670,12 +5667,6 @@ public class WebView extends AbsoluteLayout
                             mLastTouchY = y;
                         }
                         mHeldMotionless = MOTIONLESS_FALSE;
-                    } else {
-                        // keep the scrollbar on the screen even there is no
-                        // scroll
-                        mLastTouchX = x;
-                        mLastTouchY = y;
-                        keepScrollBarsVisible = true;
                     }
                     mLastTouchTime = eventTime;
                     mUserScroll = true;
@@ -5937,8 +5928,8 @@ public class WebView extends AbsoluteLayout
             action = MotionEvent.ACTION_DOWN;
         } else if (action == MotionEvent.ACTION_POINTER_UP) {
             // set mLastTouchX/Y to the remaining point
-            mLastTouchX = x;
-            mLastTouchY = y;
+            mLastTouchX = Math.round(x);
+            mLastTouchY = Math.round(y);
         } else if (action == MotionEvent.ACTION_MOVE) {
             // negative x or y indicate it is on the edge, skip it.
             if (x < 0 || y < 0) {
@@ -5946,7 +5937,7 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        return handleTouchEventCommon(ev, x, y);
+        return handleTouchEventCommon(ev, Math.round(x), Math.round(y));
     }
 
     private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
@@ -5967,8 +5958,8 @@ public class WebView extends AbsoluteLayout
 
     private void startTouch(float x, float y, long eventTime) {
         // Remember where the motion event started
-        mLastTouchX = x;
-        mLastTouchY = y;
+        mLastTouchX = Math.round(x);
+        mLastTouchY = Math.round(y);
         mLastTouchTime = eventTime;
         mVelocityTracker = VelocityTracker.obtain();
         mSnapScrollMode = SNAP_NONE;
@@ -6598,8 +6589,8 @@ public class WebView extends AbsoluteLayout
             return;
         }
         // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
-        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + mScrollX);
+        int contentY = viewToContentY(mLastTouchY + mScrollY);
         Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
                 contentX + mNavSlop, contentY + mNavSlop);
         nativeSelectBestAt(rect);
@@ -6630,8 +6621,8 @@ public class WebView extends AbsoluteLayout
         if (!inEditingMode()) {
             return;
         }
-        mLastTouchX = x + (float) (mWebTextView.getLeft() - mScrollX);
-        mLastTouchY = y + (float) (mWebTextView.getTop() - mScrollY);
+        mLastTouchX = Math.round(x + mWebTextView.getLeft() - mScrollX);
+        mLastTouchY = Math.round(y + mWebTextView.getTop() - mScrollY);
         mLastTouchTime = eventTime;
         if (!mScroller.isFinished()) {
             abortAnimation();
@@ -6690,8 +6681,8 @@ public class WebView extends AbsoluteLayout
         mTouchMode = TOUCH_DONE_MODE;
         switchOutDrawHistory();
         // mLastTouchX and mLastTouchY are the point in the current viewport
-        int contentX = viewToContentX((int) mLastTouchX + mScrollX);
-        int contentY = viewToContentY((int) mLastTouchY + mScrollY);
+        int contentX = viewToContentX(mLastTouchX + mScrollX);
+        int contentY = viewToContentY(mLastTouchY + mScrollY);
         if (getSettings().supportTouchOnly()) {
             removeTouchHighlight(false);
             WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
@@ -7052,8 +7043,8 @@ public class WebView extends AbsoluteLayout
                             || (msg.arg1 == MotionEvent.ACTION_MOVE
                             && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN)) {
                         cancelWebCoreTouchEvent(
-                                viewToContentX((int) mLastTouchX + mScrollX),
-                                viewToContentY((int) mLastTouchY + mScrollY),
+                                viewToContentX(mLastTouchX + mScrollX),
+                                viewToContentY(mLastTouchY + mScrollY),
                                 true);
                     }
                     break;
@@ -7104,8 +7095,8 @@ public class WebView extends AbsoluteLayout
                         ted.mIds = new int[1];
                         ted.mIds[0] = 0;
                         ted.mPoints = new Point[1];
-                        ted.mPoints[0] = new Point(viewToContentX((int) mLastTouchX + mScrollX),
-                                                   viewToContentY((int) mLastTouchY + mScrollY));
+                        ted.mPoints[0] = new Point(viewToContentX(mLastTouchX + mScrollX),
+                                                   viewToContentY(mLastTouchY + mScrollY));
                         // metaState for long press is tricky. Should it be the
                         // state when the press started or when the press was
                         // released? Or some intermediary key state? For
