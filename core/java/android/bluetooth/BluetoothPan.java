@@ -70,6 +70,19 @@ public final class BluetoothPan {
     public static final int STATE_CONNECTED    = 2;
     public static final int STATE_DISCONNECTING = 3;
 
+    /**
+     * Return codes for the connect and disconnect Bluez / Dbus calls.
+     */
+    public static final int PAN_DISCONNECT_FAILED_NOT_CONNECTED = 1000;
+
+    public static final int PAN_CONNECT_FAILED_ALREADY_CONNECTED = 1001;
+
+    public static final int PAN_CONNECT_FAILED_ATTEMPT_FAILED = 1002;
+
+    public static final int PAN_OPERATION_GENERIC_FAILURE = 1003;
+
+    public static final int PAN_OPERATION_SUCCESS = 1004;
+
     private final IBluetooth mService;
     private final Context mContext;
 
