@@ -1040,8 +1040,23 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             // have a 4 byte header (0x00 0x00 0x00 0x01) after conversion,
             // and thus will grow by 2 bytes per fragment.
             mLastTrack->meta->setInt32(kKeyMaxInputSize, max_size + 10 * 2);
-
             *offset += chunk_size;
+
+            // Calculate average frame rate.
+            const char *mime;
+            CHECK(mLastTrack->meta->findCString(kKeyMIMEType, &mime));
+            if (!strncasecmp("video/", mime, 6)) {
+                size_t nSamples = mLastTrack->sampleTable->countSamples();
+                int64_t durationUs;
+                if (mLastTrack->meta->findInt64(kKeyDuration, &durationUs)) {
+                    if (durationUs > 0) {
+                        int32_t frameRate = (nSamples * 1000000LL +
+                                    (durationUs >> 1)) / durationUs;
+                        mLastTrack->meta->setInt32(kKeyFrameRate, frameRate);
+                    }
+                }
+            }
+
             break;
         }
 
