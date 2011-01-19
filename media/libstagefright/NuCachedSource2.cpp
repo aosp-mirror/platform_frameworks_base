@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "NuCachedSource2"
 #include <utils/Log.h>
 
@@ -487,4 +488,5 @@ void NuCachedSource2::getDrmInfo(DecryptHandle **handle, DrmManagerClient **clie
 String8 NuCachedSource2::getUri() {
     return mSource->getUri();
 }
+
 }  // namespace android
