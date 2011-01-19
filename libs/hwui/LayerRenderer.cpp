@@ -29,7 +29,6 @@ namespace uirenderer {
 void LayerRenderer::prepare(bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &mPreviousFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
     OpenGLRenderer::prepare(opaque);
@@ -37,11 +36,17 @@ void LayerRenderer::prepare(bool opaque) {
 
 void LayerRenderer::finish() {
     OpenGLRenderer::finish();
-    glBindFramebuffer(GL_FRAMEBUFFER, mPreviousFbo);
 
     generateMesh();
 
     LAYER_RENDERER_LOGD("Finished rendering into layer, fbo = %d", mLayer->mFbo);
+
+    // No need to unbind our FBO, this will be taken care of by the caller
+    // who will invoke OpenGLRenderer::resume()
+}
+
+GLint LayerRenderer::getTargetFbo() {
+    return mLayer->fbo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

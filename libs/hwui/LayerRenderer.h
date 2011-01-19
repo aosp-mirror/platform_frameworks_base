@@ -51,6 +51,7 @@ public:
 
     bool hasLayer();
     Region* getRegion();
+    GLint getTargetFbo();
 
     static Layer* createLayer(uint32_t width, uint32_t height, bool isOpaque = false);
     static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
@@ -61,8 +62,6 @@ private:
     void generateMesh();
 
     Layer* mLayer;
-    GLuint mPreviousFbo;
-
 }; // class LayerRenderer
 
 }; // namespace uirenderer
