@@ -14,6 +14,5 @@
      limitations under the License.
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_focused="true" android:drawable="@drawable/ic_menu_moreoverflow_focused_holo_light" />
     <item android:drawable="@drawable/ic_menu_moreoverflow_normal_holo_light" />
 </selector>
