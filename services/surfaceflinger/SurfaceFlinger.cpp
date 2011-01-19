@@ -872,30 +872,36 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         for (size_t i=0 ; i<count ; i++) {
             const sp<LayerBase>& layer(layers[i]);
             layer->setPerFrameData(&cur[i]);
-            if (cur[i].hints & HWC_HINT_CLEAR_FB) {
-                if (!(layer->needsBlending())) {
-                    transparent.orSelf(layer->visibleRegionScreen);
-                }
-            }
         }
         err = hwc.prepare();
         LOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
-    }
 
-    /*
-     *  clear the area of the FB that need to be transparent
-     */
-    transparent.andSelf(dirty);
-    if (!transparent.isEmpty()) {
-        glClearColor(0,0,0,0);
-        Region::const_iterator it = transparent.begin();
-        Region::const_iterator const end = transparent.end();
-        const int32_t height = hw.getHeight();
-        while (it != end) {
-            const Rect& r(*it++);
-            const GLint sy = height - (r.top + r.height());
-            glScissor(r.left, sy, r.width(), r.height());
-            glClear(GL_COLOR_BUFFER_BIT);
+        if (err == NO_ERROR) {
+            for (size_t i=0 ; i<count ; i++) {
+                if (cur[i].hints & HWC_HINT_CLEAR_FB) {
+                    const sp<LayerBase>& layer(layers[i]);
+                    if (!(layer->needsBlending())) {
+                        transparent.orSelf(layer->visibleRegionScreen);
+                    }
+                }
+            }
+
+            /*
+             *  clear the area of the FB that need to be transparent
+             */
+            transparent.andSelf(dirty);
+            if (!transparent.isEmpty()) {
+                glClearColor(0,0,0,0);
+                Region::const_iterator it = transparent.begin();
+                Region::const_iterator const end = transparent.end();
+                const int32_t height = hw.getHeight();
+                while (it != end) {
+                    const Rect& r(*it++);
+                    const GLint sy = height - (r.top + r.height());
+                    glScissor(r.left, sy, r.width(), r.height());
+                    glClear(GL_COLOR_BUFFER_BIT);
+                }
+            }
         }
     }
 
