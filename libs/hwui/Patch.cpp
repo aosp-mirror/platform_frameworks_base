@@ -167,10 +167,6 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         float v2 = fmax(0.0f, stepY - 0.5f) / bitmapHeight;
 
         if (stepY > 0.0f) {
-            if (i == mYCount - 1 && mYDivs[i] == bitmapHeight) {
-                y2 = bottom - top;
-                v2 = 1.0f;
-            }
             generateRow(vertex, y1, y2, v1, v2, stretchX, right - left,
                     bitmapWidth, quadCount);
         }
@@ -222,10 +218,6 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         float u2 = fmax(0.0f, stepX - 0.5f) / bitmapWidth;
 
         if (stepX > 0.0f) {
-            if (i == mXCount - 1 && mXDivs[i] == bitmapWidth) {
-                x2 = bitmapWidth;
-                u2 = 1.0f;
-            }
             generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount);
         }
 
