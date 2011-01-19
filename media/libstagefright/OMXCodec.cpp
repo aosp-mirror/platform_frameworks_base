@@ -2233,7 +2233,11 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                 enablePortAsync(portIndex);
 
                 status_t err = allocateBuffersOnPort(portIndex);
-                CHECK_EQ(err, (status_t)OK);
+
+                if (err != OK) {
+                    CODEC_LOGE("allocateBuffersOnPort failed (err = %d)", err);
+                    setState(ERROR);
+                }
             }
             break;
         }
