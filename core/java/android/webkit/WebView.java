@@ -5050,7 +5050,7 @@ public class WebView extends AbsoluteLayout
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
     }
 
-    private void setActive(boolean active) {
+    void setActive(boolean active) {
         if (active) {
             if (hasFocus()) {
                 // If our window regained focus, and we have focus, then begin

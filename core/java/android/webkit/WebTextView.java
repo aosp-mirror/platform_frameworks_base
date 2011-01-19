@@ -132,6 +132,9 @@ import junit.framework.Assert;
     private boolean mAutoFillable; // Is this textview part of an autofillable form?
     private int mQueryId;
     private boolean mAutoFillProfileIsSet;
+    // Used to determine whether onFocusChanged was called as a result of
+    // calling remove().
+    private boolean mInsideRemove;
 
     // Types used with setType.  Keep in sync with CachedInput.h
     private static final int NORMAL_TEXT_FIELD = 0;
@@ -540,6 +543,11 @@ import junit.framework.Assert;
             Rect previouslyFocusedRect) {
         mFromFocusChange = true;
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+        if (focused) {
+            mWebView.setActive(true);
+        } else if (!mInsideRemove) {
+            mWebView.setActive(false);
+        }
         mFromFocusChange = false;
     }
 
@@ -770,8 +778,10 @@ import junit.framework.Assert;
         if (imm.isActive(this)) {
             imm.hideSoftInputFromWindow(getWindowToken(), 0);
         }
+        mInsideRemove = true;
         mWebView.removeView(this);
         mWebView.requestFocus();
+        mInsideRemove = false;
     }
 
     /**
