@@ -154,6 +154,16 @@ static void Region_scale(JNIEnv* env, jobject region, jfloat scale, jobject dst)
         scale_rgn(rgn, *rgn, scale);
 }
 
+static jstring Region_toString(JNIEnv* env, jobject clazz, SkRegion* region) {
+    char* str = region->toString();
+    if (str == NULL) {
+        return NULL;
+    }
+    jstring result = env->NewStringUTF(str);
+    free(str);
+    return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static SkRegion* Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
@@ -262,6 +272,7 @@ static JNINativeMethod gRegionMethods[] = {
     { "quickReject",            "(Landroid/graphics/Region;)Z",     (void*)Region_quickRejectRgn    },
     { "scale",                  "(FLandroid/graphics/Region;)V",    (void*)Region_scale             },
     { "translate",              "(IILandroid/graphics/Region;)V",   (void*)Region_translate         },
+    { "nativeToString",         "(I)Ljava/lang/String;",            (void*)Region_toString          },
     // parceling methods
     { "nativeCreateFromParcel", "(Landroid/os/Parcel;)I",           (void*)Region_createFromParcel  },
     { "nativeWriteToParcel",    "(ILandroid/os/Parcel;)Z",          (void*)Region_writeToParcel     },
