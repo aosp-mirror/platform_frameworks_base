@@ -1210,6 +1210,13 @@
         android:description="@string/permdesc_backup"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Must be required by a {@link android.widget.RemoteViewsService},
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_REMOTEVIEWS"
+        android:label="@string/permlab_bindRemoteViews"
+        android:description="@string/permdesc_bindRemoteViews"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- Allows an application to tell the AppWidget service which application
          can access AppWidget's data.  The normal user flow is that a user
          picks an AppWidget to go into a particular host, thereby giving that
