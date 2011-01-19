@@ -476,6 +476,10 @@ class FastScroller {
         }
     }
 
+    public void onSectionsChanged() {
+        mListAdapter = null;
+    }
+
     private void scrollTo(float position) {
         int count = mList.getCount();
         mScrollCompleted = false;
