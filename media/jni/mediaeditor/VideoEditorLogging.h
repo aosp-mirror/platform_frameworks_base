@@ -21,12 +21,13 @@
 
 #define VIDEOEDIT_LOG_INDENTATION                       (3)
 
+#define VIDEOEDIT_LOG_ERROR                             __android_log_print
+#define VIDEOEDIT_LOG_EXCEPTION                         __android_log_print
+
 #ifdef VIDEOEDIT_LOGGING_ENABLED
 
 #define VIDEOEDIT_LOG_ALLOCATION                        __android_log_print
 #define VIDEOEDIT_LOG_API                               __android_log_print
-#define VIDEOEDIT_LOG_ERROR                             __android_log_print
-#define VIDEOEDIT_LOG_EXCEPTION                         __android_log_print
 #define VIDEOEDIT_LOG_FUNCTION                          __android_log_print
 #define VIDEOEDIT_LOG_RESULT(x,y, ...)                     LOGI(y, __VA_ARGS__ )
 #define VIDEOEDIT_LOG_SETTING                           __android_log_print
@@ -40,8 +41,6 @@
 
 #define VIDEOEDIT_LOG_ALLOCATION                        (void)
 #define VIDEOEDIT_LOG_API                               (void)
-#define VIDEOEDIT_LOG_ERROR                             (void)
-#define VIDEOEDIT_LOG_EXCEPTION                         (void)
 #define VIDEOEDIT_LOG_FUNCTION                          (void)
 #define VIDEOEDIT_LOG_RESULT                            (void)
 #define VIDEOEDIT_LOG_SETTING                           (void)
