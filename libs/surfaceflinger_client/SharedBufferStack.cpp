@@ -261,8 +261,7 @@ bool SharedBufferClient::LockCondition::operator()() const {
     // NOTE: if stack.head is messed up, we could crash the client
     // or cause some drawing artifacts. This is okay, as long as it is
     // limited to the client.
-    return (buf != stack.index[stack.head] ||
-            (stack.queued > 0 && stack.inUse != buf));
+    return (buf != stack.index[stack.head]);
 }
 
 SharedBufferServer::BuffersAvailableCondition::BuffersAvailableCondition(
