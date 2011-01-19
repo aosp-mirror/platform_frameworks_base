@@ -393,13 +393,13 @@ size_t NuCachedSource2::cachedSize() {
     return mCacheOffset + mCache->totalSize();
 }
 
-size_t NuCachedSource2::approxDataRemaining(bool *eos) {
+size_t NuCachedSource2::approxDataRemaining(status_t *finalStatus) {
     Mutex::Autolock autoLock(mLock);
-    return approxDataRemaining_l(eos);
+    return approxDataRemaining_l(finalStatus);
 }
 
-size_t NuCachedSource2::approxDataRemaining_l(bool *eos) {
-    *eos = (mFinalStatus != OK);
+size_t NuCachedSource2::approxDataRemaining_l(status_t *finalStatus) {
+    *finalStatus = mFinalStatus;
     off64_t lastBytePosCached = mCacheOffset + mCache->totalSize();
     if (mLastAccessPos < lastBytePosCached) {
         return lastBytePosCached - mLastAccessPos;
@@ -488,4 +488,3 @@ String8 NuCachedSource2::getUri() {
     return mSource->getUri();
 }
 }  // namespace android
-

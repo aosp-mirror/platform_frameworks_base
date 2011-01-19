@@ -520,8 +520,10 @@ bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
         *durationUs = mRTSPController->getQueueDurationUs(eos);
         return true;
     } else if (mCachedSource != NULL && getBitrate(&bitrate)) {
-        size_t cachedDataRemaining = mCachedSource->approxDataRemaining(eos);
+        status_t finalStatus;
+        size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&finalStatus);
         *durationUs = cachedDataRemaining * 8000000ll / bitrate;
+        *eos = (finalStatus != OK);
         return true;
     }
 
@@ -564,11 +566,14 @@ void AwesomePlayer::onBufferingUpdate() {
     mBufferingEventPending = false;
 
     if (mCachedSource != NULL) {
-        bool eos;
-        size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&eos);
+        status_t finalStatus;
+        size_t cachedDataRemaining = mCachedSource->approxDataRemaining(&finalStatus);
+        bool eos = (finalStatus != OK);
 
         if (eos) {
-            notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+            if (finalStatus == ERROR_END_OF_STREAM) {
+                notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+            }
             if (mFlags & PREPARING) {
                 LOGV("cache has reached EOS, prepare is done.");
                 finishAsyncPrepare_l();
