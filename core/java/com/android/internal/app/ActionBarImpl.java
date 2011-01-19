@@ -388,6 +388,7 @@ public class ActionBarImpl extends ActionBar {
             mActionMode.finish();
         }
 
+        mUpperContextView.killMode();
         ActionMode mode = new ActionModeImpl(callback);
         if (callback.onCreateActionMode(mode, mode.getMenu())) {
             mode.invalidate();
