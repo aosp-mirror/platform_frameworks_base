@@ -485,7 +485,7 @@ void ScriptCState::runCompiler(Context *rsc,
         // Handle Fatal Error
     }
 
-#if 0
+#if 1
     if (bccLinkBC(s->mBccScript,
                   resName,
                   NULL /*rs_runtime_lib_bc*/,
