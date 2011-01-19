@@ -4481,6 +4481,10 @@ public class Activity extends ContextThemeWrapper
     
             mStopped = true;
         }
+        mResumed = false;
+
+        // Check for Activity leaks, if enabled.
+        StrictMode.conditionallyCheckInstanceCounts();
     }
 
     final void performDestroy() {

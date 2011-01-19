@@ -6817,6 +6817,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (info.durationMillis != -1) {
                 sb.append("Duration-Millis: ").append(info.durationMillis).append("\n");
             }
+            if (info.numInstances != -1) {
+                sb.append("Instance-Count: ").append(info.numInstances).append("\n");
+            }
             if (info.tags != null) {
                 for (String tag : info.tags) {
                     sb.append("Span-Tag: ").append(tag).append("\n");
