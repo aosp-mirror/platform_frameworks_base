@@ -8,14 +8,13 @@ page.title=Designing for Performance
 <ol>
   <li><a href="#intro">Introduction</a></li>
   <li><a href="#optimize_judiciously">Optimize Judiciously</a></li>
-  <li><a href="#object_creation">Avoid Creating Objects</a></li>
+  <li><a href="#object_creation">Avoid Creating Unnecessary Objects</a></li>
   <li><a href="#myths">Performance Myths</a></li>
   <li><a href="#prefer_static">Prefer Static Over Virtual</a></li>
   <li><a href="#internal_get_set">Avoid Internal Getters/Setters</a></li>
   <li><a href="#use_final">Use Static Final For Constants</a></li>
   <li><a href="#foreach">Use Enhanced For Loop Syntax</a></li>
-  <li><a href="#avoid_enums">Avoid Enums Where You Only Need Ints</a></li>
-  <li><a href="#package_inner">Use Package Scope with Inner Classes</a></li>
+  <li><a href="#package_inner">Consider Package Instead of Private Access with Inner Classes</a></li>
   <li><a href="#avoidfloat">Use Floating-Point Judiciously</a> </li>
   <li><a href="#library">Know And Use The Libraries</a></li>
   <li><a href="#native_methods">Use Native Methods Judiciously</a></li>
@@ -83,27 +82,31 @@ without.</p>
 test on that device.</p>
 
 <a name="object_creation"></a>
-<h2>Avoid Creating Objects</h2>
+<h2>Avoid Creating Unnecessary Objects</h2>
 
 <p>Object creation is never free. A generational GC with per-thread allocation
 pools for temporary objects can make allocation cheaper, but allocating memory
 is always more expensive than not allocating memory.</p>
 
 <p>If you allocate objects in a user interface loop, you will force a periodic
-garbage collection, creating little "hiccups" in the user experience.</p>
+garbage collection, creating little "hiccups" in the user experience. The
+concurrent collector introduced in Gingerbread helps, but unnecessary work
+should always be avoided.</p>
 
 <p>Thus, you should avoid creating object instances you don't need to.  Some
 examples of things that can help:</p>
 
 <ul>
-    <li>When extracting strings from a set of input data, try 
-    to return a substring of the original data, instead of creating a copy.
-    You will create a new String object, but it will share the char[]
-    with the data.</li>
     <li>If you have a method returning a string, and you know that its result
     will always be appended to a StringBuffer anyway, change your signature
     and implementation so that the function does the append directly,
     instead of creating a short-lived temporary object.</li>
+    <li>When extracting strings from a set of input data, try
+    to return a substring of the original data, instead of creating a copy.
+    You will create a new String object, but it will share the char[]
+    with the data. (The trade-off being that if you're only using a small
+    part of the original input, you'll be keeping it all around in memory
+    anyway if you go this route.)</li>
 </ul>
 
 <p>A somewhat more radical idea is to slice up multidimensional arrays into
@@ -119,7 +122,7 @@ parallel single one-dimension arrays:</p>
     generally much better than a single array of custom (Foo,Bar) objects.
     (The exception to this, of course, is when you're designing an API for
     other code to access;  in those cases, it's usually better to trade
-    correct API design for a small hit in speed. But in your own internal 
+    good API design for a small hit in speed. But in your own internal
     code, you should try and be as efficient as possible.)</li>
 </ul>
 
@@ -127,6 +130,7 @@ parallel single one-dimension arrays:</p>
 can.  Fewer objects created mean less-frequent garbage collection, which has
 a direct impact on user experience.</p>
 
+<a name="avoid_enums" id="avoid_enums"></a>
 <a name="myths" id="myths"></a>
 <h2>Performance Myths</h2>
 
@@ -265,43 +269,18 @@ hand-written counted loop for performance-critical ArrayList iteration.</p>
 
 <p>(See also <em>Effective Java</em> item 46.)</p>
 
-<a name="avoid_enums" id="avoid_enums"></a>
-<h2>Avoid Enums Where You Only Need Ints</h2>
-
-<p>Enums are very convenient, but unfortunately can be painful when size
-and speed matter.  For example, this:</p>
-
-<pre>public enum Shrubbery { GROUND, CRAWLING, HANGING }</pre>
-
-<p>adds 740 bytes to your .dex file compared to the equivalent class
-with three public static final ints. On first use, the
-class initializer invokes the &lt;init&gt; method on objects representing each
-of the enumerated values. Each object gets its own static field, and the full
-set is stored in an array (a static field called "$VALUES"). That's a lot of
-code and data, just for three integers. Additionally, this:</p>
-
-<pre>Shrubbery shrub = Shrubbery.GROUND;</pre>
-
-<p>causes a static field lookup.  If "GROUND" were a static final int,
-the compiler would treat it as a known constant and inline it.</p>
-
-<p>The flip side, of course, is that with enums you get nicer APIs and
-some compile-time value checking.  So, the usual trade-off applies: you should
-by all means use enums for public APIs, but try to avoid them when performance
-matters.</p>
-
-<p>If you're using <code>Enum.ordinal</code>, that's usually a sign that you
-should be using ints instead. As a rule of thumb, if an enum doesn't have a
-constructor and doesn't define its own methods, and it's used in
-performance-critical code, you should consider <code>static final int</code>
-constants instead.</p>
-
 <a name="package_inner" id="package_inner"></a>
-<h2>Use Package Scope with Inner Classes</h2>
+<h2>Consider Package Instead of Private Access with Private Inner Classes</h2>
 
 <p>Consider the following class definition:</p>
 
 <pre>public class Foo {
+    private class Inner {
+        void stuff() {
+            Foo.this.doStuff(Foo.this.mValue);
+        }
+    }
+
     private int mValue;
 
     public void run() {
@@ -313,24 +292,19 @@ constants instead.</p>
     private void doStuff(int value) {
         System.out.println("Value is " + value);
     }
-
-    private class Inner {
-        void stuff() {
-            Foo.this.doStuff(Foo.this.mValue);
-        }
-    }
 }</pre>
 
-<p>The key things to note here are that we define an inner class (Foo$Inner)
-that directly accesses a private method and a private instance field
-in the outer class.  This is legal, and the code prints "Value is 27" as
-expected.</p>
+<p>The key things to note here are that we define a private inner class
+(<code>Foo$Inner</code>) that directly accesses a private method and a private
+instance field in the outer class. This is legal, and the code prints "Value is
+27" as expected.</p>
 
-<p>The problem is that the VM considers direct access to Foo's private members
-from Foo$Inner to be illegal because Foo and Foo$Inner are different classes,
-even though the Java language allows an inner class to access an outer class'
-private members. To bridge the gap, the compiler generates a couple of
-synthetic methods:</p>
+<p>The problem is that the VM considers direct access to <code>Foo</code>'s
+private members from <code>Foo$Inner</code> to be illegal because
+<code>Foo</code> and <code>Foo$Inner</code> are different classes, even though
+the Java language allows an inner class to access an outer class' private
+members. To bridge the gap, the compiler generates a couple of synthetic
+methods:</p>
 
 <pre>/*package*/ static int Foo.access$100(Foo foo) {
     return foo.mValue;
@@ -339,22 +313,19 @@ synthetic methods:</p>
     foo.doStuff(value);
 }</pre>
 
-<p>The inner-class code calls these static methods whenever it needs to
-access the "mValue" field or invoke the "doStuff" method in the outer
-class. What this means is that the code above really boils down to a case
-where you're accessing member fields through accessor methods instead of
-directly.  Earlier we talked about how accessors are slower than direct field
+<p>The inner class code calls these static methods whenever it needs to
+access the <code>mValue</code> field or invoke the <code>doStuff</code> method
+in the outer class. What this means is that the code above really boils down to
+a case where you're accessing member fields through accessor methods.
+Earlier we talked about how accessors are slower than direct field
 accesses, so this is an example of a certain language idiom resulting in an
 "invisible" performance hit.</p>
 
-<p>We can avoid this problem by declaring fields and methods accessed
-by inner classes to have package scope, rather than private scope.
-This runs faster and removes the overhead of the generated methods.
-(Unfortunately it also means the fields could be accessed directly by other
-classes in the same package, which runs counter to the standard
-practice of making all fields private. Once again, if you're
-designing a public API you might want to carefully consider using this
-optimization.)</p>
+<p>If you're using code like this in a performance hotspot, you can avoid the
+overhead by declaring fields and methods accessed by inner classes to have
+package access, rather than private access. Unfortunately this means the fields
+can be accessed directly by other classes in the same package, so you shouldn't
+use this in public API.</p>
 
 <a name="avoidfloat" id="avoidfloat"></a>
 <h2>Use Floating-Point Judiciously</h2>
