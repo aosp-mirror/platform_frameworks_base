@@ -2803,6 +2803,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                 // Report the drop result when we're done
                 if (what == DragEvent.ACTION_DROP) {
+                    mDragDescription = null;
                     try {
                         Log.i(TAG, "Reporting drop result: " + result);
                         sWindowSession.reportDropResult(mWindow, result);
