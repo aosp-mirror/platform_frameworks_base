@@ -35,6 +35,8 @@ public:
     bool init(uint32_t size);
     void shutdown();
 
+    void printDebugData() const;
+
     LocklessCommandFifo();
     ~LocklessCommandFifo();
 
