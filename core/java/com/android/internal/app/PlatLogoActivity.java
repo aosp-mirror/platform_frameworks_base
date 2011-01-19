@@ -29,11 +29,11 @@ public class PlatLogoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        mToast = Toast.makeText(this, "Zombie art by Jack Larson", Toast.LENGTH_SHORT);
+        mToast = Toast.makeText(this, "REZZZZZZZ...", Toast.LENGTH_SHORT);
 
         ImageView content = new ImageView(this);
         content.setImageResource(com.android.internal.R.drawable.platlogo);
-        content.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        content.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         
         setContentView(content);
     }
