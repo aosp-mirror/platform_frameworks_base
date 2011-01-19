@@ -495,6 +495,7 @@ class HTML5VideoViewProxy extends Handler
                         break;
                     }
                     case ENDED:
+                        mSeekPosition = 0;
                         nativeOnEnded(mNativePointer);
                         break;
                     case PAUSED:
@@ -538,10 +539,15 @@ class HTML5VideoViewProxy extends Handler
      * Play a video stream.
      * @param url is the URL of the video stream.
      */
-    public void play(String url) {
+    public void play(String url, int position) {
         if (url == null) {
             return;
         }
+
+        if (position > 0) {
+            seek(position);
+        }
+
         Message message = obtainMessage(PLAY);
         message.obj = url;
         sendMessage(message);
