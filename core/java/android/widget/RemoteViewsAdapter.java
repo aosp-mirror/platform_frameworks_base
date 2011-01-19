@@ -917,9 +917,11 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     }
 
     private void enqueueDeferredUnbindServiceMessage() {
+        /* Temporarily disable delayed service unbinding
         // Remove any existing deferred-unbind messages
         mMainQueue.removeMessages(sUnbindServiceMessageType);
         mMainQueue.sendEmptyMessageDelayed(sUnbindServiceMessageType, sUnbindServiceDelay);
+        */
     }
 
     private boolean requestBindService() {
