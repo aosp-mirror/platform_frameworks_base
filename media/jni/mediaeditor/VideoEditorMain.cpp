@@ -437,7 +437,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
     VideoEditor_renderPreviewFrameStr frameStr;
     M4OSA_Context tnContext = M4OSA_NULL;
     const char* pMessage = NULL;
-    M4VIFI_ImagePlane *yuvPlane;
+    M4VIFI_ImagePlane *yuvPlane = NULL;
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO,
         "VIDEO_EDITOR", "surfaceWidth = %d",surfaceWidth);
@@ -1179,7 +1179,7 @@ static int removeAlphafromRGB8888 (
     }
 
     /** Remove the alpha channel */
-    for (int i = 0, j = 0; i < frameSize_argb; i++) {
+    for (size_t i = 0, j = 0; i < frameSize_argb; i++) {
         if ((i % 4) == 0) continue;
         pFramingCtx->FramingRgb->pac_data[j] = pTmpData[i];
         j++;
@@ -2729,7 +2729,7 @@ typedef struct
 } M4AM_Buffer;
 
 
-M4OSA_UInt8 logLookUp[256]{
+M4OSA_UInt8 logLookUp[256] = {
 0,120,137,146,154,159,163,167,171,173,176,178,181,182,184,186,188,189,190,192,193,
 194,195,196,198,199,199,200,201,202,203,204,205,205,206,207,207,208,209,209,210,
 211,211,212,212,213,213,214,215,215,216,216,216,217,217,218,218,219,219,220,220,
@@ -2788,7 +2788,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
     err = M4OSA_fileReadOpen (&inputFileHandle, pInputFileURL, M4OSA_kFileRead);
     if (inputFileHandle == M4OSA_NULL) {
         VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR",
-            "M4MA_generateAudioGraphFile: Cannot open input file 0x%x", err);
+            "M4MA_generateAudioGraphFile: Cannot open input file 0x%lx", err);
         return err;
     }
 
@@ -2822,7 +2822,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
         bufferIn.m_bufferSize = samplesCountInBytes*sizeof(M4OSA_UInt16);
     } else {
         VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR",
-            "M4MA_generateAudioGraphFile: Malloc failed for bufferIn.m_dataAddress 0x%x",\
+            "M4MA_generateAudioGraphFile: Malloc failed for bufferIn.m_dataAddress 0x%lx",
             M4ERR_ALLOC);
         return M4ERR_ALLOC;
     }
@@ -2862,7 +2862,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
         if (err != M4NO_ERROR) {
             // if out value of bytes-read is 0, break
             if ( numBytesToRead == 0) {
-                VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "numBytesToRead 0x%x",\
+                VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "numBytesToRead 0x%lx",
                 numBytesToRead);
                 break; /* stop if file is empty or EOF */
             }
@@ -2914,7 +2914,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
 
     } while (numBytesToRead != 0);
 
-    VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "loop 0x%x", volumeValuesCount);
+    VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR", "loop 0x%lx", volumeValuesCount);
 
     /* if some error occured in fwrite */
     if (numBytesToRead != 0) {
