@@ -85,6 +85,19 @@ public final class BluetoothInputDevice {
      */
     public static final int PRIORITY_UNDEFINED = -1;
 
+    /**
+     * Return codes for the connect and disconnect Bluez / Dbus calls.
+     */
+    public static final int INPUT_DISCONNECT_FAILED_NOT_CONNECTED = 5000;
+
+    public static final int INPUT_CONNECT_FAILED_ALREADY_CONNECTED = 5001;
+
+    public static final int INPUT_CONNECT_FAILED_ATTEMPT_FAILED = 5002;
+
+    public static final int INPUT_OPERATION_GENERIC_FAILURE = 5003;
+
+    public static final int INPUT_OPERATION_SUCCESS = 5004;
+
     private final IBluetooth mService;
     private final Context mContext;
 
