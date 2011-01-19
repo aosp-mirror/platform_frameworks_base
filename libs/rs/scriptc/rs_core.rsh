@@ -1,6 +1,12 @@
 #ifndef __RS_CORE_RSH__
 #define __RS_CORE_RSH__
 
+#ifdef BCC_PREPARE_BC
+#define _RS_STATIC  extern
+#else
+#define _RS_STATIC  static
+#endif
+
 // Debugging, print to the LOG a description string and a value.
 extern void __attribute__((overloadable))
     rsDebug(const char *, float);
@@ -35,17 +41,17 @@ extern void __attribute__((overloadable))
 #define RS_DEBUG(a) rsDebug(#a, a)
 #define RS_DEBUG_MARKER rsDebug(__FILE__, __LINE__)
 
-static void __attribute__((overloadable)) rsDebug(const char *s, float2 v) {
+_RS_STATIC void __attribute__((overloadable)) rsDebug(const char *s, float2 v) {
     rsDebug(s, v.x, v.y);
 }
-static void __attribute__((overloadable)) rsDebug(const char *s, float3 v) {
+_RS_STATIC void __attribute__((overloadable)) rsDebug(const char *s, float3 v) {
     rsDebug(s, v.x, v.y, v.z);
 }
-static void __attribute__((overloadable)) rsDebug(const char *s, float4 v) {
+_RS_STATIC void __attribute__((overloadable)) rsDebug(const char *s, float4 v) {
     rsDebug(s, v.x, v.y, v.z, v.w);
 }
 
-static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b)
+_RS_STATIC uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b)
 {
     uchar4 c;
     c.x = (uchar)(r * 255.f);
@@ -55,7 +61,7 @@ static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, 
     return c;
 }
 
-static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a)
+_RS_STATIC uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a)
 {
     uchar4 c;
     c.x = (uchar)(r * 255.f);
@@ -65,21 +71,21 @@ static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, 
     return c;
 }
 
-static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3 color)
+_RS_STATIC uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3 color)
 {
     color *= 255.f;
     uchar4 c = {color.x, color.y, color.z, 255};
     return c;
 }
 
-static uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4 color)
+_RS_STATIC uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4 color)
 {
     color *= 255.f;
     uchar4 c = {color.x, color.y, color.z, color.w};
     return c;
 }
 
-static float4 rsUnpackColor8888(uchar4 c)
+_RS_STATIC float4 rsUnpackColor8888(uchar4 c)
 {
     float4 ret = (float4)0.0039156862745f;
     ret *= convert_float4(c);
@@ -95,37 +101,37 @@ static float4 rsUnpackColor8888(uchar4 c)
 // Matrix ops
 /////////////////////////////////////////////////////
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixSet(rs_matrix4x4 *m, uint32_t row, uint32_t col, float v) {
     m->m[row * 4 + col] = v;
 }
 
-static float __attribute__((overloadable))
+_RS_STATIC float __attribute__((overloadable))
 rsMatrixGet(const rs_matrix4x4 *m, uint32_t row, uint32_t col) {
     return m->m[row * 4 + col];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixSet(rs_matrix3x3 *m, uint32_t row, uint32_t col, float v) {
     m->m[row * 3 + col] = v;
 }
 
-static float __attribute__((overloadable))
+_RS_STATIC float __attribute__((overloadable))
 rsMatrixGet(const rs_matrix3x3 *m, uint32_t row, uint32_t col) {
     return m->m[row * 3 + col];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixSet(rs_matrix2x2 *m, uint32_t row, uint32_t col, float v) {
     m->m[row * 2 + col] = v;
 }
 
-static float __attribute__((overloadable))
+_RS_STATIC float __attribute__((overloadable))
 rsMatrixGet(const rs_matrix2x2 *m, uint32_t row, uint32_t col) {
     return m->m[row * 2 + col];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadIdentity(rs_matrix4x4 *m) {
     m->m[0] = 1.f;
     m->m[1] = 0.f;
@@ -145,7 +151,7 @@ rsMatrixLoadIdentity(rs_matrix4x4 *m) {
     m->m[15] = 1.f;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadIdentity(rs_matrix3x3 *m) {
     m->m[0] = 1.f;
     m->m[1] = 0.f;
@@ -158,7 +164,7 @@ rsMatrixLoadIdentity(rs_matrix3x3 *m) {
     m->m[8] = 1.f;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadIdentity(rs_matrix2x2 *m) {
     m->m[0] = 1.f;
     m->m[1] = 0.f;
@@ -166,7 +172,7 @@ rsMatrixLoadIdentity(rs_matrix2x2 *m) {
     m->m[3] = 1.f;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix4x4 *m, const float *v) {
     m->m[0] = v[0];
     m->m[1] = v[1];
@@ -186,7 +192,7 @@ rsMatrixLoad(rs_matrix4x4 *m, const float *v) {
     m->m[15] = v[15];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix3x3 *m, const float *v) {
     m->m[0] = v[0];
     m->m[1] = v[1];
@@ -199,7 +205,7 @@ rsMatrixLoad(rs_matrix3x3 *m, const float *v) {
     m->m[8] = v[8];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix2x2 *m, const float *v) {
     m->m[0] = v[0];
     m->m[1] = v[1];
@@ -207,7 +213,7 @@ rsMatrixLoad(rs_matrix2x2 *m, const float *v) {
     m->m[3] = v[3];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix4x4 *v) {
     m->m[0] = v->m[0];
     m->m[1] = v->m[1];
@@ -227,7 +233,7 @@ rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix4x4 *v) {
     m->m[15] = v->m[15];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix3x3 *v) {
     m->m[0] = v->m[0];
     m->m[1] = v->m[1];
@@ -247,7 +253,7 @@ rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix3x3 *v) {
     m->m[15] = 1.f;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix2x2 *v) {
     m->m[0] = v->m[0];
     m->m[1] = v->m[1];
@@ -267,7 +273,7 @@ rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix2x2 *v) {
     m->m[15] = 1.f;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix3x3 *m, const rs_matrix3x3 *v) {
     m->m[0] = v->m[0];
     m->m[1] = v->m[1];
@@ -280,7 +286,7 @@ rsMatrixLoad(rs_matrix3x3 *m, const rs_matrix3x3 *v) {
     m->m[8] = v->m[8];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoad(rs_matrix2x2 *m, const rs_matrix2x2 *v) {
     m->m[0] = v->m[0];
     m->m[1] = v->m[1];
@@ -288,7 +294,7 @@ rsMatrixLoad(rs_matrix2x2 *m, const rs_matrix2x2 *v) {
     m->m[3] = v->m[3];
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadRotate(rs_matrix4x4 *m, float rot, float x, float y, float z) {
     float c, s;
     m->m[3] = 0;
@@ -327,7 +333,7 @@ rsMatrixLoadRotate(rs_matrix4x4 *m, float rot, float x, float y, float z) {
     m->m[10] = z*z*nc +  c;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadScale(rs_matrix4x4 *m, float x, float y, float z) {
     rsMatrixLoadIdentity(m);
     m->m[0] = x;
@@ -335,7 +341,7 @@ rsMatrixLoadScale(rs_matrix4x4 *m, float x, float y, float z) {
     m->m[10] = z;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadTranslate(rs_matrix4x4 *m, float x, float y, float z) {
     rsMatrixLoadIdentity(m);
     m->m[12] = x;
@@ -343,7 +349,7 @@ rsMatrixLoadTranslate(rs_matrix4x4 *m, float x, float y, float z) {
     m->m[14] = z;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *lhs, const rs_matrix4x4 *rhs) {
     for (int i=0 ; i<4 ; i++) {
         float ri0 = 0;
@@ -364,14 +370,14 @@ rsMatrixLoadMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *lhs, const rs_matrix4x
     }
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *rhs) {
     rs_matrix4x4 mt;
     rsMatrixLoadMultiply(&mt, m, rhs);
     rsMatrixLoad(m, &mt);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *lhs, const rs_matrix3x3 *rhs) {
     for (int i=0 ; i<3 ; i++) {
         float ri0 = 0;
@@ -389,14 +395,14 @@ rsMatrixLoadMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *lhs, const rs_matrix3x
     }
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *rhs) {
     rs_matrix3x3 mt;
     rsMatrixLoadMultiply(&mt, m, rhs);
     rsMatrixLoad(m, &mt);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *lhs, const rs_matrix2x2 *rhs) {
     for (int i=0 ; i<2 ; i++) {
         float ri0 = 0;
@@ -411,35 +417,35 @@ rsMatrixLoadMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *lhs, const rs_matrix2x
     }
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *rhs) {
     rs_matrix2x2 mt;
     rsMatrixLoadMultiply(&mt, m, rhs);
     rsMatrixLoad(m, &mt);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixRotate(rs_matrix4x4 *m, float rot, float x, float y, float z) {
     rs_matrix4x4 m1;
     rsMatrixLoadRotate(&m1, rot, x, y, z);
     rsMatrixMultiply(m, &m1);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixScale(rs_matrix4x4 *m, float x, float y, float z) {
     rs_matrix4x4 m1;
     rsMatrixLoadScale(&m1, x, y, z);
     rsMatrixMultiply(m, &m1);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixTranslate(rs_matrix4x4 *m, float x, float y, float z) {
     rs_matrix4x4 m1;
     rsMatrixLoadTranslate(&m1, x, y, z);
     rsMatrixMultiply(m, &m1);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadOrtho(rs_matrix4x4 *m, float left, float right, float bottom, float top, float near, float far) {
     rsMatrixLoadIdentity(m);
     m->m[0] = 2.f / (right - left);
@@ -450,7 +456,7 @@ rsMatrixLoadOrtho(rs_matrix4x4 *m, float left, float right, float bottom, float 
     m->m[14]= -(far + near) / (far - near);
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadFrustum(rs_matrix4x4 *m, float left, float right, float bottom, float top, float near, float far) {
     rsMatrixLoadIdentity(m);
     m->m[0] = 2.f * near / (right - left);
@@ -463,7 +469,7 @@ rsMatrixLoadFrustum(rs_matrix4x4 *m, float left, float right, float bottom, floa
     m->m[15]= 0.f;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixLoadPerspective(rs_matrix4x4* m, float fovy, float aspect, float near, float far) {
     float top = near * tan((float) (fovy * M_PI / 360.0f));
     float bottom = -top;
@@ -472,7 +478,7 @@ rsMatrixLoadPerspective(rs_matrix4x4* m, float fovy, float aspect, float near, f
     rsMatrixLoadFrustum(m, left, right, bottom, top, near, far);
 }
 
-static float4 __attribute__((overloadable))
+_RS_STATIC float4 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, float4 in) {
     float4 ret;
     ret.x = (m->m[0] * in.x) + (m->m[4] * in.y) + (m->m[8] * in.z) + (m->m[12] * in.w);
@@ -482,7 +488,7 @@ rsMatrixMultiply(rs_matrix4x4 *m, float4 in) {
     return ret;
 }
 
-static float4 __attribute__((overloadable))
+_RS_STATIC float4 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, float3 in) {
     float4 ret;
     ret.x = (m->m[0] * in.x) + (m->m[4] * in.y) + (m->m[8] * in.z) + m->m[12];
@@ -492,7 +498,7 @@ rsMatrixMultiply(rs_matrix4x4 *m, float3 in) {
     return ret;
 }
 
-static float4 __attribute__((overloadable))
+_RS_STATIC float4 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, float2 in) {
     float4 ret;
     ret.x = (m->m[0] * in.x) + (m->m[4] * in.y) + m->m[12];
@@ -502,7 +508,7 @@ rsMatrixMultiply(rs_matrix4x4 *m, float2 in) {
     return ret;
 }
 
-static float3 __attribute__((overloadable))
+_RS_STATIC float3 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix3x3 *m, float3 in) {
     float3 ret;
     ret.x = (m->m[0] * in.x) + (m->m[3] * in.y) + (m->m[6] * in.z);
@@ -511,7 +517,7 @@ rsMatrixMultiply(rs_matrix3x3 *m, float3 in) {
     return ret;
 }
 
-static float3 __attribute__((overloadable))
+_RS_STATIC float3 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix3x3 *m, float2 in) {
     float3 ret;
     ret.x = (m->m[0] * in.x) + (m->m[3] * in.y);
@@ -520,7 +526,7 @@ rsMatrixMultiply(rs_matrix3x3 *m, float2 in) {
     return ret;
 }
 
-static float2 __attribute__((overloadable))
+_RS_STATIC float2 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix2x2 *m, float2 in) {
     float2 ret;
     ret.x = (m->m[0] * in.x) + (m->m[2] * in.y);
@@ -529,7 +535,7 @@ rsMatrixMultiply(rs_matrix2x2 *m, float2 in) {
 }
 
 // Returns true if the matrix was successfully inversed
-static bool __attribute__((overloadable))
+_RS_STATIC bool __attribute__((overloadable))
 rsMatrixInverse(rs_matrix4x4 *m) {
     rs_matrix4x4 result;
 
@@ -571,7 +577,7 @@ rsMatrixInverse(rs_matrix4x4 *m) {
 }
 
 // Returns true if the matrix was successfully inversed
-static bool __attribute__((overloadable))
+_RS_STATIC bool __attribute__((overloadable))
 rsMatrixInverseTranspose(rs_matrix4x4 *m) {
     rs_matrix4x4 result;
 
@@ -612,7 +618,7 @@ rsMatrixInverseTranspose(rs_matrix4x4 *m) {
     return true;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixTranspose(rs_matrix4x4 *m) {
     int i, j;
     float temp;
@@ -625,7 +631,7 @@ rsMatrixTranspose(rs_matrix4x4 *m) {
     }
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixTranspose(rs_matrix3x3 *m) {
     int i, j;
     float temp;
@@ -638,7 +644,7 @@ rsMatrixTranspose(rs_matrix3x3 *m) {
     }
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsMatrixTranspose(rs_matrix2x2 *m) {
     float temp = m->m[1];
     m->m[1] = m->m[2];
@@ -649,7 +655,7 @@ rsMatrixTranspose(rs_matrix2x2 *m) {
 // quaternion ops
 /////////////////////////////////////////////////////
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsQuaternionSet(rs_quaternion *q, float w, float x, float y, float z) {
     q->w = w;
     q->x = x;
@@ -657,7 +663,7 @@ rsQuaternionSet(rs_quaternion *q, float w, float x, float y, float z) {
     q->z = z;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsQuaternionSet(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w = rhs->w;
     q->x = rhs->x;
@@ -665,7 +671,7 @@ rsQuaternionSet(rs_quaternion *q, const rs_quaternion *rhs) {
     q->z = rhs->z;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsQuaternionMultiply(rs_quaternion *q, float s) {
     q->w *= s;
     q->x *= s;
@@ -673,7 +679,7 @@ rsQuaternionMultiply(rs_quaternion *q, float s) {
     q->z *= s;
 }
 
-static void __attribute__((overloadable))
+_RS_STATIC void __attribute__((overloadable))
 rsQuaternionMultiply(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w = -q->x*rhs->x - q->y*rhs->y - q->z*rhs->z + q->w*rhs->w;
     q->x =  q->x*rhs->w + q->y*rhs->z - q->z*rhs->y + q->w*rhs->x;
@@ -681,7 +687,7 @@ rsQuaternionMultiply(rs_quaternion *q, const rs_quaternion *rhs) {
     q->z =  q->x*rhs->y - q->y*rhs->x + q->z*rhs->w + q->w*rhs->z;
 }
 
-static void
+_RS_STATIC void
 rsQuaternionAdd(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w *= rhs->w;
     q->x *= rhs->x;
@@ -689,7 +695,7 @@ rsQuaternionAdd(rs_quaternion *q, const rs_quaternion *rhs) {
     q->z *= rhs->z;
 }
 
-static void
+_RS_STATIC void
 rsQuaternionLoadRotateUnit(rs_quaternion *q, float rot, float x, float y, float z) {
     rot *= (float)(M_PI / 180.0f) * 0.5f;
     float c = cos(rot);
@@ -701,7 +707,7 @@ rsQuaternionLoadRotateUnit(rs_quaternion *q, float rot, float x, float y, float 
     q->z = z * s;
 }
 
-static void
+_RS_STATIC void
 rsQuaternionLoadRotate(rs_quaternion *q, float rot, float x, float y, float z) {
     const float len = x*x + y*y + z*z;
     if (len != 1) {
@@ -713,19 +719,19 @@ rsQuaternionLoadRotate(rs_quaternion *q, float rot, float x, float y, float z) {
     rsQuaternionLoadRotateUnit(q, rot, x, y, z);
 }
 
-static void
+_RS_STATIC void
 rsQuaternionConjugate(rs_quaternion *q) {
     q->x = -q->x;
     q->y = -q->y;
     q->z = -q->z;
 }
 
-static float
+_RS_STATIC float
 rsQuaternionDot(const rs_quaternion *q0, const rs_quaternion *q1) {
     return q0->w*q1->w + q0->x*q1->x + q0->y*q1->y + q0->z*q1->z;
 }
 
-static void
+_RS_STATIC void
 rsQuaternionNormalize(rs_quaternion *q) {
     const float len = rsQuaternionDot(q, q);
     if (len != 1) {
@@ -734,7 +740,7 @@ rsQuaternionNormalize(rs_quaternion *q) {
     }
 }
 
-static void
+_RS_STATIC void
 rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion *q1, float t) {
     if (t <= 0.0f) {
         rsQuaternionSet(q, q0);
@@ -776,7 +782,7 @@ rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion
                         tempq0.y*scale + tempq1.y*invScale, tempq0.z*scale + tempq1.z*invScale);
 }
 
-static void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
+_RS_STATIC void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
     float x2 = 2.0f * q->x * q->x;
     float y2 = 2.0f * q->y * q->y;
     float z2 = 2.0f * q->z * q->z;
@@ -811,7 +817,7 @@ static void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
 /////////////////////////////////////////////////////
 // utility funcs
 /////////////////////////////////////////////////////
-__inline__ static void __attribute__((overloadable, always_inline))
+__inline__ _RS_STATIC void __attribute__((overloadable, always_inline))
 rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
                          float4 *left, float4 *right,
                          float4 *top, float4 *bottom,
@@ -861,7 +867,7 @@ rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
     *far /= len;
 }
 
-__inline__ static bool __attribute__((overloadable, always_inline))
+__inline__ _RS_STATIC bool __attribute__((overloadable, always_inline))
 rsIsSphereInFrustum(float4 *sphere,
                       float4 *left, float4 *right,
                       float4 *top, float4 *bottom,
@@ -899,26 +905,26 @@ rsIsSphereInFrustum(float4 *sphere,
 // int ops
 /////////////////////////////////////////////////////
 
-__inline__ static uint __attribute__((overloadable, always_inline)) rsClamp(uint amount, uint low, uint high) {
+__inline__ _RS_STATIC uint __attribute__((overloadable, always_inline)) rsClamp(uint amount, uint low, uint high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static int __attribute__((overloadable, always_inline)) rsClamp(int amount, int low, int high) {
+__inline__ _RS_STATIC int __attribute__((overloadable, always_inline)) rsClamp(int amount, int low, int high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static ushort __attribute__((overloadable, always_inline)) rsClamp(ushort amount, ushort low, ushort high) {
+__inline__ _RS_STATIC ushort __attribute__((overloadable, always_inline)) rsClamp(ushort amount, ushort low, ushort high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static short __attribute__((overloadable, always_inline)) rsClamp(short amount, short low, short high) {
+__inline__ _RS_STATIC short __attribute__((overloadable, always_inline)) rsClamp(short amount, short low, short high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static uchar __attribute__((overloadable, always_inline)) rsClamp(uchar amount, uchar low, uchar high) {
+__inline__ _RS_STATIC uchar __attribute__((overloadable, always_inline)) rsClamp(uchar amount, uchar low, uchar high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
-__inline__ static char __attribute__((overloadable, always_inline)) rsClamp(char amount, char low, char high) {
+__inline__ _RS_STATIC char __attribute__((overloadable, always_inline)) rsClamp(char amount, char low, char high) {
     return amount < low ? low : (amount > high ? high : amount);
 }
 
-
+#undef _RS_STATIC
 
 #endif
 
