@@ -102,7 +102,8 @@ static void test_clamp(uint32_t index) {
     start();
 
     // Do ~100 M ops
-    for (int ct=0; ct < 1000 * 100; ct++) {
+    int ct;
+    for (ct=0; ct < 1000 * 100; ct++) {
         for (int i=0; i < (1000); i++) {
             data_f1[i] = clamp(data_f1[i], -1.f, 1.f);
         }
@@ -129,7 +130,8 @@ static void test_clamp4(uint32_t index) {
 
     float total = 0;
     // Do ~100 M ops
-    for (int ct=0; ct < 1000 * 100 /4; ct++) {
+    int ct;
+    for (ct=0; ct < 1000 * 100 /4; ct++) {
         for (int i=0; i < (1000); i++) {
             data_f4[i] = clamp(data_f4[i], -1.f, 1.f);
         }
@@ -140,7 +142,8 @@ static void test_clamp4(uint32_t index) {
 }
 
 void fp_mad_test(uint32_t index, int test_num) {
-    for (int x=0; x < 1025; x++) {
+    int x;
+    for (x=0; x < 1025; x++) {
         data_f1[x] = (x & 0xf) * 0.1f;
         data_f4[x].x = (x & 0xf) * 0.1f;
         data_f4[x].y = (x & 0xf0) * 0.1f;

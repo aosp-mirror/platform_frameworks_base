@@ -7,8 +7,6 @@
 #define _RS_STATIC  static
 #endif
 
-#define M_PI        3.14159265358979323846264338327950288f   /* pi */
-
 // Conversions
 #define CVT_FUNC_2(typeout, typein) \
 _RS_STATIC typeout##2 __attribute__((overloadable)) convert_##typeout##2(typein##2 v) { \
