@@ -988,6 +988,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     Log.i(TAG, "host=w:" + host.getMeasuredWidth() + ", h:" +
                             host.getMeasuredHeight() + ", params=" + params);
                 }
+
+                final int surfaceGenerationId = mSurface.getGenerationId();
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
                 if (params != null) {
@@ -1048,6 +1050,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mScroller.abortAnimation();
                     }
                     disposeResizeBitmap();
+                } else if (surfaceGenerationId != mSurface.getGenerationId() &&
+                        mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
+                    mAttachInfo.mHardwareRenderer.updateSurface(mHolder);
                 }
             } catch (RemoteException e) {
             }

@@ -84,6 +84,13 @@ public abstract class HardwareRenderer {
      * @return True if the initialization was successful, false otherwise.
      */
     abstract boolean initialize(SurfaceHolder holder);
+    
+    /**
+     * Updates the hardware renderer for the specified surface.
+     * 
+     * @param holder The holder for the surface to hardware accelerate.
+     */
+    abstract void updateSurface(SurfaceHolder holder);
 
     /**
      * Setup the hardware renderer for drawing. This is called for every
@@ -329,6 +336,13 @@ public abstract class HardwareRenderer {
                 }
             }
             return false;
+        }
+        
+        @Override
+        void updateSurface(SurfaceHolder holder) {
+            if (isRequested() && isEnabled()) {
+                createEglSurface(holder);
+            }
         }
 
         abstract GLES20Canvas createCanvas();
