@@ -89,13 +89,12 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     }
 
     private void freeMem() {
-        Log.v(LOGTAG, "freeMem: calling gc/finalization...");
+        Log.v(LOGTAG, "freeMem: calling gc...");
         final VMRuntime runtime = VMRuntime.getRuntime();
 
         runtime.gcSoftReferences();
         runtime.gcSoftReferences();
         runtime.gcSoftReferences();
-        Runtime.getRuntime().runFinalization();
         Runtime.getRuntime().gc();
         Runtime.getRuntime().gc();
 
