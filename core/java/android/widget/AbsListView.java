@@ -5319,6 +5319,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mRecycler.mRecyclerListener = listener;
     }
 
+    class AdapterDataSetObserver extends AdapterView<ListAdapter>.AdapterDataSetObserver {
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            if (mFastScroller != null) {
+                mFastScroller.onSectionsChanged();
+            }
+        }
+
+        @Override
+        public void onInvalidated() {
+            super.onInvalidated();
+            if (mFastScroller != null) {
+                mFastScroller.onSectionsChanged();
+            }
+        }
+    }
+
     /**
      * A MultiChoiceModeListener receives events for {@link AbsListView#CHOICE_MODE_MULTIPLE_MODAL}.
      * It acts as the {@link ActionMode.Callback} for the selection mode and also receives
