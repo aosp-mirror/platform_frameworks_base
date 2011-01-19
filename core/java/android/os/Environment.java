@@ -416,6 +416,7 @@ public class Environment {
      * <p>See {@link #getExternalStorageDirectory()} for more information.
      */
     public static boolean isExternalStorageRemovable() {
+        if (isExternalStorageEmulated()) return false;
         return Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_externalStorageRemovable);
     }
