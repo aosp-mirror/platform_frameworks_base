@@ -34,9 +34,9 @@ static inline T clamp(T v) {
 
 RotationVectorSensor::RotationVectorSensor(sensor_t const* list, size_t count)
     : mSensorDevice(SensorDevice::getInstance()),
-      mALowPass(M_SQRT1_2, 5.0f),
+      mALowPass(M_SQRT1_2, 1.5f),
       mAX(mALowPass), mAY(mALowPass), mAZ(mALowPass),
-      mMLowPass(M_SQRT1_2, 2.5f),
+      mMLowPass(M_SQRT1_2, 1.5f),
       mMX(mMLowPass), mMY(mMLowPass), mMZ(mMLowPass)
 {
     for (size_t i=0 ; i<count ; i++) {
