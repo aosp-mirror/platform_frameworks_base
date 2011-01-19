@@ -1187,8 +1187,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     service.startTethering(mDhcpRange);
                 } catch (Exception e) {
-                    transitionTo(mStartTetheringErrorState);
-                    return false;
+                    try {
+                        service.stopTethering();
+                        service.startTethering(mDhcpRange);
+                    } catch (Exception ee) {
+                        transitionTo(mStartTetheringErrorState);
+                        return false;
+                    }
                 }
                 try {
                     service.setDnsForwarders(mDnsServers);
