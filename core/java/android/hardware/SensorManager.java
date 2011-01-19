@@ -25,6 +25,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
 import android.view.Surface;
@@ -489,6 +490,8 @@ public class SensorManager
         private final Handler mHandler;
         private SensorEvent mValuesPool;
         public SparseBooleanArray mSensors = new SparseBooleanArray();
+        public SparseBooleanArray mFirstEvent = new SparseBooleanArray();
+        public SparseIntArray mSensorAccuracies = new SparseIntArray();
 
         ListenerDelegate(SensorEventListener listener, Sensor sensor, Handler handler) {
             mSensorEventListener = listener;
@@ -499,10 +502,30 @@ public class SensorManager
             mHandler = new Handler(looper) {
                 @Override
                 public void handleMessage(Message msg) {
-                    SensorEvent t = (SensorEvent)msg.obj;
-                    if (t.accuracy >= 0) {
-                        mSensorEventListener.onAccuracyChanged(t.sensor, t.accuracy);
+                    final SensorEvent t = (SensorEvent)msg.obj;
+                    final int handle = t.sensor.getHandle();
+
+                    switch (t.sensor.getType()) {
+                        // Only report accuracy for sensors that support it.
+                        case Sensor.TYPE_MAGNETIC_FIELD:
+                        case Sensor.TYPE_ORIENTATION:
+                            // call onAccuracyChanged() only if the value changes
+                            final int accuracy = mSensorAccuracies.get(handle);
+                            if ((t.accuracy >= 0) && (accuracy != t.accuracy)) {
+                                mSensorAccuracies.put(handle, t.accuracy);
+                                mSensorEventListener.onAccuracyChanged(t.sensor, t.accuracy);
+                            }
+                            break;
+                        default:
+                            // For other sensors, just report the accuracy once
+                            if (mFirstEvent.get(handle) == false) {
+                                mFirstEvent.put(handle, true);
+                                mSensorEventListener.onAccuracyChanged(
+                                        t.sensor, SENSOR_STATUS_ACCURACY_HIGH);
+                            }
+                            break;
                     }
+
                     mSensorEventListener.onSensorChanged(t);
                     returnToPool(t);
                 }
