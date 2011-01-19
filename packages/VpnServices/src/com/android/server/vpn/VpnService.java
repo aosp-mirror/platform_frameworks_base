@@ -328,6 +328,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             public void run() {
                 Log.i(TAG, "VPN connectivity monitor running");
                 try {
+                    mNotification.update(mStartTime); // to pop up notification
                     for (int i = 10; ; i--) {
                         long now = System.currentTimeMillis();
 
@@ -417,13 +418,27 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     // Helper class for showing, updating notification.
     private class NotificationHelper {
+        private NotificationManager mNotificationManager = (NotificationManager)
+                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        private Notification mNotification =
+                new Notification(R.drawable.vpn_connected, null, 0L);
+        private PendingIntent mPendingIntent = PendingIntent.getActivity(
+                mContext, 0,
+                new VpnManager(mContext).createSettingsActivityIntent(), 0);
+        private String mConnectedTitle;
+
         void update(long now) {
-            String title = getNotificationTitle(true);
-            Notification n = new Notification(R.drawable.vpn_connected, title,
-                    mStartTime);
-            n.setLatestEventInfo(mContext, title,
+            Notification n = mNotification;
+            if (now == mStartTime) {
+                // to pop up the notification for the first time
+                n.when = mStartTime;
+                n.tickerText = mConnectedTitle = getNotificationTitle(true);
+            } else {
+                n.tickerText = null;
+            }
+            n.setLatestEventInfo(mContext, mConnectedTitle,
                     getConnectedNotificationMessage(now),
-                    prepareNotificationIntent());
+                    mPendingIntent);
             n.flags |= Notification.FLAG_NO_CLEAR;
             n.flags |= Notification.FLAG_ONGOING_EVENT;
             enableNotification(n);
@@ -435,25 +450,18 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
                     title, System.currentTimeMillis());
             n.setLatestEventInfo(mContext, title,
                     getDisconnectedNotificationMessage(),
-                    prepareNotificationIntent());
+                    mPendingIntent);
             n.flags |= Notification.FLAG_AUTO_CANCEL;
             disableNotification();
             enableNotification(n);
         }
 
         void disableNotification() {
-            ((NotificationManager) mContext.getSystemService(
-                    Context.NOTIFICATION_SERVICE)).cancel(NOTIFICATION_ID);
+            mNotificationManager.cancel(NOTIFICATION_ID);
         }
 
         private void enableNotification(Notification n) {
-            ((NotificationManager) mContext.getSystemService(
-                    Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, n);
-        }
-
-        private PendingIntent prepareNotificationIntent() {
-            return PendingIntent.getActivity(mContext, 0,
-                    new VpnManager(mContext).createSettingsActivityIntent(), 0);
+            mNotificationManager.notify(NOTIFICATION_ID, n);
         }
 
         private String getNotificationTitle(boolean connected) {
