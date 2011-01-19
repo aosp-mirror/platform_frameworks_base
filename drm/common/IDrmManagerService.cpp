@@ -382,7 +382,7 @@ status_t BpDrmManagerService::setPlaybackStatus(
     }
 
     data.writeInt32(playbackStatus);
-    data.writeInt32(position);
+    data.writeInt64(position);
 
     remote()->transact(SET_PLAYBACK_STATUS, data, &reply);
     return reply.readInt32();
@@ -1111,7 +1111,7 @@ status_t BnDrmManagerService::onTransact(
         }
 
         const status_t status
-            = setPlaybackStatus(uniqueId, &handle, data.readInt32(), data.readInt32());
+            = setPlaybackStatus(uniqueId, &handle, data.readInt32(), data.readInt64());
         reply->writeInt32(status);
 
         delete handle.decryptInfo; handle.decryptInfo = NULL;
