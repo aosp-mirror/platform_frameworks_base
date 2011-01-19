@@ -16,16 +16,18 @@
 
 package android.net.vpn;
 
-import java.io.File;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Environment;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.Log;
+
+import com.android.server.vpn.VpnServiceBinder;
 
 /**
  * The class provides interface to manage all VPN-related tasks, including:
@@ -40,8 +42,6 @@ import android.util.Log;
  * {@hide}
  */
 public class VpnManager {
-    // Action for broadcasting a connectivity state.
-    private static final String ACTION_VPN_CONNECTIVITY = "vpn.connectivity";
     /** Key to the profile name of a connectivity broadcast event. */
     public static final String BROADCAST_PROFILE_NAME = "profile_name";
     /** Key to the connectivity state of a connectivity broadcast event. */
@@ -74,8 +74,10 @@ public class VpnManager {
     private static final String PACKAGE_PREFIX =
             VpnManager.class.getPackage().getName() + ".";
 
-    // Action to start VPN service
-    private static final String ACTION_VPN_SERVICE = PACKAGE_PREFIX + "SERVICE";
+    // Action for broadcasting a connectivity state.
+    private static final String ACTION_VPN_CONNECTIVITY = "vpn.connectivity";
+
+    private static final String VPN_SERVICE_NAME = "vpn";
 
     // Action to start VPN settings
     private static final String ACTION_VPN_SETTINGS =
@@ -96,13 +98,76 @@ public class VpnManager {
         return VpnType.values();
     }
 
+    public static void startVpnService(Context c) {
+        ServiceManager.addService(VPN_SERVICE_NAME, new VpnServiceBinder(c));
+    }
+
     private Context mContext;
+    private IVpnService mVpnService;
 
     /**
      * Creates a manager object with the specified context.
      */
     public VpnManager(Context c) {
         mContext = c;
+        createVpnServiceClient();
+    }
+
+    private void createVpnServiceClient() {
+        IBinder b = ServiceManager.getService(VPN_SERVICE_NAME);
+        mVpnService = IVpnService.Stub.asInterface(b);
+    }
+
+    /**
+     * Sets up a VPN connection.
+     * @param profile the profile object
+     * @param username the username for authentication
+     * @param password the corresponding password for authentication
+     * @return true if VPN is successfully connected
+     */
+    public boolean connect(VpnProfile p, String username, String password) {
+        try {
+            return mVpnService.connect(p, username, password);
+        } catch (RemoteException e) {
+            Log.e(TAG, "connect()", e);
+            return false;
+        }
+    }
+
+    /**
+     * Tears down the VPN connection.
+     */
+    public void disconnect() {
+        try {
+            mVpnService.disconnect();
+        } catch (RemoteException e) {
+            Log.e(TAG, "disconnect()", e);
+        }
+    }
+
+    /**
+     * Gets the the current connection state.
+     */
+    public VpnState getState(VpnProfile p) {
+        try {
+            return Enum.valueOf(VpnState.class, mVpnService.getState(p));
+        } catch (RemoteException e) {
+            Log.e(TAG, "getState()", e);
+            return VpnState.IDLE;
+        }
+    }
+
+    /**
+     * Returns the idle state.
+     * @return true if the system is not connecting/connected to a VPN
+     */
+    public boolean isIdle() {
+        try {
+            return mVpnService.isIdle();
+        } catch (RemoteException e) {
+            Log.e(TAG, "isIdle()", e);
+            return true;
+        }
     }
 
     /**
@@ -131,33 +196,6 @@ public class VpnManager {
             return null;
         } catch (IllegalAccessException e) {
             return null;
-        }
-    }
-
-    /**
-     * Starts the VPN service to establish VPN connection.
-     */
-    public void startVpnService() {
-        mContext.startService(new Intent(ACTION_VPN_SERVICE));
-    }
-
-    /**
-     * Stops the VPN service.
-     */
-    public void stopVpnService() {
-        mContext.stopService(new Intent(ACTION_VPN_SERVICE));
-    }
-
-    /**
-     * Binds the specified ServiceConnection with the VPN service.
-     */
-    public boolean bindVpnService(ServiceConnection c) {
-        if (!mContext.bindService(new Intent(ACTION_VPN_SERVICE), c, 0)) {
-            Log.w(TAG, "failed to connect to VPN service");
-            return false;
-        } else {
-            Log.d(TAG, "succeeded to connect to VPN service");
-            return true;
         }
     }
 
