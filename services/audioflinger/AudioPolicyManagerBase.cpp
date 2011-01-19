@@ -1052,25 +1052,27 @@ AudioPolicyManagerBase::AudioPolicyManagerBase(AudioPolicyClientInterface *clien
 
     updateDeviceForStrategy();
 #ifdef AUDIO_POLICY_TEST
-    AudioParameter outputCmd = AudioParameter();
-    outputCmd.addInt(String8("set_id"), 0);
-    mpClientInterface->setParameters(mHardwareOutput, outputCmd.toString());
+    if (mHardwareOutput != 0) {
+        AudioParameter outputCmd = AudioParameter();
+        outputCmd.addInt(String8("set_id"), 0);
+        mpClientInterface->setParameters(mHardwareOutput, outputCmd.toString());
 
-    mTestDevice = AudioSystem::DEVICE_OUT_SPEAKER;
-    mTestSamplingRate = 44100;
-    mTestFormat = AudioSystem::PCM_16_BIT;
-    mTestChannels =  AudioSystem::CHANNEL_OUT_STEREO;
-    mTestLatencyMs = 0;
-    mCurOutput = 0;
-    mDirectOutput = false;
-    for (int i = 0; i < NUM_TEST_OUTPUTS; i++) {
-        mTestOutputs[i] = 0;
+        mTestDevice = AudioSystem::DEVICE_OUT_SPEAKER;
+        mTestSamplingRate = 44100;
+        mTestFormat = AudioSystem::PCM_16_BIT;
+        mTestChannels =  AudioSystem::CHANNEL_OUT_STEREO;
+        mTestLatencyMs = 0;
+        mCurOutput = 0;
+        mDirectOutput = false;
+        for (int i = 0; i < NUM_TEST_OUTPUTS; i++) {
+            mTestOutputs[i] = 0;
+        }
+
+        const size_t SIZE = 256;
+        char buffer[SIZE];
+        snprintf(buffer, SIZE, "AudioPolicyManagerTest");
+        run(buffer, ANDROID_PRIORITY_AUDIO);
     }
-
-    const size_t SIZE = 256;
-    char buffer[SIZE];
-    snprintf(buffer, SIZE, "AudioPolicyManagerTest");
-    run(buffer, ANDROID_PRIORITY_AUDIO);
 #endif //AUDIO_POLICY_TEST
 }
 
@@ -1089,6 +1091,11 @@ AudioPolicyManagerBase::~AudioPolicyManagerBase()
         delete mInputs.valueAt(i);
    }
    mInputs.clear();
+}
+
+status_t AudioPolicyManagerBase::initCheck()
+{
+    return (mHardwareOutput == 0) ? NO_INIT : NO_ERROR;
 }
 
 #ifdef AUDIO_POLICY_TEST
