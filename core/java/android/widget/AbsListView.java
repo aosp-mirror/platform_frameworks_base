@@ -2439,8 +2439,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (adapter != null && mItemCount > 0 &&
                     motionPosition != INVALID_POSITION &&
                     motionPosition < adapter.getCount() && sameWindow()) {
-                performItemClick(getChildAt(motionPosition - mFirstPosition), motionPosition,
-                        adapter.getItemId(motionPosition));
+                final View view = getChildAt(motionPosition - mFirstPosition);
+                // If there is no view, something bad happened (the view scrolled off the
+                // screen, etc.) and we should cancel the click
+                if (view != null) {
+                    performItemClick(view, motionPosition, adapter.getItemId(motionPosition));
+                }
             }
         }
     }
