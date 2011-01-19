@@ -64,8 +64,11 @@ public class ActivityManager {
     static public int staticGetMemoryClass() {
         // Really brain dead right now -- just take this from the configured
         // vm heap size, and assume it is in megabytes and thus ends with "m".
-        String vmHeapSize = SystemProperties.get("dalvik.vm.smallheapsize", "16m");
-        return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+        String vmHeapSize = SystemProperties.get("dalvik.vm.growthlimit", "");
+        if (vmHeapSize != null && !"".equals(vmHeapSize)) {
+            return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
+        }
+        return staticGetLargeMemoryClass();
     }
     
     /**

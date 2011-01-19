@@ -3463,7 +3463,7 @@ public final class ActivityThread {
         }
 
         if ((data.appInfo.flags&ApplicationInfo.FLAG_LARGE_HEAP) != 0) {
-            // XXX bump up Dalvik's heap.
+            dalvik.system.VMRuntime.getRuntime().clearGrowthLimit();
         }
 
         // If the app is being launched for full backup or restore, bring it up in
