@@ -131,18 +131,21 @@ AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
         mAudioHardware(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1)
 {
+    Mutex::Autolock _l(mLock);
+
     mHardwareStatus = AUDIO_HW_IDLE;
 
     mAudioHardware = AudioHardwareInterface::create();
 
     mHardwareStatus = AUDIO_HW_INIT;
     if (mAudioHardware->initCheck() == NO_ERROR) {
-        // open 16-bit output stream for s/w mixer
+        AutoMutex lock(mHardwareLock);
         mMode = AudioSystem::MODE_NORMAL;
-        setMode(mMode);
-
-        setMasterVolume(1.0f);
-        setMasterMute(false);
+        mHardwareStatus = AUDIO_HW_SET_MODE;
+        mAudioHardware->setMode(mMode);
+        mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
+        mAudioHardware->setMasterVolume(1.0f);
+        mHardwareStatus = AUDIO_HW_IDLE;
     } else {
         LOGE("Couldn't even initialize the stubbed audio hardware!");
     }
@@ -440,13 +443,16 @@ status_t AudioFlinger::setMasterVolume(float value)
     }
 
     // when hw supports master volume, don't scale in sw mixer
-    AutoMutex lock(mHardwareLock);
-    mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
-    if (mAudioHardware->setMasterVolume(value) == NO_ERROR) {
-        value = 1.0f;
+    { // scope for the lock
+        AutoMutex lock(mHardwareLock);
+        mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
+        if (mAudioHardware->setMasterVolume(value) == NO_ERROR) {
+            value = 1.0f;
+        }
+        mHardwareStatus = AUDIO_HW_IDLE;
     }
-    mHardwareStatus = AUDIO_HW_IDLE;
 
+    Mutex::Autolock _l(mLock);
     mMasterVolume = value;
     for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
        mPlaybackThreads.valueAt(i)->setMasterVolume(value);
@@ -517,6 +523,7 @@ status_t AudioFlinger::setMasterMute(bool muted)
         return PERMISSION_DENIED;
     }
 
+    Mutex::Autolock _l(mLock);
     mMasterMute = muted;
     for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
        mPlaybackThreads.valueAt(i)->setMasterMute(muted);
@@ -579,6 +586,7 @@ status_t AudioFlinger::setStreamMute(int stream, bool muted)
         return BAD_VALUE;
     }
 
+    AutoMutex lock(mLock);
     mStreamTypes[stream].mute = muted;
     for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
        mPlaybackThreads.valueAt(i)->setStreamMute(stream, muted);
