@@ -93,29 +93,28 @@ public class MediaImageItem extends MediaItem {
      *
      * @throws IOException
      */
-    public MediaImageItem(VideoEditor editor, String mediaItemId,
-                         String filename, long durationMs,
-                         int renderingMode) throws IOException {
+    public MediaImageItem(VideoEditor editor, String mediaItemId, String filename, long durationMs,
+        int renderingMode) throws IOException {
 
         super(editor, mediaItemId, filename, renderingMode);
 
         mMANativeHelper = ((VideoEditorImpl)editor).getNativeContext();
         mVideoEditor = ((VideoEditorImpl)editor);
         try {
-            final Properties properties =
-                                   mMANativeHelper.getMediaProperties(filename);
+            final Properties properties = mMANativeHelper.getMediaProperties(filename);
 
             switch (mMANativeHelper.getFileType(properties.fileType)) {
                 case MediaProperties.FILE_JPEG:
+                case MediaProperties.FILE_PNG: {
                     break;
-                case MediaProperties.FILE_PNG:
-                    break;
+                }
 
-                default:
-                throw new IllegalArgumentException("Unsupported Input File Type");
+                default: {
+                    throw new IllegalArgumentException("Unsupported Input File Type");
+                }
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Unsupported file or file not found");
+            throw new IllegalArgumentException("Unsupported file or file not found: " + filename);
         }
 
         /**
@@ -130,13 +129,13 @@ public class MediaImageItem extends MediaItem {
         mDurationMs = durationMs;
         mDecodedFilename = String.format(mMANativeHelper.getProjectPath() +
                 "/" + "decoded" + getId()+ ".rgb");
-        final FileOutputStream fl = new FileOutputStream(mDecodedFilename);
-        final DataOutputStream dos = new DataOutputStream(fl);
+
         try {
             mAspectRatio = mMANativeHelper.getAspectRatio(mWidth, mHeight);
         } catch(IllegalArgumentException e) {
             throw new IllegalArgumentException ("Null width and height");
         }
+
         mGeneratedClipHeight = 0;
         mGeneratedClipWidth = 0;
 
@@ -146,9 +145,12 @@ public class MediaImageItem extends MediaItem {
          */
         final Pair<Integer, Integer>[] resolutions =
             MediaProperties.getSupportedResolutions(mAspectRatio);
+
         /**
          *  Get the highest resolution
          */
+        final FileOutputStream fl = new FileOutputStream(mDecodedFilename);
+        final DataOutputStream dos = new DataOutputStream(fl);
         final Pair<Integer, Integer> maxResolution = resolutions[resolutions.length - 1];
         if (mHeight > maxResolution.second) {
             /**
@@ -171,16 +173,16 @@ public class MediaImageItem extends MediaItem {
             int mNewHeight = 0;
             if ((mScaledWidth % 2 ) != 0) {
                 mNewWidth = mScaledWidth - 1;
-            }
-            else {
+            } else {
                 mNewWidth = mScaledWidth;
             }
+
             if ((mScaledHeight % 2 ) != 0) {
                 mNewHeight = mScaledHeight - 1;
-            }
-            else {
+            } else {
                 mNewHeight = mScaledHeight;
             }
+
             final int [] framingBuffer = new int[mNewWidth];
             final ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
             IntBuffer intBuffer;
@@ -195,6 +197,7 @@ public class MediaImageItem extends MediaItem {
                 dos.write(array);
                 tmp += 1;
             }
+
             mScaledWidth = mNewWidth;
             mScaledHeight = mNewHeight;
             scaledImage.recycle();
@@ -204,10 +207,11 @@ public class MediaImageItem extends MediaItem {
                                 + "/" + "scaled" + getId()+ ".JPG");
             if (!((new File(mScaledFilename)).exists())) {
                 super.mRegenerateClip = true;
-                FileOutputStream f1 = new FileOutputStream(mScaledFilename);
+                final FileOutputStream f1 = new FileOutputStream(mScaledFilename);
                 scaledImage.compress(Bitmap.CompressFormat.JPEG, 50,f1);
                 f1.close();
             }
+
             mScaledWidth = scaledImage.getWidth();
             mScaledHeight = scaledImage.getHeight();
 
@@ -215,17 +219,17 @@ public class MediaImageItem extends MediaItem {
             int mNewheight = 0;
             if ((mScaledWidth % 2 ) != 0) {
                 mNewWidth = mScaledWidth - 1;
-            }
-            else {
+            } else {
                 mNewWidth = mScaledWidth;
             }
+
             if ((mScaledHeight % 2 ) != 0) {
                 mNewheight = mScaledHeight - 1;
-            }
-            else {
+            } else {
                 mNewheight = mScaledHeight;
             }
-            Bitmap imageBitmap = BitmapFactory.decodeFile(mScaledFilename);
+
+            final Bitmap imageBitmap = BitmapFactory.decodeFile(mScaledFilename);
             final int [] framingBuffer = new int[mNewWidth];
             ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
             IntBuffer intBuffer;
@@ -240,10 +244,12 @@ public class MediaImageItem extends MediaItem {
                 dos.write(array);
                 tmp += 1;
             }
+
             mScaledWidth = mNewWidth;
             mScaledHeight = mNewheight;
             imageBitmap.recycle();
         }
+
         fl.close();
         System.gc();
     }
@@ -286,7 +292,7 @@ public class MediaImageItem extends MediaItem {
 
     /**
      * @return The file name of image which is decoded and stored
-     * in rgb format
+     * in RGB format
      */
     String getDecodedImageFileName() {
         return mDecodedFilename;
@@ -447,7 +453,7 @@ public class MediaImageItem extends MediaItem {
                  *  Check if the effect overlaps with the end transition
                  */
                 if (effect.getStartTime() + effect.getDuration() >
-                mDurationMs - transitionDurationMs) {
+                    mDurationMs - transitionDurationMs) {
                     mEndTransition.invalidate();
                     break;
                 }
@@ -464,7 +470,7 @@ public class MediaImageItem extends MediaItem {
                      *  Check if the overlay overlaps with the end transition
                      */
                     if (overlay.getStartTime() + overlay.getDuration() >
-                    mDurationMs - transitionDurationMs) {
+                        mDurationMs - transitionDurationMs) {
                         mEndTransition.invalidate();
                         break;
                     }
@@ -648,23 +654,24 @@ public class MediaImageItem extends MediaItem {
             for (int i = 0; i < thumbnailCount; i++) {
                 thumbnailArray[i] = thumbnail;
             }
+
             return thumbnailArray;
-
-
-        }
-        else {
+        } else {
             if (startMs > endMs) {
                 throw new IllegalArgumentException("Start time is greater than end time");
             }
+
             if (endMs > mDurationMs) {
                 throw new IllegalArgumentException("End time is greater than file duration");
             }
+
             if (startMs == endMs) {
                 Bitmap[] bitmap = new Bitmap[1];
                 bitmap[0] = mMANativeHelper.getPixels(getGeneratedImageClip(),
                     width, height,startMs);
                 return bitmap;
             }
+
             return mMANativeHelper.getPixelsList(getGeneratedImageClip(), width,
                 height,startMs,endMs,thumbnailCount);
         }
@@ -704,31 +711,51 @@ public class MediaImageItem extends MediaItem {
          */
         if (mBeginTransition != null) {
             final long transitionDurationMs = mBeginTransition.getDuration();
+            final boolean oldOverlap = isOverlapping(oldStartTimeMs, oldDurationMs, 0,
+                    transitionDurationMs);
+            final boolean newOverlap = isOverlapping(newStartTimeMs, newDurationMs, 0,
+                    transitionDurationMs);
             /**
-             *  If the start time has changed and if the old or the new item
-             *  overlaps with the begin transition, invalidate the transition.
+             * Invalidate transition if:
+             *
+             * 1. New item overlaps the transition, the old one did not
+             * 2. New item does not overlap the transition, the old one did
+             * 3. New and old item overlap the transition if begin or end
+             * time changed
              */
-            if (((oldStartTimeMs != newStartTimeMs)
-                    || (oldDurationMs != newDurationMs) )&&
-                    (isOverlapping(oldStartTimeMs, oldDurationMs, 0, transitionDurationMs) ||
-                    isOverlapping(newStartTimeMs, newDurationMs, 0,
-                    transitionDurationMs))) {
+            if (newOverlap != oldOverlap) { // Overlap has changed
                 mBeginTransition.invalidate();
+            } else if (newOverlap) { // Both old and new overlap
+                if ((oldStartTimeMs != newStartTimeMs) ||
+                        !(oldStartTimeMs + oldDurationMs > transitionDurationMs &&
+                        newStartTimeMs + newDurationMs > transitionDurationMs)) {
+                    mBeginTransition.invalidate();
+                }
             }
         }
 
         if (mEndTransition != null) {
             final long transitionDurationMs = mEndTransition.getDuration();
+            final boolean oldOverlap = isOverlapping(oldStartTimeMs, oldDurationMs,
+                    mDurationMs - transitionDurationMs, transitionDurationMs);
+            final boolean newOverlap = isOverlapping(newStartTimeMs, newDurationMs,
+                    mDurationMs - transitionDurationMs, transitionDurationMs);
             /**
-             *  If the start time + duration has changed and if the old or the new
-             *  item overlaps the end transition, invalidate the transition
+             * Invalidate transition if:
+             *
+             * 1. New item overlaps the transition, the old one did not
+             * 2. New item does not overlap the transition, the old one did
+             * 3. New and old item overlap the transition if begin or end
+             * time changed
              */
-            if (oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs &&
-                    (isOverlapping(oldStartTimeMs, oldDurationMs,
-                    mDurationMs - transitionDurationMs, transitionDurationMs) ||
-                    isOverlapping(newStartTimeMs, newDurationMs,
-                    mDurationMs - transitionDurationMs, transitionDurationMs))) {
+            if (newOverlap != oldOverlap) { // Overlap has changed
                 mEndTransition.invalidate();
+            } else if (newOverlap) { // Both old and new overlap
+                if ((oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs) ||
+                        ((oldStartTimeMs > mDurationMs - transitionDurationMs) ||
+                        newStartTimeMs > mDurationMs - transitionDurationMs)) {
+                    mEndTransition.invalidate();
+                }
             }
         }
     }
@@ -743,10 +770,12 @@ public class MediaImageItem extends MediaItem {
             setGeneratedImageClip(null);
             setRegenerateClip(true);
         }
+
         if (mScaledFilename != null) {
             new File(mScaledFilename).delete();
             mScaledFilename = null;
         }
+
         if (mDecodedFilename != null) {
             new File(mDecodedFilename).delete();
             mDecodedFilename = null;
