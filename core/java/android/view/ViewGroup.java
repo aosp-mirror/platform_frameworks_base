@@ -935,15 +935,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         } break;
 
         case DragEvent.ACTION_DRAG_ENDED: {
-            // If a child was notified about an ongoing drag, it's told that it's over
-            for (View child : mDragNotifiedChildren) {
-                child.dispatchDragEvent(event);
-            }
-
             // Release the bookkeeping now that the drag lifecycle has ended
-            mDragNotifiedChildren.clear();
-            mCurrentDrag.recycle();
-            mCurrentDrag = null;
+            if (mDragNotifiedChildren != null) {
+                for (View child : mDragNotifiedChildren) {
+                    // If a child was notified about an ongoing drag, it's told that it's over
+                    child.dispatchDragEvent(event);
+                }
+
+                mDragNotifiedChildren.clear();
+                mCurrentDrag.recycle();
+                mCurrentDrag = null;
+            }
 
             // We consider drag-ended to have been handled if one of our children
             // had offered to handle the drag.
