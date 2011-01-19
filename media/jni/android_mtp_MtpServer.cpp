@@ -62,6 +62,7 @@ private:
     String8         mStoragePath;
     uint64_t        mReserveSpace;
     jobject         mJavaServer;
+    bool            mDone;
     int             mFd;
 
 public:
@@ -72,6 +73,7 @@ public:
             mStoragePath(storagePath),
             mReserveSpace(reserveSpace),
             mJavaServer(javaServer),
+            mDone(false),
             mFd(-1)
     {
     }
@@ -104,12 +106,17 @@ public:
 
         mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
         mServer->addStorage(mStoragePath, mReserveSpace);
-        sMutex.unlock();
 
-        LOGD("MtpThread mServer->run");
-        mServer->run();
+        while (!mDone) {
+            sMutex.unlock();
 
-        sMutex.lock();
+            LOGD("MtpThread mServer->run");
+            mServer->run();
+            sleep(1);
+
+            sMutex.lock();
+        }
+
         close(mFd);
         mFd = -1;
         delete mServer;
@@ -122,6 +129,12 @@ public:
 
         LOGD("threadLoop returning");
         return false;
+    }
+
+    void stop() {
+        sMutex.lock();
+        mDone = true;
+        sMutex.unlock();
     }
 
     void sendObjectAdded(MtpObjectHandle handle) {
@@ -181,6 +194,9 @@ android_mtp_MtpServer_stop(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
     LOGD("stop\n");
+    MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
+    if (thread)
+        thread->stop();
 #endif
 }
 
@@ -212,7 +228,7 @@ android_mtp_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->setPtpMode(usePtp);
- #endif
+#endif
 }
 
 // ----------------------------------------------------------------------------
