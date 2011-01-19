@@ -78,12 +78,9 @@ public class MediaVideoItem extends MediaItem {
      *
      * @throws IOException if the file cannot be opened for reading
      */
-    public MediaVideoItem(VideoEditor editor, String mediaItemId,
-            String filename,
-            int renderingMode)
-    throws IOException {
-        this(editor, mediaItemId, filename, renderingMode, 0, END_OF_FILE,
-                100, false, null);
+    public MediaVideoItem(VideoEditor editor, String mediaItemId, String filename,
+            int renderingMode) throws IOException {
+        this(editor, mediaItemId, filename, renderingMode, 0, END_OF_FILE, 100, false, null);
     }
 
     /**
@@ -105,20 +102,22 @@ public class MediaVideoItem extends MediaItem {
      * @throws IOException if the file cannot be opened for reading
      */
     MediaVideoItem(VideoEditor editor, String mediaItemId, String filename,
-            int renderingMode,
-            long beginMs, long endMs, int volumePercent, boolean muted,
+            int renderingMode, long beginMs, long endMs, int volumePercent, boolean muted,
             String audioWaveformFilename)  throws IOException {
         super(editor, mediaItemId, filename, renderingMode);
+
         if (editor instanceof VideoEditorImpl) {
             mMANativeHelper = ((VideoEditorImpl)editor).getNativeContext();
             mVideoEditor = ((VideoEditorImpl)editor);
         }
-        Properties properties = null;
+
+        final Properties properties;
         try {
              properties = mMANativeHelper.getMediaProperties(filename);
         } catch ( Exception e) {
-            throw new IllegalArgumentException("Unsupported file or file not found");
+            throw new IllegalArgumentException("Unsupported file or file not found: " + filename);
         }
+
         switch (mMANativeHelper.getFileType(properties.fileType)) {
             case MediaProperties.FILE_3GP:
                 break;
@@ -163,8 +162,7 @@ public class MediaVideoItem extends MediaItem {
         mMuted = muted;
         mAudioWaveformFilename = audioWaveformFilename;
         if (audioWaveformFilename != null) {
-            mWaveformData =
-                new SoftReference<WaveformData>(
+            mWaveformData = new SoftReference<WaveformData>(
                         new WaveformData(audioWaveformFilename));
         } else {
             mWaveformData = null;
@@ -190,9 +188,11 @@ public class MediaVideoItem extends MediaItem {
         if (beginMs > mDurationMs) {
             throw new IllegalArgumentException("setExtractBoundaries: Invalid start time");
         }
+
         if (endMs > mDurationMs) {
             throw new IllegalArgumentException("setExtractBoundaries: Invalid end time");
         }
+
         if ((endMs != -1) && (beginMs >= endMs) ) {
             throw new IllegalArgumentException("setExtractBoundaries: Start time is greater than end time");
         }
@@ -255,18 +255,18 @@ public class MediaVideoItem extends MediaItem {
      */
     @Override
     public Bitmap getThumbnail(int width, int height, long timeMs) {
-        if (timeMs > mDurationMs)
-        {
+        if (timeMs > mDurationMs) {
             throw new IllegalArgumentException("Time Exceeds duration");
         }
-        if (timeMs < 0)
-        {
+
+        if (timeMs < 0) {
             throw new IllegalArgumentException("Invalid Time duration");
         }
-        if ((width <=0) || (height <= 0))
-        {
+
+        if ((width <=0) || (height <= 0)) {
             throw new IllegalArgumentException("Invalid Dimensions");
         }
+
         return mMANativeHelper.getPixels(super.getFilename(),
                 width, height,timeMs);
     }
@@ -280,18 +280,21 @@ public class MediaVideoItem extends MediaItem {
         if (startMs > endMs) {
             throw new IllegalArgumentException("Start time is greater than end time");
         }
+
         if (endMs > mDurationMs) {
             throw new IllegalArgumentException("End time is greater than file duration");
         }
+
         if ((height <= 0) || (width <= 0)) {
             throw new IllegalArgumentException("Invalid dimension");
         }
+
         if (startMs == endMs) {
-            Bitmap[] bitmap = new Bitmap[1];
-            bitmap[0] = mMANativeHelper.getPixels(super.getFilename(),
-                    width, height,startMs);
+            final Bitmap[] bitmap = new Bitmap[1];
+            bitmap[0] = mMANativeHelper.getPixels(super.getFilename(), width, height,startMs);
             return bitmap;
         }
+
         return mMANativeHelper.getPixelsList(super.getFilename(), width,
                 height,startMs,endMs,thumbnailCount);
     }
@@ -324,40 +327,58 @@ public class MediaVideoItem extends MediaItem {
      * {@inheritDoc}
      */
     @Override
-    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs,
-            long newStartTimeMs,
+    void invalidateTransitions(long oldStartTimeMs, long oldDurationMs, long newStartTimeMs,
             long newDurationMs) {
         /**
          *  Check if the item overlaps with the beginning and end transitions
          */
         if (mBeginTransition != null) {
             final long transitionDurationMs = mBeginTransition.getDuration();
+            final boolean oldOverlap = isOverlapping(oldStartTimeMs, oldDurationMs,
+                    mBeginBoundaryTimeMs, transitionDurationMs);
+            final boolean newOverlap = isOverlapping(newStartTimeMs, newDurationMs,
+                    mBeginBoundaryTimeMs, transitionDurationMs);
             /**
-             *  If the start time has changed and if the old or the new item
-             *  overlaps with the begin transition, invalidate the transition.
+             * Invalidate transition if:
+             *
+             * 1. New item overlaps the transition, the old one did not
+             * 2. New item does not overlap the transition, the old one did
+             * 3. New and old item overlap the transition if begin or end
+             * time changed
              */
-            if (((oldStartTimeMs != newStartTimeMs)
-                    || (oldDurationMs != newDurationMs) )&&
-                    (isOverlapping(oldStartTimeMs, oldDurationMs,
-                            mBeginBoundaryTimeMs, transitionDurationMs) ||
-                            isOverlapping(newStartTimeMs, newDurationMs,
-                                    mBeginBoundaryTimeMs, transitionDurationMs))) {
+            if (newOverlap != oldOverlap) { // Overlap has changed
                 mBeginTransition.invalidate();
+            } else if (newOverlap) { // Both old and new overlap
+                if ((oldStartTimeMs != newStartTimeMs) ||
+                        !(oldStartTimeMs + oldDurationMs > transitionDurationMs &&
+                        newStartTimeMs + newDurationMs > transitionDurationMs)) {
+                    mBeginTransition.invalidate();
+                }
             }
         }
 
         if (mEndTransition != null) {
             final long transitionDurationMs = mEndTransition.getDuration();
+            final boolean oldOverlap = isOverlapping(oldStartTimeMs, oldDurationMs,
+                    mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs);
+            final boolean newOverlap = isOverlapping(newStartTimeMs, newDurationMs,
+                    mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs);
             /**
-             *  If the start time + duration has changed and if the old or the new
-             *  item overlaps the end transition, invalidate the transition
+             * Invalidate transition if:
+             *
+             * 1. New item overlaps the transition, the old one did not
+             * 2. New item does not overlap the transition, the old one did
+             * 3. New and old item overlap the transition if begin or end
+             * time changed
              */
-            if (oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs &&
-                    (isOverlapping(oldStartTimeMs, oldDurationMs,
-                            mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs) ||
-                            isOverlapping(newStartTimeMs, newDurationMs,
-                                    mEndBoundaryTimeMs - transitionDurationMs, transitionDurationMs))) {
+            if (newOverlap != oldOverlap) { // Overlap has changed
                 mEndTransition.invalidate();
+            } else if (newOverlap) { // Both old and new overlap
+                if ((oldStartTimeMs + oldDurationMs != newStartTimeMs + newDurationMs) ||
+                        ((oldStartTimeMs > mEndBoundaryTimeMs - transitionDurationMs) ||
+                        newStartTimeMs > mEndBoundaryTimeMs - transitionDurationMs)) {
+                    mEndTransition.invalidate();
+                }
             }
         }
     }
@@ -434,7 +455,7 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("requested time not correct");
         }
 
-        Surface surface = surfaceHolder.getSurface();
+        final Surface surface = surfaceHolder.getSurface();
         if (surface == null) {
             throw new RuntimeException("Surface could not be retrieved from Surface holder");
         }
@@ -442,8 +463,7 @@ public class MediaVideoItem extends MediaItem {
         if (mFilename != null) {
             return mMANativeHelper.renderMediaItemPreviewFrame(surface,
                     mFilename,timeMs,mWidth,mHeight);
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -462,7 +482,7 @@ public class MediaVideoItem extends MediaItem {
      *             Audio track
      */
     public void extractAudioWaveform(ExtractAudioWaveformProgressListener listener)
-    throws IOException {
+        throws IOException {
         int frameDuration = 0;
         int sampleCount = 0;
         final String projectPath = mMANativeHelper.getProjectPath();
@@ -481,19 +501,17 @@ public class MediaVideoItem extends MediaItem {
              * Logic to get frame duration = (no. of frames per sample * 1000)/
              * sampling frequency
              */
-            if ( mMANativeHelper.getAudioCodecType(mAudioType) ==
+            if (mMANativeHelper.getAudioCodecType(mAudioType) ==
                 MediaProperties.ACODEC_AMRNB ) {
                 frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AMRNB*1000)/
                 MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
                 sampleCount = MediaProperties.SAMPLES_PER_FRAME_AMRNB;
-            }
-            else if ( mMANativeHelper.getAudioCodecType(mAudioType) ==
+            } else if (mMANativeHelper.getAudioCodecType(mAudioType) ==
                 MediaProperties.ACODEC_AMRWB ) {
                 frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AMRWB * 1000)/
                 MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
                 sampleCount = MediaProperties.SAMPLES_PER_FRAME_AMRWB;
-            }
-            else if ( mMANativeHelper.getAudioCodecType(mAudioType) ==
+            } else if (mMANativeHelper.getAudioCodecType(mAudioType) ==
                 MediaProperties.ACODEC_AAC_LC ) {
                 frameDuration = (MediaProperties.SAMPLES_PER_FRAME_AAC * 1000)/
                 MediaProperties.DEFAULT_SAMPLING_FREQUENCY;
@@ -682,5 +700,4 @@ public class MediaVideoItem extends MediaItem {
 
         return clipSettings;
     }
-
 }
