@@ -5235,7 +5235,7 @@ public class WebView extends AbsoluteLayout
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 mGotKeyDown = true;
             } else {
-                if (!mGotKeyDown) {
+                if (!mGotKeyDown && event.getAction() != KeyEvent.ACTION_MULTIPLE) {
                     /*
                      * We got a key up for which we were not the recipient of
                      * the original key down. Don't give it to the view.
