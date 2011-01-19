@@ -681,6 +681,12 @@
         interface of a wallpaper. Should never be needed for normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindRemoteViews">bind to a widget service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindRemoteViews">Allows the holder to bind to the top-level
+        interface of a widget service. Should never be needed for normal applications.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindDeviceAdmin">interact with a device admin</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindDeviceAdmin">Allows the holder to send intents to

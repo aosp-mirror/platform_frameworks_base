@@ -22,20 +22,21 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
-import android.content.ComponentName;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.MeasureSpec;
 
+import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
 
 /**
@@ -43,11 +44,22 @@ import com.android.internal.widget.IRemoteViewsFactory;
  * to be later inflated as child views.
  */
 /** @hide */
-public class RemoteViewsAdapter extends BaseAdapter {
+public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback {
     private static final String TAG = "RemoteViewsAdapter";
 
-    private Context mContext;
-    private Intent mIntent;
+    // The max number of items in the cache
+    private static final int sDefaultCacheSize = 36;
+    // The delay (in millis) to wait until attempting to unbind from a service after a request.
+    // This ensures that we don't stay continually bound to the service and that it can be destroyed
+    // if we need the memory elsewhere in the system.
+    private static final int sUnbindServiceDelay = 5000;
+    // Type defs for controlling different messages across the main and worker message queues
+    private static final int sDefaultMessageType = 0;
+    private static final int sUnbindServiceMessageType = 1;
+
+    private final Context mContext;
+    private final Intent mIntent;
+    private final int mAppWidgetId;
     private LayoutInflater mLayoutInflater;
     private RemoteViewsAdapterServiceConnection mServiceConnection;
     private WeakReference<RemoteAdapterConnectionCallback> mCallback;
@@ -79,7 +91,8 @@ public class RemoteViewsAdapter extends BaseAdapter {
      * garbage collected, and would cause us to leak activities due to the caching mechanism for
      * FrameLayouts in the adapter).
      */
-    private static class RemoteViewsAdapterServiceConnection implements ServiceConnection {
+    private static class RemoteViewsAdapterServiceConnection extends
+            IRemoteViewsAdapterConnection.Stub {
         private boolean mConnected;
         private WeakReference<RemoteViewsAdapter> mAdapter;
         private IRemoteViewsFactory mRemoteViewsFactory;
@@ -88,8 +101,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             mAdapter = new WeakReference<RemoteViewsAdapter>(adapter);
         }
 
-        public void onServiceConnected(ComponentName name,
-                IBinder service) {
+        public void onServiceConnected(IBinder service) {
             mRemoteViewsFactory = IRemoteViewsFactory.Stub.asInterface(service);
             mConnected = true;
 
@@ -137,7 +149,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
             });
         }
 
-        public void onServiceDisconnected(ComponentName name) {
+        public void onServiceDisconnected() {
             mConnected = false;
             mRemoteViewsFactory = null;
 
@@ -145,8 +157,9 @@ public class RemoteViewsAdapter extends BaseAdapter {
             if (adapter == null) return;
             
             // Clear the main/worker queues
-            adapter.mMainQueue.removeMessages(0);
-            adapter.mWorkerQueue.removeMessages(0);
+            adapter.mMainQueue.removeMessages(sUnbindServiceMessageType);
+            adapter.mMainQueue.removeMessages(sDefaultMessageType);
+            adapter.mWorkerQueue.removeMessages(sDefaultMessageType);
 
             final RemoteAdapterConnectionCallback callback = adapter.mCallback.get();
             if (callback != null) {
@@ -574,20 +587,26 @@ public class RemoteViewsAdapter extends BaseAdapter {
     public RemoteViewsAdapter(Context context, Intent intent, RemoteAdapterConnectionCallback callback) {
         mContext = context;
         mIntent = intent;
+        mAppWidgetId = intent.getIntExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID, -1);
         mLayoutInflater = LayoutInflater.from(context);
         if (mIntent == null) {
             throw new IllegalArgumentException("Non-null Intent must be specified.");
         }
         mRequestedViews = new RemoteViewsFrameLayoutRefSet();
 
-        // initialize the worker thread
+        // Strip the previously injected app widget id from service intent
+        if (intent.hasExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID)) {
+            intent.removeExtra(RemoteViews.EXTRA_REMOTEADAPTER_APPWIDGET_ID);
+        }
+
+        // Initialize the worker thread
         mWorkerThread = new HandlerThread("RemoteViewsCache-loader");
         mWorkerThread.start();
         mWorkerQueue = new Handler(mWorkerThread.getLooper());
-        mMainQueue = new Handler(Looper.myLooper());
+        mMainQueue = new Handler(Looper.myLooper(), this);
 
-        // initialize the cache and the service connection on startup
-        mCache = new FixedSizeRemoteViewsCache(50);
+        // Initialize the cache and the service connection on startup
+        mCache = new FixedSizeRemoteViewsCache(sDefaultCacheSize);
         mCallback = new WeakReference<RemoteAdapterConnectionCallback>(callback);
         mServiceConnection = new RemoteViewsAdapterServiceConnection(this);
         requestBindService();
@@ -687,6 +706,7 @@ public class RemoteViewsAdapter extends BaseAdapter {
                     @Override
                     public void run() {
                         mRequestedViews.notifyOnRemoteViewsLoaded(position, rv, typeId);
+                        enqueueDeferredUnbindServiceMessage();
                     }
                 });
             }
@@ -879,10 +899,34 @@ public class RemoteViewsAdapter extends BaseAdapter {
         super.notifyDataSetChanged();
     }
 
+    @Override
+    public boolean handleMessage(Message msg) {
+        boolean result = false;
+        switch (msg.what) {
+        case sUnbindServiceMessageType:
+            final AppWidgetManager mgr = AppWidgetManager.getInstance(mContext);
+            if (mServiceConnection.isConnected()) {
+                mgr.unbindRemoteViewsService(mAppWidgetId, mIntent);
+            }
+            result = true;
+            break;
+        default:
+            break;
+        }
+        return result;
+    }
+
+    private void enqueueDeferredUnbindServiceMessage() {
+        // Remove any existing deferred-unbind messages
+        mMainQueue.removeMessages(sUnbindServiceMessageType);
+        mMainQueue.sendEmptyMessageDelayed(sUnbindServiceMessageType, sUnbindServiceDelay);
+    }
+
     private boolean requestBindService() {
-        // try binding the service (which will start it if it's not already running)
+        // Try binding the service (which will start it if it's not already running)
         if (!mServiceConnection.isConnected()) {
-            mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            final AppWidgetManager mgr = AppWidgetManager.getInstance(mContext);
+            mgr.bindRemoteViewsService(mAppWidgetId, mIntent, mServiceConnection.asBinder());
         }
 
         return mServiceConnection.isConnected();
