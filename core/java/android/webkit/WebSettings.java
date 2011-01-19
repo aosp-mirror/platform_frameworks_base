@@ -1569,6 +1569,7 @@ public class WebSettings {
     public void setCacheMode(int mode) {
         if (mode != mOverrideCacheMode) {
             mOverrideCacheMode = mode;
+            postSync();
         }
     }
 
