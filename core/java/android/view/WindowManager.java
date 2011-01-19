@@ -537,7 +537,7 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_DITHER             = 0x00001000;
         
         /** Window flag: don't allow screen shots while this window is
-         * displayed. */
+         * displayed. Maps to Surface.SECURE. */
         public static final int FLAG_SECURE             = 0x00002000;
         
         /** Window flag: a special mode where the layout parameters are used

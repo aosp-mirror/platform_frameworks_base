@@ -42,8 +42,10 @@ public:
         virtual ~LayerDim();
 
     virtual void onDraw(const Region& clip) const;
-    virtual bool needsBlending() const  { return true; }
-    virtual bool isSecure() const       { return false; }
+    virtual bool needsBlending() const    { return true; }
+    virtual bool isSecure() const         { return false; }
+    virtual bool isProtectedByApp() const { return false; }
+    virtual bool isProtectedByDRM() const { return false; }
     virtual const char* getTypeId() const { return "LayerDim"; }
 
     static void initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h);

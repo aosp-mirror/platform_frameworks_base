@@ -44,6 +44,8 @@ public:
         eSecure             = 0x00000080,
         eNonPremultiplied   = 0x00000100,
         eOpaque             = 0x00000400,
+        eProtectedByApp     = 0x00000800,
+        eProtectedByDRM     = 0x00001000,
 
         eFXSurfaceNormal    = 0x00000000,
         eFXSurfaceBlur      = 0x00010000,
