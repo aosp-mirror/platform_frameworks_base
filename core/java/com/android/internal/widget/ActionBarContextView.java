@@ -160,10 +160,6 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     public void initForMode(final ActionMode mode) {
-        if (mAnimationMode != ANIMATE_IDLE || mAnimateInOnLayout) {
-            killMode();
-        }
-
         if (mClose == null) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             mClose = inflater.inflate(R.layout.action_mode_close_item, this, false);
@@ -198,15 +194,15 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
             return;
         }
 
-        mAnimationMode = ANIMATE_OUT;
         finishAnimation();
+        mAnimationMode = ANIMATE_OUT;
         mCurrentAnimation = makeOutAnimation();
         mCurrentAnimation.start();
     }
 
     private void finishAnimation() {
         final Animator a = mCurrentAnimation;
-        if (a != null && a.isRunning()) {
+        if (a != null) {
             mCurrentAnimation = null;
             a.end();
         }
@@ -448,7 +444,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
 
     @Override
     public void onAnimationEnd(Animator animation) {
-        if (mAnimationMode != ANIMATE_IN) {
+        if (mAnimationMode == ANIMATE_OUT) {
             killMode();
         }
         mAnimationMode = ANIMATE_IDLE;
