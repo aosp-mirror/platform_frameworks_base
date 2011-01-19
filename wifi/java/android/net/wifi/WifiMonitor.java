@@ -42,7 +42,8 @@ public class WifiMonitor {
     private static final int LINK_SPEED   = 5;
     private static final int TERMINATING  = 6;
     private static final int DRIVER_STATE = 7;
-    private static final int UNKNOWN      = 8;
+    private static final int EAP_FAILURE  = 8;
+    private static final int UNKNOWN      = 9;
 
     /** All events coming from the supplicant start with this prefix */
     private static final String eventPrefix = "CTRL-EVENT-";
@@ -110,6 +111,17 @@ public class WifiMonitor {
      * <code>state</code> is either STARTED or STOPPED
      */
     private static final String driverStateEvent = "DRIVER-STATE";
+    /**
+     * <pre>
+     * CTRL-EVENT-EAP-FAILURE EAP authentication failed
+     * </pre>
+     */
+    private static final String eapFailureEvent = "EAP-FAILURE";
+
+    /**
+     * This indicates an authentication failure on EAP FAILURE event
+     */
+    private static final String eapAuthFailure = "EAP authentication failed";
 
     /**
      * Regex pattern for extracting an Ethernet-style MAC address from a string.
@@ -176,7 +188,7 @@ public class WifiMonitor {
                 if (!eventStr.startsWith(eventPrefix)) {
                     if (eventStr.startsWith(wpaEventPrefix) &&
                             0 < eventStr.indexOf(passwordKeyMayBeIncorrectEvent)) {
-                        handlePasswordKeyMayBeIncorrect();
+                        mWifiStateMachine.notifyAuthenticationFailure();
                     } else if (eventStr.startsWith(wpsOverlapEvent)) {
                         mWifiStateMachine.notifyWpsOverlap();
                     }
@@ -207,16 +219,17 @@ public class WifiMonitor {
                     event = LINK_SPEED;
                 else if (eventName.equals(terminatingEvent))
                     event = TERMINATING;
-                else if (eventName.equals(driverStateEvent)) {
+                else if (eventName.equals(driverStateEvent))
                     event = DRIVER_STATE;
-                }
+                else if (eventName.equals(eapFailureEvent))
+                    event = EAP_FAILURE;
                 else
                     event = UNKNOWN;
 
                 String eventData = eventStr;
                 if (event == DRIVER_STATE || event == LINK_SPEED)
                     eventData = eventData.split(" ")[1];
-                else if (event == STATE_CHANGE) {
+                else if (event == STATE_CHANGE || event == EAP_FAILURE) {
                     int ind = eventStr.indexOf(" ");
                     if (ind != -1) {
                         eventData = eventStr.substring(ind + 1);
@@ -261,6 +274,10 @@ public class WifiMonitor {
                     // notify and exit
                     mWifiStateMachine.notifySupplicantLost();
                     break;
+                } else if (event == EAP_FAILURE) {
+                    if (eventData.startsWith(eapAuthFailure)) {
+                        mWifiStateMachine.notifyAuthenticationFailure();
+                    }
                 } else {
                     handleEvent(event, eventData);
                 }
@@ -282,10 +299,6 @@ public class WifiMonitor {
                 }
             }
             return false;
-        }
-
-        private void handlePasswordKeyMayBeIncorrect() {
-            mWifiStateMachine.notifyPasswordKeyMayBeIncorrect();
         }
 
         private void handleDriverEvent(String state) {
