@@ -2330,12 +2330,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-            if (!hasSetCloseOnTouchOutside()) {
-                if (a.getBoolean(
-                        com.android.internal.R.styleable.Window_windowCloseOnTouchOutside,
-                        false)) {
-                    setCloseOnTouchOutside(true);
-                }
+            if (a.getBoolean(
+                    com.android.internal.R.styleable.Window_windowCloseOnTouchOutside,
+                    false)) {
+                setCloseOnTouchOutsideIfNotSet(true);
             }
         }
         

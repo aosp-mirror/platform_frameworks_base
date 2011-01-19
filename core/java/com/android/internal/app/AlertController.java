@@ -391,6 +391,7 @@ public class AlertController {
         View buttonPanel = mWindow.findViewById(R.id.buttonPanel);
         if (!hasButtons) {
             buttonPanel.setVisibility(View.GONE);
+            mWindow.setCloseOnTouchOutsideIfNotSet(true);
         }
 
         FrameLayout customPanel = null;
