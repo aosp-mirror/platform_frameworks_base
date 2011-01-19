@@ -196,6 +196,10 @@ public class MtpDatabase {
                 if (lastSlash >= 0) {
                     name = name.substring(lastSlash + 1);
                 }
+                // strip trailing ".pla" from the name
+                if (name.endsWith(".pla")) {
+                    name = name.substring(0, name.length() - 4);
+                }
 
                 ContentValues values = new ContentValues(1);
                 values.put(Audio.Playlists.DATA, path);
