@@ -284,10 +284,11 @@ public class VolumePanel extends Handler
 
         synchronized (this) {
             ToneGenerator toneGen = getOrCreateToneGenerator(streamType);
-            toneGen.startTone(ToneGenerator.TONE_PROP_BEEP);
+            if (toneGen != null) {
+                toneGen.startTone(ToneGenerator.TONE_PROP_BEEP);
+                sendMessageDelayed(obtainMessage(MSG_STOP_SOUNDS), BEEP_DURATION);
+            }
         }
-
-        sendMessageDelayed(obtainMessage(MSG_STOP_SOUNDS), BEEP_DURATION);
     }
 
     protected void onStopSounds() {
@@ -319,10 +320,16 @@ public class VolumePanel extends Handler
     private ToneGenerator getOrCreateToneGenerator(int streamType) {
         synchronized (this) {
             if (mToneGenerators[streamType] == null) {
-                return mToneGenerators[streamType] = new ToneGenerator(streamType, MAX_VOLUME);
-            } else {
-                return mToneGenerators[streamType];
+                try {
+                    mToneGenerators[streamType] = new ToneGenerator(streamType, MAX_VOLUME);
+                } catch (RuntimeException e) {
+                    if (LOGD) {
+                        Log.d(TAG, "ToneGenerator constructor failed with "
+                                + "RuntimeException: " + e);
+                    }
+                }
             }
+            return mToneGenerators[streamType];
         }
     }
 
