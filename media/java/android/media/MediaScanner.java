@@ -1462,22 +1462,29 @@ public class MediaScanner
         if (lastSlash < 0) throw new IllegalArgumentException("bad path " + path);
         Uri uri, membersUri;
         long rowId = entry.mRowId;
-        if (rowId == 0) {
-            // Create a new playlist
 
-            int lastDot = path.lastIndexOf('.');
-            String name = (lastDot < 0 ? path.substring(lastSlash + 1) : path.substring(lastSlash + 1, lastDot));
-            values.put(MediaStore.Audio.Playlists.NAME, name);
+        // make sure we have a name
+        String name = values.getAsString(MediaStore.Audio.Playlists.NAME);
+        if (name == null) {
+            name = values.getAsString(MediaStore.MediaColumns.TITLE);
+            if (name == null) {
+                // extract name from file name
+                int lastDot = path.lastIndexOf('.');
+                name = (lastDot < 0 ? path.substring(lastSlash + 1)
+                        : path.substring(lastSlash + 1, lastDot));
+            }
+        }
+
+        values.put(MediaStore.Audio.Playlists.NAME, name);
+        values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
+
+        if (rowId == 0) {
             values.put(MediaStore.Audio.Playlists.DATA, path);
-            values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
             uri = mMediaProvider.insert(mPlaylistsUri, values);
             rowId = ContentUris.parseId(uri);
             membersUri = Uri.withAppendedPath(uri, Playlists.Members.CONTENT_DIRECTORY);
         } else {
             uri = ContentUris.withAppendedId(mPlaylistsUri, rowId);
-
-            // update lastModified value of existing playlist
-            values.put(MediaStore.Audio.Playlists.DATE_MODIFIED, entry.mLastModified);
             mMediaProvider.update(uri, values, null, null);
 
             // delete members of existing playlist
