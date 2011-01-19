@@ -211,6 +211,12 @@ public class Build {
          *      {@link android.R.style#Theme_Holo}.
          * <li> The activity lifecycle has changed slightly as per
          * {@link android.app.Activity}.
+         * <li> When an application requires a permission to access on of
+         * its components (activity, receiver, service, provider), this
+         * permission is no longer enforced when the application wants to
+         * access its own component.  This means it can require a permission
+         * on a component that it does not itself hold and still access that
+         * component.
          * </ul>
          */
         public static final int HONEYCOMB = CUR_DEVELOPMENT;

@@ -2035,17 +2035,25 @@ public class ActivityStack {
         }
 
         final int perm = mService.checkComponentPermission(aInfo.permission, callingPid,
-                callingUid, aInfo.exported ? -1 : aInfo.applicationInfo.uid);
+                callingUid, aInfo.applicationInfo.uid, aInfo.exported);
         if (perm != PackageManager.PERMISSION_GRANTED) {
             if (resultRecord != null) {
                 sendActivityResultLocked(-1,
                     resultRecord, resultWho, requestCode,
                     Activity.RESULT_CANCELED, null);
             }
-            String msg = "Permission Denial: starting " + intent.toString()
-                    + " from " + callerApp + " (pid=" + callingPid
-                    + ", uid=" + callingUid + ")"
-                    + " requires " + aInfo.permission;
+            String msg;
+            if (!aInfo.exported) {
+                msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ")"
+                        + " not exported from uid " + aInfo.applicationInfo.uid;
+            } else {
+                msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ")"
+                        + " requires " + aInfo.permission;
+            }
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
