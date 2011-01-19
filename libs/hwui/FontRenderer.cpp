@@ -298,8 +298,10 @@ Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize,
 // FontRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
+static bool sLogFontRendererCreate = true;
+
 FontRenderer::FontRenderer() {
-    LOGD("Creating FontRenderer");
+    if (sLogFontRendererCreate) LOGD("Creating FontRenderer");
 
     mGammaTable = NULL;
     mInitialized = false;
@@ -317,18 +319,24 @@ FontRenderer::FontRenderer() {
 
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXT_CACHE_WIDTH, property, NULL) > 0) {
-        LOGD("  Setting text cache width to %s pixels", property);
+        if (sLogFontRendererCreate) LOGD("  Setting text cache width to %s pixels", property);
         mCacheWidth = atoi(property);
     } else {
-        LOGD("  Using default text cache width of %i pixels", mCacheWidth);
+        if (sLogFontRendererCreate) {
+            LOGD("  Using default text cache width of %i pixels", mCacheWidth);
+        }
     }
 
     if (property_get(PROPERTY_TEXT_CACHE_HEIGHT, property, NULL) > 0) {
-        LOGD("  Setting text cache width to %s pixels", property);
+        if (sLogFontRendererCreate) LOGD("  Setting text cache width to %s pixels", property);
         mCacheHeight = atoi(property);
     } else {
-        LOGD("  Using default text cache height of %i pixels", mCacheHeight);
+        if (sLogFontRendererCreate) {
+            LOGD("  Using default text cache height of %i pixels", mCacheHeight);
+        }
     }
+
+    sLogFontRendererCreate = false;
 }
 
 FontRenderer::~FontRenderer() {
