@@ -109,7 +109,7 @@ _RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float4 v2) { \
     r.x = fnc(v1.x, v2.x); \
     r.y = fnc(v1.y, v2.y); \
     r.z = fnc(v1.z, v2.z); \
-    r.w = fnc(v1.w, v2.z); \
+    r.w = fnc(v1.w, v2.w); \
     return r; \
 }
 
@@ -136,6 +136,40 @@ _RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float v2) { \
     return r; \
 }
 
+#define DEF_FUNC_2P(fnc) \
+_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float2 *v2) { \
+    float2 r; \
+    float q; \
+    r.x = fnc(v1.x, &q); \
+    v2->x = q; \
+    r.y = fnc(v1.y, &q); \
+    v2->y = q; \
+    return r; \
+} \
+_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float3 *v2) { \
+    float3 r; \
+    float q; \
+    r.x = fnc(v1.x, &q); \
+    v2->x = q; \
+    r.y = fnc(v1.y, &q); \
+    v2->y = q; \
+    r.z = fnc(v1.z, &q); \
+    v2->z = q; \
+    return r; \
+} \
+_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float4 *v2) { \
+    float4 r; \
+    float q; \
+    r.x = fnc(v1.x, &q); \
+    v2->x = q; \
+    r.y = fnc(v1.y, &q); \
+    v2->y = q; \
+    r.z = fnc(v1.z, &q); \
+    v2->z = q; \
+    r.w = fnc(v1.w, &q); \
+    v2->w = q; \
+    return r; \
+}
 
 extern float __attribute__((overloadable)) acos(float);
 DEF_FUNC_1(acos)
@@ -333,9 +367,7 @@ extern float3 __attribute__((overloadable)) mad(float3, float3, float3);
 extern float4 __attribute__((overloadable)) mad(float4, float4, float4);
 
 extern float __attribute__((overloadable)) modf(float, float *);
-extern float2 __attribute__((overloadable)) modf(float2, float2 *);
-extern float3 __attribute__((overloadable)) modf(float3, float3 *);
-extern float4 __attribute__((overloadable)) modf(float4, float4 *);
+DEF_FUNC_2P(modf);
 
 //extern float __attribute__((overloadable)) nan(uint);
 

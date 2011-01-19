@@ -221,7 +221,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z5log1pf", (void *)&log1pf, true },
     //{ "logb", (void *)&, true },
     //{ "mad", (void *)&, true },
-    { "modf", (void *)&modff, true },
+    { "_Z4modffPf", (void *)&modff, true },
     //{ "nan", (void *)&, true },
     { "_Z9nextafterff", (void *)&nextafterf, true },
     { "_Z3powff", (void *)&powf, true },
