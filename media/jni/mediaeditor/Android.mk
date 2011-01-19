@@ -85,6 +85,6 @@ LOCAL_MODULE:= libvideoeditor_jni
 # to add this library to the prelink map and set this to true.
 LOCAL_PRELINK_MODULE := false
 
-LOCAL_MODULE_TAGS := eng development
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
