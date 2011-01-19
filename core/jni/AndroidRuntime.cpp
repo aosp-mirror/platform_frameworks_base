@@ -568,6 +568,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char heapstartsizeOptsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
+    char heapgrowthlimitOptsBuf[sizeof("-XX:HeapGrowthLimit=")-1 + PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
@@ -658,6 +659,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     property_get("dalvik.vm.heapsize", heapsizeOptsBuf+4, "16m");
     opt.optionString = heapsizeOptsBuf;
     mOptions.add(opt);
+
+    strcpy(heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
+    property_get("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf+20, "");
+    if (heapgrowthlimitOptsBuf[20] != '\0') {
+        opt.optionString = heapgrowthlimitOptsBuf;
+        mOptions.add(opt);
+    }
 
     /*
      * Enable or disable dexopt features, such as bytecode verification and
