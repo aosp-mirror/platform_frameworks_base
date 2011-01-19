@@ -96,18 +96,19 @@ public:
 
     virtual bool threadLoop() {
         sMutex.lock();
-        mFd = open("/dev/mtp_usb", O_RDWR);
-        printf("open returned %d\n", mFd);
-        if (mFd < 0) {
-            LOGE("could not open MTP driver\n");
-            sMutex.unlock();
-            return false;
-        }
-
-        mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
-        mServer->addStorage(mStoragePath, mReserveSpace);
 
         while (!mDone) {
+            mFd = open("/dev/mtp_usb", O_RDWR);
+            printf("open returned %d\n", mFd);
+            if (mFd < 0) {
+                LOGE("could not open MTP driver\n");
+                sMutex.unlock();
+                return false;
+            }
+
+            mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
+            mServer->addStorage(mStoragePath, mReserveSpace);
+
             sMutex.unlock();
 
             LOGD("MtpThread mServer->run");
@@ -115,12 +116,12 @@ public:
             sleep(1);
 
             sMutex.lock();
-        }
 
-        close(mFd);
-        mFd = -1;
-        delete mServer;
-        mServer = NULL;
+            close(mFd);
+            mFd = -1;
+            delete mServer;
+            mServer = NULL;
+        }
 
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         env->SetIntField(mJavaServer, field_context, 0);
