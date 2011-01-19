@@ -534,6 +534,12 @@
         <!-- The CalndarView style. -->
         <attr name="calendarViewStyle" format="reference" />
 
+        <!-- The TimePicker style. -->
+        <attr name="timePickerStyle" format="reference" />
+
+        <!-- The DatePicker style. -->
+        <attr name="datePickerStyle" format="reference" />
+
         <!-- Fast scroller styles -->
         <eat-comment />
 
@@ -2869,6 +2875,7 @@
         <!-- Gravity setting for positioning the currently selected item. -->
         <attr name="gravity" />
     </declare-styleable>
+
     <declare-styleable name="DatePicker">
         <!-- The first year (inclusive), for example "1940". -->
         <attr name="startYear" format="integer" />
@@ -2882,6 +2889,8 @@
         <attr name="minDate" format="string" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
+        <!-- @hide The layout of the time picker. -->
+        <attr name="layout" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -3080,9 +3089,20 @@
     </declare-styleable>
 
     <declare-styleable name="NumberPicker">
-        <attr name="orientation" />
-        <!-- Color for the solid color background if such for optimized rendering. -->
+        <!-- @hide Color for the solid color background if such for optimized rendering. -->
         <attr name="solidColor" format="color|reference" />
+        <!-- @hide Whether the number picker supports fligning. -->
+        <attr name="flingable" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="TimePicker">
+        <!-- @hide The layout of the time picker. -->
+        <attr name="layout" />
+    </declare-styleable>
+
+    <declare-styleable name="DatePicker">
+        <!-- @hide The layout of the time picker. -->
+        <attr name="layout" />
     </declare-styleable>
 
     <!-- ========================= -->

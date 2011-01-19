@@ -489,7 +489,16 @@
         <item name="android:orientation">vertical</item>
         <item name="android:fadingEdge">vertical</item>
         <item name="android:fadingEdgeLength">50dip</item>
-        <item name="android:solidColor">@android:color/transparent</item>
+        <item name="android:flingable">false</item>
+    </style>
+
+    <style name="Widget.TimePicker">
+        <item name="android:layout">@android:layout/time_picker</item>
+    </style>
+
+    <style name="Widget.DatePicker">
+        <item name="android:layout">@android:layout/date_picker</item>
+        <item name="android:calendarViewShown">false</item>
     </style>
 
     <style name="Widget.ImageButton.NumberPickerUpButton">
@@ -1502,6 +1511,20 @@
         <item name="android:background">@android:drawable/btn_default_holo_dark</item>
     </style>
 
+    <style name="Widget.Holo.NumberPicker" parent="Widget.NumberPicker">
+        <item name="android:solidColor">@android:color/transparent</item>
+        <item name="android:flingable">true</item>
+    </style>
+
+    <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
+        <item name="android:layout">@android:layout/time_picker_holo</item>
+    </style>
+
+    <style name="Widget.Holo.DatePicker" parent="Widget.DatePicker">
+        <item name="android:layout">@android:layout/date_picker_holo</item>
+        <item name="android:calendarViewShown">true</item>
+    </style>
+
     <style name="Widget.Holo.ImageButton.NumberPickerUpButton">
         <item name="android:background">@null</item>
         <item name="android:src">@android:drawable/numberpicker_up_btn_holo_dark</item>
@@ -1868,6 +1891,15 @@
         <item name="android:weekNumberColor">#7F080021</item>
         <item name="android:weekSeparatorLineColor">#7F08002A</item>
         <item name="android:weekDayTextAppearance">@android:style/TextAppearance.Holo.Light.CalendarViewWeekDayView</item>
+    </style>
+
+    <style name="Widget.Holo.Light.NumberPicker" parent="Widget.Holo.NumberPicker">
+    </style>
+
+    <style name="Widget.Holo.Light.TimePicker" parent="Widget.Holo.TimePicker">
+    </style>
+
+    <style name="Widget.Holo.Light.DatePicker" parent="Widget.Holo.DatePicker">
     </style>
 
     <style name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" parent="Widget.Holo.ImageButton.NumberPickerUpButton">

@@ -1426,6 +1426,8 @@
   <public type="attr" name="fastScrollTextColor" />
   <public type="attr" name="largeHeap" />
   <public type="attr" name="windowCloseOnTouchOutside" />
+  <public type="attr" name="datePickerStyle" />
+  <public type="attr" name="calendarViewStyle" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />
@@ -1627,21 +1629,15 @@
   <public type="style" name="Holo.Light.ButtonBar.AlertDialog" />
   <public type="style" name="Holo.SegmentedButton" />
   <public type="style" name="Holo.Light.SegmentedButton" />
-  <public type="style" name="Widget.ImageButton.NumberPickerUpButton" />
-  <public type="style" name="Widget.EditText.NumberPickerInputText" />
-  <public type="style" name="Widget.ImageButton.NumberPickerDownButton" />
-  <public type="style" name="Widget.Holo.ImageButton.NumberPickerUpButton" />
-  <public type="style" name="Widget.Holo.EditText.NumberPickerInputText" />
-  <public type="style" name="Widget.Holo.ImageButton.NumberPickerDownButton" />
-  <public type="style" name="Widget.Holo.Light.ImageButton.NumberPickerUpButton" />
-  <public type="style" name="Widget.Holo.Light.EditText.NumberPickerInputText" />
-  <public type="style" name="Widget.Holo.Light.ImageButton.NumberPickerDownButton" />
   <public type="style" name="Widget.CalendarView" />
   <public type="style" name="Widget.Holo.CalendarView" />
   <public type="style" name="Widget.Holo.Light.CalendarView" />
+  <public type="style" name="Widget.DatePicker" />
+  <public type="style" name="Widget.Holo.DatePicker" />
 
   <public type="string" name="selectTextMode" />
 
   <!-- Default icon for applications that don't specify an icon. -->
   <public type="mipmap" name="sym_def_app_icon" id="0x010d0000" />
+
 </resources>
