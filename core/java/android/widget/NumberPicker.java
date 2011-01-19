@@ -62,8 +62,6 @@ import android.view.inputmethod.InputMethodManager;
  * <p>
  * For an example of using this widget, see {@link android.widget.TimePicker}.
  * </p>
- *
- * @attr ref android.R.styleable#NumberPicker_solidColor
  */
 @Widget
 public class NumberPicker extends LinearLayout {
@@ -325,6 +323,11 @@ public class NumberPicker extends LinearLayout {
     private final int mSolidColor;
 
     /**
+     * Flag indicating if this widget supports flinging.
+     */
+    private final boolean mFlingable;
+
+    /**
      * Reusable {@link Rect} instance.
      */
     private final Rect mTempRect = new Rect();
@@ -427,9 +430,8 @@ public class NumberPicker extends LinearLayout {
         // process style attributes
         TypedArray attributesArray = context.obtainStyledAttributes(attrs,
                 R.styleable.NumberPicker, defStyle, 0);
-        int orientation = attributesArray.getInt(R.styleable.NumberPicker_orientation, VERTICAL);
-        setOrientation(orientation);
         mSolidColor = attributesArray.getColor(R.styleable.NumberPicker_solidColor, 0);
+        mFlingable = attributesArray.getBoolean(R.styleable.NumberPicker_flingable, true);
         attributesArray.recycle();
 
         // By default Linearlayout that we extend is not drawn. This is
@@ -563,7 +565,7 @@ public class NumberPicker extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (!isEnabled()) {
+        if (!isEnabled() || !mFlingable) {
             return false;
         }
         switch (event.getActionMasked()) {

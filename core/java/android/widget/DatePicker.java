@@ -129,27 +129,30 @@ public class DatePicker extends FrameLayout {
     }
 
     public DatePicker(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.datePickerStyle);
     }
 
     public DatePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        TypedArray attributesArray = context.obtainStyledAttributes(attrs, R.styleable.DatePicker);
+        TypedArray attributesArray = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
+                defStyle, 0);
         boolean spinnersShown = attributesArray.getBoolean(R.styleable.DatePicker_spinnersShown,
                 DEFAULT_SPINNERS_SHOWN);
         boolean calendarViewShown = attributesArray.getBoolean(
                 R.styleable.DatePicker_calendarViewShown, DEFAULT_CALENDAR_VIEW_SHOWN);
-        int startYear = attributesArray
-                .getInt(R.styleable.DatePicker_startYear, DEFAULT_START_YEAR);
+        int startYear = attributesArray.getInt(R.styleable.DatePicker_startYear,
+                DEFAULT_START_YEAR);
         int endYear = attributesArray.getInt(R.styleable.DatePicker_endYear, DEFAULT_END_YEAR);
         String minDate = attributesArray.getString(R.styleable.DatePicker_minDate);
         String maxDate = attributesArray.getString(R.styleable.DatePicker_maxDate);
+        int layoutResourceId = attributesArray.getResourceId(R.styleable.DatePicker_layout,
+                R.layout.date_picker);
         attributesArray.recycle();
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.date_picker, this, true);
+        inflater.inflate(layoutResourceId, this, true);
 
         OnValueChangedListener onChangeListener = new OnValueChangedListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
