@@ -722,6 +722,9 @@ public class AccountManagerService
                 final String[] argsAccountId = {String.valueOf(accountId)};
                 db.update(TABLE_ACCOUNTS, values, ACCOUNTS_ID + "=?", argsAccountId);
                 db.delete(TABLE_AUTHTOKENS, AUTHTOKENS_ACCOUNTS_ID + "=?", argsAccountId);
+                synchronized (mCacheLock) {
+                    mAuthTokenCache.remove(account);
+                }
                 db.setTransactionSuccessful();
             }
         } finally {
@@ -1812,6 +1815,11 @@ public class AccountManagerService
                 try {
                     db.execSQL("DELETE from " + TABLE_AUTHTOKENS);
                     db.execSQL("UPDATE " + TABLE_ACCOUNTS + " SET " + ACCOUNTS_PASSWORD + " = ''");
+
+                    synchronized (mCacheLock) {
+                        mAuthTokenCache = new HashMap<Account, HashMap<String, String>>();
+                    }
+
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
