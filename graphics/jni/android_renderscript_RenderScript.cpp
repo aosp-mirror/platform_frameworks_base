@@ -991,7 +991,7 @@ nProgramFragmentCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shade
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
-    LOG_API("nProgramFragmentCreate, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+    LOG_API("nProgramFragmentCreate, con(%p), paramLen(%i)", con, paramLen);
 
     jint ret = (jint)rsProgramFragmentCreate(con, shaderUTF.c_str(), shaderUTF.length(), (uint32_t *)paramPtr, paramLen);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
@@ -1008,7 +1008,7 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader,
     jint *paramPtr = _env->GetIntArrayElements(params, NULL);
     jint paramLen = _env->GetArrayLength(params);
 
-    LOG_API("nProgramVertexCreate, con(%p), shaderLen(%i), paramLen(%i)", con, shaderLen, paramLen);
+    LOG_API("nProgramVertexCreate, con(%p), paramLen(%i)", con, paramLen);
 
     jint ret = (jint)rsProgramVertexCreate(con, shaderUTF.c_str(), shaderUTF.length(), (uint32_t *)paramPtr, paramLen);
     _env->ReleaseIntArrayElements(params, paramPtr, JNI_ABORT);
