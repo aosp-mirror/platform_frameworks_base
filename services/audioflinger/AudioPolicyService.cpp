@@ -68,6 +68,8 @@ AudioPolicyService::AudioPolicyService()
 {
     char value[PROPERTY_VALUE_MAX];
 
+    Mutex::Autolock _l(mLock);
+
     // start tone playback thread
     mTonePlaybackThread = new AudioCommandThread(String8(""));
     // start audio commands thread
@@ -88,9 +90,18 @@ AudioPolicyService::AudioPolicyService()
     }
 #endif
 
-    // load properties
-    property_get("ro.camera.sound.forced", value, "0");
-    mpPolicyManager->setSystemProperty("ro.camera.sound.forced", value);
+    if ((mpPolicyManager != NULL) && (mpPolicyManager->initCheck() != NO_ERROR)) {
+        delete mpPolicyManager;
+        mpPolicyManager = NULL;
+    }
+
+    if (mpPolicyManager == NULL) {
+        LOGE("Could not create AudioPolicyManager");
+    } else {
+        // load properties
+        property_get("ro.camera.sound.forced", value, "0");
+        mpPolicyManager->setSystemProperty("ro.camera.sound.forced", value);
+    }
 }
 
 AudioPolicyService::~AudioPolicyService()
