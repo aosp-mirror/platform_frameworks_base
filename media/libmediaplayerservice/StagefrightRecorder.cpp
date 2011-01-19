@@ -1229,25 +1229,13 @@ status_t StagefrightRecorder::setupVideoEncoder(
     }
     if (mVideoEncoderLevel != -1) {
         enc_meta->setInt32(kKeyVideoLevel, mVideoEncoderLevel);
-    } else if (mCaptureTimeLapse) {
-        // Check if we are using high resolution and/or high bitrate and
-        // set appropriate level for the software AVCEncoder.
-        if ((width * height >= 921600) // 720p
-                || (videoBitRate >= 20000000)) {
-            enc_meta->setInt32(kKeyVideoLevel, OMX_VIDEO_AVCLevel5);
-        }
     }
 
     OMXClient client;
     CHECK_EQ(client.connect(), OK);
 
-    // Use software codec for time lapse
     uint32_t encoder_flags = 0;
-    if (mCaptureTimeLapse) {
-        // Do not use software encoder for timelapse for now
-        // It is _very_ slow and the preview appears sluggish
-        //encoder_flags |= OMXCodec::kPreferSoftwareCodecs;
-    } else if (mIsMetaDataStoredInVideoBuffers) {
+    if (mIsMetaDataStoredInVideoBuffers) {
         encoder_flags |= OMXCodec::kHardwareCodecsOnly;
         encoder_flags |= OMXCodec::kStoreMetaDataInVideoBuffers;
     }
