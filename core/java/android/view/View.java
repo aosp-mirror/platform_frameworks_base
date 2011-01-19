@@ -10647,13 +10647,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         private final WeakReference<View> mView;
 
         /**
-         * Construct a shadow builder object for use with the given view.
-         * @param view
+         * Construct a shadow builder object for use with the given View object.  The
+         * default implementation will construct a drag shadow the same size and
+         * appearance as the supplied View.
+         *
+         * @param view A view within the application's layout whose appearance
+         *        should be replicated as the drag shadow.
          */
         public DragShadowBuilder(View view) {
             mView = new WeakReference<View>(view);
         }
 
+        /**
+         * Construct a shadow builder object with no associated View.  This
+         * constructor variant is only useful when the {@link #onProvideShadowMetrics(Point, Point)}
+         * and {@link #onDrawShadow(Canvas)} methods are also overridden in order
+         * to supply the drag shadow's dimensions and appearance without
+         * reference to any View object.
+         */
+        public DragShadowBuilder() {
+            mView = new WeakReference<View>(null);
+        }
+
+        /**
+         * Returns the View object that had been passed to the
+         * {@link #View.DragShadowBuilder(View)}
+         * constructor.  If that View parameter was {@code null} or if the
+         * {@link #View.DragShadowBuilder()}
+         * constructor was used to instantiate the builder object, this method will return
+         * null.
+         *
+         * @return The View object associate with this builder object.
+         */
         final public View getView() {
             return mView.get();
         }
@@ -10664,8 +10689,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * be centered under the touch location while dragging.
          * <p>
          * The default implementation sets the dimensions of the shadow to be the
-         * same as the dimensions of the View itself and centers the shadow under
-         * the touch point.
+         * same as the dimensions of the View object that had been supplied to the
+         * {@link #View.DragShadowBuilder(View)} constructor
+         * when the builder object was instantiated, and centers the shadow under the touch
+         * point.
          *
          * @param shadowSize The application should set the {@code x} member of this
          *        parameter to the desired shadow width, and the {@code y} member to
@@ -10688,6 +10715,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * Draw the shadow image for the upcoming drag.  The shadow canvas was
          * created with the dimensions supplied by the
          * {@link #onProvideShadowMetrics(Point, Point)} callback.
+         * <p>
+         * The default implementation replicates the appearance of the View object
+         * that had been supplied to the
+         * {@link #View.DragShadowBuilder(View)}
+         * constructor when the builder object was instantiated.
          *
          * @param canvas
          */
