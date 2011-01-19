@@ -4268,7 +4268,7 @@ public class WebView extends AbsoluteLayout
         Rect vBox = contentToViewRect(bounds);
         mWebTextView.setRect(vBox.left, vBox.top, vBox.width(), vBox.height());
         if (!Rect.intersects(bounds, visibleRect)) {
-            mWebTextView.bringIntoView();
+            revealSelection();
         }
         String text = nativeFocusCandidateText();
         int nodePointer = nativeFocusCandidatePointer();
@@ -7274,7 +7274,6 @@ public class WebView extends AbsoluteLayout
                     // this is sent after finishing resize in WebViewCore. Make
                     // sure the text edit box is still on the  screen.
                     if (inEditingMode() && nativeCursorIsTextInput()) {
-                        mWebTextView.bringIntoView();
                         rebuildWebTextView();
                     }
                     break;

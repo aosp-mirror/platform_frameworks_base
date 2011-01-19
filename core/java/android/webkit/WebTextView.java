@@ -135,6 +135,7 @@ import junit.framework.Assert;
     // Used to determine whether onFocusChanged was called as a result of
     // calling remove().
     private boolean mInsideRemove;
+    private boolean mInPassword;
 
     // Types used with setType.  Keep in sync with CachedInput.h
     private static final int NORMAL_TEXT_FIELD = 0;
@@ -784,22 +785,11 @@ import junit.framework.Assert;
         mInsideRemove = false;
     }
 
-    /**
-     * Move the caret/selection into view.
-     */
-    /* package */ void bringIntoView() {
-        bringPointIntoView(Selection.getSelectionEnd(getText()));
-    }
-
     @Override
     public boolean bringPointIntoView(int offset) {
-        if (mWebView == null) return false;
-        if (mWebView.nativeFocusCandidateIsPassword()) {
+        if (mInPassword) {
             return getLayout() != null && super.bringPointIntoView(offset);
         }
-        // For non password text input, tell webkit to move the caret/selection
-        // on screen, since webkit draws them.
-        mWebView.revealSelection();
         return true;
     }
 
@@ -914,6 +904,7 @@ import junit.framework.Assert;
      * @param   inPassword  True if the textfield is a password field.
      */
     /* package */ void setInPassword(boolean inPassword) {
+        mInPassword = inPassword;
         if (inPassword) {
             setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
                 TYPE_TEXT_VARIATION_WEB_PASSWORD);
