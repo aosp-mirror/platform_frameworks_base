@@ -66,7 +66,7 @@ public final class IsoDep extends BasicTagTechnology {
      * aborted and the connection to the tag is lost. This setting is applied
      * only to the {@link Tag} object linked to this technology and will be
      * reset when {@link IsoDep#close} is called.
-     * The default transaction timeout is 5 seconds.
+     * The default transaction timeout is 300 milliseconds.
      */
     public void setTimeout(int timeout) {
         try {
