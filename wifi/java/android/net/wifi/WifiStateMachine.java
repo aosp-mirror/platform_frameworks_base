@@ -61,7 +61,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Slog;
 import android.app.backup.IBackupManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -1671,10 +1670,18 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         nwService.startAccessPoint((WifiConfiguration) message.obj,
                                     mInterfaceName,
                                     SOFTAP_IFACE);
-                    } catch(Exception e) {
-                        Log.e(TAG, "Exception in startAccessPoint()");
-                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
-                        break;
+                    } catch (Exception e) {
+                        Log.e(TAG, "Exception in softap start " + e);
+                        try {
+                            nwService.stopAccessPoint();
+                            nwService.startAccessPoint((WifiConfiguration) message.obj,
+                                    mInterfaceName,
+                                    SOFTAP_IFACE);
+                        } catch (Exception ee) {
+                            Log.e(TAG, "Exception during softap restart : " + ee);
+                            sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
+                            break;
+                        }
                     }
                     Log.d(TAG, "Soft AP start successful");
                     setWifiApState(WIFI_AP_STATE_ENABLED);
@@ -2824,13 +2831,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                                     mInterfaceName,
                                     SOFTAP_IFACE);
                     } catch(Exception e) {
-                        Log.e(TAG, "Exception in nwService during soft AP set");
+                        Log.e(TAG, "Exception in softap set " + e);
                         try {
                             nwService.stopAccessPoint();
+                            nwService.startAccessPoint((WifiConfiguration) message.obj,
+                                    mInterfaceName,
+                                    SOFTAP_IFACE);
                         } catch (Exception ee) {
-                            Slog.e(TAG, "Could not stop AP, :" + ee);
+                            Log.e(TAG, "Could not restart softap after set failed " + ee);
+                            sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
                         }
-                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
                     }
                     break;
                 /* Fail client mode operation when soft AP is enabled */
