@@ -145,12 +145,25 @@ protected:
         return mSnapshot;
     }
 
+    /**
+     * Returns the region of the current layer.
+     */
     virtual Region* getRegion() {
         return mSnapshot->region;
     }
 
+    /**
+     * Indicates whether rendering is currently targeted at a layer.
+     */
     virtual bool hasLayer() {
         return (mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region;
+    }
+
+    /**
+     * Returns the name of the FBO this renderer is rendering into.
+     */
+    virtual GLint getTargetFbo() {
+        return 0;
     }
 
 private:
