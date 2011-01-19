@@ -1277,18 +1277,6 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      *
-     * @param viewId The id of the view whose text should change
-     * @param intent The intent of the service which will be
-     *            providing data to the RemoteViewsAdapter
-     */
-    public void setRemoteAdapter(int viewId, Intent intent) {
-        // Do nothing.  This method will be removed after all widgets have been updated to the
-        // new API.
-    }
-
-    /**
-     * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
-     *
      * @param appWidgetId The id of the app widget which contains the specified view
      * @param viewId The id of the view whose text should change
      * @param intent The intent of the service which will be
