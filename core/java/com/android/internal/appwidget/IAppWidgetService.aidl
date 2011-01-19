@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package com.android.internal.appwidget;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.appwidget.AppWidgetProviderInfo;
 import com.android.internal.appwidget.IAppWidgetHost;
+import android.os.IBinder;
 import android.widget.RemoteViews;
 
 /** {@hide} */
@@ -46,6 +48,8 @@ interface IAppWidgetService {
     List<AppWidgetProviderInfo> getInstalledProviders();
     AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId);
     void bindAppWidgetId(int appWidgetId, in ComponentName provider);
+    void bindRemoteViewsService(int appWidgetId, in Intent intent, in IBinder connection);
+    void unbindRemoteViewsService(int appWidgetId, in Intent intent);
     int[] getAppWidgetIds(in ComponentName provider);
 
 }
