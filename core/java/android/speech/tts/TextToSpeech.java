@@ -349,19 +349,17 @@ public class TextToSpeech {
          */
         public static final String KEY_PARAM_UTTERANCE_ID = "utteranceId";
         /**
-         * {@hide}
          * Parameter key to specify the speech volume relative to the current stream type
          * volume used when speaking text. Volume is specified as a float ranging from 0 to 1
-         * where 0 is silence, and 1 is the maximum volume.
+         * where 0 is silence, and 1 is the maximum volume (the default behavior).
          * @see TextToSpeech#speak(String, int, HashMap)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_VOLUME = "volume";
         /**
-         * {@hide}
          * Parameter key to specify how the speech is panned from left to right when speaking text.
          * Pan is specified as a float ranging from -1 to +1 where -1 maps to a hard-left pan,
-         * 0 to center, and +1 to hard-right.
+         * 0 to center (the default behavior), and +1 to hard-right.
          * @see TextToSpeech#speak(String, int, HashMap)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
