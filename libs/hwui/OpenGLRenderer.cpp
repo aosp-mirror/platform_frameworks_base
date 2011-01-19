@@ -200,7 +200,7 @@ void OpenGLRenderer::resume() {
 
     glDisable(GL_DITHER);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     mCaches.blend = true;
