@@ -61,6 +61,7 @@ static sso_t sso;
 
 struct so_t {
     jfieldID surfaceControl;
+    jfieldID surfaceGenerationId;
     jfieldID surface;
     jfieldID saveCount;
     jfieldID canvas;
@@ -189,6 +190,12 @@ static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
         p->decStrong(clazz);
     }
     env->SetIntField(clazz, so.surface, (int)surface.get());
+    // This test is conservative and it would be better to compare the ISurfaces
+    if (p && p != surface.get()) {
+        jint generationId = env->GetIntField(clazz, so.surfaceGenerationId);
+        generationId++;
+        env->SetIntField(clazz, so.surfaceGenerationId, generationId);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -785,6 +792,7 @@ static JNINativeMethod gSurfaceMethods[] = {
 void nativeClassInit(JNIEnv* env, jclass clazz)
 {
     so.surface = env->GetFieldID(clazz, ANDROID_VIEW_SURFACE_JNI_ID, "I");
+    so.surfaceGenerationId = env->GetFieldID(clazz, "mSurfaceGenerationId", "I");
     so.surfaceControl = env->GetFieldID(clazz, "mSurfaceControl", "I");
     so.saveCount = env->GetFieldID(clazz, "mSaveCount", "I");
     so.canvas    = env->GetFieldID(clazz, "mCanvas", "Landroid/graphics/Canvas;");

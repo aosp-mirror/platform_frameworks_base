@@ -159,6 +159,8 @@ public class Surface implements Parcelable {
     private Canvas mCanvas;
     @SuppressWarnings("unused")
     private int mNativeSurface;
+    @SuppressWarnings("unused")
+    private int mSurfaceGenerationId;
     private String mName;
 
     // The display metrics used to provide the pseudo canvas size for applications
@@ -308,6 +310,13 @@ public class Surface implements Parcelable {
      * returns false.
      */
     public native   boolean isValid();
+
+    /**
+     * @hide
+     */
+    public int getGenerationId() {
+        return mSurfaceGenerationId;
+    }
     
     /** Free all server-side state associated with this surface and
      * release this object's reference. {@hide} */
