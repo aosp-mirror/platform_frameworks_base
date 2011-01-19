@@ -23,19 +23,51 @@ import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 import android.util.Log;
 
+/**
+ * Instrumentation test runner for Bluetooth tests.
+ * <p>
+ * To run:
+ * <pre>
+ * {@code
+ * adb shell am instrument \
+ *     [-e enable_iterations <iterations>] \
+ *     [-e discoverable_iterations <iterations>] \
+ *     [-e scan_iterations <iterations>] \
+ *     [-e enable_pan_iterations <iterations>] \
+ *     [-e pair_iterations <iterations>] \
+ *     [-e connect_a2dp_iterations <iterations>] \
+ *     [-e connect_headset_iterations <iterations>] \
+ *     [-e connect_input_iterations <iterations>] \
+ *     [-e connect_pan_iterations <iterations>] \
+ *     [-e pair_address <address>] \
+ *     [-e headset_address <address>] \
+ *     [-e a2dp_address <address>] \
+ *     [-e input_address <address>] \
+ *     [-e pan_address <address>] \
+ *     [-e pair_pin <pin>] \
+ *     [-e pair_passkey <passkey>] \
+ *     -w com.android.frameworks.coretests/android.bluetooth.BluetoothTestRunner
+ * }
+ * </pre>
+ */
 public class BluetoothTestRunner extends InstrumentationTestRunner {
     private static final String TAG = "BluetoothTestRunner";
 
     public static int sEnableIterations = 100;
     public static int sDiscoverableIterations = 1000;
     public static int sScanIterations = 1000;
+    public static int sEnablePanIterations = 1000;
     public static int sPairIterations = 100;
     public static int sConnectHeadsetIterations = 100;
     public static int sConnectA2dpIterations = 100;
+    public static int sConnectInputIterations = 100;
+    public static int sConnectPanIterations = 100;
 
     public static String sPairAddress = "";
     public static String sHeadsetAddress = "";
     public static String sA2dpAddress = "";
+    public static String sInputAddress = "";
+    public static String sPanAddress = "";
 
     public static byte[] sPairPin = {'1', '2', '3', '4'};
     public static int sPairPasskey = 123456;
@@ -81,6 +113,15 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
             }
         }
 
+        val = arguments.getString("enable_pan_iterations");
+        if (val != null) {
+            try {
+                sEnablePanIterations = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
+        }
+
         val = arguments.getString("pair_iterations");
         if (val != null) {
             try {
@@ -108,6 +149,24 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
             }
         }
 
+        val = arguments.getString("connect_input_iterations");
+        if (val != null) {
+            try {
+                sConnectInputIterations = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
+        }
+
+        val = arguments.getString("connect_pan_iterations");
+        if (val != null) {
+            try {
+                sConnectPanIterations = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
+        }
+
         val = arguments.getString("pair_address");
         if (val != null) {
             sPairAddress = val;
@@ -121,6 +180,16 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
         val = arguments.getString("a2dp_address");
         if (val != null) {
             sA2dpAddress = val;
+        }
+
+        val = arguments.getString("input_address");
+        if (val != null) {
+            sInputAddress = val;
+        }
+
+        val = arguments.getString("pan_address");
+        if (val != null) {
+            sPanAddress = val;
         }
 
         val = arguments.getString("pair_pin");
@@ -143,9 +212,13 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
         Log.i(TAG, String.format("pair_iterations=%d", sPairIterations));
         Log.i(TAG, String.format("connect_a2dp_iterations=%d", sConnectA2dpIterations));
         Log.i(TAG, String.format("connect_headset_iterations=%d", sConnectHeadsetIterations));
+        Log.i(TAG, String.format("connect_input_iterations=%d", sConnectInputIterations));
+        Log.i(TAG, String.format("connect_pan_iterations=%d", sConnectPanIterations));
         Log.i(TAG, String.format("pair_address=%s", sPairAddress));
         Log.i(TAG, String.format("a2dp_address=%s", sA2dpAddress));
         Log.i(TAG, String.format("headset_address=%s", sHeadsetAddress));
+        Log.i(TAG, String.format("input_address=%s", sInputAddress));
+        Log.i(TAG, String.format("pan_address=%s", sPanAddress));
         Log.i(TAG, String.format("pair_pin=%s", new String(sPairPin)));
         Log.i(TAG, String.format("pair_passkey=%d", sPairPasskey));
 
