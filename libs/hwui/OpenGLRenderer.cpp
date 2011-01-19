@@ -430,18 +430,18 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
     } else {
         // Copy the framebuffer into the layer
         glBindTexture(GL_TEXTURE_2D, layer->texture);
-
-        if (layer->empty) {
-            glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left,
-                    snapshot->height - bounds.bottom, layer->width, layer->height, 0);
-            layer->empty = false;
-        } else {
-            glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
-                    snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
+        if (!bounds.isEmpty()) {
+            if (layer->empty) {
+                glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left,
+                        snapshot->height - bounds.bottom, layer->width, layer->height, 0);
+                layer->empty = false;
+            } else {
+                glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
+                        snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
+            }
+            // Enqueue the buffer coordinates to clear the corresponding region later
+            mLayers.push(new Rect(bounds));
         }
-
-        // Enqueue the buffer coordinates to clear the corresponding region later
-        mLayers.push(new Rect(bounds));
     }
 
     return true;
@@ -565,8 +565,10 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
             resetColorFilter();
         }
     } else {
-        dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
-        composeLayerRect(layer, rect, true);
+        if (!rect.isEmpty()) {
+            dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
+            composeLayerRect(layer, rect, true);
+        }
     }
 
     if (fboLayer) {
