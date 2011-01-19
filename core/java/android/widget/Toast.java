@@ -33,6 +33,8 @@ import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import java.lang.ref.WeakReference;
+
 /**
  * A toast is a view containing a quick little message for the user.  The toast class
  * helps you create and show those.
@@ -67,7 +69,6 @@ public class Toast {
      */
     public static final int LENGTH_LONG = 1;
 
-    final Handler mHandler = new Handler();    
     final Context mContext;
     final TN mTN;
     int mDuration;
@@ -87,7 +88,7 @@ public class Toast {
      */
     public Toast(Context context) {
         mContext = context;
-        mTN = new TN();
+        mTN = new TN(this);
         mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
     }
@@ -101,13 +102,10 @@ public class Toast {
         }
 
         INotificationManager service = getService();
-
         String pkg = mContext.getPackageName();
 
-        TN tn = mTN;
-
         try {
-            service.enqueueToast(pkg, tn, mDuration);
+            service.enqueueToast(pkg, mTN, mDuration);
         } catch (RemoteException e) {
             // Empty
         }
@@ -313,7 +311,9 @@ public class Toast {
         return sService;
     }
 
-    private class TN extends ITransientNotification.Stub {
+    private static class TN extends ITransientNotification.Stub {
+        final Handler mHandler = new Handler();    
+
         final Runnable mShow = new Runnable() {
             public void run() {
                 handleShow();
@@ -327,10 +327,12 @@ public class Toast {
         };
 
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
+        private final WeakReference<Toast> mToast;
         
         WindowManagerImpl mWM;
 
-        TN() {
+        TN(Toast toast) {
+            mToast = new WeakReference<Toast>(toast);
             // XXX This should be changed to use a Dialog, with a Theme.Toast
             // defined that sets up the layout params appropriately.
             final WindowManager.LayoutParams params = mParams;
@@ -362,49 +364,53 @@ public class Toast {
         }
 
         public void handleShow() {
-            if (localLOGV) Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + mView
-                    + " mNextView=" + mNextView);
-            if (mView != mNextView) {
-                // remove the old view if necessary
-                handleHide();
-                mView = mNextView;
-                mWM = WindowManagerImpl.getDefault();
-                final int gravity = mGravity;
-                mParams.gravity = gravity;
-                if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
-                    mParams.horizontalWeight = 1.0f;
+            final Toast toast = mToast.get();
+            if (toast != null) {
+                if (localLOGV) Log.v(TAG, "HANDLE SHOW: " + this + " mView=" + toast.mView
+                        + " mNextView=" + toast.mNextView);
+                if (toast.mView != toast.mNextView) {
+                    // remove the old view if necessary
+                    handleHide();
+                    toast.mView = toast.mNextView;
+                    mWM = WindowManagerImpl.getDefault();
+                    final int gravity = toast.mGravity;
+                    mParams.gravity = gravity;
+                    if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
+                        mParams.horizontalWeight = 1.0f;
+                    }
+                    if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
+                        mParams.verticalWeight = 1.0f;
+                    }
+                    mParams.x = toast.mX;
+                    mParams.y = toast.mY;
+                    mParams.verticalMargin = toast.mVerticalMargin;
+                    mParams.horizontalMargin = toast.mHorizontalMargin;
+                    if (toast.mView.getParent() != null) {
+                        if (localLOGV) Log.v(TAG, "REMOVE! " + toast.mView + " in " + this);
+                        mWM.removeView(toast.mView);
+                    }
+                    if (localLOGV) Log.v(TAG, "ADD! " + toast.mView + " in " + this);
+                    mWM.addView(toast.mView, mParams);
+                    toast.trySendAccessibilityEvent();
                 }
-                if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
-                    mParams.verticalWeight = 1.0f;
-                }
-                mParams.x = mX;
-                mParams.y = mY;
-                mParams.verticalMargin = mVerticalMargin;
-                mParams.horizontalMargin = mHorizontalMargin;
-                if (mView.getParent() != null) {
-                    if (localLOGV) Log.v(
-                            TAG, "REMOVE! " + mView + " in " + this);
-                    mWM.removeView(mView);
-                }
-                if (localLOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
-                mWM.addView(mView, mParams);
-                trySendAccessibilityEvent();
             }
         }
 
         public void handleHide() {
-            if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + mView);
-            if (mView != null) {
-                // note: checking parent() just to make sure the view has
-                // been added...  i have seen cases where we get here when
-                // the view isn't yet added, so let's try not to crash.
-                if (mView.getParent() != null) {
-                    if (localLOGV) Log.v(
-                            TAG, "REMOVE! " + mView + " in " + this);
-                    mWM.removeView(mView);
+            final Toast toast = mToast.get();
+            if (toast != null) {
+                if (localLOGV) Log.v(TAG, "HANDLE HIDE: " + this + " mView=" + toast.mView);
+                if (toast.mView != null) {
+                    // note: checking parent() just to make sure the view has
+                    // been added...  i have seen cases where we get here when
+                    // the view isn't yet added, so let's try not to crash.
+                    if (toast.mView.getParent() != null) {
+                        if (localLOGV) Log.v(TAG, "REMOVE! " + toast.mView + " in " + this);
+                        mWM.removeView(toast.mView);
+                    }
+    
+                    toast.mView = null;
                 }
-
-                mView = null;
             }
         }
     }
