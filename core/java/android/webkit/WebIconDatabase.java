@@ -24,6 +24,7 @@ import android.os.Message;
 import android.provider.Browser;
 import android.util.Log;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -194,13 +195,16 @@ public final class WebIconDatabase {
     /**
      * Open a the icon database and store the icons in the given path.
      * @param path The directory path where the icon database will be stored.
-     * @return True if the database was successfully opened or created in
-     *         the given path.
      */
     public void open(String path) {
         if (path != null) {
+            // Make the directories and parents if they don't exist
+            File db = new File(path);
+            if (!db.exists()) {
+                db.mkdirs();
+            }
             mEventHandler.postMessage(
-                    Message.obtain(null, EventHandler.OPEN, path));
+                    Message.obtain(null, EventHandler.OPEN, db.getAbsolutePath()));
         }
     }
 
