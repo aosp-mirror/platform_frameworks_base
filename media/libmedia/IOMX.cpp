@@ -5,6 +5,7 @@
 #include <binder/IMemory.h>
 #include <binder/Parcel.h>
 #include <media/IOMX.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/Surface.h>
 
@@ -449,74 +450,8 @@ status_t BnOMX::onTransact(
         }
 
         case GET_PARAMETER:
-        {
-            CHECK_INTERFACE(IOMX, data, reply);
-
-            node_id node = (void*)data.readIntPtr();
-            OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
-
-            size_t size = data.readInt32();
-
-            // XXX I am not happy with this but Parcel::readInplace didn't work.
-            void *params = malloc(size);
-            data.read(params, size);
-
-            status_t err = getParameter(node, index, params, size);
-
-            reply->writeInt32(err);
-
-            if (err == OK) {
-                reply->write(params, size);
-            }
-
-            free(params);
-            params = NULL;
-
-            return NO_ERROR;
-        }
-
         case SET_PARAMETER:
-        {
-            CHECK_INTERFACE(IOMX, data, reply);
-
-            node_id node = (void*)data.readIntPtr();
-            OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
-
-            size_t size = data.readInt32();
-            void *params = const_cast<void *>(data.readInplace(size));
-
-            reply->writeInt32(setParameter(node, index, params, size));
-
-            return NO_ERROR;
-        }
-
         case GET_CONFIG:
-        {
-            CHECK_INTERFACE(IOMX, data, reply);
-
-            node_id node = (void*)data.readIntPtr();
-            OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
-
-            size_t size = data.readInt32();
-
-            // XXX I am not happy with this but Parcel::readInplace didn't work.
-            void *params = malloc(size);
-            data.read(params, size);
-
-            status_t err = getConfig(node, index, params, size);
-
-            reply->writeInt32(err);
-
-            if (err == OK) {
-                reply->write(params, size);
-            }
-
-            free(params);
-            params = NULL;
-
-            return NO_ERROR;
-        }
-
         case SET_CONFIG:
         {
             CHECK_INTERFACE(IOMX, data, reply);
@@ -525,9 +460,36 @@ status_t BnOMX::onTransact(
             OMX_INDEXTYPE index = static_cast<OMX_INDEXTYPE>(data.readInt32());
 
             size_t size = data.readInt32();
-            void *params = const_cast<void *>(data.readInplace(size));
 
-            reply->writeInt32(setConfig(node, index, params, size));
+            void *params = malloc(size);
+            data.read(params, size);
+
+            status_t err;
+            switch (code) {
+                case GET_PARAMETER:
+                    err = getParameter(node, index, params, size);
+                    break;
+                case SET_PARAMETER:
+                    err = setParameter(node, index, params, size);
+                    break;
+                case GET_CONFIG:
+                    err = getConfig(node, index, params, size);
+                    break;
+                case SET_CONFIG:
+                    err = setConfig(node, index, params, size);
+                    break;
+                default:
+                    TRESPASS();
+            }
+
+            reply->writeInt32(err);
+
+            if ((code == GET_PARAMETER || code == GET_CONFIG) && err == OK) {
+                reply->write(params, size);
+            }
+
+            free(params);
+            params = NULL;
 
             return NO_ERROR;
         }
