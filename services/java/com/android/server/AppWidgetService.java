@@ -484,9 +484,9 @@ class AppWidgetService extends IAppWidgetService.Stub
                     new FilterComparison(intent));
             if (mBoundRemoteViewsServices.containsKey(key)) {
                 final ServiceConnection conn = mBoundRemoteViewsServices.get(key);
+                mBoundRemoteViewsServices.remove(key);
                 conn.onServiceDisconnected(null);
                 mContext.unbindService(conn);
-                mBoundRemoteViewsServices.remove(key);
             }
         }
     }
