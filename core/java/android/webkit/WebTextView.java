@@ -135,7 +135,6 @@ import junit.framework.Assert;
     // Used to determine whether onFocusChanged was called as a result of
     // calling remove().
     private boolean mInsideRemove;
-    private boolean mInPassword;
 
     // Types used with setType.  Keep in sync with CachedInput.h
     private static final int NORMAL_TEXT_FIELD = 0;
@@ -374,18 +373,24 @@ import junit.framework.Assert;
     }
 
     /**
-     * Ensure that the underlying textfield is lined up with the WebTextView.
+     * Ensure that the underlying text field/area is lined up with the WebTextView.
      */
     private void lineUpScroll() {
         Layout layout = getLayout();
         if (mWebView != null && layout != null) {
-            float maxScrollX = Touch.getMaxScrollX(this, layout, mScrollY);
-            if (DebugFlags.WEB_TEXT_VIEW) {
-                Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
-                        + mScrollY + " maxX=" + maxScrollX);
+            if (mSingle) {
+                // textfields only need to be lined up horizontally.
+                float maxScrollX = layout.getLineRight(0) - getWidth();
+                if (DebugFlags.WEB_TEXT_VIEW) {
+                    Log.v(LOGTAG, "onTouchEvent x=" + mScrollX + " y="
+                            + mScrollY + " maxX=" + maxScrollX);
+                }
+                mWebView.scrollFocusedTextInputX(maxScrollX > 0 ?
+                        mScrollX / maxScrollX : 0);
+            } else {
+                // textareas only need to be lined up vertically.
+                mWebView.scrollFocusedTextInputY(mScrollY);
             }
-            mWebView.scrollFocusedTextInput(maxScrollX > 0 ?
-                    mScrollX / maxScrollX : 0, mScrollY);
         }
     }
 
@@ -414,6 +419,7 @@ import junit.framework.Assert;
                     mLayout.getSpacingAdd(), false, null, ellipsisWidth,
                     lineHeight);
         }
+        lineUpScroll();
     }
 
     /**
@@ -786,10 +792,8 @@ import junit.framework.Assert;
     }
 
     @Override
-    public boolean bringPointIntoView(int offset) {
-        if (mInPassword) {
-            return getLayout() != null && super.bringPointIntoView(offset);
-        }
+    public boolean requestRectangleOnScreen(Rect rectangle, boolean immediate) {
+        // Do nothing, since webkit will put the textfield on screen.
         return true;
     }
 
@@ -904,7 +908,6 @@ import junit.framework.Assert;
      * @param   inPassword  True if the textfield is a password field.
      */
     /* package */ void setInPassword(boolean inPassword) {
-        mInPassword = inPassword;
         if (inPassword) {
             setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
                 TYPE_TEXT_VARIATION_WEB_PASSWORD);
