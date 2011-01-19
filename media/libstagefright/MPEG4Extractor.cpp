@@ -1321,10 +1321,12 @@ status_t MPEG4Extractor::parseTrackHeader(
         mLastTrack->meta->setInt32(kKeyRotation, rotationDegrees);
     }
 
-#if 0
+    // Handle presentation display size, which could be different
+    // from the image size indicated by kKeyWidth and kKeyHeight.
     uint32_t width = U32_AT(&buffer[dynSize + 52]);
     uint32_t height = U32_AT(&buffer[dynSize + 56]);
-#endif
+    mLastTrack->meta->setInt32(kKeyDisplayWidth, width >> 16);
+    mLastTrack->meta->setInt32(kKeyDisplayHeight, height >> 16);
 
     return OK;
 }
