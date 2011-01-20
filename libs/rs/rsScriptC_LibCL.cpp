@@ -58,6 +58,10 @@ static float SC_log2(float v) {
     return log10(v) / log10(2.f);
 }
 
+static float SC_mad(float v1, float v2, float v3) {
+    return v1 * v2 + v3;
+}
+
 static float SC_pown(float v, int p) {
     return powf(v, (float)p);
 }
@@ -188,6 +192,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z6asinpif", (void *)&SC_asinpi, true },
     { "_Z4atanf", (void *)&atanf, true },
     { "_Z5atan2ff", (void *)&atan2f, true },
+    { "_Z5atanhf", (void *)&atanhf, true },
     { "_Z6atanpif", (void *)&SC_atanpi, true },
     { "_Z7atan2piff", (void *)&SC_atan2pi, true },
     { "_Z4cbrtf", (void *)&cbrtf, true },
@@ -215,33 +220,32 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z5ilogbf", (void *)&ilogbf, true },
     { "_Z5ldexpfi", (void *)&ldexpf, true },
     { "_Z6lgammaf", (void *)&lgammaf, true },
+    { "_Z6lgammafPi", (void *)&lgammaf_r, true },
     { "_Z3logf", (void *)&logf, true },
     { "_Z4log2f", (void *)&SC_log2, true },
     { "_Z5log10f", (void *)&log10f, true },
     { "_Z5log1pf", (void *)&log1pf, true },
-    //{ "logb", (void *)&, true },
-    //{ "mad", (void *)&, true },
+    { "_Z4logbf", (void *)&logbf, true },
+    { "_Z3madfff", (void *)&SC_mad, true },
     { "_Z4modffPf", (void *)&modff, true },
     //{ "nan", (void *)&, true },
     { "_Z9nextafterff", (void *)&nextafterf, true },
     { "_Z3powff", (void *)&powf, true },
-    { "_Z4pownfi", (void *)&SC_pown, true },
-    { "_Z4powrff", (void *)&SC_powr, true },
     { "_Z9remainderff", (void *)&remainderf, true },
-    { "remquo", (void *)&remquof, true },
+    { "_Z6remquoffPi", (void *)&remquof, true },
     { "_Z4rintf", (void *)&rintf, true },
     { "_Z5rootnfi", (void *)&SC_rootn, true },
     { "_Z5roundf", (void *)&roundf, true },
     { "_Z5rsqrtf", (void *)&SC_rsqrt, true },
     { "_Z3sinf", (void *)&sinf, true },
-    { "sincos", (void *)&SC_sincos, true },
+    { "_Z6sincosfPf", (void *)&SC_sincos, true },
     { "_Z4sinhf", (void *)&sinhf, true },
     { "_Z5sinpif", (void *)&SC_sinpi, true },
     { "_Z4sqrtf", (void *)&sqrtf, true },
     { "_Z3tanf", (void *)&tanf, true },
     { "_Z4tanhf", (void *)&tanhf, true },
     { "_Z5tanpif", (void *)&SC_tanpi, true },
-    //{ "tgamma", (void *)&, true },
+    { "_Z6tgammaf", (void *)&lgammaf, true }, // FIXME!!! NEEDS TO USE tgammaf
     { "_Z5truncf", (void *)&truncf, true },
 
     // OpenCL Int
