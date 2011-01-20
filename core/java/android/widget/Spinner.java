@@ -23,13 +23,14 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 
 /**
@@ -68,6 +69,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     private DropDownAdapter mTempAdapter;
 
     private int mGravity;
+
+    private LayoutObserver mLayoutObserver;
 
     /**
      * Construct a new spinner with the given context's theme.
@@ -169,6 +172,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                     com.android.internal.R.styleable.Spinner_dropDownHorizontalOffset, 0));
 
             mPopup = popup;
+            mLayoutObserver = new LayoutObserver();
             break;
         }
         }
@@ -421,6 +425,11 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             handled = true;
 
             if (!mPopup.isShowing()) {
+                if (mLayoutObserver != null) {
+                    final ViewTreeObserver vto = getViewTreeObserver();
+                    vto.addOnGlobalLayoutListener(mLayoutObserver);
+                    vto.addOnScrollChangedListener(mLayoutObserver);
+                }
                 mPopup.show();
             }
         }
@@ -668,6 +677,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
+            setOnDismissListener(mLayoutObserver);
         }
 
         @Override
@@ -716,6 +726,30 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         private ViewGroup.LayoutParams generateDefaultLayoutParams() {
             return new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    private class LayoutObserver implements ViewTreeObserver.OnGlobalLayoutListener,
+            ViewTreeObserver.OnScrollChangedListener, PopupWindow.OnDismissListener {
+        @Override
+        public void onScrollChanged() {
+            if (mPopup != null && mPopup.isShowing()) {
+                mPopup.show();
+            }
+        }
+
+        @Override
+        public void onGlobalLayout() {
+            if (mPopup != null && mPopup.isShowing()) {
+                mPopup.show();
+            }
+        }
+
+        @Override
+        public void onDismiss() {
+            ViewTreeObserver vto = getViewTreeObserver();
+            vto.removeGlobalOnLayoutListener(mLayoutObserver);
+            vto.removeOnScrollChangedListener(mLayoutObserver);
         }
     }
 }
