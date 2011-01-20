@@ -5027,6 +5027,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                             focusTaken = requestFocus();
                         }
 
+                        if (prepressed) {
+                            // The button is being released before we actually
+                            // showed it as pressed.  Make it show the pressed
+                            // state now (before scheduling the click) to ensure
+                            // the user sees it.
+                            mPrivateFlags |= PRESSED;
+                            refreshDrawableState();
+                       }
+                        
                         if (!mHasPerformedLongPress) {
                             // This is a tap, so remove the longpress check
                             removeLongPressCallback();
@@ -5050,8 +5059,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         }
 
                         if (prepressed) {
-                            mPrivateFlags |= PRESSED;
-                            refreshDrawableState();
                             postDelayed(mUnsetPressedState,
                                     ViewConfiguration.getPressedStateDuration());
                         } else if (!post(mUnsetPressedState)) {
