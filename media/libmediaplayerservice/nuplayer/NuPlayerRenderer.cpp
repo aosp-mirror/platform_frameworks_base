@@ -42,7 +42,8 @@ NuPlayer::Renderer::Renderer(
       mFlushingVideo(false),
       mHasAudio(mAudioSink != NULL),
       mHasVideo(true),
-      mSyncQueues(mHasAudio && mHasVideo) {
+      mSyncQueues(mHasAudio && mHasVideo),
+      mPaused(false) {
 }
 
 NuPlayer::Renderer::~Renderer() {
@@ -91,6 +92,14 @@ void NuPlayer::Renderer::signalTimeDiscontinuity() {
     mAnchorTimeMediaUs = -1;
     mAnchorTimeRealUs = -1;
     mSyncQueues = mHasAudio && mHasVideo;
+}
+
+void NuPlayer::Renderer::pause() {
+    (new AMessage(kWhatPause, id()))->post();
+}
+
+void NuPlayer::Renderer::resume() {
+    (new AMessage(kWhatResume, id()))->post();
 }
 
 void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
@@ -151,6 +160,18 @@ void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
+        case kWhatPause:
+        {
+            onPause();
+            break;
+        }
+
+        case kWhatResume:
+        {
+            onResume();
+            break;
+        }
+
         default:
             TRESPASS();
             break;
@@ -158,7 +179,7 @@ void NuPlayer::Renderer::onMessageReceived(const sp<AMessage> &msg) {
 }
 
 void NuPlayer::Renderer::postDrainAudioQueue() {
-    if (mDrainAudioQueuePending || mSyncQueues) {
+    if (mDrainAudioQueuePending || mSyncQueues || mPaused) {
         return;
     }
 
@@ -254,7 +275,7 @@ void NuPlayer::Renderer::onDrainAudioQueue() {
 }
 
 void NuPlayer::Renderer::postDrainVideoQueue() {
-    if (mDrainVideoQueuePending || mSyncQueues) {
+    if (mDrainVideoQueuePending || mSyncQueues || mPaused) {
         return;
     }
 
@@ -526,6 +547,40 @@ void NuPlayer::Renderer::notifyPosition() {
     notify->setInt32("what", kWhatPosition);
     notify->setInt64("positionUs", positionUs);
     notify->post();
+}
+
+void NuPlayer::Renderer::onPause() {
+    CHECK(!mPaused);
+
+    mDrainAudioQueuePending = false;
+    ++mAudioQueueGeneration;
+
+    mDrainVideoQueuePending = false;
+    ++mVideoQueueGeneration;
+
+    if (mHasAudio) {
+        mAudioSink->pause();
+    }
+
+    mPaused = true;
+}
+
+void NuPlayer::Renderer::onResume() {
+    CHECK(mPaused);
+
+    if (mHasAudio) {
+        mAudioSink->start();
+    }
+
+    mPaused = false;
+
+    if (!mAudioQueue.empty()) {
+        postDrainAudioQueue();
+    }
+
+    if (!mVideoQueue.empty()) {
+        postDrainVideoQueue();
+    }
 }
 
 }  // namespace android

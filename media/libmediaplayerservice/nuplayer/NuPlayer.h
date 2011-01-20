@@ -75,6 +75,8 @@ private:
         kWhatRendererNotify,
         kWhatReset,
         kWhatSeek,
+        kWhatPause,
+        kWhatResume,
     };
 
     wp<NuPlayerDriver> mDriver;
