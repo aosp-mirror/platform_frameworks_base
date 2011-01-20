@@ -213,6 +213,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
                 <span class="en">3D with OpenGL</span>
               </a></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
+                <span class="en">Animation</span>
+              </a><span class="new">new!</span></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
