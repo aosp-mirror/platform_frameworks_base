@@ -118,7 +118,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static final int NOT_A_SUBTYPE_ID = -1;
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
-    private static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
 
@@ -1645,7 +1644,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         if (!TextUtils.isEmpty(inputMethodId)) {
-            intent.putExtra(EXTRA_INPUT_METHOD_ID, inputMethodId);
+            intent.putExtra(Settings.EXTRA_INPUT_METHOD_ID, inputMethodId);
         }
         mContext.startActivity(intent);
     }
