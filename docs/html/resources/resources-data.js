@@ -405,6 +405,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new'],
+    path: 'samples/Honeycomb-Gallery/index.html',
+    title: {
+      en: 'Honeycomb Gallery'
+    },
+    description: {
+      en: 'An image gallery application using Honeycomb-specific APIs.'
+    }
+  },
+  {
     tags: ['sample', 'gamedev', 'media'],
     path: 'samples/JetBoy/index.html',
     title: {
