@@ -110,6 +110,8 @@ public:
         DrawPatch,
         DrawColor,
         DrawRect,
+        DrawRoundRect,
+        DrawCircle,
         DrawPath,
         DrawLines,
         DrawText,
@@ -270,6 +272,9 @@ public:
             float left, float top, float right, float bottom, SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    void drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, SkPaint* paint);
+    void drawCircle(float x, float y, float radius, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
     void drawLines(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);

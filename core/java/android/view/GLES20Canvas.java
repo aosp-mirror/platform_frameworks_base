@@ -452,11 +452,14 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
             int saveFlags) {
-        boolean hasColorFilter = paint != null && setupColorFilter(paint);
-        final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-        int count = nSaveLayer(mRenderer, left, top, right, bottom, nativePaint, saveFlags);
-        if (hasColorFilter) nResetModifiers(mRenderer);
-        return count;
+        if (left < right && top < bottom) {
+            boolean hasColorFilter = paint != null && setupColorFilter(paint);
+            final int nativePaint = paint == null ? 0 : paint.mNativePaint;
+            int count = nSaveLayer(mRenderer, left, top, right, bottom, nativePaint, saveFlags);
+            if (hasColorFilter) nResetModifiers(mRenderer);
+            return count;
+        }
+        return save(saveFlags);
     }
 
     private native int nSaveLayer(int renderer, float left, float top, float right, float bottom,
@@ -471,7 +474,10 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             int saveFlags) {
-        return nSaveLayerAlpha(mRenderer, left, top, right, bottom, alpha, saveFlags);
+        if (left < right && top < bottom) {
+            return nSaveLayerAlpha(mRenderer, left, top, right, bottom, alpha, saveFlags);
+        }
+        return save(saveFlags);
     }
 
     private native int nSaveLayerAlpha(int renderer, float left, float top, float right,
@@ -629,8 +635,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
-        throw new UnsupportedOperationException();
+        boolean hasModifier = setupModifiers(paint);
+        nDrawCircle(mRenderer, cx, cy, radius, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);        
     }
+
+    private native void nDrawCircle(int renderer, float cx, float cy, float radius, int paint);
 
     @Override
     public void drawColor(int color) {
@@ -767,8 +777,14 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
-        // TODO: Implement
+        boolean hasModifier = setupModifiers(paint);
+        nDrawRoundRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom,
+                rx, ry, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);        
     }
+
+    private native void nDrawRoundRect(int renderer, float left, float top,
+            float right, float bottom, float rx, float y, int paint);
 
     @Override
     public void drawText(char[] text, int index, int count, float x, float y, Paint paint) {

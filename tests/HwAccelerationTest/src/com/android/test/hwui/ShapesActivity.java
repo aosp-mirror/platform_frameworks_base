@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.test.hwui;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.os.Bundle;
+import android.view.View;
+
+@SuppressWarnings({"UnusedDeclaration"})
+public class ShapesActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(new ShapesView(this));
+    }
+
+    static class ShapesView extends View {
+        private Paint mNormalPaint;
+        private Paint mStrokePaint;
+        private Paint mFillPaint;
+        private RectF mRect;
+
+        ShapesView(Context c) {
+            super(c);
+
+            mRect = new RectF(0.0f, 0.0f, 160.0f, 90.0f);
+
+            mNormalPaint = new Paint();
+            mNormalPaint.setAntiAlias(true);
+            mNormalPaint.setColor(0xff0000ff);
+            mNormalPaint.setStrokeWidth(6.0f);
+            mNormalPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+            mStrokePaint = new Paint();
+            mStrokePaint.setAntiAlias(true);
+            mStrokePaint.setColor(0xff0000ff);
+            mStrokePaint.setStrokeWidth(6.0f);
+            mStrokePaint.setStyle(Paint.Style.STROKE);
+            
+            mFillPaint = new Paint();
+            mFillPaint.setAntiAlias(true);
+            mFillPaint.setColor(0xff0000ff);
+            mFillPaint.setStyle(Paint.Style.FILL);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            canvas.save();
+            canvas.translate(50.0f, 50.0f);
+            canvas.drawRoundRect(mRect, 6.0f, 6.0f, mNormalPaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawRoundRect(mRect, 6.0f, 6.0f, mStrokePaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawRoundRect(mRect, 6.0f, 6.0f, mFillPaint);
+            canvas.restore();
+
+            canvas.save();
+            canvas.translate(250.0f, 50.0f);
+            canvas.drawCircle(80.0f, 45.0f, 45.0f, mNormalPaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawCircle(80.0f, 45.0f, 45.0f, mStrokePaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawCircle(80.0f, 45.0f, 45.0f, mFillPaint);
+            canvas.restore();
+        }
+    }
+}

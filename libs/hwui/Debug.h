@@ -45,6 +45,9 @@
 // Turn on to display debug info about paths
 #define DEBUG_PATHS 0
 
+// Turn on to display debug info about shapes
+#define DEBUG_SHAPES 0
+
 // Turn on to display debug info about textures
 #define DEBUG_TEXTURES 0
 

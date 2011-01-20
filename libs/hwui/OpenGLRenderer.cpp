@@ -1303,6 +1303,38 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
+void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
+        float rx, float ry, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    glActiveTexture(gTextureUnits[0]);
+
+    const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
+            right - left, bottom - top, rx, ry, paint);
+    if (!texture) return;
+    const AutoTexture autoCleanup(texture);
+
+    const float x = left + texture->left - texture->offset;
+    const float y = top + texture->top - texture->offset;
+
+    drawPathTexture(texture, x, y, paint);
+}
+
+void OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    glActiveTexture(gTextureUnits[0]);
+
+    const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, paint);
+    if (!texture) return;
+    const AutoTexture autoCleanup(texture);
+
+    const float left = (x - radius) + texture->left - texture->offset;
+    const float top = (y - radius) + texture->top - texture->offset;
+
+    drawPathTexture(texture, left, top, paint);
+}
+
 void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
     if (quickReject(left, top, right, bottom)) {
         return;
@@ -1451,8 +1483,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
-    GLuint textureUnit = 0;
-    glActiveTexture(gTextureUnits[textureUnit]);
+    glActiveTexture(gTextureUnits[0]);
 
     const PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
@@ -1461,31 +1492,7 @@ void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     const float x = texture->left - texture->offset;
     const float y = texture->top - texture->offset;
 
-    if (quickReject(x, y, x + texture->width, y + texture->height)) {
-        return;
-    }
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
-    setupDraw();
-    setupDrawWithTexture(true);
-    setupDrawAlpha8Color(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(true, mode);
-    setupDrawProgram();
-    setupDrawModelView(x, y, x + texture->width, y + texture->height);
-    setupDrawTexture(texture->id);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms();
-    setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-
-    finishDrawTexture();
+    drawPathTexture(texture, x, y, paint);
 }
 
 void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
@@ -1580,6 +1587,35 @@ void OpenGLRenderer::setupShadow(float radius, float dx, float dy, int color) {
 ///////////////////////////////////////////////////////////////////////////////
 // Drawing implementation
 ///////////////////////////////////////////////////////////////////////////////
+
+void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
+        float x, float y, SkPaint* paint) {
+    if (quickReject(x, y, x + texture->width, y + texture->height)) {
+        return;
+    }
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    setupDraw();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(x, y, x + texture->width, y + texture->height);
+    setupDrawTexture(texture->id);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms();
+    setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+
+    finishDrawTexture();
+}
 
 // Same values used by Skia
 #define kStdStrikeThru_Offset   (-6.0f / 21.0f)
