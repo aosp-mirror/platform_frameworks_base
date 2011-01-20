@@ -3093,6 +3093,10 @@
         <attr name="solidColor" format="color|reference" />
         <!-- @hide Whether the number picker supports fligning. -->
         <attr name="flingable" format="boolean" />
+        <!-- @hide The divider for making the selection area. -->
+        <attr name="selectionDivider" format="reference" />
+        <!-- @hide The height of the selection divider. -->
+        <attr name="selectionDividerHeight" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="TimePicker">
