@@ -3426,8 +3426,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setError(null, null);
         } else {
             Drawable dr = getContext().getResources().
-                getDrawable(com.android.internal.R.drawable.
-                            indicator_input_error);
+                getDrawable(com.android.internal.R.drawable.indicator_input_error);
 
             dr.setBounds(0, 0, dr.getIntrinsicWidth(), dr.getIntrinsicHeight());
             setError(error, dr);
@@ -3450,8 +3449,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mErrorWasChanged = true;
         final Drawables dr = mDrawables;
         if (dr != null) {
-            setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop,
-                                 icon, dr.mDrawableBottom);
+            setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon, dr.mDrawableBottom);
         } else {
             setCompoundDrawables(null, null, icon, null);
         }
@@ -3479,8 +3477,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mPopup == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            final TextView err = (TextView) inflater.inflate(com.android.internal.R.layout.textview_hint,
-                    null);
+            final TextView err = (TextView) inflater.inflate(
+                    com.android.internal.R.layout.textview_hint, null);
 
             final float scale = getResources().getDisplayMetrics().density;
             mPopup = new ErrorPopup(err, (int) (200 * scale + 0.5f),

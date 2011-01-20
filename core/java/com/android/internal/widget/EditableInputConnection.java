@@ -142,10 +142,6 @@ public class EditableInputConnection extends BaseInputConnection {
         boolean success = super.commitText(text, newCursorPosition);
         CharSequence errorAfter = mTextView.getError();
 
-        if (errorAfter != null && errorBefore == errorAfter) {
-            mTextView.setError(null, null);
-        }
-
         return success;
     }
 }
