@@ -121,8 +121,6 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * <p>This field corresponds to the <code>android:previewImage</code> attribute in
      * the <code>&lt;receiver&gt;</code> element in the AndroidManifest.xml file.
-     * 
-     * @hide Pending API approval
      */
 	public int previewImage;
 
