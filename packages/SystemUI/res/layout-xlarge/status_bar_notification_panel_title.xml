@@ -127,14 +127,14 @@
             android:layout_height="wrap_content"
             android:gravity="right"
             android:singleLine="true"
-            android:textSize="80sp"
+            android:textSize="72sp"
             android:textColor="#999999" />
         <TextView android:id="@+id/time_fg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:singleLine="true"
-            android:textSize="80sp"
+            android:textSize="72sp"
             android:textColor="#666666" />
     </com.android.systemui.statusbar.tablet.HoloClock>
 
@@ -142,7 +142,7 @@
         android:id="@+id/date"
         style="@style/StatusBarNotificationText"
         android:layout_height="wrap_content"
-        android:layout_width="142dp"
+        android:layout_width="120dp"
         android:layout_alignBottom="@id/clock"
         android:layout_alignParentLeft="true"
         android:gravity="left"
