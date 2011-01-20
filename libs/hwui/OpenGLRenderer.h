@@ -107,6 +107,9 @@ public:
             float left, float top, float right, float bottom, SkPaint* paint);
     virtual void drawColor(int color, SkXfermode::Mode mode);
     virtual void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual void drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, SkPaint* paint);
+    virtual void drawCircle(float x, float y, float radius, SkPaint* paint);
     virtual void drawPath(SkPath* path, SkPaint* paint);
     virtual void drawLines(float* points, int count, SkPaint* paint);
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
@@ -342,6 +345,8 @@ private:
      */
     void drawTextDecorations(const char* text, int bytesCount, float length,
             float x, float y, SkPaint* paint);
+
+    void drawPathTexture(const PathTexture* texture, float x, float y, SkPaint* paint);
 
     /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values
