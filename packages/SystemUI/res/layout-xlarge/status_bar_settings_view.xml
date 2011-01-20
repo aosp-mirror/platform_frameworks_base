@@ -65,14 +65,6 @@
                 style="@style/StatusBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_wifi_button"
                 />
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginTop="16dp"
-            android:layout_marginRight="2dp"
-            android:src="@drawable/ic_notification_open"
-            />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
 
@@ -158,14 +150,6 @@
                 style="@style/StatusBarPanelSettingsContents"
                 android:text="@string/status_bar_settings_settings_button"
                 />
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginTop="16dp"
-            android:layout_marginRight="2dp"
-            android:src="@drawable/ic_notification_open"
-            />
     </LinearLayout>
     <View style="@style/StatusBarPanelSettingsPanelSeparator" />
 
