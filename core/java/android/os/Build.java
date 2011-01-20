@@ -188,9 +188,14 @@ public class Build {
         public static final int FROYO = 8;
         
         /**
-         * Newest version of Android, version 2.3.
+         * November 2010: Android 2.3
          */
         public static final int GINGERBREAD = 9;
+        
+        /**
+         * Newest version of Android, version 2.3.3.
+         */
+        public static final int GINGERBREAD_MR1 = 10;
     }
     
     /** The type of build, like "user" or "eng". */
