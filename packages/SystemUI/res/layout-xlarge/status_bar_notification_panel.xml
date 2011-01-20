@@ -18,19 +18,12 @@
 <com.android.systemui.statusbar.tablet.NotificationPanel
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/panel_root"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:gravity="right"
+    android:background="@drawable/notify_panel_bg_protect_tiled"
     >
-
-    <View
-        android:id="@+id/scrim"
-        android:background="@drawable/notify_panel_bg_protect_tiled"
-        android:layout_width="512dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        />
 
     <RelativeLayout
         android:id="@+id/content_parent"
@@ -88,7 +81,7 @@
         android:layout_alignTop="@id/content_parent"
         android:layout_alignLeft="@id/content_parent"
         android:layout_marginLeft="100dip"
-        android:layout_marginTop="-100dip"
+        android:layout_marginTop="50dip"
         />
 
 </com.android.systemui.statusbar.tablet.NotificationPanel>
