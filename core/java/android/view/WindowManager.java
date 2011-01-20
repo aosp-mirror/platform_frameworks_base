@@ -817,7 +817,7 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_IS_FORWARD_NAVIGATION = 0x100;
 
         /**
-         * Desired operating mode for any soft input area.  May any combination
+         * Desired operating mode for any soft input area.  May be any combination
          * of:
          * 
          * <ul>

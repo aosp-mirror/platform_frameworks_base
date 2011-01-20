@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -35,8 +37,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-
-import com.android.internal.R;
 
 
 /**
@@ -113,6 +113,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     private Validator mValidator = null;
 
+    // Set to true when text is set directly and no filtering shall be performed
     private boolean mBlockCompletion;
 
     private PassThroughClickListener mPassThroughClickListener;
@@ -721,6 +722,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             return;
         }
 
+        updateList();
+    }
+
+    private void updateList() {
         // the drop down is shown only when a minimum number of characters
         // was typed in the text view
         if (enoughToFilter()) {
@@ -840,7 +845,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
             mBlockCompletion = true;
             replaceText(convertSelectionToString(selectedItem));
-            mBlockCompletion = false;            
+            mBlockCompletion = false;
 
             if (mItemClickListener != null) {
                 final ListPopupWindow list = mPopup;
@@ -903,10 +908,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     /** {@inheritDoc} */
     public void onFilterComplete(int count) {
-        updateDropDownForFilter(count);
+        updateDropDownForFilter(count, true);
     }
 
-    private void updateDropDownForFilter(int count) {
+    private void updateDropDownForFilter(int count, boolean forceShow) {
         // Not attached to window, don't update drop-down
         if (getWindowVisibility() == View.GONE) return;
 
@@ -919,7 +924,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         final boolean dropDownAlwaysVisible = mPopup.isDropDownAlwaysVisible();
         if ((count > 0 || dropDownAlwaysVisible) && enoughToFilter()) {
-            if (hasFocus() && hasWindowFocus()) {
+            if (hasFocus() && hasWindowFocus() && (forceShow || isPopupShowing())) {
                 showDropDown();
             }
         } else if (!dropDownAlwaysVisible) {
@@ -1182,12 +1187,14 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 // If the popup is not showing already, showing it will cause
                 // the list of data set observers attached to the adapter to
                 // change. We can't do it from here, because we are in the middle
-                // of iterating throught he list of observers.
+                // of iterating through the list of observers.
                 post(new Runnable() {
                     public void run() {
                         final ListAdapter adapter = mAdapter;
                         if (adapter != null) {
-                            updateDropDownForFilter(adapter.getCount());
+                            // This will re-layout, thus resetting mDataChanged, so that the
+                            // listView click listener stays responsive
+                            updateDropDownForFilter(adapter.getCount(), false);
                         }
                     }
                 });
