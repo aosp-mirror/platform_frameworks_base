@@ -49,12 +49,6 @@ public abstract class ActionBar {
      * e.g. this might be presented to the user as a dropdown list.
      */
     public static final int NAVIGATION_MODE_LIST = 1;
-
-    /**
-     * @deprecated use NAVIGATION_MODE_LIST
-     */
-    @Deprecated
-    public static final int NAVIGATION_MODE_DROPDOWN_LIST = 1;
     
     /**
      * Tab navigation mode. Instead of static title text this mode
@@ -79,13 +73,6 @@ public abstract class ActionBar {
      * @see #setDisplayOptions(int, int)
      */
     public static final int DISPLAY_SHOW_HOME = 0x2;
-
-    /**
-     * @deprecated Display flags are now positive for consistency - 'show' instead of 'hide'.
-     *             Use DISPLAY_SHOW_HOME.
-     */
-    @Deprecated
-    public static final int DISPLAY_HIDE_HOME = 0x1000;
 
     /**
      * Display the 'home' element such that it appears as an 'up' affordance.
@@ -173,28 +160,6 @@ public abstract class ActionBar {
     public abstract void setCustomView(int resId);
 
     /**
-     * @param view
-     * @deprecated Use {@link #setCustomView(View)} and {@link #setDisplayOptions(int)} instead.
-     */
-    @Deprecated
-    public abstract void setCustomNavigationMode(View view);
-    
-    /**
-     * Set the action bar into dropdown navigation mode and supply an adapter
-     * that will provide views for navigation choices.
-     * 
-     * @param adapter An adapter that will provide views both to display
-     *                the current navigation selection and populate views
-     *                within the dropdown navigation menu.
-     * @param callback A OnNavigationListener that will receive events when the user
-     *                 selects a navigation item.
-     * @deprecated See setListNavigationCallbacks.
-     */
-    @Deprecated
-    public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
-            OnNavigationListener callback);
-
-    /**
      * Set the adapter and navigation callback for list navigation mode.
      *
      * The supplied adapter will provide views for the expanded list as well as
@@ -213,37 +178,11 @@ public abstract class ActionBar {
             OnNavigationListener callback);
 
     /**
-     * Set the action bar into dropdown navigation mode and supply an adapter that will
-     * provide views for navigation choices.
-     *
-     * @param adapter An adapter that will provide views both to display the current
-     *                navigation selection and populate views within the dropdown
-     *                navigation menu.
-     * @param callback A OnNavigationListener that will receive events when the user
-     *                 selects a navigation item.
-     * @param defaultSelectedPosition Position within the provided adapter that should be
-     *                                selected from the outset.
-     * @deprecated See setListNavigationCallbacks and setSelectedNavigationItem.
-     */
-    @Deprecated
-    public abstract void setDropdownNavigationMode(SpinnerAdapter adapter,
-            OnNavigationListener callback, int defaultSelectedPosition);
-
-    /**
      * Set the selected navigation item in list or tabbed navigation modes.
      *
      * @param position Position of the item to select.
      */
     public abstract void setSelectedNavigationItem(int position);
-
-    /**
-     * Get the position of the selected navigation item in list or tabbed navigation modes.
-     *
-     * @return Position of the selected item.
-     * @deprecated Use {@link #getSelectedNavigationIndex()} instead.
-     */
-    @Deprecated
-    public abstract int getSelectedNavigationItem();
 
     /**
      * Get the position of the selected navigation item in list or tabbed navigation modes.
@@ -258,17 +197,6 @@ public abstract class ActionBar {
      * @return Number of navigation items.
      */
     public abstract int getNavigationItemCount();
-
-    /**
-     * Set the action bar into standard navigation mode, using the currently set title
-     * and/or subtitle.
-     *
-     * Standard navigation mode is default. The title is automatically set to the name of
-     * your Activity on startup if an action bar is present.
-     * @deprecated See setNavigationMode
-     */
-    @Deprecated
-    public abstract void setStandardNavigationMode();
 
     /**
      * Set the action bar's title. This will only be displayed if
@@ -410,13 +338,6 @@ public abstract class ActionBar {
      * @param d Background drawable
      */
     public abstract void setBackgroundDrawable(Drawable d);
-    
-    /**
-     * @return The current custom navigation view.
-     * @deprecated Method has been renamed. Use {@link #getCustomView()}.
-     */
-    @Deprecated
-    public abstract View getCustomNavigationView();
 
     /**
      * @return The current custom view.
@@ -474,18 +395,6 @@ public abstract class ActionBar {
      * @return The current set of display options. 
      */
     public abstract int getDisplayOptions();
-
-    /**
-     * Set the action bar into tabbed navigation mode.
-     *
-     * @see #addTab(Tab)
-     * @see #insertTab(Tab, int)
-     * @see #removeTab(Tab)
-     * @see #removeTabAt(int)
-     *
-     * @deprecated See {@link #setNavigationMode(int)}
-     */
-    public abstract void setTabNavigationMode();
 
     /**
      * Create and return a new {@link Tab}.

@@ -370,12 +370,6 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void setDisplayOptions(int options) {
-        // TODO Remove this once DISPLAY_HIDE_HOME is removed
-        if ((options & ActionBar.DISPLAY_HIDE_HOME) != 0) {
-            options &= ~(ActionBar.DISPLAY_HIDE_HOME | ActionBar.DISPLAY_SHOW_HOME);
-        }
-        // End TODO
-
         final int flagsChanged = options ^ mDisplayOptions;
         mDisplayOptions = options;
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
