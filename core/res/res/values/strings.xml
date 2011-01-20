@@ -2677,4 +2677,11 @@
     <string name="sync_undo_deletes">Undo the deletes.</string>
     <!-- Dialog action for when there are too many deletes that would take place and we want user confirmation, and the user wants to do nothing for now -->
     <string name="sync_do_nothing">Do nothing for now.</string>
+
+    <!-- Title of the VPN service notification: VPN connected [CHAR LIMIT=NONE] -->
+    <string name="vpn_notification_title_connected"><xliff:g id="profilename" example="Home PPTP">%s</xliff:g> VPN connected</string>
+    <!-- Title of the VPN service notification: VPN disconnected [CHAR LIMIT=NONE] -->
+    <string name="vpn_notification_title_disconnected"><xliff:g id="profilename" example="Home PPTP">%s</xliff:g> VPN disconnected</string>
+    <!-- Message of the VPN service notification: Hint to reconnect VPN [CHAR LIMIT=NONE] -->
+    <string name="vpn_notification_hint_disconnected">Touch to reconnect to a VPN.</string>
 </resources>
