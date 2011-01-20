@@ -274,7 +274,7 @@ public static final int ACTION_DRAG_EXITED = 6;
     public String toString() {
         return "DragEvent{" + Integer.toHexString(System.identityHashCode(this))
         + " action=" + mAction + " @ (" + mX + ", " + mY + ") desc=" + mClipDescription
-        + " data=" + mClipData + " result=" + mDragResult
+        + " data=" + mClipData + " local=" + mLocalState + " result=" + mDragResult
         + "}";
     }
 

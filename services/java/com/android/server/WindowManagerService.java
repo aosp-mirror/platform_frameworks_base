@@ -708,16 +708,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Move the surface to the given touch
             if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION notifyMoveLw");
-            mSurface.openTransaction();
+            Surface.openTransaction();
             try {
                 mSurface.setPosition((int)(x - mThumbOffsetX), (int)(y - mThumbOffsetY));
             } finally {
-                mSurface.closeTransaction();
+                Surface.closeTransaction();
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
             }
 
             // Tell the affected window
             WindowState touchedWin = getTouchedWinAtPointLw(x, y);
+            if (touchedWin == null) {
+                if (DEBUG_DRAG) Slog.d(TAG, "No touched win at x=" + x + " y=" + y);
+                return;
+            }
             if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
                 final IBinder touchedBinder = touchedWin.mClient.asBinder();
                 if (touchedBinder != mLocalWin) {
