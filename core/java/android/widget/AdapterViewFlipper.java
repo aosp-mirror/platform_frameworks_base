@@ -258,8 +258,14 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
         }
     };
 
+    /**
+     * Called by an {@link android.appwidget.AppWidgetHost} to indicate that it will be
+     * automatically advancing the views of this {@link AdapterViewFlipper} by calling
+     * {@link AdapterViewFlipper#advance()} at some point in the future. This allows
+     * {@link AdapterViewFlipper} to prepare by no longer Advancing its children.
+     */
     @Override
-    public void willBeAdvancedByHost() {
+    public void fyiWillBeAdvancedByHostKThx() {
         mAdvancedByHost = true;
         updateRunning(false);
     }

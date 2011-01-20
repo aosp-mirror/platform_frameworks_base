@@ -981,11 +981,21 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         // items from the Adapter.
     }
 
+    /**
+     * Called by an {@link android.appwidget.AppWidgetHost} in order to advance the current view when
+     * it is being used within an app widget.
+     */
     public void advance() {
         showNext();
     }
 
-    public void willBeAdvancedByHost() {
+    /**
+     * Called by an {@link android.appwidget.AppWidgetHost} to indicate that it will be
+     * automatically advancing the views of this {@link AdapterViewAnimator} by calling
+     * {@link AdapterViewAnimator#advance()} at some point in the future. This allows subclasses to
+     * perform any required setup, for example, to stop automatically advancing their children.
+     */
+    public void fyiWillBeAdvancedByHostKThx() {
     }
 
     @Override

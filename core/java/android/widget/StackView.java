@@ -347,6 +347,9 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @android.view.RemotableViewMethod
     public void showNext() {
@@ -362,6 +365,9 @@ public class StackView extends AdapterViewAnimator {
         super.showNext();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @android.view.RemotableViewMethod
     public void showPrevious() {
@@ -474,6 +480,9 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
@@ -561,6 +570,9 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         super.onTouchEvent(ev);
@@ -939,6 +951,9 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onRemoteAdapterConnected() {
         super.onRemoteAdapterConnected();

@@ -34,5 +34,5 @@ public interface Advanceable {
      * Called by the AppWidgetHost once before it begins to call advance(), allowing the
      * collection to do any required setup.
      */
-    public void willBeAdvancedByHost();
+    public void fyiWillBeAdvancedByHostKThx();
 }
