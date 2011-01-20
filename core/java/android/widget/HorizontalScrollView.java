@@ -511,8 +511,10 @@ public class HorizontalScrollView extends FrameLayout {
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                final float x = ev.getX();
-                mIsBeingDragged = true;
+                mIsBeingDragged = getChildCount() != 0;
+                if (!mIsBeingDragged) {
+                    return false;
+                }
 
                 /*
                  * If being flinged and user touches, stop the fling. isFinished
@@ -523,7 +525,7 @@ public class HorizontalScrollView extends FrameLayout {
                 }
 
                 // Remember where the motion event started
-                mLastMotionX = x;
+                mLastMotionX = ev.getX();
                 mActivePointerId = ev.getPointerId(0);
                 break;
             }
