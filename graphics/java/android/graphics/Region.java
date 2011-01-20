@@ -287,6 +287,10 @@ public class Region implements Parcelable {
                         region2.mNativeRegion, op.nativeInt);
     }
 
+    public String toString() {
+        return nativeToString(mNativeRegion);
+    }
+
     //////////////////////////////////////////////////////////////////////////
     
     public static final Parcelable.Creator<Region> CREATOR
@@ -357,6 +361,8 @@ public class Region implements Parcelable {
         return mNativeRegion;
     }
 
+    private static native boolean nativeEquals(int native_r1, int native_r2);
+
     private static native int nativeConstructor();
     private static native void nativeDestructor(int native_region);
 
@@ -381,5 +387,5 @@ public class Region implements Parcelable {
     private static native boolean nativeWriteToParcel(int native_region,
                                                       Parcel p);
 
-    private static native boolean nativeEquals(int native_r1, int native_r2);
+    private static native String nativeToString(int native_region);
 }
