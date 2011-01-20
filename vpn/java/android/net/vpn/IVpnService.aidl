@@ -24,10 +24,11 @@ import android.net.vpn.VpnProfile;
  */
 interface IVpnService {
     /**
-     * Sets up the VPN connection.
+     * Sets up a VPN connection.
      * @param profile the profile object
      * @param username the username for authentication
      * @param password the corresponding password for authentication
+     * @return true if VPN is successfully connected
      */
     boolean connect(in VpnProfile profile, String username, String password);
 
@@ -37,7 +38,13 @@ interface IVpnService {
     void disconnect();
 
     /**
-     * Makes the service broadcast the connectivity state.
+     * Gets the the current connection state.
      */
-    void checkStatus(in VpnProfile profile);
+    String getState(in VpnProfile profile);
+
+    /**
+     * Returns the idle state.
+     * @return true if the system is not connecting/connected to a VPN
+     */
+    boolean isIdle();
 }

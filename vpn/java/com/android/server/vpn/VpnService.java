@@ -27,8 +27,9 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.R;
+
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -37,8 +38,7 @@ import java.net.UnknownHostException;
 /**
  * The service base class for managing a type of VPN connection.
  */
-abstract class VpnService<E extends VpnProfile> implements Serializable {
-    static final long serialVersionUID = 1L;
+abstract class VpnService<E extends VpnProfile> {
     private static final boolean DBG = true;
     private static final int NOTIFICATION_ID = 1;
 
@@ -55,10 +55,8 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     private final String TAG = VpnService.class.getSimpleName();
 
-    // FIXME: profile is only needed in connecting phase, so we can just save
-    // the profile name and service class name for recovery
     E mProfile;
-    transient VpnServiceBinder mContext;
+    transient Context mContext;
 
     private VpnState mState = VpnState.IDLE;
     private Throwable mError;
@@ -105,12 +103,8 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         return InetAddress.getByName(hostName).getHostAddress();
     }
 
-    void setContext(VpnServiceBinder context, E profile) {
+    void setContext(Context context, E profile) {
         mProfile = profile;
-        recover(context);
-    }
-
-    void recover(VpnServiceBinder context) {
         mContext = context;
         mNotification = new NotificationHelper();
 
@@ -122,6 +116,10 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
     VpnState getState() {
         return mState;
+    }
+
+    boolean isIdle() {
+      return (mState == VpnState.IDLE);
     }
 
     synchronized boolean onConnect(String username, String password) {
@@ -216,19 +214,10 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
 
         mStartTime = System.currentTimeMillis();
 
-        // Correct order to make sure VpnService doesn't break when killed:
-        // (1) set state to CONNECTED
-        // (2) save states
-        // (3) set DNS
         setState(VpnState.CONNECTED);
-        saveSelf();
         setVpnDns();
 
         startConnectivityMonitor();
-    }
-
-    private void saveSelf() throws IOException {
-        mContext.saveStates();
     }
 
     private synchronized void onFinalCleanUp() {
@@ -243,10 +232,7 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
         restoreOriginalDomainSuffices();
         setState(VpnState.IDLE);
 
-        // stop the service itself
         SystemProperties.set(VPN_STATUS, VPN_IS_DOWN);
-        mContext.removeStates();
-        mContext.stopSelf();
     }
 
     private boolean anyError() {
@@ -411,9 +397,6 @@ abstract class VpnService<E extends VpnProfile> implements Serializable {
             Thread.currentThread().sleep(ms);
         } catch (InterruptedException e) {
         }
-    }
-
-    private class DaemonHelper implements Serializable {
     }
 
     // Helper class for showing, updating notification.
