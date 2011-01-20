@@ -1035,9 +1035,7 @@ void rsi_ContextDump(Context *rsc, int32_t bits) {
 }
 
 void rsi_ContextDestroyWorker(Context *rsc) {
-    LOGE("rsi_ContextDestroyWorker 1");
     rsc->destroyWorkerThreadResources();;
-    LOGE("rsi_ContextDestroyWorker 2");
 }
 
 }
