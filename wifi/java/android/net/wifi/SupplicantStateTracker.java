@@ -31,7 +31,7 @@ import android.util.Log;
  * Tracks the state changes in supplicant and provides functionality
  * that is based on these state changes:
  * - detect a failed WPA handshake that loops indefinitely
- * - password failure handling
+ * - authentication failure handling
  */
 class SupplicantStateTracker extends HierarchicalStateMachine {
 
@@ -39,14 +39,14 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
     private static final boolean DBG = false;
 
     private WifiStateMachine mWifiStateMachine;
-    private int mPasswordFailuresCount = 0;
+    private int mAuthenticationFailuresCount = 0;
     /* Indicates authentication failure in supplicant broadcast.
      * TODO: enhance auth failure reporting to include notification
      * for all type of failures: EAP, WPS & WPA networks */
     private boolean mAuthFailureInSupplicantBroadcast = false;
 
-    /* Maximum retries on a password failure notification */
-    private static final int MAX_RETRIES_ON_PASSWORD_FAILURE = 2;
+    /* Maximum retries on a authentication failure notification */
+    private static final int MAX_RETRIES_ON_AUTHENTICATION_FAILURE = 2;
 
     /* Tracks if networks have been disabled during a connection */
     private boolean mNetworksDisabledDuringConnect = false;
@@ -155,8 +155,8 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-                case WifiStateMachine.PASSWORD_MAY_BE_INCORRECT_EVENT:
-                    mPasswordFailuresCount++;
+                case WifiStateMachine.AUTHENTICATION_FAILURE_EVENT:
+                    mAuthenticationFailuresCount++;
                     mAuthFailureInSupplicantBroadcast = true;
                     break;
                 case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
@@ -206,18 +206,17 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
-             /* If a disconnect event happens after password key failure
+             /* If a disconnect event happens after authentication failure
               * exceeds maximum retries, disable the network
               */
-
              Message message = getCurrentMessage();
              StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
 
-             if (mPasswordFailuresCount >= MAX_RETRIES_ON_PASSWORD_FAILURE) {
+             if (mAuthenticationFailuresCount >= MAX_RETRIES_ON_AUTHENTICATION_FAILURE) {
                  Log.d(TAG, "Failed to authenticate, disabling network " +
                          stateChangeResult.networkId);
                  handleNetworkConnectionFailure(stateChangeResult.networkId);
-                 mPasswordFailuresCount = 0;
+                 mAuthenticationFailuresCount = 0;
              }
          }
     }
@@ -282,8 +281,8 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
-             /* Reset password failure count */
-             mPasswordFailuresCount = 0;
+             /* Reset authentication failure count */
+             mAuthenticationFailuresCount = 0;
              if (mNetworksDisabledDuringConnect) {
                  WifiConfigStore.enableAllNetworks();
                  mNetworksDisabledDuringConnect = false;

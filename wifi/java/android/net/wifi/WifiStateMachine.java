@@ -212,8 +212,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int SCAN_RESULTS_EVENT                   = 38;
     /* Supplicate state changed */
     static final int SUPPLICANT_STATE_CHANGE_EVENT        = 39;
-    /* Password may be incorrect */
-    static final int PASSWORD_MAY_BE_INCORRECT_EVENT      = 40;
+    /* Password failure and EAP authentication failure */
+    static final int AUTHENTICATION_FAILURE_EVENT         = 40;
     /* WPS overlap detected */
     static final int WPS_OVERLAP_EVENT                    = 41;
 
@@ -1383,11 +1383,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
-     * Send the tracker a notification that a user-entered password key
-     * may be incorrect (i.e., caused authentication to fail).
+     * Send the tracker a notification that a user provided
+     * configuration caused authentication failure - this could
+     * be a password failure or a EAP authentication failure
      */
-    void notifyPasswordKeyMayBeIncorrect() {
-        sendMessage(PASSWORD_MAY_BE_INCORRECT_EVENT);
+    void notifyAuthenticationFailure() {
+        sendMessage(AUTHENTICATION_FAILURE_EVENT);
     }
 
     /**
@@ -1515,7 +1516,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case NETWORK_DISCONNECTION_EVENT:
                 case SCAN_RESULTS_EVENT:
                 case SUPPLICANT_STATE_CHANGE_EVENT:
-                case PASSWORD_MAY_BE_INCORRECT_EVENT:
+                case AUTHENTICATION_FAILURE_EVENT:
                 case WPS_OVERLAP_EVENT:
                 case CMD_BLACKLIST_NETWORK:
                 case CMD_CLEAR_BLACKLIST:
@@ -2067,7 +2068,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case SUPPLICANT_STATE_CHANGE_EVENT:
                 case NETWORK_CONNECTION_EVENT:
                 case NETWORK_DISCONNECTION_EVENT:
-                case PASSWORD_MAY_BE_INCORRECT_EVENT:
+                case AUTHENTICATION_FAILURE_EVENT:
                 case WPS_OVERLAP_EVENT:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
@@ -2300,8 +2301,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             StateChangeResult stateChangeResult;
             switch(message.what) {
-                case PASSWORD_MAY_BE_INCORRECT_EVENT:
-                    mSupplicantStateTracker.sendMessage(PASSWORD_MAY_BE_INCORRECT_EVENT);
+                case AUTHENTICATION_FAILURE_EVENT:
+                    mSupplicantStateTracker.sendMessage(AUTHENTICATION_FAILURE_EVENT);
                     break;
                 case WPS_OVERLAP_EVENT:
                     /* We just need to broadcast the error */
