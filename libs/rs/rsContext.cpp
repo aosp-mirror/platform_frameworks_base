@@ -253,7 +253,11 @@ void Context::deinitEGL() {
     LOGV("%p, deinitEGL", this);
 
     if (mEGL.mContext != EGL_NO_CONTEXT) {
-        eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mEGL.mContext);
+        eglMakeCurrent(mEGL.mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        eglDestroySurface(mEGL.mDisplay, mEGL.mSurfaceDefault);
+        if (mEGL.mSurface != EGL_NO_SURFACE) {
+            eglDestroySurface(mEGL.mDisplay, mEGL.mSurface);
+        }
         eglDestroyContext(mEGL.mDisplay, mEGL.mContext);
         checkEglError("eglDestroyContext");
     }
