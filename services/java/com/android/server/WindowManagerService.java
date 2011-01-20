@@ -522,9 +522,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 } catch (InterruptedException e) {
                 }
             }
+            return thr.mService;
         }
-
-        return thr.mService;
     }
 
     static class WMThread extends Thread {
