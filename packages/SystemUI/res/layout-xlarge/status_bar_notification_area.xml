@@ -53,7 +53,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
-                android:paddingTop="5dp"
                 android:layout_marginLeft="8dp"
                 />
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
@@ -63,23 +62,25 @@
         android:id="@+id/notificationTrigger"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:gravity="center"
         >
         <com.android.systemui.statusbar.tablet.HoloClock
             android:id="@+id/clock"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
             >
             <TextView android:id="@+id/time_bg"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"
-                android:textSize="72dip"
+                android:textSize="40sp"
                 android:textColor="#1f1f1f" />
             <TextView android:id="@+id/time_fg"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="true"
-                android:textSize="72dip"
+                android:textSize="40sp"
                 android:textColor="#2e2e2e" />
         </com.android.systemui.statusbar.tablet.HoloClock>
 
@@ -101,14 +102,13 @@
             android:id="@+id/signal_battery_cluster"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal"
             android:gravity="center"
             >
             <FrameLayout
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="top"
-                android:layout_marginTop="19dp"
                 android:layout_marginRight="4dp"
                 >
                 <ImageView
@@ -126,10 +126,6 @@
                 android:id="@+id/battery"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_gravity="top"
-                android:layout_marginTop="19dp"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
                 />
         </LinearLayout>
     </LinearLayout>
