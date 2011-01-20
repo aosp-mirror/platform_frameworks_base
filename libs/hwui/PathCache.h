@@ -17,133 +17,60 @@
 #ifndef ANDROID_HWUI_PATH_CACHE_H
 #define ANDROID_HWUI_PATH_CACHE_H
 
-#include <SkBitmap.h>
-#include <SkPaint.h>
-#include <SkPath.h>
-
 #include <utils/Vector.h>
 
 #include "Debug.h"
-#include "Texture.h"
+#include "ShapeCache.h"
+
 #include "utils/Compare.h"
-#include "utils/GenerationCache.h"
 
 namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
-
-// Debug
-#if DEBUG_PATHS
-    #define PATH_LOGD(...) LOGD(__VA_ARGS__)
-#else
-    #define PATH_LOGD(...)
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Describe a path in the path cache.
- */
-struct PathCacheEntry {
-    PathCacheEntry() {
+struct PathCacheEntry: public ShapeCacheEntry {
+    PathCacheEntry(SkPath* path, SkPaint* paint):
+            ShapeCacheEntry(ShapeCacheEntry::kShapePath, paint) {
+        this->path = path;
+    }
+
+    PathCacheEntry(): ShapeCacheEntry() {
         path = NULL;
-        join = SkPaint::kDefault_Join;
-        cap = SkPaint::kDefault_Cap;
-        style = SkPaint::kFill_Style;
-        miter = 4.0f;
-        strokeWidth = 1.0f;
     }
 
     PathCacheEntry(const PathCacheEntry& entry):
-        path(entry.path), join(entry.join), cap(entry.cap),
-        style(entry.style), miter(entry.miter),
-        strokeWidth(entry.strokeWidth) {
+            ShapeCacheEntry(entry) {
+        path = entry.path;
     }
 
-    PathCacheEntry(SkPath* path, SkPaint* paint) {
-        this->path = path;
-        join = paint->getStrokeJoin();
-        cap = paint->getStrokeCap();
-        miter = paint->getStrokeMiter();
-        strokeWidth = paint->getStrokeWidth();
-        style = paint->getStyle();
-    }
-
-    SkPath* path;
-    SkPaint::Join join;
-    SkPaint::Cap cap;
-    SkPaint::Style style;
-    float miter;
-    float strokeWidth;
-
-    bool operator<(const PathCacheEntry& rhs) const {
+    bool lessThan(const ShapeCacheEntry& r) const {
+        const PathCacheEntry& rhs = (const PathCacheEntry&) r;
         LTE_INT(path) {
-            LTE_INT(join) {
-                LTE_INT(cap) {
-                    LTE_INT(style) {
-                        LTE_FLOAT(miter) {
-                            LTE_FLOAT(strokeWidth) return false;
-                        }
-                    }
-                }
-            }
+            return false;
         }
         return false;
     }
-}; // struct PathCacheEntry
 
-/**
- * Alpha texture used to represent a path.
- */
-struct PathTexture: public Texture {
-    PathTexture(): Texture() {
-    }
-
-    /**
-     * Left coordinate of the path bounds.
-     */
-    float left;
-    /**
-     * Top coordinate of the path bounds.
-     */
-    float top;
-    /**
-     * Offset to draw the path at the correct origin.
-     */
-    float offset;
-}; // struct PathTexture
+    SkPath* path;
+}; // PathCacheEntry
 
 /**
  * A simple LRU path cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class PathCache: public OnEntryRemoved<PathCacheEntry, PathTexture*> {
+class PathCache: public ShapeCache<PathCacheEntry> {
 public:
     PathCache();
-    PathCache(uint32_t maxByteSize);
-    ~PathCache();
-
-    /**
-     * Used as a callback when an entry is removed from the cache.
-     * Do not invoke directly.
-     */
-    void operator()(PathCacheEntry& path, PathTexture*& texture);
 
     /**
      * Returns the texture associated with the specified path. If the texture
      * cannot be found in the cache, a new texture is generated.
      */
     PathTexture* get(SkPath* path, SkPaint* paint);
-    /**
-     * Clears the cache. This causes all textures to be deleted.
-     */
-    void clear();
     /**
      * Removes an entry.
      */
@@ -158,39 +85,7 @@ public:
      */
     void clearGarbage();
 
-    /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
-    /**
-     * Returns the maximum size of the cache in bytes.
-     */
-    uint32_t getMaxSize();
-    /**
-     * Returns the current size of the cache in bytes.
-     */
-    uint32_t getSize();
-
 private:
-    /**
-     * Generates the texture from a bitmap into the specified texture structure.
-     */
-    void generateTexture(SkBitmap& bitmap, Texture* texture);
-
-    void removeTexture(PathTexture* texture);
-
-    PathTexture* addTexture(const PathCacheEntry& entry, const SkPath *path, const SkPaint* paint);
-
-    void init();
-
-    GenerationCache<PathCacheEntry, PathTexture*> mCache;
-
-    uint32_t mSize;
-    uint32_t mMaxSize;
-    GLuint mMaxTextureSize;
-
-    bool mDebugEnabled;
-
     Vector<SkPath*> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache

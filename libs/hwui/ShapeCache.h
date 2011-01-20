@@ -19,11 +19,17 @@
 
 #include <GLES2/gl2.h>
 
+#include <SkBitmap.h>
 #include <SkCanvas.h>
+#include <SkPaint.h>
+#include <SkPath.h>
 #include <SkRect.h>
 
-#include "PathCache.h"
+#include "Debug.h"
 #include "Properties.h"
+#include "Texture.h"
+#include "utils/Compare.h"
+#include "utils/GenerationCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -44,6 +50,27 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Alpha texture used to represent a path.
+ */
+struct PathTexture: public Texture {
+    PathTexture(): Texture() {
+    }
+
+    /**
+     * Left coordinate of the path bounds.
+     */
+    float left;
+    /**
+     * Top coordinate of the path bounds.
+     */
+    float top;
+    /**
+     * Offset to draw the path at the correct origin.
+     */
+    float offset;
+}; // struct PathTexture
+
+/**
  * Describe a shape in the shape cache.
  */
 struct ShapeCacheEntry {
@@ -52,7 +79,8 @@ struct ShapeCacheEntry {
         kShapeRoundRect,
         kShapeCircle,
         kShapeOval,
-        kShapeArc
+        kShapeArc,
+        kShapePath
     };
 
     ShapeCacheEntry() {
@@ -196,8 +224,7 @@ private:
 template<typename Entry>
 class ShapeCache: public OnEntryRemoved<Entry, PathTexture*> {
 public:
-    ShapeCache();
-    ShapeCache(uint32_t maxByteSize);
+    ShapeCache(const char* name, const char* propertyName, float defaultSize);
     ~ShapeCache();
 
     /**
@@ -231,22 +258,23 @@ protected:
         return mCache.get(entry);
     }
 
-private:
-    /**
-     * Generates the texture from a bitmap into the specified texture structure.
-     */
-    void generateTexture(SkBitmap& bitmap, Texture* texture);
-
     void removeTexture(PathTexture* texture);
-
-    void init();
 
     GenerationCache<Entry, PathTexture*> mCache;
     uint32_t mSize;
     uint32_t mMaxSize;
     GLuint mMaxTextureSize;
 
+    char* mName;
     bool mDebugEnabled;
+
+private:
+    /**
+     * Generates the texture from a bitmap into the specified texture structure.
+     */
+    void generateTexture(SkBitmap& bitmap, Texture* texture);
+
+    void init();
 }; // class ShapeCache
 
 class RoundRectShapeCache: public ShapeCache<RoundRectShapeCacheEntry> {
@@ -269,29 +297,29 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Entry>
-ShapeCache<Entry>::ShapeCache():
+ShapeCache<Entry>::ShapeCache(const char* name, const char* propertyName, float defaultSize):
         mCache(GenerationCache<ShapeCacheEntry, PathTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_SHAPE_CACHE_SIZE)) {
+        mSize(0), mMaxSize(MB(defaultSize)) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_SHAPE_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting shape cache size to %sMB", property);
+    if (property_get(propertyName, property, NULL) > 0) {
+        LOGD("  Setting %s cache size to %sMB", name, property);
         setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default shape cache size of %.2fMB", DEFAULT_SHAPE_CACHE_SIZE);
+        LOGD("  Using default %s cache size of %.2fMB", name, defaultSize);
     }
-    init();
-}
 
-template<class Entry>
-ShapeCache<Entry>::ShapeCache(uint32_t maxByteSize):
-        mCache(GenerationCache<ShapeCacheEntry, PathTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
+    size_t len = strlen(name);
+    mName = new char[len + 1];
+    strcpy(mName, name);
+    mName[len] = '\0';
+
     init();
 }
 
 template<class Entry>
 ShapeCache<Entry>::~ShapeCache() {
     mCache.clear();
+    delete[] mName;
 }
 
 template<class Entry>
@@ -346,10 +374,10 @@ void ShapeCache<Entry>::removeTexture(PathTexture* texture) {
         const uint32_t size = texture->width * texture->height;
         mSize -= size;
 
-        SHAPE_LOGD("ShapeCache::callback: delete path: name, size, mSize = %d, %d, %d",
-                texture->id, size, mSize);
+        SHAPE_LOGD("ShapeCache::callback: delete %s: name, size, mSize = %d, %d, %d",
+                mName, texture->id, size, mSize);
         if (mDebugEnabled) {
-            LOGD("Path deleted, size = %d", size);
+            LOGD("Shape %s deleted, size = %d", mName, size);
         }
 
         glDeleteTextures(1, &texture->id);
@@ -366,7 +394,7 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     const float pathHeight = fmax(bounds.height(), 1.0f);
 
     if (pathWidth > mMaxTextureSize || pathHeight > mMaxTextureSize) {
-        LOGW("Shape too large to be rendered into a texture");
+        LOGW("Shape %s too large to be rendered into a texture", mName);
         return NULL;
     }
 
@@ -415,10 +443,10 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
 
     if (size < mMaxSize) {
         mSize += size;
-        SHAPE_LOGD("ShapeCache::get: create path: name, size, mSize = %d, %d, %d",
-                texture->id, size, mSize);
+        SHAPE_LOGD("ShapeCache::get: create %s: name, size, mSize = %d, %d, %d",
+                mName, texture->id, size, mSize);
         if (mDebugEnabled) {
-            LOGD("Shape created, size = %d", size);
+            LOGD("Shape %s created, size = %d", mName, size);
         }
         mCache.put(entry, texture);
     } else {
