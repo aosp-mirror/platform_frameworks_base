@@ -73,6 +73,10 @@ void Caches::dumpMemoryUsage() {
     LOGD("  LayerCache           %8d / %8d", layerCache.getSize(), layerCache.getMaxSize());
     LOGD("  GradientCache        %8d / %8d", gradientCache.getSize(), gradientCache.getMaxSize());
     LOGD("  PathCache            %8d / %8d", pathCache.getSize(), pathCache.getMaxSize());
+    LOGD("  CircleShapeCache     %8d / %8d",
+            circleShapeCache.getSize(), circleShapeCache.getMaxSize());
+    LOGD("  RoundRectShapeCache  %8d / %8d",
+            roundRectShapeCache.getSize(), roundRectShapeCache.getMaxSize());
     LOGD("  TextDropShadowCache  %8d / %8d", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {

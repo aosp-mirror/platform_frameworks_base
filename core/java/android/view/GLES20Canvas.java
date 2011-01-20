@@ -635,8 +635,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
-        throw new UnsupportedOperationException();
+        boolean hasModifier = setupModifiers(paint);
+        nDrawCircle(mRenderer, cx, cy, radius, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);        
     }
+
+    private native void nDrawCircle(int renderer, float cx, float cy, float radius, int paint);
 
     @Override
     public void drawColor(int color) {
@@ -773,8 +777,14 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawRoundRect(RectF rect, float rx, float ry, Paint paint) {
-        // TODO: Implement
+        boolean hasModifier = setupModifiers(paint);
+        nDrawRoundRect(mRenderer, rect.left, rect.top, rect.right, rect.bottom,
+                rx, ry, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);        
     }
+
+    private native void nDrawRoundRect(int renderer, float left, float top,
+            float right, float bottom, float rx, float y, int paint);
 
     @Override
     public void drawText(char[] text, int index, int count, float x, float y, Paint paint) {
