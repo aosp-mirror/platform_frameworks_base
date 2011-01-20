@@ -21,7 +21,12 @@
 namespace android {
 namespace uirenderer {
 
-RoundRectShapeCache::RoundRectShapeCache(): ShapeCache<RoundRectShapeCacheEntry>() {
+///////////////////////////////////////////////////////////////////////////////
+// Rounded rects
+///////////////////////////////////////////////////////////////////////////////
+
+RoundRectShapeCache::RoundRectShapeCache(): ShapeCache<RoundRectShapeCacheEntry>(
+        "round rect", PROPERTY_SHAPE_CACHE_SIZE, DEFAULT_SHAPE_CACHE_SIZE) {
 }
 
 PathTexture* RoundRectShapeCache::getRoundRect(float width, float height,
@@ -41,7 +46,12 @@ PathTexture* RoundRectShapeCache::getRoundRect(float width, float height,
     return texture;
 }
 
-CircleShapeCache::CircleShapeCache(): ShapeCache<CircleShapeCacheEntry>() {
+///////////////////////////////////////////////////////////////////////////////
+// Circles
+///////////////////////////////////////////////////////////////////////////////
+
+CircleShapeCache::CircleShapeCache(): ShapeCache<CircleShapeCacheEntry>(
+        "circle", PROPERTY_SHAPE_CACHE_SIZE, DEFAULT_SHAPE_CACHE_SIZE) {
 }
 
 PathTexture* CircleShapeCache::getCircle(float radius, SkPaint* paint) {
