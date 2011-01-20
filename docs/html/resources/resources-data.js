@@ -343,7 +343,27 @@ var ANDROID_RESOURCES = [
 ///////////////////
 /// SAMPLE CODE ///
 ///////////////////
-
+ 
+  {
+    tags: ['sample'],
+    path: 'samples/AccelerometerPlay/index.html',
+    title: {
+      en: 'Accelerometer Play'
+    },
+    description: {
+      en: ''
+    }
+  },
+  {
+    tags: ['sample'],
+    path: 'samples/AccessibilityService/index.html',
+    title: {
+      en: 'Accessibility Service'
+    },
+    description: {
+      en: 'Illustrates an accessibility service that provides custom feedback for the Clock application which comes by default with Android devices'
+    }
+  },
   {
     tags: ['sample', 'layout', 'ui'],
     path: 'samples/ApiDemos/index.html',
@@ -355,7 +375,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'data', 'newfeature', 'accountsync', 'new'],
+    tags: ['sample', 'data', 'newfeature', 'accountsync'],
     path: 'samples/BackupRestore/index.html',
     title: {
       en: 'Backup and Restore'
@@ -395,6 +415,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'ui'],
+    path: 'samples/CubeLiveWallpaper/index.html',
+    title: {
+      en: 'Cube Live Wallpaper'
+    },
+    description: {
+      en: 'An application that demonstrates how to create a live wallpaper and  bundle it in an application that users can install on their devices.'
+    }
+  },
+  {
     tags: ['sample'],
     path: 'samples/Home/index.html',
     title: {
@@ -425,16 +455,6 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'ui', 'newfeature'],
-    path: 'samples/CubeLiveWallpaper/index.html',
-    title: {
-      en: 'Live Wallpaper'
-    },
-    description: {
-      en: 'An application that demonstrates how to create a live wallpaper and  bundle it in an application that users can install on their devices.'
-    }
-  },
-  {
     tags: ['sample', 'gamedev', 'media'],
     path: 'samples/LunarLander/index.html',
     title: {
@@ -452,6 +472,16 @@ var ANDROID_RESOURCES = [
     },
     description: {
       en: 'A sample application that shows how to use resource directory qualifiers to provide different resources for different screen configurations.'
+    }
+  },
+  {
+    tags: ['sample', 'data'],
+    path: 'samples/NFCDemo/index.html',
+    title: {
+      en: 'NFC Demo'
+    },
+    description: {
+      en: 'An application for reading NFC Forum Type 2 Tags using the NFC APIs'
     }
   },
   {
@@ -485,6 +515,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample'],
+    path: 'samples/SipDemo/index.html',
+    title: {
+      en: 'SIP Demo'
+    },
+    description: {
+      en: 'A demo application highlighting how to make internet-based calls with the SIP API.'
+    }
+  },
+  {
     tags: ['sample', 'layout', 'ui'],
     path: 'samples/Snake/index.html',
     title: {
@@ -492,6 +532,16 @@ var ANDROID_RESOURCES = [
     },
     description: {
       en: 'An implementation of the classic game "Snake."'
+    }
+  },
+  {
+    tags: ['sample', 'input'],
+    path: 'samples/SoftKeyboard/index.html',
+    title: {
+      en: 'Soft Keyboard'
+    },
+    description: {
+      en: 'An example of writing an input method for a software keyboard.'
     }
   },
   {
@@ -535,16 +585,6 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'input'],
-    path: 'samples/SoftKeyboard/index.html',
-    title: {
-      en: 'Soft Keyboard'
-    },
-    description: {
-      en: 'An example of writing an input method for a software keyboard.'
-    }
-  },
-  {
     tags: ['sample', 'ui'],
     path: 'samples/Wiktionary/index.html',
     title: {
@@ -565,7 +605,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'layout', 'new'],
+    tags: ['sample', 'layout'],
     path: 'samples/XmlAdapters/index.html',
     title: {
       en: 'XML Adapters'
