@@ -44,7 +44,9 @@ import android.net.NetworkInfo;
 import android.net.DhcpInfo;
 import android.net.NetworkUtils;
 import android.net.ConnectivityManager;
+import android.net.InterfaceConfiguration;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkUtils;
 import android.net.LinkProperties;
 import android.net.wifi.NetworkUpdateResult;
 import android.net.wifi.WpsResult.Status;
@@ -2459,14 +2461,24 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 mDhcpThread.start();
             } else {
                 DhcpInfo dhcpInfo = WifiConfigStore.getIpConfiguration(mLastNetworkId);
-                if (NetworkUtils.configureInterface(mInterfaceName, dhcpInfo)) {
+                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+                INetworkManagementService netd = INetworkManagementService.Stub.asInterface(b);
+                InterfaceConfiguration ifcg = new InterfaceConfiguration();
+                ifcg.interfaceFlags = "[up]";
+                ifcg.addr = NetworkUtils.intToInetAddress(dhcpInfo.ipAddress);
+                ifcg.mask = NetworkUtils.intToInetAddress(dhcpInfo.netmask);
+                try {
+                    netd.setInterfaceConfig(mInterfaceName, ifcg);
                     Log.v(TAG, "Static IP configuration succeeded");
                     synchronized (mDhcpInfo) {
                         mDhcpInfo = dhcpInfo;
                     }
                     sendMessage(CMD_IP_CONFIG_SUCCESS);
-                } else {
-                    Log.v(TAG, "Static IP configuration failed");
+                } catch (RemoteException re) {
+                    Log.v(TAG, "Static IP configuration failed: " + re);
+                    sendMessage(CMD_IP_CONFIG_FAILURE);
+                } catch (IllegalStateException e) {
+                    Log.v(TAG, "Static IP configuration failed: " + e);
                     sendMessage(CMD_IP_CONFIG_FAILURE);
                 }
             }
