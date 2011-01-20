@@ -384,10 +384,10 @@ web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/AccessibilityService \
 		            resources/samples/AccessibilityService "Accessibility Service" \
-		-samplecode $(sample_dir)/ApiDemos \
-		            resources/samples/ApiDemos "API Demos" \
 		-samplecode $(sample_dir)/AccelerometerPlay \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
+	  -samplecode $(sample_dir)/ApiDemos \
+		            resources/samples/ApiDemos "API Demos" \
 		-samplecode $(sample_dir)/BackupRestore \
 		            resources/samples/BackupRestore "Backup and Restore" \
 		-samplecode $(sample_dir)/BluetoothChat \
@@ -396,8 +396,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/BusinessCard "Business Card" \
 		-samplecode $(sample_dir)/ContactManager \
 		            resources/samples/ContactManager "Contact Manager" \
-                -samplecode $(sample_dir)/CubeLiveWallpaper \
-                            resources/samples/CubeLiveWallpaper "Live Wallpaper" \
+    -samplecode $(sample_dir)/CubeLiveWallpaper \
+                resources/samples/CubeLiveWallpaper "Cube Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
                 -samplecode $(sample_dir)/Honeycomb-Gallery \
@@ -408,6 +408,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/LunarLander "Lunar Lander" \
 		-samplecode $(sample_dir)/MultiResolution \
 		            resources/samples/MultiResolution "Multiple Resolutions" \
+		-samplecode $(sample_dir)/NFCDemo \
+		            resources/samples/NFCDemo "NFC Demo" \
 		-samplecode $(sample_dir)/NotePad \
 		            resources/samples/NotePad "Note Pad" \
 		-samplecode $(sample_dir)/SampleSyncAdapter \
