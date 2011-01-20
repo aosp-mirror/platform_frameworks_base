@@ -342,9 +342,9 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
             if (subtype != null) {
                 return mPackageManager.getDrawable(imi.getPackageName(), subtype.getIconResId(),
                         imi.getServiceInfo().applicationInfo);
-            } else if (imi.getSubtypes().size() > 0) {
+            } else if (imi.getSubtypeCount() > 0) {
                 return mPackageManager.getDrawable(imi.getPackageName(),
-                        imi.getSubtypes().get(0).getIconResId(),
+                        imi.getSubtypeAt(0).getIconResId(),
                         imi.getServiceInfo().applicationInfo);
             } else {
                 try {
