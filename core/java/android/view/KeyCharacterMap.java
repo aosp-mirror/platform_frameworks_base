@@ -170,7 +170,7 @@ public class KeyCharacterMap {
      *
      * @param deviceId The device id of the keyboard.
      * @return The associated key character map.
-     * @throws {@link KeyCharacterMapUnavailableException} if the key character map
+     * @throws {@link UnavailableException} if the key character map
      * could not be loaded because it was malformed or the default key character map
      * is missing from the system.
      */
@@ -692,8 +692,8 @@ public class KeyCharacterMap {
     /**
      * Thrown by {@link KeyCharacterMap#load} when a key character map could not be loaded.
      */
-    public static class KeyCharacterMapUnavailableException extends AndroidRuntimeException {
-        public KeyCharacterMapUnavailableException(String msg) {
+    public static class UnavailableException extends AndroidRuntimeException {
+        public UnavailableException(String msg) {
             super(msg);
         }
     }
