@@ -1,0 +1,153 @@
+<!--
+  Copyright (C) 2006 The Android Open Source Project
+ 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+ 
+       http://www.apache.org/licenses/LICENSE-2.0
+ 
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    android:id="@+id/title_area"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:orientation="vertical"
+    android:background="@drawable/notify_panel_clock_bg"
+    >
+
+    <ImageView
+        android:id="@+id/network_signal"
+        android:layout_height="32dp"
+        android:layout_width="32dp"
+        android:scaleType="centerInside"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:baseline="22dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        />
+
+    <ImageView
+        android:id="@+id/network_type"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_alignLeft="@id/network_signal"
+        android:layout_alignBottom="@id/network_signal"
+        android:layout_marginRight="8dp"
+        />
+
+    <TextView
+        android:id="@+id/network_text"
+        style="@style/StatusBarNotificationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/network_signal"
+        android:layout_marginRight="8dp"
+        android:layout_alignBaseline="@id/network_signal"
+        android:singleLine="true"
+        android:text="@string/status_bar_settings_settings_button"
+        />
+
+    <ImageView
+        android:id="@+id/battery"
+        android:layout_height="32dp"
+        android:layout_width="32dp"
+        android:scaleType="centerInside"
+        android:layout_toRightOf="@id/network_text"
+        android:layout_alignBaseline="@id/network_signal"
+        android:baseline="22dp"
+        />
+
+    <TextView
+        android:id="@+id/battery_text"
+        style="@style/StatusBarNotificationText"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/battery"
+        android:layout_alignBaseline="@id/battery"
+        android:layout_marginRight="8dp"
+        android:singleLine="true"
+        android:text="@string/status_bar_settings_settings_button"
+        />
+
+    <ImageView
+        android:id="@+id/settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/battery"
+        android:layout_alignParentRight="true"
+        android:paddingRight="16dp"
+        android:src="@drawable/ic_notification_open"
+        android:baseline="21dp"
+        />
+
+    <ImageView
+        android:id="@+id/notification_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignBaseline="@id/battery"
+        android:paddingRight="16dp"
+        android:visibility="invisible"
+        android:src="@drawable/status_bar_veto"
+        android:baseline="21dp"
+        />
+
+    <View
+        android:id="@+id/title_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="32dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="64dip"
+        android:background="@android:drawable/divider_horizontal_dark"
+        />
+
+    <com.android.systemui.statusbar.tablet.HoloClock
+        android:id="@+id/clock"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_above="@id/title_divider"
+        android:layout_marginRight="32dip"
+        android:layout_marginBottom="8dip"
+        >
+        <TextView android:id="@+id/time_bg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:singleLine="true"
+            android:textSize="80sp"
+            android:textColor="#999999" />
+        <TextView android:id="@+id/time_fg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:singleLine="true"
+            android:textSize="80sp"
+            android:textColor="#666666" />
+    </com.android.systemui.statusbar.tablet.HoloClock>
+
+    <com.android.systemui.statusbar.policy.DateView
+        android:id="@+id/date"
+        style="@style/StatusBarNotificationText"
+        android:layout_height="wrap_content"
+        android:layout_width="142dp"
+        android:layout_alignBottom="@id/clock"
+        android:layout_alignParentLeft="true"
+        android:gravity="left"
+        android:layout_marginLeft="32dp"
+        />
+
+</RelativeLayout>
