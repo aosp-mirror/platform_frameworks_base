@@ -499,6 +499,15 @@ public class WebView extends AbsoluteLayout
     // if true, multi-touch events will be passed to webkit directly before UI
     private boolean mDeferMultitouch = false;
 
+    // Currently, multi-touch events are sent to WebKit first then back to
+    // WebView while single-touch events are handled in WebView first.
+    // So there is a chance that a single-touch move event is handled in WebView
+    // before multi-touch events are finished.
+    // if mIsHandlingMultiTouch is true, which means multi-touch event handling
+    // is not finished, then any single-touch move event will be skipped.
+    // FIXME: send single-touch events to WebKit first then back to WebView.
+    private boolean mIsHandlingMultiTouch = false;
+
     // to avoid interfering with the current touch events, track them
     // separately. Currently no snapping or fling in the deferred process mode
     private int mDeferTouchMode = TOUCH_DONE_MODE;
@@ -5356,11 +5365,19 @@ public class WebView extends AbsoluteLayout
             if (DebugFlags.WEB_VIEW) {
                 Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
             }
+            if (!mIsHandlingMultiTouch) {
+                mIsHandlingMultiTouch = true;
+            }
             passMultiTouchToWebKit(ev);
             return true;
+        } else {
+            // Skip ACTION_MOVE for single touch if it's still handling multi-touch.
+            if (mIsHandlingMultiTouch && ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
+                return false;
+            }
         }
 
-        return handleTouchEventCommon(ev, Math.round(ev.getX()), Math.round(ev.getY()));
+        return handleTouchEventCommon(ev, ev.getActionMasked(), Math.round(ev.getX()), Math.round(ev.getY()));
     }
 
     /*
@@ -5368,8 +5385,7 @@ public class WebView extends AbsoluteLayout
      * (x, y) denotes current focus point, which is the touch point for single touch
      * and the middle point for multi-touch.
      */
-    private boolean handleTouchEventCommon(MotionEvent ev, int x, int y) {
-        int action = ev.getAction();
+    private boolean handleTouchEventCommon(MotionEvent ev, int action, int x, int y) {
         long eventTime = ev.getEventTime();
 
 
@@ -5847,7 +5863,7 @@ public class WebView extends AbsoluteLayout
 
     private void passMultiTouchToWebKit(MotionEvent ev) {
         TouchEventData ted = new TouchEventData();
-        ted.mAction = ev.getAction() & MotionEvent.ACTION_MASK;
+        ted.mAction = ev.getActionMasked();
         final int count = ev.getPointerCount();
         ted.mIds = new int[count];
         ted.mPoints = new Point[count];
@@ -5866,7 +5882,7 @@ public class WebView extends AbsoluteLayout
         mPreventDefault = PREVENT_DEFAULT_IGNORE;
     }
 
-    private boolean handleMultiTouchInWebView(MotionEvent ev) {
+    private void handleMultiTouchInWebView(MotionEvent ev) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "multi-touch: " + ev + " at " + ev.getEventTime()
                 + " mTouchMode=" + mTouchMode
@@ -5879,7 +5895,7 @@ public class WebView extends AbsoluteLayout
 
         // A few apps use WebView but don't instantiate gesture detector.
         // We don't need to support multi touch for them.
-        if (detector == null) return false;
+        if (detector == null) return;
 
         float x = ev.getX();
         float y = ev.getY();
@@ -5914,7 +5930,7 @@ public class WebView extends AbsoluteLayout
             cancelLongPress();
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
             if (!mZoomManager.supportsPanDuringZoom()) {
-                return false;
+                return;
             }
             mTouchMode = TOUCH_DRAG_MODE;
             if (mVelocityTracker == null) {
@@ -5930,14 +5946,15 @@ public class WebView extends AbsoluteLayout
             // set mLastTouchX/Y to the remaining point
             mLastTouchX = Math.round(x);
             mLastTouchY = Math.round(y);
+            mIsHandlingMultiTouch = false;
         } else if (action == MotionEvent.ACTION_MOVE) {
             // negative x or y indicate it is on the edge, skip it.
             if (x < 0 || y < 0) {
-                return false;
+                return;
             }
         }
 
-        return handleTouchEventCommon(ev, Math.round(x), Math.round(y));
+        handleTouchEventCommon(ev, action, Math.round(x), Math.round(y));
     }
 
     private void cancelWebCoreTouchEvent(int x, int y, boolean removeEvents) {
