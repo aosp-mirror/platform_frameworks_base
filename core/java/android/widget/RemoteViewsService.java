@@ -42,7 +42,7 @@ public abstract class RemoteViewsService extends Service {
     /**
      * An interface for an adapter between a remote collection view (ListView, GridView, etc) and
      * the underlying data for that view.  The implementor is responsible for making a RemoteView
-     * for each item in the data set.
+     * for each item in the data set. This interface is a thin wrapper around {@link Adapter}.
      * 
      * @see android.widget.Adapter
      * @see android.appwidget.AppWidgetManager
@@ -53,24 +53,72 @@ public abstract class RemoteViewsService extends Service {
          * multiple RemoteViewAdapters depending on the intent passed.
          */
         public void onCreate();
+
         /**
          * Called when notifyDataSetChanged() is triggered on the remote adapter. This allows a
          * RemoteViewsFactory to respond to data changes by updating any internal references.
          *
+         * Note: expensive tasks can be safely performed synchronously within this method. In the
+         * interim, the old data will be displayed within the widget.
+         *
          * @see android.appwidget.AppWidgetManager#notifyAppWidgetViewDataChanged(int[], int)
          */
         public void onDataSetChanged();
+
         /**
          * Called when the last RemoteViewsAdapter that is associated with this factory is
          * unbound.
          */
         public void onDestroy();
 
+        /**
+         * See {@link Adapter#getCount()}
+         *
+         * @return Count of items.
+         */
         public int getCount();
+
+        /**
+         * See {@link Adapter#getView(int, android.view.View, android.view.ViewGroup)}.
+         *
+         * Note: expensive tasks can be safely performed synchronously within this method, and a
+         * loading view will be displayed in the interim. See {@link #getLoadingView()}.
+         *
+         * @param position The position of the item within the Factory's data set of the item whose
+         *        view we want.
+         * @return A RemoteViews object corresponding to the data at the specified position.
+         */
         public RemoteViews getViewAt(int position);
+
+        /**
+         * This allows for the use of a custom loading view which appears between the time that
+         * {@link #getViewAt(int)} is called and returns. If null is returned, a default loading
+         * view will be used.
+         *
+         * @return The RemoteViews representing the desired loading view.
+         */
         public RemoteViews getLoadingView();
+
+        /**
+         * See {@link Adapter#getViewTypeCount()}.
+         *
+         * @return The number of types of Views that will be returned by this factory.
+         */
         public int getViewTypeCount();
+
+        /**
+         * See {@link Adapter#getItemId(int)}.
+         *
+         * @param position The position of the item within the data set whose row id we want.
+         * @return The id of the item at the specified position.
+         */
         public long getItemId(int position);
+
+        /**
+         * See {@link Adapter#hasStableIds()}.
+         *
+         * @return True if the same id always refers to the same object.
+         */
         public boolean hasStableIds();
     }
 
