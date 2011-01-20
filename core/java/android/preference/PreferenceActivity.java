@@ -998,7 +998,9 @@ public abstract class PreferenceActivity extends ListActivity implements
                 mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
                 ActionBar actionBar = getActionBar();
                 if (actionBar != null) {
-                    actionBar.setCustomNavigationMode(mFragmentBreadCrumbs);
+                    actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
+                            ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
+                    actionBar.setCustomView(mFragmentBreadCrumbs);
                 }
             }
             mFragmentBreadCrumbs.setMaxVisible(2);

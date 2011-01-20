@@ -1468,7 +1468,6 @@
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
   <public type="id" name="selectTextMode" />
-  <public type="id" name="up" />
 
   <public type="dimen" name="dialog_min_width_major" />
   <public type="dimen" name="dialog_min_width_minor" />
