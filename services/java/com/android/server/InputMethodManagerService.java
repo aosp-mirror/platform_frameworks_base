@@ -1150,9 +1150,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
                             if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
                                     + uid + ": " + client);
+                            mStatusBar.setIMEButtonVisible(mCurToken, false);
                             return false;
                         }
                     } catch (RemoteException e) {
+                        mStatusBar.setIMEButtonVisible(mCurToken, false);
                         return false;
                     }
                 }
