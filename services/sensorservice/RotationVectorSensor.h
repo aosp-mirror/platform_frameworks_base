@@ -38,9 +38,9 @@ class RotationVectorSensor : public SensorInterface {
     double mAccTime;
     double mMagTime;
     SecondOrderLowPassFilter mALowPass;
-    BiquadFilter mAX, mAY, mAZ;
+    CascadedBiquadFilter mAX, mAY, mAZ;
     SecondOrderLowPassFilter mMLowPass;
-    BiquadFilter mMX, mMY, mMZ;
+    CascadedBiquadFilter mMX, mMY, mMZ;
 
 public:
     RotationVectorSensor(sensor_t const* list, size_t count);
