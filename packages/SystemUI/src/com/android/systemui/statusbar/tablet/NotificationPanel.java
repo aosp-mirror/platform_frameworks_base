@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -32,10 +33,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -100,7 +101,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         } else {
             mShowing = show;
             setVisibility(show ? View.VISIBLE : View.GONE);
-            mChoreo.jumpTo(show);
         }
     }
 
@@ -117,50 +117,74 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         super.onVisibilityChanged(v, vis);
         // when we hide, put back the notifications
         if (!isShown()) {
-            switchToNotificationMode();
+            if (mSettingsView != null) removeSettingsView();
+            mNotificationScroller.setVisibility(View.VISIBLE);
+            mNotificationScroller.setAlpha(1f);
             mNotificationScroller.scrollTo(0, 0);
+            updatePanelModeButtons();
         }
     }
 
-    /**
-     * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
-     * let LinearLayout do all the hard work, and then shift everything down to the bottom.
-     */
+    /*
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
 
-        mChoreo.setPanelHeight(mContentParent.getHeight());
+        if (DEBUG) Slog.d(TAG, String.format("PANEL: onLayout: (%d, %d, %d, %d)", l, t, r, b));
     }
 
     @Override
     public void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        
+        if (DEBUG) {
+            Slog.d(TAG, String.format("PANEL: onSizeChanged: (%d -> %d, %d -> %d)",
+                        oldw, w, oldh, h));
+        }
     }
+    */
 
     public void onClick(View v) {
         if (v == mModeToggle) {
-            if (mSettingsView == null) {
-                switchToSettingsMode();
-            } else {
-                switchToNotificationMode();
-            }
+            swapPanels();
         }
     }
 
-    public void switchToSettingsMode() {
-        removeSettingsView();
-        addSettingsView();
-        mSettingsButton.setVisibility(View.INVISIBLE);
-        mNotificationScroller.setVisibility(View.GONE);
-        mNotificationButton.setVisibility(View.VISIBLE);
-    }
+    final static int PANEL_FADE_DURATION = 150;
 
-    public void switchToNotificationMode() {
-        removeSettingsView();
-        mSettingsButton.setVisibility(View.VISIBLE);
-        mNotificationScroller.setVisibility(View.VISIBLE);
-        mNotificationButton.setVisibility(View.INVISIBLE);
+    public void swapPanels() {
+        final View toShow, toHide;
+        if (mSettingsView == null) {
+            addSettingsView();
+            toShow = mSettingsView;
+            toHide = mNotificationScroller;
+        } else {
+            toShow = mNotificationScroller;
+            toHide = mSettingsView;
+        }
+        Animator a = ObjectAnimator.ofFloat(toHide, "alpha", 1f, 0f)
+                .setDuration(PANEL_FADE_DURATION);
+        a.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator _a) {
+                toHide.setVisibility(View.GONE);
+                toShow.setVisibility(View.VISIBLE);
+                ObjectAnimator.ofFloat(toShow, "alpha", 0f, 1f)
+                        .setDuration(PANEL_FADE_DURATION)
+                        .start();
+                if (toHide == mSettingsView) {
+                    removeSettingsView();
+                }
+                updatePanelModeButtons();
+            }
+        });
+        a.start();
+    }
+ 
+    public void updatePanelModeButtons() {
+        final boolean settingsVisible = (mSettingsView != null);
+        mSettingsButton.setVisibility(!settingsVisible ? View.VISIBLE : View.INVISIBLE);
+        mNotificationButton.setVisibility(settingsVisible ? View.VISIBLE : View.INVISIBLE);
     }
 
     public boolean isInContentArea(int x, int y) {
@@ -179,9 +203,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         }
     }
 
+    // NB: it will be invisible until you show it
     void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
         mSettingsView = infl.inflate(R.layout.status_bar_settings_view, mContentFrame, false);
+        mSettingsView.setVisibility(View.GONE);
         mContentFrame.addView(mSettingsView);
     }
 
@@ -191,8 +217,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         AnimatorSet mContentAnim;
 
         // should group this into a multi-property animation
-        final int OPEN_DURATION = 250;
-        final int CLOSE_DURATION = 250;
+        final static int OPEN_DURATION = 136;
+        final static int CLOSE_DURATION = 250;
 
         // the panel will start to appear this many px from the end
         final int HYPERSPACE_OFFRAMP = 100;
@@ -255,24 +281,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             mContentAnim.start();
 
             mVisible = appearing;
-        }
-
-        void jumpTo(boolean appearing) {
-            mContentParent.setTranslationY(appearing ? 0 : mPanelHeight);
-        }
-
-        public void setPanelHeight(int h) {
-            if (DEBUG) Slog.d(TAG, "panelHeight=" + h);
-            mPanelHeight = h;
-            if (mPanelHeight == 0) {
-                // fully closed, no animation necessary
-            } else if (mVisible) {
-                if (DEBUG) {
-                    Slog.d(TAG, "panelHeight not zero but trying to open; scheduling an anim"
-                            + " to open fully");
-                }
-                startAnimation(true);
-            }
         }
 
         public void onAnimationCancel(Animator animation) {
