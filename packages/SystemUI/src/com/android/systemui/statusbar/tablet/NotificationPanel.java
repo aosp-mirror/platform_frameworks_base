@@ -54,7 +54,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     ViewGroup mContentFrame;
     Rect mContentArea = new Rect();
     View mSettingsView;
-    View mScrim, mGlow;
+    View mGlow;
     ViewGroup mContentParent;
 
     Choreographer mChoreo = new Choreographer();
@@ -79,7 +79,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mModeToggle = findViewById(R.id.mode_toggle);
         mModeToggle.setOnClickListener(this);
 
-        mScrim = findViewById(R.id.scrim);
         mGlow = findViewById(R.id.glow);
 
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
@@ -192,18 +191,21 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         AnimatorSet mContentAnim;
 
         // should group this into a multi-property animation
-        final int OPEN_DURATION = 136;
+        final int OPEN_DURATION = 250;
         final int CLOSE_DURATION = 250;
 
         // the panel will start to appear this many px from the end
-        final int HYPERSPACE_OFFRAMP = 30;
+        final int HYPERSPACE_OFFRAMP = 100;
 
         Choreographer() {
         }
 
         void createAnimation(boolean appearing) {
-            Animator bgAnim = ObjectAnimator.ofFloat(mScrim,
-                    "alpha", mScrim.getAlpha(), appearing ? 1 : 0);
+            // mVisible: previous state; appearing: new state
+            
+            View root = findViewById(R.id.panel_root);
+            Animator bgAnim = ObjectAnimator.ofInt(root.getBackground(), "alpha",
+                    mVisible ? 255 : 0, appearing ? 255 : 0);
 
             float start, end;
 
@@ -213,34 +215,33 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             if (appearing) {
                 // we want to go from near-the-top to the top, unless we're half-open in the right
                 // general vicinity
-                start = (y < HYPERSPACE_OFFRAMP)
-                    ? y
-                    : HYPERSPACE_OFFRAMP;
+                start = (y < HYPERSPACE_OFFRAMP) ? y : HYPERSPACE_OFFRAMP;
                 end = 0;
             } else {
                 start = y;
                 end = y + HYPERSPACE_OFFRAMP;
             }
-            Animator posAnim = ObjectAnimator.ofFloat(mContentParent, "translationY", start, end);
+            Animator posAnim = ObjectAnimator.ofFloat(mContentParent, "translationY",
+                    start, end);
             posAnim.setInterpolator(appearing
-                    ? new android.view.animation.DecelerateInterpolator(2.0f)
-                    : new android.view.animation.AccelerateInterpolator(2.0f));
+                    ? new android.view.animation.DecelerateInterpolator(1.0f)
+                    : new android.view.animation.AccelerateInterpolator(1.0f));
 
-            Animator glowAnim = ObjectAnimator.ofFloat(mGlow, "alpha",
-                    mGlow.getAlpha(), appearing ? 1.0f : 0.0f);
+            Animator glowAnim = ObjectAnimator.ofInt(mGlow.getBackground(), "alpha",
+                    mVisible ? 255 : 0, appearing ? 255 : 0);
             glowAnim.setInterpolator(appearing
                     ? new android.view.animation.AccelerateInterpolator(1.0f)
                     : new android.view.animation.DecelerateInterpolator(1.0f));
 
             mContentAnim = new AnimatorSet();
             mContentAnim
-                .play(ObjectAnimator.ofFloat(mContentParent, "alpha", mContentParent.getAlpha(),
-                                                                      appearing ? 1.0f : 0.0f))
-                .with(glowAnim)
+                .play(ObjectAnimator.ofFloat(mContentParent, "alpha",
+                    mContentParent.getAlpha(), appearing ? 1.0f : 0.0f))
                 .with(bgAnim)
+                .with(glowAnim)
                 .with(posAnim)
                 ;
-            mContentAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
+            mContentAnim.setDuration((DEBUG?10:1)*(appearing ? OPEN_DURATION : CLOSE_DURATION));
             mContentAnim.addListener(this);
         }
 
@@ -250,13 +251,13 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             createAnimation(appearing);
 
             mContentParent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mGlow.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             mContentAnim.start();
 
             mVisible = appearing;
         }
 
         void jumpTo(boolean appearing) {
-//            setBgAlpha(appearing ? 255 : 0);
             mContentParent.setTranslationY(appearing ? 0 : mPanelHeight);
         }
 
@@ -286,6 +287,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 setVisibility(View.GONE);
             }
             mContentParent.setLayerType(View.LAYER_TYPE_NONE, null);
+            mGlow.setLayerType(View.LAYER_TYPE_NONE, null);
             mContentAnim = null;
         }
 
