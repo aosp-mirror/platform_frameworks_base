@@ -268,22 +268,105 @@ public class Allocation extends BaseObj {
         }
     }
 
+    /**
+     * Copy an allocation from an array.  This variant is not type
+     * checked which allows an application to fill in structured
+     * data from an array.
+     *
+     * @param d the source data array
+     */
+    public void copyFromUnchecked(int[] d) {
+        mRS.validate();
+        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+    }
+    /**
+     * Copy an allocation from an array.  This variant is not type
+     * checked which allows an application to fill in structured
+     * data from an array.
+     *
+     * @param d the source data array
+     */
+    public void copyFromUnchecked(short[] d) {
+        mRS.validate();
+        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+    }
+    /**
+     * Copy an allocation from an array.  This variant is not type
+     * checked which allows an application to fill in structured
+     * data from an array.
+     *
+     * @param d the source data array
+     */
+    public void copyFromUnchecked(byte[] d) {
+        mRS.validate();
+        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+    }
+    /**
+     * Copy an allocation from an array.  This variant is not type
+     * checked which allows an application to fill in structured
+     * data from an array.
+     *
+     * @param d the source data array
+     */
+    public void copyFromUnchecked(float[] d) {
+        mRS.validate();
+        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+    }
+
+    /**
+     * Copy an allocation from an array.  This variant is type
+     * checked and will generate exceptions if the Allocation type
+     * is not a 32 bit integer type.
+     *
+     * @param d the source data array
+     */
     public void copyFrom(int[] d) {
         mRS.validate();
         copy1DRangeFrom(0, mType.getCount(), d);
     }
+
+    /**
+     * Copy an allocation from an array.  This variant is type
+     * checked and will generate exceptions if the Allocation type
+     * is not a 16 bit integer type.
+     *
+     * @param d the source data array
+     */
     public void copyFrom(short[] d) {
         mRS.validate();
         copy1DRangeFrom(0, mType.getCount(), d);
     }
+
+    /**
+     * Copy an allocation from an array.  This variant is type
+     * checked and will generate exceptions if the Allocation type
+     * is not a 8 bit integer type.
+     *
+     * @param d the source data array
+     */
     public void copyFrom(byte[] d) {
         mRS.validate();
         copy1DRangeFrom(0, mType.getCount(), d);
     }
+
+    /**
+     * Copy an allocation from an array.  This variant is type
+     * checked and will generate exceptions if the Allocation type
+     * is not a 32 bit float type.
+     *
+     * @param d the source data array
+     */
     public void copyFrom(float[] d) {
         mRS.validate();
         copy1DRangeFrom(0, mType.getCount(), d);
     }
+
+    /**
+     * Copy an allocation from a bitmap.  The height, width, and
+     * format of the bitmap must match the existing allocation.
+     *
+     * @param b the source bitmap
+     */
     public void copyFrom(Bitmap b) {
         mRS.validate();
         validateBitmapSize(b);
@@ -369,39 +452,114 @@ public class Allocation extends BaseObj {
         mRS.nAllocationGenerateMipmaps(getID());
     }
 
-    void copy1DRangeFromUnchecked(int off, int count, int[] d) {
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * not type checked which allows an application to fill in
+     * structured data from an array.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
+    public void copy1DRangeFromUnchecked(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    void copy1DRangeFromUnchecked(int off, int count, short[] d) {
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * not type checked which allows an application to fill in
+     * structured data from an array.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
+    public void copy1DRangeFromUnchecked(int off, int count, short[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    void copy1DRangeFromUnchecked(int off, int count, byte[] d) {
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * not type checked which allows an application to fill in
+     * structured data from an array.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
+    public void copy1DRangeFromUnchecked(int off, int count, byte[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
-    void copy1DRangeFromUnchecked(int off, int count, float[] d) {
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * not type checked which allows an application to fill in
+     * structured data from an array.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
+    public void copy1DRangeFromUnchecked(int off, int count, float[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
         mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
     }
 
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * type checked and will generate exceptions if the Allocation
+     * type is not a 32 bit integer type.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
     public void copy1DRangeFrom(int off, int count, int[] d) {
         validateIsInt32();
         copy1DRangeFromUnchecked(off, count, d);
     }
+
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * type checked and will generate exceptions if the Allocation
+     * type is not a 16 bit integer type.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
     public void copy1DRangeFrom(int off, int count, short[] d) {
         validateIsInt16();
         copy1DRangeFromUnchecked(off, count, d);
     }
+
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * type checked and will generate exceptions if the Allocation
+     * type is not a 8 bit integer type.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
     public void copy1DRangeFrom(int off, int count, byte[] d) {
         validateIsInt8();
         copy1DRangeFromUnchecked(off, count, d);
     }
+
+    /**
+     * Copy part of an allocation from an array.  This variant is
+     * type checked and will generate exceptions if the Allocation
+     * type is not a 32 bit float type.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param d the source data array
+     */
     public void copy1DRangeFrom(int off, int count, float[] d) {
         validateIsFloat32();
         copy1DRangeFromUnchecked(off, count, d);
