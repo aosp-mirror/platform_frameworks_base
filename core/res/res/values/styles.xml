@@ -1514,6 +1514,8 @@
     <style name="Widget.Holo.NumberPicker" parent="Widget.NumberPicker">
         <item name="android:solidColor">@android:color/transparent</item>
         <item name="android:flingable">true</item>
+        <item name="android:selectionDivider">@android:drawable/numberpicker_selection_divider</item>
+        <item name="android:selectionDividerHeight">2dip</item>
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">

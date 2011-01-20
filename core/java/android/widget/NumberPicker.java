@@ -32,6 +32,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.Align;
+import android.graphics.drawable.Drawable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -39,6 +40,7 @@ import android.text.TextUtils;
 import android.text.method.NumberKeyListener;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,7 +48,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.LayoutInflater.Filter;
-import android.view.animation.OvershootInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
 /**
@@ -107,6 +109,11 @@ public class NumberPicker extends LinearLayout {
      * The strength of fading in the top and bottom while drawing the selector.
      */
     private static final float TOP_AND_BOTTOM_FADING_EDGE_STRENGTH = 0.9f;
+
+    /**
+     * The default unscaled height of the selection divider.
+     */
+    private final int UNSCALED_DEFAULT_SELECTION_DIVIDER_HEIGHT = 2;
 
     /**
      * The numbers accepted by the input text's {@link Filter}
@@ -328,6 +335,16 @@ public class NumberPicker extends LinearLayout {
     private final boolean mFlingable;
 
     /**
+     * Divider for showing item to be selected while scrolling
+     */
+    private final Drawable mSelectionDivider;
+
+    /**
+     * The height of the selection divider.
+     */
+    private final int mSelectionDividerHeight;
+
+    /**
      * Reusable {@link Rect} instance.
      */
     private final Rect mTempRect = new Rect();
@@ -336,6 +353,11 @@ public class NumberPicker extends LinearLayout {
      * The current scroll state of the number picker.
      */
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+
+    /**
+     * The duration of the animation for showing the input controls.
+     */
+    private final long mShowInputControlsAnimimationDuration;
 
     /**
      * Interface to listen for changes of the current value.
@@ -432,7 +454,16 @@ public class NumberPicker extends LinearLayout {
                 R.styleable.NumberPicker, defStyle, 0);
         mSolidColor = attributesArray.getColor(R.styleable.NumberPicker_solidColor, 0);
         mFlingable = attributesArray.getBoolean(R.styleable.NumberPicker_flingable, true);
+        mSelectionDivider = attributesArray.getDrawable(R.styleable.NumberPicker_selectionDivider);
+        int defSelectionDividerHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                UNSCALED_DEFAULT_SELECTION_DIVIDER_HEIGHT,
+                getResources().getDisplayMetrics());
+        mSelectionDividerHeight = attributesArray.getDimensionPixelSize(
+                R.styleable.NumberPicker_selectionDividerHeight, defSelectionDividerHeight);
         attributesArray.recycle();
+
+        mShowInputControlsAnimimationDuration = getResources().getInteger(
+                R.integer.config_longAnimTime);
 
         // By default Linearlayout that we extend is not drawn. This is
         // its draw() method is not called but dispatchDraw() is called
@@ -523,8 +554,6 @@ public class NumberPicker extends LinearLayout {
         mShowInputControlsAnimator = new AnimatorSet();
         mShowInputControlsAnimator.playTogether(fadeScroller, showIncrementButton,
                 showDecrementButton);
-        mShowInputControlsAnimator.setDuration(getResources().getInteger(
-                R.integer.config_longAnimTime));
         mShowInputControlsAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mCanceled = false;
 
@@ -549,18 +578,25 @@ public class NumberPicker extends LinearLayout {
 
         // create the fling and adjust scrollers
         mFlingScroller = new Scroller(getContext(), null, true);
-        mAdjustScroller = new Scroller(getContext(), new OvershootInterpolator());
+        mAdjustScroller = new Scroller(getContext(), new DecelerateInterpolator(2.5f));
 
         updateInputTextView();
         updateIncrementAndDecrementButtonsVisibilityState();
+
+        if (mFlingable) {
+            // Start with shown selector wheel and hidden controls. When made
+            // visible hide the selector and fade-in the controls to suggest
+            // fling interaction.
+            setDrawSelectorWheel(true);
+            hideInputControls();
+        }
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        if (!hasWindowFocus) {
-            removeAllCallbacks();
-        }
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        // need to do this when we know our size
+        initializeScrollWheel();
     }
 
     @Override
@@ -580,7 +616,7 @@ public class NumberPicker extends LinearLayout {
                     if (!scrollersFinished) {
                         mFlingScroller.forceFinished(true);
                         mAdjustScroller.forceFinished(true);
-                        tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_IDLE);
+                        onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
                     }
                     mBeginEditOnUpEvent = scrollersFinished;
                     mAdjustScrollerOnUpEvent = true;
@@ -599,7 +635,7 @@ public class NumberPicker extends LinearLayout {
                 int deltaDownY = (int) Math.abs(currentMoveY - mLastDownEventY);
                 if (deltaDownY > mTouchSlop) {
                     mBeginEditOnUpEvent = false;
-                    tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+                    onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     setDrawSelectorWheel(true);
                     hideInputControls();
                     return true;
@@ -627,7 +663,7 @@ public class NumberPicker extends LinearLayout {
                     int deltaDownY = (int) Math.abs(currentMoveY - mLastDownEventY);
                     if (deltaDownY > mTouchSlop) {
                         mBeginEditOnUpEvent = false;
-                        tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
+                        onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     }
                 }
                 int deltaMoveY = (int) (currentMoveY - mLastMotionEventY);
@@ -638,7 +674,7 @@ public class NumberPicker extends LinearLayout {
             case MotionEvent.ACTION_UP:
                 if (mBeginEditOnUpEvent) {
                     setDrawSelectorWheel(false);
-                    showInputControls();
+                    showInputControls(mShowInputControlsAnimimationDuration);
                     mInputText.requestFocus();
                     InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
                             Context.INPUT_METHOD_SERVICE);
@@ -651,7 +687,7 @@ public class NumberPicker extends LinearLayout {
                 int initialVelocity = (int) velocityTracker.getYVelocity();
                 if (Math.abs(initialVelocity) > mMinimumFlingVelocity) {
                     fling(initialVelocity);
-                    tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_FLING);
+                    onScrollStateChange(OnScrollListener.SCROLL_STATE_FLING);
                 } else {
                     if (mAdjustScrollerOnUpEvent) {
                         if (mFlingScroller.isFinished() && mAdjustScroller.isFinished()) {
@@ -733,18 +769,6 @@ public class NumberPicker extends LinearLayout {
     @Override
     public void scrollBy(int x, int y) {
         int[] selectorIndices = getSelectorIndices();
-        if (mInitialScrollOffset == Integer.MIN_VALUE) {
-            int totalTextHeight = selectorIndices.length * mTextSize;
-            int totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
-            int textGapCount = selectorIndices.length - 1;
-            int selectorTextGapHeight = totalTextGapHeight / textGapCount;
-            // compensate for integer division loss of the components used to
-            // calculate the text gap
-            int integerDivisionLoss = (mTextSize + mBottom - mTop) % textGapCount;
-            mInitialScrollOffset = mCurrentScrollOffset = mTextSize - integerDivisionLoss / 2;
-            mSelectorElementHeight = mTextSize + selectorTextGapHeight;
-        }
-
         if (!mWrapSelectorWheel && y > 0
                 && selectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] <= mMinValue) {
             mCurrentScrollOffset = mInitialScrollOffset;
@@ -815,6 +839,7 @@ public class NumberPicker extends LinearLayout {
         }
         mFormatter = formatter;
         resetSelectorWheelIndices();
+        updateInputTextView();
     }
 
     /**
@@ -1023,6 +1048,17 @@ public class NumberPicker extends LinearLayout {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        // make sure we show the controls only the very
+        // first time the user sees this widget
+        if (mFlingable) {
+            // animate a bit slower the very first time
+            showInputControls(mShowInputControlsAnimimationDuration * 2);
+        }
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         removeAllCallbacks();
     }
@@ -1041,9 +1077,7 @@ public class NumberPicker extends LinearLayout {
         // However, in View.draw(), the fading is applied after all the children
         // have been drawn and we do not want this fading to be applied to the
         // buttons which are currently showing in. Therefore, we draw our
-        // children
-        // after we have completed drawing ourselves.
-
+        // children after we have completed drawing ourselves.
         super.draw(canvas);
 
         // Draw our children if we are not showing the selector wheel of fading
@@ -1069,12 +1103,30 @@ public class NumberPicker extends LinearLayout {
         float x = (mRight - mLeft) / 2;
         float y = mCurrentScrollOffset;
 
+        // draw the selector wheel
         int[] selectorIndices = getSelectorIndices();
         for (int i = 0; i < selectorIndices.length; i++) {
             int selectorIndex = selectorIndices[i];
             String scrollSelectorValue = mSelectorIndexToStringCache.get(selectorIndex);
             canvas.drawText(scrollSelectorValue, x, y, mSelectorPaint);
             y += mSelectorElementHeight;
+        }
+
+        // draw the selection dividers (only if scrolling and drawable specified)
+        if (mSelectionDivider != null) {
+            mSelectionDivider.setAlpha(mSelectorPaint.getAlpha());
+            // draw the top divider
+            int topOfTopDivider =
+                (getHeight() - mSelectorElementHeight - mSelectionDividerHeight) / 2;
+            int bottomOfTopDivider = topOfTopDivider + mSelectionDividerHeight;
+            mSelectionDivider.setBounds(0, topOfTopDivider, mRight, bottomOfTopDivider);
+            mSelectionDivider.draw(canvas);
+
+            // draw the bottom divider
+            int topOfBottomDivider =  topOfTopDivider + mSelectorElementHeight;
+            int bottomOfBottomDivider = bottomOfTopDivider + mSelectorElementHeight;
+            mSelectionDivider.setBounds(0, topOfBottomDivider, mRight, bottomOfBottomDivider);
+            mSelectionDivider.draw(canvas);
         }
     }
 
@@ -1141,26 +1193,46 @@ public class NumberPicker extends LinearLayout {
         setVerticalFadingEdgeEnabled(drawSelectorWheel);
     }
 
+    private void initializeScrollWheel() {
+        if (mInitialScrollOffset != Integer.MIN_VALUE) {
+            return;
+
+        }
+        int[] selectorIndices = getSelectorIndices();
+        int totalTextHeight = selectorIndices.length * mTextSize;
+        int totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
+        int textGapCount = selectorIndices.length - 1;
+        int selectorTextGapHeight = totalTextGapHeight / textGapCount;
+        // compensate for integer division loss of the components used to
+        // calculate the text gap
+        int integerDivisionLoss = (mTextSize + mBottom - mTop) % textGapCount;
+        mInitialScrollOffset = mCurrentScrollOffset = mTextSize - integerDivisionLoss / 2;
+        mSelectorElementHeight = mTextSize + selectorTextGapHeight;
+        updateInputTextView();
+    }
+
     /**
      * Callback invoked upon completion of a given <code>scroller</code>.
      */
     private void onScrollerFinished(Scroller scroller) {
         if (scroller == mFlingScroller) {
             postAdjustScrollerCommand(0);
-            tryNotifyScrollListener(OnScrollListener.SCROLL_STATE_IDLE);
+            onScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
         } else {
             updateInputTextView();
-            showInputControls();
+            showInputControls(mShowInputControlsAnimimationDuration);
         }
     }
 
     /**
-     * Notifies the scroll listener for the given <code>scrollState</code>
-     * if the scroll state differs from the current scroll state.
+     * Handles transition to a given <code>scrollState</code>
      */
-    private void tryNotifyScrollListener(int scrollState) {
-        if (mOnScrollListener != null && mScrollState != scrollState) {
-            mScrollState = scrollState;
+    private void onScrollStateChange(int scrollState) {
+        if (mScrollState == scrollState) {
+            return;
+        }
+        mScrollState = scrollState;
+        if (mOnScrollListener != null) {
             mOnScrollListener.onScrollStateChange(this, scrollState);
         }
     }
@@ -1206,10 +1278,13 @@ public class NumberPicker extends LinearLayout {
     /**
      * Show the input controls by making them visible and animating the alpha
      * property up/down arrows.
+     *
+     * @param animationDuration The duration of the animation.
      */
-    private void showInputControls() {
+    private void showInputControls(long animationDuration) {
         updateIncrementAndDecrementButtonsVisibilityState();
         mInputText.setVisibility(VISIBLE);
+        mShowInputControlsAnimator.setDuration(animationDuration);
         mShowInputControlsAnimator.start();
     }
 
@@ -1334,9 +1409,9 @@ public class NumberPicker extends LinearLayout {
 
     /**
      * Updates the view of this NumberPicker. If displayValues were specified in
-     * {@link #setRange}, the string corresponding to the index specified by the
-     * current value will be returned. Otherwise, the formatter specified in
-     * {@link #setFormatter} will be used to format the number.
+     * the string corresponding to the index specified by the current value will
+     * be returned. Otherwise, the formatter specified in {@link #setFormatter}
+     * will be used to format the number.
      */
     private void updateInputTextView() {
         /*
@@ -1540,7 +1615,7 @@ public class NumberPicker extends LinearLayout {
             mPreviousScrollerY = 0;
             if (mInitialScrollOffset == mCurrentScrollOffset) {
                 updateInputTextView();
-                showInputControls();
+                showInputControls(mShowInputControlsAnimimationDuration);
                 return;
             }
             // adjust to the closest value
@@ -1548,9 +1623,7 @@ public class NumberPicker extends LinearLayout {
             if (Math.abs(deltaY) > mSelectorElementHeight / 2) {
                 deltaY += (deltaY > 0) ? -mSelectorElementHeight : mSelectorElementHeight;
             }
-            float delayCoef = (float) Math.abs(deltaY) / (float) mTextSize;
-            int duration = (int) (delayCoef * SELECTOR_ADJUSTMENT_DURATION_MILLIS);
-            mAdjustScroller.startScroll(0, 0, 0, deltaY, duration);
+            mAdjustScroller.startScroll(0, 0, 0, deltaY, SELECTOR_ADJUSTMENT_DURATION_MILLIS);
             invalidate();
         }
     }
