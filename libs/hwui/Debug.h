@@ -42,9 +42,6 @@
 // This flag requires DEBUG_PATCHES to be turned on
 #define DEBUG_PATCHES_EMPTY_VERTICES 0
 
-// Turn on to display debug info about paths
-#define DEBUG_PATHS 0
-
 // Turn on to display debug info about shapes
 #define DEBUG_SHAPES 0
 
