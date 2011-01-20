@@ -285,6 +285,13 @@ public final class Settings {
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
      * <p>
+     * To tell which input method's subtypes are displayed in the settings, add
+     * {@link #EXTRA_INPUT_METHOD_ID} extra to this Intent with the input method id.
+     * If there is no extra in this Intent, subtypes from all installed input methods
+     * will be displayed in the settings.
+     *
+     * @see android.view.inputmethod.InputMethodInfo#getId
+     * <p>
      * Input: Nothing.
      * <p>
      * Output: Nothing.
@@ -554,6 +561,8 @@ public final class Settings {
      */
     public static final String EXTRA_AUTHORITIES =
             "authorities";
+
+    public static final String EXTRA_INPUT_METHOD_ID = "input_method_id";
 
     private static final String JID_RESOURCE_PREFIX = "android";
 
