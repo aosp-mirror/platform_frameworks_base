@@ -122,6 +122,8 @@ public class FileFilter {
         ignoreResultList.add("storage/indexeddb"); // indexeddb not supported
         ignoreResultList.add("storage/private-browsing-readonly.html"); // private browsing not supported
         ignoreResultList.add("websocket/tests/workers"); // workers not supported
+        ignoreResultList.add("dom/xhtml/level2/html/htmldocument04.xhtml"); // /mnt/sdcard on SR uses lowercase filesystem, this test checks filename and is case senstive.
+        ignoreResultList.add("dom/html/level2/html/htmldocument04.html"); // ditto
 
         // Expected failures due to missing expected results
         ignoreResultList.add("dom/xhtml/level3/core/canonicalform08.xhtml");
