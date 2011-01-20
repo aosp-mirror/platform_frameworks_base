@@ -5405,6 +5405,7 @@ public class WebView extends AbsoluteLayout
             case MotionEvent.ACTION_DOWN: {
                 mPreventDefault = PREVENT_DEFAULT_NO;
                 mConfirmMove = false;
+                mIsHandlingMultiTouch = false;
                 mInitialHitTestResult = null;
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
