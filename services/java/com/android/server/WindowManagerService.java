@@ -5869,7 +5869,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final InputWindow inputWindow = windowList.add();
             inputWindow.inputChannel = mDragState.mServerChannel;
             inputWindow.name = "drag";
-            inputWindow.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            inputWindow.layoutParamsFlags = 0;
             inputWindow.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
             inputWindow.dispatchingTimeoutNanos = DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
             inputWindow.visible = true;
