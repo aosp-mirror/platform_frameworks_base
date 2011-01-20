@@ -57,6 +57,8 @@ public final class MediaStore {
      * Broadcast Action:  A broadcast to indicate the end of an MTP session with the host.
      * This broadcast is only sent if MTP activity has modified the media database during the
      * most recent MTP session.
+     *
+     * @hide
      */
     public static final String ACTION_MTP_SESSION_END = "android.provider.action.MTP_SESSION_END";
 
