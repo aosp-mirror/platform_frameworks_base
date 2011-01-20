@@ -28,7 +28,6 @@ import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -1087,7 +1086,14 @@ public class PopupWindow {
                 p.width = Math.min(p.width, displayFrameWidth);
             }
 
-            p.y = Math.max(p.y, displayFrame.top);
+            if (onTop) {
+                int popupTop = mScreenLocation[1] + yoff - mPopupHeight;
+                if (popupTop < 0) {
+                    p.y += popupTop;
+                }
+            } else {
+                p.y = Math.max(p.y, displayFrame.top);
+            }
         }
 
         p.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
