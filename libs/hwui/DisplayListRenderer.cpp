@@ -103,6 +103,8 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawPatch",
     "DrawColor",
     "DrawRect",
+    "DrawRoundRect",
+    "DrawCircle",
     "DrawPath",
     "DrawLines",
     "DrawText",
@@ -330,6 +332,15 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
             break;
             case DrawRect: {
                 renderer.drawRect(getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+            }
+            break;
+            case DrawRoundRect: {
+                renderer.drawRoundRect(getFloat(), getFloat(), getFloat(), getFloat(),
+                        getFloat(), getFloat(), getPaint());
+            }
+            break;
+            case DrawCircle: {
+                renderer.drawCircle(getFloat(), getFloat(), getFloat(), getPaint());
             }
             break;
             case DrawPath: {
@@ -598,6 +609,21 @@ void DisplayListRenderer::drawRect(float left, float top, float right, float bot
         SkPaint* paint) {
     addOp(DisplayList::DrawRect);
     addBounds(left, top, right, bottom);
+    addPaint(paint);
+}
+
+void DisplayListRenderer::drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, SkPaint* paint) {
+    addOp(DisplayList::DrawRoundRect);
+    addBounds(left, top, right, bottom);
+    addPoint(rx, ry);
+    addPaint(paint);
+}
+
+void DisplayListRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
+    addOp(DisplayList::DrawCircle);
+    addPoint(x, y);
+    addFloat(radius);
     addPaint(paint);
 }
 

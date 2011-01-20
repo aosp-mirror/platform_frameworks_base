@@ -32,6 +32,7 @@
 #include "PatchCache.h"
 #include "ProgramCache.h"
 #include "PathCache.h"
+#include "ShapeCache.h"
 #include "TextDropShadowCache.h"
 #include "FboCache.h"
 #include "ResourceCache.h"
@@ -159,6 +160,8 @@ public:
     GradientCache gradientCache;
     ProgramCache programCache;
     PathCache pathCache;
+    RoundRectShapeCache roundRectShapeCache;
+    CircleShapeCache circleShapeCache;
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
