@@ -670,6 +670,26 @@ public final class BluetoothHeadset implements BluetoothProfile {
         return false;
     }
 
+    /**
+     * Send a AT command message to the headset.
+     * @param device Remote Bluetooth Device
+     * @param cmd The String to send.
+     * @hide
+     */
+    public void sendAtCommand(BluetoothDevice device, String command) {
+        if (DBG) log("sendAtCommand()");
+        if (mService != null && isEnabled() && isValidDevice(device)) {
+            try {
+                mService.sendAtCommand(device, command);
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+    }
+
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             if (DBG) Log.d(TAG, "Proxy object connected");
