@@ -2211,7 +2211,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * Gets the {@link KeyCharacterMap} associated with the keyboard device.
      *
      * @return The associated key character map.
-     * @throws {@link KeyCharacterMapUnavailableException} if the key character map
+     * @throws {@link UnavailableException} if the key character map
      * could not be loaded because it was malformed or the default key character map
      * is missing from the system.
      *
