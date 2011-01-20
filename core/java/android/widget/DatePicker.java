@@ -30,7 +30,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.widget.NumberPicker.OnValueChangedListener;
+import android.widget.NumberPicker.OnValueChangeListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -154,7 +154,7 @@ public class DatePicker extends FrameLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(layoutResourceId, this, true);
 
-        OnValueChangedListener onChangeListener = new OnValueChangedListener() {
+        OnValueChangeListener onChangeListener = new OnValueChangeListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 updateDate(mYearSpinner.getValue(), mMonthSpinner.getValue(), mDaySpinner
                         .getValue());
