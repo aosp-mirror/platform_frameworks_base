@@ -32,7 +32,6 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/large_icon"
         android:layout_toLeftOf="@id/veto"
-        android:layout_marginLeft="16dp"
         android:focusable="true"
         android:clickable="true"
         />
@@ -40,7 +39,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginLeft="16dp"
         android:layout_alignParentBottom="true"
         android:background="@android:drawable/divider_horizontal_dark"
         />
