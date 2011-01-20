@@ -228,7 +228,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     /* Drag/drop */
     ClipDescription mDragDescription;
     View mCurrentDragView;
-    Object mLocalDragState;
+    volatile Object mLocalDragState;
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
 
@@ -2051,7 +2051,9 @@ public final class ViewRoot extends Handler implements ViewParent,
         } break;
         case DISPATCH_DRAG_EVENT:
         case DISPATCH_DRAG_LOCATION_EVENT: {
-            handleDragEvent((DragEvent)msg.obj);
+            DragEvent event = (DragEvent)msg.obj;
+            event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
+            handleDragEvent(event);
         } break;
         }
     }
@@ -3133,7 +3135,6 @@ public final class ViewRoot extends Handler implements ViewParent,
         } else {
             what = DISPATCH_DRAG_EVENT;
         }
-        event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
         Message msg = obtainMessage(what, event);
         sendMessage(msg);
     }
