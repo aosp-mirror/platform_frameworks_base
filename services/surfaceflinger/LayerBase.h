@@ -174,11 +174,6 @@ public:
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
     
     /**
-     * finishPageFlip - called after all surfaces have drawn.
-     */
-    virtual void finishPageFlip();
-    
-    /**
      * needsBlending - true if this surface needs blending
      */
     virtual bool needsBlending() const  { return false; }
