@@ -8,27 +8,31 @@
 #endif
 
 // Conversions
-#define CVT_FUNC_2(typeout, typein) \
-_RS_STATIC typeout##2 __attribute__((overloadable)) convert_##typeout##2(typein##2 v) { \
-    typeout##2 r = {(typeout)v.x, (typeout)v.y}; \
-    return r; \
-} \
-_RS_STATIC typeout##3 __attribute__((overloadable)) convert_##typeout##3(typein##3 v) { \
-    typeout##3 r = {(typeout)v.x, (typeout)v.y, (typeout)v.z}; \
-    return r; \
-} \
-_RS_STATIC typeout##4 __attribute__((overloadable)) convert_##typeout##4(typein##4 v) { \
-    typeout##4 r = {(typeout)v.x, (typeout)v.y, (typeout)v.z, (typeout)v.w}; \
-    return r; \
+#define CVT_FUNC_2(typeout, typein)                             \
+_RS_STATIC typeout##2 __attribute__((overloadable))             \
+        convert_##typeout##2(typein##2 v) {                     \
+    typeout##2 r = {(typeout)v.x, (typeout)v.y};                \
+    return r;                                                   \
+}                                                               \
+_RS_STATIC typeout##3 __attribute__((overloadable))             \
+        convert_##typeout##3(typein##3 v) {                     \
+    typeout##3 r = {(typeout)v.x, (typeout)v.y, (typeout)v.z};  \
+    return r;                                                   \
+}                                                               \
+_RS_STATIC typeout##4 __attribute__((overloadable))             \
+        convert_##typeout##4(typein##4 v) {                     \
+    typeout##4 r = {(typeout)v.x, (typeout)v.y, (typeout)v.z,   \
+                    (typeout)v.w};                              \
+    return r;                                                   \
 }
 
-#define CVT_FUNC(type)      CVT_FUNC_2(type, uchar) \
-                            CVT_FUNC_2(type, char) \
-                            CVT_FUNC_2(type, ushort) \
-                            CVT_FUNC_2(type, short) \
-                            CVT_FUNC_2(type, uint) \
-                            CVT_FUNC_2(type, int) \
-                            CVT_FUNC_2(type, float)
+#define CVT_FUNC(type)  CVT_FUNC_2(type, uchar)     \
+                        CVT_FUNC_2(type, char)      \
+                        CVT_FUNC_2(type, ushort)    \
+                        CVT_FUNC_2(type, short)     \
+                        CVT_FUNC_2(type, uint)      \
+                        CVT_FUNC_2(type, int)       \
+                        CVT_FUNC_2(type, float)
 
 CVT_FUNC(char)
 CVT_FUNC(uchar)
@@ -38,276 +42,282 @@ CVT_FUNC(int)
 CVT_FUNC(uint)
 CVT_FUNC(float)
 
-
-
 // Float ops, 6.11.2
 
-#define FN_FUNC_FN(fnc) \
+#define FN_FUNC_FN(fnc)                                         \
 _RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v) { \
-    float2 r; \
-    r.x = fnc(v.x); \
-    r.y = fnc(v.y); \
-    return r; \
-} \
+    float2 r;                                                   \
+    r.x = fnc(v.x);                                             \
+    r.y = fnc(v.y);                                             \
+    return r;                                                   \
+}                                                               \
 _RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v) { \
-    float3 r; \
-    r.x = fnc(v.x); \
-    r.y = fnc(v.y); \
-    r.z = fnc(v.z); \
-    return r; \
-} \
+    float3 r;                                                   \
+    r.x = fnc(v.x);                                             \
+    r.y = fnc(v.y);                                             \
+    r.z = fnc(v.z);                                             \
+    return r;                                                   \
+}                                                               \
 _RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v) { \
-    float4 r; \
-    r.x = fnc(v.x); \
-    r.y = fnc(v.y); \
-    r.z = fnc(v.z); \
-    r.w = fnc(v.w); \
-    return r; \
+    float4 r;                                                   \
+    r.x = fnc(v.x);                                             \
+    r.y = fnc(v.y);                                             \
+    r.z = fnc(v.z);                                             \
+    r.w = fnc(v.w);                                             \
+    return r;                                                   \
 }
 
-#define IN_FUNC_FN(fnc) \
-_RS_STATIC int2 __attribute__((overloadable)) fnc(float2 v) { \
-    int2 r; \
-    r.x = fnc(v.x); \
-    r.y = fnc(v.y); \
-    return r; \
-} \
-_RS_STATIC int3 __attribute__((overloadable)) fnc(float3 v) { \
-    int3 r; \
-    r.x = fnc(v.x); \
-    r.y = fnc(v.y); \
-    r.z = fnc(v.z); \
-    return r; \
-} \
-_RS_STATIC int4 __attribute__((overloadable)) fnc(float4 v) { \
-    int4 r; \
-    r.x = fnc(v.x); \
-    r.y = fnc(v.y); \
-    r.z = fnc(v.z); \
-    r.w = fnc(v.w); \
-    return r; \
+#define IN_FUNC_FN(fnc)                                         \
+_RS_STATIC int2 __attribute__((overloadable)) fnc(float2 v) {   \
+    int2 r;                                                     \
+    r.x = fnc(v.x);                                             \
+    r.y = fnc(v.y);                                             \
+    return r;                                                   \
+}                                                               \
+_RS_STATIC int3 __attribute__((overloadable)) fnc(float3 v) {   \
+    int3 r;                                                     \
+    r.x = fnc(v.x);                                             \
+    r.y = fnc(v.y);                                             \
+    r.z = fnc(v.z);                                             \
+    return r;                                                   \
+}                                                               \
+_RS_STATIC int4 __attribute__((overloadable)) fnc(float4 v) {   \
+    int4 r;                                                     \
+    r.x = fnc(v.x);                                             \
+    r.y = fnc(v.y);                                             \
+    r.z = fnc(v.z);                                             \
+    r.w = fnc(v.w);                                             \
+    return r;                                                   \
 }
 
-#define FN_FUNC_FN_FN(fnc) \
+#define FN_FUNC_FN_FN(fnc)                                                  \
 _RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float2 v2) { \
-    float2 r; \
-    r.x = fnc(v1.x, v2.x); \
-    r.y = fnc(v1.y, v2.y); \
-    return r; \
-} \
+    float2 r;                                                               \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    return r;                                                               \
+}                                                                           \
 _RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float3 v2) { \
-    float3 r; \
-    r.x = fnc(v1.x, v2.x); \
-    r.y = fnc(v1.y, v2.y); \
-    r.z = fnc(v1.z, v2.z); \
-    return r; \
-} \
+    float3 r;                                                               \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    r.z = fnc(v1.z, v2.z);                                                  \
+    return r;                                                               \
+}                                                                           \
 _RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float4 v2) { \
-    float4 r; \
-    r.x = fnc(v1.x, v2.x); \
-    r.y = fnc(v1.y, v2.y); \
-    r.z = fnc(v1.z, v2.z); \
-    r.w = fnc(v1.w, v2.w); \
-    return r; \
+    float4 r;                                                               \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    r.z = fnc(v1.z, v2.z);                                                  \
+    r.w = fnc(v1.w, v2.w);                                                  \
+    return r;                                                               \
 }
 
-#define FN_FUNC_FN_F(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float v2) { \
-    float2 r; \
-    r.x = fnc(v1.x, v2); \
-    r.y = fnc(v1.y, v2); \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float v2) { \
-    float3 r; \
-    r.x = fnc(v1.x, v2); \
-    r.y = fnc(v1.y, v2); \
-    r.z = fnc(v1.z, v2); \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float v2) { \
-    float4 r; \
-    r.x = fnc(v1.x, v2); \
-    r.y = fnc(v1.y, v2); \
-    r.z = fnc(v1.z, v2); \
-    r.w = fnc(v1.w, v2); \
-    return r; \
+#define FN_FUNC_FN_F(fnc)                                                   \
+_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float v2) {  \
+    float2 r;                                                               \
+    r.x = fnc(v1.x, v2);                                                    \
+    r.y = fnc(v1.y, v2);                                                    \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float v2) {  \
+    float3 r;                                                               \
+    r.x = fnc(v1.x, v2);                                                    \
+    r.y = fnc(v1.y, v2);                                                    \
+    r.z = fnc(v1.z, v2);                                                    \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float v2) {  \
+    float4 r;                                                               \
+    r.x = fnc(v1.x, v2);                                                    \
+    r.y = fnc(v1.y, v2);                                                    \
+    r.z = fnc(v1.z, v2);                                                    \
+    r.w = fnc(v1.w, v2);                                                    \
+    return r;                                                               \
 }
 
-#define FN_FUNC_FN_IN(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, int2 v2) { \
-    float2 r; \
-    r.x = fnc(v1.x, v2.x); \
-    r.y = fnc(v1.y, v2.y); \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, int3 v2) { \
-    float3 r; \
-    r.x = fnc(v1.x, v2.x); \
-    r.y = fnc(v1.y, v2.y); \
-    r.z = fnc(v1.z, v2.z); \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, int4 v2) { \
-    float4 r; \
-    r.x = fnc(v1.x, v2.x); \
-    r.y = fnc(v1.y, v2.y); \
-    r.z = fnc(v1.z, v2.z); \
-    r.w = fnc(v1.w, v2.w); \
-    return r; \
+#define FN_FUNC_FN_IN(fnc)                                                  \
+_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, int2 v2) {   \
+    float2 r;                                                               \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, int3 v2) {   \
+    float3 r;                                                               \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    r.z = fnc(v1.z, v2.z);                                                  \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, int4 v2) {   \
+    float4 r;                                                               \
+    r.x = fnc(v1.x, v2.x);                                                  \
+    r.y = fnc(v1.y, v2.y);                                                  \
+    r.z = fnc(v1.z, v2.z);                                                  \
+    r.w = fnc(v1.w, v2.w);                                                  \
+    return r;                                                               \
 }
 
-#define FN_FUNC_FN_I(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, int v2) { \
-    float2 r; \
-    r.x = fnc(v1.x, v2); \
-    r.y = fnc(v1.y, v2); \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, int v2) { \
-    float3 r; \
-    r.x = fnc(v1.x, v2); \
-    r.y = fnc(v1.y, v2); \
-    r.z = fnc(v1.z, v2); \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, int v2) { \
-    float4 r; \
-    r.x = fnc(v1.x, v2); \
-    r.y = fnc(v1.y, v2); \
-    r.z = fnc(v1.z, v2); \
-    r.w = fnc(v1.w, v2); \
-    return r; \
+#define FN_FUNC_FN_I(fnc)                                                   \
+_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, int v2) {    \
+    float2 r;                                                               \
+    r.x = fnc(v1.x, v2);                                                    \
+    r.y = fnc(v1.y, v2);                                                    \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, int v2) {    \
+    float3 r;                                                               \
+    r.x = fnc(v1.x, v2);                                                    \
+    r.y = fnc(v1.y, v2);                                                    \
+    r.z = fnc(v1.z, v2);                                                    \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, int v2) {    \
+    float4 r;                                                               \
+    r.x = fnc(v1.x, v2);                                                    \
+    r.y = fnc(v1.y, v2);                                                    \
+    r.z = fnc(v1.z, v2);                                                    \
+    r.w = fnc(v1.w, v2);                                                    \
+    return r;                                                               \
 }
 
-#define FN_FUNC_FN_PFN(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float2 *v2) { \
-    float2 r; \
-    float q; \
-    r.x = fnc(v1.x, &q); \
-    v2->x = q; \
-    r.y = fnc(v1.y, &q); \
-    v2->y = q; \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float3 *v2) { \
-    float3 r; \
-    float q; \
-    r.x = fnc(v1.x, &q); \
-    v2->x = q; \
-    r.y = fnc(v1.y, &q); \
-    v2->y = q; \
-    r.z = fnc(v1.z, &q); \
-    v2->z = q; \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float4 *v2) { \
-    float4 r; \
-    float q; \
-    r.x = fnc(v1.x, &q); \
-    v2->x = q; \
-    r.y = fnc(v1.y, &q); \
-    v2->y = q; \
-    r.z = fnc(v1.z, &q); \
-    v2->z = q; \
-    r.w = fnc(v1.w, &q); \
-    v2->w = q; \
-    return r; \
+#define FN_FUNC_FN_PFN(fnc)                     \
+_RS_STATIC float2 __attribute__((overloadable)) \
+        fnc(float2 v1, float2 *v2) {            \
+    float2 r;                                   \
+    float t[2];                                 \
+    r.x = fnc(v1.x, &t[0]);                     \
+    r.y = fnc(v1.y, &t[1]);                     \
+    v2->x = t[0];                               \
+    v2->y = t[1];                               \
+    return r;                                   \
+}                                               \
+_RS_STATIC float3 __attribute__((overloadable)) \
+        fnc(float3 v1, float3 *v2) {            \
+    float3 r;                                   \
+    float t[3];                                 \
+    r.x = fnc(v1.x, &t[0]);                     \
+    r.y = fnc(v1.y, &t[1]);                     \
+    r.z = fnc(v1.z, &t[2]);                     \
+    v2->x = t[0];                               \
+    v2->y = t[1];                               \
+    v2->z = t[2];                               \
+    return r;                                   \
+}                                               \
+_RS_STATIC float4 __attribute__((overloadable)) \
+        fnc(float4 v1, float4 *v2) {            \
+    float4 r;                                   \
+    float t[4];                                 \
+    r.x = fnc(v1.x, &t[0]);                     \
+    r.y = fnc(v1.y, &t[1]);                     \
+    r.z = fnc(v1.z, &t[2]);                     \
+    r.w = fnc(v1.w, &t[3]);                     \
+    v2->x = t[0];                               \
+    v2->y = t[1];                               \
+    v2->z = t[2];                               \
+    v2->w = t[3];                               \
+    return r;                                   \
 }
 
-#define FN_FUNC_FN_PIN(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, int2 *v2) { \
-    float2 r; \
-    int q; \
-    r.x = fnc(v1.x, &q); \
-    v2->x = q; \
-    r.y = fnc(v1.y, &q); \
-    v2->y = q; \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, int3 *v2) { \
-    float3 r; \
-    int q; \
-    r.x = fnc(v1.x, &q); \
-    v2->x = q; \
-    r.y = fnc(v1.y, &q); \
-    v2->y = q; \
-    r.z = fnc(v1.z, &q); \
-    v2->z = q; \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, int4 *v2) { \
-    float4 r; \
-    int q; \
-    r.x = fnc(v1.x, &q); \
-    v2->x = q; \
-    r.y = fnc(v1.y, &q); \
-    v2->y = q; \
-    r.z = fnc(v1.z, &q); \
-    v2->z = q; \
-    r.w = fnc(v1.w, &q); \
-    v2->w = q; \
-    return r; \
+#define FN_FUNC_FN_PIN(fnc)                                                 \
+_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, int2 *v2) {  \
+    float2 r;                                                               \
+    int t[2];                                                               \
+    r.x = fnc(v1.x, &t[0]);                                                 \
+    r.y = fnc(v1.y, &t[1]);                                                 \
+    v2->x = t[0];                                                           \
+    v2->y = t[1];                                                           \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, int3 *v2) {  \
+    float3 r;                                                               \
+    int t[3];                                                               \
+    r.x = fnc(v1.x, &t[0]);                                                 \
+    r.y = fnc(v1.y, &t[1]);                                                 \
+    r.z = fnc(v1.z, &t[2]);                                                 \
+    v2->x = t[0];                                                           \
+    v2->y = t[1];                                                           \
+    v2->z = t[2];                                                           \
+    return r;                                                               \
+}                                                                           \
+_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, int4 *v2) {  \
+    float4 r;                                                               \
+    int t[4];                                                               \
+    r.x = fnc(v1.x, &t[0]);                                                 \
+    r.y = fnc(v1.y, &t[1]);                                                 \
+    r.z = fnc(v1.z, &t[2]);                                                 \
+    r.w = fnc(v1.w, &t[3]);                                                 \
+    v2->x = t[0];                                                           \
+    v2->y = t[1];                                                           \
+    v2->z = t[2];                                                           \
+    v2->w = t[3];                                                           \
+    return r;                                                               \
 }
 
-#define FN_FUNC_FN_FN_FN(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float2 v2, float2 v3) { \
-    float2 r; \
-    r.x = fnc(v1.x, v2.x, v3.x); \
-    r.y = fnc(v1.y, v2.y, v3.y); \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float3 v2, float3 v3) { \
-    float3 r; \
-    r.x = fnc(v1.x, v2.x, v3.x); \
-    r.y = fnc(v1.y, v2.y, v3.y); \
-    r.z = fnc(v1.z, v2.z, v3.z); \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float4 v2, float4 v3) { \
-    float4 r; \
-    r.x = fnc(v1.x, v2.x, v3.x); \
-    r.y = fnc(v1.y, v2.y, v3.y); \
-    r.z = fnc(v1.z, v2.z, v3.z); \
-    r.w = fnc(v1.w, v2.w, v3.w); \
-    return r; \
+#define FN_FUNC_FN_FN_FN(fnc)                   \
+_RS_STATIC float2 __attribute__((overloadable)) \
+        fnc(float2 v1, float2 v2, float2 v3) {  \
+    float2 r;                                   \
+    r.x = fnc(v1.x, v2.x, v3.x);                \
+    r.y = fnc(v1.y, v2.y, v3.y);                \
+    return r;                                   \
+}                                               \
+_RS_STATIC float3 __attribute__((overloadable)) \
+        fnc(float3 v1, float3 v2, float3 v3) {  \
+    float3 r;                                   \
+    r.x = fnc(v1.x, v2.x, v3.x);                \
+    r.y = fnc(v1.y, v2.y, v3.y);                \
+    r.z = fnc(v1.z, v2.z, v3.z);                \
+    return r;                                   \
+}                                               \
+_RS_STATIC float4 __attribute__((overloadable)) \
+        fnc(float4 v1, float4 v2, float4 v3) {  \
+    float4 r;                                   \
+    r.x = fnc(v1.x, v2.x, v3.x);                \
+    r.y = fnc(v1.y, v2.y, v3.y);                \
+    r.z = fnc(v1.z, v2.z, v3.z);                \
+    r.w = fnc(v1.w, v2.w, v3.w);                \
+    return r;                                   \
 }
 
-#define FN_FUNC_FN_FN_PIN(fnc) \
-_RS_STATIC float2 __attribute__((overloadable)) fnc(float2 v1, float2 v2, int2 *v3) { \
-    float2 r; \
-    int q; \
-    r.x = fnc(v1.x, v2.x, &q); \
-    v3->x = q; \
-    r.y = fnc(v1.y, v2.y, &q); \
-    v3->y = q; \
-    return r; \
-} \
-_RS_STATIC float3 __attribute__((overloadable)) fnc(float3 v1, float3 v2, int3 *v3) { \
-    float3 r; \
-    int q; \
-    r.x = fnc(v1.x, v2.x, &q); \
-    v3->x = q; \
-    r.y = fnc(v1.y, v2.y, &q); \
-    v3->y = q; \
-    r.z = fnc(v1.z, v2.z, &q); \
-    v3->z = q; \
-    return r; \
-} \
-_RS_STATIC float4 __attribute__((overloadable)) fnc(float4 v1, float4 v2, int4 *v3) { \
-    float4 r; \
-    int q; \
-    r.x = fnc(v1.x, v2.x, &q); \
-    v3->x = q; \
-    r.y = fnc(v1.y, v2.y, &q); \
-    v3->y = q; \
-    r.z = fnc(v1.z, v2.z, &q); \
-    v3->z = q; \
-    r.w = fnc(v1.w, v2.w, &q); \
-    v3->w = q; \
-    return r; \
+#define FN_FUNC_FN_FN_PIN(fnc)                  \
+_RS_STATIC float2 __attribute__((overloadable)) \
+        fnc(float2 v1, float2 v2, int2 *v3) {   \
+    float2 r;                                   \
+    int t[2];                                   \
+    r.x = fnc(v1.x, v2.x, &t[0]);               \
+    r.y = fnc(v1.y, v2.y, &t[1]);               \
+    v3->x = t[0];                               \
+    v3->y = t[1];                               \
+    return r;                                   \
+}                                               \
+_RS_STATIC float3 __attribute__((overloadable)) \
+        fnc(float3 v1, float3 v2, int3 *v3) {   \
+    float3 r;                                   \
+    int t[3];                                   \
+    r.x = fnc(v1.x, v2.x, &t[0]);               \
+    r.y = fnc(v1.y, v2.y, &t[1]);               \
+    r.z = fnc(v1.z, v2.z, &t[2]);               \
+    v3->x = t[0];                               \
+    v3->y = t[1];                               \
+    v3->z = t[2];                               \
+    return r;                                   \
+}                                               \
+_RS_STATIC float4 __attribute__((overloadable)) \
+        fnc(float4 v1, float4 v2, int4 *v3) {   \
+    float4 r;                                   \
+    int t[4];                                   \
+    r.x = fnc(v1.x, v2.x, &t[0]);               \
+    r.y = fnc(v1.y, v2.y, &t[1]);               \
+    r.z = fnc(v1.z, v2.z, &t[2]);               \
+    r.w = fnc(v1.w, v2.w, &t[3]);               \
+    v3->x = t[0];                               \
+    v3->y = t[1];                               \
+    v3->z = t[2];                               \
+    v3->w = t[3];                               \
+    return r;                                   \
 }
-
 
 
 extern float __attribute__((overloadable)) acos(float);
@@ -420,39 +430,7 @@ _RS_STATIC float __attribute__((overloadable)) fract(float v, float *iptr) {
     iptr[0] = i;
     return fmin(v - i, 0x1.fffffep-1f);
 }
-_RS_STATIC float2 __attribute__((overloadable)) fract(float2 v, float2 *iptr) {
-    float t[2];
-    float2 r;
-    r.x = fract(v.x, &t[0]);
-    r.y = fract(v.y, &t[1]);
-    iptr[0] = t[0];
-    iptr[1] = t[1];
-    return r;
-}
-_RS_STATIC float3 __attribute__((overloadable)) fract(float3 v, float3 *iptr) {
-    float t[3];
-    float3 r;
-    r.x = fract(v.x, &t[0]);
-    r.y = fract(v.y, &t[1]);
-    r.z = fract(v.z, &t[2]);
-    iptr[0] = t[0];
-    iptr[1] = t[1];
-    iptr[2] = t[2];
-    return r;
-}
-_RS_STATIC float4 __attribute__((overloadable)) fract(float4 v, float4 *iptr) {
-    float t[4];
-    float4 r;
-    r.x = fract(v.x, &t[0]);
-    r.y = fract(v.y, &t[1]);
-    r.z = fract(v.z, &t[2]);
-    r.w = fract(v.w, &t[3]);
-    iptr[0] = t[0];
-    iptr[1] = t[1];
-    iptr[2] = t[2];
-    iptr[3] = t[3];
-    return r;
-}
+FN_FUNC_FN_PFN(fract)
 
 extern float __attribute__((overloadable)) frexp(float, int *);
 FN_FUNC_FN_PIN(frexp)
@@ -612,36 +590,36 @@ FN_FUNC_FN(trunc)
 
 // Int ops (partial), 6.11.3
 
-#define XN_FUNC_YN(typeout, fnc, typein)                            \
-extern typeout __attribute__((overloadable)) fnc(typein);           \
+#define XN_FUNC_YN(typeout, fnc, typein)                                \
+extern typeout __attribute__((overloadable)) fnc(typein);               \
 _RS_STATIC typeout##2 __attribute__((overloadable)) fnc(typein##2 v) {  \
-    typeout##2 r;                                                   \
-    r.x = fnc(v.x);                                                 \
-    r.y = fnc(v.y);                                                 \
-    return r;                                                       \
-}                                                                   \
+    typeout##2 r;                                                       \
+    r.x = fnc(v.x);                                                     \
+    r.y = fnc(v.y);                                                     \
+    return r;                                                           \
+}                                                                       \
 _RS_STATIC typeout##3 __attribute__((overloadable)) fnc(typein##3 v) {  \
-    typeout##3 r;                                                   \
-    r.x = fnc(v.x);                                                 \
-    r.y = fnc(v.y);                                                 \
-    r.z = fnc(v.z);                                                 \
-    return r;                                                       \
-}                                                                   \
+    typeout##3 r;                                                       \
+    r.x = fnc(v.x);                                                     \
+    r.y = fnc(v.y);                                                     \
+    r.z = fnc(v.z);                                                     \
+    return r;                                                           \
+}                                                                       \
 _RS_STATIC typeout##4 __attribute__((overloadable)) fnc(typein##4 v) {  \
-    typeout##4 r;                                                   \
-    r.x = fnc(v.x);                                                 \
-    r.y = fnc(v.y);                                                 \
-    r.z = fnc(v.z);                                                 \
-    r.w = fnc(v.w);                                                 \
-    return r;                                                       \
+    typeout##4 r;                                                       \
+    r.x = fnc(v.x);                                                     \
+    r.y = fnc(v.y);                                                     \
+    r.z = fnc(v.z);                                                     \
+    r.w = fnc(v.w);                                                     \
+    return r;                                                           \
 }
 
-#define UIN_FUNC_IN(fnc)           \
+#define UIN_FUNC_IN(fnc)          \
 XN_FUNC_YN(uchar, fnc, char)      \
 XN_FUNC_YN(ushort, fnc, short)    \
 XN_FUNC_YN(uint, fnc, int)
 
-#define IN_FUNC_IN(fnc)            \
+#define IN_FUNC_IN(fnc)           \
 XN_FUNC_YN(uchar, fnc, uchar)     \
 XN_FUNC_YN(char, fnc, char)       \
 XN_FUNC_YN(ushort, fnc, ushort)   \
@@ -649,33 +627,37 @@ XN_FUNC_YN(short, fnc, short)     \
 XN_FUNC_YN(uint, fnc, uint)       \
 XN_FUNC_YN(int, fnc, int)
 
-#define XN_FUNC_XN_XN_BODY(type, fnc, body)                                       \
-_RS_STATIC type __attribute__((overloadable)) fnc(type v1, type v2) {           \
-    return body;                                                            \
-}                                                                           \
-_RS_STATIC type##2 __attribute__((overloadable)) fnc(type##2 v1, type##2 v2) {  \
-    type##2 r;                                                              \
-    r.x = fnc(v1.x, v2.x);                                                  \
-    r.y = fnc(v1.y, v2.y);                                                  \
-    return r;                                                               \
-}                                                                           \
-_RS_STATIC type##3 __attribute__((overloadable)) fnc(type##3 v1, type##3 v2) {  \
-    type##3 r;                                                              \
-    r.x = fnc(v1.x, v2.x);                                                  \
-    r.y = fnc(v1.y, v2.y);                                                  \
-    r.z = fnc(v1.z, v2.z);                                                  \
-    return r;                                                               \
-}                                                                           \
-_RS_STATIC type##4 __attribute__((overloadable)) fnc(type##4 v1, type##4 v2) {  \
-    type##4 r;                                                              \
-    r.x = fnc(v1.x, v2.x);                                                  \
-    r.y = fnc(v1.y, v2.y);                                                  \
-    r.z = fnc(v1.z, v2.z);                                                  \
-    r.w = fnc(v1.w, v2.w);                                                  \
-    return r;                                                               \
-}                                                                           \
+#define XN_FUNC_XN_XN_BODY(type, fnc, body)         \
+_RS_STATIC type __attribute__((overloadable))       \
+        fnc(type v1, type v2) {                     \
+    return body;                                    \
+}                                                   \
+_RS_STATIC type##2 __attribute__((overloadable))    \
+        fnc(type##2 v1, type##2 v2) {               \
+    type##2 r;                                      \
+    r.x = fnc(v1.x, v2.x);                          \
+    r.y = fnc(v1.y, v2.y);                          \
+    return r;                                       \
+}                                                   \
+_RS_STATIC type##3 __attribute__((overloadable))    \
+        fnc(type##3 v1, type##3 v2) {               \
+    type##3 r;                                      \
+    r.x = fnc(v1.x, v2.x);                          \
+    r.y = fnc(v1.y, v2.y);                          \
+    r.z = fnc(v1.z, v2.z);                          \
+    return r;                                       \
+}                                                   \
+_RS_STATIC type##4 __attribute__((overloadable))    \
+        fnc(type##4 v1, type##4 v2) {               \
+    type##4 r;                                      \
+    r.x = fnc(v1.x, v2.x);                          \
+    r.y = fnc(v1.y, v2.y);                          \
+    r.z = fnc(v1.z, v2.z);                          \
+    r.w = fnc(v1.w, v2.w);                          \
+    return r;                                       \
+}
 
-#define IN_FUNC_IN_IN_BODY(fnc, body)  \
+#define IN_FUNC_IN_IN_BODY(fnc, body) \
 XN_FUNC_XN_XN_BODY(uchar, fnc, body)  \
 XN_FUNC_XN_XN_BODY(char, fnc, body)   \
 XN_FUNC_XN_XN_BODY(ushort, fnc, body) \
