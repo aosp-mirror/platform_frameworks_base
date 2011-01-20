@@ -29,11 +29,7 @@ import java.security.KeyPair;
 public class Credentials {
     private static final String LOGTAG = "Credentials";
 
-    public static final String UNLOCK_ACTION = "android.credentials.UNLOCK";
-
     public static final String INSTALL_ACTION = "android.credentials.INSTALL";
-
-    public static final String SYSTEM_INSTALL_ACTION = "android.credentials.SYSTEM_INSTALL";
 
     /** Key prefix for CA certificates. */
     public static final String CA_CERTIFICATE = "CACERT_";
@@ -73,7 +69,7 @@ public class Credentials {
 
     public void unlock(Context context) {
         try {
-            Intent intent = new Intent(UNLOCK_ACTION);
+            Intent intent = new Intent("com.android.credentials.UNLOCK");
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
@@ -103,14 +99,6 @@ public class Credentials {
             Intent intent = createInstallIntent();
             intent.putExtra(type, value);
             context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(LOGTAG, e.toString());
-        }
-    }
-
-    public void installFromSdCard(Context context) {
-        try {
-            context.startActivity(createInstallIntent());
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
         }
