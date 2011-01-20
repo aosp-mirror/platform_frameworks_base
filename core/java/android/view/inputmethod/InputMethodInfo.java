@@ -265,10 +265,19 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
-     * Return the subtypes of Input Method.
+     * Return the count of the subtypes of Input Method.
      */
-    public ArrayList<InputMethodSubtype> getSubtypes() {
-        return mSubtypes;
+    public int getSubtypeCount() {
+        return mSubtypes.size();
+    }
+
+    /**
+     * Return the Input Method's subtype at the specified index.
+     *
+     * @param index the index of the subtype to return.
+     */
+    public InputMethodSubtype getSubtypeAt(int index) {
+        return mSubtypes.get(index);
     }
 
     /**

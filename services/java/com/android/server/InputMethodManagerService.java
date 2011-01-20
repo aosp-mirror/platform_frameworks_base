@@ -575,7 +575,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!allowsImplicitlySelectedSubtypes || enabledSubtypes.size() > 0) {
                 return enabledSubtypes;
             } else {
-                return getApplicableSubtypesLocked(mRes, imi.getSubtypes());
+                return getApplicableSubtypesLocked(mRes, getSubtypes(imi));
             }
         }
     }
@@ -1014,10 +1014,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (id.equals(mCurMethodId)) {
-            ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
             InputMethodSubtype subtype = null;
-            if (subtypeId >= 0 && subtypeId < subtypes.size()) {
-                subtype = subtypes.get(subtypeId);
+            if (subtypeId >= 0 && subtypeId < info.getSubtypeCount()) {
+                subtype = info.getSubtypeAt(subtypeId);
             }
             if (subtype != mCurrentSubtype) {
                 synchronized (mMethodMap) {
@@ -1543,6 +1542,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
+    private static ArrayList<InputMethodSubtype> getSubtypes(InputMethodInfo imi) {
+        ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+        final int subtypeCount = imi.getSubtypeCount();
+        for (int i = 0; i < subtypeCount; ++i) {
+            subtypes.add(imi.getSubtypeAt(i));
+        }
+        return subtypes;
+    }
+
     private boolean chooseNewDefaultIMELocked() {
         List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
         if (enabled != null && enabled.size() > 0) {
@@ -1680,7 +1688,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 ArrayList<String> subtypes = immis.get(i).second;
                 if (subtypes != null && subtypes.size() == 0) {
                     ArrayList<InputMethodSubtype> applicableSubtypes =
-                            getApplicableSubtypesLocked(mRes, imi.getSubtypes());
+                            getApplicableSubtypesLocked(mRes, getSubtypes(imi));
                     final int numSubtypes = applicableSubtypes.size();
                     for (int j = 0; j < numSubtypes; ++j) {
                         subtypes.add(String.valueOf(applicableSubtypes.get(j).hashCode()));
@@ -1710,11 +1718,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (property == null) {
                     continue;
                 }
-                ArrayList<InputMethodSubtype> subtypes = property.getSubtypes();
                 CharSequence label = property.loadLabel(pm);
                 if (showSubtypes && enabledSubtypeSet.size() > 0) {
-                    for (int j = 0; j < subtypes.size(); ++j) {
-                        InputMethodSubtype subtype = subtypes.get(j);
+                    final int subtypeCount = property.getSubtypeCount();
+                    for (int j = 0; j < subtypeCount; ++j) {
+                        InputMethodSubtype subtype = property.getSubtypeAt(j);
                         if (enabledSubtypeSet.contains(String.valueOf(subtype.hashCode()))) {
                             CharSequence title;
                             int nameResId = subtype.getNameResId();
@@ -1790,7 +1798,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 hideInputMethodMenu();
                                 if (im != null) {
                                     if ((subtypeId < 0)
-                                            || (subtypeId >= im.getSubtypes().size())) {
+                                            || (subtypeId >= im.getSubtypeCount())) {
                                         subtypeId = NOT_A_SUBTYPE_ID;
                                     }
                                     setInputMethodLocked(im.getId(), subtypeId);
@@ -1915,10 +1923,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mSettings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
             mCurrentSubtype = null;
         } else {
-            final ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
-            if (subtypeId < subtypes.size()) {
-                mSettings.putSelectedSubtype(subtypes.get(subtypeId).hashCode());
-                mCurrentSubtype = subtypes.get(subtypeId);
+            if (subtypeId < imi.getSubtypeCount()) {
+                InputMethodSubtype subtype = imi.getSubtypeAt(subtypeId);
+                mSettings.putSelectedSubtype(subtype.hashCode());
+                mCurrentSubtype = subtype;
             } else {
                 mSettings.putSelectedSubtype(NOT_A_SUBTYPE_ID);
                 mCurrentSubtype = null;
@@ -1966,9 +1974,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private int getSubtypeIdFromHashCode(InputMethodInfo imi, int subtypeHashCode) {
         if (imi != null) {
-            ArrayList<InputMethodSubtype> subtypes = imi.getSubtypes();
-            for (int i = 0; i < subtypes.size(); ++i) {
-                InputMethodSubtype ims = subtypes.get(i);
+            final int subtypeCount = imi.getSubtypeCount();
+            for (int i = 0; i < subtypeCount; ++i) {
+                InputMethodSubtype ims = imi.getSubtypeAt(i);
                 if (subtypeHashCode == ims.hashCode()) {
                     return i;
                 }
@@ -2112,13 +2120,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // 4. Search by the current subtype's locale from all subtypes.
             if (subtype == null && mCurrentSubtype != null) {
                 subtype = findLastResortApplicableSubtypeLocked(
-                        mRes, imi.getSubtypes(), mode, mCurrentSubtype.getLocale(), false);
+                        mRes, getSubtypes(imi), mode, mCurrentSubtype.getLocale(), false);
             }
             // 5. Search by the system locale from all subtypes.
             // 6. Search the first enabled subtype matched with mode from all subtypes.
             if (subtype == null) {
                 subtype = findLastResortApplicableSubtypeLocked(
-                        mRes, imi.getSubtypes(), mode, null, true);
+                        mRes, getSubtypes(imi), mode, null, true);
             }
             if (subtype != null) {
                 if (imiId.equals(mCurMethodId)) {
@@ -2196,7 +2204,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 } else {
                     mCurrentSubtype =
-                            mMethodMap.get(lastInputMethodId).getSubtypes().get(subtypeId);
+                            getSubtypes(mMethodMap.get(lastInputMethodId)).get(subtypeId);
                 }
             }
             return mCurrentSubtype;
@@ -2319,8 +2327,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 for (Pair<String, ArrayList<String>> imsPair : imsList) {
                     InputMethodInfo info = mMethodMap.get(imsPair.first);
                     if (info != null && info.getId().equals(imi.getId())) {
-                        ArrayList<InputMethodSubtype> subtypes = info.getSubtypes();
-                        for (InputMethodSubtype ims: subtypes) {
+                        final int subtypeCount = info.getSubtypeCount();
+                        for (int i = 0; i < subtypeCount; ++i) {
+                            InputMethodSubtype ims = info.getSubtypeAt(i);
                             for (String s: imsPair.second) {
                                 if (String.valueOf(ims.hashCode()).equals(s)) {
                                     enabledSubtypes.add(ims);
@@ -2560,9 +2569,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         InputMethodInfo ime = mMethodMap.get(imeId);
                         // If IME is enabled and no subtypes are enabled, applicable subtypes
                         // are enabled implicitly, so needs to treat them to be enabled.
-                        if (ime != null && ime.getSubtypes().size() > 0) {
+                        if (ime != null && ime.getSubtypeCount() > 0) {
                             List<InputMethodSubtype> implicitlySelectedSubtypes =
-                                    getApplicableSubtypesLocked(mRes, ime.getSubtypes());
+                                    getApplicableSubtypesLocked(mRes, getSubtypes(ime));
                             if (implicitlySelectedSubtypes != null) {
                                 final int N = implicitlySelectedSubtypes.size();
                                 for (int i = 0; i < N; ++i) {
