@@ -52,7 +52,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     View mNotificationScroller;
     View mNotificationGlow;
     ViewGroup mContentFrame;
-    Rect mContentArea;
+    Rect mContentArea = new Rect();
     View mSettingsView;
     View mScrim, mGlow;
     ViewGroup mContentParent;
@@ -136,7 +136,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     @Override
     public void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mContentArea = null;
     }
 
     public void onClick(View v) {
@@ -165,13 +164,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public boolean isInContentArea(int x, int y) {
-        if (mContentArea == null) {
-            mContentArea = new Rect(mContentFrame.getLeft(),
-                    mTitleArea.getTop(),
-                    mContentFrame.getRight(),
-                    mContentFrame.getBottom());
-            offsetDescendantRectToMyCoords(mContentParent, mContentArea);
-        }
+        mContentArea.left = mContentFrame.getLeft();
+        mContentArea.top = mTitleArea.getTop();
+        mContentArea.right = mContentFrame.getRight();
+        mContentArea.bottom = mContentFrame.getBottom();
+        offsetDescendantRectToMyCoords(mContentParent, mContentArea);
         return mContentArea.contains(x, y);
     }
 
