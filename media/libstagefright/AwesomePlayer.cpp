@@ -53,6 +53,8 @@ namespace android {
 
 static int64_t kLowWaterMarkUs = 2000000ll;  // 2secs
 static int64_t kHighWaterMarkUs = 10000000ll;  // 10secs
+static const size_t kLowWaterMarkBytes = 40000;
+static const size_t kHighWaterMarkBytes = 200000;
 
 struct AwesomeEvent : public TimedEventQueue::Event {
     AwesomeEvent(
@@ -588,9 +590,6 @@ void AwesomePlayer::onBufferingUpdate() {
             } else {
                 // We don't know the bitrate of the stream, use absolute size
                 // limits to maintain the cache.
-
-                const size_t kLowWaterMarkBytes = 40000;
-                const size_t kHighWaterMarkBytes = 200000;
 
                 if ((mFlags & PLAYING) && !eos
                         && (cachedDataRemaining < kLowWaterMarkBytes)) {
@@ -1478,6 +1477,34 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         mConnectingDataSource.clear();
 
         dataSource = mCachedSource;
+
+        // We're going to prefill the cache before trying to instantiate
+        // the extractor below, as the latter is an operation that otherwise
+        // could block on the datasource for a significant amount of time.
+        // During that time we'd be unable to abort the preparation phase
+        // without this prefill.
+
+        mLock.unlock();
+
+        for (;;) {
+            bool eos;
+            size_t cachedDataRemaining =
+                mCachedSource->approxDataRemaining(&eos);
+
+            if (eos || cachedDataRemaining >= kHighWaterMarkBytes
+                    || (mFlags & PREPARE_CANCELLED)) {
+                break;
+            }
+
+            usleep(200000);
+        }
+
+        mLock.lock();
+
+        if (mFlags & PREPARE_CANCELLED) {
+            LOGI("Prepare cancelled while waiting for initial cache fill.");
+            return UNKNOWN_ERROR;
+        }
     } else if (!strncasecmp(mUri.string(), "httplive://", 11)) {
         String8 uri("http://");
         uri.append(mUri.string() + 11);
