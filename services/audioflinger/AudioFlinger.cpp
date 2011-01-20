@@ -5443,19 +5443,21 @@ void AudioFlinger::EffectModule::process()
 
         // clear auxiliary effect input buffer for next accumulation
         if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-            memset(mConfig.inputCfg.buffer.raw, 0, mConfig.inputCfg.buffer.frameCount*sizeof(int32_t));
+            memset(mConfig.inputCfg.buffer.raw, 0,
+                   mConfig.inputCfg.buffer.frameCount*sizeof(int32_t));
         }
     } else if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_INSERT &&
-                mConfig.inputCfg.buffer.raw != mConfig.outputCfg.buffer.raw){
-        // If an insert effect is idle and input buffer is different from output buffer, copy input to
-        // output
+                mConfig.inputCfg.buffer.raw != mConfig.outputCfg.buffer.raw) {
+        // If an insert effect is idle and input buffer is different from output buffer,
+        // accumulate input onto output
         sp<EffectChain> chain = mChain.promote();
         if (chain != 0 && chain->activeTracks() != 0) {
-            size_t size = mConfig.inputCfg.buffer.frameCount * sizeof(int16_t);
-            if (mConfig.inputCfg.channels == CHANNEL_STEREO) {
-                size *= 2;
+            size_t frameCnt = mConfig.inputCfg.buffer.frameCount * 2;  //always stereo here
+            int16_t *in = mConfig.inputCfg.buffer.s16;
+            int16_t *out = mConfig.outputCfg.buffer.s16;
+            for (size_t i = 0; i < frameCnt; i++) {
+                out[i] = clamp16((int32_t)out[i] + (int32_t)in[i]);
             }
-            memcpy(mConfig.outputCfg.buffer.raw, mConfig.inputCfg.buffer.raw, size);
         }
     }
 }
