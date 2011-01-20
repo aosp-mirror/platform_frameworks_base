@@ -47,6 +47,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
     boolean mShowing;
     View mTitleArea;
+    View mModeToggle;
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
@@ -75,7 +76,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mContentParent = (ViewGroup)findViewById(R.id.content_parent);
         mContentParent.bringToFront();
         mTitleArea = findViewById(R.id.title_area);
-        mTitleArea.setOnClickListener(this);
+        mModeToggle = findViewById(R.id.mode_toggle);
+        mModeToggle.setOnClickListener(this);
 
         mScrim = findViewById(R.id.scrim);
         mGlow = findViewById(R.id.glow);
@@ -138,7 +140,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public void onClick(View v) {
-        if (v == mTitleArea) {
+        if (v == mModeToggle) {
             if (mSettingsView == null) {
                 switchToSettingsMode();
             } else {
@@ -163,10 +165,10 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public boolean isInContentArea(int x, int y) {
-        mContentArea.left = mContentFrame.getLeft();
-        mContentArea.top = mTitleArea.getTop();
-        mContentArea.right = mContentFrame.getRight();
-        mContentArea.bottom = mContentFrame.getBottom();
+        mContentArea.left = mContentFrame.getLeft() + mContentFrame.getPaddingLeft();
+        mContentArea.top = mTitleArea.getTop() + mTitleArea.getPaddingTop();
+        mContentArea.right = mContentFrame.getRight() - mContentFrame.getPaddingRight();
+        mContentArea.bottom = mContentFrame.getBottom() - mContentFrame.getPaddingBottom();
         offsetDescendantRectToMyCoords(mContentParent, mContentArea);
         return mContentArea.contains(x, y);
     }

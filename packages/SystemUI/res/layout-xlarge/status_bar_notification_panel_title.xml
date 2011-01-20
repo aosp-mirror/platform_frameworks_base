@@ -23,7 +23,6 @@
     android:orientation="vertical"
     android:background="@drawable/notify_panel_clock_bg"
     >
-
     <ImageView
         android:id="@+id/network_signal"
         android:layout_height="32dp"
@@ -150,4 +149,10 @@
         android:layout_marginLeft="32dp"
         />
 
+    <Button
+        android:id="@+id/mode_toggle"
+        android:background="@null"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 </RelativeLayout>
