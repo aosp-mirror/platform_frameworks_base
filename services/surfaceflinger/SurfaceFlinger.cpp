@@ -1491,8 +1491,13 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
+        /*
+         * Dump the visible layer list
+         */
         const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
         const size_t count = currentLayers.size();
+        snprintf(buffer, SIZE, "Visible layers (count = %d)\n", count);
+        result.append(buffer);
         for (size_t i=0 ; i<count ; i++) {
             const sp<LayerBase>& layer(currentLayers[i]);
             layer->dump(result, buffer, SIZE);
@@ -1502,6 +1507,24 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             layer->visibleRegionScreen.dump(result, "visibleRegionScreen");
         }
 
+        /*
+         * Dump the layers in the purgatory
+         */
+
+        const size_t purgatorySize =  mLayerPurgatory.size();
+        snprintf(buffer, SIZE, "Purgatory state (%d entries)\n", purgatorySize);
+        result.append(buffer);
+        for (size_t i=0 ; i<purgatorySize ; i++) {
+            const sp<LayerBase>& layer(mLayerPurgatory.itemAt(i));
+            layer->shortDump(result, buffer, SIZE);
+        }
+
+        /*
+         * Dump SurfaceFlinger global state
+         */
+
+        snprintf(buffer, SIZE, "SurfaceFlinger global state\n");
+        result.append(buffer);
         mWormholeRegion.dump(result, "WormholeRegion");
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         snprintf(buffer, SIZE,
@@ -1527,6 +1550,9 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
+        /*
+         * Dump HWComposer state
+         */
         HWComposer& hwc(hw.getHwComposer());
         snprintf(buffer, SIZE, "  h/w composer %s and %s\n",
                 hwc.initCheck()==NO_ERROR ? "present" : "not present",
@@ -1534,6 +1560,9 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
         result.append(buffer);
         hwc.dump(result, buffer, SIZE);
 
+        /*
+         * Dump gralloc state
+         */
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);
         hw.dump(result);
