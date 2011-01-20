@@ -1177,6 +1177,17 @@ class BrowserFrame extends Handler {
                 contentDisposition, mimeType, contentLength);
     }
 
+    /**
+     * Called by JNI when we load a page over SSL.
+     */
+    private void setCertificate(String issuedTo, String issuedBy,
+            long validNotBeforeMillis, long validNotAfterMillis) {
+        Date validNotBefore = new Date(validNotBeforeMillis);
+        Date validNotAfter = new Date(validNotAfterMillis);
+        mCallbackProxy.onReceivedCertificate(new SslCertificate(
+                issuedTo, issuedBy, validNotBefore, validNotAfter));
+    }
+
     //==========================================================================
     // native functions
     //==========================================================================
