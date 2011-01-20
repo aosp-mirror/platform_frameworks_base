@@ -1356,7 +1356,7 @@ TEST_F(SwitchInputMapperTest, GetSources) {
     SwitchInputMapper* mapper = new SwitchInputMapper(mDevice);
     addMapperAndConfigure(mapper);
 
-    ASSERT_EQ(uint32_t(0), mapper->getSources());
+    ASSERT_EQ(uint32_t(AINPUT_SOURCE_SWITCH), mapper->getSources());
 }
 
 TEST_F(SwitchInputMapperTest, GetSwitchState) {

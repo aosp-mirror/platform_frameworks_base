@@ -38,6 +38,15 @@ enum {
     AKEY_EVENT_FLAG_START_TRACKING = 0x40000000
 };
 
+enum {
+    /*
+     * Indicates that an input device has switches.
+     * This input source flag is hidden from the API because switches are only used by the system
+     * and applications have no way to interact with them.
+     */
+    AINPUT_SOURCE_SWITCH = 0x80000000,
+};
+
 /*
  * Maximum number of pointers supported per motion event.
  * Smallest number of pointers is 1.
