@@ -1762,8 +1762,11 @@ public class Activity extends ContextThemeWrapper
     /**
      * Set the activity content from a layout resource.  The resource will be
      * inflated, adding all top-level views to the activity.
-     * 
+     *
      * @param layoutResID Resource ID to be inflated.
+     * 
+     * @see #setContentView(android.view.View)
+     * @see #setContentView(android.view.View, android.view.ViewGroup.LayoutParams)
      */
     public void setContentView(int layoutResID) {
         getWindow().setContentView(layoutResID);
@@ -1773,9 +1776,17 @@ public class Activity extends ContextThemeWrapper
     /**
      * Set the activity content to an explicit view.  This view is placed
      * directly into the activity's view hierarchy.  It can itself be a complex
-     * view hierarhcy.
+     * view hierarchy.  When calling this method, the layout parameters of the
+     * specified view are ignored.  Both the width and the height of the view are
+     * set by default to {@link ViewGroup.LayoutParams#MATCH_PARENT}. To use
+     * your own layout parameters, invoke
+     * {@link #setContentView(android.view.View, android.view.ViewGroup.LayoutParams)}
+     * instead.
      * 
      * @param view The desired content to display.
+     *
+     * @see #setContentView(int)
+     * @see #setContentView(android.view.View, android.view.ViewGroup.LayoutParams)
      */
     public void setContentView(View view) {
         getWindow().setContentView(view);
@@ -1785,10 +1796,13 @@ public class Activity extends ContextThemeWrapper
     /**
      * Set the activity content to an explicit view.  This view is placed
      * directly into the activity's view hierarchy.  It can itself be a complex
-     * view hierarhcy.
+     * view hierarchy.
      * 
      * @param view The desired content to display.
      * @param params Layout parameters for the view.
+     *
+     * @see #setContentView(android.view.View)
+     * @see #setContentView(int)
      */
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         getWindow().setContentView(view, params);
