@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
@@ -827,6 +828,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         setDefaultWebSettings(mWebView);
         mIsGeolocationPermissionSet = false;
         mPendingGeolocationPermissionCallbacks = null;
+        CookieManager.getInstance().removeAllCookie();
     }
 
     private long[] getDrawWebViewTime(WebView view, int count) {
