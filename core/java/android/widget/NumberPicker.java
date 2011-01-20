@@ -188,7 +188,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Listener to be notified upon current value change.
      */
-    private OnValueChangedListener mOnValueChangedListener;
+    private OnValueChangeListener mOnValueChangeListener;
 
     /**
      * Listener to be notified upon scroll state change.
@@ -362,7 +362,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * Interface to listen for changes of the current value.
      */
-    public interface OnValueChangedListener {
+    public interface OnValueChangeListener {
 
         /**
          * Called upon a change of the current value.
@@ -808,8 +808,8 @@ public class NumberPicker extends LinearLayout {
      *
      * @param onValueChangedListener The listener.
      */
-    public void setOnValueChangedListener(OnValueChangedListener onValueChangedListener) {
-        mOnValueChangedListener = onValueChangedListener;
+    public void setOnValueChangedListener(OnValueChangeListener onValueChangedListener) {
+        mOnValueChangeListener = onValueChangedListener;
     }
 
     /**
@@ -1432,8 +1432,8 @@ public class NumberPicker extends LinearLayout {
      * NumberPicker.
      */
     private void notifyChange(int previous, int current) {
-        if (mOnValueChangedListener != null) {
-            mOnValueChangedListener.onValueChange(this, previous, mValue);
+        if (mOnValueChangeListener != null) {
+            mOnValueChangeListener.onValueChange(this, previous, mValue);
         }
     }
 

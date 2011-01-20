@@ -26,7 +26,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.NumberPicker.OnValueChangedListener;
+import android.widget.NumberPicker.OnValueChangeListener;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
@@ -125,7 +125,7 @@ public class TimePicker extends FrameLayout {
 
         // hour
         mHourSpinner = (NumberPicker) findViewById(R.id.hour);
-        mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangedListener() {
+        mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
                 if (!is24HourView()) {
                     int minValue = mHourSpinner.getMinValue();
@@ -154,7 +154,7 @@ public class TimePicker extends FrameLayout {
         mMinuteSpinner.setMaxValue(59);
         mMinuteSpinner.setOnLongPressUpdateInterval(100);
         mMinuteSpinner.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-        mMinuteSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangedListener() {
+        mMinuteSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
                 int minValue = mMinuteSpinner.getMinValue();
                 int maxValue = mMinuteSpinner.getMaxValue();
@@ -200,7 +200,7 @@ public class TimePicker extends FrameLayout {
             mAmPmSpinner.setMinValue(0);
             mAmPmSpinner.setMaxValue(1);
             mAmPmSpinner.setDisplayedValues(mAmPmStrings);
-            mAmPmSpinner.setOnValueChangedListener(new OnValueChangedListener() {
+            mAmPmSpinner.setOnValueChangedListener(new OnValueChangeListener() {
                 public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                     picker.requestFocus();
                     mIsAm = !mIsAm;
