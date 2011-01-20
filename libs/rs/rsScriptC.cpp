@@ -467,7 +467,7 @@ extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
 #endif
 
-void ScriptCState::runCompiler(Context *rsc,
+bool ScriptCState::runCompiler(Context *rsc,
                                ScriptC *s,
                                const char *resName,
                                const char *cacheDir) {
@@ -482,7 +482,7 @@ void ScriptCState::runCompiler(Context *rsc,
                   s->mEnviroment.mScriptText,
                   s->mEnviroment.mScriptTextLength, 0) != 0) {
         LOGE("bcc: FAILS to read bitcode");
-        // Handle Fatal Error
+        return false;
     }
 
 #if 1
@@ -493,14 +493,14 @@ void ScriptCState::runCompiler(Context *rsc,
                     /*"1" means skip buffer here, and let libbcc decide*/,
                   0) != 0) {
         LOGE("bcc: FAILS to link bitcode");
-        // Handle Fatal Error
+        return false;
     }
 #endif
     char *cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
 
     if (bccPrepareExecutable(s->mBccScript, cachePath, 0) != 0) {
         LOGE("bcc: FAILS to prepare executable");
-        // Handle Fatal Error
+        return false;
     }
 
     free(cachePath);
@@ -547,7 +547,7 @@ void ScriptCState::runCompiler(Context *rsc,
                 continue;
             }
             LOGE("Invalid version pragma value: %s\n", values[i]);
-            // Handle Fatal Error
+            return false;
         }
 
         if (!strcmp(keys[i], "stateVertex")) {
@@ -559,7 +559,7 @@ void ScriptCState::runCompiler(Context *rsc,
                 continue;
             }
             LOGE("Unrecognized value %s passed to stateVertex", values[i]);
-            // Handle Fatal Error
+            return false;
         }
 
         if (!strcmp(keys[i], "stateRaster")) {
@@ -571,7 +571,7 @@ void ScriptCState::runCompiler(Context *rsc,
                 continue;
             }
             LOGE("Unrecognized value %s passed to stateRaster", values[i]);
-            // Handle Fatal Error
+            return false;
         }
 
         if (!strcmp(keys[i], "stateFragment")) {
@@ -583,7 +583,7 @@ void ScriptCState::runCompiler(Context *rsc,
                 continue;
             }
             LOGE("Unrecognized value %s passed to stateFragment", values[i]);
-            // Handle Fatal Error
+            return false;
         }
 
         if (!strcmp(keys[i], "stateStore")) {
@@ -595,9 +595,10 @@ void ScriptCState::runCompiler(Context *rsc,
                 continue;
             }
             LOGE("Unrecognized value %s passed to stateStore", values[i]);
-            // Handle Fatal Error
+            return false;
         }
     }
+    return true;
 }
 
 namespace android {
@@ -630,7 +631,11 @@ RsScript rsi_ScriptCCreate(Context *rsc,
     ss->mScript.clear();
     s->incUserRef();
 
-    ss->runCompiler(rsc, s.get(), resName, cacheDir);
+    if (!ss->runCompiler(rsc, s.get(), resName, cacheDir)) {
+        // Error during compile, destroy s and return null.
+        s->zeroUserRef();
+        return NULL;
+    }
     ss->clear(rsc);
     return s.get();
 }
