@@ -78,15 +78,15 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     // URL color
     private ColorStateList mUrlColor;
 
-    // Cached column indexes, updated when the cursor changes.
-    private int mText1Col;
-    private int mText2Col;
-    private int mText2UrlCol;
-    private int mIconName1Col;
-    private int mIconName2Col;
-    private int mFlagsCol;
+    static final int INVALID_INDEX = -1;
 
-    static final int NONE = -1;
+    // Cached column indexes, updated when the cursor changes.
+    private int mText1Col = INVALID_INDEX;
+    private int mText2Col = INVALID_INDEX;
+    private int mText2UrlCol = INVALID_INDEX;
+    private int mIconName1Col = INVALID_INDEX;
+    private int mIconName2Col = INVALID_INDEX;
+    private int mFlagsCol = INVALID_INDEX;
 
     private final Runnable mStartSpinnerRunnable;
     private final Runnable mStopSpinnerRunnable;
@@ -308,7 +308,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         ChildViewCache views = (ChildViewCache) view.getTag();
 
         int flags = 0;
-        if (mFlagsCol != -1) {
+        if (mFlagsCol != INVALID_INDEX) {
             flags = cursor.getInt(mFlagsCol);
         }
         if (views.mText1 != null) {
@@ -391,7 +391,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     }
 
     private Drawable getIcon1(Cursor cursor) {
-        if (mIconName1Col < 0) {
+        if (mIconName1Col == INVALID_INDEX) {
             return null;
         }
         String value = cursor.getString(mIconName1Col);
@@ -403,7 +403,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     }
 
     private Drawable getIcon2(Cursor cursor) {
-        if (mIconName2Col < 0) {
+        if (mIconName2Col == INVALID_INDEX) {
             return null;
         }
         String value = cursor.getString(mIconName2Col);
@@ -687,7 +687,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     }
 
     private static String getStringOrNull(Cursor cursor, int col) {
-        if (col == NONE) {
+        if (col == INVALID_INDEX) {
             return null;
         }
         try {
