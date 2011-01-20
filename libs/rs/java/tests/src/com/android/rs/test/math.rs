@@ -83,7 +83,7 @@ volatile int4 i4;
     i4 = fnc(f4);
 
 
-static bool test_math(uint32_t index) {
+static bool test_fp_math(uint32_t index) {
     bool failed = false;
     start();
 
@@ -159,10 +159,10 @@ static bool test_math(uint32_t index) {
     float time = end(index);
 
     if (failed) {
-        rsDebug("test_math FAILED", time);
+        rsDebug("test_fp_math FAILED", time);
     }
     else {
-        rsDebug("test_math PASSED", time);
+        rsDebug("test_fp_math PASSED", time);
     }
 
     return failed;
@@ -170,7 +170,7 @@ static bool test_math(uint32_t index) {
 
 void math_test(uint32_t index, int test_num) {
     bool failed = false;
-    failed |= test_math(index);
+    failed |= test_fp_math(index);
 
     if (failed) {
         rsSendToClientBlocking(RS_MSG_TEST_FAILED);
