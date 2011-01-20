@@ -61,8 +61,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal|bottom"
-                    android:animateLayoutChanges="true"
-                    android:animationCache="false"
                     android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true"
