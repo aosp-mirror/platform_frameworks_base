@@ -1770,7 +1770,7 @@ final class WebViewCore {
 
     private void clearCache(boolean includeDiskFiles) {
         mBrowserFrame.clearCache();
-        if (includeDiskFiles && !JniUtil.useChromiumHttpStack()) {
+        if (includeDiskFiles) {
             CacheManager.removeAllCacheFiles();
         }
     }
