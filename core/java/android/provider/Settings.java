@@ -1792,7 +1792,6 @@ public final class Settings {
             SCREEN_BRIGHTNESS,
             SCREEN_BRIGHTNESS_MODE,
             VIBRATE_ON,
-            NOTIFICATIONS_USE_RING_VOLUME,
             MODE_RINGER,
             MODE_RINGER_STREAMS_AFFECTED,
             MUTE_STREAMS_AFFECTED,
