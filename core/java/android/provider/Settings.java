@@ -280,7 +280,7 @@ public final class Settings {
             "android.settings.INPUT_METHOD_SETTINGS";
 
     /**
-     * Activity Action: Show enabler activity to enable/disable input methods and subtypes.
+     * Activity Action: Show settings to enable/disable input method subtypes.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
      * safeguard against this.
@@ -290,8 +290,8 @@ public final class Settings {
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_INPUT_METHOD_AND_SUBTYPE_ENABLER =
-            "android.settings.INPUT_METHOD_AND_SUBTYPE_ENABLER";
+    public static final String ACTION_INPUT_METHOD_SUBTYPE_SETTINGS =
+            "android.settings.INPUT_METHOD_SUBTYPE_SETTINGS";
 
     /**
      * Activity Action: Show settings to manage the user input dictionary.

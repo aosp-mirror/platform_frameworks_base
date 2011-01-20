@@ -1640,7 +1640,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private void showInputMethodAndSubtypeEnabler(String inputMethodId) {
-        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_AND_SUBTYPE_ENABLER);
+        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
