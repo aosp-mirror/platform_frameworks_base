@@ -48,6 +48,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.LinkProperties;
 import android.net.wifi.NetworkUpdateResult;
 import android.net.wifi.WpsResult.Status;
+import android.net.InterfaceConfiguration;
 import android.os.Binder;
 import android.os.Message;
 import android.os.IBinder;
@@ -73,7 +74,7 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
 
-
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -463,6 +464,20 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent scanIntent = new Intent(ACTION_START_SCAN, null);
         mScanIntent = PendingIntent.getBroadcast(mContext, SCAN_REQUEST, scanIntent, 0);
+
+        mContext.registerReceiver(
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+
+                    ArrayList<String> available = intent.getStringArrayListExtra(
+                            ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+                    ArrayList<String> active = intent.getStringArrayListExtra(
+                            ConnectivityManager.EXTRA_ACTIVE_TETHER);
+                    updateTetherState(available, active);
+
+                }
+            },new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -971,6 +986,52 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     /*********************************************************
      * Internal private functions
      ********************************************************/
+
+    private void updateTetherState(ArrayList<String> available, ArrayList<String> tethered) {
+
+        boolean wifiTethered = false;
+        boolean wifiAvailable = false;
+
+        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
+
+        if (mCm == null) {
+            mCm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        }
+
+        String[] wifiRegexs = mCm.getTetherableWifiRegexs();
+
+        for (String intf : available) {
+            for (String regex : wifiRegexs) {
+                if (intf.matches(regex)) {
+
+                    InterfaceConfiguration ifcg = null;
+                    try {
+                        ifcg = service.getInterfaceConfig(intf);
+                        if (ifcg != null) {
+                            /* IP/netmask: 192.168.43.1/255.255.255.0 */
+                            ifcg.addr = InetAddress.getByName("192.168.43.1");
+                            ifcg.mask = InetAddress.getByName("255.255.255.0");
+                            ifcg.interfaceFlags = "[up]";
+
+                            service.setInterfaceConfig(intf, ifcg);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error configuring interface " + intf + ", :" + e);
+                        setWifiApEnabled(null, false);
+                        return;
+                    }
+
+                    if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                        Log.e(TAG, "Error tethering on " + intf);
+                        setWifiApEnabled(null, false);
+                        return;
+                    }
+                    break;
+                }
+            }
+        }
+    }
 
     /**
      * Set the country code from the system setting value, if any.
@@ -2818,6 +2879,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_STOP_AP:
                     Log.d(TAG,"Stopping Soft AP");
                     setWifiApState(WIFI_AP_STATE_DISABLING);
+
+                    if (mCm == null) {
+                        mCm = (ConnectivityManager) mContext.getSystemService(
+                                Context.CONNECTIVITY_SERVICE);
+                    }
+                    if (mCm.untether(SOFTAP_IFACE) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                        Log.e(TAG, "Untether initiate failed!");
+                    }
                     try {
                         nwService.stopAccessPoint();
                     } catch(Exception e) {

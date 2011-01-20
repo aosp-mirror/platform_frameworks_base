@@ -39,7 +39,6 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WpsConfiguration;
 import android.net.wifi.WpsResult;
 import android.net.ConnectivityManager;
-import android.net.InterfaceConfiguration;
 import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
@@ -56,7 +55,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -112,9 +110,6 @@ public class WifiService extends IWifiManager.Stub {
     private int mMulticastDisabled;
 
     private final IBatteryStats mBatteryStats;
-
-    ConnectivityManager mCm;
-    private String[] mWifiRegexs;
 
     /**
      * See {@link Settings.Secure#WIFI_IDLE_MS}. This is the default value if a
@@ -256,20 +251,6 @@ public class WifiService extends IWifiManager.Stub {
                 },
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
-        mContext.registerReceiver(
-            new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-
-                    ArrayList<String> available = intent.getStringArrayListExtra(
-                            ConnectivityManager.EXTRA_AVAILABLE_TETHER);
-                    ArrayList<String> active = intent.getStringArrayListExtra(
-                            ConnectivityManager.EXTRA_ACTIVE_TETHER);
-                    updateTetherState(available, active);
-
-                }
-            },new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -320,52 +301,6 @@ public class WifiService extends IWifiManager.Stub {
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
         setWifiEnabled(wifiEnabled);
-    }
-
-    private void updateTetherState(ArrayList<String> available, ArrayList<String> tethered) {
-
-        boolean wifiTethered = false;
-        boolean wifiAvailable = false;
-
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
-
-        if (mCm == null) {
-            mCm = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        }
-
-        mWifiRegexs = mCm.getTetherableWifiRegexs();
-
-        for (String intf : available) {
-            for (String regex : mWifiRegexs) {
-                if (intf.matches(regex)) {
-
-                    InterfaceConfiguration ifcg = null;
-                    try {
-                        ifcg = service.getInterfaceConfig(intf);
-                        if (ifcg != null) {
-                            /* IP/netmask: 192.168.43.1/255.255.255.0 */
-                            ifcg.addr = InetAddress.getByName("192.168.43.1");
-                            ifcg.mask = InetAddress.getByName("255.255.255.0");
-                            ifcg.interfaceFlags = "[up]";
-
-                            service.setInterfaceConfig(intf, ifcg);
-                        }
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error configuring interface " + intf + ", :" + e);
-                        setWifiApEnabled(null, false);
-                        return;
-                    }
-
-                    if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                        Slog.e(TAG, "Error tethering on " + intf);
-                        setWifiApEnabled(null, false);
-                        return;
-                    }
-                    break;
-                }
-            }
-        }
     }
 
     private boolean testAndClearWifiSavedState() {
