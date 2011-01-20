@@ -124,9 +124,9 @@ public class InputMethodButton extends ImageView {
             if (subtype != null) {
                 return pm.getDrawable(imi.getPackageName(), subtype.getIconResId(),
                         imi.getServiceInfo().applicationInfo);
-            } else if (imi.getSubtypes().size() > 0) {
+            } else if (imi.getSubtypeCount() > 0) {
                 return pm.getDrawable(imi.getPackageName(),
-                        imi.getSubtypes().get(0).getIconResId(),
+                        imi.getSubtypeAt(0).getIconResId(),
                         imi.getServiceInfo().applicationInfo);
             } else {
                 try {
