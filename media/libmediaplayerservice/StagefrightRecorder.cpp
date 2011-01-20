@@ -1295,12 +1295,6 @@ status_t StagefrightRecorder::setupMPEG4Recording(
     status_t err = OK;
     sp<MediaWriter> writer = new MPEG4Writer(outputFd);
 
-    // Add audio source first if it exists
-    if (!mCaptureTimeLapse && (mAudioSource != AUDIO_SOURCE_LIST_END)) {
-        err = setupAudioEncoder(writer);
-        if (err != OK) return err;
-        *totalBitRate += mAudioBitRate;
-    }
     if (mVideoSource == VIDEO_SOURCE_DEFAULT
             || mVideoSource == VIDEO_SOURCE_CAMERA) {
 
@@ -1330,6 +1324,15 @@ status_t StagefrightRecorder::setupMPEG4Recording(
 
         writer->addSource(encoder);
         *totalBitRate += videoBitRate;
+    }
+
+    // Audio source is added at the end if it exists.
+    // This help make sure that the "recoding" sound is suppressed for
+    // camcorder applications in the recorded files.
+    if (!mCaptureTimeLapse && (mAudioSource != AUDIO_SOURCE_LIST_END)) {
+        err = setupAudioEncoder(writer);
+        if (err != OK) return err;
+        *totalBitRate += mAudioBitRate;
     }
 
     if (mInterleaveDurationUs > 0) {
