@@ -244,6 +244,9 @@ public final class CacheManager {
      * obtained from {@link android.webkit.CacheManager.CacheResult#getLocalPath}, this
      * identifies the cache file.
      *
+     * Cache files are not guaranteed to be in this directory before
+     * CacheManager#getCacheFile(String, Map<String, String>) is called.
+     *
      * @return File The base directory of the cache.
      *
      * @deprecated Access to the HTTP cache will be removed in a future release.
@@ -611,8 +614,9 @@ public final class CacheManager {
             return true;
         }
         // delete rows in the cache database
-        WebViewWorker.getHandler().sendEmptyMessage(
-                WebViewWorker.MSG_CLEAR_CACHE);
+        if (!JniUtil.useChromiumHttpStack())
+            WebViewWorker.getHandler().sendEmptyMessage(WebViewWorker.MSG_CLEAR_CACHE);
+
         // delete cache files in a separate thread to not block UI.
         final Runnable clearCache = new Runnable() {
             public void run() {
