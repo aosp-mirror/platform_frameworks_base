@@ -56,6 +56,9 @@ public class ScriptC extends Script {
     protected ScriptC(RenderScript rs, Resources resources, int resourceID) {
         super(0, rs);
         int id = internalCreate(rs, resources, resourceID);
+        if (id == 0) {
+            throw new RSRuntimeException("Loading of ScriptC script failed.");
+        }
         setID(id);
     }
 
