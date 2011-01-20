@@ -570,6 +570,9 @@ final class ApplicationPackageManager extends PackageManager {
         } catch (NameNotFoundException e) {
             Log.w("PackageManager", "Failure retrieving resources for"
                   + appInfo.packageName);
+        } catch (Resources.NotFoundException e) {
+            Log.w("PackageManager", "Failure retrieving resources for"
+                  + appInfo.packageName + ": " + e.getMessage());
         } catch (RuntimeException e) {
             // If an exception was thrown, fall through to return
             // default icon.
