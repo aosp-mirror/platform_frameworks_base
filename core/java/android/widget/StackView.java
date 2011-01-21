@@ -384,8 +384,8 @@ public class StackView extends AdapterViewAnimator {
     }
 
     @Override
-    void showOnly(int childIndex, boolean animate, boolean onLayout) {
-        super.showOnly(childIndex, animate, onLayout);
+    void showOnly(int childIndex, boolean animate) {
+        super.showOnly(childIndex, animate);
 
         // Here we need to make sure that the z-order of the children is correct
         for (int i = mCurrentWindowEnd; i >= mCurrentWindowStart; i--) {
@@ -529,7 +529,7 @@ public class StackView extends AdapterViewAnimator {
             requestDisallowInterceptTouchEvent(true);
 
             if (mAdapter == null) return;
-            final int adapterCount = mAdapter.getCount();
+            final int adapterCount = getCount();
 
             int activeIndex;
             if (mStackMode == ITEMS_SLIDE_UP) {
@@ -951,19 +951,6 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onRemoteAdapterConnected() {
-        super.onRemoteAdapterConnected();
-        // On first run, we want to set the stack to the end.
-        if (mWhichChild == -1) {
-            mWhichChild = 0;
-        }
-        setDisplayedChild(mWhichChild);
-    }
-
     LayoutParams createOrReuseLayoutParams(View v) {
         final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
         if (currentLp instanceof LayoutParams) {
@@ -979,18 +966,7 @@ public class StackView extends AdapterViewAnimator {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        boolean dataChanged = mDataChanged;
-        if (dataChanged) {
-            handleDataChanged();
-
-            // if the data changes, mWhichChild might be out of the bounds of the adapter
-            // in this case, we reset mWhichChild to the beginning
-            if (mWhichChild >= mAdapter.getCount())
-                mWhichChild = 0;
-
-            showOnly(mWhichChild, true, true);
-            refreshChildren();
-        }
+        checkForAndHandleDataChanged();
 
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -1004,8 +980,6 @@ public class StackView extends AdapterViewAnimator {
                     childRight + lp.horizontalOffset, childBottom + lp.verticalOffset);
 
         }
-
-        mDataChanged = false;
         onLayout();
     }
 
@@ -1014,7 +988,7 @@ public class StackView extends AdapterViewAnimator {
         long timeSinceLastInteraction = System.currentTimeMillis() - mLastInteractionTime;
 
         if (mAdapter == null) return;
-        final int adapterCount = mAdapter.getCount();
+        final int adapterCount = getCount();
         if (adapterCount == 1 && mLoopViews) return;
 
         if (mSwipeGestureType == GESTURE_NONE &&
@@ -1089,6 +1063,7 @@ public class StackView extends AdapterViewAnimator {
                     heightSpecSize = height;
                 } else {
                     heightSpecSize |= MEASURED_STATE_TOO_SMALL;
+
                 }
             } else {
                 heightSpecSize = 0;
@@ -1112,7 +1087,6 @@ public class StackView extends AdapterViewAnimator {
                 widthSpecSize = 0;
             }
         }
-
         setMeasuredDimension(widthSpecSize, heightSpecSize);
         measureChildren();
     }
