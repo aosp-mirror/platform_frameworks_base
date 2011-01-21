@@ -16,7 +16,7 @@
 
 package android.nfc;
 
-import android.nfc.technology.TagTechnology;
+import android.nfc.tech.TagTechnology;
 import android.os.RemoteException;
 import android.util.Log;
 
