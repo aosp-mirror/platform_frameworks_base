@@ -1087,7 +1087,7 @@ import junit.framework.Assert;
      */
     /* package */ void setTextAndKeepSelection(String text) {
         mPreChange = text.toString();
-        Editable edit = (Editable) getText();
+        Editable edit = getText();
         int selStart = Selection.getSelectionStart(edit);
         int selEnd = Selection.getSelectionEnd(edit);
         mInSetTextAndKeepSelection = true;
@@ -1097,6 +1097,12 @@ import junit.framework.Assert;
         if (selEnd > newLength) selEnd = newLength;
         Selection.setSelection(edit, selStart, selEnd);
         mInSetTextAndKeepSelection = false;
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && imm.isActive(this)) {
+            // Since the text has changed, do not allow the IME to replace the
+            // existing text as though it were a completion.
+            imm.restartInput(this);
+        }
         updateCachedTextfield();
     }
 
