@@ -1633,6 +1633,8 @@
   <public type="style" name="Widget.Holo.Light.CalendarView" />
   <public type="style" name="Widget.DatePicker" />
   <public type="style" name="Widget.Holo.DatePicker" />
+  <public type="attr" name="textEditSidePasteWindowLayout" />
+  <public type="attr" name="textEditSideNoPasteWindowLayout" />
 
   <public type="string" name="selectTextMode" />
 
