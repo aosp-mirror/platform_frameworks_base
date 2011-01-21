@@ -419,6 +419,8 @@
         <item name="android:textSelectHandle">?android:attr/textSelectHandle</item>
         <item name="android:textEditPasteWindowLayout">?android:attr/textEditPasteWindowLayout</item>
         <item name="android:textEditNoPasteWindowLayout">?android:attr/textEditNoPasteWindowLayout</item>
+        <item name="android:textEditSidePasteWindowLayout">?android:attr/textEditSidePasteWindowLayout</item>
+        <item name="android:textEditSideNoPasteWindowLayout">?android:attr/textEditSideNoPasteWindowLayout</item>
     </style>
     
     <style name="Widget.TextView.ListSeparator">

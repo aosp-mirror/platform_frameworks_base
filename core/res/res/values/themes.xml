@@ -174,6 +174,8 @@
         <item name="textSelectHandleWindowStyle">@android:style/Widget.TextSelectHandle</item>
         <item name="textEditPasteWindowLayout">@android:layout/text_edit_paste_window</item>
         <item name="textEditNoPasteWindowLayout">@android:layout/text_edit_no_paste_window</item>
+        <item name="textEditSidePasteWindowLayout">@android:layout/text_edit_side_paste_window</item>
+        <item name="textEditSideNoPasteWindowLayout">@android:layout/text_edit_side_no_paste_window</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@android:style/Widget.AbsListView</item>

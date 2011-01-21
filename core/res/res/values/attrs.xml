@@ -649,6 +649,11 @@
         <attr name="textEditPasteWindowLayout" format="reference" />
         <!-- Variation of textEditPasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditNoPasteWindowLayout" format="reference" />
+        <!-- Used instead of textEditPasteWindowLayout when the window is moved on the side of the
+             insertion cursor because it would be clipped if it were positioned on top. -->
+        <attr name="textEditSidePasteWindowLayout" format="reference" />
+        <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
+        <attr name="textEditSideNoPasteWindowLayout" format="reference" />
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
@@ -2741,6 +2746,12 @@
         <attr name="textEditPasteWindowLayout" />
         <!-- Variation of textEditPasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditNoPasteWindowLayout" />
+        <!-- Used instead of textEditPasteWindowLayout when the window is moved on the side of the
+             insertion cursor because it would be clipped if it were positioned on top. -->
+        <attr name="textEditSidePasteWindowLayout" />
+        <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
+        <attr name="textEditSideNoPasteWindowLayout" />
+
         <!-- Indicates that the content of a non-editable text can be selected. -->
         <attr name="textIsSelectable" />
     </declare-styleable>
