@@ -19,6 +19,7 @@ package com.android.server;
 import com.android.internal.app.IMediaContainerService;
 import com.android.server.am.ActivityManagerService;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1635,7 +1636,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             throw new IllegalArgumentException("password cannot be null");
         }
 
-        // TODO: Enforce a permission
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
+                "no permission to access the crypt keeper");
 
         waitForReady();
 
@@ -1675,12 +1677,13 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             throw new IllegalArgumentException("password cannot be null");
         }
 
-        // TODO: Enforce a permission
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
+            "no permission to access the crypt keeper");
 
         waitForReady();
 
         if (DEBUG_EVENTS) {
-            Slog.i(TAG, "decrypting storage...");
+            Slog.i(TAG, "encrypting storage...");
         }
 
         try {

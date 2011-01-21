@@ -1284,6 +1284,13 @@
         android:description="@string/permlab_copyProtectedData"
         android:protectionLevel="signature" />
 
+    <!-- Internal permission protecting access to the encryption methods
+        @hide
+    -->
+    <permission android:name="android.permission.CRYPT_KEEPER"
+        android:protectionLevel="signatureOrSystem" />
+
+
     <!-- C2DM permission. 
          @hide Used internally.
      -->
