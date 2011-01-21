@@ -50,4 +50,6 @@ interface IBluetoothHeadset {
 
     boolean startVirtualVoiceCall(in BluetoothDevice device);
     boolean stopVirtualVoiceCall(in BluetoothDevice device);
+
+    void sendAtCommand(in BluetoothDevice device, String urc);
 }
