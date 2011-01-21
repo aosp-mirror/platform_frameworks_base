@@ -22,13 +22,10 @@ import android.os.Parcelable;
 import java.util.Arrays;
 
 /**
- * Information given to an {@link InputMethod} about a client connecting
- * to it.
- */
-/**
- * InputMethodSubtype is a subtype contained in the input method. Subtype can describe
- * locales (e.g. en_US, fr_FR...) and modes (e.g. voice, keyboard...), and is used for
- * IME switch. The subtype allows the system to call the specified subtype of IME directly.
+ * This class is used to specify meta information of a subtype contained in an input method.
+ * Subtype can describe locale (e.g. en_US, fr_FR...) and mode (e.g. voice, keyboard...), and is
+ * used for IME switch and settings. The input method subtype allows the system to bring up the
+ * specified subtype of the designated input method directly.
  */
 public final class InputMethodSubtype implements Parcelable {
     private final int mSubtypeNameResId;
