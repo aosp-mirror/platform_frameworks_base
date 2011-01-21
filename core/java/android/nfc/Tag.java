@@ -36,8 +36,8 @@ import java.util.Arrays;
 /**
  * Represents a (generic) discovered tag.
  * <p>
- * A tag is a passive NFC element, such as NFC Forum Tag's, Mifare class Tags,
- * Sony Felica Tags.
+ * A tag is a passive NFC element, such as NFC Forum Tag's, MIFARE class Tags,
+ * Sony FeliCa Tags, etc.
  * <p>
  * Tag's have a type and usually have a UID.
  * <p>
