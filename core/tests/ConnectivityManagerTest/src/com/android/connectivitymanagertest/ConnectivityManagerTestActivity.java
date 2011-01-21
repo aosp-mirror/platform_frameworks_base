@@ -78,7 +78,7 @@ public class ConnectivityManagerTestActivity extends Activity {
     public int mWifiState;
     public NetworkInfo mWifiNetworkInfo;
     public String mBssid;
-    public String mPowerSsid = "GoogleGuest"; //Default power SSID
+    public String mPowerSsid = "opennet"; //Default power SSID
     private Context mContext;
     public boolean scanResultAvailable = false;
 
