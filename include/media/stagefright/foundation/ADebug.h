@@ -75,7 +75,10 @@ MAKE_COMPARATOR(GT,>)
 #define CHECK_GE(x,y)   CHECK_OP(x,y,GE,>=)
 #define CHECK_GT(x,y)   CHECK_OP(x,y,GT,>)
 
-#define TRESPASS()      LOG_ALWAYS_FATAL("Should not be here.")
+#define TRESPASS() \
+        LOG_ALWAYS_FATAL(                                       \
+            __FILE__ ":" LITERAL_TO_STRING(__LINE__)            \
+                " Should not be here.");
 
 }  // namespace android
 
