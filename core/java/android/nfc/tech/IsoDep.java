@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -28,7 +27,7 @@ import java.io.IOException;
  * A low-level connection to a {@link Tag} using the ISO-DEP technology, also known as
  * ISO1443-4.
  *
- * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link #get}.
  * Use this class to send and receive data with {@link #transceive transceive()}.
  *
  * <p>Applications must implement their own protocol stack on top of
@@ -49,10 +48,26 @@ public final class IsoDep extends BasicTagTechnology {
     private byte[] mHiLayerResponse = null;
     private byte[] mHistBytes = null;
 
+    /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static IsoDep get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.ISO_DEP)) return null;
+        try {
+            return new IsoDep(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+    
     /** @hide */
-    public IsoDep(NfcAdapter adapter, Tag tag, Bundle extras)
+    public IsoDep(Tag tag)
             throws RemoteException {
-        super(adapter, tag, TagTechnology.ISO_DEP);
+        super(tag, TagTechnology.ISO_DEP);
+        Bundle extras = tag.getTechExtras(TagTechnology.ISO_DEP);
         if (extras != null) {
             mHiLayerResponse = extras.getByteArray(EXTRA_HI_LAYER_RESP);
             mHistBytes = extras.getByteArray(EXTRA_HIST_BYTES);
@@ -70,7 +85,7 @@ public final class IsoDep extends BasicTagTechnology {
      */
     public void setTimeout(int timeout) {
         try {
-            mTagService.setIsoDepTimeout(timeout);
+            mTag.getTagService().setIsoDepTimeout(timeout);
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
         }
@@ -79,7 +94,7 @@ public final class IsoDep extends BasicTagTechnology {
     @Override
     public void close() {
         try {
-            mTagService.resetIsoDepTimeout();
+            mTag.getTagService().resetIsoDepTimeout();
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
         }
