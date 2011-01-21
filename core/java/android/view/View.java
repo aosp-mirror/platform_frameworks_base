@@ -5158,7 +5158,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
           removeCallbacks(mPendingCheckForLongPress);
         }
     }
-    
+
+    /**
+     * Remove the pending click action
+     */
+    private void removePerformClickCallback() {
+        if (mPerformClick != null) {
+            removeCallbacks(mPerformClick);
+        }
+    }
+
     /**
      * Remove the prepress detection timer.
      */
@@ -7620,6 +7629,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         removeUnsetPressCallback();
         removeLongPressCallback();
+        removePerformClickCallback();
 
         destroyDrawingCache();
 
