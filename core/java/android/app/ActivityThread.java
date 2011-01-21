@@ -1631,6 +1631,7 @@ public final class ActivityThread {
             java.lang.ClassLoader cl = r.packageInfo.getClassLoader();
             activity = mInstrumentation.newActivity(
                     cl, component.getClassName(), r.intent);
+            StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
             if (r.state != null) {
                 r.state.setClassLoader(cl);
@@ -2712,8 +2713,10 @@ public final class ActivityThread {
     private final ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
             int configChanges, boolean getNonConfigInstance) {
         ActivityClientRecord r = mActivities.get(token);
+        Class activityClass = null;
         if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
         if (r != null) {
+            activityClass = r.activity.getClass();
             r.activity.mConfigChangeFlags |= configChanges;
             if (finishing) {
                 r.activity.mFinished = true;
@@ -2791,7 +2794,7 @@ public final class ActivityThread {
             }
         }
         mActivities.remove(token);
-
+        StrictMode.decrementExpectedActivityCount(activityClass);
         return r;
     }
 
