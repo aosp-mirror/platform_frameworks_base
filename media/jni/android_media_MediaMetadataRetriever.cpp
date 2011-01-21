@@ -22,9 +22,6 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 #include <core/SkBitmap.h>
-#include <core/SkCanvas.h>
-#include <core/SkDevice.h>
-#include <core/SkScalar.h>
 #include <media/mediametadataretriever.h>
 #include <private/media/VideoFrame.h>
 
@@ -136,6 +133,61 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
     process_media_retriever_call(env, retriever->setDataSource(fd, offset, length), "java/lang/RuntimeException", "setDataSource failed");
 }
 
+template<typename T>
+static void rotate0(T* dst, const T* src, size_t width, size_t height)
+{
+    memcpy(dst, src, width * height * sizeof(T));
+}
+
+template<typename T>
+static void rotate90(T* dst, const T* src, size_t width, size_t height)
+{
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
+            dst[j * height + height - 1 - i] = src[i * width + j];
+        }
+    }
+}
+
+template<typename T>
+static void rotate180(T* dst, const T* src, size_t width, size_t height)
+{
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
+            dst[(height - 1 - i) * width + width - 1 - j] = src[i * width + j];
+        }
+    }
+}
+
+template<typename T>
+static void rotate270(T* dst, const T* src, size_t width, size_t height)
+{
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
+            dst[(width - 1 - j) * height + i] = src[i * width + j];
+        }
+    }
+}
+
+template<typename T>
+static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
+{
+    switch (angle) {
+        case 0:
+            rotate0(dst, src, width, height);
+            break;
+        case 90:
+            rotate90(dst, src, width, height);
+            break;
+        case 180:
+            rotate180(dst, src, width, height);
+            break;
+        case 270:
+            rotate270(dst, src, width, height);
+            break;
+    }
+}
+
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option)
 {
     LOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
@@ -166,30 +218,33 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                         fields.createConfigMethod,
                         SkBitmap::kRGB_565_Config);
 
+    size_t width, height;
+    if (videoFrame->mRotationAngle == 90 || videoFrame->mRotationAngle == 270) {
+        width = videoFrame->mDisplayHeight;
+        height = videoFrame->mDisplayWidth;
+    } else {
+        width = videoFrame->mDisplayWidth;
+        height = videoFrame->mDisplayHeight;
+    }
+
     jobject jBitmap = env->CallStaticObjectMethod(
                             fields.bitmapClazz,
                             fields.createBitmapMethod,
-                            videoFrame->mDisplayWidth,
-                            videoFrame->mDisplayHeight,
+                            width,
+                            height,
                             config);
+
     SkBitmap *bitmap =
             (SkBitmap *) env->GetIntField(jBitmap, fields.nativeBitmap);
 
     bitmap->lockPixels();
-
-    memcpy((uint8_t*)bitmap->getPixels(),
-            (uint8_t*)videoFrame + sizeof(VideoFrame), videoFrame->mSize);
-
+    rotate((uint16_t*)bitmap->getPixels(),
+           (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
+           videoFrame->mDisplayWidth,
+           videoFrame->mDisplayHeight,
+           videoFrame->mRotationAngle);
     bitmap->unlockPixels();
 
-    if (videoFrame->mRotationAngle != 0) {
-        SkDevice device(*bitmap);
-        SkCanvas canvas(&device);
-        canvas.rotate((SkScalar) (videoFrame->mRotationAngle * 1.0));
-        canvas.drawBitmap(*bitmap, 0, 0);
-    }
-
-    LOGV("Return a new bitmap constructed with the rotation matrix");
     return jBitmap;
 }
 
