@@ -421,6 +421,10 @@ public final class ActivityThread {
                 token);
         }
 
+        public final void scheduleSleeping(IBinder token, boolean sleeping) {
+            queueOrSendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
+        }
+
         public final void scheduleResumeActivity(IBinder token, boolean isForward) {
             queueOrSendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0);
         }
@@ -929,6 +933,7 @@ public final class ActivityThread {
         public static final int SCHEDULE_CRASH          = 134;
         public static final int DUMP_HEAP               = 135;
         public static final int DUMP_ACTIVITY           = 136;
+        public static final int SLEEPING                = 137;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -969,6 +974,7 @@ public final class ActivityThread {
                     case SCHEDULE_CRASH: return "SCHEDULE_CRASH";
                     case DUMP_HEAP: return "DUMP_HEAP";
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
+                    case SLEEPING: return "SLEEPING";
                 }
             }
             return "(unknown)";
@@ -1100,6 +1106,9 @@ public final class ActivityThread {
                     break;
                 case DUMP_ACTIVITY:
                     handleDumpActivity((DumpComponentInfo)msg.obj);
+                    break;
+                case SLEEPING:
+                    handleSleeping((IBinder)msg.obj, msg.arg1 != 0);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
@@ -2612,6 +2621,42 @@ public final class ActivityThread {
             if (Config.LOGV) Slog.v(
                 TAG, "Handle window " + r + " visibility: " + show);
             updateVisibility(r, show);
+        }
+    }
+
+    private final void handleSleeping(IBinder token, boolean sleeping) {
+        ActivityClientRecord r = mActivities.get(token);
+
+        if (r == null) {
+            Log.w(TAG, "handleWindowVisibility: no activity for token " + token);
+            return;
+        }
+
+        if (sleeping) {
+            if (!r.stopped) {
+                try {
+                    // Now we are idle.
+                    r.activity.performStop();
+                } catch (Exception e) {
+                    if (!mInstrumentation.onException(r.activity, e)) {
+                        throw new RuntimeException(
+                                "Unable to stop activity "
+                                + r.intent.getComponent().toShortString()
+                                + ": " + e.toString(), e);
+                    }
+                }
+                r.stopped = true;
+            }
+            // Tell activity manager we slept.
+            try {
+                ActivityManagerNative.getDefault().activitySlept(r.token);
+            } catch (RemoteException ex) {
+            }
+        } else {
+            if (r.stopped && r.activity.mVisibleFromServer) {
+                r.activity.performRestart();
+                r.stopped = false;
+            }
         }
     }
 
