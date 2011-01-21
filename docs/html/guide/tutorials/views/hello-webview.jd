@@ -12,8 +12,8 @@ we'll create a simple Activity that can view web pages.</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical">
 
     &lt;WebView 
@@ -69,7 +69,7 @@ private class HelloWebViewClient extends WebViewClient {
 
    <li>Now, in the <code>onCreate()</code> method, set an instance of the <code>HelloWebViewClient</code>
    as our WebViewClient:
-      <pre>webview.setWebViewClient(new WebViewClientDemo());</pre>
+      <pre>webview.setWebViewClient(new HelloWebViewClient());</pre>
 
       <p>This line should immediately follow the initialization of our WebView object.</p>
       <p>What we've done is create a WebViewClient that will load any URL selected in our
