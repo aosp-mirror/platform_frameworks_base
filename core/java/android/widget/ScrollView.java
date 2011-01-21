@@ -497,9 +497,11 @@ public class ScrollView extends FrameLayout {
 
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                final float y = ev.getY();
-                mIsBeingDragged = true;
-                
+                mIsBeingDragged = getChildCount() != 0;
+                if (!mIsBeingDragged) {
+                    return false;
+                }
+
                 /*
                  * If being flinged and user touches, stop the fling. isFinished
                  * will be false if being flinged.
@@ -509,7 +511,7 @@ public class ScrollView extends FrameLayout {
                 }
 
                 // Remember where the motion event started
-                mLastMotionY = y;
+                mLastMotionY = ev.getY();
                 mActivePointerId = ev.getPointerId(0);
                 break;
             }
