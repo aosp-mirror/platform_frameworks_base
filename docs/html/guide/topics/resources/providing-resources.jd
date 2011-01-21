@@ -494,6 +494,7 @@ which indicates the type of touchscreen on the device.</p>
       <td>Keyboard availability</td>
       <td>
         <code>keysexposed</code><br/>
+        <code>keyshidden</code><br/>
         <code>keyssoft</code>
       </td>
       <td>
