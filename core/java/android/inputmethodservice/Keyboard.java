@@ -97,11 +97,11 @@ public class Keyboard {
     private boolean mShifted;
     
     /** Key instance for the shift key, if present */
-    private Key mShiftKey;
-    
+    private Key[] mShiftKeys = { null, null };
+
     /** Key index for the shift key, if present */
-    private int mShiftKeyIndex = -1;
-    
+    private int[] mShiftKeyIndices = {-1, -1};
+
     /** Current key width, while loading the keyboard */
     private int mKeyWidth;
     
@@ -656,8 +656,10 @@ public class Keyboard {
     }
 
     public boolean setShifted(boolean shiftState) {
-        if (mShiftKey != null) {
-            mShiftKey.on = shiftState;
+        for (Key shiftKey : mShiftKeys) {
+            if (shiftKey != null) {
+                shiftKey.on = shiftState;
+            }
         }
         if (mShifted != shiftState) {
             mShifted = shiftState;
@@ -670,8 +672,15 @@ public class Keyboard {
         return mShifted;
     }
 
+    /**
+     * @hide
+     */
+    public int[] getShiftKeyIndices() {
+        return mShiftKeyIndices;
+    }
+
     public int getShiftKeyIndex() {
-        return mShiftKeyIndex;
+        return mShiftKeyIndices[0];
     }
     
     private void computeNearestNeighbors() {
@@ -760,8 +769,14 @@ public class Keyboard {
                         key = createKeyFromXml(res, currentRow, x, y, parser);
                         mKeys.add(key);
                         if (key.codes[0] == KEYCODE_SHIFT) {
-                            mShiftKey = key;
-                            mShiftKeyIndex = mKeys.size()-1;
+                            // Find available shift key slot and put this shift key in it
+                            for (int i = 0; i < mShiftKeys.length; i++) {
+                                if (mShiftKeys[i] == null) {
+                                    mShiftKeys[i] = key;
+                                    mShiftKeyIndices[i] = mKeys.size()-1;
+                                    break;
+                                }
+                            }
                             mModifierKeys.add(key);
                         } else if (key.codes[0] == KEYCODE_ALT) {
                             mModifierKeys.add(key);
