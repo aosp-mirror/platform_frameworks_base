@@ -1111,6 +1111,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
             DEBUG_STYLES(LOGI("-> Setting to @null!"));
             value.dataType = Res_value::TYPE_NULL;
+            block = kXmlBlock;
         }
 
         DEBUG_STYLES(LOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
