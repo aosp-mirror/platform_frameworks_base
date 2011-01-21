@@ -560,7 +560,7 @@ final class WebViewCore {
     private native String nativeRetrieveImageSource(int x, int y);
 
     private native void nativeTouchUp(int touchGeneration,
-            int framePtr, int nodePtr, int x, int y);
+            int framePtr, int nodePtr, int x, int y, int scrollY);
 
     private native boolean nativeHandleTouchEvent(int action, int[] idArray,
             int[] xArray, int[] yArray, int count, int metaState);
@@ -790,6 +790,8 @@ final class WebViewCore {
         int mNode;
         int mX;
         int mY;
+        // Used in the case of a scrolled textarea
+        int mScrollY;
     }
 
     static class TouchHighlightData {
@@ -1321,7 +1323,8 @@ final class WebViewCore {
                             TouchUpData touchUpData = (TouchUpData) msg.obj;
                             nativeTouchUp(touchUpData.mMoveGeneration,
                                     touchUpData.mFrame, touchUpData.mNode,
-                                    touchUpData.mX, touchUpData.mY);
+                                    touchUpData.mX, touchUpData.mY,
+                                    touchUpData.mScrollY);
                             break;
 
                         case TOUCH_EVENT: {

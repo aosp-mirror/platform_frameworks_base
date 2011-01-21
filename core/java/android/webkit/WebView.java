@@ -6616,20 +6616,31 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Scroll the focused text field/area to match the WebTextView
+     * Scroll the focused text field to match the WebTextView
      * @param xPercent New x position of the WebTextView from 0 to 1.
-     * @param y New y position of the WebTextView in view coordinates
      */
-    /*package*/ void scrollFocusedTextInput(float xPercent, int y) {
+    /*package*/ void scrollFocusedTextInputX(float xPercent) {
         if (!inEditingMode() || mWebViewCore == null) {
             return;
         }
-        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT,
-                // Since this position is relative to the top of the text input
-                // field, we do not need to take the title bar's height into
-                // consideration.
-                viewToContentDimension(y),
+        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, 0,
                 new Float(xPercent));
+    }
+
+    /**
+     * Scroll the focused textarea vertically to match the WebTextView
+     * @param y New y position of the WebTextView in view coordinates
+     */
+    /* package */ void scrollFocusedTextInputY(int y) {
+        if (!inEditingMode()) {
+            return;
+        }
+        int xPos = viewToContentX((mWebTextView.getLeft() + mWebTextView.getRight()) / 2);
+        int yPos = viewToContentY((mWebTextView.getTop() + mWebTextView.getBottom()) / 2);
+        int layer = nativeScrollableLayer(xPos, yPos, null, null);
+        if (layer != 0) {
+            nativeScrollLayer(layer, 0, viewToContentDimension(y));
+        }
     }
 
     /**
@@ -7967,15 +7978,27 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // called by JNI
+    /**
+     * Called by JNI to send a message to the webcore thread that the user
+     * touched the webpage.
+     * @param touchGeneration Generation number of the touch, to ignore touches
+     *      after a new one has been generated.
+     * @param frame Pointer to the frame holding the node that was touched.
+     * @param node Pointer to the node touched.
+     * @param x x-position of the touch.
+     * @param y y-position of the touch.
+     * @param scrollY Only used when touching on a textarea.  Otherwise, use -1.
+     *      Tells how much the textarea is scrolled.
+     */
     private void sendMotionUp(int touchGeneration,
-            int frame, int node, int x, int y) {
+            int frame, int node, int x, int y, int scrollY) {
         WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
         touchUpData.mMoveGeneration = touchGeneration;
         touchUpData.mFrame = frame;
         touchUpData.mNode = node;
         touchUpData.mX = x;
         touchUpData.mY = y;
+        touchUpData.mScrollY = scrollY;
         mWebViewCore.sendMessage(EventHub.TOUCH_UP, touchUpData);
     }
 
@@ -8301,5 +8324,12 @@ public class WebView extends AbsoluteLayout
     // Returns a pointer to the scrollable LayerAndroid at the given point.
     private native int      nativeScrollableLayer(int x, int y, Rect scrollRect,
             Rect scrollBounds);
-    private native boolean  nativeScrollLayer(int layer, int dx, int dy);
+    /**
+     * Scroll the specified layer.
+     * @param layer Id of the layer to scroll, as determined by nativeScrollableLayer.
+     * @param newX Destination x position to which to scroll.
+     * @param newY Destination y position to which to scroll.
+     * @return True if the layer is successfully scrolled.
+     */
+    private native boolean  nativeScrollLayer(int layer, int newX, int newY);
 }
