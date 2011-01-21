@@ -301,6 +301,8 @@ public class Toast {
         final Runnable mHide = new Runnable() {
             public void run() {
                 handleHide();
+                // Don't do this in handleHide() because it is also invoked by handleShow()
+                mNextView = null;
             }
         };
 
@@ -407,7 +409,6 @@ public class Toast {
                 }
 
                 mView = null;
-                mNextView = null;
             }
         }
     }
