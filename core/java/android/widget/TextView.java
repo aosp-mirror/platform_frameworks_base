@@ -307,8 +307,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     int mTextSelectHandleLeftRes;
     int mTextSelectHandleRightRes;
     int mTextSelectHandleRes;
-    int mTextEditPasteWindowLayout;
-    int mTextEditNoPasteWindowLayout;
+    int mTextEditPasteWindowLayout, mTextEditSidePasteWindowLayout;
+    int mTextEditNoPasteWindowLayout, mTextEditSideNoPasteWindowLayout;
 
     Drawable mSelectHandleLeft;
     Drawable mSelectHandleRight;
@@ -760,6 +760,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textEditNoPasteWindowLayout:
                 mTextEditNoPasteWindowLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSidePasteWindowLayout:
+                mTextEditSidePasteWindowLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSideNoPasteWindowLayout:
+                mTextEditSideNoPasteWindowLayout = a.getResourceId(attr, 0);
                 break;
 
             case com.android.internal.R.styleable.TextView_textIsSelectable:
@@ -8422,8 +8430,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private final PopupWindow mContainer;
         private int mPositionX;
         private int mPositionY;
-        private View mPasteView, mNoPasteView;
-
+        private final View[] mPasteViews = new View[4];
+        private final int[] mPasteViewLayouts = new int[] { 
+                mTextEditPasteWindowLayout,  mTextEditNoPasteWindowLayout, 
+                mTextEditSidePasteWindowLayout, mTextEditSideNoPasteWindowLayout };
+        
         public PastePopupMenu() {
             mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
@@ -8435,12 +8446,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
-        private void updateContent() {
-            View view = canPaste() ? mPasteView : mNoPasteView;
+        private int viewIndex(boolean onTop) {
+            return (onTop ? 0 : 1<<1) + (canPaste() ? 0 : 1<<0);
+        }
+
+        private void updateContent(boolean onTop) {
+            final int viewIndex = viewIndex(onTop);
+            View view = mPasteViews[viewIndex];
 
             if (view == null) {
-                final int layout = canPaste() ? mTextEditPasteWindowLayout :
-                    mTextEditNoPasteWindowLayout;
+                final int layout = mPasteViewLayouts[viewIndex];
                 LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 if (inflater != null) {
@@ -8457,26 +8472,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 view.measure(size, size);
 
                 view.setOnClickListener(this);
-
-                if (canPaste()) mPasteView = view;
-                else mNoPasteView = view;
+                
+                mPasteViews[viewIndex] = view;
             }
 
             mContainer.setContentView(view);
         }
 
         public void show() {
-            updateContent();
-            final int[] coords = mTempCoords;
-            TextView.this.getLocationInWindow(coords);
+            updateContent(true);
             positionAtCursor();
-            coords[0] += mPositionX;
-            coords[1] += mPositionY;
-            coords[0] = Math.max(0, coords[0]);
-            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
-            coords[0] = Math.min(screenWidth - mContainer.getContentView().getMeasuredWidth(),
-                    coords[0]);
-            mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
         }
 
         public void hide() {
@@ -8496,15 +8501,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         void positionAtCursor() {
-            final int offset = TextView.this.getSelectionStart();
             View contentView = mContainer.getContentView();
-            final int width = contentView.getMeasuredWidth();
-            final int height = contentView.getMeasuredHeight();
+            int width = contentView.getMeasuredWidth();
+            int height = contentView.getMeasuredHeight();
+            final int offset = TextView.this.getSelectionStart();
             final int line = mLayout.getLineForOffset(offset);
             final int lineTop = mLayout.getLineTop(line);
+            float primaryHorizontal = mLayout.getPrimaryHorizontal(offset);
 
             final Rect bounds = sCursorControllerTempRect;
-            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - width / 2.0f);
+            bounds.left = (int) (primaryHorizontal - width / 2.0f);
             bounds.top = lineTop - height;
 
             bounds.right = bounds.left + width;
@@ -8514,6 +8520,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             mPositionX = bounds.left;
             mPositionY = bounds.top;
+
+
+            final int[] coords = mTempCoords;
+            TextView.this.getLocationInWindow(coords);
+            coords[0] += mPositionX;
+            coords[1] += mPositionY;
+
+            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+            if (coords[1] < 0) {
+                updateContent(false);
+                // Update dimensions from new view
+                contentView = mContainer.getContentView();
+                width = contentView.getMeasuredWidth();
+                height = contentView.getMeasuredHeight();
+
+                // Vertical clipping, move under edited line and to the side of insertion cursor 
+                // TODO bottom clipping in case there is no system bar
+                coords[1] += height;
+                final int lineBottom = mLayout.getLineBottom(line);
+                final int lineHeight = lineBottom - lineTop;
+                coords[1] += lineHeight;
+
+                // Move to right hand side of insertion cursor by default. TODO RTL text.
+                final Drawable handle = mContext.getResources().getDrawable(mTextSelectHandleRes);
+                final int handleHalfWidth = handle.getIntrinsicWidth() / 2;
+
+                if (primaryHorizontal + handleHalfWidth + width < screenWidth) {
+                    coords[0] += handleHalfWidth + width / 2;
+                } else {
+                    coords[0] -= handleHalfWidth + width / 2;                    
+                }
+            } else {
+                // Horizontal clipping
+                coords[0] = Math.max(0, coords[0]);
+                coords[0] = Math.min(screenWidth - width, coords[0]);
+            }
+
+            mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
         }
     }
 
@@ -8915,11 +8959,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hideDelayed();
             getHandle().show();
             removePastePopupCallback();
-            if (canPaste()) {
-                final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
-                if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
-                    delayBeforePaste = 0;
-                }
+            final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
+            if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
+                delayBeforePaste = 0;
+            }
+            if (delayBeforePaste == 0 || canPaste()) {
                 if (mPastePopupShower == null) {
                     mPastePopupShower = new Runnable() {
                         public void run() {
