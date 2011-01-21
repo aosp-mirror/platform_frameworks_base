@@ -53,6 +53,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -1925,7 +1926,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * {@link DevicePolicyManager#ENCRYPTION_STATUS_ACTIVE}.
      */
     private int getEncryptionStatus() {
-        return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+        String status = SystemProperties.get("ro.crypto.state", "unsupported");
+        if ("encrypted".equalsIgnoreCase(status)) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE;
+        } else if ("unencrypted".equalsIgnoreCase(status)) {
+            return DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
+        } else {
+            return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
+        }
     }
 
     /**
