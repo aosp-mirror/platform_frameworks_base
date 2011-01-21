@@ -41,6 +41,9 @@ struct NuPlayer::Renderer : public AHandler {
 
     void signalAudioSinkChanged();
 
+    void pause();
+    void resume();
+
     enum {
         kWhatEOS,
         kWhatFlushComplete,
@@ -60,6 +63,8 @@ private:
         kWhatQueueEOS,
         kWhatFlush,
         kWhatAudioSinkChanged,
+        kWhatPause,
+        kWhatResume,
     };
 
     struct QueueEntry {
@@ -91,6 +96,8 @@ private:
     bool mHasVideo;
     bool mSyncQueues;
 
+    bool mPaused;
+
     void onDrainAudioQueue();
     void postDrainAudioQueue();
 
@@ -101,6 +108,8 @@ private:
     void onQueueEOS(const sp<AMessage> &msg);
     void onFlush(const sp<AMessage> &msg);
     void onAudioSinkChanged();
+    void onPause();
+    void onResume();
 
     void notifyEOS(bool audio);
     void notifyFlushComplete(bool audio);
