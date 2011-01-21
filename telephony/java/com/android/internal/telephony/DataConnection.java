@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -448,22 +449,65 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
                     linkProperties.setInterfaceName(interfaceName);
 
-                    // TODO: Get gateway and dns via RIL interface not property?
-                    String gatewayAddress = SystemProperties.get(prefix + "gw");
-                    linkProperties.setGateway(InetAddress.getByName(gatewayAddress));
+                    if (response.length >= 5) {
+                        log("response.length >=5 using response for ip='" + response[2] +
+                                "' dns='" + response[3] + "' gateway='" + response[4] + "'");
+                        String [] addresses = response[2].split(" ");
+                        String [] dnses = response[3].split(" ");
+                        String gateway = response[4];
+                        for (String addr : addresses) {
+                            LinkAddress la;
+                            if (!InetAddress.isNumeric(addr)) {
+                                throw new RuntimeException(
+                                        "Vendor ril bug: Non-numeric ip addr=" + addr);
+                            }
+                            InetAddress ia = InetAddress.getByName(addr);
+                            if (ia instanceof Inet4Address) {
+                                la = new LinkAddress(ia, 32);
+                            } else {
+                                la = new LinkAddress(ia, 128);
+                            }
+                            linkProperties.addLinkAddress(la);
+                        }
 
-                    for (InterfaceAddress addr : networkInterface.getInterfaceAddresses()) {
-                        linkProperties.addLinkAddress(new LinkAddress(addr));
-                    }
-                    // TODO: Get gateway and dns via RIL interface not property?
-                    String dnsServers[] = new String[2];
-                    dnsServers[0] = SystemProperties.get(prefix + "dns1");
-                    dnsServers[1] = SystemProperties.get(prefix + "dns2");
-                    if (isDnsOk(dnsServers)) {
-                        linkProperties.addDns(InetAddress.getByName(dnsServers[0]));
-                        linkProperties.addDns(InetAddress.getByName(dnsServers[1]));
+                        if (dnses.length != 0) {
+                            for (String addr : dnses) {
+                                if (!InetAddress.isNumeric(addr)) {
+                                    throw new RuntimeException(
+                                            "Vendor ril bug: Non-numeric dns addr=" + addr);
+                                }
+                                InetAddress ia = InetAddress.getByName(addr);
+                                linkProperties.addDns(ia);
+                            }
+                            result = SetupResult.SUCCESS;
+                        } else {
+                            result = SetupResult.ERR_BadDns;
+                        }
+
+                        if (!InetAddress.isNumeric(gateway)) {
+                            throw new RuntimeException(
+                                    "Vendor ril bug: Non-numeric gateway addr=" + gateway);
+                        }
+                        linkProperties.setGateway(InetAddress.getByName(gateway));
+
                     } else {
-                        result = SetupResult.ERR_BadDns;
+                        log("response.length < 5 using properties for dns and gateway");
+                        for (InterfaceAddress addr : networkInterface.getInterfaceAddresses()) {
+                            linkProperties.addLinkAddress(new LinkAddress(addr));
+                        }
+
+                        String gatewayAddress = SystemProperties.get(prefix + "gw");
+                        linkProperties.setGateway(InetAddress.getByName(gatewayAddress));
+
+                        String dnsServers[] = new String[2];
+                        dnsServers[0] = SystemProperties.get(prefix + "dns1");
+                        dnsServers[1] = SystemProperties.get(prefix + "dns2");
+                        if (isDnsOk(dnsServers)) {
+                            linkProperties.addDns(InetAddress.getByName(dnsServers[0]));
+                            linkProperties.addDns(InetAddress.getByName(dnsServers[1]));
+                        } else {
+                            result = SetupResult.ERR_BadDns;
+                        }
                     }
                 } catch (UnknownHostException e1) {
                     log("onSetupCompleted: UnknowHostException " + e1);
