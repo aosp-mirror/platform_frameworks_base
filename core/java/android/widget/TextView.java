@@ -4791,8 +4791,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return super.onKeyUp(keyCode, event);
         }
 
-        hideControllers();
-
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
                 mDPadCenterIsDown = false;
@@ -7126,6 +7124,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+
+        // After super.onFocusChanged so that this TextView is registered and can ask for the IME
+        // Showing the IME while focus is moved using the D-Pad is a bad idea, however this does
+        // not happen in that case (using the arrows on a bluetooth keyboard).
+        if (focused) {
+            onTouchFinished(null);
+        }
     }
 
     private int getLastTapPosition() {
@@ -7268,6 +7273,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
+        final boolean touchIsFinished = action == MotionEvent.ACTION_UP && !mIgnoreActionUpEvent &&
+                isFocused();
+
         if ((mMovement != null || onCheckIsTextEditor()) && isEnabled()
                 && mText instanceof Spannable && mLayout != null) {
             boolean handled = false;
@@ -7283,8 +7291,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 handled |= mMovement.onTouchEvent(this, (Spannable) mText, event);
             }
 
-            if (mLinksClickable && mAutoLinkMask != 0 && mTextIsSelectable &&
-                    action == MotionEvent.ACTION_UP && !mIgnoreActionUpEvent && isFocused()) {
+            if (mLinksClickable && mAutoLinkMask != 0 && mTextIsSelectable && touchIsFinished) {
                 // The LinkMovementMethod which should handle taps on links has not been installed
                 // to support text selection. We reproduce its behavior here to open links.
                 ClickableSpan[] links = ((Spannable) mText).getSpans(getSelectionStart(),
@@ -7306,26 +7313,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mSelectionModifierCursorController.updatePosition();
                     }
                 }
-                if (action == MotionEvent.ACTION_UP && !mIgnoreActionUpEvent && isFocused()) {
-                    InputMethodManager imm = (InputMethodManager)
-                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
+                if (touchIsFinished) {
                     CommitSelectionReceiver csr = null;
                     if (getSelectionStart() != oldSelStart || getSelectionEnd() != oldSelEnd ||
                             didTouchFocusSelect()) {
                         csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
                     }
 
-                    if (!mTextIsSelectable) {
-                        // Show the IME, except when selecting in read-only text.
-                        handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
-                    }
-
-                    stopSelectionActionMode();
-                    boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
-                    if (hasInsertionController() && !selectAllGotFocus) {
-                        getInsertionController().show();
-                    }
+                    handled = onTouchFinished(csr);
                 }
             }
 
@@ -7335,6 +7331,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /** Shows the IME if applicable, ends selection mode and displays the selection controller.
+     *
+     * This method is called at the end of a touch event, when the finger is lifted up.
+     * It is also called when the TextField gains focus indirectly through a dispatched event from
+     * one of its parents. We want to have the same behavior in that case.
+     *
+     * @param csr A (possibly null) callback called if the IME has been displayed
+     * @return true if the event was properly sent to the csr
+     */
+    private boolean onTouchFinished(CommitSelectionReceiver csr) {
+        boolean handled = false;
+
+        // Show the IME, except when selecting in read-only text.
+        if (!mTextIsSelectable) {
+            final InputMethodManager imm = (InputMethodManager)
+                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+            handled = imm.showSoftInput(this, 0, csr) && (csr != null);
+        }
+
+        stopSelectionActionMode();
+        boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
+        if (hasInsertionController() && !selectAllGotFocus) {
+            getInsertionController().show();
+        }
+
+        return handled;
     }
 
     private void prepareCursorControllers() {
