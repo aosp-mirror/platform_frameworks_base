@@ -92,11 +92,11 @@ void NuPlayer::start() {
 }
 
 void NuPlayer::pause() {
-    // XXX to be implemented
+    (new AMessage(kWhatPause, id()))->post();
 }
 
 void NuPlayer::resume() {
-    // XXX to be implemented
+    (new AMessage(kWhatResume, id()))->post();
 }
 
 void NuPlayer::resetAsync() {
@@ -427,6 +427,20 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 }
             }
 
+            break;
+        }
+
+        case kWhatPause:
+        {
+            CHECK(mRenderer != NULL);
+            mRenderer->pause();
+            break;
+        }
+
+        case kWhatResume:
+        {
+            CHECK(mRenderer != NULL);
+            mRenderer->resume();
             break;
         }
 
