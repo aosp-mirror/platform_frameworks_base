@@ -506,8 +506,21 @@ rinse_repeat:
 
         LOGE("This doesn't look like a transport stream...");
 
-        mDataSource->queueEOS(ERROR_UNSUPPORTED);
-        return;
+        mBandwidthItems.removeAt(bandwidthIndex);
+
+        if (mBandwidthItems.isEmpty()) {
+            mDataSource->queueEOS(ERROR_UNSUPPORTED);
+            return;
+        }
+
+        LOGI("Retrying with a different bandwidth stream.");
+
+        mLastPlaylistFetchTimeUs = -1;
+        bandwidthIndex = getBandwidthIndex();
+        mPrevBandwidthIndex = bandwidthIndex;
+        mSeqNumber = -1;
+
+        goto rinse_repeat;
     }
 
     if ((size_t)mPrevBandwidthIndex != bandwidthIndex) {
