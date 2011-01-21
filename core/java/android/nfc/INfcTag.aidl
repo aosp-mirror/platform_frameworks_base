@@ -39,4 +39,7 @@ interface INfcTag
     int ndefMakeReadOnly(int nativeHandle);
     boolean ndefIsWritable(int nativeHandle);
     int formatNdef(int nativeHandle, in byte[] key);
+
+    void setIsoDepTimeout(int timeout);
+    void resetIsoDepTimeout();
 }
