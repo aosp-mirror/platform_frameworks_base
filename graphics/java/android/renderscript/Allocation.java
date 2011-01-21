@@ -212,7 +212,7 @@ public class Allocation extends BaseObj {
         for (int ct=0; ct < d.length; ct++) {
             i[ct] = d[ct].getID();
         }
-        copy1DRangeFrom(0, mType.getCount(), i);
+        copy1DRangeFromUnchecked(0, mType.getCount(), i);
     }
 
     private void validateBitmapFormat(Bitmap b) {
