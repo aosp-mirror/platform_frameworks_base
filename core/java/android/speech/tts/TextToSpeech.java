@@ -464,10 +464,17 @@ public class TextToSpeech {
 
         Intent intent = new Intent("android.intent.action.START_TTS_SERVICE");
         intent.addCategory("android.intent.category.TTS");
-        mContext.bindService(intent, mServiceConnection,
-                Context.BIND_AUTO_CREATE);
-        // TODO handle case where the binding works (should always work) but
-        //      the plugin fails
+        boolean bound = mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        if (!bound) {
+            Log.e("TextToSpeech.java", "initTts() failed to bind to service");
+            if (mInitListener != null) {
+                mInitListener.onInit(ERROR);
+            }
+        } else {
+            // initialization listener will be called inside ServiceConnection
+            Log.i("TextToSpeech.java", "initTts() successfully bound to service");
+        }
+        // TODO handle plugin failures
     }
 
 
@@ -717,8 +724,9 @@ public class TextToSpeech {
     {
         synchronized (mStartLock) {
             int result = ERROR;
-            Log.i("TTS received: ", text);
+            Log.i("TextToSpeech.java - speak", "speak text of length " + text.length());
             if (!mStarted) {
+                Log.e("TextToSpeech.java - speak", "service isn't started");
                 return result;
             }
             try {
@@ -1226,7 +1234,10 @@ public class TextToSpeech {
             String filename) {
         synchronized (mStartLock) {
             int result = ERROR;
+            Log.i("TextToSpeech.java - synthesizeToFile", "synthesizeToFile text of length "
+                    + text.length());
             if (!mStarted) {
+                Log.e("TextToSpeech.java - synthesizeToFile", "service isn't started");
                 return result;
             }
             try {
