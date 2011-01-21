@@ -165,10 +165,12 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Free up the memory associated with this bitmap's pixels, and mark the
-     * bitmap as "dead", meaning it will throw an exception if getPixels() or
-     * setPixels() is called, and will draw nothing. This operation cannot be
-     * reversed, so it should only be called if you are sure there are no
+     * Free the native object associated with this bitmap, and clear the
+     * reference to the pixel data. This will not free the pixel data synchronously;
+     * it simply allows it to be garbage collected if there are no other references.
+     * The bitmap is marked as "dead", meaning it will throw an exception if
+     * getPixels() or setPixels() is called, and will draw nothing. This operation
+     * cannot be reversed, so it should only be called if you are sure there are no
      * further uses for the bitmap. This is an advanced call, and normally need
      * not be called, since the normal GC process will free up this memory when
      * there are no more references to this bitmap.
