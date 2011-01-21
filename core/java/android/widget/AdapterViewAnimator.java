@@ -323,20 +323,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         setDisplayedChild(mWhichChild - 1);
     }
 
-    /**
-     * Shows only the specified child. The other displays Views exit the screen,
-     * optionally with the with the {@link #getOutAnimation() out animation} and
-     * the specified child enters the screen, optionally with the
-     * {@link #getInAnimation() in animation}.
-     *
-     * @param childIndex The index of the child to be shown.
-     * @param animate Whether or not to use the in and out animations, defaults
-     *            to true.
-     */
-    void showOnly(int childIndex, boolean animate) {
-        showOnly(childIndex, animate, false);
-    }
-
     int modulo(int pos, int size) {
         if (size > 0) {
             return (size + (pos % size)) % size;
@@ -363,7 +349,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     int getNumActiveViews() {
         if (mAdapter != null) {
-            return Math.min(mAdapter.getCount() + 1, mMaxNumActiveViews);
+            return Math.min(getCount() + 1, mMaxNumActiveViews);
         } else {
             return mMaxNumActiveViews;
         }
@@ -371,7 +357,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     int getWindowSize() {
         if (mAdapter != null) {
-            int adapterCount = mAdapter.getCount();
+            int adapterCount = getCount();
             if (adapterCount <= getNumActiveViews() && mLoopViews) {
                 return adapterCount*mMaxNumActiveViews;
             } else {
@@ -396,16 +382,16 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         for (int i = mCurrentWindowStart; i <= mCurrentWindowEnd; i++) {
             int index = modulo(i, getWindowSize());
 
-            int adapterCount = mAdapter.getCount();
+            int adapterCount = getCount();
             // get the fresh child from the adapter
-            View updatedChild = mAdapter.getView(modulo(i, adapterCount), null, this);
+            final View updatedChild = mAdapter.getView(modulo(i, adapterCount), null, this);
 
             if (mViewsMap.containsKey(index)) {
-                FrameLayout fl = (FrameLayout) mViewsMap.get(index).view;
-                // flush out the old child
-                fl.removeAllViewsInLayout();
+                final FrameLayout fl = (FrameLayout) mViewsMap.get(index).view;
                 // add the new child to the frame, if it exists
                 if (updatedChild != null) {
+                    // flush out the old child
+                    fl.removeAllViewsInLayout();
                     fl.addView(updatedChild);
                 }
             }
@@ -423,9 +409,19 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         return new FrameLayout(mContext);
     }
 
-    void showOnly(int childIndex, boolean animate, boolean onLayout) {
+    /**
+     * Shows only the specified child. The other displays Views exit the screen,
+     * optionally with the with the {@link #getOutAnimation() out animation} and
+     * the specified child enters the screen, optionally with the
+     * {@link #getInAnimation() in animation}.
+     *
+     * @param childIndex The index of the child to be shown.
+     * @param animate Whether or not to use the in and out animations, defaults
+     *            to true.
+     */
+    void showOnly(int childIndex, boolean animate) {
         if (mAdapter == null) return;
-        final int adapterCount = mAdapter.getCount();
+        final int adapterCount = getCount();
         if (adapterCount == 0) return;
 
         for (int i = 0; i < mPreviousViews.size(); i++) {
@@ -463,7 +459,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         // This section clears out any items that are in our active views list
         // but are outside the effective bounds of our window (this is becomes an issue
         // at the extremities of the list, eg. where newWindowStartUnbounded < 0 or
-        // newWindowEndUnbounded > mAdapter.getCount() - 1
+        // newWindowEndUnbounded > adapterCount - 1
         for (Integer index : mViewsMap.keySet()) {
             boolean remove = false;
             if (!wrap && (index < rangeStart || index > rangeEnd)) {
@@ -531,22 +527,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             mCurrentWindowEnd = newWindowEnd;
             mCurrentWindowStartUnbounded = newWindowStartUnbounded;
         }
-
-        mFirstTime = false;
-        if (!onLayout) {
-            requestLayout();
-            invalidate();
-        } else {
-            // If the Adapter tries to layout the current view when we get it using getView
-            // above the layout will end up being ignored since we are currently laying out, so
-            // we post a delayed requestLayout and invalidate
-            mMainQueue.post(new Runnable() {
-                public void run() {
-                    requestLayout();
-                    invalidate();
-                }
-            });
-        }
+        requestLayout();
+        invalidate();
     }
 
     private void addChild(View child) {
@@ -702,21 +684,30 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         measureChildren();
     }
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    void checkForAndHandleDataChanged() {
         boolean dataChanged = mDataChanged;
         if (dataChanged) {
-            handleDataChanged();
+            post(new Runnable() {
+                public void run() {
+                    handleDataChanged();
+                    // if the data changes, mWhichChild might be out of the bounds of the adapter
+                    // in this case, we reset mWhichChild to the beginning
+                    if (mWhichChild >= getWindowSize()) {
+                        mWhichChild = 0;
 
-            // if the data changes, mWhichChild might be out of the bounds of the adapter
-            // in this case, we reset mWhichChild to the beginning
-            if (mWhichChild >= mAdapter.getCount()) {
-                mWhichChild = 0;
-
-                showOnly(mWhichChild, true, true);
-            }
-            refreshChildren();
+                        showOnly(mWhichChild, true);
+                    }
+                    refreshChildren();
+                    requestLayout();
+                }
+            });
         }
+        mDataChanged = false;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        checkForAndHandleDataChanged();
 
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -727,7 +718,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
             child.layout(mPaddingLeft, mPaddingTop, childRight, childBottom);
         }
-        mDataChanged = false;
     }
 
     static class SavedState extends BaseSavedState {
@@ -921,8 +911,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (mAdapter != null) {
             mDataSetObserver = new AdapterDataSetObserver();
             mAdapter.registerDataSetObserver(mDataSetObserver);
+            mItemCount = mAdapter.getCount();
         }
         setFocusable(true);
+        setDisplayedChild(0);
     }
 
     /**
