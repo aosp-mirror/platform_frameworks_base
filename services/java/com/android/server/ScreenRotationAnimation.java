@@ -23,6 +23,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -132,9 +134,11 @@ class ScreenRotationAnimation {
                 }
         
                 if (screenshot != null) {
-                    c.drawBitmap(screenshot, 0, 0, new Paint(0));
+                    Paint paint = new Paint(0);
+                    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+                    c.drawBitmap(screenshot, 0, 0, paint);
                 } else {
-                    c.drawColor(Color.GREEN);
+                    c.drawColor(Color.GREEN, PorterDuff.Mode.SRC);
                 }
 
                 mSurface.unlockCanvasAndPost(c);
