@@ -1168,6 +1168,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.System.USE_PTP_INTERFACE,
                     R.bool.def_use_ptp_interface);
+
+            // Set notification volume to follow ringer volume by default
+            loadBooleanSetting(stmt, Settings.System.NOTIFICATIONS_USE_RING_VOLUME,
+                    R.bool.def_notifications_use_ring_volume);
+
         } finally {
             if (stmt != null) stmt.close();
         }
