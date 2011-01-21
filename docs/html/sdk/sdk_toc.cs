@@ -99,8 +99,7 @@
     </ul>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r8</a> <span class="new">new!</span></li>
-      <li><a href="<?cs var:toroot ?>sdk/win-usb.html">USB Driver for
-      Windows, r4</a> <span class="new">new!</span>
+      <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a> <span class="new">new!</span>
       </li>
     </ul>
   </li>
@@ -156,6 +155,9 @@
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
+      <li><a href="<?cs var:toroot ?>sdk/oem-usb.html">
+        <span class="en">OEM USB Drivers</span>
+      </a></li>
       <li><a href="<?cs var:toroot ?>sdk/requirements.html">SDK System Requirements</a></li>
       <!-- <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release
             Notes</a></li> -->
