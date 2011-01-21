@@ -244,11 +244,18 @@ public final class StrictMode {
     public static final int PENALTY_GATHER = 0x100;
 
     /**
-     * Mask of all the penalty bits.
+     * Mask of all the penalty bits valid for thread policies.
      */
-    private static final int PENALTY_MASK =
+    private static final int THREAD_PENALTY_MASK =
             PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER |
             PENALTY_DEATH_ON_NETWORK | PENALTY_FLASH;
+
+
+    /**
+     * Mask of all the penalty bits valid for VM policies.
+     */
+    private static final int VM_PENALTY_MASK =
+            PENALTY_LOG | PENALTY_DEATH | PENALTY_DROPBOX;
 
 
     // TODO: wrap in some ImmutableHashMap thing.
@@ -1117,7 +1124,7 @@ public final class StrictMode {
             // TODO: if in gather mode, ignore Looper.myLooper() and always
             //       go into this immediate mode?
             if (looper == null ||
-                (info.policy & PENALTY_MASK) == PENALTY_DEATH) {
+                (info.policy & THREAD_PENALTY_MASK) == PENALTY_DEATH) {
                 info.durationMillis = -1;  // unknown (redundant, already set)
                 handleViolation(info);
                 return;
@@ -1254,7 +1261,7 @@ public final class StrictMode {
                 violationMaskSubset |= violationBit;
                 final int savedPolicyMask = getThreadPolicyMask();
 
-                final boolean justDropBox = (info.policy & PENALTY_MASK) == PENALTY_DROPBOX;
+                final boolean justDropBox = (info.policy & THREAD_PENALTY_MASK) == PENALTY_DROPBOX;
                 if (justDropBox) {
                     // If all we're going to ask the activity manager
                     // to do is dropbox it (the common case during
@@ -1413,8 +1420,10 @@ public final class StrictMode {
             Looper looper = Looper.getMainLooper();
             if (looper != null) {
                 MessageQueue mq = looper.mQueue;
-                if (policy.classInstanceLimit.size() == 0) {
+                if (policy.classInstanceLimit.size() == 0 ||
+                    (sVmPolicyMask & VM_PENALTY_MASK) == 0) {
                     mq.removeIdleHandler(sProcessIdleHandler);
+                    sIsIdlerRegistered = false;
                 } else if (!sIsIdlerRegistered) {
                     mq.addIdleHandler(sProcessIdleHandler);
                     sIsIdlerRegistered = true;
