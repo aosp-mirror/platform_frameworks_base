@@ -42,11 +42,11 @@
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/preview/start.html">Getting Started</a> <span class="new">new!</span></li>
       <li class="toggle-list">
-        <div><a href="<?cs var:toroot ?>sdk/preview/platform.html">
+        <div><a href="<?cs var:toroot ?>sdk/android-3.0.html">
         <span class="en">Android 3.0 Platform</span></a> <span class="new">new!</span></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/preview/highlights.html">Platform Highlights</a></li> 
-          <li><a href="<?cs var:toroot ?>sdk/api_diff/honeycomb/changes.html">API Differences Report &raquo;</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/honeycomb/changes.html">API Differences Report
+&raquo;</a></li>
         </ul>
       </li>
     </ul>
