@@ -16,33 +16,35 @@
 
 package android.nfc.technology;
 
-import java.io.IOException;
-
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import java.io.IOException;
+
 /**
- * Concrete class for TagTechnology.MIFARE_ULTRALIGHT
+ * Technology class representing MIFARE Ultralight and MIFARE Ultralight C tags.
  *
- * MIFARE Ultralight has n sectors, with varying sizes, although
- * they are at least the same pattern for any one MIFARE Ultralight
- * product. Each sector has two keys. Authentication with the correct
- * key is needed before access to any sector.
+ * <p>Support for this technology type is optional. If the NFC stack doesn't support this technology
+ * MIFARE Ultralight class tags will still be scanned, but will only show the NfcA technology.
  *
- * Each sector has k blocks.
- * Block size is constant across the whole MIFARE Ultralight family.
+ * <p>MIFARE Ultralight class tags have a series of 4 bytes pages that can be individually written
+ * and read in chunks of 4 for a total read of 16 bytes.
  */
 public final class MifareUltralight extends BasicTagTechnology {
+    /** A MIFARE Ultralight tag */
     public static final int TYPE_ULTRALIGHT = 1;
+    /** A MIFARE Ultralight C tag */
     public static final int TYPE_ULTRALIGHT_C = 2;
+    /** The tag type is unknown */
     public static final int TYPE_UNKNOWN = 10;
 
     private static final int NXP_MANUFACTURER_ID = 0x04;
 
     private int mType;
 
+    /** @hide */
     public MifareUltralight(NfcAdapter adapter, Tag tag, Bundle extras) throws RemoteException {
         super(adapter, tag, TagTechnology.MIFARE_ULTRALIGHT);
 
@@ -57,49 +59,59 @@ public final class MifareUltralight extends BasicTagTechnology {
         }
     }
 
+    /** Returns the type of the tag */
     public int getType() {
         return mType;
     }
 
     // Methods that require connect()
     /**
+     * Reads a single 16 byte block from the given page offset.
+     *
+     * <p>This requires a that the tag be connected.
+     *
      * @throws IOException
      */
-    public byte[] readBlock(int block) throws IOException {
+    public byte[] readBlock(int page) throws IOException {
         checkConnected();
 
-        byte[] blockread_cmd = { 0x30, (byte)block }; // phHal_eMifareRead
+        byte[] blockread_cmd = { 0x30, (byte) page}; // phHal_eMifareRead
         return transceive(blockread_cmd, false);
     }
 
     /**
+     * Writes a 4 byte page to the tag.
+     *
+     * <p>This requires a that the tag be connected.
+     *
+     * @param page The offset of the page to write
+     * @param data The data to write
      * @throws IOException
      */
-    public byte[] readOTP() throws IOException {
-        checkConnected();
-
-        return readBlock(3); // OTP is at page 3
-    }
-
-    public void writePage(int block, byte[] data) throws IOException {
+    public void writePage(int page, byte[] data) throws IOException {
         checkConnected();
 
         byte[] pagewrite_cmd = new byte[data.length + 2];
         pagewrite_cmd[0] = (byte) 0xA2;
-        pagewrite_cmd[1] = (byte) block;
+        pagewrite_cmd[1] = (byte) page;
         System.arraycopy(data, 0, pagewrite_cmd, 2, data.length);
 
         transceive(pagewrite_cmd, false);
     }
 
-    public void writeBlock(int block, byte[] data) throws IOException {
-        checkConnected();
-
-        byte[] blockwrite_cmd = new byte[data.length + 2];
-        blockwrite_cmd[0] = (byte) 0xA0;
-        blockwrite_cmd[1] = (byte) block;
-        System.arraycopy(data, 0, blockwrite_cmd, 2, data.length);
-
-        transceive(blockwrite_cmd, false);
+    /**
+     * Send raw NfcA data to a tag and receive the response.
+     * <p>
+     * This method will block until the response is received. It can be canceled
+     * with {@link #close}.
+     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * <p>This requires a that the tag be connected.
+     *
+     * @param data bytes to send
+     * @return bytes received in response
+     * @throws IOException if the target is lost or connection closed
+     */
+    public byte[] transceive(byte[] data) throws IOException {
+        return transceive(data, true);
     }
 }

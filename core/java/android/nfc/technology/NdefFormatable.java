@@ -91,11 +91,4 @@ public final class NdefFormatable extends BasicTagTechnology {
             Log.e(TAG, "NFC service dead", e);
         }
     }
-
-    @Override
-    public byte[] transceive(byte[] data) {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
-    }
 }
