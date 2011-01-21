@@ -393,6 +393,10 @@ public class InputMethodService extends AbstractInputMethodService {
             if (onShowInputRequested(flags, false)) {
                 showWindow(true);
             }
+            // If user uses hard keyboard, IME button should always be shown.
+            if (!onEvaluateInputViewShown()) {
+                mImm.setIMEButtonVisible(mToken, true);
+            }
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_SHOWN
@@ -557,7 +561,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         public int touchableInsets;
     }
-    
+
     /**
      * You can call this to customize the theme used by your IME's window.
      * This theme should typically be one that derives from
@@ -573,7 +577,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mTheme = theme;
     }
-    
+
     @Override public void onCreate() {
         mTheme = Resources.selectSystemTheme(mTheme,
                 getApplicationInfo().targetSdkVersion,
@@ -698,6 +702,10 @@ public class InputMethodService extends AbstractInputMethodService {
             } else {
                 // Otherwise hide the window.
                 hideWindow();
+            }
+            // If user uses hard keyboard, IME button should always be shown.
+            if (!onEvaluateInputViewShown()) {
+                mImm.setIMEButtonVisible(mToken, true);
             }
         }
     }
@@ -1386,10 +1394,10 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
+        mImm.setIMEButtonVisible(mToken, false);
         if (mWindowVisible) {
             mWindow.hide();
             mWindowVisible = false;
-            mImm.setIMEButtonVisible(mToken, false);
             onWindowHidden();
             mWindowWasVisible = false;
         }
