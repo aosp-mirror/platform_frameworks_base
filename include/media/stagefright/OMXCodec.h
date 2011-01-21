@@ -305,6 +305,8 @@ private:
 
     void restorePatchedDataPointer(BufferInfo *info);
 
+    status_t applyRotation();
+
     OMXCodec(const OMXCodec &);
     OMXCodec &operator=(const OMXCodec &);
 };

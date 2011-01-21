@@ -1680,6 +1680,33 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
     return OK;
 }
 
+status_t OMXCodec::applyRotation() {
+    sp<MetaData> meta = mSource->getFormat();
+
+    int32_t rotationDegrees;
+    if (!meta->findInt32(kKeyRotation, &rotationDegrees)) {
+        rotationDegrees = 0;
+    }
+
+    uint32_t transform;
+    switch (rotationDegrees) {
+        case 0: transform = 0; break;
+        case 90: transform = HAL_TRANSFORM_ROT_90; break;
+        case 180: transform = HAL_TRANSFORM_ROT_180; break;
+        case 270: transform = HAL_TRANSFORM_ROT_270; break;
+        default: transform = 0; break;
+    }
+
+    status_t err = OK;
+
+    if (transform) {
+        err = native_window_set_buffers_transform(
+                mNativeWindow.get(), transform);
+    }
+
+    return err;
+}
+
 status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     // Get the number of buffers needed.
     OMX_PARAM_PORTDEFINITIONTYPE def;
@@ -1709,6 +1736,11 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     def.nBufferCountActual++;
     err = mOMX->setParameter(
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+    if (err != OK) {
+        return err;
+    }
+
+    err = applyRotation();
     if (err != OK) {
         return err;
     }
