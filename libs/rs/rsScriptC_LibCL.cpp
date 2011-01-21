@@ -24,26 +24,6 @@ using namespace android;
 using namespace android::renderscript;
 
 
-static float SC_acospi(float v) {
-    return acosf(v)/ M_PI;
-}
-
-static float SC_asinpi(float v) {
-    return asinf(v) / M_PI;
-}
-
-static float SC_atanpi(float v) {
-    return atanf(v) / M_PI;
-}
-
-static float SC_atan2pi(float y, float x) {
-    return atan2f(y, x) / M_PI;
-}
-
-static float SC_cospi(float v) {
-    return cosf(v * M_PI);
-}
-
 static float SC_exp10(float v) {
     return pow(10.f, v);
 }
@@ -81,14 +61,6 @@ float SC_rsqrt(float v) {
 float SC_sincos(float v, float *cosptr) {
     *cosptr = cosf(v);
     return sinf(v);
-}
-
-static float SC_sinpi(float v) {
-    return sinf(v * M_PI);
-}
-
-static float SC_tanpi(float v) {
-    return tanf(v * M_PI);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -186,21 +158,16 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     // OpenCL math
     { "_Z4acosf", (void *)&acosf, true },
     { "_Z5acoshf", (void *)&acoshf, true },
-    { "_Z6acospif", (void *)&SC_acospi, true },
     { "_Z4asinf", (void *)&asinf, true },
     { "_Z5asinhf", (void *)&asinhf, true },
-    { "_Z6asinpif", (void *)&SC_asinpi, true },
     { "_Z4atanf", (void *)&atanf, true },
     { "_Z5atan2ff", (void *)&atan2f, true },
     { "_Z5atanhf", (void *)&atanhf, true },
-    { "_Z6atanpif", (void *)&SC_atanpi, true },
-    { "_Z7atan2piff", (void *)&SC_atan2pi, true },
     { "_Z4cbrtf", (void *)&cbrtf, true },
     { "_Z4ceilf", (void *)&ceilf, true },
     { "_Z8copysignff", (void *)&copysignf, true },
     { "_Z3cosf", (void *)&cosf, true },
     { "_Z4coshf", (void *)&coshf, true },
-    { "_Z5cospif", (void *)&SC_cospi, true },
     { "_Z4erfcf", (void *)&erfcf, true },
     { "_Z3erff", (void *)&erff, true },
     { "_Z3expf", (void *)&expf, true },
@@ -240,11 +207,9 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z3sinf", (void *)&sinf, true },
     { "_Z6sincosfPf", (void *)&SC_sincos, true },
     { "_Z4sinhf", (void *)&sinhf, true },
-    { "_Z5sinpif", (void *)&SC_sinpi, true },
     { "_Z4sqrtf", (void *)&sqrtf, true },
     { "_Z3tanf", (void *)&tanf, true },
     { "_Z4tanhf", (void *)&tanhf, true },
-    { "_Z5tanpif", (void *)&SC_tanpi, true },
     { "_Z6tgammaf", (void *)&lgammaf, true }, // FIXME!!! NEEDS TO USE tgammaf
     { "_Z5truncf", (void *)&truncf, true },
 
