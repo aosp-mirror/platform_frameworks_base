@@ -277,36 +277,6 @@ public class ActionBarImpl extends ActionBar {
         setSubtitle(mContext.getString(resId));
     }
 
-    public void setCustomNavigationMode(View view) {
-        cleanupTabs();
-        setCustomView(view);
-        setDisplayOptions(DISPLAY_SHOW_CUSTOM, DISPLAY_SHOW_CUSTOM | DISPLAY_SHOW_TITLE);
-        mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
-        mActionView.setCallback(null);
-    }
-
-    public void setDropdownNavigationMode(SpinnerAdapter adapter, OnNavigationListener callback) {
-        setDropdownNavigationMode(adapter, callback, -1);
-    }
-
-    public void setDropdownNavigationMode(SpinnerAdapter adapter, OnNavigationListener callback,
-            int defaultSelectedPosition) {
-        cleanupTabs();
-        setDisplayOptions(0, DISPLAY_SHOW_CUSTOM | DISPLAY_SHOW_TITLE);
-        mActionView.setNavigationMode(NAVIGATION_MODE_LIST);
-        setListNavigationCallbacks(adapter, callback);
-        if (defaultSelectedPosition >= 0) {
-            mActionView.setDropdownSelectedPosition(defaultSelectedPosition);
-        }
-    }
-
-    public void setStandardNavigationMode() {
-        cleanupTabs();
-        setDisplayOptions(DISPLAY_SHOW_TITLE, DISPLAY_SHOW_TITLE | DISPLAY_SHOW_CUSTOM);
-        mActionView.setNavigationMode(NAVIGATION_MODE_STANDARD);
-        mActionView.setCallback(null);
-    }
-
     public void setSelectedNavigationItem(int position) {
         switch (mActionView.getNavigationMode()) {
         case NAVIGATION_MODE_TABS:
@@ -319,10 +289,6 @@ public class ActionBarImpl extends ActionBar {
             throw new IllegalStateException(
                     "setSelectedNavigationIndex not valid for current navigation mode");
         }
-    }
-
-    public int getSelectedNavigationItem() {
-        return getSelectedNavigationIndex();
     }
 
     public void removeAllTabs() {
@@ -357,10 +323,6 @@ public class ActionBarImpl extends ActionBar {
 
     public void setBackgroundDrawable(Drawable d) {
         mContainerView.setBackgroundDrawable(d);
-    }
-
-    public View getCustomNavigationView() {
-        return getCustomView();
     }
 
     public View getCustomView() {
@@ -474,16 +436,6 @@ public class ActionBarImpl extends ActionBar {
         if (selectedTabPosition == position) {
             selectTab(mTabs.isEmpty() ? null : mTabs.get(Math.max(0, position - 1)));
         }
-    }
-
-    @Override
-    public void setTabNavigationMode() {
-        if (mActivity == null) {
-            throw new IllegalStateException(
-                    "Tab navigation mode cannot be used outside of an Activity");
-        }
-        setDisplayOptions(0, DISPLAY_SHOW_TITLE | DISPLAY_SHOW_CUSTOM);
-        mActionView.setNavigationMode(NAVIGATION_MODE_TABS);
     }
 
     @Override

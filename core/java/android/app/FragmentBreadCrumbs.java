@@ -29,9 +29,9 @@ import android.widget.TextView;
 /**
  * Helper class for showing "bread crumbs" representing the fragment
  * stack in an activity.  This is intended to be used with
- * {@link ActionBar#setCustomNavigationMode(View)
- * ActionBar.setCustomNavigationMode(View)} to place the bread crumbs in
- * the navigation area of the action bar.
+ * {@link ActionBar#setCustomView(View)
+ * ActionBar.setCustomView(View)} to place the bread crumbs in
+ * the action bar.
  *
  * <p>The default style for this view is
  * {@link android.R.style#Widget_FragmentBreadCrumbs}.

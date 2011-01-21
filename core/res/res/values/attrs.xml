@@ -4664,8 +4664,6 @@
             <flag name="homeAsUp" value="0x4" />
             <flag name="showTitle" value="0x8" />
             <flag name="showCustom" value="0x10" />
-            <!-- DEPRECATED - Remove this later!! -->
-            <flag name="hideHome" value="0x1000" />
         </attr>
         <!-- Specifies title text used for navigationMode="normal" -->
         <attr name="title" />
