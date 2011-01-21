@@ -104,26 +104,6 @@ public class NetworkUtils {
     public native static String getDhcpError();
 
     /**
-     * When static IP configuration has been specified, configure the network
-     * interface according to the values supplied.
-     * @param interfaceName the name of the interface to configure
-     * @param ipInfo the IP address, default gateway, and DNS server addresses
-     * with which to configure the interface.
-     * @return {@code true} for success, {@code false} for failure
-     */
-    public static boolean configureInterface(String interfaceName, DhcpInfo ipInfo) {
-        return configureNative(interfaceName,
-            ipInfo.ipAddress,
-            ipInfo.netmask,
-            ipInfo.gateway,
-            ipInfo.dns1,
-            ipInfo.dns2);
-    }
-
-    private native static boolean configureNative(
-        String interfaceName, int ipAddress, int netmask, int gateway, int dns1, int dns2);
-
-    /**
      * Convert a IPv4 address from an integer to an InetAddress.
      * @param hostAddress an int corresponding to the IPv4 address in network byte order
      */
