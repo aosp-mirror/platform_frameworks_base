@@ -36,4 +36,15 @@ public class PasswordEntryKeyboardView extends KeyboardView {
         super(context, attrs, defStyle);
     }
 
+    @Override
+    public boolean setShifted(boolean shifted) {
+        boolean result = super.setShifted(shifted);
+        // invalidate both shift keys
+        int[] indices = getKeyboard().getShiftKeyIndices();
+        for (int index : indices) {
+            invalidateKey(index);
+        }
+        return result;
+    }
+
 }
