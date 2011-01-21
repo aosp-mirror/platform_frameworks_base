@@ -232,12 +232,26 @@ class ZoomManager {
     }
 
     private void setDefaultZoomScale(float defaultScale) {
+        final float originalDefault = mDefaultScale;
         mDefaultScale = defaultScale;
         mInvDefaultScale = 1 / defaultScale;
         mDefaultMaxZoomScale = defaultScale * DEFAULT_MAX_ZOOM_SCALE_FACTOR;
         mDefaultMinZoomScale = defaultScale * DEFAULT_MIN_ZOOM_SCALE_FACTOR;
-        mMaxZoomScale = mDefaultMaxZoomScale;
-        mMinZoomScale = mDefaultMinZoomScale;
+        if (originalDefault > 0.0 && mMaxZoomScale > 0.0) {
+            // Keeps max zoom scale when zoom density changes.
+            mMaxZoomScale = defaultScale / originalDefault * mMaxZoomScale;
+        } else {
+            mMaxZoomScale = mDefaultMaxZoomScale;
+        }
+        if (originalDefault > 0.0 && mMinZoomScale > 0.0) {
+            // Keeps min zoom scale when zoom density changes.
+            mMinZoomScale = defaultScale / originalDefault * mMinZoomScale;
+        } else {
+            mMinZoomScale = mDefaultMinZoomScale;
+        }
+        if (!exceedsMinScaleIncrement(mMinZoomScale, mMaxZoomScale)) {
+            mMaxZoomScale = mMinZoomScale;
+        }
     }
 
     public final float getScale() {
@@ -468,7 +482,7 @@ class ZoomManager {
             mTextWrapScale = scale;
         }
 
-        if (scale != mActualScale || force) {
+        if (exceedsMinScaleIncrement(scale, mActualScale) || force) {
             float oldScale = mActualScale;
             float oldInvScale = mInvActualScale;
 
