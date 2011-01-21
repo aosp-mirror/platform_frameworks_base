@@ -1776,7 +1776,7 @@ public class VideoEditorImpl implements VideoEditor {
              */
             int height = 480;
             int width = 854;
-            switch (getAspectRatio()) {
+            switch (mI.getAspectRatio()) {
                 case MediaProperties.ASPECT_RATIO_3_2:
                     width =  720;
                     break;
