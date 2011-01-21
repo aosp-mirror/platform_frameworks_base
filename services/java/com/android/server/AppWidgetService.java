@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,6 +63,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
@@ -121,18 +123,15 @@ class AppWidgetService extends IAppWidgetService.Stub
      * globally and may lead us to leak AppWidgetService instances (if there were more than one).
      */
     static class ServiceConnectionProxy implements ServiceConnection {
-        private final AppWidgetService mAppWidgetService;
         private final Pair<Integer, Intent.FilterComparison> mKey;
         private final IBinder mConnectionCb;
 
-        ServiceConnectionProxy(AppWidgetService appWidgetService,
-                Pair<Integer, Intent.FilterComparison> key, IBinder connectionCb) {
-            mAppWidgetService = appWidgetService;
+        ServiceConnectionProxy(Pair<Integer, Intent.FilterComparison> key, IBinder connectionCb) {
             mKey = key;
             mConnectionCb = connectionCb;
         }
         public void onServiceConnected(ComponentName name, IBinder service) {
-            IRemoteViewsAdapterConnection cb =
+            final IRemoteViewsAdapterConnection cb =
                 IRemoteViewsAdapterConnection.Stub.asInterface(mConnectionCb);
             try {
                 cb.onServiceConnected(service);
@@ -141,19 +140,13 @@ class AppWidgetService extends IAppWidgetService.Stub
             }
         }
         public void onServiceDisconnected(ComponentName name) {
-            IRemoteViewsAdapterConnection cb =
+            disconnect();
+        }
+        public void disconnect() {
+            final IRemoteViewsAdapterConnection cb =
                 IRemoteViewsAdapterConnection.Stub.asInterface(mConnectionCb);
             try {
                 cb.onServiceDisconnected();
-                mAppWidgetService.mServiceConnectionUpdateHandler.post(new Runnable() {
-                    public void run() {
-                        // We don't want to touch mBoundRemoteViewsServices from any other thread
-                        // so queue this to run on the main thread.
-                        if (mAppWidgetService.mBoundRemoteViewsServices.containsKey(mKey)) {
-                            mAppWidgetService.mBoundRemoteViewsServices.remove(mKey);
-                        }
-                    }
-                });
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -163,7 +156,6 @@ class AppWidgetService extends IAppWidgetService.Stub
     // Manages connections to RemoteViewsServices
     private final HashMap<Pair<Integer, FilterComparison>, ServiceConnection>
         mBoundRemoteViewsServices = new HashMap<Pair<Integer,FilterComparison>,ServiceConnection>();
-    private final Handler mServiceConnectionUpdateHandler = new Handler();
 
     Context mContext;
     Locale mLocale;
@@ -456,13 +448,24 @@ class AppWidgetService extends IAppWidgetService.Stub
                 throw new IllegalArgumentException("Unknown component " + componentName);
             }
 
-            // Bind to the RemoteViewsService (which will trigger a callback to the
-            // RemoteViewsAdapter)
+            // If there is already a connection made for this service intent, then disconnect from
+            // that first.  (This does not allow multiple connections to the same service under
+            // the same key)
+            ServiceConnectionProxy conn = null;
             Pair<Integer, FilterComparison> key = Pair.create(appWidgetId,
                     new FilterComparison(intent));
-            final ServiceConnection conn = new ServiceConnectionProxy(this, key, connection);
+            if (mBoundRemoteViewsServices.containsKey(key)) {
+                conn = (ServiceConnectionProxy) mBoundRemoteViewsServices.get(key);
+                conn.disconnect();
+                mContext.unbindService(conn);
+                mBoundRemoteViewsServices.remove(key);
+            }
+
+            // Bind to the RemoteViewsService (which will trigger a callback to the
+            // RemoteViewsAdapter.onServiceConnected())
             final long token = Binder.clearCallingIdentity();
             try {
+                conn = new ServiceConnectionProxy(key, connection);
                 mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
                 mBoundRemoteViewsServices.put(key, conn);
             } finally {
@@ -473,37 +476,43 @@ class AppWidgetService extends IAppWidgetService.Stub
 
     public void unbindRemoteViewsService(int appWidgetId, Intent intent) {
         synchronized (mAppWidgetIds) {
-            AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
-            if (id == null) {
-                throw new IllegalArgumentException("bad appWidgetId");
-            }
-
             // Unbind from the RemoteViewsService (which will trigger a callback to the bound
             // RemoteViewsAdapter)
             Pair<Integer, FilterComparison> key = Pair.create(appWidgetId,
                     new FilterComparison(intent));
             if (mBoundRemoteViewsServices.containsKey(key)) {
-                final ServiceConnection conn = mBoundRemoteViewsServices.get(key);
-                mBoundRemoteViewsServices.remove(key);
-                conn.onServiceDisconnected(null);
+                // We don't need to use the appWidgetId until after we are sure there is something
+                // to unbind.  Note that this may mask certain issues with apps calling unbind()
+                // more than necessary.
+                AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
+                if (id == null) {
+                    throw new IllegalArgumentException("bad appWidgetId");
+                }
+
+                ServiceConnectionProxy conn =
+                    (ServiceConnectionProxy) mBoundRemoteViewsServices.get(key);
+                conn.disconnect();
                 mContext.unbindService(conn);
+                mBoundRemoteViewsServices.remove(key);
+            } else {
+                Log.e("AppWidgetService", "Error (unbindRemoteViewsService): Connection not bound");
             }
         }
     }
 
     private void unbindAppWidgetRemoteViewsServicesLocked(AppWidgetId id) {
+        int appWidgetId = id.appWidgetId;
+        // Unbind all connections to Services bound to this AppWidgetId
         Iterator<Pair<Integer, Intent.FilterComparison>> it =
             mBoundRemoteViewsServices.keySet().iterator();
-        int appWidgetId = id.appWidgetId;
-
-        // Unbind all connections to AppWidgets bound to this id
         while (it.hasNext()) {
             final Pair<Integer, Intent.FilterComparison> key = it.next();
             if (key.first.intValue() == appWidgetId) {
-                final ServiceConnection conn = mBoundRemoteViewsServices.get(key);
-                it.remove();
-                conn.onServiceDisconnected(null);
+                final ServiceConnectionProxy conn = (ServiceConnectionProxy)
+                        mBoundRemoteViewsServices.get(key);
+                conn.disconnect();
                 mContext.unbindService(conn);
+                it.remove();
             }
         }
     }

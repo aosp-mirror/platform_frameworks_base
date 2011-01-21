@@ -54,6 +54,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     int mWhichChild = 0;
 
     /**
+     * The index of the child to restore after the asynchronous connection from the
+     * RemoteViewsAdapter has been.
+     */
+    private int mRestoreWhichChild = -1;
+
+    /**
      * Whether or not the first view(s) should be animated in
      */
     boolean mAnimateFirstTime = true;
@@ -780,7 +786,15 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         // set mWhichChild
         mWhichChild = ss.whichChild;
 
-        setDisplayedChild(mWhichChild);
+        // When using RemoteAdapters, the async connection process can lead to
+        // onRestoreInstanceState to be called before setAdapter(), so we need to save the previous
+        // values to restore the list position after we connect, and can skip setting the displayed
+        // child until then.
+        if (mRemoteViewsAdapter != null && mAdapter == null) {
+            mRestoreWhichChild = mWhichChild;
+        } else {
+            setDisplayedChild(mWhichChild);
+        }
     }
 
     /**
@@ -956,12 +970,21 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     /**
      * Called back when the adapter connects to the RemoteViewsService.
      */
-    public void onRemoteAdapterConnected() {
+    public boolean onRemoteAdapterConnected() {
         if (mRemoteViewsAdapter != mAdapter) {
             setAdapter(mRemoteViewsAdapter);
+
+            // Restore the previous position (see onRestoreInstanceState)
+            if (mRestoreWhichChild > -1) {
+                setDisplayedChild(mRestoreWhichChild);
+                mRestoreWhichChild = -1;
+            }
+            return false;
         } else if (mRemoteViewsAdapter != null) {
             mRemoteViewsAdapter.superNotifyDataSetChanged();
+            return true;
         }
+        return false;
     }
 
     /**
@@ -994,7 +1017,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
     @Override
     protected void onDetachedFromWindow() {
-        mAdapter = null;
+        setAdapter(null);
         super.onDetachedFromWindow();
     }
 }
