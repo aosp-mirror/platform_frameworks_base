@@ -1025,17 +1025,18 @@ public final class BluetoothAdapter {
         return null;
     }
 
-    /*
+    /**
      * Get the profile proxy object associated with the profile.
      *
-     * <p>Profile can be one of {@link BluetoothProfile.HEADSET} or
-     * {@link BluetoothProfile.A2DP}. Clients must implements
+     * <p>Profile can be one of {@link BluetoothProfile#HEADSET} or
+     * {@link BluetoothProfile#A2DP}. Clients must implements
      * {@link BluetoothProfile.ServiceListener} to get notified of
      * the connection status and to get the proxy object.
      *
      * @param context Context of the application
      * @param listener The service Listener for connection callbacks.
-     * @param profile
+     * @param profile The Bluetooth profile; either {@link BluetoothProfile#HEADSET}
+     *                or {@link BluetoothProfile#A2DP}.
      * @return true on success, false on error
      */
     public boolean getProfileProxy(Context context, BluetoothProfile.ServiceListener listener,
