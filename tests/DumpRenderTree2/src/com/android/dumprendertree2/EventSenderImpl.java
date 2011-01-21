@@ -73,8 +73,8 @@ public class EventSenderImpl {
     }
 
     private Point createViewPointFromContentCoordinates(int x, int y) {
-        return new Point((int)(x * mWebView.getScale()) - mWebView.getScrollX(),
-                         (int)(y * mWebView.getScale()) - mWebView.getScrollY());
+        return new Point(Math.round(x * mWebView.getScale()) - mWebView.getScrollX(),
+                         Math.round(y * mWebView.getScale()) - mWebView.getScrollY());
     }
 
     public static class TouchPoint {
