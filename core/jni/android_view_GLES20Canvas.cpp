@@ -271,6 +271,22 @@ static void android_view_GLES20Canvas_drawBitmapMatrix(JNIEnv* env, jobject canv
     renderer->drawBitmap(bitmap, matrix, paint);
 }
 
+static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer,
+        jint meshWidth, jint meshHeight, jfloatArray vertices, jint offset,
+        jintArray colors, jint colorOffset, SkPaint* paint) {
+    // This object allows the renderer to allocate a global JNI ref to the buffer object.
+    JavaHeapBitmapRef bitmapRef(env, bitmap, buffer);
+
+    jfloat* verticesArray = vertices ? env->GetFloatArrayElements(vertices, NULL) + offset : NULL;
+    jint* colorsArray = colors ? env->GetIntArrayElements(colors, NULL) + colorOffset : NULL;
+
+    renderer->drawBitmapMesh(bitmap, meshWidth, meshHeight, verticesArray, colorsArray, paint);
+
+    if (vertices) env->ReleaseFloatArrayElements(vertices, verticesArray, 0);
+    if (colors) env->ReleaseIntArrayElements(colors, colorsArray, 0);
+}
+
 static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray buffer, jbyteArray chunks,
         float left, float top, float right, float bottom, SkPaint* paint) {
@@ -393,24 +409,24 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, jcharArray text, int index, int count,
-        jfloat x, jfloat y, int flags, SkPaint* paint) {
+        OpenGLRenderer* renderer, jcharArray text, jint index, jint count,
+        jfloat x, jfloat y, jint flags, SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     renderText(renderer, textArray + index, count, x, y, flags, paint);
     env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
 }
 
 static void android_view_GLES20Canvas_drawText(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, jstring text, int start, int end,
-        jfloat x, jfloat y, int flags, SkPaint* paint) {
+        OpenGLRenderer* renderer, jstring text, jint start, jint end,
+        jfloat x, jfloat y, jint flags, SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
     renderText(renderer, textArray + start, end - start, x, y, flags, paint);
     env->ReleaseStringChars(text, textArray);
 }
 
 static void android_view_GLES20Canvas_drawTextRunArray(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, jcharArray text, int index, int count,
-        int contextIndex, int contextCount, jfloat x, jfloat y, int dirFlags,
+        OpenGLRenderer* renderer, jcharArray text, jint index, jint count,
+        jint contextIndex, jint contextCount, jfloat x, jfloat y, jint dirFlags,
         SkPaint* paint) {
     jchar* textArray = env->GetCharArrayElements(text, NULL);
     renderTextRun(renderer, textArray + contextIndex, index - contextIndex,
@@ -419,8 +435,8 @@ static void android_view_GLES20Canvas_drawTextRunArray(JNIEnv* env, jobject canv
  }
 
 static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject canvas,
-        OpenGLRenderer* renderer, jstring text, int start, int end,
-        int contextStart, int contextEnd, jfloat x, jfloat y, int dirFlags,
+        OpenGLRenderer* renderer, jstring text, jint start, jint end,
+        jint contextStart, int contextEnd, jfloat x, jfloat y, jint dirFlags,
         SkPaint* paint) {
     const jchar* textArray = env->GetStringChars(text, NULL);
     jint count = end - start;
@@ -573,10 +589,13 @@ static JNINativeMethod gMethods[] = {
     { "nGetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_getMatrix },
     { "nConcatMatrix",      "(II)V",           (void*) android_view_GLES20Canvas_concatMatrix },
 
-    { "nDrawBitmap",        "(II[BFFI)V", (void*) android_view_GLES20Canvas_drawBitmap },
-    { "nDrawBitmap",        "(II[BFFFFFFFFI)V", (void*) android_view_GLES20Canvas_drawBitmapRect },
-    { "nDrawBitmap",        "(II[BII)V", (void*) android_view_GLES20Canvas_drawBitmapMatrix },
-    { "nDrawPatch",         "(II[B[BFFFFI)V", (void*) android_view_GLES20Canvas_drawPatch },
+    { "nDrawBitmap",        "(II[BFFI)V",      (void*) android_view_GLES20Canvas_drawBitmap },
+    { "nDrawBitmap",        "(II[BFFFFFFFFI)V",(void*) android_view_GLES20Canvas_drawBitmapRect },
+    { "nDrawBitmap",        "(II[BII)V",       (void*) android_view_GLES20Canvas_drawBitmapMatrix },
+
+    { "nDrawBitmapMesh",    "(II[BII[FI[III)V",(void*) android_view_GLES20Canvas_drawBitmapMesh },
+
+    { "nDrawPatch",         "(II[B[BFFFFI)V",  (void*) android_view_GLES20Canvas_drawPatch },
 
     { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
