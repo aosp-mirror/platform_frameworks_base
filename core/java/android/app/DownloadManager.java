@@ -24,13 +24,12 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.util.Log;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import java.io.File;
@@ -53,7 +52,6 @@ import java.util.List;
  * download in a notification or from the downloads UI.
  */
 public class DownloadManager {
-    private static final String TAG = "DownloadManager";
 
     /**
      * An identifier for a particular download, unique across the system.  Clients use this ID to
@@ -385,6 +383,10 @@ public class DownloadManager {
                 throw new IllegalArgumentException("Can only download HTTP/HTTPS URIs: " + uri);
             }
             mUri = uri;
+        }
+
+        Request(String uriString) {
+            mUri = Uri.parse(uriString);
         }
 
         /**
@@ -1070,6 +1072,68 @@ public class DownloadManager {
             return null;
         }
     }
+
+    /**
+     * Adds a file to the downloads database system, so it could appear in Downloads App
+     * (and thus become eligible for management by the Downloads App).
+     * <p>
+     * It is helpful to make the file scannable by MediaScanner by setting the param
+     * isMediaScannerScannable to true. It makes the file visible in media managing
+     * applications such as Gallery App, which could be a useful purpose of using this API.
+     *
+     * @param title the title that would appear for this file in Downloads App.
+     * @param description the description that would appear for this file in Downloads App.
+     * @param isMediaScannerScannable true if the file is to be scanned by MediaScanner. Files
+     * scanned by MediaScanner appear in the applications used to view media (for example,
+     * Gallery app).
+     * @param mimeType mimetype of the file.
+     * @param path absolute pathname to the file. The file should be world-readable, so that it can
+     * be managed by the Downloads App and any other app that is used to read it (for example,
+     * Gallery app to display the file, if the file contents represent a video/image).
+     * @param length length of the downloaded file
+     * @return  an ID for the download entry added to the downloads app, unique across the system
+     * This ID is used to make future calls related to this download.
+     */
+    public long completedDownload(String title, String description,
+            boolean isMediaScannerScannable, String mimeType, String path, long length) {
+        // make sure the input args are non-null/non-zero
+        validateArgumentIsNonEmpty("title", title);
+        validateArgumentIsNonEmpty("description", description);
+        validateArgumentIsNonEmpty("path", path);
+        validateArgumentIsNonEmpty("mimeType", mimeType);
+        if (length <= 0) {
+            throw new IllegalArgumentException(" invalid value for param: totalBytes");
+        }
+
+        // if there is already an entry with the given path name in downloads.db, return its id
+        Request request = new Request(NON_DOWNLOADMANAGER_DOWNLOAD)
+                .setTitle(title)
+                .setDescription(description)
+                .setMimeType(mimeType);
+        ContentValues values = request.toContentValues(null);
+        values.put(Downloads.Impl.COLUMN_DESTINATION,
+                Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
+        values.put(Downloads.Impl._DATA, path);
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
+        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
+        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED,
+                (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES :
+                        Request.SCANNABLE_VALUE_NO);
+        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        if (downloadUri == null) {
+            return -1;
+        }
+        return Long.parseLong(downloadUri.getLastPathSegment());
+    }
+    private static final String NON_DOWNLOADMANAGER_DOWNLOAD =
+            "non-dwnldmngr-download-dont-retry2download";
+
+    private static void validateArgumentIsNonEmpty(String paramName, String val) {
+        if (TextUtils.isEmpty(val)) {
+            throw new IllegalArgumentException(paramName + " can't be null");
+        }
+    }
+
     /**
      * Get the DownloadProvider URI for the download with the given ID.
      */
@@ -1144,7 +1208,8 @@ public class DownloadManager {
         private String getLocalUri() {
             long destinationType = getLong(getColumnIndex(Downloads.Impl.COLUMN_DESTINATION));
             if (destinationType == Downloads.Impl.DESTINATION_FILE_URI ||
-                    destinationType == Downloads.Impl.DESTINATION_EXTERNAL) {
+                    destinationType == Downloads.Impl.DESTINATION_EXTERNAL ||
+                    destinationType == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
                 String localPath = getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
                 if (localPath == null) {
                     return null;

@@ -466,6 +466,12 @@ public final class Downloads {
         public static final int DESTINATION_SYSTEMCACHE_PARTITION = 5;
 
         /**
+         * This download was completed by the caller (i.e., NOT downloadmanager)
+         * and caller wants to have this download displayed in Downloads App.
+         */
+        public static final int DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD = 6;
+
+        /**
          * This download is allowed to run.
          */
         public static final int CONTROL_RUN = 0;
