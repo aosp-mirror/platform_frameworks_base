@@ -164,8 +164,8 @@ public class SearchDialog extends Dialog {
         mSearchView = (SearchView) findViewById(com.android.internal.R.id.search_view);
         mSearchView.setSubmitButtonEnabled(true);
         mSearchView.setOnCloseListener(mOnCloseListener);
-        mSearchView.setOnQueryChangeListener(mOnQueryChangeListener);
-        mSearchView.setOnSuggestionSelectionListener(mOnSuggestionSelectionListener);
+        mSearchView.setOnQueryTextListener(mOnQueryChangeListener);
+        mSearchView.setOnSuggestionListener(mOnSuggestionSelectionListener);
 
         // TODO: Move the badge logic to SearchView or move the badge to search_bar.xml
         mBadgeLabel = (TextView) mSearchView.findViewById(com.android.internal.R.id.search_badge);
@@ -678,27 +678,27 @@ public class SearchDialog extends Dialog {
         }
     };
 
-    private final SearchView.OnQueryChangeListener mOnQueryChangeListener =
-            new SearchView.OnQueryChangeListener() {
+    private final SearchView.OnQueryTextListener mOnQueryChangeListener =
+            new SearchView.OnQueryTextListener() {
 
-        public boolean onSubmitQuery(String query) {
+        public boolean onQueryTextSubmit(String query) {
             dismiss();
             return false;
         }
 
-        public boolean onQueryTextChanged(String newText) {
+        public boolean onQueryTextChange(String newText) {
             return false;
         }
     };
 
-    private final SearchView.OnSuggestionSelectionListener mOnSuggestionSelectionListener =
-            new SearchView.OnSuggestionSelectionListener() {
+    private final SearchView.OnSuggestionListener mOnSuggestionSelectionListener =
+            new SearchView.OnSuggestionListener() {
 
-        public boolean onSuggestionSelected(int position) {
+        public boolean onSuggestionSelect(int position) {
             return false;
         }
 
-        public boolean onSuggestionClicked(int position) {
+        public boolean onSuggestionClick(int position) {
             dismiss();
             return false;
         }

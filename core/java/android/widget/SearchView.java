@@ -72,10 +72,10 @@ public class SearchView extends LinearLayout {
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SearchView";
 
-    private OnQueryChangeListener mOnQueryChangeListener;
+    private OnQueryTextListener mOnQueryChangeListener;
     private OnCloseListener mOnCloseListener;
     private OnFocusChangeListener mOnQueryTextFocusChangeListener;
-    private OnSuggestionSelectionListener mOnSuggestionListener;
+    private OnSuggestionListener mOnSuggestionListener;
     private OnClickListener mOnSearchClickListener;
 
     private boolean mIconifiedByDefault;
@@ -109,7 +109,7 @@ public class SearchView extends LinearLayout {
     /**
      * Callbacks for changes to the query text.
      */
-    public interface OnQueryChangeListener {
+    public interface OnQueryTextListener {
 
         /**
          * Called when the user submits the query. This could be due to a key press on the
@@ -123,7 +123,7 @@ public class SearchView extends LinearLayout {
          * @return true if the query has been handled by the listener, false to let the
          * SearchView perform the default action.
          */
-        boolean onSubmitQuery(String query);
+        boolean onQueryTextSubmit(String query);
 
         /**
          * Called when the query text is changed by the user.
@@ -133,7 +133,7 @@ public class SearchView extends LinearLayout {
          * @return false if the SearchView should perform the default action of showing any
          * suggestions if available, true if the action was handled by the listener.
          */
-        boolean onQueryTextChanged(String newText);
+        boolean onQueryTextChange(String newText);
     }
 
     public interface OnCloseListener {
@@ -151,7 +151,7 @@ public class SearchView extends LinearLayout {
      * Callback interface for selection events on suggestions. These callbacks
      * are only relevant when a SearchableInfo has been specified by {@link #setSearchableInfo}.
      */
-    public interface OnSuggestionSelectionListener {
+    public interface OnSuggestionListener {
 
         /**
          * Called when a suggestion was selected by navigating to it.
@@ -160,7 +160,7 @@ public class SearchView extends LinearLayout {
          * @return true if the listener handles the event and wants to override the default
          * behavior of possibly rewriting the query based on the selected item, false otherwise.
          */
-        boolean onSuggestionSelected(int position);
+        boolean onSuggestionSelect(int position);
 
         /**
          * Called when a suggestion was clicked.
@@ -170,7 +170,7 @@ public class SearchView extends LinearLayout {
          * behavior of launching any intent or submitting a search query specified on that item.
          * Return false otherwise.
          */
-        boolean onSuggestionClicked(int position);
+        boolean onSuggestionClick(int position);
     }
 
     public SearchView(Context context) {
@@ -282,7 +282,7 @@ public class SearchView extends LinearLayout {
      * @param listener the listener object that receives callbacks when the user performs
      * actions in the SearchView such as clicking on buttons or typing a query.
      */
-    public void setOnQueryChangeListener(OnQueryChangeListener listener) {
+    public void setOnQueryTextListener(OnQueryTextListener listener) {
         mOnQueryChangeListener = listener;
     }
 
@@ -309,7 +309,7 @@ public class SearchView extends LinearLayout {
      *
      * @param listener the listener to inform of suggestion selection events.
      */
-    public void setOnSuggestionSelectionListener(OnSuggestionSelectionListener listener) {
+    public void setOnSuggestionListener(OnSuggestionListener listener) {
         mOnSuggestionListener = listener;
     }
 
@@ -865,7 +865,7 @@ public class SearchView extends LinearLayout {
         updateCloseButton();
         updateSubmitArea();
         if (mOnQueryChangeListener != null) {
-            mOnQueryChangeListener.onQueryTextChanged(newText.toString());
+            mOnQueryChangeListener.onQueryTextChange(newText.toString());
         }
     }
 
@@ -873,7 +873,7 @@ public class SearchView extends LinearLayout {
         CharSequence query = mQueryTextView.getText();
         if (!TextUtils.isEmpty(query)) {
             if (mOnQueryChangeListener == null
-                    || !mOnQueryChangeListener.onSubmitQuery(query.toString())) {
+                    || !mOnQueryChangeListener.onQueryTextSubmit(query.toString())) {
                 if (mSearchable != null) {
                     launchQuerySearch(KeyEvent.KEYCODE_UNKNOWN, null, query.toString());
                     setImeVisibility(false);
@@ -940,7 +940,7 @@ public class SearchView extends LinearLayout {
 
     private boolean onItemClicked(int position, int actionKey, String actionMsg) {
         if (mOnSuggestionListener == null
-                || !mOnSuggestionListener.onSuggestionClicked(position)) {
+                || !mOnSuggestionListener.onSuggestionClick(position)) {
             launchSuggestion(position, KeyEvent.KEYCODE_UNKNOWN, null);
             setImeVisibility(false);
             dismissSuggestions();
@@ -951,7 +951,7 @@ public class SearchView extends LinearLayout {
 
     private boolean onItemSelected(int position) {
         if (mOnSuggestionListener == null
-                || !mOnSuggestionListener.onSuggestionSelected(position)) {
+                || !mOnSuggestionListener.onSuggestionSelect(position)) {
             rewriteQueryFromSuggestion(position);
             return true;
         }
