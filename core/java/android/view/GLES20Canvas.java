@@ -630,8 +630,31 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmapMesh(Bitmap bitmap, int meshWidth, int meshHeight, float[] verts,
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
-        // TODO: Implement
+        if (meshWidth < 0 || meshHeight < 0 || vertOffset < 0 || colorOffset < 0) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        if (meshWidth == 0 || meshHeight == 0) {
+            return;
+        }
+
+        final int count = (meshWidth + 1) * (meshHeight + 1);
+        checkRange(verts.length, vertOffset, count * 2);
+
+        // TODO: Colors are ignored for now
+        colors = null;
+        colorOffset = 0;
+
+        boolean hasColorFilter = paint != null && setupColorFilter(paint);
+        final int nativePaint = paint == null ? 0 : paint.mNativePaint;        
+        nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, meshWidth, meshHeight,
+                verts, vertOffset, colors, colorOffset, nativePaint);
+        if (hasColorFilter) nResetModifiers(mRenderer);
     }
+
+    private native void nDrawBitmapMesh(int renderer, int bitmap, byte[] buffer,
+            int meshWidth, int meshHeight, float[] verts, int vertOffset,
+            int[] colors, int colorOffset, int paint);
 
     @Override
     public void drawCircle(float cx, float cy, float radius, Paint paint) {
