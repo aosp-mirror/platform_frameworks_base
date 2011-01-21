@@ -1175,8 +1175,11 @@ public class Canvas {
         nativeDrawBitmapMatrix(mNativeCanvas, bitmap.ni(), matrix.ni(),
                 paint != null ? paint.mNativePaint : 0);
     }
-    
-    private static void checkRange(int length, int offset, int count) {
+
+    /**
+     * @hide
+     */
+    protected static void checkRange(int length, int offset, int count) {
         if ((offset | count) < 0 || offset + count > length) {
             throw new ArrayIndexOutOfBoundsException();
         }

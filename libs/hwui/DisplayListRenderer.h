@@ -107,6 +107,7 @@ public:
         DrawBitmap,
         DrawBitmapMatrix,
         DrawBitmapRect,
+        DrawBitmapMesh,
         DrawPatch,
         DrawColor,
         DrawRect,
@@ -267,6 +268,8 @@ public:
     void drawBitmap(SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, SkPaint* paint);
+    void drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
+            float* vertices, int* colors, SkPaint* paint);
     void drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int32_t* yDivs,
             const uint32_t* colors, uint32_t width, uint32_t height, int8_t numColors,
             float left, float top, float right, float bottom, SkPaint* paint);

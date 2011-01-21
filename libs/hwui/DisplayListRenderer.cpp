@@ -100,6 +100,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawBitmap",
     "DrawBitmapMatrix",
     "DrawBitmapRect",
+    "DrawBitmapMesh",
     "DrawPatch",
     "DrawColor",
     "DrawRect",
@@ -308,6 +309,19 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
                         getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
             }
             break;
+            case DrawBitmapMesh: {
+                int verticesCount = 0;
+                uint32_t colorsCount = 0;
+
+                SkBitmap* bitmap = getBitmap();
+                uint32_t meshWidth = getInt();
+                uint32_t meshHeight = getInt();
+                float* vertices = getFloats(verticesCount);
+                bool hasColors = getInt();
+                int* colors = hasColors ? getInts(colorsCount) : NULL;
+
+                renderer.drawBitmapMesh(bitmap, meshWidth, meshHeight, vertices, colors, getPaint());
+            }
             case DrawPatch: {
                 int32_t* xDivs = NULL;
                 int32_t* yDivs = NULL;
@@ -584,6 +598,22 @@ void DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float srcT
     addBitmap(bitmap);
     addBounds(srcLeft, srcTop, srcRight, srcBottom);
     addBounds(dstLeft, dstTop, dstRight, dstBottom);
+    addPaint(paint);
+}
+
+void DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
+        float* vertices, int* colors, SkPaint* paint) {
+    addOp(DisplayList::DrawBitmapMesh);
+    addBitmap(bitmap);
+    addInt(meshWidth);
+    addInt(meshHeight);
+    addFloats(vertices, (meshWidth + 1) * (meshHeight + 1) * 2);
+    if (colors) {
+        addInt(1);
+        addInts(colors, (meshWidth + 1) * (meshHeight + 1));
+    } else {
+        addInt(0);
+    }
     addPaint(paint);
 }
 

@@ -25,6 +25,15 @@
         android:hardwareAccelerated="true">
 
         <activity
+                android:name="BitmapMeshActivity"
+                android:label="_BitmapMesh">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="ShapesActivity"
                 android:label="_Shapes">
             <intent-filter>
