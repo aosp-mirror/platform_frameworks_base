@@ -1077,6 +1077,61 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* pai
     restore();
 }
 
+void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
+        float* vertices, int* colors, SkPaint* paint) {
+    // TODO: Do a quickReject
+    if (!vertices || mSnapshot->isIgnored()) {
+        return;
+    }
+
+    glActiveTexture(gTextureUnits[0]);
+    Texture* texture = mCaches.textureCache.get(bitmap);
+    if (!texture) return;
+    const AutoTexture autoCleanup(texture);
+    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    // TODO: Support the colors array
+    const uint32_t count = meshWidth * meshHeight * 6;
+    TextureVertex mesh[count];
+
+    TextureVertex* vertex = mesh;
+    for (int32_t y = 0; y < meshHeight; y++) {
+        for (int32_t x = 0; x < meshWidth; x++) {
+            uint32_t i = (y * (meshWidth + 1) + x) * 2;
+
+            float u1 = float(x) / meshWidth;
+            float u2 = float(x + 1) / meshWidth;
+            float v1 = float(y) / meshHeight;
+            float v2 = float(y + 1) / meshHeight;
+
+            int ax = i + (meshWidth + 1) * 2;
+            int ay = ax + 1;
+            int bx = i;
+            int by = bx + 1;
+            int cx = i + 2;
+            int cy = cx + 1;
+            int dx = i + (meshWidth + 1) * 2 + 2;
+            int dy = dx + 1;
+
+            TextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2);
+            TextureVertex::set(vertex++, vertices[bx], vertices[by], u1, v1);
+            TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
+
+            TextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2);
+            TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
+            TextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2);
+        }
+    }
+
+    drawTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
+            mode, texture->blend, &mesh[0].position[0], &mesh[0].texture[0],
+            GL_TRIANGLES, count);
+}
+
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
          float srcLeft, float srcTop, float srcRight, float srcBottom,
          float dstLeft, float dstTop, float dstRight, float dstBottom,
