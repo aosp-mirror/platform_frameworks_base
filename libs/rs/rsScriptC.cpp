@@ -475,7 +475,10 @@ bool ScriptCState::runCompiler(Context *rsc,
 
     s->mEnviroment.mIsThreadable = true;
 
-    bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s);
+    if (bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s) != 0) {
+        LOGE("bcc: FAILS to register symbol callback");
+        return false;
+    }
 
     if (bccReadBC(s->mBccScript,
                   resName,
