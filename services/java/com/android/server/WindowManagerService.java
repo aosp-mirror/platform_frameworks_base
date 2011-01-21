@@ -680,6 +680,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // stop intercepting input
             mDragState.unregister();
+            mInputMonitor.setUpdateInputWindowsNeededLw();
             mInputMonitor.updateInputWindowsLw();
 
             // Retain the parameters of any deferred rotation operation so
@@ -2401,7 +2402,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean focusChanged = false;
             if (win.canReceiveKeys()) {
-                focusChanged = updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS);
+                focusChanged = updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS,
+                        false /*updateInputWindows*/);
                 if (focusChanged) {
                     imMayMove = false;
                 }
@@ -2418,9 +2420,10 @@ public class WindowManagerService extends IWindowManager.Stub
             //dump();
 
             if (focusChanged) {
-                finishUpdateFocusedWindowAfterAssignLayersLocked();
+                finishUpdateFocusedWindowAfterAssignLayersLocked(false /*updateInputWindows*/);
             }
-            
+            mInputMonitor.updateInputWindowsLw();
+
             if (localLOGV) Slog.v(
                 TAG, "New client " + client.asBinder()
                 + ": window=" + win);
@@ -2496,8 +2499,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.mExiting = true;
                 win.mRemoveOnExit = true;
                 mLayoutNeeded = true;
-                updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+                updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                        false /*updateInputWindows*/);
                 performLayoutAndPlaceSurfacesLocked();
+                mInputMonitor.updateInputWindowsLw();
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
                 }
@@ -2515,7 +2520,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 && updateOrientationFromAppTokensLocked(false)) {
             mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
-        updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
+        updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
         Binder.restoreCallingIdentity(origId);
     }
 
@@ -2613,6 +2618,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         
+        mInputMonitor.setUpdateInputWindowsNeededLw();
         mInputMonitor.updateInputWindowsLw();
     }
 
@@ -2863,6 +2869,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         outSurface.release();
                     }
                 } catch (Exception e) {
+                    mInputMonitor.setUpdateInputWindowsNeededLw();
                     mInputMonitor.updateInputWindowsLw();
                     
                     Slog.w(TAG, "Exception thrown when creating surface for client "
@@ -2950,7 +2957,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (focusMayChange) {
                 //System.out.println("Focus may change: " + win.mAttrs.getTitle());
-                if (updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
+                if (updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                        false /*updateInputWindows*/)) {
                     imMayMove = false;
                 }
                 //System.out.println("Relayout " + win + ": focus=" + mCurrentFocus);
@@ -3006,6 +3014,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             inTouchMode = mInTouchMode;
             
+            mInputMonitor.setUpdateInputWindowsNeededLw();
             mInputMonitor.updateInputWindowsLw();
         }
 
@@ -3378,7 +3387,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (changed) {
                         mLayoutNeeded = true;
                         performLayoutAndPlaceSurfacesLocked();
-                        updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
+                        updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                                false /*updateInputWindows*/);
                     }
 
                     if (delayed) {
@@ -3388,6 +3398,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
+                mInputMonitor.setUpdateInputWindowsNeededLw();
                 mInputMonitor.updateInputWindowsLw();
             } else {
                 Slog.w(TAG, "Attempted to remove non-existing token: " + token);
@@ -3707,7 +3718,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (moveFocusNow && changed) {
                 final long origId = Binder.clearCallingIdentity();
-                updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
+                updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -3882,7 +3893,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             ttoken.updateLayers();
                         }
 
-                        updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+                        updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                                true /*updateInputWindows*/);
                         mLayoutNeeded = true;
                         performLayoutAndPlaceSurfacesLocked();
                         Binder.restoreCallingIdentity(origId);
@@ -4042,12 +4054,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (changed) {
                 mLayoutNeeded = true;
+                mInputMonitor.setUpdateInputWindowsNeededLw();
                 if (performLayout) {
-                    updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+                    updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                            false /*updateInputWindows*/);
                     performLayoutAndPlaceSurfacesLocked();
-                } else {
-                    mInputMonitor.updateInputWindowsLw();
                 }
+                mInputMonitor.updateInputWindowsLw();
             }
         }
 
@@ -4302,7 +4315,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (mFocusedApp == wtoken) {
                     if (DEBUG_FOCUS) Slog.v(TAG, "Removing focused app token:" + wtoken);
                     mFocusedApp = null;
-                    updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL);
+                    updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
                     mInputMonitor.setFocusedAppLw(null);
                 }
             } else {
@@ -4481,9 +4494,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 reAddAppWindowsLocked(findWindowOffsetLocked(index), wtoken);
                 if (DEBUG_REORDER) Slog.v(TAG, "Final window list:");
                 if (DEBUG_REORDER) dumpWindowsLocked();
-                updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+                updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                        false /*updateInputWindows*/);
                 mLayoutNeeded = true;
                 performLayoutAndPlaceSurfacesLocked();
+                mInputMonitor.updateInputWindowsLw();
             }
             Binder.restoreCallingIdentity(origId);
         }
@@ -4520,11 +4535,13 @@ public class WindowManagerService extends IWindowManager.Stub
         pos = reAddAppWindowsLocked(pos, wtoken);
 
         if (updateFocusAndLayout) {
-            if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
+            if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                    false /*updateInputWindows*/)) {
                 assignLayersLocked();
             }
             mLayoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
+            mInputMonitor.updateInputWindowsLw();
         }
     }
 
@@ -4550,11 +4567,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES)) {
+        if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                false /*updateInputWindows*/)) {
             assignLayersLocked();
         }
         mLayoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
+        mInputMonitor.updateInputWindowsLw();
 
         //dump();
     }
@@ -5797,6 +5816,9 @@ public class WindowManagerService extends IWindowManager.Stub
         // When true, input dispatch proceeds normally.  Otherwise all events are dropped.
         private boolean mInputDispatchEnabled = true;
 
+        // When true, need to call updateInputWindowsLw().
+        private boolean mUpdateInputWindowsNeeded = true;
+
         // Temporary list of windows information to provide to the input dispatcher.
         private InputWindowList mTempInputWindows = new InputWindowList();
         
@@ -5891,8 +5913,17 @@ public class WindowManagerService extends IWindowManager.Stub
             inputWindow.touchableRegion.setEmpty();
         }
 
+        public void setUpdateInputWindowsNeededLw() {
+            mUpdateInputWindowsNeeded = true;
+        }
+
         /* Updates the cached window information provided to the input dispatcher. */
         public void updateInputWindowsLw() {
+            if (!mUpdateInputWindowsNeeded) {
+                return;
+            }
+            mUpdateInputWindowsNeeded = false;
+
             // Populate the input window list with information about all of the windows that
             // could potentially receive input.
             // As an optimization, we could try to prune the list of windows but this turns
@@ -6021,7 +6052,7 @@ public class WindowManagerService extends IWindowManager.Stub
         /* Called when the current input focus changes.
          * Layer assignment is assumed to be complete by the time this is called.
          */
-        public void setInputFocusLw(WindowState newWindow) {
+        public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
             if (DEBUG_INPUT) {
                 Slog.d(TAG, "Input focus has changed to " + newWindow);
             }
@@ -6033,9 +6064,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     // forgets to resume.
                     newWindow.mToken.paused = false;
                 }
-            
+
                 mInputFocus = newWindow;
-                updateInputWindowsLw();
+                setUpdateInputWindowsNeededLw();
+
+                if (updateInputWindows) {
+                    updateInputWindowsLw();
+                }
             }
         }
         
@@ -6062,6 +6097,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 
                 window.paused = true;
+                setUpdateInputWindowsNeededLw();
                 updateInputWindowsLw();
             }
         }
@@ -6073,6 +6109,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 
                 window.paused = false;
+                setUpdateInputWindowsNeededLw();
                 updateInputWindowsLw();
             }
         }
@@ -6549,12 +6586,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 // the actual drag event dispatch stuff in the dragstate
 
                 mDragState.register();
+                mInputMonitor.setUpdateInputWindowsNeededLw();
                 mInputMonitor.updateInputWindowsLw();
                 if (!mInputManager.transferTouchFocus(callingWin.mInputChannel,
                         mDragState.mServerChannel)) {
                     Slog.e(TAG, "Unable to transfer touch focus");
                     mDragState.unregister();
                     mDragState = null;
+                    mInputMonitor.setUpdateInputWindowsNeededLw();
                     mInputMonitor.updateInputWindowsLw();
                     return false;
                 }
@@ -9151,6 +9190,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // !!! TODO: ANR the app that has failed to start the drag in time
                         if (mDragState != null) {
                             mDragState.unregister();
+                            mInputMonitor.setUpdateInputWindowsNeededLw();
                             mInputMonitor.updateInputWindowsLw();
                             mDragState.reset();
                             mDragState = null;
@@ -9441,7 +9481,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private final int performLayoutLockedInner(boolean initial) {
+    private final int performLayoutLockedInner(boolean initial, boolean updateInputWindows) {
         if (!mLayoutNeeded) {
             return 0;
         }
@@ -9549,7 +9589,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         
         // Window frames may have changed.  Tell the input dispatcher about it.
-        mInputMonitor.updateInputWindowsLw();
+        mInputMonitor.setUpdateInputWindowsNeededLw();
+        if (updateInputWindows) {
+            mInputMonitor.updateInputWindowsLw();
+        }
 
         return mPolicy.finishLayoutLw();
     }
@@ -9570,7 +9613,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (mFocusMayChange) {
             mFocusMayChange = false;
-            updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES);
+            updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                    false /*updateInputWindows*/);
         }
         
         // Initialize state of exiting tokens.
@@ -9646,7 +9690,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 
                 // FIRST LOOP: Perform a layout, if needed.
                 if (repeats < 4) {
-                    changes = performLayoutLockedInner(repeats == 0);
+                    changes = performLayoutLockedInner(repeats == 0, false /*updateInputWindows*/);
                     if (changes != 0) {
                         continue;
                     }
@@ -10103,7 +10147,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (!moveInputMethodWindowsIfNeededLocked(true)) {
                             assignLayersLocked();
                         }
-                        updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES);
+                        updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
+                                false /*updateInputWindows*/);
                         mFocusMayChange = false;
                     }
                 }
@@ -10212,7 +10257,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (mFocusMayChange) {
                     mFocusMayChange = false;
-                    if (updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES)) {
+                    if (updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
+                            false /*updateInputWindows*/)) {
                         changes |= PhoneWindowManager.FINISH_LAYOUT_REDO_ANIM;
                         adjResult = 0;
                     }
@@ -10224,8 +10270,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "*** ANIM STEP: changes=0x"
                         + Integer.toHexString(changes));
-                
-                mInputMonitor.updateInputWindowsLw();
             } while (changes != 0);
 
             // THIRD LOOP: Update the surfaces of all windows.
@@ -10679,8 +10723,6 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.e(TAG, "Unhandled exception in Window Manager", e);
         }
 
-        mInputMonitor.updateInputWindowsLw();
-        
         Surface.closeTransaction();
 
         if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
@@ -10810,6 +10852,8 @@ public class WindowManagerService extends IWindowManager.Stub
             requestAnimationLocked(currentTime+(1000/60)-SystemClock.uptimeMillis());
         }
 
+        // Finally update all input windows now that the window changes have stabilized.
+        mInputMonitor.setUpdateInputWindowsNeededLw();
         mInputMonitor.updateInputWindowsLw();
 
         setHoldScreenLocked(holdScreen != null);
@@ -10988,7 +11032,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean updateFocusedWindowLocked(int mode) {
+    private boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
         WindowState newFocus = computeFocusedWindowLocked();
         if (mCurrentFocus != newFocus) {
             // This check makes sure that we don't already have the focus
@@ -11009,7 +11053,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mLayoutNeeded = true;
                 }
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
-                    performLayoutLockedInner(true);
+                    performLayoutLockedInner(true /*initial*/, updateInputWindows);
                 } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
                     // Client will do the layout, but we need to assign layers
                     // for handleNewWindowLocked() below.
@@ -11020,15 +11064,15 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
                 // If we defer assigning layers, then the caller is responsible for
                 // doing this part.
-                finishUpdateFocusedWindowAfterAssignLayersLocked();
+                finishUpdateFocusedWindowAfterAssignLayersLocked(updateInputWindows);
             }
             return true;
         }
         return false;
     }
     
-    private void finishUpdateFocusedWindowAfterAssignLayersLocked() {
-        mInputMonitor.setInputFocusLw(mCurrentFocus);
+    private void finishUpdateFocusedWindowAfterAssignLayersLocked(boolean updateInputWindows) {
+        mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
     }
 
     private WindowState computeFocusedWindowLocked() {
