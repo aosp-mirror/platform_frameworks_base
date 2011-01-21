@@ -571,7 +571,6 @@ public class WebSettings {
      * A combination of built in zoom controls enabled
      * and on screen zoom controls disabled allows for pinch to zoom
      * to work without the on screen controls
-     * @hide
      */
     public void setDisplayZoomControls(boolean enabled) {
         mDisplayZoomControls = enabled;
@@ -580,7 +579,6 @@ public class WebSettings {
 
     /**
      * Returns true if the on screen zoom buttons are being used.
-     * @hide
      */
     public boolean getDisplayZoomControls() {
         return mDisplayZoomControls;
