@@ -40,9 +40,9 @@ NuPlayer::Renderer::Renderer(
       mAnchorTimeRealUs(-1),
       mFlushingAudio(false),
       mFlushingVideo(false),
-      mHasAudio(mAudioSink != NULL),
-      mHasVideo(true),
-      mSyncQueues(mHasAudio && mHasVideo),
+      mHasAudio(false),
+      mHasVideo(false),
+      mSyncQueues(false),
       mPaused(false) {
 }
 
@@ -359,6 +359,12 @@ void NuPlayer::Renderer::notifyEOS(bool audio) {
 void NuPlayer::Renderer::onQueueBuffer(const sp<AMessage> &msg) {
     int32_t audio;
     CHECK(msg->findInt32("audio", &audio));
+
+    if (audio) {
+        mHasAudio = true;
+    } else {
+        mHasVideo = true;
+    }
 
     if (dropBufferWhileFlushing(audio, msg)) {
         return;
