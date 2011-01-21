@@ -37,6 +37,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -1370,8 +1371,9 @@ public final class StrictMode {
         }
         Runtime.getRuntime().gc();
         // Note: classInstanceLimit is immutable, so this is lock-free
-        for (Class klass : policy.classInstanceLimit.keySet()) {
-            int limit = policy.classInstanceLimit.get(klass);
+        for (Map.Entry<Class, Integer> entry : policy.classInstanceLimit.entrySet()) {
+            Class klass = entry.getKey();
+            int limit = entry.getValue();
             long instances = VMDebug.countInstancesOfClass(klass, false);
             if (instances <= limit) {
                 continue;
@@ -1382,7 +1384,7 @@ public final class StrictMode {
     }
 
     private static long sLastInstanceCountCheckMillis = 0;
-    private static boolean sIsIdlerRegistered = false;  // guarded by sProcessIdleHandler
+    private static boolean sIsIdlerRegistered = false;  // guarded by StrictMode.class
     private static final MessageQueue.IdleHandler sProcessIdleHandler =
             new MessageQueue.IdleHandler() {
                 public boolean queueIdle() {
@@ -1403,14 +1405,14 @@ public final class StrictMode {
      * @param policy the policy to put into place
      */
     public static void setVmPolicy(final VmPolicy policy) {
-        sVmPolicy = policy;
-        sVmPolicyMask = policy.mask;
-        setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
+        synchronized (StrictMode.class) {
+            sVmPolicy = policy;
+            sVmPolicyMask = policy.mask;
+            setCloseGuardEnabled(vmClosableObjectLeaksEnabled());
 
-        Looper looper = Looper.getMainLooper();
-        if (looper != null) {
-            MessageQueue mq = looper.mQueue;
-            synchronized (sProcessIdleHandler) {
+            Looper looper = Looper.getMainLooper();
+            if (looper != null) {
+                MessageQueue mq = looper.mQueue;
                 if (policy.classInstanceLimit.size() == 0) {
                     mq.removeIdleHandler(sProcessIdleHandler);
                 } else if (!sIsIdlerRegistered) {
@@ -1425,7 +1427,9 @@ public final class StrictMode {
      * Gets the current VM policy.
      */
     public static VmPolicy getVmPolicy() {
-        return sVmPolicy;
+        synchronized (StrictMode.class) {
+            return sVmPolicy;
+        }
     }
 
     /**
@@ -1480,6 +1484,11 @@ public final class StrictMode {
         final boolean penaltyLog = (sVmPolicyMask & PENALTY_LOG) != 0;
         final ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
 
+        // Erase stuff not relevant for process-wide violations
+        info.numAnimationsRunning = 0;
+        info.tags = null;
+        info.broadcastIntentAction = null;
+
         final Integer fingerprint = info.hashCode();
         final long now = SystemClock.uptimeMillis();
         long lastViolationTime = 0;
@@ -1493,8 +1502,6 @@ public final class StrictMode {
                 sLastVmViolationTime.put(fingerprint, now);
             }
         }
-
-        Log.d(TAG, "Time since last vm violation: " + timeSinceLastViolationMillis);
 
         if (penaltyLog && timeSinceLastViolationMillis > MIN_LOG_INTERVAL_MS) {
             Log.e(TAG, message, originStack);
@@ -1799,18 +1806,57 @@ public final class StrictMode {
         ((AndroidBlockGuardPolicy) policy).onWriteToDisk();
     }
 
+    // Guarded by StrictMode.class
+    private static final HashMap<Class, Integer> sExpectedActivityInstanceCount =
+            new HashMap<Class, Integer>();
+
     /**
      * @hide
      */
-    public static void noteActivityClass(Class klass) {
-        if ((sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
+    public static void incrementExpectedActivityCount(Class klass) {
+        if (klass == null || (sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
             return;
         }
-        if (sVmPolicy.classInstanceLimit.containsKey(klass)) {
+        synchronized (StrictMode.class) {
+            Integer expected = sExpectedActivityInstanceCount.get(klass);
+            Integer newExpected = expected == null ? 1 : expected + 1;
+            sExpectedActivityInstanceCount.put(klass, newExpected);
+            // Note: adding 1 here to give some breathing room during
+            // orientation changes.  (shouldn't be necessary, though?)
+            setExpectedClassInstanceCount(klass, newExpected + 1);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static void decrementExpectedActivityCount(Class klass) {
+        if (klass == null || (sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
             return;
         }
-        // Note: capping at 2, not 1, to give some breathing room.
-        setVmPolicy(new VmPolicy.Builder(sVmPolicy).setClassInstanceLimit(klass, 2).build());
+        synchronized (StrictMode.class) {
+            Integer expected = sExpectedActivityInstanceCount.get(klass);
+            Integer newExpected = (expected == null || expected == 0) ? 0 : expected - 1;
+            if (newExpected == 0) {
+                sExpectedActivityInstanceCount.remove(klass);
+            } else {
+                sExpectedActivityInstanceCount.put(klass, newExpected);
+            }
+            // Note: adding 1 here to give some breathing room during
+            // orientation changes.  (shouldn't be necessary, though?)
+            setExpectedClassInstanceCount(klass, newExpected + 1);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static void setExpectedClassInstanceCount(Class klass, int count) {
+        synchronized (StrictMode.class) {
+            setVmPolicy(new VmPolicy.Builder(sVmPolicy)
+                        .setClassInstanceLimit(klass, count)
+                        .build());
+        }
     }
 
     /**
@@ -2020,15 +2066,13 @@ public final class StrictMode {
         final long mInstances;
         final int mLimit;
 
-        private static final StackTraceElement[] FAKE_STACK = new StackTraceElement[1];
-        static {
-            FAKE_STACK[0] = new StackTraceElement("android.os.StrictMode", "setClassInstanceLimit",
-                                                  "StrictMode.java", 1);
-        }
+        private static final StackTraceElement[] FAKE_STACK = {
+            new StackTraceElement("android.os.StrictMode", "setClassInstanceLimit",
+                                  "StrictMode.java", 1)
+        };
 
         public InstanceCountViolation(Class klass, long instances, int limit) {
-            // Note: now including instances here, otherwise signatures would all be different.
-            super(klass.toString() + "; limit=" + limit);
+            super(klass.toString() + "; instances=" + instances + "; limit=" + limit);
             setStackTrace(FAKE_STACK);
             mClass = klass;
             mInstances = instances;

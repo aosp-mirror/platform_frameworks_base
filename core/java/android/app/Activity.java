@@ -859,7 +859,6 @@ public class Activity extends ContextThemeWrapper
             mFragments.restoreAllState(p, mLastNonConfigurationInstances != null
                     ? mLastNonConfigurationInstances.fragments : null);
         }
-        StrictMode.noteActivityClass(this.getClass());
         mFragments.dispatchCreate();
         mCalled = true;
     }
