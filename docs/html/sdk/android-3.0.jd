@@ -1,0 +1,668 @@
+page.title=Android 3.0 Platform
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/honeycomb/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}sdk/preview/start.html">Getting Started</a></li>
+</ol>
+
+</div>
+</div>
+
+</p>API Level: <b>Honeycomb</b></p>
+
+<p>For developers, the Android 3.0 preview is available as a downloadable component for the
+Android SDK. The downloadable platform includes an Android library and system image, as well as a
+set of emulator skins and more. The downloadable platform includes no external libraries.</p>
+
+
+
+
+<h2 id="#api">API Overview</h2>
+
+<p>The sections below provide a technical overview of what's new for developers in Android 3.0,
+including new features and changes in the framework API since the previous version.</p>
+
+
+
+
+<h3>Fragments</h3>
+
+<p>A fragment is a new framework component that allows you to separate distinct elements of an
+activity into self-contained modules that define their own UI and lifecycle. To create a
+fragment, you must extend the {@link android.app.Fragment} class and implement several lifecycle
+callback methods, similar to an {@link android.app.Activity}. You can then combine multiple
+fragments in a single activity to build a multi-pane UI in which each
+pane manages its own lifecycle and user inputs.</p>
+
+<p>You can also use a fragment without providing a UI and instead use the fragment as a worker
+for the activity, such as to manage the progress of a download that occurs only while the
+activity is running.</p>
+
+<p>Additionally:</p>
+
+<ul>
+  <li>Fragments are self-contained and can be reused in multiple activities</li>
+  <li>Fragments can be added, removed, replaced and animated inside the activity</li>
+  <li>Fragment can be added to a back stack managed by the activity, preserving the state of
+fragments as they are changed and allowing the user to navigate backward through the different
+states</li>
+  <li>By <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">providing
+alternative resources</a>, you can mix and match fragments, based
+on the screen size and orientation</li>
+  <li>Fragments have direct access to their container activity and can contribute items to the
+activity's Action Bar (discussed next)</li>
+</ul>
+
+<p>To manage the fragments in your activity, you must use the {@link
+android.app.FragmentManager}, which provides several APIs for interacting with fragments, such
+as finding fragments in the activity and popping fragments off the back stack to restore them
+after they've been removed or hidden.</p>
+
+<p>To perform transactions, such as add or remove fragments, you must create a {@link
+android.app.FragmentTransaction}. You can then call methods such as {@link
+android.app.FragmentTransaction#add add()} {@link android.app.FragmentTransaction#remove
+remove()}, {@link android.app.FragmentTransaction#replace replace()}. Once you've applied all
+the changes you want to perform for the transaction, you must call {@link
+android.app.FragmentTransaction#commit commit()} and the system will apply the transaction to
+the activity.</p>
+
+<p>For more information about using fragments in your application, read the <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+
+
+
+
+<h3>Action Bar</h3>
+
+<p>The Action Bar is a replacement for the traditional title bar at the top of the activity
+window. It includes the application logo in the left corner and also replaces the previous Options
+Menu UI with a drop-down list for the menu items. Additionally, the Action Bar allows you
+to:</p></p>
+
+<ul>
+  <li>Include select menu items directly in the Action Bar&mdash;as "action
+items"&mdash;for quick access to global actions.
+    <p>In your XML declaration for the menu item, include the attribute, {@code
+android:showAsAction} with a value of {@code "ifRoom"}. When there's enough room in the
+Action Bar, the menu item appears directly in the bar. Otherwise, it is placed in the
+overflow menu, revealed by the icon on the right side of the Action Bar.</p></li>
+  <li>Add interactive widgets ("action views"), such as a search box.
+    <p>In your XML, include the attribute, {@code android:actionViewLayout} with a layout
+resource for the action view, or {@code android:actionViewClass} with the class name of the
+widget. Like action items, an action view appears only when there's room for it in the Action
+Bar. If there's not enough room, it is placed in the overflow menu and behaves like a regular
+menu item (for example, an item can provide a {@link android.widget.SearchView} as an action
+view, but when in the overflow menu, selecting the item will activate the search dialog).</p>
+    <p></p></li>
+  <li>Add an action to the application logo when tapped and replace it with a custom logo
+    <p>The application logo is automatically assigned the {@code android.R.id.home} ID,
+which is delivered to your activity's {@link android.app.Activity#onOptionsItemSelected
+onOptionsItemSelected()} callback when tapped. Simply respond to this ID in your callback
+method to perform an action such as go to your application's "home" activity.</p>
+    <p>If your activity does not respond to the icon action, you should hide it by calling {@link
+android.app.ActionBar#setDisplayShowHomeEnabled setDisplayShowHomeEnabled(false)}.</p>
+    <p>By default, this is true, so the icon will visually respond when pressed, even if you don't
+respond. Thus, you should remove the icon if you don't respond to it.</p></li>
+  <li>Add breadcrumbs for navigating backward through fragments</li>
+  <li>Add built in tabs and a drop-down list for navigation</li>
+  <li>Customize the Action Bar  themes and custom backgrounds</li>
+</ul>
+
+<p>The Action Bar is standard for all applications that set either the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to {@code "Honeycomb"}. (The "Honeycomb" API Level is provisional
+and effective only while using the preview SDK&mdash;you must change it to the official API
+Level when the final SDK becomes available.)</p>
+
+<p>For more information, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+Bar</a> developer guide.</p>
+
+
+
+
+<h3>System clipboard</h3>
+
+<p>Applications can now copy and paste data (beyond mere text) to and from the system-wide
+clipboard. Clipped data can be plain text, a URI, or an intent.</p>
+
+<p>By providing the system access to your data in a content provider, the user can copy complex
+content (such as an image or data structure) from your application and paste it into another
+application that supports that type of content.</p>
+
+<p>To start using the clipboard, get the global {@link android.content.ClipboardManager} object
+by calling {@link android.content.Context#getSystemService getSystemService(CLIPBOARD_SERVICE)}.</p>
+
+<p>To create an item to attach to the clipboard, you need to create a new {@link
+android.content.ClipData} object, which holds one or more {@link android.content.ClipData.Item}
+objects, each describing a single entity. To create a {@link android.content.ClipData} object with
+just one {@link android.content.ClipData.Item}, you can use one of the helper methods such as,
+{@link android.content.ClipData#newPlainText newPlainText()}, {@link
+android.content.ClipData#newUri newUri()}, and {@link android.content.ClipData#newIntent
+newIntent()}, which each return a {@link android.content.ClipData} object pre-loaded with the
+appropriate {@link android.content.ClipData.Item}.</p>
+
+<p>To add the {@link android.content.ClipData} to the clipboard, pass it to {@link
+android.content.ClipboardManager#setPrimaryClip setPrimaryClip()} for your instance of {@link
+android.content.ClipboardManager}.</p>
+
+<p>You can then acquire ("paste") a file from the clipboard by calling {@link
+android.content.ClipboardManager#getPrimaryClip()} on the {@link
+android.content.ClipboardManager}. Handling the {@link android.content.ClipData} you receive can
+be more complicated and you need to be sure you can actually handle the data type.</p>
+
+<p>For more information, see the {@link android.content.ClipData} class reference. You can also see
+an example implementation of copy and paste in the <a
+href="{@docRoot}resources/samples/NotePad/index.html">NotePad</a> sample application.</p>
+
+
+
+
+<h3>Drag and drop</h3>
+
+<p>New APIs now facilitate the ability for your application to implement drag and drop
+functionality in the UI.</p>
+
+<p>To drag a {@link android.view.View} in your activity, call {@link android.view.View#startDrag
+startDrag()} on the object, providing a {@link android.content.ClipData} object that represents the
+information to drag, a {@link android.view.View.DragShadowBuilder} to facilitate the "shadow" that
+the user sees while dragging, and an {@link java.lang.Object} that can share information about the
+drag object with views that may receive the object. However, </p>
+
+<p>To accept a drag object (receive the "drop") in a
+{@link android.view.View}, register the view with an {@link android.view.View.OnDragListener} by
+calling {@link android.view.View#setOnDragListener setOnDragListener()}. When a drag event occurs on
+the view, the system calls {@link android.view.View.OnDragListener#onDrag onDrag()} for the  {@link
+android.view.View.OnDragListener}, which receives a {@link android.view.DragEvent} describing
+the type of event has occurred (such as "drag started", "drag ended", and "drop"). The receiving
+view can inquire the event type delivered to {@link
+android.view.View#onDragEvent onDragEvent()} by calling {@link
+android.view.DragEvent#getAction getAction()} on the {@link android.view.DragEvent}.</p>
+
+<p>Although a drag event may carry a {@link android.content.ClipData} object, drag and drop does
+not depend on the clipboard. The data being dragged is sent to the system as {@link
+android.content.ClipData} and the system sends it to {@link android.view.View} objects in the
+{@link android.view.DragEvent}. A drag and drop operation should never put the dragged data on the
+clipboard.</p>
+
+
+
+<h3>Multiple-choice selection for ListView and GridView</h3>
+
+<p>New {@link android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} mode for {@link
+android.widget.AbsListView#setChoiceMode setChoiceMode()} allows for selecting multiple items
+from a {@link android.widget.ListView} and {@link android.widget.GridView}.</p>
+
+<p>To enable multiple-choice selection, call {@link
+android.widget.AbsListView#setChoiceMode setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL)} and register a
+{@link android.widget.AbsListView.MultiChoiceModeListener} with {@link
+android.widget.AbsListView#setMultiChoiceModeListener setMultiChoiceModeListener()}.</p>
+
+<p>When the user performs a long-press on an item, the Action Bar switches to the Multi-choice
+Action Mode. The system notifies the {@link android.widget.AbsListView.MultiChoiceModeListener}
+when items are selected by calling {@link
+android.widget.AbsListView.MultiChoiceModeListener#onItemCheckedStateChanged
+onItemCheckedStateChanged()}.</p>
+
+<p>For an example of multiple-choice selection, see the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List15.html">List15.java</a>
+class in the API Demos sample application.</p>
+
+
+
+
+<h3>Content loaders</h3>
+
+<p>New framework APIs facilitate asynchronous loading of data using the {@link
+android.content.Loader} class. You can use it in combination with UI components such as views and
+fragments to dynamically load data from background threads. The {@link
+android.content.CursorLoader} subclass is specially designed to help do so for data queried from
+a {@link android.content.ContentResolver}.</p>
+
+
+
+<h3>Extended app widgets</h3>
+
+<p>App widgets can now be more interactive with scrolling list views, grid views, view flippers, and
+a new 3D stack widget.</p>
+
+<p>Android 3.0 supports several new widget classes for App Widgets, including:</p>
+<ul>
+  <li>{@link android.widget.GridView}</li>
+  <li>{@link android.widget.ListView}</li>
+  <li>{@link android.widget.StackView}</li>
+  <li>{@link android.widget.ViewFlipper}</li>
+  <li>{@link android.widget.AdapterViewFlipper}</li>
+</ul>
+
+<p>You can use the new {@link android.widget.RemoteViewsService} to populate the new remote
+collection views ({@link android.widget.GridView}, {@link android.widget.ListView}, and {@link
+android.widget.StackView}).</p>
+
+<p>You can also use two new {@link android.appwidget.AppWidgetProviderInfo} fields. The {@link
+android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field lets you specify the view ID of the
+app widget subview, which is auto-advanced by the app widget’s host. The
+{@link android.appwidget.AppWidgetProviderInfo#previewImage} field specifies a preview of what the
+App Widget looks like and is shown to the user from the widget picker. If this field is not
+supplied, the app widget's icon is used for the preview.</p>
+
+<p>Android also provides a new widget preview tool (WidgetPreview), located in the SDK tools. The
+tool lets you take a screenshot of your app widget, which you can use to populate the customization
+tray.</p>
+
+
+
+
+
+<h3>Extended status bar notifications</h3>
+
+<p>The {@link android.app.Notification} APIs have been extended to support more content-rich status
+bar notifications, plus a new {@link android.app.Notification.Builder} class allows you to easily
+control the notification properties. New features include:</p>
+<ul>
+  <li>Support for a large icon in the notification. This is usually for
+social applications to show the contact photo of the person who is the source of the
+notification or for media apps to show an album thumbnail. Set using {@link
+android.app.Notification.Builder#setLargeIcon setLargeIcon()}.</li>
+  <li>Support for custom layouts in the status bar ticker, using {@link
+android.app.Notification.Builder#setTicker(CharSequence,RemoteViews) setTicker()}.</li>
+  <li>Support for custom notification layouts to include buttons with {@link
+android.app.PendingIntent}s, for more interactive notification widgets
+(such as to control ongoing music in the background).</li>
+</ul>
+
+
+
+
+<h3>New animation framework</h3>
+
+<p>An all new flexible animation framework that allows you to animate the properties of any object
+(View, Drawable, Fragment, Object, anything). It allows you to define many aspects of an animation,
+such as:</p>
+<ul>
+  <li>Duration</li>
+  <li>Repeat amount and behavior</li>
+  <li>Type of time interpolation</li>
+  <li>Animator sets to play animations together, sequentially, or after specified delays</li>
+  <li>Frame refresh delay</li>
+</ul>
+  
+ <p>You can define these animation aspects, and others, for an object's int, float, and hexadecimal
+color values, by default.  To animate any other type of value, you tell the system how to calculate
+the values for that given type, by implementing the {@link android.animation.TypeEvaluator}
+interface.</p>
+
+<p>There are two animators that you can use to animate values of a property: {@link
+android.animation.ValueAnimator} and {@link android.animation.ObjectAnimator}. The {@link
+android.animation.ValueAnimator} computes the animation values, but is not aware of the specific
+object or property that is animated as a result. It simply performs the calculations, and you must
+listen for the updates and process the data with your own logic. The {@link
+android.animation.ObjectAnimator} is a subclass of {@link android.animation.ValueAnimator} and
+allows you to set the object and property to animate, so you do not have to listen for updates.</p>
+
+<p>For more information, see the <a
+href="{@docRoot}guide/topics/graphics/animation.html">Animation</a> developer guide.</p>
+
+
+
+
+
+<h3>New widgets</h3>
+
+<ul>
+  
+<li>{@link android.widget.AdapterViewAnimator}
+<p>Base class for an {@link android.widget.AdapterView} that performs animations when switching
+between its views.</p></li>
+
+<li>{@link android.widget.AdapterViewFlipper}
+<p>Simple {@link android.widget.ViewAnimator} that animates between two or more views that have
+been added to it. Only one child is shown at a time. If requested, it can automatically flip between
+each child at a regular interval.</p></li>
+
+<li>{@link android.widget.CalendarView}
+<p>Allows users to select dates from a calendar and you can configure the range of dates
+available. A user can select a date by tapping on it and can scroll and fling
+the calendar to a desired date.</p></li>
+
+<li>{@link android.widget.ListPopupWindow}
+<p>Anchors itself to a host view and displays a list of choices, such as for a list of
+suggestions when typing into an {@link android.widget.EditText} view.</p></li>
+
+<li>{@link android.widget.NumberPicker}
+<p>Enables the user to select a number from a predefined range. The widget presents an
+input field and up and down buttons for selecting a number. Touching the input field shows a
+scroll wheel that allows the user to scroll through values or touch again to directly edit the
+current value. It also allows you to map from positions to strings, so that
+the corresponding string is displayed instead of the position index.</p></li>
+
+<li>{@link android.widget.PopupMenu}
+<p>Displays a {@link android.view.Menu} in a modal popup window that's anchored to a view. The popup
+appears below the anchor view if there is room, or above it if there is not. If the IME (soft
+keyboard) is visible, the popup does not overlap it until it is touched.</p></li>
+
+<li>{@link android.widget.SearchView}
+<p>Provides a search box that works in conjunction with a search provider (in the same manner as
+the traditional <a href="{@docRoot}guide/topics/search/search-dialog.html">search dialog</a>). It
+also displays recent query suggestions or custom suggestions as configured by the search
+provider. This widget is particularly useful for offering search in the Action Bar.</p></li>
+
+<li>{@link android.widget.StackView}
+<p>A view that displays its children in a 3D stack and allows users to discretely swipe through the
+children.</p></li>
+
+</ul>
+
+
+
+
+
+<h3>Redesigned widgets</h3>
+
+<p>Android 3.0 offers an updated set of UI widgets that developers can use to quickly add new types
+of content to their applications. The new UI widgets are redesigned for use on larger screens such
+as tablets and incorporate the new holographic UI theme. Several new widget types are available,
+including a 3D stack, search box, a date/time picker, number picker, stack, calendar View etc.
+SearchView, PopupMenu, and others. Most of the redesigned widgets can now be used as remote views in
+homescreen widgets. Applications written for earlier versions can inherit the new widget designs and
+themes.</p>
+
+
+
+
+<h3>Holographic themes</h3>
+
+<p>The standard system widgets and overall look have been redesigned for use on larger screens
+such as tablets and incorporate the new holographic UI theme. These style changes are applied
+using the standard <a href="{@docRoot}guide/topics/ui/themes.html">style and theme</a> system.
+Any application that targets the Android 3.0 platform inherit the holographic theme by default.
+However, if your application also applies its own styles, then it will override the holographic
+theme, unless you update your styles to inherit them.</p>
+
+<p>To apply the holographic theme to individual activities or to inherit them in your own theme
+definitions, you can use one of several new {@link android.R.style#Theme_Holo Theme.Holo}
+themes.</p>
+
+
+
+<h3>Bluetooth A2DP and headset APIs</h3>
+
+<p>Android now includes APIs for applications to verify the state of connected Bluetooth A2DP and
+headset profile devices. You can initialize the respective {@link
+android.bluetooth.BluetoothProfile} by calling {@link
+android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with either the {@link
+android.bluetooth.BluetoothProfile#A2DP} or {@link android.bluetooth.BluetoothProfile#HEADSET}
+profile constant and a {@link android.bluetooth.BluetoothProfile.ServiceListener} to receive
+callbacks when the client is connected or disconnected.</p>
+
+
+<!--
+<h3>WebKit</h3>
+<h3>JSON (utilities)</h3>
+    -->
+
+
+<h3>Graphics</h3>
+
+<ul>
+  <li><h4>Hardware accelerated 2D graphics</h4>
+
+<p>You can now enable the OpenGL renderer for your application by setting {@code
+android:hardwareAccelerated="true"} in your manifest element's <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+element or for individual <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+elements.</p>
+
+<p>This flag helps applications by making them draw faster. This results in smoother animations,
+smoother scrolling, and overall better performance and response to user interaction.</p></li>
+
+  <li><h4>Renderscript 3D graphics engine</h4>
+
+<p>Renderscript is a runtime 3D framework that provides both an API for building 3D scenes as well
+as a special, platform-independent shader language for maximum performance. Using Renderscript, you
+can accelerate graphics operations and data processing. Renderscript is an ideal way to create
+high-performance 3D effects for applications, wallpapers, carousels, and more.</p></li>
+</ul>
+
+
+
+
+
+<h3>Media</h3>
+
+
+<ul>
+  <li><h4>Camcorder profiles</h4>
+
+<p>New {@link android.media.CamcorderProfile#hasProfile hasProfile()} method and several video
+quality profiles, such as {@link android.media.CamcorderProfile#QUALITY_1080P}, {@link
+android.media.CamcorderProfile#QUALITY_720P}, {@link
+android.media.CamcorderProfile#QUALITY_CIF}, and more, to determine the camcorder quality
+profiles.</p></li>
+
+  <li><h4>Time lapse video mode</h4>
+
+<p>Camcorder APIs now support the ability to record time lapse video. The {@link
+android.media.MediaRecorder#setCaptureRate setCaptureRate()} sets the rate at which frames
+should be captured.</p></li>
+
+  <li><h4>Digital media file transfer</h4>
+
+<p>The platform includes built-in support for Media/Picture Transfer Protocol (MTP/PTP) over USB,
+which lets users easily transfer any type of media files between devices and to a host computer.
+Developers can take advantage of this to create applications that let users create or manage files
+that they may want to transfer across devices.</p></li>
+
+  <li><h4>Digital Media File Transfer</h4>
+
+<p>The platform includes built-in support for Media/Picture Transfer Protocol (MTP/PTP) over USB,
+which lets users easily transfer any type of media files between devices and to a host computer.
+Developers can build on this support, creating applications that let users create or manage rich
+media files that they may want to transfer or share across devices. </p></li>
+
+  <li><h4>Digital rights management (DRM)</h4>
+
+<p>New extensible digital rights management (DRM) framework for checking and enforcing digital
+rights. It's implemented in two architectural layers:</p>
+<ul>
+  <li>A DRM framework API, which is exposed to applications and runs through the Dalvik VM for
+standard applications.</li>
+  <li>A native code DRM manager that implements the framework API and exposes an interface for DRM
+plug-ins to handle rights management and decryption for various DRM schemes.</li>
+</ul>
+
+<p>For application developers, the framework offers an abstract, unified API that simplifies the
+management of protected content. The API hides the complexity of DRM operations and allows a
+consistent operation mode for both protected and unprotected content, and across a variety of DRM
+schemes.</p>
+
+<p>For device manufacturers, content owners, and Internet digital media providers the DRM
+framework?s plugin API provides a means of adding support for a DRM scheme of choice into the
+Android system, for secure enforcement of content protection.</p>
+
+<p>The preview release does not provide any native DRM plug-ins for checking and enforcing digital
+rights. However, device manufacturers may ship DRM plug-ins with their devices.</p>
+
+<p>You can find all of the DRM APIs in the {@link android.drm} package.</p></li>
+
+</ul>
+
+
+
+
+
+
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android 3.0 platform delivers an updated version of
+the framework API. Because this is a preview of the Android 3.0 API, it uses a provisional API
+level of "Honeycomb", instead of an integer identifier, which will be provided when the final SDK
+is made available and all APIs are final.</p>
+
+<p>To use APIs introduced in Android 3.0 in your application, you need compile the application
+against the Android library that is provided in the Android 3.0 preview SDK platform and you must
+declare this API Level in your manifest as <code>android:minSdkVersion="Honeycomb"</code>, in the
+<code>&lt;uses-sdk&gt;</code> element in the application's manifest.</p>
+
+<p>For more information about using this provisional API Level and setting up your environment
+to use the preview SDK, please see the <a href="{@docRoot}sdk/preview/start.html">Getting
+Started</a> document.</p>
+
+
+
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Contacts</li>
+<li>Custom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gallery</li>
+<li>Music</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Spare Parts (developer app)</li>
+<li>Speech Recorder</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android 3.0 system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, Zimbabwe (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian bokmål, Norway (nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
