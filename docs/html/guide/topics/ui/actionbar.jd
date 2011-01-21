@@ -425,7 +425,7 @@ to call {@link android.app.FragmentTransaction#commit} for these transactions. Y
 <p>If your activity is stopped, you should retain the currently selected tab with the saved state so
 that when the user returns to your application, you can open the tab. When it's time to save the
 state, you can query the currently selected tab with {@link
-android.app.ActionBar#getSelectedNavigationItem()}. This returns the index position of the selected
+android.app.ActionBar#getSelectedNavigationIndex()}. This returns the index position of the selected
 tab.</p>
 
 <p class="caution"><strong>Caution:</strong> It's important that you save
