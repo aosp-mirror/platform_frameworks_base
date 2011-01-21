@@ -130,12 +130,13 @@ public static final int ACTION_DRAG_EXITED = 6;
     }
 
     private void init(int action, float x, float y, ClipDescription description, ClipData data,
-            boolean result) {
+            Object localState, boolean result) {
         mAction = action;
         mX = x;
         mY = y;
         mClipDescription = description;
         mClipData = data;
+        mLocalState = localState;
         mDragResult = result;
     }
 
@@ -150,7 +151,7 @@ public static final int ACTION_DRAG_EXITED = 6;
         synchronized (gRecyclerLock) {
             if (gRecyclerTop == null) {
                 ev = new DragEvent();
-                ev.init(action, x, y, description, data, result);
+                ev.init(action, x, y, description, data, localState, result);
                 return ev;
             }
             ev = gRecyclerTop;
@@ -161,7 +162,7 @@ public static final int ACTION_DRAG_EXITED = 6;
         ev.mRecycled = false;
         ev.mNext = null;
 
-        ev.init(action, x, y, description, data, result);
+        ev.init(action, x, y, description, data, localState, result);
 
         return ev;
     }
