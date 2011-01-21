@@ -221,18 +221,23 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
-            int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
-            switch (errorCode) {
-                case ErrorCodes.SUCCESS:
-                    return true;
-                case ErrorCodes.ERROR_IO:
-                    throw new IOException();
-                case ErrorCodes.ERROR_INVALID_PARAM:
-                    return false;
-                default:
-                    // Should not happen
-                    throw new IOException();
-            }
+            if (mTagService.isNdef(mTag.getServiceHandle())) {
+                int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
+                switch (errorCode) {
+                    case ErrorCodes.SUCCESS:
+                        return true;
+                    case ErrorCodes.ERROR_IO:
+                        throw new IOException();
+                    case ErrorCodes.ERROR_INVALID_PARAM:
+                        return false;
+                    default:
+                        // Should not happen
+                        throw new IOException();
+                }
+           }
+           else {
+               throw new IOException("Tag is not ndef");
+           }
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
             return false;
