@@ -1814,9 +1814,10 @@ class MediaArtistNativeHelper {
     private void onProgressUpdate(int taskId, int progress) {
         if (mProcessingState == PROCESSING_EXPORT) {
             if (mExportProgressListener != null) {
-                if ((progress % 2) == 0) {
-                    mProgressToApp++;
-                    mExportProgressListener.onProgress(mVideoEditor, mOutputFilename, mProgressToApp);
+                if (mProgressToApp < progress) {
+                    mExportProgressListener.onProgress(mVideoEditor, mOutputFilename, progress);
+                    /* record previous progress */
+                    mProgressToApp = progress;
                 }
             }
         }
