@@ -413,13 +413,6 @@ public final class NfcAdapter {
         }
     }
 
-    class ForegroundDispatchPausedListener implements OnActivityPausedListener {
-        @Override
-        public void onPaused(Activity activity) {
-            disableForegroundDispatchInternal(activity, true);
-        }
-    }
-
     /**
      * Enables foreground dispatching to the given Activity. This will force all NFC Intents that
      * match the given filters to be delivered to the activity bypassing the standard dispatch
@@ -438,7 +431,7 @@ public final class NfcAdapter {
             throw new NullPointerException();
         }
         if (!activity.isResumed()) {
-            throw new IllegalStateException("Foregorund dispatching can onlly be enabled " +
+            throw new IllegalStateException("Foregorund dispatching can only be enabled " +
                     "when your activity is resumed");
         }
         try {
@@ -452,13 +445,22 @@ public final class NfcAdapter {
 
     /**
      * Disables foreground activity dispatching setup with
-     * {@link #enableForegroundDispatch}. This must be called before the Activity returns from
+     * {@link #enableForegroundDispatch}.
+     *
+     * <p>This must be called before the Activity returns from
      * it's <code>onPause()</code> or this method will throw an IllegalStateException.
      *
-     * This method must be called from the main thread.
+     * <p>This method must be called from the main thread.
      */
     public void disableForegroundDispatch(Activity activity) {
         disableForegroundDispatchInternal(activity, false);
+    }
+
+    class ForegroundDispatchPausedListener implements OnActivityPausedListener {
+        @Override
+        public void onPaused(Activity activity) {
+            disableForegroundDispatchInternal(activity, true);
+        }
     }
 
     void disableForegroundDispatchInternal(Activity activity, boolean force) {
@@ -466,6 +468,58 @@ public final class NfcAdapter {
             sService.disableForegroundDispatch(activity.getComponentName());
             if (!force && !activity.isResumed()) {
                 throw new IllegalStateException("You must disable forgeground dispatching " +
+                        "while your activity is still resumed");
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Enable NDEF messages push while this Activity is in the foreground.
+     */
+    public void enableForegroundNdefPush(Activity activity, NdefMessage msg) {
+        if (activity == null || msg == null) {
+            throw new NullPointerException();
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalStateException("Foregorund NDEF push can only be enabled " +
+                    "when your activity is resumed");
+        }
+        try {
+            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
+                    new ForegroundDispatchPausedListener());
+            sService.enableForegroundNdefPush(activity.getComponentName(), msg);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Disables foreground NDEF push setup with
+     * {@link #enableForegroundNdefPush}.
+     *
+     * <p>This must be called before the Activity returns from
+     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     *
+     * <p>This method must be called from the main thread.
+     */
+    public void disableNdefPushDispatch(Activity activity) {
+        disableForegroundDispatchInternal(activity, false);
+    }
+
+    class ForegroundNdefPushPausedListener implements OnActivityPausedListener {
+        @Override
+        public void onPaused(Activity activity) {
+            disableNdefPushDispatchInternal(activity, true);
+        }
+    }
+
+    void disableNdefPushDispatchInternal(Activity activity, boolean force) {
+        try {
+            sService.disableForegroundNdefPush(activity.getComponentName());
+            if (!force && !activity.isResumed()) {
+                throw new IllegalStateException("You must disable forgeground NDEF push " +
                         "while your activity is still resumed");
             }
         } catch (RemoteException e) {

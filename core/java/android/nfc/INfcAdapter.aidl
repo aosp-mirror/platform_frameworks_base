@@ -50,6 +50,8 @@ interface INfcAdapter
     void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
         in IntentFilter[] filters);
     void disableForegroundDispatch(in ComponentName activity);
+    void enableForegroundNdefPush(in ComponentName activity, in NdefMessage msg);
+    void disableForegroundNdefPush(in ComponentName activity);
 
     // Non-public methods
     // TODO: check and complete
