@@ -357,11 +357,11 @@ public class WebViewEventSender implements EventSender {
     }
 
     private int contentsToWindowX(int x) {
-        return (int) (x * mWebView.getScale()) - mWebView.getScrollX();
+        return Math.round(x * mWebView.getScale()) - mWebView.getScrollX();
     }
 
     private int contentsToWindowY(int y) {
-        return (int) (y * mWebView.getScale()) - mWebView.getScrollY();
+        return Math.round(y * mWebView.getScale()) - mWebView.getScrollY();
     }
 
     private WebView mWebView = null;
