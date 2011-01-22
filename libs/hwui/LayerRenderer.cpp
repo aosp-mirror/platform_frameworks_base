@@ -29,6 +29,10 @@ namespace uirenderer {
 void LayerRenderer::prepare(bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
+#if RENDER_LAYERS_AS_REGIONS
+    mLayer->region.clear();
+#endif
+
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
     OpenGLRenderer::prepare(opaque);
@@ -79,7 +83,6 @@ void LayerRenderer::generateMesh() {
             mLayer->meshIndices = NULL;
             mLayer->meshElementCount = 0;
         }
-        mLayer->region.clear();
         return;
     }
 
@@ -131,8 +134,6 @@ void LayerRenderer::generateMesh() {
         indices[index + 4] = quad + 1;   // top-right
         indices[index + 5] = quad + 3;   // bottom-right
     }
-
-    mLayer->region.clear();
 #endif
 }
 
