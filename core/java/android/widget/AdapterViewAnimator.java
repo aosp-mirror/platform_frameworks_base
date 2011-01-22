@@ -696,6 +696,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                         mWhichChild = 0;
 
                         showOnly(mWhichChild, true);
+                    } else if (mOldItemCount != getCount()) {
+                        showOnly(mWhichChild, true);
                     }
                     refreshChildren();
                     requestLayout();

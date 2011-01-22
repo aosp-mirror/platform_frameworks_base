@@ -454,9 +454,13 @@ public class StackView extends AdapterViewAnimator {
         canvas.getClipBounds(stackInvalidateRect);
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
-            LayoutParams lp = (LayoutParams) getChildAt(i).getLayoutParams();
+            final View child =  getChildAt(i);
+            LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            if ((lp.horizontalOffset == 0 && lp.verticalOffset == 0) ||
+                    child.getAlpha() == 0f || child.getVisibility() != VISIBLE) {
+                lp.resetInvalidateRect();
+            }
             stackInvalidateRect.union(lp.getInvalidateRect());
-            lp.resetInvalidateRect();
         }
         canvas.save(Canvas.CLIP_SAVE_FLAG);
         canvas.clipRect(stackInvalidateRect, Region.Op.UNION);
