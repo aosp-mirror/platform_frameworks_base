@@ -34,15 +34,6 @@ public class MtpServer {
         native_setup(database, storagePath, reserveSpace);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            native_finalize();
-        } finally {
-            super.finalize();
-        }
-    }
-
     public void start() {
         native_start();
     }

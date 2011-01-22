@@ -38,7 +38,7 @@ MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, uint64_t reserveSp
         mMaxCapacity(0),
         mReserveSpace(reserveSpace)
 {
-    LOGD("MtpStorage id: %d path: %s\n", id, filePath);
+    LOGV("MtpStorage id: %d path: %s\n", id, filePath);
 }
 
 MtpStorage::~MtpStorage() {

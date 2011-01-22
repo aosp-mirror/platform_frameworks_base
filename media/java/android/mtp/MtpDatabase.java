@@ -222,7 +222,6 @@ public class MtpDatabase {
 
     private int[] getObjectList(int storageID, int format, int parent) {
         // we can ignore storageID until we support multiple storages
-        Log.d(TAG, "getObjectList parent: " + parent);
         Cursor c = null;
         try {
             if (format != 0) {
@@ -235,7 +234,6 @@ public class MtpDatabase {
                             PARENT_WHERE, new String[] { Integer.toString(parent) }, null);
             }
             if (c == null) {
-                Log.d(TAG, "null cursor");
                 return null;
             }
             int count = c.getCount();
@@ -245,7 +243,6 @@ public class MtpDatabase {
                     c.moveToNext();
                     result[i] = c.getInt(0);
                 }
-                Log.d(TAG, "returning " + result);
                 return result;
             }
         } catch (RemoteException e) {
@@ -260,7 +257,6 @@ public class MtpDatabase {
 
     private int getNumObjects(int storageID, int format, int parent) {
         // we can ignore storageID until we support multiple storages
-        Log.d(TAG, "getObjectList parent: " + parent);
         Cursor c = null;
         try {
             if (format != 0) {
@@ -529,8 +525,8 @@ public class MtpDatabase {
         String newPath = path.substring(0, lastSlash + 1) + newName;
         File newFile = new File(newPath);
         boolean success = oldFile.renameTo(newFile);
-        Log.d(TAG, "renaming "+ path + " to " + newPath + (success ? " succeeded" : " failed"));
         if (!success) {
+            Log.w(TAG, "renaming "+ path + " to " + newPath + " failed");
             return MtpConstants.RESPONSE_GENERAL_ERROR;
         }
 
@@ -557,8 +553,6 @@ public class MtpDatabase {
 
     private int setObjectProperty(int handle, int property,
                             long intValue, String stringValue) {
-        Log.d(TAG, "setObjectProperty: " + property);
-
         switch (property) {
             case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
                 return renameFile(handle, stringValue);
@@ -569,8 +563,6 @@ public class MtpDatabase {
     }
 
     private int getDeviceProperty(int property, long[] outIntValue, char[] outStringValue) {
-        Log.d(TAG, "getDeviceProperty: " + property);
-
         switch (property) {
             case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
@@ -616,8 +608,6 @@ public class MtpDatabase {
     }
 
     private int setDeviceProperty(int property, long intValue, String stringValue) {
-        Log.d(TAG, "setDeviceProperty: " + property + " : " + stringValue);
-
         switch (property) {
             case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
@@ -638,7 +628,6 @@ public class MtpDatabase {
 
     private boolean getObjectInfo(int handle, int[] outStorageFormatParent,
                         char[] outName, long[] outSizeModified) {
-        Log.d(TAG, "getObjectInfo: " + handle);
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, OBJECT_INFO_PROJECTION,
@@ -674,7 +663,6 @@ public class MtpDatabase {
     }
 
     private int getObjectFilePath(int handle, char[] outFilePath, long[] outFileLengthFormat) {
-        Log.d(TAG, "getObjectFilePath: " + handle);
         if (handle == 0) {
             // special case root directory
             mMediaStoragePath.getChars(0, mMediaStoragePath.length(), outFilePath, 0);
@@ -708,7 +696,6 @@ public class MtpDatabase {
     }
 
     private int deleteFile(int handle) {
-        Log.d(TAG, "deleteFile: " + handle);
         mDatabaseModified = true;
         String path = null;
         int format = 0;
@@ -754,7 +741,6 @@ public class MtpDatabase {
     }
 
     private int[] getObjectReferences(int handle) {
-        Log.d(TAG, "getObjectReferences for: " + handle);
         Uri uri = Files.getMtpReferencesUri(mVolumeName, handle);
         Cursor c = null;
         try {
@@ -802,14 +788,11 @@ public class MtpDatabase {
     }
 
     private void sessionStarted() {
-        Log.d(TAG, "sessionStarted");
         mDatabaseModified = false;
     }
 
     private void sessionEnded() {
-        Log.d(TAG, "sessionEnded");
         if (mDatabaseModified) {
-            Log.d(TAG, "sending ACTION_MTP_SESSION_END");
             mContext.sendBroadcast(new Intent(MediaStore.ACTION_MTP_SESSION_END));
             mDatabaseModified = false;
         }

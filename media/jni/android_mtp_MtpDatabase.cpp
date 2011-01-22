@@ -1031,7 +1031,6 @@ static void
 android_mtp_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("setup\n");
     MyMtpDatabase* database = new MyMtpDatabase(env, thiz);
     env->SetIntField(thiz, field_context, (int)database);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
@@ -1042,7 +1041,6 @@ static void
 android_mtp_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("finalize\n");
     MyMtpDatabase* database = (MyMtpDatabase *)env->GetIntField(thiz, field_context);
     database->cleanup(env);
     delete database;
@@ -1080,8 +1078,6 @@ static const char* const kClassPathName = "android/mtp/MtpDatabase";
 int register_android_mtp_MtpDatabase(JNIEnv *env)
 {
     jclass clazz;
-
-    LOGD("register_android_mtp_MtpDatabase\n");
 
     clazz = env->FindClass("android/mtp/MtpDatabase");
     if (clazz == NULL) {
