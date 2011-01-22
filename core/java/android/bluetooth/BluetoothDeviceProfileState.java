@@ -82,6 +82,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     public static final int TRANSITION_TO_STABLE = 102;
     public static final int CONNECT_OTHER_PROFILES = 103;
 
+    private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
     private static final int CONNECT_OTHER_PROFILES_DELAY = 4000; // 4 secs
 
     private BondedDevice mBondedDevice = new BondedDevice();
@@ -1010,8 +1011,9 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
             case CONNECT_HFP_INCOMING:
                 // Connect A2DP if there is no incoming connection
                 // If the priority is OFF - don't auto connect.
-                // If the priority is AUTO_CONNECT, auto connect code takes care.
-                if (mA2dpService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON) {
+                if (mA2dpService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON ||
+                        mA2dpService.getPriority(mDevice) ==
+                            BluetoothProfile.PRIORITY_AUTO_CONNECT) {
                     Message msg = new Message();
                     msg.what = CONNECT_OTHER_PROFILES;
                     msg.arg1 = CONNECT_A2DP_OUTGOING;
@@ -1023,7 +1025,9 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                 // before A2DP, so we should not hit this case. But many devices
                 // don't follow this.
                 if (mHeadsetService != null &&
-                      mHeadsetService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON) {
+                    (mHeadsetService.getPriority(mDevice) == BluetoothProfile.PRIORITY_ON ||
+                        mHeadsetService.getPriority(mDevice) ==
+                            BluetoothProfile.PRIORITY_AUTO_CONNECT)) {
                     Message msg = new Message();
                     msg.what = CONNECT_OTHER_PROFILES;
                     msg.arg1 = CONNECT_HFP_OUTGOING;
