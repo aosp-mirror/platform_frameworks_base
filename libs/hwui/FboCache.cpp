@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 
+#include "Debug.h"
 #include "FboCache.h"
 #include "Properties.h"
 
@@ -31,10 +32,10 @@ namespace uirenderer {
 FboCache::FboCache(): mMaxSize(DEFAULT_FBO_CACHE_SIZE) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_FBO_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting fbo cache size to %s", property);
+        INIT_LOGD("  Setting fbo cache size to %s", property);
         mMaxSize = atoi(property);
     } else {
-        LOGD("  Using default fbo cache size of %d", DEFAULT_FBO_CACHE_SIZE);
+        INIT_LOGD("  Using default fbo cache size of %d", DEFAULT_FBO_CACHE_SIZE);
     }
 }
 

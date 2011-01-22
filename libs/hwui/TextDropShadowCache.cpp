@@ -16,6 +16,7 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include "Debug.h"
 #include "TextDropShadowCache.h"
 #include "Properties.h"
 
@@ -31,10 +32,11 @@ TextDropShadowCache::TextDropShadowCache():
         mSize(0), mMaxSize(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting drop shadow cache size to %sMB", property);
+        INIT_LOGD("  Setting drop shadow cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default drop shadow cache size of %.2fMB", DEFAULT_DROP_SHADOW_CACHE_SIZE);
+        INIT_LOGD("  Using default drop shadow cache size of %.2fMB",
+                DEFAULT_DROP_SHADOW_CACHE_SIZE);
     }
 
     init();

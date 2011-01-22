@@ -20,6 +20,9 @@
 // Turn on to check for OpenGL errors on each frame
 #define DEBUG_OPENGL 1
 
+// Turn on to enable initialization information
+#define DEBUG_INIT 0
+
 // Turn on to enable memory usage summary on each frame
 #define DEBUG_MEMORY_USAGE 0
 
@@ -53,5 +56,11 @@
 
 // Turn on to dump display list state
 #define DEBUG_DISPLAY_LIST 0
+
+#if DEBUG_INIT
+    #define INIT_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define INIT_LOGD(...)
+#endif
 
 #endif // ANDROID_HWUI_DEBUG_H
