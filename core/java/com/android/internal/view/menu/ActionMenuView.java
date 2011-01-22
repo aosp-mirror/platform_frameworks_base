@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -328,6 +329,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 return true;
             }
 
+            playSoundEffect(SoundEffectConstants.CLICK);
             showOverflowMenu();
             return true;
         }
