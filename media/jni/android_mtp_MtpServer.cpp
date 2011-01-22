@@ -111,7 +111,6 @@ public:
 
             sMutex.unlock();
 
-            LOGD("MtpThread mServer->run");
             mServer->run();
             sleep(1);
 
@@ -128,7 +127,6 @@ public:
         env->DeleteGlobalRef(mJavaServer);
         sMutex.unlock();
 
-        LOGD("threadLoop returning");
         return false;
     }
 
@@ -160,8 +158,6 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
         jstring storagePath, jlong reserveSpace)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("setup\n");
-
     MtpDatabase* database = getMtpDatabase(env, javaDatabase);
     const char *storagePathStr = env->GetStringUTFChars(storagePath, NULL);
 
@@ -174,17 +170,9 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
 }
 
 static void
-android_mtp_MtpServer_finalize(JNIEnv *env, jobject thiz)
-{
-    LOGD("finalize\n");
-}
-
-
-static void
 android_mtp_MtpServer_start(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("start\n");
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     thread->run("MtpThread");
 #endif // HAVE_ANDROID_OS
@@ -194,7 +182,6 @@ static void
 android_mtp_MtpServer_stop(JNIEnv *env, jobject thiz)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("stop\n");
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->stop();
@@ -225,7 +212,6 @@ static void
 android_mtp_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
 {
 #ifdef HAVE_ANDROID_OS
-    LOGD("set_ptp_mode\n");
     MtpThread *thread = (MtpThread *)env->GetIntField(thiz, field_context);
     if (thread)
         thread->setPtpMode(usePtp);
@@ -237,7 +223,6 @@ android_mtp_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
 static JNINativeMethod gMethods[] = {
     {"native_setup",                "(Landroid/mtp/MtpDatabase;Ljava/lang/String;J)V",
                                             (void *)android_mtp_MtpServer_setup},
-    {"native_finalize",             "()V",  (void *)android_mtp_MtpServer_finalize},
     {"native_start",                "()V",  (void *)android_mtp_MtpServer_start},
     {"native_stop",                 "()V",  (void *)android_mtp_MtpServer_stop},
     {"native_send_object_added",    "(I)V", (void *)android_mtp_MtpServer_send_object_added},
@@ -250,8 +235,6 @@ static const char* const kClassPathName = "android/mtp/MtpServer";
 int register_android_mtp_MtpServer(JNIEnv *env)
 {
     jclass clazz;
-
-    LOGD("register_android_mtp_MtpServer\n");
 
     clazz = env->FindClass("android/mtp/MtpServer");
     if (clazz == NULL) {
