@@ -1402,10 +1402,6 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">@android:color/primary_text_holo_dark</item>
         <item name="android:minHeight">48dip</item>
-        <item name="android:paddingLeft">32dip</item>
-        <item name="android:paddingRight">32dip</item>
-        <item name="android:paddingTop">4dip</item>
-        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Button.Borderless">
@@ -1413,14 +1409,10 @@
     </style>
 
     <style name="Widget.Holo.Button.Small">
-        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
+        <item name="android:background">@android:drawable/btn_default_small_holo_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@android:color/primary_text_holo_dark</item>
         <item name="android:minHeight">48dip</item>
-        <item name="android:paddingLeft">24dip</item>
-        <item name="android:paddingRight">24dip</item>
-        <item name="android:paddingTop">4dip</item>
-        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Button.Inset">
@@ -1434,8 +1426,6 @@
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:minHeight">48dip</item>
-        <item name="android:paddingLeft">24dip</item>
-        <item name="android:paddingRight">24dip</item>
     </style>
 
     <style name="Holo.ButtonBar" parent="ButtonBar">
@@ -1483,7 +1473,11 @@
     <style name="Widget.Holo.EditText" parent="Widget.EditText">
     </style>
 
-    <style name="Widget.Holo.ExpandableListView" parent="Widget.ExpandableListView">
+    <style name="Widget.Holo.ExpandableListView" parent="Widget.Holo.ListView">
+        <item name="android:groupIndicator">@android:drawable/expander_group_holo_dark</item>
+        <item name="android:indicatorLeft">?android:attr/expandableListPreferredItemIndicatorLeft</item>
+        <item name="android:indicatorRight">?android:attr/expandableListPreferredItemIndicatorRight</item>
+        <item name="android:childDivider">?android:attr/listDivider</item>
     </style>
 
     <style name="Widget.Holo.ExpandableListView.White">
@@ -1650,6 +1644,7 @@
     </style>
 
     <style name="Widget.Holo.CompoundButton.Star" parent="Widget.CompoundButton.Star">
+        <item name="android:button">@android:drawable/btn_star_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.TabWidget" parent="Widget.TabWidget">
@@ -1796,10 +1791,6 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
         <item name="android:textColor">@android:color/primary_text_holo_light</item>
         <item name="android:minHeight">48dip</item>
-        <item name="android:paddingLeft">32dip</item>
-        <item name="android:paddingRight">32dip</item>
-        <item name="android:paddingTop">4dip</item>
-        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Borderless">
@@ -1807,13 +1798,10 @@
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">
+        <item name="android:background">@android:drawable/btn_default_small_holo_light</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@android:color/primary_text_holo_light</item>
         <item name="android:minHeight">48dip</item>
-        <item name="android:paddingLeft">24dip</item>
-        <item name="android:paddingRight">24dip</item>
-        <item name="android:paddingTop">4dip</item>
-        <item name="android:paddingBottom">4dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Inset">
@@ -1826,8 +1814,6 @@
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:minHeight">48dip</item>
-        <item name="android:paddingLeft">24dip</item>
-        <item name="android:paddingRight">24dip</item>
     </style>
 
     <style name="Holo.Light.ButtonBar" parent="Holo.ButtonBar">
@@ -1869,7 +1855,11 @@
     <style name="Widget.Holo.Light.EditText" parent="Widget.Holo.EditText">
     </style>
 
-    <style name="Widget.Holo.Light.ExpandableListView" parent="Widget.ExpandableListView">
+    <style name="Widget.Holo.Light.ExpandableListView" parent="Widget.Holo.Light.ListView">
+        <item name="android:groupIndicator">@android:drawable/expander_group_holo_light</item>
+        <item name="android:indicatorLeft">?android:attr/expandableListPreferredItemIndicatorLeft</item>
+        <item name="android:indicatorRight">?android:attr/expandableListPreferredItemIndicatorRight</item>
+        <item name="android:childDivider">?android:attr/listDivider</item>
     </style>
 
     <style name="Widget.Holo.Light.ExpandableListView.White">
@@ -1999,6 +1989,7 @@
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">
+        <item name="android:button">@android:drawable/btn_star_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.TabWidget" parent="Widget.Holo.TabWidget">
