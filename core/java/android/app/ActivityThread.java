@@ -2664,12 +2664,12 @@ public final class ActivityThread {
         ActivityClientRecord r = mActivities.get(token);
 
         if (r == null) {
-            Log.w(TAG, "handleWindowVisibility: no activity for token " + token);
+            Log.w(TAG, "handleSleeping: no activity for token " + token);
             return;
         }
 
         if (sleeping) {
-            if (!r.stopped) {
+            if (!r.stopped && !r.isPreHoneycomb()) {
                 try {
                     // Now we are idle.
                     r.activity.performStop();
