@@ -100,6 +100,24 @@ used to quickly relaunch the AVD next time. However, when you choose to save a s
 emulator will be slow to close, so you might want to enable <b>Save to
 snapshot</b> only for the first time you launch the AVD.</p>
 
+<h4>Other emulator issues</h4> 
+
+<p>The following known issues occur for Android 3.0 AVDs that are loaded in the emulator:</p> 
+  <ul> 
+    <li>You cannot take screenshots of an emulator screen. The Device Screen
+    Capture window displays <strong>Screen not available</strong>.</li> 
+    <li>The emulator cannot receive incoming SMS messages.</li> 
+    <li>GPS emulation is currently not supported.</li>        
+    <li>When rotating the emulator screen by pressing Ctrl-F11, the screen turns green momentarily,
+then displays the normal interface.</li> 
+    <li>In some circumstances, the emulator displays a rotated portrait screen while in landscape
+mode. To view the screen correctly, rotate the emulator to portrait mode by pressing Ctrl-F11 or
+turn off the auto-rotate setting in <strong>Settings > Screen > Auto-rotate screen</strong>.</li> 
+    <li>The Dev Tools application sometimes crashes when trying to use the Package Browser
+feature.</li> 
+    <li>On Ubuntu 10.04 64-bit machines, you cannot create an AVD that have an SD card.</li> 
+  </ul> 
+
 
 
 <h2 id="Optimize">Optimize Your Application for Tablets</h2>
