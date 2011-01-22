@@ -13,7 +13,7 @@ page.title=Animation
 
             <li><a href="#object-animator">Animating with ObjectAnimator</a></li>
 
-            <li><a href="#type-evaluator">Using the TypeEvaluator</a></li>
+            <li><a href="#type-evaluator">Using a TypeEvaluator</a></li>
 
             <li><a href="#interpolators">Using interpolators</a></li>
 
@@ -60,7 +60,7 @@ page.title=Animation
 
   <p>The Android system provides a flexible animation system that allows you to animate
   almost anything, either programmatically or declaratively with XML. There are two
-  animation systems that you can choose from: <a href="property-animation">property
+  animation systems that you can choose from: <a href="#property-animation">property
   animation</a> and <a href="#view-animation">view animation</a>. You can use whichever
   system that matches your needs, but use only one system for each object that you
   are animating.</p>
@@ -91,7 +91,7 @@ page.title=Animation
 
   <p>Most of the property animation system's features can be found in
   {@link android.animation android.animation}. Because the 
-  <a href="#view-animation>view animation</a> system already
+  <a href="#view-animation">view animation</a> system already
   defines many interpolators in {@link android.view.animation android.view.animation},
   you will use those to define your animation's interpolation in the property animation
   system as well.
@@ -163,7 +163,7 @@ page.title=Animation
       <p>The Android system provides a set of common interpolators in
       {@link android.view.animation android.view.animation}. If none of these suits your needs, you
       can implement the {@link android.animation.TimeInterpolator} interface and create
-      your own. See <a href="#interpolators">Interpolators</a> for more information on
+      your own. See <a href="#interpolators">Using interpolators</a> for more information on
       how to write a custom interpolator.</p>
     </dd>
   </dl>
@@ -286,14 +286,13 @@ animation.start();
   android.animation.AnimatorListenerAdapter} for just the {@link
   android.animation.Animator.AnimatorListener#onAnimationEnd onAnimationEnd()}
   callback:</p>
+  
   <pre>ValueAnimator fadeAnim = ObjectAnimator.ofFloat(newBall, "alpha", 1f, 0f);
 fadeAnim.setDuration(250);
 fadeAnim.addListener(new AnimatorListenerAdapter() {
 public void onAnimationEnd(Animator animation) {
     balls.remove(((ObjectAnimator)animation).getTarget());
-}
-  
-</pre>
+}</pre>
 
   <h3 id="object-animator">Animating with ObjectAnimator</h3>
 
@@ -308,11 +307,9 @@ public void onAnimationEnd(Animator animation) {
   <p>Instantiating an {@link android.animation.ObjectAnimator} is similar to a {@link
   android.animation.ValueAnimator}, but you also specify the object and that object's
   property (as a String) that you want to animate:</p>
-  <pre>
-ObjectAnimator anim = ObjectAnimator.ofFloat(foo, "alpha", 0f, 1f);
+  <pre>ObjectAnimator anim = ObjectAnimator.ofFloat(foo, "alpha", 0f, 1f);
 anim.setDuration(1000);
-anim.start();
-</pre>
+anim.start();</pre>
 
   <p>To have the {@link android.animation.ObjectAnimator} update properties correctly,
   you must do the following:</p>
@@ -355,7 +352,7 @@ anim.start();
     </li>
   </ul>
 
-  <h3 id="type-evaluator">Using the TypeEvaluator</h3>
+  <h3 id="type-evaluator">Using a TypeEvaluator</h3>
 
   <p>If you want to animate a type that is unknown to the Android system,
   you can create your own evaluator by implementing the {@link
@@ -369,15 +366,13 @@ anim.start();
   This allows the animator that you are using to return an
   appropriate value for your animated property at the current point of the animation. The
   {@link android.animation.FloatEvaluator} class demonstrates how to do this:</p>
-  <pre>
-public class FloatEvaluator implements TypeEvaluator {
+  <pre>public class FloatEvaluator implements TypeEvaluator {
 
     public Object evaluate(float fraction, Object startValue, Object endValue) {
         float startFloat = ((Number) startValue).floatValue();
         return startFloat + fraction * (((Number) endValue).floatValue() - startFloat);
     }
-}
-</pre>
+}</pre>
 
   <p class="note"><strong>Note:</strong> When {@link android.animation.ValueAnimator} (or
   {@link android.animation.ObjectAnimator}) runs, it calculates a current elapsed
@@ -387,7 +382,7 @@ public class FloatEvaluator implements TypeEvaluator {
   parameter, so you do not have to take into account the interpolator
   when calculating animated values.</p>
 
-  <h3 id="interpolators">Using Interpolators</h3>
+  <h3 id="interpolators">Using interpolators</h3>
 
   <p>An interpolator define how specific values in an animation are
   calculated as a function of time. For example, you can specify animations to happen
@@ -414,12 +409,12 @@ public class FloatEvaluator implements TypeEvaluator {
   <p><strong>AccelerateDecelerateInterpolator</strong></p>
   <pre>public float getInterpolation(float input) {
     return (float)(Math.cos((input + 1) * Math.PI) / 2.0f) + 0.5f;
-    }</pre>
+}</pre>
 
   <p><strong>LinearInterpolator</strong></p>
   <pre>public float getInterpolation(float input) {
     return input;
-    }</pre>
+}</pre>
 
   <p>The following table represents the approximate values that are calculated by these
   interpolators for an animation that lasts 1000ms:</p>
@@ -488,7 +483,7 @@ public class FloatEvaluator implements TypeEvaluator {
   {@link android.view.animation.LinearInterpolator} between 200ms and 600ms and slower
   between 600ms and 1000ms.</p>
 
-  <h3 id="keyframes">Specifying Keyframes</h3>
+  <h3 id="keyframes">Specifying keyframes</h3>
 
   <p>A {@link android.animation.Keyframe} object consists of a time/value pair that lets
   you define a specific state at a specific time of an animation. Each keyframe can also
@@ -505,19 +500,18 @@ public class FloatEvaluator implements TypeEvaluator {
   object, you can obtain an animator by passing in the {@link
   android.animation.PropertyValuesHolder} object and the object to animate. The following
   code snippet demonstrates how to do this:</p>
-  <pre>
-  Keyframe kf0 = Keyframe.ofFloat(0f, 0f);
-  Keyframe kf1 = Keyframe.ofFloat(.9999f, 360f);
-  Keyframe kf2 = Keyframe.ofFloat(1f, 0f);
-  PropertyValuesHolder pvhRotation = PropertyValuesHolder.ofKeyframe("rotation", kf0, kf1, kf2);
-  ObjectAnimator rotationAnim = ObjectAnimator.ofPropertyValuesHolder(target, pvhRotation)
-  rotationAnim.setDuration(5000ms);
- 
-</pre>For a more complete example on how to use keyframes, see the <a href=
+  <pre>Keyframe kf0 = Keyframe.ofFloat(0f, 0f);
+Keyframe kf1 = Keyframe.ofFloat(.9999f, 360f);
+Keyframe kf2 = Keyframe.ofFloat(1f, 0f);
+PropertyValuesHolder pvhRotation = PropertyValuesHolder.ofKeyframe("rotation", kf0, kf1, kf2);
+ObjectAnimator rotationAnim = ObjectAnimator.ofPropertyValuesHolder(target, pvhRotation)
+rotationAnim.setDuration(5000ms);
+</pre>
+<p>For a more complete example on how to use keyframes, see the <a href=
 "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/MultiPropertyAnimation.html">
-  MultiPropertyAnimation</a> sample in APIDemos.
+  MultiPropertyAnimation</a> sample in APIDemos.</p>
 
-  <h3 id="choreography">Choreographing multiple animations with Animator Sets</h3>
+  <h3 id="choreography">Choreographing multiple animations with AnimatorSet</h3>
 
   <p>In many cases, you want to play an animation that depends on when another animation
   starts or finishes. The Android system lets you bundle animations together into an
@@ -559,7 +553,7 @@ animatorSet.start();
 
   <h3 id="declaring-xml">Declaring animations in XML</h3>
 
-  <p>As with <a href="view-animation">view animation</a>, you can declare property animations with
+  <p>As with <a href="#view-animation">view animation</a>, you can declare property animations with
   XML instead of doing it programmatically. The following Android classes also have XML
   declaration support with the following XML tags:</p>
 
@@ -639,14 +633,13 @@ animatorSet.start();
             android:propertyName="y"
             android:duration="500"
             android:valueTo="300"
-            android:valueType="int" &gt;
-        &lt;/set&gt;
-        &lt;objectAnimator
-            android:propertyName="alpha"
-            android:duration="500"
-            android:valueTo="0f"/&gt;
-        &lt;/set&gt;
-</pre>
+            android:valueType="int"/&gt;
+    &lt;/set&gt;
+    &lt;objectAnimator
+        android:propertyName="alpha"
+        android:duration="500"
+        android:valueTo="0f"/&gt;
+&lt;/set&gt;</pre>
 
   <p>In order to run this animation, you must inflate the XML resources in your code to
   an {@link android.animation.AnimatorSet} object, and then set the target objects for all of
@@ -698,40 +691,38 @@ animatorSet.start();
 
   <p>The following XML from one of the ApiDemos is used to stretch, then simultaneously
   spin and rotate a View object.</p>
-  <pre>
-&lt;set android:shareInterpolator="false"&gt;
-   &lt;scale
-          android:interpolator="@android:anim/accelerate_decelerate_interpolator"
-          android:fromXScale="1.0"
-          android:toXScale="1.4"
-          android:fromYScale="1.0"
-          android:toYScale="0.6"
-          android:pivotX="50%"
-          android:pivotY="50%"
-          android:fillAfter="false"
-          android:duration="700" /&gt;
-   &lt;set android:interpolator="@android:anim/decelerate_interpolator"&gt;
-      &lt;scale
-             android:fromXScale="1.4" 
-             android:toXScale="0.0"
-             android:fromYScale="0.6"
-             android:toYScale="0.0" 
-             android:pivotX="50%" 
-             android:pivotY="50%" 
-             android:startOffset="700"
-             android:duration="400" 
-             android:fillBefore="false" /&gt;
-      &lt;rotate 
-             android:fromDegrees="0" 
-             android:toDegrees="-45"
-             android:toYScale="0.0" 
-             android:pivotX="50%" 
-             android:pivotY="50%"
-             android:startOffset="700"
-             android:duration="400" /&gt;
-   &lt;/set&gt;
-&lt;/set&gt;
-</pre>
+  <pre>&lt;set android:shareInterpolator="false"&gt;
+    &lt;scale
+        android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+        android:fromXScale="1.0"
+        android:toXScale="1.4"
+        android:fromYScale="1.0"
+        android:toYScale="0.6"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fillAfter="false"
+        android:duration="700" /&gt;
+    &lt;set android:interpolator="@android:anim/decelerate_interpolator"&gt;
+        &lt;scale
+           android:fromXScale="1.4"
+           android:toXScale="0.0"
+           android:fromYScale="0.6"
+           android:toYScale="0.0"
+           android:pivotX="50%"
+           android:pivotY="50%"
+           android:startOffset="700"
+           android:duration="400"
+           android:fillBefore="false" /&gt;
+        &lt;rotate
+           android:fromDegrees="0"
+           android:toDegrees="-45"
+           android:toYScale="0.0"
+           android:pivotX="50%"
+           android:pivotY="50%"
+           android:startOffset="700"
+           android:duration="400" /&gt;
+    &lt;/set&gt;
+&lt;/set&gt;</pre>
 
   <p>Screen coordinates (not used in this example) are (0,0) at the upper left hand
   corner, and increase as you go down and to the right.</p>
@@ -805,8 +796,7 @@ spaceshipImage.startAnimation(hyperspaceJumpAnimation);
   image to a View and then called to play. Here's an example Activity, in which the
   animation is added to an {@link android.widget.ImageView} and then animated when the
   screen is touched:</p>
-  <pre>
-AnimationDrawable rocketAnimation;
+  <pre>AnimationDrawable rocketAnimation;
 
 public void onCreate(Bundle savedInstanceState) {
   super.onCreate(savedInstanceState);
@@ -823,8 +813,7 @@ public boolean onTouchEvent(MotionEvent event) {
     return true;
   }
   return super.onTouchEvent(event);
-}
-</pre>
+}</pre>
 
   <p>It's important to note that the <code>start()</code> method called on the
   AnimationDrawable cannot be called during the <code>onCreate()</code> method of your
