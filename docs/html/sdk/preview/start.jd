@@ -8,22 +8,6 @@ devices. We're offering a preview SDK so you can get a head-start developing
 applications for it or simply optimize your existing application for upcoming
 tablets.</p>
 
-
-<h3>What is the preview SDK?</h3>
-
-<p>The Android 3.0 preview SDK is an early look at the upcoming version of Android 3.0, for
-developers only.</p>
-
-<p>The preview SDK includes:</p>
-<ul>
-  <li>An early Android 3.0 system image for use in the Android emulator</li>
-  <li>An Android 3.0 library with non-final APIs</li>
-  <li>A new WXGA emulator skin for an extra large Android Virtual Device</li>
-  <li>New documentation for Android 3.0, including a complete API reference, new developer guides,
-and an API differences report between Android 3.0 and 2.3.</li>
-</ul>
-
-<div class="note">
 <p><strong>Be aware that:</strong></p>
 <ul>
   <li>The APIs in the preview SDK are <strong>not final</strong>. Some APIs may change in behavior
@@ -36,7 +20,6 @@ does <strong>not</strong> include the Android 3.0 documentation&mdash;to read th
 developer guides for Android 3.0, you must install the Android 3.0 preview documentation from
 the AVD and SDK Manager.</li>
 </ul>
-</div>
 
 
 
@@ -130,7 +113,7 @@ don't need to change the manifest {@code minSdkVersion}).</p>
 there's nothing you <em>have to</em> do&mdash;if your application is a good citizen of the Android
 APIs, your app should work fine on devices running Android 3.0. However, in order to provide users
 a better experience when running your app on an Android 3.0 tablet, we recommend that you update
-your application to adapt to the new system theme and add optimize your application for larger
+your application to adapt to the new system theme and optimize your application for larger
 screens.</p>
 
 <p>Here's what you can do to optimize your application for tablets running Android
