@@ -332,7 +332,7 @@ final class FragmentManagerState implements Parcelable {
  * Container for fragments associated with an activity.
  */
 final class FragmentManagerImpl extends FragmentManager {
-    static boolean DEBUG = true;
+    static boolean DEBUG = false;
     static final String TAG = "FragmentManager";
     
     static final String TARGET_REQUEST_CODE_STATE_TAG = "android:target_req_state";
@@ -747,7 +747,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         f.onActivityCreated(f.mSavedFragmentState);
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
-                                    + " did not call through to super.onReady()");
+                                    + " did not call through to super.onActivityCreated()");
                         }
                         f.mSavedFragmentState = null;
                     }
@@ -810,7 +810,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         f.onDestroyView();
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
-                                    + " did not call through to super.onDestroyedView()");
+                                    + " did not call through to super.onDestroyView()");
                         }
                         if (f.mView != null && f.mContainer != null) {
                             Animator anim = null;
