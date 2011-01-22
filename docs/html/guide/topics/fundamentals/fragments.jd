@@ -9,7 +9,7 @@ page.title=Fragments
     <li>Fragments decompose application functionality and UI into reusable modules</li>
     <li>Add multiple fragments to a screen to avoid switching activities</li>
     <li>Fragments have their own lifecycle, state, and back stack</li>
-    <li>Fragments require API Level HONEYCOMB or greater</li>
+    <li>Fragments require API Level "Honeycomb" or greater</li>
   </ul>
 
   <h2>In this document</h2>
@@ -59,12 +59,12 @@ modular section of an activity, which has its own lifecycle, receives its own in
 which you can add or remove while the activity is running.</p>
 
 <p>A fragment must always be embedded in an activity and the fragment's lifecycle is directly
-affected by the activity's lifecycle. For example, when the activity is paused, so are all
+affected by the host activity's lifecycle. For example, when the activity is paused, so are all
 fragments in it, and when the activity is destroyed, so are all fragments. However, while an
 activity is running (it is in the <em>resumed</em> <a
 href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">lifecycle state</a>), you can
 manipulate each fragment independently, such as add or remove them. When you perform such a
-fragment transaction, you can it to a back stack managed by the
+fragment transaction, you can also add it to a back stack that's managed by the
 activity&mdash;each back stack entry in the activity is a record of the fragment transaction that
 occurred. The back stack allows the user to reverse a fragment transaction (navigate backwards),
 by pressing the BACK key.</p>
