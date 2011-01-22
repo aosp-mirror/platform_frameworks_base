@@ -20,6 +20,7 @@
 
 #include <utils/Log.h>
 
+#include "Debug.h"
 #include "LayerCache.h"
 #include "Properties.h"
 
@@ -33,10 +34,10 @@ namespace uirenderer {
 LayerCache::LayerCache(): mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting layer cache size to %sMB", property);
+        INIT_LOGD("  Setting layer cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
+        INIT_LOGD("  Using default layer cache size of %.2fMB", DEFAULT_LAYER_CACHE_SIZE);
     }
 }
 
