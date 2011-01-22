@@ -39,7 +39,26 @@ older versions of Android.</p>
   </li>
 </ol>
 
-
+<h3>Android 3.0 samples</h3>
+<p>Many of the new APIs that are described in the <a href="{@docRoot}sdk/android-3.0.html#api">
+Android 3.0 Platform Preview</a> also have accompanying samples that help you understand the feature.
+The samples are located in <code>&lt;sdk_root&gt;/samples/android-Honeycomb</code> and include
+the following:</p>
+<ul>
+  <li><a href="{@docRoot}resources/samples/Honeycomb-Gallery/index.html">Honeycomb Gallery</a> -
+  A demo application highlighting how to use some of the new APIs in Honeycomb, including fragments, the action bar,
+  drag and drop, transition animations, and a stack widget.</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">Fragments</a>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarMechanics.html">Action Bar</a></li>      
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.html">Clipboard</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/DragAndDropDemo.html">Drag and Drop</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List15.html">
+  Multiple-choice selection for ListView and GridView</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">Content Loaders</a></li>      
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">Property Animation</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SearchViewActionBar.html">Search View Widget</a></li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/PopupMenu1.html">Popup Menu Widget</a></li>  
+</ul>
 
 
 <h2 id="Setup">Set Up the Preview SDK</h2>
