@@ -476,6 +476,7 @@ public class WebView extends AbsoluteLayout
     private static final int TOUCH_DRAG_LAYER_MODE = 9;
 
     // Whether to forward the touch events to WebCore
+    // Can only be set by WebKit via JNI.
     private boolean mForwardTouchEvents = false;
 
     // Whether to prevent default during touch. The initial value depends on
@@ -5358,26 +5359,26 @@ public class WebView extends AbsoluteLayout
                 + " numPointers=" + ev.getPointerCount());
         }
 
-        // Always pass multi-touch event to WebKit first.
-        // If WebKit doesn't consume it and set preventDefault to true,
-        // WebView's private handler will handle it.
-        if (ev.getPointerCount() > 1) {
-            if (DebugFlags.WEB_VIEW) {
-                Log.v(LOGTAG, "passing " + ev.getPointerCount() + " points to webkit");
+        int action = ev.getActionMasked();
+        if (ev.getPointerCount() > 1) {  // Multi-touch
+            mIsHandlingMultiTouch = true;
+
+            // If WebKit already showed no interests in this sequence of events,
+            // WebView handles them directly.
+            if (mPreventDefault == PREVENT_DEFAULT_NO && action == MotionEvent.ACTION_MOVE) {
+                handleMultiTouchInWebView(ev);
+            } else {
+                passMultiTouchToWebKit(ev);
             }
-            if (!mIsHandlingMultiTouch) {
-                mIsHandlingMultiTouch = true;
-            }
-            passMultiTouchToWebKit(ev);
             return true;
-        } else {
-            // Skip ACTION_MOVE for single touch if it's still handling multi-touch.
-            if (mIsHandlingMultiTouch && ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
-                return false;
-            }
         }
 
-        return handleTouchEventCommon(ev, ev.getActionMasked(), Math.round(ev.getX()), Math.round(ev.getY()));
+        // Skip ACTION_MOVE for single touch if it's still handling multi-touch.
+        if (mIsHandlingMultiTouch && action == MotionEvent.ACTION_MOVE) {
+            return false;
+        }
+
+        return handleTouchEventCommon(ev, action, Math.round(ev.getX()), Math.round(ev.getY()));
     }
 
     /*
@@ -7346,75 +7347,85 @@ public class WebView extends AbsoluteLayout
                         if (mPreventDefault == PREVENT_DEFAULT_YES) {
                             mTouchHighlightRegion.setEmpty();
                         }
-                    } else if (msg.arg2 == 0) {
-                        // prevent default is not called in WebCore, so the
-                        // message needs to be reprocessed in UI
+                    } else {
                         TouchEventData ted = (TouchEventData) msg.obj;
 
-                        if (ted.mPoints.length > 1) {  // for multi-touch.
-                            handleMultiTouchInWebView(ted.mMotionEvent);
+                        if (ted.mPoints.length > 1) {  // multi-touch
+                            if (ted.mAction == MotionEvent.ACTION_POINTER_UP) {
+                                mIsHandlingMultiTouch = false;
+                            }
+                            if (msg.arg2 == 0) {
+                                mPreventDefault = PREVENT_DEFAULT_NO;
+                                handleMultiTouchInWebView(ted.mMotionEvent);
+                            } else {
+                                mPreventDefault = PREVENT_DEFAULT_YES;
+                            }
                             break;
                         }
 
-                        // Following is for single touch.
-                        switch (ted.mAction) {
-                            case MotionEvent.ACTION_DOWN:
-                                mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
-                                        - mScrollX;
-                                mLastDeferTouchY = contentToViewY(ted.mPoints[0].y)
-                                        - mScrollY;
-                                mDeferTouchMode = TOUCH_INIT_MODE;
-                                break;
-                            case MotionEvent.ACTION_MOVE: {
-                                // no snapping in defer process
-                                int x = contentToViewX(ted.mPoints[0].x) - mScrollX;
-                                int y = contentToViewY(ted.mPoints[0].y) - mScrollY;
-                                if (mDeferTouchMode != TOUCH_DRAG_MODE) {
-                                    mDeferTouchMode = TOUCH_DRAG_MODE;
-                                    mLastDeferTouchX = x;
-                                    mLastDeferTouchY = y;
-                                    startScrollingLayer(x, y);
-                                    startDrag();
+                        // prevent default is not called in WebCore, so the
+                        // message needs to be reprocessed in UI
+                        if (msg.arg2 == 0) {
+                            // Following is for single touch.
+                            switch (ted.mAction) {
+                                case MotionEvent.ACTION_DOWN:
+                                    mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
+                                            - mScrollX;
+                                    mLastDeferTouchY = contentToViewY(ted.mPoints[0].y)
+                                            - mScrollY;
+                                    mDeferTouchMode = TOUCH_INIT_MODE;
+                                    break;
+                                case MotionEvent.ACTION_MOVE: {
+                                    // no snapping in defer process
+                                    int x = contentToViewX(ted.mPoints[0].x) - mScrollX;
+                                    int y = contentToViewY(ted.mPoints[0].y) - mScrollY;
+                                    if (mDeferTouchMode != TOUCH_DRAG_MODE) {
+                                        mDeferTouchMode = TOUCH_DRAG_MODE;
+                                        mLastDeferTouchX = x;
+                                        mLastDeferTouchY = y;
+                                        startScrollingLayer(x, y);
+                                        startDrag();
+                                    }
+                                    int deltaX = pinLocX((int) (mScrollX
+                                            + mLastDeferTouchX - x))
+                                            - mScrollX;
+                                    int deltaY = pinLocY((int) (mScrollY
+                                            + mLastDeferTouchY - y))
+                                            - mScrollY;
+                                    doDrag(deltaX, deltaY);
+                                    if (deltaX != 0) mLastDeferTouchX = x;
+                                    if (deltaY != 0) mLastDeferTouchY = y;
+                                    break;
                                 }
-                                int deltaX = pinLocX((int) (mScrollX
-                                        + mLastDeferTouchX - x))
-                                        - mScrollX;
-                                int deltaY = pinLocY((int) (mScrollY
-                                        + mLastDeferTouchY - y))
-                                        - mScrollY;
-                                doDrag(deltaX, deltaY);
-                                if (deltaX != 0) mLastDeferTouchX = x;
-                                if (deltaY != 0) mLastDeferTouchY = y;
-                                break;
+                                case MotionEvent.ACTION_UP:
+                                case MotionEvent.ACTION_CANCEL:
+                                    if (mDeferTouchMode == TOUCH_DRAG_MODE) {
+                                        // no fling in defer process
+                                        mScroller.springBack(mScrollX, mScrollY, 0,
+                                                computeMaxScrollX(), 0,
+                                                computeMaxScrollY());
+                                        invalidate();
+                                        WebViewCore.resumePriority();
+                                        WebViewCore.resumeUpdatePicture(mWebViewCore);
+                                    }
+                                    mDeferTouchMode = TOUCH_DONE_MODE;
+                                    break;
+                                case WebViewCore.ACTION_DOUBLETAP:
+                                    // doDoubleTap() needs mLastTouchX/Y as anchor
+                                    mLastTouchX = contentToViewX(ted.mPoints[0].x) - mScrollX;
+                                    mLastTouchY = contentToViewY(ted.mPoints[0].y) - mScrollY;
+                                    mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
+                                    mDeferTouchMode = TOUCH_DONE_MODE;
+                                    break;
+                                case WebViewCore.ACTION_LONGPRESS:
+                                    HitTestResult hitTest = getHitTestResult();
+                                    if (hitTest != null && hitTest.mType
+                                            != HitTestResult.UNKNOWN_TYPE) {
+                                        performLongClick();
+                                    }
+                                    mDeferTouchMode = TOUCH_DONE_MODE;
+                                    break;
                             }
-                            case MotionEvent.ACTION_UP:
-                            case MotionEvent.ACTION_CANCEL:
-                                if (mDeferTouchMode == TOUCH_DRAG_MODE) {
-                                    // no fling in defer process
-                                    mScroller.springBack(mScrollX, mScrollY, 0,
-                                            computeMaxScrollX(), 0,
-                                            computeMaxScrollY());
-                                    invalidate();
-                                    WebViewCore.resumePriority();
-                                    WebViewCore.resumeUpdatePicture(mWebViewCore);
-                                }
-                                mDeferTouchMode = TOUCH_DONE_MODE;
-                                break;
-                            case WebViewCore.ACTION_DOUBLETAP:
-                                // doDoubleTap() needs mLastTouchX/Y as anchor
-                                mLastTouchX = contentToViewX(ted.mPoints[0].x) - mScrollX;
-                                mLastTouchY = contentToViewY(ted.mPoints[0].y) - mScrollY;
-                                mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
-                                mDeferTouchMode = TOUCH_DONE_MODE;
-                                break;
-                            case WebViewCore.ACTION_LONGPRESS:
-                                HitTestResult hitTest = getHitTestResult();
-                                if (hitTest != null && hitTest.mType
-                                        != HitTestResult.UNKNOWN_TYPE) {
-                                    performLongClick();
-                                }
-                                mDeferTouchMode = TOUCH_DONE_MODE;
-                                break;
                         }
                     }
                     break;
@@ -8151,8 +8162,8 @@ public class WebView extends AbsoluteLayout
      * @hide This is only used by the webkit layout test.
      */
     public void setDeferMultiTouch(boolean value) {
-        mDeferMultitouch = value;
-        Log.v(LOGTAG, "set mDeferMultitouch to " + value);
+      mDeferMultitouch = value;
+      Log.v(LOGTAG, "set mDeferMultitouch to " + value);
     }
 
     /**
