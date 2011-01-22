@@ -108,6 +108,9 @@ Tools will delete the file.</p>
     <li>Fixed the missing JAR file error that prevented <code>draw9patch</code> from running.</li>
     <li>Fixed the Windows launch scripts <code>hierarchyviewer</code> and <code>ddms</code> to support
     the new location of <code>adb</code>.</li>
+    <li>Known issues with emulator performance: Because the Android emulator must simulate the ARM
+instruction set architecture on your computer, emulator performance is  slow. We're working hard to
+resolve the performance issues and it will improve in future releases.</li>
   </ul>
 </dd>
 </dl>
