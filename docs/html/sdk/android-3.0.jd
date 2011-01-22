@@ -6,7 +6,6 @@ page.title=Android 3.0 Platform Preview
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#relnotes">Revisions</a></li>
   <li><a href="#api">API Overview</a></li>
   <li><a href="#api-level">API Level</a></li>
   <li><a href="#apps">Built-in Applications</a></li>
