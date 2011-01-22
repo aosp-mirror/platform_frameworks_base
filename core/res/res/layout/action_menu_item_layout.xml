@@ -42,6 +42,7 @@
             android:visibility="gone"
             android:textAppearance="?attr/textAppearanceMedium"
             style="?attr/buttonStyleSmall"
+            android:textColor="?attr/textColorPrimary"
             android:background="@null"
             android:paddingLeft="4dip"
             android:paddingRight="4dip" />

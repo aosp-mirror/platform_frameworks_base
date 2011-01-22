@@ -56,8 +56,8 @@
     <color name="hint_foreground_light">#808080</color>
     <color name="highlight_background">#cc475925</color>
     <color name="highlight_background_inverse">#ccd2e461</color>
-    <color name="highlighted_text_dark">#cc475925</color>
-    <color name="highlighted_text_light">#ccd2e461</color>
+    <color name="highlighted_text_dark">#9983CC39</color>
+    <color name="highlighted_text_light">#9983CC39</color>
     <color name="link_text_dark">#5c5cff</color>
     <color name="link_text_light">#0000ee</color>
 
