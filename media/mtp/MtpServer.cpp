@@ -130,7 +130,7 @@ void MtpServer::run() {
     while (1) {
         int ret = mRequest.read(fd);
         if (ret < 0) {
-            LOGE("request read returned %d, errno: %d", ret, errno);
+            LOGV("request read returned %d, errno: %d", ret, errno);
             if (errno == ECANCELED) {
                 // return to top of loop and wait for next command
                 continue;
@@ -204,23 +204,23 @@ void MtpServer::run() {
 
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
     if (mSessionOpen) {
-        LOGD("sendObjectAdded %d\n", handle);
+        LOGV("sendObjectAdded %d\n", handle);
         mEvent.setEventCode(MTP_EVENT_OBJECT_ADDED);
         mEvent.setTransactionID(mRequest.getTransactionID());
         mEvent.setParameter(1, handle);
         int ret = mEvent.write(mFD);
-        LOGD("mEvent.write returned %d\n", ret);
+        LOGV("mEvent.write returned %d\n", ret);
     }
 }
 
 void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
     if (mSessionOpen) {
-        LOGD("sendObjectRemoved %d\n", handle);
+        LOGV("sendObjectRemoved %d\n", handle);
         mEvent.setEventCode(MTP_EVENT_OBJECT_REMOVED);
         mEvent.setTransactionID(mRequest.getTransactionID());
         mEvent.setParameter(1, handle);
         int ret = mEvent.write(mFD);
-        LOGD("mEvent.write returned %d\n", ret);
+        LOGV("mEvent.write returned %d\n", ret);
     }
 }
 
@@ -496,7 +496,7 @@ MtpResponseCode MtpServer::doSetObjectReferences() {
 MtpResponseCode MtpServer::doGetObjectPropValue() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
-    LOGD("GetObjectPropValue %d %s\n", handle,
+    LOGV("GetObjectPropValue %d %s\n", handle,
             MtpDebug::getObjectPropCodeName(property));
 
     return mDatabase->getObjectPropertyValue(handle, property, mData);
@@ -505,7 +505,7 @@ MtpResponseCode MtpServer::doGetObjectPropValue() {
 MtpResponseCode MtpServer::doSetObjectPropValue() {
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
-    LOGD("SetObjectPropValue %d %s\n", handle,
+    LOGV("SetObjectPropValue %d %s\n", handle,
             MtpDebug::getObjectPropCodeName(property));
 
     return mDatabase->setObjectPropertyValue(handle, property, mData);
@@ -513,7 +513,7 @@ MtpResponseCode MtpServer::doSetObjectPropValue() {
 
 MtpResponseCode MtpServer::doGetDevicePropValue() {
     MtpDeviceProperty property = mRequest.getParameter(1);
-    LOGD("GetDevicePropValue %s\n",
+    LOGV("GetDevicePropValue %s\n",
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->getDevicePropertyValue(property, mData);
@@ -521,7 +521,7 @@ MtpResponseCode MtpServer::doGetDevicePropValue() {
 
 MtpResponseCode MtpServer::doSetDevicePropValue() {
     MtpDeviceProperty property = mRequest.getParameter(1);
-    LOGD("SetDevicePropValue %s\n",
+    LOGV("SetDevicePropValue %s\n",
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->setDevicePropertyValue(property, mData);
@@ -529,7 +529,7 @@ MtpResponseCode MtpServer::doSetDevicePropValue() {
 
 MtpResponseCode MtpServer::doResetDevicePropValue() {
     MtpDeviceProperty property = mRequest.getParameter(1);
-    LOGD("ResetDevicePropValue %s\n",
+    LOGV("ResetDevicePropValue %s\n",
             MtpDebug::getDevicePropCodeName(property));
 
     return mDatabase->resetDeviceProperty(property);
@@ -543,7 +543,7 @@ MtpResponseCode MtpServer::doGetObjectPropList() {
     uint32_t property = mRequest.getParameter(3);
     int groupCode = mRequest.getParameter(4);
     int depth = mRequest.getParameter(5);
-   LOGD("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
+   LOGV("GetObjectPropList %d format: %s property: %s group: %d depth: %d\n",
             handle, MtpDebug::getFormatCodeName(format),
             MtpDebug::getObjectPropCodeName(property), groupCode, depth);
 
@@ -674,7 +674,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     mData.getString(modified);     // date modified
     // keywords follow
 
-    LOGD("name: %s format: %04X\n", (const char *)name, format);
+    LOGV("name: %s format: %04X\n", (const char *)name, format);
     time_t modifiedTime;
     if (!parseDateTime(modified, modifiedTime))
         modifiedTime = 0;
@@ -750,7 +750,7 @@ MtpResponseCode MtpServer::doSendObject() {
     mfr.offset = 0;
     mfr.length = mSendObjectFileSize;
 
-    LOGD("receiving %s\n", (const char *)mSendObjectFilePath);
+    LOGV("receiving %s\n", (const char *)mSendObjectFilePath);
     // transfer the file
     ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
     close(mfr.fd);
@@ -854,7 +854,7 @@ MtpResponseCode MtpServer::doDeleteObject() {
 MtpResponseCode MtpServer::doGetObjectPropDesc() {
     MtpObjectProperty propCode = mRequest.getParameter(1);
     MtpObjectFormat format = mRequest.getParameter(2);
-    LOGD("GetObjectPropDesc %s %s\n", MtpDebug::getObjectPropCodeName(propCode),
+    LOGV("GetObjectPropDesc %s %s\n", MtpDebug::getObjectPropCodeName(propCode),
                                         MtpDebug::getFormatCodeName(format));
     MtpProperty* property = mDatabase->getObjectPropertyDesc(propCode, format);
     if (!property)
@@ -866,7 +866,7 @@ MtpResponseCode MtpServer::doGetObjectPropDesc() {
 
 MtpResponseCode MtpServer::doGetDevicePropDesc() {
     MtpDeviceProperty propCode = mRequest.getParameter(1);
-    LOGD("GetDevicePropDesc %s\n", MtpDebug::getDevicePropCodeName(propCode));
+    LOGV("GetDevicePropDesc %s\n", MtpDebug::getDevicePropCodeName(propCode));
     MtpProperty* property = mDatabase->getDevicePropertyDesc(propCode);
     if (!property)
         return MTP_RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
