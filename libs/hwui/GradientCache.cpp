@@ -23,6 +23,7 @@
 
 #include <utils/threads.h>
 
+#include "Debug.h"
 #include "GradientCache.h"
 #include "Properties.h"
 
@@ -38,10 +39,10 @@ GradientCache::GradientCache():
         mSize(0), mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
-        LOGD("  Setting gradient cache size to %sMB", property);
+        INIT_LOGD("  Setting gradient cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
+        INIT_LOGD("  Using default gradient cache size of %.2fMB", DEFAULT_GRADIENT_CACHE_SIZE);
     }
 
     mCache.setOnEntryRemovedListener(this);
