@@ -30,6 +30,8 @@ class Record {
             "com.google.android.apps.maps\\u003Adriveabout",
             "com.google.android.apps.maps:LocationFriendService",
             "com.google.android.apps.maps\\u003ALocationFriendService",
+            "com.google.android.apps.maps:NetworkLocationService",
+            "com.google.android.apps.maps\\u003ANetworkLocationService",
     };
 
     enum Type {
@@ -69,7 +71,7 @@ class Record {
 
     /** Record time (ns). */
     final long time;
-    
+
     /** Source file line# */
     int sourceLineNumber;
 
@@ -91,7 +93,7 @@ class Record {
         for (int i = 0; i < REPLACE_CLASSES.length; i+= 2) {
             line = line.replace(REPLACE_CLASSES[i], REPLACE_CLASSES[i+1]);
         }
-        
+
         line = line.substring(1);
         String[] parts = line.split(":");
 
@@ -106,12 +108,12 @@ class Record {
 
         time = Long.parseLong(parts[6]);
     }
-    
+
     /**
      * Decode any escaping that may have been written to the log line.
-     * 
+     *
      * Supports unicode-style escaping:  \\uXXXX = character in hex
-     * 
+     *
      * @param rawField the field as it was written into the log
      * @result the same field with any escaped characters replaced
      */
@@ -122,11 +124,11 @@ class Record {
             String before = result.substring(0, offset);
             String escaped = result.substring(offset+2, offset+6);
             String after = result.substring(offset+6);
-            
+
             result = String.format("%s%c%s", before, Integer.parseInt(escaped, 16), after);
 
-            // find another but don't recurse  
-            offset = result.indexOf("\\u", offset + 1);          
+            // find another but don't recurse
+            offset = result.indexOf("\\u", offset + 1);
         }
         return result;
     }
@@ -135,13 +137,13 @@ class Record {
      * Converts a VM-style name to a language-style name.
      */
     String vmTypeToLanguage(String typeName) {
-        // if the typename is (null), just return it as-is.  This is probably in dexopt and 
+        // if the typename is (null), just return it as-is.  This is probably in dexopt and
         // will be discarded anyway.  NOTE: This corresponds to the case in dalvik/vm/oo/Class.c
         // where dvmLinkClass() returns false and we clean up and exit.
         if ("(null)".equals(typeName)) {
             return typeName;
         }
-        
+
         if (!typeName.startsWith("L") || !typeName.endsWith(";") ) {
             throw new AssertionError("Bad name: " + typeName + " in line " + sourceLineNumber);
         }
