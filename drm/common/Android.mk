@@ -26,7 +26,6 @@ LOCAL_SRC_FILES:= \
     DrmInfoStatus.cpp \
     DrmRights.cpp \
     DrmSupportInfo.cpp \
-    IDrmIOService.cpp \
     IDrmManagerService.cpp \
     IDrmServiceListener.cpp \
     DrmInfoEvent.cpp \
