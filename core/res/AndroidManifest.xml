@@ -1341,7 +1341,9 @@
 
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
-                android:exported="true">
+                android:exported="true"
+                android:theme="@android:style/Theme.Holo.Dialog"
+                android:label="@string/choose_account_label">
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"

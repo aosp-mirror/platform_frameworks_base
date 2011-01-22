@@ -2684,4 +2684,7 @@
     <string name="vpn_notification_title_disconnected"><xliff:g id="profilename" example="Home PPTP">%s</xliff:g> VPN disconnected</string>
     <!-- Message of the VPN service notification: Hint to reconnect VPN [CHAR LIMIT=NONE] -->
     <string name="vpn_notification_hint_disconnected">Touch to reconnect to a VPN.</string>
+
+    <!-- Choose Account Activity label -->
+    <string name="choose_account_label">Select an account</string>
 </resources>
