@@ -39,11 +39,12 @@ older versions of Android.</p>
   </li>
 </ol>
 
-<h3>Android 3.0 samples</h3>
-<p>Many of the new APIs that are described in the <a href="{@docRoot}sdk/android-3.0.html#api">
-Android 3.0 Platform Preview</a> also have accompanying samples that help you understand the feature.
-The samples are located in <code>&lt;sdk_root&gt;/samples/android-Honeycomb</code> and include
-the following:</p>
+<h3>Code samples</h3>
+<p>Many of the new features and APIs that are described in the <a href="{@docRoot}sdk/android-3.0.html#api">
+Android 3.0 Platform Preview</a> also have accompanying samples that help you understand how to use them.
+To get the samples, download them from the SDK repository using the Android SDK Manager. After download
+the samples are located in <code>&lt;sdk_root&gt;/samples/android-Honeycomb</code>. The list of links
+below helps you find samples for the features you are interested in:</p>
 <ul>
   <li><a href="{@docRoot}resources/samples/Honeycomb-Gallery/index.html">Honeycomb Gallery</a> -
   A demo application highlighting how to use some of the new APIs in Honeycomb, including fragments, the action bar,
@@ -87,6 +88,16 @@ the target to "Android 3.0 (Preview)" and the skin to "WXGA".</li>
 <p>Because the Android emulator must simulate the ARM instruction set architecture on your
 computer and the WXGA screen is significantly larger than what the emulator
 normally handles, emulator performance is much slower than usual.</p>
+
+<p>In particular, initializing the emulator can be slow and can take several
+minutes, depending on your hardware. When the emulator is booting there is
+limited user feedback, so please be patient and continue waiting until you see
+the home screen appear. </p>
+
+<p>Note that you do not need to do a full boot of your emulator each time you
+rebuild your application &mdash; typically you only need to boot at the start of
+a session. See the Tips section below for information about using Snapshots to
+cut startup time after first initialization. </p>
 
 <p>We're working hard to resolve the performance issues and it will improve in future releases.
 Unfortunately, the emulator will perform slowly during your trial with the preview SDK. For the time
@@ -146,7 +157,7 @@ application for larger screens.</p>
     </ol>
   </li>
   
-  <li><b>Apply the new "Holographic" theme to your application</b>
+  <li><b>Apply the new "holographic" theme to your application</b>
     <ol>
       <li>Open your manifest file and update the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element to
@@ -204,8 +215,6 @@ easily accessible while holding a tablet with two hands.</li>
     <p>In general, always be sure that your application follows the <a
 href="{@docRoot}guide/practices/screens_support.html#screen-independence">Best Practices
 for Screen Independence</a>.</p>
-
-
 
 
 <h2 id="Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</h2>
@@ -281,5 +290,5 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 
 <div class="special">
 <p>To learn more about some of the new APIs,
-see the <a href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
+see the <a href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform Preview</a> document.</p>
 </div>
