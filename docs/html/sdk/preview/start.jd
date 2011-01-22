@@ -3,10 +3,9 @@ page.title=Getting Started with the Android 3.0 Preview
 
 <p>Welcome to Android 3.0!</p>
 
-<p>Android 3.0 is the next major release of the Android platform and is optimized for tablet
-devices. We're offering a preview SDK so you can get a head-start developing
-applications for it or simply optimize your existing application for upcoming
-tablets.</p>
+<p>Android 3.0 is the next major release of the Android platform and is optimized for larger screen
+devices, particularly tablets. We're offering a preview SDK so you can get a head-start developing
+applications for it or simply test and optimize your existing application for upcoming devices.</p>
 
 <p><strong>Be aware that:</strong></p>
 <ul>
@@ -29,13 +28,13 @@ the AVD and SDK Manager.</li>
   <li><a href="#Setup">Set up the preview SDK</a></li>
   <li>Then choose your app adventure:
     <ol type="a">
-      <li><a href="#Optimize">Optimize Your App for Tablets</a>
+      <li><a href="#Optimize">Optimize Your App for Tablets and Similar Devices</a>
         <p>When you have an existing application and you want to maintain compatibility with
 older versions of Android.</p>
       </li>
-      <li><a href="#Upgrade">Upgrade or Develop a New App for Tablets</a>
+      <li><a href="#Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</a>
         <p>When you want to upgrade your application to use APIs introduced in Android 3.0 or
-    create an all new application targeted to tablet devices.</p></li>
+    create a new application targeted to tablets and similar devices.</p></li>
     </ol>
   </li>
 </ol>
@@ -64,16 +63,16 @@ the target to "Android 3.0 (Preview)" and the skin to "WXGA".</li>
 </ol>
 
 
-<h3>About Emulator Performance</h3>
+<h3>About emulator performance</h3>
 
 <p>Because the Android emulator must simulate the ARM instruction set architecture on your
 computer and the WXGA screen is significantly larger than what the emulator
 normally handles, emulator performance is much slower than usual.</p>
 
 <p>We're working hard to resolve the performance issues and it will improve in future releases.
-Unfortunately, the emulator will perform slowly during your trial with the preview SDK. Please
-continue to use the emulator to evaluate your application's appearance and functionality on Android
-3.0.</p>
+Unfortunately, the emulator will perform slowly during your trial with the preview SDK. For the time
+being, the emulator is still best way to evaluate your application's appearance and functionality on
+Android 3.0.</p>
 
 <p class="note"><strong>Tip:</strong> To improve the startup time for the emulator, enable
 snapshots for the AVD when you create it with the SDK and AVD Manager (there's a checkbox in
@@ -83,7 +82,8 @@ used to quickly relaunch the AVD next time. However, when you choose to save a s
 emulator will be slow to close, so you might want to enable <b>Save to
 snapshot</b> only for the first time you launch the AVD.</p>
 
-<h4>Other emulator issues</h4> 
+
+<h3>Known issues</h3> 
 
 <p>The following known issues occur for Android 3.0 AVDs that are loaded in the emulator:</p> 
   <ul> 
@@ -98,23 +98,23 @@ mode. To view the screen correctly, rotate the emulator to portrait mode by pres
 turn off the auto-rotate setting in <strong>Settings > Screen > Auto-rotate screen</strong>.</li> 
     <li>The Dev Tools application sometimes crashes when trying to use the Package Browser
 feature.</li> 
-    <li>On Ubuntu 10.04 64-bit machines, you cannot create an AVD that have an SD card.</li> 
+    <li>On Ubuntu 10.04 64-bit machines, you cannot create an AVD that has an SD card.</li> 
   </ul> 
 
 
 
-<h2 id="Optimize">Optimize Your Application for Tablets</h2>
+<h2 id="Optimize">Optimize Your Application for Tablets and Similar Devices</h2>
 
 <p>If you've already developed an application for Android, there are a few things you can do
-to optimize it for a tablet experience, without changing the minimum platform version required (you
-don't need to change the manifest {@code minSdkVersion}).</p>
+to optimize it for a tablet-style experience, without changing the minimum platform version required
+(you don't need to change the manifest {@code minSdkVersion}).</p>
 
 <p class="note"><strong>Note:</strong> All Android applications are forward-compatible, so
 there's nothing you <em>have to</em> do&mdash;if your application is a good citizen of the Android
 APIs, your app should work fine on devices running Android 3.0. However, in order to provide users
-a better experience when running your app on an Android 3.0 tablet, we recommend that you update
-your application to adapt to the new system theme and optimize your application for larger
-screens.</p>
+a better experience when running your app on an Android 3.0 tablet or similar-size device, we
+recommend that you update your application to adapt to the new system theme and optimize your
+application for larger screens.</p>
 
 <p>Here's what you can do to optimize your application for tablets running Android
 3.0:</p>
@@ -189,10 +189,10 @@ for Screen Independence</a>.</p>
 
 
 
-<h2 id="Upgrade">Upgrade or Develop a New App for Tablets</h2>
+<h2 id="Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</h2>
 
-<p>If you want to develop something truly for tablets running Android 3.0, then you need to use new
-APIs available in Android 3.0. This section introduces some of the new features that you
+<p>If you want to develop something truly for tablet-type devices running Android 3.0, then you need
+to use new APIs available in Android 3.0. This section introduces some of the new features that you
 should use.</p>
 
 <p>The first thing to do when you create a project with the Android 3.0 preview is set the <a
@@ -227,7 +227,7 @@ activities.</p>
 
 
 
-<h3>Publishing your app for tablets only</h3>
+<h3>Publishing your app for tablet-type devices only</h3>
 
 <p>Additionally, you should decide whether your application is for <em>only</em> tablet devices
 (specifically, <em>xlarge</em> devices) or for devices of all sizes that may run Android 3.0.</p>
