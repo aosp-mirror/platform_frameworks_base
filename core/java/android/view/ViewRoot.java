@@ -715,8 +715,10 @@ public final class ViewRoot extends Handler implements ViewParent,
             // object is not initialized to its backing store, but soon it
             // will be (assuming the window is visible).
             attachInfo.mSurface = mSurface;
-            attachInfo.mUse32BitDrawingCache = PixelFormat.formatHasAlpha(lp.format) ||
-                    lp.format == PixelFormat.RGBX_8888;
+            // We used to use the following condition to choose 32 bits drawing caches:
+            // PixelFormat.hasAlpha(lp.format) || lp.format == PixelFormat.RGBX_8888
+            // However, windows are now always 32 bits by default, so choose 32 bits
+            attachInfo.mUse32BitDrawingCache = true;
             attachInfo.mHasWindowFocus = false;
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
