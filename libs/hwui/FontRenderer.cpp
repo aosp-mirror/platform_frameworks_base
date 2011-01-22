@@ -22,6 +22,7 @@
 
 #include <utils/Log.h>
 
+#include "Debug.h"
 #include "FontRenderer.h"
 
 namespace android {
@@ -301,7 +302,9 @@ Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize,
 static bool sLogFontRendererCreate = true;
 
 FontRenderer::FontRenderer() {
-    if (sLogFontRendererCreate) LOGD("Creating FontRenderer");
+    if (sLogFontRendererCreate) {
+        INIT_LOGD("Creating FontRenderer");
+    }
 
     mGammaTable = NULL;
     mInitialized = false;
@@ -319,20 +322,24 @@ FontRenderer::FontRenderer() {
 
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXT_CACHE_WIDTH, property, NULL) > 0) {
-        if (sLogFontRendererCreate) LOGD("  Setting text cache width to %s pixels", property);
+        if (sLogFontRendererCreate) {
+            INIT_LOGD("  Setting text cache width to %s pixels", property);
+        }
         mCacheWidth = atoi(property);
     } else {
         if (sLogFontRendererCreate) {
-            LOGD("  Using default text cache width of %i pixels", mCacheWidth);
+            INIT_LOGD("  Using default text cache width of %i pixels", mCacheWidth);
         }
     }
 
     if (property_get(PROPERTY_TEXT_CACHE_HEIGHT, property, NULL) > 0) {
-        if (sLogFontRendererCreate) LOGD("  Setting text cache width to %s pixels", property);
+        if (sLogFontRendererCreate) {
+            INIT_LOGD("  Setting text cache width to %s pixels", property);
+        }
         mCacheHeight = atoi(property);
     } else {
         if (sLogFontRendererCreate) {
-            LOGD("  Using default text cache height of %i pixels", mCacheHeight);
+            INIT_LOGD("  Using default text cache height of %i pixels", mCacheHeight);
         }
     }
 

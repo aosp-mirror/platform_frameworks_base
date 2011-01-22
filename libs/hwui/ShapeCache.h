@@ -302,10 +302,10 @@ ShapeCache<Entry>::ShapeCache(const char* name, const char* propertyName, float 
         mSize(0), mMaxSize(MB(defaultSize)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(propertyName, property, NULL) > 0) {
-        LOGD("  Setting %s cache size to %sMB", name, property);
+        INIT_LOGD("  Setting %s cache size to %sMB", name, property);
         setMaxSize(MB(atof(property)));
     } else {
-        LOGD("  Using default %s cache size of %.2fMB", name, defaultSize);
+        INIT_LOGD("  Using default %s cache size of %.2fMB", name, defaultSize);
     }
 
     size_t len = strlen(name);

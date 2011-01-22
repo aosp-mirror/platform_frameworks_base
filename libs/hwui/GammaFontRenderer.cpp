@@ -16,6 +16,7 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include "Debug.h"
 #include "GammaFontRenderer.h"
 #include "Properties.h"
 
@@ -27,7 +28,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 GammaFontRenderer::GammaFontRenderer() {
-    LOGD("Creating gamma font renderer");
+    INIT_LOGD("Creating gamma font renderer");
 
     // Get the renderer properties
     char property[PROPERTY_VALUE_MAX];
@@ -35,29 +36,29 @@ GammaFontRenderer::GammaFontRenderer() {
     // Get the gamma
     float gamma = DEFAULT_TEXT_GAMMA;
     if (property_get(PROPERTY_TEXT_GAMMA, property, NULL) > 0) {
-        LOGD("  Setting text gamma to %s", property);
+        INIT_LOGD("  Setting text gamma to %s", property);
         gamma = atof(property);
     } else {
-        LOGD("  Using default text gamma of %.2f", DEFAULT_TEXT_GAMMA);
+        INIT_LOGD("  Using default text gamma of %.2f", DEFAULT_TEXT_GAMMA);
     }
 
     // Get the black gamma threshold
     mBlackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
     if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, NULL) > 0) {
-        LOGD("  Setting text black gamma threshold to %s", property);
+        INIT_LOGD("  Setting text black gamma threshold to %s", property);
         mBlackThreshold = atoi(property);
     } else {
-        LOGD("  Using default text black gamma threshold of %d",
+        INIT_LOGD("  Using default text black gamma threshold of %d",
                 DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD);
     }
 
     // Get the white gamma threshold
     mWhiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
     if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, NULL) > 0) {
-        LOGD("  Setting text white gamma threshold to %s", property);
+        INIT_LOGD("  Setting text white gamma threshold to %s", property);
         mWhiteThreshold = atoi(property);
     } else {
-        LOGD("  Using default white black gamma threshold of %d",
+        INIT_LOGD("  Using default white black gamma threshold of %d",
                 DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD);
     }
 
