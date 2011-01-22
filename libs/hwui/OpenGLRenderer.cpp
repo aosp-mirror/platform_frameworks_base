@@ -1568,29 +1568,31 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
 
 
 #if RENDER_LAYERS_AS_REGIONS
-    if (layer->region.isRect()) {
-        const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
-        composeLayerRect(layer, r);
-    } else if (!layer->region.isEmpty() && layer->mesh) {
-        const Rect& rect = layer->layer;
+    if (!layer->region.isEmpty()) {
+        if (layer->region.isRect()) {
+            const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
+            composeLayerRect(layer, r);
+        } else if (layer->mesh) {
+            const Rect& rect = layer->layer;
 
-        setupDraw();
-        setupDrawWithTexture();
-        setupDrawColor(alpha, alpha, alpha, alpha);
-        setupDrawColorFilter();
-        setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
-        setupDrawProgram();
-        setupDrawDirtyRegionsDisabled();
-        setupDrawPureColorUniforms();
-        setupDrawColorFilterUniforms();
-        setupDrawTexture(layer->texture);
-        setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
-        setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
+            setupDraw();
+            setupDrawWithTexture();
+            setupDrawColor(alpha, alpha, alpha, alpha);
+            setupDrawColorFilter();
+            setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
+            setupDrawProgram();
+            setupDrawDirtyRegionsDisabled();
+            setupDrawPureColorUniforms();
+            setupDrawColorFilterUniforms();
+            setupDrawTexture(layer->texture);
+            setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
+            setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
 
-        glDrawElements(GL_TRIANGLES, layer->meshElementCount,
-                GL_UNSIGNED_SHORT, layer->meshIndices);
+            glDrawElements(GL_TRIANGLES, layer->meshElementCount,
+                    GL_UNSIGNED_SHORT, layer->meshIndices);
 
-        finishDrawTexture();
+            finishDrawTexture();
+        }
     }
 #else
     const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
