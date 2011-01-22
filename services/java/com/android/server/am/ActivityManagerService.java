@@ -5858,16 +5858,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         return pfd;
     }
 
+    // Actually is sleeping or shutting down or whatever else in the future
+    // is an inactive state.
+    public boolean isSleeping() {
+        return mSleeping || mShuttingDown;
+    }
+
     public void goingToSleep() {
         synchronized(this) {
             mSleeping = true;
             mWindowManager.setEventDispatching(false);
 
-            if (mMainStack.mResumedActivity != null) {
-                mMainStack.pauseIfSleepingLocked();
-            } else {
-                Slog.w(TAG, "goingToSleep with no resumed activity!");
-            }
+            mMainStack.stopIfSleepingLocked();
 
             // Initialize the wake times of all processes.
             checkExcessivePowerUsageLocked(false);
@@ -5891,7 +5893,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mWindowManager.setEventDispatching(false);
 
             if (mMainStack.mResumedActivity != null) {
-                mMainStack.pauseIfSleepingLocked();
+                mMainStack.stopIfSleepingLocked();
                 final long endTime = System.currentTimeMillis() + timeout;
                 while (mMainStack.mResumedActivity != null
                         || mMainStack.mPausingActivity != null) {
@@ -5915,13 +5917,30 @@ public final class ActivityManagerService extends ActivityManagerNative
         return timedout;
     }
     
+    public final void activitySlept(IBinder token) {
+        if (localLOGV) Slog.v(
+            TAG, "Activity slept: token=" + token);
+
+        ActivityRecord r = null;
+
+        final long origId = Binder.clearCallingIdentity();
+
+        synchronized (this) {
+            int index = mMainStack.indexOfTokenLocked(token);
+            if (index >= 0) {
+                r = (ActivityRecord)mMainStack.mHistory.get(index);
+                mMainStack.activitySleptLocked(r);
+            }
+        }
+
+        Binder.restoreCallingIdentity(origId);
+    }
+
     public void wakingUp() {
         synchronized(this) {
-            if (mMainStack.mGoingToSleep.isHeld()) {
-                mMainStack.mGoingToSleep.release();
-            }
             mWindowManager.setEventDispatching(true);
             mSleeping = false;
+            mMainStack.awakeFromSleepingLocked();
             mMainStack.resumeTopActivityLocked(null);
         }
     }
@@ -7520,6 +7539,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  Activities waiting to stop:");
             dumpHistoryList(pw, mMainStack.mStoppingActivities, "  ", "Stop", false);
         }
+        if (mMainStack.mGoingToSleepActivities.size() > 0) {
+            pw.println(" ");
+            pw.println("  Activities waiting to sleep:");
+            dumpHistoryList(pw, mMainStack.mGoingToSleepActivities, "  ", "Sleep", false);
+        }
         if (mMainStack.mFinishingActivities.size() > 0) {
             pw.println(" ");
             pw.println("  Activities waiting to finish:");
@@ -7531,6 +7555,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         pw.println("  mResumedActivity: " + mMainStack.mResumedActivity);
         pw.println("  mFocusedActivity: " + mFocusedActivity);
         pw.println("  mLastPausedActivity: " + mMainStack.mLastPausedActivity);
+        pw.println("  mSleepTimeout: " + mMainStack.mSleepTimeout);
 
         if (dumpAll && mRecentTasks.size() > 0) {
             pw.println(" ");

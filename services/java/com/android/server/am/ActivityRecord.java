@@ -102,6 +102,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     boolean inHistory;      // are we in the history stack?
     int launchMode;         // the launch mode activity attribute.
     boolean visible;        // does this activity's window need to be shown?
+    boolean sleeping;       // have we told the activity to sleep?
     boolean waitingVisible; // true if waiting for a new act to become vis
     boolean nowVisible;     // is this activity's window visible?
     boolean thumbnailNeeded;// has someone requested a thumbnail?
@@ -168,9 +169,10 @@ class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("fullscreen="); pw.print(fullscreen);
                 pw.print(" visible="); pw.print(visible);
-                pw.print(" frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
-                pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
+                pw.print(" sleeping="); pw.print(sleeping);
                 pw.print(" idle="); pw.println(idle);
+        pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
+                pw.print(" thumbnailNeeded="); pw.println(thumbnailNeeded);
         if (launchTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("launchTime=");
                     TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");
@@ -597,7 +599,25 @@ class ActivityRecord extends IApplicationToken.Stub {
     public boolean isInterestingToUserLocked() {
         return visible || nowVisible || state == ActivityState.PAUSING || 
                 state == ActivityState.RESUMED;
-     }
+    }
+
+    public void setSleeping(boolean _sleeping) {
+        if (sleeping == _sleeping) {
+            return;
+        }
+        if (app != null && app.thread != null) {
+            try {
+                app.thread.scheduleSleeping(this, _sleeping);
+                if (sleeping && !stack.mGoingToSleepActivities.contains(this)) {
+                    stack.mGoingToSleepActivities.add(this);
+                }
+                sleeping = _sleeping;
+            } catch (RemoteException e) {
+                Slog.w(ActivityStack.TAG, "Exception thrown when sleeping: "
+                        + intent.getComponent(), e);
+            }
+        }
+    }
     
     public String toString() {
         if (stringName != null) {
