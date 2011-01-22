@@ -186,7 +186,7 @@ public abstract class LoaderManager {
 
 class LoaderManagerImpl extends LoaderManager {
     static final String TAG = "LoaderManager";
-    static boolean DEBUG = true;
+    static boolean DEBUG = false;
 
     // These are the currently active loaders.  A loader is here
     // from the time its load is started until it has been explicitly
