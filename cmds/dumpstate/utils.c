@@ -167,6 +167,7 @@ int run_command(const char *title, int timeout_seconds, const char *command, ...
 
         execvp(command, (char**) args);
         printf("*** exec(%s): %s\n", command, strerror(errno));
+        fflush(stdout);
         _exit(-1);
     }
 
@@ -178,7 +179,7 @@ int run_command(const char *title, int timeout_seconds, const char *command, ...
         if (p == pid) {
             if (WIFSIGNALED(status)) {
                 printf("*** %s: Killed by signal %d\n", command, WTERMSIG(status));
-            } else if (WEXITSTATUS(status) > 0) {
+            } else if (WIFEXITED(status) && WEXITSTATUS(status) > 0) {
                 printf("*** %s: Exit code %d\n", command, WEXITSTATUS(status));
             }
             if (title) printf("[%s: %.1fs elapsed]\n\n", command, elapsed);
