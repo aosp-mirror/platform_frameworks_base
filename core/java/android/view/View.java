@@ -1813,6 +1813,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private int mPrevWidth = -1;
     private int mPrevHeight = -1;
 
+    private boolean mLastIsOpaque;    
+    
     /**
      * Convenience value to check for float values that are close enough to zero to be considered
      * zero.
@@ -6726,7 +6728,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void invalidate() {
         invalidate(true);
     }
-
+    
     /**
      * This is where the invalidate() work actually happens. A full invalidate()
      * causes the drawing cache to be invalidated, but this function can be called with
@@ -6743,8 +6745,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
+        boolean opaque = isOpaque();
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
-                (invalidateCache && (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID)) {
+                (invalidateCache && (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) ||
+                opaque != mLastIsOpaque) {
+            mLastIsOpaque = opaque;
             mPrivateFlags &= ~DRAWN;
             if (invalidateCache) {
                 mPrivateFlags &= ~DRAWING_CACHE_VALID;
