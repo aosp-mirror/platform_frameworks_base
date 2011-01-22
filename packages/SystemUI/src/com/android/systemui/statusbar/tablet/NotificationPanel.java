@@ -46,7 +46,10 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     static final String TAG = "Tablet/NotificationPanel";
     static final boolean DEBUG = false;
 
+    final static int PANEL_FADE_DURATION = 150;
+
     boolean mShowing;
+    int mNotificationCount = 0;
     View mTitleArea;
     View mModeToggle;
     View mSettingsButton;
@@ -90,6 +93,10 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public void show(boolean show, boolean animate) {
+        if (show && !mShowing) {
+            setContentFrameVisible(mNotificationCount > 0, false);
+        }
+
         if (animate) {
             if (mShowing != show) {
                 mShowing = show;
@@ -150,7 +157,43 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         }
     }
 
-    final static int PANEL_FADE_DURATION = 150;
+    public void setNotificationCount(int n) {
+        Slog.d(TAG, "notificationCount=" + n);
+        if (!mShowing) {
+            // just do it, already
+            setContentFrameVisible(n > 0, false);
+        } else if (mSettingsView == null) {
+            // we're looking at the notifications; time to maybe make some changes
+            if (mNotificationCount == 0 && n > 0) {
+                setContentFrameVisible(true, true);
+            } else if (mNotificationCount > 0 && n == 0) {
+                setContentFrameVisible(false, true);
+            }
+        }
+        mNotificationCount = n;
+    }
+
+    public void setContentFrameVisible(final boolean showing, boolean animate) {
+        if (!animate) {
+            mContentFrame.setVisibility(showing ? View.VISIBLE : View.GONE);
+            mContentParent.setTranslationY(showing ? 0f : 100f);
+            return;
+        }
+
+        mContentFrame.setVisibility(showing ? View.VISIBLE : View.GONE);
+        AnimatorSet set = new AnimatorSet();
+        float adjust = mContentFrame.getBackground().getMinimumHeight() + 8; // fudge factor
+        set.play(ObjectAnimator.ofFloat(
+                mContentFrame, "alpha",
+                showing ? 0f : 1f,
+                showing ? 1f : 0f))
+            .with(ObjectAnimator.ofFloat(
+                mContentParent, "translationY",
+                showing ? adjust : 0f,
+                showing ? 0f : adjust));
+        set.setDuration(200);
+        set.start();
+    }
 
     public void swapPanels() {
         final View toShow, toHide;
@@ -168,12 +211,22 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             @Override
             public void onAnimationEnd(Animator _a) {
                 toHide.setVisibility(View.GONE);
-                toShow.setVisibility(View.VISIBLE);
-                ObjectAnimator.ofFloat(toShow, "alpha", 0f, 1f)
-                        .setDuration(PANEL_FADE_DURATION)
-                        .start();
-                if (toHide == mSettingsView) {
-                    removeSettingsView();
+                if (toShow != null) {
+                    if (mNotificationCount == 0) {
+                        // show the frame for settings, hide for notifications
+                        setContentFrameVisible(toShow == mSettingsView, true);
+                    }
+
+                    toShow.setVisibility(View.VISIBLE);
+                    if (toShow == mSettingsView || mNotificationCount > 0) {
+                        ObjectAnimator.ofFloat(toShow, "alpha", 0f, 1f)
+                                .setDuration(PANEL_FADE_DURATION)
+                                .start();
+                    }
+
+                    if (toHide == mSettingsView) {
+                        removeSettingsView();
+                    }
                 }
                 updatePanelModeButtons();
             }
