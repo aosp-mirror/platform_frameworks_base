@@ -1663,6 +1663,16 @@ public abstract class Context {
     public static final String SIP_SERVICE = "sip";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.hardware.UsbManager} for access to USB devices (as a USB host)
+     * and for controlling this device's behavior as a USB device.
+     *
+     * @see #getSystemService
+     * @see android.harware.UsbManager
+     */
+    public static final String USB_SERVICE = "usb";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
