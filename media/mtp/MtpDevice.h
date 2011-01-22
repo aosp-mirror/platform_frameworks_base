@@ -45,9 +45,6 @@ private:
     MtpDeviceInfo*          mDeviceInfo;
     MtpPropertyList         mDeviceProperties;
 
-    // a unique ID for the device
-    int                     mID;
-
     // current session ID
     MtpSessionID            mSessionID;
     // current transaction ID
@@ -67,9 +64,10 @@ public:
                                     const struct usb_endpoint_descriptor *ep_in,
                                     const struct usb_endpoint_descriptor *ep_out,
                                     const struct usb_endpoint_descriptor *ep_intr);
-    virtual                 ~MtpDevice();
 
-    inline int              getID() const { return mID; }
+    static MtpDevice*       open(const char* deviceName, int fd);
+
+    virtual                 ~MtpDevice();
 
     void                    initialize();
     void                    close();
@@ -97,7 +95,11 @@ public:
     MtpProperty*            getDevicePropDesc(MtpDeviceProperty code);
     MtpProperty*            getObjectPropDesc(MtpObjectProperty code, MtpObjectFormat format);
 
-    bool                   readObject(MtpObjectHandle handle, const char* destPath, int group,
+    bool                    readObject(MtpObjectHandle handle,
+                                    bool (* callback)(void* data, int offset,
+                                            int length, void* clientData),
+                                    int objectSize, void* clientData);
+    bool                    readObject(MtpObjectHandle handle, const char* destPath, int group,
                                     int perm);
 
 private:

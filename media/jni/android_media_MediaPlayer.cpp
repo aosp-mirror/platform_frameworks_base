@@ -776,6 +776,7 @@ extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_media_AmrInputStream(JNIEnv *env);
 extern int register_android_mtp_MtpDatabase(JNIEnv *env);
+extern int register_android_mtp_MtpDevice(JNIEnv *env);
 extern int register_android_mtp_MtpServer(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -826,6 +827,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (register_android_mtp_MtpDatabase(env) < 0) {
         LOGE("ERROR: MtpDatabase native registration failed");
+        goto bail;
+    }
+
+    if (register_android_mtp_MtpDevice(env) < 0) {
+        LOGE("ERROR: MtpDevice native registration failed");
         goto bail;
     }
 
