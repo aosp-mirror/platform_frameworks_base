@@ -1,4 +1,4 @@
-page.title=Android 3.0 Platform
+page.title=Android 3.0 Platform Preview
 @jd:body
 
 <div id="qv-wrapper">
@@ -6,6 +6,7 @@ page.title=Android 3.0 Platform
 
 <h2>In this document</h2>
 <ol>
+  <li><a href="#relnotes">Revisions</a></li>
   <li><a href="#api">API Overview</a></li>
   <li><a href="#api-level">API Level</a></li>
   <li><a href="#apps">Built-in Applications</a></li>
@@ -28,11 +29,17 @@ Differences Report &raquo;</a> </li>
 </div>
 </div>
 
-</p>API Level: <b>Honeycomb</b></p>
+<p><em>API Level:</em> <b>Honeycomb</b></p>
 
 <p>For developers, the Android 3.0 preview is available as a downloadable component for the
-Android SDK. The downloadable platform includes an Android library and system image, as well as a
-set of emulator skins and more. The downloadable platform includes no external libraries.</p>
+Android SDK.</p>
+
+<p class="note"><strong>Note:</strong> Read the <a
+href="{@docRoot}sdk/preview/start.html">Getting Started</a> guide for important information
+about setting up your development environment and limitiations of the Android 3.0 preview.</p>
+
+
+
 
 
 
@@ -41,8 +48,6 @@ set of emulator skins and more. The downloadable platform includes no external l
 
 <p>The sections below provide a technical overview of what's new for developers in Android 3.0,
 including new features and changes in the framework API since the previous version.</p>
-
-
 
 
 <h3>Fragments</h3>
@@ -185,98 +190,63 @@ href="{@docRoot}resources/samples/NotePad/index.html">NotePad</a> sample applica
 <p>New APIs now facilitate the ability for your application to implement drag and drop
 functionality in the UI.</p>
 
-<p>To drag a {@link android.view.View} in your activity, call {@link android.view.View#startDrag
-startDrag()} on the object, providing a {@link android.content.ClipData} object that represents the
-information to drag, a {@link android.view.View.DragShadowBuilder} to facilitate the "shadow" that
-the user sees while dragging, and an {@link java.lang.Object} that can share information about the
-drag object with views that may receive the object. However, </p>
+<p>To begin dragging content in your activity, call {@link android.view.View#startDrag startDrag()}
+on a {@link android.view.View}, providing a {@link android.content.ClipData} object that represents
+the information to drag, a {@link android.view.View.DragShadowBuilder} to facilitate the "shadow"
+that the user sees while dragging, and an {@link java.lang.Object} that can share information about
+the drag object with views that may receive the object.</p>
 
 <p>To accept a drag object (receive the "drop") in a
 {@link android.view.View}, register the view with an {@link android.view.View.OnDragListener} by
 calling {@link android.view.View#setOnDragListener setOnDragListener()}. When a drag event occurs on
 the view, the system calls {@link android.view.View.OnDragListener#onDrag onDrag()} for the  {@link
-android.view.View.OnDragListener}, which receives a {@link android.view.DragEvent} describing
-the type of event has occurred (such as "drag started", "drag ended", and "drop"). The receiving
-view can inquire the event type delivered to {@link
-android.view.View#onDragEvent onDragEvent()} by calling {@link
-android.view.DragEvent#getAction getAction()} on the {@link android.view.DragEvent}.</p>
+android.view.View.OnDragListener}, which receives a {@link android.view.DragEvent} describing the
+type of event has occurred (such as "drag started", "drag ended", and "drop"). During a drag
+operation, there is a stream of drag events, so the system calls {@link
+android.view.View.OnDragListener#onDrag onDrag()} repeatedly on the view. The receiving view can
+inquire the event type delivered to {@link android.view.View#onDragEvent onDragEvent()} by calling
+{@link android.view.DragEvent#getAction getAction()} on the {@link android.view.DragEvent}.</p>
 
-<p>Although a drag event may carry a {@link android.content.ClipData} object, drag and drop does
-not depend on the clipboard. The data being dragged is sent to the system as {@link
-android.content.ClipData} and the system sends it to {@link android.view.View} objects in the
-{@link android.view.DragEvent}. A drag and drop operation should never put the dragged data on the
-clipboard.</p>
-
-
-
-<h3>Multiple-choice selection for ListView and GridView</h3>
-
-<p>New {@link android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} mode for {@link
-android.widget.AbsListView#setChoiceMode setChoiceMode()} allows for selecting multiple items
-from a {@link android.widget.ListView} and {@link android.widget.GridView}.</p>
-
-<p>To enable multiple-choice selection, call {@link
-android.widget.AbsListView#setChoiceMode setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL)} and register a
-{@link android.widget.AbsListView.MultiChoiceModeListener} with {@link
-android.widget.AbsListView#setMultiChoiceModeListener setMultiChoiceModeListener()}.</p>
-
-<p>When the user performs a long-press on an item, the Action Bar switches to the Multi-choice
-Action Mode. The system notifies the {@link android.widget.AbsListView.MultiChoiceModeListener}
-when items are selected by calling {@link
-android.widget.AbsListView.MultiChoiceModeListener#onItemCheckedStateChanged
-onItemCheckedStateChanged()}.</p>
-
-<p>For an example of multiple-choice selection, see the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List15.html">List15.java</a>
-class in the API Demos sample application.</p>
+<p>Although a drag event may carry a {@link android.content.ClipData} object, this is not related
+to the system clipboard. The data being dragged is passed as a {@link
+android.content.ClipData} object to {@link android.view.View#startDrag startDrag()} and the system
+sends it to the receiving {@link android.view.View} in the {@link android.view.DragEvent} sent to
+{@link android.view.View.OnDragListener#onDrag onDrag()}. A drag and drop operation should never
+put the dragged data in the global system clipboard.</p>
 
 
 
-
-<h3>Content loaders</h3>
-
-<p>New framework APIs facilitate asynchronous loading of data using the {@link
-android.content.Loader} class. You can use it in combination with UI components such as views and
-fragments to dynamically load data from background threads. The {@link
-android.content.CursorLoader} subclass is specially designed to help do so for data queried from
-a {@link android.content.ContentResolver}.</p>
-
-
-
-<h3>Extended app widgets</h3>
+<h3>App widgets</h3>
 
 <p>App widgets can now be more interactive with scrolling list views, grid views, view flippers, and
 a new 3D stack widget.</p>
 
-<p>Android 3.0 supports several new widget classes for App Widgets, including:</p>
-<ul>
-  <li>{@link android.widget.GridView}</li>
-  <li>{@link android.widget.ListView}</li>
-  <li>{@link android.widget.StackView}</li>
-  <li>{@link android.widget.ViewFlipper}</li>
-  <li>{@link android.widget.AdapterViewFlipper}</li>
-</ul>
+<p>Android 3.0 supports several new widget classes for app widgets, including: {@link
+android.widget.GridView}, {@link android.widget.ListView}, {@link android.widget.StackView}, {@link
+android.widget.ViewFlipper}, and {@link android.widget.AdapterViewFlipper}.</p>
 
 <p>You can use the new {@link android.widget.RemoteViewsService} to populate the new remote
 collection views ({@link android.widget.GridView}, {@link android.widget.ListView}, and {@link
 android.widget.StackView}).</p>
 
-<p>You can also use two new {@link android.appwidget.AppWidgetProviderInfo} fields. The {@link
+<p>{@link android.appwidget.AppWidgetProviderInfo} also supports two new fields: {@link
+android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} and {@link
+android.appwidget.AppWidgetProviderInfo#previewImage}. The {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field lets you specify the view ID of the
 app widget subview, which is auto-advanced by the app widget’s host. The
 {@link android.appwidget.AppWidgetProviderInfo#previewImage} field specifies a preview of what the
 App Widget looks like and is shown to the user from the widget picker. If this field is not
 supplied, the app widget's icon is used for the preview.</p>
 
-<p>Android also provides a new widget preview tool (WidgetPreview), located in the SDK tools. The
-tool lets you take a screenshot of your app widget, which you can use to populate the customization
-tray.</p>
+<p>Android also provides a new widget preview tool (WidgetPreview), located in the SDK tools, to
+take a screenshot of your app widget, which you can use when specifying the {@link
+android.appwidget.AppWidgetProviderInfo#previewImage} field.</p>
 
 
 
 
 
-<h3>Extended status bar notifications</h3>
+<h3>Status bar notifications</h3>
 
 <p>The {@link android.app.Notification} APIs have been extended to support more content-rich status
 bar notifications, plus a new {@link android.app.Notification.Builder} class allows you to easily
@@ -296,9 +266,34 @@ android.app.PendingIntent}s, for more interactive notification widgets
 
 
 
-<h3>New animation framework</h3>
+<h3>Content loaders</h3>
 
-<p>An all new flexible animation framework that allows you to animate the properties of any object
+<p>New framework APIs facilitate asynchronous loading of data using the {@link
+android.content.Loader} class. You can use it in combination with UI components such as views and
+fragments to dynamically load data from background threads. The {@link
+android.content.CursorLoader} subclass is specially designed to help do so for data queried from
+a {@link android.content.ContentResolver}.</p>
+
+
+
+
+
+<h3>Bluetooth A2DP and headset APIs</h3>
+
+<p>Android now includes APIs for applications to verify the state of connected Bluetooth A2DP and
+headset profile devices. You can initialize the respective {@link
+android.bluetooth.BluetoothProfile} by calling {@link
+android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with either the {@link
+android.bluetooth.BluetoothProfile#A2DP} or {@link android.bluetooth.BluetoothProfile#HEADSET}
+profile constant and a {@link android.bluetooth.BluetoothProfile.ServiceListener} to receive
+callbacks when the client is connected or disconnected.</p>
+
+
+
+
+<h3>Animation framework</h3>
+
+<p>An all new flexible animation framework allows you to animate the properties of any object
 (View, Drawable, Fragment, Object, anything). It allows you to define many aspects of an animation,
 such as:</p>
 <ul>
@@ -320,7 +315,21 @@ android.animation.ValueAnimator} computes the animation values, but is not aware
 object or property that is animated as a result. It simply performs the calculations, and you must
 listen for the updates and process the data with your own logic. The {@link
 android.animation.ObjectAnimator} is a subclass of {@link android.animation.ValueAnimator} and
-allows you to set the object and property to animate, so you do not have to listen for updates.</p>
+allows you to set the object and property to animate, and it handles all animation work.
+That is, you give the {@link android.animation.ObjectAnimator} the object to animate, the
+property of the object to change over time, and a set of values to apply to the property over
+time in order to animate it, then start the animation.</p>
+
+<p>Additionally, the {@link android.animation.LayoutTransition} class enables automatic transition
+animations for changes you make to your activity layout. To enable transitions for a {@link
+android.view.ViewGroup}, create a {@link android.animation.LayoutTransition} object and set it on
+any {@link android.view.ViewGroup} by calling {@link
+android.view.ViewGroup#setLayoutTransition setLayoutTransition()}. This causes default
+animations to run whenever items are added to or removed from the group. To specify custom
+animations, call {@link android.animation.LayoutTransition#setAnimator setAnimator()} on the {@link
+android.animation.LayoutTransition} to provide a custom {@link android.animation.Animator},
+such as a {@link android.animation.ValueAnimator} or {@link android.animation.ObjectAnimator}
+discussed above.</p>
 
 <p>For more information, see the <a
 href="{@docRoot}guide/topics/graphics/animation.html">Animation</a> developer guide.</p>
@@ -328,73 +337,67 @@ href="{@docRoot}guide/topics/graphics/animation.html">Animation</a> developer gu
 
 
 
-
-<h3>New widgets</h3>
+<h3>Extended UI framework</h3>
 
 <ul>
   
-<li>{@link android.widget.AdapterViewAnimator}
-<p>Base class for an {@link android.widget.AdapterView} that performs animations when switching
-between its views.</p></li>
+  <li><b>Multiple-choice selection for ListView and GridView</b>
 
-<li>{@link android.widget.AdapterViewFlipper}
-<p>Simple {@link android.widget.ViewAnimator} that animates between two or more views that have
-been added to it. Only one child is shown at a time. If requested, it can automatically flip between
-each child at a regular interval.</p></li>
+<p>New {@link android.widget.AbsListView#CHOICE_MODE_MULTIPLE_MODAL} mode for {@link
+android.widget.AbsListView#setChoiceMode setChoiceMode()} allows for selecting multiple items
+from a {@link android.widget.ListView} and {@link android.widget.GridView}.</p>
 
-<li>{@link android.widget.CalendarView}
-<p>Allows users to select dates from a calendar and you can configure the range of dates
-available. A user can select a date by tapping on it and can scroll and fling
-the calendar to a desired date.</p></li>
+<p>To enable multiple-choice selection, call {@link
+android.widget.AbsListView#setChoiceMode setChoiceMode(CHOICE_MODE_MULTIPLE_MODAL)} and register a
+{@link android.widget.AbsListView.MultiChoiceModeListener MultiChoiceModeListener} with {@link
+android.widget.AbsListView#setMultiChoiceModeListener setMultiChoiceModeListener()}.</p>
 
-<li>{@link android.widget.ListPopupWindow}
-<p>Anchors itself to a host view and displays a list of choices, such as for a list of
-suggestions when typing into an {@link android.widget.EditText} view.</p></li>
+<p>When the user performs a long-press on an item, the Action Bar switches to the Multi-choice
+Action Mode. The system notifies the {@link android.widget.AbsListView.MultiChoiceModeListener
+MultiChoiceModeListener} when items are selected by calling {@link
+android.widget.AbsListView.MultiChoiceModeListener#onItemCheckedStateChanged
+onItemCheckedStateChanged()}.</p>
 
-<li>{@link android.widget.NumberPicker}
-<p>Enables the user to select a number from a predefined range. The widget presents an
-input field and up and down buttons for selecting a number. Touching the input field shows a
-scroll wheel that allows the user to scroll through values or touch again to directly edit the
-current value. It also allows you to map from positions to strings, so that
-the corresponding string is displayed instead of the position index.</p></li>
+<p>For an example of multiple-choice selection, see the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List15.html">List15.
+java</a>
+class in the API Demos sample application.</p>
+  </li>
 
-<li>{@link android.widget.PopupMenu}
-<p>Displays a {@link android.view.Menu} in a modal popup window that's anchored to a view. The popup
-appears below the anchor view if there is room, or above it if there is not. If the IME (soft
-keyboard) is visible, the popup does not overlap it until it is touched.</p></li>
+  
+  <li><b>New APIs to transform views</b>
+  
+    <p>New APIs allow you to easily apply 2D and 3D transformations to {@link
+android.view.View}s in your activity layout, using a set of object properties that define the view's
+layout position, orientation, transparency and more.</p>
+    <p>New methods to set properties include: {@link android.view.View#setAlpha setAlpha()}, {@link
+android.view.View#setBottom setBottom()}, {@link android.view.View#setLeft setLeft()}, {@link
+android.view.View#setRight setRight()}, {@link android.view.View#setBottom setBottom()}, {@link
+android.view.View#setPivotX setPivotX()}, {@link android.view.View#setPivotY setPivotY()}, {@link
+android.view.View#setRotationX setRotationX()}, {@link android.view.View#setRotationY
+setRotationY()}, {@link android.view.View#setScaleX setScaleX()}, {@link android.view.View#setScaleY
+setScaleY()}, {@link android.view.View#setAlpha setAlpha()}, and others.</p>
 
-<li>{@link android.widget.SearchView}
-<p>Provides a search box that works in conjunction with a search provider (in the same manner as
-the traditional <a href="{@docRoot}guide/topics/search/search-dialog.html">search dialog</a>). It
-also displays recent query suggestions or custom suggestions as configured by the search
-provider. This widget is particularly useful for offering search in the Action Bar.</p></li>
+    <p>Some methods also have a corresponding XML attribute that you can specify in your layout
+file. Available attributes include: {@code translationX}, {@code translationY}, {@code rotation},
+{@code rotationX}, {@code rotationY}, {@code scaleX}, {@code scaleY}, {@code transformPivotX},
+{@code transformPivotY}, and {@code alpha}.</p>
 
-<li>{@link android.widget.StackView}
-<p>A view that displays its children in a 3D stack and allows users to discretely swipe through the
-children.</p></li>
+    <p>Using some of these new properties in combination with the new animation framework (discussed
+previously), you can easily create some fancy animations to your views. For example, to rotate a
+view on its y-axis, supply {@link android.animation.ObjectAnimator} with the {@link
+android.view.View}, the "rotationY" property, and the values to use:</p>
+<pre>
+ObjectAnimator animator = ObjectAnimator.ofFloat(myView, "rotationY", 0, 360);
+animator.setDuration(2000);
+animator.start();
+</pre>
+  </li>
 
-</ul>
+  
+  <li><b>New holographic themes</b>
 
-
-
-
-
-<h3>Redesigned widgets</h3>
-
-<p>Android 3.0 offers an updated set of UI widgets that developers can use to quickly add new types
-of content to their applications. The new UI widgets are redesigned for use on larger screens such
-as tablets and incorporate the new holographic UI theme. Several new widget types are available,
-including a 3D stack, search box, a date/time picker, number picker, stack, calendar View etc.
-SearchView, PopupMenu, and others. Most of the redesigned widgets can now be used as remote views in
-homescreen widgets. Applications written for earlier versions can inherit the new widget designs and
-themes.</p>
-
-
-
-
-<h3>Holographic themes</h3>
-
-<p>The standard system widgets and overall look have been redesigned for use on larger screens
+    <p>The standard system widgets and overall look have been redesigned for use on larger screens
 such as tablets and incorporate the new holographic UI theme. These style changes are applied
 using the standard <a href="{@docRoot}guide/topics/ui/themes.html">style and theme</a> system.
 Any application that targets the Android 3.0 platform inherit the holographic theme by default.
@@ -404,18 +407,62 @@ theme, unless you update your styles to inherit them.</p>
 <p>To apply the holographic theme to individual activities or to inherit them in your own theme
 definitions, you can use one of several new {@link android.R.style#Theme_Holo Theme.Holo}
 themes.</p>
+  </li>
+  
+  
+  <li><b>New widgets</b>
+
+    <ul>
+    <li>{@link android.widget.AdapterViewAnimator}
+    <p>Base class for an {@link android.widget.AdapterView} that performs animations when switching
+    between its views.</p></li>
+    
+    <li>{@link android.widget.AdapterViewFlipper}
+    <p>Simple {@link android.widget.ViewAnimator} that animates between two or more views that have
+    been added to it. Only one child is shown at a time. If requested, it can automatically flip
+  between
+    each child at a regular interval.</p></li>
+    
+    <li>{@link android.widget.CalendarView}
+    <p>Allows users to select dates from a calendar and you can configure the range of dates
+    available. A user can select a date by tapping on it and can scroll and fling
+    the calendar to a desired date.</p></li>
+    
+    <li>{@link android.widget.ListPopupWindow}
+    <p>Anchors itself to a host view and displays a list of choices, such as for a list of
+    suggestions when typing into an {@link android.widget.EditText} view.</p></li>
+    
+    <li>{@link android.widget.NumberPicker}
+    <p>Enables the user to select a number from a predefined range. The widget presents an
+    input field and up and down buttons for selecting a number. Touching the input field shows a
+    scroll wheel that allows the user to scroll through values or touch again to directly edit the
+    current value. It also allows you to map from positions to strings, so that
+    the corresponding string is displayed instead of the position index.</p></li>
+    
+    <li>{@link android.widget.PopupMenu}
+    <p>Displays a {@link android.view.Menu} in a modal popup window that's anchored to a view. The
+  popup
+    appears below the anchor view if there is room, or above it if there is not. If the IME (soft
+    keyboard) is visible, the popup does not overlap it until it is touched.</p></li>
+    
+    <li>{@link android.widget.SearchView}
+    <p>Provides a search box that works in conjunction with a search provider (in the same manner as
+    the traditional <a href="{@docRoot}guide/topics/search/search-dialog.html">search dialog</a>).
+It
+    also displays recent query suggestions or custom suggestions as configured by the search
+    provider. This widget is particularly useful for offering search in the Action Bar.</p></li>
+    
+    <li>{@link android.widget.StackView}
+    <p>A view that displays its children in a 3D stack and allows users to discretely swipe through
+  the
+    children.</p></li>
+    
+    </ul>
+  </li>
+  
+</ul>
 
 
-
-<h3>Bluetooth A2DP and headset APIs</h3>
-
-<p>Android now includes APIs for applications to verify the state of connected Bluetooth A2DP and
-headset profile devices. You can initialize the respective {@link
-android.bluetooth.BluetoothProfile} by calling {@link
-android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with either the {@link
-android.bluetooth.BluetoothProfile#A2DP} or {@link android.bluetooth.BluetoothProfile#HEADSET}
-profile constant and a {@link android.bluetooth.BluetoothProfile.ServiceListener} to receive
-callbacks when the client is connected or disconnected.</p>
 
 
 <!--
@@ -427,7 +474,7 @@ callbacks when the client is connected or disconnected.</p>
 <h3>Graphics</h3>
 
 <ul>
-  <li><h4>Hardware accelerated 2D graphics</h4>
+  <li><b>Hardware accelerated 2D graphics</b>
 
 <p>You can now enable the OpenGL renderer for your application by setting {@code
 android:hardwareAccelerated="true"} in your manifest element's <a
@@ -439,7 +486,29 @@ elements.</p>
 <p>This flag helps applications by making them draw faster. This results in smoother animations,
 smoother scrolling, and overall better performance and response to user interaction.</p></li>
 
-  <li><h4>Renderscript 3D graphics engine</h4>
+
+  <li><b>View support for hardware and software layers</b>
+  
+    <p>By default, a {@link android.view.View} has no layer specified. You can specify that the
+view be backed by either a hardware or software layer, specified by values {@link
+android.view.View#LAYER_TYPE_HARDWARE} and {@link android.view.View#LAYER_TYPE_SOFTWARE}, using
+{@link android.view.View#setLayerType setLayerType()} or the <a
+href="{@docRoot}reference/android/view/View.html#attr_android:layerType">{@code layerType}</a>
+attribute.</p>
+    <p>A hardware layer is backed by a hardware specific texture (generally Frame Buffer Objects or
+FBO on OpenGL hardware) and causes the view to be rendered using Android's hardware rendering
+pipeline, but only if hardware acceleration is turned on for the view hierarchy. When hardware
+acceleration is turned off, hardware layers behave exactly as software layers.</p>
+    <p>A software layer is backed by a bitmap and causes the view to be rendered using Android's
+software rendering pipeline, even if hardware acceleration is enabled. Software layers should be
+avoided when the affected view tree updates often. Every update will require to re-render the
+software layer, which can potentially be slow.</p>
+    <p>For more information, see the {@link android.view.View#LAYER_TYPE_HARDWARE} and {@link
+android.view.View#LAYER_TYPE_SOFTWARE} documentation.</p>
+  </li>
+  
+
+  <li><b>Renderscript 3D graphics engine</b>
 
 <p>Renderscript is a runtime 3D framework that provides both an API for building 3D scenes as well
 as a special, platform-independent shader language for maximum performance. Using Renderscript, you
@@ -450,12 +519,11 @@ high-performance 3D effects for applications, wallpapers, carousels, and more.</
 
 
 
-
 <h3>Media</h3>
 
 
 <ul>
-  <li><h4>Camcorder profiles</h4>
+  <li><b>Camcorder profiles</b>
 
 <p>New {@link android.media.CamcorderProfile#hasProfile hasProfile()} method and several video
 quality profiles, such as {@link android.media.CamcorderProfile#QUALITY_1080P}, {@link
@@ -463,27 +531,20 @@ android.media.CamcorderProfile#QUALITY_720P}, {@link
 android.media.CamcorderProfile#QUALITY_CIF}, and more, to determine the camcorder quality
 profiles.</p></li>
 
-  <li><h4>Time lapse video mode</h4>
+  <li><b>Time lapse video mode</b>
 
 <p>Camcorder APIs now support the ability to record time lapse video. The {@link
 android.media.MediaRecorder#setCaptureRate setCaptureRate()} sets the rate at which frames
 should be captured.</p></li>
 
-  <li><h4>Digital media file transfer</h4>
-
-<p>The platform includes built-in support for Media/Picture Transfer Protocol (MTP/PTP) over USB,
-which lets users easily transfer any type of media files between devices and to a host computer.
-Developers can take advantage of this to create applications that let users create or manage files
-that they may want to transfer across devices.</p></li>
-
-  <li><h4>Digital Media File Transfer</h4>
+  <li><b>Digital media file transfer</b>
 
 <p>The platform includes built-in support for Media/Picture Transfer Protocol (MTP/PTP) over USB,
 which lets users easily transfer any type of media files between devices and to a host computer.
 Developers can build on this support, creating applications that let users create or manage rich
 media files that they may want to transfer or share across devices. </p></li>
 
-  <li><h4>Digital rights management (DRM)</h4>
+  <li><b>Digital rights management (DRM)</b>
 
 <p>New extensible digital rights management (DRM) framework for checking and enforcing digital
 rights. It's implemented in two architectural layers:</p>
