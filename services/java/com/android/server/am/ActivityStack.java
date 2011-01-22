@@ -92,6 +92,9 @@ public class ActivityStack {
     // next activity.
     static final int PAUSE_TIMEOUT = 500;
 
+    // How long we can hold the sleep wake lock before giving up.
+    static final int SLEEP_TIMEOUT = 5*1000;
+
     // How long we can hold the launch wake lock before giving up.
     static final int LAUNCH_TIMEOUT = 10*1000;
 
@@ -155,6 +158,12 @@ public class ActivityStack {
      * HistoryRecord objects.
      */
     final ArrayList<ActivityRecord> mStoppingActivities
+            = new ArrayList<ActivityRecord>();
+
+    /**
+     * List of activities that are in the process of going to sleep.
+     */
+    final ArrayList<ActivityRecord> mGoingToSleepActivities
             = new ArrayList<ActivityRecord>();
 
     /**
@@ -238,9 +247,15 @@ public class ActivityStack {
     
     long mInitialStartTime = 0;
     
+    /**
+     * Set when we have taken too long waiting to go to sleep.
+     */
+    boolean mSleepTimeout = false;
+
     int mThumbnailWidth = -1;
     int mThumbnailHeight = -1;
 
+    static final int SLEEP_TIMEOUT_MSG = 8;
     static final int PAUSE_TIMEOUT_MSG = 9;
     static final int IDLE_TIMEOUT_MSG = 10;
     static final int IDLE_NOW_MSG = 11;
@@ -255,6 +270,13 @@ public class ActivityStack {
 
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case SLEEP_TIMEOUT_MSG: {
+                    if (mService.isSleeping()) {
+                        Slog.w(TAG, "Sleep timeout!  Sleeping now.");
+                        mSleepTimeout = true;
+                        checkReadyForSleepLocked();
+                    }
+                } break;
                 case PAUSE_TIMEOUT_MSG: {
                     IBinder token = (IBinder)msg.obj;
                     // We don't at this point know if the activity is fullscreen,
@@ -514,6 +536,7 @@ public class ActivityStack {
                 mService.mHomeProcess = app;
             }
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
+            r.sleeping = false;
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
                     r.info, r.icicle, results, newIntents, !andResume,
@@ -575,7 +598,7 @@ public class ActivityStack {
                 mService.addRecentTaskLocked(r.task);
             }
             completeResumeLocked(r);
-            pauseIfSleepingLocked();                
+            checkReadyForSleepLocked();
         } else {
             // This activity is not starting in the resumed state... which
             // should look like we asked it to pause+stop (but remain visible),
@@ -631,8 +654,8 @@ public class ActivityStack {
                 "activity", r.intent.getComponent(), false);
     }
     
-    void pauseIfSleepingLocked() {
-        if (mService.mSleeping || mService.mShuttingDown) {
+    void stopIfSleepingLocked() {
+        if (mService.isSleeping()) {
             if (!mGoingToSleep.isHeld()) {
                 mGoingToSleep.acquire();
                 if (mLaunchingActivity.isHeld()) {
@@ -640,16 +663,90 @@ public class ActivityStack {
                     mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
                 }
             }
+            mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
+            Message msg = mHandler.obtainMessage(SLEEP_TIMEOUT_MSG);
+            mHandler.sendMessageDelayed(msg, SLEEP_TIMEOUT);
+            checkReadyForSleepLocked();
+        }
+    }
 
-            // If we are not currently pausing an activity, get the current
-            // one to pause.  If we are pausing one, we will just let that stuff
-            // run and release the wake lock when all done.
-            if (mPausingActivity == null) {
-                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep needs to pause...");
+    void awakeFromSleepingLocked() {
+        mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
+        mSleepTimeout = false;
+        if (mGoingToSleep.isHeld()) {
+            mGoingToSleep.release();
+        }
+        // Ensure activities are no longer sleeping.
+        for (int i=mHistory.size()-1; i>=0; i--) {
+            ActivityRecord r = (ActivityRecord)mHistory.get(i);
+            r.setSleeping(false);
+        }
+        mGoingToSleepActivities.clear();
+    }
+
+    void activitySleptLocked(ActivityRecord r) {
+        mGoingToSleepActivities.remove(r);
+        checkReadyForSleepLocked();
+    }
+
+    void checkReadyForSleepLocked() {
+        if (!mService.isSleeping()) {
+            // Do not care.
+            return;
+        }
+
+        if (!mSleepTimeout) {
+            if (mResumedActivity != null) {
+                // Still have something resumed; can't sleep until it is paused.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep needs to pause " + mResumedActivity);
                 if (DEBUG_USER_LEAVING) Slog.v(TAG, "Sleep => pause with userLeaving=false");
                 startPausingLocked(false, true);
+                return;
+            }
+            if (mPausingActivity != null) {
+                // Still waiting for something to pause; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still waiting to pause " + mPausingActivity);
+                return;
+            }
+
+            if (mStoppingActivities.size() > 0) {
+                // Still need to tell some activities to stop; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to stop "
+                        + mStoppingActivities.size() + " activities");
+                Message msg = Message.obtain();
+                msg.what = IDLE_NOW_MSG;
+                mHandler.sendMessage(msg);
+                return;
+            }
+
+            ensureActivitiesVisibleLocked(null, 0);
+
+            // Make sure any stopped but visible activities are now sleeping.
+            // This ensures that the activity's onStop() is called.
+            for (int i=mHistory.size()-1; i>=0; i--) {
+                ActivityRecord r = (ActivityRecord)mHistory.get(i);
+                if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED) {
+                    r.setSleeping(true);
+                }
+            }
+
+            if (mGoingToSleepActivities.size() > 0) {
+                // Still need to tell some activities to sleep; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG, "Sleep still need to sleep "
+                        + mGoingToSleepActivities.size() + " activities");
+                return;
             }
         }
+
+        mHandler.removeMessages(SLEEP_TIMEOUT_MSG);
+
+        if (mGoingToSleep.isHeld()) {
+            mGoingToSleep.release();
+        }
+        if (mService.mShuttingDown) {
+            mService.notifyAll();
+        }
+
     }
     
     public final Bitmap screenshotActivities(ActivityRecord who) {
@@ -813,6 +910,8 @@ public class ActivityStack {
                         Message msg = Message.obtain();
                         msg.what = IDLE_NOW_MSG;
                         mHandler.sendMessage(msg);
+                    } else {
+                        checkReadyForSleepLocked();
                     }
                 }
             } else {
@@ -822,15 +921,10 @@ public class ActivityStack {
             mPausingActivity = null;
         }
 
-        if (!mService.mSleeping && !mService.mShuttingDown) {
+        if (!mService.isSleeping()) {
             resumeTopActivityLocked(prev);
         } else {
-            if (mGoingToSleep.isHeld()) {
-                mGoingToSleep.release();
-            }
-            if (mService.mShuttingDown) {
-                mService.notifyAll();
-            }
+            checkReadyForSleepLocked();
         }
         
         if (prev != null) {
@@ -985,6 +1079,7 @@ public class ActivityStack {
                             TAG, "Making visible and scheduling visibility: " + r);
                     try {
                         mService.mWindowManager.setAppVisibility(r, true);
+                        r.sleeping = false;
                         r.app.thread.scheduleWindowVisibility(r, true);
                         r.stopFreezingScreenLocked(false);
                     } catch (Exception e) {
@@ -1114,6 +1209,8 @@ public class ActivityStack {
         // The activity may be waiting for stop, but that is no longer
         // appropriate for it.
         mStoppingActivities.remove(next);
+        mGoingToSleepActivities.remove(next);
+        next.sleeping = false;
         mWaitingVisibleActivities.remove(next);
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
@@ -1315,10 +1412,11 @@ public class ActivityStack {
                         System.identityHashCode(next),
                         next.task.taskId, next.shortComponentName);
                 
+                next.sleeping = false;
                 next.app.thread.scheduleResumeActivity(next,
                         mService.isNextTransitionForward());
                 
-                pauseIfSleepingLocked();
+                checkReadyForSleepLocked();
 
             } catch (Exception e) {
                 // Whoops, need to restart this activity!
@@ -2831,6 +2929,9 @@ public class ActivityStack {
                     mService.mWindowManager.setAppVisibility(r, false);
                 }
                 r.app.thread.scheduleStopActivity(r, r.visible, r.configChangeFlags);
+                if (mService.isSleeping()) {
+                    r.setSleeping(true);
+                }
             } catch (Exception e) {
                 // Maybe just ignore exceptions here...  if the process
                 // has crashed, our death notification will clean things
@@ -2874,7 +2975,7 @@ public class ActivityStack {
                     mService.mWindowManager.setAppVisibility(s, false);
                 }
             }
-            if (!s.waitingVisible && remove) {
+            if ((!s.waitingVisible || mService.isSleeping()) && remove) {
                 if (localLOGV) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
                     stops = new ArrayList<ActivityRecord>();
@@ -3198,6 +3299,8 @@ public class ActivityStack {
                     Message msg = Message.obtain();
                     msg.what = IDLE_NOW_MSG;
                     mHandler.sendMessage(msg);
+                } else {
+                    checkReadyForSleepLocked();
                 }
             }
             r.state = ActivityState.STOPPING;
@@ -3207,6 +3310,7 @@ public class ActivityStack {
 
         // make sure the record is cleaned out of other places.
         mStoppingActivities.remove(r);
+        mGoingToSleepActivities.remove(r);
         mWaitingVisibleActivities.remove(r);
         if (mResumedActivity == r) {
             mResumedActivity = null;
@@ -3434,6 +3538,7 @@ public class ActivityStack {
     void removeHistoryRecordsForAppLocked(ProcessRecord app) {
         removeHistoryRecordsForAppLocked(mLRUActivities, app);
         removeHistoryRecordsForAppLocked(mStoppingActivities, app);
+        removeHistoryRecordsForAppLocked(mGoingToSleepActivities, app);
         removeHistoryRecordsForAppLocked(mWaitingVisibleActivities, app);
         removeHistoryRecordsForAppLocked(mFinishingActivities, app);
     }

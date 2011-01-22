@@ -124,6 +124,8 @@ public interface IActivityManager extends IInterface {
     public void activityStopped(IBinder token, Bundle state,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
     /* oneway */
+    public void activitySlept(IBinder token) throws RemoteException;
+    /* oneway */
     public void activityDestroyed(IBinder token) throws RemoteException;
     public String getCallingPackage(IBinder token) throws RemoteException;
     public ComponentName getCallingActivity(IBinder token) throws RemoteException;
@@ -553,4 +555,5 @@ public interface IActivityManager extends IInterface {
     int DUMP_HEAP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+119;
     int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
     int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
+    int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
 }

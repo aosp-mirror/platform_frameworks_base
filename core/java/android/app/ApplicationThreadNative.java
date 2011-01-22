@@ -97,6 +97,15 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
+        case SCHEDULE_SLEEPING_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder b = data.readStrongBinder();
+            boolean sleeping = data.readInt() != 0;
+            scheduleSleeping(b, sleeping);
+            return true;
+        }
+
         case SCHEDULE_RESUME_ACTIVITY_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -499,6 +508,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(token);
         data.writeInt(showWindow ? 1 : 0);
         mRemote.transact(SCHEDULE_WINDOW_VISIBILITY_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public final void scheduleSleeping(IBinder token,
+            boolean sleeping) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(sleeping ? 1 : 0);
+        mRemote.transact(SCHEDULE_SLEEPING_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
