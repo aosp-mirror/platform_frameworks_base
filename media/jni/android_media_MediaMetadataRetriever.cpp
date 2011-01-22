@@ -343,22 +343,6 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
         jniThrowException(env, "java/lang/RuntimeException", "Can't find android/graphics/Bitmap");
         return;
     }
-#if USE_PRIVATE_NATIVE_BITMAP_CONSTUCTOR
-    fields.bitmapConstructor = env->GetMethodID(fields.bitmapClazz, "<init>", "(I[BZ[BI)V");
-    if (fields.bitmapConstructor == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find Bitmap constructor");
-        return;
-    }
-    fields.createBitmapRotationMethod =
-            env->GetStaticMethodID(fields.bitmapClazz, "createBitmap",
-                    "(Landroid/graphics/Bitmap;IIIILandroid/graphics/Matrix;Z)"
-                    "Landroid/graphics/Bitmap;");
-    if (fields.createBitmapRotationMethod == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Bitmap.createBitmap method");
-        return;
-    }
-#else
     fields.createBitmapMethod =
             env->GetStaticMethodID(fields.bitmapClazz, "createBitmap",
                     "(IILandroid/graphics/Bitmap$Config;)"
@@ -388,7 +372,6 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
                 "Can't find Bitmap$Config.nativeToConfig(int)  method");
         return;
     }
-#endif
 }
 
 static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobject thiz)
