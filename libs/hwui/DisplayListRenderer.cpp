@@ -473,6 +473,12 @@ void DisplayListRenderer::prepare(bool opaque) {
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSaveCount = 1;
     mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
+    mRestoreSaveCount = -1;
+}
+
+void DisplayListRenderer::finish() {
+    insertRestoreToCount();
+    OpenGLRenderer::finish();
 }
 
 void DisplayListRenderer::acquireContext() {
@@ -497,8 +503,7 @@ void DisplayListRenderer::restore() {
 }
 
 void DisplayListRenderer::restoreToCount(int saveCount) {
-    addOp(DisplayList::RestoreToCount);
-    addInt(saveCount);
+    mRestoreSaveCount = saveCount;
     OpenGLRenderer::restoreToCount(saveCount);
 }
 
