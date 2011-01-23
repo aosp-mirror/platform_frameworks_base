@@ -832,6 +832,18 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device does not have a touch screen, but
+     * does support touch emulation for basic events. For instance, the
+     * device might use a mouse or remote control to drive a cursor, and
+     * emulate basic touch pointer events like down, up, drag, etc. All
+     * devices that support android.hardware.touchscreen or a sub-feature are
+     * presumed to also support faketouch.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FAKETOUCH = "android.hardware.faketouch";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports live wallpapers.
      */
     @SdkConstant(SdkConstantType.FEATURE)
