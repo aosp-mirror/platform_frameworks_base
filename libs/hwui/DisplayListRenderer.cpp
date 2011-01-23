@@ -107,6 +107,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawRect",
     "DrawRoundRect",
     "DrawCircle",
+    "DrawOval",
     "DrawPath",
     "DrawLines",
     "DrawText",
@@ -356,6 +357,10 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
             break;
             case DrawCircle: {
                 renderer.drawCircle(getFloat(), getFloat(), getFloat(), getPaint());
+            }
+            break;
+            case DrawOval: {
+                renderer.drawOval(getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
             }
             break;
             case DrawPath: {
@@ -660,6 +665,13 @@ void DisplayListRenderer::drawCircle(float x, float y, float radius, SkPaint* pa
     addOp(DisplayList::DrawCircle);
     addPoint(x, y);
     addFloat(radius);
+    addPaint(paint);
+}
+
+void DisplayListRenderer::drawOval(float left, float top, float right, float bottom,
+        SkPaint* paint) {
+    addOp(DisplayList::DrawOval);
+    addBounds(left, top, right, bottom);
     addPaint(paint);
 }
 

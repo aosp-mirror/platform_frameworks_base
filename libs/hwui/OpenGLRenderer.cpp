@@ -1360,14 +1360,7 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     drawColorRect(clip.left, clip.top, clip.right, clip.bottom, color, mode, true);
 }
 
-void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
-        float rx, float ry, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
-
-    glActiveTexture(gTextureUnits[0]);
-
-    const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
-            right - left, bottom - top, rx, ry, paint);
+void OpenGLRenderer::drawShape(float left, float top, const PathTexture* texture, SkPaint* paint) {
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -1377,22 +1370,47 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
     drawPathTexture(texture, x, y, paint);
 }
 
+void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bottom,
+        float rx, float ry, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    glActiveTexture(gTextureUnits[0]);
+    const PathTexture* texture = mCaches.roundRectShapeCache.getRoundRect(
+            right - left, bottom - top, rx, ry, paint);
+    drawShape(left, top, texture, paint);
+}
+
 void OpenGLRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
     glActiveTexture(gTextureUnits[0]);
-
     const PathTexture* texture = mCaches.circleShapeCache.getCircle(radius, paint);
-    if (!texture) return;
-    const AutoTexture autoCleanup(texture);
+    drawShape(x - radius, y - radius, texture, paint);
+}
 
-    const float left = (x - radius) + texture->left - texture->offset;
-    const float top = (y - radius) + texture->top - texture->offset;
+void OpenGLRenderer::drawOval(float left, float top, float right, float bottom, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
 
-    drawPathTexture(texture, left, top, paint);
+    glActiveTexture(gTextureUnits[0]);
+    const PathTexture* texture = mCaches.ovalShapeCache.getOval(right - left, bottom - top, paint);
+    drawShape(left, top, texture, paint);
+}
+
+void OpenGLRenderer::drawRectAsShape(float left, float top, float right, float bottom,
+        SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    glActiveTexture(gTextureUnits[0]);
+    const PathTexture* texture = mCaches.rectShapeCache.getRect(right - left, bottom - top, paint);
+    drawShape(left, top, texture, paint);
 }
 
 void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, SkPaint* p) {
+    if (p->getStyle() != SkPaint::kFill_Style) {
+        drawRectAsShape(left, top, right, bottom, p);
+        return;
+    }
+
     if (quickReject(left, top, right, bottom)) {
         return;
     }

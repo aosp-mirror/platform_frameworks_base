@@ -112,6 +112,7 @@ public:
     virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, SkPaint* paint);
     virtual void drawCircle(float x, float y, float radius, SkPaint* paint);
+    virtual void drawOval(float left, float top, float right, float bottom, SkPaint* paint);
     virtual void drawPath(SkPath* path, SkPaint* paint);
     virtual void drawLines(float* points, int count, SkPaint* paint);
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
@@ -276,6 +277,9 @@ private:
      */
     void drawColorRect(float left, float top, float right, float bottom,
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
+
+    void drawShape(float left, float top, const PathTexture* texture, SkPaint* paint);
+    void drawRectAsShape(float left, float top, float right, float bottom, SkPaint* p);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
