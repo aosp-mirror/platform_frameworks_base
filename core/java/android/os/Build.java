@@ -197,12 +197,17 @@ public class Build {
         public static final int FROYO = 8;
         
         /**
-         * Newest version of Android, version 2.3.
+         * November 2010: Android 2.3
          */
         public static final int GINGERBREAD = 9;
+        
+        /**
+         * Almost newest version of Android, version 2.3.3.
+         */
+        public static final int GINGERBREAD_MR1 = 10;
 
         /**
-         * Next next version of Android.
+         * Newest version of Android, version 3.0.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -211,7 +216,7 @@ public class Build {
          *      {@link android.R.style#Theme_Holo}.
          * <li> The activity lifecycle has changed slightly as per
          * {@link android.app.Activity}.
-         * <li> When an application requires a permission to access on of
+         * <li> When an application requires a permission to access one of
          * its components (activity, receiver, service, provider), this
          * permission is no longer enforced when the application wants to
          * access its own component.  This means it can require a permission
@@ -219,7 +224,7 @@ public class Build {
          * component.
          * </ul>
          */
-        public static final int HONEYCOMB = CUR_DEVELOPMENT;
+        public static final int HONEYCOMB = 11;
     }
     
     /** The type of build, like "user" or "eng". */
