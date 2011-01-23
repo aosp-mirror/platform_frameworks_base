@@ -750,6 +750,10 @@ public class ActivityStack {
     }
     
     public final Bitmap screenshotActivities(ActivityRecord who) {
+        if (who.noDisplay) {
+            return null;
+        }
+        
         Resources res = mService.mContext.getResources();
         int w = mThumbnailWidth;
         int h = mThumbnailHeight;
