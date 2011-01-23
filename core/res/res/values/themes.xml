@@ -1271,10 +1271,6 @@
 
     </style>
 
-    <!-- Development legacy name; if you're using this, switch. -->
-    <style name="Theme.Light.Holo" parent="Theme.Holo.Light">
-    </style>
-    
     <!-- Variant of the holographic (dark) theme with no action bar. -->
     <style name="Theme.Holo.NoActionBar">
         <item name="android:windowActionBar">false</item>
