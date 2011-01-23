@@ -10313,11 +10313,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + ": new=" + w.mShownFrame + ", old="
                             + w.mLastShownFrame);
 
-                    boolean resize;
                     int width, height;
                     if ((w.mAttrs.flags & w.mAttrs.FLAG_SCALED) != 0) {
-                        resize = w.mLastRequestedWidth != w.mRequestedWidth ||
-                        w.mLastRequestedHeight != w.mRequestedHeight;
                         // for a scaled surface, we just want to use
                         // the requested size.
                         width  = w.mRequestedWidth;
@@ -10325,58 +10322,61 @@ public class WindowManagerService extends IWindowManager.Stub
                         w.mLastRequestedWidth = width;
                         w.mLastRequestedHeight = height;
                         w.mLastShownFrame.set(w.mShownFrame);
-                        try {
-                            if (SHOW_TRANSACTIONS) logSurface(w,
-                                    "POS " + w.mShownFrame.left
-                                    + ", " + w.mShownFrame.top, null);
-                            w.mSurfaceX = w.mShownFrame.left;
-                            w.mSurfaceY = w.mShownFrame.top;
-                            w.mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
-                        } catch (RuntimeException e) {
-                            Slog.w(TAG, "Error positioning surface in " + w, e);
-                            if (!recoveringMemory) {
-                                reclaimSomeSurfaceMemoryLocked(w, "position");
-                            }
-                        }
                     } else {
-                        resize = !w.mLastShownFrame.equals(w.mShownFrame);
                         width = w.mShownFrame.width();
                         height = w.mShownFrame.height();
                         w.mLastShownFrame.set(w.mShownFrame);
                     }
 
-                    if (resize) {
-                        if (width < 1) width = 1;
-                        if (height < 1) height = 1;
-                        if (w.mSurface != null) {
+                    if (w.mSurface != null) {
+                        if (w.mSurfaceX != w.mShownFrame.left
+                                || w.mSurfaceY != w.mShownFrame.top) {
                             try {
                                 if (SHOW_TRANSACTIONS) logSurface(w,
-                                        "POS " + w.mShownFrame.left + ","
-                                        + w.mShownFrame.top + " SIZE "
-                                        + w.mShownFrame.width() + "x"
+                                        "POS " + w.mShownFrame.left
+                                        + ", " + w.mShownFrame.top, null);
+                                w.mSurfaceX = w.mShownFrame.left;
+                                w.mSurfaceY = w.mShownFrame.top;
+                                w.mSurface.setPosition(w.mShownFrame.left, w.mShownFrame.top);
+                            } catch (RuntimeException e) {
+                                Slog.w(TAG, "Error positioning surface of " + w
+                                        + " pos=(" + w.mShownFrame.left
+                                        + "," + w.mShownFrame.top + ")", e);
+                                if (!recoveringMemory) {
+                                    reclaimSomeSurfaceMemoryLocked(w, "position");
+                                }
+                            }
+                        }
+
+                        if (width < 1) {
+                            width = 1;
+                        }
+                        if (height < 1) {
+                            height = 1;
+                        }
+
+                        if (w.mSurfaceW != width || w.mSurfaceH != height) {
+                            try {
+                                if (SHOW_TRANSACTIONS) logSurface(w,
+                                        "SIZE " + w.mShownFrame.width() + "x"
                                         + w.mShownFrame.height(), null);
                                 w.mSurfaceResized = true;
                                 w.mSurfaceW = width;
                                 w.mSurfaceH = height;
                                 w.mSurface.setSize(width, height);
-                                w.mSurfaceX = w.mShownFrame.left;
-                                w.mSurfaceY = w.mShownFrame.top;
-                                w.mSurface.setPosition(w.mShownFrame.left,
-                                        w.mShownFrame.top);
                             } catch (RuntimeException e) {
                                 // If something goes wrong with the surface (such
                                 // as running out of memory), don't take down the
                                 // entire system.
-                                Slog.e(TAG, "Failure updating surface of " + w
-                                        + " size=(" + width + "x" + height
-                                        + "), pos=(" + w.mShownFrame.left
-                                        + "," + w.mShownFrame.top + ")", e);
+                                Slog.e(TAG, "Error resizing surface of " + w
+                                        + " size=(" + width + "x" + height + ")", e);
                                 if (!recoveringMemory) {
                                     reclaimSomeSurfaceMemoryLocked(w, "size");
                                 }
                             }
                         }
                     }
+
                     if (!w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
                         w.mContentInsetsChanged =
                             !w.mLastContentInsets.equals(w.mContentInsets);
@@ -10393,11 +10393,21 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (localLOGV) Slog.v(TAG, "Resizing " + w
                                 + ": configChanged=" + configChanged
                                 + " last=" + w.mLastFrame + " frame=" + w.mFrame);
-                        if (!w.mLastFrame.equals(w.mFrame)
+                        boolean frameChanged = !w.mLastFrame.equals(w.mFrame);
+                        if (frameChanged
                                 || w.mContentInsetsChanged
                                 || w.mVisibleInsetsChanged
                                 || w.mSurfaceResized
                                 || configChanged) {
+                            if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
+                                Slog.v(TAG, "Resize reasons: "
+                                        + "frameChanged=" + frameChanged
+                                        + " contentInsetsChanged=" + w.mContentInsetsChanged
+                                        + " visibleInsetsChanged=" + w.mVisibleInsetsChanged
+                                        + " surfaceResized=" + w.mSurfaceResized
+                                        + " configChanged=" + configChanged);
+                            }
+
                             w.mLastFrame.set(w.mFrame);
                             w.mLastContentInsets.set(w.mContentInsets);
                             w.mLastVisibleInsets.set(w.mVisibleInsets);
