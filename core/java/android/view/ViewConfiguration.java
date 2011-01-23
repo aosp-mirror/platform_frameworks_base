@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
@@ -217,22 +218,29 @@ public class ViewConfiguration {
     private ViewConfiguration(Context context) {
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         final float density = metrics.density;
+        final float sizeAndDensity;
+        if (context.getResources().getConfiguration().isLayoutSizeAtLeast(
+                Configuration.SCREENLAYOUT_SIZE_XLARGE)) {
+            sizeAndDensity = density * 1.5f;
+        } else {
+            sizeAndDensity = density;
+        }
 
-        mEdgeSlop = (int) (density * EDGE_SLOP + 0.5f);
-        mFadingEdgeLength = (int) (density * FADING_EDGE_LENGTH + 0.5f);
+        mEdgeSlop = (int) (sizeAndDensity * EDGE_SLOP + 0.5f);
+        mFadingEdgeLength = (int) (sizeAndDensity * FADING_EDGE_LENGTH + 0.5f);
         mMinimumFlingVelocity = (int) (density * MINIMUM_FLING_VELOCITY + 0.5f);
         mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
         mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
-        mTouchSlop = (int) (density * TOUCH_SLOP + 0.5f);
-        mPagingTouchSlop = (int) (density * PAGING_TOUCH_SLOP + 0.5f);
-        mDoubleTapSlop = (int) (density * DOUBLE_TAP_SLOP + 0.5f);
-        mWindowTouchSlop = (int) (density * WINDOW_TOUCH_SLOP + 0.5f);
+        mTouchSlop = (int) (sizeAndDensity * TOUCH_SLOP + 0.5f);
+        mPagingTouchSlop = (int) (sizeAndDensity * PAGING_TOUCH_SLOP + 0.5f);
+        mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
+        mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         // Size of the screen in bytes, in ARGB_8888 format
         mMaximumDrawingCacheSize = 4 * metrics.widthPixels * metrics.heightPixels;
 
-        mOverscrollDistance = (int) (density * OVERSCROLL_DISTANCE + 0.5f);
-        mOverflingDistance = (int) (density * OVERFLING_DISTANCE + 0.5f);
+        mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
+        mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
     }
 
     /**
