@@ -18,14 +18,14 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-		android:zAdjustment="normal"
+		android:zAdjustment="top"
         android:shareInterpolator="false">
     <scale android:fromXScale="0.975" android:toXScale="1.0"
             android:fromYScale="0.975" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"
             android:interpolator="@interpolator/decelerate_quint"
             android:duration="@android:integer/config_activityDefaultDur" />
-    <alpha android:fromAlpha=".75" android:toAlpha="1.0"
+    <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
             android:interpolator="@interpolator/decelerate_cubic"
             android:duration="@android:integer/config_activityDefaultDur"/>
 </set>

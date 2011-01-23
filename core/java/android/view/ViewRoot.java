@@ -1138,7 +1138,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
                         + mWidth + " measuredWidth=" + host.getMeasuredWidth()
                         + " mHeight=" + mHeight
-                        + " measuredHeight" + host.getMeasuredHeight()
+                        + " measuredHeight=" + host.getMeasuredHeight()
                         + " coveredInsetsChanged=" + contentInsetsChanged);
 
                  // Ask host how big it wants to be
