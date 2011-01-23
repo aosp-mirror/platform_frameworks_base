@@ -80,7 +80,11 @@ public class DigitalClock extends LinearLayout {
                     }
                 });
             } else {
-                mContext.unregisterReceiver(this);
+                try {
+                    mContext.unregisterReceiver(this);
+                } catch (RuntimeException e) {
+                    // Shouldn't happen
+                }
             }
         }
     };
@@ -124,7 +128,11 @@ public class DigitalClock extends LinearLayout {
                 digitalClock.setDateFormat();
                 digitalClock.updateTime();
             } else {
-                mContext.getContentResolver().unregisterContentObserver(this);
+                try {
+                    mContext.getContentResolver().unregisterContentObserver(this);
+                } catch (RuntimeException e) {
+                    // Shouldn't happen
+                }
             }
         }
     }
