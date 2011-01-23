@@ -74,4 +74,6 @@
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_height">60dp</dimen>
 
+    <!-- Minimum width of the search view text entry area. -->
+    <dimen name="search_view_text_min_width">160dip</dimen>
 </resources>
