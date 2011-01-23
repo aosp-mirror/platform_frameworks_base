@@ -38,6 +38,7 @@ public class ShapesActivity extends Activity {
         private Paint mStrokePaint;
         private Paint mFillPaint;
         private RectF mRect;
+        private RectF mOval;
 
         ShapesView(Context c) {
             super(c);
@@ -60,6 +61,8 @@ public class ShapesActivity extends Activity {
             mFillPaint.setAntiAlias(true);
             mFillPaint.setColor(0xff0000ff);
             mFillPaint.setStyle(Paint.Style.FILL);
+
+            mOval = new RectF(0.0f, 0.0f, 80.0f, 45.0f);
         }
 
         @Override
@@ -86,6 +89,28 @@ public class ShapesActivity extends Activity {
 
             canvas.translate(0.0f, 110.0f);
             canvas.drawCircle(80.0f, 45.0f, 45.0f, mFillPaint);
+            canvas.restore();
+
+            canvas.save();
+            canvas.translate(450.0f, 50.0f);
+            canvas.drawOval(mOval, mNormalPaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawOval(mOval, mStrokePaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawOval(mOval, mFillPaint);
+            canvas.restore();
+
+            canvas.save();
+            canvas.translate(650.0f, 50.0f);
+            canvas.drawRect(0.0f, 0.0f, 160.0f, 90.0f, mNormalPaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawRect(0.0f, 0.0f, 160.0f, 90.0f, mStrokePaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawRect(0.0f, 0.0f, 160.0f, 90.0f, mFillPaint);
             canvas.restore();
         }
     }

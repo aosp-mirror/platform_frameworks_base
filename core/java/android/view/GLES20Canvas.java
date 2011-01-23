@@ -525,7 +525,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
@@ -705,8 +705,13 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawOval(RectF oval, Paint paint) {
-        throw new UnsupportedOperationException();
+        boolean hasModifier = setupModifiers(paint);
+        nDrawOval(mRenderer, oval.left, oval.top, oval.right, oval.bottom, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer); 
     }
+
+    private native void nDrawOval(int renderer, float left, float top, float right, float bottom,
+            int paint);
 
     @Override
     public void drawPaint(Paint paint) {
@@ -765,12 +770,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPosText(char[] text, int index, int count, float[] pos, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
     public void drawPosText(String text, float[] pos, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
@@ -879,12 +884,12 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawTextOnPath(char[] text, int index, int count, Path path, float hOffset,
             float vOffset, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override
     public void drawTextOnPath(String text, Path path, float hOffset, float vOffset, Paint paint) {
-        throw new UnsupportedOperationException();
+        // TODO: Implement
     }
 
     @Override

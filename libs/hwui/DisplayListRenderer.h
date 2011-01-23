@@ -113,6 +113,7 @@ public:
         DrawRect,
         DrawRoundRect,
         DrawCircle,
+        DrawOval,
         DrawPath,
         DrawLines,
         DrawText,
@@ -279,6 +280,7 @@ public:
     void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, SkPaint* paint);
     void drawCircle(float x, float y, float radius, SkPaint* paint);
+    void drawOval(float left, float top, float right, float bottom, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
     void drawLines(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);

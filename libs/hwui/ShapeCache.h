@@ -76,6 +76,7 @@ struct PathTexture: public Texture {
 struct ShapeCacheEntry {
     enum ShapeType {
         kShapeNone,
+        kShapeRect,
         kShapeRoundRect,
         kShapeCircle,
         kShapeOval,
@@ -216,6 +217,70 @@ private:
     uint32_t mRadius;
 }; // CircleShapeCacheEntry
 
+struct OvalShapeCacheEntry: public ShapeCacheEntry {
+    OvalShapeCacheEntry(float width, float height, SkPaint* paint):
+            ShapeCacheEntry(ShapeCacheEntry::kShapeOval, paint) {
+        mWidth = *(uint32_t*) &width;
+        mHeight = *(uint32_t*) &height;
+    }
+
+    OvalShapeCacheEntry(): ShapeCacheEntry() {
+        mWidth = mHeight = 0;
+    }
+
+    OvalShapeCacheEntry(const OvalShapeCacheEntry& entry):
+            ShapeCacheEntry(entry) {
+        mWidth = entry.mWidth;
+        mHeight = entry.mHeight;
+    }
+
+    bool lessThan(const ShapeCacheEntry& r) const {
+        const OvalShapeCacheEntry& rhs = (const OvalShapeCacheEntry&) r;
+        LTE_INT(mWidth) {
+            LTE_INT(mHeight) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+private:
+    uint32_t mWidth;
+    uint32_t mHeight;
+}; // OvalShapeCacheEntry
+
+struct RectShapeCacheEntry: public ShapeCacheEntry {
+    RectShapeCacheEntry(float width, float height, SkPaint* paint):
+            ShapeCacheEntry(ShapeCacheEntry::kShapeRect, paint) {
+        mWidth = *(uint32_t*) &width;
+        mHeight = *(uint32_t*) &height;
+    }
+
+    RectShapeCacheEntry(): ShapeCacheEntry() {
+        mWidth = mHeight = 0;
+    }
+
+    RectShapeCacheEntry(const RectShapeCacheEntry& entry):
+            ShapeCacheEntry(entry) {
+        mWidth = entry.mWidth;
+        mHeight = entry.mHeight;
+    }
+
+    bool lessThan(const ShapeCacheEntry& r) const {
+        const RectShapeCacheEntry& rhs = (const RectShapeCacheEntry&) r;
+        LTE_INT(mWidth) {
+            LTE_INT(mHeight) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+private:
+    uint32_t mWidth;
+    uint32_t mHeight;
+}; // RectShapeCacheEntry
+
 /**
  * A simple LRU shape cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum
@@ -289,8 +354,21 @@ public:
     CircleShapeCache();
 
     PathTexture* getCircle(float radius, SkPaint* paint);
-}; // class RoundRectShapeCache
+}; // class CircleShapeCache
 
+class OvalShapeCache: public ShapeCache<OvalShapeCacheEntry> {
+public:
+    OvalShapeCache();
+
+    PathTexture* getOval(float width, float height, SkPaint* paint);
+}; // class OvalShapeCache
+
+class RectShapeCache: public ShapeCache<RectShapeCacheEntry> {
+public:
+    RectShapeCache();
+
+    PathTexture* getRect(float width, float height, SkPaint* paint);
+}; // class RectShapeCache
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor

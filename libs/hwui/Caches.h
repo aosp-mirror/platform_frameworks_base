@@ -162,6 +162,8 @@ public:
     PathCache pathCache;
     RoundRectShapeCache roundRectShapeCache;
     CircleShapeCache circleShapeCache;
+    OvalShapeCache ovalShapeCache;
+    RectShapeCache rectShapeCache;
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
