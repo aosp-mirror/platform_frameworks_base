@@ -68,5 +68,51 @@ PathTexture* CircleShapeCache::getCircle(float radius, SkPaint* paint) {
     return texture;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Ovals
+///////////////////////////////////////////////////////////////////////////////
+
+OvalShapeCache::OvalShapeCache(): ShapeCache<OvalShapeCacheEntry>(
+        "oval", PROPERTY_SHAPE_CACHE_SIZE, DEFAULT_SHAPE_CACHE_SIZE) {
+}
+
+PathTexture* OvalShapeCache::getOval(float width, float height, SkPaint* paint) {
+    OvalShapeCacheEntry entry(width, height, paint);
+    PathTexture* texture = get(entry);
+
+    if (!texture) {
+        SkPath path;
+        SkRect r;
+        r.set(0.0f, 0.0f, width, height);
+        path.addOval(r, SkPath::kCW_Direction);
+
+        texture = addTexture(entry, &path, paint);
+    }
+
+    return texture;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Rects
+///////////////////////////////////////////////////////////////////////////////
+
+RectShapeCache::RectShapeCache(): ShapeCache<RectShapeCacheEntry>(
+        "rect", PROPERTY_SHAPE_CACHE_SIZE, DEFAULT_SHAPE_CACHE_SIZE) {
+}
+
+PathTexture* RectShapeCache::getRect(float width, float height, SkPaint* paint) {
+    RectShapeCacheEntry entry(width, height, paint);
+    PathTexture* texture = get(entry);
+
+    if (!texture) {
+        SkPath path;
+        path.addRect(0.0f, 0.0f, width, height, SkPath::kCW_Direction);
+
+        texture = addTexture(entry, &path, paint);
+    }
+
+    return texture;
+}
+
 }; // namespace uirenderer
 }; // namespace android
