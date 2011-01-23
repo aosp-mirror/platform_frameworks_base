@@ -1706,12 +1706,17 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
 
         if (underlineWidth > 0.0f) {
             const float textSize = paint->getTextSize();
-            const float strokeWidth = textSize * kStdUnderline_Thickness;
+            // TODO: Support stroke width < 1.0f when we have AA lines
+            const float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
 
             const float left = x - offsetX;
             float top = 0.0f;
 
-            const int pointsCount = 4 * (flags & SkPaint::kStrikeThruText_Flag ? 2 : 1);
+            int linesCount = 0;
+            if (flags & SkPaint::kUnderlineText_Flag) linesCount++;
+            if (flags & SkPaint::kStrikeThruText_Flag) linesCount++;
+
+            const int pointsCount = 4 * linesCount;
             float points[pointsCount];
             int currentPoint = 0;
 
