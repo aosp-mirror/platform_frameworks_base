@@ -92,6 +92,7 @@ const char* DisplayList::OP_NAMES[] = {
     "Translate",
     "Rotate",
     "Scale",
+    "Skew",
     "SetMatrix",
     "ConcatMatrix",
     "ClipRect",
