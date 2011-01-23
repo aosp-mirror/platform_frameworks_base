@@ -9515,7 +9515,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final AppWindowToken atoken = win.mAppToken;
             final boolean gone = win.mViewVisibility == View.GONE
                     || !win.mRelayoutCalled
-                    || win.mRootToken.hidden
+                    || (atoken == null && win.mRootToken.hidden)
                     || (atoken != null && atoken.hiddenRequested)
                     || win.mAttachedHidden
                     || win.mExiting || win.mDestroying;
