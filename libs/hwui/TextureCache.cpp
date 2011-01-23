@@ -60,7 +60,7 @@ void TextureCache::init() {
     mCache.setOnEntryRemovedListener(this);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
-    LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
+    INIT_LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
 }
