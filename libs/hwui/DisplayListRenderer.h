@@ -238,6 +238,7 @@ public:
 
     void setViewport(int width, int height);
     void prepare(bool opaque);
+    void finish();
 
     void acquireContext();
     void releaseContext();
@@ -318,7 +319,16 @@ public:
     }
 
 private:
+    void insertRestoreToCount() {
+        if (mRestoreSaveCount >= 0) {
+            mWriter.writeInt(DisplayList::RestoreToCount);
+            addInt(mRestoreSaveCount);
+            mRestoreSaveCount = -1;
+        }
+    }
+
     inline void addOp(DisplayList::Op drawOp) {
+        insertRestoreToCount();
         mWriter.writeInt(drawOp);
     }
 
@@ -460,6 +470,8 @@ private:
     SkRefCntRecorder mTFRecorder;
 
     DisplayList *mDisplayList;
+
+    int mRestoreSaveCount;
 
     friend class DisplayList;
 
