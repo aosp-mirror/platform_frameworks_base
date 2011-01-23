@@ -326,6 +326,12 @@ static void android_view_GLES20Canvas_drawCircle(JNIEnv* env, jobject canvas,
     renderer->drawCircle(x, y, radius, paint);
 }
 
+static void android_view_GLES20Canvas_drawOval(JNIEnv* env, jobject canvas,
+        OpenGLRenderer* renderer, jfloat left, jfloat top, jfloat right, jfloat bottom,
+        SkPaint* paint) {
+    renderer->drawOval(left, top, right, bottom, paint);
+}
+
 static void android_view_GLES20Canvas_drawRects(JNIEnv* env, jobject canvas,
         OpenGLRenderer* renderer, SkRegion* region, SkPaint* paint) {
     SkRegion::Iterator it(*region);
@@ -602,6 +608,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawRects",         "(III)V",          (void*) android_view_GLES20Canvas_drawRects },
     { "nDrawRoundRect",     "(IFFFFFFI)V",     (void*) android_view_GLES20Canvas_drawRoundRect },
     { "nDrawCircle",        "(IFFFI)V",        (void*) android_view_GLES20Canvas_drawCircle },
+    { "nDrawOval",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawOval },
     { "nDrawPath",          "(III)V",          (void*) android_view_GLES20Canvas_drawPath },
     { "nDrawLines",         "(I[FIII)V",       (void*) android_view_GLES20Canvas_drawLines },
 
