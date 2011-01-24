@@ -1896,7 +1896,9 @@ class MediaArtistNativeHelper {
     private void onPreviewProgressUpdate(int progress, boolean isFinished) {
         if (mPreviewProgressListener != null) {
             mPreviewProgressListener.onProgress(mVideoEditor, progress, isFinished);
-            mPreviewProgress = progress;
+            if (progress != 0) {
+                mPreviewProgress = progress;
+            }
         }
     }
 
