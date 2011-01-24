@@ -899,7 +899,7 @@ public abstract class ContentProvider implements ComponentCallbacks {
                     return null;
                 }
             };
-            task.execute((Object[])null);
+            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Object[])null);
 
             return fds[0];
         } catch (IOException e) {
