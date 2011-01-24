@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import java.io.IOException;
-
-import android.nfc.INfcAdapter;
-import android.nfc.INfcTag;
-import android.nfc.NfcAdapter;
-import android.nfc.TransceiveResult;
-import android.nfc.Tag;
 import android.nfc.ErrorCodes;
+import android.nfc.Tag;
 import android.nfc.TagLostException;
+import android.nfc.TransceiveResult;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * A base class for tag technologies that are built on top of transceive().
@@ -37,11 +34,8 @@ import android.util.Log;
     /*package*/ final Tag mTag;
     /*package*/ boolean mIsConnected;
     /*package*/ int mSelectedTechnology;
-    private final NfcAdapter mAdapter;
-    /*package*/ final INfcAdapter mService;
-    /*package*/ final INfcTag mTagService;
 
-    BasicTagTechnology(NfcAdapter adapter, Tag tag, int tech) throws RemoteException {
+    BasicTagTechnology(Tag tag, int tech) throws RemoteException {
         int[] techList = tag.getTechnologyList();
         int i;
 
@@ -56,15 +50,12 @@ import android.util.Log;
             throw new IllegalArgumentException("Technology " + tech + " not present on tag " + tag);
         }
 
-        mAdapter = adapter;
-        mService = mAdapter.getService();
-        mTagService = mAdapter.getTagService();
         mTag = tag;
         mSelectedTechnology = tech;
     }
 
-    BasicTagTechnology(NfcAdapter adapter, Tag tag) throws RemoteException {
-        this(adapter, tag, tag.getTechnologyList()[0]);
+    BasicTagTechnology(Tag tag) throws RemoteException {
+        this(tag, tag.getTechnologyList()[0]);
     }
 
     @Override
@@ -100,7 +91,7 @@ import android.util.Log;
         }
 
         try {
-            return mTagService.isPresent(mTag.getServiceHandle());
+            return mTag.getTagService().isPresent(mTag.getServiceHandle());
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
             return false;
@@ -110,7 +101,7 @@ import android.util.Log;
     @Override
     public void connect() throws IOException {
         try {
-            int errorCode = mTagService.connect(mTag.getServiceHandle(), getTechnologyId());
+            int errorCode = mTag.getTagService().connect(mTag.getServiceHandle(), getTechnologyId());
 
             if (errorCode == ErrorCodes.SUCCESS) {
                 // Store this in the tag object
@@ -132,7 +123,7 @@ import android.util.Log;
         }
 
         try {
-            int errorCode = mTagService.reconnect(mTag.getServiceHandle());
+            int errorCode = mTag.getTagService().reconnect(mTag.getServiceHandle());
 
             if (errorCode != ErrorCodes.SUCCESS) {
                 mIsConnected = false;
@@ -153,7 +144,7 @@ import android.util.Log;
             /* Note that we don't want to physically disconnect the tag,
              * but just reconnect to it to reset its state
              */
-            mTagService.reconnect(mTag.getServiceHandle());
+            mTag.getTagService().reconnect(mTag.getServiceHandle());
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
         } finally {
@@ -167,7 +158,7 @@ import android.util.Log;
         checkConnected();
 
         try {
-            TransceiveResult result = mTagService.transceive(mTag.getServiceHandle(), data, raw);
+            TransceiveResult result = mTag.getTagService().transceive(mTag.getServiceHandle(), data, raw);
             if (result == null) {
                 throw new IOException("transceive failed");
             } else {

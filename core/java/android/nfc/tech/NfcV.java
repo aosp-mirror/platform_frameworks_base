@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -27,7 +26,7 @@ import java.io.IOException;
  * A low-level connection to a {@link Tag} using NFC vicinity technology, also known as
  * ISO15693.
  *
- * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link #get}.
  * Use this class to send and receive data with {@link #transceive transceive()}.
  *
  * <p>Applications must implement their own protocol stack on top of
@@ -47,10 +46,25 @@ public final class NfcV extends BasicTagTechnology {
     private byte mRespFlags;
     private byte mDsfId;
 
+    /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static NfcV get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.NFC_V)) return null;
+        try {
+            return new NfcV(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** @hide */
-    public NfcV(NfcAdapter adapter, Tag tag, Bundle extras)
-            throws RemoteException {
-        super(adapter, tag, TagTechnology.NFC_V);
+    public NfcV(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.NFC_V);
+        Bundle extras = tag.getTechExtras(TagTechnology.NFC_V);
         mRespFlags = extras.getByte(EXTRA_RESP_FLAGS);
         mDsfId = extras.getByte(EXTRA_DSFID);
     }

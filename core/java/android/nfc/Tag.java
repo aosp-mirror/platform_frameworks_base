@@ -16,20 +16,10 @@
 
 package android.nfc;
 
-import android.nfc.technology.IsoDep;
-import android.nfc.technology.MifareClassic;
-import android.nfc.technology.MifareUltralight;
-import android.nfc.technology.NfcV;
-import android.nfc.technology.Ndef;
-import android.nfc.technology.NdefFormatable;
-import android.nfc.technology.NfcA;
-import android.nfc.technology.NfcB;
-import android.nfc.technology.NfcF;
-import android.nfc.technology.TagTechnology;
+import android.nfc.tech.TagTechnology;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 
 import java.util.Arrays;
 
@@ -44,8 +34,8 @@ import java.util.Arrays;
  * {@link Tag} objects are passed to applications via the {@link NfcAdapter#EXTRA_TAG} extra
  * in {@link NfcAdapter#ACTION_TAG_DISCOVERED} intents. A {@link Tag} object is immutable
  * and represents the state of the tag at the time of discovery. It can be
- * directly queried for its UID and Type, or used to create a {@link TagTechnology}
- * (with {@link NfcAdapter#getTechnology}).
+ * directly queried for its UID and Type, or used to create a {@link TagTechnology} using the
+ * static <code>get()</code> methods on the varios tech classes.
  * <p>
  * A {@link Tag} can  be used to create a {@link TagTechnology} only while the tag is in
  * range. If it is removed and then returned to range, then the most recent
@@ -61,6 +51,7 @@ public class Tag implements Parcelable {
     /*package*/ final int[] mTechList;
     /*package*/ final Bundle[] mTechExtras;
     /*package*/ final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
+    /*package*/ final INfcTag mTagService;
 
     /*package*/ int mConnectedTechnology;
 
@@ -68,7 +59,8 @@ public class Tag implements Parcelable {
      * Hidden constructor to be used by NFC service and internal classes.
      * @hide
      */
-    public Tag(byte[] id, int[] techList, Bundle[] techListExtras, int serviceHandle) {
+    public Tag(byte[] id, int[] techList, Bundle[] techListExtras, int serviceHandle,
+            INfcTag tagService) {
         if (techList == null) {
             throw new IllegalArgumentException("rawTargets cannot be null");
         }
@@ -77,15 +69,15 @@ public class Tag implements Parcelable {
         // Ensure mTechExtras is as long as mTechList
         mTechExtras = Arrays.copyOf(techListExtras, techList.length);
         mServiceHandle = serviceHandle;
+        mTagService = tagService;
 
         mConnectedTechnology = -1;
     }
 
     /**
      * Construct a mock Tag.
-     * <p>This is an application constructed tag, so NfcAdapter methods on this
-     * Tag such as {@link NfcAdapter#getTechnology} may fail with
-     * {@link IllegalArgumentException} since it does not represent a physical Tag.
+     * <p>This is an application constructed tag, so NfcAdapter methods on this Tag may fail
+     * with {@link IllegalArgumentException} since it does not represent a physical Tag.
      * <p>This constructor might be useful for mock testing.
      * @param id The tag identifier, can be null
      * @param techList must not be null
@@ -93,7 +85,7 @@ public class Tag implements Parcelable {
      */
     public static Tag createMockTag(byte[] id, int[] techList, Bundle[] techListExtras) {
         // set serviceHandle to 0 to indicate mock tag
-        return new Tag(id, techList, techListExtras, 0);
+        return new Tag(id, techList, techListExtras, 0, null);
     }
 
     /**
@@ -127,7 +119,16 @@ public class Tag implements Parcelable {
         return Arrays.copyOf(mTechList, mTechList.length);
     }
 
-    /*package*/ TagTechnology getTechnology(NfcAdapter adapter, int tech) {
+    /** @hide */
+    public boolean hasTech(int techType) {
+        for (int tech : mTechList) {
+            if (tech == techType) return true;
+        }
+        return false;
+    }
+    
+    /** @hide */
+    public Bundle getTechExtras(int tech) {
         int pos = -1;
         for (int idx = 0; idx < mTechList.length; idx++) {
           if (mTechList[idx] == tech) {
@@ -139,44 +140,12 @@ public class Tag implements Parcelable {
             return null;
         }
 
-        Bundle extras = mTechExtras[pos];
-        try {
-            switch (tech) {
-                case TagTechnology.NFC_A: {
-                    return new NfcA(adapter, this, extras);
-                }
-                case TagTechnology.NFC_B: {
-                    return new NfcB(adapter, this, extras);
-                }
-                case TagTechnology.ISO_DEP: {
-                    return new IsoDep(adapter, this, extras);
-                }
-                case TagTechnology.NFC_V: {
-                    return new NfcV(adapter, this, extras);
-                }
-                case TagTechnology.NDEF: {
-                    return new Ndef(adapter, this, tech, extras);
-                }
-                case TagTechnology.NDEF_FORMATABLE: {
-                    return new NdefFormatable(adapter, this, tech, extras);
-                }
-                case TagTechnology.NFC_F: {
-                    return new NfcF(adapter, this, extras);
-                }
-                case TagTechnology.MIFARE_CLASSIC: {
-                    return new MifareClassic(adapter, this, extras);
-                }
-                case TagTechnology.MIFARE_ULTRALIGHT: {
-                    return new MifareUltralight(adapter, this, extras);
-                }
+        return mTechExtras[pos];
+    }
 
-                default: {
-                    throw new UnsupportedOperationException("Tech " + tech + " not supported");
-                }
-            }
-        } catch (RemoteException e) {
-            return null;
-        }
+    /** @hide */
+    public INfcTag getTagService() {
+        return mTagService;
     }
 
     @Override
@@ -223,6 +192,7 @@ public class Tag implements Parcelable {
         dest.writeIntArray(mTechList);
         dest.writeTypedArray(mTechExtras, 0);
         dest.writeInt(mServiceHandle);
+        dest.writeStrongBinder(mTagService.asBinder());
     }
 
     public static final Parcelable.Creator<Tag> CREATOR =
@@ -235,8 +205,9 @@ public class Tag implements Parcelable {
             in.readIntArray(techList);
             Bundle[] techExtras = in.createTypedArray(Bundle.CREATOR);
             int serviceHandle = in.readInt();
+            INfcTag tagService = INfcTag.Stub.asInterface(in.readStrongBinder());
 
-            return new Tag(id, techList, techExtras, serviceHandle);
+            return new Tag(id, techList, techExtras, serviceHandle, tagService);
         }
 
         @Override

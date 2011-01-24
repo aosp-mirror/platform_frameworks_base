@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import android.nfc.NfcAdapter;
-import android.nfc.TagLostException;
 import android.nfc.Tag;
-import android.os.Bundle;
+import android.nfc.TagLostException;
 import android.os.RemoteException;
 
 import java.io.IOException;
@@ -82,12 +80,27 @@ public final class MifareClassic extends BasicTagTechnology {
     private int mType;
     private int mSize;
 
+    /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static MifareClassic get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.MIFARE_CLASSIC)) return null;
+        try {
+            return new MifareClassic(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** @hide */
-    public MifareClassic(NfcAdapter adapter, Tag tag, Bundle extras) throws RemoteException {
-        super(adapter, tag, TagTechnology.MIFARE_CLASSIC);
+    public MifareClassic(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.MIFARE_CLASSIC);
 
         // Check if this could actually be a MIFARE Classic
-        NfcA a = (NfcA) adapter.getTechnology(tag, TagTechnology.NFC_A);
+        NfcA a = NfcA.get(tag);
 
         mIsEmulated = false;
         mType = TYPE_UNKNOWN;
