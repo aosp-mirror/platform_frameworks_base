@@ -18,26 +18,26 @@
     <item android:id="@+id/copy"
         android:icon="?android:attr/actionModeCopyDrawable"
         android:title="@string/copy"
-        android:showAsAction="always|withText"
+        android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/share"
         android:icon="@drawable/ic_menu_share"
         android:title="@string/share"
-        android:showAsAction="always|withText"
+        android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/select_all"
         android:title="@string/selectAll"
-        android:showAsAction="always|withText"
+        android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/find"
         android:icon="@drawable/ic_menu_find"
         android:title="@string/find"
-        android:showAsAction="always|withText"
+        android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/websearch"
         android:icon="@drawable/ic_menu_search"
         android:title="@string/websearch"
-        android:showAsAction="always|withText"
+        android:showAsAction="ifRoom|withText"
         />
 </menu>
 
