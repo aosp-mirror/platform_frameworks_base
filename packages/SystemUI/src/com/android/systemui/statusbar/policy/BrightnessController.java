@@ -80,7 +80,7 @@ public class BrightnessController implements ToggleSlider.Listener {
         setMode(automatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
                 : Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
         if (!automatic) {
-            final int val = value + value + MINIMUM_BACKLIGHT;
+            final int val = value + MINIMUM_BACKLIGHT;
             setBrightness(val);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
