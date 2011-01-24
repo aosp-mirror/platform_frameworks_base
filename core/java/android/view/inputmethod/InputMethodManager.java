@@ -803,7 +803,7 @@ public final class InputMethodManager {
     public static final int HIDE_NOT_ALWAYS = 0x0002;
     
     /**
-     * Synonym for {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)
+     * Synonym for {@link #hideSoftInputFromWindow(IBinder, int, ResultReceiver)}
      * without a result: request to hide the soft input window from the
      * context of the window that is currently accepting input.
      * 
