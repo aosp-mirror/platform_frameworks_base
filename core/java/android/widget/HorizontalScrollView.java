@@ -647,6 +647,7 @@ public class HorizontalScrollView extends FrameLayout {
         if (!mScroller.isFinished()) {
             mScrollX = scrollX;
             mScrollY = scrollY;
+            invalidateParentIfAccelerated();
             if (clampedX) {
                 mScroller.springBack(mScrollX, mScrollY, 0, getScrollRange(), 0, 0);
             }

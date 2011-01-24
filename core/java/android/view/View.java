@@ -1509,6 +1509,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /*package*/ int mMeasuredHeight;
 
     /**
+     * Flag to indicate that this view was marked INVALIDATED, or had its display list
+     * invalidated, prior to the current drawing iteration. If true, the view must re-draw
+     * its display list. This flag, used only when hw accelerated, allows us to clear the
+     * flag while retaining this information until it's needed (at getDisplayList() time and
+     * in drawChild(), when we decide to draw a view's children's display lists into our own).
+     *
+     * {@hide}
+     */
+    boolean mRecreateDisplayList = false;
+
+    /**
      * The view's identifier.
      * {@hide}
      *
@@ -1670,6 +1681,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /** {@hide} */
     static final int ACTIVATED                    = 0x40000000;
+
+    /**
+     * Indicates that this view was specifically invalidated, not just dirtied because some
+     * child view was invalidated. The flag is used to determine when we need to recreate
+     * a view's display list (as opposed to just returning a reference to its existing
+     * display list).
+     *
+     * @hide
+     */
+    static final int INVALIDATED                  = 0x80000000;
 
     /**
      * Always allow a user to over-scroll this view, provided it is a
@@ -5295,6 +5316,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((changed & VISIBILITY_MASK) != 0) {
             if (mParent instanceof ViewGroup) {
                 ((ViewGroup)mParent).onChildVisibilityChanged(this, (flags & VISIBILITY_MASK));
+                ((View) mParent).invalidate();
             }
             dispatchVisibilityChanged(this, (flags & VISIBILITY_MASK));
         }
@@ -5306,6 +5328,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((changed & DRAWING_CACHE_ENABLED) != 0) {
             destroyDrawingCache();
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            invalidateParentIfAccelerated();
         }
 
         if ((changed & DRAWING_CACHE_QUALITY_MASK) != 0) {
@@ -5666,6 +5689,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5699,6 +5723,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5732,6 +5757,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5767,6 +5793,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5802,6 +5829,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5843,6 +5871,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5883,6 +5912,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -5922,6 +5952,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags &= ~ALPHA_SET;
             invalidate(false);
         }
+        invalidateParentIfAccelerated();
     }
 
     /**
@@ -6241,6 +6272,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -6274,6 +6306,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
+            invalidateParentIfAccelerated();
         }
     }
 
@@ -6490,6 +6523,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int oldY = mScrollY;
             mScrollX = x;
             mScrollY = y;
+            invalidateParentIfAccelerated();
             onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             if (!awakenScrollBars()) {
                 invalidate();
@@ -6690,8 +6724,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
-                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID ||
+                (mPrivateFlags & INVALIDATED) != INVALIDATED) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            mPrivateFlags |= INVALIDATED;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null && ai.mHardwareAccelerated) {
@@ -6728,8 +6764,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
-                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
+                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID ||
+                (mPrivateFlags & INVALIDATED) != INVALIDATED) {
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            mPrivateFlags |= INVALIDATED;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
             if (p != null && ai != null && ai.mHardwareAccelerated) {
@@ -6776,10 +6814,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         boolean opaque = isOpaque();
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
                 (invalidateCache && (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) ||
-                opaque != mLastIsOpaque) {
+                opaque != mLastIsOpaque || (mPrivateFlags & INVALIDATED) != INVALIDATED) {
             mLastIsOpaque = opaque;
             mPrivateFlags &= ~DRAWN;
             if (invalidateCache) {
+                mPrivateFlags |= INVALIDATED;
                 mPrivateFlags &= ~DRAWING_CACHE_VALID;
             }
             final AttachInfo ai = mAttachInfo;
@@ -6798,6 +6837,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // our own bounds
                 p.invalidateChild(this, r);
             }
+        }
+    }
+
+    /**
+     * Used to indicate that the parent of this view should be invalidated. This functionality
+     * is used to force the parent to rebuild its display list (when hardware-accelerated),
+     * which is necessary when various parent-managed properties of the view change, such as
+     * alpha, translationX/Y, scrollX/Y, scaleX/Y, and rotation/X/Y.
+     *
+     * @hide
+     */
+    protected void invalidateParentIfAccelerated() {
+        if (isHardwareAccelerated() && mParent instanceof View) {
+            ((View) mParent).invalidate();
         }
     }
 
@@ -7630,6 +7683,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mHardwareLayer = null;
         }
 
+        if (mDisplayList != null) {
+            mDisplayList.invalidate();
+        }
+
         if (mAttachInfo != null) {
             mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_MSG, this);
             mAttachInfo.mHandler.removeMessages(AttachInfo.INVALIDATE_RECT_MSG, this);
@@ -7953,7 +8010,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, " 
                     + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
         }
-        
+
         if (layerType == mLayerType) {
             if (layerType != LAYER_TYPE_NONE && paint != mLayerPaint) {
                 mLayerPaint = paint == null ? new Paint() : paint;
@@ -8041,7 +8098,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mHardwareLayer.resize(width, height);
             }
 
-            final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
+            final HardwareCanvas canvas = mHardwareLayer.start(mAttachInfo.mHardwareCanvas);
             try {
                 canvas.setViewport(width, height);
                 canvas.onPreDraw();
@@ -8064,7 +8121,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
-                mHardwareLayer.end(currentCanvas);
+                mHardwareLayer.end(mAttachInfo.mHardwareCanvas);
             }
         }
 
@@ -8081,9 +8138,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * 
      * <p>Enabling the drawing cache is similar to
      * {@link #setLayerType(int, android.graphics.Paint) setting a layer} when hardware
-     * acceleration is turned off. When hardware acceleration is turned on enabling the
-     * drawing cache has either no effect or the cache used at drawing time is not a bitmap.
-     * This API can however be used to manually generate a bitmap copy of this view.</p>
+     * acceleration is turned off. When hardware acceleration is turned on, enabling the
+     * drawing cache has no effect on rendering because the system uses a different mechanism
+     * for acceleration which ignores the flag. If you want to use a Bitmap for the view, even
+     * when hardware acceleration is enabled, see {@link #setLayerType(int, android.graphics.Paint)}
+     * for information on how to enable software and hardware layers.</p>
+     *
+     * <p>This API can be used to manually generate
+     * a bitmap copy of this view, by setting the flag to <code>true</code> and calling
+     * {@link #getDrawingCache()}.</p>
      *
      * @param enabled true to enable the drawing cache, false otherwise
      *
@@ -8110,25 +8173,76 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Debugging utility which recursively outputs the dirty state of a view and its
+     * descendants.
+     * 
+     * @hide
+     */
+    public void outputDirtyFlags(String indent, boolean clear, int clearMask) {
+        Log.d("View", indent + this + "             DIRTY(" + (mPrivateFlags & View.DIRTY_MASK) +
+                ") DRAWN(" + (mPrivateFlags & DRAWN) + ")" + " CACHE_VALID(" +
+                (mPrivateFlags & View.DRAWING_CACHE_VALID) +
+                ") INVALIDATED(" + (mPrivateFlags & INVALIDATED) + ")");
+        if (clear) {
+            mPrivateFlags &= clearMask;
+        }
+        if (this instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) this;
+            final int count = parent.getChildCount();
+            for (int i = 0; i < count; i++) {
+                final View child = (View) parent.getChildAt(i);
+                child.outputDirtyFlags(indent + "  ", clear, clearMask);
+            }
+        }
+    }
+
+    /**
+     * This method is used by ViewGroup to cause its children to restore or recreate their
+     * display lists. It is called by getDisplayList() when the parent ViewGroup does not need
+     * to recreate its own display list, which would happen if it went through the normal
+     * draw/dispatchDraw mechanisms.
+     *
+     * @hide
+     */
+    protected void dispatchGetDisplayList() {}
+    
+    /**
      * <p>Returns a display list that can be used to draw this view again
      * without executing its draw method.</p>
      * 
      * @return A DisplayList ready to replay, or null if caching is not enabled.
+     *
+     * @hide
      */
-    DisplayList getDisplayList() {
-        if ((mViewFlags & WILL_NOT_CACHE_DRAWING) == WILL_NOT_CACHE_DRAWING) {
-            return null;
-        }
+    public DisplayList getDisplayList() {
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
             return null;
         }
 
-        if ((mViewFlags & DRAWING_CACHE_ENABLED) == DRAWING_CACHE_ENABLED &&
-                ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 ||
-                        mDisplayList == null || !mDisplayList.isValid())) {
+        if (((mPrivateFlags & DRAWING_CACHE_VALID) == 0 ||
+                mDisplayList == null || !mDisplayList.isValid() ||
+                mRecreateDisplayList)) {
+            // Don't need to recreate the display list, just need to tell our
+            // children to restore/recreate theirs
+            if (mDisplayList != null && mDisplayList.isValid() &&
+                    !mRecreateDisplayList) {
+                mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+                mPrivateFlags &= ~DIRTY_MASK;
+                dispatchGetDisplayList();
+
+                return mDisplayList;
+            }
+
+            // If we got here, we're recreating it. Mark it as such to ensure that
+            // we copy in child display lists into ours in drawChild()
+            mRecreateDisplayList = true;
 
             if (mDisplayList == null) {
-                mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList();
+                mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList(this);
+                // If we're creating a new display list, make sure our parent gets invalidated
+                // since they will need to recreate their display list to account for this
+                // new child display list.
+                invalidateParentIfAccelerated();
             }
 
             final HardwareCanvas canvas = mDisplayList.start();
@@ -8141,6 +8255,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                 final int restoreCount = canvas.save();
 
+                computeScroll();
+                canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
     
                 // Fast path for layouts with no backgrounds
@@ -8228,9 +8344,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mUnscaledDrawingCache != null) {
             mUnscaledDrawingCache.recycle();
             mUnscaledDrawingCache = null;
-        }
-        if (mDisplayList != null) {
-            mDisplayList.invalidate();
         }
     }
 
@@ -10480,6 +10593,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         animation.setStartTime(Animation.START_ON_FIRST_FRAME);
         setAnimation(animation);
         invalidate();
+        invalidateParentIfAccelerated();
     }
 
     /**
@@ -10490,6 +10604,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mCurrentAnimation.detach();
         }
         mCurrentAnimation = null;
+        invalidateParentIfAccelerated();
     }
 
     /**
@@ -11494,6 +11609,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         final IBinder mWindowToken;
 
         final Callbacks mRootCallbacks;
+
+        Canvas mHardwareCanvas;
 
         /**
          * The top view of the hierarchy.

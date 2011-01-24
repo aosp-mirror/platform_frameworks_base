@@ -120,7 +120,7 @@ public abstract class HardwareRenderer {
      * 
      * @return A new display list.
      */
-    abstract DisplayList createDisplayList();
+    abstract DisplayList createDisplayList(View v);
 
     /**
      * Creates a new hardware layer.
@@ -506,19 +506,32 @@ public abstract class HardwareRenderer {
                 if (checkCurrent()) {
                     onPreDraw();
     
-                    Canvas canvas = mCanvas;
+                    HardwareCanvas canvas = mCanvas;
+                    attachInfo.mHardwareCanvas = canvas;
                     int saveCount = canvas.save();
                     callbacks.onHardwarePreDraw(canvas);
-    
+
                     try {
-                        view.draw(canvas);
+                        view.mRecreateDisplayList =
+                                (view.mPrivateFlags & View.INVALIDATED) == View.INVALIDATED;
+                        view.mPrivateFlags &= ~View.INVALIDATED;
+                        DisplayList displayList = view.getDisplayList();
+                        if (displayList != null) {
+                            if (canvas.drawDisplayList(displayList)) {
+                                view.invalidate();
+                            }
+                        } else {
+                            // Shouldn't reach here
+                            view.draw(canvas);
+                        }
                     } finally {
                         callbacks.onHardwarePostDraw(canvas);
                         canvas.restoreToCount(saveCount);
+                        view.mRecreateDisplayList = false;
                     }
-    
+
                     onPostDraw();
-    
+
                     if (ViewDebug.DEBUG_PROFILE_DRAWING) {
                         EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
                     }
@@ -704,8 +717,8 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        DisplayList createDisplayList() {
-            return new GLES20DisplayList();
+        DisplayList createDisplayList(View v) {
+            return new GLES20DisplayList(v);
         }
         
         @Override

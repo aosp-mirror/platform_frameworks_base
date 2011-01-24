@@ -213,6 +213,13 @@ void OpenGLRenderer::releaseContext() {
     resume();
 }
 
+bool OpenGLRenderer::callDrawGLFunction(Functor *functor) {
+    interrupt();
+    status_t result = (*functor)();
+    resume();
+    return (result == 0) ? false : true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // State management
 ///////////////////////////////////////////////////////////////////////////////
@@ -1031,12 +1038,13 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
+bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList) {
-        displayList->replay(*this, level);
+        return displayList->replay(*this, level);
     }
+    return false;
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {

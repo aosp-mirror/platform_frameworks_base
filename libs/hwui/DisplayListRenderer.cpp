@@ -117,7 +117,8 @@ const char* DisplayList::OP_NAMES[] = {
     "ResetColorFilter",
     "SetupColorFilter",
     "ResetShadow",
-    "SetupShadow"
+    "SetupShadow",
+    "DrawGLFunction"
 };
 
 DisplayList::DisplayList(const DisplayListRenderer& recorder) {
@@ -212,7 +213,8 @@ void DisplayList::init() {
     mPathHeap = NULL;
 }
 
-void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
+bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
+    bool needsInvalidate = false;
     TextContainer text;
     mReader.rewind();
 
@@ -229,87 +231,165 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
     int saveCount = renderer.getSaveCount() - 1;
     while (!mReader.eof()) {
         int op = mReader.readInt();
-        DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
 
         switch (op) {
+            case DrawGLFunction: {
+                Functor *functor = (Functor *) getInt();
+                DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], functor);
+                needsInvalidate |= renderer.callDrawGLFunction(functor);
+            }
+            break;
             case AcquireContext: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.acquireContext();
             }
             break;
             case ReleaseContext: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.releaseContext();
             }
             break;
             case Save: {
-                renderer.save(getInt());
+                int rendererNum = getInt();
+                DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, OP_NAMES[op], rendererNum);
+                renderer.save(rendererNum);
             }
             break;
             case Restore: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.restore();
             }
             break;
             case RestoreToCount: {
-                renderer.restoreToCount(saveCount + getInt());
+                int restoreCount = saveCount + getInt();
+                DISPLAY_LIST_LOGD("%s%s %d", (char*) indent, OP_NAMES[op], restoreCount);
+                renderer.restoreToCount(restoreCount);
             }
             break;
             case SaveLayer: {
-                renderer.saveLayer(getFloat(), getFloat(), getFloat(), getFloat(),
-                        getPaint(), getInt());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                SkPaint* paint = getPaint();
+                int flags = getInt();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p, 0x%x", (char*) indent,
+                    OP_NAMES[op], f1, f2, f3, f4, paint, flags);
+                renderer.saveLayer(f1, f2, f3, f4, paint, flags);
             }
             break;
             case SaveLayerAlpha: {
-                renderer.saveLayerAlpha(getFloat(), getFloat(), getFloat(), getFloat(),
-                        getInt(), getInt());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                int alpha = getInt();
+                int flags = getInt();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", (char*) indent,
+                    OP_NAMES[op], f1, f2, f3, f4, alpha, flags);
+                renderer.saveLayerAlpha(f1, f2, f3, f4, alpha, flags);
             }
             break;
             case Translate: {
-                renderer.translate(getFloat(), getFloat());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f", (char*) indent, OP_NAMES[op], f1, f2);
+                renderer.translate(f1, f2);
             }
             break;
             case Rotate: {
-                renderer.rotate(getFloat());
+                float rotation = getFloat();
+                DISPLAY_LIST_LOGD("%s%s %.2f", (char*) indent, OP_NAMES[op], rotation);
+                renderer.rotate(rotation);
             }
             break;
             case Scale: {
-                renderer.scale(getFloat(), getFloat());
+                float sx = getFloat();
+                float sy = getFloat();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f", (char*) indent, OP_NAMES[op], sx, sy);
+                renderer.scale(sx, sy);
             }
             break;
             case Skew: {
-                renderer.skew(getFloat(), getFloat());
+                float sx = getFloat();
+                float sy = getFloat();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f", (char*) indent, OP_NAMES[op], sx, sy);
+                renderer.skew(sx, sy);
             }
             break;
             case SetMatrix: {
-                renderer.setMatrix(getMatrix());
+                SkMatrix* matrix = getMatrix();
+                DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], matrix);
+                renderer.setMatrix(matrix);
             }
             break;
             case ConcatMatrix: {
-                renderer.concatMatrix(getMatrix());
+                SkMatrix* matrix = getMatrix();
+                DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], matrix);
+                renderer.concatMatrix(matrix);
             }
             break;
             case ClipRect: {
-                renderer.clipRect(getFloat(), getFloat(), getFloat(), getFloat(),
-                        (SkRegion::Op) getInt());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                int regionOp = getInt();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d", (char*) indent, OP_NAMES[op],
+                    f1, f2, f3, f4, regionOp);
+                renderer.clipRect(f1, f2, f3, f4, (SkRegion::Op) regionOp);
             }
             break;
             case DrawDisplayList: {
-                renderer.drawDisplayList(getDisplayList(), level + 1);
+                DisplayList* displayList = getDisplayList();
+                DISPLAY_LIST_LOGD("%s%s %p, %d", (char*) indent, OP_NAMES[op],
+                    displayList, level + 1);
+                needsInvalidate |= renderer.drawDisplayList(displayList, level + 1);
             }
             break;
             case DrawLayer: {
-                renderer.drawLayer((Layer*) getInt(), getFloat(), getFloat(), getPaint());
+                Layer* layer = (Layer*) getInt();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    layer, x, y, paint);
+                renderer.drawLayer(layer, x, y, paint);
             }
             break;
             case DrawBitmap: {
-                renderer.drawBitmap(getBitmap(), getFloat(), getFloat(), getPaint());
+                SkBitmap* bitmap = getBitmap();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    bitmap, x, y, paint);
+                renderer.drawBitmap(bitmap, x, y, paint);
             }
             break;
             case DrawBitmapMatrix: {
-                renderer.drawBitmap(getBitmap(), getMatrix(), getPaint());
+                SkBitmap* bitmap = getBitmap();
+                SkMatrix* matrix = getMatrix();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %p, %p, %p", (char*) indent, OP_NAMES[op],
+                    bitmap, matrix, paint);
+                renderer.drawBitmap(bitmap, matrix, paint);
             }
             break;
             case DrawBitmapRect: {
-                renderer.drawBitmap(getBitmap(), getFloat(), getFloat(), getFloat(), getFloat(),
-                        getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+                SkBitmap* bitmap = getBitmap();
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                float f5 = getFloat();
+                float f6 = getFloat();
+                float f7 = getFloat();
+                float f8 = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %p, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
+                renderer.drawBitmap(bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
             }
             break;
             case DrawBitmapMesh: {
@@ -323,6 +403,7 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
                 bool hasColors = getInt();
                 int* colors = hasColors ? getInts(colorsCount) : NULL;
 
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawBitmapMesh(bitmap, meshWidth, meshHeight, vertices, colors, getPaint());
             }
             break;
@@ -340,80 +421,148 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
                 yDivs = getInts(yDivsCount);
                 colors = getUInts(numColors);
 
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawPatch(bitmap, xDivs, yDivs, colors, xDivsCount, yDivsCount,
                         numColors, getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
             }
             break;
             case DrawColor: {
-                renderer.drawColor(getInt(), (SkXfermode::Mode) getInt());
+                int color = getInt();
+                int xferMode = getInt();
+                DISPLAY_LIST_LOGD("%s%s 0x%x %d", (char*) indent, OP_NAMES[op], color, xferMode);
+                renderer.drawColor(color, (SkXfermode::Mode) xferMode);
             }
             break;
             case DrawRect: {
-                renderer.drawRect(getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    f1, f2, f3, f4, paint);
+                renderer.drawRect(f1, f2, f3, f4, paint);
             }
             break;
             case DrawRoundRect: {
-                renderer.drawRoundRect(getFloat(), getFloat(), getFloat(), getFloat(),
-                        getFloat(), getFloat(), getPaint());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                float f5 = getFloat();
+                float f6 = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, paint);
+                renderer.drawRoundRect(f1, f2, f3, f4, f5, f6, paint);
             }
             break;
             case DrawCircle: {
-                renderer.drawCircle(getFloat(), getFloat(), getFloat(), getPaint());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, paint);
+                renderer.drawCircle(f1, f2, f3, paint);
             }
             break;
             case DrawOval: {
-                renderer.drawOval(getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, f4, paint);
+                renderer.drawOval(f1, f2, f3, f4, paint);
             }
             break;
             case DrawArc: {
-                renderer.drawArc(getFloat(), getFloat(), getFloat(), getFloat(),
-                        getFloat(), getFloat(), getInt() == 1, getPaint());
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                float f5 = getFloat();
+                float f6 = getFloat();
+                int i1 = getInt();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %d, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, i1, paint);
+                renderer.drawArc(f1, f2, f3, f4, f5, f6, i1 == 1, paint);
             }
             break;
             case DrawPath: {
-                renderer.drawPath(getPath(), getPaint());
+                SkPath* path = getPath();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %p, %p", (char*) indent, OP_NAMES[op], path, paint);
+                renderer.drawPath(path, paint);
             }
             break;
             case DrawLines: {
                 int count = 0;
                 float* points = getFloats(count);
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawLines(points, count, getPaint());
             }
             break;
             case DrawText: {
                 getText(&text);
-                renderer.drawText(text.text(), text.length(), getInt(),
-                        getFloat(), getFloat(), getPaint());
+                int count = getInt();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint();
+                DISPLAY_LIST_LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    text.text(), text.length(), count, x, y, paint);
+                renderer.drawText(text.text(), text.length(), count, x, y, paint);
             }
             break;
             case ResetShader: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.resetShader();
             }
             break;
             case SetupShader: {
-                renderer.setupShader(getShader());
+                SkiaShader* shader = getShader();
+                DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], shader);
+                renderer.setupShader(shader);
             }
             break;
             case ResetColorFilter: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.resetColorFilter();
             }
             break;
             case SetupColorFilter: {
-                renderer.setupColorFilter(getColorFilter());
+                SkiaColorFilter *colorFilter = getColorFilter();
+                DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], colorFilter);
+                renderer.setupColorFilter(colorFilter);
             }
             break;
             case ResetShadow: {
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.resetShadow();
             }
             break;
             case SetupShadow: {
-                renderer.setupShadow(getFloat(), getFloat(), getFloat(), getInt());
+                float radius = getFloat();
+                float dx = getFloat();
+                float dy = getFloat();
+                int color = getInt();
+                DISPLAY_LIST_LOGD("%s%s %.2f, %.2f, %.2f, 0x%x", (char*) indent, OP_NAMES[op],
+                    radius, dx, dy, color);
+                renderer.setupShadow(radius, dx, dy, color);
             }
             break;
+            default:
+                DISPLAY_LIST_LOGD("Display List error: op not handled: %s%s",
+                    (char*) indent, OP_NAMES[op]);
+                break;
         }
     }
 
-    DISPLAY_LIST_LOGD("%sDone", (char*) indent + 2);
+    DISPLAY_LIST_LOGD("%sDone, returning %d", (char*) indent + 2, needsInvalidate);
+    return needsInvalidate;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -493,12 +642,26 @@ void DisplayListRenderer::finish() {
     OpenGLRenderer::finish();
 }
 
+void DisplayListRenderer::interrupt() {
+
+}
+void DisplayListRenderer::resume() {
+
+}
 void DisplayListRenderer::acquireContext() {
+    // TODO: probably noop instead of calling super
     addOp(DisplayList::AcquireContext);
     OpenGLRenderer::acquireContext();
 }
 
+bool DisplayListRenderer::callDrawGLFunction(Functor *functor) {
+    addOp(DisplayList::DrawGLFunction);
+    addInt((int) functor);
+    return false; // No invalidate needed at record-time
+}
+
 void DisplayListRenderer::releaseContext() {
+    // TODO: probably noop instead of calling super
     addOp(DisplayList::ReleaseContext);
     OpenGLRenderer::releaseContext();
 }
@@ -581,9 +744,10 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
 }
 
-void DisplayListRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
+bool DisplayListRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
     addOp(DisplayList::DrawDisplayList);
     addDisplayList(displayList);
+    return false;
 }
 
 void DisplayListRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
