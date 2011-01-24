@@ -998,22 +998,27 @@ public class ViewDebug {
                         new ViewOperation<Object>() {
                             public Object[] pre() {
                                 final DisplayMetrics metrics =
-                                        view.getResources().getDisplayMetrics();
-                                final Bitmap bitmap =
+                                        (view != null && view.getResources() != null) ?
+                                                view.getResources().getDisplayMetrics() : null;
+                                final Bitmap bitmap = metrics != null ?
                                         Bitmap.createBitmap(metrics.widthPixels,
-                                                metrics.heightPixels, Bitmap.Config.RGB_565);
-                                final Canvas canvas = new Canvas(bitmap);
+                                                metrics.heightPixels, Bitmap.Config.RGB_565) : null;
+                                final Canvas canvas = bitmap != null ? new Canvas(bitmap) : null;
                                 return new Object[] {
                                         bitmap, canvas
                                 };
                             }
 
                             public void run(Object... data) {
-                                view.draw((Canvas) data[1]);
+                                if (data[1] != null) {
+                                    view.draw((Canvas) data[1]);
+                                }
                             }
 
                             public void post(Object... data) {
-                                ((Bitmap) data[0]).recycle();
+                                if (data[0] != null) {
+                                    ((Bitmap) data[0]).recycle();
+                                }
                             }
                         }) : 0;
         out.write(String.valueOf(durationMeasure));

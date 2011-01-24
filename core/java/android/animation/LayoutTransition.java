@@ -34,15 +34,16 @@ import java.util.List;
  * custom animations, use the {@link LayoutTransition#setAnimator(int, Animator)
  * setAnimator()} method.
  *
- * <p>One of the core concepts of these transition animations is that there are two core
+ * <p>One of the core concepts of these transition animations is that there are two types of
  * changes that cause the transition and four different animations that run because of
  * those changes. The changes that trigger the transition are items being added to a container
  * (referred to as an "appearing" transition) or removed from a container (also known as
- * "disappearing"). The animations that run due to those events are one that animates
+ * "disappearing"). Setting the visibility of views (between GONE and VISIBLE) will trigger
+ * the same add/remove logic. The animations that run due to those events are one that animates
  * items being added, one that animates items being removed, and two that animate the other
  * items in the container that change due to the add/remove occurrence. Users of
  * the transition may want different animations for the changing items depending on whether
- * they are changing due to anappearing or disappearing event, so there is one animation for
+ * they are changing due to an appearing or disappearing event, so there is one animation for
  * each of these variations of the changing event. Most of the API of this class is concerned
  * with setting up the basic properties of the animations used in these four situations,
  * or with setting up custom animations for any or all of the four.</p>
@@ -62,6 +63,18 @@ import java.util.List;
  * values when the transition begins. Custom animations will be similarly populated with
  * the target and values being animated, assuming they use ObjectAnimator objects with
  * property names that are known on the target object.</p>
+ *
+ * <p>This class, and the associated XML flag for containers, animateLayoutChanges="true",
+ * provides a simple utility meant for automating changes in straightforward situations.
+ * Using LayoutTransition at multiple levels of a nested view hierarchy may not work due to the
+ * interrelationship of the various levels of layout. Also, a container that is being scrolled
+ * at the same time as items are being added or removed is probably not a good candidate for
+ * this utility, because the before/after locations calculated by LayoutTransition
+ * may not match the actual locations when the animations finish due to the container
+ * being scrolled as the animations are running. You can work around that
+ * particular issue by disabling the 'changing' animations by setting the CHANGE_APPEARING
+ * and CHANGE_DISAPPEARING animations to null, and setting the startDelay of the
+ * other animations appropriately.</p>
  */
 public class LayoutTransition {
 

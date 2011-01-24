@@ -28,6 +28,7 @@
 #include <SkTSearch.h>
 
 #include "OpenGLRenderer.h"
+#include "Functor.h"
 
 namespace android {
 namespace uirenderer {
@@ -124,13 +125,14 @@ public:
         SetupColorFilter,
         ResetShadow,
         SetupShadow,
+        DrawGLFunction,
     };
 
     static const char* OP_NAMES[];
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder);
 
-    void replay(OpenGLRenderer& renderer, uint32_t level = 0);
+    bool replay(OpenGLRenderer& renderer, uint32_t level = 0);
 
 private:
     void init();
@@ -242,8 +244,12 @@ public:
     void prepare(bool opaque);
     void finish();
 
+    bool callDrawGLFunction(Functor *functor);
     void acquireContext();
     void releaseContext();
+
+    void interrupt();
+    void resume();
 
     int save(int flags);
     void restore();
@@ -264,7 +270,7 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    void drawDisplayList(DisplayList* displayList, uint32_t level = 0);
+    bool drawDisplayList(DisplayList* displayList, uint32_t level = 0);
     void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);

@@ -27,6 +27,7 @@
 #include <SkShader.h>
 #include <SkXfermode.h>
 
+#include <utils/Functor.h>
 #include <utils/RefBase.h>
 #include <utils/Vector.h>
 
@@ -65,9 +66,10 @@ public:
     virtual void finish();
 
     // These two calls must not be recorded in display lists
-    void interrupt();
-    void resume();
+    virtual void interrupt();
+    virtual void resume();
 
+    virtual bool callDrawGLFunction(Functor *functor);
     virtual void acquireContext();
     virtual void releaseContext();
 
@@ -95,7 +97,7 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    virtual void drawDisplayList(DisplayList* displayList, uint32_t level = 0);
+    virtual bool drawDisplayList(DisplayList* displayList, uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
