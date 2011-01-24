@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -24,10 +23,10 @@ import android.os.RemoteException;
 import java.io.IOException;
 
 /**
- * A low-level connection to a {@link Tag} using the NFC-F technology, also known as
- * JIS6319-4.
+ * A low-level connection to a {@link Tag} using the NFC-B technology, also known as
+ * ISO1443-3B.
  *
- * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link #get}.
  * Use this class to send and receive data with {@link #transceive transceive()}.
  *
  * <p>Applications must implement their own protocol stack on top of
@@ -37,31 +36,52 @@ import java.io.IOException;
  * Use of this class requires the {@link android.Manifest.permission#NFC}
  * permission.
  */
-public final class NfcF extends BasicTagTechnology {
+public final class NfcB extends BasicTagTechnology {
     /** @hide */
-    public static final String EXTRA_SC = "systemcode";
+    public static final String EXTRA_APPDATA = "appdata";
     /** @hide */
-    public static final String EXTRA_PMM = "pmm";
+    public static final String EXTRA_PROTINFO = "protinfo";
 
-    private byte[] mSystemCode = null;
-    private byte[] mManufacturer = null;
+    private byte[] mAppData;
+    private byte[] mProtInfo;
 
-    /** @hide */
-    public NfcF(NfcAdapter adapter, Tag tag, Bundle extras)
-            throws RemoteException {
-        super(adapter, tag, TagTechnology.NFC_F);
-        if (extras != null) {
-            mSystemCode = extras.getByteArray(EXTRA_SC);
-            mManufacturer = extras.getByteArray(EXTRA_PMM);
+    /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static NfcB get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.NFC_B)) return null;
+        try {
+            return new NfcB(tag);
+        } catch (RemoteException e) {
+            return null;
         }
     }
 
-    public byte[] getSystemCode() {
-      return mSystemCode;
+    /** @hide */
+    public NfcB(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.NFC_B);
+        Bundle extras = tag.getTechExtras(TagTechnology.NFC_B);
+        mAppData = extras.getByteArray(EXTRA_APPDATA);
+        mProtInfo = extras.getByteArray(EXTRA_PROTINFO);
     }
 
-    public byte[] getManufacturer() {
-      return mManufacturer;
+    /**
+     * Returns the Application Data bytes from the ATQB/SENSB_RES
+     * bytes discovered at tag discovery.
+     */
+    public byte[] getApplicationData() {
+        return mAppData;
+    }
+
+    /**
+     * Returns the Protocol Info bytes from the ATQB/SENSB_RES
+     * bytes discovered at tag discovery.
+     */
+    public byte[] getProtocolInfo() {
+        return mProtInfo;
     }
 
     /**
