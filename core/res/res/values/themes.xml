@@ -149,6 +149,8 @@
         <item name="alertDialogTheme">@android:style/Theme.Dialog.Alert</item>
         <item name="alertDialogCenterButtons">true</item>
         <item name="alertDialogIcon">@android:drawable/ic_dialog_alert</item>
+
+        <item name="toastFrameBackground">@android:drawable/toast_frame</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -863,6 +865,8 @@
         <item name="alertDialogTheme">@android:style/Theme.Holo.Dialog.Alert</item>
         <item name="alertDialogCenterButtons">false</item>
         <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_dark</item>
+
+        <item name="toastFrameBackground">@android:drawable/toast_frame_holo</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
@@ -1132,6 +1136,8 @@
         <item name="alertDialogCenterButtons">false</item>
         <item name="alertDialogTheme">@android:style/Theme.Holo.Light.Dialog.Alert</item>
         <item name="alertDialogIcon">@android:drawable/ic_dialog_alert_holo_light</item>
+
+        <item name="toastFrameBackground">@android:drawable/toast_frame_holo</item>
         
         <!-- Panel attributes -->
         <item name="panelBackground">@android:drawable/menu_background</item>
