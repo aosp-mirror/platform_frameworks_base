@@ -116,6 +116,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     // Set to true when text is set directly and no filtering shall be performed
     private boolean mBlockCompletion;
 
+    // When set, an update in the underlying adapter will update the result list popup.
+    // Set to false when the list is hidden to prevent asynchronous updates to popup the list again.
+    private boolean mPopupCanBeUpdated = true;
+
     private PassThroughClickListener mPassThroughClickListener;
     private PopupDataSetObserver mObserver;
 
@@ -722,21 +726,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             return;
         }
 
-        updateList();
-    }
-
-    private void updateList() {
         // the drop down is shown only when a minimum number of characters
         // was typed in the text view
         if (enoughToFilter()) {
             if (mFilter != null) {
+                mPopupCanBeUpdated = true;
                 performFiltering(getText(), mLastKeyCode);
                 buildImeCompletions();
             }
         } else {
             // drop down is automatically dismissed when enough characters
             // are deleted from the text view
-            if (!mPopup.isDropDownAlwaysVisible()) dismissDropDown();
+            if (!mPopup.isDropDownAlwaysVisible()) {
+                dismissDropDown();
+            }
             if (mFilter != null) {
                 mFilter.filter(null);
             }
@@ -908,10 +911,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
     /** {@inheritDoc} */
     public void onFilterComplete(int count) {
-        updateDropDownForFilter(count, true);
+        updateDropDownForFilter(count);
     }
 
-    private void updateDropDownForFilter(int count, boolean forceShow) {
+    private void updateDropDownForFilter(int count) {
         // Not attached to window, don't update drop-down
         if (getWindowVisibility() == View.GONE) return;
 
@@ -924,11 +927,15 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
 
         final boolean dropDownAlwaysVisible = mPopup.isDropDownAlwaysVisible();
         if ((count > 0 || dropDownAlwaysVisible) && enoughToFilter()) {
-            if (hasFocus() && hasWindowFocus() && (forceShow || isPopupShowing())) {
+            if (hasFocus() && hasWindowFocus() && mPopupCanBeUpdated) {
                 showDropDown();
             }
-        } else if (!dropDownAlwaysVisible) {
+        } else if (!dropDownAlwaysVisible && isPopupShowing()) {
             dismissDropDown();
+            // When the filter text is changed, the first update from the adapter may show an empty
+            // count (when the query is being performed on the network). Future updates when some
+            // content has been retrieved should still be able to update the list.
+            mPopupCanBeUpdated = true;
         }
     }
 
@@ -984,6 +991,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             imm.displayCompletions(this, null);
         }
         mPopup.dismiss();
+        mPopupCanBeUpdated = false;
     }
 
     @Override
@@ -1194,7 +1202,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                         if (adapter != null) {
                             // This will re-layout, thus resetting mDataChanged, so that the
                             // listView click listener stays responsive
-                            updateDropDownForFilter(adapter.getCount(), false);
+                            updateDropDownForFilter(adapter.getCount());
                         }
                     }
                 });
