@@ -722,6 +722,12 @@ OSCL_EXPORT_REF void PVGetVideoDimensions(VideoDecControls *decCtrl, int32 *disp
     *display_height = video->displayHeight;
 }
 
+OSCL_EXPORT_REF void PVGetBufferDimensions(VideoDecControls *decCtrl, int32 *width, int32 *height) {
+    VideoDecData *video = (VideoDecData *)decCtrl->videoDecoderData;
+    *width = video->width;
+    *height = video->height;
+}
+
 /* ======================================================================== */
 /*  Function : PVGetVideoTimeStamp()                                        */
 /*  Date     : 04/27/2000, 08/29/2000                                       */
