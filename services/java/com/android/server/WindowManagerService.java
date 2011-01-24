@@ -8891,6 +8891,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 // Ignore if process has died.
                             }
                         }
+
+                        mPolicy.focusChanged(lastFocus, newFocus);
                     }
                 } break;
 
@@ -11428,6 +11430,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     in.close();
                 } catch (IOException e) {
+                }
+            }
+        }
+    }
+
+    @Override
+    public void statusBarVisibilityChanged(int visibility) {
+        synchronized (mWindowMap) {
+            final int N = mWindows.size();
+            for (int i = 0; i < N; i++) {
+                WindowState ws = mWindows.get(i);
+                try {
+                    if (ws.getAttrs().hasSystemUiListeners) {
+                        ws.mClient.dispatchSystemUiVisibilityChanged(visibility);
+                    }
+                } catch (RemoteException e) {
+                    // so sorry
                 }
             }
         }

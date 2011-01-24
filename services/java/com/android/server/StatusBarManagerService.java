@@ -32,6 +32,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.view.View;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
@@ -308,10 +309,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * app keeps trying to turn it on.  For now they can just fight it out.  Having
      * these two separte inputs will allow us to keep that change local to here.  --joeo
      */
-    public void setLightsOn(boolean lightsOn) {
+    public void setSystemUiVisibility(int vis) {
         enforceStatusBarService();
 
         synchronized (mLock) {
+            final boolean lightsOn = (vis & View.STATUS_BAR_HIDDEN) == 0;
             updateLightsOnLocked(lightsOn);
         }
     }

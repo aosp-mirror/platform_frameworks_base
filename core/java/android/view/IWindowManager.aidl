@@ -187,4 +187,9 @@ interface IWindowManager
 	 * Create a screenshot of the applications currently displayed.
 	 */
 	Bitmap screenshotApplications(IBinder appToken, int maxWidth, int maxHeight);
+
+    /**
+     * Called by the status bar to notify Views of changes to System UI visiblity.
+     */
+    void statusBarVisibilityChanged(int visibility);
 }

@@ -564,14 +564,25 @@ public class TabletStatusBar extends StatusBar implements
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
                     mBarContents.setVisibility(View.VISIBLE);
                     mShadow.setVisibility(View.GONE);
+                    notifyLightsChanged(true);
                     break;
                 case MSG_HIDE_CHROME:
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
                     animateCollapse();
                     mBarContents.setVisibility(View.GONE);
                     mShadow.setVisibility(View.VISIBLE);
+                    notifyLightsChanged(false);
                     break;
             }
+        }
+    }
+
+    private void notifyLightsChanged(boolean shown) {
+        try {
+            Slog.d(TAG, "lights " + (shown?"on":"out"));
+            mWindowManager.statusBarVisibilityChanged(
+                    shown ? View.STATUS_BAR_VISIBLE : View.STATUS_BAR_HIDDEN);
+        } catch (RemoteException ex) {
         }
     }
 
