@@ -226,7 +226,7 @@ static int videoEditor_registerManualEditMethods(
 static void jniPreviewProgressCallback(void* cookie, M4OSA_UInt32 msgType,
                                         M4OSA_UInt32 argc);
 
-static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv, 
+static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
                                                     jobject thiz,
                                                     jobject mSurface,
                                                     jstring filePath,
@@ -259,6 +259,11 @@ videoEditor_generateClip(
                 jobject                             thiz,
                 jobject                             settings);
 
+static void videoEditor_clearSurface(JNIEnv* pEnv,
+                                    jobject thiz,
+                                    jobject surface,
+                                    jint width,
+                                    jint height);
 
 static JNINativeMethod gManualEditMethods[] = {
     {"getVersion",               "()L"VERSION_CLASS_NAME";",
@@ -295,6 +300,8 @@ static JNINativeMethod gManualEditMethods[] = {
                                 (int *)videoEditor_generateAudioRawFile      },
     {"nativeGenerateClip",      "(L"EDIT_SETTINGS_CLASS_NAME";)I",
                                 (void *)videoEditor_generateClip  },
+    {"nativeClearSurface",       "(Landroid/view/Surface;II)V",
+                                (void *)videoEditor_clearSurface  },
 };
 
 // temp file name of VSS out file
@@ -418,6 +425,134 @@ static void videoEditor_stopPreview(JNIEnv*  pEnv,
                                              "not initialized");
     pContext->mPreviewController->stopPreview();
 }
+
+static void videoEditor_clearSurface(JNIEnv* pEnv,
+                                    jobject thiz,
+                                    jobject surface,
+                                    jint width,
+                                    jint height)
+{
+    bool needToBeLoaded = true;
+    M4OSA_UInt32 framesizeYuv =0;
+    M4OSA_ERR result = M4NO_ERROR;
+    VideoEditor_renderPreviewFrameStr frameStr;
+    const char* pMessage = NULL;
+    M4VIFI_ImagePlane *yuvPlane;
+    ManualEditContext* pContext = M4OSA_NULL;
+
+    // Get the context.
+    pContext = (ManualEditContext*)videoEditClasses_getContext(&needToBeLoaded, pEnv, thiz);
+    VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO,
+                                "VIDEO_EDITOR","pContext = 0x%x",pContext);
+
+    // Make sure that the context was set.
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                             (M4OSA_NULL == pContext),
+                                             "not initialized");
+
+    // Make sure that the context was set.
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                 (M4OSA_NULL == pContext->mPreviewController),
+                                 "not initialized");
+
+    // Validate the surface parameter.
+    videoEditJava_checkAndThrowIllegalArgumentException(&needToBeLoaded, pEnv,
+                                                (NULL == surface),
+                                                "surface is null");
+
+    jclass surfaceClass = pEnv->FindClass("android/view/Surface");
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                             (M4OSA_NULL == surfaceClass),
+                                             "not initialized");
+
+    jfieldID surface_native =
+            pEnv->GetFieldID(surfaceClass, ANDROID_VIEW_SURFACE_JNI_ID, "I");
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                             (M4OSA_NULL == surface_native),
+                                             "not initialized");
+
+    Surface* const p = (Surface*)pEnv->GetIntField(surface, surface_native);
+    sp<Surface> previewSurface = sp<Surface>(p);
+
+    /**
+    * Allocate output YUV planes
+    */
+    yuvPlane = (M4VIFI_ImagePlane*)M4OSA_malloc(3*sizeof(M4VIFI_ImagePlane), M4VS,
+        (M4OSA_Char*)"videoEditor_clearSurface Output plane YUV");
+    if (yuvPlane == M4OSA_NULL) {
+        VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR",
+            "videoEditor_clearSurface() malloc error for yuv plane");
+        pMessage = videoEditJava_getErrorName(M4ERR_ALLOC);
+        jniThrowException(pEnv, "java/lang/RuntimeException", pMessage);
+        return ;
+    }
+
+    framesizeYuv = width * height * 1.5;
+    yuvPlane[0].u_width = width;
+    yuvPlane[0].u_height = height;
+    yuvPlane[0].u_topleft = 0;
+    yuvPlane[0].u_stride = width;
+    yuvPlane[0].pac_data = (M4VIFI_UInt8 *)M4OSA_malloc(framesizeYuv, M4VS,
+            (M4OSA_Char*)"videoEditor pixelArray");
+    if (yuvPlane[0].pac_data == M4OSA_NULL) {
+       VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR",
+       "videoEditor_renderPreviewFrame() malloc error");
+       pMessage = videoEditJava_getErrorName(M4ERR_ALLOC);
+       jniThrowException(pEnv, "java/lang/RuntimeException", pMessage);
+       return;
+    }
+
+    /* memset yuvPlane[0].pac_data with 0 for black frame */
+    M4OSA_memset((M4OSA_MemAddr8)yuvPlane[0].pac_data,framesizeYuv,0x00);
+    FILE *p1 = fopen("/mnt/sdcard/black.raw","wb");
+    fwrite(yuvPlane[0].pac_data,1,framesizeYuv,p1);
+    fclose(p1);
+
+    yuvPlane[1].u_width = width>>1;
+    yuvPlane[1].u_height = height>>1;
+    yuvPlane[1].u_topleft = 0;
+    yuvPlane[1].u_stride = width>>1;
+    yuvPlane[1].pac_data = yuvPlane[0].pac_data
+                + yuvPlane[0].u_width * yuvPlane[0].u_height;
+
+    M4OSA_memset((M4OSA_MemAddr8)yuvPlane[1].pac_data,yuvPlane[1].u_width *
+                                yuvPlane[1].u_height,128);
+    yuvPlane[2].u_width = (width)>>1;
+    yuvPlane[2].u_height = (height)>>1;
+    yuvPlane[2].u_topleft = 0;
+    yuvPlane[2].u_stride = (width)>>1;
+    yuvPlane[2].pac_data = yuvPlane[1].pac_data
+                + yuvPlane[1].u_width * yuvPlane[1].u_height;
+
+    M4OSA_memset((M4OSA_MemAddr8)yuvPlane[2].pac_data,yuvPlane[2].u_width *
+                                 yuvPlane[2].u_height,128);
+
+    /* Fill up the render structure*/
+    frameStr.pBuffer = (M4OSA_Void*)yuvPlane[0].pac_data;
+
+    frameStr.timeMs = 0;
+    frameStr.uiSurfaceWidth = width;
+    frameStr.uiSurfaceHeight = height;
+    frameStr.uiFrameWidth = width;
+    frameStr.uiFrameHeight = height;
+    frameStr.bApplyEffect = M4OSA_FALSE;
+    frameStr.clipBeginCutTime = 0;
+    frameStr.clipEndCutTime = 0;
+
+    /*pContext->mPreviewController->setPreviewFrameRenderingMode(
+        pContext->pEditSettings->\
+        pClipList[iCurrentClipIndex]->xVSS.MediaRendering,
+        pContext->pEditSettings->xVSS.outputVideoSize);
+     */
+
+    result = pContext->mPreviewController->renderPreviewFrame(previewSurface,
+                                                              &frameStr);
+    videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+            (M4NO_ERROR != result), result);
+
+    M4OSA_free((M4OSA_MemAddr32)yuvPlane[0].pac_data);
+    M4OSA_free((M4OSA_MemAddr32)yuvPlane);
+  }
 
 static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
                                     jobject thiz,
