@@ -10816,7 +10816,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Returns the status bar visibility that this view has requested.
      */
-    public int getSystemUiVisibility(int visibility) {
+    public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
 
