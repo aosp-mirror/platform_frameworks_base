@@ -307,7 +307,7 @@ public class MediaRecorder
             degrees != 270) {
             throw new IllegalArgumentException("Unsupported angle: " + degrees);
         }
-        setParameter(String.format("video-param-rotation-angle-degrees=%d", degrees));
+        setParameter("video-param-rotation-angle-degrees=" + degrees);
     }
 
     /**
@@ -426,7 +426,7 @@ public class MediaRecorder
         if (samplingRate <= 0) {
             throw new IllegalArgumentException("Audio sampling rate is not positive");
         }
-        setParameter(String.format("audio-param-sampling-rate=%d", samplingRate));
+        setParameter("audio-param-sampling-rate=" + samplingRate);
     }
 
     /**
@@ -441,7 +441,7 @@ public class MediaRecorder
         if (numChannels <= 0) {
             throw new IllegalArgumentException("Number of channels is not positive");
         }
-        setParameter(String.format("audio-param-number-of-channels=%d", numChannels));
+        setParameter("audio-param-number-of-channels=" + numChannels);
     }
 
     /**
@@ -457,7 +457,7 @@ public class MediaRecorder
         if (bitRate <= 0) {
             throw new IllegalArgumentException("Audio encoding bit rate is not positive");
         }
-        setParameter(String.format("audio-param-encoding-bitrate=%d", bitRate));
+        setParameter("audio-param-encoding-bitrate=" + bitRate);
     }
 
     /**
@@ -473,7 +473,7 @@ public class MediaRecorder
         if (bitRate <= 0) {
             throw new IllegalArgumentException("Video encoding bit rate is not positive");
         }
-        setParameter(String.format("video-param-encoding-bitrate=%d", bitRate));
+        setParameter("video-param-encoding-bitrate=" + bitRate);
     }
 
     /**
