@@ -152,8 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим полета"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режим полета ВКЛЮЧЕН"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режим полета ВЫКЛЮЧЕН"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безопасный режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Платные услуги"</string>
@@ -257,6 +256,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"связать с фоновым рисунком"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Разрешает выполнять привязку к интерфейсу фонового рисунка верхнего уровня. Не требуется для обычных приложений."</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаимодействовать с администратором устройства"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Позволяет владельцу отправлять целевые значения администратору устройства. Никогда не используется обычными приложениями."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"изменять ориентацию экрана"</string>
@@ -466,10 +469,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"изменять/удалять содержимое SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Разрешает приложению запись на USB-накопитель."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"изм./удал. содерж. мультимедиа"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Позволяет приложению изменять содержание внутреннего хранилища мультимедиа."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"получать доступ к кэшу файловой системы"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Разрешает программам доступ для записи и чтения к кэшу файловой системы."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"совершать и принимать интернет-вызовы"</string>
@@ -608,6 +609,8 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Рабочий"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Другой"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Введите PIN-код"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Введите пароль для разблокировки"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Введите PIN-код для разблокировки"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неверный PIN-код!"</string>
@@ -651,6 +654,8 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Вход"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неверное имя пользователя или пароль."</string>
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Проверка..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Разблокировать"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Вкл. звук"</string>
@@ -669,7 +674,7 @@
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Перейти с этой страницы?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Нажмите \"ОК\", чтобы продолжить, или \"Отмена\", чтобы остаться на текущей странице."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Подтвердите"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Совет: нажмите дважды, чтобы увеличить и уменьшить масштаб."</string>
-    <string name="autofill_this_form" msgid="1272247532604569872">"Автозап."</string>
+    <string name="autofill_this_form" msgid="1272247532604569872">"Автозаполнение"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Нужна настройка"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
@@ -692,7 +697,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Никогда"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"У вас нет разрешения на открытие этой страницы."</string>
     <string name="text_copied" msgid="4985729524670131385">"Текст скопирован в буфер обмена."</string>
-    <string name="more_item_label" msgid="4650918923083320495">"Дополнительно"</string>
+    <string name="more_item_label" msgid="4650918923083320495">"Ещё"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Меню+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"пробел"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ввод"</string>
@@ -1029,5 +1034,13 @@
     <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
 </resources>
