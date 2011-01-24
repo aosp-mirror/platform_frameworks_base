@@ -70,4 +70,9 @@ oneway interface IWindow {
      * Drag/drop events
      */
      void dispatchDragEvent(in DragEvent event);
+
+    /**
+     * System chrome visibility changes
+     */
+     void dispatchSystemUiVisibilityChanged(int visibility);
 }

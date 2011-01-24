@@ -27,6 +27,8 @@ import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.StatusBarManager;
+import android.content.Context;
+import android.util.AttributeSet;
 import android.os.Vibrator;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import android.os.SystemClock;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import android.os.PowerManager;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -45,6 +48,13 @@ public class StatusBarTest extends TestActivity
     StatusBarManager mStatusBarManager;
     NotificationManager mNotificationManager;
     Handler mHandler = new Handler();
+
+    View.OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener
+            = new View.OnSystemUiVisibilityChangeListener() {
+        public void onSystemUiVisibilityChange(int visibility) {
+            Log.d(TAG, "onSystemUiVisibilityChange visibility=" + visibility);
+        }
+    };
 
     @Override
     protected String tag() {
@@ -60,6 +70,20 @@ public class StatusBarTest extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+        new Test("STATUS_BAR_HIDDEN") {
+            public void run() {
+                View v = findViewById(android.R.id.list);
+                v.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+                v.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
+            }
+        },
+        new Test("not STATUS_BAR_HIDDEN") {
+            public void run() {
+                View v = findViewById(android.R.id.list);
+                v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+                v.setOnSystemUiVisibilityChangeListener(null);
+            }
+        },
         new Test("Double Remove") {
             public void run() {
                 Log.d(TAG, "set 0");

@@ -86,6 +86,10 @@ public final class BridgeWindow implements IWindow {
         // pass for now.
     }
 
+    public void dispatchSystemUiVisibilityChanged(int visibility) {
+        // pass for now.
+    }
+
     public IBinder asBinder() {
         // pass for now.
         return null;

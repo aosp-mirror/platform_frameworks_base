@@ -73,6 +73,9 @@ public class BaseIWindow extends IWindow.Stub {
     public void dispatchDragEvent(DragEvent event) {
     }
 
+    public void dispatchSystemUiVisibilityChanged(int visibility) {
+    }
+
     public void dispatchWallpaperCommand(String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         if (sync) {

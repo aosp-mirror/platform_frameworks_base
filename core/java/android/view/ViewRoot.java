@@ -718,6 +718,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             attachInfo.mWindowVisibility = viewVisibility;
             attachInfo.mRecomputeGlobalAttributes = false;
             attachInfo.mKeepScreenOn = false;
+            attachInfo.mSystemUiVisibility = 0;
             viewVisibilityChanged = false;
             mLastConfiguration.setTo(host.getResources().getConfiguration());
             host.dispatchAttachedToWindow(attachInfo, 0);
@@ -891,14 +892,17 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         if (attachInfo.mRecomputeGlobalAttributes) {
-            //Log.i(TAG, "Computing screen on!");
+            //Log.i(TAG, "Computing view hierarchy attributes!");
             attachInfo.mRecomputeGlobalAttributes = false;
-            boolean oldVal = attachInfo.mKeepScreenOn;
+            boolean oldScreenOn = attachInfo.mKeepScreenOn;
+            int oldVis = attachInfo.mSystemUiVisibility;
             attachInfo.mKeepScreenOn = false;
+            attachInfo.mSystemUiVisibility = 0;
+            attachInfo.mHasSystemUiListeners = false;
             host.dispatchCollectViewAttributes(0);
-            if (attachInfo.mKeepScreenOn != oldVal) {
+            if (attachInfo.mKeepScreenOn != oldScreenOn ||
+                    attachInfo.mSystemUiVisibility != oldVis) {
                 params = lp;
-                //Log.i(TAG, "Keep screen on changed: " + attachInfo.mKeepScreenOn);
             }
         }
 
@@ -980,6 +984,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (attachInfo.mKeepScreenOn) {
                         params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
                     }
+                    params.systemUiVisibility = attachInfo.mSystemUiVisibility;
+                    params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
                 }
                 if (DEBUG_LAYOUT) {
                     Log.i(TAG, "host=w:" + host.getMeasuredWidth() + ", h:" +
@@ -1895,6 +1901,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int CLOSE_SYSTEM_DIALOGS = 1014;
     public final static int DISPATCH_DRAG_EVENT = 1015;
     public final static int DISPATCH_DRAG_LOCATION_EVENT = 1016;
+    public final static int DISPATCH_SYSTEM_UI_VISIBILITY = 1017;
 
     @Override
     public void handleMessage(Message msg) {
@@ -2056,6 +2063,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             DragEvent event = (DragEvent)msg.obj;
             event.mLocalState = mLocalDragState;    // only present when this app called startDrag()
             handleDragEvent(event);
+        } break;
+        case DISPATCH_SYSTEM_UI_VISIBILITY: {
+            handleDispatchSystemUiVisibilityChanged(msg.arg1);
         } break;
         }
     }
@@ -2826,6 +2836,11 @@ public final class ViewRoot extends Handler implements ViewParent,
         event.recycle();
     }
 
+    public void handleDispatchSystemUiVisibilityChanged(int visibility) {
+        if (mView == null) return;
+        mView.dispatchSystemUiVisibilityChanged(visibility);
+    }
+
     public void getLastTouchPoint(Point outLocation) {
         outLocation.x = (int) mLastTouchPoint.x;
         outLocation.y = (int) mLastTouchPoint.y;
@@ -3141,6 +3156,10 @@ public final class ViewRoot extends Handler implements ViewParent,
         sendMessage(msg);
     }
 
+    public void dispatchSystemUiVisibilityChanged(int visibility) {
+        sendMessage(obtainMessage(DISPATCH_SYSTEM_UI_VISIBILITY, visibility, 0));
+    }
+
     /**
      * The window is getting focus so if there is anything focused/selected
      * send an {@link AccessibilityEvent} to announce that.
@@ -3357,6 +3376,14 @@ public final class ViewRoot extends Handler implements ViewParent,
             final ViewRoot viewRoot = mViewRoot.get();
             if (viewRoot != null) {
                 viewRoot.dispatchDragEvent(event);
+            }
+        }
+
+        @Override
+        public void dispatchSystemUiVisibilityChanged(int visibility) {
+            final ViewRoot viewRoot = mViewRoot.get();
+            if (viewRoot != null) {
+                viewRoot.dispatchSystemUiVisibilityChanged(visibility);
             }
         }
     }
