@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 #include <hardware_legacy/AudioPolicyManagerBase.h>
 #include <media/mediarecorder.h>
+#include <math.h>
 
 namespace android {
 
@@ -1019,6 +1020,8 @@ AudioPolicyManagerBase::AudioPolicyManagerBase(AudioPolicyClientInterface *clien
         mForceUse[i] = AudioSystem::FORCE_NONE;
     }
 
+    initializeVolumeCurves();
+
     // devices available by default are speaker, ear piece and microphone
     mAvailableOutputDevices = AudioSystem::DEVICE_OUT_EARPIECE |
                         AudioSystem::DEVICE_OUT_SPEAKER;
@@ -1810,6 +1813,62 @@ audio_io_handle_t AudioPolicyManagerBase::getActiveInput()
     return 0;
 }
 
+float AudioPolicyManagerBase::volIndexToAmpl(uint32_t device, const StreamDescriptor& streamDesc,
+        int indexInUi) {
+    // the volume index in the UI is relative to the min and max volume indices for this stream type
+    int nbSteps = 1 + streamDesc.mVolIndex[StreamDescriptor::VOLMAX] -
+            streamDesc.mVolIndex[StreamDescriptor::VOLMIN];
+    int volIdx = (nbSteps * (indexInUi - streamDesc.mIndexMin)) /
+            (streamDesc.mIndexMax - streamDesc.mIndexMin);
+
+    // find what part of the curve this index volume belongs to, or if it's out of bounds
+    int segment = 0;
+    if (volIdx < streamDesc.mVolIndex[StreamDescriptor::VOLMIN]) {         // out of bounds
+        return 0.0f;
+    } else if (volIdx < streamDesc.mVolIndex[StreamDescriptor::VOLKNEE1]) {
+        segment = 0;
+    } else if (volIdx < streamDesc.mVolIndex[StreamDescriptor::VOLKNEE2]) {
+        segment = 1;
+    } else if (volIdx <= streamDesc.mVolIndex[StreamDescriptor::VOLMAX]) {
+        segment = 2;
+    } else {                                                               // out of bounds
+        return 1.0f;
+    }
+
+    // linear interpolation in the attenuation table in dB
+    float decibels = streamDesc.mVolDbAtt[segment] +
+            ((float)(volIdx - streamDesc.mVolIndex[segment])) *
+                ( (streamDesc.mVolDbAtt[segment+1] - streamDesc.mVolDbAtt[segment]) /
+                    ((float)(streamDesc.mVolIndex[segment+1] - streamDesc.mVolIndex[segment])) );
+
+    float amplification = exp( decibels * 0.115129f); // exp( dB * ln(10) / 20 )
+
+    LOGV("VOLUME vol index=[%d %d %d], dB=[%.1f %.1f %.1f] ampl=%.5f",
+            streamDesc.mVolIndex[segment], volIdx, streamDesc.mVolIndex[segment+1],
+            streamDesc.mVolDbAtt[segment], decibels, streamDesc.mVolDbAtt[segment+1],
+            amplification);
+
+    return amplification;
+}
+
+void AudioPolicyManagerBase::initializeVolumeCurves() {
+    // initialize the volume curves to a (-49.5 - 0 dB) attenuation in 0.5dB steps
+    for (int i=0 ; i< AudioSystem::NUM_STREAM_TYPES ; i++) {
+        mStreams[i].mVolIndex[StreamDescriptor::VOLMIN] = 1;
+        mStreams[i].mVolDbAtt[StreamDescriptor::VOLMIN] = -49.5f;
+        mStreams[i].mVolIndex[StreamDescriptor::VOLKNEE1] = 33;
+        mStreams[i].mVolDbAtt[StreamDescriptor::VOLKNEE1] = -33.5f;
+        mStreams[i].mVolIndex[StreamDescriptor::VOLKNEE2] = 66;
+        mStreams[i].mVolDbAtt[StreamDescriptor::VOLKNEE2] = -17.0f;
+        // here we use 100 steps to avoid rounding errors
+        // when computing the volume in volIndexToAmpl()
+        mStreams[i].mVolIndex[StreamDescriptor::VOLMAX] = 100;
+        mStreams[i].mVolDbAtt[StreamDescriptor::VOLMAX] = 0.0f;
+    }
+
+    // TODO add modifications for music to have finer steps below knee1 and above knee2
+}
+
 float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_handle_t output, uint32_t device)
 {
     float volume = 1.0;
@@ -1820,8 +1879,7 @@ float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_hand
         device = outputDesc->device();
     }
 
-    int volInt = (100 * (index - streamDesc.mIndexMin)) / (streamDesc.mIndexMax - streamDesc.mIndexMin);
-    volume = AudioSystem::linearToLog(volInt);
+    volume = volIndexToAmpl(device, streamDesc, index);
 
     // if a headset is connected, apply the following rules to ring tones and notifications
     // to avoid sound level bursts in user's ears:
