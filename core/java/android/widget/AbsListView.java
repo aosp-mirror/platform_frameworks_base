@@ -1098,7 +1098,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (childCount == 0) return true;
         if (childCount != mItemCount) return false;
 
-        return getChildAt(0).getTop() >= 0 && getChildAt(childCount - 1).getBottom() <= mBottom;
+        return getChildAt(0).getTop() >= mListPadding.top &&
+                getChildAt(childCount - 1).getBottom() <= getHeight() - mListPadding.bottom;
     }
 
     /**
