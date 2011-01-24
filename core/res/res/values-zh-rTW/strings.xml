@@ -152,8 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飛航模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛航模式為 [關閉]"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要額外費用的服務。"</string>
@@ -257,6 +256,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"允許擁有人連結至輸入法的最頂層介面。一般應用程式不需使用此選項。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"連結至桌布"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允許擁有人連結至桌布的最頂層介面，一般應用程式不需使用此選項。"</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允許應用程式將調用請求 (intent) 傳送至裝置管理員；一般應用程式不需使用此選項。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"變更螢幕顯示方向"</string>
@@ -466,10 +469,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/刪除 SD 卡的內容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"允許應用程式寫入 USB 儲存裝置。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"允許應用程式寫入 SD 卡。"</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/刪除內部媒體儲存裝置內容"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"允許應用程式修改內部媒體儲存裝置內容。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"存取快取檔案系統"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"撥打/接聽網路電話"</string>
@@ -608,6 +609,8 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"公司"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"輸入 PIN 碼"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"輸入 PIN 進行解鎖"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 碼錯誤！"</string>
@@ -651,6 +654,8 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密碼"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登入"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"使用者名稱或密碼錯誤。"</string>
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"檢查中..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解除封鎖"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"開啟音效"</string>
@@ -1029,5 +1034,13 @@
     <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
 </resources>

@@ -257,6 +257,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"入力方法のトップレベルインターフェースに関連付けることを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"壁紙にバインド"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"壁紙のトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"デバイス管理者との通信"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"デバイス管理者へのintentの送信を所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"画面の向きの変更"</string>
@@ -608,6 +612,8 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"勤務先"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"その他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PINコードを入力"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"ロックを解除するにはパスワードを入力"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"ロックを解除するにはPINを入力"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PINコードが正しくありません。"</string>
@@ -651,6 +657,8 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"パスワード"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ログイン"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ユーザー名またはパスワードが正しくありません。"</string>
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"確認中..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ロック解除"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"サウンドON"</string>
@@ -1029,5 +1037,13 @@
     <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
 </resources>
