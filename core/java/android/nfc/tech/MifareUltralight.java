@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.os.Bundle;
 import android.os.RemoteException;
 
 import java.io.IOException;
@@ -44,16 +42,31 @@ public final class MifareUltralight extends BasicTagTechnology {
 
     private int mType;
 
+    /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static MifareUltralight get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.MIFARE_ULTRALIGHT)) return null;
+        try {
+            return new MifareUltralight(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** @hide */
-    public MifareUltralight(NfcAdapter adapter, Tag tag, Bundle extras) throws RemoteException {
-        super(adapter, tag, TagTechnology.MIFARE_ULTRALIGHT);
+    public MifareUltralight(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.MIFARE_ULTRALIGHT);
 
         // Check if this could actually be a Mifare
-        NfcA a = (NfcA) adapter.getTechnology(tag, TagTechnology.NFC_A);
+        NfcA a = NfcA.get(tag);
 
         mType = TYPE_UNKNOWN;
 
-        if( a.getSak() == 0x00 && tag.getId()[0] == NXP_MANUFACTURER_ID ) {
+        if (a.getSak() == 0x00 && tag.getId()[0] == NXP_MANUFACTURER_ID) {
             // could be UL or UL-C
             mType = TYPE_ULTRALIGHT;
         }

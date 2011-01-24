@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
 import android.nfc.ErrorCodes;
 import android.nfc.FormatException;
+import android.nfc.INfcTag;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -32,7 +33,7 @@ import java.io.IOException;
  * to interact with NDEF data. MiFare Classic cards that present NDEF data may also be used
  * via this class. To determine the exact technology being used call {@link #getTechnologyId()}
  *
- * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link #get}.
  *
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
@@ -60,14 +61,12 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_TYPE = "ndeftype";
 
-    //TODO: consider removing OTHER entirely - and not allowing Ndef to
-    // enumerate for tag types outside of (NFC Forum 1-4, MifareClassic)
     public static final int OTHER = -1;
     public static final int NFC_FORUM_TYPE_1 = 1;
     public static final int NFC_FORUM_TYPE_2 = 2;
     public static final int NFC_FORUM_TYPE_3 = 3;
     public static final int NFC_FORUM_TYPE_4 = 4;
-    public static final int MIFARE_CLASSIC = 105;
+    public static final int MIFARE_CLASSIC = 101;
 
     private final int mMaxNdefSize;
     private final int mCardState;
@@ -75,11 +74,27 @@ public final class Ndef extends BasicTagTechnology {
     private final int mNdefType;
 
     /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static Ndef get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.NDEF)) return null;
+        try {
+            return new Ndef(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Internal constructor, to be used by NfcAdapter
      * @hide
      */
-    public Ndef(NfcAdapter adapter, Tag tag, int tech, Bundle extras) throws RemoteException {
-        super(adapter, tag, tech);
+    public Ndef(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.NDEF);
+        Bundle extras = tag.getTechExtras(TagTechnology.NDEF);
         if (extras != null) {
             mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
             mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
@@ -142,11 +157,12 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
+            INfcTag tagService = mTag.getTagService();
             int serviceHandle = mTag.getServiceHandle();
-            if (mTagService.isNdef(serviceHandle)) {
-                NdefMessage msg = mTagService.ndefRead(serviceHandle);
+            if (tagService.isNdef(serviceHandle)) {
+                NdefMessage msg = tagService.ndefRead(serviceHandle);
                 if (msg == null) {
-                    int errorCode = mTagService.getLastError(serviceHandle);
+                    int errorCode = tagService.getLastError(serviceHandle);
                     switch (errorCode) {
                         case ErrorCodes.ERROR_IO:
                             throw new IOException();
@@ -175,9 +191,10 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
+            INfcTag tagService = mTag.getTagService();
             int serviceHandle = mTag.getServiceHandle();
-            if (mTagService.isNdef(serviceHandle)) {
-                int errorCode = mTagService.ndefWrite(serviceHandle, msg);
+            if (tagService.isNdef(serviceHandle)) {
+                int errorCode = tagService.ndefWrite(serviceHandle, msg);
                 switch (errorCode) {
                     case ErrorCodes.SUCCESS:
                         break;
@@ -221,8 +238,9 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
-            if (mTagService.isNdef(mTag.getServiceHandle())) {
-                int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
+            INfcTag tagService = mTag.getTagService();
+            if (tagService.isNdef(mTag.getServiceHandle())) {
+                int errorCode = tagService.ndefMakeReadOnly(mTag.getServiceHandle());
                 switch (errorCode) {
                     case ErrorCodes.SUCCESS:
                         return true;

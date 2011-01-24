@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
 import android.nfc.Tag;
 
@@ -24,42 +24,49 @@ public interface TagTechnology {
     /**
      * This technology is an instance of {@link NfcA}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int NFC_A = 1;
 
     /**
      * This technology is an instance of {@link NfcB}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int NFC_B = 2;
 
     /**
      * This technology is an instance of {@link IsoDep}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int ISO_DEP = 3;
 
     /**
      * This technology is an instance of {@link NfcF}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int NFC_F = 4;
 
     /**
      * This technology is an instance of {@link NfcV}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int NFC_V = 5;
 
     /**
      * This technology is an instance of {@link Ndef}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int NDEF = 6;
 
     /**
      * This technology is an instance of {@link NdefFormatable}.
      * <p>Support for this technology type is mandatory.
+     * @hide
      */
     public static final int NDEF_FORMATABLE = 7;
 
@@ -68,6 +75,7 @@ public interface TagTechnology {
      * <p>Support for this technology type is optional. If a stack doesn't support this technology
      * type tags using it must still be discovered and present the lower level radio interface
      * technologies in use.
+     * @hide
      */
     public static final int MIFARE_CLASSIC = 8;
 
@@ -76,11 +84,13 @@ public interface TagTechnology {
      * <p>Support for this technology type is optional. If a stack doesn't support this technology
      * type tags using it must still be discovered and present the lower level radio interface
      * technologies in use.
+     * @hide
      */
     public static final int MIFARE_ULTRALIGHT = 9;
 
     /**
      * Returns the technology type for this tag connection.
+     * @hide
      */
     public int getTechnologyId();
 
