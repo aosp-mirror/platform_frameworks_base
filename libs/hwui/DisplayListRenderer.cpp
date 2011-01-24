@@ -325,6 +325,7 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
 
                 renderer.drawBitmapMesh(bitmap, meshWidth, meshHeight, vertices, colors, getPaint());
             }
+            break;
             case DrawPatch: {
                 int32_t* xDivs = NULL;
                 int32_t* yDivs = NULL;
