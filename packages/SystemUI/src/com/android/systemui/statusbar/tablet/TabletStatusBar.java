@@ -1219,6 +1219,8 @@ public class TabletStatusBar extends StatusBar implements
                 mPile.addView(toShow.get(i));
             }
         }
+
+        mNotificationPanel.setNotificationCount(N);
     }
 
     void workAroundBadLayerDrawableOpacity(View v) {
