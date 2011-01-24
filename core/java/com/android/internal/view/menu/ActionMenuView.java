@@ -53,7 +53,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     
     private Drawable mDivider;
 
-    private Runnable mShowOverflow = new Runnable() {
+    private final Runnable mShowOverflow = new Runnable() {
         public void run() {
             showOverflowMenu();
         }
@@ -127,6 +127,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         super.onDetachedFromWindow();
         if (mOverflowPopup != null && mOverflowPopup.isShowing()) {
             mOverflowPopup.dismiss();
+        }
+        removeCallbacks(mShowOverflow);
+        if (mPostedOpenRunnable != null) {
+            removeCallbacks(mPostedOpenRunnable);
         }
     }
 
