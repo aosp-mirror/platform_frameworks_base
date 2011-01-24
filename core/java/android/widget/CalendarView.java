@@ -440,11 +440,18 @@ public class CalendarView extends FrameLayout {
             return;
         }
         mMinDate.setTimeInMillis(minDate);
-        // reinitialize the adapter since its range depends on min date
-        mAdapter.init();
+        // make sure the current date is not earlier than
+        // the new min date since the latter is used for
+        // calculating the indices in the adapter thus
+        // avoiding out of bounds error
         Calendar date = mAdapter.mSelectedDate;
         if (date.before(mMinDate)) {
-            setDate(mMinDate.getTimeInMillis());
+            mAdapter.setSelectedDay(mMinDate);
+        }
+        // reinitialize the adapter since its range depends on min date
+        mAdapter.init();
+        if (date.before(mMinDate)) {
+            setDate(mTempDate.getTimeInMillis());
         } else {
             // we go to the current date to force the ListView to query its
             // adapter for the shown views since we have changed the adapter
@@ -753,7 +760,13 @@ public class CalendarView extends FrameLayout {
             mFirstDayOfMonth.set(Calendar.DAY_OF_MONTH, 1);
 
             setMonthDisplayed(mFirstDayOfMonth);
-            position = getWeeksSinceMinDate(mFirstDayOfMonth);
+
+            // the earliest time we can scroll to is the min date
+            if (mFirstDayOfMonth.before(mMinDate)) {
+                position = 0;
+            } else {
+                position = getWeeksSinceMinDate(mFirstDayOfMonth);
+            }
 
             mPreviousScrollState = OnScrollListener.SCROLL_STATE_FLING;
             if (animate) {
