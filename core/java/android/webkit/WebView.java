@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.view.HardwareCanvas;
 import com.android.internal.R;
 
 import android.annotation.Widget;
@@ -353,7 +354,7 @@ public class WebView extends AbsoluteLayout
 
     private ZoomManager mZoomManager;
 
-    private Rect mGLRectViewport;
+    private Rect mGLRectViewport = new Rect();
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -4079,20 +4080,8 @@ public class WebView extends AbsoluteLayout
         }
 
         if (canvas.isHardwareAccelerated()) {
-            try {
-                if (canvas.acquireContext()) {
-                      Rect rect = new Rect(mGLRectViewport.left,
-                                           mGLRectViewport.top,
-                                           mGLRectViewport.right,
-                                           mGLRectViewport.bottom
-                                           - getVisibleTitleHeight());
-                      if (nativeDrawGL(rect, getScale(), extras)) {
-                          invalidate();
-                      }
-                }
-            } finally {
-                canvas.releaseContext();
-            }
+            int functor = nativeGetDrawGLFunction(mGLRectViewport, getScale(), extras);
+            ((HardwareCanvas) canvas).callDrawGLFunction(functor);
         } else {
             DrawFilter df = null;
             if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
@@ -5163,7 +5152,6 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(false, false, true);
                 }
-                setFocusControllerActive(false);
             }
             mGotKeyDown = false;
         }
@@ -5173,18 +5161,16 @@ public class WebView extends AbsoluteLayout
 
     void setGLRectViewport() {
         // Use the getGlobalVisibleRect() to get the intersection among the parents
-        Rect webViewRect = new Rect();
-        boolean visible = getGlobalVisibleRect(webViewRect);
+        getGlobalVisibleRect(mGLRectViewport);
 
         // Then need to invert the Y axis, just for GL
         View rootView = getRootView();
         int rootViewHeight = rootView.getHeight();
-        int savedWebViewBottom = webViewRect.bottom;
-        webViewRect.bottom = rootViewHeight - webViewRect.top;
-        webViewRect.top = rootViewHeight - savedWebViewBottom;
+        int savedWebViewBottom = mGLRectViewport.bottom;
+        mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeight();
+        mGLRectViewport.top = rootViewHeight - savedWebViewBottom;
 
-        // Store the viewport
-        mGLRectViewport = webViewRect;
+        nativeUpdateDrawGLFunction(mGLRectViewport);
     }
 
     /**
@@ -8239,6 +8225,8 @@ public class WebView extends AbsoluteLayout
             boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations();
+    private native int      nativeGetDrawGLFunction(Rect rect, float scale, int extras);
+    private native void     nativeUpdateDrawGLFunction(Rect rect);
     private native boolean  nativeDrawGL(Rect rect, float scale, int extras);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper,

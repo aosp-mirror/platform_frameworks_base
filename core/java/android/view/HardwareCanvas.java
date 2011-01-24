@@ -21,9 +21,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 
 /**
- * Hardware accelerated canvas. 
+ * Hardware accelerated canvas.
+ *
+ * @hide 
  */
-abstract class HardwareCanvas extends Canvas {
+public abstract class HardwareCanvas extends Canvas {
     @Override
     public boolean isHardwareAccelerated() {
         return true;
@@ -49,7 +51,7 @@ abstract class HardwareCanvas extends Canvas {
      * 
      * @param displayList The display list to replay.
      */
-    abstract void drawDisplayList(DisplayList displayList);
+    abstract boolean drawDisplayList(DisplayList displayList);
 
     /**
      * Draws the specified layer onto this canvas.
@@ -59,5 +61,18 @@ abstract class HardwareCanvas extends Canvas {
      * @param y The top coordinate of the layer
      * @param paint The paint used to draw the layer
      */
-    abstract void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint); 
+    abstract void drawHardwareLayer(HardwareLayer layer, float x, float y, Paint paint);
+
+    /**
+     * Calls the function specified with the drawGLFunction function pointer. This is
+     * functionality used by webkit for calling into their renderer from our display lists.
+     * This function may return true if an invalidation is needed after the call.
+     *
+     * @param drawGLFunction A native function pointer
+     * @return true if an invalidate is needed after the call, false otherwise
+     */
+    public boolean callDrawGLFunction(int drawGLFunction) {
+        // Noop - this is done in the display list recorder subclass
+        return false;
+    }
 }

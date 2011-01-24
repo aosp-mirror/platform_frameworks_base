@@ -220,6 +220,13 @@ class GLES20Canvas extends HardwareCanvas {
     private native void nAcquireContext(int renderer);
 
     @Override
+    public boolean callDrawGLFunction(int drawGLFunction) {
+        return nCallDrawGLFunction(mRenderer, drawGLFunction);
+    }
+
+    private native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
+
+    @Override
     public void releaseContext() {
         if (mContextLocked) {
             nReleaseContext(mRenderer);
@@ -246,11 +253,11 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDestroyDisplayList(int displayList);
 
     @Override
-    public void drawDisplayList(DisplayList displayList) {
-        nDrawDisplayList(mRenderer, ((GLES20DisplayList) displayList).mNativeDisplayList);
+    public boolean drawDisplayList(DisplayList displayList) {
+        return nDrawDisplayList(mRenderer, ((GLES20DisplayList) displayList).mNativeDisplayList);
     }
 
-    private native void nDrawDisplayList(int renderer, int displayList);
+    private native boolean nDrawDisplayList(int renderer, int displayList);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
@@ -306,7 +313,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean clipRect(int left, int top, int right, int bottom) {
-        return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);        
+        return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
     
     private native boolean nClipRect(int renderer, int left, int top, int right, int bottom, int op);

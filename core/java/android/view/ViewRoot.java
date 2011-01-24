@@ -597,7 +597,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 dirty.inset(-1, -1);
             }
         }
-        if (!mDirty.isEmpty()) {
+        if (!mDirty.isEmpty() && !mDirty.contains(dirty)) {
             mAttachInfo.mIgnoreDirtyState = true;
         }
         mDirty.union(dirty);
