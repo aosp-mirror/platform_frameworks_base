@@ -690,6 +690,7 @@ public final class MenuItemImpl implements MenuItem {
 
     public MenuItem setActionView(View view) {
         mActionView = view;
+        mMenu.onItemActionRequestChanged(this);
         return this;
     }
 
