@@ -572,4 +572,13 @@ public interface VideoEditor {
      *        milliseconds
      */
     public long stopPreview();
+
+    /**
+     * Clears the preview surface
+     *
+     * @param surfaceHolder SurfaceHolder where the preview is rendered
+     * and needs to be cleared.
+     */
+    public void clearSurface(SurfaceHolder surfaceHolder);
+
 }
