@@ -4334,7 +4334,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selStart = getSelectionStart();
             selEnd = getSelectionEnd();
 
-            if ((mCursorVisible || mTextIsSelectable) && selStart >= 0 && isEnabled()) {
+            if ((isCursorVisible() || mTextIsSelectable) && selStart >= 0 && isEnabled()) {
                 if (mHighlightPath == null)
                     mHighlightPath = new Path();
 
@@ -6491,6 +6491,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         prepareCursorControllers();
     }
 
+    private boolean isCursorVisible() {
+        return mCursorVisible && isTextEditable();
+    }
+
     private boolean canMarquee() {
         int width = (mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight());
         return width > 0 && mLayout.getLineWidth(0) > width;
@@ -6979,7 +6983,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void makeBlink() {
-        if (!mCursorVisible || !isTextEditable()) {
+        if (!isCursorVisible()) {
             if (mBlink != null) {
                 mBlink.removeCallbacks(mBlink);
             }
@@ -7373,8 +7377,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     || windowParams.type > WindowManager.LayoutParams.LAST_SUB_WINDOW;
         }
 
-        mInsertionControllerEnabled = windowSupportsHandles && isTextEditable() && mCursorVisible &&
-                mLayout != null;
+        mInsertionControllerEnabled = windowSupportsHandles && isCursorVisible() && mLayout != null;
         mSelectionControllerEnabled = windowSupportsHandles && textCanBeSelected() &&
                 mLayout != null;
 
