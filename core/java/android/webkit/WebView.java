@@ -498,9 +498,6 @@ public class WebView extends AbsoluteLayout
     // default is not set, the UI will continue handle them.
     private boolean mDeferTouchProcess;
 
-    // if true, multi-touch events will be passed to webkit directly before UI
-    private boolean mDeferMultitouch = false;
-
     // Currently, multi-touch events are sent to WebKit first then back to
     // WebView while single-touch events are handled in WebView first.
     // So there is a chance that a single-touch move event is handled in WebView
@@ -8162,17 +8159,6 @@ public class WebView extends AbsoluteLayout
      */
     public void setTouchInterval(int interval) {
         mCurrentTouchInterval = interval;
-    }
-
-    /**
-     * Toggle whether multi touch events should be sent to webkit
-     * no matter if UI wants to handle it first.
-     *
-     * @hide This is only used by the webkit layout test.
-     */
-    public void setDeferMultiTouch(boolean value) {
-      mDeferMultitouch = value;
-      Log.v(LOGTAG, "set mDeferMultitouch to " + value);
     }
 
     /**

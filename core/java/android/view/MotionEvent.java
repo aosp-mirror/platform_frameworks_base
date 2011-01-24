@@ -1569,7 +1569,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             + " device=" + mDeviceId
             + " source=0x" + Integer.toHexString(mSource)
             + (getPointerCount() > 1 ?
-                " pointerId2=" + getPointerId(1) + " x2=" + getX(2) + " y2=" + getY(2) : "")
+                " pointerId2=" + getPointerId(1) + " x2=" + getX(1) + " y2=" + getY(1) : "")
             + "}";
     }
 
