@@ -695,6 +695,12 @@ public interface WindowManagerPolicy {
      * immediately.
      */
     public boolean allowAppAnimationsLw();
+
+
+    /**
+     * A new window has been focused.
+     */
+    public void focusChanged(WindowState lastFocus, WindowState newFocus);
     
     /**
      * Called after the screen turns off.

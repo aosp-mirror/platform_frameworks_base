@@ -48,6 +48,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -1697,6 +1698,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int OVER_SCROLL_NEVER = 2;
 
     /**
+     * View has requested the status bar to be visible (the default).
+     *
+     * @see setSystemUiVisibility
+     */
+    public static final int STATUS_BAR_VISIBLE = 0;
+
+    /**
+     * View has requested the status bar to be visible (the default).
+     *
+     * @see setSystemUiVisibility
+     */
+    public static final int STATUS_BAR_HIDDEN = 0x00000001;
+
+    /**
      * Controls the over-scroll mode for this view.
      * See {@link #overScrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVER_SCROLL_ALWAYS}, {@link #OVER_SCROLL_IF_CONTENT_SCROLLS},
@@ -1733,6 +1748,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY, name = "DIRTY")
     })
     int mPrivateFlags;
+
+    /**
+     * This view's request for the visibility of the status bar.
+     * @hide
+     */
+    int mSystemUiVisibility;
 
     /**
      * Count of how many windows this view has been attached to.
@@ -2036,6 +2057,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private OnTouchListener mOnTouchListener;
 
     private OnDragListener mOnDragListener;
+
+    private OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener;
 
     /**
      * The application environment this view lives in.
@@ -4716,17 +4739,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     void performCollectViewAttributes(int visibility) {
-        //noinspection PointlessBitwiseExpression
-        if (((visibility | mViewFlags) & (VISIBILITY_MASK | KEEP_SCREEN_ON))
-                == (VISIBLE | KEEP_SCREEN_ON)) {
-            mAttachInfo.mKeepScreenOn = true;
+        if ((visibility & VISIBILITY_MASK) == VISIBLE) {
+            if ((mViewFlags & KEEP_SCREEN_ON) == KEEP_SCREEN_ON) {
+                mAttachInfo.mKeepScreenOn = true;
+            }
+            mAttachInfo.mSystemUiVisibility |= mSystemUiVisibility;
+            if (mOnSystemUiVisibilityChangeListener != null) {
+                mAttachInfo.mHasSystemUiListeners = true;
+            }
         }
     }
 
     void needGlobalAttributesUpdate(boolean force) {
-        AttachInfo ai = mAttachInfo;
+        final AttachInfo ai = mAttachInfo;
         if (ai != null) {
-            if (ai.mKeepScreenOn || force) {
+            if (force || ai.mKeepScreenOn || (ai.mSystemUiVisibility != 0)
+                    || ai.mHasSystemUiListeners) {
                 ai.mRecomputeGlobalAttributes = true;
             }
         }
@@ -5342,7 +5370,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         if ((changed & KEEP_SCREEN_ON) != 0) {
-            if (mParent != null) {
+            if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
                 mParent.recomputeViewAttributes(this);
             }
         }
@@ -10659,6 +10687,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Request that the visibility of the status bar be changed.
+     */
+    public void setSystemUiVisibility(int visibility) {
+        if (visibility != mSystemUiVisibility) {
+            mSystemUiVisibility = visibility;
+            if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
+                mParent.recomputeViewAttributes(this);
+            }
+        }
+    }
+
+    /**
+     * Returns the status bar visibility that this view has requested.
+     */
+    public int getSystemUiVisibility(int visibility) {
+        return mSystemUiVisibility;
+    }
+
+    public void setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener l) {
+        mOnSystemUiVisibilityChangeListener = l;
+        if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
+            mParent.recomputeViewAttributes(this);
+        }
+    }
+
+    /**
+     */
+    public void dispatchSystemUiVisibilityChanged(int visibility) {
+        if (mOnSystemUiVisibilityChangeListener != null) {
+            mOnSystemUiVisibilityChangeListener.onSystemUiVisibilityChange(visibility);
+        }
+    }
+
+    /**
      * !!! TODO: real docs
      *
      * The base class implementation makes the shadow the same size and appearance
@@ -11348,6 +11410,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo);
     }
 
+    /**
+     * Interface definition for a callback to be invoked when the status bar changes
+     * visibility.
+     *
+     * @see #setOnSystemUiVisibilityChangeListener
+     */
+    public interface OnSystemUiVisibilityChangeListener {
+        /**
+         * Called when the status bar changes visibility because of a call to
+         * {@link #setSystemUiVisibility}.
+         *
+         * @param visibility {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
+         */
+        public void onSystemUiVisibilityChange(int visibility);
+    }
+
     private final class UnsetPressedState implements Runnable {
         public void run() {
             setPressed(false);
@@ -11564,6 +11642,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * Set during a traveral if any views want to keep the screen on.
          */
         boolean mKeepScreenOn;
+
+        /**
+         * Bitwise-or of all of the values that views have passed to setSystemUiVisibility().
+         */
+        int mSystemUiVisibility;
+
+        /**
+         * True if a view in this hierarchy has an OnSystemUiVisibilityChangeListener
+         * attached.
+         */
+        boolean mHasSystemUiListeners;
 
         /**
          * Set if the visibility of any views has changed.

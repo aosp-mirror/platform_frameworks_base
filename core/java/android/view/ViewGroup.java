@@ -860,8 +860,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     public void recomputeViewAttributes(View child) {
-        ViewParent parent = mParent;
-        if (parent != null) parent.recomputeViewAttributes(this);
+        if (mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
+            ViewParent parent = mParent;
+            if (parent != null) parent.recomputeViewAttributes(this);
+        }
     }
 
     @Override
@@ -1068,6 +1070,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.mCanAcceptDrop = child.dispatchDragEvent(mCurrentDrag);
         }
         return child.mCanAcceptDrop;
+    }
+
+    @Override
+    public void dispatchSystemUiVisibilityChanged(int visible) {
+        super.dispatchSystemUiVisibilityChanged(visible);
+
+        final int count = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i=0; i <count; i++) {
+            final View child = children[i];
+            child.dispatchSystemUiVisibilityChanged(visible);
+        }
     }
 
     /**
