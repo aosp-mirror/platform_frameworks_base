@@ -885,15 +885,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final Menu parentMenu = subMenu.getRootMenu();
         final PanelFeatureState panel = findMenuPanel(parentMenu);
 
-        /*
-         * Use the panel open state to determine whether this is coming from an open panel
-         * or an action button. If it's an open panel we want to use MenuDialogHelper.
-         * If it's closed we want to grab the relevant view and create a popup anchored to it.
-         */
-        if (panel.isOpen) {
-            // The window manager will give us a valid window token
-            new MenuDialogHelper(subMenu).show(null);
-        } else if (hasFeature(FEATURE_ACTION_BAR)) {
+        if (hasFeature(FEATURE_ACTION_BAR) && panel.featureId == FEATURE_OPTIONS_PANEL) {
             mDecor.post(new Runnable() {
                 public void run() {
                     mActionButtonPopup = new ActionButtonSubmenu(getContext(), subMenu);
@@ -904,6 +896,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
             });
+        } else {
+            // The window manager will give us a valid window token
+            new MenuDialogHelper(subMenu).show(null);
         }
 
         return true;
