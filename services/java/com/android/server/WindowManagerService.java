@@ -396,6 +396,8 @@ public class WindowManagerService extends IWindowManager.Stub
     int mLastRotationFlags;
     ArrayList<IRotationWatcher> mRotationWatchers
             = new ArrayList<IRotationWatcher>();
+    int mDeferredRotation;
+    int mDeferredRotationAnimFlags;
 
     boolean mLayoutNeeded = true;
     boolean mAnimationPending = false;
@@ -516,10 +518,6 @@ public class WindowManagerService extends IWindowManager.Stub
         ArrayList<WindowState> mNotifiedWindows;
         boolean mDragInProgress;
 
-        boolean mPerformDeferredRotation;
-        int mRotation;
-        int mAnimFlags;
-
         private final Region mTmpRegion = new Region();
 
         DragState(IBinder token, Surface surface, int flags, IBinder localWin) {
@@ -541,7 +539,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mData = null;
             mThumbOffsetX = mThumbOffsetY = 0;
             mNotifiedWindows = null;
-            mPerformDeferredRotation = false;
         }
 
         void register() {
@@ -683,24 +680,15 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputMonitor.setUpdateInputWindowsNeededLw();
             mInputMonitor.updateInputWindowsLw();
 
-            // Retain the parameters of any deferred rotation operation so
-            // that we can perform it after the reset / unref of the drag state
-            final boolean performRotation = mPerformDeferredRotation;
-            final int rotation = mRotation;
-            final int animFlags = mAnimFlags;
-
             // free our resources and drop all the object references
             mDragState.reset();
             mDragState = null;
 
-            // Now that we've officially ended the drag, execute any
-            // deferred rotation
-            if (performRotation) {
-                if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-drag rotation");
-                boolean changed = setRotationUncheckedLocked(rotation, animFlags, false);
-                if (changed) {
-                    sendNewConfiguration();
-                }
+            if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-drag rotation");
+            boolean changed = setRotationUncheckedLocked(
+                    WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
+            if (changed) {
+                sendNewConfiguration();
             }
         }
 
@@ -835,12 +823,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             return touchedWin;
-        }
-
-        void setDeferredRotation(int rotation, int animFlags) {
-            mRotation = rotation;
-            mAnimFlags = animFlags;
-            mPerformDeferredRotation = true;
         }
     }
 
@@ -5168,21 +5150,30 @@ public class WindowManagerService extends IWindowManager.Stub
      * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
      */
     public boolean setRotationUncheckedLocked(int rotation, int animFlags, boolean inTransaction) {
-        if (mDragState != null) {
+        if (mDragState != null || mScreenRotationAnimation != null) {
             // Potential rotation during a drag.  Don't do the rotation now, but make
             // a note to perform the rotation later.
-            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation during drag");
-            mDragState.setDeferredRotation(rotation, animFlags);
+            if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation.");
+            if (rotation != WindowManagerPolicy.USE_LAST_ROTATION) {
+                mDeferredRotation = rotation;
+                mDeferredRotationAnimFlags = animFlags;
+            }
             return false;
         }
 
         boolean changed;
         if (rotation == WindowManagerPolicy.USE_LAST_ROTATION) {
+            if (mDeferredRotation != WindowManagerPolicy.USE_LAST_ROTATION) {
+                rotation = mDeferredRotation;
+                mRequestedRotation = rotation;
+                mLastRotationFlags = mDeferredRotationAnimFlags;
+            }
             rotation = mRequestedRotation;
         } else {
             mRequestedRotation = rotation;
             mLastRotationFlags = animFlags;
         }
+        mDeferredRotation = WindowManagerPolicy.USE_LAST_ROTATION;
         if (DEBUG_ORIENTATION) Slog.v(TAG, "Overwriting rotation value from " + rotation);
         rotation = mPolicy.rotationForOrientationLw(mForcedAppOrientation,
                 mRotation, mDisplayEnabled);
@@ -9634,6 +9625,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean focusDisplayed = false;
         boolean animating = false;
         boolean createWatermark = false;
+        boolean updateRotation = false;
 
         if (mFxSession == null) {
             mFxSession = new SurfaceSession();
@@ -9731,6 +9723,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             animating = true;
                         } else {
                             mScreenRotationAnimation = null;
+                            updateRotation = true;
                         }
                     }
                 }
@@ -10892,6 +10885,15 @@ public class WindowManagerService extends IWindowManager.Stub
             mTurnOnScreen = false;
         }
         
+        if (updateRotation) {
+            if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
+            boolean changed = setRotationUncheckedLocked(
+                    WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
+            if (changed) {
+                sendNewConfiguration();
+            }
+        }
+        
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
         enableScreenIfNeededLocked();
@@ -11218,6 +11220,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Debug.stopMethodTracing();
         }
 
+        boolean updateRotation = false;
+        
         if (CUSTOM_SCREEN_ROTATION) {
             if (mScreenRotationAnimation != null) {
                 if (mScreenRotationAnimation.dismiss(MAX_ANIMATION_DURATION,
@@ -11225,6 +11229,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     requestAnimationLocked(0);
                 } else {
                     mScreenRotationAnimation = null;
+                    updateRotation = true;
                 }
             }
         } else {
@@ -11251,6 +11256,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 2000);
 
         mScreenFrozenLock.release();
+        
+        if (updateRotation) {
+            if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
+            boolean changed = setRotationUncheckedLocked(
+                    WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
+            if (changed) {
+                sendNewConfiguration();
+            }
+        }
     }
 
     static int getPropertyInt(String[] tokens, int index, int defUnits, int defDps,
@@ -11629,6 +11643,8 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mRotation="); pw.print(mRotation);
                     pw.print(", mForcedAppOrientation="); pw.print(mForcedAppOrientation);
                     pw.print(", mRequestedRotation="); pw.println(mRequestedRotation);
+            pw.print("  mDeferredRotation="); pw.print(mDeferredRotation);
+                    pw.print(", mDeferredRotationAnimFlags="); pw.print(mDeferredRotationAnimFlags);
             pw.print("  mAnimationPending="); pw.print(mAnimationPending);
                     pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
