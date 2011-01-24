@@ -108,6 +108,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawRoundRect",
     "DrawCircle",
     "DrawOval",
+    "DrawArc",
     "DrawPath",
     "DrawLines",
     "DrawText",
@@ -361,6 +362,11 @@ void DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
             break;
             case DrawOval: {
                 renderer.drawOval(getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+            }
+            break;
+            case DrawArc: {
+                renderer.drawArc(getFloat(), getFloat(), getFloat(), getFloat(),
+                        getFloat(), getFloat(), getInt() == 1, getPaint());
             }
             break;
             case DrawPath: {
@@ -672,6 +678,15 @@ void DisplayListRenderer::drawOval(float left, float top, float right, float bot
         SkPaint* paint) {
     addOp(DisplayList::DrawOval);
     addBounds(left, top, right, bottom);
+    addPaint(paint);
+}
+
+void DisplayListRenderer::drawArc(float left, float top, float right, float bottom,
+        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+    addOp(DisplayList::DrawOval);
+    addBounds(left, top, right, bottom);
+    addPoint(startAngle, sweepAngle);
+    addInt(useCenter ? 1 : 0);
     addPaint(paint);
 }
 

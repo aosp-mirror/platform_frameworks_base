@@ -164,6 +164,7 @@ public:
     CircleShapeCache circleShapeCache;
     OvalShapeCache ovalShapeCache;
     RectShapeCache rectShapeCache;
+    ArcShapeCache arcShapeCache;
     PatchCache patchCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
