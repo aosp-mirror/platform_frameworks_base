@@ -1816,4 +1816,32 @@ public class VideoEditorImpl implements VideoEditor {
             }
         }
     }
+
+    /**
+     * Clears the preview surface
+     *
+     * @param surfaceHolder SurfaceHolder where the preview is rendered
+     * and needs to be cleared.
+     */
+    public void clearSurface(SurfaceHolder surfaceHolder) {
+
+      if (surfaceHolder == null) {
+         throw new IllegalArgumentException();
+       }
+      Rect frame;
+      int surfaceWidth;
+      int surfaceHeight;
+      Surface surface = surfaceHolder.getSurface();
+
+      if (surface == null) {
+        Log.e("VideoEditorImpl",
+        "Surface could not be retrieved from surface holder");
+        throw new RuntimeException();
+      }
+      frame = surfaceHolder.getSurfaceFrame();
+      surfaceWidth = frame.width();
+      surfaceHeight = frame.height();
+      mMANativeHelper.clearPreviewSurface(surface,surfaceWidth,surfaceHeight);
+    }
+
 }
