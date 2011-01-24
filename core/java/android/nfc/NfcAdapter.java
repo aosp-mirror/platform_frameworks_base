@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -54,7 +55,7 @@ public final class NfcAdapter {
     /**
      * Intent to started when a tag is discovered. The data URI is formated as
      * {@code vnd.android.nfc://tag/} with the path having a directory entry for each technology
-     * in the {@link Tag#getTechnologyList()} is ascending order.
+     * in the {@link Tag#getTechList()} is sorted ascending order.
      *
      * This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
      * {@link #ACTION_TAG_DISCOVERED}
@@ -426,7 +427,7 @@ public final class NfcAdapter {
      * @throws IllegalStateException
      */
     public void enableForegroundDispatch(Activity activity, PendingIntent intent,
-            IntentFilter... filters) {
+            IntentFilter[] filters, String[][] techLists) {
         if (activity == null || intent == null) {
             throw new NullPointerException();
         }
@@ -435,9 +436,14 @@ public final class NfcAdapter {
                     "when your activity is resumed");
         }
         try {
+            TechListParcel parcel = null;
+            if (techLists != null && techLists.length > 0) {
+                parcel = new TechListParcel(techLists);
+            }
             ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
                     mForegroundDispatchListener);
-            sService.enableForegroundDispatch(activity.getComponentName(), intent, filters);
+            sService.enableForegroundDispatch(activity.getComponentName(), intent, filters,
+                    parcel);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
