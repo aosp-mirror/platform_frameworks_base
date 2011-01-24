@@ -18,6 +18,7 @@ package com.android.layoutlib.bridge.android;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
@@ -41,6 +42,7 @@ import java.io.FileReader;
 public final class BridgeInflater extends LayoutInflater {
 
     private final IProjectCallback mProjectCallback;
+    private boolean mIsInMerge = false;
 
     /**
      * List of class prefixes which are tried first by default.
@@ -211,8 +213,6 @@ public final class BridgeInflater extends LayoutInflater {
         return null;
     }
 
-
-
     private void setupViewInContext(View view, AttributeSet attrs) {
         if (getContext() instanceof BridgeContext) {
             BridgeContext bc = (BridgeContext) getContext();
@@ -222,9 +222,11 @@ public final class BridgeInflater extends LayoutInflater {
                 // get the view key
                 Object viewKey = parser.getViewCookie();
 
-                // if there's no view key and the depth is 1 (ie this is the first tag),
+                // if there's no view key and the depth is 1 (ie this is the first tag), or 2
+                // (this is first item in included merge layout)
                 // look for a previous parser in the context, and check if this one has a viewkey.
-                if (viewKey == null && parser.getDepth() == 1) {
+                int testDepth = mIsInMerge ? 2 : 1;
+                if (viewKey == null && parser.getDepth() == testDepth) {
                     BridgeXmlBlockParser previousParser = bc.getPreviousParser();
                     if (previousParser != null) {
                         viewKey = previousParser.getViewCookie();
@@ -232,10 +234,19 @@ public final class BridgeInflater extends LayoutInflater {
                 }
 
                 if (viewKey != null) {
+                    if (testDepth == 2) {
+                        // include-merge case
+                        viewKey = new MergeCookie(viewKey);
+                    }
+
                     bc.addViewKey(view, viewKey);
                 }
             }
         }
+    }
+
+    public void setIsInMerge(boolean isInMerge) {
+        mIsInMerge = isInMerge;
     }
 
     @Override
