@@ -721,7 +721,7 @@ public class AudioService extends IAudioService.Stub {
                                         if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL) {
                                             mBluetoothHeadset.stopVoiceRecognition(
                                                     mBluetoothHeadsetDevice);
-                                            mBluetoothHeadset.stopVirtualVoiceCall(
+                                            mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
                                                     mBluetoothHeadsetDevice);
                                         } else {
                                             clearAllScoClients(mCb, true);
@@ -808,7 +808,8 @@ public class AudioService extends IAudioService.Stub {
                             checkScoAudioState();
                             if (mScoAudioState == SCO_STATE_ACTIVE_EXTERNAL) {
                                 mBluetoothHeadset.stopVoiceRecognition(mBluetoothHeadsetDevice);
-                                mBluetoothHeadset.stopVirtualVoiceCall(mBluetoothHeadsetDevice);
+                                mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
+                                    mBluetoothHeadsetDevice);
                             } else {
                                 clearAllScoClients(cb, true);
                             }
@@ -1296,10 +1297,10 @@ public class AudioService extends IAudioService.Stub {
                         state == BluetoothHeadset.STATE_AUDIO_CONNECTED &&
                         mScoAudioState == SCO_STATE_INACTIVE) {
                     mScoAudioState = SCO_STATE_ACTIVE_INTERNAL;
-                    mBluetoothHeadset.startVirtualVoiceCall(mBluetoothHeadsetDevice);
+                    mBluetoothHeadset.startScoUsingVirtualVoiceCall(mBluetoothHeadsetDevice);
                 } else if (state == BluetoothHeadset.STATE_AUDIO_DISCONNECTED &&
                         mScoAudioState == SCO_STATE_ACTIVE_INTERNAL){
-                    mBluetoothHeadset.stopVirtualVoiceCall(mBluetoothHeadsetDevice);
+                    mBluetoothHeadset.stopScoUsingVirtualVoiceCall(mBluetoothHeadsetDevice);
                 }
             }
         }
