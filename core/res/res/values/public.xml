@@ -1279,7 +1279,7 @@
   <public type="style" name="TextAppearance.StatusBar.EventContent.Title" id="0x01030068" />
 
 <!-- ===============================================================
-     Resources proposed for Honeycomb.
+     Resources added in version 11 of the platform (Honeycomb / 3.0).
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="allContactsName" />
@@ -1428,6 +1428,8 @@
   <public type="attr" name="windowCloseOnTouchOutside" />
   <public type="attr" name="datePickerStyle" />
   <public type="attr" name="calendarViewStyle" />
+  <public type="attr" name="textEditSidePasteWindowLayout" />
+  <public type="attr" name="textEditSideNoPasteWindowLayout" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />
@@ -1498,7 +1500,6 @@
   <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
 
   <public type="style" name="Theme.Holo" />
-  <public type="style" name="Theme.Light.Holo" />
   <public type="style" name="Theme.Holo.NoActionBar" />
   <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
   <public type="style" name="Theme.Holo.Light" />
@@ -1633,8 +1634,6 @@
   <public type="style" name="Widget.Holo.Light.CalendarView" />
   <public type="style" name="Widget.DatePicker" />
   <public type="style" name="Widget.Holo.DatePicker" />
-  <public type="attr" name="textEditSidePasteWindowLayout" />
-  <public type="attr" name="textEditSideNoPasteWindowLayout" />
 
   <public type="string" name="selectTextMode" />
 
