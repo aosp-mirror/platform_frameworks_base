@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.nfc.tech.TagTechnology;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -416,18 +415,19 @@ public final class NfcAdapter {
     /**
      * Enables foreground dispatching to the given Activity. This will force all NFC Intents that
      * match the given filters to be delivered to the activity bypassing the standard dispatch
-     * mechanism.
+     * mechanism. If no IntentFilters are given all the PendingIntent will be invoked for every
+     * dispatch Intent.
      *
      * This method must be called from the main thread.
      *
      * @param activity the Activity to dispatch to
      * @param intent the PendingIntent to start for the dispatch
-     * @param filters the IntentFilters to override dispatching for
+     * @param filters the IntentFilters to override dispatching for, or null to always dispatch
      * @throws IllegalStateException
      */
     public void enableForegroundDispatch(Activity activity, PendingIntent intent,
             IntentFilter... filters) {
-        if (activity == null || intent == null || filters == null) {
+        if (activity == null || intent == null) {
             throw new NullPointerException();
         }
         if (!activity.isResumed()) {
@@ -478,7 +478,13 @@ public final class NfcAdapter {
     }
 
     /**
-     * Enable NDEF messages push while this Activity is in the foreground.
+     * Enable NDEF message push over P2P while this Activity is in the foreground. For this to
+     * function properly the other NFC device being scanned must support the "com.android.npp"
+     * NDEF push protocol.
+     *
+     * <p><em>NOTE</em> While foreground NDEF push is active standard tag dispatch is disabled.
+     * Only the foreground activity may receive tag discovered dispatches via
+     * {@link #enableForegroundDispatch}.
      */
     public void enableForegroundNdefPush(Activity activity, NdefMessage msg) {
         if (activity == null || msg == null) {
