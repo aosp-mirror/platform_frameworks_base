@@ -696,7 +696,7 @@ final class LoadedApk {
                 final Intent intent = mCurIntent;
                 mCurIntent = null;
                 
-                if (receiver == null) {
+                if (receiver == null || !mRegistered) {
                     if (mRegistered && ordered) {
                         if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                                 "Finishing null broadcast to " + mReceiver);
