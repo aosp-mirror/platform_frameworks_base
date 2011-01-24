@@ -5152,6 +5152,7 @@ public class WebView extends AbsoluteLayout
                 if (mNativeClass != 0) {
                     nativeRecordButtons(false, false, true);
                 }
+                setFocusControllerActive(false);
             }
             mGotKeyDown = false;
         }
