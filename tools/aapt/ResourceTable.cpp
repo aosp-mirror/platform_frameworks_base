@@ -1322,6 +1322,22 @@ status_t compileResourceFile(Bundle* bundle,
                     }
                 }
             } else if (strcmp16(block.getElementName(&len), string_array16.string()) == 0) {
+                // Check whether these strings need valid formats.
+                // (simplified form of what string16 does above)
+                size_t n = block.getAttributeCount();
+                for (size_t i = 0; i < n; i++) {
+                    size_t length;
+                    const uint16_t* attr = block.getAttributeName(i, &length);
+                    if (strcmp16(attr, translatable16.string()) == 0
+                            || strcmp16(attr, formatted16.string()) == 0) {
+                        const uint16_t* value = block.getAttributeStringValue(i, &length);
+                        if (strcmp16(value, false16.string()) == 0) {
+                            curIsFormatted = false;
+                            break;
+                        }
+                    }
+                }
+
                 curTag = &string_array16;
                 curType = array16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
