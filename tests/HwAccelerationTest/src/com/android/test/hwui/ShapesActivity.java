@@ -39,6 +39,7 @@ public class ShapesActivity extends Activity {
         private Paint mFillPaint;
         private RectF mRect;
         private RectF mOval;
+        private RectF mArc;
 
         ShapesView(Context c) {
             super(c);
@@ -63,6 +64,7 @@ public class ShapesActivity extends Activity {
             mFillPaint.setStyle(Paint.Style.FILL);
 
             mOval = new RectF(0.0f, 0.0f, 80.0f, 45.0f);
+            mArc = new RectF(0.0f, 0.0f, 100.0f, 120.0f);
         }
 
         @Override
@@ -103,7 +105,7 @@ public class ShapesActivity extends Activity {
             canvas.restore();
 
             canvas.save();
-            canvas.translate(650.0f, 50.0f);
+            canvas.translate(625.0f, 50.0f);
             canvas.drawRect(0.0f, 0.0f, 160.0f, 90.0f, mNormalPaint);
 
             canvas.translate(0.0f, 110.0f);
@@ -111,6 +113,28 @@ public class ShapesActivity extends Activity {
 
             canvas.translate(0.0f, 110.0f);
             canvas.drawRect(0.0f, 0.0f, 160.0f, 90.0f, mFillPaint);
+            canvas.restore();
+
+            canvas.save();
+            canvas.translate(825.0f, 50.0f);
+            canvas.drawArc(mArc, -30.0f, 70.0f, true, mNormalPaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawArc(mArc, -30.0f, 70.0f, true, mStrokePaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawArc(mArc, -30.0f, 70.0f, true, mFillPaint);
+            canvas.restore();
+            
+            canvas.save();
+            canvas.translate(950.0f, 50.0f);
+            canvas.drawArc(mArc, 30.0f, 100.0f, false, mNormalPaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawArc(mArc, 30.0f, 100.0f, false, mStrokePaint);
+
+            canvas.translate(0.0f, 110.0f);
+            canvas.drawArc(mArc, 30.0f, 100.0f, false, mFillPaint);
             canvas.restore();
         }
     }

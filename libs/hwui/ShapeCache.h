@@ -281,6 +281,58 @@ private:
     uint32_t mHeight;
 }; // RectShapeCacheEntry
 
+struct ArcShapeCacheEntry: public ShapeCacheEntry {
+    ArcShapeCacheEntry(float width, float height, float startAngle, float sweepAngle,
+            bool useCenter, SkPaint* paint):
+            ShapeCacheEntry(ShapeCacheEntry::kShapeArc, paint) {
+        mWidth = *(uint32_t*) &width;
+        mHeight = *(uint32_t*) &height;
+        mStartAngle = *(uint32_t*) &startAngle;
+        mSweepAngle = *(uint32_t*) &sweepAngle;
+        mUseCenter = useCenter ? 1 : 0;
+    }
+
+    ArcShapeCacheEntry(): ShapeCacheEntry() {
+        mWidth = 0;
+        mHeight = 0;
+        mStartAngle = 0;
+        mSweepAngle = 0;
+        mUseCenter = 0;
+    }
+
+    ArcShapeCacheEntry(const ArcShapeCacheEntry& entry):
+            ShapeCacheEntry(entry) {
+        mWidth = entry.mWidth;
+        mHeight = entry.mHeight;
+        mStartAngle = entry.mStartAngle;
+        mSweepAngle = entry.mSweepAngle;
+        mUseCenter = entry.mUseCenter;
+    }
+
+    bool lessThan(const ShapeCacheEntry& r) const {
+        const ArcShapeCacheEntry& rhs = (const ArcShapeCacheEntry&) r;
+        LTE_INT(mWidth) {
+            LTE_INT(mHeight) {
+                LTE_INT(mStartAngle) {
+                    LTE_INT(mSweepAngle) {
+                        LTE_INT(mUseCenter) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+private:
+    uint32_t mWidth;
+    uint32_t mHeight;
+    uint32_t mStartAngle;
+    uint32_t mSweepAngle;
+    uint32_t mUseCenter;
+}; // ArcShapeCacheEntry
+
 /**
  * A simple LRU shape cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum
@@ -369,6 +421,14 @@ public:
 
     PathTexture* getRect(float width, float height, SkPaint* paint);
 }; // class RectShapeCache
+
+class ArcShapeCache: public ShapeCache<ArcShapeCacheEntry> {
+public:
+    ArcShapeCache();
+
+    PathTexture* getArc(float width, float height, float startAngle, float sweepAngle,
+            bool useCenter, SkPaint* paint);
+}; // class ArcShapeCache
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor

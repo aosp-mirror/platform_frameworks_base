@@ -525,8 +525,14 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter,
             Paint paint) {
-        // TODO: Implement
+        boolean hasModifier = setupModifiers(paint);
+        nDrawArc(mRenderer, oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle,
+                useCenter, paint.mNativePaint);
+        if (hasModifier) nResetModifiers(mRenderer);
     }
+
+    private native void nDrawArc(int renderer, float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, boolean useCenter, int paint);
 
     @Override
     public void drawARGB(int a, int r, int g, int b) {

@@ -113,6 +113,8 @@ public:
             float rx, float ry, SkPaint* paint);
     virtual void drawCircle(float x, float y, float radius, SkPaint* paint);
     virtual void drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+    virtual void drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
     virtual void drawPath(SkPath* path, SkPaint* paint);
     virtual void drawLines(float* points, int count, SkPaint* paint);
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
