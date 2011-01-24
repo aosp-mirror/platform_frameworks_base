@@ -950,7 +950,22 @@ public interface WindowManager extends ViewManager {
          * will be used.
          */
         public int screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-        
+
+        /**
+         * Control the visibility of the status bar.
+         * @hide
+         */
+        public int systemUiVisibility;
+
+        /**
+         * Get callbacks about the system ui visibility changing.
+         * 
+         * TODO: Maybe there should be a bitfield of optional callbacks that we need.
+         *
+         * @hide
+         */
+        public boolean hasSystemUiListeners;
+
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
@@ -1030,6 +1045,8 @@ public interface WindowManager extends ViewManager {
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
+            out.writeInt(systemUiVisibility);
+            out.writeInt(hasSystemUiListeners ? 1 : 0);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1065,6 +1082,8 @@ public interface WindowManager extends ViewManager {
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
+            systemUiVisibility = in.readInt();
+            hasSystemUiListeners = in.readInt() != 0;
         }
     
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1082,6 +1101,10 @@ public interface WindowManager extends ViewManager {
         public static final int SCREEN_BRIGHTNESS_CHANGED = 1<<11;
         /** {@hide} */
         public static final int BUTTON_BRIGHTNESS_CHANGED = 1<<12;
+        /** {@hide} */
+        public static final int SYSTEM_UI_VISIBILITY_CHANGED = 1<<13;
+        /** {@hide} */
+        public static final int SYSTEM_UI_LISTENER_CHANGED = 1<<14;
     
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -1189,6 +1212,16 @@ public interface WindowManager extends ViewManager {
                 changes |= SCREEN_ORIENTATION_CHANGED;
             }
 
+            if (systemUiVisibility != o.systemUiVisibility) {
+                systemUiVisibility = o.systemUiVisibility;
+                changes |= SYSTEM_UI_VISIBILITY_CHANGED;
+            }
+
+            if (hasSystemUiListeners != o.hasSystemUiListeners) {
+                hasSystemUiListeners = o.hasSystemUiListeners;
+                changes |= SYSTEM_UI_LISTENER_CHANGED;
+            }
+
             return changes;
         }
     
@@ -1260,6 +1293,14 @@ public interface WindowManager extends ViewManager {
             }
             if ((flags & FLAG_COMPATIBLE_WINDOW) != 0) {
                 sb.append(" compatible=true");
+            }
+            if (systemUiVisibility != 0) {
+                sb.append(" sysui=0x");
+                sb.append(Integer.toHexString(systemUiVisibility));
+            }
+            if (hasSystemUiListeners) {
+                sb.append(" sysuil=");
+                sb.append(hasSystemUiListeners);
             }
             sb.append('}');
             return sb.toString();

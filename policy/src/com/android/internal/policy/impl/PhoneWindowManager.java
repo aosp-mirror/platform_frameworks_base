@@ -34,6 +34,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -270,7 +271,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mPointerLocationMode = 0;
     PointerLocationView mPointerLocationView = null;
     InputChannel mPointerLocationInputChannel;
-    
+
+    // The last window we were told about in focusChanged.
+    WindowState mFocusedWindow;
+
     private final InputHandler mPointerLocationInputHandler = new BaseInputHandler() {
         @Override
         public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
@@ -1953,7 +1957,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mKeyguardMediator.setHidden(false);
             }
         }
-        
+
+        updateSystemUiVisibility();
+
         // update since mAllowLockscreenWhenOn might have changed
         updateLockScreenTimeout();
         return changes;
@@ -1991,6 +1997,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return true;
+    }
+
+    public void focusChanged(WindowState lastFocus, WindowState newFocus) {
+        mFocusedWindow = newFocus;
+        updateSystemUiVisibility();
     }
 
     /** {@inheritDoc} */
@@ -2836,6 +2847,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean allowKeyRepeat() {
         // disable key repeat when screen is off
         return mScreenOn;
+    }
+
+    private void updateSystemUiVisibility() {
+        // If there is no window focused, there will be nobody to handle the events
+        // anyway, so just hang on in whatever state we're in until things settle down.
+        if (mFocusedWindow != null) {
+            final int visibility = mFocusedWindow.getAttrs().systemUiVisibility;
+            mHandler.post(new Runnable() {
+                    public void run() {
+                        if (mStatusBarService == null) {
+                            mStatusBarService = IStatusBarService.Stub.asInterface(
+                                    ServiceManager.getService("statusbar"));
+                        }
+                        if (mStatusBarService != null) {
+                            // need to assume status bar privileges to invoke lights on
+                            long origId = Binder.clearCallingIdentity();
+                            try {
+                                mStatusBarService.setSystemUiVisibility(visibility);
+                            } catch (RemoteException e) {
+                                // not much to be done
+                                mStatusBarService = null;
+                            } finally {
+                                Binder.restoreCallingIdentity(origId);
+                            }
+                        }
+                    }
+                });
+        }
     }
 
     public void dump(String prefix, FileDescriptor fd, PrintWriter pw, String[] args) {
