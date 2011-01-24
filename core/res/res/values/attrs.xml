@@ -690,6 +690,9 @@
         <!-- Style for buttons without an explicit border, often used in groups. -->
         <attr name="borderlessButtonStyle" format="reference" />
 
+        <!-- Background to use for toasts -->
+        <attr name="toastFrameBackground" format="reference" />
+
         <!-- ============================ -->
         <!-- SearchView styles and assets -->
         <!-- ============================ -->
