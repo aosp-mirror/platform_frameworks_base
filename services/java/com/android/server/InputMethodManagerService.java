@@ -121,6 +121,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
 
+    // TODO: Will formalize this value as API
+    private static final String SUBTYPE_EXTRAVALUE_EXCLUDE_FROM_LAST_IME =
+            "excludeFromLastInputMethod";
+
     final Context mContext;
     final Resources mRes;
     final Handler mHandler;
@@ -1901,12 +1905,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private boolean canAddToLastInputMethod(InputMethodSubtype subtype) {
+        if (subtype == null) return true;
+        String[] extraValues = subtype.getExtraValue().split(",");
+        final int N = extraValues.length;
+        for (int i = 0; i < N; ++i) {
+            if (SUBTYPE_EXTRAVALUE_EXCLUDE_FROM_LAST_IME.equals(extraValues[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void saveCurrentInputMethodAndSubtypeToHistory() {
         String subtypeId = NOT_A_SUBTYPE_ID_STR;
         if (mCurrentSubtype != null) {
             subtypeId = String.valueOf(mCurrentSubtype.hashCode());
         }
-        mSettings.addSubtypeToHistory(mCurMethodId, subtypeId);
+        if (canAddToLastInputMethod(mCurrentSubtype)) {
+            mSettings.addSubtypeToHistory(mCurMethodId, subtypeId);
+        }
     }
 
     private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
