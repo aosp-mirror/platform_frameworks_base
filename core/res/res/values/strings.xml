@@ -1637,6 +1637,9 @@
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
 
+    <!-- Displayed as hint in passwordEntry EditText on PasswordUnlockScreen [CHAR LIMIT=30]-->
+    <string name="keyguard_password_entry_touch_hint"><font size="17">Touch to enter password</font></string>
+
     <!-- Instructions telling the user to enter their text password to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_password_code">Enter password to unlock</string>
