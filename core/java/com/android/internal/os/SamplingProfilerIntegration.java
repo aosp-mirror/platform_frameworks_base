@@ -16,22 +16,21 @@
 
 package com.android.internal.os;
 
+import android.content.pm.PackageInfo;
+import android.os.Build;
+import android.os.SystemProperties;
+import android.util.Log;
 import dalvik.system.SamplingProfiler;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ThreadFactory;
-
-import android.content.pm.PackageInfo;
-import android.util.Log;
-import android.os.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import libcore.io.IoUtils;
 
 /**
  * Integrates the framework with Dalvik's sampling profiler.
@@ -162,19 +161,16 @@ public class SamplingProfilerIntegration {
         PrintStream out = null;
         try {
             out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
-        } catch (IOException e) {
-            Log.e(TAG, "Could not open " + path + ":" + e);
-            return;
-        }
-        try {
             generateSnapshotHeader(name, packageInfo, out);
-            INSTANCE.writeHprofData(out);
-        } finally {
-            out.close();
-        }
-        if (out.checkError()) {
-            Log.e(TAG, "Error writing snapshot.");
+            new SamplingProfiler.AsciiHprofWriter(INSTANCE.getHprofData(), out).write();
+            if (out.checkError()) {
+                throw new IOException();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error writing snapshot to " + path, e);
             return;
+        } finally {
+            IoUtils.closeQuietly(out);
         }
         // set file readable to the world so that SamplingProfilerService
         // can put it to dropbox
