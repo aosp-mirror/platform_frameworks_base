@@ -16,6 +16,15 @@
 
 package android.view.inputmethod;
 
+import com.android.internal.os.HandlerCaller;
+import com.android.internal.view.IInputConnectionWrapper;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodCallback;
+import com.android.internal.view.IInputMethodClient;
+import com.android.internal.view.IInputMethodManager;
+import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.InputBindResult;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -27,23 +36,12 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewRoot;
-import android.view.inputmethod.InputMethodSubtype;
-
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.view.IInputConnectionWrapper;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodCallback;
-import com.android.internal.view.IInputMethodClient;
-import com.android.internal.view.IInputMethodManager;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.InputBindResult;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -96,7 +94,7 @@ import java.util.concurrent.TimeUnit;
  * be aware of are:</p>
  * 
  * <ul>
- * <li> Properly set the {@link android.R.attr#inputType} if your editable
+ * <li> Properly set the {@link android.R.attr#inputType} in your editable
  * text views, so that the input method will have enough context to help the
  * user in entering text into them.
  * <li> Deal well with losing screen space when the input method is
@@ -389,6 +387,7 @@ public final class InputMethodManager {
             super(mainLooper, conn);
         }
 
+        @Override
         public boolean isActive() {
             return mActive;
         }
