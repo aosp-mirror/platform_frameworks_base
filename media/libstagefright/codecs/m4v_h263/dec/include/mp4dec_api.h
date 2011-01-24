@@ -159,6 +159,7 @@ extern "C"
     Bool    PVDecodeVopBody(VideoDecControls *decCtrl, int32 buffer_size[]);
     void    PVDecPostProcess(VideoDecControls *decCtrl, uint8 *outputYUV);
     OSCL_IMPORT_REF void    PVGetVideoDimensions(VideoDecControls *decCtrl, int32 *display_width, int32 *display_height);
+    OSCL_IMPORT_REF void    PVGetBufferDimensions(VideoDecControls *decCtrl, int32 *buf_width, int32 *buf_height);
     OSCL_IMPORT_REF void    PVSetPostProcType(VideoDecControls *decCtrl, int mode);
     uint32  PVGetVideoTimeStamp(VideoDecControls *decoderControl);
     int     PVGetDecBitrate(VideoDecControls *decCtrl);
