@@ -114,6 +114,7 @@ public:
         DrawRoundRect,
         DrawCircle,
         DrawOval,
+        DrawArc,
         DrawPath,
         DrawLines,
         DrawText,
@@ -281,6 +282,8 @@ public:
             float rx, float ry, SkPaint* paint);
     void drawCircle(float x, float y, float radius, SkPaint* paint);
     void drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+    void drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
     void drawLines(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);

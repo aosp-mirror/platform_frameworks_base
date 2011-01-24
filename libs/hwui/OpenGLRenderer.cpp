@@ -1396,6 +1396,21 @@ void OpenGLRenderer::drawOval(float left, float top, float right, float bottom, 
     drawShape(left, top, texture, paint);
 }
 
+void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
+        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    if (fabs(sweepAngle) >= 360.0f) {
+        drawOval(left, top, right, bottom, paint);
+        return;
+    }
+
+    glActiveTexture(gTextureUnits[0]);
+    const PathTexture* texture = mCaches.arcShapeCache.getArc(right - left, bottom - top,
+            startAngle, sweepAngle, useCenter, paint);
+    drawShape(left, top, texture, paint);
+}
+
 void OpenGLRenderer::drawRectAsShape(float left, float top, float right, float bottom,
         SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
