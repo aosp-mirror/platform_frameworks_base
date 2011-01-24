@@ -104,7 +104,12 @@ public class TestDelegates extends TestCase {
                         parameters);
 
                 // check that the method is static
-                assertTrue((delegateMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
+                assertTrue(
+                        String.format(
+                                "Delegate method %1$s for class %2$s is not static",
+                                delegateMethod.getName(),
+                                originalClass.getName()),
+                        (delegateMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
             } catch (NoSuchMethodException e) {
                 // compute a full class name that's long but not too long.
                 StringBuilder sb = new StringBuilder(originalMethod.getName() + "(");
