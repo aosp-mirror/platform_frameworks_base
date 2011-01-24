@@ -22,10 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -41,11 +38,30 @@ public class BitmapMeshActivity extends Activity {
     static class BitmapMeshView extends View {
         private Paint mBitmapPaint;
         private final Bitmap mBitmap1;
+        private float[] mVertices;
+        private int[] mColors;
 
         BitmapMeshView(Context c) {
             super(c);
 
             mBitmap1 = BitmapFactory.decodeResource(c.getResources(), R.drawable.sunset1);
+
+            final float width = mBitmap1.getWidth() / 3.0f;
+            final float height = mBitmap1.getHeight() / 3.0f;
+
+            mVertices = new float[] {
+                0.0f, 0.0f, width, 0.0f, width * 2, 0.0f, width * 3, 0.0f,
+                0.0f, height, width, height, width * 2, height, width * 4, height,
+                0.0f, height * 2, width, height * 2, width * 2, height * 2, width * 3, height * 2,
+                0.0f, height * 4, width, height * 4, width * 2, height * 4, width * 4, height * 4,
+            };
+            
+            mColors = new int[] {
+                0xffff0000, 0xff00ff00, 0xff0000ff, 0xffff0000,
+                0xff0000ff, 0xffff0000, 0xff00ff00, 0xff00ff00,
+                0xff00ff00, 0xff0000ff, 0xffff0000, 0xff00ff00,
+                0x00ff0000, 0x0000ff00, 0x000000ff, 0x00ff0000,
+            };
         }
 
         @Override
@@ -54,14 +70,10 @@ public class BitmapMeshActivity extends Activity {
 
             canvas.drawARGB(255, 255, 255, 255);
             canvas.translate(100, 100);
-            final float width = mBitmap1.getWidth() / 3.0f;
-            final float height = mBitmap1.getHeight() / 3.0f;
-            canvas.drawBitmapMesh(mBitmap1, 3, 3, new float[] {
-                    0.0f, 0.0f, width, 0.0f, width * 2, 0.0f, width * 3, 0.0f,
-                    0.0f, height, width, height, width * 2, height, width * 4, height,
-                    0.0f, height * 2, width, height * 2, width * 2, height * 2, width * 3, height * 2,
-                    0.0f, height * 4, width, height * 4, width * 2, height * 4, width * 4, height * 4,
-            }, 0, null, 0, null);
+            canvas.drawBitmapMesh(mBitmap1, 3, 3, mVertices, 0, null, 0, null);
+
+            canvas.translate(400, 0);
+            canvas.drawBitmapMesh(mBitmap1, 3, 3, mVertices, 0, mColors, 0, null);
         }
     }
 }

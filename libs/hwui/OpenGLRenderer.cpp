@@ -1094,10 +1094,10 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    // TODO: Support the colors array
     const uint32_t count = meshWidth * meshHeight * 6;
-    TextureVertex mesh[count];
 
+    // TODO: Support the colors array
+    TextureVertex mesh[count];
     TextureVertex* vertex = mesh;
     for (int32_t y = 0; y < meshHeight; y++) {
         for (int32_t x = 0; x < meshWidth; x++) {
