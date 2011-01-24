@@ -23,8 +23,8 @@
 #include "mp4dec_api.h"
 
 #include <OMX_Component.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
@@ -106,7 +106,7 @@ status_t M4vH263Decoder::start(MetaData *) {
     int32_t vol_size = 0;
     if (meta->findData(kKeyESDS, &type, &data, &size)) {
         ESDS esds((const uint8_t *)data, size);
-        CHECK_EQ(esds.InitCheck(), OK);
+        CHECK_EQ(esds.InitCheck(), (status_t)OK);
 
         const void *codec_specific_data;
         size_t codec_specific_data_size;
@@ -185,7 +185,7 @@ status_t M4vH263Decoder::read(
     ReadOptions::SeekMode mode;
     if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         seeking = true;
-        CHECK_EQ(PVResetVideoDecoder(mHandle), PV_TRUE);
+        CHECK_EQ((int)PVResetVideoDecoder(mHandle), PV_TRUE);
     }
 
     MediaBuffer *inputBuffer = NULL;
@@ -223,18 +223,27 @@ status_t M4vH263Decoder::read(
         return UNKNOWN_ERROR;
     }
 
-    int32_t width, height;
-    PVGetVideoDimensions(mHandle, &width, &height);
-    if (width != mWidth || height != mHeight) {
+    int32_t disp_width, disp_height;
+    PVGetVideoDimensions(mHandle, &disp_width, &disp_height);
+
+    int32_t buf_width, buf_height;
+    PVGetBufferDimensions(mHandle, &buf_width, &buf_height);
+
+    if (buf_width != mWidth || buf_height != mHeight) {
         ++mNumSamplesOutput;  // The client will never get to see this frame.
 
         inputBuffer->release();
         inputBuffer = NULL;
 
-        mWidth = width;
-        mHeight = height;
+        mWidth = buf_width;
+        mHeight = buf_height;
         mFormat->setInt32(kKeyWidth, mWidth);
         mFormat->setInt32(kKeyHeight, mHeight);
+
+        CHECK_LE(disp_width, buf_width);
+        CHECK_LE(disp_height, buf_height);
+
+        mFormat->setRect(kKeyCropRect, 0, 0, disp_width - 1, disp_height - 1);
 
         return INFO_FORMAT_CHANGED;
     }
