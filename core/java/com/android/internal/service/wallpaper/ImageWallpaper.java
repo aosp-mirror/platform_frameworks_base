@@ -187,33 +187,36 @@ public class ImageWallpaper extends WallpaperService {
             }
 
             SurfaceHolder sh = getSurfaceHolder();
+            final Rect frame = sh.getSurfaceFrame();
+            final Drawable background = mBackground;
+            final int dw = frame.width();
+            final int dh = frame.height();
+            final int bw = background != null ? background.getIntrinsicWidth() : 0;
+            final int bh = background != null ? background.getIntrinsicHeight() : 0;
+            final int availw = dw - bw;
+            final int availh = dh - bh;
+            int xPixels = availw < 0 ? (int)(availw * mXOffset + .5f) : (availw / 2);
+            int yPixels = availh < 0 ? (int)(availh * mYOffset + .5f) : (availh / 2);
+
+            mOffsetsChanged = false;
+            if (!mRedrawNeeded
+                    && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
+                if (DEBUG) {
+                    Log.d(TAG, "Suppressed drawFrame since the image has not "
+                            + "actually moved an integral number of pixels.");
+                }
+                return;
+            }
+            mRedrawNeeded = false;
+            mLastXTranslation = xPixels;
+            mLastYTranslation = yPixels;
+
             Canvas c = sh.lockCanvas();
             if (c != null) {
                 try {
-                    final Rect frame = sh.getSurfaceFrame();
-                    final Drawable background = mBackground;
-                    final int dw = frame.width();
-                    final int dh = frame.height();
-                    final int bw = background != null ? background.getIntrinsicWidth() : 0;
-                    final int bh = background != null ? background.getIntrinsicHeight() : 0;
-                    final int availw = dw-bw;
-                    final int availh = dh-bh;
-                    int xPixels = availw < 0 ? (int)(availw*mXOffset+.5f) : (availw/2);
-                    int yPixels = availh < 0 ? (int)(availh*mYOffset+.5f) : (availh/2);
-
-                    mOffsetsChanged = false;
-                    if (!mRedrawNeeded) {
-                        if (xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
-                            if (DEBUG) {
-                                Log.d(TAG, "Suppressed drawFrame since the image has not "
-                                        + "actually moved an integral number of pixels.");
-                            }
-                            return;
-                        }
+                    if (DEBUG) {
+                        Log.d(TAG, "Redrawing: xPixels=" + xPixels + ", yPixels=" + yPixels);
                     }
-                    mRedrawNeeded = false;
-                    mLastXTranslation = xPixels;
-                    mLastYTranslation = yPixels;
 
                     c.translate(xPixels, yPixels);
                     if (availw < 0 || availh < 0) {
