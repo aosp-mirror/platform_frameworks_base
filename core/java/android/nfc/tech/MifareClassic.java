@@ -59,8 +59,8 @@ public final class MifareClassic extends BasicTagTechnology {
     public static final int TYPE_PLUS = 1;
     /** A MIFARE Pro tag */
     public static final int TYPE_PRO = 2;
-    /** The tag type is unknown */
-    public static final int TYPE_UNKNOWN = 5;
+    /** A Mifare Classic compatible card that does not match the other types */
+    public static final int TYPE_OTHER = -1;
 
     /** The tag contains 16 sectors, each holding 4 blocks. */
     public static final int SIZE_1K = 1024;
@@ -73,8 +73,12 @@ public final class MifareClassic extends BasicTagTechnology {
     public static final int SIZE_4K = 4096;
     /** The tag contains 5 sectors, each holding 4 blocks. */
     public static final int SIZE_MINI = 320;
-    /** The capacity is unknown */
-    public static final int SIZE_UNKNOWN = 0;
+
+    /** Size of a Mifare Classic block (in bytes) */
+    public static final int BLOCK_SIZE = 16;
+
+    private static final int MAX_BLOCK_COUNT = 256;
+    private static final int MAX_SECTOR_COUNT = 40;
 
     private boolean mIsEmulated;
     private int mType;
@@ -99,102 +103,76 @@ public final class MifareClassic extends BasicTagTechnology {
     public MifareClassic(Tag tag) throws RemoteException {
         super(tag, TagTechnology.MIFARE_CLASSIC);
 
-        // Check if this could actually be a MIFARE Classic
-        NfcA a = NfcA.get(tag);
+        NfcA a = NfcA.get(tag);  // Mifare Classic is always based on NFC a
 
         mIsEmulated = false;
-        mType = TYPE_UNKNOWN;
-        mSize = SIZE_UNKNOWN;
 
         switch (a.getSak()) {
-            case 0x08:
-                // Type == classic
-                // Size = 1K
-                mType = TYPE_CLASSIC;
-                mSize = SIZE_1K;
-                break;
-            case 0x09:
-                // Type == classic mini
-                // Size == ?
-                mType = TYPE_CLASSIC;
-                mSize = SIZE_MINI;
-                break;
-            case 0x10:
-                // Type == MF+
-                // Size == 2K
-                // SecLevel = SL2
-                mType = TYPE_PLUS;
-                mSize = SIZE_2K;
-                break;
-            case 0x11:
-                // Type == MF+
-                // Size == 4K
-                // Seclevel = SL2
-                mType = TYPE_PLUS;
-                mSize = SIZE_4K;
-                break;
-            case 0x18:
-                // Type == classic
-                // Size == 4k
-                mType = TYPE_CLASSIC;
-                mSize = SIZE_4K;
-                break;
-            case 0x20:
-                // TODO this really should be a short, not byte
-                if (a.getAtqa()[0] == 0x03) {
-                    // Type == DESFIRE
-                    break;
-                } else {
-                    // Type == MF+
-                    // SL = SL3
-                    mType = TYPE_PLUS;
-                    mSize = SIZE_UNKNOWN;
-                }
-                break;
-            case 0x28:
-                // Type == MF Classic
-                // Size == 1K
-                // Emulated == true
-                mType = TYPE_CLASSIC;
-                mSize = SIZE_1K;
-                mIsEmulated = true;
-                break;
-            case 0x38:
-                // Type == MF Classic
-                // Size == 4K
-                // Emulated == true
-                mType = TYPE_CLASSIC;
-                mSize = SIZE_4K;
-                mIsEmulated = true;
-                break;
-            case 0x88:
-                // Type == MF Classic
-                // Size == 1K
-                // NXP-tag: false
-                mType = TYPE_CLASSIC;
-                mSize = SIZE_1K;
-                break;
-            case 0x98:
-            case 0xB8:
-                // Type == MF Pro
-                // Size == 4K
-                mType = TYPE_PRO;
-                mSize = SIZE_4K;
-                break;
+        case 0x08:
+            mType = TYPE_CLASSIC;
+            mSize = SIZE_1K;
+            break;
+        case 0x09:
+            mType = TYPE_CLASSIC;
+            mSize = SIZE_MINI;
+            break;
+        case 0x10:
+            mType = TYPE_PLUS;
+            mSize = SIZE_2K;
+            // SecLevel = SL2
+            break;
+        case 0x11:
+            mType = TYPE_PLUS;
+            mSize = SIZE_4K;
+            // Seclevel = SL2
+            break;
+        case 0x18:
+            mType = TYPE_CLASSIC;
+            mSize = SIZE_4K;
+            break;
+        case 0x28:
+            mType = TYPE_CLASSIC;
+            mSize = SIZE_1K;
+            mIsEmulated = true;
+            break;
+        case 0x38:
+            mType = TYPE_CLASSIC;
+            mSize = SIZE_4K;
+            mIsEmulated = true;
+            break;
+        case 0x88:
+            mType = TYPE_CLASSIC;
+            mSize = SIZE_1K;
+            // NXP-tag: false
+            break;
+        case 0x98:
+        case 0xB8:
+            mType = TYPE_PRO;
+            mSize = SIZE_4K;
+            break;
+        default:
+            // Stack incorrectly reported a MifareClassic. We cannot handle this
+            // gracefully - we have no idea of the memory layout. Bail.
+            throw new RuntimeException(
+                    "Tag incorrectly enumerated as Mifare Classic, SAK = " + a.getSak());
         }
     }
 
-    /** Returns the size of the tag, determined at discovery time */
-    public int getSize() {
-        return mSize;
-    }
-
-    /** Returns the size of the tag, determined at discovery time */
+    /** Returns the type of the tag, determined at discovery time */
     public int getType() {
         return mType;
     }
 
-    /** Returns true if the tag is emulated, determined at discovery time */
+    /** Returns the size of the tag in bytes, determined at discovery time */
+    public int getSize() {
+        return mSize;
+    }
+
+    /** Returns true if the tag is emulated, determined at discovery time.
+     * These are actually smart-cards that emulate a Mifare Classic interface.
+     * They can be treated identically to a Mifare Classic tag.
+     * @hide
+     */
     public boolean isEmulated() {
         return mIsEmulated;
     }
@@ -202,67 +180,78 @@ public final class MifareClassic extends BasicTagTechnology {
     /** Returns the number of sectors on this tag, determined at discovery time */
     public int getSectorCount() {
         switch (mSize) {
-            case SIZE_1K: {
-                return 16;
-            }
-            case SIZE_2K: {
-                return 32;
-            }
-            case SIZE_4K: {
-                return 40;
-            }
-            case SIZE_MINI: {
-                return 5;
-            }
-            default: {
-                return 0;
-            }
+        case SIZE_1K:
+            return 16;
+        case SIZE_2K:
+            return 32;
+        case SIZE_4K:
+            return 40;
+        case SIZE_MINI:
+            return 5;
+        default:
+            return 0;
         }
-    }
-
-    /** Returns the sector size, determined at discovery time */
-    public int getSectorSize(int sector) {
-        return getBlockCount(sector) * 16;
     }
 
     /** Returns the total block count, determined at discovery time */
-    public int getTotalBlockCount() {
-        int totalBlocks = 0;
-        for (int sec = 0; sec < getSectorCount(); sec++) {
-            totalBlocks += getSectorSize(sec);
-        }
-
-        return totalBlocks;
+    public int getBlockCount() {
+        return mSize / BLOCK_SIZE;
     }
 
     /** Returns the block count for the given sector, determined at discovery time */
-    public int getBlockCount(int sector) {
-        if (sector >= getSectorCount()) {
-            throw new IllegalArgumentException("this card only has " + getSectorCount() +
-                    " sectors");
-        }
+    public int getBlockCountInSector(int sectorIndex) {
+        validateSector(sectorIndex);
 
-        if (sector <= 32) {
+        if (sectorIndex < 32) {
             return 4;
         } else {
             return 16;
         }
     }
 
-    private byte firstBlockInSector(int sector) {
-        if (sector < 32) {
-            return (byte) ((sector * 4) & 0xff);
+    /** Return the sector index of a given block */
+    public int blockToSector(int blockIndex) {
+        validateBlock(blockIndex);
+
+        if (blockIndex < 32 * 4) {
+            return blockIndex / 4;
         } else {
-            return (byte) ((32 * 4 + ((sector - 32) * 16)) & 0xff);
+            return 32 + (blockIndex - 32 * 4) / 16;
+        }
+    }
+
+    /** Return the first block of a given sector */
+    public int sectorToBlock(int sectorIndex) {
+        if (sectorIndex < 32) {
+            return sectorIndex * 4;
+        } else {
+            return 32 * 4 + (sectorIndex - 32) * 16;
         }
     }
 
     // Methods that require connect()
     /**
-     * Authenticate the entire sector that the given block resides in.
+     * Authenticate a sector.
+     * <p>Every sector has an A and B key with different access privileges,
+     * this method attempts to authenticate against the A key.
      * <p>This requires a that the tag be connected.
      */
-    public boolean authenticateBlock(int block, byte[] key, boolean keyA) throws IOException {
+    public boolean authenticateSectorWithKeyA(int sectorIndex, byte[] key) throws IOException {
+        return authenticate(sectorIndex, key, true);
+    }
+
+    /**
+     * Authenticate a sector.
+     * <p>Every sector has an A and B key with different access privileges,
+     * this method attempts to authenticate against the B key.
+     * <p>This requires a that the tag be connected.
+     */
+    public boolean authenticateSectorWithKeyB(int sectorIndex, byte[] key) throws IOException {
+        return authenticate(sectorIndex, key, false);
+    }
+
+    private boolean authenticate(int sector, byte[] key, boolean keyA) throws IOException {
+        validateSector(sector);
         checkConnected();
 
         byte[] cmd = new byte[12];
@@ -275,7 +264,9 @@ public final class MifareClassic extends BasicTagTechnology {
         }
 
         // Second byte is block address
-        cmd[1] = (byte) block;
+        // Authenticate command takes a block address. Authenticating a block
+        // of a sector will authenticate the entire sector.
+        cmd[1] = (byte) sectorToBlock(sector);
 
         // Next 4 bytes are last 4 bytes of UID
         byte[] uid = getTag().getId();
@@ -285,7 +276,7 @@ public final class MifareClassic extends BasicTagTechnology {
         System.arraycopy(key, 0, cmd, 6, 6);
 
         try {
-            if ((transceive(cmd, false) != null)) {
+            if (transceive(cmd, false) != null) {
                 return true;
             }
         } catch (TagLostException e) {
@@ -297,106 +288,92 @@ public final class MifareClassic extends BasicTagTechnology {
     }
 
     /**
-     * Authenticate for a given sector.
-     * <p>This requires a that the tag be connected.
-     */
-    public boolean authenticateSector(int sector, byte[] key, boolean keyA) throws IOException {
-        checkConnected();
-
-        byte addr = (byte) ((firstBlockInSector(sector)) & 0xff);
-
-        // Note that authenticating a block of a sector, will authenticate
-        // the entire sector.
-        return authenticateBlock(addr, key, keyA);
-    }
-
-    /**
-     * Sector indexing starts at 0.
-     * Block indexing starts at 0, and resets in each sector.
+     * Read 16-byte block.
      * <p>This requires a that the tag be connected.
      * @throws IOException
      */
-    public byte[] readBlock(int sector, int block) throws IOException {
+    public byte[] readBlock(int blockIndex) throws IOException {
+        validateBlock(blockIndex);
         checkConnected();
 
-        byte addr = (byte) ((firstBlockInSector(sector) + block) & 0xff);
-        return readBlock(addr);
+        byte[] cmd = { 0x30, (byte) blockIndex };
+        return transceive(cmd, false);
     }
 
     /**
-     * Reads absolute block index.
+     * Write 16-byte block.
      * <p>This requires a that the tag be connected.
      * @throws IOException
      */
-    public byte[] readBlock(int block) throws IOException {
+    public void writeBlock(int blockIndex, byte[] data) throws IOException {
+        validateBlock(blockIndex);
         checkConnected();
+        if (data.length != 16) {
+            throw new IllegalArgumentException("must write 16-bytes");
+        }
 
-        byte addr = (byte) block;
-        byte[] blockread_cmd = { 0x30, addr };
+        byte[] cmd = new byte[data.length + 2];
+        cmd[0] = (byte) 0xA0; // MF write command
+        cmd[1] = (byte) blockIndex;
+        System.arraycopy(data, 0, cmd, 2, data.length);
 
-        return transceive(blockread_cmd, false);
+        transceive(cmd, false);
     }
 
     /**
-     * Writes absolute block index.
-     * <p>This requires a that the tag be connected.
+     * Increment a value block, and store the result in temporary memory.
+     * @param block
      * @throws IOException
      */
-    public void writeBlock(int block, byte[] data) throws IOException {
+    public void increment(int blockIndex) throws IOException {
+        validateBlock(blockIndex);
         checkConnected();
 
-        byte addr = (byte) block;
-        byte[] blockwrite_cmd = new byte[data.length + 2];
-        blockwrite_cmd[0] = (byte) 0xA0; // MF write command
-        blockwrite_cmd[1] = addr;
-        System.arraycopy(data, 0, blockwrite_cmd, 2, data.length);
+        byte[] cmd = { (byte) 0xC1, (byte) blockIndex };
 
-        transceive(blockwrite_cmd, false);
+        transceive(cmd, false);
     }
 
     /**
-     * Writes relative block in sector.
-     * <p>This requires a that the tag be connected.
+     * Decrement a value block, and store the result in temporary memory.
+     * @param block
      * @throws IOException
      */
-    public void writeBlock(int sector, int block, byte[] data) throws IOException {
+    public void decrement(int blockIndex) throws IOException {
+        validateBlock(blockIndex);
         checkConnected();
 
-        byte addr = (byte) ((firstBlockInSector(sector) + block) & 0xff);
+        byte[] cmd = { (byte) 0xC0, (byte) blockIndex };
 
-        writeBlock(addr, data);
+        transceive(cmd, false);
     }
 
-    public void increment(int block) throws IOException {
+    /**
+     * Copy from temporary memory to value block.
+     * @param block
+     * @throws IOException
+     */
+    public void transfer(int blockIndex) throws IOException {
+        validateBlock(blockIndex);
         checkConnected();
 
-        byte[] incr_cmd = { (byte) 0xC1, (byte) block };
+        byte[] cmd = { (byte) 0xB0, (byte) blockIndex };
 
-        transceive(incr_cmd, false);
+        transceive(cmd, false);
     }
 
-    public void decrement(int block) throws IOException {
+    /**
+     * Copy from value block to temporary memory.
+     * @param block
+     * @throws IOException
+     */
+    public void restore(int blockIndex) throws IOException {
+        validateBlock(blockIndex);
         checkConnected();
 
-        byte[] decr_cmd = { (byte) 0xC0, (byte) block };
+        byte[] cmd = { (byte) 0xC2, (byte) blockIndex };
 
-        transceive(decr_cmd, false);
-    }
-
-    public void transfer(int block) throws IOException {
-        checkConnected();
-
-        byte[] trans_cmd = { (byte) 0xB0, (byte) block };
-
-        transceive(trans_cmd, false);
-    }
-
-    public void restore(int block) throws IOException {
-        checkConnected();
-
-        byte[] rest_cmd = { (byte) 0xC2, (byte) block };
-
-        transceive(rest_cmd, false);
+        transceive(cmd, false);
     }
 
     /**
@@ -413,5 +390,25 @@ public final class MifareClassic extends BasicTagTechnology {
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
+    }
+
+    private void validateSector(int sector) {
+        // Do not be too strict on upper bounds checking, since some cards
+        // have more addressable memory than they report. For example,
+        // Mifare Plus 2k cards will appear as Mifare Classic 1k cards when in
+        // Mifare Classic compatibility mode.
+        // Note that issuing a command to an out-of-bounds block is safe - the
+        // tag should report error causing IOException. This validation is a
+        // helper to guard against obvious programming mistakes.
+        if (sector < 0 || sector >= MAX_SECTOR_COUNT) {
+            throw new IndexOutOfBoundsException("sector out of bounds: " + sector);
+        }
+    }
+
+    private void validateBlock(int block) {
+        // Just looking for obvious out of bounds...
+        if (block < 0 || block >= MAX_BLOCK_COUNT) {
+            throw new IndexOutOfBoundsException("block out of bounds: " + block);
+        }
     }
 }
