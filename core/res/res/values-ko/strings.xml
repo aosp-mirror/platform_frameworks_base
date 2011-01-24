@@ -152,8 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"비행기 모드"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"비행기 모드 사용"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"비행기 모드 사용 안함"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"요금이 부과되는 서비스"</string>
@@ -257,6 +256,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"배경화면 연결"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"권한을 가진 프로그램이 배경화면에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"기기 관리자와 상호 작용"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"보유자가 기기 관리자에게 인텐트를 보낼 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"화면 방향 변경"</string>
@@ -466,10 +469,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD 카드 콘텐츠 수정/삭제"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"애플리케이션에서 USB 저장소의 정보를 변경할 수 있습니다."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"애플리케이션이 SD 카드에 쓸 수 있도록 합니다."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"내부 미디어 저장소 콘텐츠 수정/삭제"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"애플리케이션이 내부 미디어 저장소의 콘텐츠를 수정할 수 있도록 합니다."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"캐시 파일시스템 액세스"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"애플리케이션이 캐시 파일시스템을 읽고 쓸 수 있도록 합니다."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"인터넷 전화 걸기/받기"</string>
@@ -608,6 +609,8 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"기타"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN 코드 입력"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"잠금을 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"잠금을 해제하려면 PIN 입력"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 코드가 잘못되었습니다."</string>
@@ -651,6 +654,8 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"비밀번호"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"로그인"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"확인 중..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"잠금해제"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"사운드 켜기"</string>
@@ -1029,5 +1034,13 @@
     <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
 </resources>

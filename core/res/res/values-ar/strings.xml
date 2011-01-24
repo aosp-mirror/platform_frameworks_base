@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"وضع الطائرة"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"وضع الطائرة قيد التشغيل"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"وضع الطائرة متوقف"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"+100"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"نظام Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"الخدمات التي تكلفك المال"</string>
@@ -256,6 +255,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لطريقة الإرسال. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"الالتزام بخلفية ما"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للخلفية. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"التفاعل مع مشرف الجهاز"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"للسماح للمالك بإرسال الأهداف إلى أحد مشرفي الجهاز. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"تغيير اتجاه الشاشة"</string>
@@ -466,7 +469,7 @@
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"للسماح لتطبيق ما بالكتابة على وحدة تخزين USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"للسماح لتطبيق ما بالكتابة إلى بطاقة SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تعديل/حذف محتويات وحدة تخزين الوسائط الداخلية"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"للسماح لتطبيق ما بتعديل محتويات وحدة تخزين الوسائط الداخلية."</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"للسماح لأحد التطبيقات بتعديل محتويات وحدة تخزين الوسائط الداخلية."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"الدخول إلى نظام ملفات ذاكرة التخزين المؤقت"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"للسماح لتطبيق ما بقراءة نظام ملفات ذاكرة التخزين المؤقت والكتابة به."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"إجراء/تلقي مكالمات عبر الإنترنت"</string>
@@ -605,6 +608,8 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"العمل"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"غير ذلك"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"أدخل رقم التعريف الشخصي"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"أدخل كلمة المرور لإلغاء التأمين"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"أدخل رقم التعريف الشخصي (PIN) لإلغاء القفل"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"كود PIN غير صحيح!"</string>
@@ -648,6 +653,8 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"كلمة المرور"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"تسجيل الدخول"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"اسم المستخدم غير صحيح أو كلمة المرور غير صحيحة."</string>
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"جارٍ التحقق..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"إلغاء تأمين"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"تشغيل الصوت"</string>
@@ -1023,5 +1030,13 @@
     <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
 </resources>
