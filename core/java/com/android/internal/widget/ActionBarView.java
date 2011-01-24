@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -351,6 +352,8 @@ public class ActionBarView extends ViewGroup {
         mTitle = title;
         if (mTitleView != null) {
             mTitleView.setText(title);
+            mTitleLayout.setVisibility(TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle) ?
+                    GONE : VISIBLE);
         }
         if (mLogoNavItem != null) {
             mLogoNavItem.setTitle(title);
@@ -366,6 +369,8 @@ public class ActionBarView extends ViewGroup {
         if (mSubtitleView != null) {
             mSubtitleView.setText(subtitle);
             mSubtitleView.setVisibility(subtitle != null ? VISIBLE : GONE);
+            mTitleLayout.setVisibility(TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle) ?
+                    GONE : VISIBLE);
         }
     }
 
@@ -636,7 +641,7 @@ public class ActionBarView extends ViewGroup {
             rightOfCenter -= mMenuView.getMeasuredWidth();
         }
 
-        boolean showTitle = mTitleLayout != null &&
+        boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
                 (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
         if (showTitle) {
             availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
@@ -768,7 +773,7 @@ public class ActionBarView extends ViewGroup {
             x += positionChild(mHomeLayout, x, y, contentHeight);
         }
         
-        final boolean showTitle = mTitleLayout != null &&
+        final boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
                 (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
         if (showTitle) {
             x += positionChild(mTitleLayout, x, y, contentHeight);
