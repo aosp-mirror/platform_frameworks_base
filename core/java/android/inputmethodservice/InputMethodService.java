@@ -49,6 +49,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.CompletionInfo;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputBinding;
@@ -56,7 +57,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -1024,7 +1024,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * there is no hard keyboard or the keyboard is hidden.  If you change what
      * this returns, you will need to call {@link #updateInputViewShown()}
      * yourself whenever the returned value may have changed to have it
-     * re-evalauted and applied.
+     * re-evaluated and applied.
      */
     public boolean onEvaluateInputViewShown() {
         Configuration config = getResources().getConfiguration();

@@ -372,7 +372,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTextPaint.density = getResources().getDisplayMetrics().density;
         mTextPaint.setCompatibilityScaling(
                 getResources().getCompatibilityInfo().applicationScale);
-        
+
         // If we get the paint from the skin, we should set it to left, since
         // the layout always wants it to be left.
         // mTextPaint.setTextAlign(Paint.Align.LEFT);
@@ -7130,11 +7130,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
 
-        // After super.onFocusChanged so that this TextView is registered and can ask for the IME
-        // Showing the IME while focus is moved using the D-Pad is a bad idea, however this does
-        // not happen in that case (using the arrows on a bluetooth keyboard).
-        if (focused) {
-            onTouchFinished(null);
+        // Performed after super.onFocusChanged so that this TextView is registered and can ask for
+        // the IME. Showing the IME while focus is moved using the D-Pad is a bad idea, however this
+        // does not happen in that case (using the arrows on a bluetooth keyboard).
+        if (focused && isTextEditable()) {
+            final InputMethodManager imm = (InputMethodManager)
+            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+            imm.showSoftInput(this, 0, null);
         }
     }
 
@@ -7326,7 +7329,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
                     }
 
-                    handled = onTouchFinished(csr);
+                    // Show the IME, except when selecting in read-only text.
+                    if (!mTextIsSelectable) {
+                        final InputMethodManager imm = (InputMethodManager)
+                                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                        handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                    }
+
+                    stopSelectionActionMode();
+                    boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
+                    if (hasInsertionController() && !selectAllGotFocus) {
+                        getInsertionController().show();
+                    }
                 }
             }
 
@@ -7336,35 +7351,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
-    }
-
-    /** Shows the IME if applicable, ends selection mode and displays the selection controller.
-     *
-     * This method is called at the end of a touch event, when the finger is lifted up.
-     * It is also called when the TextField gains focus indirectly through a dispatched event from
-     * one of its parents. We want to have the same behavior in that case.
-     *
-     * @param csr A (possibly null) callback called if the IME has been displayed
-     * @return true if the event was properly sent to the csr
-     */
-    private boolean onTouchFinished(CommitSelectionReceiver csr) {
-        boolean handled = false;
-
-        // Show the IME, except when selecting in read-only text.
-        if (!mTextIsSelectable) {
-            final InputMethodManager imm = (InputMethodManager)
-                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-            handled = imm.showSoftInput(this, 0, csr) && (csr != null);
-        }
-
-        stopSelectionActionMode();
-        boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
-        if (hasInsertionController() && !selectAllGotFocus) {
-            getInsertionController().show();
-        }
-
-        return handled;
     }
 
     private void prepareCursorControllers() {
