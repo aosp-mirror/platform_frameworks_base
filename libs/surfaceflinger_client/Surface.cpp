@@ -377,7 +377,7 @@ status_t Surface::writeToParcel(
 
 
 Mutex Surface::sCachedSurfacesLock;
-DefaultKeyedVector<wp<IBinder>, wp<Surface> > Surface::sCachedSurfaces(wp<Surface>(0));
+DefaultKeyedVector<wp<IBinder>, wp<Surface> > Surface::sCachedSurfaces;
 
 sp<Surface> Surface::readFromParcel(const Parcel& data) {
     Mutex::Autolock _l(sCachedSurfacesLock);
@@ -390,13 +390,13 @@ sp<Surface> Surface::readFromParcel(const Parcel& data) {
     if (surface->mSurface == 0) {
       surface = 0;
     }
-    cleanCachedSurfaces();
+    cleanCachedSurfacesLocked();
     return surface;
 }
 
 // Remove the stale entries from the surface cache.  This should only be called
 // with sCachedSurfacesLock held.
-void Surface::cleanCachedSurfaces() {
+void Surface::cleanCachedSurfacesLocked() {
     for (int i = sCachedSurfaces.size()-1; i >= 0; --i) {
         wp<Surface> s(sCachedSurfaces.valueAt(i));
         if (s == 0 || s.promote() == 0) {
