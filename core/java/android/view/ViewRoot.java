@@ -898,7 +898,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
         }
 
-        if (attachInfo.mRecomputeGlobalAttributes) {
+        if (attachInfo.mRecomputeGlobalAttributes && host.mAttachInfo != null) {
             //Log.i(TAG, "Computing view hierarchy attributes!");
             attachInfo.mRecomputeGlobalAttributes = false;
             boolean oldScreenOn = attachInfo.mKeepScreenOn;
