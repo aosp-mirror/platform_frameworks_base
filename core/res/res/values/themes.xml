@@ -255,7 +255,7 @@
         <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/action_bar_context_background</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_dark</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_dark</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_dark</item>
@@ -378,6 +378,8 @@
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_light</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_light</item>
         <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_light</item>
+
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
         <item name="searchViewCloseIcon">@android:drawable/ic_clear_holo_light</item>
