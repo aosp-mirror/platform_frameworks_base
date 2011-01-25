@@ -677,8 +677,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // stop intercepting input
             mDragState.unregister();
-            mInputMonitor.setUpdateInputWindowsNeededLw();
-            mInputMonitor.updateInputWindowsLw();
+            mInputMonitor.updateInputWindowsLw(true /*force*/);
 
             // free our resources and drop all the object references
             mDragState.reset();
@@ -2382,6 +2381,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 res |= WindowManagerImpl.ADD_FLAG_APP_VISIBLE;
             }
 
+            mInputMonitor.setUpdateInputWindowsNeededLw();
+
             boolean focusChanged = false;
             if (win.canReceiveKeys()) {
                 focusChanged = updateFocusedWindowLocked(UPDATE_FOCUS_WILL_ASSIGN_LAYERS,
@@ -2404,7 +2405,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (focusChanged) {
                 finishUpdateFocusedWindowAfterAssignLayersLocked(false /*updateInputWindows*/);
             }
-            mInputMonitor.updateInputWindowsLw();
+            mInputMonitor.updateInputWindowsLw(false /*force*/);
 
             if (localLOGV) Slog.v(
                 TAG, "New client " + client.asBinder()
@@ -2484,7 +2485,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                         false /*updateInputWindows*/);
                 performLayoutAndPlaceSurfacesLocked();
-                mInputMonitor.updateInputWindowsLw();
+                mInputMonitor.updateInputWindowsLw(false /*force*/);
                 if (win.mAppToken != null) {
                     win.mAppToken.updateReportedVisibilityLocked();
                 }
@@ -2600,8 +2601,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         
-        mInputMonitor.setUpdateInputWindowsNeededLw();
-        mInputMonitor.updateInputWindowsLw();
+        mInputMonitor.updateInputWindowsLw(true /*force*/);
     }
 
     private static void logSurface(WindowState w, String msg, RuntimeException where) {
@@ -2851,8 +2851,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         outSurface.release();
                     }
                 } catch (Exception e) {
-                    mInputMonitor.setUpdateInputWindowsNeededLw();
-                    mInputMonitor.updateInputWindowsLw();
+                    mInputMonitor.updateInputWindowsLw(true /*force*/);
                     
                     Slog.w(TAG, "Exception thrown when creating surface for client "
                              + client + " (" + win.mAttrs.getTitle() + ")",
@@ -2996,8 +2995,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             inTouchMode = mInTouchMode;
             
-            mInputMonitor.setUpdateInputWindowsNeededLw();
-            mInputMonitor.updateInputWindowsLw();
+            mInputMonitor.updateInputWindowsLw(true /*force*/);
         }
 
         if (configChanged) {
@@ -3380,8 +3378,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                 }
 
-                mInputMonitor.setUpdateInputWindowsNeededLw();
-                mInputMonitor.updateInputWindowsLw();
+                mInputMonitor.updateInputWindowsLw(true /*force*/);
             } else {
                 Slog.w(TAG, "Attempted to remove non-existing token: " + token);
             }
@@ -4042,7 +4039,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             false /*updateInputWindows*/);
                     performLayoutAndPlaceSurfacesLocked();
                 }
-                mInputMonitor.updateInputWindowsLw();
+                mInputMonitor.updateInputWindowsLw(false /*force*/);
             }
         }
 
@@ -4479,8 +4476,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                         false /*updateInputWindows*/);
                 mLayoutNeeded = true;
+                mInputMonitor.setUpdateInputWindowsNeededLw();
                 performLayoutAndPlaceSurfacesLocked();
-                mInputMonitor.updateInputWindowsLw();
+                mInputMonitor.updateInputWindowsLw(false /*force*/);
             }
             Binder.restoreCallingIdentity(origId);
         }
@@ -4517,13 +4515,14 @@ public class WindowManagerService extends IWindowManager.Stub
         pos = reAddAppWindowsLocked(pos, wtoken);
 
         if (updateFocusAndLayout) {
+            mInputMonitor.setUpdateInputWindowsNeededLw();
             if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                     false /*updateInputWindows*/)) {
                 assignLayersLocked();
             }
             mLayoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
-            mInputMonitor.updateInputWindowsLw();
+            mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
     }
 
@@ -4549,13 +4548,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        mInputMonitor.setUpdateInputWindowsNeededLw();
         if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                 false /*updateInputWindows*/)) {
             assignLayersLocked();
         }
         mLayoutNeeded = true;
         performLayoutAndPlaceSurfacesLocked();
-        mInputMonitor.updateInputWindowsLw();
+        mInputMonitor.updateInputWindowsLw(false /*force*/);
 
         //dump();
     }
@@ -5909,8 +5909,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         /* Updates the cached window information provided to the input dispatcher. */
-        public void updateInputWindowsLw() {
-            if (!mUpdateInputWindowsNeeded) {
+        public void updateInputWindowsLw(boolean force) {
+            if (!force && !mUpdateInputWindowsNeeded) {
                 return;
             }
             mUpdateInputWindowsNeeded = false;
@@ -6060,7 +6060,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 setUpdateInputWindowsNeededLw();
 
                 if (updateInputWindows) {
-                    updateInputWindowsLw();
+                    updateInputWindowsLw(false /*force*/);
                 }
             }
         }
@@ -6088,8 +6088,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 
                 window.paused = true;
-                setUpdateInputWindowsNeededLw();
-                updateInputWindowsLw();
+                updateInputWindowsLw(true /*force*/);
             }
         }
         
@@ -6100,8 +6099,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 
                 window.paused = false;
-                setUpdateInputWindowsNeededLw();
-                updateInputWindowsLw();
+                updateInputWindowsLw(true /*force*/);
             }
         }
         
@@ -6577,15 +6575,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // the actual drag event dispatch stuff in the dragstate
 
                 mDragState.register();
-                mInputMonitor.setUpdateInputWindowsNeededLw();
-                mInputMonitor.updateInputWindowsLw();
+                mInputMonitor.updateInputWindowsLw(true /*force*/);
                 if (!mInputManager.transferTouchFocus(callingWin.mInputChannel,
                         mDragState.mServerChannel)) {
                     Slog.e(TAG, "Unable to transfer touch focus");
                     mDragState.unregister();
                     mDragState = null;
-                    mInputMonitor.setUpdateInputWindowsNeededLw();
-                    mInputMonitor.updateInputWindowsLw();
+                    mInputMonitor.updateInputWindowsLw(true /*force*/);
                     return false;
                 }
 
@@ -9183,8 +9179,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // !!! TODO: ANR the app that has failed to start the drag in time
                         if (mDragState != null) {
                             mDragState.unregister();
-                            mInputMonitor.setUpdateInputWindowsNeededLw();
-                            mInputMonitor.updateInputWindowsLw();
+                            mInputMonitor.updateInputWindowsLw(true /*force*/);
                             mDragState.reset();
                             mDragState = null;
                         }
@@ -9584,7 +9579,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Window frames may have changed.  Tell the input dispatcher about it.
         mInputMonitor.setUpdateInputWindowsNeededLw();
         if (updateInputWindows) {
-            mInputMonitor.updateInputWindowsLw();
+            mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
 
         return mPolicy.finishLayoutLw();
@@ -10858,8 +10853,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Finally update all input windows now that the window changes have stabilized.
-        mInputMonitor.setUpdateInputWindowsNeededLw();
-        mInputMonitor.updateInputWindowsLw();
+        mInputMonitor.updateInputWindowsLw(true /*force*/);
 
         setHoldScreenLocked(holdScreen != null);
         if (screenBrightness < 0 || screenBrightness > 1.0f) {
