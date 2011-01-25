@@ -91,13 +91,16 @@ status_t AudioSource::start(MetaData *params) {
         mStartTimeUs = startTimeUs;
     }
     status_t err = mRecord->start();
-
     if (err == OK) {
         mGroup = new MediaBufferGroup;
         mGroup->add_buffer(new MediaBuffer(kMaxBufferSize));
 
         mStarted = true;
+    } else {
+        delete mRecord;
+        mRecord = NULL;
     }
+
 
     return err;
 }

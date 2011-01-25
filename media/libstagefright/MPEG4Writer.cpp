@@ -78,6 +78,7 @@ private:
     volatile bool mDone;
     volatile bool mPaused;
     volatile bool mResumed;
+    volatile bool mStarted;
     bool mIsAvc;
     bool mIsAudio;
     bool mIsMPEG4;
@@ -951,6 +952,7 @@ MPEG4Writer::Track::Track(
       mDone(false),
       mPaused(false),
       mResumed(false),
+      mStarted(false),
       mTrackDurationUs(0),
       mEstimatedTrackSizeBytes(0),
       mSamplesHaveSameSize(true),
@@ -1279,6 +1281,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     mDone = false;
+    mStarted = true;
     mTrackDurationUs = 0;
     mReachedEOS = false;
     mEstimatedTrackSizeBytes = 0;
@@ -1307,10 +1310,14 @@ status_t MPEG4Writer::Track::pause() {
 
 status_t MPEG4Writer::Track::stop() {
     LOGD("Stopping %s track", mIsAudio? "Audio": "Video");
+    if (!mStarted) {
+        LOGE("Stop() called but track is not started");
+        return ERROR_END_OF_STREAM;
+    }
+
     if (mDone) {
         return OK;
     }
-
     mDone = true;
 
     void *dummy;

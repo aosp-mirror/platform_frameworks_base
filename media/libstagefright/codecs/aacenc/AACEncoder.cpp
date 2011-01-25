@@ -151,7 +151,11 @@ status_t AACEncoder::start(MetaData *params) {
     mInputFrame = new int16_t[mChannels * kNumSamplesPerFrame];
     CHECK(mInputFrame != NULL);
 
-    mSource->start(params);
+    status_t err = mSource->start(params);
+    if (err != OK) {
+         LOGE("AudioSource is not available");
+        return err;
+    }
 
     mStarted = true;
 
@@ -159,11 +163,6 @@ status_t AACEncoder::start(MetaData *params) {
 }
 
 status_t AACEncoder::stop() {
-    if (!mStarted) {
-        LOGW("Call stop() when encoder has not started");
-        return OK;
-    }
-
     if (mInputBuffer) {
         mInputBuffer->release();
         mInputBuffer = NULL;
@@ -172,8 +171,17 @@ status_t AACEncoder::stop() {
     delete mBufferGroup;
     mBufferGroup = NULL;
 
-    mSource->stop();
+    if (mInputFrame) {
+        delete[] mInputFrame;
+        mInputFrame = NULL;
+    }
 
+    if (!mStarted) {
+        LOGW("Call stop() when encoder has not started");
+        return ERROR_END_OF_STREAM;
+    }
+
+    mSource->stop();
     if (mEncoderHandle) {
         CHECK_EQ(VO_ERR_NONE, mApiHandle->Uninit(mEncoderHandle));
         mEncoderHandle = NULL;
@@ -182,10 +190,6 @@ status_t AACEncoder::stop() {
     mApiHandle = NULL;
 
     mStarted = false;
-    if (mInputFrame) {
-        delete[] mInputFrame;
-        mInputFrame = NULL;
-    }
 
     return OK;
 }
