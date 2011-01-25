@@ -18,6 +18,8 @@
 package android.view;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Log;
@@ -38,6 +40,16 @@ import javax.microedition.khronos.opengles.GL;
 public abstract class HardwareRenderer {
     static final String LOG_TAG = "HardwareRenderer";
 
+    /**
+     * Turn on to only refresh the parts of the screen that need updating.
+     */
+    public static final boolean RENDER_DIRTY_REGIONS = true;
+
+    /**
+     * Turn on to draw dirty regions every other frame.
+     */
+    private static final boolean DEBUG_DIRTY_REGION = false;
+    
     /**
      * A process can set this flag to false to prevent the use of hardware
      * rendering.
@@ -108,11 +120,14 @@ public abstract class HardwareRenderer {
 
     /**
      * Draws the specified view.
-     * 
+     *
      * @param view The view to draw.
      * @param attachInfo AttachInfo tied to the specified view.
+     * @param callbacks Callbacks invoked when drawing happens.
+     * @param dirty The dirty rectangle to update, can be null.
      */
-    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks);
+    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
+            Rect dirty);
 
     /**
      * Creates a new display list that can be used to record batches of
@@ -214,6 +229,8 @@ public abstract class HardwareRenderer {
     @SuppressWarnings({"deprecation"})
     static abstract class GlRenderer extends HardwareRenderer {
         private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+        private static final int EGL_SURFACE_TYPE = 0x3033;
+        private static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
 
         static EGLContext sEglContext;
         static EGL10 sEgl;
@@ -226,6 +243,9 @@ public abstract class HardwareRenderer {
         
         GL mGl;
         HardwareCanvas mCanvas;
+        int mFrameCount;
+        Paint mDebugPaint;
+
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -412,7 +432,7 @@ public abstract class HardwareRenderer {
             if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
                 int error = sEgl.eglGetError();
                 if (error == EGL10.EGL_BAD_NATIVE_WINDOW) {
-                    Log.e("EglHelper", "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
+                    Log.e(LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
                     return null;
                 }
                 throw new RuntimeException("createWindowSurface failed "
@@ -426,6 +446,12 @@ public abstract class HardwareRenderer {
             if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
                 throw new RuntimeException("eglMakeCurrent failed "
                         + getEGLErrorString(sEgl.eglGetError()));
+            }
+            
+            if (RENDER_DIRTY_REGIONS) {
+                if (!GLES20Canvas.preserveBackBuffer()) {
+                    Log.w(LOG_TAG, "Backbuffer cannot be preserved");
+                }
             }
 
             return sEglContext.getGL();
@@ -471,12 +497,12 @@ public abstract class HardwareRenderer {
         void setup(int width, int height) {
             mCanvas.setViewport(width, height);
         }
-        
+
         boolean canDraw() {
             return mGl != null && mCanvas != null;
         }        
         
-        void onPreDraw() {
+        void onPreDraw(Rect dirty) {
         }
 
         void onPostDraw() {
@@ -492,8 +518,14 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
+        void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
+                Rect dirty) {
             if (canDraw()) {
+                //noinspection PointlessBooleanExpression,ConstantConditions
+                if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
+                    dirty = null;
+                }
+
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 attachInfo.mIgnoreDirtyState = true;
                 view.mPrivateFlags |= View.DRAWN;
@@ -504,10 +536,11 @@ public abstract class HardwareRenderer {
                 }
 
                 if (checkCurrent()) {
-                    onPreDraw();
+                    onPreDraw(dirty);
     
                     HardwareCanvas canvas = mCanvas;
                     attachInfo.mHardwareCanvas = canvas;
+
                     int saveCount = canvas.save();
                     callbacks.onHardwarePreDraw(canvas);
 
@@ -515,6 +548,7 @@ public abstract class HardwareRenderer {
                         view.mRecreateDisplayList =
                                 (view.mPrivateFlags & View.INVALIDATED) == View.INVALIDATED;
                         view.mPrivateFlags &= ~View.INVALIDATED;
+
                         DisplayList displayList = view.getDisplayList();
                         if (displayList != null) {
                             if (canvas.drawDisplayList(displayList)) {
@@ -523,6 +557,16 @@ public abstract class HardwareRenderer {
                         } else {
                             // Shouldn't reach here
                             view.draw(canvas);
+                        }
+
+                        if (DEBUG_DIRTY_REGION) {
+                            if (mDebugPaint == null) {
+                                mDebugPaint = new Paint();
+                                mDebugPaint.setColor(0x7fff0000);
+                            }
+                            if (dirty != null && (mFrameCount++ & 1) == 0) {
+                                canvas.drawRect(dirty, mDebugPaint);
+                            }
                         }
                     } finally {
                         callbacks.onHardwarePostDraw(canvas);
@@ -636,6 +680,8 @@ public abstract class HardwareRenderer {
                         EGL10.EGL_ALPHA_SIZE, alphaSize,
                         EGL10.EGL_DEPTH_SIZE, depthSize,
                         EGL10.EGL_STENCIL_SIZE, stencilSize,
+                        EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT |
+                                (RENDER_DIRTY_REGIONS ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
                         EGL10.EGL_NONE });
                 mValue = new int[1];
                 mRedSize = redSize;
@@ -656,7 +702,16 @@ public abstract class HardwareRenderer {
                         int g = findConfigAttrib(egl, display, config, EGL10.EGL_GREEN_SIZE, 0);
                         int b = findConfigAttrib(egl, display, config, EGL10.EGL_BLUE_SIZE, 0);
                         int a = findConfigAttrib(egl, display, config, EGL10.EGL_ALPHA_SIZE, 0);
-                        if (r >= mRedSize && g >= mGreenSize && b >= mBlueSize && a >= mAlphaSize) {
+                        boolean backBuffer;
+                        if (RENDER_DIRTY_REGIONS) {
+                            int surfaceType = findConfigAttrib(egl, display, config,
+                                    EGL_SURFACE_TYPE, 0);
+                            backBuffer = (surfaceType & EGL_SWAP_BEHAVIOR_PRESERVED_BIT) != 0;
+                        } else {
+                            backBuffer = true;
+                        }
+                        if (r >= mRedSize && g >= mGreenSize && b >= mBlueSize && a >= mAlphaSize
+                                && backBuffer) {
                             return config;
                         }
                     }
@@ -696,8 +751,8 @@ public abstract class HardwareRenderer {
         }                
 
         @Override
-        void onPreDraw() {
-            mGlCanvas.onPreDraw();
+        void onPreDraw(Rect dirty) {
+            mGlCanvas.onPreDraw(dirty);
         }
 
         @Override

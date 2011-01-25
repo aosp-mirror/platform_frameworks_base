@@ -62,7 +62,8 @@ public:
 
     virtual void setViewport(int width, int height);
 
-    virtual void prepare(bool opaque);
+    void prepare(bool opaque);
+    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
     // These two calls must not be recorded in display lists
