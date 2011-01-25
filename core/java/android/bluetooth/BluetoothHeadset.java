@@ -626,18 +626,21 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Initiates a Virtual Voice Call to the handsfree device (if connected).
-     * Allows the handsfree device to be used for routing non-cellular call audio
+     * Initiates a SCO channel connection with the headset (if connected).
+     * Also initiates a virtual voice call for Handsfree devices as many devices
+     * do not accept SCO audio without a call.
+     * This API allows the handsfree device to be used for routing non-cellular
+     * call audio.
      *
      * @param device Remote Bluetooth Device
      * @return true if successful, false if there was some error.
      * @hide
      */
-    public boolean startVirtualVoiceCall(BluetoothDevice device) {
-        if (DBG) log("startVirtualVoiceCall()");
+    public boolean startScoUsingVirtualVoiceCall(BluetoothDevice device) {
+        if (DBG) log("startScoUsingVirtualVoiceCall()");
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.startVirtualVoiceCall(device);
+                return mService.startScoUsingVirtualVoiceCall(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -649,17 +652,18 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Terminates an ongoing Virtual Voice Call to the handsfree device (if connected).
+     * Terminates an ongoing SCO connection and the associated virtual
+     * call.
      *
      * @param device Remote Bluetooth Device
      * @return true if successful, false if there was some error.
      * @hide
      */
-    public boolean stopVirtualVoiceCall(BluetoothDevice device) {
-        if (DBG) log("stopVirtualVoiceCall()");
+    public boolean stopScoUsingVirtualVoiceCall(BluetoothDevice device) {
+        if (DBG) log("stopScoUsingVirtualVoiceCall()");
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
-                return mService.stopVirtualVoiceCall(device);
+                return mService.stopScoUsingVirtualVoiceCall(device);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
