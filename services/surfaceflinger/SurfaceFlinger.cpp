@@ -396,10 +396,6 @@ bool SurfaceFlinger::threadLoop()
         logger.log(GraphicLog::SF_COMPOSITION_COMPLETE, index);
         hw.compositionComplete();
 
-        // release the clients before we flip ('cause flip might block)
-        logger.log(GraphicLog::SF_UNLOCK_CLIENTS, index);
-        unlockClients();
-
         logger.log(GraphicLog::SF_SWAP_BUFFERS, index);
         postFramebuffer();
 
@@ -407,7 +403,6 @@ bool SurfaceFlinger::threadLoop()
     } else {
         // pretend we did the post
         hw.compositionComplete();
-        unlockClients();
         usleep(16667); // 60 fps period
     }
     return true;
@@ -892,17 +887,6 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
         if (!clip.isEmpty()) {
             layer->draw(clip);
         }
-    }
-}
-
-void SurfaceFlinger::unlockClients()
-{
-    const LayerVector& drawingLayers(mDrawingState.layersSortedByZ);
-    const size_t count = drawingLayers.size();
-    sp<LayerBase> const* const layers = drawingLayers.array();
-    for (size_t i=0 ; i<count ; ++i) {
-        const sp<LayerBase>& layer = layers[i];
-        layer->finishPageFlip();
     }
 }
 
