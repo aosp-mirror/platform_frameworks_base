@@ -105,6 +105,7 @@
                 android:layout_gravity="center_vertical"
                 android:background="?android:attr/selectableItemBackground"
                 android:src="?android:attr/searchViewCloseIcon"
+                android:focusable="true"
             />
 
         </LinearLayout>
@@ -127,6 +128,7 @@
             android:background="?android:attr/selectableItemBackground"
             android:src="?android:attr/searchViewGoIcon"
             android:visibility="gone"
+            android:focusable="true"
         />
 
         <ImageView
@@ -139,6 +141,7 @@
             android:src="?android:attr/searchViewVoiceIcon"
             android:background="?android:attr/selectableItemBackground"
             android:visibility="gone"
+            android:focusable="true"
         />
     </LinearLayout>
 </LinearLayout>
