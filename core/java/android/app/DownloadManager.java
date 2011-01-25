@@ -266,6 +266,13 @@ public class DownloadManager {
     public final static String ACTION_VIEW_DOWNLOADS = "android.intent.action.VIEW_DOWNLOADS";
 
     /**
+     * Intent extra included with {@link #ACTION_VIEW_DOWNLOADS} to start DownloadApp in
+     * sort-by-size mode.
+     */
+    public final static String INTENT_EXTRAS_SORT_BY_SIZE =
+            "android.app.DownloadManager.extra_sortBySize";
+
+    /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a
      * long) of the download that just completed.
      */
