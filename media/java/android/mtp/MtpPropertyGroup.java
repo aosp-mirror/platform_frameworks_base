@@ -282,7 +282,7 @@ class MtpPropertyGroup {
     }
 
     MtpPropertyList getPropertyList(int handle, int format, int depth, int storageID) {
-        Log.d(TAG, "getPropertyList handle: " + handle + " format: " + format + " depth: " + depth);
+        //Log.d(TAG, "getPropertyList handle: " + handle + " format: " + format + " depth: " + depth);
         if (depth > 1) {
             // we only support depth 0 and 1
             // depth 0: single object, depth 1: immediate children
