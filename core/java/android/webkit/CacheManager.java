@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
+import com.android.org.bouncycastle.crypto.Digest;
+import com.android.org.bouncycastle.crypto.digests.SHA1Digest;
 
 /**
  * The class CacheManager provides the persistent cache of content that is
