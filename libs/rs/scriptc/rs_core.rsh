@@ -683,7 +683,7 @@ _RS_STATIC void __attribute__((overloadable))
 rsQuaternionMultiply(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w = -q->x*rhs->x - q->y*rhs->y - q->z*rhs->z + q->w*rhs->w;
     q->x =  q->x*rhs->w + q->y*rhs->z - q->z*rhs->y + q->w*rhs->x;
-    q->y = -q->x*rhs->z + q->y*rhs->w + q->z*rhs->z + q->w*rhs->y;
+    q->y = -q->x*rhs->z + q->y*rhs->w + q->z*rhs->x + q->w*rhs->y;
     q->z =  q->x*rhs->y - q->y*rhs->x + q->z*rhs->w + q->w*rhs->z;
 }
 
