@@ -47,12 +47,11 @@
                 android:id="@+id/item_radio"
                 android:layout_width="30dip"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="11dip"
                 android:focusable="false"
                 android:clickable="false" />
             <ImageView
                 android:id="@+id/item_icon"
-                android:layout_width="wrap_content"
+                android:layout_width="@android:dimen/app_icon_size"
                 android:layout_height="wrap_content"
                 android:scaleType="fitCenter" />
             <LinearLayout
