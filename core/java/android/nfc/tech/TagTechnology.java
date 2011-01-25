@@ -89,12 +89,6 @@ public interface TagTechnology {
     public static final int MIFARE_ULTRALIGHT = 9;
 
     /**
-     * Returns the technology type for this tag connection.
-     * @hide
-     */
-    public int getTechnologyId();
-
-    /**
      * Get the {@link Tag} object this technology came from.
      */
     public Tag getTag();
