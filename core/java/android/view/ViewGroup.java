@@ -2395,8 +2395,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 canvas.scale(scale, scale);
             }
         }
-        
-        boolean layerSaved = false;
 
         if (transformToApply != null || alpha < 1.0f || !child.hasIdentityMatrix()) {
             if (transformToApply != null || !childHasIdentityMatrix) {
