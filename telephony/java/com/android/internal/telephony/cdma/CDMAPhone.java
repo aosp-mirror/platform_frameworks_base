@@ -1143,20 +1143,6 @@ public class CDMAPhone extends PhoneBase {
     }
 
     /**
-     * Set the TTY mode of the CDMAPhone
-     */
-    public void setTTYMode(int ttyMode, Message onComplete) {
-        this.mCM.setTTYMode(ttyMode, onComplete);
-    }
-
-    /**
-     * Queries the TTY mode of the CDMAPhone
-     */
-    public void queryTTYMode(Message onComplete) {
-        this.mCM.queryTTYMode(onComplete);
-    }
-
-    /**
      * Activate or deactivate cell broadcast SMS.
      *
      * @param activate 0 = activate, 1 = deactivate

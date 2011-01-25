@@ -1463,9 +1463,11 @@ public interface Phone {
     /**
      * setTTYMode
      * sets a TTY mode option.
-     *
-     * @param ttyMode is a boolean representing the state that you are
-     *        requesting, true for enabled, false for disabled.
+     * @param ttyMode is a one of the following:
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_OFF}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_FULL}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_HCO}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      * @param onComplete a callback message when the action is completed
      */
     void setTTYMode(int ttyMode, Message onComplete);
