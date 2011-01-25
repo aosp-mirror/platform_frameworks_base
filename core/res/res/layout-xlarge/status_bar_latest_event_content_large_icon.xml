@@ -8,6 +8,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:orientation="vertical"
+        android:paddingLeft="16dp"
         >
         <TextView android:id="@+id/title"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
@@ -16,6 +17,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
+            android:layout_marginBottom="-4dp"
             />
         <TextView android:id="@+id/text"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
@@ -28,20 +30,27 @@
             android:fadingEdge="horizontal"
             />
     </LinearLayout>
-    <TextView android:id="@+id/info"
-        android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:singleLine="true"
-        android:gravity="center_vertical"
-        android:paddingLeft="8dp"
-        />
-    <ImageView android:id="@+id/icon"
-        android:layout_width="48dp"
-        android:layout_height="32dp"
-        android:layout_gravity="top"
-        android:layout_marginTop="8dp"
-        android:scaleType="center"
-        />
+        >
+        <TextView android:id="@+id/info"
+            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:layout_alignParentLeft="true"
+            android:paddingLeft="8dp"
+            />
+        <ImageView android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignRight="@id/info"
+            android:layout_marginBottom="8dip"
+            android:scaleType="center"
+            />
+    </RelativeLayout>
 </LinearLayout>
 

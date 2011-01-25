@@ -68,20 +68,16 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="2dip"
+            android:layout_marginLeft="4dip"
+            android:layout_marginRight="4dip"
             >
-            <TextView android:id="@+id/time_bg"
+            <TextView android:id="@+id/time_solid"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textSize="40sp"
-                android:textColor="#1f1f1f" />
-            <TextView android:id="@+id/time_fg"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:singleLine="true"
-                android:textSize="40sp"
-                android:textColor="#2e2e2e" />
+                android:textColor="#8cffffff" />
         </com.android.systemui.statusbar.tablet.HoloClock>
 
         <TextView
