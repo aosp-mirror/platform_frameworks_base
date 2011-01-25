@@ -81,7 +81,7 @@ public class TabletStatusBar extends StatusBar implements
 
     public static final int MAX_NOTIFICATION_ICONS = 5;
     // IME switcher icon is big and occupy width of two icons
-    public static final int MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE = MAX_NOTIFICATION_ICONS - 2;
+    public static final int MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE = MAX_NOTIFICATION_ICONS - 1;
 
     public static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     public static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
@@ -860,11 +860,8 @@ public class TabletStatusBar extends StatusBar implements
         if (DEBUG) {
             Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
         }
-        int oldVisibility = mInputMethodSwitchButton.getVisibility();
         mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
-        if (oldVisibility != mInputMethodSwitchButton.getVisibility()) {
-            updateNotificationIcons();
-        }
+        updateNotificationIcons();
         mInputMethodsPanel.setImeToken(token);
         mBackButton.setImageResource(
                 visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
