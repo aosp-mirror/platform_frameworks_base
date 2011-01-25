@@ -117,6 +117,7 @@ class CallbackProxy extends Handler {
     private static final int AUTH_CREDENTIALS                    = 137;
     private static final int SET_INSTALLABLE_WEBAPP              = 138;
     private static final int NOTIFY_SEARCHBOX_LISTENERS          = 139;
+    private static final int AUTO_LOGIN                          = 140;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -770,7 +771,7 @@ class CallbackProxy extends Handler {
                             (WebHistoryItem) msg.obj, msg.arg1);
                 }
                 break;
-            case AUTH_CREDENTIALS:
+            case AUTH_CREDENTIALS: {
                 String host = msg.getData().getString("host");
                 String realm = msg.getData().getString("realm");
                 username = msg.getData().getString("username");
@@ -778,6 +779,7 @@ class CallbackProxy extends Handler {
                 mWebView.setHttpAuthUsernamePassword(
                         host, realm, username, password);
                 break;
+            }
             case SET_INSTALLABLE_WEBAPP:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.setInstallableWebApp();
@@ -789,6 +791,17 @@ class CallbackProxy extends Handler {
                 @SuppressWarnings("unchecked")
                 List<String> suggestions = (List<String>) msg.obj;
                 searchBox.handleSuggestions(msg.getData().getString("query"), suggestions);
+                break;
+            case AUTO_LOGIN: {
+                if (mWebViewClient != null) {
+                    String realm = msg.getData().getString("realm");
+                    String account = msg.getData().getString("account");
+                    String args = msg.getData().getString("args");
+                    mWebViewClient.onReceivedLoginRequest(mWebView, realm,
+                            account, args);
+                }
+                break;
+            }
         }
     }
 
@@ -1048,6 +1061,20 @@ class CallbackProxy extends Handler {
         Bundle bundle = msg.getData();
         bundle.putFloat("old", oldScale);
         bundle.putFloat("new", newScale);
+        sendMessage(msg);
+    }
+
+    void onReceivedLoginRequest(String realm, String account, String args) {
+        // Do an unsynchronized quick check to avoid posting if no callback has
+        // been set.
+        if (mWebViewClient == null) {
+            return;
+        }
+        Message msg = obtainMessage(AUTO_LOGIN);
+        Bundle bundle = msg.getData();
+        bundle.putString("realm", realm);
+        bundle.putString("account", account);
+        bundle.putString("args", args);
         sendMessage(msg);
     }
 

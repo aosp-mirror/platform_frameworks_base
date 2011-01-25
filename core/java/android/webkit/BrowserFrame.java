@@ -1237,9 +1237,15 @@ class BrowserFrame extends Handler {
         }
     }
 
-
     /*package*/ SearchBox getSearchBox() {
         return mSearchBox;
+    }
+
+    /**
+     * Called by JNI when processing the X-Auto-Login header.
+     */
+    private void autoLogin(String realm, String account, String args) {
+        mCallbackProxy.onReceivedLoginRequest(realm, account, args);
     }
 
     //==========================================================================
