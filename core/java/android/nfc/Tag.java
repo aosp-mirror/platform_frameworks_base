@@ -187,25 +187,39 @@ public class Tag implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        // Null mTagService means this is a mock tag
+        int isMock = (mTagService == null)?1:0;
+
         writeBytesWithNull(dest, mId);
         dest.writeInt(mTechList.length);
         dest.writeIntArray(mTechList);
         dest.writeTypedArray(mTechExtras, 0);
         dest.writeInt(mServiceHandle);
-        dest.writeStrongBinder(mTagService.asBinder());
+        dest.writeInt(isMock);
+        if (isMock == 0) {
+            dest.writeStrongBinder(mTagService.asBinder());
+        }
     }
 
     public static final Parcelable.Creator<Tag> CREATOR =
             new Parcelable.Creator<Tag>() {
         @Override
         public Tag createFromParcel(Parcel in) {
+            INfcTag tagService;
+
             // Tag fields
             byte[] id = Tag.readBytesWithNull(in);
             int[] techList = new int[in.readInt()];
             in.readIntArray(techList);
             Bundle[] techExtras = in.createTypedArray(Bundle.CREATOR);
             int serviceHandle = in.readInt();
-            INfcTag tagService = INfcTag.Stub.asInterface(in.readStrongBinder());
+            int isMock = in.readInt();
+            if (isMock == 0) {
+                tagService = INfcTag.Stub.asInterface(in.readStrongBinder());
+            }
+            else {
+                tagService = null;
+            }
 
             return new Tag(id, techList, techExtras, serviceHandle, tagService);
         }
