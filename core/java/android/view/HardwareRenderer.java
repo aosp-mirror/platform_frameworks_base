@@ -232,6 +232,10 @@ public abstract class HardwareRenderer {
         private static final int EGL_SURFACE_TYPE = 0x3033;
         private static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
 
+        private static final int SURFACE_STATE_ERROR = 0;
+        private static final int SURFACE_STATE_SUCCESS = 1;
+        private static final int SURFACE_STATE_UPDATED = 2;
+        
         static EGLContext sEglContext;
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
@@ -535,7 +539,13 @@ public abstract class HardwareRenderer {
                     startTime = SystemClock.elapsedRealtime();
                 }
 
-                if (checkCurrent()) {
+                final int surfaceState = checkCurrent();
+                if (surfaceState != SURFACE_STATE_ERROR) {
+                    // We had to change the current surface and/or context, redraw everything
+                    if (surfaceState == SURFACE_STATE_UPDATED) {
+                        dirty = null;
+                    }
+
                     onPreDraw(dirty);
     
                     HardwareCanvas canvas = mCanvas;
@@ -587,8 +597,8 @@ public abstract class HardwareRenderer {
                 }
             }
         }
-
-        private boolean checkCurrent() {
+        
+        private int checkCurrent() {
             // TODO: Don't check the current context when we have one per UI thread
             // TODO: Use a threadlocal flag to know whether the surface has changed
             if (sEgl.eglGetCurrentContext() != sEglContext ||
@@ -597,10 +607,12 @@ public abstract class HardwareRenderer {
                     fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
                             getEGLErrorString(sEgl.eglGetError()));
-                    return false;
+                    return SURFACE_STATE_ERROR;
+                } else {
+                    return SURFACE_STATE_UPDATED;
                 }
             }
-            return true;
+            return SURFACE_STATE_SUCCESS;
         }
 
         static abstract class EglConfigChooser {
@@ -673,6 +685,7 @@ public abstract class HardwareRenderer {
 
             ComponentSizeChooser(int glVersion, int redSize, int greenSize, int blueSize,
                     int alphaSize, int depthSize, int stencilSize) {
+                //noinspection PointlessBitwiseExpression
                 super(glVersion, new int[] {
                         EGL10.EGL_RED_SIZE, redSize,
                         EGL10.EGL_GREEN_SIZE, greenSize,
