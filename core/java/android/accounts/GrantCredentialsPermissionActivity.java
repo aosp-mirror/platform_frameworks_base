@@ -51,9 +51,9 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
     private final AccountManagerService accountManagerService = AccountManagerService.getSingleton();
 
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.grant_credentials_permission);
+        setTitle(R.string.grant_permissions_header_text);
 
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
