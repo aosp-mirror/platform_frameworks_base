@@ -29,7 +29,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
-import org.bouncycastle.util.encoders.Base64;
+import com.android.org.bouncycastle.util.encoders.Base64;
 
 import java.io.File;
 import java.io.FileFilter;
