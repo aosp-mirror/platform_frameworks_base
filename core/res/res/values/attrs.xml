@@ -223,6 +223,9 @@
         <!-- The preferred right bound for an expandable list child's indicator. -->
         <attr name="expandableListPreferredChildIndicatorRight" format="dimension" />
 
+        <!-- The preferred item height for dropdown lists. -->
+        <attr name="dropdownListPreferredItemHeight" format="dimension" />
+
         <!-- ============= -->
         <!-- Window styles -->
         <!-- ============= -->
