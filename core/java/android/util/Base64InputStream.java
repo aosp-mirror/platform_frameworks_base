@@ -145,7 +145,7 @@ public class Base64InputStream extends FilterInputStream {
             success = coder.process(inputBuffer, 0, bytesRead, false);
         }
         if (!success) {
-            throw new IOException("bad base-64");
+            throw new Base64DataException("bad base-64");
         }
         outputEnd = coder.op;
         outputStart = 0;
