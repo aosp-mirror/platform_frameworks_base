@@ -1680,6 +1680,16 @@ public final class Settings {
         public static final String POINTER_LOCATION = "pointer_location";
 
         /**
+         * Log raw orientation data from {@link WindowOrientationListener} for use with the
+         * orientationplot.py tool.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String WINDOW_ORIENTATION_LISTENER_LOG =
+                "window_orientation_listener_log";
+
+        /**
          * Whether to play a sound for low-battery alerts.
          * @hide
          */

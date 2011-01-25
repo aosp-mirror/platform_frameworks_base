@@ -389,6 +389,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.WINDOW_ORIENTATION_LISTENER_LOG), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.POINTER_LOCATION), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
@@ -758,6 +760,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mAccelerometerDefault = accelerometerDefault;
                 updateOrientationListenerLp();
             }
+
+            mOrientationListener.setLogEnabled(
+                    Settings.System.getInt(resolver,
+                            Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, 0) != 0);
 
             if (mSystemReady) {
                 int pointerLocation = Settings.System.getInt(resolver,
@@ -2492,17 +2498,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return mSeascapeRotation;
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
                     //return either landscape rotation based on the sensor
-                    mOrientationListener.setAllow180Rotation(
-                            isLandscapeOrSeascape(Surface.ROTATION_180));
                     return getCurrentLandscapeRotation(lastRotation);
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-                    mOrientationListener.setAllow180Rotation(
-                            !isLandscapeOrSeascape(Surface.ROTATION_180));
                     return getCurrentPortraitRotation(lastRotation);
             }
-
-            mOrientationListener.setAllow180Rotation(mAllowAllRotations ||
-                    orientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
 
             // case for nosensor meaning ignore sensor and consider only lid
             // or orientation sensor disabled
@@ -2519,7 +2518,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return mUserRotation;
             } else {
                 if (useSensorForOrientationLp(orientation)) {
-                    return mOrientationListener.getCurrentRotation(lastRotation);
+                    // Disable 180 degree rotation unless allowed by default for the device
+                    // or explicitly requested by the application.
+                    int rotation = mOrientationListener.getCurrentRotation(lastRotation);
+                    if (rotation == Surface.ROTATION_180
+                            && !mAllowAllRotations
+                            && orientation != ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR) {
+                        return lastRotation;
+                    }
+                    return rotation;
                 }
                 return Surface.ROTATION_0;
             }
