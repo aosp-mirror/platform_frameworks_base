@@ -2083,10 +2083,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return mSeascapeRotation;
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
                     //return either landscape rotation based on the sensor
-                    mOrientationListener.setAllow180Rotation(false);
+                    mOrientationListener.setAllow180Rotation(
+                            isLandscapeOrSeascape(Surface.ROTATION_180));
                     return getCurrentLandscapeRotation(lastRotation);
                 case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-                    mOrientationListener.setAllow180Rotation(true);
+                    mOrientationListener.setAllow180Rotation(
+                            !isLandscapeOrSeascape(Surface.ROTATION_180));
                     return getCurrentPortraitRotation(lastRotation);
             }
 
