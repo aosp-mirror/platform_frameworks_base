@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 
 /**
  * Hardware accelerated canvas.
@@ -38,8 +39,10 @@ public abstract class HardwareCanvas extends Canvas {
     
     /**
      * Invoked before any drawing operation is performed in this canvas.
+     * 
+     * @param dirty The dirty rectangle to update, can be null.
      */
-    abstract void onPreDraw();
+    abstract void onPreDraw(Rect dirty);
 
     /**
      * Invoked after all drawing operation have been performed.

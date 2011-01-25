@@ -26,7 +26,7 @@ namespace uirenderer {
 // Rendering
 ///////////////////////////////////////////////////////////////////////////////
 
-void LayerRenderer::prepare(bool opaque) {
+void LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
 #if RENDER_LAYERS_AS_REGIONS
@@ -35,7 +35,7 @@ void LayerRenderer::prepare(bool opaque) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
-    OpenGLRenderer::prepare(opaque);
+    OpenGLRenderer::prepareDirty(0.0f, 0.0f, mLayer->width, mLayer->height, opaque);
 }
 
 void LayerRenderer::finish() {

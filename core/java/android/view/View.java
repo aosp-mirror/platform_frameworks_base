@@ -6771,11 +6771,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags |= INVALIDATED;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
-            if (p != null && ai != null && ai.mHardwareAccelerated) {
-                // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                // with a null dirty rect, which tells the ViewRoot to redraw everything
-                p.invalidateChild(this, null);
-                return;
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
+                if (p != null && ai != null && ai.mHardwareAccelerated) {
+                    // fast-track for GL-enabled applications; just invalidate the whole hierarchy
+                    // with a null dirty rect, which tells the ViewRoot to redraw everything
+                    p.invalidateChild(this, null);
+                    return;
+                }
             }
             if (p != null && ai != null) {
                 final int scrollX = mScrollX;
@@ -6811,11 +6814,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags |= INVALIDATED;
             final ViewParent p = mParent;
             final AttachInfo ai = mAttachInfo;
-            if (p != null && ai != null && ai.mHardwareAccelerated) {
-                // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                // with a null dirty rect, which tells the ViewRoot to redraw everything
-                p.invalidateChild(this, null);
-                return;
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
+                if (p != null && ai != null && ai.mHardwareAccelerated) {
+                    // fast-track for GL-enabled applications; just invalidate the whole hierarchy
+                    // with a null dirty rect, which tells the ViewRoot to redraw everything
+                    p.invalidateChild(this, null);
+                    return;
+                }
             }
             if (p != null && ai != null && l < r && t < b) {
                 final int scrollX = mScrollX;
@@ -6864,11 +6870,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             }
             final AttachInfo ai = mAttachInfo;
             final ViewParent p = mParent;
-            if (p != null && ai != null && ai.mHardwareAccelerated) {
-                // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                // with a null dirty rect, which tells the ViewRoot to redraw everything
-                p.invalidateChild(this, null);
-                return;
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
+                if (p != null && ai != null && ai.mHardwareAccelerated) {
+                    // fast-track for GL-enabled applications; just invalidate the whole hierarchy
+                    // with a null dirty rect, which tells the ViewRoot to redraw everything
+                    p.invalidateChild(this, null);
+                    return;
+                }
             }
 
             if (p != null && ai != null) {
@@ -8142,7 +8151,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             final HardwareCanvas canvas = mHardwareLayer.start(mAttachInfo.mHardwareCanvas);
             try {
                 canvas.setViewport(width, height);
-                canvas.onPreDraw();
+                // TODO: We should pass the dirty rect
+                canvas.onPreDraw(null);
 
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
@@ -8231,7 +8241,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ViewGroup parent = (ViewGroup) this;
             final int count = parent.getChildCount();
             for (int i = 0; i < count; i++) {
-                final View child = (View) parent.getChildAt(i);
+                final View child = parent.getChildAt(i);
                 child.outputDirtyFlags(indent + "  ", clear, clearMask);
             }
         }
@@ -8292,7 +8302,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 int height = mBottom - mTop;
 
                 canvas.setViewport(width, height);
-                canvas.onPreDraw();
+                // The dirty rect should always be null for a display list
+                canvas.onPreDraw(null);
 
                 final int restoreCount = canvas.save();
 

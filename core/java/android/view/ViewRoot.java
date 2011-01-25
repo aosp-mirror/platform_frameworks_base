@@ -165,7 +165,9 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     int mWidth;
     int mHeight;
-    Rect mDirty; // will be a graphics.Region soon
+    Rect mDirty;
+    final Rect mCurrentDirty = new Rect();
+    final Rect mPreviousDirty = new Rect();
     boolean mIsAnimating;
 
     CompatibilityInfo.Translator mTranslator;
@@ -1060,6 +1062,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     disposeResizeBitmap();
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
+                    fullRedrawNeeded = true;
                     mAttachInfo.mHardwareRenderer.updateSurface(mHolder);
                 }
             } catch (RemoteException e) {
@@ -1493,10 +1496,15 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
             if (!dirty.isEmpty() || mIsAnimating) {
                 mIsAnimating = false;
-                dirty.setEmpty();
                 mHardwareYOffset = yoff;
                 mResizeAlpha = resizeAlpha;
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this);
+
+                mCurrentDirty.set(dirty);
+                mCurrentDirty.union(mPreviousDirty);
+                mPreviousDirty.set(dirty);
+                dirty.setEmpty();
+
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this, mCurrentDirty);
             }
 
             if (animating) {
@@ -1995,6 +2003,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                     if (mAttachInfo.mHardwareRenderer != null &&
                             mSurface != null && mSurface.isValid()) {
+                        mFullRedrawNeeded = true;
                         mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
                                 mAttachInfo, mHolder);
                     }

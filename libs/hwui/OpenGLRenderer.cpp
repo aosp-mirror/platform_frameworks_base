@@ -136,6 +136,10 @@ void OpenGLRenderer::setViewport(int width, int height) {
 }
 
 void OpenGLRenderer::prepare(bool opaque) {
+    prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
+}
+
+void OpenGLRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     mCaches.clearGarbage();
 
     mSnapshot = new Snapshot(mFirstSnapshot,
@@ -146,15 +150,14 @@ void OpenGLRenderer::prepare(bool opaque) {
 
     glDisable(GL_DITHER);
 
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
+    mSnapshot->setClip(left, top, right, bottom);
+
     if (!opaque) {
-        glDisable(GL_SCISSOR_TEST);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
     }
-
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(0, 0, mWidth, mHeight);
-    mSnapshot->setClip(0.0f, 0.0f, mWidth, mHeight);
 }
 
 void OpenGLRenderer::finish() {
