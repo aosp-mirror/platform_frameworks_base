@@ -1609,8 +1609,6 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     layer->alpha = alpha;
     layer->mode = mode;
 
-    LOGD("Drawing layer with alpha = %d", alpha);
-
 #if RENDER_LAYERS_AS_REGIONS
     if (!layer->region.isEmpty()) {
         if (layer->region.isRect()) {
