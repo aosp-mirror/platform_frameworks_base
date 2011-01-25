@@ -22,6 +22,7 @@ import android.os.RemoteException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * Technology class representing MIFARE Classic tags (also known as MIFARE Standard).
@@ -328,12 +329,14 @@ public final class MifareClassic extends BasicTagTechnology {
      */
     public void increment(int blockIndex, int value) throws IOException {
         validateBlock(blockIndex);
+        validateValueOperand(value);
         checkConnected();
 
         ByteBuffer cmd = ByteBuffer.allocate(6);
+        cmd.order(ByteOrder.LITTLE_ENDIAN);
         cmd.put( (byte) 0xC1 );
         cmd.put( (byte) blockIndex );
-        cmd.putInt(value);  // ByteBuffer does the correct big endian translation
+        cmd.putInt(value);
 
         transceive(cmd.array(), false);
     }
@@ -345,14 +348,22 @@ public final class MifareClassic extends BasicTagTechnology {
      */
     public void decrement(int blockIndex, int value) throws IOException {
         validateBlock(blockIndex);
+        validateValueOperand(value);
         checkConnected();
 
         ByteBuffer cmd = ByteBuffer.allocate(6);
+        cmd.order(ByteOrder.LITTLE_ENDIAN);
         cmd.put( (byte) 0xC0 );
         cmd.put( (byte) blockIndex );
-        cmd.putInt(value);  // ByteBuffer does the correct big endian translation
+        cmd.putInt(value);
 
         transceive(cmd.array(), false);
+    }
+
+    private void validateValueOperand(int value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("value operand negative");
+        }
     }
 
     /**
