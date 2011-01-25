@@ -36,9 +36,12 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.android.systemui.R;
 
@@ -47,9 +50,10 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     private static final String TAG = "InputMethodsPanel";
 
     private final InputMethodManager mImm;
-    private final HashMap<InputMethodInfo, List<InputMethodSubtype>>
+    private final TreeMap<InputMethodInfo, List<InputMethodSubtype>>
             mEnabledInputMethodAndSubtypesCache =
-                    new HashMap<InputMethodInfo, List<InputMethodSubtype>>();
+                    new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
+                            new InputMethodComparator());
     private final HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>> mRadioViewAndImiMap =
             new HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>>();
 
@@ -60,6 +64,21 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     private PackageManager mPackageManager;
     private String mEnabledInputMethodAndSubtypesCacheStr;
     private View mConfigureImeShortcut;
+
+    private class InputMethodComparator implements Comparator<InputMethodInfo> {
+        public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
+            if (imi2 == null) return 0;
+            if (imi1 == null) return 1;
+            if (mPackageManager != null) {
+                CharSequence imiId1 = imi1.loadLabel(mPackageManager);
+                CharSequence imiId2 = imi2.loadLabel(mPackageManager);
+                if (imiId1 != null && imiId2 != null) {
+                    return imiId1.toString().compareTo(imiId2.toString());
+                }
+            }
+            return imi1.getId().compareTo(imi2.getId());
+        }
+    }
 
     public InputMethodsPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -190,8 +209,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         mRadioViewAndImiMap.clear();
         mPackageManager = mContext.getPackageManager();
 
-        HashMap<InputMethodInfo, List<InputMethodSubtype>> enabledIMIs
-                = getEnabledInputMethodAndSubtypeList();
+        Map<InputMethodInfo, List<InputMethodSubtype>> enabledIMIs =
+                getEnabledInputMethodAndSubtypeList();
         // TODO: Sort by alphabet and mode.
         Set<InputMethodInfo> cachedImiSet = enabledIMIs.keySet();
         for (InputMethodInfo imi: cachedImiSet) {
@@ -278,7 +297,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         }
     }
 
-    private HashMap<InputMethodInfo, List<InputMethodSubtype>>
+    private TreeMap<InputMethodInfo, List<InputMethodSubtype>>
             getEnabledInputMethodAndSubtypeList() {
         String newEnabledIMIs = Settings.Secure.getString(
                 mContext.getContentResolver(), Settings.Secure.ENABLED_INPUT_METHODS);
