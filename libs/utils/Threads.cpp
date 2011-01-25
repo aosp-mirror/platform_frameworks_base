@@ -799,9 +799,6 @@ void Thread::requestExit()
 
 status_t Thread::requestExitAndWait()
 {
-    // hold a reference so mThreadExitedCondition is not destroyed before wait() returns
-    sp<Thread> strong(mHoldSelf);
-
     if (mThread == getThreadId()) {
         LOGW(
         "Thread (this=%p): don't call waitForExit() from this "
