@@ -16,10 +16,10 @@
 
 package android.webkit;
 
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.jce.netscape.NetscapeCertRequest;
-import org.bouncycastle.util.encoders.Base64;
+import com.android.org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import com.android.org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import com.android.org.bouncycastle.jce.netscape.NetscapeCertRequest;
+import com.android.org.bouncycastle.util.encoders.Base64;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
