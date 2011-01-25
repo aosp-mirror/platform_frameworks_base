@@ -95,6 +95,8 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
+        <item name="dropdownListPreferredItemHeight">64dip</item>
+
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
         <item name="listDivider">@drawable/divider_horizontal_dark</item>
@@ -813,6 +815,8 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
+        <item name="dropdownListPreferredItemHeight">48dip</item>
+
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
         <item name="listDivider">@drawable/list_divider_holo_dark</item>
@@ -1084,6 +1088,8 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
+        <item name="dropdownListPreferredItemHeight">48dip</item>
+
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
         <item name="listDivider">@drawable/list_divider_holo_light</item>
