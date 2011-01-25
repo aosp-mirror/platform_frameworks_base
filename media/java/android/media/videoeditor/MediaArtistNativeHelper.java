@@ -4005,8 +4005,8 @@ class MediaArtistNativeHelper {
         }
     }
 
-    public void clearPreviewSurface(Surface surface, int width, int height) {
-       nativeClearSurface(surface,width,height);
+    public void clearPreviewSurface(Surface surface) {
+       nativeClearSurface(surface);
     }
     /**     Native Methods        */
     native Properties getMediaProperties(String file) throws IllegalArgumentException,
@@ -4053,7 +4053,7 @@ class MediaArtistNativeHelper {
     /*
      * Clear the preview surface
      */
-    public native void nativeClearSurface(Surface surface, int width, int height);
+    private native void nativeClearSurface(Surface surface);
 
 
     /**
