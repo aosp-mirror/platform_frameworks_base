@@ -116,7 +116,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ViewGroup mContentParent;
 
     SurfaceHolder.Callback2 mTakeSurfaceCallback;
-    BaseSurfaceHolder mSurfaceHolder;
     
     InputQueue.Callback mTakeInputQueueCallback;
     

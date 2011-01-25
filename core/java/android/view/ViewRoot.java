@@ -1082,6 +1082,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     //mSurfaceHolder.mSurface.copyFrom(mSurface);
                     mSurfaceHolder.mSurface = mSurface;
                 }
+                mSurfaceHolder.setSurfaceFrameSize(mWidth, mHeight);
                 mSurfaceHolder.mSurfaceLock.unlock();
                 if (mSurface.isValid()) {
                     if (!hadSurface) {

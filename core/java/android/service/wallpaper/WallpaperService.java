@@ -546,7 +546,8 @@ public abstract class WallpaperService extends Service {
                         sizeChanged = true;
                         mCurHeight = h;
                     }
-                    
+
+                    mSurfaceHolder.setSurfaceFrameSize(w, h);
                     mSurfaceHolder.mSurfaceLock.unlock();
 
                     if (!mSurfaceHolder.mSurface.isValid()) {
