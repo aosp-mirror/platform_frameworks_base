@@ -90,13 +90,11 @@ class TextLine {
         tl.mText = null;
         tl.mPaint = null;
         tl.mDirections = null;
-        if (tl.mLen < 250) {
-            synchronized(cached) {
-                for (int i = 0; i < cached.length; ++i) {
-                    if (cached[i] == null) {
-                        cached[i] = tl;
-                        break;
-                    }
+        synchronized(cached) {
+            for (int i = 0; i < cached.length; ++i) {
+                if (cached[i] == null) {
+                    cached[i] = tl;
+                    break;
                 }
             }
         }
