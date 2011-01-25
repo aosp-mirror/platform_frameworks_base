@@ -244,7 +244,7 @@ public class RecoverySystem {
             // algorithm is used by the signature (which should be
             // SHA1withRSA).
 
-            String da = sigInfo.getdigestAlgorithm();
+            String da = sigInfo.getDigestAlgorithm();
             String dea = sigInfo.getDigestEncryptionAlgorithm();
             String alg = null;
             if (da == null || dea == null) {
