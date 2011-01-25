@@ -522,7 +522,7 @@ M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime)
 
     if (M4WAR_VIDEORENDERER_NO_NEW_FRAME == err)
     {
-        err = M4NO_ERROR;
+        return err;
     }
     CHECK_ERR(videoBrowserPrepareFrame, err) ;
 
