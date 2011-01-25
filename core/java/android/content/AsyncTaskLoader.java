@@ -195,7 +195,7 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
                 }
             }
             if (DEBUG) Slog.v(TAG, "Executing: " + mTask);
-            mTask.execute((Void[]) null);
+            mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
         }
     }
 

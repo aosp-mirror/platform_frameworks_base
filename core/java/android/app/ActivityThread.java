@@ -2410,7 +2410,9 @@ public final class ActivityThread {
             performPauseActivity(token, finished, r.isPreHoneycomb());
 
             // Make sure any pending writes are now committed.
-            QueuedWork.waitToFinish();
+            if (r.isPreHoneycomb()) {
+                QueuedWork.waitToFinish();
+            }
             
             // Tell the activity manager we have paused.
             try {
@@ -2619,6 +2621,11 @@ public final class ActivityThread {
 
         updateVisibility(r, show);
 
+        // Make sure any pending writes are now committed.
+        if (!r.isPreHoneycomb()) {
+            QueuedWork.waitToFinish();
+        }
+
         // Tell activity manager we have been stopped.
         try {
             ActivityManagerNative.getDefault().activityStopped(
@@ -2683,6 +2690,12 @@ public final class ActivityThread {
                 }
                 r.stopped = true;
             }
+
+            // Make sure any pending writes are now committed.
+            if (!r.isPreHoneycomb()) {
+                QueuedWork.waitToFinish();
+            }
+
             // Tell activity manager we slept.
             try {
                 ActivityManagerNative.getDefault().activitySlept(r.token);

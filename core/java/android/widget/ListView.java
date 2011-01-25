@@ -2706,7 +2706,7 @@ public class ListView extends AbsListView {
             int startPos = (mSelectedPosition != INVALID_POSITION) ?
                     mSelectedPosition - 1 :
                     firstPosition + getChildCount() - 1;
-            if (startPos < 0) {
+            if (startPos < 0 || startPos >= mAdapter.getCount()) {
                 return INVALID_POSITION;
             }
             if (startPos > last) {

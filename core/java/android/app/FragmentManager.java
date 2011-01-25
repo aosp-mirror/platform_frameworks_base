@@ -28,6 +28,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DebugUtils;
 import android.util.Log;
+import android.util.LogWriter;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -968,6 +970,7 @@ final class FragmentManagerImpl extends FragmentManager {
         makeActive(fragment);
         if (DEBUG) Log.v(TAG, "add: " + fragment);
         fragment.mAdded = true;
+        fragment.mRemoving = false;
         if (fragment.mHasMenu) {
             mNeedMenuInvalidate = true;
         }
@@ -984,6 +987,7 @@ final class FragmentManagerImpl extends FragmentManager {
             mNeedMenuInvalidate = true;
         }
         fragment.mAdded = false;
+        fragment.mRemoving = true;
         moveToState(fragment, inactive ? Fragment.INITIALIZING : Fragment.CREATED,
                 transition, transitionStyle);
         if (inactive) {
@@ -1376,6 +1380,14 @@ final class FragmentManagerImpl extends FragmentManager {
                     }
 
                     if (f.mTarget != null) {
+                        if (f.mTarget.mIndex < 0) {
+                            String msg = "Failure saving state: " + f
+                                + " has target not in fragment manager: " + f.mTarget;
+                            Slog.e(TAG, msg);
+                            dump("  ", null, new PrintWriter(new LogWriter(
+                                    Log.ERROR, TAG, Log.LOG_ID_SYSTEM)), new String[] { });
+                            throw new IllegalStateException(msg);
+                        }
                         if (fs.mSavedFragmentState == null) {
                             fs.mSavedFragmentState = new Bundle();
                         }

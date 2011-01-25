@@ -357,6 +357,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // True if the fragment is in the list of added fragments.
     boolean mAdded;
     
+    // If set this fragment is being removed from its activity.
+    boolean mRemoving;
+
     // True if the fragment is in the resumed state.
     boolean mResumed;
     
@@ -638,6 +641,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * Return <code>getActivity().getResources()</code>.
      */
     final public Resources getResources() {
+        if (mActivity == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
         return mActivity.getResources();
     }
     
@@ -689,7 +695,16 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * Return true if the fragment is currently added to its activity.
      */
     final public boolean isAdded() {
-        return mActivity != null && mActivity.mFragments.mAdded.contains(this);
+        return mActivity != null && mAdded;
+    }
+
+    /**
+     * Return true if this fragment is currently being removed from its
+     * activity.  This is  <em>not</em> whether its activity is finishing, but
+     * rather whether it is in the process of being removed from its activity.
+     */
+    final public boolean isRemoving() {
+        return mRemoving;
     }
     
     /**
@@ -787,6 +802,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         if (mLoaderManager != null) {
             return mLoaderManager;
         }
+        if (mActivity == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
         mCheckedForLoaderManager = true;
         mLoaderManager = mActivity.getLoaderManager(mIndex, mLoadersStarted, true);
         return mLoaderManager;
@@ -797,6 +815,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * containing Activity.
      */
     public void startActivity(Intent intent) {
+        if (mActivity == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
         mActivity.startActivityFromFragment(this, intent, -1);
     }
     
@@ -805,6 +826,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      * containing Activity.
      */
     public void startActivityForResult(Intent intent, int requestCode) {
+        if (mActivity == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
         mActivity.startActivityFromFragment(this, intent, requestCode);
     }
     
@@ -1217,6 +1241,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
                 writer.print(" mWho="); writer.print(mWho);
                 writer.print(" mBackStackNesting="); writer.println(mBackStackNesting);
         writer.print(prefix); writer.print("mAdded="); writer.print(mAdded);
+                writer.print(" mRemoving="); writer.print(mRemoving);
                 writer.print(" mResumed="); writer.print(mResumed);
                 writer.print(" mFromLayout="); writer.print(mFromLayout);
                 writer.print(" mInLayout="); writer.println(mInLayout);

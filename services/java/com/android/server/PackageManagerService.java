@@ -2087,7 +2087,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 return (List<ResolveInfo>) mActivities.queryIntentForPackage(intent,
                         resolvedType, flags, pkg.activities);
             }
-            return null;
+            return new ArrayList<ResolveInfo>();
         }
     }
 
