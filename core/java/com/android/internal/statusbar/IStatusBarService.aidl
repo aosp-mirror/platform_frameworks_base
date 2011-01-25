@@ -30,7 +30,6 @@ interface IStatusBarService
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
-    void setActiveWindowIsFullscreen(boolean fullscreen);
     void setMenuKeyVisible(boolean visible);
     void setIMEButtonVisible(in IBinder token, boolean visible);
 

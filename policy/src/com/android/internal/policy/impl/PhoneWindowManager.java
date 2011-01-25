@@ -1892,14 +1892,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + (topNeedsMenu ? "needs" : "does not need")
                 + " the MENU key");
 
-        final boolean changedFullscreen = (mTopIsFullscreen != topIsFullscreen);
+        mTopIsFullscreen = topIsFullscreen;
         final boolean changedMenu = (topNeedsMenu != mShowMenuKey);
 
-        if (changedFullscreen || changedMenu) {
-            final boolean topIsFullscreenF = topIsFullscreen;
+        if (changedMenu) {
             final boolean topNeedsMenuF = topNeedsMenu;
 
-            mTopIsFullscreen = topIsFullscreen;
             mShowMenuKey = topNeedsMenu;
 
             mHandler.post(new Runnable() {
@@ -1917,9 +1915,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             try {
                                 if (changedMenu) {
                                     sbs.setMenuKeyVisible(topNeedsMenuF);
-                                }
-                                if (changedFullscreen) {
-                                    sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
                                 }
                             } catch (RemoteException e) {
                                 // This should be impossible because we're in the same process.
