@@ -88,9 +88,13 @@ public class ImageWallpaper extends WallpaperService {
 
         class WallpaperObserver extends BroadcastReceiver {
             public void onReceive(Context context, Intent intent) {
+                if (DEBUG) {
+                    Log.d(TAG, "onReceive");
+                }
+
                 synchronized (mLock) {
                     updateWallpaperLocked();
-                    drawFrameLocked(true, false);
+                    drawFrameLocked();
                 }
 
                 // Assume we are the only one using the wallpaper in this
@@ -101,6 +105,10 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
+            if (DEBUG) {
+                Log.d(TAG, "onCreate");
+            }
+
             super.onCreate(surfaceHolder);
             IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
             mReceiver = new WallpaperObserver();
@@ -120,9 +128,18 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onVisibilityChanged(boolean visible) {
+            if (DEBUG) {
+                Log.d(TAG, "onVisibilityChanged: visible=" + visible);
+            }
+
             synchronized (mLock) {
-                mVisible = visible;
-                drawFrameLocked(false, false);
+                if (mVisible != visible) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Visibility changed to visible=" + visible);
+                    }
+                    mVisible = visible;
+                    drawFrameLocked();
+                }
             }
         }
 
@@ -135,6 +152,12 @@ public class ImageWallpaper extends WallpaperService {
         public void onOffsetsChanged(float xOffset, float yOffset,
                 float xOffsetStep, float yOffsetStep,
                 int xPixels, int yPixels) {
+            if (DEBUG) {
+                Log.d(TAG, "onOffsetsChanged: xOffset=" + xOffset + ", yOffset=" + yOffset
+                        + ", xOffsetStep=" + xOffsetStep + ", yOffsetStep=" + yOffsetStep
+                        + ", xPixels=" + xPixels + ", yPixels=" + yPixels);
+            }
+
             synchronized (mLock) {
                 if (mXOffset != xOffset || mYOffset != yOffset) {
                     if (DEBUG) {
@@ -142,36 +165,27 @@ public class ImageWallpaper extends WallpaperService {
                     }
                     mXOffset = xOffset;
                     mYOffset = yOffset;
-                    drawFrameLocked(false, true);
-                } else {
-                    drawFrameLocked(false, false);
+                    mOffsetsChanged = true;
                 }
+                drawFrameLocked();
             }
         }
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            if (DEBUG) {
+                Log.d(TAG, "onSurfaceChanged: width=" + width + ", height=" + height);
+            }
+
             super.onSurfaceChanged(holder, format, width, height);
-            
+
             synchronized (mLock) {
-                drawFrameLocked(true, false);
+                mRedrawNeeded = true;
+                drawFrameLocked();
             }
         }
 
-        @Override
-        public void onSurfaceCreated(SurfaceHolder holder) {
-            super.onSurfaceCreated(holder);
-        }
-
-        @Override
-        public void onSurfaceDestroyed(SurfaceHolder holder) {
-            super.onSurfaceDestroyed(holder);
-        }
-
-        void drawFrameLocked(boolean redrawNeeded, boolean offsetsChanged) {
-            mRedrawNeeded |= redrawNeeded;
-            mOffsetsChanged |= offsetsChanged;
-
+        void drawFrameLocked() {
             if (!mVisible) {
                 if (DEBUG) {
                     Log.d(TAG, "Suppressed drawFrame since wallpaper is not visible.");

@@ -158,6 +158,7 @@ public class SurfaceView extends View {
     int mHeight = -1;
     int mFormat = -1;
     final Rect mSurfaceFrame = new Rect();
+    Rect mTmpDirty;
     int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
     boolean mUpdateWindowNeeded;
     boolean mReportDrawNeeded;
@@ -739,9 +740,16 @@ public class SurfaceView extends View {
 
             Canvas c = null;
             if (!mDrawingStopped && mWindow != null) {
-                Rect frame = dirty != null ? dirty : mSurfaceFrame;
+                if (dirty == null) {
+                    if (mTmpDirty == null) {
+                        mTmpDirty = new Rect();
+                    }
+                    mTmpDirty.set(mSurfaceFrame);
+                    dirty = mTmpDirty;
+                }
+
                 try {
-                    c = mSurface.lockCanvas(frame);
+                    c = mSurface.lockCanvas(dirty);
                 } catch (Exception e) {
                     Log.e(LOG_TAG, "Exception locking surface", e);
                 }
