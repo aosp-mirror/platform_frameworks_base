@@ -76,7 +76,8 @@ uint32_t LocklessCommandFifo::getFreeSpace() const {
 }
 
 bool LocklessCommandFifo::isEmpty() const {
-    return mPut == mGet;
+    uint32_t p = android_atomic_acquire_load((int32_t *)&mPut);
+    return ((uint8_t *)p) == mGet;
 }
 
 
@@ -155,7 +156,9 @@ const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData) {
 
 void LocklessCommandFifo::next() {
     uint32_t bytes = reinterpret_cast<const uint16_t *>(mGet)[1];
-    mGet += ((bytes + 3) & ~3) + 4;
+
+    android_atomic_add(((bytes + 3) & ~3) + 4, (int32_t *)&mGet);
+    //mGet += ((bytes + 3) & ~3) + 4;
     if (isEmpty()) {
         mSignalToControl.set();
     }
