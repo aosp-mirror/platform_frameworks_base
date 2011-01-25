@@ -10288,6 +10288,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         mPrivateFlags |= FORCE_LAYOUT;
+        mPrivateFlags |= INVALIDATED;
 
         if (mParent != null && !mParent.isLayoutRequested()) {
             mParent.requestLayout();
@@ -10301,6 +10302,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void forceLayout() {
         mPrivateFlags |= FORCE_LAYOUT;
+        mPrivateFlags |= INVALIDATED;
     }
 
     /**
