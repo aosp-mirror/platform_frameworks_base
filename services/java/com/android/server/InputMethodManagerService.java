@@ -1356,14 +1356,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     public boolean switchToLastInputMethod(IBinder token) {
         synchronized (mMethodMap) {
-            Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
-            if (lastIme != null) {
-                InputMethodInfo imi = mMethodMap.get(lastIme.first);
-                if (imi != null) {
-                    setInputMethodWithSubtypeId(token, lastIme.first, getSubtypeIdFromHashCode(
-                            imi, Integer.valueOf(lastIme.second)));
-                    return true;
+            final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
+            if (lastIme == null) return false;
+            final InputMethodInfo lastImi = mMethodMap.get(lastIme.first);
+            if (lastImi == null) return false;
+
+            final boolean imiIdIsSame = lastImi.getId().equals(mCurMethodId);
+            final int lastSubtypeHash = Integer.valueOf(lastIme.second);
+            // If the last IME is the same as the current IME and the last subtype is not defined,
+            // there is no need to switch to the last IME.
+            if (imiIdIsSame && lastSubtypeHash == NOT_A_SUBTYPE_ID) return false;
+
+            int currentSubtypeHash = mCurrentSubtype == null ? NOT_A_SUBTYPE_ID
+                    : mCurrentSubtype.hashCode();
+            if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Switch to: " + lastImi.getId() + ", " + lastIme.second + ", from: "
+                            + mCurMethodId + ", " + currentSubtypeHash);
                 }
+                setInputMethodWithSubtypeId(token, lastIme.first, getSubtypeIdFromHashCode(
+                        lastImi, lastSubtypeHash));
+                return true;
             }
             return false;
         }
