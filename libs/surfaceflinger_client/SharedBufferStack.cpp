@@ -58,7 +58,6 @@ SharedBufferStack::SharedBufferStack()
 
 void SharedBufferStack::init(int32_t i)
 {
-    inUse = -2;
     status = NO_ERROR;
     identity = i;
 }
@@ -199,9 +198,9 @@ String8 SharedBufferBase::dump(char const* prefix) const
     SharedBufferStack& stack( *mSharedStack );
     snprintf(buffer, SIZE, 
             "%s[ head=%2d, available=%2d, queued=%2d ] "
-            "reallocMask=%08x, inUse=%2d, identity=%d, status=%d",
+            "reallocMask=%08x, identity=%d, status=%d",
             prefix, stack.head, stack.available, stack.queued,
-            stack.reallocMask, stack.inUse, stack.identity, stack.status);
+            stack.reallocMask, stack.identity, stack.status);
     result.append(buffer);
     result.append("\n");
     return result;
@@ -261,8 +260,7 @@ bool SharedBufferClient::LockCondition::operator()() const {
     // NOTE: if stack.head is messed up, we could crash the client
     // or cause some drawing artifacts. This is okay, as long as it is
     // limited to the client.
-    return (buf != stack.index[stack.head] ||
-            (stack.queued > 0 && stack.inUse != buf));
+    return (buf != stack.index[stack.head]);
 }
 
 // ----------------------------------------------------------------------------
@@ -295,22 +293,6 @@ ssize_t SharedBufferClient::CancelUpdate::operator()() {
     return NO_ERROR;
 }
 
-SharedBufferServer::UnlockUpdate::UnlockUpdate(
-        SharedBufferBase* sbb, int lockedBuffer)
-    : UpdateBase(sbb), lockedBuffer(lockedBuffer) {
-}
-ssize_t SharedBufferServer::UnlockUpdate::operator()() {
-    if (stack.inUse != lockedBuffer) {
-        LOGE("unlocking %d, but currently locked buffer is %d "
-             "(identity=%d, token=%d)",
-                lockedBuffer, stack.inUse,
-                stack.identity, stack.token);
-        return BAD_VALUE;
-    }
-    android_atomic_write(-1, &stack.inUse);
-    return NO_ERROR;
-}
-
 SharedBufferServer::RetireUpdate::RetireUpdate(
         SharedBufferBase* sbb, int numBuffers)
     : UpdateBase(sbb), numBuffers(numBuffers) {
@@ -319,9 +301,6 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
     int32_t head = stack.head;
     if (uint32_t(head) >= SharedBufferStack::NUM_BUFFER_MAX)
         return BAD_VALUE;
-
-    // Preventively lock the current buffer before updating queued.
-    android_atomic_write(stack.headBuf, &stack.inUse);
 
     // Decrement the number of queued buffers 
     int32_t queued;
@@ -338,7 +317,6 @@ ssize_t SharedBufferServer::RetireUpdate::operator()() {
     head = (head + 1) % numBuffers;
     const int8_t headBuf = stack.index[head];
     stack.headBuf = headBuf;
-    android_atomic_write(headBuf, &stack.inUse);
 
     // head is only modified here, so we don't need to use cmpxchg
     android_atomic_write(head, &stack.head);
@@ -540,13 +518,6 @@ ssize_t SharedBufferServer::retireAndLock()
                 int(buf), dump("").string());
     }
     return buf;
-}
-
-status_t SharedBufferServer::unlock(int buf)
-{
-    UnlockUpdate update(this, buf);
-    status_t err = updateCondition( update );
-    return err;
 }
 
 void SharedBufferServer::setStatus(status_t status)

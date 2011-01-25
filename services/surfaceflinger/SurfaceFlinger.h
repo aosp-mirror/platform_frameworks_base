@@ -310,7 +310,6 @@ private:
             bool        handleBypassLayer();
             void        postFramebuffer();
             void        composeSurfaces(const Region& dirty);
-            void        unlockClients();
 
 
             ssize_t     addClientLayer(const sp<Client>& client,
