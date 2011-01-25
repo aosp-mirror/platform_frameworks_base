@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import com.android.internal.view.menu.MenuBuilder.MenuAdapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -45,6 +46,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private WeakReference<View> mAnchorView;
     private boolean mOverflowOnly;
     private ViewTreeObserver mTreeObserver;
+
+    private final Handler mHandler = new Handler();
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false);
@@ -137,8 +140,14 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         } else {
             item = mMenu.getVisibleItems().get(position);
         }
-        mMenu.performItemAction(item, 0);
         dismiss();
+
+        final MenuItem performItem = item;
+        mHandler.post(new Runnable() {
+            public void run() {
+                mMenu.performItemAction(performItem, 0);
+            }
+        });
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
