@@ -46,7 +46,7 @@ public:
     ~LayerRenderer() {
     }
 
-    void prepare(bool opaque);
+    void prepareDirty(float left, float top, float right, float bottom, bool opaque);
     void finish();
 
     bool hasLayer();

@@ -28,7 +28,7 @@
 #include <SkTSearch.h>
 
 #include "OpenGLRenderer.h"
-#include "Functor.h"
+#include "utils/Functor.h"
 
 namespace android {
 namespace uirenderer {
@@ -241,7 +241,7 @@ public:
     DisplayList* getDisplayList();
 
     void setViewport(int width, int height);
-    void prepare(bool opaque);
+    void prepareDirty(float left, float top, float right, float bottom, bool opaque);
     void finish();
 
     bool callDrawGLFunction(Functor *functor);
