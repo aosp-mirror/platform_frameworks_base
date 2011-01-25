@@ -8087,7 +8087,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return A HardwareLayer ready to render, or null if an error occurred.
      */
-    HardwareLayer getHardwareLayer(Canvas currentCanvas) {
+    HardwareLayer getHardwareLayer() {
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
             return null;
         }
@@ -8107,7 +8107,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mHardwareLayer.resize(width, height);
             }
 
-            final HardwareCanvas canvas = mHardwareLayer.start(mAttachInfo.mHardwareCanvas);
+            Canvas currentCanvas = mAttachInfo.mHardwareCanvas;
+            final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
+            mAttachInfo.mHardwareCanvas = canvas;
             try {
                 canvas.setViewport(width, height);
                 // TODO: We should pass the dirty rect
@@ -8131,7 +8133,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
-                mHardwareLayer.end(mAttachInfo.mHardwareCanvas);
+                mHardwareLayer.end(currentCanvas);
+                mAttachInfo.mHardwareCanvas = currentCanvas;
             }
         }
 
