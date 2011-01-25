@@ -48,8 +48,8 @@ interface IBluetoothHeadset {
     boolean setAudioState(in BluetoothDevice device, int state);
     int getAudioState(in BluetoothDevice device);
 
-    boolean startVirtualVoiceCall(in BluetoothDevice device);
-    boolean stopVirtualVoiceCall(in BluetoothDevice device);
+    boolean startScoUsingVirtualVoiceCall(in BluetoothDevice device);
+    boolean stopScoUsingVirtualVoiceCall(in BluetoothDevice device);
 
     void sendAtCommand(in BluetoothDevice device, String urc);
 }
