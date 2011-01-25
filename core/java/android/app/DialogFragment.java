@@ -378,6 +378,12 @@ public class DialogFragment extends Fragment
      * default implementation simply instantiates and returns a {@link Dialog}
      * class.
      * 
+     * <p><em>Note: DialogFragment own the {@link Dialog#setOnCancelListener
+     * Dialog.setOnCancelListener} and {@link Dialog#setOnDismissListener
+     * Dialog.setOnDismissListener} callbacks.  You must not set them yourself.</em>
+     * To find out about these events, override {@link #onCancel(DialogInterface)}
+     * and {@link #onDismiss(DialogInterface)}.</p>
+     * 
      * @param savedInstanceState The last saved instance state of the Fragment,
      * or null if this is a freshly created Fragment.
      * 
@@ -417,8 +423,10 @@ public class DialogFragment extends Fragment
         }
         mDialog.setOwnerActivity(getActivity());
         mDialog.setCancelable(mCancelable);
-        mDialog.setOnCancelListener(this);
-        mDialog.setOnDismissListener(this);
+        if (!mDialog.takeCancelAndDismissListeners("DialogFragment", this, this)) {
+            throw new IllegalStateException(
+                    "You can not set Dialog's OnCancelListener or OnDismissListener");
+        }
         if (savedInstanceState != null) {
             Bundle dialogState = savedInstanceState.getBundle(SAVED_DIALOG_STATE_TAG);
             if (dialogState != null) {
