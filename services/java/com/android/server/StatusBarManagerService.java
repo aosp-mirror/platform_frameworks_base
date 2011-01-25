@@ -283,16 +283,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    /**
-     * This is used for the user-controlled version of lights-out mode.  Only call this from
-     * the status bar itself.
-     *
-     * We have two different functions here, because I think we're going to want to
-     * tweak the behavior when the user keeps turning lights-out mode off and the
-     * app keeps trying to turn it on.  For now they can just fight it out.  Having
-     * these two separte inputs will allow us to keep that change local to here.  --joeo
-     */
     public void setSystemUiVisibility(int vis) {
+        // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
         synchronized (mLock) {
