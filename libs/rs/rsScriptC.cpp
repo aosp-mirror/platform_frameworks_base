@@ -421,21 +421,9 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
 }
 
 ScriptCState::ScriptCState() {
-    mScript.clear();
 }
 
 ScriptCState::~ScriptCState() {
-    mScript.clear();
-}
-
-void ScriptCState::init(Context *rsc) {
-    clear(rsc);
-}
-
-void ScriptCState::clear(Context *rsc) {
-    rsAssert(rsc);
-    mScript.clear();
-    mScript.set(new ScriptC(rsc));
 }
 
 static void* symbolLookup(void* pContext, char const* name) {
@@ -608,8 +596,6 @@ namespace android {
 namespace renderscript {
 
 void rsi_ScriptCBegin(Context * rsc) {
-    ScriptCState *ss = &rsc->mScriptC;
-    ss->clear(rsc);
 }
 
 void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
@@ -618,8 +604,8 @@ void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
     char *t = (char *)malloc(len + 1);
     memcpy(t, text, len);
     t[len] = 0;
-    ss->mScript->mEnviroment.mScriptText = t;
-    ss->mScript->mEnviroment.mScriptTextLength = len;
+    ss->mScriptText = t;
+    ss->mScriptLen = len;
 }
 
 
@@ -630,17 +616,19 @@ RsScript rsi_ScriptCCreate(Context *rsc,
 {
     ScriptCState *ss = &rsc->mScriptC;
 
-    ObjectBaseRef<ScriptC> s(ss->mScript);
-    ss->mScript.clear();
+    ScriptC *s = new ScriptC(rsc);
+    s->mEnviroment.mScriptText = ss->mScriptText;
+    s->mEnviroment.mScriptTextLength = ss->mScriptLen;
+    ss->mScriptText = NULL;
+    ss->mScriptLen = 0;
     s->incUserRef();
 
-    if (!ss->runCompiler(rsc, s.get(), resName, cacheDir)) {
+    if (!ss->runCompiler(rsc, s, resName, cacheDir)) {
         // Error during compile, destroy s and return null.
-        s->zeroUserRef();
+        delete s;
         return NULL;
     }
-    ss->clear(rsc);
-    return s.get();
+    return s;
 }
 
 }

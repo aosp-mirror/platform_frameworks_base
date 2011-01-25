@@ -76,11 +76,9 @@ public:
     ScriptCState();
     ~ScriptCState();
 
-    ObjectBaseRef<ScriptC> mScript;
+    char * mScriptText;
+    size_t mScriptLen;
 
-    void init(Context *rsc);
-
-    void clear(Context *rsc);
     bool runCompiler(Context *rsc, ScriptC *s, const char *resName, const char *cacheDir);
 
     struct SymbolTable_t {
@@ -88,7 +86,6 @@ public:
         void * mPtr;
         bool threadable;
     };
-    //static SymbolTable_t gSyms[];
     static const SymbolTable_t * lookupSymbol(const char *);
     static const SymbolTable_t * lookupSymbolCL(const char *);
     static const SymbolTable_t * lookupSymbolGL(const char *);
