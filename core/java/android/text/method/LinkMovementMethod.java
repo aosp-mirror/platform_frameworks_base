@@ -42,9 +42,9 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
                 if (KeyEvent.metaStateHasNoModifiers(movementMetaState)) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN
-                            && event.getRepeatCount() == 0) {
-                        return action(CLICK, widget, buffer);
+                    if (event.getAction() == KeyEvent.ACTION_DOWN &&
+                            event.getRepeatCount() == 0 && action(CLICK, widget, buffer)) {
+                        return true;
                     }
                 }
                 break;
