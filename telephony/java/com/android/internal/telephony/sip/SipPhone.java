@@ -306,7 +306,9 @@ public class SipPhone extends SipPhoneBase {
     }
 
     public boolean getMute() {
-        return foregroundCall.getMute();
+        return (foregroundCall.getState().isAlive()
+                ? foregroundCall.getMute()
+                : backgroundCall.getMute());
     }
 
     public Call getForegroundCall() {
