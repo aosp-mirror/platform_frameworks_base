@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -340,8 +341,48 @@ public class DialogFragment extends Fragment
             mShowsDialog = savedInstanceState.getBoolean(SAVED_SHOWS_DIALOG, mShowsDialog);
             mBackStackId = savedInstanceState.getInt(SAVED_BACK_STACK_ID, -1);
         }
+        
     }
 
+    /** @hide */
+    @Override
+    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
+        if (!mShowsDialog) {
+            return super.getLayoutInflater(savedInstanceState);
+        }
+
+        mDialog = onCreateDialog(savedInstanceState);
+        mDestroyed = false;
+        switch (mStyle) {
+            case STYLE_NO_INPUT:
+                mDialog.getWindow().addFlags(
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                // fall through...
+            case STYLE_NO_FRAME:
+            case STYLE_NO_TITLE:
+                mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+        return (LayoutInflater)mDialog.getContext().getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+    }
+    
+    /**
+     * Override to build your own custom Dialog container.  This is typically
+     * used to show an AlertDialog instead of a generic Dialog; when doing so,
+     * {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)} does not need
+     * to be implemented since the AlertDialog takes care of its own content.
+     * 
+     * <p>This method will be called after {@link #onCreate(Bundle)} and
+     * before {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.  The
+     * default implementation simply instantiates and returns a {@link Dialog}
+     * class.
+     * 
+     * @param savedInstanceState The last saved instance state of the Fragment,
+     * or null if this is a freshly created Fragment.
+     * 
+     * @return Return a new Dialog instance to be displayed by the Fragment.
+     */
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new Dialog(getActivity(), getTheme());
     }
@@ -367,18 +408,6 @@ public class DialogFragment extends Fragment
             return;
         }
 
-        mDialog = onCreateDialog(savedInstanceState);
-        mDestroyed = false;
-        switch (mStyle) {
-            case STYLE_NO_INPUT:
-                mDialog.getWindow().addFlags(
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                // fall through...
-            case STYLE_NO_FRAME:
-            case STYLE_NO_TITLE:
-                mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        }
         View view = getView();
         if (view != null) {
             if (view.getParent() != null) {

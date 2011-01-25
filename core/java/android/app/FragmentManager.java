@@ -705,7 +705,7 @@ final class FragmentManagerImpl extends FragmentManager {
                         // For fragments that are part of the content view
                         // layout, we need to instantiate the view immediately
                         // and the inflater will take care of adding it.
-                        f.mView = f.onCreateView(mActivity.getLayoutInflater(),
+                        f.mView = f.onCreateView(f.getLayoutInflater(f.mSavedFragmentState),
                                 null, f.mSavedFragmentState);
                         if (f.mView != null) {
                             f.mView.setSaveFromParentEnabled(false);
@@ -727,7 +727,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                 }
                             }
                             f.mContainer = container;
-                            f.mView = f.onCreateView(mActivity.getLayoutInflater(),
+                            f.mView = f.onCreateView(f.getLayoutInflater(f.mSavedFragmentState),
                                     container, f.mSavedFragmentState);
                             if (f.mView != null) {
                                 f.mView.setSaveFromParentEnabled(false);

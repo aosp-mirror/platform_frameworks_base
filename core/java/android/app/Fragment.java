@@ -850,6 +850,15 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
     
     /**
+     * @hide Hack so that DialogFragment can make its Dialog before creating
+     * its views, and the view construction can use the dialog's context for
+     * inflation.  Maybe this should become a public API. Note sure.
+     */
+    public LayoutInflater getLayoutInflater(Bundle savedInstanceState) {
+        return mActivity.getLayoutInflater();
+    }
+    
+    /**
      * Called when a fragment is being created as part of a view layout
      * inflation, typically from setting the content view of an activity.  This
      * will be called immediately after the fragment is created from a <fragment>
