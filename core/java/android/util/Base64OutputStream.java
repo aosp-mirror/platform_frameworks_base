@@ -136,7 +136,7 @@ public class Base64OutputStream extends FilterOutputStream {
     private void internalWrite(byte[] b, int off, int len, boolean finish) throws IOException {
         coder.output = embiggen(coder.output, coder.maxOutputSize(len));
         if (!coder.process(b, off, len, finish)) {
-            throw new IOException("bad base-64");
+            throw new Base64DataException("bad base-64");
         }
         out.write(coder.output, 0, coder.op);
     }
