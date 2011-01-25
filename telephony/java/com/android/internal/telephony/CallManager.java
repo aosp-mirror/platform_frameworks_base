@@ -774,13 +774,23 @@ public final class CallManager {
         boolean allLinesTaken = hasActiveCall && hasHoldingCall;
         Call.State fgCallState = getActiveFgCallState();
 
-        return (serviceState != ServiceState.STATE_POWER_OFF
+        boolean result = (serviceState != ServiceState.STATE_POWER_OFF
                 && !hasRingingCall
                 && !allLinesTaken
                 && ((fgCallState == Call.State.ACTIVE)
                     || (fgCallState == Call.State.IDLE)
                     || (fgCallState == Call.State.DISCONNECTED)));
-            }
+
+        if (result == false) {
+            Log.d(LOG_TAG, "canDial serviceState=" + serviceState
+                            + " hasRingingCall=" + hasRingingCall
+                            + " hasActiveCall=" + hasActiveCall
+                            + " hasHoldingCall=" + hasHoldingCall
+                            + " allLinesTaken=" + allLinesTaken
+                            + " fgCallState=" + fgCallState);
+        }
+        return result;
+    }
 
     /**
      * Whether or not the phone can do explicit call transfer in the current
