@@ -25,8 +25,8 @@ import java.util.Vector;
 
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.X509Name;
+import com.android.org.bouncycastle.asn1.DERObjectIdentifier;
+import com.android.org.bouncycastle.asn1.x509.X509Name;
 
 /**
  * SSL certificate info (certificate details) class
