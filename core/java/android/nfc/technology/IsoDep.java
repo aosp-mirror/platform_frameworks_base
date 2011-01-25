@@ -27,7 +27,7 @@ import java.io.IOException;
  * A low-level connection to a {@link Tag} using the ISO-DEP technology, also known as
  * ISO1443-4.
  *
- * <p>You can acquire this kind of connection with {@link Tag#getTechnology(int)}.
+ * <p>You can acquire this kind of connection with {@link Tag#getTechnology}.
  * Use this class to send and receive data with {@link #transceive transceive()}.
  *
  * <p>Applications must implement their own protocol stack on top of

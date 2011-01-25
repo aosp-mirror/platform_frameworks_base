@@ -29,7 +29,7 @@ import java.io.IOException;
 /**
  * An interface to a {@link Tag} allowing to format the tag as NDEF.
  *
- * <p>You can acquire this kind of interface with {@link Tag#getTechnology(int)}.
+ * <p>You can acquire this kind of interface with {@link Tag#getTechnology}.
  *
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
