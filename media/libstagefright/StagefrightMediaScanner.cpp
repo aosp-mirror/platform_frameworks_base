@@ -28,9 +28,7 @@
 
 namespace android {
 
-StagefrightMediaScanner::StagefrightMediaScanner()
-    : mRetriever(new MediaMetadataRetriever) {
-}
+StagefrightMediaScanner::StagefrightMediaScanner() {}
 
 StagefrightMediaScanner::~StagefrightMediaScanner() {}
 
@@ -131,37 +129,41 @@ status_t StagefrightMediaScanner::processFile(
         if (status != OK) {
             return status;
         }
-    } else if (mRetriever->setDataSource(path) == OK) {
-        const char *value;
-        if ((value = mRetriever->extractMetadata(
-                        METADATA_KEY_MIMETYPE)) != NULL) {
-            client.setMimeType(value);
-        }
+    } else {
+        sp<MediaMetadataRetriever> mRetriever(new MediaMetadataRetriever);
 
-        struct KeyMap {
-            const char *tag;
-            int key;
-        };
-        static const KeyMap kKeyMap[] = {
-            { "tracknumber", METADATA_KEY_CD_TRACK_NUMBER },
-            { "discnumber", METADATA_KEY_DISC_NUMBER },
-            { "album", METADATA_KEY_ALBUM },
-            { "artist", METADATA_KEY_ARTIST },
-            { "albumartist", METADATA_KEY_ALBUMARTIST },
-            { "composer", METADATA_KEY_COMPOSER },
-            { "genre", METADATA_KEY_GENRE },
-            { "title", METADATA_KEY_TITLE },
-            { "year", METADATA_KEY_YEAR },
-            { "duration", METADATA_KEY_DURATION },
-            { "writer", METADATA_KEY_WRITER },
-            { "compilation", METADATA_KEY_COMPILATION },
-        };
-        static const size_t kNumEntries = sizeof(kKeyMap) / sizeof(kKeyMap[0]);
-
-        for (size_t i = 0; i < kNumEntries; ++i) {
+         if (mRetriever->setDataSource(path) == OK) {
             const char *value;
-            if ((value = mRetriever->extractMetadata(kKeyMap[i].key)) != NULL) {
-                client.addStringTag(kKeyMap[i].tag, value);
+            if ((value = mRetriever->extractMetadata(
+                            METADATA_KEY_MIMETYPE)) != NULL) {
+                client.setMimeType(value);
+            }
+
+            struct KeyMap {
+                const char *tag;
+                int key;
+            };
+            static const KeyMap kKeyMap[] = {
+                { "tracknumber", METADATA_KEY_CD_TRACK_NUMBER },
+                { "discnumber", METADATA_KEY_DISC_NUMBER },
+                { "album", METADATA_KEY_ALBUM },
+                { "artist", METADATA_KEY_ARTIST },
+                { "albumartist", METADATA_KEY_ALBUMARTIST },
+                { "composer", METADATA_KEY_COMPOSER },
+                { "genre", METADATA_KEY_GENRE },
+                { "title", METADATA_KEY_TITLE },
+                { "year", METADATA_KEY_YEAR },
+                { "duration", METADATA_KEY_DURATION },
+                { "writer", METADATA_KEY_WRITER },
+                { "compilation", METADATA_KEY_COMPILATION },
+            };
+            static const size_t kNumEntries = sizeof(kKeyMap) / sizeof(kKeyMap[0]);
+
+            for (size_t i = 0; i < kNumEntries; ++i) {
+                const char *value;
+                if ((value = mRetriever->extractMetadata(kKeyMap[i].key)) != NULL) {
+                    client.addStringTag(kKeyMap[i].tag, value);
+                }
             }
         }
     }
@@ -180,6 +182,7 @@ char *StagefrightMediaScanner::extractAlbumArt(int fd) {
     }
     lseek64(fd, 0, SEEK_SET);
 
+    sp<MediaMetadataRetriever> mRetriever(new MediaMetadataRetriever);
     if (mRetriever->setDataSource(fd, 0, size) == OK) {
         sp<IMemory> mem = mRetriever->extractAlbumArt();
 
