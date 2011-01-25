@@ -215,6 +215,11 @@ public class MenuBuilder implements Menu {
 
     private ViewGroup mMeasureActionButtonParent;
 
+    private final WeakReference<MenuAdapter>[] mAdapterCache =
+            new WeakReference[NUM_TYPES];
+    private final WeakReference<OverflowMenuAdapter>[] mOverflowAdapterCache =
+            new WeakReference[NUM_TYPES];
+
     // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
     private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
 
@@ -1004,6 +1009,12 @@ public class MenuBuilder implements Menu {
                     MenuView menuView = menuTypes[i].mMenuView.get();
                     menuView.updateChildren(cleared);
                 }
+
+                MenuAdapter adapter = mAdapterCache[i] == null ? null : mAdapterCache[i].get();
+                if (adapter != null) adapter.notifyDataSetChanged();
+
+                adapter = mOverflowAdapterCache[i] == null ? null : mOverflowAdapterCache[i].get();
+                if (adapter != null) adapter.notifyDataSetChanged();
             }
         }
     }
@@ -1358,7 +1369,13 @@ public class MenuBuilder implements Menu {
      * @return A {@link MenuAdapter} for this menu with the given menu type.
      */
     public MenuAdapter getMenuAdapter(int menuType) {
-        return new MenuAdapter(menuType);
+        MenuAdapter adapter = mAdapterCache[menuType] == null ?
+                null : mAdapterCache[menuType].get();
+        if (adapter != null) return adapter;
+
+        adapter = new MenuAdapter(menuType);
+        mAdapterCache[menuType] = new WeakReference<MenuAdapter>(adapter);
+        return adapter;
     }
 
     /**
@@ -1368,7 +1385,13 @@ public class MenuBuilder implements Menu {
      * @return A {@link MenuAdapter} for this menu with the given menu type.
      */
     public MenuAdapter getOverflowMenuAdapter(int menuType) {
-        return new OverflowMenuAdapter(menuType);
+        OverflowMenuAdapter adapter = mOverflowAdapterCache[menuType] == null ?
+                null : mOverflowAdapterCache[menuType].get();
+        if (adapter != null) return adapter;
+
+        adapter = new OverflowMenuAdapter(menuType);
+        mOverflowAdapterCache[menuType] = new WeakReference<OverflowMenuAdapter>(adapter);
+        return adapter;
     }
 
     void setOptionalIconsVisible(boolean visible) {
@@ -1469,21 +1492,18 @@ public class MenuBuilder implements Menu {
      * source for overflow menu items that do not fit in the list of action items.
      */
     private class OverflowMenuAdapter extends MenuAdapter {
-        private ArrayList<MenuItemImpl> mOverflowItems;
-
         public OverflowMenuAdapter(int menuType) {
             super(menuType);
-            mOverflowItems = getNonActionItems(true);
         }
 
         @Override
         public MenuItemImpl getItem(int position) {
-            return mOverflowItems.get(position);
+            return getNonActionItems(true).get(position);
         }
 
         @Override
         public int getCount() {
-            return mOverflowItems.size();
+            return getNonActionItems(true).size();
         }
     }
 }
