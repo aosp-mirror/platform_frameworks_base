@@ -130,6 +130,7 @@ final class WebViewCore {
 
     private int mLowMemoryUsageThresholdMb;
     private int mHighMemoryUsageThresholdMb;
+    private int mHighUsageDeltaMb;
 
     // The thread name used to identify the WebCore thread and for use in
     // debugging other classes that require operation within the WebCore thread.
@@ -186,12 +187,15 @@ final class WebViewCore {
 
         // Allow us to use up to our memory class value before V8's GC kicks in.
         // These values have been determined by experimentation.
-        mLowMemoryUsageThresholdMb = manager.getMemoryClass();
+        mLowMemoryUsageThresholdMb = manager.getLargeMemoryClass();
         // If things get crazy, allow V8 to use up to 3 times our memory class, or a third of the
-        // device's total available memory, whichever is smaller. At that point V8 will start
-        // attempting more aggressive garbage collection.
-        mHighMemoryUsageThresholdMb = Math.min(mLowMemoryUsageThresholdMb * 3,
-                (int) (memInfo.availMem / 3) >> 20);
+        // device's total available memory, whichever is smaller.  This value must be no less
+        // than the low memory threshold.
+        // At that point V8 will start attempting more aggressive garbage collection.
+        mHighMemoryUsageThresholdMb = Math.max(Math.min(mLowMemoryUsageThresholdMb * 3,
+                (int) (memInfo.availMem / 3) >> 20), mLowMemoryUsageThresholdMb);
+        // Avoid constant V8 GC when memory usage equals to working set estimate.
+        mHighUsageDeltaMb = 1;
 
         // Send a message to initialize the WebViewCore.
         Message init = sWebCoreHandler.obtainMessage(
