@@ -3357,7 +3357,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         addInArray(child, index);
 
         child.mParent = this;
-        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK & ~DRAWING_CACHE_VALID) | DRAWN;
+        child.mPrivateFlags = (child.mPrivateFlags & ~DIRTY_MASK & ~DRAWING_CACHE_VALID) |
+                DRAWN | INVALIDATED;
+        this.mPrivateFlags |= INVALIDATED;
 
         if (child.hasFocus()) {
             requestChildFocus(child, child.findFocus());
