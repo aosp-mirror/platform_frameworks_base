@@ -849,7 +849,7 @@ void DisplayListRenderer::drawOval(float left, float top, float right, float bot
 
 void DisplayListRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
-    addOp(DisplayList::DrawOval);
+    addOp(DisplayList::DrawArc);
     addBounds(left, top, right, bottom);
     addPoint(startAngle, sweepAngle);
     addInt(useCenter ? 1 : 0);
