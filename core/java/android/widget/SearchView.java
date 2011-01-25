@@ -214,6 +214,8 @@ public class SearchView extends LinearLayout {
             }
         });
 
+        boolean focusable = true;
+
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
         int maxWidth = a.getDimensionPixelSize(R.styleable.SearchView_maxWidth, -1);
@@ -225,6 +227,11 @@ public class SearchView extends LinearLayout {
             setQueryHint(queryHint);
         }
         a.recycle();
+
+        a = context.obtainStyledAttributes(attrs, R.styleable.View, 0, 0);
+        focusable = a.getBoolean(R.styleable.View_focusable, focusable);
+        a.recycle();
+        setFocusable(focusable);
 
         // Save voice intent for later queries/launching
         mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
@@ -259,10 +266,18 @@ public class SearchView extends LinearLayout {
     /** @hide */
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
-        if (mClearingFocus || isIconified()) return false;
-        boolean result = mQueryTextView.requestFocus(direction, previouslyFocusedRect);
-        if (result) updateViewsVisibility(mIconifiedByDefault);
-        return result;
+        // Don't accept focus if in the middle of clearing focus
+        if (mClearingFocus) return false;
+        // Check if SearchView is focusable.
+        if (!isFocusable()) return false;
+        // If it is not iconified, then give the focus to the text field
+        if (!isIconified()) {
+            boolean result = mQueryTextView.requestFocus(direction, previouslyFocusedRect);
+            if (result) updateViewsVisibility(false);
+            return result;
+        } else {
+            return super.requestFocus(direction, previouslyFocusedRect);
+        }
     }
 
     /** @hide */
@@ -527,7 +542,6 @@ public class SearchView extends LinearLayout {
         updateCloseButton();
         updateVoiceButton(!hasText);
         updateSubmitArea();
-        requestLayout();
     }
 
     private boolean hasVoiceSearch() {
@@ -580,7 +594,7 @@ public class SearchView extends LinearLayout {
 
     private void setImeVisibility(boolean visible) {
         InputMethodManager imm = (InputMethodManager)
-        getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         // We made sure the IME was displayed, so also make sure it is closed
         // when we go away.
@@ -903,8 +917,8 @@ public class SearchView extends LinearLayout {
     }
 
     private void onSearchClicked() {
-        mQueryTextView.requestFocus();
         updateViewsVisibility(false);
+        mQueryTextView.requestFocus();
         setImeVisibility(true);
         if (mOnSearchClickListener != null) {
             mOnSearchClickListener.onClick(this);
