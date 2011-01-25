@@ -897,6 +897,9 @@ public class AccountManagerService
             // let authenticator know the identity of the caller
             loginOptions.putInt(AccountManager.KEY_CALLER_UID, callerUid);
             loginOptions.putInt(AccountManager.KEY_CALLER_PID, callerPid);
+            if (notifyOnAuthFailure) {
+                loginOptions.putBoolean(AccountManager.KEY_NOTIFY_ON_FAILURE, true);
+            }
         }
 
         long identityToken = clearCallingIdentity();
@@ -964,7 +967,7 @@ public class AccountManagerService
                         }
 
                         Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
-                        if (intent != null && notifyOnAuthFailure) {
+                        if (intent != null && notifyOnAuthFailure && !customTokens) {
                             doNotification(
                                     account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
                                     intent);
