@@ -63,11 +63,12 @@ public class ResolverActivity extends AlertActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         onCreate(savedInstanceState, new Intent(getIntent()),
                 getResources().getText(com.android.internal.R.string.whichApplication),
-                null, true);
+                null, null, true);
     }
 
     protected void onCreate(Bundle savedInstanceState, Intent intent,
-            CharSequence title, Intent[] initialIntents, boolean alwaysUseOption) {
+            CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
+            boolean alwaysUseOption) {
         super.onCreate(savedInstanceState);
         mPm = getPackageManager();
         intent.setComponent(null);
@@ -88,7 +89,7 @@ public class ResolverActivity extends AlertActivity implements
                                                         com.android.internal.R.id.clearDefaultHint);
             mClearDefaultHint.setVisibility(View.GONE);
         }
-        mAdapter = new ResolveListAdapter(this, intent, initialIntents);
+        mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList);
         if (mAdapter.getCount() > 1) {
             ap.mAdapter = mAdapter;
         } else if (mAdapter.getCount() == 1) {
@@ -215,14 +216,16 @@ public class ResolverActivity extends AlertActivity implements
         private List<DisplayResolveInfo> mList;
 
         public ResolveListAdapter(Context context, Intent intent,
-                Intent[] initialIntents) {
+                Intent[] initialIntents, List<ResolveInfo> rList) {
             mIntent = new Intent(intent);
             mIntent.setComponent(null);
             mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            List<ResolveInfo> rList = mPm.queryIntentActivities(
-                    intent, PackageManager.MATCH_DEFAULT_ONLY
-                    | (mAlwaysCheck != null ? PackageManager.GET_RESOLVED_FILTER : 0));
+            if (rList == null) {
+                rList = mPm.queryIntentActivities(
+                        intent, PackageManager.MATCH_DEFAULT_ONLY
+                        | (mAlwaysCheck != null ? PackageManager.GET_RESOLVED_FILTER : 0));
+            }
             int N;
             if ((rList != null) && ((N = rList.size()) > 0)) {
                 // Only display the first matches that are either of equal
