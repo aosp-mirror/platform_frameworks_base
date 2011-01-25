@@ -31,6 +31,7 @@ import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
+import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Environment;
@@ -1224,7 +1225,20 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
             protected String findActiveUpstreamIface() {
                 // check for what iface we can use - if none found switch to error.
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+                IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
+
+                try {
+                    LinkProperties defaultProp = cm.getActiveLinkProperties();
+                    if (defaultProp != null) {
+                        String iface = defaultProp.getInterfaceName();
+                        for(String regex : mUpstreamIfaceRegexs) {
+                            if (iface.matches(regex)) return iface;
+                        }
+                    }
+                } catch (RemoteException e) { }
+
+                b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
                 INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
 
                 String[] ifaces = new String[0];
@@ -1395,7 +1409,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         break;
                     case CMD_UPSTREAM_CHANGED:
-                        mTryCell = WAIT_FOR_NETWORK_TO_SETTLE;
+                        // need to try DUN immediately if Wifi goes down
+                        mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
                         chooseUpstreamType(mTryCell);
                         mTryCell = !mTryCell;
                         break;
