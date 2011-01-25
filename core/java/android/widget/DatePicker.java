@@ -34,6 +34,7 @@ import android.widget.NumberPicker.OnValueChangeListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -156,8 +157,34 @@ public class DatePicker extends FrameLayout {
 
         OnValueChangeListener onChangeListener = new OnValueChangeListener() {
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                updateDate(mYearSpinner.getValue(), mMonthSpinner.getValue(), mDaySpinner
-                        .getValue());
+                mTempDate.setTimeInMillis(mCurrentDate.getTimeInMillis());
+                // take care of wrapping of days and months to update greater fields
+                if (picker == mDaySpinner) {
+                    int maxDayOfMonth = mTempDate.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    if (oldVal == maxDayOfMonth && newVal == 1) {
+                        mTempDate.add(Calendar.DAY_OF_MONTH, 1);
+                    } else if (oldVal == 1 && newVal == maxDayOfMonth) {
+                        mTempDate.add(Calendar.DAY_OF_MONTH, -1);
+                    } else {
+                        mTempDate.add(Calendar.DAY_OF_MONTH, newVal - oldVal);
+                    }
+                } else if (picker == mMonthSpinner) {
+                    if (oldVal == 11 && newVal == 0) {
+                        mTempDate.add(Calendar.MONTH, 1);
+                    } else if (oldVal == 0 && newVal == 11) {
+                        mTempDate.add(Calendar.MONTH, -1);
+                    } else {
+                        mTempDate.add(Calendar.MONTH, newVal - oldVal);
+                    }
+                } else if (picker == mYearSpinner) {
+                    mTempDate.set(Calendar.YEAR, newVal);
+                } else {
+                    throw new IllegalArgumentException();
+                }
+                // now set the date to the adjusted one
+                setDate(mTempDate.get(Calendar.YEAR), mTempDate.get(Calendar.MONTH),
+                        mTempDate.get(Calendar.DAY_OF_MONTH));
+                notifyDateChanged();
             }
         };
 
@@ -167,7 +194,8 @@ public class DatePicker extends FrameLayout {
         mCalendarView = (CalendarView) findViewById(R.id.calendar_view);
         mCalendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             public void onSelectedDayChange(CalendarView view, int year, int month, int monthDay) {
-                updateDate(year, month, monthDay);
+                setDate(year, month, monthDay);
+                notifyDateChanged();
             }
         });
 
@@ -260,10 +288,12 @@ public class DatePicker extends FrameLayout {
             return;
         }
         mMinDate.setTimeInMillis(minDate);
-        mYearSpinner.setMinValue(mMinDate.get(Calendar.YEAR));
-        mYearSpinner.setMaxValue(mMaxDate.get(Calendar.YEAR));
         mCalendarView.setMinDate(minDate);
-        updateSpinners(mYearSpinner.getValue(), mMonthSpinner.getValue(), mDaySpinner.getValue());
+        if (mCurrentDate.before(mMinDate)) {
+            mCurrentDate.setTimeInMillis(mMinDate.getTimeInMillis());
+            updateCalendarView();
+        }
+        updateSpinners();
     }
 
     /**
@@ -294,10 +324,12 @@ public class DatePicker extends FrameLayout {
             return;
         }
         mMaxDate.setTimeInMillis(maxDate);
-        mYearSpinner.setMinValue(mMinDate.get(Calendar.YEAR));
-        mYearSpinner.setMaxValue(mMaxDate.get(Calendar.YEAR));
         mCalendarView.setMaxDate(maxDate);
-        updateSpinners(mYearSpinner.getValue(), mMonthSpinner.getValue(), mDaySpinner.getValue());
+        if (mCurrentDate.after(mMaxDate)) {
+            mCurrentDate.setTimeInMillis(mMaxDate.getTimeInMillis());
+            updateCalendarView();
+        }
+        updateSpinners();
     }
 
     @Override
@@ -433,13 +465,11 @@ public class DatePicker extends FrameLayout {
      * @param dayOfMonth The day of the month.
      */
     public void updateDate(int year, int month, int dayOfMonth) {
-        if (mCurrentDate.get(Calendar.YEAR) != year
-                || mCurrentDate.get(Calendar.MONTH) != dayOfMonth
-                || mCurrentDate.get(Calendar.DAY_OF_MONTH) != month) {
-            updateSpinners(year, month, dayOfMonth);
-            updateCalendarView();
-            notifyDateChanged();
+        if (!isNewDate(year, month, dayOfMonth)) {
+            return;
         }
+        setDate(year, month, dayOfMonth);
+        notifyDateChanged();
     }
 
     // Override so we are in complete control of save / restore for this widget.
@@ -451,15 +481,14 @@ public class DatePicker extends FrameLayout {
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
-        return new SavedState(superState, mYearSpinner.getValue(), mMonthSpinner.getValue(),
-                mDaySpinner.getValue());
+        return new SavedState(superState, getYear(), getMonth(), getDayOfMonth());
     }
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-        updateSpinners(ss.mYear, ss.mMonth, ss.mDay);
+        setDate(ss.mYear, ss.mMonth, ss.mDay);
     }
 
     /**
@@ -474,10 +503,7 @@ public class DatePicker extends FrameLayout {
      */
     public void init(int year, int monthOfYear, int dayOfMonth,
             OnDateChangedListener onDateChangedListener) {
-        // make sure there is no callback
-        mOnDateChangedListener = null;
-        updateDate(year, monthOfYear, dayOfMonth);
-        // register the callback after updating the date
+        setDate(year, monthOfYear, dayOfMonth);
         mOnDateChangedListener = onDateChangedListener;
     }
 
@@ -514,104 +540,94 @@ public class DatePicker extends FrameLayout {
         }
     }
 
-    /**
-     * Updates the spinners with the given <code>year</code>, <code>month</code>
-     * , and <code>dayOfMonth</code>. If the provided values designate an
-     * inconsistent date the values are normalized before updating the spinners.
-     */
-    private void updateSpinners(int year, int month, int dayOfMonth) {
-        // compute the deltas before modifying the current date
-        int deltaMonths = getDelataMonth(month);
-        int deltaDays = getDelataDayOfMonth(dayOfMonth);
-        mCurrentDate.set(Calendar.YEAR, year);
-        mCurrentDate.add(Calendar.MONTH, deltaMonths);
-        mCurrentDate.add(Calendar.DAY_OF_MONTH, deltaDays);
+    private boolean isNewDate(int year, int month, int dayOfMonth) {
+        return (mCurrentDate.get(Calendar.YEAR) != year
+                || mCurrentDate.get(Calendar.MONTH) != dayOfMonth
+                || mCurrentDate.get(Calendar.DAY_OF_MONTH) != month);
+    }
 
+    private void setDate(int year, int month, int dayOfMonth) {
+        mCurrentDate.set(year, month, dayOfMonth);
         if (mCurrentDate.before(mMinDate)) {
             mCurrentDate.setTimeInMillis(mMinDate.getTimeInMillis());
         } else if (mCurrentDate.after(mMaxDate)) {
             mCurrentDate.setTimeInMillis(mMaxDate.getTimeInMillis());
         }
+        updateSpinners();
+        updateCalendarView();
+    }
 
+    private void updateSpinners() {
+        // set the spinner ranges respecting the min and max dates
+        if (mCurrentDate.equals(mMinDate)) {
+            mDaySpinner.setMinValue(mCurrentDate.get(Calendar.DAY_OF_MONTH));
+            mDaySpinner.setMaxValue(mCurrentDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+            mDaySpinner.setWrapSelectorWheel(false);
+            mMonthSpinner.setDisplayedValues(null);
+            mMonthSpinner.setMinValue(mCurrentDate.get(Calendar.MONTH));
+            mMonthSpinner.setMaxValue(mCurrentDate.getActualMaximum(Calendar.MONTH));
+            mMonthSpinner.setWrapSelectorWheel(false);
+        } else if (mCurrentDate.equals(mMaxDate)) {
+            mDaySpinner.setMinValue(mCurrentDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+            mDaySpinner.setMaxValue(mCurrentDate.get(Calendar.DAY_OF_MONTH));
+            mDaySpinner.setWrapSelectorWheel(false);
+            mMonthSpinner.setDisplayedValues(null);
+            mMonthSpinner.setMinValue(mCurrentDate.getActualMinimum(Calendar.MONTH));
+            mMonthSpinner.setMaxValue(mCurrentDate.get(Calendar.MONTH));
+            mMonthSpinner.setWrapSelectorWheel(false);
+        } else {
+            mDaySpinner.setMinValue(1);
+            mDaySpinner.setMaxValue(mCurrentDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+            mDaySpinner.setWrapSelectorWheel(true);
+            mMonthSpinner.setDisplayedValues(null);
+            mMonthSpinner.setMinValue(0);
+            mMonthSpinner.setMaxValue(11);
+            mMonthSpinner.setWrapSelectorWheel(true);
+        }
+
+        // make sure the month names are a zero based array
+        // with the months in the month spinner
+        String[] displayedValues = Arrays.copyOfRange(getShortMonths(),
+                mMonthSpinner.getMinValue(), mMonthSpinner.getMaxValue() + 1);
+        mMonthSpinner.setDisplayedValues(displayedValues);
+
+        // year spinner range does not change based on the current date
+        mYearSpinner.setMinValue(mMinDate.get(Calendar.YEAR));
+        mYearSpinner.setMaxValue(mMaxDate.get(Calendar.YEAR));
+        mYearSpinner.setWrapSelectorWheel(false);
+
+        // set the spinner values
         mYearSpinner.setValue(mCurrentDate.get(Calendar.YEAR));
         mMonthSpinner.setValue(mCurrentDate.get(Calendar.MONTH));
-        mDaySpinner.setMinValue(1);
-        mDaySpinner.setMaxValue(mCurrentDate.getActualMaximum(Calendar.DAY_OF_MONTH));
         mDaySpinner.setValue(mCurrentDate.get(Calendar.DAY_OF_MONTH));
     }
 
     /**
-     * @return The delta days of moth from the current date and the given
-     *         <code>dayOfMonth</code>.
-     */
-    private int getDelataDayOfMonth(int dayOfMonth) {
-        int prevDayOfMonth = mCurrentDate.get(Calendar.DAY_OF_MONTH);
-        if (prevDayOfMonth == dayOfMonth) {
-            return 0;
-        }
-        int maxDayOfMonth = mCurrentDate.getActualMaximum(Calendar.DAY_OF_MONTH);
-        if (dayOfMonth == 1 && prevDayOfMonth == maxDayOfMonth) {
-            return 1;
-        }
-        if (dayOfMonth == maxDayOfMonth && prevDayOfMonth == 1) {
-            return -1;
-        }
-        return dayOfMonth - prevDayOfMonth;
-    }
-
-    /**
-     * @return The delta months from the current date and the given
-     *         <code>month</code>.
-     */
-    private int getDelataMonth(int month) {
-        int prevMonth = mCurrentDate.get(Calendar.MONTH);
-        if (prevMonth == month) {
-            return 0;
-        }
-        if (month == 0 && prevMonth == 11) {
-            return 1;
-        }
-        if (month == 11 && prevMonth == 0) {
-            return -1;
-        }
-        return month - prevMonth;
-    }
-
-    /**
-     * Updates the calendar view with the given year, month, and day selected by
-     * the number spinners.
+     * Updates the calendar view with the current date.
      */
     private void updateCalendarView() {
-        mTempDate.setTimeInMillis(mCalendarView.getDate());
-        if (mTempDate.get(Calendar.YEAR) != mYearSpinner.getValue()
-                || mTempDate.get(Calendar.MONTH) != mMonthSpinner.getValue()
-                || mTempDate.get(Calendar.DAY_OF_MONTH) != mDaySpinner.getValue()) {
-            mTempDate.clear();
-            mTempDate.set(mYearSpinner.getValue(), mMonthSpinner.getValue(),
-                    mDaySpinner.getValue());
-            mCalendarView.setDate(mTempDate.getTimeInMillis(), false, false);
-        }
+         mCalendarView.setDate(mCurrentDate.getTimeInMillis(), false, false);
     }
 
     /**
      * @return The selected year.
      */
     public int getYear() {
-        return mYearSpinner.getValue();
+        return mCurrentDate.get(Calendar.YEAR);
     }
 
     /**
      * @return The selected month.
      */
     public int getMonth() {
-        return mMonthSpinner.getValue();
+        return mCurrentDate.get(Calendar.MONTH);
     }
 
     /**
      * @return The selected day of month.
      */
     public int getDayOfMonth() {
-        return mDaySpinner.getValue();
+        return mCurrentDate.get(Calendar.DAY_OF_MONTH);
     }
 
     /**
@@ -619,8 +635,7 @@ public class DatePicker extends FrameLayout {
      */
     private void notifyDateChanged() {
         if (mOnDateChangedListener != null) {
-            mOnDateChangedListener.onDateChanged(DatePicker.this, mYearSpinner.getValue(),
-                    mMonthSpinner.getValue(), mDaySpinner.getValue());
+            mOnDateChangedListener.onDateChanged(this, getYear(), getMonth(), getDayOfMonth());
         }
     }
 

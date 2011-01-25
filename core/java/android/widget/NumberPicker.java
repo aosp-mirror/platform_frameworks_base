@@ -917,6 +917,8 @@ public class NumberPicker extends LinearLayout {
             // force the selector indices array to be reinitialized
             mSelectorIndices[SELECTOR_MIDDLE_ITEM_INDEX] = Integer.MAX_VALUE;
             mWrapSelectorWheel = wrapSelector;
+            // force redraw since we might look different
+            updateIncrementAndDecrementButtonsVisibilityState();
         }
     }
 
@@ -972,7 +974,6 @@ public class NumberPicker extends LinearLayout {
         setWrapSelectorWheel(wrapSelectorWheel);
         resetSelectorWheelIndices();
         updateInputTextView();
-        updateIncrementAndDecrementButtonsVisibilityState();
     }
 
     /**
@@ -1004,7 +1005,6 @@ public class NumberPicker extends LinearLayout {
         setWrapSelectorWheel(wrapSelectorWheel);
         resetSelectorWheelIndices();
         updateInputTextView();
-        updateIncrementAndDecrementButtonsVisibilityState();
     }
 
     /**
