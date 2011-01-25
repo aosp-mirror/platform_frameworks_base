@@ -1213,8 +1213,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
         const bool pureTranslate = mSnapshot->transform->isPureTranslate();
 #if RENDER_LAYERS_AS_REGIONS
         // Mark the current layer dirty where we are going to draw the patch
-        if ((mSnapshot->flags & Snapshot::kFlagFboTarget) &&
-                mSnapshot->region && mesh->hasEmptyQuads) {
+        if (hasLayer() && mesh->hasEmptyQuads) {
             const size_t count = mesh->quads.size();
             for (size_t i = 0; i < count; i++) {
                 const Rect& bounds = mesh->quads.itemAt(i);
@@ -1610,6 +1609,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     layer->alpha = alpha;
     layer->mode = mode;
 
+    LOGD("Drawing layer with alpha = %d", alpha);
 
 #if RENDER_LAYERS_AS_REGIONS
     if (!layer->region.isEmpty()) {
@@ -1617,11 +1617,12 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
             const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
             composeLayerRect(layer, r);
         } else if (layer->mesh) {
+            const float a = alpha / 255.0f;
             const Rect& rect = layer->layer;
 
             setupDraw();
             setupDrawWithTexture();
-            setupDrawColor(alpha, alpha, alpha, alpha);
+            setupDrawColor(a, a, a, a);
             setupDrawColorFilter();
             setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
             setupDrawProgram();
