@@ -1013,9 +1013,20 @@ public class MediaImageItem extends MediaItem {
 
             if (dx > dy) {
                 bitmapWidth = width;
-                bitmapHeight = Math.round(nativeHeight / dx);
+
+                if (((float)nativeHeight / dx) < (float)height) {
+                    bitmapHeight = (float)Math.ceil(nativeHeight / dx);
+                } else { // value equals the requested height
+                    bitmapHeight = (float)Math.floor(nativeHeight / dx);
+                }
+
             } else {
-                bitmapWidth = Math.round(nativeWidth / dy);
+                if (((float)nativeWidth / dy) > (float)width) {
+                    bitmapWidth = (float)Math.floor(nativeWidth / dy);
+                } else { // value equals the requested width
+                    bitmapWidth = (float)Math.ceil(nativeWidth / dy);
+                }
+
                 bitmapHeight = height;
             }
 
