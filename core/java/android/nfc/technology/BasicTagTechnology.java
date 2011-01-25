@@ -226,6 +226,22 @@ import android.util.Log;
         }
     }
 
+    /** internal transceive */
+    /*package*/ byte[] transceive(byte[] data, boolean raw) throws IOException {
+        checkConnected();
+
+        try {
+            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, raw);
+            if (response == null) {
+                throw new IOException("transceive failed");
+            }
+            return response;
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            throw new IOException("NFC service died");
+        }
+    }
+
     /**
      * Send data to a tag and receive the response.
      * <p>
@@ -238,17 +254,6 @@ import android.util.Log;
      * @throws IOException if the target is lost or connection closed
      */
     public byte[] transceive(byte[] data) throws IOException {
-        checkConnected();
-
-        try {
-            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, true);
-            if (response == null) {
-                throw new IOException("transceive failed");
-            }
-            return response;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            throw new IOException("NFC service died");
-        }
+        return transceive(data, true);
     }
 }

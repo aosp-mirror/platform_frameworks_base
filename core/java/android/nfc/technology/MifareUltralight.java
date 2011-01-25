@@ -69,7 +69,7 @@ public final class MifareUltralight extends BasicTagTechnology {
         checkConnected();
 
         byte[] blockread_cmd = { 0x30, (byte)block }; // phHal_eMifareRead
-        return transceive(blockread_cmd);
+        return transceive(blockread_cmd, false);
     }
 
     /**
@@ -89,7 +89,7 @@ public final class MifareUltralight extends BasicTagTechnology {
         pagewrite_cmd[1] = (byte) block;
         System.arraycopy(data, 0, pagewrite_cmd, 2, data.length);
 
-        transceive(pagewrite_cmd);
+        transceive(pagewrite_cmd, false);
     }
 
     public void writeBlock(int block, byte[] data) throws IOException {
@@ -100,34 +100,6 @@ public final class MifareUltralight extends BasicTagTechnology {
         blockwrite_cmd[1] = (byte) block;
         System.arraycopy(data, 0, blockwrite_cmd, 2, data.length);
 
-        transceive(blockwrite_cmd);
+        transceive(blockwrite_cmd, false);
     }
-
-    /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     *
-     * @param data bytes to send
-     * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
-     */
-    @Override
-    public byte[] transceive(byte[] data) throws IOException {
-        checkConnected();
-
-        try {
-            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, false);
-            if (response == null) {
-                throw new IOException("transceive failed");
-            }
-            return response;
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            throw new IOException("NFC service died");
-        }
-    }
-
 }
