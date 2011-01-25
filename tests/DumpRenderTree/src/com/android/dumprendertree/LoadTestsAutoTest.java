@@ -16,8 +16,6 @@
 
 package com.android.dumprendertree;
 
-import dalvik.system.VMRuntime;
-
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
@@ -34,12 +32,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShellActivity> {
 
     private final static String LOGTAG = "LoadTest";
     private final static String LOAD_TEST_RESULT =
         Environment.getExternalStorageDirectory() + "/load_test_result.txt";
+    private final static int MAX_GC_WAIT_SEC = 10;
     private boolean mFinished;
     static final String LOAD_TEST_RUNNER_FILES[] = {
         "run_page_cycler.py"
@@ -90,14 +91,23 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
 
     private void freeMem() {
         Log.v(LOGTAG, "freeMem: calling gc...");
-        final VMRuntime runtime = VMRuntime.getRuntime();
-
-        runtime.gcSoftReferences();
-        runtime.gcSoftReferences();
-        runtime.gcSoftReferences();
-        Runtime.getRuntime().gc();
-        Runtime.getRuntime().gc();
-
+        final CountDownLatch latch = new CountDownLatch(1);
+        Object dummy = new Object() {
+            @Override
+            protected void finalize() throws Throwable {
+                latch.countDown();
+                super.finalize();
+            }
+        };
+        dummy = null;
+        System.gc();
+        try {
+            if (!latch.await(MAX_GC_WAIT_SEC, TimeUnit.SECONDS)) {
+                Log.w(LOGTAG, "gc did not happen in 10s");
+            }
+        } catch (InterruptedException e) {
+            //ignore
+        }
     }
 
     private void printRow(PrintStream ps, String format, Object...objs) {
