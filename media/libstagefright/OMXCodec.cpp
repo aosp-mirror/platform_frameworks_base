@@ -3316,7 +3316,7 @@ status_t OMXCodec::stop() {
 
     mSource->stop();
 
-    CODEC_LOGV("stopped");
+    CODEC_LOGI("stopped in state %d", mState);
 
     return OK;
 }
