@@ -1828,9 +1828,6 @@ public class VideoEditorImpl implements VideoEditor {
       if (surfaceHolder == null) {
          throw new IllegalArgumentException();
        }
-      Rect frame;
-      int surfaceWidth;
-      int surfaceHeight;
       Surface surface = surfaceHolder.getSurface();
 
       if (surface == null) {
@@ -1838,10 +1835,7 @@ public class VideoEditorImpl implements VideoEditor {
         "Surface could not be retrieved from surface holder");
         throw new RuntimeException();
       }
-      frame = surfaceHolder.getSurfaceFrame();
-      surfaceWidth = frame.width();
-      surfaceHeight = frame.height();
-      mMANativeHelper.clearPreviewSurface(surface,surfaceWidth,surfaceHeight);
+      mMANativeHelper.clearPreviewSurface(surface);
     }
 
 }
