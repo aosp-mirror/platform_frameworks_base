@@ -3021,7 +3021,7 @@ class MediaArtistNativeHelper {
      */
     public void doPreview(Surface surface, long fromMs, long toMs, boolean loop,
             int callbackAfterFrameCount, PreviewProgressListener listener) {
-        mPreviewProgress = 0;
+        mPreviewProgress = fromMs;
         if (listener != null) {
             mPreviewProgressListener = listener;
         }
