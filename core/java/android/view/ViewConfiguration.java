@@ -167,7 +167,7 @@ public class ViewConfiguration {
     /**
      * Max distance to overfling for edge effects
      */
-    private static final int OVERFLING_DISTANCE = 12;
+    private static final int OVERFLING_DISTANCE = 6;
 
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
