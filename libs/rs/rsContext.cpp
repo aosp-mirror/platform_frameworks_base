@@ -201,9 +201,9 @@ bool Context::initGLThread() {
     mGL.mExtensions = glGetString(GL_EXTENSIONS);
 
     //LOGV("EGL Version %i %i", mEGL.mMajorVersion, mEGL.mMinorVersion);
-    LOGV("GL Version %s", mGL.mVersion);
+    //LOGV("GL Version %s", mGL.mVersion);
     //LOGV("GL Vendor %s", mGL.mVendor);
-    LOGV("GL Renderer %s", mGL.mRenderer);
+    //LOGV("GL Renderer %s", mGL.mRenderer);
     //LOGV("GL Extensions %s", mGL.mExtensions);
 
     const char *verptr = NULL;
@@ -468,7 +468,6 @@ void * Context::threadProc(void *vrsc) {
          return NULL;
      }
 
-     rsc->mScriptC.init(rsc);
      if (rsc->mIsGraphicsContext) {
          rsc->mStateRaster.init(rsc);
          rsc->setProgramRaster(NULL);
@@ -528,7 +527,7 @@ void * Context::threadProc(void *vrsc) {
 }
 
 void Context::destroyWorkerThreadResources() {
-    LOGV("destroyWorkerThreadResources 1");
+    //LOGV("destroyWorkerThreadResources 1");
     if (mIsGraphicsContext) {
          mRaster.clear();
          mFragment.clear();
@@ -544,7 +543,7 @@ void Context::destroyWorkerThreadResources() {
          mShaderCache.cleanupAll();
     }
     ObjectBase::zeroAllUserRef(this);
-    LOGV("destroyWorkerThreadResources 2");
+    //LOGV("destroyWorkerThreadResources 2");
     mExit = true;
 }
 
@@ -552,7 +551,7 @@ void * Context::helperThreadProc(void *vrsc) {
      Context *rsc = static_cast<Context *>(vrsc);
      uint32_t idx = (uint32_t)android_atomic_inc(&rsc->mWorkers.mLaunchCount);
 
-     LOGV("RS helperThread starting %p idx=%i", rsc, idx);
+     //LOGV("RS helperThread starting %p idx=%i", rsc, idx);
 
      rsc->mWorkers.mLaunchSignals[idx].init();
      rsc->mWorkers.mNativeThreadId[idx] = gettid();
@@ -573,7 +572,7 @@ void * Context::helperThreadProc(void *vrsc) {
          LOGE("pthread_setspecific %i", status);
      }
 
-     while (rsc->mRunning) {
+     while (!rsc->mExit) {
          rsc->mWorkers.mLaunchSignals[idx].wait();
          if (rsc->mWorkers.mLaunchCallback) {
             rsc->mWorkers.mLaunchCallback(rsc->mWorkers.mLaunchData, idx);
@@ -582,7 +581,7 @@ void * Context::helperThreadProc(void *vrsc) {
          rsc->mWorkers.mCompleteSignal.set();
      }
 
-     LOGV("RS helperThread exiting %p idx=%i", rsc, idx);
+     //LOGV("RS helperThread exited %p idx=%i", rsc, idx);
      return NULL;
 }
 
@@ -729,6 +728,16 @@ Context::~Context() {
 
     mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
+
+    // Cleanup compute threads.
+    mWorkers.mLaunchData = NULL;
+    mWorkers.mLaunchCallback = NULL;
+    mWorkers.mRunningCount = (int)mWorkers.mCount;
+    for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
+        mWorkers.mLaunchSignals[ct].set();
+        int status = pthread_join(mWorkers.mThreadId[ct], &res);
+    }
+    rsAssert(!mWorkers.mRunningCount);
 
     // Global structure cleanup.
     pthread_mutex_lock(&gInitMutex);
