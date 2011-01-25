@@ -1729,6 +1729,15 @@ public class BluetoothService extends IBluetooth.Stub {
             getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_OFF) {
             return false;
         }
+
+        BluetoothClass btClass = new BluetoothClass(getRemoteClass(device.getAddress()));
+        int btDeviceClass = btClass.getDeviceClass();
+        if (btDeviceClass != BluetoothClass.Device.PERIPHERAL_KEYBOARD &&
+            btDeviceClass != BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
+            log("Input device btDeviceClass: " + btDeviceClass + " Not a keyboard");
+            return false;
+        }
+
         BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
         if (state != null) {
             Message msg = new Message();
