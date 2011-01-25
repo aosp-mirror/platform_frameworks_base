@@ -21,6 +21,7 @@ import android.nfc.TagLostException;
 import android.os.RemoteException;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Technology class representing MIFARE Classic tags (also known as MIFARE Standard).
@@ -32,8 +33,8 @@ import java.io.IOException;
  * 16 bytes, but the number of sectors and the sector size varies by product. MIFARE has encryption
  * built in and each sector has two keys associated with it, as well as ACLs to determine what
  * level acess each key grants. Before operating on a sector you must call either
- * {@link #authenticateSector(int, byte[], boolean)} or
- * {@link #authenticateBlock(int, byte[], boolean)} to gain authorize your request.
+ * {@link #authenticateSectorWithKeyA(int, byte[])} or
+ * {@link #authenticateSectorWithKeyB(int, byte[])} to gain authorization for your request.
  */
 public final class MifareClassic extends BasicTagTechnology {
     /**
@@ -322,35 +323,41 @@ public final class MifareClassic extends BasicTagTechnology {
 
     /**
      * Increment a value block, and store the result in temporary memory.
-     * @param block
+     * @param blockIndex
      * @throws IOException
      */
-    public void increment(int blockIndex) throws IOException {
+    public void increment(int blockIndex, int value) throws IOException {
         validateBlock(blockIndex);
         checkConnected();
 
-        byte[] cmd = { (byte) 0xC1, (byte) blockIndex };
+        ByteBuffer cmd = ByteBuffer.allocate(6);
+        cmd.put( (byte) 0xC1 );
+        cmd.put( (byte) blockIndex );
+        cmd.putInt(value);  // ByteBuffer does the correct big endian translation
 
-        transceive(cmd, false);
+        transceive(cmd.array(), false);
     }
 
     /**
      * Decrement a value block, and store the result in temporary memory.
-     * @param block
+     * @param blockIndex
      * @throws IOException
      */
-    public void decrement(int blockIndex) throws IOException {
+    public void decrement(int blockIndex, int value) throws IOException {
         validateBlock(blockIndex);
         checkConnected();
 
-        byte[] cmd = { (byte) 0xC0, (byte) blockIndex };
+        ByteBuffer cmd = ByteBuffer.allocate(6);
+        cmd.put( (byte) 0xC0 );
+        cmd.put( (byte) blockIndex );
+        cmd.putInt(value);  // ByteBuffer does the correct big endian translation
 
-        transceive(cmd, false);
+        transceive(cmd.array(), false);
     }
 
     /**
      * Copy from temporary memory to value block.
-     * @param block
+     * @param blockIndex
      * @throws IOException
      */
     public void transfer(int blockIndex) throws IOException {
@@ -364,7 +371,7 @@ public final class MifareClassic extends BasicTagTechnology {
 
     /**
      * Copy from value block to temporary memory.
-     * @param block
+     * @param blockIndex
      * @throws IOException
      */
     public void restore(int blockIndex) throws IOException {
