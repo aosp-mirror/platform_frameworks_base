@@ -72,7 +72,7 @@ fragments as they are changed and allowing the user to navigate backward through
 states</li>
   <li>By <a
 href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">providing
-alternative resources</a>, you can mix and match fragments, based
+alternative layouts</a>, you can mix and match fragments, based
 on the screen size and orientation</li>
   <li>Fragments have direct access to their container activity and can contribute items to the
 activity's Action Bar (discussed next)</li>
@@ -83,15 +83,15 @@ android.app.FragmentManager}, which provides several APIs for interacting with f
 as finding fragments in the activity and popping fragments off the back stack to restore them
 after they've been removed or hidden.</p>
 
-<p>To perform transactions, such as add or remove fragments, you must create a {@link
+<p>To perform a transaction, such as add or remove a fragment, you must create a {@link
 android.app.FragmentTransaction}. You can then call methods such as {@link
 android.app.FragmentTransaction#add add()} {@link android.app.FragmentTransaction#remove
-remove()}, {@link android.app.FragmentTransaction#replace replace()}. Once you've applied all
+remove()}, or {@link android.app.FragmentTransaction#replace replace()}. Once you've applied all
 the changes you want to perform for the transaction, you must call {@link
-android.app.FragmentTransaction#commit commit()} and the system will apply the transaction to
+android.app.FragmentTransaction#commit commit()} and the system applies the fragment transaction to
 the activity.</p>
 
-<p>For more information about using fragments in your application, read the <a
+<p>For more information about using fragments, read the <a
 href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
 
 
@@ -99,38 +99,37 @@ href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> develope
 
 <h3>Action Bar</h3>
 
-<p>The Action Bar is a replacement for the traditional title bar at the top of the activity
-window. It includes the application logo in the left corner and also replaces the previous Options
-Menu UI with a drop-down list for the menu items. Additionally, the Action Bar allows you
-to:</p></p>
+<p>The Action Bar is a replacement for the traditional title bar at the top of the activity window.
+It includes the application logo in the left corner and provides a new interface for items in the
+activity's Options Menu. Additionally, the Action Bar allows you to:</p>
 
 <ul>
   <li>Include select menu items directly in the Action Bar&mdash;as "action
-items"&mdash;for quick access to global actions.
+items"&mdash;for quick access to global user actions.
     <p>In your XML declaration for the menu item, include the attribute, {@code
 android:showAsAction} with a value of {@code "ifRoom"}. When there's enough room in the
-Action Bar, the menu item appears directly in the bar. Otherwise, it is placed in the
+Action Bar, the menu item appears directly in the bar. Otherwise, the item is placed in the
 overflow menu, revealed by the icon on the right side of the Action Bar.</p></li>
-  <li>Add interactive widgets ("action views"), such as a search box.
-    <p>In your XML, include the attribute, {@code android:actionViewLayout} with a layout
-resource for the action view, or {@code android:actionViewClass} with the class name of the
+
+  <li>Add interactive widgets to the Action Bar&mdash;as "action views"&mdash;such as a search box.
+    <p>In the XML for the menu item that should behave as an action view, include the {@code
+android:actionViewLayout} attribute with a layout
+resource for the action view or {@code android:actionViewClass} with the class name of the
 widget. Like action items, an action view appears only when there's room for it in the Action
 Bar. If there's not enough room, it is placed in the overflow menu and behaves like a regular
 menu item (for example, an item can provide a {@link android.widget.SearchView} as an action
-view, but when in the overflow menu, selecting the item will activate the search dialog).</p>
-    <p></p></li>
+view, but when in the overflow menu, selecting the item activates the search dialog).</p></li>
+
   <li>Add an action to the application logo when tapped and replace it with a custom logo
     <p>The application logo is automatically assigned the {@code android.R.id.home} ID,
-which is delivered to your activity's {@link android.app.Activity#onOptionsItemSelected
+which the system deliveres to your activity's {@link android.app.Activity#onOptionsItemSelected
 onOptionsItemSelected()} callback when tapped. Simply respond to this ID in your callback
 method to perform an action such as go to your application's "home" activity.</p>
-    <p>If your activity does not respond to the icon action, you should hide it by calling {@link
-android.app.ActionBar#setDisplayShowHomeEnabled setDisplayShowHomeEnabled(false)}.</p>
-    <p>By default, this is true, so the icon will visually respond when pressed, even if you don't
-respond. Thus, you should remove the icon if you don't respond to it.</p></li>
+    <p>To replace the icon with a logo, </p></li>
+
   <li>Add breadcrumbs for navigating backward through fragments</li>
   <li>Add built in tabs and a drop-down list for navigation</li>
-  <li>Customize the Action Bar  themes and custom backgrounds</li>
+  <li>Customize the Action Bar themes and custom backgrounds</li>
 </ul>
 
 <p>The Action Bar is standard for all applications that set either the <a
@@ -139,9 +138,11 @@ android:minSdkVersion}</a> or <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to {@code "Honeycomb"}. (The "Honeycomb" API Level is provisional
 and effective only while using the preview SDK&mdash;you must change it to the official API
-Level when the final SDK becomes available.)</p>
+Level when the final SDK becomes available&mdash;see <a
+href="{@docRoot}sdk/preview/start.html">Getting Started</a> for more information.)</p>
 
-<p>For more information, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+<p>For more information about the Action Bar, read the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action
 Bar</a> developer guide.</p>
 
 
@@ -159,10 +160,10 @@ application that supports that type of content.</p>
 <p>To start using the clipboard, get the global {@link android.content.ClipboardManager} object
 by calling {@link android.content.Context#getSystemService getSystemService(CLIPBOARD_SERVICE)}.</p>
 
-<p>To create an item to attach to the clipboard, you need to create a new {@link
+<p>To create an item to attach to the clipboard ("copy"), you need to create a new {@link
 android.content.ClipData} object, which holds one or more {@link android.content.ClipData.Item}
 objects, each describing a single entity. To create a {@link android.content.ClipData} object with
-just one {@link android.content.ClipData.Item}, you can use one of the helper methods such as,
+just one {@link android.content.ClipData.Item}, you can use one of the helper methods, such as
 {@link android.content.ClipData#newPlainText newPlainText()}, {@link
 android.content.ClipData#newUri newUri()}, and {@link android.content.ClipData#newIntent
 newIntent()}, which each return a {@link android.content.ClipData} object pre-loaded with the
@@ -186,7 +187,7 @@ href="{@docRoot}resources/samples/NotePad/index.html">NotePad</a> sample applica
 
 <h3>Drag and drop</h3>
 
-<p>New APIs now facilitate the ability for your application to implement drag and drop
+<p>New APIs facilitate the ability for your application to implement drag and drop
 functionality in the UI.</p>
 
 <p>To begin dragging content in your activity, call {@link android.view.View#startDrag startDrag()}
@@ -196,13 +197,16 @@ that the user sees while dragging, and an {@link java.lang.Object} that can shar
 the drag object with views that may receive the object.</p>
 
 <p>To accept a drag object (receive the "drop") in a
-{@link android.view.View}, register the view with an {@link android.view.View.OnDragListener} by
+{@link android.view.View}, register the view with an {@link android.view.View.OnDragListener
+OnDragListener} by
 calling {@link android.view.View#setOnDragListener setOnDragListener()}. When a drag event occurs on
 the view, the system calls {@link android.view.View.OnDragListener#onDrag onDrag()} for the  {@link
-android.view.View.OnDragListener}, which receives a {@link android.view.DragEvent} describing the
-type of event has occurred (such as "drag started", "drag ended", and "drop"). During a drag
-operation, there is a stream of drag events, so the system calls {@link
-android.view.View.OnDragListener#onDrag onDrag()} repeatedly on the view. The receiving view can
+android.view.View.OnDragListener OnDragListener}, which receives a {@link android.view.DragEvent}
+describing the
+type of event has occurred (such as "drag started", "drag ended", or "drop"). During a drag, the
+system repeatedly calls {@link
+android.view.View.OnDragListener#onDrag onDrag()} for the view underneath the drag, to
+deliver a stream of events. The receiving view can
 inquire the event type delivered to {@link android.view.View#onDragEvent onDragEvent()} by calling
 {@link android.view.DragEvent#getAction getAction()} on the {@link android.view.DragEvent}.</p>
 
@@ -217,16 +221,14 @@ put the dragged data in the global system clipboard.</p>
 
 <h3>App widgets</h3>
 
-<p>App widgets can now be more interactive with scrolling list views, grid views, view flippers, and
-a new 3D stack widget.</p>
-
-<p>Android 3.0 supports several new widget classes for app widgets, including: {@link
+<p>Android 3.0 supports several new widget classes for more interactive app widgets, including:
+{@link
 android.widget.GridView}, {@link android.widget.ListView}, {@link android.widget.StackView}, {@link
 android.widget.ViewFlipper}, and {@link android.widget.AdapterViewFlipper}.</p>
 
-<p>You can use the new {@link android.widget.RemoteViewsService} to populate the new remote
-collection views ({@link android.widget.GridView}, {@link android.widget.ListView}, and {@link
-android.widget.StackView}).</p>
+<p>You can also use the new {@link android.widget.RemoteViewsService} to populate
+collection views such as ({@link android.widget.GridView}, {@link android.widget.ListView}, and
+{@link android.widget.StackView}).</p>
 
 <p>{@link android.appwidget.AppWidgetProviderInfo} also supports two new fields: {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} and {@link
@@ -234,11 +236,11 @@ android.appwidget.AppWidgetProviderInfo#previewImage}. The {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field lets you specify the view ID of the
 app widget subview, which is auto-advanced by the app widget’s host. The
 {@link android.appwidget.AppWidgetProviderInfo#previewImage} field specifies a preview of what the
-App Widget looks like and is shown to the user from the widget picker. If this field is not
+app widget looks like and is shown to the user from the widget picker. If this field is not
 supplied, the app widget's icon is used for the preview.</p>
 
-<p>Android also provides a new widget preview tool (WidgetPreview), located in the SDK tools, to
-take a screenshot of your app widget, which you can use when specifying the {@link
+<p>Android also provides a new widget preview tool ({@code WidgetPreview}), located in the SDK
+tools, to take a screenshot of your app widget, which you can use when specifying the {@link
 android.appwidget.AppWidgetProviderInfo#previewImage} field.</p>
 
 
@@ -249,12 +251,13 @@ android.appwidget.AppWidgetProviderInfo#previewImage} field.</p>
 
 <p>The {@link android.app.Notification} APIs have been extended to support more content-rich status
 bar notifications, plus a new {@link android.app.Notification.Builder} class allows you to easily
-control the notification properties. New features include:</p>
+control the notification properties.</p>
+<p>New features include:</p>
 <ul>
-  <li>Support for a large icon in the notification. This is usually for
+  <li>Support for a large icon in the notification, using {@link
+android.app.Notification.Builder#setLargeIcon setLargeIcon()}. This is usually for
 social applications to show the contact photo of the person who is the source of the
-notification or for media apps to show an album thumbnail. Set using {@link
-android.app.Notification.Builder#setLargeIcon setLargeIcon()}.</li>
+notification or for media apps to show an album thumbnail.</li>
   <li>Support for custom layouts in the status bar ticker, using {@link
 android.app.Notification.Builder#setTicker(CharSequence,RemoteViews) setTicker()}.</li>
   <li>Support for custom notification layouts to include buttons with {@link
@@ -269,7 +272,7 @@ android.app.PendingIntent}s, for more interactive notification widgets
 
 <p>New framework APIs facilitate asynchronous loading of data using the {@link
 android.content.Loader} class. You can use it in combination with UI components such as views and
-fragments to dynamically load data from background threads. The {@link
+fragments to dynamically load data from worker threads. The {@link
 android.content.CursorLoader} subclass is specially designed to help do so for data queried from
 a {@link android.content.ContentResolver}.</p>
 
@@ -280,21 +283,25 @@ a {@link android.content.ContentResolver}.</p>
 <h3>Bluetooth A2DP and headset APIs</h3>
 
 <p>Android now includes APIs for applications to verify the state of connected Bluetooth A2DP and
-headset profile devices. You can initialize the respective {@link
-android.bluetooth.BluetoothProfile} by calling {@link
+headset profile devices. For example, applications can identify when a Bluetooth headset is
+connected for listening to music and notify the user as appropriate. Applications can also receive
+broadcasts for vendor specific AT commands and notify the user about the state of the connected
+device, such as when the connected device's battery is low.</p>
+
+<p>You can initialize the respective {@link android.bluetooth.BluetoothProfile} by calling {@link
 android.bluetooth.BluetoothAdapter#getProfileProxy getProfileProxy()} with either the {@link
 android.bluetooth.BluetoothProfile#A2DP} or {@link android.bluetooth.BluetoothProfile#HEADSET}
 profile constant and a {@link android.bluetooth.BluetoothProfile.ServiceListener} to receive
-callbacks when the client is connected or disconnected.</p>
+callbacks when the Bluetooth client is connected or disconnected.</p>
 
 
 
 
 <h3>Animation framework</h3>
 
-<p>An all new flexible animation framework allows you to animate the properties of any object
-(View, Drawable, Fragment, Object, anything). It allows you to define many aspects of an animation,
-such as:</p>
+<p>An all new flexible animation framework allows you to animate arbitrary properties of any object
+(View, Drawable, Fragment, Object, or anything else). It allows you to define many aspects of an
+animation, such as:</p>
 <ul>
   <li>Duration</li>
   <li>Repeat amount and behavior</li>
@@ -308,7 +315,7 @@ color values, by default.  To animate any other type of value, you tell the syst
 the values for that given type, by implementing the {@link android.animation.TypeEvaluator}
 interface.</p>
 
-<p>There are two animators that you can use to animate values of a property: {@link
+<p>There are two animators you can use to animate values of a property: {@link
 android.animation.ValueAnimator} and {@link android.animation.ObjectAnimator}. The {@link
 android.animation.ValueAnimator} computes the animation values, but is not aware of the specific
 object or property that is animated as a result. It simply performs the calculations, and you must
@@ -320,13 +327,13 @@ property of the object to change over time, and a set of values to apply to the 
 time in order to animate it, then start the animation.</p>
 
 <p>Additionally, the {@link android.animation.LayoutTransition} class enables automatic transition
-animations for changes you make to your activity layout. To enable transitions for a {@link
-android.view.ViewGroup}, create a {@link android.animation.LayoutTransition} object and set it on
+animations for changes you make to your activity layout. To enable transitions for part of the
+layout, create a {@link android.animation.LayoutTransition} object and set it on
 any {@link android.view.ViewGroup} by calling {@link
 android.view.ViewGroup#setLayoutTransition setLayoutTransition()}. This causes default
 animations to run whenever items are added to or removed from the group. To specify custom
 animations, call {@link android.animation.LayoutTransition#setAnimator setAnimator()} on the {@link
-android.animation.LayoutTransition} to provide a custom {@link android.animation.Animator},
+android.animation.LayoutTransition} and provide a custom {@link android.animation.Animator},
 such as a {@link android.animation.ValueAnimator} or {@link android.animation.ObjectAnimator}
 discussed above.</p>
 
@@ -397,14 +404,14 @@ animator.start();
   <li><b>New holographic themes</b>
 
     <p>The standard system widgets and overall look have been redesigned for use on larger screens
-such as tablets and incorporate the new holographic UI theme. These style changes are applied
+such as tablets and incorporate the new "holographic" UI theme. The system applies these styles
 using the standard <a href="{@docRoot}guide/topics/ui/themes.html">style and theme</a> system.
-Any application that targets the Android 3.0 platform inherit the holographic theme by default.
+Any application that targets the Android 3.0 platform inherits the holographic theme by default.
 However, if your application also applies its own styles, then it will override the holographic
-theme, unless you update your styles to inherit them.</p>
+theme, unless you update your styles to inherit the holographic theme.</p>
 
 <p>To apply the holographic theme to individual activities or to inherit them in your own theme
-definitions, you can use one of several new {@link android.R.style#Theme_Holo Theme.Holo}
+definitions, use one of several new {@link android.R.style#Theme_Holo Theme.Holo}
 themes.</p>
   </li>
   
@@ -522,19 +529,39 @@ high-performance 3D effects for applications, wallpapers, carousels, and more.</
 
 
 <ul>
-  <li><b>Camcorder profiles</b>
 
-<p>New {@link android.media.CamcorderProfile#hasProfile hasProfile()} method and several video
-quality profiles, such as {@link android.media.CamcorderProfile#QUALITY_1080P}, {@link
-android.media.CamcorderProfile#QUALITY_720P}, {@link
-android.media.CamcorderProfile#QUALITY_CIF}, and more, to determine the camcorder quality
-profiles.</p></li>
-
-  <li><b>Time lapse video mode</b>
+  <li><b>Time lapse video</b>
 
 <p>Camcorder APIs now support the ability to record time lapse video. The {@link
 android.media.MediaRecorder#setCaptureRate setCaptureRate()} sets the rate at which frames
 should be captured.</p></li>
+
+  <li><b>Texture support for image streams</b>
+    
+<p>New {@link android.graphics.SurfaceTexture} allows you to capture an image stream as an OpenGL ES
+texture. By calling {@link android.hardware.Camera#setPreviewTexture setPreviewTexture()} for your
+{@link android.hardware.Camera} instance, you can specify the {@link
+android.graphics.SurfaceTexture} upon which to draw video playback or preview frames from the
+camera.</p></li>
+
+  <li><b>HTTP Live streaming</b>
+    
+<p>Applications can now pass an M3U playlist URL to the media framework to begin an HTTP Live
+streaming session. The media framework supports most of the HTTP Live streaming specification,
+including adaptive bit rate.</p></li>
+
+  <li><b>EXIF data</b>
+    
+<p>The {@link android.media.ExifInterface} includes new fields for photo aperture, ISO, and exposure
+time.</p></li>
+
+  <li><b>Camcorder profiles</b>
+
+<p>New {@link android.media.CamcorderProfile#hasProfile hasProfile()} method and several video
+quality profiles (such as {@link android.media.CamcorderProfile#QUALITY_1080P}, {@link
+android.media.CamcorderProfile#QUALITY_720P}, {@link
+android.media.CamcorderProfile#QUALITY_CIF}, and others) allow you to determine camcorder
+quality options.</p></li>
 
   <li><b>Digital media file transfer</b>
 
