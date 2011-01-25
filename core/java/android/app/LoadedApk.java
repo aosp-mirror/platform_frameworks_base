@@ -567,6 +567,7 @@ final class LoadedApk {
             } else {
                 rd.validate(context, handler);
             }
+            rd.mForgotten = false;
             return rd.getIIntentReceiver();
         }
     }
@@ -596,6 +597,7 @@ final class LoadedApk {
                         rd.setUnregisterLocation(ex);
                         holder.put(r, rd);
                     }
+                    rd.mForgotten = true;
                     return rd.getIIntentReceiver();
                 }
             }
@@ -666,6 +668,7 @@ final class LoadedApk {
         final boolean mRegistered;
         final IntentReceiverLeaked mLocation;
         RuntimeException mUnregisterLocation;
+        boolean mForgotten;
 
         final class Args extends BroadcastReceiver.PendingResult implements Runnable {
             private Intent mCurIntent;
@@ -696,7 +699,7 @@ final class LoadedApk {
                 final Intent intent = mCurIntent;
                 mCurIntent = null;
                 
-                if (receiver == null || !mRegistered) {
+                if (receiver == null || mForgotten) {
                     if (mRegistered && ordered) {
                         if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                                 "Finishing null broadcast to " + mReceiver);
