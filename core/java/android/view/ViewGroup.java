@@ -3529,10 +3529,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             (int) (boundingRect.bottom + 0.5f));
                 }
 
+                if (child.mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= INVALIDATED;
+                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                }                
                 do {
                     View view = null;
                     if (parent instanceof View) {
                         view = (View) parent;
+                        if (view.mLayerType != LAYER_TYPE_NONE &&
+                                view.getParent() instanceof View) {
+                            final View grandParent = (View) view.getParent();
+                            grandParent.mPrivateFlags |= INVALIDATED;
+                            grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                        }
                     }
 
                     if (drawAnimation) {

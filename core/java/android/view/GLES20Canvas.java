@@ -192,21 +192,36 @@ class GLES20Canvas extends HardwareCanvas {
         nSetViewport(mRenderer, width, height);
     }
     
-    private native void nSetViewport(int renderer, int width, int height);
+    private static native void nSetViewport(int renderer, int width, int height);
 
-    @Override
-    void onPreDraw() {
-        nPrepare(mRenderer, mOpaque);
+    /**
+     * @hide
+     */
+    public static boolean preserveBackBuffer() {
+        return nPreserveBackBuffer();
     }
 
-    private native void nPrepare(int renderer, boolean opaque);
+    private static native boolean nPreserveBackBuffer();    
+    
+    @Override
+    void onPreDraw(Rect dirty) {
+        if (dirty != null) {
+            nPrepareDirty(mRenderer, dirty.left, dirty.top, dirty.right, dirty.bottom, mOpaque);
+        } else {
+            nPrepare(mRenderer, mOpaque);
+        }
+    }
+
+    private static native void nPrepare(int renderer, boolean opaque);
+    private static native void nPrepareDirty(int renderer, int left, int top, int right, int bottom,
+            boolean opaque);
 
     @Override
     void onPostDraw() {
         nFinish(mRenderer);
     }
     
-    private native void nFinish(int renderer);
+    private static native void nFinish(int renderer);
 
     @Override
     public boolean acquireContext() {
@@ -217,14 +232,14 @@ class GLES20Canvas extends HardwareCanvas {
         return mContextLocked;
     }
 
-    private native void nAcquireContext(int renderer);
+    private static native void nAcquireContext(int renderer);
 
     @Override
     public boolean callDrawGLFunction(int drawGLFunction) {
         return nCallDrawGLFunction(mRenderer, drawGLFunction);
     }
 
-    private native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
+    private static native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
 
     @Override
     public void releaseContext() {
@@ -234,7 +249,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private native void nReleaseContext(int renderer);
+    private static native void nReleaseContext(int renderer);
     
     ///////////////////////////////////////////////////////////////////////////
     // Display list
@@ -244,7 +259,7 @@ class GLES20Canvas extends HardwareCanvas {
         return nGetDisplayList(mRenderer);
     }
 
-    private native int nGetDisplayList(int renderer);
+    private static native int nGetDisplayList(int renderer);
     
     static void destroyDisplayList(int displayList) {
         nDestroyDisplayList(displayList);
@@ -257,7 +272,7 @@ class GLES20Canvas extends HardwareCanvas {
         return nDrawDisplayList(mRenderer, ((GLES20DisplayList) displayList).mNativeDisplayList);
     }
 
-    private native boolean nDrawDisplayList(int renderer, int displayList);
+    private static native boolean nDrawDisplayList(int renderer, int displayList);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
@@ -271,7 +286,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawLayer(int renderer, int layer, float x, float y, int paint);
+    private static native void nDrawLayer(int renderer, int layer, float x, float y, int paint);
     
     void interrupt() {
         nInterrupt(mRenderer);
@@ -281,8 +296,8 @@ class GLES20Canvas extends HardwareCanvas {
         nResume(mRenderer);
     }
 
-    private native void nInterrupt(int renderer);
-    private native void nResume(int renderer);
+    private static native void nInterrupt(int renderer);
+    private static native void nResume(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Clipping
@@ -303,7 +318,7 @@ class GLES20Canvas extends HardwareCanvas {
         return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
     
-    private native boolean nClipRect(int renderer, float left, float top,
+    private static native boolean nClipRect(int renderer, float left, float top,
             float right, float bottom, int op);
 
     @Override
@@ -316,7 +331,8 @@ class GLES20Canvas extends HardwareCanvas {
         return nClipRect(mRenderer, left, top, right, bottom, Region.Op.INTERSECT.nativeInt);
     }
     
-    private native boolean nClipRect(int renderer, int left, int top, int right, int bottom, int op);
+    private static native boolean nClipRect(int renderer, int left, int top, int right, int bottom,
+            int op);
 
     @Override
     public boolean clipRect(Rect rect) {
@@ -355,14 +371,14 @@ class GLES20Canvas extends HardwareCanvas {
         return nGetClipBounds(mRenderer, bounds);
     }
 
-    private native boolean nGetClipBounds(int renderer, Rect bounds);
+    private static native boolean nGetClipBounds(int renderer, Rect bounds);
 
     @Override
     public boolean quickReject(float left, float top, float right, float bottom, EdgeType type) {
         return nQuickReject(mRenderer, left, top, right, bottom, type.nativeInt);
     }
     
-    private native boolean nQuickReject(int renderer, float left, float top,
+    private static native boolean nQuickReject(int renderer, float left, float top,
             float right, float bottom, int edge);
 
     @Override
@@ -384,56 +400,56 @@ class GLES20Canvas extends HardwareCanvas {
         if (dx != 0.0f || dy != 0.0f) nTranslate(mRenderer, dx, dy);
     }
     
-    private native void nTranslate(int renderer, float dx, float dy);
+    private static native void nTranslate(int renderer, float dx, float dy);
 
     @Override
     public void skew(float sx, float sy) {
         nSkew(mRenderer, sx, sy);
     }
 
-    private native void nSkew(int renderer, float sx, float sy);
+    private static native void nSkew(int renderer, float sx, float sy);
 
     @Override
     public void rotate(float degrees) {
         nRotate(mRenderer, degrees);
     }
     
-    private native void nRotate(int renderer, float degrees);
+    private static native void nRotate(int renderer, float degrees);
 
     @Override
     public void scale(float sx, float sy) {
         nScale(mRenderer, sx, sy);
     }
     
-    private native void nScale(int renderer, float sx, float sy);
+    private static native void nScale(int renderer, float sx, float sy);
 
     @Override
     public void setMatrix(Matrix matrix) {
         nSetMatrix(mRenderer, matrix.native_instance);
     }
     
-    private native void nSetMatrix(int renderer, int matrix);
+    private static native void nSetMatrix(int renderer, int matrix);
 
     @Override
     public int getNativeMatrix() {
         return nGetMatrix(mRenderer);
     }
 
-    private native int nGetMatrix(int renderer);    
+    private static native int nGetMatrix(int renderer);    
 
     @Override
     public void getMatrix(Matrix matrix) {
         nGetMatrix(mRenderer, matrix.native_instance);
     }
     
-    private native void nGetMatrix(int renderer, int matrix);
+    private static native void nGetMatrix(int renderer, int matrix);
 
     @Override
     public void concat(Matrix matrix) {
         nConcatMatrix(mRenderer, matrix.native_instance);
     }
     
-    private native void nConcatMatrix(int renderer, int matrix);
+    private static native void nConcatMatrix(int renderer, int matrix);
     
     ///////////////////////////////////////////////////////////////////////////
     // State management
@@ -449,7 +465,7 @@ class GLES20Canvas extends HardwareCanvas {
         return nSave(mRenderer, saveFlags);
     }
 
-    private native int nSave(int renderer, int flags);
+    private static native int nSave(int renderer, int flags);
     
     @Override
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
@@ -469,8 +485,8 @@ class GLES20Canvas extends HardwareCanvas {
         return save(saveFlags);
     }
 
-    private native int nSaveLayer(int renderer, float left, float top, float right, float bottom,
-            int paint, int saveFlags);
+    private static native int nSaveLayer(int renderer, float left, float top,
+            float right, float bottom, int paint, int saveFlags);
 
     @Override
     public int saveLayerAlpha(RectF bounds, int alpha, int saveFlags) {
@@ -487,7 +503,7 @@ class GLES20Canvas extends HardwareCanvas {
         return save(saveFlags);
     }
 
-    private native int nSaveLayerAlpha(int renderer, float left, float top, float right,
+    private static native int nSaveLayerAlpha(int renderer, float left, float top, float right,
             float bottom, int alpha, int saveFlags);
     
     @Override
@@ -495,21 +511,21 @@ class GLES20Canvas extends HardwareCanvas {
         nRestore(mRenderer);
     }
     
-    private native void nRestore(int renderer);
+    private static native void nRestore(int renderer);
 
     @Override
     public void restoreToCount(int saveCount) {
         nRestoreToCount(mRenderer, saveCount);
     }
 
-    private native void nRestoreToCount(int renderer, int saveCount);
+    private static native void nRestoreToCount(int renderer, int saveCount);
     
     @Override
     public int getSaveCount() {
         return nGetSaveCount(mRenderer);
     }
     
-    private native int nGetSaveCount(int renderer);
+    private static native int nGetSaveCount(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Filtering
@@ -538,8 +554,9 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawArc(int renderer, float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, boolean useCenter, int paint);
+    private static native void nDrawArc(int renderer, float left, float top,
+            float right, float bottom, float startAngle, float sweepAngle,
+            boolean useCenter, int paint);
 
     @Override
     public void drawARGB(int a, int r, int g, int b) {
@@ -556,7 +573,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawPatch(int renderer, int bitmap, byte[] buffer, byte[] chunks,
+    private static native void nDrawPatch(int renderer, int bitmap, byte[] buffer, byte[] chunks,
             float left, float top, float right, float bottom, int paint);
 
     @Override
@@ -568,7 +585,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmap(
+    private static native void nDrawBitmap(
             int renderer, int bitmap, byte[] buffer, float left, float top, int paint);
 
     @Override
@@ -581,7 +598,8 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmap(int renderer, int bitmap, byte[] buff, int matrix, int paint);
+    private static native void nDrawBitmap(int renderer, int bitmap, byte[] buff,
+            int matrix, int paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
@@ -616,7 +634,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmap(int renderer, int bitmap, byte[] buffer,
+    private static native void nDrawBitmap(int renderer, int bitmap, byte[] buffer,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
             float left, float top, float right, float bottom, int paint);
 
@@ -665,7 +683,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasColorFilter) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawBitmapMesh(int renderer, int bitmap, byte[] buffer,
+    private static native void nDrawBitmapMesh(int renderer, int bitmap, byte[] buffer,
             int meshWidth, int meshHeight, float[] verts, int vertOffset,
             int[] colors, int colorOffset, int paint);
 
@@ -676,7 +694,8 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer);        
     }
 
-    private native void nDrawCircle(int renderer, float cx, float cy, float radius, int paint);
+    private static native void nDrawCircle(int renderer, float cx, float cy,
+            float radius, int paint);
 
     @Override
     public void drawColor(int color) {
@@ -688,7 +707,7 @@ class GLES20Canvas extends HardwareCanvas {
         nDrawColor(mRenderer, color, mode.nativeInt);
     }
     
-    private native void nDrawColor(int renderer, int color, int mode);
+    private static native void nDrawColor(int renderer, int color, int mode);
 
     @Override
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
@@ -709,7 +728,8 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawLines(int renderer, float[] points, int offset, int count, int paint);
+    private static native void nDrawLines(int renderer, float[] points,
+            int offset, int count, int paint);
 
     @Override
     public void drawLines(float[] pts, Paint paint) {
@@ -723,8 +743,8 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer); 
     }
 
-    private native void nDrawOval(int renderer, float left, float top, float right, float bottom,
-            int paint);
+    private static native void nDrawOval(int renderer, float left, float top,
+            float right, float bottom, int paint);
 
     @Override
     public void drawPaint(Paint paint) {
@@ -746,8 +766,8 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawPath(int renderer, int path, int paint);
-    private native void nDrawRects(int renderer, int region, int paint);
+    private static native void nDrawPath(int renderer, int path, int paint);
+    private static native void nDrawRects(int renderer, int region, int paint);
 
     @Override
     public void drawPicture(Picture picture) {
@@ -798,8 +818,8 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer);
     }
 
-    private native void nDrawRect(int renderer, float left, float top, float right, float bottom,
-            int paint);
+    private static native void nDrawRect(int renderer, float left, float top,
+            float right, float bottom, int paint);
 
     @Override
     public void drawRect(Rect r, Paint paint) {
@@ -824,7 +844,7 @@ class GLES20Canvas extends HardwareCanvas {
         if (hasModifier) nResetModifiers(mRenderer);        
     }
 
-    private native void nDrawRoundRect(int renderer, float left, float top,
+    private static native void nDrawRoundRect(int renderer, float left, float top,
             float right, float bottom, float rx, float y, int paint);
 
     @Override
@@ -841,8 +861,8 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
     
-    private native void nDrawText(int renderer, char[] text, int index, int count, float x, float y,
-            int bidiFlags, int paint);
+    private static native void nDrawText(int renderer, char[] text, int index, int count,
+            float x, float y, int bidiFlags, int paint);
 
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
@@ -858,7 +878,8 @@ class GLES20Canvas extends HardwareCanvas {
             } else {
                 char[] buf = TemporaryBuffer.obtain(end - start);
                 TextUtils.getChars(text, start, end, buf, 0);
-                nDrawText(mRenderer, buf, 0, end - start, x, y, paint.mBidiFlags, paint.mNativePaint);
+                nDrawText(mRenderer, buf, 0, end - start, x, y,
+                        paint.mBidiFlags, paint.mNativePaint);
                 TemporaryBuffer.recycle(buf);
             }
         } finally {
@@ -880,8 +901,8 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private native void nDrawText(int renderer, String text, int start, int end, float x, float y,
-            int bidiFlags, int paint);
+    private static native void nDrawText(int renderer, String text, int start, int end,
+            float x, float y, int bidiFlags, int paint);
 
     @Override
     public void drawText(String text, float x, float y, Paint paint) {
@@ -924,7 +945,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private native void nDrawTextRun(int renderer, char[] text, int index, int count,
+    private static native void nDrawTextRun(int renderer, char[] text, int index, int count,
             int contextIndex, int contextCount, float x, float y, int dir, int nativePaint);
 
     @Override
@@ -958,7 +979,7 @@ class GLES20Canvas extends HardwareCanvas {
         }
     }
 
-    private native void nDrawTextRun(int renderer, String text, int start, int end,
+    private static native void nDrawTextRun(int renderer, String text, int start, int end,
             int contextStart, int contextEnd, float x, float y, int flags, int nativePaint);
 
     @Override
@@ -1001,9 +1022,10 @@ class GLES20Canvas extends HardwareCanvas {
         return false;        
     }
     
-    private native void nSetupShader(int renderer, int shader);
-    private native void nSetupColorFilter(int renderer, int colorFilter);
-    private native void nSetupShadow(int renderer, float radius, float dx, float dy, int color);
+    private static native void nSetupShader(int renderer, int shader);
+    private static native void nSetupColorFilter(int renderer, int colorFilter);
+    private static native void nSetupShadow(int renderer, float radius,
+            float dx, float dy, int color);
 
-    private native void nResetModifiers(int renderer);
+    private static native void nResetModifiers(int renderer);
 }
