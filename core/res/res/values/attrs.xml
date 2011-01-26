@@ -142,6 +142,11 @@
         <!-- EditText background drawable. -->
         <attr name="editTextBackground" format="reference" />
 
+        <!-- Popup text displayed in TextView when setError is used. -->
+        <attr name="errorMessageBackground" format="reference" />
+        <!-- Background used instead of errorMessageBackground when the popup has to be above. -->
+        <attr name="errorMessageAboveBackground" format="reference" />
+
         <!-- A styled string, specifying the style to be used for showing
              inline candidate text when composing with an input method.  The
              text itself will be ignored, but the style spans will be applied
