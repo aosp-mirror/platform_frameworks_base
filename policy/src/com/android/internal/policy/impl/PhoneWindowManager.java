@@ -2855,7 +2855,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
         if (mFocusedWindow != null) {
-            final int visibility = mFocusedWindow.getAttrs().systemUiVisibility;
+            final WindowManager.LayoutParams params = mFocusedWindow.getAttrs();
+            final int visibility = params.systemUiVisibility | params.subtreeSystemUiVisibility;
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mStatusBarService == null) {
