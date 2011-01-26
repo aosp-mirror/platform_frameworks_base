@@ -93,6 +93,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         new HashMap<String, SoftReference<NinePatchChunk>>();
 
     private static Map<String, Map<String, Integer>> sEnumValueMap;
+    private static Map<String, String> sPlatformProperties;
 
     /**
      * int[] wrapper to use as keys in maps.
@@ -157,9 +158,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      */
     private static LayoutLog sCurrentLog = sDefaultLog;
 
-
     private EnumSet<Capability> mCapabilities;
-
 
     @Override
     public int getApiLevel() {
@@ -172,8 +171,11 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     }
 
     @Override
-    public boolean init(File fontLocation, Map<String, Map<String, Integer>> enumValueMap,
+    public boolean init(Map<String,String> platformProperties,
+            File fontLocation,
+            Map<String, Map<String, Integer>> enumValueMap,
             LayoutLog log) {
+        sPlatformProperties = platformProperties;
         sEnumValueMap = enumValueMap;
 
         // don't use EnumSet.allOf(), because the bridge doesn't come with its specific version
@@ -426,6 +428,13 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the platform build properties.
+     */
+    public static Map<String, String> getPlatformProperties() {
+        return sPlatformProperties;
     }
 
     /**

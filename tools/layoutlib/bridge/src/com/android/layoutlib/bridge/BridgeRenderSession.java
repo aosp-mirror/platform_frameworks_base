@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,8 +56,8 @@ public class BridgeRenderSession extends RenderSession {
     }
 
     @Override
-    public ViewInfo getRootView() {
-        return mSession.getViewInfo();
+    public List<ViewInfo> getRootViews() {
+        return mSession.getViewInfos();
     }
 
     @Override
