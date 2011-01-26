@@ -2867,11 +2867,8 @@ class MediaArtistNativeHelper {
             mClipProperties.clipProperties = new Properties[mTotalClips];
 
             /** record the call back progress listner */
-            if (listener != null)
-            {
-                mMediaProcessingProgressListener = listener;
-                mProgressToApp = 0;
-            }
+            mMediaProcessingProgressListener = listener;
+            mProgressToApp = 0;
 
             if (mediaItemsList.size() > 0) {
                 for (int i = 0; i < mediaItemsList.size(); i++) {
@@ -3022,9 +3019,8 @@ class MediaArtistNativeHelper {
     public void doPreview(Surface surface, long fromMs, long toMs, boolean loop,
             int callbackAfterFrameCount, PreviewProgressListener listener) {
         mPreviewProgress = fromMs;
-        if (listener != null) {
-            mPreviewProgressListener = listener;
-        }
+        mPreviewProgressListener = listener;
+
         if (!mInvalidatePreviewArray) {
             try {
                 /** Modify the image files names to rgb image files. */
@@ -3555,9 +3551,9 @@ class MediaArtistNativeHelper {
         int outBitrate = 0;
         mExportFilename = filePath;
         previewStoryBoard(mediaItemsList, mediaTransitionList, mediaBGMList,null);
-        if (listener != null) {
-            mExportProgressListener = listener;
-        }
+
+        mExportProgressListener = listener;
+
         mProgressToApp = 0;
 
         switch (bitrate) {
@@ -3682,9 +3678,9 @@ class MediaArtistNativeHelper {
         int outBitrate = 0;
         mExportFilename = filePath;
         previewStoryBoard(mediaItemsList, mediaTransitionList, mediaBGMList,null);
-        if (listener != null) {
-            mExportProgressListener = listener;
-        }
+
+        mExportProgressListener = listener;
+
         mProgressToApp = 0;
 
         switch (bitrate) {
@@ -3977,9 +3973,8 @@ class MediaArtistNativeHelper {
             ExtractAudioWaveformProgressListener listener, boolean isVideo) {
         String tempPCMFileName;
 
-        if (listener != null) {
-            mExtractAudioWaveformProgressListener = listener;
-        }
+        mExtractAudioWaveformProgressListener = listener;
+
         /**
          * in case of Video , first call will generate the PCM file to make the
          * audio graph
