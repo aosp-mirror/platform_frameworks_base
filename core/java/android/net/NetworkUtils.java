@@ -162,8 +162,8 @@ public class NetworkUtils {
         // TODO - do this for real, using a hidden method on InetAddress that aborts
         // instead of doing dns step
         if (!InetAddress.isNumeric(addrString)) {
-            throw new IllegalArgumentException("numericToInetAddress with non numeric: " +
-                    addrString);
+            throw new IllegalArgumentException("numericToInetAddress with non numeric: '" +
+                    addrString + "'");
         }
         try {
             return InetAddress.getByName(addrString);
