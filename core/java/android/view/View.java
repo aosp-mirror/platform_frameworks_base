@@ -8290,7 +8290,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // If we got here, we're recreating it. Mark it as such to ensure that
             // we copy in child display lists into ours in drawChild()
             mRecreateDisplayList = true;
-
             if (mDisplayList == null) {
                 mDisplayList = mAttachInfo.mHardwareRenderer.createDisplayList(this);
                 // If we're creating a new display list, make sure our parent gets invalidated
@@ -8328,6 +8327,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                 mDisplayList.end();
             }
+        } else {
+            mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+            mPrivateFlags &= ~DIRTY_MASK;
         }
 
         return mDisplayList;
