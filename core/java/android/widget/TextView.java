@@ -3508,6 +3508,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static class ErrorPopup extends PopupWindow {
         private boolean mAbove = false;
         private final TextView mView;
+        private int mPopupInlineErrorBackgroundId = 0;
+        private int mPopupInlineErrorAboveBackgroundId = 0;
 
         ErrorPopup(TextView v, int width, int height) {
             super(v, width, height);
@@ -3518,10 +3520,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mAbove = above;
 
             if (above) {
-                mView.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error_above);
+                mPopupInlineErrorAboveBackgroundId =
+                    getResourceId(mPopupInlineErrorAboveBackgroundId, com.android.internal.R.styleable.Theme_errorMessageAboveBackground);
             } else {
-                mView.setBackgroundResource(com.android.internal.R.drawable.popup_inline_error);
+                mPopupInlineErrorBackgroundId =
+                    getResourceId(mPopupInlineErrorBackgroundId, com.android.internal.R.styleable.Theme_errorMessageBackground);
             }
+
+            mView.setBackgroundResource(above ? mPopupInlineErrorAboveBackgroundId : mPopupInlineErrorBackgroundId);
+        }
+
+        private int getResourceId(int currentId, int index) {
+            if (currentId == 0) {
+                TypedArray styledAttributes = mView.getContext().obtainStyledAttributes(R.styleable.Theme);
+                currentId = styledAttributes.getResourceId(index, 0);
+                styledAttributes.recycle();
+            }
+            return currentId;
         }
 
         @Override
