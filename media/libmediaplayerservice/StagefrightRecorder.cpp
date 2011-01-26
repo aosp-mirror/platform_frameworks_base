@@ -1239,6 +1239,14 @@ status_t StagefrightRecorder::setupVideoEncoder(
         encoder_flags |= OMXCodec::kHardwareCodecsOnly;
         encoder_flags |= OMXCodec::kStoreMetaDataInVideoBuffers;
     }
+
+    // Do not wait for all the input buffers to become available.
+    // This give timelapse video recording faster response in
+    // receiving output from video encoder component.
+    if (mCaptureTimeLapse) {
+        encoder_flags |= OMXCodec::kOnlySubmitOneInputBufferAtOneTime;
+    }
+
     sp<MediaSource> encoder = OMXCodec::Create(
             client.interface(), enc_meta,
             true /* createEncoder */, cameraSource,
