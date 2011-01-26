@@ -285,6 +285,7 @@ public:
     virtual ~LayerBaseClient();
 
             sp<Surface> getSurface();
+            wp<IBinder> getSurfaceBinder() const;
     virtual sp<Surface> createSurface() const;
     virtual sp<LayerBaseClient> getLayerBaseClient() const {
         return const_cast<LayerBaseClient*>(this); }
@@ -325,6 +326,7 @@ protected:
 private:
     mutable Mutex mLock;
     mutable wp<Surface> mClientSurface;
+    wp<IBinder> mClientSurfaceBinder;
     const wp<Client> mClientRef;
     // only read
     const uint32_t mIdentity;
