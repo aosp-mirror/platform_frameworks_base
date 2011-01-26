@@ -1015,10 +1015,4 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      */
     public void fyiWillBeAdvancedByHostKThx() {
     }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        setAdapter(null);
-        super.onDetachedFromWindow();
-    }
 }
