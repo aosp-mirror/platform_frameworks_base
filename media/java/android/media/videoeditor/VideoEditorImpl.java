@@ -60,6 +60,11 @@ public class VideoEditorImpl implements VideoEditor {
     final Semaphore mPreviewSemaphore = new Semaphore(1, true);
 
     /*
+     *  Semaphore to control export calls
+     */
+    final Semaphore mExportSemaphore = new Semaphore(1, true);
+
+    /*
      *  XML tags
      */
     private static final String TAG_PROJECT = "project";
@@ -401,8 +406,15 @@ public class VideoEditorImpl implements VideoEditor {
                 throw new IllegalArgumentException("Argument Bitrate incorrect");
         }
 
-        mMANativeHelper.export(filename, mProjectPath, height,bitrate,audioCodec,
+        try {
+            mExportSemaphore.acquire();
+            mMANativeHelper.export(filename, mProjectPath, height,bitrate,audioCodec,
                 videoCodec,mMediaItems, mTransitions, mAudioTracks,listener);
+        } catch (InterruptedException  ex) {
+            Log.e("VideoEditorImpl", "Sem acquire NOT successful in export");
+        } finally {
+            mExportSemaphore.release();
+        }
     }
 
     /*
@@ -466,9 +478,16 @@ public class VideoEditorImpl implements VideoEditor {
                 throw new IllegalArgumentException("Argument Bitrate incorrect");
         }
 
-        mMANativeHelper.export(filename, mProjectPath, height,bitrate,
+        try {
+            mExportSemaphore.acquire();
+            mMANativeHelper.export(filename, mProjectPath, height,bitrate,
                                mMediaItems, mTransitions, mAudioTracks,
                                listener);
+        } catch (InterruptedException  ex) {
+            Log.e("VideoEditorImpl", "Sem acquire NOT successful in export");
+        } finally {
+            mExportSemaphore.release();
+        }
     }
 
     /*
@@ -476,7 +495,7 @@ public class VideoEditorImpl implements VideoEditor {
      */
     public void generatePreview(MediaProcessingProgressListener listener) {
         boolean semAcquireDone = false;
-        try{
+        try {
             mPreviewSemaphore.acquire();
             semAcquireDone = true;
             mMANativeHelper.setGeneratePreview(true);
