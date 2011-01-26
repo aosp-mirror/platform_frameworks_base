@@ -113,6 +113,11 @@ class AccessibilityInjector {
      * @return True if the event was processed.
      */
     public boolean onKeyEvent(KeyEvent event) {
+        // We do not handle ENTER in any circumstances.
+        if (isEnterActionKey(event.getKeyCode())) {
+            return false;
+        }
+
         if (event.getAction() == KeyEvent.ACTION_UP) {
             return mLastDownEventHandled;
         }
@@ -365,6 +370,12 @@ class AccessibilityInjector {
                 Log.e(LOG_TAG, "Disregarding malformed key binding: " + bindingString);
             }
         }
+    }
+
+    private boolean isEnterActionKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_DPAD_CENTER
+                || keyCode == KeyEvent.KEYCODE_ENTER
+                || keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER;
     }
 
     /**

@@ -51,7 +51,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     private static final long TIMEOUT_ENABLE_ACCESSIBILITY_AND_MOCK_SERVICE = 1000;
 
     /** The count of tests to detect when to shut down the service. */
-    private static final int TEST_CASE_COUNT = 8;
+    private static final int TEST_CASE_COUNT = 16;
 
     /** The meta state for pressed left ALT. */
     private static final int META_STATE_ALT_LEFT_ON = KeyEvent.META_ALT_ON
@@ -140,7 +140,8 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
                    "</p>" +
                    "<p>" +
                      "d" +
-                     "<input>e</input>" +
+                     "<p/>" +
+                     "e" +
                    "</p>" +
                "</body>" +
              "</html>";
@@ -179,6 +180,10 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
         assertSelectionString(null);
 
+        // go to the fifth character (reverse)
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("e");
+
         // go to the fourth character (reverse)
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
         assertSelectionString("d");
@@ -198,6 +203,10 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         // try to go before the first character
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
         assertSelectionString(null);
+
+        // go to the first character
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("a");
 
         // go to the second character (reverse again)
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -223,11 +232,11 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
                    "</p>" +
                    "<p>" +
                      " scattered " +
-                     "<input>all</input>" +
-                     " over " +
+                     "<p/>" +
+                     " all over " +
                    "</p>" +
                    "<div>" +
-                     "<button>the place.</button>" +
+                     "<p>the place.</p>" +
                    "</div>" +
                "</body>" +
              "</html>";
@@ -284,7 +293,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
 
         // go to the last word (reverse)
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
-        assertSelectionString("place");
+        assertSelectionString("place.");
 
         // go to the eight word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
@@ -321,6 +330,10 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         // try to go before the first word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
         assertSelectionString(null);
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("This");
 
         // go to the second word (reverse again)
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -384,6 +397,10 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
         assertSelectionString(null);
 
+        // go to the fifth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("This is the second sentence of the second paragraph.");
+
         // go to the fourth sentence (reverse)
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
         assertSelectionString("This is the first sentence of the second paragraph.");
@@ -404,6 +421,11 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         // try to go before the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
         assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("This is the first sentence of the first paragraph and has an "
+                + "<b>inline bold tag</b>.");
 
         // go to the second sentence (reverse again)
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -747,6 +769,539 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     }
 
     /**
+     * Tests that the selection does not cross anchor boundaries. This is a
+     * workaround for the asymmetric and inconsistent handling of text with
+     * links by WebKit while traversing by sentence.
+     */
+    @LargeTest
+    public void testEnforceSelectionDoesNotCrossAnchorBoundary1() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>First</div>" +
+                "<p>" +
+                  "<a href=\"\">Second</a> Third" +
+                "</p>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"\">Second</a>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Third");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Third");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"\">Second</a>");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests that the selection does not cross anchor boundaries. This is a
+     * workaround for the asymmetric and inconsistent handling of text with
+     * links by WebKit while traversing by sentence.
+     */
+    @LargeTest
+    public void testEnforceSelectionDoesNotCrossAnchorBoundary2() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>First</div>" +
+                "<a href=\"#\">Second</a>" +
+                "&nbsp;" +
+                "<a href=\"#\">Third</a>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\">Second</a>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("&nbsp;");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\">Third</a>");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"#\">Third</a>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("&nbsp;");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"#\">Second</a>");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests that the selection does not cross anchor boundaries. This is a
+     * workaround for the asymmetric and inconsistent handling of text with
+     * links by WebKit while traversing by sentence.
+     */
+    @LargeTest
+    public void testEnforceSelectionDoesNotCrossAnchorBoundary3() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>" +
+                  "First" +
+                "<div>" +
+                "<div>" +
+                  "<a href=\"#\">Second</a>" +
+                "</div>" +
+                "<div>" +
+                  "Third" +
+                "</div>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\">Second</a>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Third");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Third");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"#\">Second</a>");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests skipping of content with hidden visibility.
+     */
+    @LargeTest
+    public void testSkipVisibilityHidden() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>First </div>" +
+                "<div style=\"visibility:hidden;\">Second</div>" +
+                "<div> Third</div>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // change navigation axis to word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
+        assertSelectionString("1"); // expect the word navigation axis
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the third word (the second is invisible)
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Third");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third word (the second is invisible)
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Third");
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests skipping of content with display none.
+     */
+    @LargeTest
+    public void testSkipDisplayNone() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>First</div>" +
+                "<div style=\"display: none;\">Second</div>" +
+                "<div>Third</div>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // change navigation axis to word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
+        assertSelectionString("1"); // expect the word navigation axis
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the third word (the second is invisible)
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Third");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third word (the second is invisible)
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Third");
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first word
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests for the selection not getting stuck.
+     *
+     * Note: The selection always proceeds but if it can
+     * be selecting the same content i.e. between the start
+     * and end are contained the same text nodes.
+     */
+    @LargeTest
+    public void testSelectionTextProceed() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<a href=\"#\">First</a>" +
+                "<span><a href=\"#\"><span>Second</span>&nbsp;<small>a</small></a>" +
+                "</span>&nbsp;<a href=\"#\">Third</a>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\">First</a>");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\"><span>Second&nbsp;<small>a</small></a>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("&nbsp;");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\">Third</a>");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"#\">Third</a>");
+
+        // NOTE: Here we are a bit asymmetric around whitespace but we can live with it
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("&nbsp;");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"#\"><span>Second&nbsp;<small>a</small></a>");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<a href=\"#\">First</a>");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<a href=\"#\">First</a>");
+    }
+
+    /**
+     * Tests if input elements are selected rather skipped.
+     */
+    @LargeTest
+    public void testSelectionOfInputElements() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<p>" +
+                  "First" +
+                "</p>" +
+                "<input type=\"text\"/>" +
+                "<p>" +
+                  "Second" +
+                "</p>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Second");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Second");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests traversing of input controls.
+     */
+    @LargeTest
+    public void testSelectionOfInputElements2() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>" +
+                  "First" +
+                  "<input type=\"text\"/>" +
+                  "<span>" +
+                    "<input type=\"text\"/>" +
+                  "</span>" +
+                  "<button type=\"button\">Click Me!</button>" +
+                  "<div>" +
+                    "<input type=\"submit\"/>" +
+                  "</div>" +
+                  "<p>" +
+                    "Second" +
+                  "</p>" +
+                "</div>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = createWebVewWithHtml(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<button type=\"button\">Click Me!</button>");
+
+        // go to the fifth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"submit\">");
+
+        // go to the sixth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Second");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the sixth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Second");
+
+        // go to the fifth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"submit\">");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<button type=\"button\">Click Me!</button>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+    }
+
+    /**
      * Enable accessibility and the mock accessibility service.
      */
     private void enableAccessibilityAndMockAccessibilityService() {
@@ -887,7 +1442,8 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
      */
     private void restoreDefaultWebContentKeyBindings() {
         Settings.Secure.putString(getContext().getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS, mDefaultKeyBindings);
+                Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
+                mDefaultKeyBindings);
     }
 
     /**

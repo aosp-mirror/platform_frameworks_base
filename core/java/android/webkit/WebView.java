@@ -16,9 +16,6 @@
 
 package android.webkit;
 
-import android.view.HardwareCanvas;
-import com.android.internal.R;
-
 import android.annotation.Widget;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -31,7 +28,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -57,7 +53,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.Selection;
@@ -66,6 +61,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.HardwareCanvas;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -92,7 +88,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
-import android.widget.EdgeGlow;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.OverScroller;
@@ -677,6 +672,8 @@ public class WebView extends AbsoluteLayout
     static final int SET_AUTOFILLABLE                   = 133;
     static final int AUTOFILL_COMPLETE                  = 134;
 
+    static final int SELECT_AT                          = 135;
+
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
 
@@ -728,7 +725,8 @@ public class WebView extends AbsoluteLayout
         "SET_TOUCH_HIGHLIGHT_RECTS", //      = 131;
         "SAVE_WEBARCHIVE_FINISHED", //       = 132;
         "SET_AUTOFILLABLE", //               = 133;
-        "AUTOFILL_COMPLETE" //               = 134;
+        "AUTOFILL_COMPLETE", //              = 134;
+        "SELECT_AT" //                       = 135;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -7600,6 +7598,10 @@ public class WebView extends AbsoluteLayout
                     }
                     break;
 
+                case SELECT_AT:
+                    nativeSelectAt(msg.arg1, msg.arg2);
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -7957,24 +7959,6 @@ public class WebView extends AbsoluteLayout
                 cursorData());
     }
 
-    /*
-     * Called from JNI when the cursor has moved. This method
-     * sends a message to the WebCore requesting the given
-     * nodePtr in the given framePrt to be selected which will
-     * result in firing an accessibility event announing its
-     * content.
-     *
-     * Note: Accessibility support.
-     */
-    @SuppressWarnings("unused")
-    // called from JNI
-    private void sendMoveSelection(int framePtr, int nodePtr) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled()
-                && mAccessibilityInjector != null) {
-            mWebViewCore.sendMessage(EventHub.MOVE_SELECTION, framePtr, nodePtr);
-        }
-    }
-
     /**
      * Called by JNI to send a message to the webcore thread that the user
      * touched the webpage.
@@ -8286,6 +8270,7 @@ public class WebView extends AbsoluteLayout
     private native Point    nativeSelectableText();
     private native void     nativeSelectAll();
     private native void     nativeSelectBestAt(Rect rect);
+    private native void     nativeSelectAt(int x, int y);
     private native int      nativeSelectionX();
     private native int      nativeSelectionY();
     private native int      nativeFindIndex();
