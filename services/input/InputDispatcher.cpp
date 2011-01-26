@@ -1165,12 +1165,15 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         mTempTouchState.reset();
         mTempTouchState.down = true;
         mTempTouchState.deviceId = entry->deviceId;
+        mTempTouchState.source = entry->source;
         isSplit = false;
         wrongDevice = false;
     } else {
         mTempTouchState.copyFrom(mTouchState);
         isSplit = mTempTouchState.split;
-        wrongDevice = mTempTouchState.down && mTempTouchState.deviceId != entry->deviceId;
+        wrongDevice = mTempTouchState.down
+                && (mTempTouchState.deviceId != entry->deviceId
+                        || mTempTouchState.source != entry->source);
         if (wrongDevice) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
             LOGD("Dropping event because a pointer for a different device is already down.");
@@ -1599,6 +1602,9 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
         if (inputTarget->pointerIds.count() != originalMotionEntry->pointerCount) {
             MotionEntry* splitMotionEntry = splitMotionEvent(
                     originalMotionEntry, inputTarget->pointerIds);
+            if (!splitMotionEntry) {
+                return; // split event was dropped
+            }
 #if DEBUG_FOCUS
             LOGD("channel '%s' ~ Split motion event.",
                     connection->getInputChannelName());
@@ -2120,7 +2126,19 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             splitPointerCount += 1;
         }
     }
-    assert(splitPointerCount == pointerIds.count());
+
+    if (splitPointerCount != pointerIds.count()) {
+        // This is bad.  We are missing some of the pointers that we expected to deliver.
+        // Most likely this indicates that we received an ACTION_MOVE events that has
+        // different pointer ids than we expected based on the previous ACTION_DOWN
+        // or ACTION_POINTER_DOWN events that caused us to decide to split the pointers
+        // in this way.
+        LOGW("Dropping split motion event because the pointer count is %d but "
+                "we expected there to be %d pointers.  This probably means we received "
+                "a broken sequence of pointer ids from the input device.",
+                splitPointerCount, pointerIds.count());
+        return NULL;
+    }
 
     int32_t action = originalMotionEntry->action;
     int32_t maskedAction = action & AMOTION_EVENT_ACTION_MASK;
@@ -2196,7 +2214,7 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
     }
 }
 
-void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
+void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t source,
         uint32_t policyFlags, int32_t action, int32_t flags,
         int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
@@ -2243,7 +2261,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
     }
 }
 
-void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
+void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
         uint32_t policyFlags, int32_t action, int32_t flags, int32_t metaState, int32_t edgeFlags,
         uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
         float xPrecision, float yPrecision, nsecs_t downTime) {
@@ -2296,6 +2314,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
                 }
 
                 if (motionEntry->action != AMOTION_EVENT_ACTION_MOVE
+                        || motionEntry->source != source
                         || motionEntry->pointerCount != pointerCount
                         || motionEntry->isInjected()) {
                     // Last motion event in the queue for this device is not compatible for
@@ -2355,6 +2374,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t 
                             dispatchEntry->eventEntry);
                     if (motionEntry->action != AMOTION_EVENT_ACTION_MOVE
                             || motionEntry->deviceId != deviceId
+                            || motionEntry->source != source
                             || motionEntry->pointerCount != pointerCount
                             || motionEntry->isInjected()) {
                         // The motion event is not compatible with this move.
@@ -2883,6 +2903,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
     dump.appendFormat(INDENT "TouchDown: %s\n", toString(mTouchState.down));
     dump.appendFormat(INDENT "TouchSplit: %s\n", toString(mTouchState.split));
     dump.appendFormat(INDENT "TouchDeviceId: %d\n", mTouchState.deviceId);
+    dump.appendFormat(INDENT "TouchSource: 0x%08x\n", mTouchState.source);
     if (!mTouchState.windows.isEmpty()) {
         dump.append(INDENT "TouchedWindows:\n");
         for (size_t i = 0; i < mTouchState.windows.size(); i++) {
@@ -3308,7 +3329,7 @@ InputDispatcher::Allocator::obtainConfigurationChangedEntry(nsecs_t eventTime) {
 }
 
 InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t eventTime,
-        int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
+        int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
         int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
         int32_t repeatCount, nsecs_t downTime) {
     KeyEntry* entry = mKeyEntryPool.alloc();
@@ -3329,7 +3350,7 @@ InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t ev
 }
 
 InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsecs_t eventTime,
-        int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
+        int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
         int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
         nsecs_t downTime, uint32_t pointerCount,
         const int32_t* pointerIds, const PointerCoords* pointerCoords) {
@@ -3757,7 +3778,7 @@ InputDispatcher::CommandEntry::~CommandEntry() {
 // --- InputDispatcher::TouchState ---
 
 InputDispatcher::TouchState::TouchState() :
-    down(false), split(false), deviceId(-1) {
+    down(false), split(false), deviceId(-1), source(0) {
 }
 
 InputDispatcher::TouchState::~TouchState() {
@@ -3767,6 +3788,7 @@ void InputDispatcher::TouchState::reset() {
     down = false;
     split = false;
     deviceId = -1;
+    source = 0;
     windows.clear();
 }
 
@@ -3774,6 +3796,7 @@ void InputDispatcher::TouchState::copyFrom(const TouchState& other) {
     down = other.down;
     split = other.split;
     deviceId = other.deviceId;
+    source = other.source;
     windows.clear();
     windows.appendVector(other.windows);
 }

@@ -227,10 +227,10 @@ public:
      * These methods should only be called on the input reader thread.
      */
     virtual void notifyConfigurationChanged(nsecs_t eventTime) = 0;
-    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
+    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime) = 0;
-    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
+    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags,
             int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
@@ -313,10 +313,10 @@ public:
     virtual void dispatchOnce();
 
     virtual void notifyConfigurationChanged(nsecs_t eventTime);
-    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
+    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime);
-    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
+    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags,
             int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
@@ -379,7 +379,7 @@ private:
 
     struct KeyEntry : EventEntry {
         int32_t deviceId;
-        int32_t source;
+        uint32_t source;
         int32_t action;
         int32_t flags;
         int32_t keyCode;
@@ -407,7 +407,7 @@ private:
 
     struct MotionEntry : EventEntry {
         int32_t deviceId;
-        int32_t source;
+        uint32_t source;
         int32_t action;
         int32_t flags;
         int32_t metaState;
@@ -549,11 +549,11 @@ private:
         InjectionState* obtainInjectionState(int32_t injectorPid, int32_t injectorUid);
         ConfigurationChangedEntry* obtainConfigurationChangedEntry(nsecs_t eventTime);
         KeyEntry* obtainKeyEntry(nsecs_t eventTime,
-                int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
+                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
                 int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
                 int32_t repeatCount, nsecs_t downTime);
         MotionEntry* obtainMotionEntry(nsecs_t eventTime,
-                int32_t deviceId, int32_t source, uint32_t policyFlags, int32_t action,
+                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
                 int32_t flags, int32_t metaState, int32_t edgeFlags,
                 float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
@@ -645,7 +645,7 @@ private:
     private:
         struct KeyMemento {
             int32_t deviceId;
-            int32_t source;
+            uint32_t source;
             int32_t keyCode;
             int32_t scanCode;
             int32_t flags;
@@ -654,7 +654,7 @@ private:
 
         struct MotionMemento {
             int32_t deviceId;
-            int32_t source;
+            uint32_t source;
             float xPrecision;
             float yPrecision;
             nsecs_t downTime;
@@ -846,6 +846,7 @@ private:
         bool down;
         bool split;
         int32_t deviceId; // id of the device that is currently down, others are rejected
+        uint32_t source;  // source of the device that is current down, others are rejected
         Vector<TouchedWindow> windows;
 
         TouchState();

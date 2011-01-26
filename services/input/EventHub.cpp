@@ -778,12 +778,12 @@ int EventHub::openDevice(const char *devicePath) {
         // Is this a new modern multi-touch driver?
         if (test_bit(ABS_MT_POSITION_X, abs_bitmask)
                 && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
-            device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN | INPUT_DEVICE_CLASS_TOUCHSCREEN_MT;
+            device->classes |= INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_TOUCH_MT;
 
         // Is this an old style single-touch driver?
         } else if (test_bit(BTN_TOUCH, key_bitmask)
                 && test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
-            device->classes |= INPUT_DEVICE_CLASS_TOUCHSCREEN;
+            device->classes |= INPUT_DEVICE_CLASS_TOUCH;
         }
     }
 
@@ -808,7 +808,7 @@ int EventHub::openDevice(const char *devicePath) {
     }
 #endif
 
-    if ((device->classes & INPUT_DEVICE_CLASS_TOUCHSCREEN)) {
+    if ((device->classes & INPUT_DEVICE_CLASS_TOUCH)) {
         // Load the virtual keys for the touch screen, if any.
         // We do this now so that we can make sure to load the keymap if necessary.
         status_t status = loadVirtualKeyMap(device);
