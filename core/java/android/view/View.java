@@ -4750,7 +4750,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     void performCollectViewAttributes(int visibility) {
-        if ((visibility & VISIBILITY_MASK) == VISIBLE) {
+        if ((visibility & VISIBILITY_MASK) == VISIBLE && mAttachInfo != null) {
             if ((mViewFlags & KEEP_SCREEN_ON) == KEEP_SCREEN_ON) {
                 mAttachInfo.mKeepScreenOn = true;
             }
