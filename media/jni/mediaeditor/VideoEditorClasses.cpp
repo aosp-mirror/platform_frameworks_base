@@ -2481,7 +2481,7 @@ videoEditClasses_getEffectSettings(
 
             pSettings->xVSS.width = pSettings->xVSS.pFramingBuffer->u_width;
             pSettings->xVSS.height = pSettings->xVSS.pFramingBuffer->u_height;
-            pSettings->xVSS.rgbType = M4VSS3GPP_kRGB888;
+            pSettings->xVSS.rgbType = M4VSS3GPP_kRGB565;
 
             VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
                     "pFramingBuffer u_width %d ", pSettings->xVSS.pFramingBuffer->u_width);
