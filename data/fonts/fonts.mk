@@ -28,4 +28,5 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/Clockopia.ttf:system/fonts/Clockopia.ttf \
     frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf \
     frameworks/base/data/fonts/AndroidClock.ttf:system/fonts/AndroidClock.ttf \
-    frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Highlight.ttf 
+    frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Highlight.ttf \
+    frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Solid.ttf 

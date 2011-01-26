@@ -1,7 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="65dp"
-    android:background="@drawable/status_bar_item_background"
     >
 
     <ImageButton
@@ -12,8 +11,9 @@
         android:layout_alignParentRight="true"
         android:src="@drawable/status_bar_veto"
         android:scaleType="center"
-        android:background="#ff000000"
+        android:background="@null"
         android:paddingRight="8dp"
+        android:paddingLeft="8dp"
         />
 
     <ImageView
@@ -24,7 +24,6 @@
         android:layout_alignParentLeft="true"
         android:scaleType="center"
         />
-        <!-- TODO: scaleType should be top-left but ImageView doesn't support that. -->
 
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
         android:layout_width="match_parent"
