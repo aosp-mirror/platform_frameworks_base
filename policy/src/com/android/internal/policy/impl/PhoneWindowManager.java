@@ -1892,14 +1892,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + (topNeedsMenu ? "needs" : "does not need")
                 + " the MENU key");
 
-        final boolean changedFullscreen = (mTopIsFullscreen != topIsFullscreen);
+        mTopIsFullscreen = topIsFullscreen;
         final boolean changedMenu = (topNeedsMenu != mShowMenuKey);
 
-        if (changedFullscreen || changedMenu) {
-            final boolean topIsFullscreenF = topIsFullscreen;
+        if (changedMenu) {
             final boolean topNeedsMenuF = topNeedsMenu;
 
-            mTopIsFullscreen = topIsFullscreen;
             mShowMenuKey = topNeedsMenu;
 
             mHandler.post(new Runnable() {
@@ -1917,9 +1915,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             try {
                                 if (changedMenu) {
                                     sbs.setMenuKeyVisible(topNeedsMenuF);
-                                }
-                                if (changedFullscreen) {
-                                    sbs.setActiveWindowIsFullscreen(topIsFullscreenF);
                                 }
                             } catch (RemoteException e) {
                                 // This should be impossible because we're in the same process.
@@ -2860,7 +2855,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // If there is no window focused, there will be nobody to handle the events
         // anyway, so just hang on in whatever state we're in until things settle down.
         if (mFocusedWindow != null) {
-            final int visibility = mFocusedWindow.getAttrs().systemUiVisibility;
+            final WindowManager.LayoutParams params = mFocusedWindow.getAttrs();
+            final int visibility = params.systemUiVisibility | params.subtreeSystemUiVisibility;
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mStatusBarService == null) {
