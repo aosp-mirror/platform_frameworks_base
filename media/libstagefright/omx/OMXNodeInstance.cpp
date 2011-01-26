@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 #define LOG_TAG "OMXNodeInstance"
 #include <utils/Log.h>
 
@@ -124,6 +124,8 @@ static status_t StatusFromOMXError(OMX_ERRORTYPE err) {
 }
 
 status_t OMXNodeInstance::freeNode(OMXMaster *master) {
+    static int32_t kMaxNumIterations = 10;
+
     // Transition the node from its current state all the way down
     // to "Loaded".
     // This ensures that all active buffers are properly freed even
@@ -143,9 +145,16 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
             LOGV("forcing Executing->Idle");
             sendCommand(OMX_CommandStateSet, OMX_StateIdle);
             OMX_ERRORTYPE err;
+            int32_t iteration = 0;
             while ((err = OMX_GetState(mHandle, &state)) == OMX_ErrorNone
                    && state != OMX_StateIdle
                    && state != OMX_StateInvalid) {
+                if (++iteration > kMaxNumIterations) {
+                    LOGE("component failed to enter Idle state, aborting.");
+                    state = OMX_StateInvalid;
+                    break;
+                }
+
                 usleep(100000);
             }
             CHECK_EQ(err, OMX_ErrorNone);
@@ -165,9 +174,16 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
             freeActiveBuffers();
 
             OMX_ERRORTYPE err;
+            int32_t iteration = 0;
             while ((err = OMX_GetState(mHandle, &state)) == OMX_ErrorNone
                    && state != OMX_StateLoaded
                    && state != OMX_StateInvalid) {
+                if (++iteration > kMaxNumIterations) {
+                    LOGE("component failed to enter Loaded state, aborting.");
+                    state = OMX_StateInvalid;
+                    break;
+                }
+
                 LOGV("waiting for Loaded state...");
                 usleep(100000);
             }
@@ -185,8 +201,10 @@ status_t OMXNodeInstance::freeNode(OMXMaster *master) {
             break;
     }
 
+    LOGV("calling destroyComponentInstance");
     OMX_ERRORTYPE err = master->destroyComponentInstance(
             static_cast<OMX_COMPONENTTYPE *>(mHandle));
+    LOGV("destroyComponentInstance returned err %d", err);
 
     mHandle = NULL;
 
