@@ -8043,6 +8043,14 @@ class PackageManagerService extends IPackageManager.Stub {
             sharedUser = orig.sharedUser;
         }
 
+        public void copyFrom(PackageSetting base) {
+            super.copyFrom((PackageSettingBase) base);
+
+            userId = base.userId;
+            sharedUser = base.sharedUser;
+            pkg = base.pkg;
+        }
+
         @Override
         public String toString() {
             return "PackageSetting{"
