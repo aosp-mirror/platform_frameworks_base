@@ -82,8 +82,6 @@ void PathHeap::flatten(SkFlattenableWriteBuffer& buffer) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 const char* DisplayList::OP_NAMES[] = {
-    "AcquireContext",
-    "ReleaseContext",
     "Save",
     "Restore",
     "RestoreToCount",
@@ -237,16 +235,6 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
                 Functor *functor = (Functor *) getInt();
                 DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], functor);
                 needsInvalidate |= renderer.callDrawGLFunction(functor);
-            }
-            break;
-            case AcquireContext: {
-                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
-                renderer.acquireContext();
-            }
-            break;
-            case ReleaseContext: {
-                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
-                renderer.releaseContext();
             }
             break;
             case Save: {
@@ -644,27 +632,15 @@ void DisplayListRenderer::finish() {
 }
 
 void DisplayListRenderer::interrupt() {
-
 }
+
 void DisplayListRenderer::resume() {
-
-}
-void DisplayListRenderer::acquireContext() {
-    // TODO: probably noop instead of calling super
-    addOp(DisplayList::AcquireContext);
-    OpenGLRenderer::acquireContext();
 }
 
 bool DisplayListRenderer::callDrawGLFunction(Functor *functor) {
     addOp(DisplayList::DrawGLFunction);
     addInt((int) functor);
     return false; // No invalidate needed at record-time
-}
-
-void DisplayListRenderer::releaseContext() {
-    // TODO: probably noop instead of calling super
-    addOp(DisplayList::ReleaseContext);
-    OpenGLRenderer::releaseContext();
 }
 
 int DisplayListRenderer::save(int flags) {

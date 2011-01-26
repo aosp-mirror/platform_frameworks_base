@@ -137,19 +137,9 @@ static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
     renderer->finish();
 }
 
-static void android_view_GLES20Canvas_acquireContext(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer) {
-    renderer->acquireContext();
-}
-
 static bool android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, Functor *functor) {
     return renderer->callDrawGLFunction(functor);
-}
-
-static void android_view_GLES20Canvas_releaseContext(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer) {
-    renderer->releaseContext();
 }
 
 // ----------------------------------------------------------------------------
@@ -609,8 +599,6 @@ static JNINativeMethod gMethods[] = {
     { "nPrepare",           "(IZ)V",           (void*) android_view_GLES20Canvas_prepare },
     { "nPrepareDirty",      "(IIIIIZ)V",       (void*) android_view_GLES20Canvas_prepareDirty },
     { "nFinish",            "(I)V",            (void*) android_view_GLES20Canvas_finish },
-    { "nAcquireContext",    "(I)V",            (void*) android_view_GLES20Canvas_acquireContext },
-    { "nReleaseContext",    "(I)V",            (void*) android_view_GLES20Canvas_releaseContext },
 
     { "nCallDrawGLFunction", "(II)Z",
             (void*) android_view_GLES20Canvas_callDrawGLFunction },

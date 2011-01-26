@@ -89,9 +89,7 @@ public:
     // IMPORTANT: Update the intialization of OP_NAMES in the .cpp file
     //            when modifying this file
     enum Op {
-        AcquireContext = 0,
-        ReleaseContext,
-        Save,
+        Save = 0,
         Restore,
         RestoreToCount,
         SaveLayer,
@@ -245,8 +243,6 @@ public:
     void finish();
 
     bool callDrawGLFunction(Functor *functor);
-    void acquireContext();
-    void releaseContext();
 
     void interrupt();
     void resume();
