@@ -1,0 +1,81 @@
+[type=QWERTY]                                           
+                                                        
+# this keymap is to be used in the emulator only. note
+# that I have liberally modified certain key strokes to
+# make it more usable in this context. the main differences
+# with the reference keyboard image are:
+#
+#  - cap-2 produces '@', and not '"', without that, typing
+#    email addresses becomes a major pain with a qwerty
+#    keyboard. note that you can type '"' with fn-E anyway.
+#
+#  - cap-COMMA and cap-PERIOD return '<' and '>', instead
+#    of nothing.
+#
+#
+                                                        
+# keycode       display  number base    caps    fn      caps_fn
+                                                        
+A               'A'     '2'     'a'     'A'     'a'     'A'
+B               'B'     '2'     'b'     'B'     'b'     'B'
+C               'C'     '2'     'c'     'C'     0x00e7  0x00E7
+D               'D'     '3'     'd'     'D'     '''     '''
+E               'E'     '3'     'e'     'E'     '"'     0x0301
+F               'F'     '3'     'f'     'F'     '['     '['
+G               'G'     '4'     'g'     'G'     ']'     ']'
+H               'H'     '4'     'h'     'H'     '<'     '<'
+I               'I'     '4'     'i'     'I'     '-'     0x0302
+J               'J'     '5'     'j'     'J'     '>'     '>'
+K               'K'     '5'     'k'     'K'     ';'     '~'
+L               'L'     '5'     'l'     'L'     ':'     '`'
+M               'M'     '6'     'm'     'M'     '%'     0x00
+N               'N'     '6'     'n'     'N'     0x00    0x0303
+O               'O'     '6'     'o'     'O'     '+'     '+'
+P               'P'     '7'     'p'     'P'     '='     0x00A5
+Q               'Q'     '7'     'q'     'Q'     '|'     0x0300
+R               'R'     '7'     'r'     'R'     '`'     0x20AC
+S               'S'     '7'     's'     'S'     '\'     0x00DF
+T               'T'     '8'     't'     'T'     '{'     0x00A3
+U               'U'     '8'     'u'     'U'     '_'     0x0308
+V               'V'     '8'     'v'     'V'     'v'     'V'
+W               'W'     '9'     'w'     'W'     '~'     '~'
+X               'X'     '9'     'x'     'X'     'x'     0xEF00
+Y               'Y'     '9'     'y'     'Y'     '}'     0x00A1
+Z               'Z'     '9'     'z'     'Z'     'z'     'Z'
+                                                        
+COMMA           ','     ','     ','     '<'     ','     ','
+PERIOD          '.'     '.'     '.'     '>'     '.'     0x2026
+AT              '@'     '@'     '@'     '@'     '@'     0x2022
+SLASH           '/'     '/'     '/'     '?'     '?'     '?'
+                                                        
+SPACE           0x20    0x20    0x20    0x20    0xEF01  0xEF01
+ENTER         0xa     0xa     0xa     0xa     0xa     0xa
+                                                        
+0               '0'     '0'     '0'     ')'     ')'     ')'
+1               '1'     '1'     '1'     '!'     '!'     '!'
+2               '2'     '2'     '2'     '@'     '@'     '@'
+3               '3'     '3'     '3'     '#'     '#'     '#'
+4               '4'     '4'     '4'     '$'     '$'     '$'
+5               '5'     '5'     '5'     '%'     '%'     '%'
+6               '6'     '6'     '6'     '^'     '^'     '^'
+7               '7'     '7'     '7'     '&'     '&'     '&'
+8               '8'     '8'     '8'     '*'     '*'     '*'
+9               '9'     '9'     '9'     '('     '('     '('
+                                                        
+# the rest is for a qwerty keyboard
+#
+TAB             0x9     0x9     0x9     0x9     0x9     0x9
+GRAVE           '`'     '`'     '`'     '~'     '`'     '~'
+MINUS           '-'     '-'     '-'     '_'     '-'     '_'
+EQUALS          '='     '='     '='     '+'     '='     '+'
+LEFT_BRACKET    '['     '['     '['     '{'     '['     '{'
+RIGHT_BRACKET   ']'     ']'     ']'     '}'     ']'     '}'
+BACKSLASH       '\'     '\'     '\'     '|'     '\'     '|'
+SEMICOLON       ';'     ';'     ';'     ':'     ';'     ':'
+APOSTROPHE      '''     '''     '''     '"'     '''     '"'
+STAR            '*'     '*'     '*'     '*'     '*'     '*'
+POUND           '#'     '#'     '#'     '#'     '#'     '#'
+PLUS            '+'     '+'     '+'     '+'     '+'     '+'
+                                                        
+                                                        
+                                                        
