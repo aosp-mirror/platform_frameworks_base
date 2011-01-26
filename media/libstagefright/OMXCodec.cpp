@@ -2203,8 +2203,9 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
                         crop.right = right;
                         crop.bottom = bottom;
 
-                        CHECK_EQ(0, native_window_set_crop(
-                                    mNativeWindow.get(), &crop));
+                        // We'll ignore any errors here, if the surface is
+                        // already invalid, we'll know soon enough.
+                        native_window_set_crop(mNativeWindow.get(), &crop);
                     }
                 }
             }
