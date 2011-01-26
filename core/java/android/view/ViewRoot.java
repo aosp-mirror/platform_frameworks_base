@@ -903,8 +903,9 @@ public final class ViewRoot extends Handler implements ViewParent,
             attachInfo.mSystemUiVisibility = 0;
             attachInfo.mHasSystemUiListeners = false;
             host.dispatchCollectViewAttributes(0);
-            if (attachInfo.mKeepScreenOn != oldScreenOn ||
-                    attachInfo.mSystemUiVisibility != oldVis) {
+            if (attachInfo.mKeepScreenOn != oldScreenOn
+                    || attachInfo.mSystemUiVisibility != oldVis
+                    || attachInfo.mHasSystemUiListeners) {
                 params = lp;
             }
         }
@@ -987,8 +988,10 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (attachInfo.mKeepScreenOn) {
                         params.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
                     }
-                    params.systemUiVisibility = attachInfo.mSystemUiVisibility;
-                    params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners;
+                    params.subtreeSystemUiVisibility = attachInfo.mSystemUiVisibility;
+                    params.hasSystemUiListeners = attachInfo.mHasSystemUiListeners
+                            || params.subtreeSystemUiVisibility != 0
+                            || params.systemUiVisibility != 0;
                 }
                 if (DEBUG_LAYOUT) {
                     Log.i(TAG, "host=w:" + host.getMeasuredWidth() + ", h:" +
@@ -2854,6 +2857,9 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     public void handleDispatchSystemUiVisibilityChanged(int visibility) {
         if (mView == null) return;
+        if (mAttachInfo != null) {
+            mAttachInfo.mSystemUiVisibility = visibility;
+        }
         mView.dispatchSystemUiVisibilityChanged(visibility);
     }
 

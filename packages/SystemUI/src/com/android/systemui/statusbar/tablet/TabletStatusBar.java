@@ -391,8 +391,11 @@ public class TabletStatusBar extends StatusBar implements
             new View.OnTouchListener() {
                 public boolean onTouch(View v, MotionEvent ev) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-                        mShadow.setVisibility(View.GONE);
-                        mBarContents.setVisibility(View.VISIBLE);
+                        try {
+                            mBarService.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+                        } catch (RemoteException ex) {
+                            // system process dead
+                        }
                     }
                     return false;
                 }
