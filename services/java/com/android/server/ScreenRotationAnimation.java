@@ -102,7 +102,7 @@ class ScreenRotationAnimation {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
 
-            if (false) {
+            if (true) {
                 try {
                     int size = mOriginalWidth > mOriginalHeight ? mOriginalWidth : mOriginalHeight;
                     mBlackSurface = new Surface(session, 0, "BlackSurface",
