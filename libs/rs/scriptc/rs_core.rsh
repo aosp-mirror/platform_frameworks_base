@@ -131,352 +131,62 @@ rsMatrixGet(const rs_matrix2x2 *m, uint32_t row, uint32_t col) {
     return m->m[row * 2 + col];
 }
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadIdentity(rs_matrix4x4 *m) {
-    m->m[0] = 1.f;
-    m->m[1] = 0.f;
-    m->m[2] = 0.f;
-    m->m[3] = 0.f;
-    m->m[4] = 0.f;
-    m->m[5] = 1.f;
-    m->m[6] = 0.f;
-    m->m[7] = 0.f;
-    m->m[8] = 0.f;
-    m->m[9] = 0.f;
-    m->m[10] = 1.f;
-    m->m[11] = 0.f;
-    m->m[12] = 0.f;
-    m->m[13] = 0.f;
-    m->m[14] = 0.f;
-    m->m[15] = 1.f;
-}
+extern void __attribute__((overloadable)) rsMatrixLoadIdentity(rs_matrix4x4 *m);
+extern void __attribute__((overloadable)) rsMatrixLoadIdentity(rs_matrix3x3 *m);
+extern void __attribute__((overloadable)) rsMatrixLoadIdentity(rs_matrix2x2 *m);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix4x4 *m, const float *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix3x3 *m, const float *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix2x2 *m, const float *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix4x4 *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix3x3 *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix2x2 *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix3x3 *m, const rs_matrix3x3 *v);
+extern void __attribute__((overloadable)) rsMatrixLoad(rs_matrix2x2 *m, const rs_matrix2x2 *v);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadIdentity(rs_matrix3x3 *m) {
-    m->m[0] = 1.f;
-    m->m[1] = 0.f;
-    m->m[2] = 0.f;
-    m->m[3] = 0.f;
-    m->m[4] = 1.f;
-    m->m[5] = 0.f;
-    m->m[6] = 0.f;
-    m->m[7] = 0.f;
-    m->m[8] = 1.f;
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadRotate(rs_matrix4x4 *m, float rot, float x, float y, float z);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadIdentity(rs_matrix2x2 *m) {
-    m->m[0] = 1.f;
-    m->m[1] = 0.f;
-    m->m[2] = 0.f;
-    m->m[3] = 1.f;
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadScale(rs_matrix4x4 *m, float x, float y, float z);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix4x4 *m, const float *v) {
-    m->m[0] = v[0];
-    m->m[1] = v[1];
-    m->m[2] = v[2];
-    m->m[3] = v[3];
-    m->m[4] = v[4];
-    m->m[5] = v[5];
-    m->m[6] = v[6];
-    m->m[7] = v[7];
-    m->m[8] = v[8];
-    m->m[9] = v[9];
-    m->m[10] = v[10];
-    m->m[11] = v[11];
-    m->m[12] = v[12];
-    m->m[13] = v[13];
-    m->m[14] = v[14];
-    m->m[15] = v[15];
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadTranslate(rs_matrix4x4 *m, float x, float y, float z);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix3x3 *m, const float *v) {
-    m->m[0] = v[0];
-    m->m[1] = v[1];
-    m->m[2] = v[2];
-    m->m[3] = v[3];
-    m->m[4] = v[4];
-    m->m[5] = v[5];
-    m->m[6] = v[6];
-    m->m[7] = v[7];
-    m->m[8] = v[8];
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *lhs, const rs_matrix4x4 *rhs);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix2x2 *m, const float *v) {
-    m->m[0] = v[0];
-    m->m[1] = v[1];
-    m->m[2] = v[2];
-    m->m[3] = v[3];
-}
+extern void __attribute__((overloadable))
+rsMatrixMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *rhs);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix4x4 *v) {
-    m->m[0] = v->m[0];
-    m->m[1] = v->m[1];
-    m->m[2] = v->m[2];
-    m->m[3] = v->m[3];
-    m->m[4] = v->m[4];
-    m->m[5] = v->m[5];
-    m->m[6] = v->m[6];
-    m->m[7] = v->m[7];
-    m->m[8] = v->m[8];
-    m->m[9] = v->m[9];
-    m->m[10] = v->m[10];
-    m->m[11] = v->m[11];
-    m->m[12] = v->m[12];
-    m->m[13] = v->m[13];
-    m->m[14] = v->m[14];
-    m->m[15] = v->m[15];
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *lhs, const rs_matrix3x3 *rhs);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix3x3 *v) {
-    m->m[0] = v->m[0];
-    m->m[1] = v->m[1];
-    m->m[2] = v->m[2];
-    m->m[3] = 0.f;
-    m->m[4] = v->m[3];
-    m->m[5] = v->m[4];
-    m->m[6] = v->m[5];
-    m->m[7] = 0.f;
-    m->m[8] = v->m[6];
-    m->m[9] = v->m[7];
-    m->m[10] = v->m[8];
-    m->m[11] = 0.f;
-    m->m[12] = 0.f;
-    m->m[13] = 0.f;
-    m->m[14] = 0.f;
-    m->m[15] = 1.f;
-}
+extern void __attribute__((overloadable))
+rsMatrixMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *rhs);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix4x4 *m, const rs_matrix2x2 *v) {
-    m->m[0] = v->m[0];
-    m->m[1] = v->m[1];
-    m->m[2] = 0.f;
-    m->m[3] = 0.f;
-    m->m[4] = v->m[3];
-    m->m[5] = v->m[4];
-    m->m[6] = 0.f;
-    m->m[7] = 0.f;
-    m->m[8] = v->m[6];
-    m->m[9] = v->m[7];
-    m->m[10] = 1.f;
-    m->m[11] = 0.f;
-    m->m[12] = 0.f;
-    m->m[13] = 0.f;
-    m->m[14] = 0.f;
-    m->m[15] = 1.f;
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *lhs, const rs_matrix2x2 *rhs);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix3x3 *m, const rs_matrix3x3 *v) {
-    m->m[0] = v->m[0];
-    m->m[1] = v->m[1];
-    m->m[2] = v->m[2];
-    m->m[3] = v->m[3];
-    m->m[4] = v->m[4];
-    m->m[5] = v->m[5];
-    m->m[6] = v->m[6];
-    m->m[7] = v->m[7];
-    m->m[8] = v->m[8];
-}
+extern void __attribute__((overloadable))
+rsMatrixMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *rhs);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoad(rs_matrix2x2 *m, const rs_matrix2x2 *v) {
-    m->m[0] = v->m[0];
-    m->m[1] = v->m[1];
-    m->m[2] = v->m[2];
-    m->m[3] = v->m[3];
-}
+extern void __attribute__((overloadable))
+rsMatrixRotate(rs_matrix4x4 *m, float rot, float x, float y, float z);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadRotate(rs_matrix4x4 *m, float rot, float x, float y, float z) {
-    float c, s;
-    m->m[3] = 0;
-    m->m[7] = 0;
-    m->m[11]= 0;
-    m->m[12]= 0;
-    m->m[13]= 0;
-    m->m[14]= 0;
-    m->m[15]= 1;
-    rot *= (float)(M_PI / 180.0f);
-    c = cos(rot);
-    s = sin(rot);
+extern void __attribute__((overloadable))
+rsMatrixScale(rs_matrix4x4 *m, float x, float y, float z);
 
-    const float len = x*x + y*y + z*z;
-    if (len != 1) {
-        const float recipLen = 1.f / sqrt(len);
-        x *= recipLen;
-        y *= recipLen;
-        z *= recipLen;
-    }
-    const float nc = 1.0f - c;
-    const float xy = x * y;
-    const float yz = y * z;
-    const float zx = z * x;
-    const float xs = x * s;
-    const float ys = y * s;
-    const float zs = z * s;
-    m->m[ 0] = x*x*nc +  c;
-    m->m[ 4] =  xy*nc - zs;
-    m->m[ 8] =  zx*nc + ys;
-    m->m[ 1] =  xy*nc + zs;
-    m->m[ 5] = y*y*nc +  c;
-    m->m[ 9] =  yz*nc - xs;
-    m->m[ 2] =  zx*nc - ys;
-    m->m[ 6] =  yz*nc + xs;
-    m->m[10] = z*z*nc +  c;
-}
+extern void __attribute__((overloadable))
+rsMatrixTranslate(rs_matrix4x4 *m, float x, float y, float z);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadScale(rs_matrix4x4 *m, float x, float y, float z) {
-    rsMatrixLoadIdentity(m);
-    m->m[0] = x;
-    m->m[5] = y;
-    m->m[10] = z;
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadOrtho(rs_matrix4x4 *m, float left, float right, float bottom, float top, float near, float far);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadTranslate(rs_matrix4x4 *m, float x, float y, float z) {
-    rsMatrixLoadIdentity(m);
-    m->m[12] = x;
-    m->m[13] = y;
-    m->m[14] = z;
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadFrustum(rs_matrix4x4 *m, float left, float right, float bottom, float top, float near, float far);
 
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *lhs, const rs_matrix4x4 *rhs) {
-    for (int i=0 ; i<4 ; i++) {
-        float ri0 = 0;
-        float ri1 = 0;
-        float ri2 = 0;
-        float ri3 = 0;
-        for (int j=0 ; j<4 ; j++) {
-            const float rhs_ij = rsMatrixGet(rhs, i,j);
-            ri0 += rsMatrixGet(lhs, j, 0) * rhs_ij;
-            ri1 += rsMatrixGet(lhs, j, 1) * rhs_ij;
-            ri2 += rsMatrixGet(lhs, j, 2) * rhs_ij;
-            ri3 += rsMatrixGet(lhs, j, 3) * rhs_ij;
-        }
-        rsMatrixSet(m, i, 0, ri0);
-        rsMatrixSet(m, i, 1, ri1);
-        rsMatrixSet(m, i, 2, ri2);
-        rsMatrixSet(m, i, 3, ri3);
-    }
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixMultiply(rs_matrix4x4 *m, const rs_matrix4x4 *rhs) {
-    rs_matrix4x4 mt;
-    rsMatrixLoadMultiply(&mt, m, rhs);
-    rsMatrixLoad(m, &mt);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *lhs, const rs_matrix3x3 *rhs) {
-    for (int i=0 ; i<3 ; i++) {
-        float ri0 = 0;
-        float ri1 = 0;
-        float ri2 = 0;
-        for (int j=0 ; j<3 ; j++) {
-            const float rhs_ij = rsMatrixGet(rhs, i,j);
-            ri0 += rsMatrixGet(lhs, j, 0) * rhs_ij;
-            ri1 += rsMatrixGet(lhs, j, 1) * rhs_ij;
-            ri2 += rsMatrixGet(lhs, j, 2) * rhs_ij;
-        }
-        rsMatrixSet(m, i, 0, ri0);
-        rsMatrixSet(m, i, 1, ri1);
-        rsMatrixSet(m, i, 2, ri2);
-    }
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixMultiply(rs_matrix3x3 *m, const rs_matrix3x3 *rhs) {
-    rs_matrix3x3 mt;
-    rsMatrixLoadMultiply(&mt, m, rhs);
-    rsMatrixLoad(m, &mt);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *lhs, const rs_matrix2x2 *rhs) {
-    for (int i=0 ; i<2 ; i++) {
-        float ri0 = 0;
-        float ri1 = 0;
-        for (int j=0 ; j<2 ; j++) {
-            const float rhs_ij = rsMatrixGet(rhs, i,j);
-            ri0 += rsMatrixGet(lhs, j, 0) * rhs_ij;
-            ri1 += rsMatrixGet(lhs, j, 1) * rhs_ij;
-        }
-        rsMatrixSet(m, i, 0, ri0);
-        rsMatrixSet(m, i, 1, ri1);
-    }
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixMultiply(rs_matrix2x2 *m, const rs_matrix2x2 *rhs) {
-    rs_matrix2x2 mt;
-    rsMatrixLoadMultiply(&mt, m, rhs);
-    rsMatrixLoad(m, &mt);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixRotate(rs_matrix4x4 *m, float rot, float x, float y, float z) {
-    rs_matrix4x4 m1;
-    rsMatrixLoadRotate(&m1, rot, x, y, z);
-    rsMatrixMultiply(m, &m1);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixScale(rs_matrix4x4 *m, float x, float y, float z) {
-    rs_matrix4x4 m1;
-    rsMatrixLoadScale(&m1, x, y, z);
-    rsMatrixMultiply(m, &m1);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixTranslate(rs_matrix4x4 *m, float x, float y, float z) {
-    rs_matrix4x4 m1;
-    rsMatrixLoadTranslate(&m1, x, y, z);
-    rsMatrixMultiply(m, &m1);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadOrtho(rs_matrix4x4 *m, float left, float right, float bottom, float top, float near, float far) {
-    rsMatrixLoadIdentity(m);
-    m->m[0] = 2.f / (right - left);
-    m->m[5] = 2.f / (top - bottom);
-    m->m[10]= -2.f / (far - near);
-    m->m[12]= -(right + left) / (right - left);
-    m->m[13]= -(top + bottom) / (top - bottom);
-    m->m[14]= -(far + near) / (far - near);
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadFrustum(rs_matrix4x4 *m, float left, float right, float bottom, float top, float near, float far) {
-    rsMatrixLoadIdentity(m);
-    m->m[0] = 2.f * near / (right - left);
-    m->m[5] = 2.f * near / (top - bottom);
-    m->m[8] = (right + left) / (right - left);
-    m->m[9] = (top + bottom) / (top - bottom);
-    m->m[10]= -(far + near) / (far - near);
-    m->m[11]= -1.f;
-    m->m[14]= -2.f * far * near / (far - near);
-    m->m[15]= 0.f;
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixLoadPerspective(rs_matrix4x4* m, float fovy, float aspect, float near, float far) {
-    float top = near * tan((float) (fovy * M_PI / 360.0f));
-    float bottom = -top;
-    float left = bottom * aspect;
-    float right = top * aspect;
-    rsMatrixLoadFrustum(m, left, right, bottom, top, near, far);
-}
+extern void __attribute__((overloadable))
+rsMatrixLoadPerspective(rs_matrix4x4* m, float fovy, float aspect, float near, float far);
 
 _RS_STATIC float4 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, float4 in) {
@@ -535,121 +245,11 @@ rsMatrixMultiply(rs_matrix2x2 *m, float2 in) {
 }
 
 // Returns true if the matrix was successfully inversed
-_RS_STATIC bool __attribute__((overloadable))
-rsMatrixInverse(rs_matrix4x4 *m) {
-    rs_matrix4x4 result;
-
-    int i, j;
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j) {
-            // computeCofactor for int i, int j
-            int c0 = (i+1) % 4;
-            int c1 = (i+2) % 4;
-            int c2 = (i+3) % 4;
-            int r0 = (j+1) % 4;
-            int r1 = (j+2) % 4;
-            int r2 = (j+3) % 4;
-
-            float minor = (m->m[c0 + 4*r0] * (m->m[c1 + 4*r1] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r1]))
-                         - (m->m[c0 + 4*r1] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r0]))
-                         + (m->m[c0 + 4*r2] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r1] - m->m[c1 + 4*r1] * m->m[c2 + 4*r0]));
-
-            float cofactor = (i+j) & 1 ? -minor : minor;
-
-            result.m[4*i + j] = cofactor;
-        }
-    }
-
-    // Dot product of 0th column of source and 0th row of result
-    float det = m->m[0]*result.m[0] + m->m[4]*result.m[1] +
-                 m->m[8]*result.m[2] + m->m[12]*result.m[3];
-
-    if (fabs(det) < 1e-6) {
-        return false;
-    }
-
-    det = 1.0f / det;
-    for (i = 0; i < 16; ++i) {
-        m->m[i] = result.m[i] * det;
-    }
-
-    return true;
-}
-
-// Returns true if the matrix was successfully inversed
-_RS_STATIC bool __attribute__((overloadable))
-rsMatrixInverseTranspose(rs_matrix4x4 *m) {
-    rs_matrix4x4 result;
-
-    int i, j;
-    for (i = 0; i < 4; ++i) {
-        for (j = 0; j < 4; ++j) {
-            // computeCofactor for int i, int j
-            int c0 = (i+1) % 4;
-            int c1 = (i+2) % 4;
-            int c2 = (i+3) % 4;
-            int r0 = (j+1) % 4;
-            int r1 = (j+2) % 4;
-            int r2 = (j+3) % 4;
-
-            float minor = (m->m[c0 + 4*r0] * (m->m[c1 + 4*r1] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r1]))
-                         - (m->m[c0 + 4*r1] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r2] - m->m[c1 + 4*r2] * m->m[c2 + 4*r0]))
-                         + (m->m[c0 + 4*r2] * (m->m[c1 + 4*r0] * m->m[c2 + 4*r1] - m->m[c1 + 4*r1] * m->m[c2 + 4*r0]));
-
-            float cofactor = (i+j) & 1 ? -minor : minor;
-
-            result.m[4*j + i] = cofactor;
-        }
-    }
-
-    // Dot product of 0th column of source and 0th column of result
-    float det = m->m[0]*result.m[0] + m->m[4]*result.m[4] +
-                 m->m[8]*result.m[8] + m->m[12]*result.m[12];
-
-    if (fabs(det) < 1e-6) {
-        return false;
-    }
-
-    det = 1.0f / det;
-    for (i = 0; i < 16; ++i) {
-        m->m[i] = result.m[i] * det;
-    }
-
-    return true;
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixTranspose(rs_matrix4x4 *m) {
-    int i, j;
-    float temp;
-    for (i = 0; i < 3; ++i) {
-        for (j = i + 1; j < 4; ++j) {
-            temp = m->m[i*4 + j];
-            m->m[i*4 + j] = m->m[j*4 + i];
-            m->m[j*4 + i] = temp;
-        }
-    }
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixTranspose(rs_matrix3x3 *m) {
-    int i, j;
-    float temp;
-    for (i = 0; i < 2; ++i) {
-        for (j = i + 1; j < 3; ++j) {
-            temp = m->m[i*3 + j];
-            m->m[i*3 + j] = m->m[j*4 + i];
-            m->m[j*3 + i] = temp;
-        }
-    }
-}
-
-_RS_STATIC void __attribute__((overloadable))
-rsMatrixTranspose(rs_matrix2x2 *m) {
-    float temp = m->m[1];
-    m->m[1] = m->m[2];
-    m->m[2] = temp;
-}
+extern bool __attribute__((overloadable)) rsMatrixInverse(rs_matrix4x4 *m);
+extern bool __attribute__((overloadable)) rsMatrixInverseTranspose(rs_matrix4x4 *m);
+extern void __attribute__((overloadable)) rsMatrixTranspose(rs_matrix4x4 *m);
+extern void __attribute__((overloadable)) rsMatrixTranspose(rs_matrix3x3 *m);
+extern void __attribute__((overloadable)) rsMatrixTranspose(rs_matrix2x2 *m);
 
 /////////////////////////////////////////////////////
 // quaternion ops
