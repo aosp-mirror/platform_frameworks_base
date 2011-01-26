@@ -246,7 +246,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      *        being removed
      * @param view The view that is being animated
      */
-    void animateViewForTransition(int fromIndex, int toIndex, View view) {
+    void transformViewForTransition(int fromIndex, int toIndex, View view, boolean animate) {
         if (fromIndex == -1) {
             mInAnimation.setTarget(view);
             mInAnimation.start();
@@ -473,7 +473,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 int oldRelativeIndex = mViewsMap.get(index).index;
 
                 mPreviousViews.add(index);
-                animateViewForTransition(oldRelativeIndex, -1, previousView);
+                transformViewForTransition(oldRelativeIndex, -1, previousView, animate);
             }
         }
 
@@ -501,7 +501,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     View view = mViewsMap.get(index).view;
                     mViewsMap.get(index).index = newRelativeIndex;
                     applyTransformForChildAtIndex(view, newRelativeIndex);
-                    animateViewForTransition(oldRelativeIndex, newRelativeIndex, view);
+                    transformViewForTransition(oldRelativeIndex, newRelativeIndex, view, animate);
 
                 // Otherwise this view is new to the window
                 } else {
@@ -519,7 +519,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     mViewsMap.put(index, new ViewAndIndex(fl, newRelativeIndex));
                     addChild(fl);
                     applyTransformForChildAtIndex(fl, newRelativeIndex);
-                    animateViewForTransition(-1, newRelativeIndex, fl);
+                    transformViewForTransition(-1, newRelativeIndex, fl, animate);
                 }
                 mViewsMap.get(index).view.bringToFront();
             }
@@ -695,9 +695,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     if (mWhichChild >= getWindowSize()) {
                         mWhichChild = 0;
 
-                        showOnly(mWhichChild, true);
+                        showOnly(mWhichChild, false);
                     } else if (mOldItemCount != getCount()) {
-                        showOnly(mWhichChild, true);
+                        showOnly(mWhichChild, false);
                     }
                     refreshChildren();
                     requestLayout();
@@ -916,7 +916,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             mItemCount = mAdapter.getCount();
         }
         setFocusable(true);
-        setDisplayedChild(0);
+        mWhichChild = 0;
+        showOnly(mWhichChild, false);
     }
 
     /**
