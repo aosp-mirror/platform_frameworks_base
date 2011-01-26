@@ -563,8 +563,13 @@ sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
     if (s == 0) {
         s = createSurface();
         mClientSurface = s;
+        mClientSurfaceBinder = s->asBinder();
     }
     return s;
+}
+
+wp<IBinder> LayerBaseClient::getSurfaceBinder() const {
+    return mClientSurfaceBinder;
 }
 
 sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
