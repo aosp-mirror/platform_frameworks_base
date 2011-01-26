@@ -605,11 +605,19 @@ void InputDevice::configure() {
 
     mSources = 0;
 
-    size_t numMappers = mMappers.size();
-    for (size_t i = 0; i < numMappers; i++) {
+    for (size_t i = 0; i < mMappers.size(); i++) {
         InputMapper* mapper = mMappers[i];
         mapper->configure();
-        mSources |= mapper->getSources();
+
+        uint32_t sources = mapper->getSources();
+        if (sources) {
+            mSources |= sources;
+        } else {
+            // The input mapper does not provide any sources.  Remove it from the list.
+            mMappers.removeAt(i);
+            delete mapper;
+            i -= 1;
+        }
     }
 }
 
@@ -1074,7 +1082,7 @@ void CursorInputMapper::configure() {
     // Configure device mode.
     switch (mParameters.mode) {
     case Parameters::MODE_POINTER:
-        mSources = AINPUT_SOURCE_MOUSE;
+        mSources = 0; // AINPUT_SOURCE_MOUSE; disable mouse support
         mXPrecision = 1.0f;
         mYPrecision = 1.0f;
         mXScale = 1.0f;
