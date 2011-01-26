@@ -195,7 +195,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z4logbf", (void *)&logbf, true },
     { "_Z3madfff", (void *)&SC_mad, true },
     { "_Z4modffPf", (void *)&modff, true },
-    //{ "nan", (void *)&, true },
+    //{ "_Z3nanj", (void *)&SC_nan, true },
     { "_Z9nextafterff", (void *)&nextafterf, true },
     { "_Z3powff", (void *)&powf, true },
     { "_Z9remainderff", (void *)&remainderf, true },
@@ -210,7 +210,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z4sqrtf", (void *)&sqrtf, true },
     { "_Z3tanf", (void *)&tanf, true },
     { "_Z4tanhf", (void *)&tanhf, true },
-    { "_Z6tgammaf", (void *)&lgammaf, true }, // FIXME!!! NEEDS TO USE tgammaf
+    { "_Z6tgammaf", (void *)&tgammaf, true },
     { "_Z5truncf", (void *)&truncf, true },
 
     // OpenCL Int
