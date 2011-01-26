@@ -188,7 +188,7 @@ public:
     struct NotifyKeyArgs {
         nsecs_t eventTime;
         int32_t deviceId;
-        int32_t source;
+        uint32_t source;
         uint32_t policyFlags;
         int32_t action;
         int32_t flags;
@@ -201,7 +201,7 @@ public:
     struct NotifyMotionArgs {
         nsecs_t eventTime;
         int32_t deviceId;
-        int32_t source;
+        uint32_t source;
         uint32_t policyFlags;
         int32_t action;
         int32_t flags;
@@ -288,7 +288,7 @@ private:
         mNotifyConfigurationChangedArgs.push_back(args);
     }
 
-    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t source,
+    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
             int32_t scanCode, int32_t metaState, nsecs_t downTime) {
         NotifyKeyArgs args;
@@ -305,7 +305,7 @@ private:
         mNotifyKeyArgs.push_back(args);
     }
 
-    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, int32_t source,
+    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags,
             int32_t metaState, int32_t edgeFlags,
             uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
@@ -976,8 +976,10 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenAlphabeticKeyboardPresent_Retu
 }
 
 TEST_F(InputReaderTest, GetInputConfiguration_WhenTouchScreenPresent_ReturnsFingerTouchScreen) {
+    PropertyMap configuration;
+    configuration.addProperty(String8("touch.deviceType"), String8("touchScreen"));
     ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("touchscreen"),
-            INPUT_DEVICE_CLASS_TOUCHSCREEN, NULL));
+            INPUT_DEVICE_CLASS_TOUCH, &configuration));
 
     InputConfiguration config;
     mReader->getInputConfiguration(&config);
@@ -985,6 +987,18 @@ TEST_F(InputReaderTest, GetInputConfiguration_WhenTouchScreenPresent_ReturnsFing
     ASSERT_EQ(InputConfiguration::KEYBOARD_NOKEYS, config.keyboard);
     ASSERT_EQ(InputConfiguration::NAVIGATION_NONAV, config.navigation);
     ASSERT_EQ(InputConfiguration::TOUCHSCREEN_FINGER, config.touchScreen);
+}
+
+TEST_F(InputReaderTest, GetInputConfiguration_WhenTouchPadPresent_ReturnsFingerNoTouch) {
+    ASSERT_NO_FATAL_FAILURE(addDevice(0, String8("touchpad"),
+            INPUT_DEVICE_CLASS_TOUCH, NULL));
+
+    InputConfiguration config;
+    mReader->getInputConfiguration(&config);
+
+    ASSERT_EQ(InputConfiguration::KEYBOARD_NOKEYS, config.keyboard);
+    ASSERT_EQ(InputConfiguration::NAVIGATION_NONAV, config.navigation);
+    ASSERT_EQ(InputConfiguration::TOUCHSCREEN_NOTOUCH, config.touchScreen);
 }
 
 TEST_F(InputReaderTest, GetInputConfiguration_WhenMousePresent_ReturnsNoNavigation) {
@@ -2385,6 +2399,14 @@ void SingleTouchInputMapperTest::processSync(SingleTouchInputMapper* mapper) {
 }
 
 
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecified_ReturnsTouchPad) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    prepareAxes(POSITION);
+    addMapperAndConfigure(mapper);
+
+    ASSERT_EQ(AINPUT_SOURCE_TOUCHPAD, mapper->getSources());
+}
+
 TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchPad_ReturnsTouchPad) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     prepareAxes(POSITION);
@@ -2405,6 +2427,7 @@ TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchScreen_Return
 
 TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2432,6 +2455,7 @@ TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
 
 TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2459,6 +2483,7 @@ TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
 
 TEST_F(SingleTouchInputMapperTest, MarkSupportedKeyCodes) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2475,6 +2500,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
     // Note: Ideally we should send cancels but the implementation is more straightforward
     // with up and this will only happen if a device is forcibly removed.
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2508,6 +2534,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
 
 TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2534,6 +2561,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNormally_SendsKeyDownAndKeyUp) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2583,6 +2611,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfBounds_SendsKeyDownAndKeyCancel) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2697,6 +2726,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMovesIn_SendsDownAsTouchEntersDisplay) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2765,6 +2795,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
 
 TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -2848,6 +2879,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotateMotions) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareAxes(POSITION);
     addConfigurationProperty("touch.orientationAware", "0");
     addMapperAndConfigure(mapper);
@@ -2870,6 +2902,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotate
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 
@@ -2930,6 +2963,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
 
 TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | PRESSURE | TOOL);
     addMapperAndConfigure(mapper);
@@ -3062,6 +3096,7 @@ void MultiTouchInputMapperTest::processSync(MultiTouchInputMapper* mapper) {
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackingIds) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION);
     prepareVirtualKeys();
@@ -3313,6 +3348,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingIds) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | ID);
     prepareVirtualKeys();
@@ -3473,6 +3509,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
 
 TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | PRESSURE | ORIENTATION | ID | MINOR);
     addMapperAndConfigure(mapper);
@@ -3518,6 +3555,7 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | MINOR);
     addConfigurationProperty("touch.touchSize.calibration", "geometric");
@@ -3559,6 +3597,7 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinearCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
     addConfigurationProperty("touch.touchSize.calibration", "pressure");
@@ -3615,6 +3654,7 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
     addConfigurationProperty("touch.touchSize.calibration", "pressure");
