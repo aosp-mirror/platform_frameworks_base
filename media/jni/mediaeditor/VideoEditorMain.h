@@ -21,10 +21,17 @@
 
 typedef enum
 {
-    MSG_TYPE_PROGRESS_INDICATION,             /* Playback progress indication event*/
-    MSG_TYPE_PLAYER_ERROR,                    /* Playback error*/
-    MSG_TYPE_PREVIEW_END,                     /* Preview of clips is complete */
+    MSG_TYPE_PROGRESS_INDICATION,     // Playback progress indication event
+    MSG_TYPE_PLAYER_ERROR,            // Playback error
+    MSG_TYPE_PREVIEW_END,             // Preview of clips is complete
+    MSG_TYPE_OVERLAY_UPDATE,          // update overlay during preview
+    MSG_TYPE_OVERLAY_CLEAR,           // clear the overlay
 } progress_callback_msg_type;
+
+typedef struct {
+    int overlaySettingsIndex;
+    int clipIndex;
+} VideoEditorCurretEditInfo;
 
 typedef struct
 {
