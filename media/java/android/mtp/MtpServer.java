@@ -54,12 +54,8 @@ public class MtpServer {
         native_set_ptp_mode(usePtp);
     }
 
-    // used by the JNI code
-    private int mNativeContext;
-
     private native final void native_setup(MtpDatabase database, String storagePath,
             long reserveSpace);
-    private native final void native_finalize();
     private native final void native_start();
     private native final void native_stop();
     private native final void native_send_object_added(int handle);
