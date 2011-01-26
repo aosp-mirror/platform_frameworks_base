@@ -835,6 +835,7 @@ const char *AudioParameter::keySamplingRate = "sampling_rate";
 const char *AudioParameter::keyFormat = "format";
 const char *AudioParameter::keyChannels = "channels";
 const char *AudioParameter::keyFrameCount = "frame_count";
+const char *AudioParameter::keyInputSource = "input_source";
 
 AudioParameter::AudioParameter(const String8& keyValuePairs)
 {
