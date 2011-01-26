@@ -1095,7 +1095,7 @@
     <permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"
         android:label="@string/permlab_changeComponentState"
         android:description="@string/permdesc_changeComponentState"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to use SurfaceFlinger's low level features -->
     <permission android:name="android.permission.ACCESS_SURFACE_FLINGER"
