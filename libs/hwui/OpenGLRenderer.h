@@ -71,8 +71,6 @@ public:
     virtual void resume();
 
     virtual bool callDrawGLFunction(Functor *functor);
-    virtual void acquireContext();
-    virtual void releaseContext();
 
     int getSaveCount() const;
     virtual int save(int flags);

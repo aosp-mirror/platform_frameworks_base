@@ -191,10 +191,6 @@ void OpenGLRenderer::interrupt() {
     mCaches.unbindMeshBuffer();
 }
 
-void OpenGLRenderer::acquireContext() {
-    interrupt();
-}
-
 void OpenGLRenderer::resume() {
     glViewport(0, 0, mSnapshot->viewport.getWidth(), mSnapshot->viewport.getHeight());
 
@@ -210,10 +206,6 @@ void OpenGLRenderer::resume() {
     glEnable(GL_BLEND);
     glBlendFunc(mCaches.lastSrcMode, mCaches.lastDstMode);
     glBlendEquation(GL_FUNC_ADD);
-}
-
-void OpenGLRenderer::releaseContext() {
-    resume();
 }
 
 bool OpenGLRenderer::callDrawGLFunction(Functor *functor) {
