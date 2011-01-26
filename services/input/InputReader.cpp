@@ -260,10 +260,10 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
         device->addMapper(new CursorInputMapper(device));
     }
 
-    // Touchscreen-like devices.
-    if (classes & INPUT_DEVICE_CLASS_TOUCHSCREEN_MT) {
+    // Touchscreens and touchpad devices.
+    if (classes & INPUT_DEVICE_CLASS_TOUCH_MT) {
         device->addMapper(new MultiTouchInputMapper(device));
-    } else if (classes & INPUT_DEVICE_CLASS_TOUCHSCREEN) {
+    } else if (classes & INPUT_DEVICE_CLASS_TOUCH) {
         device->addMapper(new SingleTouchInputMapper(device));
     }
 
@@ -1455,12 +1455,12 @@ void TouchInputMapper::configureParameters() {
     mParameters.virtualKeyQuietTime = getPolicy()->getVirtualKeyQuietTime();
 
     String8 deviceTypeString;
-    mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
+    mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
     if (getDevice()->getConfiguration().tryGetProperty(String8("touch.deviceType"),
             deviceTypeString)) {
-        if (deviceTypeString == "touchPad") {
-            mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
-        } else if (deviceTypeString != "touchScreen") {
+        if (deviceTypeString == "touchScreen") {
+            mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
+        } else if (deviceTypeString != "touchPad") {
             LOGW("Invalid value for touch.deviceType: '%s'", deviceTypeString.string());
         }
     }

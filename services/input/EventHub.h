@@ -106,14 +106,14 @@ enum {
     /* The input device is an alpha-numeric keyboard (not just a dial pad). */
     INPUT_DEVICE_CLASS_ALPHAKEY      = 0x00000002,
 
-    /* The input device is a touchscreen (either single-touch or multi-touch). */
-    INPUT_DEVICE_CLASS_TOUCHSCREEN   = 0x00000004,
+    /* The input device is a touchscreen or a touchpad (either single-touch or multi-touch). */
+    INPUT_DEVICE_CLASS_TOUCH         = 0x00000004,
 
     /* The input device is a cursor device such as a trackball or mouse. */
     INPUT_DEVICE_CLASS_CURSOR        = 0x00000008,
 
     /* The input device is a multi-touch touchscreen. */
-    INPUT_DEVICE_CLASS_TOUCHSCREEN_MT= 0x00000010,
+    INPUT_DEVICE_CLASS_TOUCH_MT      = 0x00000010,
 
     /* The input device is a directional pad (implies keyboard, has DPAD keys). */
     INPUT_DEVICE_CLASS_DPAD          = 0x00000020,

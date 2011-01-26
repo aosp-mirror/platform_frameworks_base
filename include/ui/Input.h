@@ -50,8 +50,10 @@ enum {
 /*
  * Maximum number of pointers supported per motion event.
  * Smallest number of pointers is 1.
+ * (We want at least 10 but some touch controllers obstensibly configured for 10 pointers
+ * will occasionally emit 11.  There is not much harm making this constant bigger.)
  */
-#define MAX_POINTERS 10
+#define MAX_POINTERS 16
 
 /*
  * Maximum pointer id value supported in a motion event.
