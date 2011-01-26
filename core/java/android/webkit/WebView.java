@@ -8075,7 +8075,7 @@ public class WebView extends AbsoluteLayout
                     + " mLastCursorTime=" + mLastCursorTime
                     + " handled=" + keyHandled);
         }
-        if (keyHandled == false || mHeightCanMeasure == false) {
+        if (keyHandled == false) {
             return keyHandled;
         }
         Rect contentCursorRingBounds = nativeGetCursorRingBounds();
@@ -8084,6 +8084,9 @@ public class WebView extends AbsoluteLayout
         // set last touch so that context menu related functions will work
         mLastTouchX = (viewCursorRingBounds.left + viewCursorRingBounds.right) / 2;
         mLastTouchY = (viewCursorRingBounds.top + viewCursorRingBounds.bottom) / 2;
+        if (mHeightCanMeasure == false) {
+            return keyHandled;
+        }
         Rect visRect = new Rect();
         calcOurVisibleRect(visRect);
         Rect outset = new Rect(visRect);
