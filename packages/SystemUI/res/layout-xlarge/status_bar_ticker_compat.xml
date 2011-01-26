@@ -18,9 +18,9 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@*android:dimen/status_bar_height"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/status_bar_ticker_background"
+    android:gravity="bottom"
     >
 
     <ImageView
@@ -30,29 +30,38 @@
         android:scaleType="center"
         android:visibility="gone"
         />
-    
-    <ImageView android:id="@+id/left_icon"
-        android:layout_width="64dp"
-        android:layout_height="match_parent"
-        android:scaleType="center"
-        android:visibility="gone"
-        />
 
-    <TextView android:id="@+id/text"
-        android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="12dp"
-        android:gravity="center_vertical"
-        android:maxLines="2"
-        />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_weight="1"
+        android:background="@drawable/status_bar_ticker_background"
+        >
+        
+        <ImageView android:id="@+id/left_icon"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:scaleType="center"
+            android:visibility="gone"
+            />
 
-    <ImageView android:id="@+id/right_icon"
-        android:layout_width="64dp"
-        android:layout_height="match_parent"
-        android:scaleType="center"
-        android:visibility="gone"
-        />
+        <TextView android:id="@+id/text"
+            android:textAppearance="@*android:style/TextAppearance.StatusBar.Ticker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="12dp"
+            android:gravity="center_vertical"
+            android:maxLines="2"
+            />
+
+        <ImageView android:id="@+id/right_icon"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:scaleType="center"
+            android:visibility="gone"
+            />
+
+    </LinearLayout>
 
 </LinearLayout>
