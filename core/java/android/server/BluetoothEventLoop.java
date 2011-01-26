@@ -648,7 +648,8 @@ class BluetoothEventLoop {
             } else {
                 Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
             }
-        } else if (BluetoothUuid.isInputDevice(uuid) && !isOtherInputDeviceConnected(address)) {
+        } else if (BluetoothUuid.isInputDevice(uuid) && !isOtherInputDeviceConnected(address) &&
+                   isKeyboard(address)) {
             BluetoothInputDevice inputDevice = new BluetoothInputDevice(mContext);
             authorized = inputDevice.getInputDevicePriority(device) >
                          BluetoothInputDevice.PRIORITY_OFF;
@@ -665,6 +666,17 @@ class BluetoothEventLoop {
         }
         log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
         return authorized;
+    }
+
+    private boolean isKeyboard(String address) {
+        BluetoothClass btClass = new BluetoothClass(mBluetoothService.getRemoteClass(address));
+        int btDeviceClass = btClass.getDeviceClass();
+        if (btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD ||
+            btDeviceClass == BluetoothClass.Device.PERIPHERAL_KEYBOARD_POINTING) {
+            return true;
+        }
+        log("Incoming Connect: Input device class: " + btDeviceClass + " Not a keyboard");
+        return false;
     }
 
     private boolean isOtherInputDeviceConnected(String address) {
