@@ -3497,7 +3497,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         ((ViewRoot) parent).invalidate();
                         parent = null;
                     } else if (view != null) {
-                        if ((mPrivateFlags & DRAWN) == DRAWN) {
+                        if ((view.mPrivateFlags & DRAWN) == DRAWN ||
+                                (view.mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
                             view.mPrivateFlags &= ~DRAWING_CACHE_VALID;
                             view.mPrivateFlags |= DIRTY;
                             parent = view.mParent;
@@ -3594,7 +3595,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE_CHILD_IN_PARENT);
         }
 
-        if ((mPrivateFlags & DRAWN) == DRAWN) {
+        if ((mPrivateFlags & DRAWN) == DRAWN ||
+                (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) {
             if ((mGroupFlags & (FLAG_OPTIMIZE_INVALIDATE | FLAG_ANIMATION_DONE)) !=
                         FLAG_OPTIMIZE_INVALIDATE) {
                 dirty.offset(location[CHILD_LEFT_INDEX] - mScrollX,
