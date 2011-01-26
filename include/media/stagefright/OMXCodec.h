@@ -47,6 +47,9 @@ struct OMXCodec : public MediaSource,
 
         // Store meta data in video buffers
         kStoreMetaDataInVideoBuffers = 32,
+
+        // Only submit one input buffer at one time.
+        kOnlySubmitOneInputBufferAtOneTime = 64,
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,
@@ -192,6 +195,7 @@ private:
     Condition mBufferFilled;
 
     bool mIsMetaDataStoredInVideoBuffers;
+    bool mOnlySubmitOneBufferAtOneTime;
 
     OMXCodec(const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
              bool isEncoder, const char *mime, const char *componentName,

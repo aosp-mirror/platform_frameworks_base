@@ -158,6 +158,7 @@ protected:
     int32_t mNumFramesReceived;
     int64_t mLastFrameTimestampUs;
     bool mStarted;
+    int32_t mNumFramesEncoded;
 
     CameraSource(const sp<ICamera>& camera, int32_t cameraId,
                  Size videoSize, int32_t frameRate,
@@ -189,7 +190,6 @@ private:
     List<int64_t> mFrameTimes;
 
     int64_t mFirstFrameTimeUs;
-    int32_t mNumFramesEncoded;
     int32_t mNumFramesDropped;
     int32_t mNumGlitches;
     int64_t mGlitchDurationThresholdUs;
