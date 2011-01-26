@@ -3732,6 +3732,10 @@ public class WebView extends AbsoluteLayout
             return;
         }
 
+        if (canvas.isHardwareAccelerated()) {
+            mZoomManager.setHardwareAccelerated();
+        }
+
         int saveCount = canvas.save();
         if (mInOverScrollMode && !getSettings()
                 .getUseWebViewBackgroundForOverscrollBackground()) {
