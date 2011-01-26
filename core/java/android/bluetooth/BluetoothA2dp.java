@@ -56,7 +56,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
      *
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      *
@@ -75,10 +75,10 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * <ul>
      *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
      *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
-     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. <li/>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
      *
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_PLAYING}, {@link #STATE_NOT_PLAYING},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
