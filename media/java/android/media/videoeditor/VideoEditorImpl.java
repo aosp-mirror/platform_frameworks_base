@@ -899,7 +899,8 @@ public class VideoEditorImpl implements VideoEditor {
     /*
      * {@inheritDoc}
      */
-    public long renderPreviewFrame(SurfaceHolder surfaceHolder, long timeMs) {
+    public long renderPreviewFrame(SurfaceHolder surfaceHolder, long timeMs,
+                                    OverlayData overlayData) {
         long result = 0;
         int surfaceWidth = 0;
         int surfaceHeight = 0;
@@ -939,7 +940,7 @@ public class VideoEditorImpl implements VideoEditor {
             if (!mMANativeHelper.mInvalidatePreviewArray) {
                 if (mMediaItems.size() > 0) {
                     result = mMANativeHelper.renderPreviewFrame(surface,
-                                             timeMs,surfaceWidth,surfaceHeight);
+                                             timeMs,surfaceWidth,surfaceHeight, overlayData);
                 }
                 else {
                     result = 0;
@@ -1643,7 +1644,7 @@ public class VideoEditorImpl implements VideoEditor {
                     mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
                                                       mAudioTracks, null);
                     mMANativeHelper.doPreview(mSurface, fromMs, toMs, loop,
-                                             callbackAfterFrameCount, listener);
+                                     callbackAfterFrameCount, listener);
                     mPreviewInProgress = true;
                 } catch (IllegalArgumentException ex) {
                     mPreviewSemaphore.release();
@@ -1683,7 +1684,7 @@ public class VideoEditorImpl implements VideoEditor {
         }
     }
 
-    /**
+    /*
      * Remove transitions associated with the specified media item
      *
      * @param mediaItem The media item

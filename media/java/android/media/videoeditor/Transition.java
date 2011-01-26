@@ -332,8 +332,6 @@ public abstract class Transition {
         List<EffectSettings> effectSettings_clip2;
 
         String output = null;
-        String effectClip1 = null;
-        String effectClip2 = null;
 
         if (mNativeHelper == null) {
             if (m1 != null)
