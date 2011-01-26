@@ -143,7 +143,7 @@ static void dumpstate() {
     dump_file("BINDER STATS", "/sys/kernel/debug/binder/stats");
     dump_file("BINDER STATE", "/sys/kernel/debug/binder/state");
 
-    run_command("FILESYSTEMS & FREE SPACE", 10, "df", NULL);
+    run_command("FILESYSTEMS & FREE SPACE", 10, "su", "root", "df", NULL);
 
     dump_file("PACKAGE SETTINGS", "/data/system/packages.xml");
     dump_file("PACKAGE UID ERRORS", "/data/system/uiderrors.txt");
