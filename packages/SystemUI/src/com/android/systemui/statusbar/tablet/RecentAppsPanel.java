@@ -98,10 +98,12 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     };
 
     public boolean isInContentArea(int x, int y) {
-        final int l = mRecentsContainer.getPaddingLeft();
-        final int r = mRecentsContainer.getWidth() - mRecentsContainer.getPaddingRight();
-        final int t = mRecentsContainer.getPaddingTop();
-        final int b = mRecentsContainer.getHeight() - mRecentsContainer.getPaddingBottom();
+        // use mRecentsContainer's exact bounds to determine horizontal position
+        final int l = mRecentsContainer.getLeft();
+        final int r = mRecentsContainer.getRight();
+        // use surrounding mRecentsGlowView's position in parent determine vertical bounds
+        final int t = mRecentsGlowView.getTop();
+        final int b = mRecentsGlowView.getBottom();
         return x >= l && x < r && y >= t && y < b;
     }
 
