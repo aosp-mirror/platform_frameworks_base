@@ -38,7 +38,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -173,6 +173,7 @@ public class TabletTicker
                     mWindow = makeWindow();
                     WindowManagerImpl.getDefault().addView(mWindow, mWindow.getLayoutParams());
                 }
+
                 mWindow.addView(mCurrentView);
                 sendEmptyMessageDelayed(MSG_ADVANCE, ADVANCE_DELAY);
                 break;
@@ -259,10 +260,11 @@ public class TabletTicker
         }
         if (n.tickerView != null) {
             group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_panel, null, false);
+            ViewGroup content = (FrameLayout) group.findViewById(R.id.ticker_expanded);
             View expanded = null;
             Exception exception = null;
             try {
-                expanded = n.tickerView.apply(mContext, group);
+                expanded = n.tickerView.apply(mContext, content);
             }
             catch (RuntimeException e) {
                 exception = e;
@@ -273,12 +275,10 @@ public class TabletTicker
                 Slog.e(TAG, "couldn't inflate view for notification " + ident, exception);
                 return null;
             }
-            final int statusBarHeight = mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, statusBarHeight, 1.0f);
-            lp.gravity = Gravity.BOTTOM;
-            group.addView(expanded, lp);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, 
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            content.addView(expanded, lp);
         } else if (n.tickerText != null) {
             group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,

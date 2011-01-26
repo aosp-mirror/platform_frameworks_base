@@ -18,14 +18,10 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/status_bar_ticker_background"
     android:gravity="bottom"
     >
-    <!--
-    android:background="@drawable/ticker_background"
-    -->
 
     <ImageView
         android:id="@+id/large_icon"
@@ -34,6 +30,12 @@
         android:scaleType="center"
         android:visibility="gone"
         />
-        <!-- TODO: scaleType should be top-left but ImageView doesn't support that. -->
 
+    <FrameLayout
+        android:id="@+id/ticker_expanded"
+        android:layout_weight="1"
+        android:layout_height="@*android:dimen/status_bar_height"
+        android:layout_width="match_parent"
+        android:background="@drawable/status_bar_ticker_background"
+        />
 </LinearLayout>
