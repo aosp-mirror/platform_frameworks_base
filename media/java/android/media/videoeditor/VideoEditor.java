@@ -20,7 +20,10 @@ package android.media.videoeditor;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
-
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.view.SurfaceHolder;
 
 /**
@@ -78,9 +81,26 @@ public interface VideoEditor {
          * @param videoEditor The VideoEditor instance
          * @param timeMs The current preview position (expressed in milliseconds
          *        since the beginning of the storyboard timeline).
-         * @param end true if the end of the timeline was reached
+         * @param overlayData The overlay data (null if the overlay data
+         *      is unchanged)
          */
-        public void onProgress(VideoEditor videoEditor, long timeMs, boolean end);
+        public void onProgress(VideoEditor videoEditor, long timeMs,
+                               OverlayData overlayData);
+        /**
+         * This method notifies the listener when the preview is started
+         * previewing a project.
+         *
+         * @param videoEditor The VideoEditor instance
+         */
+        public void onStart(VideoEditor videoEditor);
+
+        /**
+         * This method notifies the listener when the preview is stopped
+         * previewing a project.
+         *
+         * @param videoEditor The VideoEditor instance
+         */
+        public void onStop(VideoEditor videoEditor);
     }
 
     /**
@@ -123,6 +143,158 @@ public interface VideoEditor {
          *          this value is set to 0; at the end, the value is set to 100.
          */
         public void onProgress(Object item, int action, int progress);
+    }
+
+    /**
+     * The overlay data
+     */
+    public static final class OverlayData {
+        // Instance variables
+        private Bitmap mOverlayBitmap;
+        private int mRenderingMode;
+        private boolean mClear;
+
+        /**
+         * Default constructor
+         */
+        public OverlayData() {
+            mOverlayBitmap = null;
+            mRenderingMode = MediaArtistNativeHelper.MediaRendering.BLACK_BORDERS;
+            mClear = false;
+        }
+
+        /**
+         * Releases the bitmap
+         */
+        public void release() {
+            if (mOverlayBitmap != null) {
+                mOverlayBitmap.recycle();
+                mOverlayBitmap = null;
+            }
+        }
+
+        /**
+         * Check if the overlay needs to be rendered
+         *
+         * @return true if rendering is needed
+         */
+        public boolean needsRendering() {
+            return (mClear || mOverlayBitmap != null);
+        }
+
+        /**
+         * Store the overlay data
+         *
+         * @param overlayBitmap The overlay bitmap
+         * @param renderingMode The rendering mode
+         */
+        void set(Bitmap overlayBitmap, int renderingMode) {
+            mOverlayBitmap = overlayBitmap;
+            mRenderingMode = renderingMode;
+            mClear = false;
+        }
+
+        /**
+         * Clear the overlay
+         */
+        void setClear() {
+            mClear = true;
+        }
+
+        /**
+        * Render the overlay by either clearing it or by
+        * rendering the overlay bitmap with the specified
+        * rendering mode
+        *
+        * @param destBitmap The destination bitmap
+        */
+        public void renderOverlay(Bitmap destBitmap) {
+            if (mClear) {
+                destBitmap.eraseColor(Color.TRANSPARENT);
+            } else if (mOverlayBitmap != null) {
+                final Canvas overlayCanvas = new Canvas(destBitmap);
+                final Rect destRect;
+                final Rect srcRect;
+                switch (mRenderingMode) {
+                    case MediaArtistNativeHelper.MediaRendering.RESIZING: {
+                        destRect = new Rect(0, 0, overlayCanvas.getWidth(),
+                                                 overlayCanvas.getHeight());
+                        srcRect = new Rect(0, 0, mOverlayBitmap.getWidth(),
+                                                 mOverlayBitmap.getHeight());
+                        break;
+                    }
+
+                    case MediaArtistNativeHelper.MediaRendering.BLACK_BORDERS: {
+                        int left, right, top, bottom;
+                        float aROverlayImage, aRCanvas;
+                        aROverlayImage = (float)(mOverlayBitmap.getWidth()) /
+                                         (float)(mOverlayBitmap.getHeight());
+
+                        aRCanvas = (float)(overlayCanvas.getWidth()) /
+                                         (float)(overlayCanvas.getHeight());
+
+                        if (aROverlayImage > aRCanvas) {
+                            int newHeight = ((overlayCanvas.getWidth() * mOverlayBitmap.getHeight())
+                                             / mOverlayBitmap.getWidth());
+                            left = 0;
+                            top  = (overlayCanvas.getHeight() - newHeight) / 2;
+                            right = overlayCanvas.getWidth();
+                            bottom = top + newHeight;
+                        } else {
+                            int newWidth = ((overlayCanvas.getHeight() * mOverlayBitmap.getWidth())
+                                                / mOverlayBitmap.getHeight());
+                            left = (overlayCanvas.getWidth() - newWidth) / 2;
+                            top  = 0;
+                            right = left + newWidth;
+                            bottom = overlayCanvas.getHeight();
+                        }
+
+                        destRect = new Rect(left, top, right, bottom);
+                        srcRect = new Rect(0, 0, mOverlayBitmap.getWidth(), mOverlayBitmap.getHeight());
+                        break;
+                    }
+
+                    case MediaArtistNativeHelper.MediaRendering.CROPPING: {
+                        // Calculate the source rect
+                        int left, right, top, bottom;
+                        float aROverlayImage, aRCanvas;
+                        aROverlayImage = (float)(mOverlayBitmap.getWidth()) /
+                                         (float)(mOverlayBitmap.getHeight());
+                        aRCanvas = (float)(overlayCanvas.getWidth()) /
+                                        (float)(overlayCanvas.getHeight());
+                        if (aROverlayImage < aRCanvas) {
+                            int newHeight = ((mOverlayBitmap.getWidth() * overlayCanvas.getHeight())
+                                       / overlayCanvas.getWidth());
+
+                            left = 0;
+                            top  = (mOverlayBitmap.getHeight() - newHeight) / 2;
+                            right = mOverlayBitmap.getWidth();
+                            bottom = top + newHeight;
+                        } else {
+                            int newWidth = ((mOverlayBitmap.getHeight() * overlayCanvas.getWidth())
+                                        / overlayCanvas.getHeight());
+                            left = (mOverlayBitmap.getWidth() - newWidth) / 2;
+                            top  = 0;
+                            right = left + newWidth;
+                            bottom = mOverlayBitmap.getHeight();
+                        }
+
+                        srcRect = new Rect(left, top, right, bottom);
+                        destRect = new Rect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
+                        break;
+                    }
+
+                    default: {
+                        throw new IllegalStateException("Rendering mode: " + mRenderingMode);
+                    }
+                }
+
+                destBitmap.eraseColor(Color.TRANSPARENT);
+                overlayCanvas.drawBitmap(mOverlayBitmap, srcRect, destRect, null);
+
+                mOverlayBitmap.recycle();
+            }
+        }
     }
 
     /**
@@ -518,6 +690,7 @@ public interface VideoEditor {
      *
      * @param surfaceHolder SurfaceHolder used by the application
      * @param timeMs time corresponding to the frame to display
+     * @param overlayData The overlay data
      *
      * @return The accurate time stamp of the frame that is rendered.
      *
@@ -526,7 +699,8 @@ public interface VideoEditor {
      * @throws IllegalArgumentException if time is negative or beyond the
      *        preview duration
      */
-    public long renderPreviewFrame(SurfaceHolder surfaceHolder, long timeMs);
+    public long renderPreviewFrame(SurfaceHolder surfaceHolder, long timeMs,
+            OverlayData overlayData);
 
     /**
      * This method must be called after any changes made to the storyboard
@@ -534,7 +708,6 @@ public interface VideoEditor {
      * extensive period of time.
      */
     public void generatePreview(MediaProcessingProgressListener listener);
-
 
     /**
      * Start the preview of all the storyboard items applied on all MediaItems
@@ -580,5 +753,4 @@ public interface VideoEditor {
      * and needs to be cleared.
      */
     public void clearSurface(SurfaceHolder surfaceHolder);
-
 }
