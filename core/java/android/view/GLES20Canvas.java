@@ -56,8 +56,6 @@ class GLES20Canvas extends HardwareCanvas {
 
     private DrawFilter mFilter;
 
-    private boolean mContextLocked;
-
     ///////////////////////////////////////////////////////////////////////////
     // JNI
     ///////////////////////////////////////////////////////////////////////////
@@ -224,33 +222,12 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nFinish(int renderer);
 
     @Override
-    public boolean acquireContext() {
-        if (!mContextLocked) {
-            nAcquireContext(mRenderer);
-            mContextLocked = true;
-        }
-        return mContextLocked;
-    }
-
-    private static native void nAcquireContext(int renderer);
-
-    @Override
     public boolean callDrawGLFunction(int drawGLFunction) {
         return nCallDrawGLFunction(mRenderer, drawGLFunction);
     }
 
     private static native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
 
-    @Override
-    public void releaseContext() {
-        if (mContextLocked) {
-            nReleaseContext(mRenderer);
-            mContextLocked = false;
-        }
-    }
-
-    private static native void nReleaseContext(int renderer);
-    
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////
