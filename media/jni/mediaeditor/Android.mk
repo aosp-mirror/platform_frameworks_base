@@ -51,6 +51,7 @@ LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
     libnativehelper \
     libmedia \
+    libaudioflinger \
     libbinder \
     libstagefright \
     libstagefright_omx \
