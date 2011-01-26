@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
@@ -49,14 +51,24 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final String TAG = "InputMethodsPanel";
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onPackageChanged();
+        }
+    };
+
     private final InputMethodManager mImm;
+    private final IntentFilter mIntentFilter = new IntentFilter();
+    private final HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>> mRadioViewAndImiMap =
+            new HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>>();
     private final TreeMap<InputMethodInfo, List<InputMethodSubtype>>
             mEnabledInputMethodAndSubtypesCache =
                     new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
                             new InputMethodComparator());
-    private final HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>> mRadioViewAndImiMap =
-            new HashMap<View, Pair<InputMethodInfo, InputMethodSubtype>>();
 
+    private boolean mAttached = false;
+    private boolean mPackageChanged = false;
     private Context mContext;
     private IBinder mToken;
     private InputMethodButton mInputMethodSwitchButton;
@@ -88,6 +100,28 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         super(context, attrs, defStyle);
         mContext = context;
         mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        mIntentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        mIntentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        mIntentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        mIntentFilter.addDataScheme("package");
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mAttached) {
+            getContext().unregisterReceiver(mBroadcastReceiver);
+            mAttached = false;
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!mAttached) {
+            getContext().registerReceiver(mBroadcastReceiver, mIntentFilter);
+            mAttached = true;
+        }
     }
 
     @Override
@@ -302,7 +336,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         String newEnabledIMIs = Settings.Secure.getString(
                 mContext.getContentResolver(), Settings.Secure.ENABLED_INPUT_METHODS);
         if (mEnabledInputMethodAndSubtypesCacheStr == null
-                || !mEnabledInputMethodAndSubtypesCacheStr.equals(newEnabledIMIs)) {
+                || !mEnabledInputMethodAndSubtypesCacheStr.equals(newEnabledIMIs)
+                || mPackageChanged) {
             mEnabledInputMethodAndSubtypesCache.clear();
             final List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
             for (InputMethodInfo imi: imis) {
@@ -310,6 +345,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
                         mImm.getEnabledInputMethodSubtypeList(imi, true));
             }
             mEnabledInputMethodAndSubtypesCacheStr = newEnabledIMIs;
+            mPackageChanged = false;
         }
         return mEnabledInputMethodAndSubtypesCache;
     }
@@ -375,5 +411,12 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
             }
         }
         return null;
+    }
+
+    private void onPackageChanged() {
+        if (DEBUG) {
+            Log.d(TAG, "onPackageChanged.");
+        }
+        mPackageChanged = true;
     }
 }
