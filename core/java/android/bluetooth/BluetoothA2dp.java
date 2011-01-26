@@ -50,15 +50,18 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * profile.
      *
      * <p>This intent will have 3 extras:
-     * {@link #EXTRA_STATE} - The current state of the profile.
-     * {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile
-     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * </ul>
      *
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
@@ -69,14 +72,17 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * profile.
      *
      * <p>This intent will have 3 extras:
-     * {@link #EXTRA_STATE} - The current state of the profile.
-     * {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile
-     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. <li/>
+     * </ul>
      *
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_PLAYING}, {@link #STATE_NOT_PLAYING},
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PLAYING_STATE_CHANGED =
@@ -258,7 +264,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
     /**
      * Check if A2DP profile is streaming music.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device BluetoothDevice device
      */
@@ -281,11 +287,12 @@ public final class BluetoothA2dp implements BluetoothProfile {
      *
      * <p> This API will return false in scenarios like the A2DP
      * device is not in connected state etc. When this API returns,
-     * true, it is guaranteed that {@link #ACTION_SINK_STATE_CHANGED}
+     * true, it is guaranteed that {@link #ACTION_CONNECTION_STATE_CHANGED}
      * intent will be broadcasted with the state. Users can get the
      * state of the A2DP device from this intent.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
      *
      * @param device Remote A2DP sink
      * @return false on immediate error,

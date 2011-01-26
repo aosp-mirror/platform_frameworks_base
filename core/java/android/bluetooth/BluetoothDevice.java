@@ -748,6 +748,15 @@ public final class BluetoothDevice implements Parcelable {
      * outgoing connection to this remote device on given channel.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link createInsecureRfcommSocket}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
      * connection.
      * <p>Valid RFCOMM channels are in range 1 to 30.
@@ -775,6 +784,15 @@ public final class BluetoothDevice implements Parcelable {
      * determine which channel to connect to.
      * <p>The remote device will be authenticated and communication on this
      * socket will be encrypted.
+     * <p> Use this socket only if an authenticated socket link is possible.
+     * Authentication refers to the authentication of the link key to
+     * prevent man-in-the-middle type of attacks.
+     * For example, for Bluetooth 2.1 devices, if any of the devices does not
+     * have an input and output capability or just has the ability to
+     * display a numeric key, a secure socket connection is not possible.
+     * In such a case, use {#link createInsecureRfcommSocketToServiceRecord}.
+     * For more details, refer to the Security Model section 5.2 (vol 3) of
+     * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Hint: If you are connecting to a Bluetooth serial board then try
      * using the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB.
      * However if you are connecting to an Android peer then please generate

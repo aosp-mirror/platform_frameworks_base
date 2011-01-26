@@ -52,15 +52,17 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * profile.
      *
      * <p>This intent will have 3 extras:
-     * {@link #EXTRA_STATE} - The current state of the profile.
-     * {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile
-     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
-     *
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * </ul>
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
@@ -71,14 +73,16 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * A2DP profile.
      *
      * <p>This intent will have 3 extras:
-     * {@link #EXTRA_STATE} - The current state of the profile.
-     * {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile
-     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
-     *
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * </ul>
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_AUDIO_CONNECTED}, {@link #STATE_AUDIO_DISCONNECTED},
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission
+     * to receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AUDIO_STATE_CHANGED =
@@ -90,16 +94,18 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * vendor-specific event.
      *
      * <p>This intent will have 4 extras and 1 category.
-     * {@link BluetoothDevice#EXTRA_DEVICE} - The remote Bluetooth Device
-     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD} - The vendor specific
-     *                                                    command
-     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE} - The AT command
-     *                                                         type.
-     * Can be one of  {@link #AT_CMD_TYPE_READ}, {@link #AT_CMD_TYPE_TEST},
-     * or {@link #AT_CMD_TYPE_SET}, {@link #AT_CMD_TYPE_BASIC},
-     * {@link #AT_CMD_TYPE_ACTION}.
-     *
-     * {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS} - Command arguments.
+     * <ul>
+     *  <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote Bluetooth Device
+     *       </li>
+     *  <li> {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD} - The vendor
+     *       specific command </li>
+     *  <li> {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE} - The AT
+     *       command type which can be one of  {@link #AT_CMD_TYPE_READ},
+     *       {@link #AT_CMD_TYPE_TEST}, or {@link #AT_CMD_TYPE_SET},
+     *       {@link #AT_CMD_TYPE_BASIC},{@link #AT_CMD_TYPE_ACTION}. <li/>
+     *  <li> {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS} - Command
+     *       arguments. </li>
+     * </ul>
      *
      * The category is the Company ID of the vendor defining the
      * vendor-specific command. {@link BluetoothAssignedNumbers}
@@ -108,11 +114,13 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Category will be {@link #VENDOR_SPECIFIC_HEADSET_EVENT_COMPANY_ID_CATEGORY}.55
      *
      * <p> For example, an AT+XEVENT=foo,3 will get translated into
-     * EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD = +XEVENT
-     * EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE = AT_CMD_TYPE_SET
-     * EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS = foo, 3
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <ul>
+     *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD = +XEVENT </li>
+     *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE = AT_CMD_TYPE_SET </li>
+     *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS = foo, 3 <li>
+     * </ul>
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission
+     * to receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VENDOR_SPECIFIC_HEADSET_EVENT =
@@ -184,7 +192,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
             "android.bluetooth.headset.intent.category.companyid";
 
     /**
-     * Headset state when SCO audio is not connected
+     * Headset state when SCO audio is not connected.
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
@@ -192,7 +200,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static final int STATE_AUDIO_DISCONNECTED = 10;
 
     /**
-     * Headset state when SCO audio is connecting
+     * Headset state when SCO audio is connecting.
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
@@ -200,7 +208,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static final int STATE_AUDIO_CONNECTING = 11;
 
     /**
-     * Headset state when SCO audio is connected
+     * Headset state when SCO audio is connected.
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
      * {@link #ACTION_AUDIO_STATE_CHANGED} intent.
@@ -410,7 +418,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Stop Bluetooth Voice Recognition mode, and shut down the
      * Bluetooth audio path.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
      * @return false if there is no headset connected
@@ -433,7 +441,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * Check if Bluetooth SCO audio is connected.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth headset
      * @return true if SCO is connected,

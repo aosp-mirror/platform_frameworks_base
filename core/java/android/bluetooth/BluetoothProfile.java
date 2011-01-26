@@ -105,6 +105,7 @@ public interface BluetoothProfile {
      * from this intent.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
      *
      * @param device Remote Bluetooth Device
      * @return false on immediate error,
@@ -132,6 +133,7 @@ public interface BluetoothProfile {
      * two scenarios.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
      *
      * @param device Remote Bluetooth Device
      * @return false on immediate error,
@@ -145,20 +147,20 @@ public interface BluetoothProfile {
      *
      * <p> Return the set of devices which are in state {@link #STATE_CONNECTED}
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @return List of devices. The list will be empty on error.
      */
     public List<BluetoothDevice> getConnectedDevices();
 
     /**
-     * Get a set of devices that match any of the given connection
+     * Get a list of devices that match any of the given connection
      * states.
      *
-     * <p> If none of devices match any of the given states,
-     * an empty set will be returned.
+     * <p> If none of the devices match any of the given states,
+     * an empty list will be returned.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param states Array of states. States can be one of
      *              {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
@@ -170,7 +172,7 @@ public interface BluetoothProfile {
     /**
      * Get the current connection state of the profile
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Remote bluetooth device.
      * @return State of the profile connection. One of
@@ -187,6 +189,7 @@ public interface BluetoothProfile {
      * {@link #PRIORITY_OFF},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
      *
      * @param device Paired bluetooth device
      * @param priority
@@ -202,7 +205,7 @@ public interface BluetoothProfile {
      * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
      * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device Bluetooth device
      * @return priority of the device
