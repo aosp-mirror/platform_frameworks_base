@@ -18,7 +18,7 @@ package android.bluetooth;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfo;
+import android.net.DhcpInfoInternal;
 import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
@@ -251,23 +251,12 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
             public void run() {
                 //TODO(): Add callbacks for failure and success case.
                 //Currently this thread runs independently.
-                DhcpInfo dhcpInfo = new DhcpInfo();
-                if (!NetworkUtils.runDhcp(mIface, dhcpInfo)) {
+                DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
+                if (!NetworkUtils.runDhcp(mIface, dhcpInfoInternal)) {
                     Log.e(TAG, "DHCP request error:" + NetworkUtils.getDhcpError());
                     return;
                 }
-                mLinkProperties.addLinkAddress(new LinkAddress(
-                    NetworkUtils.intToInetAddress(dhcpInfo.ipAddress),
-                    NetworkUtils.intToInetAddress(dhcpInfo.netmask)));
-                mLinkProperties.setGateway(NetworkUtils.intToInetAddress(dhcpInfo.gateway));
-                InetAddress dns1Addr = NetworkUtils.intToInetAddress(dhcpInfo.dns1);
-                if (dns1Addr == null || dns1Addr.equals("0.0.0.0")) {
-                    mLinkProperties.addDns(dns1Addr);
-                }
-                InetAddress dns2Addr = NetworkUtils.intToInetAddress(dhcpInfo.dns2);
-                if (dns2Addr == null || dns2Addr.equals("0.0.0.0")) {
-                    mLinkProperties.addDns(dns2Addr);
-                }
+                mLinkProperties = dhcpInfoInternal.makeLinkProperties();
                 mLinkProperties.setInterfaceName(mIface);
 
                 mNetworkInfo.setIsAvailable(true);

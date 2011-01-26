@@ -77,7 +77,7 @@ public class NetworkUtils {
      * the IP address information.
      * @return {@code true} for success, {@code false} for failure
      */
-    public native static boolean runDhcp(String interfaceName, DhcpInfo ipInfo);
+    public native static boolean runDhcp(String interfaceName, DhcpInfoInternal ipInfo);
 
     /**
      * Shut down the DHCP client daemon.
@@ -147,6 +147,29 @@ public class NetworkUtils {
         }
         int value = 0xffffffff << (32 - prefixLength);
         return Integer.reverseBytes(value);
+    }
+
+    /**
+     * Create an InetAddress from a string where the string must be a standard
+     * representation of a V4 or V6 address.  Avoids doing a DNS lookup on failure
+     * but it will throw an IllegalArgumentException in that case.
+     * @param addrString
+     * @return the InetAddress
+     * @hide
+     */
+    public static InetAddress numericToInetAddress(String addrString)
+            throws IllegalArgumentException {
+        // TODO - do this for real, using a hidden method on InetAddress that aborts
+        // instead of doing dns step
+        if (!InetAddress.isNumeric(addrString)) {
+            throw new IllegalArgumentException("numericToInetAddress with non numeric: " +
+                    addrString);
+        }
+        try {
+            return InetAddress.getByName(addrString);
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
