@@ -166,13 +166,17 @@ public abstract class AsyncTask<Params, Progress, Result> {
             new LinkedBlockingQueue<Runnable>(10);
 
     /**
-     * A {@link ThreadPoolExecutor} that can be used to execute tasks in parallel.
+     * An {@link Executor} that can be used to execute tasks in parallel.
      */
-    public static final ThreadPoolExecutor THREAD_POOL_EXECUTOR
+    public static final Executor THREAD_POOL_EXECUTOR
             = new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
                     TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
 
-    private static final SerialExecutor sSerialExecutor = new SerialExecutor();
+    /**
+     * An {@link Executor} that executes tasks one at a time in serial
+     * order.  This serialization is global to a particular process.
+     */
+    public static final Executor SERIAL_EXECUTOR = new SerialExecutor();
 
     private static final int MESSAGE_POST_RESULT = 0x1;
     private static final int MESSAGE_POST_PROGRESS = 0x2;
@@ -468,13 +472,21 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     /**
      * Executes the task with the specified parameters. The task returns
-     * itself (this) so that the caller can keep a reference to it.  The tasks
-     * started by all invocations of this method in a given process are run
-     * sequentially.  Call the executeOnExecutor(Executor,Params...)
-     * with a custom {@link Executor} to have finer grained control over how the
-     * tasks are run.
+     * itself (this) so that the caller can keep a reference to it.
+     * 
+     * <p>Note: this function schedules the task on a queue for a single background
+     * thread or pool of threads depending on the platform version.  When first
+     * introduced, AsyncTasks were executed serially on a single background thread.
+     * Starting with {@link android.os.Build.VERSION_CODES#DONUT}, this was changed
+     * to a pool of threads allowing multiple tasks to operate in parallel.  After
+     * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, it is planned to change this
+     * back to a single thread to avoid common application errors caused
+     * by parallel execution.  If you truly want parallel execution, you can use
+     * the {@link #executeOnExecutor} version of this method
+     * with {@link #THREAD_POOL_EXECUTOR}; however, see commentary there for warnings on
+     * its use.
      *
-     * This method must be invoked on the UI thread.
+     * <p>This method must be invoked on the UI thread.
      *
      * @param params The parameters of the task.
      *
@@ -484,14 +496,30 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
      */
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
-        return executeOnExecutor(sSerialExecutor, params);
+        return executeOnExecutor(THREAD_POOL_EXECUTOR, params);
     }
 
     /**
      * Executes the task with the specified parameters. The task returns
      * itself (this) so that the caller can keep a reference to it.
+     * 
+     * <p>This method is typically used with {@link #THREAD_POOL_EXECUTOR} to
+     * allow multiple tasks to run in parallel on a pool of threads managed by
+     * AsyncTask, however you can also use your own {@link Executor} for custom
+     * behavior.
+     * 
+     * <p><em>Warning:</em> Allowing multiple tasks to run in parallel from
+     * a thread pool is generally <em>not</em> what one wants, because the order
+     * of their operation is not defined.  For example, if these tasks are used
+     * to modify any state in common (such as writing a file due to a button click),
+     * there are no guarantees on the order of the modifications.
+     * Without careful work it is possible in rare cases for the newer version
+     * of the data to be over-written by an older one, leading to obscure data
+     * loss and stability issues.  Such changes are best
+     * executed in serial; to guarantee such work is serialized regardless of
+     * platform version you can use this function with {@link #SERIAL_EXECUTOR}.
      *
-     * This method must be invoked on the UI thread.
+     * <p>This method must be invoked on the UI thread.
      *
      * @param exec The executor to use.  {@link #THREAD_POOL_EXECUTOR} is available as a
      *              convenient process-wide thread pool for tasks that are loosely coupled.
@@ -527,11 +555,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /**
-     * Schedules the {@link Runnable} in serial with the other AsyncTasks that were started
-     * with {@link #execute}.
+     * Convenience version of {@link #execute(Object...)} for use with
+     * a simple Runnable object.
      */
     public static void execute(Runnable runnable) {
-        sSerialExecutor.execute(runnable);
+        THREAD_POOL_EXECUTOR.execute(runnable);
     }
 
     /**
