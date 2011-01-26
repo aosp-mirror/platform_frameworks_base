@@ -16,6 +16,9 @@
 # Emulator keyboard configuration file #1.
 #
 
+touch.deviceType = touchScreen
+touch.orientationAware = 1
+
 keyboard.layout = qwerty
 keyboard.characterMap = qwerty
 keyboard.orientationAware = 1
