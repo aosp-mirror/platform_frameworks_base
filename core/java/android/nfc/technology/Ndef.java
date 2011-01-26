@@ -224,7 +224,22 @@ public final class Ndef extends BasicTagTechnology {
     }
 
     /**
-     * Set the CC field to indicate this tag is read-only
+     * Indicates whether a tag can be made read-only with
+     * {@link #makeReadonly()}
+     */
+    public boolean canMakeReadonly() {
+        if (mNdefType == NFC_FORUM_TYPE_1 || mNdefType == NFC_FORUM_TYPE_2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Sets the CC field to indicate this tag is read-only
+     * and permanently sets the lock bits to prevent any further NDEF
+     * modifications.
+     * This is a one-way process and can not be reverted!
      * @throws IOException
      */
     public boolean makeReadonly() throws IOException {
@@ -247,17 +262,6 @@ public final class Ndef extends BasicTagTechnology {
             Log.e(TAG, "NFC service dead", e);
             return false;
         }
-    }
-
-    /**
-     * Attempt to use tag specific technology to really make
-     * the tag read-only
-     * For NFC Forum Type 1 and 2 only.
-     */
-    public void makeLowLevelReadonly() {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
     }
 
     @Override
