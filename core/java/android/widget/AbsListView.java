@@ -5289,12 +5289,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     /**
      * Called back when the adapter connects to the RemoteViewsService.
      */
-    public void onRemoteAdapterConnected() {
+    public boolean onRemoteAdapterConnected() {
         if (mRemoteAdapter != mAdapter) {
             setAdapter(mRemoteAdapter);
+            return false;
         } else if (mRemoteAdapter != null) {
             mRemoteAdapter.superNotifyDataSetChanged();
+            return true;
         }
+        return false;
     }
 
     /**
