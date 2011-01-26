@@ -859,11 +859,19 @@ public class Intent implements Parcelable, Cloneable {
      * only pick from data that can be represented as a stream.  This is
      * accomplished by requiring the {@link #CATEGORY_OPENABLE} in the Intent.
      * <p>
+     * Callers can optionally specify {@link #EXTRA_LOCAL_ONLY} to request that
+     * the launched content chooser only return results representing data that
+     * is locally available on the device.  For example, if this extra is set
+     * to true then an image picker should not show any pictures that are available
+     * from a remote server but not already on the local device (thus requiring
+     * they be downloaded when opened).
+     * <p>
      * Input: {@link #getType} is the desired MIME type to retrieve.  Note
      * that no URI is supplied in the intent, as there are no constraints on
      * where the returned data originally comes from.  You may also include the
      * {@link #CATEGORY_OPENABLE} if you can only accept data that can be
-     * opened as a stream.
+     * opened as a stream.  You may use {@link #EXTRA_LOCAL_ONLY} to limit content
+     * selection to local data.
      * <p>
      * Output: The URI of the item that was picked.  This must be a content:
      * URI so that any receiver can access it.
@@ -2397,6 +2405,18 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_CLIENT_INTENT =
             "android.intent.extra.client_intent";
 
+    /**
+     * Used to indicate that a {@link #ACTION_GET_CONTENT} intent should only return
+     * data that is on the local device.  This is a boolean extra; the default
+     * is false.  If true, an implementation of ACTION_GET_CONTENT should only allow
+     * the user to select media that is already on the device, not requiring it
+     * be downloaded from a remote service when opened.  Another way to look
+     * at it is that such content should generally have a "_data" column to the
+     * path of the content on local external storage.
+     */
+    public static final String EXTRA_LOCAL_ONLY =
+        "android.intent.extra.LOCAL_ONLY";
+    
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
