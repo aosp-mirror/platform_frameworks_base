@@ -126,8 +126,6 @@ public:
     virtual status_t    setLooping(int loop) = 0;
     virtual player_type playerType() = 0;
 
-    virtual void        setNotifyCallback(void* cookie, notify_callback_f notifyFunc) {
-                            mCookie = cookie; mNotify = notifyFunc; }
     // Invoke a generic method on the player by using opaque parcels
     // for the request and reply.
     //
@@ -149,9 +147,21 @@ public:
         return INVALID_OPERATION;
     };
 
-    virtual void        sendEvent(int msg, int ext1=0, int ext2=0) { if (mNotify) mNotify(mCookie, msg, ext1, ext2); }
+    void        setNotifyCallback(
+            void* cookie, notify_callback_f notifyFunc) {
+        Mutex::Autolock autoLock(mNotifyLock);
+        mCookie = cookie; mNotify = notifyFunc;
+    }
 
-protected:
+    void        sendEvent(int msg, int ext1=0, int ext2=0) {
+        Mutex::Autolock autoLock(mNotifyLock);
+        if (mNotify) mNotify(mCookie, msg, ext1, ext2);
+    }
+
+private:
+    friend class MediaPlayerService;
+
+    Mutex               mNotifyLock;
     void*               mCookie;
     notify_callback_f   mNotify;
 };
