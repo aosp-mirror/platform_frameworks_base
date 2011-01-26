@@ -48,7 +48,6 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
@@ -1721,14 +1720,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * View has requested the status bar to be visible (the default).
      *
-     * @see setSystemUiVisibility
+     * @see #setSystemUiVisibility(int) 
      */
     public static final int STATUS_BAR_VISIBLE = 0;
 
     /**
      * View has requested the status bar to be visible (the default).
      *
-     * @see setSystemUiVisibility
+     * @see #setSystemUiVisibility(int) 
      */
     public static final int STATUS_BAR_HIDDEN = 0x00000001;
 
@@ -3283,7 +3282,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             imm.focusIn(this);
         }
 
-        invalidate();
+        invalidate(true);
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
         }
@@ -3722,7 +3721,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         // Invalidate too, since the default behavior for views is to be
         // be drawn at 50% alpha rather than to change the drawable.
-        invalidate();
+        invalidate(true);
     }
 
     /**
@@ -5286,7 +5285,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((changed & GONE) != 0) {
             needGlobalAttributesUpdate(false);
             requestLayout();
-            invalidate();
+            invalidate(true);
 
             if (((mViewFlags & VISIBILITY_MASK) == GONE)) {
                 if (hasFocus()) clearFocus();
@@ -5300,7 +5299,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         /* Check if the VISIBLE bit has changed */
         if ((changed & INVISIBLE) != 0) {
             needGlobalAttributesUpdate(false);
-            invalidate();
+            invalidate(true);
 
             if (((mViewFlags & VISIBILITY_MASK) == INVISIBLE) && hasFocus()) {
                 // root view becoming invisible shouldn't clear focus
@@ -5315,8 +5314,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if ((changed & VISIBILITY_MASK) != 0) {
             if (mParent instanceof ViewGroup) {
-                ((ViewGroup)mParent).onChildVisibilityChanged(this, (flags & VISIBILITY_MASK));
-                ((View) mParent).invalidate();
+                ((ViewGroup) mParent).onChildVisibilityChanged(this, (flags & VISIBILITY_MASK));
+                ((View) mParent).invalidate(true);
             }
             dispatchVisibilityChanged(this, (flags & VISIBILITY_MASK));
         }
@@ -5328,7 +5327,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((changed & DRAWING_CACHE_ENABLED) != 0) {
             destroyDrawingCache();
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            invalidateParentIfAccelerated();
+            invalidateParentCaches();
         }
 
         if ((changed & DRAWING_CACHE_QUALITY_MASK) != 0) {
@@ -5348,7 +5347,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags &= ~SKIP_DRAW;
             }
             requestLayout();
-            invalidate();
+            invalidate(true);
         }
 
         if ((changed & KEEP_SCREEN_ON) != 0) {
@@ -5683,13 +5682,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setRotation(float rotation) {
         if (mRotation != rotation) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mRotation = rotation;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5717,13 +5716,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setRotationY(float rotationY) {
         if (mRotationY != rotationY) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mRotationY = rotationY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5751,13 +5750,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setRotationX(float rotationX) {
         if (mRotationX != rotationX) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mRotationX = rotationX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5787,13 +5786,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setScaleX(float scaleX) {
         if (mScaleX != scaleX) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mScaleX = scaleX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5823,13 +5822,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setScaleY(float scaleY) {
         if (mScaleY != scaleY) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mScaleY = scaleY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5865,13 +5864,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setPivotX(float pivotX) {
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         if (mPivotX != pivotX) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mPivotX = pivotX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5906,13 +5905,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setPivotY(float pivotY) {
         mPrivateFlags |= PIVOT_EXPLICITLY_SET;
         if (mPivotY != pivotY) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mPivotY = pivotY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -5944,15 +5943,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setAlpha(float alpha) {
         mAlpha = alpha;
+        invalidateParentCaches();
         if (onSetAlpha((int) (alpha * 255))) {
             mPrivateFlags |= ALPHA_SET;
             // subclass is handling alpha - don't optimize rendering cache invalidation
-            invalidate();
+            invalidate(true);
         } else {
             mPrivateFlags &= ~ALPHA_SET;
             invalidate(false);
         }
-        invalidateParentIfAccelerated();
     }
 
     /**
@@ -5993,7 +5992,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
+                invalidate(true);
             }
 
             int width = mRight - mLeft;
@@ -6009,7 +6008,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
+                invalidate(true);
             }
             mBackgroundSizeChanged = true;
         }
@@ -6059,7 +6058,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
+                invalidate(true);
             }
 
             int width = mRight - mLeft;
@@ -6075,7 +6074,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
+                invalidate(true);
             }
             mBackgroundSizeChanged = true;
         }
@@ -6119,7 +6118,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
+                invalidate(true);
             }
 
             int oldWidth = mRight - mLeft;
@@ -6135,7 +6134,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
+                invalidate(true);
             }
             mBackgroundSizeChanged = true;
         }
@@ -6176,7 +6175,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
-                invalidate();
+                invalidate(true);
             }
 
             int oldWidth = mRight - mLeft;
@@ -6192,7 +6191,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     mMatrixDirty = true;
                 }
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
-                invalidate();
+                invalidate(true);
             }
             mBackgroundSizeChanged = true;
         }
@@ -6266,13 +6265,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setTranslationX(float translationX) {
         if (mTranslationX != translationX) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mTranslationX = translationX;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -6300,13 +6299,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setTranslationY(float translationY) {
         if (mTranslationY != translationY) {
+            invalidateParentCaches();
             // Double-invalidation is necessary to capture view's old and new areas
             invalidate(false);
             mTranslationY = translationY;
             mMatrixDirty = true;
             mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
             invalidate(false);
-            invalidateParentIfAccelerated();
         }
     }
 
@@ -6523,10 +6522,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int oldY = mScrollY;
             mScrollX = x;
             mScrollY = y;
-            invalidateParentIfAccelerated();
+            invalidateParentCaches();
             onScrollChanged(mScrollX, mScrollY, oldX, oldY);
             if (!awakenScrollBars()) {
-                invalidate();
+                invalidate(true);
             }
         }
     }
@@ -6680,7 +6679,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             if (invalidate) {
                 // Invalidate to show the scrollbars
-                invalidate();
+                invalidate(true);
             }
 
             if (scrollCache.state == ScrollabilityCache.OFF) {
@@ -6817,11 +6816,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
 
-        boolean opaque = isOpaque();
         if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
                 (invalidateCache && (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID) ||
-                opaque != mLastIsOpaque || (mPrivateFlags & INVALIDATED) != INVALIDATED) {
-            mLastIsOpaque = opaque;
+                (mPrivateFlags & INVALIDATED) != INVALIDATED || isOpaque() != mLastIsOpaque) {
+            mLastIsOpaque = isOpaque();
             mPrivateFlags &= ~DRAWN;
             if (invalidateCache) {
                 mPrivateFlags |= INVALIDATED;
@@ -6850,16 +6848,32 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Used to indicate that the parent of this view should be invalidated. This functionality
+     * Used to indicate that the parent of this view should clear its caches. This functionality
      * is used to force the parent to rebuild its display list (when hardware-accelerated),
      * which is necessary when various parent-managed properties of the view change, such as
-     * alpha, translationX/Y, scrollX/Y, scaleX/Y, and rotation/X/Y.
+     * alpha, translationX/Y, scrollX/Y, scaleX/Y, and rotation/X/Y. This method only
+     * clears the parent caches and does not causes an invalidate event.
      *
      * @hide
      */
-    protected void invalidateParentIfAccelerated() {
+    protected void invalidateParentCaches() {
+        if (mParent instanceof View) {
+            ((View) mParent).mPrivateFlags |= INVALIDATED;
+        }
+    }
+    
+    /**
+     * Used to indicate that the parent of this view should be invalidated. This functionality
+     * is used to force the parent to rebuild its display list (when hardware-accelerated),
+     * which is necessary when various parent-managed properties of the view change, such as
+     * alpha, translationX/Y, scrollX/Y, scaleX/Y, and rotation/X/Y. This method will propagate
+     * an invalidation event to the parent.
+     *
+     * @hide
+     */
+    protected void invalidateParentIfNeeded() {
         if (isHardwareAccelerated() && mParent instanceof View) {
-            ((View) mParent).invalidate();
+            ((View) mParent).invalidate(true);
         }
     }
 
@@ -8023,10 +8037,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (layerType == mLayerType) {
             if (layerType != LAYER_TYPE_NONE && paint != mLayerPaint) {
                 mLayerPaint = paint == null ? new Paint() : paint;
-                if (mParent instanceof ViewGroup) {
-                    ((ViewGroup) mParent).invalidate();
-                }
-                invalidate();
+                invalidateParentCaches();
+                invalidate(true);
             }
             return;
         }
@@ -8057,10 +8069,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mLayerType = layerType;
         mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : (paint == null ? new Paint() : paint);
 
-        if (mParent instanceof ViewGroup) {
-            ((ViewGroup) mParent).invalidate();
-        }
-        invalidate();
+        invalidateParentCaches();
+        invalidate(true);
     }
 
     /**
@@ -8255,7 +8265,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // If we're creating a new display list, make sure our parent gets invalidated
                 // since they will need to recreate their display list to account for this
                 // new child display list.
-                invalidateParentIfAccelerated();
+                invalidateParentCaches();
             }
 
             final HardwareCanvas canvas = mDisplayList.start();
@@ -9167,7 +9177,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             int drawn = mPrivateFlags & DRAWN;
 
             // Invalidate our old position
-            invalidate();
+            invalidate(true);
 
 
             int oldWidth = mRight - mLeft;
@@ -9198,7 +9208,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // before this call to setFrame came in, thereby clearing
                 // the DRAWN bit.
                 mPrivateFlags |= DRAWN;
-                invalidate();
+                invalidate(true);
             }
 
             // Reset drawn bit to original value (invalidate turns it off)
@@ -9587,7 +9597,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         mBackgroundSizeChanged = true;
-        invalidate();
+        invalidate(true);
     }
 
     /**
@@ -9722,7 +9732,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (((mPrivateFlags & SELECTED) != 0) != selected) {
             mPrivateFlags = (mPrivateFlags & ~SELECTED) | (selected ? SELECTED : 0);
             if (!selected) resetPressedState();
-            invalidate();
+            invalidate(true);
             refreshDrawableState();
             dispatchSetSelected(selected);
         }
@@ -9764,7 +9774,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setActivated(boolean activated) {
         if (((mPrivateFlags & ACTIVATED) != 0) != activated) {
             mPrivateFlags = (mPrivateFlags & ~ACTIVATED) | (activated ? ACTIVATED : 0);
-            invalidate();
+            invalidate(true);
             refreshDrawableState();
             dispatchSetActivated(activated);
         }
@@ -10608,8 +10618,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void startAnimation(Animation animation) {
         animation.setStartTime(Animation.START_ON_FIRST_FRAME);
         setAnimation(animation);
-        invalidate();
-        invalidateParentIfAccelerated();
+        invalidateParentCaches();
+        invalidate(true);
     }
 
     /**
@@ -10620,7 +10630,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mCurrentAnimation.detach();
         }
         mCurrentAnimation = null;
-        invalidateParentIfAccelerated();
+        invalidateParentIfNeeded();
     }
 
     /**
@@ -11945,7 +11955,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 state = FADING;
 
                 // Kick off the fade animation
-                host.invalidate();
+                host.invalidate(true);
             }
         }
 
