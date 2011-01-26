@@ -57,7 +57,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
      *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      *
@@ -78,7 +78,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile. </li>
      *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
      * </ul>
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
      * {@link #STATE_AUDIO_CONNECTED}, {@link #STATE_AUDIO_DISCONNECTED},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission
@@ -102,12 +102,12 @@ public final class BluetoothHeadset implements BluetoothProfile {
      *  <li> {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE} - The AT
      *       command type which can be one of  {@link #AT_CMD_TYPE_READ},
      *       {@link #AT_CMD_TYPE_TEST}, or {@link #AT_CMD_TYPE_SET},
-     *       {@link #AT_CMD_TYPE_BASIC},{@link #AT_CMD_TYPE_ACTION}. <li/>
+     *       {@link #AT_CMD_TYPE_BASIC},{@link #AT_CMD_TYPE_ACTION}. </li>
      *  <li> {@link #EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS} - Command
      *       arguments. </li>
      * </ul>
      *
-     * The category is the Company ID of the vendor defining the
+     *<p> The category is the Company ID of the vendor defining the
      * vendor-specific command. {@link BluetoothAssignedNumbers}
      *
      * For example, for Plantronics specific events
@@ -117,7 +117,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * <ul>
      *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD = +XEVENT </li>
      *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_CMD_TYPE = AT_CMD_TYPE_SET </li>
-     *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS = foo, 3 <li>
+     *   <li> EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS = foo, 3 </li>
      * </ul>
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission
      * to receive.
