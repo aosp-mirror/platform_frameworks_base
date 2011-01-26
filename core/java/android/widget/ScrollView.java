@@ -644,7 +644,7 @@ public class ScrollView extends FrameLayout {
         if (!mScroller.isFinished()) {
             mScrollX = scrollX;
             mScrollY = scrollY;
-            invalidateParentIfAccelerated();
+            invalidateParentIfNeeded();
             if (clampedY) {
                 mScroller.springBack(mScrollX, mScrollY, 0, 0, 0, getScrollRange());
             }
