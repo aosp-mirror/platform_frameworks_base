@@ -1128,9 +1128,42 @@ public class SyncManager implements OnAccountsUpdateListener {
                     pw.print(formatTime(status.initialFailureTime));
                     pw.print(" lastTime=");
                     pw.println(formatTime(status.lastFailureTime));
-                    pw.print("      message: "); pw.println(status.lastFailureMesg);
+                    int errCode = status.getLastFailureMesgAsInt(0);
+                    pw.print("      message: "); pw.println(
+                            getLastFailureMessage(errCode) + " (" + errCode + ")");
                 }
             }
+        }
+    }
+
+    private String getLastFailureMessage(int code) {
+        switch (code) {
+            case ContentResolver.SYNC_ERROR_SYNC_ALREADY_IN_PROGRESS:
+                return "sync already in progress";
+
+            case ContentResolver.SYNC_ERROR_AUTHENTICATION:
+                return "authentication error";
+
+            case ContentResolver.SYNC_ERROR_IO:
+                return "I/O error";
+
+            case ContentResolver.SYNC_ERROR_PARSE:
+                return "parse error";
+
+            case ContentResolver.SYNC_ERROR_CONFLICT:
+                return "conflict error";
+
+            case ContentResolver.SYNC_ERROR_TOO_MANY_DELETIONS:
+                return "too many deletions error";
+
+            case ContentResolver.SYNC_ERROR_TOO_MANY_RETRIES:
+                return "too many retries error";
+
+            case ContentResolver.SYNC_ERROR_INTERNAL:
+                return "internal error";
+
+            default:
+                return "unknown";
         }
     }
 
