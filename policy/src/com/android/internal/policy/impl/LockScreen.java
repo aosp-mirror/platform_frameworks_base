@@ -34,6 +34,7 @@ import android.widget.*;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.media.AudioManager;
+import android.os.BatteryManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -417,7 +418,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen, KeyguardUpdateM
         }
 
         if (mPluggedIn) {
-            if (mBatteryLevel >= 100) {
+            if (mUpdateMonitor.isDeviceCharged()) {
                 mCharging = getContext().getString(R.string.lockscreen_charged);
             } else {
                 mCharging = getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel);
