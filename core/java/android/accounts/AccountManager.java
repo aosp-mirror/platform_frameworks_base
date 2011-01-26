@@ -195,6 +195,13 @@ public class AccountManager {
     public static final String KEY_CALLER_UID = "callerUid";
     public static final String KEY_CALLER_PID = "callerPid";
 
+    /**
+     * Boolean, if set and 'customTokens' the authenticator is responsible for
+     * notifications.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_ON_FAILURE = "notifyOnAuthFailure";
+
     public static final String ACTION_AUTHENTICATOR_INTENT =
             "android.accounts.AccountAuthenticator";
     public static final String AUTHENTICATOR_META_DATA_NAME =
