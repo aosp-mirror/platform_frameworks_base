@@ -85,6 +85,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     protected boolean mCancelable = true;
 
+    private String mCancelAndDismissTaken;
     private Message mCancelMessage;
     private Message mDismissMessage;
     private Message mShowMessage;
@@ -1078,6 +1079,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @param listener The {@link DialogInterface.OnCancelListener} to use.
      */
     public void setOnCancelListener(final OnCancelListener listener) {
+        if (mCancelAndDismissTaken != null) {
+            throw new IllegalStateException(
+                    "OnCancelListener is already taken by "
+                    + mCancelAndDismissTaken + " and can not be replaced.");
+        }
         if (listener != null) {
             mCancelMessage = mListenersHandler.obtainMessage(CANCEL, listener);
         } else {
@@ -1099,6 +1105,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @param listener The {@link DialogInterface.OnDismissListener} to use.
      */
     public void setOnDismissListener(final OnDismissListener listener) {
+        if (mCancelAndDismissTaken != null) {
+            throw new IllegalStateException(
+                    "OnDismissListener is already taken by "
+                    + mCancelAndDismissTaken + " and can not be replaced.");
+        }
         if (listener != null) {
             mDismissMessage = mListenersHandler.obtainMessage(DISMISS, listener);
         } else {
@@ -1126,6 +1137,22 @@ public class Dialog implements DialogInterface, Window.Callback,
         mDismissMessage = msg;
     }
 
+    /** @hide */
+    public boolean takeCancelAndDismissListeners(String msg, final OnCancelListener cancel,
+            final OnDismissListener dismiss) {
+        if (mCancelAndDismissTaken != null) {
+            mCancelAndDismissTaken = null;
+        } else if (mCancelMessage != null || mDismissMessage != null) {
+            return false;
+        }
+        
+        setOnCancelListener(cancel);
+        setOnDismissListener(dismiss);
+        mCancelAndDismissTaken = msg;
+        
+        return true;
+    }
+    
     /**
      * By default, this will use the owner Activity's suggested stream type.
      * 
