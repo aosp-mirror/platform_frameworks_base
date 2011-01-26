@@ -27,5 +27,6 @@ interface IRemoteViewsFactory {
     int getViewTypeCount();
     long getItemId(int position);
     boolean hasStableIds();
+    boolean isCreated();
 }
 

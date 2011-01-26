@@ -17,11 +17,11 @@
 package android.widget;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.widget.IRemoteViewsFactory;
@@ -35,8 +35,13 @@ public abstract class RemoteViewsService extends Service {
 
     private static final String LOG_TAG = "RemoteViewsService";
 
-    // multimap implementation for reference counting
-    private HashMap<Intent.FilterComparison, Pair<RemoteViewsFactory, Integer>> mRemoteViewFactories;
+    // Used for reference counting of RemoteViewsFactories
+    // Because we are now unbinding when we are not using the Service (to allow them to be
+    // reclaimed), the references to the factories that are created need to be stored and used when
+    // the service is restarted (in response to user input for example).  When the process is
+    // destroyed, so is this static cache of RemoteViewsFactories.
+    private static final HashMap<Intent.FilterComparison, RemoteViewsFactory> mRemoteViewFactories =
+            new HashMap<Intent.FilterComparison, RemoteViewsFactory>();
     private final Object mLock = new Object();
 
     /**
@@ -126,9 +131,13 @@ public abstract class RemoteViewsService extends Service {
      * A private proxy class for the private IRemoteViewsFactory interface through the
      * public RemoteViewsFactory interface.
      */
-    private class RemoteViewsFactoryAdapter extends IRemoteViewsFactory.Stub {
-        public RemoteViewsFactoryAdapter(RemoteViewsFactory factory) {
+    private static class RemoteViewsFactoryAdapter extends IRemoteViewsFactory.Stub {
+        public RemoteViewsFactoryAdapter(RemoteViewsFactory factory, boolean isCreated) {
             mFactory = factory;
+            mIsCreated = isCreated;
+        }
+        public synchronized boolean isCreated() {
+            return mIsCreated;
         }
         public synchronized void onDataSetChanged() {
             mFactory.onDataSetChanged();
@@ -155,56 +164,26 @@ public abstract class RemoteViewsService extends Service {
         }
 
         private RemoteViewsFactory mFactory;
-    }
-
-    public RemoteViewsService() {
-        mRemoteViewFactories =
-                new HashMap<Intent.FilterComparison, Pair<RemoteViewsFactory, Integer>>();
+        private boolean mIsCreated;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         synchronized (mLock) {
-            // increment the reference count to the particular factory associated with this intent
             Intent.FilterComparison fc = new Intent.FilterComparison(intent);
-            Pair<RemoteViewsFactory, Integer> factoryRef = null;
             RemoteViewsFactory factory = null;
+            boolean isCreated = false;
             if (!mRemoteViewFactories.containsKey(fc)) {
                 factory = onGetViewFactory(intent);
-                factoryRef = new Pair<RemoteViewsFactory, Integer>(factory, 1);
-                mRemoteViewFactories.put(fc, factoryRef);
+                mRemoteViewFactories.put(fc, factory);
                 factory.onCreate();
+                isCreated = false;
             } else {
-                Pair<RemoteViewsFactory, Integer> oldFactoryRef = mRemoteViewFactories.get(fc);
-                factory = oldFactoryRef.first;
-                int newRefCount = oldFactoryRef.second.intValue() + 1;
-                factoryRef = new Pair<RemoteViewsFactory, Integer>(oldFactoryRef.first, newRefCount);
-                mRemoteViewFactories.put(fc, factoryRef);
+                factory = mRemoteViewFactories.get(fc);
+                isCreated = true;
             }
-            return new RemoteViewsFactoryAdapter(factory);
+            return new RemoteViewsFactoryAdapter(factory, isCreated);
         }
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        synchronized (mLock) {
-            Intent.FilterComparison fc = new Intent.FilterComparison(intent);
-            if (mRemoteViewFactories.containsKey(fc)) {
-                // this alleviates the user's responsibility of having to clear all factories
-                Pair<RemoteViewsFactory, Integer> oldFactoryRef =
-                        mRemoteViewFactories.get(fc);
-                int newRefCount = oldFactoryRef.second.intValue() - 1;
-                if (newRefCount <= 0) {
-                    oldFactoryRef.first.onDestroy();
-                    mRemoteViewFactories.remove(fc);
-                } else {
-                    Pair<RemoteViewsFactory, Integer> factoryRef =
-                            new Pair<RemoteViewsFactory, Integer>(oldFactoryRef.first, newRefCount);
-                    mRemoteViewFactories.put(fc, factoryRef);
-                }
-            }
-        }
-        return super.onUnbind(intent);
     }
 
     /**
