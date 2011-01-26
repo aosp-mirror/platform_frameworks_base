@@ -24,15 +24,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.media.videoeditor.VideoEditor.ExportProgressListener;
 import android.media.videoeditor.VideoEditor.PreviewProgressListener;
 import android.media.videoeditor.VideoEditor.MediaProcessingProgressListener;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
 
 /**
  *This class provide Native methods to be used by MediaArtist {@hide}
@@ -70,10 +71,16 @@ class MediaArtistNativeHelper {
     private boolean mExportDone = false;
 
     private int mProgressToApp;
+
     /**
      *  The resize paint
      */
     private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+
+    private String mRenderPreviewOverlayFile;
+    private int   mRenderPreviewRenderingMode;
+
+    private boolean mIsFirstProgress;
 
     public static final int TASK_LOADING_SETTINGS = 1;
 
@@ -1899,11 +1906,34 @@ class MediaArtistNativeHelper {
     }
 
     @SuppressWarnings("unused")
-    private void onPreviewProgressUpdate(int progress, boolean isFinished) {
+    private void onPreviewProgressUpdate(int progress, boolean isFinished,
+                  boolean updateOverlay, String filename, int renderingMode) {
         if (mPreviewProgressListener != null) {
-            mPreviewProgressListener.onProgress(mVideoEditor, progress, isFinished);
+            if (mIsFirstProgress) {
+                mPreviewProgressListener.onStart(mVideoEditor);
+                mIsFirstProgress = false;
+            }
+
+            final VideoEditor.OverlayData overlayData;
+            if (updateOverlay) {
+                overlayData = new VideoEditor.OverlayData();
+                if (filename != null) {
+                    overlayData.set(BitmapFactory.decodeFile(filename), renderingMode);
+                } else {
+                    overlayData.setClear();
+                }
+            } else {
+                overlayData = null;
+            }
+
+            mPreviewProgressListener.onProgress(mVideoEditor, progress, overlayData);
+
             if (progress != 0) {
                 mPreviewProgress = progress;
+            }
+
+            if (isFinished) {
+                mPreviewProgressListener.onStop(mVideoEditor);
             }
         }
     }
@@ -2894,6 +2924,7 @@ class MediaArtistNativeHelper {
                     maxHeight = populateMediaItemProperties(lMediaItem,
                                                             previewIndex,
                                                             maxHeight);
+                    /* Get the clip properties of the media item. */
                     if (lMediaItem instanceof MediaImageItem)
                     {
                         int tmpCnt = 0;
@@ -3014,11 +3045,11 @@ class MediaArtistNativeHelper {
      * @param callbackAfterFrameCount INdicated after how many frames
      * the callback is needed
      * @param listener The PreviewProgressListener
-     *
      */
     public void doPreview(Surface surface, long fromMs, long toMs, boolean loop,
             int callbackAfterFrameCount, PreviewProgressListener listener) {
         mPreviewProgress = fromMs;
+        mIsFirstProgress = true;
         mPreviewProgressListener = listener;
 
         if (!mInvalidatePreviewArray) {
@@ -3042,9 +3073,6 @@ class MediaArtistNativeHelper {
                 Log.e("MediaArtistNativeHelper", "Runtime exception in nativeStartPreview");
                 throw ex;
             }
-
-        } else {
-            return;
         }
     }
 
@@ -3064,22 +3092,37 @@ class MediaArtistNativeHelper {
      * @param time The time in ms at which the frame has to be rendered
      * @param surfaceWidth The surface width
      * @param surfaceHeight The surface height
+     * @param overlayData The overlay data
      *
      * @return The actual time from the story board at which the  frame was extracted
      * and rendered
      */
     public long renderPreviewFrame(Surface surface, long time, int surfaceWidth,
-                                   int surfaceHeight) {
+            int surfaceHeight, VideoEditor.OverlayData overlayData) {
         long timeMs = 0;
         if (!mInvalidatePreviewArray) {
             try {
-                for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length; clipCnt++) {
+                for (int clipCnt = 0;
+                      clipCnt < mPreviewEditSettings.clipSettingsArray.length;
+                      clipCnt++) {
+
                     if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
-                        mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath = mPreviewEditSettings.clipSettingsArray[clipCnt].clipDecodedPath;
+                        mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath =
+                            mPreviewEditSettings.clipSettingsArray[clipCnt].clipDecodedPath;
                     }
                 }
+
+                // Reset the render preview frame params that shall be set by native.
+                mRenderPreviewOverlayFile = null;
+                mRenderPreviewRenderingMode = MediaRendering.RESIZING;
                 nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
                 timeMs = (long)nativeRenderPreviewFrame(surface, time, surfaceWidth, surfaceHeight);
+
+                if (mRenderPreviewOverlayFile != null) {
+                    overlayData.set(BitmapFactory.decodeFile(mRenderPreviewOverlayFile), mRenderPreviewRenderingMode);
+                } else {
+                    overlayData.setClear();
+                }
             } catch (IllegalArgumentException ex) {
                 Log.e("MediaArtistNativeHelper",
                 "Illegal Argument exception in nativeRenderPreviewFrame");
@@ -3094,10 +3137,15 @@ class MediaArtistNativeHelper {
             }
             return timeMs;
         } else {
-
             throw new RuntimeException("Call generate preview first");
         }
     }
+
+    private void previewFrameEditInfo(String filename, int renderingMode) {
+        mRenderPreviewOverlayFile = filename;
+        mRenderPreviewRenderingMode = renderingMode;
+    }
+
 
     /**
      * This function is responsible for rendering a single frame
@@ -3551,7 +3599,6 @@ class MediaArtistNativeHelper {
         int outBitrate = 0;
         mExportFilename = filePath;
         previewStoryBoard(mediaItemsList, mediaTransitionList, mediaBGMList,null);
-
         mExportProgressListener = listener;
 
         mProgressToApp = 0;
@@ -3678,7 +3725,6 @@ class MediaArtistNativeHelper {
         int outBitrate = 0;
         mExportFilename = filePath;
         previewStoryBoard(mediaItemsList, mediaTransitionList, mediaBGMList,null);
-
         mExportProgressListener = listener;
 
         mProgressToApp = 0;
@@ -4003,6 +4049,7 @@ class MediaArtistNativeHelper {
     public void clearPreviewSurface(Surface surface) {
        nativeClearSurface(surface);
     }
+
     /**     Native Methods        */
     native Properties getMediaProperties(String file) throws IllegalArgumentException,
     IllegalStateException, RuntimeException, Exception;
