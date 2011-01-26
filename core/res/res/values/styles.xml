@@ -1399,6 +1399,7 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">@android:color/primary_text_holo_dark</item>
         <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">64dip</item>
     </style>
 
     <style name="Widget.Holo.Button.Borderless">
@@ -1406,10 +1407,11 @@
     </style>
 
     <style name="Widget.Holo.Button.Small">
-        <item name="android:background">@android:drawable/btn_default_small_holo_dark</item>
+        <item name="android:background">@android:drawable/btn_default_holo_dark</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@android:color/primary_text_holo_dark</item>
         <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">48dip</item>
     </style>
 
     <style name="Widget.Holo.Button.Inset">
@@ -1788,6 +1790,7 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMediumInverse</item>
         <item name="android:textColor">@android:color/primary_text_holo_light</item>
         <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">64dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Borderless">
@@ -1795,10 +1798,11 @@
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">
-        <item name="android:background">@android:drawable/btn_default_small_holo_light</item>
+        <item name="android:background">@android:drawable/btn_default_holo_light</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:textColor">@android:color/primary_text_holo_light</item>
         <item name="android:minHeight">48dip</item>
+        <item name="android:minWidth">48dip</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Inset">
