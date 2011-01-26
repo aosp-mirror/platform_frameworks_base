@@ -69,7 +69,7 @@ public class StackView extends AdapterViewAnimator {
     private float mNewPerspectiveShiftY;
 
     @SuppressWarnings({"FieldCanBeLocal"})
-    private static final float PERSPECTIVE_SCALE_FACTOR = 0.f;
+    private static final float PERSPECTIVE_SCALE_FACTOR = 0f;
 
     /**
      * Represent the two possible stack modes, one where items slide up, and the other
@@ -193,19 +193,16 @@ public class StackView extends AdapterViewAnimator {
     /**
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
-    void animateViewForTransition(int fromIndex, int toIndex, final View view) {
+    void transformViewForTransition(int fromIndex, int toIndex, final View view, boolean animate) {
         ObjectAnimator alphaOa = null;
         ObjectAnimator oldAlphaOa = null;
 
-        // If there is currently an alpha animation on this view, we need
-        // to know about it, and may need to cancel it so as not to interfere with
-        // a new alpha animation.
-        Object tag = view.getTag(com.android.internal.R.id.viewAlphaAnimation);
-        if (tag instanceof WeakReference<?>) {
-            Object obj = ((WeakReference<?>) tag).get();
-            if (obj instanceof ObjectAnimator) {
-                oldAlphaOa = (ObjectAnimator) obj;
-            }
+        if (!animate) {
+            ((StackFrame) view).cancelSliderAnimator();
+            view.setRotationX(0f);
+            LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            lp.setVerticalOffset(0);
+            lp.setHorizontalOffset(0);
         }
 
         if (fromIndex == -1 && toIndex == getNumActiveViews() -1) {
@@ -216,63 +213,87 @@ public class StackView extends AdapterViewAnimator {
             transformViewAtIndex(toIndex, view, false);
             view.setVisibility(VISIBLE);
 
-            alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
-            alphaOa.setDuration(FADE_IN_ANIMATION_DURATION);
-            if (oldAlphaOa != null) oldAlphaOa.cancel();
-            alphaOa.start();
-            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation,
-                    new WeakReference<ObjectAnimator>(alphaOa));
+            ((StackFrame) view).cancelAlphaAnimator();
+            if (animate) {
+                alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 1.0f);
+                alphaOa.setDuration(FADE_IN_ANIMATION_DURATION);
+                ((StackFrame) view).setAlphaAnimator(alphaOa);
+                alphaOa.start();
+            } else {
+                view.setAlpha(1.0f);
+            }
         } else if (fromIndex == 0 && toIndex == 1) {
             // Slide item in
+            ((StackFrame) view).cancelSliderAnimator();
             view.setVisibility(VISIBLE);
 
             int duration = Math.round(mStackSlider.getDurationForNeutralPosition(mYVelocity));
-
             StackSlider animationSlider = new StackSlider(mStackSlider);
             animationSlider.setView(view);
-            PropertyValuesHolder slideInY = PropertyValuesHolder.ofFloat("YProgress", 0.0f);
-            PropertyValuesHolder slideInX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
-            ObjectAnimator slideIn = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
-                    slideInX, slideInY);
-            slideIn.setDuration(duration);
-            slideIn.setInterpolator(new LinearInterpolator());
-            slideIn.start();
+
+            if (animate) {
+                PropertyValuesHolder slideInY = PropertyValuesHolder.ofFloat("YProgress", 0.0f);
+                PropertyValuesHolder slideInX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
+                ObjectAnimator slideIn = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
+                        slideInX, slideInY);
+                slideIn.setDuration(duration);
+                slideIn.setInterpolator(new LinearInterpolator());
+                ((StackFrame) view).setSliderAnimator(slideIn);
+                slideIn.start();
+            } else {
+                animationSlider.setYProgress(0f);
+                animationSlider.setXProgress(0f);
+            }
         } else if (fromIndex == 1 && toIndex == 0) {
             // Slide item out
+            ((StackFrame) view).cancelSliderAnimator();
             int duration = Math.round(mStackSlider.getDurationForOffscreenPosition(mYVelocity));
 
             StackSlider animationSlider = new StackSlider(mStackSlider);
             animationSlider.setView(view);
-            PropertyValuesHolder slideOutY = PropertyValuesHolder.ofFloat("YProgress", 1.0f);
-            PropertyValuesHolder slideOutX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
-            ObjectAnimator slideOut = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
-                    slideOutX, slideOutY);
-            slideOut.setDuration(duration);
-            slideOut.setInterpolator(new LinearInterpolator());
-            slideOut.start();
+            if (animate) {
+                PropertyValuesHolder slideOutY = PropertyValuesHolder.ofFloat("YProgress", 1.0f);
+                PropertyValuesHolder slideOutX = PropertyValuesHolder.ofFloat("XProgress", 0.0f);
+                ObjectAnimator slideOut = ObjectAnimator.ofPropertyValuesHolder(animationSlider,
+                        slideOutX, slideOutY);
+                slideOut.setDuration(duration);
+                slideOut.setInterpolator(new LinearInterpolator());
+                ((StackFrame) view).setSliderAnimator(slideOut);
+                slideOut.start();
+            } else {
+                animationSlider.setYProgress(1.0f);
+                animationSlider.setXProgress(0f);
+            }
         } else if (toIndex == 0) {
             // Make sure this view that is "waiting in the wings" is invisible
             view.setAlpha(0.0f);
             view.setVisibility(INVISIBLE);
-        } else if (fromIndex == 0 && toIndex > 1) {
+        } else if ((fromIndex == 0 || fromIndex == 1) && toIndex > 1) {
             view.setVisibility(VISIBLE);
             view.setAlpha(1.0f);
+            view.setRotationX(0f);
+            LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            lp.setVerticalOffset(0);
+            lp.setHorizontalOffset(0);
         } else if (fromIndex == -1) {
             view.setAlpha(1.0f);
             view.setVisibility(VISIBLE);
         } else if (toIndex == -1) {
             // Fade item out
-            alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
-            alphaOa.setDuration(STACK_RELAYOUT_DURATION);
-            if (oldAlphaOa != null) oldAlphaOa.cancel();
-            alphaOa.start();
-            view.setTagInternal(com.android.internal.R.id.viewAlphaAnimation,
-                    new WeakReference<ObjectAnimator>(alphaOa));
+            ((StackFrame) view).cancelAlphaAnimator();
+            if (animate) {
+                alphaOa = ObjectAnimator.ofFloat(view, "alpha", view.getAlpha(), 0.0f);
+                alphaOa.setDuration(STACK_RELAYOUT_DURATION);
+                ((StackFrame) view).setAlphaAnimator(alphaOa);
+                alphaOa.start();
+            } else {
+                view.setAlpha(0f);
+            }
         }
 
         // Implement the faked perspective
         if (toIndex != -1) {
-            transformViewAtIndex(toIndex, view, true);
+            transformViewAtIndex(toIndex, view, animate);
         }
     }
 
@@ -304,12 +325,8 @@ public class StackView extends AdapterViewAnimator {
 
         // If this view is currently being animated for a certain position, we need to cancel
         // this animation so as not to interfere with the new transformation.
-        Object tag = view.getTag(com.android.internal.R.id.viewAnimation);
-        if (tag instanceof WeakReference<?>) {
-            Object obj = ((WeakReference<?>) tag).get();
-            if (obj instanceof ObjectAnimator) {
-                ((ObjectAnimator) obj).cancel();
-            }
+        if (view instanceof StackFrame) {
+            ((StackFrame) view).cancelTransformAnimator();
         }
 
         if (animate) {
@@ -321,8 +338,9 @@ public class StackView extends AdapterViewAnimator {
             ObjectAnimator oa = ObjectAnimator.ofPropertyValuesHolder(view, scalePropX, scalePropY,
                     translationY, translationX);
             oa.setDuration(STACK_RELAYOUT_DURATION);
-            view.setTagInternal(com.android.internal.R.id.viewAnimation, 
-                    new WeakReference<ObjectAnimator>(oa));
+            if (view instanceof StackFrame) {
+                ((StackFrame) view).setTransformAnimator(oa);
+            }
             oa.start();
         } else {
             view.setTranslationX(transX);
@@ -396,6 +414,9 @@ public class StackView extends AdapterViewAnimator {
                 if (v != null) v.bringToFront();
             }
         }
+        if (mHighlight != null) {
+            mHighlight.bringToFront();
+        }
         mTransitionIsSetup = false;
         mClickFeedbackIsValid = false;
     }
@@ -436,9 +457,64 @@ public class StackView extends AdapterViewAnimator {
         }
     }
 
+    private static class StackFrame extends FrameLayout {
+        WeakReference<ObjectAnimator> alphaAnimator;
+        WeakReference<ObjectAnimator> transformAnimator;
+        WeakReference<ObjectAnimator> sliderAnimator;
+
+        public StackFrame(Context context) {
+            super(context);
+        }
+
+        void setAlphaAnimator(ObjectAnimator oa) {
+            alphaAnimator = new WeakReference<ObjectAnimator>(oa);
+        }
+
+        void setTransformAnimator(ObjectAnimator oa) {
+            transformAnimator = new WeakReference<ObjectAnimator>(oa);
+        }
+
+        void setSliderAnimator(ObjectAnimator oa) {
+            sliderAnimator = new WeakReference<ObjectAnimator>(oa);
+        }
+
+        boolean cancelAlphaAnimator() {
+            if (alphaAnimator != null) {
+                ObjectAnimator oa = alphaAnimator.get();
+                if (oa != null) {
+                    oa.cancel();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        boolean cancelTransformAnimator() {
+            if (transformAnimator != null) {
+                ObjectAnimator oa = transformAnimator.get();
+                if (oa != null) {
+                    oa.cancel();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        boolean cancelSliderAnimator() {
+            if (sliderAnimator != null) {
+                ObjectAnimator oa = sliderAnimator.get();
+                if (oa != null) {
+                    oa.cancel();
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     @Override
     FrameLayout getFrameForChild() {
-        FrameLayout fl = new FrameLayout(mContext);
+        StackFrame fl = new StackFrame(mContext);
         fl.setPadding(mFramePadding, mFramePadding, mFramePadding, mFramePadding);
         return fl;
     }
@@ -471,16 +547,26 @@ public class StackView extends AdapterViewAnimator {
     private void onLayout() {
         if (!mFirstLayoutHappened) {
             mSlideAmount = Math.round(SLIDE_UP_RATIO * getMeasuredHeight());
-            updateChildTransforms();
             mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO * mSlideAmount);
             mFirstLayoutHappened = true;
+            post(new Runnable() {
+                public void run() {
+                    updateChildTransforms();
+                }
+            });
         }
 
         if (Float.compare(mPerspectiveShiftY, mNewPerspectiveShiftY) != 0 ||
                 Float.compare(mPerspectiveShiftX, mNewPerspectiveShiftX) != 0) {
+
             mPerspectiveShiftY = mNewPerspectiveShiftY;
             mPerspectiveShiftX = mNewPerspectiveShiftX;
-            updateChildTransforms();
+
+            post(new Runnable() {
+                public void run() {
+                    updateChildTransforms();
+                }
+            });
         }
     }
 
@@ -1034,11 +1120,11 @@ public class StackView extends AdapterViewAnimator {
 
         mNewPerspectiveShiftX = PERSPECTIVE_SHIFT_FACTOR_X * measuredWidth;
         mNewPerspectiveShiftY = PERSPECTIVE_SHIFT_FACTOR_Y * measuredHeight;
-        if (maxWidth > 0 && maxWidth < childWidth) {
+        if (maxWidth > 0 && count > 0 && maxWidth < childWidth) {
             mNewPerspectiveShiftX = measuredWidth - maxWidth;
         }
 
-        if (maxHeight > 0 && maxHeight < childHeight) {
+        if (maxHeight > 0 && count > 0 && maxHeight < childHeight) {
             mNewPerspectiveShiftY = measuredHeight - maxHeight;
         }
     }
