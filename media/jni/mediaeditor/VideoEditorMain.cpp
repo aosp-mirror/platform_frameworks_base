@@ -86,6 +86,7 @@ typedef struct
     jmethodID                      onWarningMethodId;
     jmethodID                      onProgressUpdateMethodId;
     jmethodID                      onPreviewProgressUpdateMethodId;
+    jmethodID                      previewFrameEditInfoId;
     M4xVSS_InitParams              initParams;
     void*                          pTextRendererHandle;
     M4xVSS_getTextRgbBufferFct     pTextRendererFunction;
@@ -102,6 +103,9 @@ typedef struct
     M4OSA_Bool                      bSkipState;
     jmethodID                       onAudioGraphProgressUpdateMethodId;
     Mutex                           mLock;
+    bool                            mIsUpdateOverlay;
+    char                            *mOverlayFileName;
+    int                             mOverlayRenderingMode;
 } ManualEditContext;
 
 extern "C" M4OSA_ERR M4MCS_open_normalMode(
@@ -224,7 +228,7 @@ static int videoEditor_registerManualEditMethods(
                 JNIEnv*                             pEnv);
 
 static void jniPreviewProgressCallback(void* cookie, M4OSA_UInt32 msgType,
-                                        M4OSA_UInt32 argc);
+                                        void *argc);
 
 static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
                                                     jobject thiz,
@@ -374,35 +378,105 @@ getClipSetting(
 }
 
 static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
-                                        M4OSA_UInt32 argc)
+                                        void *argc)
 {
     ManualEditContext *pContext = (ManualEditContext *)cookie;
     JNIEnv*     pEnv = NULL;
     bool        isFinished = false;
     int         currentMs = 0;
     int         error = M4NO_ERROR;
+    bool        isUpdateOverlay = false;
+    int         overlayEffectIndex;
+    char        *extPos;
+    bool        isSendProgress = true;
+    jstring     tmpFileName;
+    VideoEditorCurretEditInfo *pCurrEditInfo;
 
     // Attach the current thread.
     pContext->pVM->AttachCurrentThread(&pEnv, NULL);
     switch(msgType)
     {
         case MSG_TYPE_PROGRESS_INDICATION:
-            currentMs = argc;
+            currentMs = *(int*)argc;
             break;
         case MSG_TYPE_PLAYER_ERROR:
             currentMs = -1;
-            error = argc;
+            error = *(int*)argc;
             break;
         case MSG_TYPE_PREVIEW_END:
             isFinished = true;
+            break;
+        case MSG_TYPE_OVERLAY_UPDATE:
+        {
+            int overlayFileNameLen = 0;
+            isSendProgress = false;
+            pContext->mIsUpdateOverlay = true;
+            pCurrEditInfo = (VideoEditorCurretEditInfo*)argc;
+            overlayEffectIndex = pCurrEditInfo->overlaySettingsIndex;
+            LOGV("MSG_TYPE_OVERLAY_UPDATE");
+
+            if (pContext->mOverlayFileName != NULL) {
+                M4OSA_free((M4OSA_MemAddr32)pContext->mOverlayFileName);
+                pContext->mOverlayFileName = NULL;
+            }
+
+            overlayFileNameLen =
+                strlen((const char*)pContext->pEditSettings->Effects[overlayEffectIndex].xVSS.pFramingFilePath);
+
+            pContext->mOverlayFileName =
+                (char*)M4OSA_malloc(overlayFileNameLen+1,
+                                    M4VS, (M4OSA_Char*)"videoEdito JNI overlayFile");
+            if (pContext->mOverlayFileName != NULL) {
+                strncpy (pContext->mOverlayFileName,
+                    (const char*)pContext->pEditSettings->\
+                    Effects[overlayEffectIndex].xVSS.pFramingFilePath, overlayFileNameLen);
+                //Change the name to png file
+                extPos = strstr(pContext->mOverlayFileName, ".rgb");
+                if (extPos != NULL) {
+                    *extPos = '\0';
+                } else {
+                    LOGE("ERROR the overlay file is incorrect");
+                }
+
+                strcat(pContext->mOverlayFileName, ".png");
+                LOGV("Conv string is %s", pContext->mOverlayFileName);
+                LOGV("Current Clip index = %d", pCurrEditInfo->clipIndex);
+
+                pContext->mOverlayRenderingMode = pContext->pEditSettings->\
+                         pClipList[pCurrEditInfo->clipIndex]->xVSS.MediaRendering;
+                LOGI("rendering mode %d ", pContext->mOverlayRenderingMode);
+
+            }
+
+            break;
+        }
+
+        case MSG_TYPE_OVERLAY_CLEAR:
+            isSendProgress = false;
+            pContext->mOverlayFileName = NULL;
+            LOGI("MSG_TYPE_OVERLAY_CLEAR");
+            //argc is not used
+            pContext->mIsUpdateOverlay = true;
             break;
         default:
             break;
     }
 
-    pEnv->CallVoidMethod(pContext->engine,
-                        pContext->onPreviewProgressUpdateMethodId,
-                        currentMs,isFinished);
+    if (isSendProgress) {
+        tmpFileName  = pEnv->NewStringUTF(pContext->mOverlayFileName);
+        pEnv->CallVoidMethod(pContext->engine,
+                pContext->onPreviewProgressUpdateMethodId,
+                currentMs,isFinished, pContext->mIsUpdateOverlay,
+                tmpFileName, pContext->mOverlayRenderingMode);
+
+        if (pContext->mIsUpdateOverlay) {
+            pContext->mIsUpdateOverlay = false;
+        }
+
+        if (tmpFileName) {
+            pEnv->DeleteLocalRef(tmpFileName);
+        }
+    }
 
     // Detach the current thread.
     pContext->pVM->DetachCurrentThread();
@@ -422,6 +496,11 @@ static void videoEditor_stopPreview(JNIEnv*  pEnv,
                                              (M4OSA_NULL == pContext),
                                              "not initialized");
     pContext->mPreviewController->stopPreview();
+
+    if (pContext->mOverlayFileName != NULL) {
+        M4OSA_free((M4OSA_MemAddr32)pContext->mOverlayFileName);
+        pContext->mOverlayFileName = NULL;
+    }
 }
 
 static void videoEditor_clearSurface(JNIEnv* pEnv,
@@ -507,6 +586,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
     M4OSA_Context tnContext = M4OSA_NULL;
     const char* pMessage = NULL;
     M4VIFI_ImagePlane *yuvPlane = NULL;
+    VideoEditorCurretEditInfo  currEditInfo;
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO,
         "VIDEO_EDITOR", "surfaceWidth = %d",surfaceWidth);
@@ -770,9 +850,36 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
         pContext->pEditSettings->\
         pClipList[iCurrentClipIndex]->xVSS.MediaRendering,
         pContext->pEditSettings->xVSS.outputVideoSize);
-
     result = pContext->mPreviewController->renderPreviewFrame(previewSurface,
-                                                              &frameStr);
+                                                              &frameStr, &currEditInfo);
+
+    if (currEditInfo.overlaySettingsIndex != -1) {
+        char tmpOverlayFilename[100];
+        char *extPos = NULL;
+        jstring tmpOverlayString;
+        int tmpRenderingMode = 0;
+
+        strncpy (tmpOverlayFilename,
+                (const char*)pContext->pEditSettings->Effects[currEditInfo.overlaySettingsIndex].xVSS.pFramingFilePath, 99);
+
+        //Change the name to png file
+        extPos = strstr(tmpOverlayFilename, ".rgb");
+        if (extPos != NULL) {
+            *extPos = '\0';
+        } else {
+            LOGE("ERROR the overlay file is incorrect");
+        }
+
+        strcat(tmpOverlayFilename, ".png");
+
+        tmpRenderingMode = pContext->pEditSettings->pClipList[iCurrentClipIndex]->xVSS.MediaRendering;
+        tmpOverlayString = pEnv->NewStringUTF(tmpOverlayFilename);
+        pEnv->CallVoidMethod(pContext->engine,
+            pContext->previewFrameEditInfoId,
+            tmpOverlayString, tmpRenderingMode);
+
+    }
+
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
             (M4NO_ERROR != result), result);
 
@@ -937,7 +1044,7 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
     /*  pContext->mPreviewController->setPreviewFrameRenderingMode(M4xVSS_kBlackBorders,
     (M4VIDEOEDITING_VideoFrameSize)(M4VIDEOEDITING_kHD960+1));*/
     result
-    = pContext->mPreviewController->renderPreviewFrame(previewSurface,&frameStr);
+    = pContext->mPreviewController->renderPreviewFrame(previewSurface,&frameStr, NULL);
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
                                                 (M4NO_ERROR != result), result);
 
@@ -1325,7 +1432,7 @@ videoEditor_populateSettings(
                                      "not initialized");
 
     pContext->onPreviewProgressUpdateMethodId = pEnv->GetMethodID(engineClass,
-            "onPreviewProgressUpdate",     "(IZ)V");
+            "onPreviewProgressUpdate",     "(IZZLjava/lang/String;I)V");
     // Check if the context is valid (required because the context is dereferenced).
     if (needToBeLoaded) {
         // Make sure that we are in a correct state.
@@ -1341,6 +1448,9 @@ videoEditor_populateSettings(
             settings, &pContext->pEditSettings,false);
     }
     M4OSA_TRACE1_0("videoEditorC_getEditSettings done");
+
+    pContext->previewFrameEditInfoId = pEnv->GetMethodID(engineClass,
+        "previewFrameEditInfo", "(Ljava/lang/String;I)V");
 
     if ( pContext->pEditSettings != NULL )
     {
@@ -1440,22 +1550,22 @@ videoEditor_populateSettings(
                 width = pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_width;
                 height = pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_height;
 
-                pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_stride = width*3;
+                //RGB 565
+                pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_stride = width*2;
 
-                //for RGB888
+                //for RGB565
                 pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_topleft = 0;
-
                 pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->pac_data =
-                                                    (M4VIFI_UInt8 *)M4OSA_malloc(width*height*3,
-                    0x00,(M4OSA_Char *)"pac_data buffer");
+                            (M4VIFI_UInt8 *)M4OSA_malloc(width*height*2,
+                            0x00,(M4OSA_Char *)"pac_data buffer");
 
                 M4OSA_memcpy((M4OSA_Int8 *)&pContext->pEditSettings->\
                     Effects[j].xVSS.pFramingBuffer->\
-                    pac_data[0],(M4OSA_Int8 *)&aFramingCtx->FramingRgb->pac_data[0],(width*height*3));
+                    pac_data[0],(M4OSA_Int8 *)&aFramingCtx->FramingRgb->pac_data[0],(width*height*2));
 
-                //As of now rgb type is always rgb888, can be changed in future for rgb 565
+                //As of now rgb type is 565
                 pContext->pEditSettings->Effects[j].xVSS.rgbType =
-                (M4VSS3GPP_RGBType)M4VSS3GPP_kRGB888; //M4VSS3GPP_kRGB565;
+                    (M4VSS3GPP_RGBType) M4VSS3GPP_kRGB565;
 
                 if (aFramingCtx->FramingYuv != M4OSA_NULL )
                 {
@@ -2153,6 +2263,8 @@ videoEditor_init(
             M4OSA_chrNCat((M4OSA_Char*)pContext->initParams.pTempPath, tmpString, M4OSA_chrLength(tmpString));
             M4OSA_chrNCat((M4OSA_Char*)pContext->initParams.pTempPath, (M4OSA_Char*)"/", 1);
             M4OSA_free((M4OSA_MemAddr32)tmpString);
+            pContext->mIsUpdateOverlay = false;
+            pContext->mOverlayFileName = NULL;
         }
 
         // Check if the initialization succeeded
