@@ -96,6 +96,7 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] DELEGATE_METHODS = new String[] {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         "android.os.Handler#sendMessageAtTime",
+        "android.os.Build#getString",
         "android.view.LayoutInflater#rInflate",
         "android.view.View#isInEditMode",
         "com.android.internal.util.XmlUtils#convertValueToInt",

@@ -446,6 +446,15 @@ public class Region_Delegate {
         return region1.mArea.equals(region2.mArea);
     }
 
+    /*package*/ static String nativeToString(int native_region) {
+        Region_Delegate region = sManager.getDelegate(native_region);
+        if (region == null) {
+            return "not found";
+        }
+
+        return region.mArea.toString();
+    }
+
     // ---- Private delegate/helper methods ----
 
 }
