@@ -22,6 +22,7 @@ import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.nfc.technology.TagTechnology;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -368,6 +369,16 @@ public final class NfcAdapter {
             attemptDeadServiceRecovery(e);
             return false;
         }
+    }
+
+    /**
+     * Retrieve a TagTechnology object used to interact with a Tag that is
+     * in field.
+     * <p>
+     * @return TagTechnology object, or null if not present
+     */
+    public TagTechnology getTechnology(Tag tag, int tech) {
+        return tag.getTechnology(NfcAdapter.this, tech);
     }
 
     /**

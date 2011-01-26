@@ -25,7 +25,7 @@ import android.os.RemoteException;
  * A low-level connection to a {@link Tag} using the NFC-A technology, also known as
  * ISO1443-3A.
  *
- * <p>You can acquire this kind of connection with {@link Tag#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
  * Use this class to send and receive data with {@link #transceive transceive()}.
  *
  * <p>Applications must implement their own protocol stack on top of
