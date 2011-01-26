@@ -23,6 +23,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -36,6 +37,8 @@ import java.io.IOException;
  * permission.
  */
 public final class NdefFormatable extends BasicTagTechnology {
+    private static final String TAG = "NFC";
+
     /**
      * Internal constructor, to be used by NfcAdapter
      * @hide
@@ -85,7 +88,7 @@ public final class NdefFormatable extends BasicTagTechnology {
                 throw new IOException();
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
         }
     }
 

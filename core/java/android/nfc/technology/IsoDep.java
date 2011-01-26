@@ -58,10 +58,14 @@ public final class IsoDep extends BasicTagTechnology {
     /**
      * 3A only
      */
-    public byte[] getHistoricalBytes() { return mHistBytes; }
+    public byte[] getHistoricalBytes() {
+        return mHistBytes;
+    }
 
     /**
      * 3B only
      */
-    public byte[] getHiLayerResponse() { return mHiLayerResponse; }
+    public byte[] getHiLayerResponse() {
+        return mHiLayerResponse;
+    }
 }

@@ -195,6 +195,7 @@ public final class NfcAdapter {
     // attemptDeadServiceRecovery() when NFC crashes - we accept a best effort
     // recovery
     private static INfcAdapter sService;
+    private static INfcTag sTagService;
 
     private final Context mContext;
 
@@ -231,6 +232,12 @@ public final class NfcAdapter {
             sService = getServiceInterface();
             if (sService == null) {
                 Log.e(TAG, "could not retrieve NFC service");
+                return null;
+            }
+            try {
+                sTagService = sService.getNfcTagInterface();
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not retrieve NFC Tag service");
                 return null;
             }
         }
@@ -299,6 +306,14 @@ public final class NfcAdapter {
     }
 
     /**
+     * Returns the binder interface to the tag service.
+     * @hide
+     */
+    public INfcTag getTagService() {
+        return sTagService;
+    }
+
+    /**
      * NFC service dead - attempt best effort recovery
      * @hide
      */
@@ -307,11 +322,21 @@ public final class NfcAdapter {
         INfcAdapter service = getServiceInterface();
         if (service == null) {
             Log.e(TAG, "could not retrieve NFC service during service recovery");
+            // nothing more can be done now, sService is still stale, we'll hit
+            // this recovery path again later
             return;
         }
-        /* assigning to sService is not thread-safe, but this is best-effort code
-         * and on a well-behaved system should never happen */
+        // assigning to sService is not thread-safe, but this is best-effort code
+        // and on a well-behaved system should never happen
         sService = service;
+        try {
+            sTagService = service.getNfcTagInterface();
+        } catch (RemoteException ee) {
+            Log.e(TAG, "could not retrieve NFC tag service during service recovery");
+            // nothing more can be done now, sService is still stale, we'll hit
+            // this recovery path again later
+        }
+
         return;
     }
 
