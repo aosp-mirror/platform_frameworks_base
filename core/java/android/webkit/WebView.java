@@ -4087,7 +4087,9 @@ public class WebView extends AbsoluteLayout
                 df = mScrollFilter;
             }
             canvas.setDrawFilter(df);
-            int content = nativeDraw(canvas, color, extras, true);
+            // XXX: Revisit splitting content.  Right now it causes a
+            // synchronization problem with layers.
+            int content = nativeDraw(canvas, color, extras, false);
             canvas.setDrawFilter(null);
             if (content != 0) {
                 mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
