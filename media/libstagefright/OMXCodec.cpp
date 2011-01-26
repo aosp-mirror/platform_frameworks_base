@@ -522,6 +522,12 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
     if (flags & kStoreMetaDataInVideoBuffers) {
         mIsMetaDataStoredInVideoBuffers = true;
     }
+
+    mOnlySubmitOneBufferAtOneTime = false;
+    if (flags & kOnlySubmitOneInputBufferAtOneTime) {
+        mOnlySubmitOneBufferAtOneTime = true;
+    }
+
     if (!(flags & kIgnoreCodecSpecificData)) {
         uint32_t type;
         const void *data;
@@ -2610,7 +2616,17 @@ void OMXCodec::drainInputBuffers() {
 
     Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
     for (size_t i = 0; i < buffers->size(); ++i) {
-        if (!drainInputBuffer(&buffers->editItemAt(i))) {
+        BufferInfo *info = &buffers->editItemAt(i);
+
+        if (info->mStatus != OWNED_BY_US) {
+            continue;
+        }
+
+        if (!drainInputBuffer(info)) {
+            break;
+        }
+
+        if (mOnlySubmitOneBufferAtOneTime) {
             break;
         }
     }
