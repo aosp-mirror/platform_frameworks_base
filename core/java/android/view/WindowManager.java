@@ -953,9 +953,18 @@ public interface WindowManager extends ViewManager {
 
         /**
          * Control the visibility of the status bar.
-         * @hide
+         *
+         * @see View#STATUS_BAR_VISIBLE
+         * @see View#STATUS_BAR_HIDDEN
          */
         public int systemUiVisibility;
+
+        /**
+         * @hide
+         * The ui visibility as requested by the views in this hierarchy.
+         * the combined value should be systemUiVisibility | subtreeSystemUiVisibility.
+         */
+        public int subtreeSystemUiVisibility;
 
         /**
          * Get callbacks about the system ui visibility changing.
@@ -1046,6 +1055,7 @@ public interface WindowManager extends ViewManager {
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
             out.writeInt(systemUiVisibility);
+            out.writeInt(subtreeSystemUiVisibility);
             out.writeInt(hasSystemUiListeners ? 1 : 0);
         }
         
@@ -1083,6 +1093,7 @@ public interface WindowManager extends ViewManager {
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
             systemUiVisibility = in.readInt();
+            subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readInt() != 0;
         }
     
@@ -1204,8 +1215,10 @@ public interface WindowManager extends ViewManager {
                 changes |= SCREEN_ORIENTATION_CHANGED;
             }
 
-            if (systemUiVisibility != o.systemUiVisibility) {
+            if (systemUiVisibility != o.systemUiVisibility
+                    || subtreeSystemUiVisibility != o.subtreeSystemUiVisibility) {
                 systemUiVisibility = o.systemUiVisibility;
+                subtreeSystemUiVisibility = o.subtreeSystemUiVisibility;
                 changes |= SYSTEM_UI_VISIBILITY_CHANGED;
             }
 
@@ -1289,6 +1302,10 @@ public interface WindowManager extends ViewManager {
             if (systemUiVisibility != 0) {
                 sb.append(" sysui=0x");
                 sb.append(Integer.toHexString(systemUiVisibility));
+            }
+            if (subtreeSystemUiVisibility != 0) {
+                sb.append(" vsysui=0x");
+                sb.append(Integer.toHexString(subtreeSystemUiVisibility));
             }
             if (hasSystemUiListeners) {
                 sb.append(" sysuil=");
