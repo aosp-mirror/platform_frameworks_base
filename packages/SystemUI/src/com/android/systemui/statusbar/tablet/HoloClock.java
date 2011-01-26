@@ -52,8 +52,13 @@ public class HoloClock extends FrameLayout {
     private String mClockFormatString;
     private SimpleDateFormat mClockFormat;
 
-    private static Typeface sBackgroundType, sForegroundType;
-    private TextView mBgText, mFgText;
+    private static final String FONT_DIR = "/system/fonts/";
+    private static final String CLOCK_FONT = FONT_DIR + "AndroidClock_Solid.ttf"; 
+    private static final String CLOCK_FG_FONT = FONT_DIR + "AndroidClock.ttf"; 
+    private static final String CLOCK_BG_FONT = FONT_DIR + "AndroidClock_Highlight.ttf"; 
+
+    private static Typeface sBackgroundType, sForegroundType, sSolidType;
+    private TextView mSolidText, mBgText, mFgText;
 
     public HoloClock(Context context) {
         this(context, null);
@@ -71,13 +76,10 @@ public class HoloClock extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        if (sBackgroundType == null) {
-            AssetManager assets = getContext().getAssets();
-
-            sBackgroundType = Typeface.createFromAsset(assets,
-                "fonts/AndroidClock.ttf");
-            sForegroundType = Typeface.createFromAsset(assets,
-                "fonts/AndroidClock2.ttf");
+        if (sSolidType == null) {
+            sSolidType = Typeface.createFromFile(CLOCK_FONT);
+            sBackgroundType = Typeface.createFromFile(CLOCK_BG_FONT);
+            sForegroundType = Typeface.createFromFile(CLOCK_FG_FONT);
         }
         mBgText = (TextView) findViewById(R.id.time_bg);
         if (mBgText != null) {
@@ -86,6 +88,10 @@ public class HoloClock extends FrameLayout {
         mFgText = (TextView) findViewById(R.id.time_fg);
         if (mFgText != null) {
             mFgText.setTypeface(sForegroundType);
+        }
+        mSolidText = (TextView) findViewById(R.id.time_solid);
+        if (mSolidText != null) {
+            mSolidText.setTypeface(sSolidType);
         }
     }
 
@@ -142,8 +148,9 @@ public class HoloClock extends FrameLayout {
     final void updateClock() {
         mCalendar.setTimeInMillis(System.currentTimeMillis());
         CharSequence txt = getTimeText();
-        mBgText.setText(txt);
-        mFgText.setText(txt);
+        if (mBgText != null) mBgText.setText(txt);
+        if (mFgText != null) mFgText.setText(txt);
+        if (mSolidText != null) mSolidText.setText(txt);
     }
 
     private final CharSequence getTimeText() {

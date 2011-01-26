@@ -3,9 +3,9 @@
     android:layout_height="match_parent"
     >
     <ImageView android:id="@+id/icon"
-        android:layout_width="48dp"
-        android:layout_height="64dp"
-        android:layout_marginLeft="4dp"
+        android:layout_width="@dimen/notification_large_icon_width"
+        android:layout_height="@dimen/notification_large_icon_height"
+        android:background="@drawable/notify_panel_notification_icon_bg"
         android:scaleType="center"
         />
     <LinearLayout
@@ -14,7 +14,7 @@
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingLeft="8dp"
+        android:paddingLeft="16dp"
         >
         <TextView android:id="@+id/title"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Title"
@@ -23,6 +23,7 @@
             android:singleLine="true"
             android:ellipsize="marquee"
             android:fadingEdge="horizontal"
+            android:layout_marginBottom="-4dp"
             />
         <TextView android:id="@+id/text"
             android:textAppearance="@style/TextAppearance.StatusBar.EventContent"

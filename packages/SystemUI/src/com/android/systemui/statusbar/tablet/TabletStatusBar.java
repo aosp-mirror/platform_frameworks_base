@@ -1222,6 +1222,7 @@ public class TabletStatusBar extends StatusBar implements
 
     void workAroundBadLayerDrawableOpacity(View v) {
         LayerDrawable d = (LayerDrawable)v.getBackground();
+        if (d == null) return;
         v.setBackgroundDrawable(null);
         d.setOpacity(PixelFormat.TRANSLUCENT);
         v.setBackgroundDrawable(d);

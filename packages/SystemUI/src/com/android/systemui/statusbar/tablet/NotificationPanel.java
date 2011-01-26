@@ -58,7 +58,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     ViewGroup mContentFrame;
     Rect mContentArea = new Rect();
     View mSettingsView;
-    View mGlow;
     ViewGroup mContentParent;
 
     Choreographer mChoreo = new Choreographer();
@@ -82,8 +81,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mTitleArea = findViewById(R.id.title_area);
         mModeToggle = findViewById(R.id.mode_toggle);
         mModeToggle.setOnClickListener(this);
-
-        mGlow = findViewById(R.id.glow);
 
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
@@ -306,18 +303,15 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                     ? new android.view.animation.DecelerateInterpolator(1.0f)
                     : new android.view.animation.AccelerateInterpolator(1.0f));
 
-            Animator glowAnim = ObjectAnimator.ofInt(mGlow.getBackground(), "alpha",
-                    mVisible ? 255 : 0, appearing ? 255 : 0);
-            glowAnim.setInterpolator(appearing
-                    ? new android.view.animation.AccelerateInterpolator(1.0f)
-                    : new android.view.animation.DecelerateInterpolator(1.0f));
+            if (mContentAnim != null && mContentAnim.isRunning()) {
+                mContentAnim.cancel();
+            }
 
             mContentAnim = new AnimatorSet();
             mContentAnim
                 .play(ObjectAnimator.ofFloat(mContentParent, "alpha",
                     mContentParent.getAlpha(), appearing ? 1.0f : 0.0f))
                 .with(bgAnim)
-                .with(glowAnim)
                 .with(posAnim)
                 ;
             mContentAnim.setDuration((DEBUG?10:1)*(appearing ? OPEN_DURATION : CLOSE_DURATION));
@@ -330,7 +324,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             createAnimation(appearing);
 
             mContentParent.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            mGlow.setLayerType(View.LAYER_TYPE_HARDWARE, null);
             mContentAnim.start();
 
             mVisible = appearing;
@@ -338,8 +331,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
         public void onAnimationCancel(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationCancel");
-            // force this to zero so we close the window
-            mVisible = false;
         }
 
         public void onAnimationEnd(Animator animation) {
@@ -348,7 +339,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 setVisibility(View.GONE);
             }
             mContentParent.setLayerType(View.LAYER_TYPE_NONE, null);
-            mGlow.setLayerType(View.LAYER_TYPE_NONE, null);
             mContentAnim = null;
         }
 

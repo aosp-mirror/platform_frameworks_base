@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_weight="1"
                 >
-                <com.android.systemui.statusbar.tablet.NotificationLinearLayout
+                <LinearLayout
                     android:id="@+id/content"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -66,21 +66,9 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:descendantFocusability="afterDescendants"
-                    >
-                </com.android.systemui.statusbar.tablet.NotificationLinearLayout>
+                    />
             </ScrollView>
         </LinearLayout>
     </RelativeLayout>
-
-    <View
-        android:id="@+id/glow"
-        android:background="@drawable/notify_glow_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/content_parent"
-        android:layout_alignLeft="@id/content_parent"
-        android:layout_marginLeft="100dip"
-        android:layout_marginTop="50dip"
-        />
 
 </com.android.systemui.statusbar.tablet.NotificationPanel>
