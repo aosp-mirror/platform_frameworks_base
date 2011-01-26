@@ -86,7 +86,7 @@ android_hardware_UsbDevice_get_fd(JNIEnv *env, jobject thiz)
     return usb_device_get_fd(device);
 }
 
-static jint
+static jboolean
 android_hardware_UsbDevice_claim_interface(JNIEnv *env, jobject thiz, int interfaceID, jboolean force)
 {
     struct usb_device* device = get_device_from_object(env, thiz);
@@ -101,7 +101,7 @@ android_hardware_UsbDevice_claim_interface(JNIEnv *env, jobject thiz, int interf
         usb_device_connect_kernel_driver(device, interfaceID, false);
         ret = usb_device_claim_interface(device, interfaceID);
     }
-    return ret;
+    return ret == 0;
 }
 
 static jint
