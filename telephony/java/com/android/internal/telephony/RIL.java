@@ -214,7 +214,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
      * Wake lock timeout should be longer than the longest timeout in
      * the vendor ril.
      */
-    private static final int DEFAULT_WAKE_LOCK_TIMEOUT = 30000;
+    private static final int DEFAULT_WAKE_LOCK_TIMEOUT = 60000;
 
     //***** Instance Variables
 
