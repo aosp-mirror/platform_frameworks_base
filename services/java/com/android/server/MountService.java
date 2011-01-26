@@ -79,7 +79,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     private static final boolean LOCAL_LOGD = false;
     private static final boolean DEBUG_UNMOUNT = false;
     private static final boolean DEBUG_EVENTS = false;
-    private static final boolean DEBUG_OBB = true;
+    private static final boolean DEBUG_OBB = false;
 
     private static final String TAG = "MountService";
 
