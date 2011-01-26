@@ -55,7 +55,7 @@ bool parseDateTime(const char* dateTime, time_t& outSeconds) {
     tm.tm_min = minute;
     tm.tm_hour = hour;
     tm.tm_mday = day;
-    tm.tm_mon = month;
+    tm.tm_mon = month - 1;  // mktime uses months in 0 - 11 range
     tm.tm_year = year - 1900;
     tm.tm_wday = 0;
     tm.tm_isdst = -1;
@@ -72,7 +72,9 @@ void formatDateTime(time_t seconds, char* buffer, int bufferLength) {
 
     localtime_r(&seconds, &tm);
     snprintf(buffer, bufferLength, "%04d%02d%02dT%02d%02d%02d",
-        tm.tm_year + 1900, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+        tm.tm_year + 1900, 
+        tm.tm_mon + 1, // localtime_r uses months in 0 - 11 range
+        tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 }
 
 }  // namespace android
