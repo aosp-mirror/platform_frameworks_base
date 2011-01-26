@@ -218,6 +218,9 @@ void OpenGLRenderer::releaseContext() {
 
 bool OpenGLRenderer::callDrawGLFunction(Functor *functor) {
     interrupt();
+    if (mDirtyClip) {
+        setScissorFromClip();
+    }
     status_t result = (*functor)();
     resume();
     return (result == 0) ? false : true;
@@ -1451,13 +1454,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
         mode = getXfermode(p->getXfermode());
     }
 
-    // Skia draws using the color's alpha channel if < 255
-    // Otherwise, it uses the paint's alpha
     int color = p->getColor();
-    if (((color >> 24) & 0xff) == 255) {
-        color |= p->getAlpha() << 24;
-    }
-
     drawColorRect(left, top, right, bottom, color, mode);
 }
 

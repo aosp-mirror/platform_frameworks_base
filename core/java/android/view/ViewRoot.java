@@ -784,6 +784,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                                     Bitmap.Config.ARGB_8888);
                             mResizeBitmap.setHasAlpha(false);
                             Canvas canvas = new Canvas(mResizeBitmap);
+                            canvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
                             int yoff;
                             final boolean scrolling = mScroller != null
                                     && mScroller.computeScrollOffset();
@@ -1500,7 +1501,12 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mPreviousDirty.set(dirty);
                 dirty.setEmpty();
 
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this, mCurrentDirty);
+                Rect currentDirty = mCurrentDirty;
+                if (animating) {
+                    currentDirty = null;
+                }
+
+                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this, currentDirty);
             }
 
             if (animating) {
