@@ -27,7 +27,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:button="@drawable/status_bar_toggle_button"
+        android:button="@null"
         />
     <SeekBar
         android:id="@+id/slider"
