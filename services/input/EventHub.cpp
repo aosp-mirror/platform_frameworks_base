@@ -863,7 +863,7 @@ int EventHub::openDevice(const char *devicePath) {
     // See if this device is a joystick.
     // Ignore touchscreens because they use the same absolute axes for other purposes.
     if (device->classes & INPUT_DEVICE_CLASS_GAMEPAD
-            && !(device->classes & INPUT_DEVICE_CLASS_TOUCHSCREEN)) {
+            && !(device->classes & INPUT_DEVICE_CLASS_TOUCH)) {
         if (test_bit(ABS_X, abs_bitmask)
                 || test_bit(ABS_Y, abs_bitmask)
                 || test_bit(ABS_HAT0X, abs_bitmask)
