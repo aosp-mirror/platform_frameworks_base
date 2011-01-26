@@ -1152,7 +1152,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
                 if (!mNetAttributes[checkType].isDefault()) continue;
-                if (!mNetTrackers[checkType].isAvailable()) continue;
+
+// Enabling the isAvailable() optimization caused mobile to not get
+// selected if it was in the middle of error handling. Specifically
+// a moble connection that took 30 seconds to complete the DEACTIVATE_DATA_CALL
+// would not be available and we wouldn't get connected to anything.
+// So removing the isAvailable() optimization below for now. TODO: This
+// optimization should work and we need to investigate why it doesn't work.
+// This could be related to how DEACTIVATE_DATA_CALL is reporting its
+// complete before it is really complete.
+//                if (!mNetTrackers[checkType].isAvailable()) continue;
+
 //                if (currentPriority >= mNetAttributes[checkType].mPriority) continue;
 
                 NetworkStateTracker checkTracker = mNetTrackers[checkType];
