@@ -16,6 +16,15 @@
 
 package android.nfc;
 
+import android.nfc.tech.IsoDep;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.MifareUltralight;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NdefFormatable;
+import android.nfc.tech.NfcA;
+import android.nfc.tech.NfcB;
+import android.nfc.tech.NfcF;
+import android.nfc.tech.NfcV;
 import android.nfc.tech.TagTechnology;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -49,6 +58,7 @@ import java.util.Arrays;
 public class Tag implements Parcelable {
     /*package*/ final byte[] mId;
     /*package*/ final int[] mTechList;
+    /*package*/ final String[] mTechStringList;
     /*package*/ final Bundle[] mTechExtras;
     /*package*/ final int mServiceHandle;  // for use by NFC service, 0 indicates a mock
     /*package*/ final INfcTag mTagService;
@@ -66,6 +76,7 @@ public class Tag implements Parcelable {
         }
         mId = id;
         mTechList = Arrays.copyOf(techList, techList.length);
+        mTechStringList = generateTechStringList(techList);
         // Ensure mTechExtras is as long as mTechList
         mTechExtras = Arrays.copyOf(techListExtras, techList.length);
         mServiceHandle = serviceHandle;
@@ -86,6 +97,45 @@ public class Tag implements Parcelable {
     public static Tag createMockTag(byte[] id, int[] techList, Bundle[] techListExtras) {
         // set serviceHandle to 0 to indicate mock tag
         return new Tag(id, techList, techListExtras, 0, null);
+    }
+
+    private String[] generateTechStringList(int[] techList) {
+        final int size = techList.length;
+        String[] strings = new String[size];
+        for (int i = 0; i < size; i++) {
+            switch (techList[i]) {
+                case TagTechnology.ISO_DEP:
+                    strings[i] = IsoDep.class.getName();
+                    break;
+                case TagTechnology.MIFARE_CLASSIC:
+                    strings[i] = MifareClassic.class.getName();
+                    break;
+                case TagTechnology.MIFARE_ULTRALIGHT:
+                    strings[i] = MifareUltralight.class.getName();
+                    break;
+                case TagTechnology.NDEF:
+                    strings[i] = Ndef.class.getName();
+                    break;
+                case TagTechnology.NDEF_FORMATABLE:
+                    strings[i] = NdefFormatable.class.getName();
+                    break;
+                case TagTechnology.NFC_A:
+                    strings[i] = NfcA.class.getName();
+                    break;
+                case TagTechnology.NFC_B:
+                    strings[i] = NfcB.class.getName();
+                    break;
+                case TagTechnology.NFC_F:
+                    strings[i] = NfcF.class.getName();
+                    break;
+                case TagTechnology.NFC_V:
+                    strings[i] = NfcV.class.getName();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown tech type " + techList[i]);
+            }
+        }
+        return strings;
     }
 
     /**
@@ -110,13 +160,12 @@ public class Tag implements Parcelable {
      * Returns technologies present in the tag that this implementation understands,
      * or a zero length array if there are no supported technologies on this tag.
      *
-     * The elements of the list are guaranteed be one of the constants defined in
-     * {@link TagTechnology}. 
+     * The elements of the list are the names of the classes implementing the technology. 
      *
      * The ordering of the returned array is undefined and should not be relied upon.
      */
-    public int[] getTechnologyList() { 
-        return Arrays.copyOf(mTechList, mTechList.length);
+    public String[] getTechList() {
+        return mTechStringList;
     }
 
     /** @hide */

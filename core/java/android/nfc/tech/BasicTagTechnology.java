@@ -36,26 +36,8 @@ import java.io.IOException;
     /*package*/ int mSelectedTechnology;
 
     BasicTagTechnology(Tag tag, int tech) throws RemoteException {
-        int[] techList = tag.getTechnologyList();
-        int i;
-
-        // Check target validity
-        for (i = 0; i < techList.length; i++) {
-            if (tech == techList[i]) {
-                break;
-            }
-        }
-        if (i >= techList.length) {
-            // Technology not found
-            throw new IllegalArgumentException("Technology " + tech + " not present on tag " + tag);
-        }
-
         mTag = tag;
         mSelectedTechnology = tech;
-    }
-
-    BasicTagTechnology(Tag tag) throws RemoteException {
-        this(tag, tag.getTechnologyList()[0]);
     }
 
     @Override
@@ -65,15 +47,10 @@ import java.io.IOException;
 
     /** Internal helper to throw IllegalStateException if the technology isn't connected */
     void checkConnected() {
-       if ((mTag.getConnectedTechnology() != getTechnologyId()) ||
+       if ((mTag.getConnectedTechnology() != mSelectedTechnology) ||
                (mTag.getConnectedTechnology() == -1)) {
            throw new IllegalStateException("Call connect() first!");
        }
-    }
-
-    @Override
-    public int getTechnologyId() {
-        return mSelectedTechnology;
     }
 
     /**
@@ -101,11 +78,12 @@ import java.io.IOException;
     @Override
     public void connect() throws IOException {
         try {
-            int errorCode = mTag.getTagService().connect(mTag.getServiceHandle(), getTechnologyId());
+            int errorCode = mTag.getTagService().connect(mTag.getServiceHandle(),
+                    mSelectedTechnology);
 
             if (errorCode == ErrorCodes.SUCCESS) {
                 // Store this in the tag object
-                mTag.setConnectedTechnology(getTechnologyId());
+                mTag.setConnectedTechnology(mSelectedTechnology);
                 mIsConnected = true;
             } else {
                 throw new IOException();
@@ -158,7 +136,8 @@ import java.io.IOException;
         checkConnected();
 
         try {
-            TransceiveResult result = mTag.getTagService().transceive(mTag.getServiceHandle(), data, raw);
+            TransceiveResult result = mTag.getTagService().transceive(mTag.getServiceHandle(),
+                    data, raw);
             if (result == null) {
                 throw new IOException("transceive failed");
             } else {

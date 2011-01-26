@@ -31,7 +31,7 @@ import java.io.IOException;
 /**
  * A high-level connection to a {@link Tag} using one of the NFC type 1, 2, 3, or 4 technologies
  * to interact with NDEF data. MiFare Classic cards that present NDEF data may also be used
- * via this class. To determine the exact technology being used call {@link #getTechnologyId()}
+ * via this class. To determine the exact technology being used call {@link #getType()}
  *
  * <p>You can acquire this kind of connection with {@link #get}.
  *
