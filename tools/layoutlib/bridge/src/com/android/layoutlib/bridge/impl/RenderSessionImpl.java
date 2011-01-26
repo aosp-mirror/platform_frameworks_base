@@ -116,7 +116,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
     // information being returned through the API
     private BufferedImage mImage;
-    private ViewInfo mViewInfo;
+    private List<ViewInfo> mViewInfoList;
 
     private static final class PostInflateException extends Exception {
         private static final long serialVersionUID = 1L;
@@ -478,7 +478,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
             mViewRoot.draw(mCanvas);
 
-            mViewInfo = visit(((ViewGroup)mViewRoot).getChildAt(0), mContext);
+            mViewInfoList = visitAllChildren((ViewGroup)mViewRoot, mContext);
 
             // success!
             return SUCCESS.createResult();
@@ -1101,15 +1101,24 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
-            List<ViewInfo> children = new ArrayList<ViewInfo>();
-            for (int i = 0; i < group.getChildCount(); i++) {
-                children.add(visit(group.getChildAt(i), context));
-            }
-            result.setChildren(children);
+            result.setChildren(visitAllChildren(group, context));
         }
 
         return result;
     }
+
+    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, BridgeContext context) {
+        if (viewGroup == null) {
+            return null;
+        }
+
+        List<ViewInfo> children = new ArrayList<ViewInfo>();
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            children.add(visit(viewGroup.getChildAt(i), context));
+        }
+        return children;
+    }
+
 
     private void invalidateRenderingSize() {
         mMeasuredScreenWidth = mMeasuredScreenHeight = -1;
@@ -1119,8 +1128,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         return mImage;
     }
 
-    public ViewInfo getViewInfo() {
-        return mViewInfo;
+    public List<ViewInfo> getViewInfos() {
+        return mViewInfoList;
     }
 
     public Map<String, String> getDefaultProperties(Object viewObject) {
