@@ -665,6 +665,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         @Override
         public void show() {
             setWidth(Spinner.this.getWidth());
+            setInputMethodMode(ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
