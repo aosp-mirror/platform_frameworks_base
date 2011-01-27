@@ -673,6 +673,7 @@ public class WebView extends AbsoluteLayout
     static final int AUTOFILL_COMPLETE                  = 134;
 
     static final int SELECT_AT                          = 135;
+    static final int SCREEN_ON                          = 136;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -726,7 +727,8 @@ public class WebView extends AbsoluteLayout
         "SAVE_WEBARCHIVE_FINISHED", //       = 132;
         "SET_AUTOFILLABLE", //               = 133;
         "AUTOFILL_COMPLETE", //              = 134;
-        "SELECT_AT" //                       = 135;
+        "SELECT_AT", //                      = 135;
+        "SCREEN_ON" //                       = 136;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -7452,6 +7454,10 @@ public class WebView extends AbsoluteLayout
 
                 case DO_MOTION_UP:
                     doMotionUp(msg.arg1, msg.arg2);
+                    break;
+
+                case SCREEN_ON:
+                    setKeepScreenOn(msg.arg1 == 1);
                     break;
 
                 case SHOW_FULLSCREEN: {
