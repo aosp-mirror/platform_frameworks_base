@@ -59,9 +59,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
     private Status mStatus = Status.Normal;
 
-    private final LockPatternUtils mLockPatternUtils;
-    private final KeyguardUpdateMonitor mUpdateMonitor;
-    private final KeyguardScreenCallback mCallback;
+    private LockPatternUtils mLockPatternUtils;
+    private KeyguardUpdateMonitor mUpdateMonitor;
+    private KeyguardScreenCallback mCallback;
 
     private SlidingTab mSlidingTab;
     private TextView mScreenLocked;
@@ -659,7 +659,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
     /** {@inheritDoc} */
     public void cleanUp() {
-        mUpdateMonitor.removeCallback(this);
+        mUpdateMonitor.removeCallback(this); // this must be first
+        mLockPatternUtils = null;
+        mUpdateMonitor = null;
+        mCallback = null;
     }
 
     /** {@inheritDoc} */
