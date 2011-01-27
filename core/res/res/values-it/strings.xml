@@ -589,7 +589,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"L\'azione FACTORY_TEST è supportata soltanto per i pacchetti installati in /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Nessun pacchetto trovato che fornisca l\'azione FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Riavvia"</string>
-    <string name="js_dialog_title" msgid="8143918455087008109">"La pagina all\'indirizzo <xliff:g id="TITLE">%s</xliff:g> indica:"</string>
+    <string name="js_dialog_title" msgid="8143918455087008109">"Avviso relativo alla pagina <xliff:g id="TITLE">%s</xliff:g>:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Uscire da questa pagina?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Seleziona OK per continuare o Annulla per rimanere nella pagina corrente."</string>
     <string name="save_password_label" msgid="6860261758665825069">"Conferma"</string>

@@ -883,7 +883,7 @@
     <string name="reset" msgid="2448168080964209908">"リセット"</string>
     <string name="submit" msgid="1602335572089911941">"送信"</string>
     <string name="description_star" msgid="2654319874908576133">"お気に入り"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モードを有効にする"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モードになっています"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"運転モードを終了するには選択してください。"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"テザリングまたはアクセスポイントが有効です"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"タップして設定する"</string>

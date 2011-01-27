@@ -450,7 +450,7 @@
     <item msgid="9192514806975898961">"Personalizar"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Personal"</item>
+    <item msgid="8073994352956129127">"Casa"</item>
     <item msgid="7084237356602625604">"Trabajo"</item>
     <item msgid="1112044410659011023">"Otra"</item>
     <item msgid="2374913952870110618">"Personalizar"</item>
@@ -558,7 +558,7 @@
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Conecta el cargador"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Falta la tarjeta SIM"</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"No se ha insertado ninguna tarjeta SIM en el teléfono."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inserta una tarjeta SIM."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inserta una tarjeta SIM"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Solo llamadas de emergencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Bloqueada para la red"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La tarjeta SIM está bloqueada con el código PUK."</string>
@@ -727,8 +727,8 @@
     <string name="yes" msgid="5362982303337969312">"Aceptar"</string>
     <string name="no" msgid="5141531044935541497">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Atención"</string>
-    <string name="capital_on" msgid="1544682755514494298">"Activado"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Desconectado"</string>
+    <string name="capital_on" msgid="1544682755514494298">"SÍ"</string>
+    <string name="capital_off" msgid="6815870386972805832">"NO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Completar acción utilizando"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de forma predeterminada para esta acción"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar valores predeterminados en la página de configuración de la pantalla de inicio del teléfono &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
