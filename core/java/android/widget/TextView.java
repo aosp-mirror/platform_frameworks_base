@@ -3320,7 +3320,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             } else if (actionCode == EditorInfo.IME_ACTION_DONE) {
                 InputMethodManager imm = InputMethodManager.peekInstance();
-                if (imm != null) {
+                if (imm != null && imm.isActive(this)) {
                     imm.hideSoftInputFromWindow(getWindowToken(), 0);
                 }
                 return;
@@ -4822,9 +4822,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (mOnClickListener == null) {
                         if (mMovement != null && mText instanceof Editable
                                 && mLayout != null && onCheckIsTextEditor()) {
-                            InputMethodManager imm = (InputMethodManager)
-                                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                            imm.showSoftInput(this, 0);
+                            InputMethodManager imm = InputMethodManager.peekInstance();
+                            if (imm != null) imm.showSoftInput(this, 0);
                         }
                     }
                 }
@@ -4877,7 +4876,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 // No target for next focus, but make sure the IME
                                 // if this came from it.
                                 InputMethodManager imm = InputMethodManager.peekInstance();
-                                if (imm != null) {
+                                if (imm != null && imm.isActive(this)) {
                                     imm.hideSoftInputFromWindow(getWindowToken(), 0);
                                 }
                             }
@@ -7149,10 +7148,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // the IME. Showing the IME while focus is moved using the D-Pad is a bad idea, however this
         // does not happen in that case (using the arrows on a bluetooth keyboard).
         if (focused && isTextEditable()) {
-            final InputMethodManager imm = (InputMethodManager)
-            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-            imm.showSoftInput(this, 0, null);
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) imm.showSoftInput(this, 0, null);
         }
     }
 
@@ -7346,10 +7343,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     // Show the IME, except when selecting in read-only text.
                     if (!mTextIsSelectable) {
-                        final InputMethodManager imm = (InputMethodManager)
-                                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-                        handled |= imm.showSoftInput(this, 0, csr) && (csr != null);
+                        final InputMethodManager imm = InputMethodManager.peekInstance();
+                        handled |= imm != null && imm.showSoftInput(this, 0, csr) && (csr != null);
                     }
 
                     stopSelectionActionMode();
@@ -8247,16 +8242,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectCurrentWord();
         }
 
-        if (!mTextIsSelectable) {
-            // Show the IME, except when selection non editable text.
-            final InputMethodManager imm = (InputMethodManager)
-                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(this, 0, null);
-        }
-
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
         mSelectionActionMode = startActionMode(actionModeCallback);
-        return mSelectionActionMode != null;
+        final boolean selectionStarted = mSelectionActionMode != null;
+
+        if (selectionStarted && !mTextIsSelectable) {
+            // Show the IME to be able to replace text, except when selecting non editable text.
+            final InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null) imm.showSoftInput(this, 0, null);
+        }
+
+        return selectionStarted;
     }
 
     /**
