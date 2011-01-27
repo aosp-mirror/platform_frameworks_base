@@ -296,8 +296,10 @@ static inline SkBitmap::Config convertPixelFormat(PixelFormat format)
 static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
 {
     const sp<Surface>& surface(getSurface(env, clazz));
-    if (!Surface::isValid(surface))
+    if (!Surface::isValid(surface)) {
+        doThrow(env, "java/lang/IllegalArgumentException", NULL);
         return 0;
+    }
 
     // get dirty region
     Region dirtyRegion;
