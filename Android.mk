@@ -373,6 +373,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/7.xml 7 \
     -since ./frameworks/base/api/8.xml 8 \
     -since ./frameworks/base/api/9.xml 9 \
+    -since ./frameworks/base/api/10.xml 10 \
     -werror -hide 13 \
     -overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -446,7 +447,7 @@ framework_docs_SDK_VERSION:=2.3
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
   # flag to build offline docs for a preview release
-framework_docs_SDK_PREVIEW:=0
+framework_docs_SDK_PREVIEW:=true
 
 framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-hdf sdk.version $(framework_docs_SDK_VERSION) \
@@ -573,6 +574,10 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-toroot / \
 		-hdf android.whichdoc online \
 		-hdf template.showLanguageMenu true
+
+ifeq ($(framework_docs_SDK_PREVIEW),true)
+  LOCAL_DROIDDOC_OPTIONS += -hdf sdk.preview true
+endif
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_DROIDDOC_CUSTOM_ASSET_DIR:=assets-sdk
