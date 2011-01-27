@@ -1,9 +1,8 @@
 page.title=ADT Plugin for Eclipse
-sdk.preview=0
-adt.zip.version=8.0.1
-adt.zip.download=ADT-8.0.1.zip
-adt.zip.bytes=8724909
-adt.zip.checksum=0e62185279083ddc01f18098ce7ba2d1
+adt.zip.version=9.0.0
+adt.zip.download=ADT-9.0.0.zip
+adt.zip.bytes=4433536
+adt.zip.checksum=bc2757f2a5a11d131390ce547bae154b
 
 @jd:body
 
@@ -100,6 +99,115 @@ padding: .25em 1em;
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
 width="9px" />
+ADT 9.0.0</a> <em>(January 2011)</em>
+  <div class="toggleme">
+
+<dl>
+
+<dt>Dependencies:</dt>
+
+<dd>ADT 9.0.0 is designed for use with SDK Tools r9. If you haven't
+already installed SDK Tools r9 into your SDK, use the Android SDK and AVD Manager to do
+so.</dd>
+
+<dt>General notes:</dt>
+<dd>
+  <ul>    
+    <li>"Go To Declaration" hyperlink support: You can jump directly from code references (such as
+    <code>R.id.main</code>) to the corresponding XML declaration, or from XML attributes (such as
+    <code>@string</code>) to the corresponding resource definition, or from manifest XML
+    registrations to activities and services.</li>
+    <li>Improvements were made to name refactoring.</li>
+    <li>AVDs now automatically save their state, so they can restart almost instantly. You can enable this feature when
+    creating an AVD or by editing an AVD with the AVD Manager.</li> 
+    <li>Improvements to the Visual Layout Editor:
+      <ul>
+        <li>Support for rendering targets: You can now choose an arbitrary Android platform to
+        render the current page, regardless of the project's minimum platform. This makes it
+        easy to verify the layout and appearance of your activity on different versions of
+        the platform.
+        </li>
+        <li>Improved support for empty and nested layouts: Dragging items over nested and
+        invisible layouts automatically enlarges and highlights these layouts, so that they
+        can receive drops.
+        </li>
+        <li>XML formatting improvements: The editor generates cleaner XML and you can now enable
+        XML auto-formatting in the <strong>Preferences</strong> menu.</li>
+        <li>Improved Outline labels: The Outline tab now displays additional information about each
+        View. Textual Views display a snippet of the actual text. Views with a source
+        (such as ImageView) displays the resource name. Included Views display the name of the View.
+        </li>
+        <li>When you right click a View in the Layout Editor,
+        the context menu now contains <strong>Edit ID...</strong> and <strong>Edit Text...</strong>
+        items. The <strong>Properties...</strong> context menus now list all of the properties and
+        provide a way to edit them
+        (<a href="http://tools.android.com/recent/editidtextandotherpropertiesviamenu">Details</a>).
+        </li>
+        <li>The layout editor now properly handles
+        <a href="{@docRoot}guide/topics/resources/layout-resource.html#include-element"><code>&lt;include&gt;</code></a>
+        and <a href="{@docRoot}guide/topics/resources/layout-resource.html#merge-element"><code>&lt;merge&gt;</code></a>
+        tags (<a href="http://tools.android.com/recent/supportforincludeandmerge">Details</a>).</li>
+        <li>"Extract as Include" refactoring: The Layout Editor has a new refactoring that allows
+        you to select one or more views in a layout, and extract it into a separate layout
+        (<a href="http://tools.android.com/recent/extractasincluderefactoring">Details</a>).</li>
+        <li>Improved diagnostics for class loading and rendering errors: Class loading and rendering
+        error messages are more useful and provide better information about the root cause of the
+        error.</li>
+        <li>Improved error handling to prevent drag and reordering operations from adding children
+        into an {@link android.widget.AdapterView}.</li>
+        <li>Outline reordering: Reordering your views in the Outline tab is much easier
+        (<a href="http://tools.android.com/recent/outlineimprovements">Details</a>).</li>
+        <li>Fix for keybinding bug where keyboard shortcuts did not work (Issues 
+        <a href="http://code.google.com/p/android/issues/detail?id=13231">13231</a> and 
+        <a href="http://code.google.com/p/android/issues/detail?id=13134">13134</a>).</li>
+        <li>Fix for problems with Custom layout attribute menu (Issue 
+        <a href="http://code.google.com/p/android/issues/detail?id=13134">13134</a>).</li>
+        <li>Automatic configuration for various view types: Certain views have properties configured
+        by default. For example, the width of an {@link android.widget.EditText} object is set to
+        <code>match_parent</code> when added to a vertical {@link android.widget.LinearLayout}
+        or a default image is added to an {@link android.widget.ImageButton}.</li>
+        <li>Previews during dragging: Dragging from the palette or dragging within the layout editor
+        now shows live previews of the dragged item.</li>
+        <li>Navigation improvements: In the Layout Editor, double-clicking Views jumps to the
+        corresponding XML element. In the Outline view, double-clicking opens the Properties view.</li>
+        <li>The editor has Honeycomb style animation preview support.</li>
+        <li>Improved rendering support for various Views (such as TabHosts and SlidingDrawers) in
+        Honeycomb (Issues <a href="http://code.google.com/p/android/issues/detail?id=3162">3162</a>
+        and <a href="http://code.google.com/p/android/issues/detail?id=13092">13092</a>).</li>
+        <li>Included layouts can be rendered and edited in the context of the layouts that include
+        them. From a layout using an <a href="{@docRoot}guide/topics/resources/layout-resource.html#include-element">
+        <code>&lt;include&gt;</code></a> tag, double-clicking on the 
+        <a href="{@docRoot}guide/topics/resources/layout-resource.html#include-element">
+        <code>&lt;include&gt;</code></a> element edits the referenced layout in the context of the
+        current layout. Additionally, when editing a layout that is included by other layouts,
+        you can quickly change between context layouts, by right clicking in the editor and choosing
+        <strong>Show included in...</strong>. This feature is only available in Honeycomb.</li>
+      </ul>
+    </li>
+    <li>This release fixes many other bugs, but the most important ones are listed below:
+  <ul>
+   <li>Fixed issue that prevented launching debug builds on productions devices when
+    <code>debuggable=true</code> was not set in the Android manifest.</li>    
+    <li>The LogCat view in DDMS properly handles UTF-8 characters.</li>
+    <li>The SDK Manager is more reliable on Windows
+    (<a href="http://tools.android.com/recent/sdkmanagerfixes">Details</a>).</li>
+    <li>A JUnit initialization bug that prevented you from working with JUnit tests was fixed 
+    (Issue <a href="http://code.google.com/p/android/issues/detail?id=12411">12411</a>).</li>   
+  </ul>
+</li>
+  </ul>
+</dd>
+</dl>
+</div>
+</div>
+
+
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
+width="9px" />
 ADT 8.0.1</a> <em>(December 2010)</em>
   <div class="toggleme">
 
@@ -121,7 +229,7 @@ so.</p></dd>
 <p>Also see the recent release notes for 8.0.0, below.</p>
 </dd>
 </dl>
- </div>
+</div>
 </div>
 
 
