@@ -30,6 +30,17 @@
 
 namespace android {
 
+enum Tx_Rx {
+    TX,
+    RX
+};
+
+enum Tcp_Udp {
+    TCP,
+    UDP,
+    TCP_AND_UDP
+};
+
 // Returns an ASCII decimal number read from the specified file, -1 on error.
 static jlong readNumber(char const* filename) {
 #ifdef HAVE_ANDROID_OS
@@ -140,16 +151,136 @@ static jlong getTotalRxBytes(JNIEnv* env, jobject clazz) {
 
 // Per-UID stats require reading from a constructed filename.
 
+static jlong getUidBytes(JNIEnv* env, jobject clazz, jint uid,
+                         enum Tx_Rx tx_or_rx, enum Tcp_Udp tcp_or_udp) {
+    char tcp_filename[80], udp_filename[80];
+    jlong tcp_bytes = -1, udp_bytes = -1, total_bytes = -1;
+
+    switch (tx_or_rx) {
+        case TX:
+            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_snd", uid);
+            sprintf(udp_filename, "/proc/uid_stat/%d/udp_snd", uid);
+            break;
+        case RX:
+            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_rcv", uid);
+            sprintf(udp_filename, "/proc/uid_stat/%d/udp_rcv", uid);
+            break;
+        default:
+            return -1;
+    }
+
+    switch (tcp_or_udp) {
+        case TCP:
+            tcp_bytes = readNumber(tcp_filename);
+            total_bytes = (tcp_bytes >= 0) ? tcp_bytes : -1;
+            break;
+        case UDP:
+            udp_bytes = readNumber(udp_filename);
+            total_bytes = (udp_bytes >= 0) ? udp_bytes : -1;
+            break;
+        case TCP_AND_UDP:
+            tcp_bytes = readNumber(tcp_filename);
+            total_bytes += (tcp_bytes >= 0 ? tcp_bytes : 0);
+
+            udp_bytes = readNumber(udp_filename);
+            total_bytes += (udp_bytes >= 0 ? udp_bytes : 0);
+            break;
+        default:
+            return -1;
+    }
+
+    return total_bytes;
+}
+
+static jlong getUidPkts(JNIEnv* env, jobject clazz, jint uid,
+                         enum Tx_Rx tx_or_rx, enum Tcp_Udp tcp_or_udp) {
+    char tcp_filename[80], udp_filename[80];
+    jlong tcp_pkts = -1, udp_pkts = -1, total_pkts = -1;
+
+    switch (tx_or_rx) {
+        case TX:
+            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_snd_pkt", uid);
+            sprintf(udp_filename, "/proc/uid_stat/%d/udp_snd_pkt", uid);
+            break;
+        case RX:
+            sprintf(tcp_filename, "/proc/uid_stat/%d/tcp_rcv_pkt", uid);
+            sprintf(udp_filename, "/proc/uid_stat/%d/udp_rcv_pkt", uid);
+            break;
+        default:
+            return -1;
+    }
+
+    switch (tcp_or_udp) {
+        case TCP:
+            tcp_pkts = readNumber(tcp_filename);
+            total_pkts = (tcp_pkts >= 0) ? tcp_pkts : -1;
+            break;
+        case UDP:
+            udp_pkts = readNumber(udp_filename);
+            total_pkts = (udp_pkts >= 0) ? udp_pkts : -1;
+            break;
+        case TCP_AND_UDP:
+            tcp_pkts = readNumber(tcp_filename);
+            total_pkts += (tcp_pkts >= 0 ? tcp_pkts : 0);
+
+            udp_pkts = readNumber(udp_filename);
+            total_pkts += (udp_pkts >= 0 ? udp_pkts : 0);
+            break;
+        default:
+            return -1;
+    }
+
+    return total_pkts;
+}
+
 static jlong getUidRxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    char filename[80];
-    sprintf(filename, "/proc/uid_stat/%d/tcp_rcv", uid);
-    return readNumber(filename);
+    return getUidBytes(env, clazz, uid, RX, TCP_AND_UDP);
 }
 
 static jlong getUidTxBytes(JNIEnv* env, jobject clazz, jint uid) {
-    char filename[80];
-    sprintf(filename, "/proc/uid_stat/%d/tcp_snd", uid);
-    return readNumber(filename);
+    return getUidBytes(env, clazz, uid, TX, TCP_AND_UDP);
+}
+
+/* TCP Segments + UDP Packets */
+static jlong getUidTxPackets(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidPkts(env, clazz, uid, TX, TCP_AND_UDP);
+}
+
+/* TCP Segments + UDP Packets */
+static jlong getUidRxPackets(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidPkts(env, clazz, uid, RX, TCP_AND_UDP);
+}
+
+static jlong getUidTcpTxBytes(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidBytes(env, clazz, uid, TX, TCP);
+}
+
+static jlong getUidTcpRxBytes(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidBytes(env, clazz, uid, RX, TCP);
+}
+
+static jlong getUidUdpTxBytes(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidBytes(env, clazz, uid, TX, UDP);
+}
+
+static jlong getUidUdpRxBytes(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidBytes(env, clazz, uid, RX, UDP);
+}
+
+static jlong getUidTcpTxSegments(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidPkts(env, clazz, uid, TX, TCP);
+}
+
+static jlong getUidTcpRxSegments(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidPkts(env, clazz, uid, RX, TCP);
+}
+
+static jlong getUidUdpTxPackets(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidPkts(env, clazz, uid, TX, UDP);
+}
+
+static jlong getUidUdpRxPackets(JNIEnv* env, jobject clazz, jint uid) {
+    return getUidPkts(env, clazz, uid, RX, UDP);
 }
 
 static JNINativeMethod gMethods[] = {
@@ -161,8 +292,22 @@ static JNINativeMethod gMethods[] = {
     {"getTotalRxPackets", "()J", (void*) getTotalRxPackets},
     {"getTotalTxBytes", "()J", (void*) getTotalTxBytes},
     {"getTotalRxBytes", "()J", (void*) getTotalRxBytes},
+
+    /* Per-UID Stats */
     {"getUidTxBytes", "(I)J", (void*) getUidTxBytes},
     {"getUidRxBytes", "(I)J", (void*) getUidRxBytes},
+    {"getUidTxPackets", "(I)J", (void*) getUidTxPackets},
+    {"getUidRxPackets", "(I)J", (void*) getUidRxPackets},
+
+    {"getUidTcpTxBytes", "(I)J", (void*) getUidTcpTxBytes},
+    {"getUidTcpRxBytes", "(I)J", (void*) getUidTcpRxBytes},
+    {"getUidUdpTxBytes", "(I)J", (void*) getUidUdpTxBytes},
+    {"getUidUdpRxBytes", "(I)J", (void*) getUidUdpRxBytes},
+
+    {"getUidTcpTxSegments", "(I)J", (void*) getUidTcpTxSegments},
+    {"getUidTcpRxSegments", "(I)J", (void*) getUidTcpRxSegments},
+    {"getUidUdpTxPackets", "(I)J", (void*) getUidUdpTxPackets},
+    {"getUidUdpRxPackets", "(I)J", (void*) getUidUdpRxPackets},
 };
 
 int register_android_net_TrafficStats(JNIEnv* env) {
