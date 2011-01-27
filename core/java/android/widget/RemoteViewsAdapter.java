@@ -48,11 +48,11 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private static final String TAG = "RemoteViewsAdapter";
 
     // The max number of items in the cache
-    private static final int sDefaultCacheSize = 50;
+    private static final int sDefaultCacheSize = 40;
     // The delay (in millis) to wait until attempting to unbind from a service after a request.
     // This ensures that we don't stay continually bound to the service and that it can be destroyed
     // if we need the memory elsewhere in the system.
-    private static final int sUnbindServiceDelay = 1000;
+    private static final int sUnbindServiceDelay = 5000;
     // Type defs for controlling different messages across the main and worker message queues
     private static final int sDefaultMessageType = 0;
     private static final int sUnbindServiceMessageType = 1;
@@ -421,17 +421,19 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private class RemoteViewsIndexMetaData {
         int typeId;
         long itemId;
+        boolean isRequested;
 
-        public RemoteViewsIndexMetaData(RemoteViews v, long itemId) {
-            set(v, itemId);
+        public RemoteViewsIndexMetaData(RemoteViews v, long itemId, boolean requested) {
+            set(v, itemId, requested);
         }
 
-        public void set(RemoteViews v, long id) {
+        public void set(RemoteViews v, long id, boolean requested) {
             itemId = id;
             if (v != null)
                 typeId = v.getLayoutId();
             else
                 typeId = 0;
+            isRequested = requested;
         }
     }
 
@@ -461,6 +463,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // The set of indices that have been explicitly requested by the collection view
         private HashSet<Integer> mRequestedIndices;
 
+        // We keep a reference of the last requested index to determine which item to prune the
+        // farthest items from when we hit the memory limit
+        private int mLastRequestedIndex;
+
         // The set of indices to load, including those explicitly requested, as well as those
         // determined by the preloading algorithm to be prefetched
         private HashSet<Integer> mLoadIndices;
@@ -477,7 +483,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         private int mMaxCount;
         private int mMaxCountSlack;
         private static final float sMaxCountSlackPercent = 0.75f;
-        private static final int sMaxMemoryUsage = 1024 * 1024;
+        private static final int sMaxMemoryLimitInBytes = 2 * 1024 * 1024;
 
         public FixedSizeRemoteViewsCache(int maxCacheSize) {
             mMaxCount = maxCacheSize;
@@ -489,31 +495,33 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             mIndexMetaData = new HashMap<Integer, RemoteViewsIndexMetaData>();
             mIndexRemoteViews = new HashMap<Integer, RemoteViews>();
             mRequestedIndices = new HashSet<Integer>();
+            mLastRequestedIndex = -1;
             mLoadIndices = new HashSet<Integer>();
         }
 
-        public void insert(int position, RemoteViews v, long itemId) {
+        public void insert(int position, RemoteViews v, long itemId, boolean isRequested) {
             // Trim the cache if we go beyond the count
             if (mIndexRemoteViews.size() >= mMaxCount) {
                 mIndexRemoteViews.remove(getFarthestPositionFrom(position));
             }
 
             // Trim the cache if we go beyond the available memory size constraints
-            while (getRemoteViewsBitmapMemoryUsage() >= sMaxMemoryUsage) {
+            int pruneFromPosition = (mLastRequestedIndex > -1) ? mLastRequestedIndex : position;
+            while (getRemoteViewsBitmapMemoryUsage() >= sMaxMemoryLimitInBytes) {
                 // Note: This is currently the most naive mechanism for deciding what to prune when
                 // we hit the memory limit.  In the future, we may want to calculate which index to
                 // remove based on both its position as well as it's current memory usage, as well
                 // as whether it was directly requested vs. whether it was preloaded by our caching
                 // mechanism.
-                mIndexRemoteViews.remove(getFarthestPositionFrom(position));
+                mIndexRemoteViews.remove(getFarthestPositionFrom(pruneFromPosition));
             }
 
             // Update the metadata cache
             if (mIndexMetaData.containsKey(position)) {
                 final RemoteViewsIndexMetaData metaData = mIndexMetaData.get(position);
-                metaData.set(v, itemId);
+                metaData.set(v, itemId, isRequested);
             } else {
-                mIndexMetaData.put(position, new RemoteViewsIndexMetaData(v, itemId));
+                mIndexMetaData.put(position, new RemoteViewsIndexMetaData(v, itemId, isRequested));
             }
             mIndexRemoteViews.put(position, v);
         }
@@ -560,17 +568,31 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             // Find the index farthest away and remove that
             int maxDist = 0;
             int maxDistIndex = -1;
+            int maxDistNonRequested = 0;
+            int maxDistIndexNonRequested = -1;
             for (int i : mIndexRemoteViews.keySet()) {
                 int dist = Math.abs(i-pos);
+                if (dist > maxDistNonRequested && !mIndexMetaData.get(i).isRequested) {
+                    // maxDistNonRequested/maxDistIndexNonRequested will store the index of the
+                    // farthest non-requested position
+                    maxDistIndexNonRequested = i;
+                    maxDistNonRequested = dist;
+                }
                 if (dist > maxDist) {
+                    // maxDist/maxDistIndex will store the index of the farthest position
+                    // regardless of whether it was directly requested or not
                     maxDistIndex = i;
                     maxDist = dist;
                 }
+            }
+            if (maxDistIndexNonRequested > -1) {
+                return maxDistIndexNonRequested;
             }
             return maxDistIndex;
         }
 
         public void queueRequestedPositionToLoad(int position) {
+            mLastRequestedIndex = position;
             synchronized (mLoadIndices) {
                 mRequestedIndices.add(position);
                 mLoadIndices.add(position);
@@ -610,7 +632,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             }
             return true;
         }
-        public int getNextIndexToLoad() {
+        /** Returns the next index to load, and whether that index was directly requested or not */
+        public int[] getNextIndexToLoad() {
             // We try and prioritize items that have been requested directly, instead
             // of items that are loaded as a result of the caching mechanism
             synchronized (mLoadIndices) {
@@ -619,17 +642,17 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     Integer i = mRequestedIndices.iterator().next();
                     mRequestedIndices.remove(i);
                     mLoadIndices.remove(i);
-                    return i.intValue();
+                    return new int[]{i.intValue(), 1};
                 }
 
                 // Otherwise, preload other indices as necessary
                 if (!mLoadIndices.isEmpty()) {
                     Integer i = mLoadIndices.iterator().next();
                     mLoadIndices.remove(i);
-                    return i.intValue();
+                    return new int[]{i.intValue(), 0};
                 }
 
-                return -1;
+                return new int[]{-1, 0};
             }
         }
 
@@ -647,6 +670,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
             mPreloadLowerBound = 0;
             mPreloadUpperBound = -1;
+            mLastRequestedIndex = -1;
             mIndexRemoteViews.clear();
             mIndexMetaData.clear();
             synchronized (mLoadIndices) {
@@ -691,12 +715,15 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 if (mServiceConnection.isConnected()) {
                     // Get the next index to load
                     int position = -1;
+                    boolean isRequested = false;
                     synchronized (mCache) {
-                        position = mCache.getNextIndexToLoad();
+                        int[] res = mCache.getNextIndexToLoad();
+                        position = res[0];
+                        isRequested = res[1] > 0;
                     }
                     if (position > -1) {
                         // Load the item, and notify any existing RemoteViewsFrameLayouts
-                        updateRemoteViews(position);
+                        updateRemoteViews(position, isRequested);
 
                         // Queue up for the next one to load
                         loadNextIndexInBackground();
@@ -756,7 +783,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
     }
 
-    private void updateRemoteViews(final int position) {
+    private void updateRemoteViews(final int position, boolean isRequested) {
         if (!mServiceConnection.isConnected()) return;
         IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
 
@@ -784,7 +811,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
         synchronized (mCache) {
             // Cache the RemoteViews we loaded
-            mCache.insert(position, remoteViews, itemId);
+            mCache.insert(position, remoteViews, itemId, isRequested);
 
             // Notify all the views that we have previously returned for this index that
             // there is new data for it.
