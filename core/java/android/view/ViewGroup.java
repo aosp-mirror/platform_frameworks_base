@@ -2381,7 +2381,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 } else if (layerType == LAYER_TYPE_NONE) {
                     // Delay getting the display list until animation-driven alpha values are
                     // set up and possibly passed on to the view
-                    hasDisplayList = true;
+                    hasDisplayList = child.canHaveDisplayList();
                 }
             }
         }
