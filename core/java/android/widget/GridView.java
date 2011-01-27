@@ -1486,77 +1486,79 @@ public class GridView extends AbsListView {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_LEFT);
+                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_LEFT);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_RIGHT);
+                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_RIGHT);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_UP:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_UP);
                     } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_UP);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_DOWN);
                     } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_ENTER: {
-                    if (event.hasNoModifiers()
-                            && event.getRepeatCount() == 0 && getChildCount() > 0) {
-                        ensureSelectionOnMovementKey();
-                        keyPressed();
+                case KeyEvent.KEYCODE_ENTER:
+                    if (event.hasNoModifiers()) {
+                        handled = resurrectSelectionIfNeeded();
+                        if (!handled
+                                && event.getRepeatCount() == 0 && getChildCount() > 0) {
+                            keyPressed();
+                            handled = true;
+                        }
                     }
-                    return true;
-                }
+                    break;
 
                 case KeyEvent.KEYCODE_SPACE:
                     if (mPopup == null || !mPopup.isShowing()) {
                         if (event.hasNoModifiers()) {
-                            handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                            handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_DOWN);
                         } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                            handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                            handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_UP);
                         }
                     }
                     break;
 
                 case KeyEvent.KEYCODE_PAGE_UP:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_UP);
                     } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_UP);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_PAGE_DOWN:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_DOWN);
                     } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_MOVE_HOME:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_UP);
                     }
                     break;
 
                 case KeyEvent.KEYCODE_MOVE_END:
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
                     }
                     break;
 
@@ -1569,32 +1571,34 @@ public class GridView extends AbsListView {
                     //     perhaps it should be configurable (and more comprehensive).
                     if (false) {
                         if (event.hasNoModifiers()) {
-                            handled = ensureSelectionOnMovementKey() && sequenceScroll(FOCUS_FORWARD);
+                            handled = resurrectSelectionIfNeeded()
+                                    || sequenceScroll(FOCUS_FORWARD);
                         } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                            handled = ensureSelectionOnMovementKey() && sequenceScroll(FOCUS_BACKWARD);
+                            handled = resurrectSelectionIfNeeded()
+                                    || sequenceScroll(FOCUS_BACKWARD);
                         }
                     }
                     break;
             }
         }
 
-        if (!handled) {
-            handled = sendToTextFilter(keyCode, count, event);
-        }
-
         if (handled) {
             return true;
-        } else {
-            switch (action) {
-                case KeyEvent.ACTION_DOWN:
-                    return super.onKeyDown(keyCode, event);
-                case KeyEvent.ACTION_UP:
-                    return super.onKeyUp(keyCode, event);
-                case KeyEvent.ACTION_MULTIPLE:
-                    return super.onKeyMultiple(keyCode, count, event);
-                default:
-                    return false;
-            }
+        }
+
+        if (sendToTextFilter(keyCode, count, event)) {
+            return true;
+        }
+
+        switch (action) {
+            case KeyEvent.ACTION_DOWN:
+                return super.onKeyDown(keyCode, event);
+            case KeyEvent.ACTION_UP:
+                return super.onKeyUp(keyCode, event);
+            case KeyEvent.ACTION_MULTIPLE:
+                return super.onKeyMultiple(keyCode, count, event);
+            default:
+                return false;
         }
     }
 
