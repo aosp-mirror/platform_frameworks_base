@@ -3447,6 +3447,444 @@ class GLLogWrapper extends GLWrapperBase {
         checkError();
     }
 
+    @Override
+    public void glBindFramebufferOES(int target, int framebuffer) {
+        begin("glBindFramebufferOES");
+        arg("target", target);
+        arg("framebuffer", framebuffer);
+        end();
+        mgl11ExtensionPack.glBindFramebufferOES(target, framebuffer);
+        checkError();
+    }
+
+    @Override
+    public void glBindRenderbufferOES(int target, int renderbuffer) {
+        begin("glBindRenderbufferOES");
+        arg("target", target);
+        arg("renderbuffer", renderbuffer);
+        end();
+        mgl11ExtensionPack.glBindRenderbufferOES(target, renderbuffer);
+        checkError();
+    }
+
+    @Override
+    public void glBlendEquation(int mode) {
+        begin("glBlendEquation");
+        arg("mode", mode);
+        end();
+        mgl11ExtensionPack.glBlendEquation(mode);
+        checkError();
+    }
+
+    @Override
+    public void glBlendEquationSeparate(int modeRGB, int modeAlpha) {
+        begin("glBlendEquationSeparate");
+        arg("modeRGB", modeRGB);
+        arg("modeAlpha", modeAlpha);
+        end();
+        mgl11ExtensionPack.glBlendEquationSeparate(modeRGB, modeAlpha);
+        checkError();
+    }
+
+    @Override
+    public void glBlendFuncSeparate(int srcRGB, int dstRGB, int srcAlpha,
+            int dstAlpha) {
+        begin("glBlendFuncSeparate");
+        arg("srcRGB", srcRGB);
+        arg("dstRGB", dstRGB);
+        arg("srcAlpha", srcAlpha);
+        arg("dstAlpha", dstAlpha);
+        end();
+        mgl11ExtensionPack.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+        checkError();
+    }
+
+    @Override
+    public int glCheckFramebufferStatusOES(int target) {
+        begin("glCheckFramebufferStatusOES");
+        arg("target", target);
+        end();
+        int result = mgl11ExtensionPack.glCheckFramebufferStatusOES(target);
+        checkError();
+        return result;
+    }
+
+    @Override
+    public void glDeleteFramebuffersOES(int n, int[] framebuffers, int offset) {
+        begin("glDeleteFramebuffersOES");
+        arg("n", n);
+        arg("framebuffers", framebuffers.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glDeleteFramebuffersOES(n, framebuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glDeleteFramebuffersOES(int n, IntBuffer framebuffers) {
+        begin("glDeleteFramebuffersOES");
+        arg("n", n);
+        arg("framebuffers", framebuffers.toString());
+        end();
+        mgl11ExtensionPack.glDeleteFramebuffersOES(n, framebuffers);
+        checkError();
+    }
+
+    @Override
+    public void glDeleteRenderbuffersOES(int n, int[] renderbuffers, int offset) {
+        begin("glDeleteRenderbuffersOES");
+        arg("n", n);
+        arg("renderbuffers", renderbuffers.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glDeleteRenderbuffersOES(n, renderbuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glDeleteRenderbuffersOES(int n, IntBuffer renderbuffers) {
+        begin("glDeleteRenderbuffersOES");
+        arg("n", n);
+        arg("renderbuffers", renderbuffers.toString());
+        end();
+        mgl11ExtensionPack.glDeleteRenderbuffersOES(n, renderbuffers);
+        checkError();
+    }
+
+    @Override
+    public void glFramebufferRenderbufferOES(int target, int attachment,
+            int renderbuffertarget, int renderbuffer) {
+        begin("glFramebufferRenderbufferOES");
+        arg("target", target);
+        arg("attachment", attachment);
+        arg("renderbuffertarget", renderbuffertarget);
+        arg("renderbuffer", renderbuffer);
+        end();
+        mgl11ExtensionPack.glFramebufferRenderbufferOES(target, attachment, renderbuffertarget, renderbuffer);
+        checkError();
+    }
+
+    @Override
+    public void glFramebufferTexture2DOES(int target, int attachment,
+            int textarget, int texture, int level) {
+        begin("glFramebufferTexture2DOES");
+        arg("target", target);
+        arg("attachment", attachment);
+        arg("textarget", textarget);
+        arg("texture", texture);
+        arg("level", level);
+        end();
+        mgl11ExtensionPack.glFramebufferTexture2DOES(target, attachment, textarget, texture, level);
+        checkError();
+    }
+
+    @Override
+    public void glGenerateMipmapOES(int target) {
+        begin("glGenerateMipmapOES");
+        arg("target", target);
+        end();
+        mgl11ExtensionPack.glGenerateMipmapOES(target);
+        checkError();
+    }
+
+    @Override
+    public void glGenFramebuffersOES(int n, int[] framebuffers, int offset) {
+        begin("glGenFramebuffersOES");
+        arg("n", n);
+        arg("framebuffers", framebuffers.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGenFramebuffersOES(n, framebuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGenFramebuffersOES(int n, IntBuffer framebuffers) {
+        begin("glGenFramebuffersOES");
+        arg("n", n);
+        arg("framebuffers", framebuffers.toString());
+        end();
+        mgl11ExtensionPack.glGenFramebuffersOES(n, framebuffers);
+        checkError();
+    }
+
+    @Override
+    public void glGenRenderbuffersOES(int n, int[] renderbuffers, int offset) {
+        begin("glGenRenderbuffersOES");
+        arg("n", n);
+        arg("renderbuffers", renderbuffers.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGenRenderbuffersOES(n, renderbuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGenRenderbuffersOES(int n, IntBuffer renderbuffers) {
+        begin("glGenRenderbuffersOES");
+        arg("n", n);
+        arg("renderbuffers", renderbuffers.toString());
+        end();
+        mgl11ExtensionPack.glGenRenderbuffersOES(n, renderbuffers);
+        checkError();
+    }
+
+    @Override
+    public void glGetFramebufferAttachmentParameterivOES(int target,
+            int attachment, int pname, int[] params, int offset) {
+        begin("glGetFramebufferAttachmentParameterivOES");
+        arg("target", target);
+        arg("attachment", attachment);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetFramebufferAttachmentParameterivOES(int target,
+            int attachment, int pname, IntBuffer params) {
+        begin("glGetFramebufferAttachmentParameterivOES");
+        arg("target", target);
+        arg("attachment", attachment);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetRenderbufferParameterivOES(int target, int pname,
+            int[] params, int offset) {
+        begin("glGetRenderbufferParameterivOES");
+        arg("target", target);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGetRenderbufferParameterivOES(target, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetRenderbufferParameterivOES(int target, int pname,
+            IntBuffer params) {
+        begin("glGetRenderbufferParameterivOES");
+        arg("target", target);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glGetRenderbufferParameterivOES(target, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenfv(int coord, int pname, float[] params, int offset) {
+        begin("glGetTexGenfv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGetTexGenfv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenfv(int coord, int pname, FloatBuffer params) {
+        begin("glGetTexGenfv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glGetTexGenfv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGeniv(int coord, int pname, int[] params, int offset) {
+        begin("glGetTexGeniv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGetTexGeniv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGeniv(int coord, int pname, IntBuffer params) {
+        begin("glGetTexGeniv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glGetTexGeniv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenxv(int coord, int pname, int[] params, int offset) {
+        begin("glGetTexGenxv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glGetTexGenxv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenxv(int coord, int pname, IntBuffer params) {
+        begin("glGetTexGenxv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glGetTexGenxv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public boolean glIsFramebufferOES(int framebuffer) {
+        begin("glIsFramebufferOES");
+        arg("framebuffer", framebuffer);
+        end();
+        boolean result = mgl11ExtensionPack.glIsFramebufferOES(framebuffer);
+        checkError();
+        return result;
+    }
+
+    @Override
+    public boolean glIsRenderbufferOES(int renderbuffer) {
+        begin("glIsRenderbufferOES");
+        arg("renderbuffer", renderbuffer);
+        end();
+        mgl11ExtensionPack.glIsRenderbufferOES(renderbuffer);
+        checkError();
+        return false;
+    }
+
+    @Override
+    public void glRenderbufferStorageOES(int target, int internalformat,
+            int width, int height) {
+        begin("glRenderbufferStorageOES");
+        arg("target", target);
+        arg("internalformat", internalformat);
+        arg("width", width);
+        arg("height", height);
+        end();
+        mgl11ExtensionPack.glRenderbufferStorageOES(target, internalformat, width, height);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenf(int coord, int pname, float param) {
+        begin("glTexGenf");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("param", param);
+        end();
+        mgl11ExtensionPack.glTexGenf(coord, pname, param);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenfv(int coord, int pname, float[] params, int offset) {
+        begin("glTexGenfv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glTexGenfv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenfv(int coord, int pname, FloatBuffer params) {
+        begin("glTexGenfv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glTexGenfv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glTexGeni(int coord, int pname, int param) {
+        begin("glTexGeni");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("param", param);
+        end();
+        mgl11ExtensionPack.glTexGeni(coord, pname, param);
+        checkError();
+    }
+
+    @Override
+    public void glTexGeniv(int coord, int pname, int[] params, int offset) {
+        begin("glTexGeniv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glTexGeniv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glTexGeniv(int coord, int pname, IntBuffer params) {
+        begin("glTexGeniv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glTexGeniv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenx(int coord, int pname, int param) {
+        begin("glTexGenx");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("param", param);
+        end();
+        mgl11ExtensionPack.glTexGenx(coord, pname, param);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenxv(int coord, int pname, int[] params, int offset) {
+        begin("glTexGenxv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        arg("offset", offset);
+        end();
+        mgl11ExtensionPack.glTexGenxv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenxv(int coord, int pname, IntBuffer params) {
+        begin("glTexGenxv");
+        arg("coord", coord);
+        arg("pname", pname);
+        arg("params", params.toString());
+        end();
+        mgl11ExtensionPack.glTexGenxv(coord, pname, params);
+        checkError();
+    }
+
     private class PointerInfo {
         /**
          * The number of coordinates per vertex. 1..4
