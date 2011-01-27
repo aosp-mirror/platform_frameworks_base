@@ -92,16 +92,16 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
                 // some music players need to see this before entering MTP mode.
                 char buffer[256];
                 memset(buffer, 0, sizeof(buffer));
-                int ret = usb_device_send_control(device,
+                int ret = usb_device_control_transfer(device,
                         USB_DIR_IN|USB_RECIP_DEVICE|USB_TYPE_STANDARD,
                         USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | 0xEE,
-                        0, sizeof(buffer), buffer);
-                printf("usb_device_send_control returned %d errno: %d\n", ret, errno);
+                        0, buffer, sizeof(buffer), 0);
+                printf("usb_device_control_transfer returned %d errno: %d\n", ret, errno);
                 if (ret > 0) {
                     printf("got MTP string %s\n", buffer);
-                    ret = usb_device_send_control(device,
+                    ret = usb_device_control_transfer(device,
                             USB_DIR_IN|USB_RECIP_DEVICE|USB_TYPE_VENDOR, 1,
-                            0, 4, sizeof(buffer), buffer);
+                            0, 4, buffer, sizeof(buffer), 0);
                     printf("OS descriptor got %d\n", ret);
                 } else {
                     printf("no MTP string\n");
