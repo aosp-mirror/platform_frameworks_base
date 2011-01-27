@@ -8204,6 +8204,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link android.R.id#selectAll}, {@link android.R.id#cut}, {@link android.R.id#copy} or
      * {@link android.R.id#paste} ids as parameters.
      *
+     * Returning false from {@link ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will
+     * prevent the action mode from being started.
+     *
      * Action click events should be handled by the custom implementation of
      * {@link ActionMode.Callback#onActionItemClicked(ActionMode, MenuItem)}.
      *
@@ -8364,7 +8367,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             styledAttributes.recycle();
 
             if (mCustomSelectionActionModeCallback != null) {
-                mCustomSelectionActionModeCallback.onCreateActionMode(mode, menu);
+                if (!mCustomSelectionActionModeCallback.onCreateActionMode(mode, menu)) {
+                    // The custom mode can choose to cancel the action mode
+                    return false;
+                }
             }
 
             if (menu.hasVisibleItems() || mode.getCustomView() != null) {
