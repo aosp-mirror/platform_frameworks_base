@@ -424,7 +424,7 @@ public class VideoEditorImpl implements VideoEditor {
                                mMediaItems, mTransitions, mAudioTracks,
                                listener);
         } catch (InterruptedException  ex) {
-            Log.e("VideoEditorImpl", "Sem acquire NOT successful in export");
+            Log.e(TAG, "Sem acquire NOT successful in export");
         } finally {
             mExportSemaphore.release();
         }
@@ -444,7 +444,7 @@ public class VideoEditorImpl implements VideoEditor {
                         mAudioTracks, listener);
             }
         } catch (InterruptedException  ex) {
-            Log.e("VideoEditorImpl", "Sem acquire NOT successful in previewStoryBoard");
+            Log.e(TAG, "Sem acquire NOT successful in previewStoryBoard");
         } finally {
             if (semAcquireDone) {
                 mPreviewSemaphore.release();
@@ -891,7 +891,7 @@ public class VideoEditorImpl implements VideoEditor {
             }
 
         } catch (InterruptedException  ex) {
-            Log.e("VideoEditorImpl", "Sem acquire NOT successful in renderPreviewFrame");
+            Log.e(TAG, "Sem acquire NOT successful in renderPreviewFrame");
         }
         finally {
             if (semAcquireDone) {
@@ -1567,16 +1567,14 @@ public class VideoEditorImpl implements VideoEditor {
             mPreviewSemaphore.acquire();
             semAcquireDone = true;
         } catch (InterruptedException  ex) {
-            Log.e("VideoEditorImpl", "Sem acquire NOT successful in startPreview");
+            Log.e(TAG, "Sem acquire NOT successful in startPreview");
         }
 
         if (semAcquireDone) {
             Surface mSurface = surfaceHolder.getSurface();
 
             if (mSurface == null) {
-                Log.e("VideoEditoeImpl",
-                "Surface could not be retrieved from surface holder"); throw new
-                RuntimeException();
+                throw new RuntimeException("Surface could not be retrieved from surface holder");
             }
 
             if (mMediaItems.size() > 0) {
@@ -1588,15 +1586,15 @@ public class VideoEditorImpl implements VideoEditor {
                     mPreviewInProgress = true;
                 } catch (IllegalArgumentException ex) {
                     mPreviewSemaphore.release();
-                    Log.e("VideoEditorImpl", "Illegal Argument exception in do preview");
+                    Log.e(TAG, "Illegal Argument exception in do preview");
                     throw ex;
                 } catch (IllegalStateException ex) {
                     mPreviewSemaphore.release();
-                    Log.e("VideoEditorImpl", "Illegal State exception in do preview");
+                    Log.e(TAG, "Illegal State exception in do preview");
                     throw ex;
                 } catch (RuntimeException ex) {
                     mPreviewSemaphore.release();
-                    Log.e("VideoEditorImpl", "Runtime exception in do preview");
+                    Log.e(TAG, "Runtime exception in do preview");
                     throw ex;
                 }
             }
@@ -1732,7 +1730,7 @@ public class VideoEditorImpl implements VideoEditor {
         if (mMediaItems.size() > 0) {
             MediaItem mI = mMediaItems.get(0);
             /*
-             * Lets initialise the width for default aspect ratio i.e 16:9
+             * Lets initialiZe the width for default aspect ratio i.e 16:9
              */
             int height = 480;
             int width = 854;
@@ -1784,18 +1782,19 @@ public class VideoEditorImpl implements VideoEditor {
      * and needs to be cleared.
      */
     public void clearSurface(SurfaceHolder surfaceHolder) {
+        if (surfaceHolder == null) {
+            throw new IllegalArgumentException("Invalid surface holder");
+        }
 
-      if (surfaceHolder == null) {
-         throw new IllegalArgumentException();
-       }
-      Surface surface = surfaceHolder.getSurface();
+        final Surface surface = surfaceHolder.getSurface();
+        if (surface == null) {
+            throw new RuntimeException("Surface could not be retrieved from surface holder");
+        }
 
-      if (surface == null) {
-        Log.e("VideoEditorImpl",
-        "Surface could not be retrieved from surface holder");
-        throw new RuntimeException();
-      }
-      mMANativeHelper.clearPreviewSurface(surface);
+        if (mMANativeHelper != null) {
+            mMANativeHelper.clearPreviewSurface(surface);
+        } else {
+            Log.w(TAG, "Native helper was not ready!");
+        }
     }
-
 }
