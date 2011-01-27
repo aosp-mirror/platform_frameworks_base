@@ -1013,24 +1013,17 @@
     <string name="websearch" msgid="4337157977400211589">"Paghahanap sa Web"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
+    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"Hiling ng lokasyon"</string>
     <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
     <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
+    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"Oo"</string>
+    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"Hindi"</string>
+    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Nalagpasan na ang limitasyon sa pagtanggal"</string>
     <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
     <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"Tanggalin ang mga item."</string>
+    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"I-undo ang mga pagtanggal."</string>
+    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"Walang gawin sa ngayon."</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
