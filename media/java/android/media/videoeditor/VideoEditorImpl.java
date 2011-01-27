@@ -327,16 +327,6 @@ public class VideoEditorImpl implements VideoEditor {
     public void export(String filename, int height, int bitrate,
                        int audioCodec, int videoCodec,
                        ExportProgressListener listener) throws IOException {
-        if ( filename == null) {
-            throw new IllegalArgumentException("export: filename is null");
-        }
-        File tempPathFile = new File(filename);
-        if (tempPathFile == null) {
-            throw new IOException(filename + "can not be created");
-        }
-        if (mMediaItems.size() == 0) {
-            throw new IllegalStateException("No MediaItems added");
-        }
 
         switch (audioCodec) {
             case MediaProperties.ACODEC_AAC_LC:
@@ -345,7 +335,8 @@ public class VideoEditorImpl implements VideoEditor {
                 break;
 
             default :
-                throw new IllegalArgumentException("Audio codec type incorrect");
+                String message = "Unsupported audio codec type " + audioCodec;
+                throw new IllegalArgumentException(message);
         }
 
         switch (videoCodec) {
@@ -357,64 +348,11 @@ public class VideoEditorImpl implements VideoEditor {
                 break;
 
             default :
-                throw new IllegalArgumentException("Video codec type incorrect");
+                String message = "Unsupported video codec type " + videoCodec;
+                throw new IllegalArgumentException(message);
         }
 
-        switch (height) {
-            case MediaProperties.HEIGHT_144:
-                break;
-            case MediaProperties.HEIGHT_360:
-                break;
-            case MediaProperties.HEIGHT_480:
-                break;
-            case MediaProperties.HEIGHT_720:
-                break;
-
-            default:
-                throw new IllegalArgumentException("Argument Height incorrect");
-        }
-
-        switch (bitrate) {
-            case MediaProperties.BITRATE_28K:
-                break;
-            case MediaProperties.BITRATE_40K:
-                break;
-            case MediaProperties.BITRATE_64K:
-                break;
-            case MediaProperties.BITRATE_96K:
-                break;
-            case MediaProperties.BITRATE_128K:
-                break;
-            case MediaProperties.BITRATE_192K:
-                break;
-            case MediaProperties.BITRATE_256K:
-                break;
-            case MediaProperties.BITRATE_384K:
-                break;
-            case MediaProperties.BITRATE_512K:
-                break;
-            case MediaProperties.BITRATE_800K:
-                break;
-            case MediaProperties.BITRATE_2M:
-                break;
-            case MediaProperties.BITRATE_5M:
-                break;
-            case MediaProperties.BITRATE_8M:
-                break;
-
-            default:
-                throw new IllegalArgumentException("Argument Bitrate incorrect");
-        }
-
-        try {
-            mExportSemaphore.acquire();
-            mMANativeHelper.export(filename, mProjectPath, height,bitrate,audioCodec,
-                videoCodec,mMediaItems, mTransitions, mAudioTracks,listener);
-        } catch (InterruptedException  ex) {
-            Log.e("VideoEditorImpl", "Sem acquire NOT successful in export");
-        } finally {
-            mExportSemaphore.release();
-        }
+        export(filename, height, bitrate, listener);
     }
 
     /*
@@ -444,7 +382,8 @@ public class VideoEditorImpl implements VideoEditor {
                 break;
 
             default:
-                throw new IllegalArgumentException("Argument Height incorrect");
+                String message = "Unsupported height value " + height;
+                throw new IllegalArgumentException(message);
         }
         switch (bitrate) {
             case MediaProperties.BITRATE_28K:
@@ -475,7 +414,8 @@ public class VideoEditorImpl implements VideoEditor {
                 break;
 
             default:
-                throw new IllegalArgumentException("Argument Bitrate incorrect");
+                final String message = "Unsupported bitrate value " + bitrate;
+                throw new IllegalArgumentException(message);
         }
 
         try {
