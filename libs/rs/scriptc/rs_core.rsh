@@ -164,7 +164,7 @@ extern void __attribute__((overloadable)) rsMatrixTranspose(rs_matrix2x2 *m);
 // quaternion ops
 /////////////////////////////////////////////////////
 
-_RS_RUNTIME void __attribute__((overloadable))
+static void __attribute__((overloadable))
 rsQuaternionSet(rs_quaternion *q, float w, float x, float y, float z) {
     q->w = w;
     q->x = x;
@@ -172,7 +172,7 @@ rsQuaternionSet(rs_quaternion *q, float w, float x, float y, float z) {
     q->z = z;
 }
 
-_RS_RUNTIME void __attribute__((overloadable))
+static void __attribute__((overloadable))
 rsQuaternionSet(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w = rhs->w;
     q->x = rhs->x;
@@ -180,7 +180,7 @@ rsQuaternionSet(rs_quaternion *q, const rs_quaternion *rhs) {
     q->z = rhs->z;
 }
 
-_RS_RUNTIME void __attribute__((overloadable))
+static void __attribute__((overloadable))
 rsQuaternionMultiply(rs_quaternion *q, float s) {
     q->w *= s;
     q->x *= s;
@@ -188,7 +188,7 @@ rsQuaternionMultiply(rs_quaternion *q, float s) {
     q->z *= s;
 }
 
-_RS_RUNTIME void __attribute__((overloadable))
+static void __attribute__((overloadable))
 rsQuaternionMultiply(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w = -q->x*rhs->x - q->y*rhs->y - q->z*rhs->z + q->w*rhs->w;
     q->x =  q->x*rhs->w + q->y*rhs->z - q->z*rhs->y + q->w*rhs->x;
@@ -196,7 +196,7 @@ rsQuaternionMultiply(rs_quaternion *q, const rs_quaternion *rhs) {
     q->z =  q->x*rhs->y - q->y*rhs->x + q->z*rhs->w + q->w*rhs->z;
 }
 
-_RS_RUNTIME void
+static void
 rsQuaternionAdd(rs_quaternion *q, const rs_quaternion *rhs) {
     q->w *= rhs->w;
     q->x *= rhs->x;
@@ -204,7 +204,7 @@ rsQuaternionAdd(rs_quaternion *q, const rs_quaternion *rhs) {
     q->z *= rhs->z;
 }
 
-_RS_RUNTIME void
+static void
 rsQuaternionLoadRotateUnit(rs_quaternion *q, float rot, float x, float y, float z) {
     rot *= (float)(M_PI / 180.0f) * 0.5f;
     float c = cos(rot);
@@ -216,7 +216,7 @@ rsQuaternionLoadRotateUnit(rs_quaternion *q, float rot, float x, float y, float 
     q->z = z * s;
 }
 
-_RS_RUNTIME void
+static void
 rsQuaternionLoadRotate(rs_quaternion *q, float rot, float x, float y, float z) {
     const float len = x*x + y*y + z*z;
     if (len != 1) {
@@ -228,19 +228,19 @@ rsQuaternionLoadRotate(rs_quaternion *q, float rot, float x, float y, float z) {
     rsQuaternionLoadRotateUnit(q, rot, x, y, z);
 }
 
-_RS_RUNTIME void
+static void
 rsQuaternionConjugate(rs_quaternion *q) {
     q->x = -q->x;
     q->y = -q->y;
     q->z = -q->z;
 }
 
-_RS_RUNTIME float
+static float
 rsQuaternionDot(const rs_quaternion *q0, const rs_quaternion *q1) {
     return q0->w*q1->w + q0->x*q1->x + q0->y*q1->y + q0->z*q1->z;
 }
 
-_RS_RUNTIME void
+static void
 rsQuaternionNormalize(rs_quaternion *q) {
     const float len = rsQuaternionDot(q, q);
     if (len != 1) {
@@ -249,7 +249,7 @@ rsQuaternionNormalize(rs_quaternion *q) {
     }
 }
 
-_RS_RUNTIME void
+static void
 rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion *q1, float t) {
     if (t <= 0.0f) {
         rsQuaternionSet(q, q0);
@@ -291,7 +291,7 @@ rsQuaternionSlerp(rs_quaternion *q, const rs_quaternion *q0, const rs_quaternion
                         tempq0.y*scale + tempq1.y*invScale, tempq0.z*scale + tempq1.z*invScale);
 }
 
-_RS_RUNTIME void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
+static void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion *q) {
     float x2 = 2.0f * q->x * q->x;
     float y2 = 2.0f * q->y * q->y;
     float z2 = 2.0f * q->z * q->z;
@@ -326,7 +326,7 @@ _RS_RUNTIME void rsQuaternionGetMatrixUnit(rs_matrix4x4 *m, const rs_quaternion 
 /////////////////////////////////////////////////////
 // utility funcs
 /////////////////////////////////////////////////////
-__inline__ _RS_RUNTIME void __attribute__((overloadable, always_inline))
+__inline__ static void __attribute__((overloadable, always_inline))
 rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
                          float4 *left, float4 *right,
                          float4 *top, float4 *bottom,
@@ -376,7 +376,7 @@ rsExtractFrustumPlanes(const rs_matrix4x4 *modelViewProj,
     *far /= len;
 }
 
-__inline__ _RS_RUNTIME bool __attribute__((overloadable, always_inline))
+__inline__ static bool __attribute__((overloadable, always_inline))
 rsIsSphereInFrustum(float4 *sphere,
                       float4 *left, float4 *right,
                       float4 *top, float4 *bottom,
