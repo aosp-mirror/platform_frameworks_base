@@ -141,6 +141,55 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
+        // First measure with no constraint
+        final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        super.measureHorizontal(unspecifiedWidth, heightMeasureSpec);
+
+        final int count = getChildCount();
+        int totalWidth = 0;
+        int totalCount = 0;
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
+            final int childWidth = child.getMeasuredWidth();
+            totalWidth += childWidth;
+            totalCount++;
+        }
+
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        if (totalWidth > width && totalCount > 0) {
+            int extraWidth = totalWidth - width;
+            for (int i = 0; i < count; i++) {
+                final View child = getChildAt(i);
+                if (child.getVisibility() == GONE) {
+                    continue;
+                }
+                final int childWidth = child.getMeasuredWidth();
+                final int delta = extraWidth / totalCount;
+                final int tabWidth = Math.max(0, childWidth - delta);
+
+                final int tabWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        tabWidth, MeasureSpec.EXACTLY);
+                final int tabHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        child.getMeasuredHeight(), MeasureSpec.EXACTLY);
+
+                child.measure(tabWidthMeasureSpec, tabHeightMeasureSpec);
+
+                // Make sure the extra width is evenly distributed, avoiding int division remainder
+                extraWidth -= delta;
+                totalCount--;
+            }
+            setMeasuredDimension(width, getMeasuredHeight());
+        }
+    }
+
+    /**
      * Returns the tab indicator view at the given index.
      *
      * @param index the zero-based index of the tab indicator view to return
@@ -175,6 +224,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * Sets the drawable to use as a divider between the tab indicators.
      * @param drawable the divider drawable
      */
+    @Override
     public void setDividerDrawable(Drawable drawable) {
         mDividerDrawable = drawable;
         requestLayout();
