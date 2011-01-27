@@ -18,9 +18,10 @@ package android.nfc.tech;
 
 import android.nfc.Tag;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public interface TagTechnology {
+public interface TagTechnology extends Closeable {
     /**
      * This technology is an instance of {@link NfcA}.
      * <p>Support for this technology type is mandatory.
@@ -135,5 +136,5 @@ public interface TagTechnology {
      * @see #connect()
      * @see #reconnect()
      */
-    public void close();
+    public void close() throws IOException;
 }
