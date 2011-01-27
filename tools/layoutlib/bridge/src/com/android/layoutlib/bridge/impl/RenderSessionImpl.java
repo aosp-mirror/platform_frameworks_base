@@ -72,6 +72,7 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TabHost.TabSpec;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -385,13 +386,17 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * <p>
      * {@link #acquire(long)} must have been called before this.
      *
+     * @param freshRender whether the render is a new one and should erase the existing bitmap (in
+     *      the case where bitmaps are reused). This is typically needed when not playing
+     *      animations.)
+     *
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
      * @see SceneParams#getRenderingMode()
      * @see LayoutScene#render(long)
      */
-    public Result render() {
+    public Result render(boolean freshRender) {
         checkLock();
 
         try {
@@ -450,6 +455,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
             // draw the views
             // create the BufferedImage into which the layout will be rendered.
+            boolean newImage = false;
             if (newRenderSize || mCanvas == null) {
                 if (mParams.getImageFactory() != null) {
                     mImage = mParams.getImageFactory().getImage(mMeasuredScreenWidth,
@@ -457,11 +463,15 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 } else {
                     mImage = new BufferedImage(mMeasuredScreenWidth,
                             mMeasuredScreenHeight - mScreenOffset, BufferedImage.TYPE_INT_ARGB);
+                    newImage = true;
                 }
 
                 if (mParams.isBgColorOverridden()) {
+                    // since we override the content, it's the same as if it was a new image.
+                    newImage = true;
                     Graphics2D gc = mImage.createGraphics();
                     gc.setColor(new Color(mParams.getOverrideBgColor(), true));
+                    gc.setComposite(AlphaComposite.Src);
                     gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight - mScreenOffset);
                     gc.dispose();
                 }
@@ -474,6 +484,14 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 // create a Canvas around the Android bitmap
                 mCanvas = new Canvas(bitmap);
                 mCanvas.setDensity(mParams.getDensity());
+            }
+
+            if (freshRender && newImage == false) {
+                Graphics2D gc = mImage.createGraphics();
+                gc.setColor(new Color(0x00000000, true));
+                gc.setComposite(AlphaComposite.Src);
+                gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight - mScreenOffset);
+                gc.dispose();
             }
 
             mViewRoot.draw(mCanvas);
@@ -600,7 +618,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             return result;
         }
 
-        result = render();
+        result = render(false /*freshRender*/);
         if (result.isSuccess()) {
             result = result.getCopyWithData(child);
         }
@@ -678,7 +696,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                         }
 
                         try {
-                            result = render();
+                            result = render(false /*freshRender*/);
                             if (result.isSuccess()) {
                                 listener.onNewFrame(RenderSessionImpl.this.getSession());
                             }
@@ -734,7 +752,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             return result;
         }
 
-        result = render();
+        result = render(false /*freshRender*/);
         if (layoutParams != null && result.isSuccess()) {
             result = result.getCopyWithData(layoutParams);
         }
@@ -866,7 +884,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             return result;
         }
 
-        return render();
+        return render(false /*freshRender*/);
     }
 
     /**
