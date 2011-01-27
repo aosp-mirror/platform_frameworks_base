@@ -897,10 +897,13 @@ public class CalendarView extends FrameLayout {
             throw new IllegalArgumentException("fromDate: " + mMinDate.getTime()
                     + " does not precede toDate: " + date.getTime());
         }
-        int fromDateDayOfWeek = mMinDate.get(Calendar.DAY_OF_WEEK);
-        long diff = (fromDateDayOfWeek - mFirstDayOfWeek) * MILLIS_IN_DAY;
-        long refDay = mMinDate.getTimeInMillis() - diff;
-        return (int) ((date.getTimeInMillis() - refDay) / MILLIS_IN_WEEK);
+        long endTimeMillis = date.getTimeInMillis()
+                + date.getTimeZone().getOffset(date.getTimeInMillis());
+        long startTimeMillis = mMinDate.getTimeInMillis()
+                + mMinDate.getTimeZone().getOffset(mMinDate.getTimeInMillis());
+        long dayOffsetMillis = (mMinDate.get(Calendar.DAY_OF_WEEK) - mFirstDayOfWeek)
+                * MILLIS_IN_DAY;
+        return (int) ((endTimeMillis - startTimeMillis + dayOffsetMillis) / MILLIS_IN_WEEK);
     }
 
     /**
@@ -1180,6 +1183,7 @@ public class CalendarView extends FrameLayout {
             mNumCells = mShowWeekNumber ? mDaysPerWeek + 1 : mDaysPerWeek;
             mWeek = weekNumber;
             mTempDate.setTimeInMillis(mMinDate.getTimeInMillis());
+
             mTempDate.add(Calendar.WEEK_OF_YEAR, mWeek);
             mTempDate.setFirstDayOfWeek(mFirstDayOfWeek);
 
