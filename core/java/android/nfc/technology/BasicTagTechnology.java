@@ -39,10 +39,7 @@ import android.util.Log;
     /*package*/ final INfcAdapter mService;
     /*package*/ final INfcTag mTagService;
 
-    /**
-     * @hide
-     */
-    public BasicTagTechnology(NfcAdapter adapter, Tag tag, int tech) throws RemoteException {
+    BasicTagTechnology(NfcAdapter adapter, Tag tag, int tech) throws RemoteException {
         int[] techList = tag.getTechnologyList();
         int i;
 
@@ -64,46 +61,36 @@ import android.util.Log;
         mSelectedTechnology = tech;
     }
 
-    /**
-     * @hide
-     */
-    public BasicTagTechnology(NfcAdapter adapter, Tag tag) throws RemoteException {
+    BasicTagTechnology(NfcAdapter adapter, Tag tag) throws RemoteException {
         this(adapter, tag, tag.getTechnologyList()[0]);
     }
 
-    /**
-     * Get the {@link Tag} this connection is associated with.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     */
     @Override
     public Tag getTag() {
         return mTag;
     }
 
-    public void checkConnected() {
+    /** Internal helper to throw IllegalStateException if the technology isn't connected */
+    void checkConnected() {
        if ((mTag.getConnectedTechnology() != getTechnologyId()) ||
                (mTag.getConnectedTechnology() == -1)) {
            throw new IllegalStateException("Call connect() first!");
        }
     }
 
-    /**
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     */
     @Override
     public int getTechnologyId() {
         return mSelectedTechnology;
     }
 
     /**
-     * Helper to indicate if {@link #transceive transceive()} calls might succeed.
+     * Helper to indicate if {@link #connect} has succeeded.
      * <p>
      * Does not cause RF activity, and does not block.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
      * @return true if {@link #connect} has completed successfully and the {@link Tag} is believed
      * to be within range. Applications must still handle {@link java.io.IOException}
-     * while using {@link #transceive transceive()}, in case connection is lost after this method
-     * returns true.
+     * while using methods that require a connection in case the connection is lost after this
+     * method returns.
      */
     public boolean isConnected() {
         if (!mIsConnected) {
@@ -118,16 +105,6 @@ import android.util.Log;
         }
     }
 
-    /**
-     * Connect to the {@link Tag} associated with this connection.
-     * <p>
-     * This method blocks until the connection is established.
-     * <p>
-     * {@link #close} can be called from another thread to cancel this connection
-     * attempt.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @throws IOException if the target is lost, or connect canceled
-     */
     @Override
     public void connect() throws IOException {
         try {
@@ -146,17 +123,6 @@ import android.util.Log;
         }
     }
 
-    /**
-     * Re-connect to the {@link Tag} associated with this connection.
-     * <p>
-     * Reconnecting to a tag can be used to reset the state of the tag itself.
-     * This method blocks until the connection is re-established.
-     * <p>
-     * {@link #close} can be called from another thread to cancel this connection
-     * attempt.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * @throws IOException if the target is lost, or connect canceled
-     */
     @Override
     public void reconnect() throws IOException {
         if (!mIsConnected) {
@@ -179,16 +145,6 @@ import android.util.Log;
         }
     }
 
-    /**
-     * Close this connection.
-     * <p>
-     * Causes blocking operations such as {@link #transceive transceive()} or {@link #connect} to
-     * be canceled and immediately throw {@link java.io.IOException}.
-     * <p>
-     * Once this method is called, this object cannot be re-used and should be discarded. Further
-     * calls to {@link #transceive transceive()} or {@link #connect} will fail.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     */
     @Override
     public void close() {
         try {
@@ -204,7 +160,7 @@ import android.util.Log;
         }
     }
 
-    /** internal transceive */
+    /** Internal transceive */
     /*package*/ byte[] transceive(byte[] data, boolean raw) throws IOException {
         checkConnected();
 
@@ -218,20 +174,5 @@ import android.util.Log;
             Log.e(TAG, "NFC service dead", e);
             throw new IOException("NFC service died");
         }
-    }
-
-    /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     *
-     * @param data bytes to send
-     * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
-     */
-    public byte[] transceive(byte[] data) throws IOException {
-        return transceive(data, true);
     }
 }
