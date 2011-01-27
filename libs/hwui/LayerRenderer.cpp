@@ -43,7 +43,7 @@ void LayerRenderer::finish() {
 
     generateMesh();
 
-    LAYER_RENDERER_LOGD("Finished rendering into layer, fbo = %d", mLayer->mFbo);
+    LAYER_RENDERER_LOGD("Finished rendering into layer, fbo = %d", mLayer->fbo);
 
     // No need to unbind our FBO, this will be taken care of by the caller
     // who will invoke OpenGLRenderer::resume()
