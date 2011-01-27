@@ -138,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"正在关机..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板电脑会关闭。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"您的手机会关机。"</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <!-- outdated translation 4249474800794963142 -->     <string name="shutdown_confirm_question" msgid="6656441286856415014">"要关闭手机吗？"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"没有最近的应用程序。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"平板电脑选项"</string>
@@ -291,7 +290,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允许应用程序读取/写入诊断组所拥有的任何资源（例如，/dev 中的文件）。这可能会影响系统稳定性和安全性。此权限仅供制造商或运营商诊断硬件问题。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"启用或停用应用程序组件"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"允许应用程序更改是否启用其他应用程序的组件。恶意应用程序可借此停用重要的平板电脑功能。使用此权限时请务必谨慎，因为这可能导致应用程序组件陷入不可用、不一致或不稳定的状态。"</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"允许应用程序更改是否启用其他应用程序的组件。恶意应用程序可借此停用重要的平板电脑功能。使用此权限时请务必谨慎，因为这可能导致应用程序组件陷入不可用、不一致或不稳定的状态。"</string>
+    <!-- outdated translation 1791075936446230356 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"允许应用程序更改是否启用其他应用程序的组件。恶意应用程序可借此停用重要的平板电脑功能。使用此权限时请务必谨慎，因为这可能导致应用程序组件陷入不可用、不一致或不稳定的状态。"</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"设置首选应用程序"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"允许应用程序修改首选的应用程序。这样恶意应用程序可能会暗中更改运行的应用程序，从而骗过您的现有应用程序来收集您的保密数据。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"修改全局系统设置"</string>
@@ -470,10 +469,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/删除 SD 卡中的内容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"允许应用程序写入 USB 存储设备。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"允许应用程序写入 SD 卡。"</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <!-- outdated translation 5585262071354704256 -->     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/删除内部媒体存储设备内容"</string>
+    <!-- outdated translation 2372999661142345443 -->     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"允许应用程序修改内部媒体存储设备中的内容。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"访问缓存文件系统"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允许应用程序读取和写入缓存文件系统。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"拨打/接听互联网通话"</string>
@@ -680,11 +677,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"自动填充"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"设置自动填充"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
+    <!-- outdated translation 7531610259426153850 -->     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <!-- outdated translation 8398158823767723887 -->     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$3$2$1"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"读取浏览器的历史记录和书签"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允许应用程序读取用浏览器访问过的所有网址，以及浏览器的所有书签。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"写入浏览器的历史记录和书签"</string>
@@ -1000,8 +995,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 个匹配项"</item>
     <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 项，共 <xliff:g id="TOTAL">%d</xliff:g> 项"</item>
   </plurals>
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
+    <!-- outdated translation 9218298627167585235 -->     <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"正在卸载 USB 存储设备..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"正在卸载 SD 卡..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"正在格式化 USB 存储设备"</string>
@@ -1020,24 +1014,17 @@
     <string name="websearch" msgid="4337157977400211589">"网页搜索"</string>
     <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
     <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
+    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"定位请求"</string>
     <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
     <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
+    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"是"</string>
+    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"否"</string>
+    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"超出删除限制"</string>
     <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
     <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"删除这些项。"</string>
+    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"撤消删除。"</string>
+    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"目前不进行任何操作。"</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
