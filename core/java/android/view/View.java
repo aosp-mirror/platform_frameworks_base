@@ -2937,13 +2937,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Gets the current list of listeners for layout changes.
-     */
-    public List<OnLayoutChangeListener> getOnLayoutChangeListeners() {
-        return mOnLayoutChangeListeners;
-    }
-
-    /**
      * Returns the focus-change callback registered for this view.
      *
      * @return The callback, or null if one is not registered.
@@ -6052,6 +6045,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
         }
     }
 
@@ -6118,6 +6112,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
         }
     }
 
@@ -6178,6 +6173,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
         }
     }
 
@@ -6235,6 +6231,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 invalidate(true);
             }
             mBackgroundSizeChanged = true;
+            invalidateParentIfNeeded();
         }
     }
 
@@ -6479,6 +6476,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(false);
             }
+            invalidateParentIfNeeded();
         }
     }
 
@@ -6517,6 +6515,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 mPrivateFlags |= DRAWN; // force another invalidation with the new orientation
                 invalidate(false);
             }
+            invalidateParentIfNeeded();
         }
     }
 

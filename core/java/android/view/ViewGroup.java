@@ -17,6 +17,7 @@
 package android.view;
 
 import android.animation.LayoutTransition;
+import android.view.animation.AlphaAnimation;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 
@@ -2377,6 +2378,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         DisplayList displayList = null;
         Bitmap cache = null;
+        boolean hasDisplayList = false;
         if (caching) {
             if (!canvas.isHardwareAccelerated()) {
                 if (layerType != LAYER_TYPE_NONE) {
@@ -2389,12 +2391,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     child.buildDrawingCache(true);
                     cache = child.getDrawingCache(true);
                 } else if (layerType == LAYER_TYPE_NONE) {
-                    displayList = child.getDisplayList();
+                    // Delay getting the display list until animation-driven alpha values are
+                    // set up and possibly passed on to the view
+                    hasDisplayList = true;
                 }
             }
         }
 
-        final boolean hasDisplayList = displayList != null && displayList.isReady();
         final boolean hasNoCache = cache == null || hasDisplayList;
 
         final int restoreTo = canvas.save();
@@ -2485,6 +2488,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
+        if (hasDisplayList) {
+            displayList = child.getDisplayList();
+        }
+
         if (hasNoCache) {
             boolean layerRendered = false;
             if (layerType == LAYER_TYPE_HARDWARE) {
@@ -2542,7 +2549,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         canvas.restoreToCount(restoreTo);
 
         if (a != null && !more) {
-            child.onSetAlpha(255);
+            if (!canvas.isHardwareAccelerated() && !a.getFillAfter()) {
+                child.onSetAlpha(255);
+            }
             finishAnimatingView(child, a);
         }
 
@@ -2551,6 +2560,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // display lists to render, force an invalidate to allow the animation to
             // continue drawing another frame
             invalidate();
+            if (a instanceof AlphaAnimation) {
+                // alpha animations should cause the child to recreate its display list
+                child.invalidate();
+            }
         }
 
         child.mRecreateDisplayList = false;
