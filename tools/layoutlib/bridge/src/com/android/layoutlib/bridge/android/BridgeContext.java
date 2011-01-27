@@ -267,7 +267,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public final TypedArray obtainStyledAttributes(int[] attrs) {
-        return createStyleBasedTypedArray(mRenderResources.getTheme(), attrs);
+        return createStyleBasedTypedArray(mRenderResources.getCurrentTheme(), attrs);
     }
 
     @Override

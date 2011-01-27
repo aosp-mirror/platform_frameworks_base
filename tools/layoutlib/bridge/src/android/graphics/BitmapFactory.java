@@ -17,8 +17,8 @@
 package android.graphics;
 
 import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.resources.Density;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -462,9 +462,9 @@ public class BitmapFactory {
             // into is.read(...) This number is not related to the value passed
             // to mark(...) above.
             try {
-                ResourceDensity density = ResourceDensity.MEDIUM;
+                Density density = Density.MEDIUM;
                 if (opts != null) {
-                    density = ResourceDensity.getEnum(opts.inDensity);
+                    density = Density.getEnum(opts.inDensity);
                 }
                 bm = Bitmap_Delegate.createBitmap(is, true, density);
             } catch (IOException e) {
