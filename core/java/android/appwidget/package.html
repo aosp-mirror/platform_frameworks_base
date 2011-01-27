@@ -1,32 +1,32 @@
 <body>
-<p>Android allows applications to publish views to be embedded in other applications.  These
-views are called widgets, and are published by "AppWidget providers."  The component that can
-contain widgets is called a "AppWidget host."
-</p>
-<p>For more information, see the 
-<a href="{@docRoot}guide/topics/appwidgets/index.html">AppWidgets</a> 
-documentation in the Dev Guide.</p>
-
+<p>Contains the components necessary to create "app widgets", which users can embed in other
+applications (such as the home screen) to quickly access application data and services without
+launching a new activity.</p>
+<p>For more information, see the
+<a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>
+developer guide.</p>
 
 {@more}
+<p>The behavior of an app widget is published by an "app widget provider."  An "app widget host" is
+a component that can contain app widgets (such as the Home screen).</p>
 
+<p>Any application can publish app widgets (as an app widget provider).  All an application needs to
+do to publish an app widget is
+provide a {@link android.content.BroadcastReceiver} that receives the {@link
+android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE} intent
+and provide some metadata about the app widget.  Android provides the
+{@link android.appwidget.AppWidgetProvider} class, which extends {@link
+android.content.BroadcastReceiver}, as a convenience class to define the app widget behavrio and aid
+in handling the broadcasts.</p>
 
-<h2><a name="providers"></a>AppWidget Providers</h2>
-<p>Any application can publish widgets.  All an application needs to do to publish a widget is
-to have a {@link android.content.BroadcastReceiver} that receives the {@link
-android.appwidget.AppWidgetManager#ACTION_APPWIDGET_UPDATE AppWidgetManager.ACTION_APPWIDGET_UPDATE} intent,
-and provide some meta-data about the widget.  Android provides the
-{@link android.appwidget.AppWidgetProvider} class, which extends BroadcastReceiver, as a convenience
-class to aid in handling the broadcasts.
-
-
-<h2>AppWidget Hosts</h3>
-<p>Widget hosts are the containers in which widgets can be placed.  Most of the look and feel
+<p>App widget hosts are the containers in which widgets can be placed.  Most of the look and feel
 details are left up to the widget hosts.  For example, the home screen has one way of viewing
 widgets, but the lock screen could also contain widgets, and it would have a different way of
 adding, removing and otherwise managing widgets.</p>
-<p>For more information on implementing your own widget host, see the
-{@link android.appwidget.AppWidgetHost AppWidgetHost} class.</p>
+
+<p>The <a href="{@docRoot}guide/topics/appwidgets/index.html">App Widgets</a>
+developer guide shows you how to create an app widget provider. For information about implementing
+an app widget host, see the {@link android.appwidget.AppWidgetHost} class.</p>
 
 </body>
 
