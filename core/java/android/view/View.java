@@ -11439,6 +11439,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
     }
 
+    /** @hide */
+    public void hackTurnOffWindowResizeAnim(boolean off) {
+        mAttachInfo.mTurnOffWindowResizeAnim = off;
+    }
+    
     /**
      * Interface definition for a callback to be invoked when a key event is
      * dispatched to this view. The callback will be invoked before the key
@@ -11704,6 +11709,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          */
         boolean mScalingRequired;
 
+        /**
+         * If set, ViewRoot doesn't use its lame animation for when the window resizes.
+         */
+        boolean mTurnOffWindowResizeAnim;
+        
         /**
          * Left position of this view's window
          */

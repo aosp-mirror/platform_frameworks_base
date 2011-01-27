@@ -777,6 +777,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 if (!mAttachInfo.mContentInsets.equals(mPendingContentInsets)) {
                     if (mWidth > 0 && mHeight > 0 &&
                             mSurface != null && mSurface.isValid() &&
+                            !mAttachInfo.mTurnOffWindowResizeAnim &&
                             mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled() &&
                             lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
