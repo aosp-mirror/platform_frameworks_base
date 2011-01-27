@@ -416,8 +416,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private void lock(boolean forced) {
         // make sure this method is NOT being called from a 'synchronized' method
         if (Thread.holdsLock(this)) {
-            // STOPSHIP change the following line to Log.w()
-            throw new IllegalStateException("don't lock() while in a synchronized method");
+            Log.w(TAG, "don't lock() while in a synchronized method");
         }
         verifyDbIsOpen();
         if (!forced && !mLockingEnabled) return;
