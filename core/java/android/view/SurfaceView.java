@@ -169,7 +169,7 @@ public class SurfaceView extends View {
                 @Override
                 public boolean onPreDraw() {
                     // reposition ourselves where the surface is 
-                    mHaveFrame = true;
+                    mHaveFrame = getWidth() > 0 && getHeight() > 0;
                     updateWindow(false, false);
                     return true;
                 }
