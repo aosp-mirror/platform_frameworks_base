@@ -88,6 +88,9 @@ class BrowserFrame extends Handler {
     // Attached Javascript interfaces
     private Map<String, Object> mJSInterfaceMap;
 
+    // Key store handler when Chromium HTTP stack is used.
+    private KeyStoreHandler mKeyStoreHandler = null;
+
     // message ids
     // a message posted when a frame loading is completed
     static final int FRAME_COMPLETED = 1001;
@@ -1173,8 +1176,27 @@ class BrowserFrame extends Handler {
         }
         mimeType = MimeTypeMap.getSingleton().remapGenericMimeType(
                 mimeType, url, contentDisposition);
-        mCallbackProxy.onDownloadStart(url, userAgent,
+
+        if (CertTool.getCertType(mimeType) != null) {
+            mKeyStoreHandler = new KeyStoreHandler(mimeType);
+        } else {
+            mCallbackProxy.onDownloadStart(url, userAgent,
                 contentDisposition, mimeType, contentLength);
+        }
+    }
+
+    /**
+     * Called by JNI for Chrome HTTP stack when the Java side needs to access the data.
+     */
+    private void didReceiveData(byte data[], int size) {
+        if (mKeyStoreHandler != null) mKeyStoreHandler.didReceiveData(data, size);
+    }
+
+    private void didFinishLoading() {
+      if (mKeyStoreHandler != null) {
+          mKeyStoreHandler.installCert(mContext);
+          mKeyStoreHandler = null;
+      }
     }
 
     /**
