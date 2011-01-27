@@ -2105,7 +2105,6 @@ class MediaArtistNativeHelper {
                 //For image get the scaled height. Aspect ratio would remain the same
                 mediaItemHeight = ((MediaImageItem)overlay.getMediaItem()).getScaledHeight();
                 aspectRatio = overlay.getMediaItem().getAspectRatio();
-                effectSettings.framingResize = false; //since the image can be of odd size.
             }
         } else {
             aspectRatio = overlay.getMediaItem().getAspectRatio();
