@@ -1537,6 +1537,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                 int top = dirty.top;
                 int right = dirty.right;
                 int bottom = dirty.bottom;
+
                 canvas = surface.lockCanvas(dirty);
 
                 if (left != dirty.left || top != dirty.top || right != dirty.right ||
