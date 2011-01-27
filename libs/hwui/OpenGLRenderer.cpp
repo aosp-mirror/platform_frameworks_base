@@ -1613,10 +1613,12 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
             setupDrawColorFilter();
             setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
             setupDrawProgram();
-            setupDrawDirtyRegionsDisabled();
             setupDrawPureColorUniforms();
             setupDrawColorFilterUniforms();
             setupDrawTexture(layer->texture);
+            // TODO: The current layer, if any, will be dirtied with the bounding box
+            //       of the layer we are drawing. Since the layer we are drawing has
+            //       a mesh, we know the dirty region, we should use it instead
             setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
             setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
 
