@@ -1,4 +1,183 @@
-sdk.redirect=true
-
+page.title=Android 3.0 Preview SDK
 @jd:body
+
+<p>Android 3.0 is the next major release of the Android platform and is optimized for tablet
+devices. We're offering a Preview SDK so you can get a head-start developing
+applications for it or simply optimize your existing application for upcoming
+tablets.</p>
+
+
+<h3>What is the Preview SDK?</h3>
+
+<p>The Android 3.0 Preview SDK is an early look at the upcoming version of Android 3.0, for
+developers only. </p>
+
+<p>The Preview SDK includes:</p>
+<ul>
+  <li>An early Android 3.0 system image for use in the Android emulator</li>
+  <li>An Android 3.0 library with non-final APIs</li>
+  <li>A new WXGA emulator skin for an extra large Android Virtual Device</li>
+  <li>New documentation for Android 3.0, including a complete API reference, new developer guides,
+and an API differences report between Android 3.0 and 2.3.</li>
+</ul>
+
+<div class="note">
+<p><strong>Be aware that:</strong></p>
+<ul>
+  <li>The APIs in the Preview SDK are <strong>not final</strong>. Some APIs may change in behavior
+or availability when the final SDK is made available.</li>
+  <li>You <strong>cannot</strong> publish an application that's built against the Preview
+SDK&mdash;you can only run an application built against the Preview SDK on the Android
+emulator.</li>
+  <li>The documentation on <a href="http://developer.android.com">developer.android.com</a>
+does <strong>not</strong> include the Android 3.0 documentation&mdash;to read the API reference and
+developer guides for Android 3.0, you must install the Android 3.0 Preview documentation from
+the AVD and SDK Manager.</li>
+</ul>
+</div>
+
+
+<p><b>About emulator performance</b></p>
+
+<p>Because the Android emulator must simulate the ARM instruction set architecture on your
+computer and the WXGA screen is significantly larger than what the emulator
+normally handles, emulator performance is much slower than usual. </p>
+
+<p>In particular, initializing the emulator can be slow and can take several
+minutes, depending on your hardware. When the emulator is booting there is
+limited user feedback, so please be patient and continue waiting until you see
+the home screen appear. </p>
+
+<p>We're working hard to resolve the performance issues in the emulator and it will improve in
+future releases. In the meantime, we wanted to give developers access to new APIs and an basic test
+environment as early as possible. </p>
+
+<p>Keeping in mind that performance on the emulator does not reflect the speed or performance of
+apps on actual devices running Android 3.0, developing and testing on the emulator is still an
+important tool in evaluating your application's appearance and functionality on the new platform. 
+</p>
+
+
+
+
+
+<h3>What can I do with the preview?</h3>
+
+<p>The Preview SDK is intended for testing existing applications on the new platform and
+developing new applications with new Android 3.0 APIs.</p>
+
+<p>If you have an existing Android application, you don't <em>have to</em> do anything. Android
+applications are always forward-compatible. If your application is a good citizen of the Android
+APIs, your app should work fine on devices running Android 3.0 without any additional work. However,
+in order to ensure proper performance and provide users a better experience when running your
+application on an Android 3.0 tablet, we recommend that you perform the following:</p>
+
+<ol>
+  <li><b>Test your application on Android 3.0</b>
+    <p>Simply install the Android 3.0 preview in your Android SDK, create an AVD using the
+Android 3.0 system image, install your application, and run some tests.</p>
+    <p>As mentioned above, your application should perform as expected. You might, however,
+discover that your activity layouts are less than ideal on a large screen or some other aspects
+of your application don't behave the way you expect.</p>
+  </li>
+  <li><b>Inherit the new "Holographic" theme</b>
+    <p>Android 3.0 offers an updated set of UI widgets that are redesigned for use on larger screens
+such as tablets and incorporate the new holographic theme. Your existing application can inherit
+the new design simply by setting the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+element's {@code android:targetSdkVersion} attribute to {@code "Honeycomb"}.</p>
+    <p>If you do not update the {@code android:targetSdkVersion} attribute and the {@code
+android:minSdkVersion} is set to "9" or lower, then your application uses the widget designs
+from Android 2.3 and does <em>not</em> inherit the holographic theme.</p>
+    <p>In order for your application to match the rest of the system UI, we highly recommend you
+make this change to inherit the new widget styles and system theme. However, beware that doing so
+might conflict with color or text designs you applied to your application based on the previous
+system theme, so you should be sure to inspect your application UI when using the holographic
+theme.</p>
+  </li>
+  <li><b>Provide alternative layouts for extra large screens</b>
+    <p>As discussed in the guide to <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>, Android
+2.3 and above support the <code>xlarge</code> resource qualifier, which you should use to supply
+alternative layouts for extra large screens.</p>
+    <p>By providing alternative layouts for some of your activities when running on extra large
+screens, you can improve the user experience of your application on a tablet without using any
+new APIs.</p>
+    <p>For example, here are some things to consider when creating a new layout for tables:</p>
+    <ul>
+      <li>Landscape layout: The "normal" orientation for tablets is usually landscape (wide), so
+you should be sure that your activities offer an appropriate layout for such a wide viewing
+area.</li>
+      <li>Button position: Consider whether the position of the most common buttons in your UI are
+easily accessible while holding a tablet with two hands.</li>
+    </ul>
+    <p class="note"><strong>Note:</strong> You can add alternative resources for <em>xlarge</em>
+screens without changing your {@code minSdkVersion}. For example, if you add alternative layouts in
+<code>res/layout-xlarge/</code> and your application is compatible with older versions, such
+as Android 1.5&mdash;which doesn't support <em>xlarge</em> screens&mdash;this layout directory is
+simply ignored by those devices.</p>
+  </li>
+</ol>
+
+
+<p>Otherwise, if you want to develop a new application or upgrade your existing application to
+use APIs added in Android 3.0, we encourage you to get started by developing against the Android
+3.0 preview platform. You can get started the same way as you would for any other version of
+Android.</p>
+
+
+<p>To get started&mdash;whether testing an existing application or creating a new one&mdash;follow
+the procedure in the following section to install the Preview SDK.</p>
+
+
+
+<h3 id="Setup">How do I get it?</h3>
+
+<p>To get the Preview SDK, you can download it using the Android SDK and AVD Manager.</p>
+
+<p>If you're new to Android development, start by <a href="{@docRoot}sdk/index.html">downloading the
+Android SDK starter package</a>.</p>
+
+<p><a href="{@docRoot}sdk/adding-components.html#launching">Launch the Android SDK and AVD
+Manager</a> and install the following:</p>
+<ul>
+  <li>SDK Platform Android Honeycomb Preview</li>
+  <li>Android SDK Tools, revision 9</li>
+  <li>Android SDK Platform-tools, revision 2</li>
+  <li>Documentation for Android 'Honeycomb' Preview</li>
+  <li>Samples for SDK API Honeycomb Preview</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Be sure to install the documentation component for the
+Honeycomb Preview SDK. The API reference for the Android 3.0 API is <strong>not</strong> available
+online.</p>
+
+<p>Once you have installed these components, open your SDK directory and navigate to {@code
+docs/sdk/} and open {@code index.html} in your browser. </p>
+
+
+
+<h3 id="Issues">Known issues</h3>
+
+<p>The following known issues occur for Android 3.0 AVDs that are loaded in the emulator:</p>
+
+<ul>
+  <li>The emulator displays a rotated portrait screen while in landscape
+orientation. To view the screen correctly in landscape orientation, turn off the auto-rotate setting
+in <strong>Settings > Screen > Auto-rotate screen</strong>. Then use Ctrl-F11 to rotate the
+emulator.</li>
+  <li>You cannot take screenshots of an emulator screen. The Device Screen Capture window displays
+<strong>Screen not available</strong>.</li>
+  <li>GPS emulation is currently not supported.</li>
+  <li>When rotating the emulator screen by pressing Ctrl-F11, the screen turns green momentarily,
+then displays the normal interface.</li>
+  <li>The Dev Tools application sometimes crashes when trying to use the Package Browser
+feature.</li>
+</ul>
+
+
+<div class="special">
+ <p>For an overview of new features in Android 3.0, read the <a
+href="{@docRoot}sdk/android-3.0-highlights.html">Platform Highlights</a>.</p>
+</div>
 
