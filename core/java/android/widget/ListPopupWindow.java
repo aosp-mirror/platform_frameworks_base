@@ -774,7 +774,7 @@ public class ListPopupWindow {
     }
 
     /**
-     * Filter key down events. By forwarding key up events to this function,
+     * Filter key down events. By forwarding key down events to this function,
      * views using non-modal ListPopupWindow can have it handle key selection of items.
      *  
      * @param keyCode keyCode param passed to the host view's onKeyDown
