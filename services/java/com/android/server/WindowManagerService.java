@@ -1918,9 +1918,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowState wb = localmWindows.get(foundI-1);
                 if (wb.mBaseLayer < maxLayer &&
                         wb.mAttachedWindow != foundW &&
-                        wb.mAttachedWindow != foundW.mAttachedWindow &&
+                        (foundW.mAttachedWindow == null ||
+                                wb.mAttachedWindow != foundW.mAttachedWindow) &&
                         (wb.mAttrs.type != TYPE_APPLICATION_STARTING ||
-                                wb.mToken != foundW.mToken)) {
+                                foundW.mToken == null || wb.mToken != foundW.mToken)) {
                     // This window is not related to the previous one in any
                     // interesting way, so stop here.
                     break;
@@ -5003,7 +5004,6 @@ public class WindowManagerService extends IWindowManager.Stub
         Bitmap rawss;
 
         int maxLayer = 0;
-        boolean foundApp;
         final Rect frame = new Rect();
 
         float scale;
@@ -5013,24 +5013,49 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             long ident = Binder.clearCallingIdentity();
 
+            dw = mDisplay.getWidth();
+            dh = mDisplay.getHeight();
+
             int aboveAppLayer = mPolicy.windowTypeToLayerLw(
                     WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
                     + TYPE_LAYER_OFFSET;
             aboveAppLayer += TYPE_LAYER_MULTIPLIER;
 
+            boolean isImeTarget = mInputMethodTarget != null
+                    && mInputMethodTarget.mAppToken != null
+                    && mInputMethodTarget.mAppToken.appToken != null
+                    && mInputMethodTarget.mAppToken.appToken.asBinder() == appToken;
+
             // Figure out the part of the screen that is actually the app.
-            for (int i=0; i<mWindows.size(); i++) {
+            boolean including = false;
+            for (int i=mWindows.size()-1; i>=0; i--) {
                 WindowState ws = mWindows.get(i);
                 if (ws.mSurface == null) {
                     continue;
                 }
                 if (ws.mLayer >= aboveAppLayer) {
-                    break;
-                }
-                if (appToken != null && (ws.mAppToken == null
-                        || ws.mAppToken.token != appToken)) {
                     continue;
                 }
+                // When we will skip windows: when we are not including
+                // ones behind a window we didn't skip, and we are actually
+                // taking a screenshot of a specific app.
+                if (!including && appToken != null) {
+                    // Also, we can possibly skip this window if it is not
+                    // an IME target or the application for the screenshot
+                    // is not the current IME target.
+                    if (!ws.mIsImWindow || !isImeTarget) {
+                        // And finally, this window is of no interest if it
+                        // is not associated with the screenshot app.
+                        if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
+                            continue;
+                        }
+                    }
+                }
+
+                // We keep on including windows until we go past a full-screen
+                // window.
+                including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
+
                 if (maxLayer < ws.mAnimLayer) {
                     maxLayer = ws.mAnimLayer;
                 }
@@ -5065,8 +5090,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // The screen shot will contain the entire screen.
-            dw = (int)(mDisplay.getWidth()*scale);
-            dh = (int)(mDisplay.getHeight()*scale);
+            dw = (int)(dw*scale);
+            dh = (int)(dh*scale);
             if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
                 int tmp = dw;
                 dw = dh;
@@ -10856,17 +10881,19 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputMonitor.updateInputWindowsLw(true /*force*/);
 
         setHoldScreenLocked(holdScreen != null);
-        if (screenBrightness < 0 || screenBrightness > 1.0f) {
-            mPowerManager.setScreenBrightnessOverride(-1);
-        } else {
-            mPowerManager.setScreenBrightnessOverride((int)
-                    (screenBrightness * Power.BRIGHTNESS_ON));
-        }
-        if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
-            mPowerManager.setButtonBrightnessOverride(-1);
-        } else {
-            mPowerManager.setButtonBrightnessOverride((int)
-                    (buttonBrightness * Power.BRIGHTNESS_ON));
+        if (!mDisplayFrozen) {
+            if (screenBrightness < 0 || screenBrightness > 1.0f) {
+                mPowerManager.setScreenBrightnessOverride(-1);
+            } else {
+                mPowerManager.setScreenBrightnessOverride((int)
+                        (screenBrightness * Power.BRIGHTNESS_ON));
+            }
+            if (buttonBrightness < 0 || buttonBrightness > 1.0f) {
+                mPowerManager.setButtonBrightnessOverride(-1);
+            } else {
+                mPowerManager.setButtonBrightnessOverride((int)
+                        (buttonBrightness * Power.BRIGHTNESS_ON));
+            }
         }
         if (holdScreen != mHoldingScreenOn) {
             mHoldingScreenOn = holdScreen;
