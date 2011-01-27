@@ -2013,13 +2013,7 @@ public class WebView extends AbsoluteLayout
     }
 
     private void startPrivateBrowsing() {
-        boolean wasPrivateBrowsingEnabled = isPrivateBrowsingEnabled();
-
         getSettings().setPrivateBrowsingEnabled(true);
-
-        if (!wasPrivateBrowsingEnabled) {
-            loadUrl("browser:incognito");
-        }
     }
 
     private boolean extendScroll(int y) {
