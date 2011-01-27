@@ -8166,10 +8166,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // TODO: We should pass the dirty rect
                 canvas.onPreDraw(null);
 
+                final int restoreCount = canvas.save();
+
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
-
-                final int restoreCount = canvas.save();
 
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
     

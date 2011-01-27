@@ -99,11 +99,13 @@ void LayerRenderer::generateMesh() {
         mLayer->meshIndices = NULL;
     }
 
+    bool rebuildIndices = false;
     if (!mLayer->mesh) {
         mLayer->mesh = new TextureVertex[count * 4];
         mLayer->meshIndices = new uint16_t[elementCount];
-        mLayer->meshElementCount = elementCount;
+        rebuildIndices = true;
     }
+    mLayer->meshElementCount = elementCount;
 
     const float texX = 1.0f / float(mLayer->width);
     const float texY = 1.0f / float(mLayer->height);
@@ -125,14 +127,16 @@ void LayerRenderer::generateMesh() {
         TextureVertex::set(mesh++, r->left, r->bottom, u1, v2);
         TextureVertex::set(mesh++, r->right, r->bottom, u2, v2);
 
-        uint16_t quad = i * 4;
-        int index = i * 6;
-        indices[index    ] = quad;       // top-left
-        indices[index + 1] = quad + 1;   // top-right
-        indices[index + 2] = quad + 2;   // bottom-left
-        indices[index + 3] = quad + 2;   // bottom-left
-        indices[index + 4] = quad + 1;   // top-right
-        indices[index + 5] = quad + 3;   // bottom-right
+        if (rebuildIndices) {
+            uint16_t quad = i * 4;
+            int index = i * 6;
+            indices[index    ] = quad;       // top-left
+            indices[index + 1] = quad + 1;   // top-right
+            indices[index + 2] = quad + 2;   // bottom-left
+            indices[index + 3] = quad + 2;   // bottom-left
+            indices[index + 4] = quad + 1;   // top-right
+            indices[index + 5] = quad + 3;   // bottom-right
+        }
     }
 #endif
 }
