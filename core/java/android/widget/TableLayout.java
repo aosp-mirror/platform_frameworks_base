@@ -560,7 +560,7 @@ public class TableLayout extends LinearLayout {
 
         if ((totalWidth > size) && (mShrinkAllColumns || mShrinkableColumns.size() > 0)) {
             // oops, the largest columns are wider than the row itself
-            // fairly redistribute the row's widh among the columns
+            // fairly redistribute the row's width among the columns
             mutateColumnsWidth(mShrinkableColumns, mShrinkAllColumns, size, totalWidth);
         } else if ((totalWidth < size) && (mStretchAllColumns || mStretchableColumns.size() > 0)) {
             // if we have some space left, we distribute it among the
