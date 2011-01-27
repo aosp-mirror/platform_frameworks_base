@@ -83,6 +83,8 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
     private DrawableHolder mUnlockHalo;
     private int mLockState = STATE_RESET_LOCK;
     private int mGrabbedState = OnTriggerListener.NO_HANDLE;
+    private boolean mWavesRunning;
+    private boolean mFinishWaves;
 
     public WaveView(Context context) {
         this(context, null);
@@ -241,6 +243,7 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
 
             case STATE_READY:
                 if (DBG) Log.v(TAG, "State READY");
+                mWaveTimerDelay = WAVE_DELAY;
                 break;
 
             case STATE_START_ATTEMPT:
@@ -264,14 +267,13 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                 mUnlockRing.addAnimTo(DURATION, 0, "scaleY", 1.0f, true);
                 mUnlockRing.addAnimTo(DURATION, 0, "alpha", 1.0f, true);
 
-                postDelayed(mAddWaveAction, mWaveTimerDelay);
-
                 mLockState = STATE_ATTEMPTING;
                 break;
 
             case STATE_ATTEMPTING:
                 if (DBG) Log.v(TAG, "State ATTEMPTING (fingerDown = " + fingerDown + ")");
                 if (dragDistance > mSnapRadius) {
+                    mFinishWaves = true; // don't start any more waves.
                     if (fingerDown) {
                         mUnlockHalo.addAnimTo(0, 0, "x", ringX, true);
                         mUnlockHalo.addAnimTo(0, 0, "y", ringY, true);
@@ -283,6 +285,13 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
                         mLockState = STATE_UNLOCK_ATTEMPT;
                     }
                 } else {
+                    // If waves have stopped, we need to kick them off again...
+                    if (!mWavesRunning) {
+                        mWavesRunning = true;
+                        mFinishWaves = false;
+                        // mWaveTimerDelay = WAVE_DELAY;
+                        postDelayed(mAddWaveAction, mWaveTimerDelay);
+                    }
                     mUnlockHalo.addAnimTo(0, 0, "x", mouseX, true);
                     mUnlockHalo.addAnimTo(0, 0, "y", mouseY, true);
                     mUnlockHalo.addAnimTo(0, 0, "scaleX", 1.0f, true);
@@ -429,9 +438,14 @@ public class WaveView extends View implements ValueAnimator.AnimatorUpdateListen
 
                 mCurrentWave = (mCurrentWave+1) % mWaveCount;
                 if (DBG) Log.v(TAG, "WaveTimerDelay: start new wave in " + mWaveTimerDelay);
-                postDelayed(mAddWaveAction, mWaveTimerDelay);
             } else {
                 mWaveTimerDelay += DELAY_INCREMENT2;
+            }
+            if (mFinishWaves) {
+                // sentinel used to restart the waves after they've stopped
+                mWavesRunning = false;
+            } else {
+                postDelayed(mAddWaveAction, mWaveTimerDelay);
             }
         }
     };
