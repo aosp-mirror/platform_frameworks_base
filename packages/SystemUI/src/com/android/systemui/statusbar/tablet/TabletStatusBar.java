@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -859,17 +860,32 @@ public class TabletStatusBar extends StatusBar implements
         if (visible) setLightsOn(true);
     }
 
-    public void setIMEButtonVisible(IBinder token, boolean visible) {
-        if (DEBUG) {
-            Slog.d(TAG, (visible?"showing":"hiding") + " the IME button");
-        }
-        mInputMethodSwitchButton.setIMEButtonVisible(token, visible);
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
+        mInputMethodSwitchButton.setImeWindowStatus(token,
+                (vis & InputMethodService.IME_ACTIVE) != 0);
         updateNotificationIcons();
         mInputMethodsPanel.setImeToken(token);
-        mBackButton.setImageResource(
-                visible ? R.drawable.ic_sysbar_back_ime : R.drawable.ic_sysbar_back);
+        int res;
+        switch (backDisposition) {
+            case InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS:
+                res = R.drawable.ic_sysbar_back;
+                break;
+            case InputMethodService.BACK_DISPOSITION_WILL_DISMISS:
+                res = R.drawable.ic_sysbar_back_ime;
+                break;
+            case InputMethodService.BACK_DISPOSITION_DEFAULT:
+            default:
+                if ((vis & InputMethodService.IME_VISIBLE) != 0) {
+                    res = R.drawable.ic_sysbar_back_ime;
+                } else {
+                    res = R.drawable.ic_sysbar_back;
+                }
+                break;
+        }
+        mBackButton.setImageResource(res);
         if (FAKE_SPACE_BAR) {
-            mFakeSpaceBar.setVisibility(visible ? View.VISIBLE : View.GONE);
+            mFakeSpaceBar.setVisibility(((vis & InputMethodService.IME_VISIBLE) != 0)
+                    ? View.VISIBLE : View.GONE);
         }
     }
 

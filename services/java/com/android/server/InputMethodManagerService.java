@@ -49,6 +49,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
+import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -311,6 +312,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     boolean mScreenOn = true;
 
+    int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
+    int mImeWindowVis;
+
     AlertDialog.Builder mDialogBuilder;
     AlertDialog mSwitchingDialog;
     InputMethodInfo[] mIms;
@@ -430,7 +434,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // Uh oh, current input method is no longer around!
                             // Pick another one...
                             Slog.i(TAG, "Current input method removed: " + curInputMethodId);
-                            mStatusBar.setIMEButtonVisible(mCurToken, false);
+                            mImeWindowVis = 0;
+                            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
+                                    mBackDisposition);
                             if (!chooseNewDefaultIMELocked()) {
                                 changed = true;
                                 curIm = null;
@@ -982,17 +988,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public void setIMEButtonVisible(IBinder token, boolean visible) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
             if (token == null || mCurToken != token) {
-                Slog.w(TAG, "Ignoring setIMEButtonVisible of uid " + uid + " token: " + token);
+                Slog.w(TAG, "Ignoring setImeWindowStatus of uid " + uid + " token: " + token);
                 return;
             }
 
             synchronized (mMethodMap) {
-                mStatusBar.setIMEButtonVisible(token, visible);
+                mImeWindowVis = vis;
+                mBackDisposition = backDisposition;
+                mStatusBar.setImeWindowStatus(token, vis, backDisposition);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1045,12 +1053,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     if (mCurMethod != null) {
                         try {
-                            if (mInputShown) {
-                                // If mInputShown is false, there is no IME button on the
-                                // system bar.
-                                // Thus there is no need to make it invisible explicitly.
-                                mStatusBar.setIMEButtonVisible(mCurToken, true);
-                            }
+                            mImeWindowVis = 0;
+                            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
+                                    mBackDisposition);
                             // If subtype is null, try to find the most applicable one from
                             // getCurrentInputMethodSubtype.
                             if (subtype == null) {
@@ -1168,11 +1173,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if (!mIWindowManager.inputMethodClientHasFocus(client)) {
                             if (DEBUG) Slog.w(TAG, "Ignoring hideSoftInput of uid "
                                     + uid + ": " + client);
-                            mStatusBar.setIMEButtonVisible(mCurToken, false);
+                            mImeWindowVis = 0;
+                            mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
+                                    mBackDisposition);
                             return false;
                         }
                     } catch (RemoteException e) {
-                        mStatusBar.setIMEButtonVisible(mCurToken, false);
+                        mImeWindowVis = 0;
+                        mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis, mBackDisposition);
                         return false;
                     }
                 }

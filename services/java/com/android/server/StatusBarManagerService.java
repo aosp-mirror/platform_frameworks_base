@@ -73,8 +73,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // We usually call it lights out mode, but double negatives are annoying
     boolean mLightsOn = true;
     boolean mMenuVisible = false;
-    boolean mIMEButtonVisible = false;
-    IBinder mIMEToken = null;
+    int mImeWindowVis = 0;
+    int mImeBackDisposition;
+    IBinder mImeToken = null;
 
     private class DisableRecord implements IBinder.DeathRecipient {
         String pkg;
@@ -259,22 +260,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    public void setIMEButtonVisible(final IBinder token, final boolean visible) {
+    public void setImeWindowStatus(final IBinder token, final int vis, final int backDisposition) {
         enforceStatusBar();
 
-        if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " IME Button");
+        if (SPEW) {
+            Slog.d(TAG, "swetImeWindowStatus vis=" + vis + " backDisposition=" + backDisposition);
+        }
 
         synchronized(mLock) {
-            // In case of IME change, we need to call up setIMEButtonVisible() regardless of
-            // mIMEButtonVisible because mIMEButtonVisible may not have been set to false when the
+            // In case of IME change, we need to call up setImeWindowStatus() regardless of
+            // mImeWindowVis because mImeWindowVis may not have been set to false when the
             // previous IME was destroyed.
-            mIMEButtonVisible = visible;
-            mIMEToken = token;
+            mImeWindowVis = vis;
+            mImeBackDisposition = backDisposition;
+            mImeToken = token;
             mHandler.post(new Runnable() {
                 public void run() {
                     if (mBar != null) {
                         try {
-                            mBar.setIMEButtonVisible(token, visible);
+                            mBar.setImeWindowStatus(token, vis, backDisposition);
                         } catch (RemoteException ex) {
                         }
                     }
@@ -348,8 +352,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             switches[0] = gatherDisableActionsLocked();
             switches[1] = mLightsOn ? 1 : 0;
             switches[2] = mMenuVisible ? 1 : 0;
-            switches[3] = mIMEButtonVisible ? 1 : 0;
-            binders.add(mIMEToken);
+            switches[3] = mImeWindowVis;
+            switches[4] = mImeBackDisposition;
+            binders.add(mImeToken);
         }
     }
 
