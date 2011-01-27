@@ -193,12 +193,15 @@ class StatusView {
                             mBatteryLevel));
                 }
                 mStatus1.setCompoundDrawablesWithIntrinsicBounds(CHARGING_ICON, 0, 0, 0);
-            } else {
+                mStatus1.setVisibility(View.VISIBLE);
+            } else if (mBatteryLevel < KeyguardUpdateMonitor.LOW_BATTERY_THRESHOLD) {
                 // Battery is low
                 mStatus1.setText(getContext().getString(R.string.lockscreen_low_battery));
                 mStatus1.setCompoundDrawablesWithIntrinsicBounds(BATTERY_LOW_ICON, 0, 0, 0);
+                mStatus1.setVisibility(View.VISIBLE);
+            } else {
+                mStatus1.setVisibility(View.INVISIBLE);
             }
-            mStatus1.setVisibility(View.VISIBLE);
         } else {
             // nothing specific to show; show help message and icon, if provided
             if (mHelpMessageId != 0) {
