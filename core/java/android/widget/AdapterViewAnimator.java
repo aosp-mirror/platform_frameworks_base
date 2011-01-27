@@ -280,6 +280,10 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param whichChild the index of the child view to display
      */
     public void setDisplayedChild(int whichChild) {
+        setDisplayedChild(whichChild, true);
+    }
+
+    private void setDisplayedChild(int whichChild, boolean animate) {
         if (mAdapter != null) {
             mWhichChild = whichChild;
             if (whichChild >= getWindowSize()) {
@@ -290,7 +294,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
             boolean hasFocus = getFocusedChild() != null;
             // This will clear old focus if we had it
-            showOnly(mWhichChild);
+            showOnly(mWhichChild, animate);
             if (hasFocus) {
                 // Try to retake focus if we had it
                 requestFocus(FOCUS_FORWARD);
@@ -793,20 +797,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         if (mRemoteViewsAdapter != null && mAdapter == null) {
             mRestoreWhichChild = mWhichChild;
         } else {
-            setDisplayedChild(mWhichChild);
+            setDisplayedChild(mWhichChild, false);
         }
-    }
-
-    /**
-     * Shows only the specified child. The other displays Views exit the screen
-     * with the {@link #getOutAnimation() out animation} and the specified child
-     * enters the screen with the {@link #getInAnimation() in animation}.
-     *
-     * @param childIndex The index of the child to be shown.
-     */
-    void showOnly(int childIndex) {
-        final boolean animate = (!mFirstTime || mAnimateFirstTime);
-        showOnly(childIndex, animate);
     }
 
     /**
@@ -977,7 +969,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
             // Restore the previous position (see onRestoreInstanceState)
             if (mRestoreWhichChild > -1) {
-                setDisplayedChild(mRestoreWhichChild);
+                setDisplayedChild(mRestoreWhichChild, false);
                 mRestoreWhichChild = -1;
             }
             return false;
