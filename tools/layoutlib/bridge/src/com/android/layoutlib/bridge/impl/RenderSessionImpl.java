@@ -68,6 +68,7 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.QuickContactBadge;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TabHost.TabSpec;
@@ -1016,6 +1017,9 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             throws PostInflateException {
         if (view instanceof TabHost) {
             setupTabHost((TabHost)view, projectCallback);
+        } else if (view instanceof QuickContactBadge) {
+            QuickContactBadge badge = (QuickContactBadge) view;
+            badge.setImageToDefault();
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup)view;
             final int count = group.getChildCount();
