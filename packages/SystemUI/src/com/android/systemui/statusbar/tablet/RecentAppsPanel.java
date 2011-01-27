@@ -70,6 +70,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     private Bitmap mGlowBitmap;
     private boolean mShowing;
     private Choreographer mChoreo;
+    private View mRecentsDismissButton;
 
     static class ActivityDescription {
         int id;
@@ -272,6 +273,12 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         mRecentsGlowView = findViewById(R.id.recents_glow);
         mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView);
+        mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
+        mRecentsDismissButton.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                hide(true);
+            }
+        });
 
         // In order to save space, we make the background texture repeat in the Y direction
         if (mRecentsScrim != null && mRecentsScrim.getBackground() instanceof BitmapDrawable) {
@@ -399,8 +406,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         } else {
             // Immediately hide this panel
             mShowing = false;
-            setVisibility(View.GONE);
-            // mBar.animateCollapse();
+            hide(false);
         }
     }
 
@@ -445,8 +451,8 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
             appIcon.setImageDrawable(activityDescription.icon);
             appLabel.setText(activityDescription.label);
             appDesc.setText(activityDescription.description);
-            view.setOnClickListener(this);
-            view.setTag(activityDescription);
+            appThumbnail.setOnClickListener(this);
+            appThumbnail.setTag(activityDescription);
             mRecentsContainer.addView(view);
         }
 
@@ -469,7 +475,13 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
             getContext().startActivity(intent);
         }
+        hide(true);
+    }
+
+    private void hide(boolean animate) {
         setVisibility(View.GONE);
-        mBar.animateCollapse();
+        if (animate) {
+            mBar.animateCollapse();
+        }
     }
 }
