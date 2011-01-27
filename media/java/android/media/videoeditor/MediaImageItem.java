@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ public class MediaImageItem extends MediaItem {
     private String mDecodedFilename;
     private int mGeneratedClipHeight;
     private int mGeneratedClipWidth;
+    private String mFileName;
 
     private final MediaArtistNativeHelper mMANativeHelper;
 
@@ -116,7 +117,7 @@ public class MediaImageItem extends MediaItem {
         } catch (Exception e) {
             throw new IllegalArgumentException("Unsupported file or file not found: " + filename);
         }
-
+        mFileName = filename;
         /**
          *  Determine the dimensions of the image
          */
@@ -149,108 +150,53 @@ public class MediaImageItem extends MediaItem {
         /**
          *  Get the highest resolution
          */
-        final FileOutputStream fl = new FileOutputStream(mDecodedFilename);
-        final DataOutputStream dos = new DataOutputStream(fl);
         final Pair<Integer, Integer> maxResolution = resolutions[resolutions.length - 1];
+
+        final Bitmap imageBitmap;
+
         if (mHeight > maxResolution.second) {
             /**
              *  We need to scale the image
              */
-            final Bitmap scaledImage = scaleImage(filename, maxResolution.first,
-                                                          maxResolution.second);
+            imageBitmap = scaleImage(filename, maxResolution.first,
+                                                         maxResolution.second);
             mScaledFilename = String.format(mMANativeHelper.getProjectPath() +
                     "/" + "scaled" + getId()+ ".JPG");
             if (!((new File(mScaledFilename)).exists())) {
                 super.mRegenerateClip = true;
                 final FileOutputStream f1 = new FileOutputStream(mScaledFilename);
-                scaledImage.compress(Bitmap.CompressFormat.JPEG, 50,f1);
+                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 50,f1);
                 f1.close();
             }
-            mScaledWidth = scaledImage.getWidth();
-            mScaledHeight = scaledImage.getHeight();
-
-            int mNewWidth = 0;
-            int mNewHeight = 0;
-            if ((mScaledWidth % 2 ) != 0) {
-                mNewWidth = mScaledWidth - 1;
-            } else {
-                mNewWidth = mScaledWidth;
-            }
-
-            if ((mScaledHeight % 2 ) != 0) {
-                mNewHeight = mScaledHeight - 1;
-            } else {
-                mNewHeight = mScaledHeight;
-            }
-
-            final int [] framingBuffer = new int[mNewWidth];
+            mScaledWidth =  (imageBitmap.getWidth() >> 1) << 1;
+            mScaledHeight = (imageBitmap.getHeight() >> 1) << 1;
+        } else {
+            mScaledFilename = filename;
+            mScaledWidth =  (mWidth >> 1) << 1;
+            mScaledHeight = (mHeight >> 1) << 1;
+            imageBitmap = BitmapFactory.decodeFile(mScaledFilename);
+        }
+        int newWidth = mScaledWidth;
+        int newHeight = mScaledHeight;
+        if (!((new File(mDecodedFilename)).exists())) {
+            final FileOutputStream fl = new FileOutputStream(mDecodedFilename);
+            final DataOutputStream dos = new DataOutputStream(fl);
+            final int [] framingBuffer = new int[newWidth];
             final ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
             IntBuffer intBuffer;
-
             final byte[] array = byteBuffer.array();
             int tmp = 0;
-            while (tmp < mNewHeight) {
-                scaledImage.getPixels(framingBuffer,0,mScaledWidth,0,
-                                                               tmp,mNewWidth,1);
+            while (tmp < newHeight) {
+                imageBitmap.getPixels(framingBuffer, 0, mScaledWidth, 0,
+                                                        tmp, newWidth, 1);
                 intBuffer = byteBuffer.asIntBuffer();
-                intBuffer.put(framingBuffer,0,mNewWidth);
+                intBuffer.put(framingBuffer, 0, newWidth);
                 dos.write(array);
                 tmp += 1;
             }
-
-            mScaledWidth = mNewWidth;
-            mScaledHeight = mNewHeight;
-            scaledImage.recycle();
-        } else {
-            final Bitmap scaledImage = BitmapFactory.decodeFile(filename);
-            mScaledFilename = String.format(mMANativeHelper.getProjectPath()
-                                + "/" + "scaled" + getId()+ ".JPG");
-            if (!((new File(mScaledFilename)).exists())) {
-                super.mRegenerateClip = true;
-                final FileOutputStream f1 = new FileOutputStream(mScaledFilename);
-                scaledImage.compress(Bitmap.CompressFormat.JPEG, 50,f1);
-                f1.close();
-            }
-
-            mScaledWidth = scaledImage.getWidth();
-            mScaledHeight = scaledImage.getHeight();
-
-            int mNewWidth = 0;
-            int mNewheight = 0;
-            if ((mScaledWidth % 2 ) != 0) {
-                mNewWidth = mScaledWidth - 1;
-            } else {
-                mNewWidth = mScaledWidth;
-            }
-
-            if ((mScaledHeight % 2 ) != 0) {
-                mNewheight = mScaledHeight - 1;
-            } else {
-                mNewheight = mScaledHeight;
-            }
-
-            final Bitmap imageBitmap = BitmapFactory.decodeFile(mScaledFilename);
-            final int [] framingBuffer = new int[mNewWidth];
-            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
-            IntBuffer intBuffer;
-
-            byte[] array = byteBuffer.array();
-            int tmp = 0;
-            while (tmp < mNewheight) {
-                imageBitmap.getPixels(framingBuffer,0,mScaledWidth,0,
-                                                               tmp,mNewWidth,1);
-                intBuffer = byteBuffer.asIntBuffer();
-                intBuffer.put(framingBuffer,0,mNewWidth);
-                dos.write(array);
-                tmp += 1;
-            }
-
-            mScaledWidth = mNewWidth;
-            mScaledHeight = mNewheight;
-            imageBitmap.recycle();
+            fl.close();
         }
-
-        fl.close();
+        imageBitmap.recycle();
         System.gc();
     }
 
@@ -772,7 +718,9 @@ public class MediaImageItem extends MediaItem {
         }
 
         if (mScaledFilename != null) {
-            new File(mScaledFilename).delete();
+            if(mFileName != mScaledFilename) {
+                new File(mScaledFilename).delete();
+            }
             mScaledFilename = null;
         }
 
