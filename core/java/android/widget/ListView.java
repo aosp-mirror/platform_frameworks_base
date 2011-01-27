@@ -2081,25 +2081,35 @@ public class ListView extends AbsListView {
             switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (event.hasNoModifiers()) {
-                    if (ensureSelectionOnMovementKey()) {
+                    handled = resurrectSelectionIfNeeded();
+                    if (!handled) {
                         while (count-- > 0) {
-                            handled |= arrowScroll(FOCUS_UP);
+                            if (arrowScroll(FOCUS_UP)) {
+                                handled = true;
+                            } else {
+                                break;
+                            }
                         }
                     }
                 } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                    handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_UP);
                 }
                 break;
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (event.hasNoModifiers()) {
-                    if (ensureSelectionOnMovementKey()) {
+                    handled = resurrectSelectionIfNeeded();
+                    if (!handled) {
                         while (count-- > 0) {
-                            handled |= arrowScroll(FOCUS_DOWN);
+                            if (arrowScroll(FOCUS_DOWN)) {
+                                handled = true;
+                            } else {
+                                break;
+                            }
                         }
                     }
                 } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                    handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
                 }
                 break;
 
@@ -2117,19 +2127,22 @@ public class ListView extends AbsListView {
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
-                if (mItemCount > 0 && event.getRepeatCount() == 0) {
-                    ensureSelectionOnMovementKey();
-                    keyPressed();
+                if (event.hasNoModifiers()) {
+                    handled = resurrectSelectionIfNeeded();
+                    if (!handled
+                            && event.getRepeatCount() == 0 && getChildCount() > 0) {
+                        keyPressed();
+                        handled = true;
+                    }
                 }
-                handled = true;
                 break;
 
             case KeyEvent.KEYCODE_SPACE:
                 if (mPopup == null || !mPopup.isShowing()) {
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_DOWN);
                     } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                        handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_UP);
                     }
                     handled = true;
                 }
@@ -2137,29 +2150,29 @@ public class ListView extends AbsListView {
 
             case KeyEvent.KEYCODE_PAGE_UP:
                 if (event.hasNoModifiers()) {
-                    handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_UP);
+                    handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_UP);
                 } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                    handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_UP);
                 }
                 break;
 
             case KeyEvent.KEYCODE_PAGE_DOWN:
                 if (event.hasNoModifiers()) {
-                    handled = ensureSelectionOnMovementKey() && pageScroll(FOCUS_DOWN);
+                    handled = resurrectSelectionIfNeeded() || pageScroll(FOCUS_DOWN);
                 } else if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                    handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
                 }
                 break;
 
             case KeyEvent.KEYCODE_MOVE_HOME:
                 if (event.hasNoModifiers()) {
-                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_UP);
+                    handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_UP);
                 }
                 break;
 
             case KeyEvent.KEYCODE_MOVE_END:
                 if (event.hasNoModifiers()) {
-                    handled = ensureSelectionOnMovementKey() && fullScroll(FOCUS_DOWN);
+                    handled = resurrectSelectionIfNeeded() || fullScroll(FOCUS_DOWN);
                 }
                 break;
 
@@ -2172,35 +2185,35 @@ public class ListView extends AbsListView {
                 //     perhaps it should be configurable (and more comprehensive).
                 if (false) {
                     if (event.hasNoModifiers()) {
-                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_DOWN);
+                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_DOWN);
                     } else if (event.hasModifiers(KeyEvent.META_SHIFT_ON)) {
-                        handled = ensureSelectionOnMovementKey() && arrowScroll(FOCUS_UP);
+                        handled = resurrectSelectionIfNeeded() || arrowScroll(FOCUS_UP);
                     }
                 }
                 break;
             }
         }
 
-        if (!handled) {
-            handled = sendToTextFilter(keyCode, count, event);
-        }
-
         if (handled) {
             return true;
-        } else {
-            switch (action) {
-                case KeyEvent.ACTION_DOWN:
-                    return super.onKeyDown(keyCode, event);
+        }
 
-                case KeyEvent.ACTION_UP:
-                    return super.onKeyUp(keyCode, event);
+        if (sendToTextFilter(keyCode, count, event)) {
+            return true;
+        }
 
-                case KeyEvent.ACTION_MULTIPLE:
-                    return super.onKeyMultiple(keyCode, count, event);
+        switch (action) {
+            case KeyEvent.ACTION_DOWN:
+                return super.onKeyDown(keyCode, event);
 
-                default: // shouldn't happen
-                    return false;
-            }
+            case KeyEvent.ACTION_UP:
+                return super.onKeyUp(keyCode, event);
+
+            case KeyEvent.ACTION_MULTIPLE:
+                return super.onKeyMultiple(keyCode, count, event);
+
+            default: // shouldn't happen
+                return false;
         }
     }
 
