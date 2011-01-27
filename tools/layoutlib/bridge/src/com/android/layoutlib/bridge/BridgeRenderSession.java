@@ -108,7 +108,7 @@ public class BridgeRenderSession extends RenderSession {
             Bridge.prepareThread();
             mLastResult = mSession.acquire(timeout);
             if (mLastResult.isSuccess()) {
-                mLastResult = mSession.render();
+                mLastResult = mSession.render(false /*freshRender*/);
             }
         } finally {
             mSession.release();

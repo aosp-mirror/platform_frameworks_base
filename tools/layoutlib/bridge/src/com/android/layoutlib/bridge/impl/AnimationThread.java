@@ -146,7 +146,7 @@ public abstract class AnimationThread extends Thread {
                     }
 
                     bundle.mTarget.handleMessage(bundle.mMessage);
-                    if (mSession.render().isSuccess()) {
+                    if (mSession.render(false /*freshRender*/).isSuccess()) {
                         mListener.onNewFrame(session);
                     }
                 } finally {
