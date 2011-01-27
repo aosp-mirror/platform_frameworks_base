@@ -549,11 +549,7 @@ public class StackView extends AdapterViewAnimator {
             mSlideAmount = Math.round(SLIDE_UP_RATIO * getMeasuredHeight());
             mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO * mSlideAmount);
             mFirstLayoutHappened = true;
-            post(new Runnable() {
-                public void run() {
-                    updateChildTransforms();
-                }
-            });
+            updateChildTransforms();
         }
 
         if (Float.compare(mPerspectiveShiftY, mNewPerspectiveShiftY) != 0 ||
@@ -561,12 +557,7 @@ public class StackView extends AdapterViewAnimator {
 
             mPerspectiveShiftY = mNewPerspectiveShiftY;
             mPerspectiveShiftX = mNewPerspectiveShiftX;
-
-            post(new Runnable() {
-                public void run() {
-                    updateChildTransforms();
-                }
-            });
+            updateChildTransforms();
         }
     }
 
@@ -1120,6 +1111,8 @@ public class StackView extends AdapterViewAnimator {
 
         mNewPerspectiveShiftX = PERSPECTIVE_SHIFT_FACTOR_X * measuredWidth;
         mNewPerspectiveShiftY = PERSPECTIVE_SHIFT_FACTOR_Y * measuredHeight;
+
+        // If we have extra space, we try and spread the items out
         if (maxWidth > 0 && count > 0 && maxWidth < childWidth) {
             mNewPerspectiveShiftX = measuredWidth - maxWidth;
         }
