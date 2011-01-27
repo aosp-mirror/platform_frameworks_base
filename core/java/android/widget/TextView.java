@@ -4608,9 +4608,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInput.onKeyDown(this, (Editable)mText, keyCode, down);
                 mInput.onKeyUp(this, (Editable)mText, keyCode, up);
             }
-            if (mError != null && !mErrorWasChanged) {
-                setError(null, null);
-            }
+            hideErrorIfUnchanged();
 
         } else if (which == 2) {
             mMovement.onKeyUp(this, (Spannable)mText, keyCode, up);
@@ -4731,13 +4729,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mInput != null) {
-            /*
-             * Keep track of what the error was before doing the input
-             * so that if an input filter changed the error, we leave
-             * that error showing.  Otherwise, we take down whatever
-             * error was showing when the user types something.
-             */
-            mErrorWasChanged = false;
+            resetErrorChangedFlag();
 
             boolean doDown = true;
             if (otherEvent != null) {
@@ -4745,9 +4737,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     beginBatchEdit();
                     boolean handled = mInput.onKeyOther(this, (Editable) mText,
                             otherEvent);
-                    if (mError != null && !mErrorWasChanged) {
-                        setError(null, null);
-                    }
+                    hideErrorIfUnchanged();
                     doDown = false;
                     if (handled) {
                         return -1;
@@ -4764,9 +4754,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 beginBatchEdit();
                 if (mInput.onKeyDown(this, (Editable) mText, keyCode, event)) {
                     endBatchEdit();
-                    if (mError != null && !mErrorWasChanged) {
-                        setError(null, null);
-                    }
+                    hideErrorIfUnchanged();
                     return 1;
                 }
                 endBatchEdit();
@@ -4798,6 +4786,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return 0;
+    }
+
+    /**
+     * Resets the mErrorWasChanged flag, so that future calls to {@link #setError(CharSequence)}
+     * can be recorded.
+     * @hide
+     */
+    public void resetErrorChangedFlag() {
+        /*
+         * Keep track of what the error was before doing the input
+         * so that if an input filter changed the error, we leave
+         * that error showing.  Otherwise, we take down whatever
+         * error was showing when the user types something.
+         */
+        mErrorWasChanged = false;
+    }
+
+    /**
+     * @hide
+     */
+    public void hideErrorIfUnchanged() {
+        if (mError != null && !mErrorWasChanged) {
+            setError(null, null);
+        }
     }
 
     @Override
