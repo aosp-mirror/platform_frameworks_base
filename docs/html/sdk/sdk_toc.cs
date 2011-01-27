@@ -52,6 +52,16 @@
     </ul>
   </li><?cs
   /if ?>
+  <?cs
+  if:sdk.preview ?>
+  <li><h2>Android 3.0 Preview</h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>sdk/android-3.0-highlights.html">Platform Highlights</a> <span
+class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/preview/index.html">SDK</a> <span class="new">new!</span></li>
+    </ul>
+  </li><?cs
+  /if ?>
   <li>
     <h2>
       <span class="en">Downloadable SDK Components</span>
@@ -158,10 +168,7 @@
         <span class="en">OEM USB Drivers</span>
       </a></li>
       <li><a href="<?cs var:toroot ?>sdk/requirements.html">SDK System Requirements</a></li>
-      <!-- <li><a href="<?cs var:toroot ?>sdk/RELEASENOTES.html">SDK Release
-            Notes</a></li> -->
-      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">SDK
-            Archives</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/older_releases.html">SDK Archives</a></li>
 
     </ul>
   </li>
