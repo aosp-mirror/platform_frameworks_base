@@ -16,6 +16,9 @@
 
 package android.net;
 
+import android.text.TextUtils;
+import android.util.Log;
+
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -26,6 +29,7 @@ import java.net.UnknownHostException;
  * @hide
  */
 public class DhcpInfoInternal {
+    private final static String TAG = "DhcpInfoInternal";
     public String ipAddress;
     public String gateway;
     public int prefixLength;
@@ -65,15 +69,31 @@ public class DhcpInfoInternal {
     }
 
     public LinkAddress makeLinkAddress() {
+        if (TextUtils.isEmpty(ipAddress)) {
+            Log.e(TAG, "makeLinkAddress with empty ipAddress");
+            return null;
+        }
         return new LinkAddress(NetworkUtils.numericToInetAddress(ipAddress), prefixLength);
     }
 
     public LinkProperties makeLinkProperties() {
         LinkProperties p = new LinkProperties();
         p.addLinkAddress(makeLinkAddress());
-        p.setGateway(NetworkUtils.numericToInetAddress(gateway));
-        p.addDns(NetworkUtils.numericToInetAddress(dns1));
-        p.addDns(NetworkUtils.numericToInetAddress(dns2));
+        if (TextUtils.isEmpty(gateway) == false) {
+            p.setGateway(NetworkUtils.numericToInetAddress(gateway));
+        } else {
+            Log.e(TAG, "makeLinkProperties with empty gateway!");
+        }
+        if (TextUtils.isEmpty(dns1) == false) {
+            p.addDns(NetworkUtils.numericToInetAddress(dns1));
+        } else {
+            Log.e(TAG, "makeLinkProperties with empty dns1!");
+        }
+        if (TextUtils.isEmpty(dns2) == false) {
+            p.addDns(NetworkUtils.numericToInetAddress(dns2));
+        } else {
+            Log.e(TAG, "makeLinkProperties with empty dns2!");
+        }
         return p;
     }
 
