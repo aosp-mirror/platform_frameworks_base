@@ -190,6 +190,7 @@ public class ListPopupWindow {
     public ListPopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
         mPopup = new PopupWindow(context, attrs, defStyleAttr, defStyleRes);
+        mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
     }
 
     /**
@@ -576,7 +577,6 @@ public class ListPopupWindow {
             }
 
             mPopup.setWindowLayoutMode(widthSpec, heightSpec);
-            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
             mPopup.setClipToScreenEnabled(true);
             
             // use outside touchable to dismiss drop down when touching outside of it, so
