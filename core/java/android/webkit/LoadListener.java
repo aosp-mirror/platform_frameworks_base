@@ -75,14 +75,6 @@ class LoadListener extends Handler implements EventHandler {
     private static final int HTTP_NOT_FOUND = 404;
     private static final int HTTP_PROXY_AUTH = 407;
 
-    private static HashMap<String, String> sCertificateTypeMap;
-    static {
-        sCertificateTypeMap = new HashMap<String, String>();
-        sCertificateTypeMap.put("application/x-x509-ca-cert", CertTool.CERT);
-        sCertificateTypeMap.put("application/x-x509-user-cert", CertTool.CERT);
-        sCertificateTypeMap.put("application/x-pkcs12", CertTool.PKCS12);
-    }
-
     private static int sNativeLoaderCount;
 
     private final ByteArrayBuilder mDataBuilder = new ByteArrayBuilder();
@@ -1053,7 +1045,7 @@ class LoadListener extends Handler implements EventHandler {
 
     // This commits the headers without checking the response status code.
     private void commitHeaders() {
-        if (mIsMainPageLoader && sCertificateTypeMap.containsKey(mMimeType)) {
+        if (mIsMainPageLoader && CertTool.getCertType(mMimeType) != null) {
             // In the case of downloading certificate, we will save it to the
             // KeyStore in commitLoad. Do not call webcore.
             return;
@@ -1114,7 +1106,7 @@ class LoadListener extends Handler implements EventHandler {
         }
 
         if (mIsMainPageLoader) {
-            String type = sCertificateTypeMap.get(mMimeType);
+            String type = CertTool.getCertType(mMimeType);
             if (type != null) {
                 // This must be synchronized so that no more data can be added
                 // after getByteSize returns.

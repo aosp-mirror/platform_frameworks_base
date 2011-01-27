@@ -29,6 +29,7 @@ import android.util.Log;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.HashMap;
 
 class CertTool {
     private static final String LOGTAG = "CertTool";
@@ -38,6 +39,14 @@ class CertTool {
 
     static final String CERT = Credentials.CERTIFICATE;
     static final String PKCS12 = Credentials.PKCS12;
+
+    private static HashMap<String, String> sCertificateTypeMap;
+    static {
+        sCertificateTypeMap = new HashMap<String, String>();
+        sCertificateTypeMap.put("application/x-x509-ca-cert", CertTool.CERT);
+        sCertificateTypeMap.put("application/x-x509-user-cert", CertTool.CERT);
+        sCertificateTypeMap.put("application/x-pkcs12", CertTool.PKCS12);
+    }
 
     static String[] getKeyStrengthList() {
         return new String[] {"High Grade", "Medium Grade"};
@@ -65,6 +74,10 @@ class CertTool {
     static void addCertificate(Context context, String type, byte[] value) {
         Credentials.getInstance().install(context, type, value);
     }
+
+    static String getCertType(String mimeType) {
+        return sCertificateTypeMap.get(mimeType);
+  }
 
     private CertTool() {}
 }
