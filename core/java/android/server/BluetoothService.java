@@ -617,8 +617,6 @@ public class BluetoothService extends IBluetooth.Stub {
                          BluetoothUuid.getServiceIdentifierFromParcelUuid(
                              BluetoothUuid.HSP_AG),
                          BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                             BluetoothUuid.PBAP_PSE),
-                         BluetoothUuid.getServiceIdentifierFromParcelUuid(
                              BluetoothUuid.ObexObjectPush),
                          };
                       mAdapterSdpUuids = uuids;
