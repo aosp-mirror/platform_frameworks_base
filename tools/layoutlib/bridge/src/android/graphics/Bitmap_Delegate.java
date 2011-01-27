@@ -17,9 +17,9 @@
 package android.graphics;
 
 import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.resources.Density;
 
 import android.graphics.Bitmap.Config;
 import android.os.Parcel;
@@ -89,12 +89,12 @@ public final class Bitmap_Delegate {
      * @see Bitmap#isMutable()
      * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(File input, boolean isMutable, ResourceDensity density)
+    public static Bitmap createBitmap(File input, boolean isMutable, Density density)
             throws IOException {
         // create a delegate with the content of the file.
         Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input), Config.ARGB_8888);
 
-        return createBitmap(delegate, isMutable, density.getDpi());
+        return createBitmap(delegate, isMutable, density.getDpiValue());
     }
 
     /**
@@ -107,12 +107,12 @@ public final class Bitmap_Delegate {
      * @see Bitmap#isMutable()
      * @see Bitmap#getDensity()
      */
-    public static Bitmap createBitmap(InputStream input, boolean isMutable, ResourceDensity density)
+    public static Bitmap createBitmap(InputStream input, boolean isMutable, Density density)
             throws IOException {
         // create a delegate with the content of the stream.
         Bitmap_Delegate delegate = new Bitmap_Delegate(ImageIO.read(input), Config.ARGB_8888);
 
-        return createBitmap(delegate, isMutable, density.getDpi());
+        return createBitmap(delegate, isMutable, density.getDpiValue());
     }
 
     /**
@@ -126,11 +126,11 @@ public final class Bitmap_Delegate {
      * @see Bitmap#getDensity()
      */
     public static Bitmap createBitmap(BufferedImage image, boolean isMutable,
-            ResourceDensity density) throws IOException {
+            Density density) throws IOException {
         // create a delegate with the given image.
         Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.ARGB_8888);
 
-        return createBitmap(delegate, isMutable, density.getDpi());
+        return createBitmap(delegate, isMutable, density.getDpiValue());
     }
 
     /**
@@ -425,7 +425,7 @@ public final class Bitmap_Delegate {
 
         // the density doesn't matter, it's set by the Java method.
         return createBitmap(delegate, false /*isMutable*/,
-                ResourceDensity.DEFAULT_DENSITY /*density*/);
+                Density.DEFAULT_DENSITY /*density*/);
     }
 
     /*package*/ static void nativePrepareToDraw(int nativeBitmap) {

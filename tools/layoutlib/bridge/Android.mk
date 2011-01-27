@@ -20,7 +20,8 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 
 LOCAL_JAVA_LIBRARIES := \
 	kxml2-2.3.0 \
-	layoutlib_api-prebuilt
+	layoutlib_api-prebuilt \
+	resources-prebuilt
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
 	temp_layoutlib \

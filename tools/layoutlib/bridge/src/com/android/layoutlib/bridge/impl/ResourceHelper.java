@@ -18,13 +18,13 @@ package com.android.layoutlib.bridge.impl;
 
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.ide.common.rendering.api.ResourceDensity;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.ninepatch.NinePatch;
 import com.android.ninepatch.NinePatchChunk;
+import com.android.resources.Density;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -147,7 +147,7 @@ public final class ResourceHelper {
                             }
 
                             if (bitmap == null) {
-                                ResourceDensity density = ResourceDensity.MEDIUM;
+                                Density density = Density.MEDIUM;
                                 if (value instanceof DensityBasedResourceValue) {
                                     density =
                                         ((DensityBasedResourceValue)value).getResourceDensity();
@@ -214,7 +214,7 @@ public final class ResourceHelper {
                             isFramework ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        ResourceDensity density = ResourceDensity.MEDIUM;
+                        Density density = Density.MEDIUM;
                         if (value instanceof DensityBasedResourceValue) {
                             density = ((DensityBasedResourceValue)value).getResourceDensity();
                         }
