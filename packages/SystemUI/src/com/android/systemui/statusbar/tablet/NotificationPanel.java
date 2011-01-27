@@ -60,6 +60,9 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     View mSettingsView;
     ViewGroup mContentParent;
 
+    // amount to slide mContentParent down by when mContentFrame is missing
+    float mContentFrameMissingTranslation;
+
     Choreographer mChoreo = new Choreographer();
 
     public NotificationPanel(Context context, AttributeSet attrs) {
@@ -87,11 +90,17 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
         mNotificationScroller = findViewById(R.id.notification_scroller);
         mContentFrame = (ViewGroup)findViewById(R.id.content_frame);
+        mContentFrameMissingTranslation =
+            mContentFrame.getBackground().getMinimumHeight() + 10;
+
+        mShowing = false;
+
+        setContentFrameVisible(mNotificationCount > 0, false);
     }
 
     public void show(boolean show, boolean animate) {
         if (show && !mShowing) {
-            setContentFrameVisible(mNotificationCount > 0, false);
+            setContentFrameVisible(mSettingsView != null || mNotificationCount > 0, false);
         }
 
         if (animate) {
@@ -120,7 +129,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     public void onVisibilityChanged(View v, int vis) {
         super.onVisibilityChanged(v, vis);
         // when we hide, put back the notifications
-        if (!isShown()) {
+        if (vis != View.VISIBLE) {
             if (mSettingsView != null) removeSettingsView();
             mNotificationScroller.setVisibility(View.VISIBLE);
             mNotificationScroller.setAlpha(1f);
@@ -161,10 +170,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             setContentFrameVisible(n > 0, false);
         } else if (mSettingsView == null) {
             // we're looking at the notifications; time to maybe make some changes
-            if (mNotificationCount == 0 && n > 0) {
-                setContentFrameVisible(true, true);
-            } else if (mNotificationCount > 0 && n == 0) {
-                setContentFrameVisible(false, true);
+            if (mNotificationCount != n) {
+                setContentFrameVisible(n > 0, true);
             }
         }
         mNotificationCount = n;
@@ -173,22 +180,35 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     public void setContentFrameVisible(final boolean showing, boolean animate) {
         if (!animate) {
             mContentFrame.setVisibility(showing ? View.VISIBLE : View.GONE);
-            mContentParent.setTranslationY(showing ? 0f : 100f);
+            mContentFrame.setAlpha(1f);
+            // the translation will be patched up when the window is slid into place
             return;
         }
 
-        mContentFrame.setVisibility(showing ? View.VISIBLE : View.GONE);
+        if (showing) {
+            mContentFrame.setVisibility(View.VISIBLE);
+        }
         AnimatorSet set = new AnimatorSet();
-        float adjust = mContentFrame.getBackground().getMinimumHeight() + 8; // fudge factor
         set.play(ObjectAnimator.ofFloat(
                 mContentFrame, "alpha",
                 showing ? 0f : 1f,
                 showing ? 1f : 0f))
             .with(ObjectAnimator.ofFloat(
                 mContentParent, "translationY",
-                showing ? adjust : 0f,
-                showing ? 0f : adjust));
+                showing ? mContentFrameMissingTranslation : 0f,
+                showing ? 0f : mContentFrameMissingTranslation))
+              ;
+
         set.setDuration(200);
+        if (!showing) {
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator _a) {
+                    mContentFrame.setVisibility(View.GONE);
+                    mContentFrame.setAlpha(1f);
+                }
+            });
+        }
         set.start();
     }
 
@@ -238,10 +258,15 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public boolean isInContentArea(int x, int y) {
-        mContentArea.left = mContentFrame.getLeft() + mContentFrame.getPaddingLeft();
-        mContentArea.top = mTitleArea.getTop() + mTitleArea.getPaddingTop();
-        mContentArea.right = mContentFrame.getRight() - mContentFrame.getPaddingRight();
-        mContentArea.bottom = mContentFrame.getBottom() - mContentFrame.getPaddingBottom();
+        mContentArea.left = mTitleArea.getLeft() + mTitleArea.getPaddingLeft();
+        mContentArea.top = mTitleArea.getTop() + mTitleArea.getPaddingTop() 
+            + (int)mContentParent.getTranslationY(); // account for any adjustment
+        mContentArea.right = mTitleArea.getRight() - mTitleArea.getPaddingRight();
+
+        View theBottom = (mContentFrame.getVisibility() == View.VISIBLE)
+            ? mContentFrame : mTitleArea;
+        mContentArea.bottom = theBottom.getBottom() - theBottom.getPaddingBottom();
+
         offsetDescendantRectToMyCoords(mContentParent, mContentArea);
         return mContentArea.contains(x, y);
     }
@@ -291,12 +316,16 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             if (appearing) {
                 // we want to go from near-the-top to the top, unless we're half-open in the right
                 // general vicinity
-                start = (y < HYPERSPACE_OFFRAMP) ? y : HYPERSPACE_OFFRAMP;
                 end = 0;
+                if (mNotificationCount == 0) {
+                    end += mContentFrameMissingTranslation;
+                }
+                start = (y < (HYPERSPACE_OFFRAMP+end)) ? y : (HYPERSPACE_OFFRAMP+end);
             } else {
                 start = y;
                 end = y + HYPERSPACE_OFFRAMP;
             }
+
             Animator posAnim = ObjectAnimator.ofFloat(mContentParent, "translationY",
                     start, end);
             posAnim.setInterpolator(appearing
