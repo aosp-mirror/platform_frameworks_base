@@ -3187,7 +3187,6 @@ public class ActivityStack {
         EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                 System.identityHashCode(r),
                 r.task.taskId, r.shortComponentName, reason);
-        r.task.numActivities--;
         if (index < (mHistory.size()-1)) {
             ActivityRecord next = (ActivityRecord)mHistory.get(index+1);
             if (next.task == r.task) {
