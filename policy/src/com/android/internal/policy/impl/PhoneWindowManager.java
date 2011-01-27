@@ -1402,7 +1402,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode, metaState);
                     if (shortcutIntent != null) {
                         shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        mContext.startActivity(shortcutIntent);
+                        try {
+                            mContext.startActivity(shortcutIntent);
+                        } catch (ActivityNotFoundException ex) {
+                            Slog.w(TAG, "Dropping shortcut key combination because "
+                                    + "the activity to which it is registered was not found: "
+                                    + KeyEvent.keyCodeToString(mShortcutKeyPressed)
+                                    + "+" + KeyEvent.keyCodeToString(keyCode), ex);
+                        }
                     } else {
                         Slog.i(TAG, "Dropping unregistered shortcut key combination: "
                                 + KeyEvent.keyCodeToString(mShortcutKeyPressed)
