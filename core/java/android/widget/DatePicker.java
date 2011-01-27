@@ -184,6 +184,8 @@ public class DatePicker extends FrameLayout {
                 // now set the date to the adjusted one
                 setDate(mTempDate.get(Calendar.YEAR), mTempDate.get(Calendar.MONTH),
                         mTempDate.get(Calendar.DAY_OF_MONTH));
+                updateSpinners();
+                updateCalendarView();
                 notifyDateChanged();
             }
         };
@@ -195,6 +197,7 @@ public class DatePicker extends FrameLayout {
         mCalendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             public void onSelectedDayChange(CalendarView view, int year, int month, int monthDay) {
                 setDate(year, month, monthDay);
+                updateSpinners();
                 notifyDateChanged();
             }
         });
@@ -469,6 +472,8 @@ public class DatePicker extends FrameLayout {
             return;
         }
         setDate(year, month, dayOfMonth);
+        updateSpinners();
+        updateCalendarView();
         notifyDateChanged();
     }
 
@@ -489,6 +494,8 @@ public class DatePicker extends FrameLayout {
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         setDate(ss.mYear, ss.mMonth, ss.mDay);
+        updateSpinners();
+        updateCalendarView();
     }
 
     /**
@@ -504,6 +511,8 @@ public class DatePicker extends FrameLayout {
     public void init(int year, int monthOfYear, int dayOfMonth,
             OnDateChangedListener onDateChangedListener) {
         setDate(year, monthOfYear, dayOfMonth);
+        updateSpinners();
+        updateCalendarView();
         mOnDateChangedListener = onDateChangedListener;
     }
 
@@ -553,8 +562,6 @@ public class DatePicker extends FrameLayout {
         } else if (mCurrentDate.after(mMaxDate)) {
             mCurrentDate.setTimeInMillis(mMaxDate.getTimeInMillis());
         }
-        updateSpinners();
-        updateCalendarView();
     }
 
     private void updateSpinners() {

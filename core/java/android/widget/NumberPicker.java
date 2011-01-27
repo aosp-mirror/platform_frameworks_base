@@ -623,7 +623,11 @@ public class NumberPicker extends LinearLayout {
                     hideInputControls();
                     return true;
                 }
-                if (isEventInInputText(event)) {
+                if (isEventInViewHitRect(event, mInputText)
+                        || (!mIncrementButton.isShown()
+                                && isEventInViewHitRect(event, mIncrementButton))
+                        || (!mDecrementButton.isShown()
+                                && isEventInViewHitRect(event, mDecrementButton))) {
                     mAdjustScrollerOnUpEvent = false;
                     setDrawSelectorWheel(true);
                     hideInputControls();
@@ -708,7 +712,7 @@ public class NumberPicker extends LinearLayout {
     public boolean dispatchTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
         if ((action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)
-                && !isEventInInputText(event)) {
+                && !isEventInViewHitRect(event, mInputText)) {
             removeAllCallbacks();
         }
         return super.dispatchTouchEvent(event);
@@ -1177,10 +1181,10 @@ public class NumberPicker extends LinearLayout {
     }
 
     /**
-     * @return If the <code>event</code> is in the input text.
+     * @return If the <code>event</code> is in the <code>view</code>.
      */
-    private boolean isEventInInputText(MotionEvent event) {
-        mInputText.getHitRect(mTempRect);
+    private boolean isEventInViewHitRect(MotionEvent event, View view) {
+        view.getHitRect(mTempRect);
         return mTempRect.contains((int) event.getX(), (int) event.getY());
     }
 
