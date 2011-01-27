@@ -7539,10 +7539,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 final int height = mBottom - mTop;
 
                 final ScrollBarDrawable scrollBar = cache.scrollBar;
-                int size = scrollBar.getSize(false);
-                if (size <= 0) {
-                    size = cache.scrollBarSize;
-                }
 
                 final int scrollX = mScrollX;
                 final int scrollY = mScrollY;
@@ -7551,6 +7547,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 int left, top, right, bottom;
                 
                 if (drawHorizontalScrollBar) {
+                    int size = scrollBar.getSize(false);
+                    if (size <= 0) {
+                        size = cache.scrollBarSize;
+                    }
+
                     scrollBar.setParameters(computeHorizontalScrollRange(),
                                             computeHorizontalScrollOffset(),
                                             computeHorizontalScrollExtent(), false);
@@ -7567,6 +7568,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
 
                 if (drawVerticalScrollBar) {
+                    int size = scrollBar.getSize(true);
+                    if (size <= 0) {
+                        size = cache.scrollBarSize;
+                    }
+
                     scrollBar.setParameters(computeVerticalScrollRange(),
                                             computeVerticalScrollOffset(),
                                             computeVerticalScrollExtent(), true);
