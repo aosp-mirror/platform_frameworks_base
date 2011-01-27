@@ -40,6 +40,7 @@ import dalvik.system.BlockGuard;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -2504,7 +2505,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                 String lastnode = path.substring((indx != -1) ? ++indx : 0);
 
                 // get list of attached dbs and for each db, get its size and pagesize
-                ArrayList<Pair<String, String>> attachedDbs = db.getAttachedDbs();
+                List<Pair<String, String>> attachedDbs = db.getAttachedDbs();
                 if (attachedDbs == null) {
                     continue;
                 }
@@ -2560,7 +2561,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @return ArrayList of pairs of (database name, database file path) or null if the database
      * is not open.
      */
-    public ArrayList<Pair<String, String>> getAttachedDbs() {
+    public List<Pair<String, String>> getAttachedDbs() {
         if (!isOpen()) {
             return null;
         }
@@ -2613,7 +2614,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public boolean isDatabaseIntegrityOk() {
         verifyDbIsOpen();
-        ArrayList<Pair<String, String>> attachedDbs = null;
+        List<Pair<String, String>> attachedDbs = null;
         try {
             attachedDbs = getAttachedDbs();
             if (attachedDbs == null) {

@@ -16,7 +16,7 @@
 package android.database;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -65,7 +65,7 @@ public final class DefaultDatabaseErrorHandler implements DatabaseErrorHandler {
             return;
         }
 
-        ArrayList<Pair<String, String>> attachedDbs = null;
+        List<Pair<String, String>> attachedDbs = null;
         try {
             // Close the database, which will cause subsequent operations to fail.
             // before that, get the attached database list first.
