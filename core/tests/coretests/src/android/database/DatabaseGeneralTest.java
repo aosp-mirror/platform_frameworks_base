@@ -37,6 +37,7 @@ import junit.framework.Assert;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceTestCase {
@@ -1130,7 +1131,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         assertTrue(new File(attachedDb1File).exists());
         assertNotNull(dbObj);
         assertTrue(dbObj.isOpen());
-        ArrayList<Pair<String, String>> attachedDbs = dbObj.getAttachedDbs();
+        List<Pair<String, String>> attachedDbs = dbObj.getAttachedDbs();
         try {
             errorHandler.onCorruption(dbObj);
             assertFalse(dbfile.exists());
