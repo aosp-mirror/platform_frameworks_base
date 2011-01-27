@@ -1239,7 +1239,7 @@
     </style>
 
     <style name="TextAppearance.Holo.Widget.EditText">
-        <item name="android:textColor">@color/widget_edittext_holo_dark</item>
+        <item name="android:textColor">@android:color/bright_foreground_light</item>
         <item name="android:textColorHint">@android:color/hint_foreground_holo_light</item>
     </style>
 
@@ -1351,7 +1351,7 @@
     </style>
 
     <style name="TextAppearance.Holo.Light.Widget.EditText">
-        <item name="android:textColor">@color/widget_edittext_holo_light</item>
+        <item name="android:textColor">@android:color/bright_foreground_dark</item>
         <item name="android:textColorHint">@android:color/hint_foreground_holo_dark</item>
     </style>
 
