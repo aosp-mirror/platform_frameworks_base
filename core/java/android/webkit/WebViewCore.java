@@ -2549,6 +2549,15 @@ final class WebViewCore {
     }
 
     // called by JNI
+    private void keepScreenOn(boolean screenOn) {
+        if (mWebView != null) {
+            Message message = mWebView.mPrivateHandler.obtainMessage(WebView.SCREEN_ON);
+            message.arg1 = screenOn ? 1 : 0;
+            message.sendToTarget();
+        }
+    }
+
+    // called by JNI
     private Class<?> getPluginClass(String libName, String clsName) {
         
         if (mWebView == null) {
