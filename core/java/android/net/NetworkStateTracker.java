@@ -302,7 +302,7 @@ public abstract class NetworkStateTracker extends Handler {
     public boolean isTeardownRequested() {
         return mTeardownRequested;
     }
-    
+
     /**
      * Send a  notification that the results of a scan for network access
      * points has completed, and results are available.
@@ -327,10 +327,10 @@ public abstract class NetworkStateTracker extends Handler {
     }
 
     protected void setSubtype(int subtype, String subtypeName) {
-        if (mNetworkInfo.isConnected()) {
-            int oldSubtype = mNetworkInfo.getSubtype();
-            if (subtype != oldSubtype) {
-                mNetworkInfo.setSubtype(subtype, subtypeName);
+        int oldSubtype = mNetworkInfo.getSubtype();
+        if (subtype != oldSubtype) {
+            mNetworkInfo.setSubtype(subtype, subtypeName);
+            if (mNetworkInfo.isConnected()) {
                 Message msg = mTarget.obtainMessage(
                         EVENT_NETWORK_SUBTYPE_CHANGED, oldSubtype, 0, mNetworkInfo);
                 msg.sendToTarget();
