@@ -2263,13 +2263,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean scalingRequired = false;
         boolean caching;
         int layerType = child.getLayerType();
-        
+
+        final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
                 (flags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE) {
             caching = true;
             if (mAttachInfo != null) scalingRequired = mAttachInfo.mScalingRequired;
         } else {
-            caching = (layerType != LAYER_TYPE_NONE) || canvas.isHardwareAccelerated();
+            caching = (layerType != LAYER_TYPE_NONE) || hardwareAccelerated;
         }
 
         if (a != null) {
@@ -2351,7 +2352,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return more;
         }
 
-        if (canvas.isHardwareAccelerated()) {
+        if (hardwareAccelerated) {
             // Clear INVALIDATED flag to allow invalidation to occur during rendering, but
             // retain the flag's value temporarily in the mRecreateDisplayList flag
             child.mRecreateDisplayList = (child.mPrivateFlags & INVALIDATED) == INVALIDATED;
@@ -2367,7 +2368,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         Bitmap cache = null;
         boolean hasDisplayList = false;
         if (caching) {
-            if (!canvas.isHardwareAccelerated()) {
+            if (!hardwareAccelerated) {
                 if (layerType != LAYER_TYPE_NONE) {
                     layerType = LAYER_TYPE_SOFTWARE;
                     child.buildDrawingCache(true);
@@ -2506,11 +2507,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                 } else {
                     child.mPrivateFlags &= ~DIRTY_MASK;
-                    // Skip drawing the display list into ours if we were just refreshing
-                    // it's content; we already have a reference to it in our display list
-                    if (mRecreateDisplayList || mLayerType != LAYER_TYPE_NONE) {
-                        ((HardwareCanvas) canvas).drawDisplayList(displayList);
-                    }
+                    ((HardwareCanvas) canvas).drawDisplayList(displayList);
                 }
             }
         } else if (cache != null) {
@@ -2536,13 +2533,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         canvas.restoreToCount(restoreTo);
 
         if (a != null && !more) {
-            if (!canvas.isHardwareAccelerated() && !a.getFillAfter()) {
+            if (!hardwareAccelerated && !a.getFillAfter()) {
                 child.onSetAlpha(255);
             }
             finishAnimatingView(child, a);
         }
 
-        if (more && canvas.isHardwareAccelerated()) {
+        if (more && hardwareAccelerated) {
             // invalidation is the trigger to recreate display lists, so if we're using
             // display lists to render, force an invalidate to allow the animation to
             // continue drawing another frame
