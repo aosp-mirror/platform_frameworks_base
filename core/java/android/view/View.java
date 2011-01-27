@@ -8268,6 +8268,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     protected void dispatchGetDisplayList() {}
+
+    /**
+     * A view that is not attached or hardware accelerated cannot create a display list.
+     * This method checks these conditions and returns the appropriate result.
+     *
+     * @return true if view has the ability to create a display list, false otherwise.
+     *
+     * @hide
+     */
+    public boolean canHaveDisplayList() {
+        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+            return false;
+        }
+        return true;
+    }
     
     /**
      * <p>Returns a display list that can be used to draw this view again
@@ -8278,7 +8293,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     public DisplayList getDisplayList() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+        if (!canHaveDisplayList()) {
             return null;
         }
 
