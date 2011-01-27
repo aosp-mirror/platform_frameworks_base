@@ -163,7 +163,18 @@ public class SurfaceView extends View {
     boolean mUpdateWindowNeeded;
     boolean mReportDrawNeeded;
     private Translator mTranslator;
-    
+
+    private final ViewTreeObserver.OnPreDrawListener mDrawListener =
+            new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    // reposition ourselves where the surface is 
+                    mHaveFrame = true;
+                    updateWindow(false, false);
+                    return true;
+                }
+            };
+
     public SurfaceView(Context context) {
         super(context);
         init();
@@ -201,7 +212,9 @@ public class SurfaceView extends View {
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView");
         mViewVisibility = getVisibility() == VISIBLE;
-        getViewTreeObserver().addOnScrollChangedListener(mScrollChangedListener);
+        ViewTreeObserver observer = getViewTreeObserver();
+        observer.addOnScrollChangedListener(mScrollChangedListener);
+        observer.addOnPreDrawListener(mDrawListener);
     }
 
     @Override
@@ -262,7 +275,9 @@ public class SurfaceView extends View {
     
     @Override
     protected void onDetachedFromWindow() {
-        getViewTreeObserver().removeOnScrollChangedListener(mScrollChangedListener);
+        ViewTreeObserver observer = getViewTreeObserver();
+        observer.removeOnScrollChangedListener(mScrollChangedListener);
+        observer.removeOnPreDrawListener(mDrawListener);
         mRequestedVisible = false;
         updateWindow(false, false);
         mHaveFrame = false;
@@ -346,9 +361,6 @@ public class SurfaceView extends View {
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
             }
         }
-        // reposition ourselves where the surface is 
-        mHaveFrame = true;
-        updateWindow(false, false);
         super.dispatchDraw(canvas);
     }
 
