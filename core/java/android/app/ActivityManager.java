@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Debug;
 import android.os.RemoteException;
@@ -30,6 +32,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
+
 import java.util.List;
 
 /**
@@ -1145,7 +1149,67 @@ public class ActivityManager {
         }
         return null;
     }
-    
+
+    /**
+     * Get the preferred density of icons for the launcher. This is used when
+     * custom drawables are created (e.g., for shortcuts).
+     *
+     * @return density in terms of DPI
+     */
+    public int getLauncherLargeIconDensity() {
+        final Resources res = mContext.getResources();
+        final int density = res.getDisplayMetrics().densityDpi;
+
+        if ((res.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
+                != Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+            return density;
+        }
+
+        switch (density) {
+            case DisplayMetrics.DENSITY_LOW:
+                return DisplayMetrics.DENSITY_MEDIUM;
+            case DisplayMetrics.DENSITY_MEDIUM:
+                return DisplayMetrics.DENSITY_HIGH;
+            case DisplayMetrics.DENSITY_HIGH:
+                return DisplayMetrics.DENSITY_XHIGH;
+            case DisplayMetrics.DENSITY_XHIGH:
+                return DisplayMetrics.DENSITY_MEDIUM * 2;
+            default:
+                return density;
+        }
+    }
+
+    /**
+     * Get the preferred launcher icon size. This is used when custom drawables
+     * are created (e.g., for shortcuts).
+     *
+     * @return dimensions of square icons in terms of pixels
+     */
+    public int getLauncherLargeIconSize() {
+        final Resources res = mContext.getResources();
+        final int size = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
+
+        if ((res.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK)
+                != Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+            return size;
+        }
+
+        final int density = res.getDisplayMetrics().densityDpi;
+
+        switch (density) {
+            case DisplayMetrics.DENSITY_LOW:
+                return (size * DisplayMetrics.DENSITY_MEDIUM) / DisplayMetrics.DENSITY_LOW;
+            case DisplayMetrics.DENSITY_MEDIUM:
+                return (size * DisplayMetrics.DENSITY_HIGH) / DisplayMetrics.DENSITY_MEDIUM;
+            case DisplayMetrics.DENSITY_HIGH:
+                return (size * DisplayMetrics.DENSITY_XHIGH) / DisplayMetrics.DENSITY_HIGH;
+            case DisplayMetrics.DENSITY_XHIGH:
+                return (size * DisplayMetrics.DENSITY_MEDIUM * 2) / DisplayMetrics.DENSITY_XHIGH;
+            default:
+                return size;
+        }
+    }
+
     /**
      * Returns "true" if the user interface is currently being messed with
      * by a monkey.
