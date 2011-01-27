@@ -359,7 +359,10 @@ sp<ABuffer> AMPEG4AudioAssembler::removeLATMFraming(const sp<ABuffer> &buffer) {
         }
     }
 
-    CHECK_EQ(offset, buffer->size());
+    if (offset < buffer->size()) {
+        LOGI("ignoring %d bytes of trailing data", buffer->size() - offset);
+    }
+    CHECK_LE(offset, buffer->size());
 
     return out;
 }
