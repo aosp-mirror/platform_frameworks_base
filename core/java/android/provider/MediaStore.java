@@ -375,12 +375,29 @@ public final class MediaStore {
             public static final String MEDIA_TYPE = "media_type";
 
             /**
-             * Constants for MEDIA_TYPE
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file
+             * is not an audio, image, video or playlist file.
              */
             public static final int MEDIA_TYPE_NONE = 0;
+
+            /**
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an image file.
+             */
             public static final int MEDIA_TYPE_IMAGE = 1;
+
+            /**
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an audio file.
+             */
             public static final int MEDIA_TYPE_AUDIO = 2;
+
+            /**
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an video file.
+             */
             public static final int MEDIA_TYPE_VIDEO = 3;
+
+            /**
+             * Constant for the {@link #MEDIA_TYPE} column indicating that file is an playlist file.
+             */
             public static final int MEDIA_TYPE_PLAYLIST = 4;
         }
     }
