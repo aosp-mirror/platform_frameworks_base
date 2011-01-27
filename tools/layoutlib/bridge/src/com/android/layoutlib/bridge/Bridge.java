@@ -304,7 +304,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 if (lastResult.isSuccess()) {
                     lastResult = scene.inflate();
                     if (lastResult.isSuccess()) {
-                        lastResult = scene.render();
+                        lastResult = scene.render(true /*freshRender*/);
                     }
                 }
             } finally {
