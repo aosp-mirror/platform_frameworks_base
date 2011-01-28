@@ -48,6 +48,7 @@ import com.android.layoutlib.bridge.android.BridgeWindow;
 import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.resources.Density;
+import com.android.resources.ResourceType;
 import com.android.resources.ScreenSize;
 
 import android.animation.Animator;
@@ -566,17 +567,16 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         int animationId = 0;
         if (isFrameworkAnimation) {
             animationResource = mContext.getRenderResources().getFrameworkResource(
-                    RenderResources.RES_ANIMATOR, animationName);
+                    ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = Bridge.getResourceValue(RenderResources.RES_ANIMATOR,
-                        animationName);
+                animationId = Bridge.getResourceValue(ResourceType.ANIMATOR, animationName);
             }
         } else {
             animationResource = mContext.getRenderResources().getProjectResource(
-                    RenderResources.RES_ANIMATOR, animationName);
+                    ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
                 animationId = mContext.getProjectCallback().getResourceValue(
-                        RenderResources.RES_ANIMATOR, animationName);
+                        ResourceType.ANIMATOR, animationName);
             }
         }
 
@@ -1022,7 +1022,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 mStatusBarSize = DEFAULT_STATUS_BAR_HEIGHT;
 
                 // get the real value
-                ResourceValue value = resources.getFrameworkResource(RenderResources.RES_DIMEN,
+                ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
                         "status_bar_height");
 
                 if (value != null) {
@@ -1110,7 +1110,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             mSystemBarSize = 56; // ??
 
             // get the real value
-            ResourceValue value = resources.getFrameworkResource(RenderResources.RES_DIMEN,
+            ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
                     "status_bar_height");
 
             if (value != null) {
@@ -1309,7 +1309,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
     // --- FrameworkResourceIdProvider methods
 
     @Override
-    public Integer getId(String resType, String resName) {
+    public Integer getId(ResourceType resType, String resName) {
         return Bridge.getResourceValue(resType, resName);
     }
 }
