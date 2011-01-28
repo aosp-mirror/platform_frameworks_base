@@ -249,31 +249,31 @@ ObjectBase *FileA3D::initializeFromEntry(size_t index) {
             entry->mRsObj = Allocation::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_PROGRAM_VERTEX:
-            entry->mRsObj = ProgramVertex::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = ProgramVertex::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_PROGRAM_RASTER:
-            entry->mRsObj = ProgramRaster::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = ProgramRaster::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_PROGRAM_FRAGMENT:
-            entry->mRsObj = ProgramFragment::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = ProgramFragment::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_PROGRAM_STORE:
-            entry->mRsObj = ProgramStore::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = ProgramStore::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_SAMPLER:
-            entry->mRsObj = Sampler::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = Sampler::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_ANIMATION:
-            entry->mRsObj = Animation::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = Animation::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_ADAPTER_1D:
-            entry->mRsObj = Adapter1D::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = Adapter1D::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_ADAPTER_2D:
-            entry->mRsObj = Adapter2D::createFromStream(mRSC, mReadStream);
+            //entry->mRsObj = Adapter2D::createFromStream(mRSC, mReadStream);
             break;
         case RS_A3D_CLASS_ID_SCRIPT_C:
-            return NULL;
+            break;
     }
     if (entry->mRsObj) {
         entry->mRsObj->incUserRef();

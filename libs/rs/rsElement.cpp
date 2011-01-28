@@ -17,10 +17,8 @@
 
 #ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-#include <GLES/gl.h>
 #else
 #include "rsContextHostStub.h"
-#include <OpenGL/gl.h>
 #endif
 
 using namespace android;
@@ -65,7 +63,7 @@ size_t Element::getSizeBits() const {
 
 void Element::dumpLOGV(const char *prefix) const {
     ObjectBase::dumpLOGV(prefix);
-    LOGV("%s Element: fieldCount: %i,  size bytes: %i", prefix, mFieldCount, getSizeBytes());
+    LOGV("%s Element: fieldCount: %zu,  size bytes: %zu", prefix, mFieldCount, getSizeBytes());
     for (uint32_t ct = 0; ct < mFieldCount; ct++) {
         LOGV("%s Element field index: %u ------------------", prefix, ct);
         LOGV("%s name: %s, offsetBits: %u, arraySize: %u",

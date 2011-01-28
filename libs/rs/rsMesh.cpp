@@ -22,9 +22,6 @@
 #include <GLES/glext.h>
 #else
 #include "rsContextHostStub.h"
-
-#include <OpenGL/gl.h>
-#include <OpenGl/glext.h>
 #endif
 
 using namespace android;
@@ -35,10 +32,13 @@ Mesh::Mesh(Context *rsc) : ObjectBase(rsc) {
     mPrimitivesCount = 0;
     mVertexBuffers = NULL;
     mVertexBufferCount = 0;
+
+#ifndef ANDROID_RS_BUILD_FOR_HOST
     mAttribs = NULL;
     mAttribAllocationIndex = NULL;
 
     mAttribCount = 0;
+#endif
 }
 
 Mesh::~Mesh() {
@@ -53,11 +53,96 @@ Mesh::~Mesh() {
         delete[] mPrimitives;
     }
 
+#ifndef ANDROID_RS_BUILD_FOR_HOST
     if (mAttribs) {
         delete[] mAttribs;
         delete[] mAttribAllocationIndex;
     }
+#endif
 }
+
+void Mesh::serialize(OStream *stream) const {
+    // Need to identify ourselves
+    stream->addU32((uint32_t)getClassId());
+
+    String8 name(getName());
+    stream->addString(&name);
+
+    // Store number of vertex streams
+    stream->addU32(mVertexBufferCount);
+    for (uint32_t vCount = 0; vCount < mVertexBufferCount; vCount ++) {
+        mVertexBuffers[vCount]->serialize(stream);
+    }
+
+    stream->addU32(mPrimitivesCount);
+    // Store the primitives
+    for (uint32_t pCount = 0; pCount < mPrimitivesCount; pCount ++) {
+        Primitive_t * prim = mPrimitives[pCount];
+
+        stream->addU8((uint8_t)prim->mPrimitive);
+
+        if (prim->mIndexBuffer.get()) {
+            stream->addU32(1);
+            prim->mIndexBuffer->serialize(stream);
+        } else {
+            stream->addU32(0);
+        }
+    }
+}
+
+Mesh *Mesh::createFromStream(Context *rsc, IStream *stream) {
+    // First make sure we are reading the correct object
+    RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
+    if (classID != RS_A3D_CLASS_ID_MESH) {
+        LOGE("mesh loading skipped due to invalid class id");
+        return NULL;
+    }
+
+    Mesh * mesh = new Mesh(rsc);
+
+    String8 name;
+    stream->loadString(&name);
+    mesh->setName(name.string(), name.size());
+
+    mesh->mVertexBufferCount = stream->loadU32();
+    if (mesh->mVertexBufferCount) {
+        mesh->mVertexBuffers = new ObjectBaseRef<Allocation>[mesh->mVertexBufferCount];
+
+        for (uint32_t vCount = 0; vCount < mesh->mVertexBufferCount; vCount ++) {
+            Allocation *vertexAlloc = Allocation::createFromStream(rsc, stream);
+            mesh->mVertexBuffers[vCount].set(vertexAlloc);
+        }
+    }
+
+    mesh->mPrimitivesCount = stream->loadU32();
+    if (mesh->mPrimitivesCount) {
+        mesh->mPrimitives = new Primitive_t *[mesh->mPrimitivesCount];
+
+        // load all primitives
+        for (uint32_t pCount = 0; pCount < mesh->mPrimitivesCount; pCount ++) {
+            Primitive_t * prim = new Primitive_t;
+            mesh->mPrimitives[pCount] = prim;
+
+            prim->mPrimitive = (RsPrimitive)stream->loadU8();
+
+            // Check to see if the index buffer was stored
+            uint32_t isIndexPresent = stream->loadU32();
+            if (isIndexPresent) {
+                Allocation *indexAlloc = Allocation::createFromStream(rsc, stream);
+                prim->mIndexBuffer.set(indexAlloc);
+            }
+        }
+    }
+
+#ifndef ANDROID_RS_BUILD_FOR_HOST
+    mesh->updateGLPrimitives();
+    mesh->initVertexAttribs();
+    mesh->uploadAll(rsc);
+#endif
+    return mesh;
+}
+
+#ifndef ANDROID_RS_BUILD_FOR_HOST
 
 bool Mesh::isValidGLComponent(const Element *elem, uint32_t fieldIdx) {
     // Do not create attribs for padding
@@ -224,86 +309,6 @@ void Mesh::updateGLPrimitives() {
     }
 }
 
-void Mesh::serialize(OStream *stream) const {
-    // Need to identify ourselves
-    stream->addU32((uint32_t)getClassId());
-
-    String8 name(getName());
-    stream->addString(&name);
-
-    // Store number of vertex streams
-    stream->addU32(mVertexBufferCount);
-    for (uint32_t vCount = 0; vCount < mVertexBufferCount; vCount ++) {
-        mVertexBuffers[vCount]->serialize(stream);
-    }
-
-    stream->addU32(mPrimitivesCount);
-    // Store the primitives
-    for (uint32_t pCount = 0; pCount < mPrimitivesCount; pCount ++) {
-        Primitive_t * prim = mPrimitives[pCount];
-
-        stream->addU8((uint8_t)prim->mPrimitive);
-
-        if (prim->mIndexBuffer.get()) {
-            stream->addU32(1);
-            prim->mIndexBuffer->serialize(stream);
-        } else {
-            stream->addU32(0);
-        }
-    }
-}
-
-Mesh *Mesh::createFromStream(Context *rsc, IStream *stream) {
-    // First make sure we are reading the correct object
-    RsA3DClassID classID = (RsA3DClassID)stream->loadU32();
-    if (classID != RS_A3D_CLASS_ID_MESH) {
-        LOGE("mesh loading skipped due to invalid class id");
-        return NULL;
-    }
-
-    Mesh * mesh = new Mesh(rsc);
-
-    String8 name;
-    stream->loadString(&name);
-    mesh->setName(name.string(), name.size());
-
-    mesh->mVertexBufferCount = stream->loadU32();
-    if (mesh->mVertexBufferCount) {
-        mesh->mVertexBuffers = new ObjectBaseRef<Allocation>[mesh->mVertexBufferCount];
-
-        for (uint32_t vCount = 0; vCount < mesh->mVertexBufferCount; vCount ++) {
-            Allocation *vertexAlloc = Allocation::createFromStream(rsc, stream);
-            mesh->mVertexBuffers[vCount].set(vertexAlloc);
-        }
-    }
-
-    mesh->mPrimitivesCount = stream->loadU32();
-    if (mesh->mPrimitivesCount) {
-        mesh->mPrimitives = new Primitive_t *[mesh->mPrimitivesCount];
-
-        // load all primitives
-        for (uint32_t pCount = 0; pCount < mesh->mPrimitivesCount; pCount ++) {
-            Primitive_t * prim = new Primitive_t;
-            mesh->mPrimitives[pCount] = prim;
-
-            prim->mPrimitive = (RsPrimitive)stream->loadU8();
-
-            // Check to see if the index buffer was stored
-            uint32_t isIndexPresent = stream->loadU32();
-            if (isIndexPresent) {
-                Allocation *indexAlloc = Allocation::createFromStream(rsc, stream);
-                prim->mIndexBuffer.set(indexAlloc);
-            }
-        }
-    }
-
-    mesh->updateGLPrimitives();
-    mesh->initVertexAttribs();
-    mesh->uploadAll(rsc);
-
-    return mesh;
-}
-
 void Mesh::computeBBox() {
     float *posPtr = NULL;
     uint32_t vectorSize = 0;
@@ -345,13 +350,6 @@ void Mesh::computeBBox() {
         }
         posPtr += stride;
     }
-}
-
-
-MeshContext::MeshContext() {
-}
-
-MeshContext::~MeshContext() {
 }
 
 namespace android {
@@ -428,3 +426,5 @@ void rsaMeshGetIndices(RsContext con, RsMesh mv, RsAllocation *va, uint32_t *pri
         }
     }
 }
+
+#endif

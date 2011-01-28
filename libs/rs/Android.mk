@@ -130,6 +130,28 @@ LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 
+# Now build a host version for serialization
+include $(CLEAR_VARS)
+LOCAL_CFLAGS += -DANDROID_RS_BUILD_FOR_HOST
+
+LOCAL_SRC_FILES:= \
+	rsAllocation.cpp \
+	rsComponent.cpp \
+	rsElement.cpp \
+	rsFileA3D.cpp \
+	rsObjectBase.cpp \
+	rsMesh.cpp \
+	rsStream.cpp \
+	rsType.cpp
+
+LOCAL_STATIC_LIBRARIES := libcutils libutils
+
+LOCAL_LDLIBS := -lpthread
+LOCAL_MODULE:= libRSserialize
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_HOST_STATIC_LIBRARY)
+
 # include the java examples
 include $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk,\
     java \

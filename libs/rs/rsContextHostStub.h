@@ -18,33 +18,17 @@
 #define ANDROID_RS_CONTEXT_HOST_STUB_H
 
 #include "rsUtils.h"
-//#include "rsMutex.h"
-
-//#include "rsThreadIO.h"
 #include "rsType.h"
-#include "rsMatrix.h"
 #include "rsAllocation.h"
 #include "rsMesh.h"
-//#include "rsDevice.h"
-#include "rsScriptC.h"
 #include "rsAllocation.h"
-#include "rsAdapter.h"
-#include "rsSampler.h"
-#include "rsProgramFragment.h"
-#include "rsProgramStore.h"
-#include "rsProgramRaster.h"
-#include "rsProgramVertex.h"
-#include "rsShaderCache.h"
-#include "rsVertexArray.h"
-
-//#include "rsgApiStructs.h"
-//#include "rsLocklessFifo.h"
-
-//#include <ui/egl/android_natives.h>
 
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
+
+#define CHECK_OBJ(o)
+#define CHECK_OBJ_OR_NULL(o)
 
 class Device;
 
@@ -56,36 +40,13 @@ public:
     ~Context() {
     }
 
-
     //StructuredAllocationContext mStateAllocation;
     ElementState mStateElement;
     TypeState mStateType;
-    SamplerState mStateSampler;
-    //ProgramFragmentState mStateFragment;
-    ProgramStoreState mStateFragmentStore;
-    //ProgramRasterState mStateRaster;
-    //ProgramVertexState mStateVertex;
-    VertexArrayState mStateVertexArray;
-
-    //ScriptCState mScriptC;
-    ShaderCache mShaderCache;
-
     RsSurfaceConfig mUserSurfaceConfig;
 
     //bool setupCheck();
 
-    ProgramFragment * getDefaultProgramFragment() const {
-        return NULL;
-    }
-    ProgramVertex * getDefaultProgramVertex() const {
-        return NULL;
-    }
-    ProgramStore * getDefaultProgramStore() const {
-        return NULL;
-    }
-    ProgramRaster * getDefaultProgramRaster() const {
-        return NULL;
-    }
 
     uint32_t getWidth() const {return 0;}
     uint32_t getHeight() const {return 0;}
@@ -98,6 +59,8 @@ public:
         RS_TIMER_CLEAR_SWAP,
         _RS_TIMER_TOTAL
     };
+
+    void timerSet(Timers) { }
 
     bool checkVersion1_1() const {return false; }
     bool checkVersion2_0() const {return false; }
@@ -157,3 +120,4 @@ protected:
 }
 }
 #endif
+

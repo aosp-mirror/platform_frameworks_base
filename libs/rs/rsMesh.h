@@ -50,15 +50,18 @@ public:
     Primitive_t ** mPrimitives;
     uint32_t mPrimitivesCount;
 
+    virtual void serialize(OStream *stream) const;
+    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
+    static Mesh *createFromStream(Context *rsc, IStream *stream);
+
+#ifndef ANDROID_RS_BUILD_FOR_HOST
     void render(Context *) const;
     void renderPrimitive(Context *, uint32_t primIndex) const;
     void renderPrimitiveRange(Context *, uint32_t primIndex, uint32_t start, uint32_t len) const;
     void uploadAll(Context *);
     void updateGLPrimitives();
 
-    virtual void serialize(OStream *stream) const;
-    virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
-    static Mesh *createFromStream(Context *rsc, IStream *stream);
+
 
     // Bounding volumes
     float mBBoxMin[3];
@@ -76,12 +79,15 @@ protected:
     // buffer, it lets us properly map it
     uint32_t *mAttribAllocationIndex;
     uint32_t mAttribCount;
+#endif
 };
 
 class MeshContext {
 public:
-    MeshContext();
-    ~MeshContext();
+    MeshContext() {
+    }
+    ~MeshContext() {
+    }
 };
 
 }
