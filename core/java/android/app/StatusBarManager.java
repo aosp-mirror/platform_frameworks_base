@@ -22,6 +22,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.view.View;
 
 import com.android.internal.statusbar.IStatusBarService;
 
@@ -31,51 +32,23 @@ import com.android.internal.statusbar.IStatusBarService;
  * @hide
  */
 public class StatusBarManager {
-    /**
-     * Flag for {@link #disable} to make the status bar not expandable.  Unless you also
-     * set {@link #DISABLE_NOTIFICATION_ICONS}, new notifications will continue to show.
-     */
-    public static final int DISABLE_EXPAND = 0x00000001;
 
-    /**
-     * Flag for {@link #disable} to hide notification icons and scrolling ticker text.
-     */
-    public static final int DISABLE_NOTIFICATION_ICONS = 0x00000002;
+    public static final int DISABLE_EXPAND = View.STATUS_BAR_DISABLE_EXPAND;
+    public static final int DISABLE_NOTIFICATION_ICONS = View.STATUS_BAR_DISABLE_NOTIFICATION_ICONS;
+    public static final int DISABLE_NOTIFICATION_ALERTS
+            = View.STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
+    public static final int DISABLE_NOTIFICATION_TICKER
+            = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
+    public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
+    public static final int DISABLE_NAVIGATION = View.STATUS_BAR_DISABLE_NAVIGATION;
+    public static final int DISABLE_BACK = View.STATUS_BAR_DISABLE_BACK;
+    public static final int DISABLE_CLOCK = View.STATUS_BAR_DISABLE_CLOCK;
 
-    /**
-     * Flag for {@link #disable} to disable incoming notification alerts.  This will not block
-     * icons, but it will block sound, vibrating and other visual or aural notifications.
-     */
-    public static final int DISABLE_NOTIFICATION_ALERTS = 0x00000004;
-
-    /**
-     * Flag for {@link #disable} to hide only the scrolling ticker.  Note that
-     * {@link #DISABLE_NOTIFICATION_ICONS} implies {@link #DISABLE_NOTIFICATION_TICKER}.
-     */
-    public static final int DISABLE_NOTIFICATION_TICKER = 0x00000008;
-
-    /**
-     * Flag for {@link #disable} to hide the center system info area.
-     */
-    public static final int DISABLE_SYSTEM_INFO = 0x00000010;
-
-    /**
-     * Flag for {@link #disable} to hide only the navigation buttons.  Don't use this
-     * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
-     */
-    public static final int DISABLE_NAVIGATION = 0x00000020;
-
-    /**
-     * Flag for {@link #disable} to hide only the clock.  You might use this if your activity has
-     * its own clock making the status bar's clock redundant.
-     */
-    public static final int DISABLE_CLOCK = 0x00000040;
-
-
-    /**
-     * Re-enable all of the status bar features that you've disabled.
-     */
     public static final int DISABLE_NONE = 0x00000000;
+
+    public static final int DISABLE_MASK = DISABLE_EXPAND | DISABLE_NOTIFICATION_ICONS
+            | DISABLE_NOTIFICATION_ALERTS | DISABLE_NOTIFICATION_TICKER
+            | DISABLE_SYSTEM_INFO| DISABLE_NAVIGATION | DISABLE_BACK | DISABLE_CLOCK;
 
     private Context mContext;
     private IStatusBarService mService;
