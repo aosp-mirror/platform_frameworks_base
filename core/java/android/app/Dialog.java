@@ -119,7 +119,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      *                present its UI.
      */
     public Dialog(Context context) {
-        this(context, 0);
+        this(context, 0, true);
     }
 
     /**
@@ -135,6 +135,10 @@ public class Dialog implements DialogInterface, Window.Callback,
      * <var>context</var>.  If 0, the default dialog theme will be used.
      */
     public Dialog(Context context, int theme) {
+        this(context, theme, true);
+    }
+
+    Dialog(Context context, int theme, boolean createContextWrapper) {
         if (theme == 0) {
             TypedValue outValue = new TypedValue();
             context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,
@@ -142,7 +146,7 @@ public class Dialog implements DialogInterface, Window.Callback,
             theme = outValue.resourceId;
         }
 
-        mContext = new ContextThemeWrapper(context, theme);
+        mContext = createContextWrapper ? new ContextThemeWrapper(context, theme) : context;
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Window w = PolicyManager.makeNewWindow(mContext);
         mWindow = w;
@@ -152,7 +156,7 @@ public class Dialog implements DialogInterface, Window.Callback,
         mUiThread = Thread.currentThread();
         mListenersHandler = new ListenersHandler(this);
     }
-
+    
     /**
      * @deprecated
      * @hide

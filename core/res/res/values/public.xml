@@ -1496,6 +1496,9 @@
        a ListView). -->
   <public type="layout" name="simple_list_item_activated_2" />
 
+  <public type="drawable" name="dialog_holo_dark_frame" />
+  <public type="drawable" name="dialog_holo_light_frame" />
+
   <public type="style" name="Theme.WithActionBar" />
   <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
 
