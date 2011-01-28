@@ -1315,7 +1315,20 @@ public class WindowManagerService extends IWindowManager.Stub
     static boolean canBeImeTarget(WindowState w) {
         final int fl = w.mAttrs.flags
                 & (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM);
-        if (fl == 0 || fl == (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)) {
+        if (fl == 0 || fl == (FLAG_NOT_FOCUSABLE|FLAG_ALT_FOCUSABLE_IM)
+                || w.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+            if (DEBUG_INPUT_METHOD) {
+                Slog.i(TAG, "isVisibleOrAdding " + w + ": " + w.isVisibleOrAdding());
+                if (!w.isVisibleOrAdding()) {
+                    Slog.i(TAG, "  mSurface=" + w.mSurface + " reportDestroy=" + w.mReportDestroySurface
+                            + " relayoutCalled=" + w.mRelayoutCalled + " viewVis=" + w.mViewVisibility
+                            + " policyVis=" + w.mPolicyVisibility + " attachHid=" + w.mAttachedHidden
+                            + " exiting=" + w.mExiting + " destroying=" + w.mDestroying);
+                    if (w.mAppToken != null) {
+                        Slog.i(TAG, "  mAppToken.hiddenRequested=" + w.mAppToken.hiddenRequested);
+                    }
+                }
+            }
             return w.isVisibleOrAdding();
         }
         return false;
@@ -1330,8 +1343,8 @@ public class WindowManagerService extends IWindowManager.Stub
             i--;
             w = localmWindows.get(i);
 
-            //Slog.i(TAG, "Checking window @" + i + " " + w + " fl=0x"
-            //        + Integer.toHexString(w.mAttrs.flags));
+            if (DEBUG_INPUT_METHOD && willMove) Slog.i(TAG, "Checking window @" + i
+                    + " " + w + " fl=0x" + Integer.toHexString(w.mAttrs.flags));
             if (canBeImeTarget(w)) {
                 //Slog.i(TAG, "Putting input method here!");
 
@@ -1353,6 +1366,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        if (DEBUG_INPUT_METHOD && willMove) Slog.v(TAG, "Proposed new IME target: " + w);
+        
         // Now, a special case -- if the last target's window is in the
         // process of exiting, and is above the new target, keep on the
         // last target to avoid flicker.  Consider for example a Dialog with
@@ -1365,6 +1380,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInputMethodTarget.mAnimLayer > w.mAnimLayer) {
                 w = mInputMethodTarget;
                 i = localmWindows.indexOf(w);
+                if (DEBUG_INPUT_METHOD) Slog.v(TAG, "Current target higher, switching to: " + w);
             }
         }
 
@@ -1420,6 +1436,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         // with an animation, and it is on top of the next target
                         // we will be over, then hold off on moving until
                         // that is done.
+                        mInputMethodTargetWaitingAnim = true;
                         mInputMethodTarget = highestTarget;
                         return highestPos + 1;
                     }
@@ -1440,6 +1457,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + mInputMethodTarget + " to " + w, e);
                 }
                 mInputMethodTarget = w;
+                mInputMethodTargetWaitingAnim = false;
                 if (w.mAppToken != null) {
                     setInputMethodAnimLayerAdjustment(w.mAppToken.animLayerAdjustment);
                 } else {
@@ -8539,7 +8557,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 w.mAnimLayer = w.mLayer + adj;
                 if (DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": "
                         + w.mAnimLayer);
-                if (w == mInputMethodTarget) {
+                if (w == mInputMethodTarget && !mInputMethodTargetWaitingAnim) {
                     setInputMethodAnimLayerAdjustment(adj);
                 }
                 if (w == mWallpaperTarget && mLowerWallpaperTarget == null) {
@@ -8630,6 +8648,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             clearAnimation();
             animating = false;
+            if (animLayerAdjustment != 0) {
+                animLayerAdjustment = 0;
+                updateLayers();
+            }
             if (mInputMethodTarget != null && mInputMethodTarget.mAppToken == this) {
                 moveInputMethodWindowsIfNeededLocked(true);
             }
@@ -8639,10 +8661,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ": reportedVisible=" + reportedVisible);
 
             transformation.clear();
-            if (animLayerAdjustment != 0) {
-                animLayerAdjustment = 0;
-                updateLayers();
-            }
 
             final int N = windows.size();
             for (int i=0; i<N; i++) {
@@ -9248,9 +9266,45 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState imFocus;
             if (idx > 0) {
                 imFocus = mWindows.get(idx-1);
+                //Log.i(TAG, "Desired input method target: " + imFocus);
+                //Log.i(TAG, "Current focus: " + this.mCurrentFocus);
+                //Log.i(TAG, "Last focus: " + this.mLastFocus);
                 if (imFocus != null) {
+                    // This may be a starting window, in which case we still want
+                    // to count it as okay.
+                    if (imFocus.mAttrs.type == LayoutParams.TYPE_APPLICATION_STARTING
+                            && imFocus.mAppToken != null) {
+                        // The client has definitely started, so it really should
+                        // have a window in this app token.  Let's look for it.
+                        for (int i=0; i<imFocus.mAppToken.windows.size(); i++) {
+                            WindowState w = imFocus.mAppToken.windows.get(i);
+                            if (w != imFocus) {
+                                //Log.i(TAG, "Switching to real app window: " + w);
+                                imFocus = w;
+                                break;
+                            }
+                        }
+                    }
+                    //Log.i(TAG, "IM target client: " + imFocus.mSession.mClient);
+                    //if (imFocus.mSession.mClient != null) {
+                    //    Log.i(TAG, "IM target client binder: " + imFocus.mSession.mClient.asBinder());
+                    //    Log.i(TAG, "Requesting client binder: " + client.asBinder());
+                    //}
                     if (imFocus.mSession.mClient != null &&
                             imFocus.mSession.mClient.asBinder() == client.asBinder()) {
+                        return true;
+                    }
+                    
+                    // Okay, how about this...  what is the current focus?
+                    // It seems in some cases we may not have moved the IM
+                    // target window, such as when it was in a pop-up window,
+                    // so let's also look at the current focus.  (An example:
+                    // go to Gmail, start searching so the keyboard goes up,
+                    // press home.  Sometimes the IME won't go down.)
+                    // Would be nice to fix this more correctly, but it's
+                    // way at the end of a release, and this should be good enough.
+                    if (mCurrentFocus != null && mCurrentFocus.mSession.mClient != null &&
+                            mCurrentFocus.mSession.mClient.asBinder() == client.asBinder()) {
                         return true;
                     }
                 }
