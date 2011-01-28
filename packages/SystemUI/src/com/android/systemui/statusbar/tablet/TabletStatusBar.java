@@ -97,8 +97,6 @@ public class TabletStatusBar extends StatusBar implements
     // Fitts' Law assistance for LatinIME; TODO: replace with a more general approach
     private static final boolean FAKE_SPACE_BAR = true;
 
-    public static final int LIGHTS_ON_DELAY = 5000;
-
     // The height of the bar, as definied by the build.  It may be taller if we're plugged
     // into hdmi.
     int mNaturalBarHeight = -1;
@@ -391,6 +389,12 @@ public class TabletStatusBar extends StatusBar implements
             new View.OnTouchListener() {
                 public boolean onTouch(View v, MotionEvent ev) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                        // even though setting the systemUI visibility below will turn these views
+                        // on, we need them to come up faster so that they can catch this motion
+                        // event
+                        mShadow.setVisibility(View.GONE);
+                        mBarContents.setVisibility(View.VISIBLE);
+
                         try {
                             mBarService.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
                         } catch (RemoteException ex) {
