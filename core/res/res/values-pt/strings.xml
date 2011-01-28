@@ -730,7 +730,7 @@
     <string name="capital_on" msgid="1544682755514494298">"ATIVADO"</string>
     <string name="capital_off" msgid="6815870386972805832">"DESATIVADO"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Complete a ação usando"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Use o como padrão para esta ação."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Usar como padrão para esta ação."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Limpar o padrão em Configurações da página inicial &gt; Aplicativos &gt; Gerenciar aplicativos."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Selecionar uma ação"</string>
     <string name="noApplications" msgid="1691104391758345586">"Nenhum aplicativo pode realizar esta ação."</string>

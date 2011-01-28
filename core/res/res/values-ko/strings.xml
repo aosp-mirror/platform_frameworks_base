@@ -365,7 +365,7 @@
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"애플리케이션이 시스템 배경화면을 설정할 수 있도록 합니다."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"배경화면 크기 힌트 설정"</string>
     <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"애플리케이션이 시스템 배경화면 크기 힌트를 설정할 수 있도록 합니다."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"시스템을 기본값으로 재설정"</string>
+    <string name="permlab_masterClear" msgid="2315750423139697397">"시스템 초기화"</string>
     <string name="permdesc_masterClear" msgid="5033465107545174514">"애플리케이션이 모든 데이터, 구성 및 설치된 애플리케이션을 지워서 시스템을 완전히 초기화할 수 있도록 합니다."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"시간 설정"</string>
     <string name="permdesc_setTime" msgid="667294309287080045">"애플리케이션이 휴대전화 시계의 시간을 변경할 수 있도록 합니다."</string>
@@ -880,7 +880,7 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"사전 공유 키 기반 L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"인증서 기반 L2TP/IPSec VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
-    <string name="reset" msgid="2448168080964209908">"재설정"</string>
+    <string name="reset" msgid="2448168080964209908">"초기화"</string>
     <string name="submit" msgid="1602335572089911941">"제출"</string>
     <string name="description_star" msgid="2654319874908576133">"즐겨찾기"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"운전모드 사용"</string>
