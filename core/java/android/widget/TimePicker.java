@@ -23,9 +23,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.NumberPicker.OnValueChangeListener;
 
 import java.text.DateFormatSymbols;
@@ -87,6 +89,8 @@ public class TimePicker extends FrameLayout {
 
     // callbacks
     private OnTimeChangedListener mOnTimeChangedListener;
+
+    private Calendar mTempCalendar;
 
     /**
      * The callback interface used to indicate the time has been adjusted.
@@ -214,12 +218,12 @@ public class TimePicker extends FrameLayout {
         updateAmPmControl();
 
         // initialize to current time
-        Calendar calendar = Calendar.getInstance();
+        mTempCalendar = Calendar.getInstance();
         setOnTimeChangedListener(NO_OP_CHANGE_LISTENER);
 
         // set to current time
-        setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
-        setCurrentMinute(calendar.get(Calendar.MINUTE));
+        setCurrentHour(mTempCalendar.get(Calendar.HOUR_OF_DAY));
+        setCurrentMinute(mTempCalendar.get(Calendar.MINUTE));
 
         if (!isEnabled()) {
             setEnabled(false);
@@ -406,6 +410,22 @@ public class TimePicker extends FrameLayout {
         return mHourSpinner.getBaseline();
     }
 
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        int flags = DateUtils.FORMAT_SHOW_TIME;
+        if (mIs24HourView) {
+            flags |= DateUtils.FORMAT_24HOUR;
+        } else {
+            flags |= DateUtils.FORMAT_12HOUR;
+        }
+        mTempCalendar.set(Calendar.HOUR_OF_DAY, getCurrentHour());
+        mTempCalendar.set(Calendar.MINUTE, getCurrentMinute());
+        String selectedDateUtterance = DateUtils.formatDateTime(mContext,
+                mTempCalendar.getTimeInMillis(), flags);
+        event.getText().add(selectedDateUtterance);
+        return true;
+    }
+
     private void updateHourControl() {
         if (is24HourView()) {
             mHourSpinner.setMinValue(0);
@@ -435,9 +455,11 @@ public class TimePicker extends FrameLayout {
                 mAmPmButton.setVisibility(View.VISIBLE);
             }
         }
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
     }
 
     private void onTimeChanged() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnTimeChangedListener != null) {
             mOnTimeChangedListener.onTimeChanged(this, getCurrentHour(), getCurrentMinute());
         }
