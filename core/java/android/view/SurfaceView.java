@@ -174,6 +174,7 @@ public class SurfaceView extends View {
                     return true;
                 }
             };
+    private boolean mGlobalListenersAdded;
 
     public SurfaceView(Context context) {
         super(context);
@@ -212,9 +213,13 @@ public class SurfaceView extends View {
         mLayout.token = getWindowToken();
         mLayout.setTitle("SurfaceView");
         mViewVisibility = getVisibility() == VISIBLE;
-        ViewTreeObserver observer = getViewTreeObserver();
-        observer.addOnScrollChangedListener(mScrollChangedListener);
-        observer.addOnPreDrawListener(mDrawListener);
+
+        if (!mGlobalListenersAdded) {
+            ViewTreeObserver observer = getViewTreeObserver();
+            observer.addOnScrollChangedListener(mScrollChangedListener);
+            observer.addOnPreDrawListener(mDrawListener);
+            mGlobalListenersAdded = true;
+        }
     }
 
     @Override
@@ -275,9 +280,13 @@ public class SurfaceView extends View {
     
     @Override
     protected void onDetachedFromWindow() {
-        ViewTreeObserver observer = getViewTreeObserver();
-        observer.removeOnScrollChangedListener(mScrollChangedListener);
-        observer.removeOnPreDrawListener(mDrawListener);
+        if (mGlobalListenersAdded) {
+            ViewTreeObserver observer = getViewTreeObserver();
+            observer.removeOnScrollChangedListener(mScrollChangedListener);
+            observer.removeOnPreDrawListener(mDrawListener);
+            mGlobalListenersAdded = false;
+        }
+
         mRequestedVisible = false;
         updateWindow(false, false);
         mHaveFrame = false;
@@ -285,6 +294,7 @@ public class SurfaceView extends View {
             try {
                 mSession.remove(mWindow);
             } catch (RemoteException ex) {
+                // Not much we can do here...
             }
             mWindow = null;
         }
