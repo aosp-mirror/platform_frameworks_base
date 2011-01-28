@@ -28,8 +28,7 @@ import java.net.UnknownHostException;
  */
 public class InterfaceConfiguration implements Parcelable {
     public String hwAddr;
-    public InetAddress addr;
-    public InetAddress mask;
+    public LinkAddress addr;
     public String interfaceFlags;
 
     public InterfaceConfiguration() {
@@ -41,8 +40,6 @@ public class InterfaceConfiguration implements Parcelable {
 
         str.append("ipddress ");
         str.append((addr != null) ? addr.toString() : "NULL");
-        str.append(" netmask ");
-        str.append((mask != null) ? mask.toString() : "NULL");
         str.append(" flags ").append(interfaceFlags);
         str.append(" hwaddr ").append(hwAddr);
 
@@ -59,7 +56,7 @@ public class InterfaceConfiguration implements Parcelable {
     public boolean isActive() {
         try {
             if(interfaceFlags.contains("up")) {
-                for (byte b : addr.getAddress()) {
+                for (byte b : addr.getAddress().getAddress()) {
                     if (b != 0) return true;
                 }
             }
@@ -79,13 +76,7 @@ public class InterfaceConfiguration implements Parcelable {
         dest.writeString(hwAddr);
         if (addr != null) {
             dest.writeByte((byte)1);
-            dest.writeByteArray(addr.getAddress());
-        } else {
-            dest.writeByte((byte)0);
-        }
-        if (mask != null) {
-            dest.writeByte((byte)1);
-            dest.writeByteArray(mask.getAddress());
+            dest.writeParcelable(addr, flags);
         } else {
             dest.writeByte((byte)0);
         }
@@ -99,14 +90,7 @@ public class InterfaceConfiguration implements Parcelable {
                 InterfaceConfiguration info = new InterfaceConfiguration();
                 info.hwAddr = in.readString();
                 if (in.readByte() == 1) {
-                    try {
-                        info.addr = InetAddress.getByAddress(in.createByteArray());
-                    } catch (UnknownHostException e) {}
-                }
-                if (in.readByte() == 1) {
-                    try {
-                        info.mask = InetAddress.getByAddress(in.createByteArray());
-                    } catch (UnknownHostException e) {}
+                    info.addr = in.readParcelable(null);
                 }
                 info.interfaceFlags = in.readString();
                 return info;

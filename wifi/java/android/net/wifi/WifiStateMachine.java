@@ -1013,8 +1013,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         ifcg = service.getInterfaceConfig(intf);
                         if (ifcg != null) {
                             /* IP/netmask: 192.168.43.1/255.255.255.0 */
-                            ifcg.addr = InetAddress.getByName("192.168.43.1");
-                            ifcg.mask = InetAddress.getByName("255.255.255.0");
+                            ifcg.addr = new LinkAddress(InetAddress.getByName("192.168.43.1"), 24);
                             ifcg.interfaceFlags = "[up]";
 
                             service.setInterfaceConfig(intf, ifcg);
@@ -2529,9 +2528,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
                 INetworkManagementService netd = INetworkManagementService.Stub.asInterface(b);
                 InterfaceConfiguration ifcg = new InterfaceConfiguration();
-                ifcg.addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
-                ifcg.mask = NetworkUtils.intToInetAddress(
-                        NetworkUtils.prefixLengthToNetmaskInt(dhcpInfoInternal.prefixLength));
+                ifcg.addr = dhcpInfoInternal.makeLinkAddress();
                 ifcg.interfaceFlags = "[up]";
                 try {
                     netd.setInterfaceConfig(mInterfaceName, ifcg);
