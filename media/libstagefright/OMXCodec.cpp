@@ -528,6 +528,12 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
         mOnlySubmitOneBufferAtOneTime = true;
     }
 
+    mEnableGrallocUsageProtected = false;
+    if (flags & kEnableGrallocUsageProtected) {
+        mEnableGrallocUsageProtected = true;
+    }
+    LOGV("configureCodec protected=%d", mEnableGrallocUsageProtected);
+
     if (!(flags & kIgnoreCodecSpecificData)) {
         uint32_t type;
         const void *data;
@@ -1751,7 +1757,11 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         // XXX: Currently this error is logged, but not fatal.
         usage = 0;
     }
+    if (mEnableGrallocUsageProtected) {
+        usage |= GRALLOC_USAGE_PROTECTED;
+    }
 
+    LOGV("native_window_set_usage usage=0x%x", usage);
     err = native_window_set_usage(
             mNativeWindow.get(), usage | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
     if (err != 0) {
