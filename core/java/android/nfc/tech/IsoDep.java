@@ -92,7 +92,7 @@ public final class IsoDep extends BasicTagTechnology {
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         try {
             mTag.getTagService().resetIsoDepTimeout();
         } catch (RemoteException e) {
