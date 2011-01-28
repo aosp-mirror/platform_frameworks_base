@@ -40,9 +40,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"
-            android:textAppearance="?attr/textAppearanceMedium"
+            android:textAppearance="?attr/actionMenuTextAppearance"
             style="?attr/buttonStyleSmall"
-            android:textColor="?attr/textColorPrimary"
+            android:textColor="?attr/actionMenuTextColor"
             android:background="@null"
             android:paddingLeft="4dip"
             android:paddingRight="4dip" />
