@@ -957,6 +957,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
         gprsState = newGPRSState;
         networkType = newNetworkType;
+        // this new state has been applied - forget it until we get a new new state
+        newNetworkType = 0;
+
 
         newSS.setStateOutOfService(); // clean slate for next time
 
