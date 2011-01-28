@@ -138,9 +138,9 @@ public class EditableInputConnection extends BaseInputConnection {
             return super.commitText(text, newCursorPosition);
         }
 
-        CharSequence errorBefore = mTextView.getError();
+        mTextView.resetErrorChangedFlag();
         boolean success = super.commitText(text, newCursorPosition);
-        CharSequence errorAfter = mTextView.getError();
+        mTextView.hideErrorIfUnchanged();
 
         return success;
     }
