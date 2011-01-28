@@ -1377,5 +1377,287 @@ class GLErrorWrapper extends GLWrapperBase {
         checkError();
     }
 
+    @Override
+    public void glBindFramebufferOES(int target, int framebuffer) {
+        checkThread();
+        mgl11ExtensionPack.glBindFramebufferOES(target, framebuffer);
+        checkError();
+    }
 
+    @Override
+    public void glBindRenderbufferOES(int target, int renderbuffer) {
+        checkThread();
+        mgl11ExtensionPack.glBindRenderbufferOES(target, renderbuffer);
+        checkError();
+    }
+
+    @Override
+    public void glBlendEquation(int mode) {
+        checkThread();
+        mgl11ExtensionPack.glBlendEquation(mode);
+        checkError();
+    }
+
+    @Override
+    public void glBlendEquationSeparate(int modeRGB, int modeAlpha) {
+        checkThread();
+        mgl11ExtensionPack.glBlendEquationSeparate(modeRGB, modeAlpha);
+        checkError();
+    }
+
+    @Override
+    public void glBlendFuncSeparate(int srcRGB, int dstRGB, int srcAlpha,
+            int dstAlpha) {
+        checkThread();
+        mgl11ExtensionPack.glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+        checkError();
+    }
+
+    @Override
+    public int glCheckFramebufferStatusOES(int target) {
+        checkThread();
+        int result = mgl11ExtensionPack.glCheckFramebufferStatusOES(target);
+        checkError();
+        return result;
+    }
+
+    @Override
+    public void glDeleteFramebuffersOES(int n, int[] framebuffers, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glDeleteFramebuffersOES(n, framebuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glDeleteFramebuffersOES(int n, IntBuffer framebuffers) {
+        checkThread();
+        mgl11ExtensionPack.glDeleteFramebuffersOES(n, framebuffers);
+        checkError();
+    }
+
+    @Override
+    public void glDeleteRenderbuffersOES(int n, int[] renderbuffers, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glDeleteRenderbuffersOES(n, renderbuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glDeleteRenderbuffersOES(int n, IntBuffer renderbuffers) {
+        checkThread();
+        mgl11ExtensionPack.glDeleteRenderbuffersOES(n, renderbuffers);
+        checkError();
+    }
+
+    @Override
+    public void glFramebufferRenderbufferOES(int target, int attachment,
+            int renderbuffertarget, int renderbuffer) {
+        checkThread();
+        mgl11ExtensionPack.glFramebufferRenderbufferOES(target, attachment, renderbuffertarget, renderbuffer);
+        checkError();
+    }
+
+    @Override
+    public void glFramebufferTexture2DOES(int target, int attachment,
+            int textarget, int texture, int level) {
+        checkThread();
+        mgl11ExtensionPack.glFramebufferTexture2DOES(target, attachment, textarget, texture, level);
+        checkError();
+    }
+
+    @Override
+    public void glGenerateMipmapOES(int target) {
+        checkThread();
+        mgl11ExtensionPack.glGenerateMipmapOES(target);
+        checkError();
+    }
+
+    @Override
+    public void glGenFramebuffersOES(int n, int[] framebuffers, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGenFramebuffersOES(n, framebuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGenFramebuffersOES(int n, IntBuffer framebuffers) {
+        checkThread();
+        mgl11ExtensionPack.glGenFramebuffersOES(n, framebuffers);
+        checkError();
+    }
+
+    @Override
+    public void glGenRenderbuffersOES(int n, int[] renderbuffers, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGenRenderbuffersOES(n, renderbuffers, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGenRenderbuffersOES(int n, IntBuffer renderbuffers) {
+        checkThread();
+        mgl11ExtensionPack.glGenRenderbuffersOES(n, renderbuffers);
+        checkError();
+    }
+
+    @Override
+    public void glGetFramebufferAttachmentParameterivOES(int target,
+            int attachment, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetFramebufferAttachmentParameterivOES(int target,
+            int attachment, int pname, IntBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glGetFramebufferAttachmentParameterivOES(target, attachment, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetRenderbufferParameterivOES(int target, int pname,
+            int[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGetRenderbufferParameterivOES(target, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetRenderbufferParameterivOES(int target, int pname,
+            IntBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glGetRenderbufferParameterivOES(target, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenfv(int coord, int pname, float[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGetTexGenfv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenfv(int coord, int pname, FloatBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glGetTexGenfv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGeniv(int coord, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGetTexGeniv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGeniv(int coord, int pname, IntBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glGetTexGeniv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenxv(int coord, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glGetTexGenxv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glGetTexGenxv(int coord, int pname, IntBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glGetTexGenxv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public boolean glIsFramebufferOES(int framebuffer) {
+        checkThread();
+        boolean result = mgl11ExtensionPack.glIsFramebufferOES(framebuffer);
+        checkError();
+        return result;
+    }
+
+    @Override
+    public boolean glIsRenderbufferOES(int renderbuffer) {
+        checkThread();
+        mgl11ExtensionPack.glIsRenderbufferOES(renderbuffer);
+        checkError();
+        return false;
+    }
+
+    @Override
+    public void glRenderbufferStorageOES(int target, int internalformat,
+            int width, int height) {
+        checkThread();
+        mgl11ExtensionPack.glRenderbufferStorageOES(target, internalformat, width, height);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenf(int coord, int pname, float param) {
+        checkThread();
+        mgl11ExtensionPack.glTexGenf(coord, pname, param);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenfv(int coord, int pname, float[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glTexGenfv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenfv(int coord, int pname, FloatBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glTexGenfv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glTexGeni(int coord, int pname, int param) {
+        checkThread();
+        mgl11ExtensionPack.glTexGeni(coord, pname, param);
+        checkError();
+    }
+
+    @Override
+    public void glTexGeniv(int coord, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glTexGeniv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glTexGeniv(int coord, int pname, IntBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glTexGeniv(coord, pname, params);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenx(int coord, int pname, int param) {
+        checkThread();
+        mgl11ExtensionPack.glTexGenx(coord, pname, param);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenxv(int coord, int pname, int[] params, int offset) {
+        checkThread();
+        mgl11ExtensionPack.glTexGenxv(coord, pname, params, offset);
+        checkError();
+    }
+
+    @Override
+    public void glTexGenxv(int coord, int pname, IntBuffer params) {
+        checkThread();
+        mgl11ExtensionPack.glTexGenxv(coord, pname, params);
+        checkError();
+    }
 }

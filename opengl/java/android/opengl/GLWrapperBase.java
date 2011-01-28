@@ -28,7 +28,7 @@ import javax.microedition.khronos.opengles.GL11ExtensionPack;
  * some convenient instance variables and default implementations.
  */
 abstract class GLWrapperBase
-    implements GL, GL10, GL10Ext, GL11, GL11Ext {
+    implements GL, GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     public GLWrapperBase(GL gl) {
         mgl = (GL10) gl;
         if (gl instanceof GL10Ext) {
