@@ -50,6 +50,7 @@ import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.resources.Density;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenSize;
+import com.android.util.Pair;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -569,13 +570,13 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             animationResource = mContext.getRenderResources().getFrameworkResource(
                     ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = Bridge.getResourceValue(ResourceType.ANIMATOR, animationName);
+                animationId = Bridge.getResourceId(ResourceType.ANIMATOR, animationName);
             }
         } else {
             animationResource = mContext.getRenderResources().getProjectResource(
                     ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = mContext.getProjectCallback().getResourceValue(
+                animationId = mContext.getProjectCallback().getResourceId(
                         ResourceType.ANIMATOR, animationName);
             }
         }
@@ -1227,10 +1228,10 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 View child = content.getChildAt(i);
                 String tabSpec = String.format("tab_spec%d", i+1);
                 int id = child.getId();
-                String[] resource = projectCallback.resolveResourceValue(id);
+                Pair<ResourceType, String> resource = projectCallback.resolveResourceId(id);
                 String name;
                 if (resource != null) {
-                    name = resource[0]; // 0 is resource name, 1 is resource type.
+                    name = resource.getSecond();
                 } else {
                     name = String.format("Tab %d", i+1); // default name if id is unresolved.
                 }
@@ -1310,6 +1311,6 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
     @Override
     public Integer getId(ResourceType resType, String resName) {
-        return Bridge.getResourceValue(resType, resName);
+        return Bridge.getResourceId(resType, resName);
     }
 }

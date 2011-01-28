@@ -31,6 +31,7 @@ import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
+import com.android.util.Pair;
 
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -42,6 +43,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,9 +71,11 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     private final static ReentrantLock sLock = new ReentrantLock();
 
     /**
-     * Maps from id to resource name/type. This is for android.R only.
+     * Maps from id to resource type/name. This is for android.R only.
      */
-    private final static Map<Integer, String[]> sRMap = new HashMap<Integer, String[]>();
+    private final static Map<Integer, Pair<ResourceType, String>> sRMap =
+        new HashMap<Integer, Pair<ResourceType, String>>();
+
     /**
      * Same as sRMap except for int[] instead of int resources. This is for android.R only.
      */
@@ -80,8 +84,8 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Reverse map compared to sRMap, resource type -> (resource name -> id).
      * This is for android.R only.
      */
-    private final static Map<String, Map<String, Integer>> sRFullMap =
-        new HashMap<String, Map<String,Integer>>();
+    private final static Map<ResourceType, Map<String, Integer>> sRFullMap =
+        new EnumMap<ResourceType, Map<String,Integer>>(ResourceType.class);
 
     private final static Map<Object, Map<String, SoftReference<Bitmap>>> sProjectBitmapCache =
         new HashMap<Object, Map<String, SoftReference<Bitmap>>>();
@@ -131,7 +135,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
     }
 
-    /** Instance of IntArrayWrapper to be reused in {@link #resolveResourceValue(int[])}. */
+    /** Instance of IntArrayWrapper to be reused in {@link #resolveResourceId(int[])}. */
     private final static IntArray sIntArrayWrapper = new IntArray();
 
     /**
@@ -237,28 +241,30 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             Class<?> r = com.android.internal.R.class;
 
             for (Class<?> inner : r.getDeclaredClasses()) {
-                String resType = inner.getSimpleName();
+                String resTypeName = inner.getSimpleName();
+                ResourceType resType = ResourceType.getEnum(resTypeName);
+                if (resType != null) {
+                    Map<String, Integer> fullMap = new HashMap<String, Integer>();
+                    sRFullMap.put(resType, fullMap);
 
-                Map<String, Integer> fullMap = new HashMap<String, Integer>();
-                sRFullMap.put(resType, fullMap);
-
-                for (Field f : inner.getDeclaredFields()) {
-                    // only process static final fields. Since the final attribute may have
-                    // been altered by layoutlib_create, we only check static
-                    int modifiers = f.getModifiers();
-                    if (Modifier.isStatic(modifiers)) {
-                        Class<?> type = f.getType();
-                        if (type.isArray() && type.getComponentType() == int.class) {
-                            // if the object is an int[] we put it in sRArrayMap using an IntArray
-                            // wrapper that properly implements equals and hashcode for the array
-                            // objects, as required by the map contract.
-                            sRArrayMap.put(new IntArray((int[]) f.get(null)), f.getName());
-                        } else if (type == int.class) {
-                            Integer value = (Integer) f.get(null);
-                            sRMap.put(value, new String[] { f.getName(), resType });
-                            fullMap.put(f.getName(), value);
-                        } else {
-                            assert false;
+                    for (Field f : inner.getDeclaredFields()) {
+                        // only process static final fields. Since the final attribute may have
+                        // been altered by layoutlib_create, we only check static
+                        int modifiers = f.getModifiers();
+                        if (Modifier.isStatic(modifiers)) {
+                            Class<?> type = f.getType();
+                            if (type.isArray() && type.getComponentType() == int.class) {
+                                // if the object is an int[] we put it in sRArrayMap using an IntArray
+                                // wrapper that properly implements equals and hashcode for the array
+                                // objects, as required by the map contract.
+                                sRArrayMap.put(new IntArray((int[]) f.get(null)), f.getName());
+                            } else if (type == int.class) {
+                                Integer value = (Integer) f.get(null);
+                                sRMap.put(value, Pair.of(resType, f.getName()));
+                                fullMap.put(f.getName(), value);
+                            } else {
+                                assert false;
+                            }
                         }
                     }
                 }
@@ -389,10 +395,10 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     /**
      * Returns details of a framework resource from its integer value.
      * @param value the integer value
-     * @return an array of 2 strings containing the resource name and type, or null if the id
-     * does not match any resource.
+     * @return a Pair containing the resource type and name, or null if the id
+     *     does not match any resource.
      */
-    public static String[] resolveResourceValue(int value) {
+    public static Pair<ResourceType, String> resolveResourceId(int value) {
         return sRMap.get(value);
     }
 
@@ -400,7 +406,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Returns the name of a framework resource whose value is an int array.
      * @param array
      */
-    public static String resolveResourceValue(int[] array) {
+    public static String resolveResourceId(int[] array) {
         sIntArrayWrapper.set(array);
         return sRArrayMap.get(sIntArrayWrapper);
     }
@@ -411,9 +417,8 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * @param name the name of the resource.
      * @return an {@link Integer} containing the resource id, or null if no resource were found.
      */
-    public static Integer getResourceValue(ResourceType type, String name) {
-        String typeString = type.getName();
-        Map<String, Integer> map = sRFullMap.get(typeString);
+    public static Integer getResourceId(ResourceType type, String name) {
+        Map<String, Integer> map = sRFullMap.get(type);
         if (map != null) {
             return map.get(name);
         }

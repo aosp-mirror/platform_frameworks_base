@@ -589,7 +589,7 @@ public final class BridgeTypedArray extends TypedArray {
         // then the xml attribute value was "resolved" which leads us to a ResourceValue with a
         // valid getType() and getName() returning a resource name.
         // (and getValue() returning null!). We need to handle this!
-        if (resValue.getResourceType() != null && resValue.getType().startsWith("@+") == false) {
+        if (resValue.getResourceType() != null) {
             // if this is a framework id
             if (mPlatformFile || resValue.isFramework()) {
                 // look for idName in the android R classes
@@ -647,10 +647,10 @@ public final class BridgeTypedArray extends TypedArray {
         Integer idValue = null;
 
         if (resValue.isFramework()) {
-            idValue = Bridge.getResourceValue(resValue.getResourceType(),
+            idValue = Bridge.getResourceId(resValue.getResourceType(),
                     resValue.getName());
         } else {
-            idValue = mContext.getProjectCallback().getResourceValue(
+            idValue = mContext.getProjectCallback().getResourceId(
                     resValue.getResourceType(), resValue.getName());
         }
 
