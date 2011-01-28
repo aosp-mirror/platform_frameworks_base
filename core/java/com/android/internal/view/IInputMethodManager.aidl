@@ -59,7 +59,7 @@ interface IInputMethodManager {
     void hideMySoftInput(in IBinder token, int flags);
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
-    void setIMEButtonVisible(in IBinder token, boolean visible);
+    void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     boolean switchToLastInputMethod(in IBinder token);

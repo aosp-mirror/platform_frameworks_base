@@ -531,9 +531,9 @@ public final class InputMethodManager {
     }
 
     /** @hide */
-    public void setIMEButtonVisible(IBinder imeToken, boolean visible) {
+    public void setImeWindowStatus(IBinder imeToken, int vis, int backDisposition) {
         try {
-            mService.setIMEButtonVisible(imeToken, visible);
+            mService.setImeWindowStatus(imeToken, vis, backDisposition);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
