@@ -11944,28 +11944,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             adj = FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "exec-service";
-        } else if (app.foregroundServices) {
-            // The user is aware of this app, so make it visible.
-            adj = PERCEPTIBLE_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_DEFAULT;
-            app.adjType = "foreground-service";
-        } else if (app.forcingToForeground != null) {
-            // The user is aware of this app, so make it visible.
-            adj = PERCEPTIBLE_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_DEFAULT;
-            app.adjType = "force-foreground";
-            app.adjSource = app.forcingToForeground;
-        } else if (app == mHeavyWeightProcess) {
-            // We don't want to kill the current heavy-weight process.
-            adj = HEAVY_WEIGHT_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
-            app.adjType = "heavy";
-        } else if (app == mHomeProcess) {
-            // This process is hosting what we currently consider to be the
-            // home app, so we don't want to let it go into the background.
-            adj = HOME_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
-            app.adjType = "home";
         } else if ((N=app.activities.size()) != 0) {
             // This app is in the background with paused activities.
             app.hidden = true;
@@ -11998,7 +11976,37 @@ public final class ActivityManagerService extends ActivityManagerNative
             adj = hiddenAdj;
             app.adjType = "bg-empty";
         }
+        
+        if (adj > PERCEPTIBLE_APP_ADJ) {
+            if (app.foregroundServices) {
+                // The user is aware of this app, so make it visible.
+                adj = PERCEPTIBLE_APP_ADJ;
+                schedGroup = Process.THREAD_GROUP_DEFAULT;
+                app.adjType = "foreground-service";
+            } else if (app.forcingToForeground != null) {
+                // The user is aware of this app, so make it visible.
+                adj = PERCEPTIBLE_APP_ADJ;
+                schedGroup = Process.THREAD_GROUP_DEFAULT;
+                app.adjType = "force-foreground";
+                app.adjSource = app.forcingToForeground;
+            }
+        }
+        
+        if (adj > HEAVY_WEIGHT_APP_ADJ && app == mHeavyWeightProcess) {
+            // We don't want to kill the current heavy-weight process.
+            adj = HEAVY_WEIGHT_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.adjType = "heavy";
+        }
 
+        if (adj > HOME_APP_ADJ && app == mHomeProcess) {
+            // This process is hosting what we currently consider to be the
+            // home app, so we don't want to let it go into the background.
+            adj = HOME_APP_ADJ;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.adjType = "home";
+        }
+        
         //Slog.i(TAG, "OOM " + app + ": initial adj=" + adj);
         
         // By default, we use the computed adjustment.  It may be changed if
