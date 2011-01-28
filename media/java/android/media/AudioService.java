@@ -1450,7 +1450,7 @@ public class AudioService extends IAudioService.Stub {
         if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_BT_SCO) {
             // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
             return AudioSystem.STREAM_BLUETOOTH_SCO;
-        } else if (isOffhook || AudioSystem.isStreamActive(AudioSystem.STREAM_VOICE_CALL)) {
+        } else if (isOffhook || getMode() == AudioManager.MODE_IN_COMMUNICATION) {
             // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
             return AudioSystem.STREAM_VOICE_CALL;
         } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC)) {
