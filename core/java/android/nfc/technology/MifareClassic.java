@@ -17,6 +17,7 @@
 package android.nfc.technology;
 
 import android.nfc.NfcAdapter;
+import android.nfc.TagLostException;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -248,7 +249,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * Authenticate the entire sector that the given block resides in.
      * <p>This requires a that the tag be connected.
      */
-    public boolean authenticateBlock(int block, byte[] key, boolean keyA) {
+    public boolean authenticateBlock(int block, byte[] key, boolean keyA) throws TagLostException {
         checkConnected();
 
         byte[] cmd = new byte[12];
@@ -274,6 +275,8 @@ public final class MifareClassic extends BasicTagTechnology {
             if ((transceive(cmd, false) != null)) {
                 return true;
             }
+        } catch (TagLostException e) {
+            throw e;
         } catch (IOException e) {
             // No need to deal with, will return false anyway
         }
@@ -284,7 +287,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * Authenticate for a given sector.
      * <p>This requires a that the tag be connected.
      */
-    public boolean authenticateSector(int sector, byte[] key, boolean keyA) {
+    public boolean authenticateSector(int sector, byte[] key, boolean keyA) throws TagLostException {
         checkConnected();
 
         byte addr = (byte) ((firstBlockInSector(sector)) & 0xff);

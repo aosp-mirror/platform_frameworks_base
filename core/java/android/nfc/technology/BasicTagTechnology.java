@@ -21,8 +21,10 @@ import java.io.IOException;
 import android.nfc.INfcAdapter;
 import android.nfc.INfcTag;
 import android.nfc.NfcAdapter;
+import android.nfc.TransceiveResult;
 import android.nfc.Tag;
 import android.nfc.ErrorCodes;
+import android.nfc.TagLostException;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -165,11 +167,21 @@ import android.util.Log;
         checkConnected();
 
         try {
-            byte[] response = mTagService.transceive(mTag.getServiceHandle(), data, raw);
-            if (response == null) {
+            TransceiveResult result = mTagService.transceive(mTag.getServiceHandle(), data, raw);
+            if (result == null) {
                 throw new IOException("transceive failed");
+            } else {
+                if (result.isSuccessful()) {
+                    return result.getResponseData();
+                } else {
+                    if (result.isTagLost()) {
+                        throw new TagLostException("Tag was lost.");
+                    }
+                    else {
+                        throw new IOException("transceive failed");
+                    }
+                }
             }
-            return response;
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
             throw new IOException("NFC service died");
