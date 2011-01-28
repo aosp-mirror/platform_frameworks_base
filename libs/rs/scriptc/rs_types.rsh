@@ -73,8 +73,6 @@ typedef struct {
     float m[4];
 } rs_matrix2x2;
 
-typedef float4 rs_quaternion;
-
 #define RS_PACKED __attribute__((packed, aligned(4)))
 
 #endif
