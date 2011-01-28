@@ -55,6 +55,14 @@ struct ASessionDescription : public RefBase {
 
     bool findAttribute(size_t index, const char *key, AString *value) const;
 
+    // parses strings of the form
+    //   npt      := npt-time "-" npt-time? | "-" npt-time
+    //   npt-time := "now" | [0-9]+("." [0-9]*)?
+    //
+    // Returns true iff both "npt1" and "npt2" times were available,
+    // i.e. we have a fixed duration, otherwise this is live streaming.
+    static bool parseNTPRange(const char *s, float *npt1, float *npt2);
+
 protected:
     virtual ~ASessionDescription();
 

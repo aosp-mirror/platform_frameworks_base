@@ -254,26 +254,12 @@ bool ASessionDescription::getDurationUs(int64_t *durationUs) const {
         return false;
     }
 
-    if (value == "npt=now-" || value == "npt=0-") {
-        return false;
-    }
-
     if (strncmp(value.c_str(), "npt=", 4)) {
         return false;
     }
 
-    const char *s = value.c_str() + 4;
-    char *end;
-    double from = strtod(s, &end);
-
-    if (end == s || *end != '-') {
-        return false;
-    }
-
-    s = end + 1;
-    double to = strtod(s, &end);
-
-    if (end == s || *end != '\0' || to < from) {
+    float from, to;
+    if (!parseNTPRange(value.c_str() + 4, &from, &to)) {
         return false;
     }
 
@@ -305,6 +291,40 @@ void ASessionDescription::ParseFormatDesc(
 
         *numChannels = x;
     }
+}
+
+// static
+bool ASessionDescription::parseNTPRange(
+        const char *s, float *npt1, float *npt2) {
+    if (s[0] == '-') {
+        return false;  // no start time available.
+    }
+
+    if (!strncmp("now", s, 3)) {
+        return false;  // no absolute start time available
+    }
+
+    char *end;
+    *npt1 = strtof(s, &end);
+
+    if (end == s || *end != '-') {
+        // Failed to parse float or trailing "dash".
+        return false;
+    }
+
+    s = end + 1;  // skip the dash.
+
+    if (!strncmp("now", s, 3)) {
+        return false;  // no absolute end time available
+    }
+
+    *npt2 = strtof(s, &end);
+
+    if (end == s || *end != '\0') {
+        return false;
+    }
+
+    return *npt2 > *npt1;
 }
 
 }  // namespace android

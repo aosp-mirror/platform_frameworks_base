@@ -938,13 +938,11 @@ struct MyHandler : public AHandler {
 
         AString val;
         CHECK(GetAttribute(range.c_str(), "npt", &val));
-        float npt1, npt2;
 
-        if (val == "now-" || val == "0-") {
+        float npt1, npt2;
+        if (!ASessionDescription::parseNTPRange(val.c_str(), &npt1, &npt2)) {
             // This is a live stream and therefore not seekable.
             return;
-        } else {
-            CHECK_EQ(sscanf(val.c_str(), "%f-%f", &npt1, &npt2), 2);
         }
 
         i = response->mHeaders.indexOfKey("rtp-info");
