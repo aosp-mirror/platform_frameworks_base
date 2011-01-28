@@ -141,11 +141,11 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Display-Sperre"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Ausschalten"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lautlos"</string>
-    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist aus"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ton ist AN"</string>
+    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist AUS."</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ton ist AN."</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flugmodus"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist aus"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Kostenpflichtige Dienste"</string>
@@ -787,7 +787,7 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Es werden eine große Anzahl an Kurznachrichten versendet. Wählen Sie \"OK\", um fortzufahren, oder drücken Sie auf \"Abbrechen\", um den Sendevorgang zu beenden."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Abbrechen"</string>
-    <string name="date_time_set" msgid="5777075614321087758">"Einstellen"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ausblenden"</b></string>
