@@ -1732,6 +1732,88 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int STATUS_BAR_HIDDEN = 0x00000001;
 
     /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to make the status bar not expandable.  Unless you also
+     * set {@link #STATUS_BAR_DISABLE_NOTIFICATION_ICONS}, new notifications will continue to show.
+     */
+    public static final int STATUS_BAR_DISABLE_EXPAND = 0x00010000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to hide notification icons and scrolling ticker text.
+     */
+    public static final int STATUS_BAR_DISABLE_NOTIFICATION_ICONS = 0x00020000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to disable incoming notification alerts.  This will not block
+     * icons, but it will block sound, vibrating and other visual or aural notifications.
+     */
+    public static final int STATUS_BAR_DISABLE_NOTIFICATION_ALERTS = 0x00040000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to hide only the scrolling ticker.  Note that
+     * {@link #STATUS_BAR_DISABLE_NOTIFICATION_ICONS} implies
+     * {@link #STATUS_BAR_DISABLE_NOTIFICATION_TICKER}.
+     */
+    public static final int STATUS_BAR_DISABLE_NOTIFICATION_TICKER = 0x00080000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to hide the center system info area.
+     */
+    public static final int STATUS_BAR_DISABLE_SYSTEM_INFO = 0x00100000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to hide only the navigation buttons.  Don't use this
+     * unless you're a special part of the system UI (i.e., setup wizard, keyguard).
+     */
+    public static final int STATUS_BAR_DISABLE_NAVIGATION = 0x00200000;
+
+    /**
+     * @hide
+     *
+     * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
+     * out of the public fields to keep the undefined bits out of the developer's way.
+     *
+     * Flag to hide only the clock.  You might use this if your activity has
+     * its own clock making the status bar's clock redundant.
+     */
+    public static final int STATUS_BAR_DISABLE_CLOCK = 0x00400000;
+
+    /**
+     * @hide
+     */
+    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = STATUS_BAR_HIDDEN;
+    
+
+    /**
      * Controls the over-scroll mode for this view.
      * See {@link #overScrollBy(int, int, int, int, int, int, int, int, boolean)},
      * {@link #OVER_SCROLL_ALWAYS}, {@link #OVER_SCROLL_IF_CONTENT_SCROLLS},
@@ -10839,7 +10921,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void dispatchSystemUiVisibilityChanged(int visibility) {
         mSystemUiVisibility = visibility;
         if (mOnSystemUiVisibilityChangeListener != null) {
-            mOnSystemUiVisibilityChangeListener.onSystemUiVisibilityChange(visibility);
+            mOnSystemUiVisibilityChangeListener.onSystemUiVisibilityChange(
+                    visibility & ~PUBLIC_STATUS_BAR_VISIBILITY_MASK);
         }
     }
 
