@@ -70,6 +70,12 @@ public class StatusBarTest extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+        new Test("DISABLE_NAVIGATION") {
+            public void run() {
+                View v = findViewById(android.R.id.list);
+                v.setSystemUiVisibility(View.STATUS_BAR_DISABLE_NAVIGATION);
+            }
+        },
         new Test("STATUS_BAR_HIDDEN") {
             public void run() {
                 View v = findViewById(android.R.id.list);
@@ -77,7 +83,7 @@ public class StatusBarTest extends TestActivity
                 v.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
             }
         },
-        new Test("not STATUS_BAR_HIDDEN") {
+        new Test("no setSystemUiVisibility") {
             public void run() {
                 View v = findViewById(android.R.id.list);
                 v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
