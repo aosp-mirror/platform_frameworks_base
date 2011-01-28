@@ -117,7 +117,7 @@ import java.io.IOException;
     }
 
     @Override
-    public void close() {
+    public void close() throws IOException {
         try {
             /* Note that we don't want to physically disconnect the tag,
              * but just reconnect to it to reset its state
