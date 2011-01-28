@@ -1020,7 +1020,7 @@ public class PhoneStatusBar extends StatusBar {
 
     // Not supported
     public void setMenuKeyVisible(boolean visible) { }
-    public void setIMEButtonVisible(IBinder token, boolean visible) { }
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) { }
 
     private class Launcher implements View.OnClickListener {
         private PendingIntent mIntent;

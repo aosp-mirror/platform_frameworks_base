@@ -53,7 +53,7 @@ public class InputMethodButton extends ImageView {
     private final int mId;
     private ImageView mIcon;
     private IBinder mToken;
-    private boolean mKeyboardVisible = false;
+    private boolean mShowButton = false;
     private boolean mScreenLocked = false;
     private InputMethodInfo mShortcutInfo;
     private InputMethodSubtype mShortcutSubtype;
@@ -144,7 +144,7 @@ public class InputMethodButton extends ImageView {
     // * There are no explicitly enabled (by the user) subtypes of the IME, or the IME doesn't have
     // its subtypes at all
     private boolean needsToShowIMEButton() {
-        if (!mKeyboardVisible || mScreenLocked) return false;
+        if (!mShowButton || mScreenLocked) return false;
         List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
         final int size = imis.size();
         final int visibility = loadInputMethodSelectorVisibility();
@@ -194,9 +194,9 @@ public class InputMethodButton extends ImageView {
         }
     }
 
-    public void setIMEButtonVisible(IBinder token, boolean keyboardVisible) {
+    public void setImeWindowStatus(IBinder token, boolean showButton) {
         mToken = token;
-        mKeyboardVisible = keyboardVisible;
+        mShowButton = showButton;
         refreshStatusIcon();
     }
 

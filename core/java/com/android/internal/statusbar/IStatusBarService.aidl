@@ -31,7 +31,7 @@ interface IStatusBarService
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
     void setMenuKeyVisible(boolean visible);
-    void setIMEButtonVisible(in IBinder token, boolean visible);
+    void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
