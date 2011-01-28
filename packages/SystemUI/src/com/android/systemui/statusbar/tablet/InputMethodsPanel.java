@@ -75,6 +75,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     private LinearLayout mInputMethodMenuList;
     private PackageManager mPackageManager;
     private String mEnabledInputMethodAndSubtypesCacheStr;
+    private String mLastSystemLocaleString;
     private View mConfigureImeShortcut;
 
     private class InputMethodComparator implements Comparator<InputMethodInfo> {
@@ -335,8 +336,10 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
             getEnabledInputMethodAndSubtypeList() {
         String newEnabledIMIs = Settings.Secure.getString(
                 mContext.getContentResolver(), Settings.Secure.ENABLED_INPUT_METHODS);
-        if (mEnabledInputMethodAndSubtypesCacheStr == null
-                || !mEnabledInputMethodAndSubtypesCacheStr.equals(newEnabledIMIs)
+        String currentSystemLocaleString =
+                mContext.getResources().getConfiguration().locale.toString();
+        if (!TextUtils.equals(mEnabledInputMethodAndSubtypesCacheStr, newEnabledIMIs)
+                || !TextUtils.equals(mLastSystemLocaleString, currentSystemLocaleString)
                 || mPackageChanged) {
             mEnabledInputMethodAndSubtypesCache.clear();
             final List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
@@ -346,6 +349,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
             }
             mEnabledInputMethodAndSubtypesCacheStr = newEnabledIMIs;
             mPackageChanged = false;
+            mLastSystemLocaleString = currentSystemLocaleString;
         }
         return mEnabledInputMethodAndSubtypesCache;
     }
