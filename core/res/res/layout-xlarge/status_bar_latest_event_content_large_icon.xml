@@ -30,27 +30,21 @@
             android:fadingEdge="horizontal"
             />
     </LinearLayout>
-    <RelativeLayout
+    <TextView android:id="@+id/info"
+        android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        >
-        <TextView android:id="@+id/info"
-            android:textAppearance="@style/TextAppearance.StatusBar.EventContent.Info"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:singleLine="true"
-            android:gravity="center_vertical"
-            android:layout_alignParentLeft="true"
-            android:paddingLeft="8dp"
-            />
-        <ImageView android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignRight="@id/info"
-            android:layout_marginBottom="8dip"
-            android:scaleType="center"
-            />
-    </RelativeLayout>
+        android:singleLine="true"
+        android:gravity="center_vertical"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        />
+    <ImageView android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="13dip"
+        android:scaleType="center"
+        />
 </LinearLayout>
 
