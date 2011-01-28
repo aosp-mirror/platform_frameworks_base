@@ -41,13 +41,14 @@ public class StatusBarManager {
             = View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER;
     public static final int DISABLE_SYSTEM_INFO = View.STATUS_BAR_DISABLE_SYSTEM_INFO;
     public static final int DISABLE_NAVIGATION = View.STATUS_BAR_DISABLE_NAVIGATION;
+    public static final int DISABLE_BACK = View.STATUS_BAR_DISABLE_BACK;
     public static final int DISABLE_CLOCK = View.STATUS_BAR_DISABLE_CLOCK;
 
     public static final int DISABLE_NONE = 0x00000000;
 
     public static final int DISABLE_MASK = DISABLE_EXPAND | DISABLE_NOTIFICATION_ICONS
             | DISABLE_NOTIFICATION_ALERTS | DISABLE_NOTIFICATION_TICKER
-            | DISABLE_SYSTEM_INFO| DISABLE_NAVIGATION | DISABLE_CLOCK;
+            | DISABLE_SYSTEM_INFO| DISABLE_NAVIGATION | DISABLE_BACK | DISABLE_CLOCK;
 
     private Context mContext;
     private IStatusBarService mService;

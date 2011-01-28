@@ -370,8 +370,8 @@ public class TabletStatusBar extends StatusBar implements
                 (ImageView)sb.findViewById(R.id.network_type));
 
         // The navigation buttons
+        mBackButton = (ImageView)sb.findViewById(R.id.back);
         mNavigationArea = sb.findViewById(R.id.navigationArea);
-        mBackButton = (ImageView)mNavigationArea.findViewById(R.id.back);
         mHomeButton = mNavigationArea.findViewById(R.id.home);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
@@ -789,6 +789,18 @@ public class TabletStatusBar extends StatusBar implements
                 mInputMethodSwitchButton.setScreenLocked(false);
             }
         }
+        if ((diff & StatusBarManager.DISABLE_BACK) != 0) {
+            if ((state & StatusBarManager.DISABLE_BACK) != 0) {
+                Slog.i(TAG, "DISABLE_BACK: yes");
+                mBackButton.setVisibility(View.INVISIBLE);
+                mInputMethodSwitchButton.setScreenLocked(true);
+            } else {
+                Slog.i(TAG, "DISABLE_BACK: no");
+                mBackButton.setVisibility(View.VISIBLE);
+                mInputMethodSwitchButton.setScreenLocked(false);
+            }
+        }
+
     }
 
     private boolean hasTicker(Notification n) {
