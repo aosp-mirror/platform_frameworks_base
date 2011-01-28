@@ -94,16 +94,24 @@ char *genCacheFileName(const char *cacheDir,
 }
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc) {
-    LOGD(">>>> ScriptC ctor called, obj=%p", this);
     mBccScript = NULL;
     memset(&mProgram, 0, sizeof(mProgram));
 }
 
 ScriptC::~ScriptC() {
-    LOGD(">>>> ~ScriptC() mBccScript = %p", mBccScript);
     if (mBccScript) {
+        if (mProgram.mObjectSlotList) {
+            for (size_t ct=0; ct < mProgram.mObjectSlotCount; ct++) {
+                setVarObj(mProgram.mObjectSlotList[ct], NULL);
+            }
+            delete [] mProgram.mObjectSlotList;
+            mProgram.mObjectSlotList = NULL;
+            mProgram.mObjectSlotCount = 0;
+        }
+
+
+        LOGD(">>>> ~ScriptC  bccDisposeScript(%p)", mBccScript);
         bccDisposeScript(mBccScript);
-        LOGD(">>>> ~ScriptC(mBCCScript)");
     }
     free(mEnviroment.mScriptText);
     mEnviroment.mScriptText = NULL;
@@ -589,6 +597,16 @@ bool ScriptCState::runCompiler(Context *rsc,
             return false;
         }
     }
+
+    size_t objectSlotCount = bccGetObjectSlotCount(s->mBccScript);
+    uint32_t *objectSlots = NULL;
+    if (objectSlotCount) {
+        objectSlots = new uint32_t[objectSlotCount];
+        bccGetObjectSlotList(s->mBccScript, objectSlotCount, objectSlots);
+        s->mProgram.mObjectSlotList = objectSlots;
+        s->mProgram.mObjectSlotCount = objectSlotCount;
+    }
+
     return true;
 }
 
