@@ -30,6 +30,7 @@
     </style>
     <style name="TextAppearance.StatusBar.EventContent">
         <item name="android:textColor">#ff999999</item>
+        <item name="android:textSize">14sp</item>
     </style>
     <style name="TextAppearance.StatusBar.EventContent.Title">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
