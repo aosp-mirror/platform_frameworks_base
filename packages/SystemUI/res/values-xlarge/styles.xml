@@ -39,6 +39,7 @@
         <item name="android:layout_weight">1</item>
         <item name="android:layout_gravity">left|center_vertical</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="StatusBarPanelSettingsPanelSeparator">
