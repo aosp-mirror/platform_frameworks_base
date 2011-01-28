@@ -1430,6 +1430,8 @@
   <public type="attr" name="calendarViewStyle" />
   <public type="attr" name="textEditSidePasteWindowLayout" />
   <public type="attr" name="textEditSideNoPasteWindowLayout" />
+  <public type="attr" name="actionMenuTextAppearance" />
+  <public type="attr" name="actionMenuTextColor" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />
