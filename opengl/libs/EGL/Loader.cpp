@@ -200,11 +200,13 @@ void Loader::init_api(void* dso,
         }
         if (f == NULL) {
             // Try with the OES postfix
-            ssize_t index = ssize_t(strlen(name)) - 3;
+            ssize_t size  = ssize_t(strlen(name));
+            ssize_t index = size - 3;
             if ((index>0 && (index<252)) && (strcmp(name+index, "OES"))) {
-                strncpy(scrap, name, index);
-                scrap[index] = 0;
-                strcat(scrap, "OES");
+                strncpy(scrap, name, sizeof(scrap) - 1);
+                scrap[size] = 0;
+                strncat(scrap, "OES", sizeof(scrap) - 1);
+                scrap[size + 3] = 0;
                 f = (__eglMustCastToProperFunctionPointerType)dlsym(dso, scrap);
                 //LOGD_IF(f, "found <%s> instead", scrap);
             }
