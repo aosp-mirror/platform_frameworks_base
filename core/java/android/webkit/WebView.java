@@ -350,6 +350,7 @@ public class WebView extends AbsoluteLayout
     private ZoomManager mZoomManager;
 
     private Rect mGLRectViewport = new Rect();
+    private boolean mGLViewportEmpty = false;
 
     /**
      *  Transportation object for returning WebView across thread boundaries.
@@ -4075,7 +4076,8 @@ public class WebView extends AbsoluteLayout
         }
 
         if (canvas.isHardwareAccelerated()) {
-            int functor = nativeGetDrawGLFunction(mGLRectViewport, getScale(), extras);
+            int functor = nativeGetDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
+                    getScale(), extras);
             ((HardwareCanvas) canvas).callDrawGLFunction(functor);
         } else {
             DrawFilter df = null;
@@ -5159,16 +5161,21 @@ public class WebView extends AbsoluteLayout
 
     void setGLRectViewport() {
         // Use the getGlobalVisibleRect() to get the intersection among the parents
-        getGlobalVisibleRect(mGLRectViewport);
-
-        // Then need to invert the Y axis, just for GL
-        View rootView = getRootView();
-        int rootViewHeight = rootView.getHeight();
-        int savedWebViewBottom = mGLRectViewport.bottom;
-        mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeight();
-        mGLRectViewport.top = rootViewHeight - savedWebViewBottom;
-
-        nativeUpdateDrawGLFunction(mGLRectViewport);
+        // visible == false means we're clipped - send a null rect down to indicate that
+        // we should not draw
+        boolean visible = getGlobalVisibleRect(mGLRectViewport);
+        if (visible) {
+            // Then need to invert the Y axis, just for GL
+            View rootView = getRootView();
+            int rootViewHeight = rootView.getHeight();
+            int savedWebViewBottom = mGLRectViewport.bottom;
+            mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeight();
+            mGLRectViewport.top = rootViewHeight - savedWebViewBottom;
+            mGLViewportEmpty = false;
+        } else {
+            mGLViewportEmpty = true;
+        }
+        nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport);
     }
 
     /**
