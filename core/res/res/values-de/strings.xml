@@ -146,13 +146,12 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Display-Sperre"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Ausschalten"</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Lautlos"</string>
-    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist aus"</string>
-    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ton ist AN"</string>
+    <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ton ist AUS."</string>
+    <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ton ist AN."</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flugmodus"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist aus"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100 +"</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Kostenpflichtige Dienste"</string>
@@ -469,8 +468,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SD-Karten-Inhalt ändern/löschen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ermöglicht der Anwendung Schreiben in USB-Speicher"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ermöglicht einer Anwendung, auf die SD-Karte zu schreiben"</string>
-    <!-- outdated translation 5585262071354704256 -->     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Inhalt des internen Medienspeichers ändern/löschen"</string>
-    <!-- outdated translation 2372999661142345443 -->     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ermöglicht einer Anwendung, den Inhalt des internen Medienspeichers zu verändern"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Intern. Mediensp. änd./löschen"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ermöglicht es einer Anwendung, den Inhalt des internen Medienspeichers zu ändern"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Gewährt einer Anwendung Lese- und Schreibzugriff auf das Cache-Dateisystem."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Internetanrufe tätigen/annehmen"</string>
@@ -879,14 +878,14 @@
     <string name="sms_control_no" msgid="1715320703137199869">"Abbrechen"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Uhrzeit festlegen"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum festlegen"</string>
-    <string name="date_time_set" msgid="5777075614321087758">"Einstellen"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Standard"</string>
     <string name="no_permissions" msgid="7283357728219338112">"Keine Berechtigungen erforderlich"</string>
     <string name="perms_hide" msgid="7283915391320676226"><b>"Ausblenden"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Alle anzeigen"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"USB-Massenspeicher"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB-Verbindung"</string>
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer in den USB-Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Sie haben eine USB-Verbindung mit Ihrem Computer hergestellt. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer in den USB-Speicher Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Sie haben Ihr Telefon über USB mit Ihrem Computer verbunden. Berühren Sie die Schaltfläche unten, wenn Sie Dateien von Ihrem Computer auf die SD-Karte Ihres Android-Geräts und umgekehrt kopieren möchten."</string>
     <string name="usb_storage_button_mount" msgid="1052259930369508235">"USB-Speicher aktivieren"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Bei der Verwendung Ihres USB-Speichers als USB-Massenspeicher ist ein Problem aufgetreten."</string>
@@ -1032,5 +1031,9 @@
     <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
     <skip />
     <!-- no translation found for choose_account_label (4191313562041125787) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
+    <skip />
+    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
 </resources>

@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- outdated translation 4341545325987974494 -->     <string name="status_bar_clear_all_button" msgid="4722520806446512408">"全部清除"</string>
+    <string name="status_bar_clear_all_button" msgid="4722520806446512408">"全部清除"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"未连接至互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi 已连接"</string>
 </resources>
