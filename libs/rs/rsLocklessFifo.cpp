@@ -100,7 +100,9 @@ void LocklessCommandFifo::commit(uint32_t command, uint32_t sizeInBytes) {
     //dumpState("commit 1");
     reinterpret_cast<uint16_t *>(mPut)[0] = command;
     reinterpret_cast<uint16_t *>(mPut)[1] = sizeInBytes;
-    mPut += ((sizeInBytes + 3) & ~3) + 4;
+
+    int32_t s = ((sizeInBytes + 3) & ~3) + 4;
+    android_atomic_add(s, (int32_t *)&mPut);
     //dumpState("commit 2");
     mSignalToWorker.set();
 }
