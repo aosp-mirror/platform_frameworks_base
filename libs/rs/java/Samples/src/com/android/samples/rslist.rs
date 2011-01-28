@@ -44,7 +44,6 @@ int root(int launchID) {
 
     rsgFontColor(0.9f, 0.9f, 0.9f, 1.0f);
     rsgBindFont(gItalic);
-    color(0.2, 0.2, 0.2, 0);
 
     rs_allocation listAlloc;
     rsSetObject(&listAlloc, rsGetAllocation(gList));
