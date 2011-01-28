@@ -28,6 +28,7 @@ import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.ninepatch.NinePatchChunk;
+import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 
@@ -410,8 +411,9 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * @param name the name of the resource.
      * @return an {@link Integer} containing the resource id, or null if no resource were found.
      */
-    public static Integer getResourceValue(String type, String name) {
-        Map<String, Integer> map = sRFullMap.get(type);
+    public static Integer getResourceValue(ResourceType type, String name) {
+        String typeString = type.getName();
+        Map<String, Integer> map = sRFullMap.get(typeString);
         if (map != null) {
             return map.get(name);
         }

@@ -24,6 +24,7 @@ import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
+import com.android.resources.ResourceType;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -614,7 +615,7 @@ public final class BridgeContext extends Activity {
         return null;
     }
 
-    int getFrameworkResourceValue(String resType, String resName, int defValue) {
+    int getFrameworkResourceValue(ResourceType resType, String resName, int defValue) {
         Integer value = Bridge.getResourceValue(resType, resName);
         if (value != null) {
             return value.intValue();
@@ -623,7 +624,7 @@ public final class BridgeContext extends Activity {
         return defValue;
     }
 
-    int getProjectResourceValue(String resType, String resName, int defValue) {
+    int getProjectResourceValue(ResourceType resType, String resName, int defValue) {
         if (mProjectCallback != null) {
             Integer value = mProjectCallback.getResourceValue(resType, resName);
             if (value != null) {

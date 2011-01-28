@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -58,7 +59,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         String ns = mParser.getAttributeNamespace(index);
 
         if (BridgeConstants.NS_RESOURCES.equals(ns)) {
-            Integer v = Bridge.getResourceValue(RenderResources.RES_ATTR, name);
+            Integer v = Bridge.getResourceValue(ResourceType.ATTR, name);
             if (v != null) {
                 return v.intValue();
             }
@@ -69,7 +70,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         // this is not an attribute in the android namespace, we query the customviewloader, if
         // the namespaces match.
         if (mContext.getProjectCallback().getNamespace().equals(ns)) {
-            Integer v = mContext.getProjectCallback().getResourceValue(RenderResources.RES_ATTR,
+            Integer v = mContext.getProjectCallback().getResourceValue(ResourceType.ATTR,
                     name);
             if (v != null) {
                 return v.intValue();
@@ -110,10 +111,10 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         if (resource != null) {
             Integer id = null;
             if (mPlatformFile || resource.isFramework()) {
-                id = Bridge.getResourceValue(resource.getType(), resource.getName());
+                id = Bridge.getResourceValue(resource.getResourceType(), resource.getName());
             } else {
                 id = mContext.getProjectCallback().getResourceValue(
-                        resource.getType(), resource.getName());
+                        resource.getResourceType(), resource.getName());
             }
 
             if (id != null) {
