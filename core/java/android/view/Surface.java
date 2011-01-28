@@ -99,6 +99,17 @@ public class Surface implements Parcelable {
      */
     public static final int OPAQUE              = 0x00000400;
     
+    /**
+     * Application requires a hardware-protected path to an
+     * external display sink. If a hardware-protected path is not available,
+     * then this surface will not be displayed on the external sink.
+     *
+     * @hide
+     */
+    public static final int PROTECTED_APP       = 0x00000800;
+
+    // 0x1000 is reserved for an independent DRM protected flag in framework
+
     /** Creates a normal surface. This is the default. */
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
     

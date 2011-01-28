@@ -79,6 +79,8 @@ public:
     virtual bool needsDithering() const     { return mNeedsDithering; }
     virtual bool needsFiltering() const;
     virtual bool isSecure() const           { return mSecure; }
+    virtual bool isProtectedByApp() const   { return mProtectedByApp; }
+    virtual bool isProtectedByDRM() const   { return mProtectedByDRM; }
     virtual sp<Surface> createSurface() const;
     virtual status_t ditch();
     virtual void onRemoved();
@@ -218,7 +220,9 @@ private:
     bool mNeedsDithering;
 
     // page-flip thread (currently main thread)
-    bool mSecure;
+    bool mSecure;         // no screenshots
+    bool mProtectedByApp; // application requires protected path to external sink
+    bool mProtectedByDRM; // DRM agent requires protected path to external sink
     Region mPostedDirtyRegion;
 
     // page-flip thread and transaction thread (currently main thread)

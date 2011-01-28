@@ -196,6 +196,18 @@ public:
      */
     virtual bool isSecure() const       { return false; }
 
+    /**
+     * isProtectedByApp - true if application says this surface is protected, that
+     * is if it requires a hardware-protected data path to an external sink.
+     */
+    virtual bool isProtectedByApp() const   { return false; }
+
+    /**
+     * isProtectedByDRM - true if DRM agent says this surface is protected, that
+     * is if it requires a hardware-protected data path to an external sink.
+     */
+    virtual bool isProtectedByDRM() const   { return false; }
+
     /** Called from the main thread, when the surface is removed from the
      * draw list */
     virtual status_t ditch() { return NO_ERROR; }
