@@ -7801,7 +7801,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     void dispatchDetachedFromWindow() {
-        //System.out.println("Detached! " + this);
         AttachInfo info = mAttachInfo;
         if (info != null) {
             int vis = info.mWindowVisibility;
@@ -7811,10 +7810,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         onDetachedFromWindow();
-        if ((mPrivateFlags&SCROLL_CONTAINER_ADDED) != 0) {
+
+        if ((mPrivateFlags & SCROLL_CONTAINER_ADDED) != 0) {
             mAttachInfo.mScrollContainers.remove(this);
             mPrivateFlags &= ~SCROLL_CONTAINER_ADDED;
         }
+
         mAttachInfo = null;
     }
 
