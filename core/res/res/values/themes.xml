@@ -270,6 +270,8 @@
         <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
         <item name="actionBarSize">56dip</item>
         <item name="actionModePopupWindowStyle">?android:attr/popupWindowStyle</item>
+        <item name="actionMenuTextAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="actionMenuTextColor">?android:attr/textColorPrimary</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
         <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
