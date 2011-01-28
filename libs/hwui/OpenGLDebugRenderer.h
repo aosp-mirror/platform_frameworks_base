@@ -34,7 +34,7 @@ public:
     ~OpenGLDebugRenderer() {
     }
 
-    void prepare(bool opaque);
+    void prepareDirty(float left, float top, float right, float bottom, bool opaque);
     void finish();
 
     int saveLayer(float left, float top, float right, float bottom,
@@ -52,6 +52,12 @@ public:
             float left, float top, float right, float bottom, SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
     void drawRect(float left, float top, float right, float bottom, SkPaint* paint);
+    void drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, SkPaint* paint);
+    void drawCircle(float x, float y, float radius, SkPaint* paint);
+    void drawOval(float left, float top, float right, float bottom, SkPaint* paint);
+    void drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
     void drawLines(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y,
