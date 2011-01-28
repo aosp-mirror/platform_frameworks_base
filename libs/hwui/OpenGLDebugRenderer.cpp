@@ -23,10 +23,11 @@
 namespace android {
 namespace uirenderer {
 
-void OpenGLDebugRenderer::prepare(bool opaque) {
+void OpenGLDebugRenderer::prepareDirty(float left, float top,
+        float right, float bottom, bool opaque) {
     mPrimitivesCount = 0;
     LOGD("========= Frame start =========");
-    OpenGLRenderer::prepare(opaque);
+    OpenGLRenderer::prepareDirty(left, top, right, bottom, opaque);
 }
 
 void OpenGLDebugRenderer::finish() {
@@ -103,6 +104,33 @@ void OpenGLDebugRenderer::drawRect(float left, float top, float right, float bot
     mPrimitivesCount++;
     StopWatch w("drawRect");
     OpenGLRenderer::drawRect(left, top, right, bottom, paint);
+}
+
+void OpenGLDebugRenderer::drawRoundRect(float left, float top, float right, float bottom,
+        float rx, float ry, SkPaint* paint) {
+    mPrimitivesCount++;
+    StopWatch w("drawRoundRect");
+    OpenGLRenderer::drawRoundRect(left, top, right, bottom, rx, ry, paint);
+}
+
+void OpenGLDebugRenderer::drawCircle(float x, float y, float radius, SkPaint* paint) {
+    mPrimitivesCount++;
+    StopWatch w("drawCircle");
+    OpenGLRenderer::drawCircle(x, y, radius, paint);
+}
+
+void OpenGLDebugRenderer::drawOval(float left, float top, float right, float bottom,
+        SkPaint* paint) {
+    mPrimitivesCount++;
+    StopWatch w("drawOval");
+    OpenGLRenderer::drawOval(left, top, right, bottom, paint);
+}
+
+void OpenGLDebugRenderer::drawArc(float left, float top, float right, float bottom,
+        float startAngle, float sweepAngle, bool useCenter, SkPaint* paint) {
+    mPrimitivesCount++;
+    StopWatch w("drawArc");
+    OpenGLRenderer::drawArc(left, top, right, bottom, startAngle, sweepAngle, useCenter, paint);
 }
 
 void OpenGLDebugRenderer::drawPath(SkPath* path, SkPaint* paint) {
