@@ -53,7 +53,7 @@ public class TabletTicker
 
     private static final String TAG = "StatusBar.TabletTicker";
 
-    private static final boolean CLICKABLE_TICKER = false;
+    private static final boolean CLICKABLE_TICKER = true;
 
     // 3 is enough to let us see most cases, but not get so far behind that it's too annoying.
     private static final int QUEUE_LENGTH = 3;
@@ -300,8 +300,16 @@ public class TabletTicker
         if (CLICKABLE_TICKER) {
             PendingIntent contentIntent = notification.notification.contentIntent;
             if (contentIntent != null) {
-                group.setOnClickListener(mBar.makeClicker(contentIntent,
-                            notification.pkg, notification.tag, notification.id));
+                // create the usual notification clicker, but chain it together with a halt() call
+                // to abort the ticker too
+                final View.OnClickListener clicker = mBar.makeClicker(contentIntent,
+                                            notification.pkg, notification.tag, notification.id);
+                group.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        halt();
+                        clicker.onClick(v);
+                    }
+                });
             } else {
                 group.setOnClickListener(null);
             }
