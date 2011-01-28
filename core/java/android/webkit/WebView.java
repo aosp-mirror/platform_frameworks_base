@@ -6835,7 +6835,7 @@ public class WebView extends AbsoluteLayout
                     previouslyFocusedRect);
         } else {
             result = super.requestFocus(direction, previouslyFocusedRect);
-            if (mWebViewCore.getSettings().getNeedInitialFocus()) {
+            if (mWebViewCore.getSettings().getNeedInitialFocus() && !isInTouchMode()) {
                 // For cases such as GMail, where we gain focus from a direction,
                 // we want to move to the first available link.
                 // FIXME: If there are no visible links, we may not want to
