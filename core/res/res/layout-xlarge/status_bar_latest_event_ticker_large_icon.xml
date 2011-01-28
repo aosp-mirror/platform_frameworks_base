@@ -37,11 +37,13 @@
         android:layout_marginTop="-10dp"
         />
     <ImageView android:id="@+id/icon"
-        android:layout_width="48dp"
-        android:layout_height="32dp"
-        android:layout_gravity="top"
-        android:layout_marginTop="6dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="13dip"
         android:scaleType="center"
+        android:layout_marginRight="4dip"
+        android:layout_marginLeft="16dip"
         />
 </LinearLayout>
 
