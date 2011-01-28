@@ -3703,9 +3703,9 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
 void ResTable::getLocales(Vector<String8>* locales) const
 {
     Vector<ResTable_config> configs;
-    LOGD("calling getConfigurations");
+    LOGV("calling getConfigurations");
     getConfigurations(&configs);
-    LOGD("called getConfigurations size=%d", (int)configs.size());
+    LOGV("called getConfigurations size=%d", (int)configs.size());
     const size_t I = configs.size();
     for (size_t i=0; i<I; i++) {
         char locale[6];
