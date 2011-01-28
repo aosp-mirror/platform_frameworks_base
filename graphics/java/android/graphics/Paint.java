@@ -1690,7 +1690,7 @@ public class Paint {
         int contextLen = contextEnd - contextStart;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        int result = getTextRunCursor(buf, 0, contextLen, flags, offset, cursorOpt);
+        int result = getTextRunCursor(buf, 0, contextLen, flags, offset - contextStart, cursorOpt);
         TemporaryBuffer.recycle(buf);
         return result;
     }
