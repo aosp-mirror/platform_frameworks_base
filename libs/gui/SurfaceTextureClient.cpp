@@ -88,7 +88,7 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
     int buf = -1;
     status_t err = mSurfaceTexture->dequeueBuffer(&buf);
     if (err < 0) {
-        LOGE("dequeueBuffer: ISurfaceTexture::dequeueBuffer failed: %d", err);
+        LOGV("dequeueBuffer: ISurfaceTexture::dequeueBuffer failed: %d", err);
         return err;
     }
     sp<GraphicBuffer>& gbuf(mSlots[buf]);
