@@ -24,9 +24,9 @@ import android.os.Message;
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
  *
- * <p>The image stream may come from either video playback or camera preview.  A SurfaceTexture may
- * be used in place of a SurfaceHolder when specifying the output destination of a MediaPlayer or
- * Camera object.  This will cause all the frames from that image stream to be sent to the
+ * <p>The image stream may come from either camera preview.  A SurfaceTexture may be used in place
+ * of a SurfaceHolder when specifying the output destination of a {@link android.hardware.Camera}
+ * object.  Doing so will cause all the frames from the image stream to be sent to the
  * SurfaceTexture object rather than to the device's display.  When {@link #updateTexImage} is
  * called, the contents of the texture object specified when the SurfaceTexture was created is
  * updated to contain the most recent image from the image stream.  This may cause some frames of
@@ -34,6 +34,11 @@ import android.os.Message;
  *
  * <p>The texture object uses the GL_TEXTURE_EXTERNAL_OES texture target, which is defined by the
  * OES_EGL_image_external OpenGL ES extension.  This limits how the texture may be used.
+ *
+ * <p>SurfaceTexture objects may be created on any thread.  {@link #updateTexImage} may only be
+ * called on the thread with the OpenGL ES context that contains the texture object.  The
+ * frame-available callback is called on an arbitrary thread, so unless special care is taken {@link
+ * #updateTexImage} should not be called directly from the callback.
  */
 public class SurfaceTexture {
 
