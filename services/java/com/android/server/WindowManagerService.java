@@ -11315,13 +11315,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputMonitor.thawInputDispatchingLw();
 
+        boolean configChanged;
+        
         // While the display is frozen we don't re-compute the orientation
         // to avoid inconsistent states.  However, something interesting
         // could have actually changed during that time so re-evaluate it
         // now to catch that.
-        if (updateOrientationFromAppTokensLocked(false)) {
-            mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
-        }
+        configChanged = updateOrientationFromAppTokensLocked(false);
 
         // A little kludge: a lot could have happened while the
         // display was frozen, so now that we are coming back we
@@ -11336,11 +11336,12 @@ public class WindowManagerService extends IWindowManager.Stub
         
         if (updateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            boolean changed = setRotationUncheckedLocked(
+            configChanged |= setRotationUncheckedLocked(
                     WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
-            if (changed) {
-                sendNewConfiguration();
-            }
+        }
+        
+        if (configChanged) {
+            mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
         }
     }
 

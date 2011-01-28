@@ -68,6 +68,7 @@ public abstract class LayoutInflater {
     private boolean mFactorySet;
     private Factory mFactory;
     private Factory2 mFactory2;
+    private Factory2 mPrivateFactory;
     private Filter mFilter;
 
     private final Object[] mConstructorArgs = new Object[2];
@@ -193,6 +194,7 @@ public abstract class LayoutInflater {
         mContext = newContext;
         mFactory = original.mFactory;
         mFactory2 = original.mFactory2;
+        mPrivateFactory = original.mPrivateFactory;
         mFilter = original.mFilter;
     }
     
@@ -297,6 +299,13 @@ public abstract class LayoutInflater {
         } else {
             mFactory = new FactoryMerger(factory, factory, mFactory, mFactory2);
         }
+    }
+
+    /**
+     * @hide for use by framework
+     */
+    public void setPrivateFactory(Factory2 factory) {
+        mPrivateFactory = factory;
     }
 
     /**
@@ -651,6 +660,10 @@ public abstract class LayoutInflater {
             else if (mFactory != null) view = mFactory.onCreateView(name, mContext, attrs);
             else view = null;
 
+            if (view == null && mPrivateFactory != null) {
+                view = mPrivateFactory.onCreateView(parent, name, mContext, attrs);
+            }
+            
             if (view == null) {
                 if (-1 == name.indexOf('.')) {
                     view = onCreateView(parent, name, attrs);
