@@ -183,6 +183,9 @@ class ZoomManager {
     private ScaleGestureDetector mScaleDetector;
     private boolean mPinchToZoomAnimating = false;
 
+    private boolean mHardwareAccelerated = false;
+    private boolean mInHWAcceleratedZoom = false;
+
     public ZoomManager(WebView webView, CallbackProxy callbackProxy) {
         mWebView = webView;
         mCallbackProxy = callbackProxy;
@@ -384,6 +387,10 @@ class ZoomManager {
             scale = getReadingLevelScale();
         }
 
+        if (mHardwareAccelerated) {
+            mInHWAcceleratedZoom = true;
+        }
+
         setZoomScale(scale, reflowText);
 
         if (oldScale != mActualScale) {
@@ -447,8 +454,18 @@ class ZoomManager {
                 - titleHeight, mWebView.getViewHeight(), Math.round(mWebView.getContentHeight()
                 * zoomScale)) + titleHeight) + mWebView.getScrollY();
 
-        canvas.translate(tx, ty);
-        canvas.scale(zoomScale, zoomScale);
+        if (mHardwareAccelerated) {
+            mWebView.updateScrollCoordinates(mWebView.getScrollX() - tx, mWebView.getScrollY() - ty);
+            setZoomScale(zoomScale, false);
+
+            if (mZoomScale == 0) {
+                // We've reached the end of the zoom animation.
+                mInHWAcceleratedZoom = false;
+            }
+        } else {
+            canvas.translate(tx, ty);
+            canvas.scale(zoomScale, zoomScale);
+        }
     }
 
     public boolean isZoomAnimating() {
@@ -493,12 +510,14 @@ class ZoomManager {
             mActualScale = scale;
             mInvActualScale = 1 / scale;
 
-            if (!mWebView.drawHistory()) {
+            if (!mWebView.drawHistory() && !mInHWAcceleratedZoom) {
 
                 // If history Picture is drawn, don't update scroll. They will
                 // be updated when we get out of that mode.
                 // update our scroll so we don't appear to jump
                 // i.e. keep the center of the doc in the center of the view
+                // If this is part of a zoom on a HW accelerated canvas, we
+                // have already updated the scroll so don't do it again.
                 int oldX = mWebView.getScrollX();
                 int oldY = mWebView.getScrollY();
                 float ratio = scale * oldInvScale;
@@ -1019,5 +1038,9 @@ class ZoomManager {
         } else {
             return null;
         }
+    }
+
+    public void setHardwareAccelerated() {
+        mHardwareAccelerated = true;
     }
 }
