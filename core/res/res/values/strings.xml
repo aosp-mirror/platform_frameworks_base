@@ -2690,4 +2690,11 @@
 
     <!-- Choose Account Activity label -->
     <string name="choose_account_label">Select an account</string>
+
+    <!-- NumberPicker - accessibility support -->
+    <!-- Description of the button to increment the NumberPicker value. [CHAR LIMIT=NONE] -->
+    <string name="number_picker_increment_button">Increment</string>
+    <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
+    <string name="number_picker_decrement_button">Decrement</string>
+
 </resources>

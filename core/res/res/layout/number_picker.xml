@@ -22,7 +22,8 @@
     <ImageButton android:id="@+id/increment"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        style="?android:attr/numberPickerUpButtonStyle" />
+        style="?android:attr/numberPickerUpButtonStyle"
+        android:contentDescription="@string/number_picker_increment_button" />
 
     <EditText android:id="@+id/numberpicker_input"
         android:layout_width="fill_parent"
@@ -32,6 +33,7 @@
     <ImageButton android:id="@+id/decrement"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        style="?android:attr/numberPickerDownButtonStyle" />
+        style="?android:attr/numberPickerDownButtonStyle"
+        android:contentDescription="@string/number_picker_decrement_button" />
 
 </merge>

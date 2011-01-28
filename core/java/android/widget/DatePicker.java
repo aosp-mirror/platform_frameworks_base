@@ -30,6 +30,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.NumberPicker.OnValueChangeListener;
 
 import java.text.ParseException;
@@ -353,6 +354,16 @@ public class DatePicker extends FrameLayout {
         return mIsEnabled;
     }
 
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY
+                | DateUtils.FORMAT_SHOW_YEAR;
+        String selectedDateUtterance = DateUtils.formatDateTime(mContext,
+                mCurrentDate.getTimeInMillis(), flags);
+        event.getText().add(selectedDateUtterance);
+        return true;
+    }
+
     /**
      * Gets whether the {@link CalendarView} is shown.
      *
@@ -641,6 +652,7 @@ public class DatePicker extends FrameLayout {
      * Notifies the listener, if such, for a change in the selected date.
      */
     private void notifyDateChanged() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         if (mOnDateChangedListener != null) {
             mOnDateChangedListener.onDateChanged(this, getYear(), getMonth(), getDayOfMonth());
         }
