@@ -587,7 +587,11 @@
         <attr name="actionBarSize" format="dimension" >
             <enum name="wrap_content" value="0" />
         </attr>
-
+        <!-- TextAppearance style that will be applied to text that
+             appears within action menu items. -->
+        <attr name="actionMenuTextAppearance" format="reference" />
+        <!-- Color for text that appears within action menu items. -->
+        <attr name="actionMenuTextColor" format="color|reference" />
 
         <!-- =================== -->
         <!-- Action mode styles  -->
