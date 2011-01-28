@@ -228,8 +228,8 @@ public class MenuInflater {
         private boolean itemAdded;
         private int itemId;
         private int itemCategoryOrder;
-        private String itemTitle;
-        private String itemTitleCondensed;
+        private CharSequence itemTitle;
+        private CharSequence itemTitleCondensed;
         private int itemIconResId;
         private char itemAlphabeticShortcut;
         private char itemNumericShortcut;
@@ -311,8 +311,8 @@ public class MenuInflater {
             final int category = a.getInt(com.android.internal.R.styleable.MenuItem_menuCategory, groupCategory);
             final int order = a.getInt(com.android.internal.R.styleable.MenuItem_orderInCategory, groupOrder);
             itemCategoryOrder = (category & Menu.CATEGORY_MASK) | (order & Menu.USER_MASK);
-            itemTitle = a.getString(com.android.internal.R.styleable.MenuItem_title);
-            itemTitleCondensed = a.getString(com.android.internal.R.styleable.MenuItem_titleCondensed);
+            itemTitle = a.getText(com.android.internal.R.styleable.MenuItem_title);
+            itemTitleCondensed = a.getText(com.android.internal.R.styleable.MenuItem_titleCondensed);
             itemIconResId = a.getResourceId(com.android.internal.R.styleable.MenuItem_icon, 0);
             itemAlphabeticShortcut =
                     getShortcut(a.getString(com.android.internal.R.styleable.MenuItem_alphabeticShortcut));
