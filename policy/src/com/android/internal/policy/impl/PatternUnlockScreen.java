@@ -296,7 +296,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         } else if (mShowingBatteryInfo && mNextAlarm == null) {
             // battery only
             if (mPluggedIn) {
-              if (mBatteryLevel >= 100) {
+              if (mUpdateMonitor.isDeviceCharged()) {
                 mStatus1.setText(getContext().getString(R.string.lockscreen_charged));
               } else {
                   mStatus1.setText(getContext().getString(R.string.lockscreen_plugged_in, mBatteryLevel));
