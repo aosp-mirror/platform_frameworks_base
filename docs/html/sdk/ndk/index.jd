@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r5-windows.zip
-ndk.win_bytes=62217450
-ndk.win_checksum=59cbb02d91d74e9c5c7278d94c989e80
+ndk.win_download=android-ndk-r5b-windows.zip
+ndk.win_bytes=61299831
+ndk.win_checksum=87745ada305ab639399161ab4faf684c
 
-ndk.mac_download=android-ndk-r5-darwin-x86.tar.bz2
+ndk.mac_download=android-ndk-r5b-darwin-x86.tar.bz2
 ndk.mac_bytes=50210863
-ndk.mac_checksum=9dee8e4cb529a5619e9b8d1707478c32
+ndk.mac_checksum=019a14622a377b3727ec789af6707037
 
-ndk.linux_download=android-ndk-r5-linux-x86.tar.bz2
-ndk.linux_bytes=44362746
-ndk.linux_checksum=49d5c35ec02bafc074842542c58b7eb3
+ndk.linux_download=android-ndk-r5b-linux-x86.tar.bz2
+ndk.linux_bytes=44138539
+ndk.linux_checksum=4c0045ddc2bfd657be9d5177d0e0b7e7
 
 page.title=Android NDK
 @jd:body
