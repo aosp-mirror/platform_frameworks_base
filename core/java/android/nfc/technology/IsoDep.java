@@ -62,7 +62,7 @@ public final class IsoDep extends BasicTagTechnology {
     /**
      * Sets the timeout of an IsoDep transceive transaction in milliseconds.
      * If the transaction has not completed before the timeout,
-     * any ongoing {@link BasicTagTechnology#transceive} operation will be
+     * any ongoing {@link #transceive} operation will be
      * aborted and the connection to the tag is lost. This setting is applied
      * only to the {@link Tag} object linked to this technology and will be
      * reset when {@link IsoDep#close} is called.
