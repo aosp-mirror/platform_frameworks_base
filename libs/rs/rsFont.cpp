@@ -74,6 +74,15 @@ bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data
     return true;
 }
 
+void Font::preDestroy() const {
+    for (uint32_t ct = 0; ct < mRSC->mStateFont.mActiveFonts.size(); ct++) {
+        if (mRSC->mStateFont.mActiveFonts[ct] == this) {
+            mRSC->mStateFont.mActiveFonts.removeAt(ct);
+            break;
+        }
+    }
+}
+
 void Font::invalidateTextureCache() {
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
         mCachedGlyphs.valueAt(i)->mIsValid = false;
@@ -307,13 +316,6 @@ Font * Font::create(Context *rsc, const char *name, float fontSize, uint32_t dpi
 Font::~Font() {
     if (mFace) {
         FT_Done_Face(mFace);
-    }
-
-    for (uint32_t ct = 0; ct < mRSC->mStateFont.mActiveFonts.size(); ct++) {
-        if (mRSC->mStateFont.mActiveFonts[ct] == this) {
-            mRSC->mStateFont.mActiveFonts.removeAt(ct);
-            break;
-        }
     }
 
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
@@ -798,11 +800,6 @@ void FontState::deinit(Context *rsc) {
     mCacheLines.clear();
 
     mDefault.clear();
-
-    Vector<Font*> fontsToDereference = mActiveFonts;
-    for (uint32_t i = 0; i < fontsToDereference.size(); i ++) {
-        fontsToDereference[i]->zeroUserRef();
-    }
 
     if (mLibrary) {
         FT_Done_FreeType( mLibrary );

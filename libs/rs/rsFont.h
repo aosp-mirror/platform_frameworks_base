@@ -119,6 +119,7 @@ protected:
     Font(Context *rsc);
     bool init(const char *name, float fontSize, uint32_t dpi, const void *data = NULL, uint32_t dataLen = 0);
 
+    virtual void preDestroy() const;
     FT_Face mFace;
     bool mInitialized;
     bool mHasKerning;

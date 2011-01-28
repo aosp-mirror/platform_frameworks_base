@@ -528,6 +528,7 @@ void * Context::threadProc(void *vrsc) {
 
 void Context::destroyWorkerThreadResources() {
     //LOGV("destroyWorkerThreadResources 1");
+    ObjectBase::zeroAllUserRef(this);
     if (mIsGraphicsContext) {
          mRaster.clear();
          mFragment.clear();
@@ -542,7 +543,6 @@ void Context::destroyWorkerThreadResources() {
          mStateFont.deinit(this);
          mShaderCache.cleanupAll();
     }
-    ObjectBase::zeroAllUserRef(this);
     //LOGV("destroyWorkerThreadResources 2");
     mExit = true;
 }

@@ -78,8 +78,6 @@ void Script::setVarObj(uint32_t slot, ObjectBase *val) {
             (*destPtr)->decSysRef();
         }
         *destPtr = val;
-    } else {
-        LOGV("Calling setVarObj on slot = %i which is null.  This is dangerous because the script will not hold a ref count on the object.", slot);
     }
 }
 
