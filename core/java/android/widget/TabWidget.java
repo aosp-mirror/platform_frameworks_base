@@ -132,7 +132,17 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
                 mRightStrip = resources.getDrawable(
                         com.android.internal.R.drawable.tab_bottom_right_v4);
             }
-        }
+        } else {
+            // Use modern color scheme for Eclair and beyond
+            if (mLeftStrip == null) {
+                mLeftStrip = resources.getDrawable(
+                        com.android.internal.R.drawable.tab_bottom_left);
+            }
+            if (mRightStrip == null) {
+                mRightStrip = resources.getDrawable(
+                        com.android.internal.R.drawable.tab_bottom_right);
+            }
+         }
 
         // Deal with focus, as we don't want the focus to go by default
         // to a tab other than the current tab
