@@ -20,6 +20,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -38,6 +39,8 @@ import java.io.IOException;
  * permission.
  */
 public final class IsoDep extends BasicTagTechnology {
+    private static final String TAG = "NFC";
+
     /** @hide */
     public static final String EXTRA_HI_LAYER_RESP = "hiresp";
     /** @hide */
@@ -54,6 +57,33 @@ public final class IsoDep extends BasicTagTechnology {
             mHiLayerResponse = extras.getByteArray(EXTRA_HI_LAYER_RESP);
             mHistBytes = extras.getByteArray(EXTRA_HIST_BYTES);
         }
+    }
+
+    /**
+     * Sets the timeout of an IsoDep transceive transaction in milliseconds.
+     * If the transaction has not completed before the timeout,
+     * any ongoing {@link BasicTagTechnology#transceive} operation will be
+     * aborted and the connection to the tag is lost. This setting is applied
+     * only to the {@link Tag} object linked to this technology and will be
+     * reset when {@link IsoDep#close} is called.
+     * The default transaction timeout is 5 seconds.
+     */
+    public void setTimeout(int timeout) {
+        try {
+            mTagService.setIsoDepTimeout(timeout);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            mTagService.resetIsoDepTimeout();
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+        }
+        super.close();
     }
 
     /**
