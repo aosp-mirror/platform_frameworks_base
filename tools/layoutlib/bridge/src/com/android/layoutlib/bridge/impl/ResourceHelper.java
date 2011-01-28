@@ -298,7 +298,7 @@ public final class ResourceHelper {
      */
     public static boolean stringToFloat(String s, TypedValue outValue) {
         // remove the space before and after
-        s.trim();
+        s = s.trim();
         int len = s.length();
 
         if (len <= 0) {

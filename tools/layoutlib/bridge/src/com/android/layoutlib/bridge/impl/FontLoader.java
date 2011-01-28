@@ -163,7 +163,7 @@ public final class FontLoader {
             mTtfToFontMap.put(ttf, styleMap);
         }
 
-        Font f = styleMap.get(style);
+        Font f = styleMap.get(style[0]);
 
         if (f != null) {
             return f;

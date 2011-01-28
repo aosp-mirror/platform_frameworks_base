@@ -24,6 +24,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
+import com.android.resources.ResourceType;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -39,6 +40,7 @@ import android.view.ViewGroup.LayoutParams;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -587,17 +589,17 @@ public final class BridgeTypedArray extends TypedArray {
         // then the xml attribute value was "resolved" which leads us to a ResourceValue with a
         // valid getType() and getName() returning a resource name.
         // (and getValue() returning null!). We need to handle this!
-        if (resValue.getType() != null && resValue.getType().startsWith("@+") == false) {
+        if (resValue.getResourceType() != null && resValue.getType().startsWith("@+") == false) {
             // if this is a framework id
             if (mPlatformFile || resValue.isFramework()) {
                 // look for idName in the android R classes
                 return mContext.getFrameworkResourceValue(
-                        resValue.getType(), resValue.getName(), defValue);
+                        resValue.getResourceType(), resValue.getName(), defValue);
             }
 
             // look for idName in the project R class.
             return mContext.getProjectResourceValue(
-                    resValue.getType(), resValue.getName(), defValue);
+                    resValue.getResourceType(), resValue.getName(), defValue);
         }
 
         // else, try to get the value, and resolve it somehow.
@@ -634,21 +636,22 @@ public final class BridgeTypedArray extends TypedArray {
             // if this is a framework id
             if (mPlatformFile || value.startsWith("@android") || value.startsWith("@+android")) {
                 // look for idName in the android R classes
-                return mContext.getFrameworkResourceValue(RenderResources.RES_ID, idName, defValue);
+                return mContext.getFrameworkResourceValue(ResourceType.ID, idName, defValue);
             }
 
             // look for idName in the project R class.
-            return mContext.getProjectResourceValue(RenderResources.RES_ID, idName, defValue);
+            return mContext.getProjectResourceValue(ResourceType.ID, idName, defValue);
         }
 
         // not a direct id valid reference? resolve it
         Integer idValue = null;
 
         if (resValue.isFramework()) {
-            idValue = Bridge.getResourceValue(resValue.getType(), resValue.getName());
+            idValue = Bridge.getResourceValue(resValue.getResourceType(),
+                    resValue.getName());
         } else {
             idValue = mContext.getProjectCallback().getResourceValue(
-                    resValue.getType(), resValue.getName());
+                    resValue.getResourceType(), resValue.getName());
         }
 
         if (idValue != null) {
@@ -796,6 +799,6 @@ public final class BridgeTypedArray extends TypedArray {
 
     @Override
     public String toString() {
-        return mResourceData.toString();
+        return Arrays.toString(mResourceData);
     }
  }
