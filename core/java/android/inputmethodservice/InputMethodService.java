@@ -219,7 +219,34 @@ import java.io.PrintWriter;
 public class InputMethodService extends AbstractInputMethodService {
     static final String TAG = "InputMethodService";
     static final boolean DEBUG = false;
-    
+
+    /**
+     * The back button will close the input window.
+     */
+    public static final int BACK_DISPOSITION_DEFAULT = 0;  // based on window
+
+    /**
+     * This input method will not consume the back key.
+     */
+    public static final int BACK_DISPOSITION_WILL_NOT_DISMISS = 1; // back
+
+    /**
+     * This input method will consume the back key.
+     */
+    public static final int BACK_DISPOSITION_WILL_DISMISS = 2; // down
+
+    /**
+     * @hide
+     * The IME is active.  It may or may not be visible.
+     */
+    public static final int IME_ACTIVE = 0x1;
+
+    /**
+     * @hide
+     * The IME is visible.
+     */
+    public static final int IME_VISIBLE = 0x2;
+
     InputMethodManager mImm;
     
     int mTheme = 0;
@@ -271,6 +298,7 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mIsInputViewShown;
     
     int mStatusIcon;
+    int mBackDisposition;
 
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
@@ -394,9 +422,9 @@ public class InputMethodService extends AbstractInputMethodService {
                 showWindow(true);
             }
             // If user uses hard keyboard, IME button should always be shown.
-            if (!onEvaluateInputViewShown()) {
-                mImm.setIMEButtonVisible(mToken, true);
-            }
+            boolean showing = onEvaluateInputViewShown();
+            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
+                    mBackDisposition);
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_SHOWN
@@ -704,9 +732,9 @@ public class InputMethodService extends AbstractInputMethodService {
                 hideWindow();
             }
             // If user uses hard keyboard, IME button should always be shown.
-            if (!onEvaluateInputViewShown()) {
-                mImm.setIMEButtonVisible(mToken, true);
-            }
+            boolean showing = onEvaluateInputViewShown();
+            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
+                    mBackDisposition);
         }
     }
 
@@ -736,6 +764,14 @@ public class InputMethodService extends AbstractInputMethodService {
         return mWindow;
     }
     
+    public void setBackDisposition(int disposition) {
+        mBackDisposition = disposition;
+    }
+
+    public int getBackDisposition() {
+        return mBackDisposition;
+    }
+
     /**
      * Return the maximum width, in pixels, available the input method.
      * Input methods are positioned at the bottom of the screen and, unless
@@ -1378,7 +1414,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
         if (!wasVisible) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
-            mImm.setIMEButtonVisible(mToken, true);
+            mImm.setImeWindowStatus(mToken, IME_ACTIVE, mBackDisposition);
             onWindowShown();
             mWindow.show();
         }
@@ -1394,7 +1430,7 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         mInputViewStarted = false;
         mCandidatesViewStarted = false;
-        mImm.setIMEButtonVisible(mToken, false);
+        mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
         if (mWindowVisible) {
             mWindow.hide();
             mWindowVisible = false;

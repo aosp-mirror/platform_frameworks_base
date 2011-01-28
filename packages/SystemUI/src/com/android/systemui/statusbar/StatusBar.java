@@ -67,7 +67,7 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
         mCommandQueue = new CommandQueue(this, iconList);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        int[] switches = new int[4];
+        int[] switches = new int[5];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         try {
             mBarService.registerStatusBar(mCommandQueue, iconList, notificationKeys, notifications,
@@ -80,7 +80,7 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
         setLightsOn(switches[1] != 0);
         setMenuKeyVisible(switches[2] != 0);
         // StatusBarManagerService has a back up of IME token and it's restored here.
-        setIMEButtonVisible(binders.get(0), switches[3] != 0);
+        setImeWindowStatus(binders.get(0), switches[3], switches[4]);
 
         // Set up the initial icon state
         int N = iconList.size();
