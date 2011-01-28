@@ -546,10 +546,14 @@ public class StackView extends AdapterViewAnimator {
 
     private void onLayout() {
         if (!mFirstLayoutHappened) {
-            mSlideAmount = Math.round(SLIDE_UP_RATIO * getMeasuredHeight());
-            mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO * mSlideAmount);
             mFirstLayoutHappened = true;
             updateChildTransforms();
+        }
+
+        final int newSlideAmount = Math.round(SLIDE_UP_RATIO * getMeasuredHeight());
+        if (mSlideAmount != newSlideAmount) {
+            mSlideAmount = newSlideAmount;
+            mSwipeThreshold = Math.round(SWIPE_THRESHOLD_RATIO * newSlideAmount);
         }
 
         if (Float.compare(mPerspectiveShiftY, mNewPerspectiveShiftY) != 0 ||
