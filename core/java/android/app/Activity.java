@@ -4268,7 +4268,7 @@ public class Activity extends ContextThemeWrapper
         
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
-        mWindow.getLayoutInflater().setFactory2(this);
+        mWindow.getLayoutInflater().setPrivateFactory(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
             mWindow.setSoftInputMode(info.softInputMode);
         }
