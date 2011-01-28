@@ -193,6 +193,11 @@ public final class UsbDevice implements Parcelable {
 
     /**
      * Performs a control transaction on endpoint zero for this device.
+     * The direction of the transfer is determined by the request type.
+     * If requestType & {@link UsbConstants#USB_ENDPOINT_DIR_MASK} is
+     * {@link UsbConstants#USB_DIR_OUT}, then the transfer is a write,
+     * and if it is {@link UsbConstants#USB_DIR_IN}, then the transfer
+     * is a read.
      *
      * @param requestType request type for this transaction
      * @param request request ID for this transaction
@@ -201,12 +206,28 @@ public final class UsbDevice implements Parcelable {
      * @param buffer buffer for data portion of transaction,
      * or null if no data needs to be sent or received
      * @param length the length of the data to send or receive
+     * @param timeout in milliseconds
      * @return length of data transferred (or zero) for success,
      * or negative value for failure
      */
-    public int sendControlRequest(int requestType, int request, int value,
-            int index, byte[] buffer, int length) {
-        return native_control_request(requestType, request, value, index, buffer, length);
+    public int controlTransfer(int requestType, int request, int value,
+            int index, byte[] buffer, int length, int timeout) {
+        return native_control_request(requestType, request, value, index, buffer, length, timeout);
+    }
+
+    /**
+     * Performs a bulk transaction on the given endpoint.
+     * The direction of the transfer is determined by the direction of the endpoint
+     *
+     * @param endpoint the endpoint for this transaction
+     * @param buffer buffer for data to send or receive,
+     * @param length the length of the data to send or receive
+     * @param timeout in milliseconds
+     * @return length of data transferred (or zero) for success,
+     * or negative value for failure
+     */
+    public int bulkTransfer(UsbEndpoint endpoint, byte[] buffer, int length, int timeout) {
+        return native_bulk_request(endpoint.getAddress(), buffer, length, timeout);
     }
 
     /**
@@ -305,7 +326,8 @@ public final class UsbDevice implements Parcelable {
     private native boolean native_claim_interface(int interfaceID, boolean force);
     private native boolean native_release_interface(int interfaceID);
     private native int native_control_request(int requestType, int request, int value,
-            int index, byte[] buffer, int length);
+            int index, byte[] buffer, int length, int timeout);
+    private native int native_bulk_request(int endpoint, byte[] buffer, int length, int timeout);
     private native UsbRequest native_request_wait();
     private native String native_get_serial();
 
