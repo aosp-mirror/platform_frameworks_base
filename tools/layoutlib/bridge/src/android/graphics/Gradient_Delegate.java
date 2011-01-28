@@ -95,7 +95,7 @@ public abstract class Gradient_Delegate extends Shader_Delegate {
          * Pre-computes the colors for the gradient. This must be called once before any call
          * to {@link #getGradientColor(float)}
          */
-        protected synchronized void precomputeGradientColors() {
+        protected void precomputeGradientColors() {
             if (mGradient == null) {
                 // actually create an array with an extra size, so that we can really go
                 // from 0 to SIZE (100%), or currentPos in the loop below will never equal 1.0

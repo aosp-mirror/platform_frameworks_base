@@ -22,6 +22,7 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
+import com.android.resources.ResourceType;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -103,9 +104,14 @@ public final class BridgeResources extends Resources {
         String[] resourceInfo = Bridge.resolveResourceValue(id);
 
         if (resourceInfo != null) {
+            ResourceType resType = ResourceType.getEnum(resourceInfo[1]);
+            if (resType == null) {
+                return null;
+            }
+
             platformResFlag_out[0] = true;
             return mContext.getRenderResources().getFrameworkResource(
-                    resourceInfo[1], resourceInfo[0]);
+                    resType, resourceInfo[0]);
         }
 
         // didn't find a match in the framework? look in the project.
@@ -113,9 +119,14 @@ public final class BridgeResources extends Resources {
             resourceInfo = mProjectCallback.resolveResourceValue(id);
 
             if (resourceInfo != null) {
+                ResourceType resType = ResourceType.getEnum(resourceInfo[1]);
+                if (resType == null) {
+                    return null;
+                }
+
                 platformResFlag_out[0] = false;
                 return mContext.getRenderResources().getProjectResource(
-                        resourceInfo[1], resourceInfo[0]);
+                        resType, resourceInfo[0]);
             }
         }
 
