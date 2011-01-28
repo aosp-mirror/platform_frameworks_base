@@ -42,7 +42,11 @@ public:
 
         RunScript_t mRoot;
         VoidFunc_t mInit;
+
+        uint32_t * mObjectSlotList;
+        uint32_t mObjectSlotCount;
     };
+
 
     Program_t mProgram;
 
