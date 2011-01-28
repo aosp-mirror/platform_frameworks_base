@@ -12,20 +12,25 @@ parent.link=index.html
     <li>Provides action items from the Options Menu and modes of navigating around the
 application</li>
     <li>Supports custom views, including an embedded search box</li>
-    <li>Requires API Level HONEYCOMB</li>
+    <li>Requires API Level 11</li>
   </ul>
 
   <h2>In this document</h2>
   <ol>
-    <li><a href="#Adding">Adding the Action Bar</a></li>
+    <li><a href="#Adding">Adding the Action Bar</a>
+      <ol>
+        <li><a href="#Removing">Removing the Action Bar</a></li>
+      </ol>
+    </li>
     <li><a href="#ActionItems">Adding Action Items</a>
       <ol>
-        <li><a href="#Home">Using the application icon as an action item</a></li>
+        <li><a href="#Home">Using the app icon as an action item</a></li>
       </ol>
     </li>
     <li><a href="#ActionView">Adding an Action View</a></li>
     <li><a href="#Tabs">Adding Tabs</a></li>
     <li><a href="#Dropdown">Adding Drop-down Navigation</a></li>
+    <li><a href="#Style">Styling the Action Bar</a></li>
   </ol>
 
   <h2>Key classes</h2>
@@ -42,96 +47,129 @@ application</li>
 </div>
 
 <p>The Action Bar is a widget for activities that replaces the traditional title bar at
-the top of an activity. By default, the Action Bar includes the application logo on the left side,
-followed by the activity title. The Action Bar offers several useful features for
-applications&mdash;especially those targeted to tablet devices. The Action Bar features include
-the ability to:</p>
+the top of the screen. By default, the Action Bar includes the application logo on the left side,
+followed by the activity title, and any available items from the Options Menu on the right side. The
+Action Bar offers several useful features, including the ability to:</p>
 
 <ul>
   <li>Display items from the <a
-href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">Options Menu</a> as "action
-items"&mdash;providing instant access to key user actions. (Menu items not appearing as action
-items are placed in the Overflow Menu, revealed by a drop-down in the Action Bar.)</li>
+href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">Options Menu</a> directly in the Action
+Bar, as "action
+items"&mdash;providing instant access to key user actions.
+    <p>Menu items that do not appear as action items are placed in the overflow menu, revealed
+by a drop-down list in the Action Bar.</p></li>
   <li>Provide tabs for navigating between <a
 href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>.</li>
-  <li>Provide drop-down navigation items.</li>
-  <li>Provide interactive "action views" in place of action items.</li>
-  <li>Use the application logo as a "return home" or "up" navigation action.</li>
+  <li>Provide a drop-down list for navigation.</li>
+  <li>Provide interactive "action views" in place of action items (such as a search box).</li>
 </ul>
 
 <img src="{@docRoot}images/ui/actionbar.png" height="36" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> A screenshot of the Action Bar in the NotePad
-sample application, containing action items to save and delete the note.</p>
+
+<p class="img-caption"><strong>Figure 1.</strong> A screenshot of the Action Bar in the Email
+application, containing action items to compose new email and refresh the inbox.</p>
 
 
 <h2 id="Adding">Adding the Action Bar</h2>
 
-<p>To add the Action Bar to your activities, simply target your application for HONEYCOMB or later,
-using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk&gt;}</a> element. That is, by setting either the {@code android:minSdkVersion} or
-{@code android:targetSdkVersion} to HONEYCOMB or later, each activity in your application will
-include the Action Bar when running on devices with HONEYCOMB or later. For example:</p>
+<p>The Action Bar is included by default in all activities that target Android 3.0 or greater. More
+specifically, all activities that use the new "holographic" theme include the Action Bar, and any
+application that targets Android 3.0 automatically receives this theme. An application is considered
+to "target" Android 3.0 when it has set either the {@code android:minSdkVersion} or {@code
+android:targetSdkVersion} attribute in the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element to
+{@code "11"} or greater. For example:</p>
 
 <pre>
 &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.example.helloworld"
       android:versionCode="1"
       android:versionName="1.0"&gt;
-    <b>&lt;uses-sdk android:minSdkVersion="Froyo" /&gt;</b>
+    &lt;uses-sdk android:minSdkVersion="4"
+              <b>android:targetSdkVersion="11"</b> /&gt;
     &lt;application ... &gt;
         ...
     &lt;/application&gt;
 &lt;/manifest&gt;
 </pre>
 
-<p>This also enables the "Holographic" theme for all your activities, which is the new default
-application theme for HONEYCOMB and later.</p>
+<p>In this example, the application requires a minimum version of API
+Level 4 (Android 1.6), but it also targets API Level 11 (Android 3.0). This way, when
+the application is installed on a device running Android 3.0 or greater, the system applies the
+holographic theme to each activity, and thus, each activity includes the Action Bar.</p>
 
-<p class="note"><strong>Note:</strong> In order for the Holographic theme to be applied based on
-the target platform version, the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
-element must appear <em>before</em> the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
-element.</p>
+<p>However, if you want to use Action Bar APIs, such as to add tabs or modify Action Bar styles,
+you need to set the {@code android:minSdkVersion} to {@code "11"}, so you can access the
+{@link android.app.ActionBar} class.</p>
 
-<h3>Hide the Action Bar</h3>
 
-<p>If you want to hide the Action Bar for a particular activity, set the activity theme to
-{@code android:style/Theme.NoTitleBar}. For example:</p>
+<h3 id="Removing">Removing the Action Bar</h3>
+
+<p>If you want to remove the Action Bar for a particular activity, set the activity theme to
+{@link android.R.style#Theme_Holo_NoActionBar Theme.Holo.NoActionBar}. For example:</p>
 
 <pre>
-&lt;activity android:theme="@android:style/Theme.NoTitleBar"&gt;
+&lt;activity android:theme="&#64;android:style/Theme.Holo.NoActionBar"&gt;
 </pre>
+
+<p class="note"><strong>Tip:</strong> If you have a custom activity theme in which you'd like to
+remove the Action Bar, set the {@link android.R.styleable#Theme_windowActionBar
+android:windowActionBar} style property {@code false}. See <a href="#Style">Styling the Action
+Bar</a> for more about Action Bar styles.</p>
+
+<p>You can also hide the Action Bar at runtime by calling {@link android.app.ActionBar#hide},
+then show it again by calling {@link android.app.ActionBar#show}. For example:</p>
+
+<pre>
+ActionBar actionBar = getActionBar();
+actionBar.hide();
+</pre>
+
+<p>When the Action Bar hides, the system adjusts your activity content to fill all the
+available screen space.</p>
+
+<p class="note"><strong>Note:</strong> If you remove the Action Bar using a theme, then the
+window will not allow the Action Bar at all, so you cannot add it at runtime&mdash;calling
+{@link android.app.Activity#getActionBar getActionBar()} will return null.</p>
 
 
 <h2 id="ActionItems">Adding Action Items</h2>
 
-<p>For each action item you want to add to the Action Bar, you must add a menu item to the
-activity's <a href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">Options Menu</a> and declare
-that the item be shown as an action.</p>
+<p>An action item is simply a menu item from the <a
+href="{@docRoot}guide/topics/ui/menus.html#OptionsMenu">Options Menu</a> which you declare should
+appear directly in the Action Bar. An action item can include an icon and/or text. If a menu
+item does not appear as an action item, then the system places it in the overflow menu, which
+the user can open with the menu icon on the right side of the Action Bar.</p>
 
 <div class="figure" style="width:359px">
   <img src="{@docRoot}images/ui/actionbar-item-withtext.png" height="57" alt="" />
   <p class="img-caption"><strong>Figure 2.</strong> A screenshot from an Action Bar with two
-action items.</p>
+action items and the overflow menu.</p>
 </div>
 
+<p>When the activity first starts, the system populates the Action Bar and overflow menu by calling
+{@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()} for your activity. As
+discussed in the guide to <a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a>, it's in
+this callback method that you define the Options Menu for the activity.</p>
+
 <p>You can specify a menu item to appear as an action item&mdash;if there is room
-for it&mdash;from the <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu
+for it&mdash;from your <a href="{@docRoot}guide/topics/resources/menu-resource.html">menu
 resource</a> by declaring {@code
-android:showAsAction="ifRoom"} for the {@code &lt;item&gt;} element. This way, the item will display
-in the Action Bar for quick access only if there is room available for it&mdash;if there's not
-enough room, the item is placed the Overflow Menu (revealed by the menu icon on the right side
-of the Action Bar). From your application code, you can specify the item to appear as an action item
-by calling {@link android.view.MenuItem#setShowAsAction setShowAsAction()} on the {@link
+android:showAsAction="ifRoom"} for the {@code &lt;item&gt;} element. This way, the menu item appears
+in the Action Bar for quick access only if there is room available for it. If there's not
+enough room, the item is placed the overflow menu (revealed by the menu icon on the right side
+of the Action Bar).</p>
+
+<p>You can also declare a menu item to appear as an action item from your application code, by
+calling {@link android.view.MenuItem#setShowAsAction setShowAsAction()} on the {@link
 android.view.MenuItem} and passing {@link android.view.MenuItem#SHOW_AS_ACTION_IF_ROOM}.</p>
 
-<p>If your item supplies both a title and an icon, then the action item shows only
-the icon by defult. If you want to include the text with the action item, add the <em>with text</em>
-flag&mdash;in XML, add {@code withText} to the {@code android:showAsAction} attribute or, in
+<p>If your menu item supplies both a title and an icon, then the action item shows only
+the icon by defult. If you want to include the text with the action item, add the "with
+text" flag: in XML, add {@code withText} to the {@code android:showAsAction} attribute or, in
 your application code, use the {@link android.view.MenuItem#SHOW_AS_ACTION_WITH_TEXT} flag when
-calling {@link android.view.MenuItem#setShowAsAction setShowAsAction()}. Figure 2 shows a screenshot
-of an Action Bar with two action items that include text.</p>
+calling {@link android.view.MenuItem#setShowAsAction setShowAsAction()}. Figure 2 shows an Action
+Bar that has two action items with text and the icon for the overflow menu.</p>
 
 <p>Here's an example of how you can declare a menu item as an action item in a <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> file:</p>
@@ -149,32 +187,54 @@ href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> fil
 item appears as an action item, it includes the title text along with the icon.</p>
 
 <p>A menu item placed in the Action Bar triggers the same callback methods as other items in the
-Options Menu. When the user selects an item in the Action Bar, your activity receives a call to
+Options Menu. When the user selects an action item, your activity receives a call to
 {@link android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()}, passing the
-item ID. (If you added the item from a fragment, then the respective {@link
-android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} method is called
-for that fragment.)</p>
+item ID.</p>
 
-<p class="note"><strong>Note:</strong> Menu items that appear in the Overflow Menu (not as action
-items) also show an icon, so it's best if you provide an icon for every menu item.</p>
+<p class="note"><strong>Note:</strong> If you added the menu item from a fragment, then the
+respective {@link
+android.app.Fragment#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} method is called
+for that fragment. However the activity gets a chance to handle it first, so the system calls {@link
+android.app.Activity#onOptionsItemSelected(MenuItem) onOptionsItemSelected()} on the activity
+before calling the fragment.</p>
 
 <p>You can also declare an item to <em>always</em> appear as an action item,  but you should avoid
-doing so. Most of the time, there will be enough room for several action items and they will appear
-in the order you declare them. If you set items to always appear as action
-items  (instead of <em>if room</em>), then they are added without discrimination and there is a risk
-that they will collide with other elements in the Action Bar, such as tabs or custom views.</p>
+doing so, because it can create a cluttered UI if there are too many action items and they might
+collide with other elements in the Action Bar.</p>
 
 <p>For more information about menus, see the <a
 href="{@docRoot}guide/topics/ui/menus.html#options-menu">Creating Menus</a> developer guide.</p>
 
 
-<h3 id="Home">Using the application icon as an action item</h3>
+<h3 id="Home">Using the app icon as an action item</h3>
 
-<p>By default, the application icon appears in the Action Bar on the left side, but does nothing
-when tapped. To use the application icon as an action item when tapped, you simply need to add a
-condition to your {@link android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} method
-that performs an action when the {@link android.view.MenuItem} ID is {@code android.R.id.home}.
-This ID is delivered every time the user taps the application icon.</p>
+<p>By default, your application icon appears in the Action Bar on the left side. It also responds 
+to user interaction (when the user taps it, it visually responds the same way action
+items do) and it's your responsibility to do something when the user taps it.</p>
+
+<img src="{@docRoot}images/ui/actionbar.png" height="36" alt="" />
+<p class="img-caption"><strong>Figure 3.</strong> Email's Action Bar, with the
+application icon on the left.</p>
+
+<p>The normal behavior should be for your application to return to the "home" activity or the
+initial state (such as when the activity hasn't changed, but fragments have changed) when the user
+taps the icon. If the user is already at home or the initial state, then you don't need to do
+anything.</p>
+
+<p>When the user taps the icon, the system calls your activity's {@link
+android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} method with the  {@code
+android.R.id.home} ID. So, you need to add a condition to your {@link
+android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} method to listen for {@code
+android.R.id.home} and perform the appropriate action, such as start the home activity or pop recent
+fragment transactions off the stack.</p>
+
+<p>If you respond to the application icon by returning to the home activity, you should include
+the {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP} flag in the {@link
+android.content.Intent}. With this flag, if the activity you're starting already exists in the
+current task, then all activities on top of it are destroyed and it is brought to the front.
+You should favor this approach, because going "home" is an action that's equivalent to "going
+back" and you should usually not create a new instance of the home activity. Otherwise, you
+might end up with a long stack of activities in the current task.</p>
 
 <p>For example, here's an implementation of {@link android.app.Activity#onOptionsItemSelected
 onOptionsItemSelected()} that returns to the application's "home" activity:</p>
@@ -186,97 +246,126 @@ public boolean onOptionsItemSelected(MenuItem item) {
         case android.R.id.home:
             // app icon in Action Bar clicked; go home
             Intent intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-            break;
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
     }
-    return super.onOptionsItemSelected(item);
 }
 </pre>
 
+
+
+
+<h4>Using the app icon to navigate "up"</h4>
+
 <div class="figure" style="width:144px">
   <img src="{@docRoot}images/ui/actionbar-logo.png" height="140" alt="" />
-  <p class="img-caption"><strong>Figure 3.</strong> The standard icon for the Email application
-(top) and the "up navigation" icon (bottom).</p>
+  <p class="img-caption"><strong>Figure 4.</strong> The standard icon for the Email application
+(top) and the "up" icon (bottom).</p>
 </div>
 
-<p>You can also use the application icon to provide "up" navigation. The way you handle the event
-when a user taps the icon is the same, but if the user experience for the event is to <em>navigate
-up to the parent activity</em>, then you should indicate this behavior by setting the
-Action Bar to "show home as up." You can do so by calling {@link
-android.app.ActionBar#setDisplayOptions setDisplayOptions()} on your activity's {@link
-android.app.ActionBar}, and passing the {@link
-android.app.ActionBar#DISPLAY_HOME_AS_UP} display option.</p>
+<p>You can also use the application icon to provide "up" navigation for the user. This is especially
+useful when your application is composed of activities that generally appear in a certain order and
+you want to facilitate the ability for the user to navigate up the activity hierarchy
+(regardless of how they entered the current activity).</p>
 
-<p>To get the {@link android.app.ActionBar}, call {@link android.app.Activity#getActionBar} from
-your {@link android.app.Activity} during {@link android.app.Activity#onCreate onCreate()} (but be
-sure you do so <em>after</em> you've called {@link android.app.Activity#setContentView
-setContentView()}).</p>
+<p>The way you respond to this event is the same as when navigating home (as
+discussed above, except you start a different activity, based on the current activity). All you
+need to do to indicate to the user that the behavior is different is set the Action Bar to "show
+home as up." You can do so by calling {@link android.app.ActionBar#setDisplayHomeAsUpEnabled
+setDisplayHomeAsUpEnabled(true)} on your activity's {@link android.app.ActionBar}. When you do, the
+system draws your application icon with an arrow indicating the up behavior, as shown in figure
+4.</p>
 
-<p>For example, here's how you can change the Action Bar display mode to show the application
-icon as an "up" action:</p>
+<p>For example, here's how you can show the application icon as an "up" action:</p>
 
 <pre>
 &#64;Override
 protected void onStart() {
-  super.onStart();
-  ActionBar actionBar = this.getActionBar();
-  actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
+    super.onStart();
+    ActionBar actionBar = this.getActionBar();
+    actionBar.setDisplayHomeAsUpEnabled(true);
 }
 </pre>
 
-<p class="caution"><strong>Caution:</strong> If your activity does not have an Action Bar (if you
-did not set the theme of your activity or application to the holographic or Action Bar theme), then
-{@link android.app.Activity#getActionBar} returns null.</p>
+<p>Then, your activity should respond to the user tapping the icon, from the {@link
+android.app.Activity#onOptionsItemSelected
+onOptionsItemSelected()}, by listening for the {@code android.R.id.home} ID (as shown above). In
+this case, when navigating up, it's even more important that you use the {@link
+android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP} flag in the {@link android.content.Intent}, so that
+you don't create a new instance of the parent activity if one already exists.</p>
+
 
 
 
 <h2 id="ActionView">Adding an Action View</h2>
 
-<div class="figure" style="width:281px">
+<div class="figure" style="width:429px">
   <img src="{@docRoot}images/ui/actionbar-actionview.png" alt="" />
-  <p class="img-caption"><strong>Figure 4.</strong> An action view with a search widget.</p>
+  <p class="img-caption"><strong>Figure 5.</strong> An action view with a {@link
+android.widget.SearchView} widget.</p>
 </div>
 
-<p>An action view is a customized view you can specify for an item in your Options Menu, to
-display in the Action Bar when the item is included as an action item. For example, you can
-include a menu item for "Search", which appears and behaves as a normal menu item in the Overflow
-Menu, but, when set as an action item, it provides an action view that is a {@link
-android.widget.SearchView}, so the user can initiate a search directly from the Action Bar.
-Figure 4 shows an example of this, in which a menu item for search provides an action view
-using the {@link android.widget.SearchView} widget.</p>
+<p>An action view is a widget that appears in the Action Bar as a substitute for an action 
+item. For example, if you have an item in the Options Menu for "Search", you can add an action view
+for the item that provides a {@link android.widget.SearchView} widget in the Action Bar whenever
+the item is enabled as an action item.</p>
+
+<p>When adding an action view for a menu item, it's important that you still allow the item to
+behave as a normal menu item when it does not appear in the Action Bar. For example, a menu item to
+perform a search should, by default, bring up the <a
+href="{@docRoot}guide/topics/search/search-dialog.html">search dialog</a>, but if the item is
+placed in the Action Bar, the action view appears with a {@link android.widget.SearchView}
+widget. Figure 4 shows an example of  the {@link android.widget.SearchView} widget in an action
+view.</p>
 
 <p>The best way to declare an action view for an item is in your <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>, using the {@code
-android:actionLayout} or {@code android:actionViewClass} attribute.</p>
+android:actionLayout} or {@code android:actionViewClass} attribute:</p>
 
 <ul>
   <li>The value for {@code android:actionLayout} must be a resource pointer to a layout file.
 For example:
 <pre>
-&lt;item android:id="@+id/menu_search"
-    android:title="Search"
-    android:icon="@drawable/ic_menu_search"
-    android:showAsAction="ifRoom"
-    <b>android:actionLayout="@layout/searchview"</b> /&gt;
-</pre></li>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:id="@+id/menu_search"
+        android:title="Search"
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="ifRoom"
+        <b>android:actionLayout="@layout/searchview"</b> /&gt;
+&lt;/menu>
+</pre>
+</li>
+
   <li>The value for {@code android:actionViewClass} must be a fully-qualified class name for
 the {@link android.view.View} you want to use. For example:
 <pre>
-&lt;item android:id="@+id/menu_search"
-    android:title="Search"
-    android:icon="@drawable/ic_menu_search"
-    android:showAsAction="ifRoom"
-    <b>android:actionViewClass="android.widget.SearchView"</b> /&gt;
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;item android:id="@+id/menu_search"
+        android:title="Search"
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="ifRoom"
+        <b>android:actionViewClass="android.widget.SearchView"</b> /&gt;
+&lt;/menu>
 </pre></li>
 </ul>
 
-<p>Now, when the menu item is displayed as an action item, it's action view appears instead of
-the item's traditional icon and/or text. Yet, if for some reason the item does not appear in the
-Action Bar, then it behaves like a normal menu item in the Overflow Menu and you must respond
-accordingly when the user taps it, from the {@link android.app.Activity#onOptionsItemSelected
-onOptionsItemSelected()} callback.</p>
+<p class="note">You must include {@code android:showAsAction="ifRoom"} in order for the item to
+appear as an action view when room is available. If necessary, however, you can force the item to 
+always appear as an action view by setting {@code android:showAsAction} to {@code "always"}.</p>
 
-<p>When the activity first starts, the system populates the Action Bar and Overflow Menu by calling
+<p>Now, when the menu item is displayed as an action item, it's action view appears instead of
+the icon and/or title text. However, if there's not enough room in the Action Bar, the item appears
+in the overflow menu as a normal menu item and you must respond to it from the {@link
+android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} callback method. (For a
+guide to providing search functionality, see the <a
+href="{@docRoot}gudie/topics/search/index.html">Search</a> documentation.)</p>
+
+<p>When the activity first starts, the system populates the Action Bar and overflow menu by calling
 {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()}.
 After you've inflated your menu in this method, you can acquire elements in an action view
 (perhaps in order to attach listeners) by calling {@link android.view.Menu#findItem
@@ -300,18 +389,20 @@ href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
 
 
 
+
 <h2 id="Tabs">Adding Tabs</h2>
+
+
+<div class="figure" style="width:504px">
+  <img src="{@docRoot}images/ui/actionbar-tabs.png" alt="" />
+  <p class="img-caption"><strong>Figure 6.</strong> Screenshot of tabs in the
+Action Bar, from the <a
+href="{@docRoot}resources/samples/Honeycomb-Gallery/index.html">Honeycomb Gallery</a> sample
+application.</p>
+</div>
 
 <p>The Action Bar can display tabs that allow the user navigate between different fragments in the
 activity. Each tab can include a title and/or an icon.</p>
-
-<!--
-<div class="figure" style="width:300px">
-  <img src="{@docRoot}images/ui/actionbar-tabs.png" alt="" />
-  <p class="img-caption"><strong>Figure 5.</strong> Screenshot of tabs in the
-Action Bar.</p>
-</div>
--->
 
 <p>To begin, your layout must include a {@link android.view.View} in which each {@link
 android.app.Fragment} associated with a tab is displayed. Be sure the view has an ID that you
@@ -381,7 +472,7 @@ setTabListener()}.
   </li>
   <li>Add each {@link android.app.ActionBar.Tab} to the Action Bar by calling {@link
 android.app.ActionBar#addTab addTab()} on the {@link android.app.ActionBar} and passing the
-{@link android.app.ActionBar.Tab}.<>
+{@link android.app.ActionBar.Tab}.</li>
 </ol>
 <p>For example, the following code combines steps 2 - 5 to create two tabs and add them to
 the Action Bar:</p>
@@ -395,7 +486,7 @@ protected void onCreate(Bundle savedInstanceState) {
     final ActionBar actionBar = getActionBar();
     actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     // remove the activity title to make space for tabs
-    actionBar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+    actionBar.setDisplayShowTitleEnabled(false);
 
     // instantiate fragment for the tab
     Fragment artistsFragment = new ArtistsFragment();
@@ -418,9 +509,10 @@ android.app.FragmentTransaction}. Likewise, when a tab is deselected (because an
 selected), you should remove that fragment from the layout, using {@link
 android.app.FragmentTransaction#remove remove()}.</p>
 
-<p class="note"><strong>Note:</strong> You <strong>do not</strong> need
-to call {@link android.app.FragmentTransaction#commit} for these transactions. You also
-<strong>cannot</strong> add these fragment transactions to the back stack.</p>
+<p class="caution"><strong>Caution:</strong> You <strong>must not</strong> call {@link
+android.app.FragmentTransaction#commit} for these transactions&mdash;the system calls it for you
+and it may throw an exception if you call it yourself. You also <strong>cannot</strong> add these
+fragment transactions to the back stack.</p>
 
 <p>If your activity is stopped, you should retain the currently selected tab with the saved state so
 that when the user returns to your application, you can open the tab. When it's time to save the
@@ -433,6 +525,7 @@ the state of each fragment as necessary, so when the user switches fragments wit
 then returns to a previous fragment, it appears the way they left. For information about saving
 the state of your fragment, see the <a
 href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+
 
 
 
@@ -450,23 +543,25 @@ Action Bar.</p>
 </div>
 -->
 
-<p>Here's a quick list of what you must do to enable drop-down navigation:</p>
+<p>Here's a quick list of steps to enable drop-down navigation:</p>
 
 <ol>
   <li>Create a {@link android.widget.SpinnerAdapter} that provides the
-list of selectable items for the list and the layout to use when drawing each item in the list.</li>
+list of selectable items for the drop-down and the layout to use when drawing each item in the
+list.</li>
   <li>Implement {@link android.app.ActionBar.OnNavigationListener} to define the behavior when the
 user selects an item from the list.</li>
-  <li>Turn on navigation mode for the Action Bar with {@link
+  <li>Enable navigation mode for the Action Bar with {@link
 android.app.ActionBar#setNavigationMode setNavigationMode()}. For example:
 <pre>
 ActionBar actionBar = getActionBar();
 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 </pre>
-  <p>You should perform this during your activity's {@link android.app.Activity#onCreate
+  <p class="note"><strong>Note:</strong> You should perform this during your activity's {@link
+android.app.Activity#onCreate
 onCreate()} method.</p>
   </li>
-  <li>Following that, set the callback for your drop-down list with {@link
+  <li>Then, set the callback for the drop-down list with {@link
 android.app.ActionBar#setListNavigationCallbacks setListNavigationCallbacks()}. For example:
 <pre>
 actionBar.setListNavigationCallbacks(mSpinnerAdapter, mNavigationCallback);
@@ -476,37 +571,45 @@ android.app.ActionBar.OnNavigationListener}. More about these next.</p>
 </li>
 </ol>
 
-<p>That's the basic setup. The {@link android.widget.SpinnerAdapter} and {@link
-android.app.ActionBar.OnNavigationListener} is where most of the work is done. There are many ways
-you can implement these to define the functionality for your drop-down navigation. Implementing
-various types of {@link android.widget.SpinnerAdapter} is beyond the scope of this
-document&mdash;you should refer to the class refrence for more information about implementing it or
-extending an existing implementation. However, below is a simple example for a {@link
-android.widget.SpinnerAdapter} and {@link android.app.ActionBar.OnNavigationListener} to get you
-started.</p>
+<p>That's the basic setup. However, implementing the {@link android.widget.SpinnerAdapter} and
+{@link android.app.ActionBar.OnNavigationListener} is where most of the work is done. There are many
+ways you can implement these to define the functionality for your drop-down navigation and
+implementing various types of {@link android.widget.SpinnerAdapter} is beyond the scope of this
+document (you should refer to the {@link android.widget.SpinnerAdapter} class reference for more
+information). However, below is a simple example for a {@link android.widget.SpinnerAdapter} and
+{@link android.app.ActionBar.OnNavigationListener} to get you started (click the title to
+reveal the sample).</p>
 
 
-<h3 id="Spinner">Example: simple SpinnerAdapter</h3>
 
-<p>{@link android.widget.SpinnerAdapter} is an interface that you can implement to provide
-content for the list and is where your implementation for the drop-down list can be heavily
-customized. Android includes some useful implementations that you can extend, such as {@link
-android.widget.ArrayAdapter} and {@link
+<div class="toggle-content closed">
+
+  <h3 id="Spinner"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
+    Example SpinnerAdapter and OnNavigationListener
+  </a></h3>
+
+  <div class="toggle-content-toggleme">
+
+<p>{@link android.widget.SpinnerAdapter} is an adapter that provides data for a spinner widget,
+such as the drop-down list in the Action Bar. {@link android.widget.SpinnerAdapter} is an interface
+that you can implement, but Android includes some useful implementations that you can extend, such
+as {@link android.widget.ArrayAdapter} and {@link
 android.widget.SimpleCursorAdapter}. For example, here's an easy way to create a {@link
-android.widget.SpinnerAdapter} with {@link android.widget.ArrayAdapter}, using a string array
-from resources:</p>
+android.widget.SpinnerAdapter} by using {@link android.widget.ArrayAdapter} implementation, which
+uses a string array as the data source:</p>
 
 <pre>
 SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.action_list,
           android.R.layout.simple_spinner_dropdown_item);
 </pre>
 
-<p>This is now ready to be given to {@link
-android.app.ActionBar#setListNavigationCallbacks setListNavigationCallbacks()}, in step 4 from
-above.</p>
+<p>The {@link android.widget.ArrayAdapter#createFromResource createFromResource()} method takes
+three parameters: the application {@link android.content.Context}, the resource ID for the string
+array, and the layout to use for each list item.</p>
 
 <p>A <a href="{@docRoot}guide/topics/resources/string-resource.html#StringArray">string array</a>
-defined as a resource looks like this:</p>
+defined in a resource looks like this:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -519,21 +622,26 @@ defined as a resource looks like this:</p>
 &lt;/pre&gt;
 </pre>
 
+<p>The {@link android.widget.ArrayAdapter} returned by {@link
+android.widget.ArrayAdapter#createFromResource createFromResource()} is complete and ready for you
+to pass it to {@link android.app.ActionBar#setListNavigationCallbacks setListNavigationCallbacks()}
+(in step 4 from above). Before you do, though, you need to create the {@link
+android.app.ActionBar.OnNavigationListener OnNavigationListener}.</p>
 
-<h3 id="OnNavigationListener">Example: simple OnNavigationListener</h3>
 
 <p>Your implementation of {@link android.app.ActionBar.OnNavigationListener} is where you handle
 fragment changes or other modifications to your activity when the user selects an item from the
-drop-down list. There's only one callback method to implement: {@link
+drop-down list. There's only one callback method to implement in the listener: {@link
 android.app.ActionBar.OnNavigationListener#onNavigationItemSelected onNavigationItemSelected()}.</p>
 
 <p>The {@link
 android.app.ActionBar.OnNavigationListener#onNavigationItemSelected onNavigationItemSelected()}
-method receives the position of the item in the list and an item ID provided by the {@link
+method receives the position of the item in the list and a unique item ID provided by the {@link
 android.widget.SpinnerAdapter}.</p>
 
 <p>Here's an example that instantiates an anonymous implementation of {@link
-android.app.ActionBar.OnNavigationListener}, which inserts a {@link android.app.Fragment} into the
+android.app.ActionBar.OnNavigationListener OnNavigationListener}, which inserts a {@link
+android.app.Fragment} into the
 layout container identified by {@code R.id.fragment_container}:</p>
 
 <pre>
@@ -556,13 +664,18 @@ mOnNavigationListener = new OnNavigationListener() {
 };
 </pre>
 
-<p>This instance of {@link android.app.ActionBar.OnNavigationListener} can be given to {@link
-android.app.ActionBar#setListNavigationCallbacks setListNavigationCallbacks()}, in step 4 from
-above.</p>
+<p>This instance of {@link android.app.ActionBar.OnNavigationListener OnNavigationListener} is
+complete and you can now call {@link android.app.ActionBar#setListNavigationCallbacks
+setListNavigationCallbacks()} (in step 4), passing the {@link android.widget.ArrayAdapter} and this
+{@link android.app.ActionBar.OnNavigationListener OnNavigationListener}.</p>
 
-<p>In this example, the fragment added is given a tag that can uniquely identify the fragment.
-For this example, the {@code ListContentFragment} class used uses this tag as
-the text for a {@link android.widget.TextView} in the fragment's layout. Here's how it's done:</p>
+<p>In this example, when the user selects an item from the drop-down list, a fragment is added to
+the layout (replacing the current fragment in the {@code R.id.fragment_container} view). The
+fragment added is given a tag that uniquely identifies it, which is the same string used to
+identify the fragment in the drop-down list.</p>
+
+<p>Here's a look at the {@code ListContentFragment} class that defines each fragment in this
+example:</p>
 
 <pre>
 public class ListContentFragment extends Fragment {
@@ -587,6 +700,150 @@ public class ListContentFragment extends Fragment {
     }
 }
 </pre>
+
+  </div><!-- end toggle-content-toggleme -->
+
+</div><!-- end toggle-content -->
+
+
+
+
+
+<h2 id="Style">Styling the Action Bar</h2>
+
+<p>The Action Bar is the heading for your application and a primary interaction point for users,
+so you might want to modify some of its design in order to make it feel more integrated with your
+application design. There are several ways you can do this if you wish.</p>
+
+<p>For simple modifications to the {@link android.app.ActionBar}, you can use the following
+methods:</p>
+
+<dl>
+  <dt>{@link android.app.ActionBar#setBackgroundDrawable setBackgroundDrawable()}</dt>
+  <dd>Sets a drawable to use as the Action Bar's background. The drawable should be a <a
+href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">Nine-patch</a> image, a <a
+href="{@docRoot}guide/topics/resources/drawable-resource.html#Shape">shape</a>, or a <a
+href="{@docRoot}guide/topics/resources/more-resources.html#Color">solid color</a>, so the system can
+resize the drawable based on the size of the Action Bar (you should <em>not</em> use a fixed-size
+bitmap image).</dd>
+
+  <dt>{@link android.app.ActionBar#setDisplayUseLogoEnabled setDisplayUseLogoEnabled()}</dt>
+  <dd>Enables the use of an alternative image (a "logo") in the Action Bar, instead of the default
+application icon. A logo is often a wider, more detailed image that represents the application.
+When this is enabled, the system uses the logo image defined for the application (or the
+individual activity) in the manifest file, with the <a
+href="{@docRoot}guide/topics/manifest/application-element.html#logo">{@code android:logo}</a>
+attribute. The logo will be resized as necessary to fit the height of the Action Bar. (Best
+practice is to design the logo at the same size as your application icon.)</dd>
+</dl>
+
+
+<p>For more complex customizations, you can use Android's <a
+href="{@docRoot}guide/topics/ui/themes.html">style and theme</a> framework to restyle your Action
+Bar in several ways.</p>
+
+<p>The Action Bar has two standard themes, "dark" and "light". The dark theme is applied with
+the default holographic theme, as specified by the {@link android.R.style#Theme_Holo Theme.Holo}
+theme. If you want a white background with dark text, instead, you can apply the {@link
+android.R.style#Theme_Holo_Light Theme.Holo.Light} theme to the activity in the manifest file. For
+example:</p>
+
+<pre>
+&lt;activity android:name=".ExampleActivity"
+          android:theme="@android:style/Theme.Holo.Light" />
+</pre>
+
+<p>For more control, you can override either the {@link android.R.style#Theme_Holo
+Theme.Holo} or {@link android.R.style#Theme_Holo_Light Theme.Holo.Light} theme and apply custom
+styles to certain aspects of the Action Bar. Some of the Action Bar properties you can customize
+include the following:</p>
+
+<dl>
+  <dt>{@link android.R.styleable#Theme_actionBarTabStyle
+      android:actionBarTabStyle}</dt>
+  <dd>Style for tabs in the Action Bar.</dd>
+
+  <dt>{@link android.R.styleable#Theme_actionBarTabBarStyle
+      android:actionBarTabBarStyle}</dt>
+  <dd>Style for the bar that appears below tabs in the Action Bar.</dd>
+
+  <dt>{@link android.R.styleable#Theme_actionBarTabTextStyle
+      android:actionBarTabTextStyle}</dt>
+  <dd>Style for the text in the tabs.</dd>
+
+  <dt>{@link android.R.styleable#Theme_actionDropDownStyle
+      android:actionDropDownStyle}</dt>
+  <dd>Style for the drop-down list used for the overflow menu and drop-down navigation.</dd>
+
+  <dt>{@link android.R.styleable#Theme_actionButtonStyle
+      android:actionButtonStyle}</dt>
+  <dd>Style for the background image used for buttons in the Action Bar.</dd>
+
+</dl>
+
+<p>For example, here's a resource file that defines a custom theme for the Action Bar, based on
+the standard {@link android.R.style#Theme_Holo Theme.Holo} theme:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;resources>
+    &lt;!-- the theme applied to the application or activity -->
+    &lt;style name="CustomActionBar" parent="android:style/Theme.Holo.Light">
+        &lt;item name="android:actionBarTabTextStyle">@style/customActionBarTabTextStyle&lt;/item>
+        &lt;item name="android:actionBarTabStyle">@style/customActionBarTabStyle&lt;/item>
+        &lt;item name="android:actionBarTabBarStyle">@style/customActionBarTabBarStyle&lt;/item>
+    &lt;/style>
+
+    &lt;!-- style for the tab text -->
+    &lt;style name="customActionBarTabTextStyle">
+        &lt;item name="android:textColor">#2966c2&lt;/item>
+        &lt;item name="android:textSize">20sp&lt;/item>
+        &lt;item name="android:typeface">sans&lt;/item>
+    &lt;/style>
+
+    &lt;!-- style for the tabs -->
+    &lt;style name="customActionBarTabStyle">
+        &lt;item name="android:background">@drawable/actionbar_tab_bg&lt;/item>
+        &lt;item name="android:paddingLeft">20dp&lt;/item>
+        &lt;item name="android:paddingRight">20dp&lt;/item>
+    &lt;/style>
+
+    &lt;!-- style for the tab bar -->
+    &lt;style name="customActionBarTabBarStyle">
+        &lt;item name="android:background">@drawable/actionbar_tab_bar&lt;/item>
+    &lt;/style>
+&lt;/resources>
+</pre>
+
+<p class="note"><strong>Note:</strong> In order for the tab background image to change,
+depending on the current tab state (selected, pressed, unselected), the drawable resource used
+must be a <a href="{@docRoot}guide/topics/resources/drawable-resource.html#StateList">state
+list drawable</a>. Also be certain that your theme declares a parent theme, from which it
+inherits all styles not explicitly declared in your theme.</p>
+
+<p>You can apply your custom theme to the entire application or to individual activities in your
+manifest file, like this:</p>
+
+<pre>
+&lt;application android:theme="&#64;style/CustomActionBar"
+             ... />
+</pre>
+
+<p>Additionally, if you want to create a custom theme for your activity that removes the Action
+Bar completely, use the following style attributes:</p>
+
+<dl>
+  <dt>{@link android.R.styleable#Theme_windowActionBar
+      android:windowActionBar}</dt>
+  <dd>Set this style property {@code false} to remove the Action Bar.</dd>
+
+  <dt>{@link android.R.styleable#Theme_windowNoTitle
+      android:windowNoTitle}</dt>
+  <dd>Set this style property {@code true} to also remove the traditional title bar.</dd>
+</dl>
+  
+<p>For more information about using themes in your application, read <a
+href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
 
 
 
