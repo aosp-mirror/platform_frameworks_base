@@ -1142,7 +1142,7 @@ public class TextUtils {
 
                     // XXX this is probably ok, but need to look at it more
                     tempMt.setPara(format, 0, format.length(), request);
-                    float moreWid = mt.addStyleRun(p, mt.mLen, null);
+                    float moreWid = tempMt.addStyleRun(p, tempMt.mLen, null);
 
                     if (w + moreWid <= avail) {
                         ok = i + 1;
