@@ -235,7 +235,7 @@ public class OverlayFrame extends Overlay {
          mOFWidth = width;
      }
     /**
-     * Delete the overlay file
+     * Delete the overlay files
      */
     void invalidate() {
         if (mFilename != null) {
@@ -243,6 +243,10 @@ public class OverlayFrame extends Overlay {
             mFilename = null;
             mBitmap.recycle();
             mBitmap = null;
+        }
+        if (mBitmapFileName != null) {
+            new File(mBitmapFileName).delete();
+            mBitmapFileName = null;
         }
     }
 }
