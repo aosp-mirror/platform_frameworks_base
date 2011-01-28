@@ -979,7 +979,7 @@
     <string name="submit" msgid="1602335572089911941">"Prześlij"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Tryb samochodowy włączony"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Wybierz, aby zakończyć tryb samochodowy."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Jest aktywne powiązanie lub punkt dostępu"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Aktywny tethering lub punkt dostępu"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Dotknij, aby skonfigurować"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Wróć"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Dalej"</string>
@@ -1031,5 +1031,9 @@
     <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
     <skip />
     <!-- no translation found for choose_account_label (4191313562041125787) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
+    <skip />
+    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
 </resources>

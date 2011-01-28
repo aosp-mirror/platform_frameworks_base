@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"機内モード"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"機内モードON"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"機内モードOFF"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100超"</string>
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Androidシステム"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"料金の発生するサービス"</string>
@@ -469,8 +468,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SDカードのコンテンツを修正/削除する"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"USBストレージへの書き込みをアプリケーションに許可します。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"SDカードへの書き込みをアプリケーションに許可します。"</string>
-    <!-- outdated translation 5585262071354704256 -->     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"内部メディアストレージのコンテンツの変更/削除"</string>
-    <!-- outdated translation 2372999661142345443 -->     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"内部メディアストレージのコンテンツの変更をアプリケーションに許可します。"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"USBストレージの内容の変更/削除"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"内部メディアストレージの内容の変更をアプリケーションに許可します。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"キャッシュファイルシステムにアクセス"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"キャッシュファイルシステムへの読み書きをアプリケーションに許可します。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"インターネット通話の発着信"</string>
@@ -1032,5 +1031,9 @@
     <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
     <skip />
     <!-- no translation found for choose_account_label (4191313562041125787) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
+    <skip />
+    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
 </resources>
