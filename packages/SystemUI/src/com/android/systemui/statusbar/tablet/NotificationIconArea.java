@@ -23,13 +23,14 @@ import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ImageView;
 import android.view.MotionEvent;
 
 import com.android.systemui.R;
 
 
-public class NotificationIconArea extends LinearLayout {
+public class NotificationIconArea extends RelativeLayout {
     private static final String TAG = "NotificationIconArea";
 
     IconLayout mIconLayout;
