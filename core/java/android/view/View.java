@@ -10934,7 +10934,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      */
     public void dispatchSystemUiVisibilityChanged(int visibility) {
-        mSystemUiVisibility = visibility;
         if (mOnSystemUiVisibilityChangeListener != null) {
             mOnSystemUiVisibilityChangeListener.onSystemUiVisibilityChange(
                     visibility & ~PUBLIC_STATUS_BAR_VISIBILITY_MASK);
