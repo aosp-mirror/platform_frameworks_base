@@ -393,7 +393,10 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_IDEN = 11;
     /** Current network is EVDO revision B*/
     public static final int NETWORK_TYPE_EVDO_B = 12;
-
+    /** @hide */
+    public static final int NETWORK_TYPE_LTE = 13;
+    /** @hide */
+    public static final int NETWORK_TYPE_EHRPD = 14;
 
     /**
      * Returns a constant indicating the radio technology (network type)
