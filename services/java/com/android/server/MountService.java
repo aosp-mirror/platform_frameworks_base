@@ -46,6 +46,7 @@ import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageResultCode;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -1632,8 +1633,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     }
 
     public int decryptStorage(String password) {
-        if (password == null) {
-            throw new IllegalArgumentException("password cannot be null");
+        if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
         }
 
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
@@ -1647,13 +1648,13 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
 
         try {
             ArrayList<String> rsp = mConnector.doCommand("cryptfs checkpw " + password);
-            String []tok = rsp.get(0).split(" ");
+            String[] tokens = rsp.get(0).split(" ");
 
-            if (tok == null || tok.length != 2) {
+            if (tokens == null || tokens.length != 2) {
                 return -1;
             }
 
-            int code = Integer.parseInt(tok[1]);
+            int code = Integer.parseInt(tokens[1]);
 
             if (code == 0) {
                 // Decrypt was successful. Post a delayed message before restarting in order
@@ -1662,7 +1663,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                     public void run() {
                         mConnector.doCommand(String.format("cryptfs restart"));
                     }
-                }, 2000); // 2 seconds
+                }, 1000); // 1 second
             }
 
             return code;
@@ -1673,8 +1674,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     }
 
     public int encryptStorage(String password) {
-        if (password == null) {
-            throw new IllegalArgumentException("password cannot be null");
+        if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
         }
 
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
@@ -1694,6 +1695,36 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
 
         return 0;
+    }
+
+    public int changeEncryptionPassword(String password) {
+        if (TextUtils.isEmpty(password)) {
+            throw new IllegalArgumentException("password cannot be empty");
+        }
+
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
+            "no permission to access the crypt keeper");
+
+        waitForReady();
+
+        if (DEBUG_EVENTS) {
+            Slog.i(TAG, "changing encryption password...");
+        }
+
+        try {
+            ArrayList<String> response = mConnector.doCommand("cryptfs changepw " + password);
+
+            String[] tokens = response.get(0).split(" ");
+
+            if (tokens == null || tokens.length != 2) {
+                return -1;
+            }
+
+            return Integer.parseInt(tokens[1]);
+        } catch (NativeDaemonConnectorException e) {
+            // Encryption failed
+            return e.getCode();
+        }
     }
 
     private void addObbStateLocked(ObbState obbState) throws RemoteException {
