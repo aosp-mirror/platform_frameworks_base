@@ -50,6 +50,6 @@ public class ChooserActivity extends ResolverActivity {
                 initialIntents[i] = (Intent)pa[i];
             }
         }
-        super.onCreate(savedInstanceState, target, title, initialIntents, false);
+        super.onCreate(savedInstanceState, target, title, initialIntents, null, false);
     }
 }
