@@ -697,7 +697,7 @@ public class NetworkController extends BroadcastReceiver {
         } else {
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             combinedSignalIconId = mDataSignalIconId;
-            dataTypeIconId = mDataTypeIconId;
+            dataTypeIconId = 0;
         }
 
         if (false) {
