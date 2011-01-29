@@ -402,7 +402,6 @@ public class TelephonyManager {
     /** Current network is eHRPD */
     public static final int NETWORK_TYPE_EHRPD = 14;
 
-
     /**
      * Returns a constant indicating the radio technology (network type)
      * currently in use on the device for data transmission.
