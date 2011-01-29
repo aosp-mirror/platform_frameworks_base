@@ -21,24 +21,43 @@ import android.os.RemoteException;
 
 import java.io.IOException;
 
+//TOOD: Ultralight C 3-DES authentication, one-way counter
+
 /**
  * Technology class representing MIFARE Ultralight and MIFARE Ultralight C tags.
  *
  * <p>Support for this technology type is optional. If the NFC stack doesn't support this technology
  * MIFARE Ultralight class tags will still be scanned, but will only show the NfcA technology.
  *
- * <p>MIFARE Ultralight class tags have a series of 4 bytes pages that can be individually written
- * and read in chunks of 4 for a total read of 16 bytes.
+ * <p>MIFARE Ultralight compatible tags have 4 byte pages. The read command
+ * returns 4 pages (16 bytes) at a time, for speed. The write command operates
+ * on a single page (4 bytes) to minimize EEPROM write cycles.
+ *
+ * <p>The original MIFARE Ultralight consists of a 64 byte EEPROM. The first
+ * 4 pages are for the OTP area, manufacturer data, and locking bits. They are
+ * readable and some bits are writable. The final 12 pages are the user
+ * read/write area. For more information see the NXP data sheet MF0ICU1.
+ *
+ * <p>The MIFARE Ultralight C consists of a 192 byte EEPROM. The first 4 pages
+ * are for OTP, manufacturer data, and locking bits. The next 36 pages are the
+ * user read/write area. The next 4 pages are additional locking bits, counters
+ * and authentication configuration and are readable. The final 4 pages are for
+ * the authentication key and are not readable. For more information see the
+ * NXP data sheet MF0ICU2.
  */
 public final class MifareUltralight extends BasicTagTechnology {
+    /** A MIFARE Ultralight compatible tag of unknown type */
+    public static final int TYPE_UNKNOWN = -1;
     /** A MIFARE Ultralight tag */
     public static final int TYPE_ULTRALIGHT = 1;
     /** A MIFARE Ultralight C tag */
     public static final int TYPE_ULTRALIGHT_C = 2;
-    /** The tag type is unknown */
-    public static final int TYPE_UNKNOWN = 10;
+
+    /** Size of a MIFARE Ultralight page in bytes */
+    public static final int PAGE_SIZE = 4;
 
     private static final int NXP_MANUFACTURER_ID = 0x04;
+    private static final int MAX_PAGE_COUNT = 256;
 
     private int mType;
 
@@ -68,48 +87,62 @@ public final class MifareUltralight extends BasicTagTechnology {
 
         if (a.getSak() == 0x00 && tag.getId()[0] == NXP_MANUFACTURER_ID) {
             // could be UL or UL-C
+            //TODO: stack should use NXP AN1303 procedure to make a best guess
+            // attempt at classifying Ultralight vs Ultralight C.
             mType = TYPE_ULTRALIGHT;
         }
     }
 
-    /** Returns the type of the tag */
+    /** Returns the type of the tag.
+     * <p>It is very hard to always accurately classify a MIFARE Ultralight
+     * compatible tag as Ultralight original or Ultralight C. So consider
+     * {@link #getType} a hint. */
     public int getType() {
         return mType;
     }
 
     // Methods that require connect()
     /**
-     * Reads a single 16 byte block from the given page offset.
+     * Read 4 pages (16 bytes).
+     * <p>The MIFARE Ultralight protocol always reads 4 pages at a time.
+     * <p>If the read spans past the last readable block, then the tag will
+     * return pages that have been wrapped back to the first blocks. MIFARE
+     * Ultralight tags have readable blocks 0x00 through 0x0F. So a read to
+     * block offset 0x0E would return blocks 0x0E, 0x0F, 0x00, 0x01. MIFARE
+     * Ultralight C tags have readable blocks 0x00 through 0x2B. So a read to
+     * block 0x2A would return blocks 0x2A, 0x2B, 0x00, 0x01.
+     * <p>This requires that the tag be connected.
      *
-     * <p>This requires a that the tag be connected.
-     *
+     * @return 4 pages (16 bytes)
      * @throws IOException
      */
-    public byte[] readBlock(int page) throws IOException {
+    public byte[] readPages(int pageOffset) throws IOException {
+        validatePageOffset(pageOffset);
         checkConnected();
 
-        byte[] blockread_cmd = { 0x30, (byte) page}; // phHal_eMifareRead
-        return transceive(blockread_cmd, false);
+        byte[] cmd = { 0x30, (byte) pageOffset};
+        return transceive(cmd, false);
     }
 
     /**
-     * Writes a 4 byte page to the tag.
-     *
-     * <p>This requires a that the tag be connected.
+     * Write 1 page (4 bytes).
+     * <p>The MIFARE Ultralight protocol always writes 1 page at a time.
+     * <p>This requires that the tag be connected.
      *
      * @param page The offset of the page to write
      * @param data The data to write
      * @throws IOException
      */
-    public void writePage(int page, byte[] data) throws IOException {
+    public void writePage(int pageOffset, byte[] data) throws IOException {
+        validatePageOffset(pageOffset);
         checkConnected();
 
-        byte[] pagewrite_cmd = new byte[data.length + 2];
-        pagewrite_cmd[0] = (byte) 0xA2;
-        pagewrite_cmd[1] = (byte) page;
-        System.arraycopy(data, 0, pagewrite_cmd, 2, data.length);
+        byte[] cmd = new byte[data.length + 2];
+        cmd[0] = (byte) 0xA2;
+        cmd[1] = (byte) pageOffset;
+        System.arraycopy(data, 0, cmd, 2, data.length);
 
-        transceive(pagewrite_cmd, false);
+        transceive(cmd, false);
     }
 
     /**
@@ -126,5 +159,16 @@ public final class MifareUltralight extends BasicTagTechnology {
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
+    }
+
+    private static void validatePageOffset(int pageOffset) {
+        // Do not be too strict on upper bounds checking, since some cards
+        // may have more addressable memory than they report.
+        // Note that issuing a command to an out-of-bounds block is safe - the
+        // tag will wrap the read to an addressable area. This validation is a
+        // helper to guard against obvious programming mistakes.
+        if (pageOffset < 0 || pageOffset >= MAX_PAGE_COUNT) {
+            throw new IndexOutOfBoundsException("page out of bounds: " + pageOffset);
+        }
     }
 }
