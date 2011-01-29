@@ -166,6 +166,7 @@ public class LayoutTransition {
      * we cache all of the current animations in this map for possible cancellation on
      * another layout event.
      */
+    private final HashMap<View, Animator> pendingAnimations = new HashMap<View, Animator>();
     private final HashMap<View, Animator> currentChangingAnimations = new HashMap<View, Animator>();
     private final HashMap<View, Animator> currentVisibilityAnimations =
             new HashMap<View, Animator>();
@@ -542,6 +543,8 @@ public class LayoutTransition {
 
         // reset the inter-animation delay, in case we use it later
         staggerDelay = 0;
+        final long duration = (changeReason == APPEARING) ?
+                mChangingAppearingDuration : mChangingDisappearingDuration;
 
         final ViewTreeObserver observer = parent.getViewTreeObserver(); // used for later cleanup
         if (!observer.isAlive()) {
@@ -556,12 +559,6 @@ public class LayoutTransition {
             // only animate the views not being added or removed
             if (child != newView) {
 
-                // If there's an animation running on this view already, cancel it
-                Animator currentAnimation = currentChangingAnimations.get(child);
-                if (currentAnimation != null) {
-                    currentAnimation.cancel();
-                    currentChangingAnimations.remove(child);
-                }
 
                 // Make a copy of the appropriate animation
                 final Animator anim = baseAnimator.clone();
@@ -573,6 +570,30 @@ public class LayoutTransition {
                 // its target object
                 anim.setupStartValues();
 
+                // If there's an animation running on this view already, cancel it
+                Animator currentAnimation = pendingAnimations.get(child);
+                if (currentAnimation != null) {
+                    currentAnimation.cancel();
+                    pendingAnimations.remove(child);
+                }
+                // Cache the animation in case we need to cancel it later
+                pendingAnimations.put(child, anim);
+
+                // For the animations which don't get started, we have to have a means of
+                // removing them from the cache, lest we leak them and their target objects.
+                // We run an animator for the default duration+100 (an arbitrary time, but one
+                // which should far surpass the delay between setting them up here and
+                // handling layout events which start them.
+                ValueAnimator pendingAnimRemover = ValueAnimator.ofFloat(0f, 1f).
+                        setDuration(duration+100);
+                pendingAnimRemover.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        pendingAnimations.remove(child);
+                    }
+                });
+                pendingAnimRemover.start();
+
                 // Add a listener to track layout changes on this view. If we don't get a callback,
                 // then there's nothing to animate.
                 final View.OnLayoutChangeListener listener = new View.OnLayoutChangeListener() {
@@ -583,19 +604,25 @@ public class LayoutTransition {
                         anim.setupEndValues();
 
                         long startDelay;
-                        long duration;
                         if (changeReason == APPEARING) {
                             startDelay = mChangingAppearingDelay + staggerDelay;
                             staggerDelay += mChangingAppearingStagger;
-                            duration = mChangingAppearingDuration;
                         } else {
                             startDelay = mChangingDisappearingDelay + staggerDelay;
                             staggerDelay += mChangingDisappearingStagger;
-                            duration = mChangingDisappearingDuration;
                         }
                         anim.setStartDelay(startDelay);
                         anim.setDuration(duration);
 
+                        Animator prevAnimation = currentChangingAnimations.get(child);
+                        if (prevAnimation != null) {
+                            prevAnimation.cancel();
+                            currentChangingAnimations.remove(child);
+                        }
+                        Animator pendingAnimation = pendingAnimations.get(child);
+                        if (pendingAnimation != null) {
+                            pendingAnimations.remove(child);
+                        }
                         // Cache the animation in case we need to cancel it later
                         currentChangingAnimations.put(child, anim);
 
