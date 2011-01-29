@@ -23,6 +23,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
+import com.android.util.Pair;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -101,32 +102,22 @@ public final class BridgeResources extends Resources {
 
     private ResourceValue getResourceValue(int id, boolean[] platformResFlag_out) {
         // first get the String related to this id in the framework
-        String[] resourceInfo = Bridge.resolveResourceValue(id);
+        Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
 
         if (resourceInfo != null) {
-            ResourceType resType = ResourceType.getEnum(resourceInfo[1]);
-            if (resType == null) {
-                return null;
-            }
-
             platformResFlag_out[0] = true;
             return mContext.getRenderResources().getFrameworkResource(
-                    resType, resourceInfo[0]);
+                    resourceInfo.getFirst(), resourceInfo.getSecond());
         }
 
         // didn't find a match in the framework? look in the project.
         if (mProjectCallback != null) {
-            resourceInfo = mProjectCallback.resolveResourceValue(id);
+            resourceInfo = mProjectCallback.resolveResourceId(id);
 
             if (resourceInfo != null) {
-                ResourceType resType = ResourceType.getEnum(resourceInfo[1]);
-                if (resType == null) {
-                    return null;
-                }
-
                 platformResFlag_out[0] = false;
                 return mContext.getRenderResources().getProjectResource(
-                        resType, resourceInfo[0]);
+                        resourceInfo.getFirst(), resourceInfo.getSecond());
             }
         }
 
@@ -625,18 +616,18 @@ public final class BridgeResources extends Resources {
      */
     private void throwException(int id) throws NotFoundException {
         // first get the String related to this id in the framework
-        String[] resourceInfo = Bridge.resolveResourceValue(id);
+        Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
 
         // if the name is unknown in the framework, get it from the custom view loader.
         if (resourceInfo == null && mProjectCallback != null) {
-            resourceInfo = mProjectCallback.resolveResourceValue(id);
+            resourceInfo = mProjectCallback.resolveResourceId(id);
         }
 
         String message = null;
         if (resourceInfo != null) {
             message = String.format(
                     "Could not find %1$s resource matching value 0x%2$X (resolved name: %3$s) in current configuration.",
-                    resourceInfo[1], id, resourceInfo[0]);
+                    resourceInfo.getFirst(), id, resourceInfo.getSecond());
         } else {
             message = String.format(
                     "Could not resolve resource value: 0x%1$X.", id);

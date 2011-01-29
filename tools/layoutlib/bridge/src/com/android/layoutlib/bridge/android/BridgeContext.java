@@ -25,6 +25,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
 import com.android.resources.ResourceType;
+import com.android.util.Pair;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -518,14 +519,14 @@ public final class BridgeContext extends Activity {
      */
     private TreeMap<Integer,String> searchAttrs(int[] attrs, boolean[] outFrameworkFlag) {
         // get the name of the array from the framework resources
-        String arrayName = Bridge.resolveResourceValue(attrs);
+        String arrayName = Bridge.resolveResourceId(attrs);
         if (arrayName != null) {
             // if we found it, get the name of each of the int in the array.
             TreeMap<Integer,String> attributes = new TreeMap<Integer, String>();
             for (int i = 0 ; i < attrs.length ; i++) {
-                String[] info = Bridge.resolveResourceValue(attrs[i]);
+                Pair<ResourceType, String> info = Bridge.resolveResourceId(attrs[i]);
                 if (info != null) {
-                    attributes.put(i, info[0]);
+                    attributes.put(i, info.getSecond());
                 } else {
                     // FIXME Not sure what we should be doing here...
                     attributes.put(i, null);
@@ -541,13 +542,13 @@ public final class BridgeContext extends Activity {
 
         // if the name was not found in the framework resources, look in the project
         // resources
-        arrayName = mProjectCallback.resolveResourceValue(attrs);
+        arrayName = mProjectCallback.resolveResourceId(attrs);
         if (arrayName != null) {
             TreeMap<Integer,String> attributes = new TreeMap<Integer, String>();
             for (int i = 0 ; i < attrs.length ; i++) {
-                String[] info = mProjectCallback.resolveResourceValue(attrs[i]);
+                Pair<ResourceType, String> info = mProjectCallback.resolveResourceId(attrs[i]);
                 if (info != null) {
-                    attributes.put(i, info[0]);
+                    attributes.put(i, info.getSecond());
                 } else {
                     // FIXME Not sure what we should be doing here...
                     attributes.put(i, null);
@@ -572,14 +573,14 @@ public final class BridgeContext extends Activity {
      *         if nothing is found.
      */
     public String searchAttr(int attr) {
-        String[] info = Bridge.resolveResourceValue(attr);
+        Pair<ResourceType, String> info = Bridge.resolveResourceId(attr);
         if (info != null) {
-            return info[0];
+            return info.getSecond();
         }
 
-        info = mProjectCallback.resolveResourceValue(attr);
+        info = mProjectCallback.resolveResourceId(attr);
         if (info != null) {
-            return info[0];
+            return info.getSecond();
         }
 
         return null;
@@ -616,7 +617,7 @@ public final class BridgeContext extends Activity {
     }
 
     int getFrameworkResourceValue(ResourceType resType, String resName, int defValue) {
-        Integer value = Bridge.getResourceValue(resType, resName);
+        Integer value = Bridge.getResourceId(resType, resName);
         if (value != null) {
             return value.intValue();
         }
@@ -626,7 +627,7 @@ public final class BridgeContext extends Activity {
 
     int getProjectResourceValue(ResourceType resType, String resName, int defValue) {
         if (mProjectCallback != null) {
-            Integer value = mProjectCallback.getResourceValue(resType, resName);
+            Integer value = mProjectCallback.getResourceId(resType, resName);
             if (value != null) {
                 return value.intValue();
             }

@@ -197,7 +197,8 @@ public final class ResourceHelper {
                 } catch (Exception e) {
                     // this is an error and not warning since the file existence is checked before
                     // attempting to parse it.
-                    Bridge.getLog().error(null, "Failed to parse file " + value, e, null /*data*/);
+                    Bridge.getLog().error(null, "Failed to parse file " + stringValue,
+                            e, null /*data*/);
                 }
             } else {
                 Bridge.getLog().error(LayoutLog.TAG_BROKEN,
