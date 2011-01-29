@@ -8,35 +8,39 @@
 LOCAL_PATH:= frameworks/base/data/sounds
 
 PRODUCT_COPY_FILES += \
-	$(LOCAL_PATH)/Alarm_Buzzer.ogg:system/media/audio/alarms/Alarm_Buzzer.ogg \
-	$(LOCAL_PATH)/Alarm_Beep_01.ogg:system/media/audio/alarms/Alarm_Beep_01.ogg \
-	$(LOCAL_PATH)/Alarm_Beep_02.ogg:system/media/audio/alarms/Alarm_Beep_02.ogg \
-	$(LOCAL_PATH)/Alarm_Classic.ogg:system/media/audio/alarms/Alarm_Classic.ogg \
-	$(LOCAL_PATH)/Alarm_Beep_03.ogg:system/media/audio/alarms/Alarm_Beep_03.ogg \
-	$(LOCAL_PATH)/effects/Effect_Tick.ogg:system/media/audio/ui/Effect_Tick.ogg \
-	$(LOCAL_PATH)/effects/KeypressStandard.ogg:system/media/audio/ui/KeypressStandard.ogg \
-	$(LOCAL_PATH)/effects/KeypressSpacebar.ogg:system/media/audio/ui/KeypressSpacebar.ogg \
-	$(LOCAL_PATH)/effects/KeypressDelete.ogg:system/media/audio/ui/KeypressDelete.ogg \
-	$(LOCAL_PATH)/effects/KeypressReturn.ogg:system/media/audio/ui/KeypressReturn.ogg \
-	$(LOCAL_PATH)/effects/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
-	$(LOCAL_PATH)/effects/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
-	$(LOCAL_PATH)/effects/LowBattery.ogg:system/media/audio/ui/LowBattery.ogg \
-	$(LOCAL_PATH)/effects/Dock.ogg:system/media/audio/ui/Dock.ogg \
-	$(LOCAL_PATH)/effects/Undock.ogg:system/media/audio/ui/Undock.ogg \
-	$(LOCAL_PATH)/effects/Lock.ogg:system/media/audio/ui/Lock.ogg \
-	$(LOCAL_PATH)/effects/Unlock.ogg:system/media/audio/ui/Unlock.ogg \
-	$(LOCAL_PATH)/notifications/aidos.ogg:system/media/audio/notifications/aidos.ogg \
-	$(LOCAL_PATH)/notifications/nomos1.ogg:system/media/audio/notifications/nomos1.ogg \
-	$(LOCAL_PATH)/notifications/hypnos1.ogg:system/media/audio/notifications/hypnos1.ogg \
-	$(LOCAL_PATH)/notifications/thrasos1.ogg:system/media/audio/notifications/thrasos1.ogg \
-	$(LOCAL_PATH)/notifications/nomos2.ogg:system/media/audio/notifications/nomos2.ogg \
-	$(LOCAL_PATH)/notifications/horkos.ogg:system/media/audio/notifications/horkos.ogg \
-	$(LOCAL_PATH)/notifications/kratos1.ogg:system/media/audio/notifications/kratos1.ogg \
-	$(LOCAL_PATH)/notifications/circios.ogg:system/media/audio/notifications/circios.ogg \
-	$(LOCAL_PATH)/notifications/ouranos.ogg:system/media/audio/notifications/ouranos.ogg \
-	$(LOCAL_PATH)/notifications/poros.ogg:system/media/audio/notifications/poros.ogg \
-	$(LOCAL_PATH)/notifications/phantasos.ogg:system/media/audio/notifications/phantasos.ogg \
-	$(LOCAL_PATH)/notifications/kratos2.ogg:system/media/audio/notifications/kratos2.ogg \
+	$(LOCAL_PATH)/alarms/ogg/Analysis.ogg:system/media/audio/alarms/Analysis.ogg \
+	$(LOCAL_PATH)/alarms/ogg/Departure.ogg:system/media/audio/alarms/Departure.ogg \
+	$(LOCAL_PATH)/alarms/ogg/FireDrill.ogg:system/media/audio/alarms/FireDrill.ogg \
+	$(LOCAL_PATH)/alarms/ogg/Timing.ogg:system/media/audio/alarms/Timing.ogg \
+	$(LOCAL_PATH)/effects/ogg/Effect_Tick.ogg:system/media/audio/ui/Effect_Tick.ogg \
+	$(LOCAL_PATH)/effects/ogg/KeypressStandard.ogg:system/media/audio/ui/KeypressStandard.ogg \
+	$(LOCAL_PATH)/effects/ogg/KeypressSpacebar.ogg:system/media/audio/ui/KeypressSpacebar.ogg \
+	$(LOCAL_PATH)/effects/ogg/KeypressDelete.ogg:system/media/audio/ui/KeypressDelete.ogg \
+	$(LOCAL_PATH)/effects/ogg/KeypressReturn.ogg:system/media/audio/ui/KeypressReturn.ogg \
+	$(LOCAL_PATH)/effects/ogg/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
+	$(LOCAL_PATH)/effects/ogg/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
+	$(LOCAL_PATH)/effects/ogg/LowBattery.ogg:system/media/audio/ui/LowBattery.ogg \
+	$(LOCAL_PATH)/effects/ogg/Dock.ogg:system/media/audio/ui/Dock.ogg \
+	$(LOCAL_PATH)/effects/ogg/Undock.ogg:system/media/audio/ui/Undock.ogg \
+	$(LOCAL_PATH)/effects/ogg/Lock.ogg:system/media/audio/ui/Lock.ogg \
+	$(LOCAL_PATH)/effects/ogg/Unlock.ogg:system/media/audio/ui/Unlock.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Antimony.ogg:system/media/audio/notifications/Antimony.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Argon.ogg:system/media/audio/notifications/Argon.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Beryllium.ogg:system/media/audio/notifications/Beryllium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Cobalt.ogg:system/media/audio/notifications/Cobalt.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Fluorine.ogg:system/media/audio/notifications/Fluorine.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Gallium.ogg:system/media/audio/notifications/Gallium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Helium.ogg:system/media/audio/notifications/Helium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Iridium.ogg:system/media/audio/notifications/Iridium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Krypton.ogg:system/media/audio/notifications/Krypton.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Palladium.ogg:system/media/audio/notifications/Palladium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Radon.ogg:system/media/audio/notifications/Radon.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Rubidium.ogg:system/media/audio/notifications/Rubidium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Selenium.ogg:system/media/audio/notifications/Selenium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Strontium.ogg:system/media/audio/notifications/Strontium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Thallium.ogg:system/media/audio/notifications/Thallium.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Xenon.ogg:system/media/audio/notifications/Xenon.ogg \
+	$(LOCAL_PATH)/notifications/ogg/Zirconium.ogg:system/media/audio/notifications/Zirconium.ogg \
 	$(LOCAL_PATH)/ringtones/ANDROMEDA.ogg:system/media/audio/ringtones/ANDROMEDA.ogg \
 	$(LOCAL_PATH)/ringtones/Aquila.ogg:system/media/audio/ringtones/Aquila.ogg \
 	$(LOCAL_PATH)/ringtones/ArgoNavis.ogg:system/media/audio/ringtones/ArgoNavis.ogg \
@@ -61,25 +65,4 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/ringtones/Solarium.ogg:system/media/audio/ringtones/Solarium.ogg \
 	$(LOCAL_PATH)/ringtones/Testudo.ogg:system/media/audio/ringtones/Testudo.ogg \
 	$(LOCAL_PATH)/ringtones/URSAMINOR.ogg:system/media/audio/ringtones/URSAMINOR.ogg \
-	$(LOCAL_PATH)/ringtones/Vespa.ogg:system/media/audio/ringtones/Vespa.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone18.ogg:system/media/audio/ringtones/ringtone18.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone19.ogg:system/media/audio/ringtones/ringtone19.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone20.ogg:system/media/audio/ringtones/ringtone20.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone21.ogg:system/media/audio/ringtones/ringtone21.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone22.ogg:system/media/audio/ringtones/ringtone22.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone23.ogg:system/media/audio/ringtones/ringtone23.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone24.ogg:system/media/audio/ringtones/ringtone24.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone25.ogg:system/media/audio/ringtones/ringtone25.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone26.ogg:system/media/audio/ringtones/ringtone26.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone27.ogg:system/media/audio/ringtones/ringtone27.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone28.ogg:system/media/audio/ringtones/ringtone28.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone29.ogg:system/media/audio/ringtones/ringtone29.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone30.ogg:system/media/audio/ringtones/ringtone30.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone31.ogg:system/media/audio/ringtones/ringtone31.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone32.ogg:system/media/audio/ringtones/ringtone32.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone33.ogg:system/media/audio/ringtones/ringtone33.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone34.ogg:system/media/audio/ringtones/ringtone34.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone35.ogg:system/media/audio/ringtones/ringtone35.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone36.ogg:system/media/audio/ringtones/ringtone36.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone37.ogg:system/media/audio/ringtones/ringtone37.ogg \
-	$(LOCAL_PATH)/ringtones/ringtone38.ogg:system/media/audio/ringtones/ringtone38.ogg
+	$(LOCAL_PATH)/ringtones/Vespa.ogg:system/media/audio/ringtones/Vespa.ogg
