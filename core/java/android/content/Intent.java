@@ -2794,7 +2794,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param action The Intent action, such as ACTION_VIEW.
      */
     public Intent(String action) {
-        mAction = action;
+        setAction(action);
     }
 
     /**
@@ -2814,7 +2814,7 @@ public class Intent implements Parcelable, Cloneable {
      * @param uri The Intent data URI.
      */
     public Intent(String action, Uri uri) {
-        mAction = action;
+        setAction(action);
         mData = uri;
     }
 
@@ -2863,7 +2863,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public Intent(String action, Uri uri,
             Context packageContext, Class<?> cls) {
-        mAction = action;
+        setAction(action);
         mData = uri;
         mComponent = new ComponentName(packageContext, cls);
     }
@@ -2985,7 +2985,7 @@ public class Intent implements Parcelable, Cloneable {
 
                 // action
                 if (uri.startsWith("action=", i)) {
-                    intent.mAction = value;
+                    intent.setAction(value);
                 }
 
                 // categories
@@ -4061,7 +4061,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #getAction
      */
     public Intent setAction(String action) {
-        mAction = action;
+        mAction = action != null ? action.intern() : null;
         return this;
     }
 
@@ -4165,7 +4165,7 @@ public class Intent implements Parcelable, Cloneable {
         if (mCategories == null) {
             mCategories = new HashSet<String>();
         }
-        mCategories.add(category);
+        mCategories.add(category.intern());
         return this;
     }
 
@@ -5678,7 +5678,7 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     public void readFromParcel(Parcel in) {
-        mAction = in.readString();
+        setAction(in.readString());
         mData = Uri.CREATOR.createFromParcel(in);
         mType = in.readString();
         mFlags = in.readInt();
@@ -5694,7 +5694,7 @@ public class Intent implements Parcelable, Cloneable {
             mCategories = new HashSet<String>();
             int i;
             for (i=0; i<N; i++) {
-                mCategories.add(in.readString());
+                mCategories.add(in.readString().intern());
             }
         } else {
             mCategories = null;

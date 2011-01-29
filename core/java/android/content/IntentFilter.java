@@ -461,7 +461,7 @@ public class IntentFilter implements Parcelable {
      * @return True if the action is explicitly mentioned in the filter.
      */
     public final boolean hasAction(String action) {
-        return mActions.contains(action);
+        return action != null && mActions.contains(action);
     }
 
     /**
@@ -470,14 +470,10 @@ public class IntentFilter implements Parcelable {
      *
      * @param action The desired action to look for.
      *
-     * @return True if the action is listed in the filter or the filter does
-     *         not specify any actions.
+     * @return True if the action is listed in the filter.
      */
     public final boolean matchAction(String action) {
-        if (action == null || mActions == null || mActions.size() == 0) {
-            return false;
-        }
-        return mActions.contains(action);
+        return hasAction(action);
     }
 
     /**
@@ -818,9 +814,9 @@ public class IntentFilter implements Parcelable {
         if (mDataPaths == null) {
             return false;
         }
-        Iterator<PatternMatcher> i = mDataPaths.iterator();
-        while (i.hasNext()) {
-            final PatternMatcher pe = i.next();
+        final int numDataPaths = mDataPaths.size();
+        for (int i = 0; i < numDataPaths; i++) {
+            final PatternMatcher pe = mDataPaths.get(i);
             if (pe.match(data)) {
                 return true;
             }
@@ -849,9 +845,9 @@ public class IntentFilter implements Parcelable {
         if (mDataAuthorities == null) {
             return NO_MATCH_DATA;
         }
-        Iterator<AuthorityEntry> i = mDataAuthorities.iterator();
-        while (i.hasNext()) {
-            final AuthorityEntry ae = i.next();
+        final int numDataAuthorities = mDataAuthorities.size();
+        for (int i = 0; i < numDataAuthorities; i++) {
+            final AuthorityEntry ae = mDataAuthorities.get(i);
             int match = ae.match(data);
             if (match >= 0) {
                 return match;
@@ -1098,7 +1094,7 @@ public class IntentFilter implements Parcelable {
      */
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag) {
-        if (action != null && !matchAction(action)) {
+        if (!matchAction(action)) {
             if (Config.LOGV) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;
@@ -1119,11 +1115,11 @@ public class IntentFilter implements Parcelable {
             return dataMatch;
         }
 
-        String categoryMatch = matchCategories(categories);
-        if (categoryMatch != null) {
-            if (Config.LOGV) Log.v(
-                logTag, "No matching category "
-                + categoryMatch + " for " + this);
+        String categoryMismatch = matchCategories(categories);
+        if (categoryMismatch != null) {
+            if (Config.LOGV) {
+                Log.v(logTag, "No matching category " + categoryMismatch + " for " + this);
+            }
             return NO_MATCH_CATEGORY;
         }
 
@@ -1469,9 +1465,9 @@ public class IntentFilter implements Parcelable {
             if (typeLength == slashpos+2 && type.charAt(slashpos+1) == '*') {
                 // Need to look through all types for one that matches
                 // our base...
-                final Iterator<String> it = t.iterator();
-                while (it.hasNext()) {
-                    String v = it.next();
+                final int numTypes = t.size();
+                for (int i = 0; i < numTypes; i++) {
+                    final String v = t.get(i);
                     if (type.regionMatches(0, v, 0, slashpos+1)) {
                         return true;
                     }

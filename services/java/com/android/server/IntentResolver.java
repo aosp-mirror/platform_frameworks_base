@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.net.Uri;
+import android.util.FastImmutableArraySet;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -207,10 +209,11 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         final boolean debug = localLOGV ||
                 ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
+        FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
         final String scheme = intent.getScheme();
         int N = listCut.size();
         for (int i = 0; i < N; ++i) {
-            buildResolveList(intent, debug, defaultOnly,
+            buildResolveList(intent, categories, debug, defaultOnly,
                              resolvedType, scheme, listCut.get(i), resultList);
         }
         sortResults(resultList);
@@ -286,20 +289,21 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
             if (debug) Slog.v(TAG, "Action list: " + firstTypeCut);
         }
 
+        FastImmutableArraySet<String> categories = getFastIntentCategories(intent);
         if (firstTypeCut != null) {
-            buildResolveList(intent, debug, defaultOnly,
+            buildResolveList(intent, categories, debug, defaultOnly,
                     resolvedType, scheme, firstTypeCut, finalList);
         }
         if (secondTypeCut != null) {
-            buildResolveList(intent, debug, defaultOnly,
+            buildResolveList(intent, categories, debug, defaultOnly,
                     resolvedType, scheme, secondTypeCut, finalList);
         }
         if (thirdTypeCut != null) {
-            buildResolveList(intent, debug, defaultOnly,
+            buildResolveList(intent, categories, debug, defaultOnly,
                     resolvedType, scheme, thirdTypeCut, finalList);
         }
         if (schemeCut != null) {
-            buildResolveList(intent, debug, defaultOnly,
+            buildResolveList(intent, categories, debug, defaultOnly,
                     resolvedType, scheme, schemeCut, finalList);
         }
         sortResults(finalList);
@@ -478,9 +482,19 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
         return false;
     }
 
-    private void buildResolveList(Intent intent, boolean debug, boolean defaultOnly,
+    private static FastImmutableArraySet<String> getFastIntentCategories(Intent intent) {
+        final Set<String> categories = intent.getCategories();
+        if (categories == null) {
+            return null;
+        }
+        return new FastImmutableArraySet<String>(categories.toArray(new String[categories.size()]));
+    }
+
+    private void buildResolveList(Intent intent, FastImmutableArraySet<String> categories,
+            boolean debug, boolean defaultOnly,
             String resolvedType, String scheme, List<F> src, List<R> dest) {
-        Set<String> categories = intent.getCategories();
+        final String action = intent.getAction();
+        final Uri data = intent.getData();
 
         final int N = src != null ? src.size() : 0;
         boolean hasNonDefaults = false;
@@ -498,8 +512,7 @@ public class IntentResolver<F extends IntentFilter, R extends Object> {
                 continue;
             }
 
-            match = filter.match(
-                    intent.getAction(), resolvedType, scheme, intent.getData(), categories, TAG);
+            match = filter.match(action, resolvedType, scheme, data, categories, TAG);
             if (match >= 0) {
                 if (debug) Slog.v(TAG, "  Filter matched!  match=0x" +
                         Integer.toHexString(match));
