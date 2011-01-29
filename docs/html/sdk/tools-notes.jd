@@ -103,8 +103,10 @@ Tools will delete the file.</p>
     <li>The LogCat view in DDMS now properly displays UTF-8 characters.</li>
     <li>The SDK Manager is more reliable on Windows. For details on the improvements, see the
     <a href="http://tools.android.com/recent/sdkmanagerfixes">Android Tools Project Site</a>. </li>
-    <li>If you enabled snapshots for an AVD, they are automatically captured. The emulator also now restores to the state when
-     it last closed almost instantly.</li>
+    <li>Early look at the new snapshot feature: To improve startup time for the emulator, you can
+enable snapshots for the system state. The emulator will then restore to the state when it last
+closed almost instantly. <strong>Note:</strong> The snapshot feature is still under active
+development and might not always perform as expected.</li>
     <li>Fixed the missing JAR file error that prevented <code>draw9patch</code> from running.</li>
     <li>Fixed the Windows launch scripts <code>hierarchyviewer</code> and <code>ddms</code> to support
     the new location of <code>adb</code>.</li>
