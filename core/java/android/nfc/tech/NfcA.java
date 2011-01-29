@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
-import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -27,7 +26,7 @@ import java.io.IOException;
  * A low-level connection to a {@link Tag} using the NFC-A technology, also known as
  * ISO1443-3A.
  *
- * <p>You can acquire this kind of connection with {@link NfcAdapter#getTechnology}.
+ * <p>You can acquire this kind of connection with {@link #get}.
  * Use this class to send and receive data with {@link #transceive transceive()}.
  *
  * <p>Applications must implement their own protocol stack on top of
@@ -46,9 +45,25 @@ public final class NfcA extends BasicTagTechnology {
     private short mSak;
     private byte[] mAtqa;
 
+    /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static NfcA get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.NFC_A)) return null;
+        try {
+            return new NfcA(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /** @hide */
-    public NfcA(NfcAdapter adapter, Tag tag, Bundle extras) throws RemoteException {
-        super(adapter, tag, TagTechnology.NFC_A);
+    public NfcA(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.NFC_A);
+        Bundle extras = tag.getTechExtras(TagTechnology.NFC_A);
         mSak = extras.getShort(EXTRA_SAK);
         mAtqa = extras.getByteArray(EXTRA_ATQA);
     }
