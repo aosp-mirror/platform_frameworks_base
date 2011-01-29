@@ -22,6 +22,7 @@ import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.resources.ResourceType;
+import com.android.util.Pair;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -155,16 +156,16 @@ public final class BridgeInflater extends LayoutInflater {
 
             ResourceValue value = null;
 
-            String[] layoutInfo = Bridge.resolveResourceValue(resource);
+            Pair<ResourceType, String> layoutInfo = Bridge.resolveResourceId(resource);
             if (layoutInfo != null) {
                 value = bridgeContext.getRenderResources().getFrameworkResource(
-                        ResourceType.LAYOUT, layoutInfo[0]);
+                        ResourceType.LAYOUT, layoutInfo.getSecond());
             } else {
-                layoutInfo = mProjectCallback.resolveResourceValue(resource);
+                layoutInfo = mProjectCallback.resolveResourceId(resource);
 
                 if (layoutInfo != null) {
                     value = bridgeContext.getRenderResources().getProjectResource(
-                            ResourceType.LAYOUT, layoutInfo[0]);
+                            ResourceType.LAYOUT, layoutInfo.getSecond());
                 }
             }
 

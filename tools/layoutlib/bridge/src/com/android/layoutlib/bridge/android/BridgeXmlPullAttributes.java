@@ -59,7 +59,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         String ns = mParser.getAttributeNamespace(index);
 
         if (BridgeConstants.NS_RESOURCES.equals(ns)) {
-            Integer v = Bridge.getResourceValue(ResourceType.ATTR, name);
+            Integer v = Bridge.getResourceId(ResourceType.ATTR, name);
             if (v != null) {
                 return v.intValue();
             }
@@ -70,8 +70,7 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         // this is not an attribute in the android namespace, we query the customviewloader, if
         // the namespaces match.
         if (mContext.getProjectCallback().getNamespace().equals(ns)) {
-            Integer v = mContext.getProjectCallback().getResourceValue(ResourceType.ATTR,
-                    name);
+            Integer v = mContext.getProjectCallback().getResourceId(ResourceType.ATTR, name);
             if (v != null) {
                 return v.intValue();
             }
@@ -111,9 +110,9 @@ public class BridgeXmlPullAttributes extends XmlPullAttributes {
         if (resource != null) {
             Integer id = null;
             if (mPlatformFile || resource.isFramework()) {
-                id = Bridge.getResourceValue(resource.getResourceType(), resource.getName());
+                id = Bridge.getResourceId(resource.getResourceType(), resource.getName());
             } else {
-                id = mContext.getProjectCallback().getResourceValue(
+                id = mContext.getProjectCallback().getResourceId(
                         resource.getResourceType(), resource.getName());
             }
 
