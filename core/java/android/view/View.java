@@ -2183,8 +2183,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     boolean mCanAcceptDrop;
 
     /**
-     * Flag indicating that a drag can cross window boundaries
-     * @hide
+     * Flag indicating that a drag can cross window boundaries.  When
+     * {@link #startDrag(ClipData, DragShadowBuilder, Object, int)} is called
+     * with this flag set, all visible applications will be able to participate
+     * in the drag operation and receive the dragged content.
      */
     public static final int DRAG_FLAG_GLOBAL = 1;
 
