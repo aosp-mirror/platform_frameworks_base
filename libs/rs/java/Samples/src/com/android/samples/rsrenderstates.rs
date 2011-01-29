@@ -407,7 +407,7 @@ static void setupCustomShaderLights() {
     gVSConstants->light1_Diffuse = 1.0f;
     gVSConstants->light1_Specular = 0.7f;
     gVSConstants->light1_CosinePower = 25.0f;
-    rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
+    rsgAllocationSyncAll(rsGetAllocation(gVSConstants));
 
     gVSConstants2->light_Posision[0] = light0Pos;
     gVSConstants2->light_Diffuse[0] = 1.0f;
@@ -417,7 +417,7 @@ static void setupCustomShaderLights() {
     gVSConstants2->light_Diffuse[1] = 1.0f;
     gVSConstants2->light_Specular[1] = 0.7f;
     gVSConstants2->light_CosinePower[1] = 25.0f;
-    rsAllocationMarkDirty(rsGetAllocation(gVSConstants2));
+    rsgAllocationSyncAll(rsGetAllocation(gVSConstants2));
 
     // Update fragmetn shader constants
     // Set light 0 colors
@@ -426,14 +426,14 @@ static void setupCustomShaderLights() {
     // Set light 1 colors
     gFSConstants->light1_DiffuseColor = light1DiffCol;
     gFSConstants->light1_SpecularColor = light1SpecCol;
-    rsAllocationMarkDirty(rsGetAllocation(gFSConstants));
+    rsgAllocationSyncAll(rsGetAllocation(gFSConstants));
 
     gFSConstants2->light_DiffuseColor[0] = light0DiffCol;
     gFSConstants2->light_SpecularColor[0] = light0SpecCol;
     // Set light 1 colors
     gFSConstants2->light_DiffuseColor[1] = light1DiffCol;
     gFSConstants2->light_SpecularColor[1] = light1SpecCol;
-    rsAllocationMarkDirty(rsGetAllocation(gFSConstants2));
+    rsgAllocationSyncAll(rsGetAllocation(gFSConstants2));
 }
 
 static void displayCustomShaderSamples() {

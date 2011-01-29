@@ -679,6 +679,7 @@ static void mip(const Adapter2D &out, const Adapter2D &in) {
 void rsi_AllocationSyncAll(Context *rsc, RsAllocation va, RsAllocationUsageType src) {
     Allocation *a = static_cast<Allocation *>(va);
     a->syncAll(rsc, src);
+    a->sendDirty();
 }
 
 void rsi_AllocationGenerateMipmaps(Context *rsc, RsAllocation va) {
