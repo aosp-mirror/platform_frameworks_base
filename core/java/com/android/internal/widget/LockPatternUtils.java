@@ -16,23 +16,25 @@
 
 package com.android.internal.widget;
 
+import com.android.internal.R;
+import com.android.internal.telephony.ITelephony;
+import com.google.android.collect.Lists;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.FileObserver;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.storage.IMountService;
 import android.provider.Settings;
 import android.security.MessageDigest;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
-
-import com.android.internal.R;
-import com.android.internal.telephony.ITelephony;
-import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -139,6 +141,7 @@ public class LockPatternUtils {
             int fileObserverMask = FileObserver.CLOSE_WRITE | FileObserver.DELETE |
                     FileObserver.MOVED_TO | FileObserver.CREATE;
             sPasswordObserver = new FileObserver(dataSystemDirectory, fileObserverMask) {
+                    @Override
                     public void onEvent(int event, String path) {
                         if (LOCK_PATTERN_FILE.equals(path)) {
                             Log.d(TAG, "lock pattern file changed");
@@ -439,6 +442,27 @@ public class LockPatternUtils {
         return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     }
 
+    /** Update the encryption password if it is enabled **/
+    private void updateEncryptionPassword(String password) {
+        DevicePolicyManager dpm = getDevicePolicyManager();
+        if (dpm.getStorageEncryptionStatus() != DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
+            return;
+        }
+
+        IBinder service = ServiceManager.getService("mount");
+        if (service == null) {
+            Log.e(TAG, "Could not find the mount service to update the encryption password");
+            return;
+        }
+
+        IMountService mountService = IMountService.Stub.asInterface(service);
+        try {
+            mountService.changeEncryptionPassword(password);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error changing encryption password", e);
+        }
+    }
+
     /**
      * Save a lock password.  Does not ensure that the password is as good
      * as the requested mode, but will adjust the mode to be as good as the
@@ -461,6 +485,9 @@ public class LockPatternUtils {
             raf.close();
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (password != null) {
+                // Update the encryption password.
+                updateEncryptionPassword(password);
+
                 int computedQuality = computePasswordQuality(password);
                 setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
                 if (computedQuality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {

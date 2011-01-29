@@ -26,7 +26,7 @@ import android.os.RemoteException;
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
  * file. In particular, the ordering of the methods below must match the
  * _TRANSACTION enum in IMountService.cpp
- * 
+ *
  * @hide - Applications should use android.os.storage.StorageManager to access
  *       storage functions.
  */
@@ -620,6 +620,23 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            public int changeEncryptionPassword(String password) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                int _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(password);
+                    mRemote.transact(Stub.TRANSACTION_changeEncryptionPassword, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readInt();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -679,6 +696,8 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_decryptStorage = IBinder.FIRST_CALL_TRANSACTION + 26;
 
         static final int TRANSACTION_encryptStorage = IBinder.FIRST_CALL_TRANSACTION + 27;
+
+        static final int TRANSACTION_changeEncryptionPassword = IBinder.FIRST_CALL_TRANSACTION + 28;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -977,6 +996,14 @@ public interface IMountService extends IInterface {
                     reply.writeInt(result);
                     return true;
                 }
+                case TRANSACTION_changeEncryptionPassword: {
+                    data.enforceInterface(DESCRIPTOR);
+                    String password = data.readString();
+                    int result = changeEncryptionPassword(password);
+                    reply.writeNoException();
+                    reply.writeInt(result);
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1146,4 +1173,10 @@ public interface IMountService extends IInterface {
      * Encrypts storage.
      */
     public int encryptStorage(String password) throws RemoteException;
+
+    /**
+     * Changes the encryption password.
+     */
+    public int changeEncryptionPassword(String password) throws RemoteException;
+
 }
