@@ -76,7 +76,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.recent.RecentApplicationsActivity;
 
 public class TabletStatusBar extends StatusBar implements
-        HeightReceiver.OnBarHeightChangedListener {
+        HeightReceiver.OnBarHeightChangedListener,
+        InputMethodsPanel.OnHardKeyboardEnabledChangeListener {
     public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
@@ -268,6 +269,7 @@ public class TabletStatusBar extends StatusBar implements
         // Input methods Panel
         mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
                 R.layout.status_bar_input_methods_panel, null);
+        mInputMethodsPanel.setHardKeyboardEnabledChangeListener(this);
         mInputMethodsPanel.setVisibility(View.GONE);
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
@@ -902,6 +904,25 @@ public class TabletStatusBar extends StatusBar implements
         if (FAKE_SPACE_BAR) {
             mFakeSpaceBar.setVisibility(((vis & InputMethodService.IME_VISIBLE) != 0)
                     ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    @Override
+    public void setHardKeyboardStatus(boolean available, boolean enabled) {
+        if (DEBUG) {
+            Slog.d(TAG, "Set hard keyboard status: available=" + available
+                    + ", enabled=" + enabled);
+        }
+        mInputMethodSwitchButton.setHardKeyboardStatus(available);
+        updateNotificationIcons();
+        mInputMethodsPanel.setHardKeyboardStatus(available, enabled);
+    }
+
+    @Override
+    public void onHardKeyboardEnabledChange(boolean enabled) {
+        try {
+            mBarService.setHardKeyboardEnabled(enabled);
+        } catch (RemoteException ex) {
         }
     }
 

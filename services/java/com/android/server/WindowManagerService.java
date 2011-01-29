@@ -454,6 +454,10 @@ public class WindowManagerService extends IWindowManager.Stub
     WindowState mInputMethodWindow = null;
     final ArrayList<WindowState> mInputMethodDialogs = new ArrayList<WindowState>();
 
+    boolean mHardKeyboardAvailable;
+    boolean mHardKeyboardEnabled;
+    OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
+
     final ArrayList<WindowToken> mWallpaperTokens = new ArrayList<WindowToken>();
 
     // If non-null, this is the currently visible window that is associated
@@ -5776,7 +5780,62 @@ public class WindowManagerService extends IWindowManager.Stub
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
         mPolicy.adjustConfigurationLw(config);
+
+        // Adjust the hard keyboard configuration based on whether the hard keyboard is enabled.
+        boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+        if (hardKeyboardAvailable != mHardKeyboardAvailable) {
+            mHardKeyboardAvailable = hardKeyboardAvailable;
+            mHardKeyboardEnabled = hardKeyboardAvailable;
+
+            mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+            mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+        }
+        if (!mHardKeyboardEnabled) {
+            config.keyboard = Configuration.KEYBOARD_NOKEYS;
+            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+        }
         return true;
+    }
+
+    public boolean isHardKeyboardAvailable() {
+        synchronized (mWindowMap) {
+            return mHardKeyboardAvailable;
+        }
+    }
+
+    public boolean isHardKeyboardEnabled() {
+        synchronized (mWindowMap) {
+            return mHardKeyboardEnabled;
+        }
+    }
+
+    public void setHardKeyboardEnabled(boolean enabled) {
+        synchronized (mWindowMap) {
+            if (mHardKeyboardEnabled != enabled) {
+                mHardKeyboardEnabled = enabled;
+                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
+            }
+        }
+    }
+
+    public void setOnHardKeyboardStatusChangeListener(
+            OnHardKeyboardStatusChangeListener listener) {
+        synchronized (mWindowMap) {
+            mHardKeyboardStatusChangeListener = listener;
+        }
+    }
+
+    void notifyHardKeyboardStatusChange() {
+        final boolean available, enabled;
+        final OnHardKeyboardStatusChangeListener listener;
+        synchronized (mWindowMap) {
+            listener = mHardKeyboardStatusChangeListener;
+            available = mHardKeyboardAvailable;
+            enabled = mHardKeyboardEnabled;
+        }
+        if (listener != null) {
+            listener.onHardKeyboardStatusChange(available, enabled);
+        }
     }
 
     // -------------------------------------------------------------
@@ -8869,6 +8928,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_WINDOWS_CHANGE = 19;
         public static final int DRAG_START_TIMEOUT = 20;
         public static final int DRAG_END_TIMEOUT = 21;
+        public static final int REPORT_HARD_KEYBOARD_STATUS_CHANGE = 22;
 
         private Session mLastReportedHold;
 
@@ -9240,6 +9300,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         mDragState.mDragResult = false;
                         mDragState.endDragLw();
                     }
+                    break;
+                }
+
+                case REPORT_HARD_KEYBOARD_STATUS_CHANGE: {
+                    notifyHardKeyboardStatusChange();
                     break;
                 }
             }
@@ -11987,5 +12052,9 @@ public class WindowManagerService extends IWindowManager.Stub
         public int getZAdjustment() {
             return Animation.ZORDER_TOP;
         }
+    }
+
+    public interface OnHardKeyboardStatusChangeListener {
+        public void onHardKeyboardStatusChange(boolean available, boolean enabled);
     }
 }
