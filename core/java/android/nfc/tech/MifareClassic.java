@@ -55,14 +55,14 @@ public final class MifareClassic extends BasicTagTechnology {
     public static final byte[] KEY_NFC_FORUM =
             {(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7};
 
+    /** A Mifare Classic compatible card of unknown type */
+    public static final int TYPE_UNKNOWN = -1;
     /** A MIFARE Classic tag */
     public static final int TYPE_CLASSIC = 0;
     /** A MIFARE Plus tag */
     public static final int TYPE_PLUS = 1;
     /** A MIFARE Pro tag */
     public static final int TYPE_PRO = 2;
-    /** A Mifare Classic compatible card that does not match the other types */
-    public static final int TYPE_OTHER = -1;
 
     /** The tag contains 16 sectors, each holding 4 blocks. */
     public static final int SIZE_1K = 1024;
@@ -360,12 +360,6 @@ public final class MifareClassic extends BasicTagTechnology {
         transceive(cmd.array(), false);
     }
 
-    private void validateValueOperand(int value) {
-        if (value < 0) {
-            throw new IllegalArgumentException("value operand negative");
-        }
-    }
-
     /**
      * Copy from temporary memory to value block.
      * @param blockIndex
@@ -410,7 +404,7 @@ public final class MifareClassic extends BasicTagTechnology {
         return transceive(data, true);
     }
 
-    private void validateSector(int sector) {
+    private static void validateSector(int sector) {
         // Do not be too strict on upper bounds checking, since some cards
         // have more addressable memory than they report. For example,
         // Mifare Plus 2k cards will appear as Mifare Classic 1k cards when in
@@ -423,10 +417,16 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
-    private void validateBlock(int block) {
+    private static void validateBlock(int block) {
         // Just looking for obvious out of bounds...
         if (block < 0 || block >= MAX_BLOCK_COUNT) {
             throw new IndexOutOfBoundsException("block out of bounds: " + block);
+        }
+    }
+
+    private static void validateValueOperand(int value) {
+        if (value < 0) {
+            throw new IllegalArgumentException("value operand negative");
         }
     }
 }
