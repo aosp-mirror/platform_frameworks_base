@@ -1053,7 +1053,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     if (mCurMethod != null) {
                         try {
-                            mImeWindowVis = 0;
+                            final Configuration conf = mRes.getConfiguration();
+                            final boolean haveHardKeyboard = conf.keyboard
+                                    != Configuration.KEYBOARD_NOKEYS;
+                            final boolean hardKeyShown = haveHardKeyboard
+                                    && conf.hardKeyboardHidden != Configuration.KEYBOARDHIDDEN_YES;
+                            mImeWindowVis = (mInputShown || hardKeyShown) ? (
+                                    InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE)
+                                    : 0;
                             mStatusBar.setImeWindowStatus(mCurToken, mImeWindowVis,
                                     mBackDisposition);
                             // If subtype is null, try to find the most applicable one from
