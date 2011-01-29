@@ -1893,7 +1893,8 @@ float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_hand
         AudioSystem::DEVICE_OUT_WIRED_HEADPHONE |
         AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET |
         AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET)) &&
-        (getStrategy((AudioSystem::stream_type)stream) == STRATEGY_SONIFICATION) &&
+        ((getStrategy((AudioSystem::stream_type)stream) == STRATEGY_SONIFICATION) ||
+         (stream == AudioSystem::SYSTEM)) &&
         streamDesc.mCanBeMuted) {
         volume *= SONIFICATION_HEADSET_VOLUME_FACTOR;
         // when the phone is ringing we must consider that music could have been paused just before
