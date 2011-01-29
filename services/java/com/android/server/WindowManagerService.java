@@ -5804,8 +5804,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         outSurface.copyFrom(surface);
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
-                        // TODO: preserve flags param in DragState
-                        mDragState = new DragState(token, surface, 0, winBinder);
+                        mDragState = new DragState(token, surface, flags, winBinder);
                         mDragState.mSurface = surface;
                         token = mDragState.mToken = new Binder();
 
