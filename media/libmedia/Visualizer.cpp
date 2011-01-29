@@ -219,8 +219,13 @@ status_t Visualizer::doFft(uint8_t *fft, uint8_t *waveform)
     }
 
     for (uint32_t i = 0; i < mCaptureSize; i += 2) {
-        fft[i] = workspace[i >> 1] >> 24;
-        fft[i + 1] = workspace[i >> 1] >> 8;
+        short tmp = workspace[i >> 1] >> 21;
+        while (tmp > 127 || tmp < -128) tmp >>= 1;
+        fft[i] = tmp;
+        tmp = workspace[i >> 1];
+        tmp >>= 5;
+        while (tmp > 127 || tmp < -128) tmp >>= 1;
+        fft[i + 1] = tmp;
     }
 
     return NO_ERROR;
