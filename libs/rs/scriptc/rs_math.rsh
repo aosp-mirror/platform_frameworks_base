@@ -1,6 +1,12 @@
 #ifndef __RS_MATH_RSH__
 #define __RS_MATH_RSH__
 
+/**
+ * Copy reference to the specified object.
+ *
+ * @param dst
+ * @param src
+ */
 extern void __attribute__((overloadable))
     rsSetObject(rs_element *dst, rs_element src);
 extern void __attribute__((overloadable))
@@ -24,6 +30,11 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsSetObject(rs_font *dst, rs_font src);
 
+/**
+ * Sets the object to NULL.
+ *
+ * @return bool
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_element *dst);
 extern void __attribute__((overloadable))
@@ -47,6 +58,12 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsClearObject(rs_font *dst);
 
+/**
+ * Tests if the object is valid.  Returns true if the object is valid, false if
+ * it is NULL.
+ *
+ * @return bool
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_element);
 extern bool __attribute__((overloadable))
@@ -71,27 +88,58 @@ extern bool __attribute__((overloadable))
     rsIsObject(rs_font);
 
 
-
-// Allocations
-
-// Return the rs_allocation associated with a bound data
-// pointer.
+/**
+ * Returns the Allocation for a given pointer.  The pointer should point within
+ * a valid allocation.  The results are undefined if the pointer is not from a
+ * valid allocation.
+ */
 extern rs_allocation __attribute__((overloadable))
     rsGetAllocation(const void *);
 
-// Mark the allocation dirty and notify those using it
+/**
+ * Mark the contents of an allocation as dirty.  This forces any other scripts
+ * using the allocation to receive the updated
+ */
 extern void __attribute__((overloadable))
     rsAllocationMarkDirty(rs_allocation);
 
-// Return the dimensions associated with an allocation.
+/**
+ * Query the dimension of an allocation.
+ *
+ * @return uint32_t The X dimension of the allocation.
+ */
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimX(rs_allocation);
+
+/**
+ * Query the dimension of an allocation.
+ *
+ * @return uint32_t The Y dimension of the allocation.
+ */
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimY(rs_allocation);
+
+/**
+ * Query the dimension of an allocation.
+ *
+ * @return uint32_t The Z dimension of the allocation.
+ */
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimZ(rs_allocation);
+
+/**
+ * Query an allocation for the presence of more than one LOD.
+ *
+ * @return uint32_t Returns 1 if more than one LOD is present, 0 otherwise.
+ */
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimLOD(rs_allocation);
+
+/**
+ * Query an allocation for the presence of more than one face.
+ *
+ * @return uint32_t Returns 1 if more than one face is present, 0 otherwise.
+ */
 extern uint32_t __attribute__((overloadable))
     rsAllocationGetDimFaces(rs_allocation);
 

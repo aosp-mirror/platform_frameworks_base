@@ -81,7 +81,7 @@ int root(int launchID) {
     rsgProgramVertexLoadModelMatrix(&robot2Ptr->globalMat);
     rsgDrawMesh(gTestMesh);
 
-    color(0.3f, 0.3f, 0.3f, 1.0f);
+    //color(0.3f, 0.3f, 0.3f, 1.0f);
     rsgDrawText("Renderscript transform test", 30, 695);
 
     rsgBindFont(gItalic);
