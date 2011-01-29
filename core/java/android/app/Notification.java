@@ -927,9 +927,8 @@ public class Notification implements Parcelable
             if (mContentInfo != null) {
                 contentView.setTextViewText(R.id.info, mContentInfo);
             } else if (mNumber > 0) {
-                if (mNumber > 100) {
-                    contentView.setTextViewText(R.id.info, mContext.getString(
-                                R.string.status_bar_notification_info_overflow));
+                if (mNumber > 999) {
+                    contentView.setTextViewText(R.id.info, "999+");
                 } else {
                     NumberFormat f = NumberFormat.getIntegerInstance();
                     contentView.setTextViewText(R.id.info, f.format(mNumber));
