@@ -129,7 +129,7 @@ public final class MifareUltralight extends BasicTagTechnology {
      * <p>The MIFARE Ultralight protocol always writes 1 page at a time.
      * <p>This requires that the tag be connected.
      *
-     * @param page The offset of the page to write
+     * @param pageOffset The offset of the page to write
      * @param data The data to write
      * @throws IOException
      */
