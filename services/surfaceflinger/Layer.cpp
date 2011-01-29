@@ -152,8 +152,7 @@ status_t Layer::ditch()
     // the layer is not on screen anymore. free as much resources as possible
     mFreezeLock.clear();
 
-    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-    mBufferManager.destroy(dpy);
+    // Free our own reference to ISurface
     mSurface.clear();
 
     Mutex::Autolock _l(mLock);
