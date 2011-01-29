@@ -315,6 +315,8 @@ static inline int native_window_set_buffer_count(
  * If all parameters are 0, the normal behavior is restored. That is,
  * dequeued buffers following this call will be sized to the window's size.
  *
+ * Calling this function will reset the window crop to a NULL value, which
+ * disables cropping of the buffers.
  */
 static inline int native_window_set_buffers_geometry(
         ANativeWindow* window,
