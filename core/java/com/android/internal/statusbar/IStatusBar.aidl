@@ -33,5 +33,6 @@ oneway interface IStatusBar
     void setLightsOn(boolean on);
     void setMenuKeyVisible(boolean visible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
+    void setHardKeyboardStatus(boolean available, boolean enabled);
 }
 

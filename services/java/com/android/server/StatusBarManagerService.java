@@ -53,11 +53,13 @@ import java.util.Map;
  * if they are local, that they just enqueue messages to not deadlock.
  */
 public class StatusBarManagerService extends IStatusBarService.Stub
+    implements WindowManagerService.OnHardKeyboardStatusChangeListener
 {
     static final String TAG = "StatusBarManagerService";
     static final boolean SPEW = false;
 
     final Context mContext;
+    final WindowManagerService mWindowManager;
     Handler mHandler = new Handler();
     NotificationCallbacks mNotificationCallbacks;
     volatile IStatusBar mBar;
@@ -103,8 +105,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     /**
      * Construct the service, add the status bar view to the window manager
      */
-    public StatusBarManagerService(Context context) {
+    public StatusBarManagerService(Context context, WindowManagerService windowManager) {
         mContext = context;
+        mWindowManager = windowManager;
+        mWindowManager.setOnHardKeyboardStatusChangeListener(this);
 
         final Resources res = context.getResources();
         mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
@@ -320,6 +324,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    public void setHardKeyboardEnabled(final boolean enabled) {
+        mHandler.post(new Runnable() {
+            public void run() {
+                mWindowManager.setHardKeyboardEnabled(enabled);
+            }
+        });
+    }
+
+    @Override
+    public void onHardKeyboardStatusChange(final boolean available, final boolean enabled) {
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (mBar != null) {
+                    try {
+                        mBar.setHardKeyboardStatus(available, enabled);
+                    } catch (RemoteException ex) {
+                    }
+                }
+            }
+        });
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");
@@ -334,7 +360,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
                 "StatusBarManagerService");
     }
-
 
     // ================================================================================
     // Callbacks from the status bar service.
@@ -363,6 +388,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             switches[4] = mImeBackDisposition;
             binders.add(mImeToken);
         }
+        switches[5] = mWindowManager.isHardKeyboardAvailable() ? 1 : 0;
+        switches[6] = mWindowManager.isHardKeyboardEnabled() ? 1 : 0;
     }
 
     /**
