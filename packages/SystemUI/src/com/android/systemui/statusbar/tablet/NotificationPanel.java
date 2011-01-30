@@ -320,7 +320,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 if (mNotificationCount == 0) {
                     end += mContentFrameMissingTranslation;
                 }
-                start = (y < (HYPERSPACE_OFFRAMP+end)) ? y : (HYPERSPACE_OFFRAMP+end);
+                start = HYPERSPACE_OFFRAMP+end;
             } else {
                 start = y;
                 end = y + HYPERSPACE_OFFRAMP;
@@ -336,10 +336,15 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 mContentAnim.cancel();
             }
 
+            Animator fadeAnim = ObjectAnimator.ofFloat(mContentParent, "alpha",
+                                mContentParent.getAlpha(), appearing ? 1.0f : 0.0f);
+            fadeAnim.setInterpolator(appearing
+                    ? new android.view.animation.AccelerateInterpolator(2.0f)
+                    : new android.view.animation.DecelerateInterpolator(2.0f));
+
             mContentAnim = new AnimatorSet();
             mContentAnim
-                .play(ObjectAnimator.ofFloat(mContentParent, "alpha",
-                    mContentParent.getAlpha(), appearing ? 1.0f : 0.0f))
+                .play(fadeAnim)
                 .with(bgAnim)
                 .with(posAnim)
                 ;
