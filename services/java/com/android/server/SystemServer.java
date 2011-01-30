@@ -248,7 +248,7 @@ class ServerThread extends Thread {
 
             try {
                 Slog.i(TAG, "Status Bar");
-                statusBar = new StatusBarManagerService(context);
+                statusBar = new StatusBarManagerService(context, wm);
                 ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting StatusBarManagerService", e);

@@ -56,6 +56,7 @@ public class CommandQueue extends IStatusBar.Stub {
 
     private static final int MSG_SHOW_MENU = 0x00080000;
     private static final int MSG_SHOW_IME_BUTTON = 0x00090000;
+    private static final int MSG_SET_HARD_KEYBOARD_STATUS = 0x000a0000;
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -83,6 +84,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void setLightsOn(boolean on);
         public void setMenuKeyVisible(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
+        public void setHardKeyboardStatus(boolean available, boolean enabled);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -173,6 +175,14 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void setHardKeyboardStatus(boolean available, boolean enabled) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_SET_HARD_KEYBOARD_STATUS);
+            mHandler.obtainMessage(MSG_SET_HARD_KEYBOARD_STATUS,
+                    available ? 1 : 0, enabled ? 1 : 0).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -235,6 +245,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_IME_BUTTON:
                     mCallbacks.setImeWindowStatus((IBinder)msg.obj, msg.arg1, msg.arg2);
+                    break;
+                case MSG_SET_HARD_KEYBOARD_STATUS:
+                    mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);
                     break;
             }
         }

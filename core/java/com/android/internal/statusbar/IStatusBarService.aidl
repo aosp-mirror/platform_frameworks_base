@@ -45,4 +45,5 @@ interface IStatusBarService
     void onClearAllNotifications();
     void onNotificationClear(String pkg, String tag, int id);
     void setSystemUiVisibility(int vis);
+    void setHardKeyboardEnabled(boolean enabled);
 }
