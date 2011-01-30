@@ -1065,7 +1065,7 @@ public class InputMethodService extends AbstractInputMethodService {
     public boolean onEvaluateInputViewShown() {
         Configuration config = getResources().getConfiguration();
         return config.keyboard == Configuration.KEYBOARD_NOKEYS
-                || config.hardKeyboardHidden == Configuration.KEYBOARDHIDDEN_YES;
+                || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES;
     }
     
     /**
