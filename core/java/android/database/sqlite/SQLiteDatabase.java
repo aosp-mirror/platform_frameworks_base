@@ -2274,6 +2274,17 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
+    /* package */ boolean isInQueueOfStatementsToBeFinalized(int id) {
+        if (!isOpen()) {
+            // database already closed. this statement will already have been finalized.
+            // return true so that the caller doesn't have to worry about finalizing this statement.
+            return true;
+        }
+        synchronized(mClosedStatementIds) {
+            return mClosedStatementIds.contains(id);
+        }
+    }
+
     /* package */ void closePendingStatements() {
         if (!isOpen()) {
             // since this database is already closed, no need to finalize anything.
