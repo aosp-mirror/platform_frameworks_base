@@ -17,6 +17,7 @@
 package android.nfc;
 
 import android.nfc.NdefMessage;
+import android.nfc.TransceiveResult;
 
 /**
  * @hide
@@ -30,7 +31,7 @@ interface INfcTag
     byte[] getUid(int nativeHandle);
     boolean isNdef(int nativeHandle);
     boolean isPresent(int nativeHandle);
-    byte[] transceive(int nativeHandle, in byte[] data, boolean raw);
+    TransceiveResult transceive(int nativeHandle, in byte[] data, boolean raw);
 
     int getLastError(int nativeHandle);
 
@@ -39,4 +40,7 @@ interface INfcTag
     int ndefMakeReadOnly(int nativeHandle);
     boolean ndefIsWritable(int nativeHandle);
     int formatNdef(int nativeHandle, in byte[] key);
+
+    void setIsoDepTimeout(int timeout);
+    void resetIsoDepTimeout();
 }

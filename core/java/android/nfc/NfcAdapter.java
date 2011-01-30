@@ -18,11 +18,16 @@ package android.nfc;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.OnActivityPausedListener;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -43,7 +48,6 @@ public final class NfcAdapter {
      *
      * If any activities respond to this intent neither
      * {@link #ACTION_TECHNOLOGY_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
@@ -51,13 +55,12 @@ public final class NfcAdapter {
     /**
      * Intent to started when a tag is discovered. The data URI is formated as
      * {@code vnd.android.nfc://tag/} with the path having a directory entry for each technology
-     * in the {@link Tag#getTechnologyList()} is ascending order.
+     * in the {@link Tag#getTechList()} is sorted ascending order.
      *
      * This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
      * {@link #ACTION_TAG_DISCOVERED}
      *
      * If any activities respond to this intent {@link #ACTION_TAG_DISCOVERED} will not be started.
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TECHNOLOGY_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
@@ -76,7 +79,6 @@ public final class NfcAdapter {
 
     /**
      * Mandatory Tag extra for the ACTION_TAG intents.
-     * @hide
      */
     public static final String EXTRA_TAG = "android.nfc.extra.TAG";
 
@@ -100,6 +102,20 @@ public final class NfcAdapter {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TRANSACTION_DETECTED =
             "android.nfc.action.TRANSACTION_DETECTED";
+
+    /**
+     * Broadcast Action: an RF field ON has been detected.
+     * @hide
+     */
+    public static final String ACTION_RF_FIELD_ON_DETECTED =
+            "android.nfc.action.RF_FIELD_ON_DETECTED";
+
+    /**
+     * Broadcast Action: an RF Field OFF has been detected.
+     * @hide
+     */
+    public static final String ACTION_RF_FIELD_OFF_DETECTED =
+            "android.nfc.action.RF_FIELD_OFF_DETECTED";
 
     /**
      * Broadcast Action: an adapter's state changed between enabled and disabled.
@@ -197,8 +213,7 @@ public final class NfcAdapter {
     // attemptDeadServiceRecovery() when NFC crashes - we accept a best effort
     // recovery
     private static INfcAdapter sService;
-
-    private final Context mContext;
+    private static INfcTag sTagService;
 
     /**
      * Helper to check if this device has FEATURE_NFC, but without using
@@ -233,6 +248,12 @@ public final class NfcAdapter {
             sService = getServiceInterface();
             if (sService == null) {
                 Log.e(TAG, "could not retrieve NFC service");
+                return null;
+            }
+            try {
+                sTagService = sService.getNfcTagInterface();
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not retrieve NFC Tag service");
                 return null;
             }
         }
@@ -289,7 +310,6 @@ public final class NfcAdapter {
         if (setupService() == null) {
             throw new UnsupportedOperationException();
         }
-        mContext = context;
     }
 
     /**
@@ -297,7 +317,17 @@ public final class NfcAdapter {
      * @hide
      */
     public INfcAdapter getService() {
+        isEnabled();  // NOP call to recover sService if it is stale
         return sService;
+    }
+
+    /**
+     * Returns the binder interface to the tag service.
+     * @hide
+     */
+    public INfcTag getTagService() {
+        isEnabled();  // NOP call to recover sTagService if it is stale
+        return sTagService;
     }
 
     /**
@@ -309,11 +339,21 @@ public final class NfcAdapter {
         INfcAdapter service = getServiceInterface();
         if (service == null) {
             Log.e(TAG, "could not retrieve NFC service during service recovery");
+            // nothing more can be done now, sService is still stale, we'll hit
+            // this recovery path again later
             return;
         }
-        /* assigning to sService is not thread-safe, but this is best-effort code
-         * and on a well-behaved system should never happen */
+        // assigning to sService is not thread-safe, but this is best-effort code
+        // and on a well-behaved system should never happen
         sService = service;
+        try {
+            sTagService = service.getNfcTagInterface();
+        } catch (RemoteException ee) {
+            Log.e(TAG, "could not retrieve NFC tag service during service recovery");
+            // nothing more can be done now, sService is still stale, we'll hit
+            // this recovery path again later
+        }
+
         return;
     }
 
@@ -370,6 +410,136 @@ public final class NfcAdapter {
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
+        }
+    }
+
+    /**
+     * Enables foreground dispatching to the given Activity. This will force all NFC Intents that
+     * match the given filters to be delivered to the activity bypassing the standard dispatch
+     * mechanism. If no IntentFilters are given all the PendingIntent will be invoked for every
+     * dispatch Intent.
+     *
+     * This method must be called from the main thread.
+     *
+     * @param activity the Activity to dispatch to
+     * @param intent the PendingIntent to start for the dispatch
+     * @param filters the IntentFilters to override dispatching for, or null to always dispatch
+     * @throws IllegalStateException
+     */
+    public void enableForegroundDispatch(Activity activity, PendingIntent intent,
+            IntentFilter[] filters, String[][] techLists) {
+        if (activity == null || intent == null) {
+            throw new NullPointerException();
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalStateException("Foregorund dispatching can only be enabled " +
+                    "when your activity is resumed");
+        }
+        try {
+            TechListParcel parcel = null;
+            if (techLists != null && techLists.length > 0) {
+                parcel = new TechListParcel(techLists);
+            }
+            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
+                    mForegroundDispatchListener);
+            sService.enableForegroundDispatch(activity.getComponentName(), intent, filters,
+                    parcel);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Disables foreground activity dispatching setup with
+     * {@link #enableForegroundDispatch}.
+     *
+     * <p>This must be called before the Activity returns from
+     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     *
+     * <p>This method must be called from the main thread.
+     */
+    public void disableForegroundDispatch(Activity activity) {
+        ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
+                mForegroundDispatchListener);
+        disableForegroundDispatchInternal(activity, false);
+    }
+
+    OnActivityPausedListener mForegroundDispatchListener = new OnActivityPausedListener() {
+        @Override
+        public void onPaused(Activity activity) {
+            disableForegroundDispatchInternal(activity, true);
+        }
+    };
+
+    void disableForegroundDispatchInternal(Activity activity, boolean force) {
+        try {
+            sService.disableForegroundDispatch(activity.getComponentName());
+            if (!force && !activity.isResumed()) {
+                throw new IllegalStateException("You must disable forgeground dispatching " +
+                        "while your activity is still resumed");
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Enable NDEF message push over P2P while this Activity is in the foreground. For this to
+     * function properly the other NFC device being scanned must support the "com.android.npp"
+     * NDEF push protocol.
+     *
+     * <p><em>NOTE</em> While foreground NDEF push is active standard tag dispatch is disabled.
+     * Only the foreground activity may receive tag discovered dispatches via
+     * {@link #enableForegroundDispatch}.
+     */
+    public void enableForegroundNdefPush(Activity activity, NdefMessage msg) {
+        if (activity == null || msg == null) {
+            throw new NullPointerException();
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalStateException("Foregorund NDEF push can only be enabled " +
+                    "when your activity is resumed");
+        }
+        try {
+            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
+                    mForegroundNdefPushListener);
+            sService.enableForegroundNdefPush(activity.getComponentName(), msg);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Disables foreground NDEF push setup with
+     * {@link #enableForegroundNdefPush}.
+     *
+     * <p>This must be called before the Activity returns from
+     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     *
+     * <p>This method must be called from the main thread.
+     */
+    public void disableForegroundNdefPush(Activity activity) {
+        ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
+                mForegroundNdefPushListener);
+        disableForegroundNdefPushInternal(activity, false);
+    }
+
+    OnActivityPausedListener mForegroundNdefPushListener = new OnActivityPausedListener() {
+        @Override
+        public void onPaused(Activity activity) {
+            disableForegroundNdefPushInternal(activity, true);
+        }
+    };
+
+    void disableForegroundNdefPushInternal(Activity activity, boolean force) {
+        try {
+            sService.disableForegroundNdefPush(activity.getComponentName());
+            if (!force && !activity.isResumed()) {
+                throw new IllegalStateException("You must disable forgeground NDEF push " +
+                        "while your activity is still resumed");
+            }
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
         }
     }
 

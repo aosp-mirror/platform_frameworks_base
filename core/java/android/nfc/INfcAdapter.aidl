@@ -16,8 +16,12 @@
 
 package android.nfc;
 
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.IntentFilter;
 import android.nfc.NdefMessage;
 import android.nfc.Tag;
+import android.nfc.TechListParcel;
 import android.nfc.ILlcpSocket;
 import android.nfc.ILlcpServiceSocket;
 import android.nfc.ILlcpConnectionlessSocket;
@@ -44,6 +48,11 @@ interface INfcAdapter
     NdefMessage localGet();
     void localSet(in NdefMessage message);
     void openTagConnection(in Tag tag);
+    void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
+            in IntentFilter[] filters, in TechListParcel techLists);
+    void disableForegroundDispatch(in ComponentName activity);
+    void enableForegroundNdefPush(in ComponentName activity, in NdefMessage msg);
+    void disableForegroundNdefPush(in ComponentName activity);
 
     // Non-public methods
     // TODO: check and complete

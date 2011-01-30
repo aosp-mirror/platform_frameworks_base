@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
-package android.nfc.technology;
+package android.nfc.tech;
 
 import android.nfc.ErrorCodes;
 import android.nfc.FormatException;
+import android.nfc.INfcTag;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.IOException;
 
 /**
  * A high-level connection to a {@link Tag} using one of the NFC type 1, 2, 3, or 4 technologies
  * to interact with NDEF data. MiFare Classic cards that present NDEF data may also be used
- * via this class. To determine the exact technology being used call {@link #getTechnologyId()}
+ * via this class. To determine the exact technology being used call {@link #getType()}
  *
- * <p>You can acquire this kind of connection with {@link Tag#getTechnology(int)}.
+ * <p>You can acquire this kind of connection with {@link #get}.
  *
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
  * permission.
  */
 public final class Ndef extends BasicTagTechnology {
+    private static final String TAG = "NFC";
+
     /** @hide */
     public static final int NDEF_MODE_READ_ONLY = 1;
     /** @hide */
@@ -57,14 +61,12 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_TYPE = "ndeftype";
 
-    //TODO: consider removing OTHER entirely - and not allowing Ndef to
-    // enumerate for tag types outside of (NFC Forum 1-4, MifareClassic)
     public static final int OTHER = -1;
     public static final int NFC_FORUM_TYPE_1 = 1;
     public static final int NFC_FORUM_TYPE_2 = 2;
     public static final int NFC_FORUM_TYPE_3 = 3;
     public static final int NFC_FORUM_TYPE_4 = 4;
-    public static final int MIFARE_CLASSIC = 105;
+    public static final int MIFARE_CLASSIC = 101;
 
     private final int mMaxNdefSize;
     private final int mCardState;
@@ -72,11 +74,27 @@ public final class Ndef extends BasicTagTechnology {
     private final int mNdefType;
 
     /**
+     * Returns an instance of this tech for the given tag. If the tag doesn't support
+     * this tech type null is returned.
+     *
+     * @param tag The tag to get the tech from
+     */
+    public static Ndef get(Tag tag) {
+        if (!tag.hasTech(TagTechnology.NDEF)) return null;
+        try {
+            return new Ndef(tag);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Internal constructor, to be used by NfcAdapter
      * @hide
      */
-    public Ndef(NfcAdapter adapter, Tag tag, int tech, Bundle extras) throws RemoteException {
-        super(adapter, tag, tech);
+    public Ndef(Tag tag) throws RemoteException {
+        super(tag, TagTechnology.NDEF);
+        Bundle extras = tag.getTechExtras(TagTechnology.NDEF);
         if (extras != null) {
             mMaxNdefSize = extras.getInt(EXTRA_NDEF_MAXLENGTH);
             mCardState = extras.getInt(EXTRA_NDEF_CARDSTATE);
@@ -94,15 +112,6 @@ public final class Ndef extends BasicTagTechnology {
      */
     public NdefMessage getCachedNdefMessage() {
         return mNdefMsg;
-    }
-
-    /**
-     * Get optional extra NDEF messages.
-     * Some tags may contain extra NDEF messages, but not all
-     * implementations will be able to read them.
-     */
-    public NdefMessage[] getExtraNdefMessage() throws IOException, FormatException {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -148,11 +157,12 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
+            INfcTag tagService = mTag.getTagService();
             int serviceHandle = mTag.getServiceHandle();
-            if (mTagService.isNdef(serviceHandle)) {
-                NdefMessage msg = mTagService.ndefRead(serviceHandle);
+            if (tagService.isNdef(serviceHandle)) {
+                NdefMessage msg = tagService.ndefRead(serviceHandle);
                 if (msg == null) {
-                    int errorCode = mTagService.getLastError(serviceHandle);
+                    int errorCode = tagService.getLastError(serviceHandle);
                     switch (errorCode) {
                         case ErrorCodes.ERROR_IO:
                             throw new IOException();
@@ -168,7 +178,7 @@ public final class Ndef extends BasicTagTechnology {
                 return null;
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             return null;
         }
     }
@@ -181,9 +191,10 @@ public final class Ndef extends BasicTagTechnology {
         checkConnected();
 
         try {
+            INfcTag tagService = mTag.getTagService();
             int serviceHandle = mTag.getServiceHandle();
-            if (mTagService.isNdef(serviceHandle)) {
-                int errorCode = mTagService.ndefWrite(serviceHandle, msg);
+            if (tagService.isNdef(serviceHandle)) {
+                int errorCode = tagService.ndefWrite(serviceHandle, msg);
                 switch (errorCode) {
                     case ErrorCodes.SUCCESS:
                         break;
@@ -200,67 +211,54 @@ public final class Ndef extends BasicTagTechnology {
                 throw new IOException("Tag is not ndef");
             }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
         }
     }
 
     /**
-     * Attempt to write extra NDEF messages.
-     * Implementations may be able to write extra NDEF
-     * message after the first primary message, but it is not
-     * guaranteed. Even if it can be written, other implementations
-     * may not be able to read NDEF messages after the primary message.
-     * It is recommended to use additional NDEF records instead.
-     *
-     * @throws IOException
+     * Indicates whether a tag can be made read-only with
+     * {@link #makeReadonly()}
      */
-    public void writeExtraNdefMessage(int i, NdefMessage msg) throws IOException, FormatException {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
+    public boolean canMakeReadonly() {
+        if (mNdefType == NFC_FORUM_TYPE_1 || mNdefType == NFC_FORUM_TYPE_2) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Set the CC field to indicate this tag is read-only
+     * Sets the CC field to indicate this tag is read-only
+     * and permanently sets the lock bits to prevent any further NDEF
+     * modifications.
+     * This is a one-way process and can not be reverted!
      * @throws IOException
      */
     public boolean makeReadonly() throws IOException {
         checkConnected();
 
         try {
-            int errorCode = mTagService.ndefMakeReadOnly(mTag.getServiceHandle());
-            switch (errorCode) {
-                case ErrorCodes.SUCCESS:
-                    return true;
-                case ErrorCodes.ERROR_IO:
-                    throw new IOException();
-                case ErrorCodes.ERROR_INVALID_PARAM:
-                    return false;
-                default:
-                    // Should not happen
-                    throw new IOException();
-            }
+            INfcTag tagService = mTag.getTagService();
+            if (tagService.isNdef(mTag.getServiceHandle())) {
+                int errorCode = tagService.ndefMakeReadOnly(mTag.getServiceHandle());
+                switch (errorCode) {
+                    case ErrorCodes.SUCCESS:
+                        return true;
+                    case ErrorCodes.ERROR_IO:
+                        throw new IOException();
+                    case ErrorCodes.ERROR_INVALID_PARAM:
+                        return false;
+                    default:
+                        // Should not happen
+                        throw new IOException();
+                }
+           }
+           else {
+               throw new IOException("Tag is not ndef");
+           }
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "NFC service dead", e);
             return false;
         }
-    }
-
-    /**
-     * Attempt to use tag specific technology to really make
-     * the tag read-only
-     * For NFC Forum Type 1 and 2 only.
-     */
-    public void makeLowLevelReadonly() {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public byte[] transceive(byte[] data) {
-        checkConnected();
-
-        throw new UnsupportedOperationException();
     }
 }

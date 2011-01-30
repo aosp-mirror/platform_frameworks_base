@@ -221,6 +221,8 @@ public class ConnectivityManager
 
     /** {@hide} */
     public static final int TYPE_DUMMY       = 8;
+    /** {@hide} */
+    public static final int TYPE_ETHERNET    = 9;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
     public static final int MAX_RADIO_TYPE   = TYPE_DUMMY;
     /** {@hide} TODO: Need to adjust this for WiMAX. */
