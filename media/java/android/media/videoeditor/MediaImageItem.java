@@ -794,8 +794,8 @@ public class MediaImageItem extends MediaItem {
             return clipSettings;
         }
 
-        PanZoomXa = (100 * start.width()) / width;
-        PanZoomXb = (100 * end.width()) / width;
+        PanZoomXa = (1000 * start.width()) / width;
+        PanZoomXb = (1000 * end.width()) / width;
 
         clipSettings.clipPath = getDecodedImageFileName();
         clipSettings.fileType = mMANativeHelper.getMediaItemFileType(getFileType());
@@ -805,11 +805,11 @@ public class MediaImageItem extends MediaItem {
         clipSettings.endCutPercent = 0;
         clipSettings.panZoomEnabled = true;
         clipSettings.panZoomPercentStart = PanZoomXa;
-        clipSettings.panZoomTopLeftXStart = (start.left * 100) / width;
-        clipSettings.panZoomTopLeftYStart = (start.top * 100) / height;
+        clipSettings.panZoomTopLeftXStart = (start.left * 1000) / width;
+        clipSettings.panZoomTopLeftYStart = (start.top * 1000) / height;
         clipSettings.panZoomPercentEnd = PanZoomXb;
-        clipSettings.panZoomTopLeftXEnd = (end.left * 100) / width;
-        clipSettings.panZoomTopLeftYEnd = (end.top * 100) / height;
+        clipSettings.panZoomTopLeftXEnd = (end.left * 1000) / width;
+        clipSettings.panZoomTopLeftYEnd = (end.top * 1000) / height;
         clipSettings.mediaRendering
             = mMANativeHelper.getMediaItemRenderingMode(getRenderingMode());
 

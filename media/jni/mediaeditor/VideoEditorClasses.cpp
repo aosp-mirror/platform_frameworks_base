@@ -1548,7 +1548,7 @@ videoEditClasses_createClipSettings(
 
             // Set the panZoomPercentStart field.
             pEnv->SetIntField(object, fieldIds.panZoomPercentStart,
-                (100 - pSettings->xVSS.PanZoomXa));
+                (1000 - pSettings->xVSS.PanZoomXa));
 
             // Set the panZoomTopLeftXStart field.
             pEnv->SetIntField(object, fieldIds.panZoomTopLeftXStart,
@@ -1560,7 +1560,7 @@ videoEditClasses_createClipSettings(
 
             // Set the panZoomPercentEnd field.
             pEnv->SetIntField(object, fieldIds.panZoomPercentEnd,
-                (100 - pSettings->xVSS.PanZoomXb));
+                (1000 - pSettings->xVSS.PanZoomXb));
 
             // Set the panZoomTopLeftXEnd field.
             pEnv->SetIntField(object, fieldIds.panZoomTopLeftXEnd,
