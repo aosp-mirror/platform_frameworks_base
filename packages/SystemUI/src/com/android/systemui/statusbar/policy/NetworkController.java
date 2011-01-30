@@ -146,6 +146,7 @@ public class NetworkController extends BroadcastReceiver {
         filter.addAction(Telephony.Intents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         context.registerReceiver(this, filter);
 
         // yuck
@@ -196,6 +197,8 @@ public class NetworkController extends BroadcastReceiver {
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
                  action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity(intent);
+            refreshViews();
+        } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
             refreshViews();
         }
     }
