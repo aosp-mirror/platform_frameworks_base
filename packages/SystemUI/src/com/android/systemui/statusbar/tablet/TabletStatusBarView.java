@@ -51,6 +51,8 @@ public class TabletStatusBarView extends FrameLayout {
             mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_RECENTS_PANEL);
             mHandler.removeMessages(TabletStatusBar.MSG_CLOSE_INPUT_METHODS_PANEL);
             mHandler.sendEmptyMessage(TabletStatusBar.MSG_CLOSE_INPUT_METHODS_PANEL);
+            mHandler.removeMessages(TabletStatusBar.MSG_STOP_TICKER);
+            mHandler.sendEmptyMessage(TabletStatusBar.MSG_STOP_TICKER);
 
             for (int i=0; i < mPanels.length; i++) {
                 if (mPanels[i] != null && mPanels[i].getVisibility() == View.VISIBLE) {
