@@ -498,11 +498,9 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
 }
 
 void LayerBase::setBufferCrop(const Rect& crop) {
-    if (!crop.isEmpty()) {
-        if (mBufferCrop != crop) {
-            mBufferCrop = crop;
-            mFlinger->invalidateHwcGeometry();
-        }
+    if (mBufferCrop != crop) {
+        mBufferCrop = crop;
+        mFlinger->invalidateHwcGeometry();
     }
 }
 
