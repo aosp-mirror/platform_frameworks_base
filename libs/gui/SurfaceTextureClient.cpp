@@ -238,13 +238,15 @@ int SurfaceTextureClient::setCrop(Rect const* rect)
     LOGV("SurfaceTextureClient::setCrop");
     Mutex::Autolock lock(mMutex);
 
-    // empty/invalid rects are not allowed
-    if (rect->isEmpty())
-        return BAD_VALUE;
+    Rect realRect;
+    if (rect == NULL || rect->isEmpty()) {
+        realRect = Rect(0, 0);
+    } else {
+        realRect = *rect;
+    }
 
     status_t err = mSurfaceTexture->setCrop(*rect);
-    LOGE_IF(err, "ISurfaceTexture::setCrop(...) returned %s",
-            strerror(-err));
+    LOGE_IF(err, "ISurfaceTexture::setCrop(...) returned %s", strerror(-err));
 
     return err;
 }
@@ -280,7 +282,10 @@ int SurfaceTextureClient::setBuffersGeometry(int w, int h, int format)
     mReqHeight = h;
     mReqFormat = format;
 
-    return NO_ERROR;
+    status_t err = mSurfaceTexture->setCrop(Rect(0, 0));
+    LOGE_IF(err, "ISurfaceTexture::setCrop(...) returned %s", strerror(-err));
+
+    return err;
 }
 
 int SurfaceTextureClient::setBuffersTransform(int transform)
