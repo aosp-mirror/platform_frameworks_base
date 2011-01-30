@@ -95,6 +95,7 @@ public class TabletStatusBar extends StatusBar implements
     public static final int MSG_HIDE_CHROME = 1031;
     public static final int MSG_OPEN_INPUT_METHODS_PANEL = 1040;
     public static final int MSG_CLOSE_INPUT_METHODS_PANEL = 1041;
+    public static final int MSG_STOP_TICKER = 2000;
 
     // Fitts' Law assistance for LatinIME; TODO: replace with a more general approach
     private static final boolean FAKE_SPACE_BAR = true;
@@ -582,6 +583,9 @@ public class TabletStatusBar extends StatusBar implements
                     mBarContents.setVisibility(View.GONE);
                     mShadow.setVisibility(View.VISIBLE);
                     notifyLightsChanged(false);
+                    break;
+                case MSG_STOP_TICKER:
+                    mTicker.halt();
                     break;
             }
         }
