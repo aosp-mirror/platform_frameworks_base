@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.widget.TextView;
@@ -27,7 +28,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 public final class DateView extends TextView {
@@ -86,8 +86,11 @@ public final class DateView extends TextView {
     }
 
     private final void updateClock() {
+        final Context context = getContext();
         Date now = new Date();
-        setText(DateFormat.getDateInstance(DateFormat.FULL).format(now));
+        CharSequence dow = DateFormat.format("EEEE", now);
+        CharSequence date = DateFormat.getMediumDateFormat(getContext()).format(now);
+        setText(dow + "\n" + date);
     }
 
     private boolean isVisible() {
