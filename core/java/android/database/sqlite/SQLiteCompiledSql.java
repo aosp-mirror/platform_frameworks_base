@@ -103,6 +103,11 @@ import android.util.Log;
     protected void finalize() throws Throwable {
         try {
             if (nStatement == 0) return;
+            // don't worry about finalizing this object if it is ALREADY in the
+            // queue of statements to be finalized later
+            if (mDatabase.isInQueueOfStatementsToBeFinalized(nStatement)) {
+                return;
+            }
             // finalizer should NEVER get called
             // but if the database itself is not closed and is GC'ed, then
             // all sub-objects attached to the database could end up getting GC'ed too.
