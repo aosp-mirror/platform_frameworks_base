@@ -3697,7 +3697,6 @@ class MediaArtistNativeHelper {
         }
 
         mExportDone = true;
-        setGeneratePreview(true);
         mExportProgressListener = null;
     }
 
@@ -3845,7 +3844,6 @@ class MediaArtistNativeHelper {
         }
 
         mExportDone = true;
-        setGeneratePreview(true);
         mExportProgressListener = null;
     }
 
