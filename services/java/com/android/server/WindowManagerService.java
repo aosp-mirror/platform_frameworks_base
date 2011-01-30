@@ -5030,13 +5030,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     mScreenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE;
                 } else {
                     mScreenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL;
-
-                    // If this screen is wider than normal HVGA, or taller
-                    // than FWVGA, then for old apps we want to run in size
-                    // compatibility mode.
-                    if (shortSize > 321 || longSize > 570) {
-                        mScreenLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
-                    }
+                }
+                
+                // If this screen is wider than normal HVGA, or taller
+                // than FWVGA, then for old apps we want to run in size
+                // compatibility mode.
+                if (shortSize > 321 || longSize > 570) {
+                    mScreenLayout |= Configuration.SCREENLAYOUT_COMPAT_NEEDED;
                 }
 
                 // Is this a long screen?
