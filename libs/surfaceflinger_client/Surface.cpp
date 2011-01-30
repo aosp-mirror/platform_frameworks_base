@@ -827,13 +827,15 @@ int Surface::disconnect(int api)
 
 int Surface::crop(Rect const* rect)
 {
-    // empty/invalid rects are not allowed
-    if (rect->isEmpty())
-        return BAD_VALUE;
-
     Mutex::Autolock _l(mSurfaceLock);
     // TODO: validate rect size
-    mNextBufferCrop = *rect;
+
+    if (rect == NULL || rect->isEmpty()) {
+        mNextBufferCrop = Rect(0,0);
+    } else {
+        mNextBufferCrop = *rect;
+    }
+
     return NO_ERROR;
 }
 
@@ -884,6 +886,9 @@ int Surface::setBuffersGeometry(int w, int h, int format)
         // EGLConfig validation.
         mFormat = format;
     }
+
+    mNextBufferCrop = Rect(0,0);
+
     return NO_ERROR;
 }
 
