@@ -1057,7 +1057,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             final boolean haveHardKeyboard = conf.keyboard
                                     != Configuration.KEYBOARD_NOKEYS;
                             final boolean hardKeyShown = haveHardKeyboard
-                                    && conf.hardKeyboardHidden != Configuration.KEYBOARDHIDDEN_YES;
+                                    && conf.hardKeyboardHidden
+                                            != Configuration.HARDKEYBOARDHIDDEN_YES;
                             mImeWindowVis = (mInputShown || hardKeyShown) ? (
                                     InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE)
                                     : 0;
