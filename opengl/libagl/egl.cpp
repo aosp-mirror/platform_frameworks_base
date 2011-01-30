@@ -82,6 +82,11 @@ static GLint getError() {
     if (ggl_unlikely(gEGLErrorKey == -1))
         return EGL_SUCCESS;
     GLint error = (GLint)pthread_getspecific(gEGLErrorKey);
+    if (error == 0) {
+        // The TLS key has been created by another thread, but the value for
+        // this thread has not been initialized.
+        return EGL_SUCCESS;
+    }
     pthread_setspecific(gEGLErrorKey, (void*)EGL_SUCCESS);
     return error;
 }
