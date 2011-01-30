@@ -775,6 +775,7 @@ int Thread::_threadLoop(void* user)
             self->mLock.lock();
             self->mRunning = false;
             self->mThreadExitedCondition.broadcast();
+            self->mThread = thread_id_t(-1); // thread id could be reused
             self->mLock.unlock();
             break;
         }
