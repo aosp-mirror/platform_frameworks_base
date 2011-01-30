@@ -521,7 +521,7 @@ import java.util.WeakHashMap;
  * The framework provides basic support for views that wish to internally
  * scroll their content. This includes keeping track of the X and Y scroll
  * offset as well as mechanisms for drawing scrollbars. See
- * {@link #scrollBy(int, int)}, {@link #scrollTo(int, int)}, and 
+ * {@link #scrollBy(int, int)}, {@link #scrollTo(int, int)}, and
  * {@link #awakenScrollBars()} for more details.
  * </p>
  *
@@ -1645,27 +1645,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     static final int OPAQUE_MASK                    = 0x01800000;
-    
+
     /**
      * Indicates a prepressed state;
      * the short time between ACTION_DOWN and recognizing
      * a 'real' press. Prepressed is used to recognize quick taps
      * even when they are shorter than ViewConfiguration.getTapTimeout().
-     * 
+     *
      * @hide
      */
     private static final int PREPRESSED             = 0x02000000;
-    
+
     /**
      * Indicates whether the view is temporarily detached.
      *
      * @hide
      */
     static final int CANCEL_NEXT_UP_EVENT = 0x04000000;
-    
+
     /**
      * Indicates that we should awaken scroll bars once attached
-     * 
+     *
      * @hide
      */
     private static final int AWAKEN_SCROLL_BARS_ON_ATTACH = 0x08000000;
@@ -1720,14 +1720,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * View has requested the status bar to be visible (the default).
      *
-     * @see #setSystemUiVisibility(int) 
+     * @see #setSystemUiVisibility(int)
      */
     public static final int STATUS_BAR_VISIBLE = 0;
 
     /**
      * View has requested the status bar to be visible (the default).
      *
-     * @see #setSystemUiVisibility(int) 
+     * @see #setSystemUiVisibility(int)
      */
     public static final int STATUS_BAR_HIDDEN = 0x00000001;
 
@@ -1950,8 +1950,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private int mPrevWidth = -1;
     private int mPrevHeight = -1;
 
-    private boolean mLastIsOpaque;    
-    
+    private boolean mLastIsOpaque;
+
     /**
      * Convenience value to check for float values that are close enough to zero to be considered
      * zero.
@@ -2225,7 +2225,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
-    
+
     private UnsetPressedState mUnsetPressedState;
 
     /**
@@ -2266,7 +2266,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Special tree observer used when mAttachInfo is null.
      */
     private ViewTreeObserver mFloatingTreeObserver;
-    
+
     /**
      * Cache the touch slop from the context that created the view.
      */
@@ -2308,11 +2308,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Indicates that the view does not have a layer.
-     * 
-     * @see #getLayerType() 
-     * @see #setLayerType(int, android.graphics.Paint) 
+     *
+     * @see #getLayerType()
+     * @see #setLayerType(int, android.graphics.Paint)
      * @see #LAYER_TYPE_SOFTWARE
-     * @see #LAYER_TYPE_HARDWARE 
+     * @see #LAYER_TYPE_HARDWARE
      */
     public static final int LAYER_TYPE_NONE = 0;
 
@@ -2320,7 +2320,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>Indicates that the view has a software layer. A software layer is backed
      * by a bitmap and causes the view to be rendered using Android's software
      * rendering pipeline, even if hardware acceleration is enabled.</p>
-     * 
+     *
      * <p>Software layers have various usages:</p>
      * <p>When the application is not using hardware acceleration, a software layer
      * is useful to apply a specific color filter and/or blending mode and/or
@@ -2336,11 +2336,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * potentially be slow (particularly when hardware acceleration is turned on
      * since the layer will have to be uploaded into a hardware texture after every
      * update.)</p>
-     * 
-     * @see #getLayerType() 
-     * @see #setLayerType(int, android.graphics.Paint) 
+     *
+     * @see #getLayerType()
+     * @see #setLayerType(int, android.graphics.Paint)
      * @see #LAYER_TYPE_NONE
-     * @see #LAYER_TYPE_HARDWARE 
+     * @see #LAYER_TYPE_HARDWARE
      */
     public static final int LAYER_TYPE_SOFTWARE = 1;
 
@@ -2351,7 +2351,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * rendering pipeline, but only if hardware acceleration is turned on for the
      * view hierarchy. When hardware acceleration is turned off, hardware layers
      * behave exactly as {@link #LAYER_TYPE_SOFTWARE software layers}.</p>
-     * 
+     *
      * <p>A hardware layer is useful to apply a specific color filter and/or
      * blending mode and/or translucency to a view and all its children.</p>
      * <p>A hardware layer can be used to cache a complex view tree into a
@@ -2361,14 +2361,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>A hardware layer can also be used to increase the rendering quality when
      * rotation transformations are applied on a view. It can also be used to
      * prevent potential clipping issues when applying 3D transforms on a view.</p>
-     * 
-     * @see #getLayerType() 
+     *
+     * @see #getLayerType()
      * @see #setLayerType(int, android.graphics.Paint)
      * @see #LAYER_TYPE_NONE
      * @see #LAYER_TYPE_SOFTWARE
      */
     public static final int LAYER_TYPE_HARDWARE = 2;
-    
+
     @ViewDebug.ExportedProperty(category = "drawing", mapping = {
             @ViewDebug.IntToString(from = LAYER_TYPE_NONE, to = "NONE"),
             @ViewDebug.IntToString(from = LAYER_TYPE_SOFTWARE, to = "SOFTWARE"),
@@ -2670,7 +2670,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     break;
                 case R.styleable.View_onClick:
                     if (context.isRestricted()) {
-                        throw new IllegalStateException("The android:onClick attribute cannot " 
+                        throw new IllegalStateException("The android:onClick attribute cannot "
                                 + "be used within a restricted context");
                     }
 
@@ -2909,19 +2909,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         initScrollCache();
 
         final ScrollabilityCache scrollabilityCache = mScrollCache;
-        
+
         if (scrollabilityCache.scrollBar == null) {
             scrollabilityCache.scrollBar = new ScrollBarDrawable();
         }
-        
+
         final boolean fadeScrollbars = a.getBoolean(R.styleable.View_fadeScrollbars, true);
 
         if (!fadeScrollbars) {
             scrollabilityCache.state = ScrollabilityCache.ON;
         }
         scrollabilityCache.fadeScrollBars = fadeScrollbars;
-        
-        
+
+
         scrollabilityCache.scrollBarFadeDuration = a.getInt(
                 R.styleable.View_scrollbarFadeDuration, ViewConfiguration
                         .getScrollBarFadeDuration());
@@ -2929,7 +2929,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 R.styleable.View_scrollbarDefaultDelayBeforeFade,
                 ViewConfiguration.getScrollDefaultDelay());
 
-                
+
         scrollabilityCache.scrollBarSize = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.View_scrollbarSize,
                 ViewConfiguration.get(mContext).getScaledScrollBarSize());
@@ -3165,8 +3165,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Register a callback to be invoked when a drag event is sent to this view.
-     * @param l The drag listener to attach to this view
+     * Register a drag event listener callback object for this View. The parameter is
+     * an implementation of {@link android.view.View.OnDragListener}. To send a drag event to a
+     * View, the system calls the
+     * {@link android.view.View.OnDragListener#onDrag(View,DragEvent)} method.
+     * @param l An implementation of {@link android.view.View.OnDragListener}.
      */
     public void setOnDragListener(OnDragListener l) {
         mOnDragListener = l;
@@ -3377,7 +3380,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mOnFocusChangeListener != null) {
             mOnFocusChangeListener.onFocusChange(this, gainFocus);
         }
-        
+
         if (mAttachInfo != null) {
             mAttachInfo.mKeyDispatchState.reset(this);
         }
@@ -4525,7 +4528,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public KeyEvent.DispatcherState getKeyDispatcherState() {
         return mAttachInfo != null ? mAttachInfo.mKeyDispatchState : null;
     }
-    
+
     /**
      * Dispatch a key event before it is processed by any input method
      * associated with the view hierarchy.  This can be used to intercept
@@ -4603,7 +4606,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param event The motion event to be filtered.
      * @return True if the event should be dispatched, false if the event should be dropped.
-     * 
+     *
      * @see #getFilterTouchesWhenObscured
      */
     public boolean onFilterTouchEventForSecurity(MotionEvent event) {
@@ -4720,7 +4723,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * a View moves out of the screen, it might receives a display hint indicating
      * the view is not displayed. Applications should not <em>rely</em> on this hint
      * as there is no guarantee that they will receive one.
-     * 
+     *
      * @param hint A hint about whether or not this view is displayed:
      * {@link #VISIBLE} or {@link #INVISIBLE}.
      */
@@ -4733,7 +4736,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * a View moves out of the screen, it might receives a display hint indicating
      * the view is not displayed. Applications should not <em>rely</em> on this hint
      * as there is no guarantee that they will receive one.
-     * 
+     *
      * @param hint A hint about whether or not this view is displayed:
      * {@link #VISIBLE} or {@link #INVISIBLE}.
      */
@@ -5217,7 +5220,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                             mPrivateFlags |= PRESSED;
                             refreshDrawableState();
                        }
-                        
+
                         if (!mHasPerformedLongPress) {
                             // This is a tap, so remove the longpress check
                             removeLongPressCallback();
@@ -5720,7 +5723,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Returns true if the transform matrix is the identity matrix.
      * Recomputes the matrix if necessary.
-     * 
+     *
      * @return True if the transform matrix is the identity matrix, false otherwise.
      */
     final boolean hasIdentityMatrix() {
@@ -6061,16 +6064,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * <p>Sets the opacity of the view. This is a value from 0 to 1, where 0 means the view is
      * completely transparent and 1 means the view is completely opaque.</p>
-     * 
+     *
      * <p>If this view overrides {@link #onSetAlpha(int)} to return true, then this view is
      * responsible for applying the opacity itself. Otherwise, calling this method is
      * equivalent to calling {@link #setLayerType(int, android.graphics.Paint)} and
-     * setting a hardware layer.</p> 
+     * setting a hardware layer.</p>
      *
      * @param alpha The opacity of the view.
      *
-     * @see #setLayerType(int, android.graphics.Paint) 
-     * 
+     * @see #setLayerType(int, android.graphics.Paint)
+     *
      * @attr ref android.R.styleable#View_alpha
      */
     public void setAlpha(float alpha) {
@@ -6336,7 +6339,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * The visual x position of this view, in pixels. This is equivalent to the
      * {@link #setTranslationX(float) translationX} property plus the current
-     * {@link #getLeft() left} property. 
+     * {@link #getLeft() left} property.
      *
      * @return The visual x position of this view, in pixels.
      */
@@ -6733,7 +6736,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * provides animated scrolling, the start delay should equal the duration of
      * the scrolling animation.
      * </p>
-     * 
+     *
      * <p>
      * The animation starts only if at least one of the scrollbars is enabled,
      * as specified by {@link #isHorizontalScrollBarEnabled()} and
@@ -6742,17 +6745,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * started, this method calls {@link #invalidate()}; in that case the caller
      * should not call {@link #invalidate()}.
      * </p>
-     * 
+     *
      * <p>
      * This method should be invoked everytime a subclass directly updates the
      * scroll parameters.
      * </p>
-     * 
+     *
      * @param startDelay the delay, in milliseconds, after which the animation
      *        should start; when the delay is 0, the animation starts
      *        immediately
      * @return true if the animation is played, false otherwise
-     * 
+     *
      * @see #scrollBy(int, int)
      * @see #scrollTo(int, int)
      * @see #isHorizontalScrollBarEnabled()
@@ -6763,7 +6766,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected boolean awakenScrollBars(int startDelay) {
         return awakenScrollBars(startDelay, true);
     }
-        
+
     /**
      * <p>
      * Trigger the scrollbars to draw. When invoked this method starts an
@@ -6771,30 +6774,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * provides animated scrolling, the start delay should equal the duration of
      * the scrolling animation.
      * </p>
-     * 
+     *
      * <p>
      * The animation starts only if at least one of the scrollbars is enabled,
      * as specified by {@link #isHorizontalScrollBarEnabled()} and
      * {@link #isVerticalScrollBarEnabled()}. When the animation is started,
      * this method returns true, and false otherwise. If the animation is
-     * started, this method calls {@link #invalidate()} if the invalidate parameter 
+     * started, this method calls {@link #invalidate()} if the invalidate parameter
      * is set to true; in that case the caller
      * should not call {@link #invalidate()}.
      * </p>
-     * 
+     *
      * <p>
      * This method should be invoked everytime a subclass directly updates the
      * scroll parameters.
      * </p>
-     * 
+     *
      * @param startDelay the delay, in milliseconds, after which the animation
      *        should start; when the delay is 0, the animation starts
      *        immediately
-     * 
+     *
      * @param invalidate Wheter this method should call invalidate
-     * 
+     *
      * @return true if the animation is played, false otherwise
-     * 
+     *
      * @see #scrollBy(int, int)
      * @see #scrollTo(int, int)
      * @see #isHorizontalScrollBarEnabled()
@@ -6804,7 +6807,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     protected boolean awakenScrollBars(int startDelay, boolean invalidate) {
         final ScrollabilityCache scrollCache = mScrollCache;
-        
+
         if (scrollCache == null || !scrollCache.fadeScrollBars) {
             return false;
         }
@@ -6937,7 +6940,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void invalidate() {
         invalidate(true);
     }
-    
+
     /**
      * This is where the invalidate() work actually happens. A full invalidate()
      * causes the drawing cache to be invalidated, but this function can be called with
@@ -6999,7 +7002,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             ((View) mParent).mPrivateFlags |= INVALIDATED;
         }
     }
-    
+
     /**
      * Used to indicate that the parent of this view should be invalidated. This functionality
      * is used to force the parent to rebuild its display list (when hardware-accelerated),
@@ -7428,12 +7431,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     protected void recomputePadding() {
         setPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
     }
-    
+
     /**
      * Define whether scrollbars will fade when the view is not scrolling.
-     * 
+     *
      * @param fadeScrollbars wheter to enable fading
-     * 
+     *
      */
     public void setScrollbarFadingEnabled(boolean fadeScrollbars) {
         initScrollCache();
@@ -7445,17 +7448,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             scrollabilityCache.state = ScrollabilityCache.ON;
         }
     }
-    
+
     /**
-     * 
+     *
      * Returns true if scrollbars will fade when this view is not scrolling
-     * 
+     *
      * @return true if scrollbar fading is enabled
      */
     public boolean isScrollbarFadingEnabled() {
-        return mScrollCache != null && mScrollCache.fadeScrollBars; 
+        return mScrollCache != null && mScrollCache.fadeScrollBars;
     }
-    
+
     /**
      * <p>Specify the style of the scrollbars. The scrollbars can be overlaid or
      * inset. When inset, they add to the padding of the view. And the scrollbars
@@ -7622,30 +7625,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * scrollbars are painted only if they have been awakened first.</p>
      *
      * @param canvas the canvas on which to draw the scrollbars
-     * 
+     *
      * @see #awakenScrollBars(int)
      */
     protected final void onDrawScrollBars(Canvas canvas) {
         // scrollbars are drawn only when the animation is running
         final ScrollabilityCache cache = mScrollCache;
         if (cache != null) {
-            
+
             int state = cache.state;
-            
+
             if (state == ScrollabilityCache.OFF) {
                 return;
             }
-            
+
             boolean invalidate = false;
-            
+
             if (state == ScrollabilityCache.FADING) {
                 // We're fading -- get our fade interpolation
                 if (cache.interpolatorValues == null) {
                     cache.interpolatorValues = new float[1];
                 }
-                
+
                 float[] values = cache.interpolatorValues;
-                
+
                 // Stops the animation if we're done
                 if (cache.scrollBarInterpolator.timeToValues(values) ==
                         Interpolator.Result.FREEZE_END) {
@@ -7653,8 +7656,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 } else {
                     cache.scrollBar.setAlpha(Math.round(values[0]));
                 }
-                
-                // This will make the scroll bars inval themselves after 
+
+                // This will make the scroll bars inval themselves after
                 // drawing. We only want this when we're fading so that
                 // we prevent excessive redraws
                 invalidate = true;
@@ -7664,7 +7667,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 cache.scrollBar.setAlpha(255);
             }
 
-            
+
             final int viewFlags = mViewFlags;
 
             final boolean drawHorizontalScrollBar =
@@ -7684,7 +7687,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 final int inside = (viewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
 
                 int left, top, right, bottom;
-                
+
                 if (drawHorizontalScrollBar) {
                     int size = scrollBar.getSize(false);
                     if (size <= 0) {
@@ -7696,7 +7699,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                                             computeHorizontalScrollExtent(), false);
                     final int verticalScrollBarGap = drawVerticalScrollBar ?
                             getVerticalScrollbarWidth() : 0;
-                    top = scrollY + height - size - (mUserPaddingBottom & inside);                         
+                    top = scrollY + height - size - (mUserPaddingBottom & inside);
                     left = scrollX + (mPaddingLeft & inside);
                     right = scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap;
                     bottom = top + size;
@@ -8081,8 +8084,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (state != BaseSavedState.EMPTY_STATE && state != null) {
             throw new IllegalArgumentException("Wrong state class, expecting View State but "
                     + "received " + state.getClass().toString() + " instead. This usually happens "
-                    + "when two views of different type have the same id in the same hierarchy. " 
-                    + "This view's id is " + ViewDebug.resolveId(mContext, getId()) + ". Make sure " 
+                    + "when two views of different type have the same id in the same hierarchy. "
+                    + "This view's id is " + ViewDebug.resolveId(mContext, getId()) + ". Make sure "
                     + "other views do not use the same id.");
         }
     }
@@ -8107,7 +8110,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * <p>Note: if this view's parent addStateFromChildren property is enabled and this
      * property is enabled, an exception will be thrown.</p>
-     * 
+     *
      * <p>Note: if the child view uses and updates additionnal states which are unknown to the
      * parent, these states should not be affected by this method.</p>
      *
@@ -8138,7 +8141,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>Specifies the type of layer backing this view. The layer can be
      * {@link #LAYER_TYPE_NONE disabled}, {@link #LAYER_TYPE_SOFTWARE software} or
      * {@link #LAYER_TYPE_HARDWARE hardware}.</p>
-     * 
+     *
      * <p>A layer is associated with an optional {@link android.graphics.Paint}
      * instance that controls how the layer is composed on screen. The following
      * properties of the paint are taken into account when composing the layer:</p>
@@ -8147,35 +8150,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <li>{@link android.graphics.Paint#getXfermode() Blending mode}</li>
      * <li>{@link android.graphics.Paint#getColorFilter() Color filter}</li>
      * </ul>
-     * 
+     *
      * <p>If this view has an alpha value set to < 1.0 by calling
      * {@link #setAlpha(float)}, the alpha value of the layer's paint is replaced by
      * this view's alpha value. Calling {@link #setAlpha(float)} is therefore
      * equivalent to setting a hardware layer on this view and providing a paint with
      * the desired alpha value.<p>
-     * 
+     *
      * <p>Refer to the documentation of {@link #LAYER_TYPE_NONE disabled},
      * {@link #LAYER_TYPE_SOFTWARE software} and {@link #LAYER_TYPE_HARDWARE hardware}
      * for more information on when and how to use layers.</p>
-     * 
+     *
      * @param layerType The ype of layer to use with this view, must be one of
      *        {@link #LAYER_TYPE_NONE}, {@link #LAYER_TYPE_SOFTWARE} or
      *        {@link #LAYER_TYPE_HARDWARE}
      * @param paint The paint used to compose the layer. This argument is optional
      *        and can be null. It is ignored when the layer type is
      *        {@link #LAYER_TYPE_NONE}
-     * 
-     * @see #getLayerType() 
+     *
+     * @see #getLayerType()
      * @see #LAYER_TYPE_NONE
      * @see #LAYER_TYPE_SOFTWARE
      * @see #LAYER_TYPE_HARDWARE
-     * @see #setAlpha(float) 
-     * 
+     * @see #setAlpha(float)
+     *
      * @attr ref android.R.styleable#View_layerType
      */
     public void setLayerType(int layerType, Paint paint) {
         if (layerType < LAYER_TYPE_NONE || layerType > LAYER_TYPE_HARDWARE) {
-            throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, " 
+            throw new IllegalArgumentException("Layer type can only be one of: LAYER_TYPE_NONE, "
                     + "LAYER_TYPE_SOFTWARE or LAYER_TYPE_HARDWARE");
         }
 
@@ -8195,7 +8198,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     mDrawingCache.recycle();
                     mDrawingCache = null;
                 }
-    
+
                 if (mUnscaledDrawingCache != null) {
                     mUnscaledDrawingCache.recycle();
                     mUnscaledDrawingCache = null;
@@ -8223,11 +8226,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * a view does not have a layer, and the layer type is {@link #LAYER_TYPE_NONE}.
      * Refer to the documentation of {@link #setLayerType(int, android.graphics.Paint)}
      * for more information on the different types of layers.
-     * 
+     *
      * @return {@link #LAYER_TYPE_NONE}, {@link #LAYER_TYPE_SOFTWARE} or
      *         {@link #LAYER_TYPE_HARDWARE}
-     * 
-     * @see #setLayerType(int, android.graphics.Paint) 
+     *
+     * @see #setLayerType(int, android.graphics.Paint)
      * @see #LAYER_TYPE_NONE
      * @see #LAYER_TYPE_SOFTWARE
      * @see #LAYER_TYPE_HARDWARE
@@ -8235,7 +8238,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public int getLayerType() {
         return mLayerType;
     }
-    
+
     /**
      * <p>Returns a hardware layer that can be used to draw this view again
      * without executing its draw method.</p>
@@ -8249,7 +8252,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         final int width = mRight - mLeft;
         final int height = mBottom - mTop;
-        
+
         if (width == 0 || height == 0) {
             return null;
         }
@@ -8276,7 +8279,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.translate(-mScrollX, -mScrollY);
 
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
-    
+
                 // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
                     mPrivateFlags &= ~DIRTY_MASK;
@@ -8284,7 +8287,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 } else {
                     draw(canvas);
                 }
-    
+
                 canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
@@ -8303,7 +8306,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * the cache is enabled. To benefit from the cache, you must request the drawing cache by
      * calling {@link #getDrawingCache()} and draw it on screen if the returned bitmap is not
      * null.</p>
-     * 
+     *
      * <p>Enabling the drawing cache is similar to
      * {@link #setLayerType(int, android.graphics.Paint) setting a layer} when hardware
      * acceleration is turned off. When hardware acceleration is turned on, enabling the
@@ -8321,7 +8324,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #isDrawingCacheEnabled()
      * @see #getDrawingCache()
      * @see #buildDrawingCache()
-     * @see #setLayerType(int, android.graphics.Paint) 
+     * @see #setLayerType(int, android.graphics.Paint)
      */
     public void setDrawingCacheEnabled(boolean enabled) {
         setFlags(enabled ? DRAWING_CACHE_ENABLED : 0, DRAWING_CACHE_ENABLED);
@@ -8343,7 +8346,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Debugging utility which recursively outputs the dirty state of a view and its
      * descendants.
-     * 
+     *
      * @hide
      */
     public void outputDirtyFlags(String indent, boolean clear, int clearMask) {
@@ -8388,11 +8391,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         return true;
     }
-    
+
     /**
      * <p>Returns a display list that can be used to draw this view again
      * without executing its draw method.</p>
-     * 
+     *
      * @return A DisplayList ready to replay, or null if caching is not enabled.
      *
      * @hide
@@ -8441,7 +8444,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
-    
+
                 // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
                     mPrivateFlags &= ~DIRTY_MASK;
@@ -8449,7 +8452,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 } else {
                     draw(canvas);
                 }
-    
+
                 canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
@@ -8466,9 +8469,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * <p>Calling this method is equivalent to calling <code>getDrawingCache(false)</code>.</p>
-     * 
+     *
      * @return A non-scaled bitmap representing this view or null if cache is disabled.
-     * 
+     *
      * @see #getDrawingCache(boolean)
      */
     public Bitmap getDrawingCache() {
@@ -8482,7 +8485,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * draw from the cache when the cache is enabled. To benefit from the cache, you must
      * request the drawing cache by calling this method and draw it on screen if the
      * returned bitmap is not null.</p>
-     * 
+     *
      * <p>Note about auto scaling in compatibility mode: When auto scaling is not enabled,
      * this method will create a bitmap of the same size as this view. Because this bitmap
      * will be drawn scaled by the parent ViewGroup, the result on screen might show
@@ -8490,13 +8493,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * the auto scaling to true. Doing so, however, will generate a bitmap of a different
      * size than the view. This implies that your application must be able to handle this
      * size.</p>
-     * 
+     *
      * @param autoScale Indicates whether the generated bitmap should be scaled based on
      *        the current density of the screen when the application is in compatibility
      *        mode.
      *
      * @return A bitmap representing this view or null if cache is disabled.
-     * 
+     *
      * @see #setDrawingCacheEnabled(boolean)
      * @see #isDrawingCacheEnabled()
      * @see #buildDrawingCache(boolean)
@@ -8562,7 +8565,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * <p>Calling this method is equivalent to calling <code>buildDrawingCache(false)</code>.</p>
-     * 
+     *
      * @see #buildDrawingCache(boolean)
      */
     public void buildDrawingCache() {
@@ -8575,7 +8578,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>If you call {@link #buildDrawingCache()} manually without calling
      * {@link #setDrawingCacheEnabled(boolean) setDrawingCacheEnabled(true)}, you
      * should cleanup the cache by calling {@link #destroyDrawingCache()} afterwards.</p>
-     * 
+     *
      * <p>Note about auto scaling in compatibility mode: When auto scaling is not enabled,
      * this method will create a bitmap of the same size as this view. Because this bitmap
      * will be drawn scaled by the parent ViewGroup, the result on screen might show
@@ -8583,10 +8586,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * the auto scaling to true. Doing so, however, will generate a bitmap of a different
      * size than the view. This implies that your application must be able to handle this
      * size.</p>
-     * 
+     *
      * <p>You should avoid calling this method when hardware acceleration is enabled. If
      * you do not need the drawing cache bitmap, calling this method will increase memory
-     * usage and cause the view to be rendered in software once, thus negatively impacting 
+     * usage and cause the view to be rendered in software once, thus negatively impacting
      * performance.</p>
      *
      * @see #getDrawingCache()
@@ -8699,12 +8702,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
             computeScroll();
             final int restoreCount = canvas.save();
-            
+
             if (autoScale && scalingRequired) {
                 final float scale = attachInfo.mApplicationScale;
                 canvas.scale(scale, scale);
             }
-            
+
             canvas.translate(-mScrollX, -mScrollY);
 
             mPrivateFlags |= DRAWN;
@@ -8745,14 +8748,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         final float scale = attachInfo != null ? attachInfo.mApplicationScale : 1.0f;
         width = (int) ((width * scale) + 0.5f);
         height = (int) ((height * scale) + 0.5f);
-        
+
         Bitmap bitmap = Bitmap.createBitmap(width > 0 ? width : 1, height > 0 ? height : 1, quality);
         if (bitmap == null) {
             throw new OutOfMemoryError();
         }
 
         bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
-        
+
         Canvas canvas;
         if (attachInfo != null) {
             canvas = attachInfo.mCanvas;
@@ -8902,7 +8905,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * <p>Indicates whether this view is attached to an hardware accelerated
      * window or not.</p>
-     * 
+     *
      * <p>Even if this method returns true, it does not mean that every call
      * to {@link #draw(android.graphics.Canvas)} will be made with an hardware
      * accelerated {@link android.graphics.Canvas}. For instance, if this view
@@ -8910,14 +8913,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * window is hardware accelerated,
      * {@link android.graphics.Canvas#isHardwareAccelerated()} will likely
      * return false, and this method will return true.</p>
-     * 
+     *
      * @return True if the view is attached to a window and the window is
      *         hardware accelerated; false in any other case.
      */
     public boolean isHardwareAccelerated() {
         return mAttachInfo != null && mAttachInfo.mHardwareAccelerated;
     }
-    
+
     /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
@@ -10984,21 +10987,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * !!! TODO: real docs
-     *
-     * The base class implementation makes the shadow the same size and appearance
-     * as the view itself, and positions it with its center at the touch point.
+     * Creates an image that the system displays during the drag and drop
+     * operation. This is called a &quot;drag shadow&quot;. The default implementation
+     * for a DragShadowBuilder based on a View returns an image that has exactly the same
+     * appearance as the given View. The default also positions the center of the drag shadow
+     * directly under the touch point. If no View is provided (the constructor with no parameters
+     * is used), and {@link #onProvideShadowMetrics(Point,Point) onProvideShadowMetrics()} and
+     * {@link #onDrawShadow(Canvas) onDrawShadow()} are not overriden, then the
+     * default is an invisible drag shadow.
+     * <p>
+     * You are not required to use the View you provide to the constructor as the basis of the
+     * drag shadow. The {@link #onDrawShadow(Canvas) onDrawShadow()} method allows you to draw
+     * anything you want as the drag shadow.
+     * </p>
+     * <p>
+     *  You pass a DragShadowBuilder object to the system when you start the drag. The system
+     *  calls {@link #onProvideShadowMetrics(Point,Point) onProvideShadowMetrics()} to get the
+     *  size and position of the drag shadow. It uses this data to construct a
+     *  {@link android.graphics.Canvas} object, then it calls {@link #onDrawShadow(Canvas) onDrawShadow()}
+     *  so that your application can draw the shadow image in the Canvas.
+     * </p>
      */
     public static class DragShadowBuilder {
         private final WeakReference<View> mView;
 
         /**
-         * Construct a shadow builder object for use with the given View object.  The
-         * default implementation will construct a drag shadow the same size and
-         * appearance as the supplied View.
-         *
-         * @param view A view within the application's layout whose appearance
-         *        should be replicated as the drag shadow.
+         * Constructs a shadow image builder based on a View. By default, the resulting drag
+         * shadow will have the same appearance and dimensions as the View, with the touch point
+         * over the center of the View.
+         * @param view A View. Any View in scope can be used.
          */
         public DragShadowBuilder(View view) {
             mView = new WeakReference<View>(view);
@@ -11009,7 +11026,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * constructor variant is only useful when the {@link #onProvideShadowMetrics(Point, Point)}
          * and {@link #onDrawShadow(Canvas)} methods are also overridden in order
          * to supply the drag shadow's dimensions and appearance without
-         * reference to any View object.
+         * reference to any View object. If they are not overridden, then the result is an
+         * invisible drag shadow.
          */
         public DragShadowBuilder() {
             mView = new WeakReference<View>(null);
@@ -11030,22 +11048,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         /**
-         * Provide the draggable-shadow metrics for the operation: the dimensions of
-         * the shadow image itself, and the point within that shadow that should
+         * Provides the metrics for the shadow image. These include the dimensions of
+         * the shadow image, and the point within that shadow that should
          * be centered under the touch location while dragging.
          * <p>
          * The default implementation sets the dimensions of the shadow to be the
-         * same as the dimensions of the View object that had been supplied to the
-         * {@link #View.DragShadowBuilder(View)} constructor
-         * when the builder object was instantiated, and centers the shadow under the touch
-         * point.
+         * same as the dimensions of the View itself and centers the shadow under
+         * the touch point.
+         * </p>
          *
-         * @param shadowSize The application should set the {@code x} member of this
-         *        parameter to the desired shadow width, and the {@code y} member to
-         *        the desired height.
-         * @param shadowTouchPoint The application should set this point to be the
-         *        location within the shadow that should track directly underneath
-         *        the touch point on the screen during a drag.
+         * @param shadowSize A {@link android.graphics.Point} containing the width and height
+         * of the shadow image. Your application must set {@link android.graphics.Point#x} to the
+         * desired width and must set {@link android.graphics.Point#y} to the desired height of the
+         * image.
+         *
+         * @param shadowTouchPoint A {@link android.graphics.Point} for the position within the
+         * shadow image that should be underneath the touch point during the drag and drop
+         * operation. Your application must set {@link android.graphics.Point#x} to the
+         * X coordinate and {@link android.graphics.Point#y} to the Y coordinate of this position.
          */
         public void onProvideShadowMetrics(Point shadowSize, Point shadowTouchPoint) {
             final View view = mView.get();
@@ -11058,16 +11078,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         /**
-         * Draw the shadow image for the upcoming drag.  The shadow canvas was
-         * created with the dimensions supplied by the
+         * Draws the shadow image. The system creates the {@link android.graphics.Canvas} object
+         * based on the dimensions it received from the
          * {@link #onProvideShadowMetrics(Point, Point)} callback.
-         * <p>
-         * The default implementation replicates the appearance of the View object
-         * that had been supplied to the
-         * {@link #View.DragShadowBuilder(View)}
-         * constructor when the builder object was instantiated.
          *
-         * @param canvas
+         * @param canvas A {@link android.graphics.Canvas} object in which to draw the shadow image.
          */
         public void onDrawShadow(Canvas canvas) {
             final View view = mView.get();
@@ -11080,24 +11095,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Drag and drop.  App calls startDrag(), then callbacks to the shadow builder's
-     * {@link DragShadowBuilder#onProvideShadowMetrics(Point, Point)} and
-     * {@link DragShadowBuilder#onDrawShadow(Canvas)} methods happen, then the drag
-     * operation is handed over to the OS.
-     * !!! TODO: real docs
-     *
-     * @param data !!! TODO
-     * @param shadowBuilder !!! TODO
-     * @param myLocalState An arbitrary object that will be passed as part of every DragEvent
-     *     delivered to the calling application during the course of the current drag operation.
-     *     This object is private to the application that called startDrag(), and is not
-     *     visible to other applications. It provides a lightweight way for the application to
-     *     propagate information from the initiator to the recipient of a drag within its own
-     *     application; for example, to help disambiguate between 'copy' and 'move' semantics.
-     * @param flags Flags affecting the drag operation.  At present no flags are defined;
-     *     pass 0 for this parameter.
-     * @return {@code true} if the drag operation was initiated successfully; {@code false} if
-     *     an error prevented the drag from taking place.
+     * Starts a drag and drop operation. When your application calls this method, it passes a
+     * {@link android.view.View.DragShadowBuilder} object to the system. The
+     * system calls this object's {@link DragShadowBuilder#onProvideShadowMetrics(Point, Point)}
+     * to get metrics for the drag shadow, and then calls the object's
+     * {@link DragShadowBuilder#onDrawShadow(Canvas)} to draw the drag shadow itself.
+     * <p>
+     *  Once the system has the drag shadow, it begins the drag and drop operation by sending
+     *  drag events to all the View objects in your application that are currently visible. It does
+     *  this either by calling the View object's drag listener (an implementation of
+     *  {@link android.view.View.OnDragListener#onDrag(View,DragEvent) onDrag()} or by calling the
+     *  View object's {@link android.view.View#onDragEvent(DragEvent) onDragEvent()} method.
+     *  Both are passed a {@link android.view.DragEvent} object that has a
+     *  {@link android.view.DragEvent#getAction()} value of
+     *  {@link android.view.DragEvent#ACTION_DRAG_STARTED}.
+     * </p>
+     * <p>
+     * Your application can invoke startDrag() on any attached View object. The View object does not
+     * need to be the one used in {@link android.view.View.DragShadowBuilder}, nor does it need to
+     * be related to the View the user selected for dragging.
+     * </p>
+     * @param data A {@link android.content.ClipData} object pointing to the data to be
+     * transferred by the drag and drop operation.
+     * @param shadowBuilder A {@link android.view.View.DragShadowBuilder} object for building the
+     * drag shadow.
+     * @param myLocalState An {@link java.lang.Object} containing local data about the drag and
+     * drop operation. This Object is put into every DragEvent object sent by the system during the
+     * current drag.
+     * <p>
+     * myLocalState is a lightweight mechanism for the sending information from the dragged View
+     * to the target Views. For example, it can contain flags that differentiate between a
+     * a copy operation and a move operation.
+     * </p>
+     * @param flags Flags that control the drag and drop operation. No flags are currently defined,
+     * so the parameter should be set to 0.
+     * @return {@code true} if the method completes successfully, or
+     * {@code false} if it fails anywhere. Returning {@code false} means the system was unable to
+     * do a drag, and so no drag operation is in progress.
      */
     public final boolean startDrag(ClipData data, DragShadowBuilder shadowBuilder,
             Object myLocalState, int flags) {
@@ -11156,42 +11190,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Drag-and-drop event dispatch.  The event.getAction() verb is one of the DragEvent
-     * constants DRAG_STARTED_EVENT, DRAG_EVENT, DROP_EVENT, and DRAG_ENDED_EVENT.
-     *
-     * For DRAG_STARTED_EVENT, event.getClipDescription() describes the content
-     * being dragged.  onDragEvent() should return 'true' if the view can handle
-     * a drop of that content.  A view that returns 'false' here will receive no
-     * further calls to onDragEvent() about the drag/drop operation.
-     *
-     * For DRAG_ENTERED, event.getClipDescription() describes the content being
-     * dragged.  This will be the same content description passed in the
-     * DRAG_STARTED_EVENT invocation.
-     *
-     * For DRAG_EXITED, event.getClipDescription() describes the content being
-     * dragged.  This will be the same content description passed in the
-     * DRAG_STARTED_EVENT invocation.  The view should return to its approriate
-     * drag-acceptance visual state.
-     *
-     * For DRAG_LOCATION_EVENT, event.getX() and event.getY() give the location in View
-     * coordinates of the current drag point.  The view must return 'true' if it
-     * can accept a drop of the current drag content, false otherwise.
-     *
-     * For DROP_EVENT, event.getX() and event.getY() give the location of the drop
-     * within the view; also, event.getClipData() returns the full data payload
-     * being dropped.  The view should return 'true' if it consumed the dropped
-     * content, 'false' if it did not.
-     *
-     * For DRAG_ENDED_EVENT, the 'event' argument may be null.  The view should return
-     * to its normal visual state.
+     * Handles drag events sent by the system following a call to
+     * {@link android.view.View#startDrag(ClipData,DragShadowBuilder,Object,int) startDrag()}.
+     *<p>
+     * When the system calls this method, it passes a
+     * {@link android.view.DragEvent} object. A call to
+     * {@link android.view.DragEvent#getAction()} returns one of the action type constants defined
+     * in DragEvent. The method uses these to determine what is happening in the drag and drop
+     * operation.
+     * @param event The {@link android.view.DragEvent} sent by the system.
+     * The {@link android.view.DragEvent#getAction()} method returns an action type constant defined
+     * in DragEvent, indicating the type of drag event represented by this object.
+     * @return {@code true} if the method was successful, otherwise {@code false}.
+     * <p>
+     *  The method should return {@code true} in response to an action type of
+     *  {@link android.view.DragEvent#ACTION_DRAG_STARTED} to receive drag events for the current
+     *  operation.
+     * </p>
+     * <p>
+     *  The method should also return {@code true} in response to an action type of
+     *  {@link android.view.DragEvent#ACTION_DROP} if it consumed the drop, or
+     *  {@code false} if it didn't.
+     * </p>
      */
     public boolean onDragEvent(DragEvent event) {
         return false;
     }
 
     /**
-     * Views typically don't need to override dispatchDragEvent(); it just calls
-     * onDragEvent(event) and passes the result up appropriately.
+     * Detects if this View is enabled and has a drag event listener.
+     * If both are true, then it calls the drag event listener with the
+     * {@link android.view.DragEvent} it received. If the drag event listener returns
+     * {@code true}, then dispatchDragEvent() returns {@code true}.
+     * <p>
+     * For all other cases, the method calls the
+     * {@link android.view.View#onDragEvent(DragEvent) onDragEvent()} drag event handler
+     * method and returns its result.
+     * </p>
+     * <p>
+     * This ensures that a drag event is always consumed, even if the View does not have a drag
+     * event listener. However, if the View has a listener and the listener returns true, then
+     * onDragEvent() is not called.
+     * </p>
      */
     public boolean dispatchDragEvent(DragEvent event) {
         if (mOnDragListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
@@ -11208,7 +11248,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void onCloseSystemDialogs(String reason) {
     }
-    
+
     /**
      * Given a Drawable whose bounds have been set to draw into this view,
      * update a Region being computed for {@link #gatherTransparentRegion} so
@@ -11540,7 +11580,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mOriginalWindowAttachCount = mWindowAttachCount;
         }
     }
-    
+
     private final class CheckForTap implements Runnable {
         public void run() {
             mPrivateFlags &= ~PREPRESSED;
@@ -11562,7 +11602,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void hackTurnOffWindowResizeAnim(boolean off) {
         mAttachInfo.mTurnOffWindowResizeAnim = off;
     }
-    
+
     /**
      * Interface definition for a callback to be invoked when a key event is
      * dispatched to this view. The callback will be invoked before the key
@@ -11625,11 +11665,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * Called when a drag event is dispatched to a view. This allows listeners
          * to get a chance to override base View behavior.
          *
-         * @param v The view the drag has been dispatched to.
-         * @param event The DragEvent object containing full information
-         *        about the event.
-         * @return true if the listener consumed the DragEvent, false in order to fall
-         *         back to the view's default handling.
+         * @param v The View that received the drag event.
+         * @param event The {@link android.view.DragEvent} object for the drag event.
+         * @return {@code true} if the drag event was handled successfully, or {@code false}
+         * if the drag event was not handled. Note that {@code false} will trigger the View
+         * to call its {@link #onDragEvent(DragEvent) onDragEvent()} handler.
          */
         boolean onDrag(View v, DragEvent event);
     }
@@ -11817,7 +11857,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         boolean mHardwareAccelerated;
         boolean mHardwareAccelerationRequested;
         HardwareRenderer mHardwareRenderer;
-        
+
         /**
          * Scale factor used by the compatibility mode
          */
@@ -11832,7 +11872,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * If set, ViewRoot doesn't use its lame animation for when the window resizes.
          */
         boolean mTurnOffWindowResizeAnim;
-        
+
         /**
          * Left position of this view's window
          */
@@ -12025,7 +12065,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * instances of View.</p>
      */
     private static class ScrollabilityCache implements Runnable {
-                
+
         /**
          * Scrollbars are not visible
          */
@@ -12042,7 +12082,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         public static final int FADING = 2;
 
         public boolean fadeScrollBars;
-        
+
         public int fadingEdgeLength;
         public int scrollBarDefaultDelayBeforeFade;
         public int scrollBarFadeDuration;
@@ -12060,7 +12100,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         private static final float[] OPAQUE = { 255 };
         private static final float[] TRANSPARENT = { 0.0f };
-        
+
         /**
          * When fading should start. This time moves into the future every time
          * a new scroll happens. Measured based on SystemClock.uptimeMillis()
@@ -12105,7 +12145,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 paint.setXfermode(null);
             }
         }
-        
+
         public void run() {
             long now = AnimationUtils.currentAnimationTimeMillis();
             if (now >= fadeStartTime) {
