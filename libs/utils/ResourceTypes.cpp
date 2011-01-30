@@ -4141,6 +4141,38 @@ void print_complex(uint32_t complex, bool isFraction)
     }
 }
 
+// Normalize a string for output
+String8 ResTable::normalizeForOutput( const char *input )
+{
+    String8 ret;
+    char buff[2];
+    buff[1] = '\0';
+
+    while (*input != '\0') {
+        switch (*input) {
+            // All interesting characters are in the ASCII zone, so we are making our own lives
+            // easier by scanning the string one byte at a time.
+        case '\\':
+            ret += "\\\\";
+            break;
+        case '\n':
+            ret += "\\n";
+            break;
+        case '"':
+            ret += "\\\"";
+            break;
+        default:
+            buff[0] = *input;
+            ret += buff;
+            break;
+        }
+
+        input++;
+    }
+
+    return ret;
+}
+
 void ResTable::print_value(const Package* pkg, const Res_value& value) const
 {
     if (value.dataType == Res_value::TYPE_NULL) {
@@ -4154,13 +4186,13 @@ void ResTable::print_value(const Package* pkg, const Res_value& value) const
         const char* str8 = pkg->header->values.string8At(
                 value.data, &len);
         if (str8 != NULL) {
-            printf("(string8) \"%s\"\n", str8);
+            printf("(string8) \"%s\"\n", normalizeForOutput(str8).string());
         } else {
             const char16_t* str16 = pkg->header->values.stringAt(
                     value.data, &len);
             if (str16 != NULL) {
                 printf("(string16) \"%s\"\n",
-                    String8(str16, len).string());
+                    normalizeForOutput(String8(str16, len).string()).string());
             } else {
                 printf("(string) null\n");
             }
