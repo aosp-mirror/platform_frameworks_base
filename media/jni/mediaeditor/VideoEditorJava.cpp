@@ -410,7 +410,7 @@ videoEditJava_getStaticIntField(
             (*pValue) = pEnv->GetStaticIntField(clazz, fieldId);
 
             // Log the value.
-            VIDEOEDIT_LOG_EXCEPTION(ANDROID_LOG_INFO, "VIDEO_EDITOR_JAVA",
+            VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR_JAVA",
                     "videoEditJava_getStaticIntField, %s = %d", pName, (*pValue));
         }
         else
