@@ -23,11 +23,13 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodInfo;
@@ -36,6 +38,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.Comparator;
@@ -45,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 
 public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, OnClickListener {
@@ -73,6 +77,11 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     private IBinder mToken;
     private InputMethodButton mInputMethodSwitchButton;
     private LinearLayout mInputMethodMenuList;
+    private boolean mHardKeyboardAvailable;
+    private boolean mHardKeyboardEnabled;
+    private OnHardKeyboardEnabledChangeListener mHardKeyboardEnabledChangeListener;
+    private LinearLayout mHardKeyboardSection;
+    private Switch mHardKeyboardSwitch;
     private PackageManager mPackageManager;
     private String mEnabledInputMethodAndSubtypesCacheStr;
     private String mLastSystemLocaleString;
@@ -107,6 +116,11 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         mIntentFilter.addDataScheme("package");
     }
 
+    public void setHardKeyboardEnabledChangeListener(
+            OnHardKeyboardEnabledChangeListener listener) {
+        mHardKeyboardEnabledChangeListener = listener;
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
@@ -128,6 +142,9 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     @Override
     public void onFinishInflate() {
         mInputMethodMenuList = (LinearLayout) findViewById(R.id.input_method_menu_list);
+        mHardKeyboardSection = (LinearLayout) findViewById(R.id.hard_keyboard_section);
+        mHardKeyboardSwitch = (Switch) findViewById(R.id.hard_keyboard_switch);
+        mHardKeyboardSwitch.setOnClickListener(this);
         mConfigureImeShortcut = ((View) findViewById(R.id.ime_settings_shortcut));
         mConfigureImeShortcut.setOnClickListener(this);
         // TODO: If configurations for IME are not changed, do not update
@@ -162,7 +179,9 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         if (view == mConfigureImeShortcut) {
             showConfigureInputMethods();
             onFinishPanel(true);
-            return;
+        } else if (view == mHardKeyboardSwitch) {
+            mHardKeyboardEnabled = mHardKeyboardSwitch.isChecked();
+            mHardKeyboardEnabledChangeListener.onHardKeyboardEnabledChange(mHardKeyboardEnabled);
         }
     }
 
@@ -239,6 +258,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     }
 
     private void updateUiElements() {
+        updateHardKeyboardSection();
+
         // TODO: Reuse subtype views.
         mInputMethodMenuList.removeAllViews();
         mRadioViewAndImiMap.clear();
@@ -275,6 +296,23 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
             mImm.setInputMethodAndSubtype(mToken, imi.getId(), subtype);
         } else {
             Log.w(TAG, "IME Token is not set yet.");
+        }
+    }
+
+    public void setHardKeyboardStatus(boolean available, boolean enabled) {
+        if (mHardKeyboardAvailable != available || mHardKeyboardEnabled != enabled) {
+            mHardKeyboardAvailable = available;
+            mHardKeyboardEnabled = enabled;
+            updateHardKeyboardSection();
+        }
+    }
+
+    private void updateHardKeyboardSection() {
+        if (mHardKeyboardAvailable) {
+            mHardKeyboardSection.setVisibility(View.VISIBLE);
+            mHardKeyboardSwitch.setChecked(mHardKeyboardEnabled);
+        } else {
+            mHardKeyboardSection.setVisibility(View.GONE);
         }
     }
 
@@ -422,5 +460,9 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
             Log.d(TAG, "onPackageChanged.");
         }
         mPackageChanged = true;
+    }
+
+    public interface OnHardKeyboardEnabledChangeListener {
+        public void onHardKeyboardEnabledChange(boolean enabled);
     }
 }

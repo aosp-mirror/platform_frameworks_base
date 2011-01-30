@@ -17,31 +17,22 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.AttributeSet;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
 
 import java.util.List;
-import java.util.Map;
 
 public class InputMethodButton extends ImageView {
 
     private static final String  TAG = "StatusBar/InputMethodButton";
     private static final boolean DEBUG = false;
-
-    private static final int ID_IME_SWITCH_BUTTON = R.id.imeSwitchButton;
-    // IME shortcut button is disabled.
-    private static final int ID_IME_SHORTCUT_BUTTON = 0;
 
     // These values are defined in Settings application.
     private static final int ID_IME_BUTTON_VISIBILITY_AUTO = 0;
@@ -55,8 +46,7 @@ public class InputMethodButton extends ImageView {
     private IBinder mToken;
     private boolean mShowButton = false;
     private boolean mScreenLocked = false;
-    private InputMethodInfo mShortcutInfo;
-    private InputMethodSubtype mShortcutSubtype;
+    private boolean mHardKeyboardAvailable;
 
     public InputMethodButton(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,26 +55,6 @@ public class InputMethodButton extends ImageView {
         mId = getId();
         // IME hookup
         mImm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-        // TODO: read the current icon & visibility state directly from the service
-
-        // TODO: register for notifications about changes to visibility & subtype from service
-
-        setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (mId) {
-                    case ID_IME_SWITCH_BUTTON:
-                        mImm.showInputMethodPicker();
-                        break;
-                    case ID_IME_SHORTCUT_BUTTON:
-                        if (mToken != null && mShortcutInfo != null) {
-                            mImm.setInputMethodAndSubtype(
-                                    mToken, mShortcutInfo.getId(), mShortcutSubtype);
-                        }
-                        break;
-                }
-            }
-        });
     }
 
     @Override
@@ -94,57 +64,17 @@ public class InputMethodButton extends ImageView {
         refreshStatusIcon();
     }
 
-    // TODO: Need to show an appropriate drawable for this shortcut button,
-    // if there are two or more shortcut input methods contained in this button.
-    // And need to add other methods to handle multiple shortcuts as appropriate.
-    private Drawable getShortcutInputMethodAndSubtypeDrawable() {
-        Map<InputMethodInfo, List<InputMethodSubtype>> shortcuts =
-                mImm.getShortcutInputMethodsAndSubtypes();
-        if (shortcuts.size() > 0) {
-            for (InputMethodInfo imi: shortcuts.keySet()) {
-                List<InputMethodSubtype> subtypes = shortcuts.get(imi);
-                // TODO: Returns the first found IMI for now. Should handle all shortcuts as
-                // appropriate.
-                mShortcutInfo = imi;
-                // TODO: Pick up the first found subtype for now. Should handle all subtypes
-                // as appropriate.
-                mShortcutSubtype = subtypes.size() > 0 ? subtypes.get(0) : null;
-                return getSubtypeIcon(mShortcutInfo, mShortcutSubtype);
-            }
-        }
-        return null;
-    }
-
-    private Drawable getSubtypeIcon(InputMethodInfo imi, InputMethodSubtype subtype) {
-        final PackageManager pm = getContext().getPackageManager();
-        if (imi != null) {
-            if (DEBUG) {
-                Log.d(TAG, "Update icons of IME: " + imi.getPackageName());
-            }
-            if (subtype != null) {
-                return pm.getDrawable(imi.getPackageName(), subtype.getIconResId(),
-                        imi.getServiceInfo().applicationInfo);
-            } else if (imi.getSubtypeCount() > 0) {
-                return pm.getDrawable(imi.getPackageName(),
-                        imi.getSubtypeAt(0).getIconResId(),
-                        imi.getServiceInfo().applicationInfo);
-            } else {
-                try {
-                    return pm.getApplicationInfo(imi.getPackageName(), 0).loadIcon(pm);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, "IME can't be found: " + imi.getPackageName());
-                }
-            }
-        }
-        return null;
-    }
-
     // Display IME switcher icon only when all of the followings are true:
     // * There is only one enabled IME on the device.  (Note that the IME should be the system IME)
     // * There are no explicitly enabled (by the user) subtypes of the IME, or the IME doesn't have
     // its subtypes at all
     private boolean needsToShowIMEButton() {
         if (!mShowButton || mScreenLocked) return false;
+
+        if (mHardKeyboardAvailable) {
+            return true;
+        }
+
         List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
         final int size = imis.size();
         final int visibility = loadInputMethodSelectorVisibility();
@@ -170,17 +100,7 @@ public class InputMethodButton extends ImageView {
         } else {
             setVisibility(View.VISIBLE);
         }
-        Drawable icon = null;
-        switch (mId) {
-            case ID_IME_SHORTCUT_BUTTON:
-                icon = getShortcutInputMethodAndSubtypeDrawable();
-                break;
-        }
-        if (icon == null) {
-            mIcon.setImageResource(R.drawable.ic_sysbar_ime);
-        } else {
-            mIcon.setImageDrawable(icon);
-        }
+        mIcon.setImageResource(R.drawable.ic_sysbar_ime);
     }
 
     private int loadInputMethodSelectorVisibility() {
@@ -198,6 +118,13 @@ public class InputMethodButton extends ImageView {
         mToken = token;
         mShowButton = showButton;
         refreshStatusIcon();
+    }
+
+    public void setHardKeyboardStatus(boolean available) {
+        if (mHardKeyboardAvailable != available) {
+            mHardKeyboardAvailable = available;
+            refreshStatusIcon();
+        }
     }
 
     public void setScreenLocked(boolean locked) {

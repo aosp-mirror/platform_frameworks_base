@@ -38,6 +38,47 @@
             android:layout_marginLeft="20dip"
             android:orientation="vertical"
             android:background="@*android:drawable/dialog_full_holo_dark">
+            <!-- Hard keyboard switch -->
+            <LinearLayout
+                android:id="@+id/hard_keyboard_section"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/use_physical_keyboard_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:minHeight="?android:attr/listPreferredItemHeight"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:orientation="vertical"
+                        android:paddingRight="6dip"
+                        android:paddingLeft="30dip"
+                        android:paddingTop="5dip"
+                        android:paddingBottom="5dip"
+                        android:gravity="center_vertical"
+                        android:singleLine="true"
+                        android:text="@string/status_bar_use_physical_keyboard"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:ellipsize="marquee" />
+                    <Switch
+                        android:id="@+id/hard_keyboard_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="16dip" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:background="@android:drawable/divider_horizontal_dark" />
+            </LinearLayout>
+
+            <!-- Input method list -->
             <ScrollView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -50,6 +91,8 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
             </ScrollView>
+
+            <!-- Configure input methods -->
             <TextView
                 android:id="@+id/ime_settings_shortcut"
                 android:layout_width="match_parent"
