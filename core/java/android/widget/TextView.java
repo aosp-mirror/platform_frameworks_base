@@ -4735,8 +4735,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (otherEvent != null) {
                 try {
                     beginBatchEdit();
-                    boolean handled = mInput.onKeyOther(this, (Editable) mText,
-                            otherEvent);
+                    final boolean handled = mInput.onKeyOther(this, (Editable) mText, otherEvent);
                     hideErrorIfUnchanged();
                     doDown = false;
                     if (handled) {
@@ -4752,12 +4751,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             
             if (doDown) {
                 beginBatchEdit();
-                if (mInput.onKeyDown(this, (Editable) mText, keyCode, event)) {
-                    endBatchEdit();
-                    hideErrorIfUnchanged();
-                    return 1;
-                }
+                final boolean handled = mInput.onKeyDown(this, (Editable) mText, keyCode, event);
                 endBatchEdit();
+                hideErrorIfUnchanged();
+                if (handled) return 1;
             }
         }
 
