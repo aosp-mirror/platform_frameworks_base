@@ -587,6 +587,7 @@ class LoaderManagerImpl extends LoaderManager {
                     if (DEBUG) Log.v(TAG, "  Removing last inactive loader: " + info);
                     inactive.mDeliveredData = false;
                     inactive.destroy();
+                    info.mLoader.abandon();
                     mInactiveLoaders.put(id, info);
                 } else {
                     // We already have an inactive loader for this ID that we are
@@ -617,6 +618,7 @@ class LoaderManagerImpl extends LoaderManager {
                 // Keep track of the previous instance of this loader so we can destroy
                 // it when the new one completes.
                 if (DEBUG) Log.v(TAG, "  Making last loader inactive: " + info);
+                info.mLoader.abandon();
                 mInactiveLoaders.put(id, info);
             }
         }
