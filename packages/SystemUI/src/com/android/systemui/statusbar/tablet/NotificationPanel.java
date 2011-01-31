@@ -170,7 +170,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             setContentFrameVisible(n > 0, false);
         } else if (mSettingsView == null) {
             // we're looking at the notifications; time to maybe make some changes
-            if (mNotificationCount != n) {
+            if ((mNotificationCount > 0) != (n > 0)) {
                 setContentFrameVisible(n > 0, true);
             }
         }
