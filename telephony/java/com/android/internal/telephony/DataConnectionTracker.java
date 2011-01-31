@@ -531,7 +531,9 @@ public abstract class DataConnectionTracker extends Handler {
      *         {@code true} otherwise.
      */
     public synchronized boolean getAnyDataEnabled() {
-        return (mInternalDataEnabled && mDataEnabled && (enabledCount != 0));
+        boolean result = (mInternalDataEnabled && mDataEnabled && (enabledCount != 0));
+        if (!result && DBG) log("getAnyDataEnabled " + result);
+        return result;
     }
 
     protected abstract void startNetStatPoll();
@@ -657,7 +659,13 @@ public abstract class DataConnectionTracker extends Handler {
 
     // disabled apn's still need avail/unavail notificiations - send them out
     protected void notifyOffApnsOfAvailability(String reason, boolean availability) {
-        if (mAvailability == availability) return;
+        if (mAvailability == availability) {
+            if (DBG) {
+                log("notifyOffApnsOfAvailability: no change in availability, " +
+                     "not nofitying about reason='" + reason + "' availability=" + availability);
+            }
+            return;
+        }
         mAvailability = availability;
         for (int id = 0; id < APN_NUM_TYPES; id++) {
             if (!isApnIdEnabled(id)) {
@@ -685,10 +693,13 @@ public abstract class DataConnectionTracker extends Handler {
      * @return {@code true} if data connectivity is possible, {@code false} otherwise.
      */
     protected boolean isDataPossible() {
-        boolean possible = (isDataAllowed()
-                && !(getAnyDataEnabled() && (mState == State.FAILED || mState == State.IDLE)));
-        if (!possible && DBG && isDataAllowed()) {
-            log("Data not possible.  No coverage: dataState = " + mState);
+        boolean dataAllowed = isDataAllowed();
+        boolean anyDataEnabled = getAnyDataEnabled();
+        boolean possible = (dataAllowed
+                && !(anyDataEnabled && (mState == State.FAILED || mState == State.IDLE)));
+        if (!possible && DBG) {
+            log("isDataPossible() " + possible + ", dataAllowed=" + dataAllowed +
+                    " anyDataEnabled=" + anyDataEnabled + " dataState=" + mState);
         }
         return possible;
     }
