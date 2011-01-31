@@ -23,6 +23,8 @@
 #include <utils/misc.h>
 #include <signal.h>
 
+#include <cutils/properties.h>
+
 #include <binder/IPCThreadState.h>
 #include <utils/threads.h>
 #include <utils/Atomic.h>
@@ -51,6 +53,7 @@
 
 #define USER_BOOTANIMATION_FILE "/data/local/bootanimation.zip"
 #define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
+#define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
 
 namespace android {
 
@@ -248,11 +251,25 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurface = s;
 
     mAndroidAnimation = true;
-    if ((access(USER_BOOTANIMATION_FILE, R_OK) == 0) &&
-            (mZip.open(USER_BOOTANIMATION_FILE) == NO_ERROR) ||
-            (access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
-            (mZip.open(SYSTEM_BOOTANIMATION_FILE) == NO_ERROR))
+
+    // If the device has encryption turned on or is in process 
+    // of being encrypted we show the encrypted boot animation.
+    char decrypt[PROPERTY_VALUE_MAX];
+    property_get("vold.decrypt", decrypt, "");
+
+    bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
+
+    if ((encryptedAnimation &&
+            (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
+            (mZip.open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE) == NO_ERROR)) ||
+
+            ((access(USER_BOOTANIMATION_FILE, R_OK) == 0) &&
+            (mZip.open(USER_BOOTANIMATION_FILE) == NO_ERROR)) ||
+
+            ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
+            (mZip.open(SYSTEM_BOOTANIMATION_FILE) == NO_ERROR))) {
         mAndroidAnimation = false;
+    }
 
     return NO_ERROR;
 }
