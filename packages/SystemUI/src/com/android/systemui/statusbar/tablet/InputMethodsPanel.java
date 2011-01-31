@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.tablet;
 
+import com.android.systemui.R;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,18 +25,16 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -48,10 +48,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.R;
-
-public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, OnClickListener {
+public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, View.OnClickListener,
+        CompoundButton.OnCheckedChangeListener {
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final String TAG = "InputMethodsPanel";
 
@@ -144,8 +142,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         mInputMethodMenuList = (LinearLayout) findViewById(R.id.input_method_menu_list);
         mHardKeyboardSection = (LinearLayout) findViewById(R.id.hard_keyboard_section);
         mHardKeyboardSwitch = (Switch) findViewById(R.id.hard_keyboard_switch);
-        mHardKeyboardSwitch.setOnClickListener(this);
-        mConfigureImeShortcut = ((View) findViewById(R.id.ime_settings_shortcut));
+        mHardKeyboardSwitch.setOnCheckedChangeListener(this);
+        mConfigureImeShortcut = findViewById(R.id.ime_settings_shortcut);
         mConfigureImeShortcut.setOnClickListener(this);
         // TODO: If configurations for IME are not changed, do not update
         // by checking onConfigurationChanged.
@@ -179,9 +177,17 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
         if (view == mConfigureImeShortcut) {
             showConfigureInputMethods();
             onFinishPanel(true);
-        } else if (view == mHardKeyboardSwitch) {
-            mHardKeyboardEnabled = mHardKeyboardSwitch.isChecked();
-            mHardKeyboardEnabledChangeListener.onHardKeyboardEnabledChange(mHardKeyboardEnabled);
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton button, boolean checked) {
+        if (button == mHardKeyboardSwitch) {
+            if (mHardKeyboardEnabled != checked) {
+                mHardKeyboardEnabled = checked;
+                if (mHardKeyboardEnabledChangeListener != null)
+                    mHardKeyboardEnabledChangeListener.onHardKeyboardEnabledChange(checked);
+            }
         }
     }
 
@@ -247,9 +253,9 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
                 subtypeView, new Pair<InputMethodInfo, InputMethodSubtype> (imi, subtype));
         subtypeView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 Pair<InputMethodInfo, InputMethodSubtype> imiAndSubtype =
-                        updateRadioButtonsByView(view);
+                        updateRadioButtonsByView(v);
                 onFinishPanel(false);
                 setInputMethodAndSubtype(imiAndSubtype.first, imiAndSubtype.second);
             }
@@ -310,7 +316,9 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, O
     private void updateHardKeyboardSection() {
         if (mHardKeyboardAvailable) {
             mHardKeyboardSection.setVisibility(View.VISIBLE);
-            mHardKeyboardSwitch.setChecked(mHardKeyboardEnabled);
+            if (mHardKeyboardSwitch.isChecked() != mHardKeyboardEnabled) {
+                mHardKeyboardSwitch.setChecked(mHardKeyboardEnabled);
+            }
         } else {
             mHardKeyboardSection.setVisibility(View.GONE);
         }
