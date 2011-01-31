@@ -119,7 +119,7 @@
         android:layout_width="match_parent"
         android:layout_alignParentRight="true"
         android:layout_above="@id/title_divider"
-        android:layout_marginRight="32dip"
+        android:layout_marginRight="6dip"
         android:layout_marginBottom="8dip"
         >
         <TextView android:id="@+id/time_bg"
@@ -127,14 +127,14 @@
             android:layout_height="wrap_content"
             android:gravity="right"
             android:singleLine="true"
-            android:textSize="72sp"
+            android:textSize="78sp"
             android:textColor="#999999" />
         <TextView android:id="@+id/time_fg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
             android:singleLine="true"
-            android:textSize="72sp"
+            android:textSize="78sp"
             android:textColor="#666666" />
     </com.android.systemui.statusbar.tablet.HoloClock>
 
