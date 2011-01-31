@@ -7358,7 +7358,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     stopSelectionActionMode();
                     boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
-                    if (hasInsertionController() && !selectAllGotFocus) {
+                    if (hasInsertionController() && !selectAllGotFocus && mText.length() > 0) {
                         getInsertionController().show();
                     }
                 }
@@ -8881,6 +8881,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mLastParentX = coords[0];
                     mLastParentY = coords[1];
                     mIsDragging = true;
+                    if (mIsInsertionHandle) {
+                        mTouchTimer = SystemClock.uptimeMillis();
+                    }
                     break;
                 }
 
@@ -9029,6 +9032,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (offset != previousOffset) {
                 updateOffset(handle, offset);
+                removePastePopupCallback();
             }
             hideDelayed();
         }
