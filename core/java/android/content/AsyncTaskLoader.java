@@ -169,11 +169,6 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
      * to properly dispose of the result.
      */
     public void onCanceled(D data) {
-        onCancelled(data);
-    }
-
-    @Deprecated
-    public void onCancelled(D data) {
     }
 
     void executePendingTask() {
@@ -214,10 +209,15 @@ public abstract class AsyncTaskLoader<D> extends Loader<D> {
             if (DEBUG) Slog.v(TAG, "Load complete of old task, trying to cancel");
             dispatchOnCancelled(task, data);
         } else {
-            mLastLoadCompleteTime = SystemClock.uptimeMillis();
-            mTask = null;
-            if (DEBUG) Slog.v(TAG, "Delivering result");
-            deliverResult(data);
+            if (isAbandoned()) {
+                // This cursor has been abandoned; just cancel the new data.
+                onCanceled(data);
+            } else {
+                mLastLoadCompleteTime = SystemClock.uptimeMillis();
+                mTask = null;
+                if (DEBUG) Slog.v(TAG, "Delivering result");
+                deliverResult(data);
+            }
         }
     }
 
