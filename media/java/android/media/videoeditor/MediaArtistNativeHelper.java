@@ -20,9 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -39,22 +40,29 @@ import android.view.Surface;
  *This class provide Native methods to be used by MediaArtist {@hide}
  */
 class MediaArtistNativeHelper {
+    private static final String TAG = "MediaArtistNativeHelper";
 
     static {
         System.loadLibrary("videoeditor_jni");
     }
 
-    private final int MAX_THUMBNAIL_PERMITTED = 8;
+    private static final int MAX_THUMBNAIL_PERMITTED = 8;
+
+    public static final int TASK_LOADING_SETTINGS = 1;
+    public static final int TASK_ENCODING = 2;
+
+    /**
+     *  The resize paint
+     */
+    private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
     private final VideoEditor mVideoEditor;
 
-    public EditSettings mStoryBoardSettings;
+    private EditSettings mStoryBoardSettings;
 
     private String mOutputFilename;
 
-    EditSettings mEditSettings = null;
-
-    PreviewClipProperties mClipProperties = null;
+    private PreviewClipProperties mClipProperties = null;
 
     private EditSettings mPreviewEditSettings;
 
@@ -62,29 +70,23 @@ class MediaArtistNativeHelper {
 
     private AudioTrack mAudioTrack = null;
 
-    public boolean mInvalidatePreviewArray = true;
+    private boolean mInvalidatePreviewArray = true;
 
     private boolean mRegenerateAudio = true;
 
     private String mExportFilename = null;
 
-    private boolean mExportDone = false;
-
     private int mProgressToApp;
 
-    /**
-     *  The resize paint
+    /*
+     *  Semaphore to control preview calls
      */
-    private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+    private final Semaphore mLock = new Semaphore(1, true);
 
     private String mRenderPreviewOverlayFile;
-    private int   mRenderPreviewRenderingMode;
+    private int mRenderPreviewRenderingMode;
 
     private boolean mIsFirstProgress;
-
-    public static final int TASK_LOADING_SETTINGS = 1;
-
-    public static final int TASK_ENCODING = 2;
 
     private static final String AUDIO_TRACK_PCM_FILE = "AudioPcm.pcm";
 
@@ -98,32 +100,24 @@ class MediaArtistNativeHelper {
     public static final int PROCESSING_INTERMEDIATE3 = 13;
     public static final int PROCESSING_EXPORT        = 20;
 
-    private int    mProcessingState;
+    private int mProcessingState;
     private Object mProcessingObject;
-
     private PreviewProgressListener mPreviewProgressListener;
     private ExportProgressListener mExportProgressListener;
     private ExtractAudioWaveformProgressListener mExtractAudioWaveformProgressListener;
-    private MediaProcessingProgressListener      mMediaProcessingProgressListener;
+    private MediaProcessingProgressListener mMediaProcessingProgressListener;
     private final String mProjectPath;
 
     private long mPreviewProgress;
 
     private String mAudioTrackPCMFilePath;
 
-    int mTotalClips = 0;
-
-    int mPreviewEffectsSize = 0;
+    private int mTotalClips = 0;
 
     private boolean mErrorFlagSet = false;
 
     @SuppressWarnings("unused")
     private int mManualEditContext;
-
-
-    List<Effect> mMediaEffectList;
-
-    List<Overlay> mMediaOverLayList;
 
     /* Listeners */
 
@@ -763,7 +757,6 @@ class MediaArtistNativeHelper {
 
         /** Internal error. */
         public static final int ERR_INTERNAL = 255;
-
     }
 
     /**
@@ -1203,9 +1196,8 @@ class MediaArtistNativeHelper {
     }
 
     /**
-     * Defines transition behaviours.
-     **/
-
+     * Defines transition behaviors.
+     */
     public static final class TransitionBehaviour {
 
         /** The transition uses an increasing speed. */
@@ -1230,7 +1222,9 @@ class MediaArtistNativeHelper {
         public static final int FAST_MIDDLE = 4;
     }
 
-    /** Defines settings for the background music. */
+    /**
+     * Defines settings for the background music.
+     */
     public static class BackgroundMusicSettings {
 
         /** Background music file. */
@@ -1273,7 +1267,6 @@ class MediaArtistNativeHelper {
         public int lowVolume;
 
         public boolean isLooping;
-
     }
 
     /** Defines settings for an effect. */
@@ -1568,7 +1561,6 @@ class MediaArtistNativeHelper {
         boolean bInDucking_enable;
 
         String pcmFilePath;
-
     }
 
     /** Encapsulates preview clips and effect settings */
@@ -1775,7 +1767,6 @@ class MediaArtistNativeHelper {
         public int audioVolumeValue;
 
         public String Id;
-
     }
 
     /**
@@ -1796,8 +1787,6 @@ class MediaArtistNativeHelper {
         if (mStoryBoardSettings == null)
             mStoryBoardSettings = new EditSettings();
 
-        mMediaEffectList = new ArrayList<Effect>();
-        mMediaOverLayList = new ArrayList<Overlay>();
         _init(mProjectPath, "null");
         mAudioTrackPCMFilePath = null;
     }
@@ -1879,7 +1868,7 @@ class MediaArtistNativeHelper {
                 case PROCESSING_NONE:
 
                 default:
-                    Log.e("MediaArtistNativeHelper", "ERROR unexpected State=" + mProcessingState);
+                    Log.e(TAG, "ERROR unexpected State=" + mProcessingState);
                     return;
             }
             if ((mProgressToApp != actualProgress) && (actualProgress != 0)) {
@@ -1888,8 +1877,7 @@ class MediaArtistNativeHelper {
 
                 if (mMediaProcessingProgressListener != null) {
                     // Send the progress indication
-                    mMediaProcessingProgressListener.onProgress(mProcessingObject,
-                                                                action,
+                    mMediaProcessingProgressListener.onProgress(mProcessingObject, action,
                                                                 actualProgress);
                 }
             }
@@ -1899,8 +1887,7 @@ class MediaArtistNativeHelper {
                     /*
                      *  Send the progress indication
                      */
-                    mMediaProcessingProgressListener.onProgress(mProcessingObject,
-                                                                action,
+                    mMediaProcessingProgressListener.onProgress(mProcessingObject, action,
                                                                 actualProgress);
                 }
                 mProgressToApp = 1;
@@ -1944,15 +1931,14 @@ class MediaArtistNativeHelper {
     /**
      * Release the native helper object
      */
-    public void releaseNativeHelper() {
+    void releaseNativeHelper() {
         try {
             release();
         } catch (IllegalStateException ex) {
-            Log.e("MediaArtistNativeHelper",
-            "Illegal State exeption caught in releaseNativeHelper");
+            Log.e(TAG, "Illegal State exeption caught in releaseNativeHelper");
             throw ex;
         } catch (RuntimeException ex) {
-            Log.e("MediaArtistNativeHelper", "Runtime exeption caught in releaseNativeHelper");
+            Log.e(TAG, "Runtime exeption caught in releaseNativeHelper");
             throw ex;
         }
     }
@@ -1962,9 +1948,7 @@ class MediaArtistNativeHelper {
      */
     @SuppressWarnings("unused")
     private void onAudioGraphExtractProgressUpdate(int progress, boolean isVideo) {
-
-        if ((mExtractAudioWaveformProgressListener != null) && (progress > 0))
-        {
+        if ((mExtractAudioWaveformProgressListener != null) && (progress > 0)) {
             mExtractAudioWaveformProgressListener.onProgress(progress);
         }
     }
@@ -1974,8 +1958,7 @@ class MediaArtistNativeHelper {
      *
      * @param effects The reference of EffectColor
      *
-     * @return The populated effect settings in EffectSettings
-     * reference
+     * @return The populated effect settings in EffectSettings reference
      */
     EffectSettings getEffectSettings(EffectColor effects) {
         EffectSettings effectSettings = new EffectSettings();
@@ -2017,8 +2000,7 @@ class MediaArtistNativeHelper {
      *
      * @param overlay The reference of OverlayFrame
      *
-     * @return The populated overlay settings in EffectSettings
-     * reference
+     * @return The populated overlay settings in EffectSettings reference
      */
     EffectSettings getOverlaySettings(OverlayFrame overlay) {
         EffectSettings effectSettings = new EffectSettings();
@@ -2039,7 +2021,7 @@ class MediaArtistNativeHelper {
                 try {
                     (overlay).save(mProjectPath);
                 } catch (IOException e) {
-                    Log.e("MediaArtistNativeHelper","getOverlaySettings : File not found");
+                    Log.e(TAG, "getOverlaySettings : File not found");
                 }
                 effectSettings.framingFile = overlay.getFilename();
             }
@@ -2098,13 +2080,12 @@ class MediaArtistNativeHelper {
         int aspectRatio;
         if (overlay.getMediaItem() instanceof MediaImageItem) {
             if (((MediaImageItem)overlay.getMediaItem()).getGeneratedImageClip() != null) {
-                //Kenburns was applied
+                // Ken Burns was applied
                 mediaItemHeight = ((MediaImageItem)overlay.getMediaItem()).getGeneratedClipHeight();
                 aspectRatio = getAspectRatio(
                     ((MediaImageItem)overlay.getMediaItem()).getGeneratedClipWidth()
                     , mediaItemHeight);
-            }
-            else {
+            } else {
                 //For image get the scaled height. Aspect ratio would remain the same
                 mediaItemHeight = ((MediaImageItem)overlay.getMediaItem()).getScaledHeight();
                 aspectRatio = overlay.getMediaItem().getAspectRatio();
@@ -2148,7 +2129,7 @@ class MediaArtistNativeHelper {
      *
      * @return The frame rate from one of the defined enum values
      */
-    public int GetClosestVideoFrameRate(int averageFrameRate) {
+    int GetClosestVideoFrameRate(int averageFrameRate) {
         if (averageFrameRate >= 25) {
             return VideoFrameRate.FR_30_FPS;
         } else if (averageFrameRate >= 20) {
@@ -2172,8 +2153,7 @@ class MediaArtistNativeHelper {
      * Helper function to adjust the effect or overlay start time
      * depending on the begin and end boundary time of meddia item
      */
-    public void adjustEffectsStartTimeAndDuration(EffectSettings lEffect,
-                                                  int beginCutTime,
+    public void adjustEffectsStartTimeAndDuration(EffectSettings lEffect, int beginCutTime,
                                                   int endCutTime) {
 
         int effectStartTime = 0;
@@ -2271,20 +2251,20 @@ class MediaArtistNativeHelper {
         try {
             err = nativeGenerateClip(editSettings);
         } catch (IllegalArgumentException ex) {
-            Log.e("MediaArtistNativeHelper","Illegal Argument exception in load settings");
+            Log.e(TAG, "Illegal Argument exception in load settings");
             return -1;
         } catch (IllegalStateException ex) {
-            Log.e("MediaArtistNativeHelper","Illegal state exception in load settings");
+            Log.e(TAG, "Illegal state exception in load settings");
             return -1;
         } catch (RuntimeException ex) {
-            Log.e("MediaArtistNativeHelper", "Runtime exception in load settings");
+            Log.e(TAG, "Runtime exception in load settings");
             return -1;
         }
         return err;
     }
 
     /**
-     * Init function to initialise the  ClipSettings reference to
+     * Init function to initialiZe the  ClipSettings reference to
      * default values
      *
      * @param lclipSettings The ClipSettings reference
@@ -2357,9 +2337,8 @@ class MediaArtistNativeHelper {
             //editSettings.videoFormat = VideoFormat.MPEG4;
             editSettings.videoFormat = VideoFormat.H264;
             editSettings.videoFrameRate = VideoFrameRate.FR_30_FPS;
-            editSettings.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(), m
-                    .getHeight());
-
+            editSettings.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(),
+                    m.getHeight());
         } else {
             MediaImageItem m = (MediaImageItem)lMediaItem;
             editSettings.audioBitrate = Bitrate.BR_64_KBPS;
@@ -2370,8 +2349,8 @@ class MediaArtistNativeHelper {
             editSettings.videoBitrate = Bitrate.BR_5_MBPS;
             editSettings.videoFormat = VideoFormat.H264;
             editSettings.videoFrameRate = VideoFrameRate.FR_30_FPS;
-            editSettings.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(), m
-                    .getScaledHeight());
+            editSettings.videoFrameSize = findVideoResolution(mVideoEditor.getAspectRatio(),
+                    m.getScaledHeight());
         }
 
         editSettings.outputFile = EffectClipPath;
@@ -2466,11 +2445,9 @@ class MediaArtistNativeHelper {
                 clip2Height = ((MediaImageItem)m2).getScaledHeight();
             }
             if (clip1Height > clip2Height) {
-                videoSize = findVideoResolution(mVideoEditor.getAspectRatio(),
-                                                                   clip1Height);
+                videoSize = findVideoResolution(mVideoEditor.getAspectRatio(), clip1Height);
             } else {
-                videoSize = findVideoResolution(mVideoEditor.getAspectRatio(),
-                                                                   clip2Height);
+                videoSize = findVideoResolution(mVideoEditor.getAspectRatio(), clip2Height);
             }
         } else if (m1 == null && m2 != null) {
             if (m2 instanceof MediaVideoItem) {
@@ -2478,16 +2455,14 @@ class MediaArtistNativeHelper {
             } else if (m2 instanceof MediaImageItem) {
                 clip2Height = ((MediaImageItem)m2).getScaledHeight();
             }
-            videoSize = findVideoResolution(mVideoEditor.getAspectRatio(),
-                                                                   clip2Height);
+            videoSize = findVideoResolution(mVideoEditor.getAspectRatio(), clip2Height);
         } else if (m1 != null && m2 == null) {
             if (m1 instanceof MediaVideoItem) {
                 clip1Height = m1.getHeight();
             } else if (m1 instanceof MediaImageItem) {
                 clip1Height = ((MediaImageItem)m1).getScaledHeight();
             }
-            videoSize = findVideoResolution(mVideoEditor.getAspectRatio(),
-                                                                   clip1Height);
+            videoSize = findVideoResolution(mVideoEditor.getAspectRatio(), clip1Height);
         }
         return videoSize;
     }
@@ -2542,7 +2517,7 @@ class MediaArtistNativeHelper {
      *
      * @param m1 Media item associated with effect
      * @param effectSettings The EffectSettings reference containing
-     * effect specific data
+     *      effect specific data
      * @param beginCutTime The begin cut time of the clip associated with effect
      * @param endCutTime The end cut time of the clip associated with effect
      * @param storyBoardTime The current story board time
@@ -2551,8 +2526,6 @@ class MediaArtistNativeHelper {
      */
     private int populateEffects(MediaItem m, EffectSettings[] effectSettings, int i,
             int beginCutTime, int endCutTime, int storyBoardTime) {
-        List<Effect> effects = m.getAllEffects();
-        List<Overlay> overlays = m.getAllOverlays();
 
         if (m.getBeginTransition() != null && m.getBeginTransition().getDuration() > 0
                 && m.getEndTransition() != null && m.getEndTransition().getDuration() > 0) {
@@ -2566,19 +2539,20 @@ class MediaArtistNativeHelper {
             beginCutTime += m.getBeginTransition().getDuration();
         }
 
+        final List<Effect> effects = m.getAllEffects();
+        final List<Overlay> overlays = m.getAllOverlays();
         for (Effect effect : effects) {
             if (effect instanceof EffectColor) {
                 effectSettings[i] = getEffectSettings((EffectColor)effect);
-                adjustEffectsStartTimeAndDuration(effectSettings[i],
-                                                      beginCutTime, endCutTime);
+                adjustEffectsStartTimeAndDuration(effectSettings[i], beginCutTime, endCutTime);
                 effectSettings[i].startTime += storyBoardTime;
                 i++;
             }
         }
+
         for (Overlay overlay : overlays) {
             effectSettings[i] = getOverlaySettings((OverlayFrame)overlay);
-            adjustEffectsStartTimeAndDuration(effectSettings[i],
-                                                      beginCutTime, endCutTime);
+            adjustEffectsStartTimeAndDuration(effectSettings[i], beginCutTime, endCutTime);
             effectSettings[i].startTime += storyBoardTime;
             i++;
         }
@@ -2596,31 +2570,24 @@ class MediaArtistNativeHelper {
                                          Properties clipProperties, MediaItem m) {
         if (m.getBeginTransition() != null && m.getBeginTransition().getDuration() > 0
                 && m.getEndTransition() != null && m.getEndTransition().getDuration() > 0) {
-
             clipSettings.beginCutTime += m.getBeginTransition().getDuration();
             clipSettings.endCutTime -= m.getEndTransition().getDuration();
-
         } else if (m.getBeginTransition() == null && m.getEndTransition() != null
                 && m.getEndTransition().getDuration() > 0) {
-
             clipSettings.endCutTime -= m.getEndTransition().getDuration();
-
         } else if (m.getEndTransition() == null && m.getBeginTransition() != null
                 && m.getBeginTransition().getDuration() > 0) {
-
             clipSettings.beginCutTime += m.getBeginTransition().getDuration();
         }
-        clipProperties.duration = clipSettings.endCutTime -
-                                                      clipSettings.beginCutTime;
+
+        clipProperties.duration = clipSettings.endCutTime - clipSettings.beginCutTime;
 
         if (clipProperties.videoDuration != 0) {
-            clipProperties.videoDuration = clipSettings.endCutTime -
-                                                      clipSettings.beginCutTime;
+            clipProperties.videoDuration = clipSettings.endCutTime - clipSettings.beginCutTime;
         }
 
         if (clipProperties.audioDuration != 0) {
-            clipProperties.audioDuration = clipSettings.endCutTime -
-                                                      clipSettings.beginCutTime;
+            clipProperties.audioDuration = clipSettings.endCutTime - clipSettings.beginCutTime;
         }
     }
 
@@ -2642,27 +2609,25 @@ class MediaArtistNativeHelper {
         editSettings.clipSettingsArray[index].clipPath = transition.getFilename();
         editSettings.clipSettingsArray[index].fileType = FileType.THREE_GPP;
         editSettings.clipSettingsArray[index].beginCutTime = 0;
-        editSettings.clipSettingsArray[index].endCutTime =
-                                                  (int)transition.getDuration();
-        editSettings.clipSettingsArray[index].mediaRendering =
-                                                   MediaRendering.BLACK_BORDERS;
+        editSettings.clipSettingsArray[index].endCutTime = (int)transition.getDuration();
+        editSettings.clipSettingsArray[index].mediaRendering = MediaRendering.BLACK_BORDERS;
+
         try {
             clipPropertiesArray.clipProperties[index] =
-                                   getMediaProperties(transition.getFilename());
+                getMediaProperties(transition.getFilename());
         } catch (Exception e) {
             throw new IllegalArgumentException("Unsupported file or file not found");
         }
+
         clipPropertiesArray.clipProperties[index].Id = null;
         clipPropertiesArray.clipProperties[index].audioVolumeValue = 100;
-        clipPropertiesArray.clipProperties[index].duration =
-                                                  (int)transition.getDuration();
+        clipPropertiesArray.clipProperties[index].duration = (int)transition.getDuration();
         if (clipPropertiesArray.clipProperties[index].videoDuration != 0) {
-            clipPropertiesArray.clipProperties[index].videoDuration =
-                                                  (int)transition.getDuration();
+            clipPropertiesArray.clipProperties[index].videoDuration = (int)transition.getDuration();
         }
+
         if (clipPropertiesArray.clipProperties[index].audioDuration != 0) {
-            clipPropertiesArray.clipProperties[index].audioDuration =
-                                                  (int)transition.getDuration();
+            clipPropertiesArray.clipProperties[index].audioDuration = (int)transition.getDuration();
         }
     }
 
@@ -2676,10 +2641,10 @@ class MediaArtistNativeHelper {
     private void adjustVolume(MediaItem m, PreviewClipProperties clipProperties,
                               int index) {
         if (m instanceof MediaVideoItem) {
-            boolean videoMuted = ((MediaVideoItem)m).isMuted();
+            final boolean videoMuted = ((MediaVideoItem)m).isMuted();
             if (videoMuted == false) {
-                mClipProperties.clipProperties[index].audioVolumeValue = ((MediaVideoItem)m)
-                .getVolume();
+                mClipProperties.clipProperties[index].audioVolumeValue =
+                    ((MediaVideoItem)m).getVolume();
             } else {
                 mClipProperties.clipProperties[index].audioVolumeValue = 0;
             }
@@ -2725,22 +2690,22 @@ class MediaArtistNativeHelper {
     private int populateMediaItemProperties(MediaItem m, int index, int maxHeight) {
         mPreviewEditSettings.clipSettingsArray[index] = new ClipSettings();
         if (m instanceof MediaVideoItem) {
-            mPreviewEditSettings.clipSettingsArray[index] = ((MediaVideoItem)m)
-            .getVideoClipProperties();
+            mPreviewEditSettings.clipSettingsArray[index] =
+                ((MediaVideoItem)m).getVideoClipProperties();
             if (((MediaVideoItem)m).getHeight() > maxHeight) {
                 maxHeight = ((MediaVideoItem)m).getHeight();
             }
         } else if (m instanceof MediaImageItem) {
-            mPreviewEditSettings.clipSettingsArray[index] = ((MediaImageItem)m)
-            .getImageClipProperties();
+            mPreviewEditSettings.clipSettingsArray[index] =
+                ((MediaImageItem)m).getImageClipProperties();
             if (((MediaImageItem)m).getScaledHeight() > maxHeight) {
                 maxHeight = ((MediaImageItem)m).getScaledHeight();
             }
         }
         /** + Handle the image files here */
         if (mPreviewEditSettings.clipSettingsArray[index].fileType == FileType.JPG) {
-            mPreviewEditSettings.clipSettingsArray[index].clipDecodedPath = ((MediaImageItem)m)
-            .getDecodedImageFileName();
+            mPreviewEditSettings.clipSettingsArray[index].clipDecodedPath =
+                ((MediaImageItem)m).getDecodedImageFileName();
 
             mPreviewEditSettings.clipSettingsArray[index].clipOriginalPath =
                          mPreviewEditSettings.clipSettingsArray[index].clipPath;
@@ -2758,8 +2723,7 @@ class MediaArtistNativeHelper {
 
         if (mediaBGMList.size() == 1) {
             mAudioTrack = mediaBGMList.get(0);
-        } else
-        {
+        } else {
             mAudioTrack = null;
         }
 
@@ -2792,41 +2756,31 @@ class MediaArtistNativeHelper {
             mAudioSettings.ducking_threshold = mAudioTrack.getDuckingThreshhold();
             mAudioSettings.bInDucking_enable = mAudioTrack.isDuckingEnabled();
             mAudioTrackPCMFilePath = String.format(mProjectPath + "/" + AUDIO_TRACK_PCM_FILE);
-            //String.format(mProjectPath + "/" + "AudioPcm" + ".pcm");
             mAudioSettings.pcmFilePath = mAudioTrackPCMFilePath;
 
-            mPreviewEditSettings.backgroundMusicSettings =
-                                                  new BackgroundMusicSettings();
-            mPreviewEditSettings.backgroundMusicSettings.file =
-                                                         mAudioTrackPCMFilePath;
-            mPreviewEditSettings.backgroundMusicSettings.fileType =
-                                                      mAudioProperties.fileType;
+            mPreviewEditSettings.backgroundMusicSettings = new BackgroundMusicSettings();
+            mPreviewEditSettings.backgroundMusicSettings.file = mAudioTrackPCMFilePath;
+            mPreviewEditSettings.backgroundMusicSettings.fileType = mAudioProperties.fileType;
             mPreviewEditSettings.backgroundMusicSettings.insertionTime =
-                                                     mAudioTrack.getStartTime();
-            mPreviewEditSettings.backgroundMusicSettings.volumePercent =
-                                                        mAudioTrack.getVolume();
-            mPreviewEditSettings.backgroundMusicSettings.beginLoop = mAudioTrack
-            .getBoundaryBeginTime();
+                mAudioTrack.getStartTime();
+            mPreviewEditSettings.backgroundMusicSettings.volumePercent = mAudioTrack.getVolume();
+            mPreviewEditSettings.backgroundMusicSettings.beginLoop =
+                mAudioTrack.getBoundaryBeginTime();
             mPreviewEditSettings.backgroundMusicSettings.endLoop =
                                                mAudioTrack.getBoundaryEndTime();
-            mPreviewEditSettings.backgroundMusicSettings.enableDucking = mAudioTrack
-            .isDuckingEnabled();
-            mPreviewEditSettings.backgroundMusicSettings.duckingThreshold = mAudioTrack
-            .getDuckingThreshhold();
-            mPreviewEditSettings.backgroundMusicSettings.lowVolume = mAudioTrack
-            .getDuckedTrackVolume();
-            mPreviewEditSettings.backgroundMusicSettings.isLooping =
-                                                        mAudioTrack.isLooping();
+            mPreviewEditSettings.backgroundMusicSettings.enableDucking =
+                mAudioTrack.isDuckingEnabled();
+            mPreviewEditSettings.backgroundMusicSettings.duckingThreshold =
+                mAudioTrack.getDuckingThreshhold();
+            mPreviewEditSettings.backgroundMusicSettings.lowVolume =
+                mAudioTrack.getDuckedTrackVolume();
+            mPreviewEditSettings.backgroundMusicSettings.isLooping = mAudioTrack.isLooping();
             mPreviewEditSettings.primaryTrackVolume = 100;
             mProcessingState  = PROCESSING_AUDIO_PCM;
             mProcessingObject = mAudioTrack;
         } else {
-            if (mAudioSettings != null) {
-                mAudioSettings = null;
-            }
-            if (mPreviewEditSettings.backgroundMusicSettings != null) {
-                mPreviewEditSettings.backgroundMusicSettings = null;
-            }
+            mAudioSettings = null;
+            mPreviewEditSettings.backgroundMusicSettings = null;
             mAudioTrackPCMFilePath = null;
         }
     }
@@ -2850,8 +2804,9 @@ class MediaArtistNativeHelper {
             final Iterator<Effect> ef = t.getAllEffects().iterator();
             while (ef.hasNext()) {
                 final Effect e = ef.next();
-                if (e instanceof EffectKenBurns)
+                if (e instanceof EffectKenBurns) {
                     totalEffects--;
+                }
             }
         }
         return totalEffects;
@@ -2869,7 +2824,7 @@ class MediaArtistNativeHelper {
      * @param listener The MediaProcessingProgressListener
      *
      */
-    public void previewStoryBoard(List<MediaItem> mediaItemsList,
+    void previewStoryBoard(List<MediaItem> mediaItemsList,
             List<Transition> mediaTransitionList, List<AudioTrack> mediaBGMList,
             MediaProcessingProgressListener listener) {
         if (mInvalidatePreviewArray) {
@@ -2888,8 +2843,9 @@ class MediaArtistNativeHelper {
 
             mTotalClips = mediaItemsList.size();
             for (Transition transition : mediaTransitionList) {
-                if (transition.getDuration() > 0)
+                if (transition.getDuration() > 0) {
                     mTotalClips++;
+                }
             }
 
             totalEffects = getTotalEffects(mediaItemsList);
@@ -2898,7 +2854,7 @@ class MediaArtistNativeHelper {
             mPreviewEditSettings.effectSettingsArray = new EffectSettings[totalEffects];
             mClipProperties.clipProperties = new Properties[mTotalClips];
 
-            /** record the call back progress listner */
+            /** record the call back progress listener */
             mMediaProcessingProgressListener = listener;
             mProgressToApp = 0;
 
@@ -2923,19 +2879,16 @@ class MediaArtistNativeHelper {
                         previewIndex++;
                     }
                     /* Populate media item properties */
-                    maxHeight = populateMediaItemProperties(lMediaItem,
-                                                            previewIndex,
-                                                            maxHeight);
+                    maxHeight = populateMediaItemProperties(lMediaItem, previewIndex, maxHeight);
                     /* Get the clip properties of the media item. */
-                    if (lMediaItem instanceof MediaImageItem)
-                    {
+                    if (lMediaItem instanceof MediaImageItem) {
                         int tmpCnt = 0;
                         boolean bEffectKbPresent = false;
-                        List<Effect> effectList = lMediaItem.getAllEffects();
+                        final List<Effect> effectList = lMediaItem.getAllEffects();
                         /**
-                         * check if Kenburns effect is present
+                         * Check if Ken Burns effect is present
                          */
-                        while ( tmpCnt < effectList.size()) {
+                        while (tmpCnt < effectList.size()) {
                             if (effectList.get(tmpCnt) instanceof EffectKenBurns) {
                                 bEffectKbPresent = true;
                                 break;
@@ -2960,9 +2913,7 @@ class MediaArtistNativeHelper {
                             mClipProperties.clipProperties[previewIndex].width = ((MediaImageItem)lMediaItem).getScaledWidth();
                             mClipProperties.clipProperties[previewIndex].height = ((MediaImageItem)lMediaItem).getScaledHeight();
                         }
-
-                    }else
-                    {
+                    } else {
                         try {
                             mClipProperties.clipProperties[previewIndex]
                                  = getMediaProperties(lMediaItem.getFilename());
@@ -3008,22 +2959,19 @@ class MediaArtistNativeHelper {
             if (!mErrorFlagSet) {
                 mPreviewEditSettings.videoFrameSize = findVideoResolution(mVideoEditor
                         .getAspectRatio(), maxHeight);
-                /*if (mediaBGMList.size() == 1) //for remove Audio check */ {
-                    populateBackgroundMusicProperties(mediaBGMList);
-                }
+                populateBackgroundMusicProperties(mediaBGMList);
+
                 /** call to native populate settings */
                 try {
                     nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
                 } catch (IllegalArgumentException ex) {
-                    Log.e("MediaArtistNativeHelper",
-                    "Illegal argument exception in nativePopulateSettings");
+                    Log.e(TAG, "Illegal argument exception in nativePopulateSettings");
                     throw ex;
                 } catch (IllegalStateException ex) {
-                    Log.e("MediaArtistNativeHelper",
-                    "Illegal state exception in nativePopulateSettings");
+                    Log.e(TAG, "Illegal state exception in nativePopulateSettings");
                     throw ex;
                 } catch (RuntimeException ex) {
-                    Log.e("MediaArtistNativeHelper", "Runtime exception in nativePopulateSettings");
+                    Log.e(TAG, "Runtime exception in nativePopulateSettings");
                     throw ex;
                 }
                 mInvalidatePreviewArray = false;
@@ -3048,7 +2996,7 @@ class MediaArtistNativeHelper {
      * the callback is needed
      * @param listener The PreviewProgressListener
      */
-    public void doPreview(Surface surface, long fromMs, long toMs, boolean loop,
+    void doPreview(Surface surface, long fromMs, long toMs, boolean loop,
             int callbackAfterFrameCount, PreviewProgressListener listener) {
         mPreviewProgress = fromMs;
         mIsFirstProgress = true;
@@ -3057,22 +3005,23 @@ class MediaArtistNativeHelper {
         if (!mInvalidatePreviewArray) {
             try {
                 /** Modify the image files names to rgb image files. */
-                for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length; clipCnt++) {
+                for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length;
+                    clipCnt++) {
                     if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
-                        mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath = mPreviewEditSettings.clipSettingsArray[clipCnt].clipDecodedPath;
+                        mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath =
+                            mPreviewEditSettings.clipSettingsArray[clipCnt].clipDecodedPath;
                     }
                 }
                 nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
                 nativeStartPreview(surface, fromMs, toMs, callbackAfterFrameCount, loop);
             } catch (IllegalArgumentException ex) {
-                Log.e("MediaArtistNativeHelper",
-                "Illegal argument exception in nativeStartPreview");
+                Log.e(TAG, "Illegal argument exception in nativeStartPreview");
                 throw ex;
             } catch (IllegalStateException ex) {
-                Log.e("MediaArtistNativeHelper", "Illegal state exception in nativeStartPreview");
+                Log.e(TAG, "Illegal state exception in nativeStartPreview");
                 throw ex;
             } catch (RuntimeException ex) {
-                Log.e("MediaArtistNativeHelper", "Runtime exception in nativeStartPreview");
+                Log.e(TAG, "Runtime exception in nativeStartPreview");
                 throw ex;
             }
         }
@@ -3081,7 +3030,7 @@ class MediaArtistNativeHelper {
     /**
      * This function is responsible for stopping the preview
      */
-    public long stopPreview() {
+    long stopPreview() {
         nativeStopPreview();
         return mPreviewProgress;
     }
@@ -3099,48 +3048,48 @@ class MediaArtistNativeHelper {
      * @return The actual time from the story board at which the  frame was extracted
      * and rendered
      */
-    public long renderPreviewFrame(Surface surface, long time, int surfaceWidth,
+    long renderPreviewFrame(Surface surface, long time, int surfaceWidth,
             int surfaceHeight, VideoEditor.OverlayData overlayData) {
-        long timeMs = 0;
-        if (!mInvalidatePreviewArray) {
-            try {
-                for (int clipCnt = 0;
-                      clipCnt < mPreviewEditSettings.clipSettingsArray.length;
-                      clipCnt++) {
-
-                    if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
-                        mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath =
-                            mPreviewEditSettings.clipSettingsArray[clipCnt].clipDecodedPath;
-                    }
-                }
-
-                // Reset the render preview frame params that shall be set by native.
-                mRenderPreviewOverlayFile = null;
-                mRenderPreviewRenderingMode = MediaRendering.RESIZING;
-                nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
-                timeMs = (long)nativeRenderPreviewFrame(surface, time, surfaceWidth, surfaceHeight);
-
-                if (mRenderPreviewOverlayFile != null) {
-                    overlayData.set(BitmapFactory.decodeFile(mRenderPreviewOverlayFile), mRenderPreviewRenderingMode);
-                } else {
-                    overlayData.setClear();
-                }
-            } catch (IllegalArgumentException ex) {
-                Log.e("MediaArtistNativeHelper",
-                "Illegal Argument exception in nativeRenderPreviewFrame");
-                throw ex;
-            } catch (IllegalStateException ex) {
-                Log.e("MediaArtistNativeHelper",
-                "Illegal state exception in nativeRenderPreviewFrame");
-                throw ex;
-            } catch (RuntimeException ex) {
-                Log.e("MediaArtistNativeHelper", "Runtime exception in nativeRenderPreviewFrame");
-                throw ex;
-            }
-            return timeMs;
-        } else {
+        if (mInvalidatePreviewArray) {
             throw new RuntimeException("Call generate preview first");
         }
+
+        long timeMs = 0;
+        try {
+            for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length;
+                  clipCnt++) {
+                if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
+                    mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath =
+                        mPreviewEditSettings.clipSettingsArray[clipCnt].clipDecodedPath;
+                }
+            }
+
+            // Reset the render preview frame params that shall be set by native.
+            mRenderPreviewOverlayFile = null;
+            mRenderPreviewRenderingMode = MediaRendering.RESIZING;
+
+            nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
+
+            timeMs = (long)nativeRenderPreviewFrame(surface, time, surfaceWidth, surfaceHeight);
+
+            if (mRenderPreviewOverlayFile != null) {
+                overlayData.set(BitmapFactory.decodeFile(mRenderPreviewOverlayFile),
+                        mRenderPreviewRenderingMode);
+            } else {
+                overlayData.setClear();
+            }
+        } catch (IllegalArgumentException ex) {
+            Log.e(TAG, "Illegal Argument exception in nativeRenderPreviewFrame");
+            throw ex;
+        } catch (IllegalStateException ex) {
+            Log.e(TAG, "Illegal state exception in nativeRenderPreviewFrame");
+            throw ex;
+        } catch (RuntimeException ex) {
+            Log.e(TAG, "Runtime exception in nativeRenderPreviewFrame");
+            throw ex;
+        }
+
+        return timeMs;
     }
 
     private void previewFrameEditInfo(String filename, int renderingMode) {
@@ -3162,24 +3111,20 @@ class MediaArtistNativeHelper {
      * @return The actual time from media item at which the  frame was extracted
      * and rendered
      */
-    public long renderMediaItemPreviewFrame(Surface surface, String filepath,
-                                            long time, int framewidth,
-                                            int frameheight) {
+    long renderMediaItemPreviewFrame(Surface surface, String filepath,
+                                            long time, int framewidth, int frameheight) {
         long timeMs = 0;
         try {
-
             timeMs = (long)nativeRenderMediaItemPreviewFrame(surface, filepath, framewidth,
                     frameheight, 0, 0, time);
         } catch (IllegalArgumentException ex) {
-            Log.e("MediaArtistNativeHelper",
-            "Illegal Argument exception in renderMediaItemPreviewFrame");
+            Log.e(TAG, "Illegal Argument exception in renderMediaItemPreviewFrame");
             throw ex;
         } catch (IllegalStateException ex) {
-            Log.e("MediaArtistNativeHelper",
-            "Illegal state exception in renderMediaItemPreviewFrame");
+            Log.e(TAG, "Illegal state exception in renderMediaItemPreviewFrame");
             throw ex;
         } catch (RuntimeException ex) {
-            Log.e("MediaArtistNativeHelper", "Runtime exception in renderMediaItemPreviewFrame");
+            Log.e(TAG, "Runtime exception in renderMediaItemPreviewFrame");
             throw ex;
         }
 
@@ -3191,7 +3136,18 @@ class MediaArtistNativeHelper {
      * and for generating the preview again
      */
     void setGeneratePreview(boolean isRequired) {
-        mInvalidatePreviewArray = isRequired;
+        boolean semAcquiredDone = false;
+        try {
+            lock();
+            semAcquiredDone = true;
+            mInvalidatePreviewArray = isRequired;
+        } catch (InterruptedException ex) {
+            Log.e(TAG, "Runtime exception in renderMediaItemPreviewFrame");
+        } finally {
+            if (semAcquiredDone) {
+                unlock();
+            }
+        }
     }
 
     /**
@@ -3210,7 +3166,7 @@ class MediaArtistNativeHelper {
      *
      * @return The calculated aspect ratio
      */
-    public int getAspectRatio(int w, int h) {
+    int getAspectRatio(int w, int h) {
         double apRatio = (double)(w) / (double)(h);
         BigDecimal bd = new BigDecimal(apRatio);
         bd = bd.setScale(3, BigDecimal.ROUND_HALF_UP);
@@ -3238,7 +3194,7 @@ class MediaArtistNativeHelper {
      *
      * @return The File type in JAVA layer
      */
-    public int getFileType(int fileType) {
+    int getFileType(int fileType) {
         int retValue = -1;
         switch (fileType) {
             case FileType.UNSUPPORTED:
@@ -3277,7 +3233,7 @@ class MediaArtistNativeHelper {
      *
      * @return The video codec type in JAVA layer
      */
-    public int getVideoCodecType(int codecType) {
+    int getVideoCodecType(int codecType) {
         int retValue = -1;
         switch (codecType) {
             case VideoFormat.H263:
@@ -3305,7 +3261,7 @@ class MediaArtistNativeHelper {
      *
      * @return The audio codec type in JAVA layer
      */
-    public int getAudioCodecType(int codecType) {
+    int getAudioCodecType(int codecType) {
         int retValue = -1;
         switch (codecType) {
             case AudioFormat.AMR_NB:
@@ -3331,7 +3287,7 @@ class MediaArtistNativeHelper {
      *
      * @return The frame rate as integer
      */
-    public int getFrameRate(int fps) {
+    int getFrameRate(int fps) {
         int retValue = -1;
         switch (fps) {
             case VideoFrameRate.FR_5_FPS:
@@ -3536,7 +3492,7 @@ class MediaArtistNativeHelper {
     }
 
     /**
-     * Calculates videdo resolution for output clip
+     * Calculates video resolution for output clip
      * based on clip's height and aspect ratio of storyboard
      *
      * @param aspectRatio The aspect ratio of story board
@@ -3580,8 +3536,7 @@ class MediaArtistNativeHelper {
             resolutions = MediaProperties.getSupportedResolutions(mVideoEditor.getAspectRatio());
             // Get the highest resolution
             maxResolution = resolutions[resolutions.length - 1];
-            retValue = findVideoResolution(mVideoEditor.getAspectRatio(),
-                                           maxResolution.second);
+            retValue = findVideoResolution(mVideoEditor.getAspectRatio(), maxResolution.second);
         }
 
         return retValue;
@@ -3595,12 +3550,12 @@ class MediaArtistNativeHelper {
      * @param height The height of clip
      * @param bitrate The bitrate at which the movie should be exported
      * @param mediaItemsList The media items list
-     * @param mediaTransitionList The transitons list
+     * @param mediaTransitionList The transitions list
      * @param mediaBGMList The background track list
      * @param listener The ExportProgressListener
      *
      */
-    public void export(String filePath, String projectDir, int height, int bitrate,
+    void export(String filePath, String projectDir, int height, int bitrate,
             List<MediaItem> mediaItemsList, List<Transition> mediaTransitionList,
             List<AudioTrack> mediaBGMList, ExportProgressListener listener) {
 
@@ -3672,8 +3627,10 @@ class MediaArtistNativeHelper {
         mPreviewEditSettings.transitionSettingsArray = new TransitionSettings[mTotalClips - 1];
         for (int index = 0; index < mTotalClips - 1; index++) {
             mPreviewEditSettings.transitionSettingsArray[index] = new TransitionSettings();
-            mPreviewEditSettings.transitionSettingsArray[index].videoTransitionType = VideoTransition.NONE;
-            mPreviewEditSettings.transitionSettingsArray[index].audioTransitionType = AudioTransition.NONE;
+            mPreviewEditSettings.transitionSettingsArray[index].videoTransitionType =
+                VideoTransition.NONE;
+            mPreviewEditSettings.transitionSettingsArray[index].audioTransitionType =
+                AudioTransition.NONE;
         }
         for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length; clipCnt++) {
             if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
@@ -3690,191 +3647,39 @@ class MediaArtistNativeHelper {
             err = generateClip(mPreviewEditSettings);
             mProcessingState  = PROCESSING_NONE;
         } catch (IllegalArgumentException ex) {
-            Log.e("MediaArtistNativeHelper", "IllegalArgument for generateClip");
+            Log.e(TAG, "IllegalArgument for generateClip");
             throw ex;
         } catch (IllegalStateException ex) {
-            Log.e("MediaArtistNativeHelper", "IllegalStateExceptiont for generateClip");
+            Log.e(TAG, "IllegalStateExceptiont for generateClip");
             throw ex;
         } catch (RuntimeException ex) {
-            Log.e("MediaArtistNativeHelper", "RuntimeException for generateClip");
+            Log.e(TAG, "RuntimeException for generateClip");
             throw ex;
         }
 
         if (err != 0) {
-            Log.e("MediaArtistNativeHelper", "RuntimeException for generateClip");
-            throw new RuntimeException("generateClip failed with error="+err );
+            Log.e(TAG, "RuntimeException for generateClip");
+            throw new RuntimeException("generateClip failed with error=" + err);
         }
 
-        mExportDone = true;
         mExportProgressListener = null;
     }
-
-    /**
-     * This method is responsible for exporting a movie
-     *
-     * @param filePath The output file path
-     * @param projectDir The output project directory
-     * @param height The height of clip
-     * @param bitrate The bitrate at which the movie should be exported
-     * @param audioCodec The audio codec to use
-     * @param videoCodec The video codec to use
-     * @param mediaItemsList The media items list
-     * @param mediaTransitionList The transitons list
-     * @param mediaBGMList The background track list
-     * @param listener The ExportProgressListener
-     *
-     */
-    public void export(String filePath, String projectDir,int height,int bitrate,
-            int audioCodec,int videoCodec,List<MediaItem> mediaItemsList,
-            List<Transition> mediaTransitionList,List<AudioTrack> mediaBGMList,
-            ExportProgressListener listener) {
-
-        int outBitrate = 0;
-        mExportFilename = filePath;
-        previewStoryBoard(mediaItemsList, mediaTransitionList, mediaBGMList,null);
-        mExportProgressListener = listener;
-
-        mProgressToApp = 0;
-
-        switch (bitrate) {
-            case MediaProperties.BITRATE_28K:
-                outBitrate = Bitrate.BR_32_KBPS;
-                break;
-            case MediaProperties.BITRATE_40K:
-                outBitrate = Bitrate.BR_48_KBPS;
-                break;
-            case MediaProperties.BITRATE_64K:
-                outBitrate = Bitrate.BR_64_KBPS;
-                break;
-            case MediaProperties.BITRATE_96K:
-                outBitrate = Bitrate.BR_96_KBPS;
-                break;
-            case MediaProperties.BITRATE_128K:
-                outBitrate = Bitrate.BR_128_KBPS;
-                break;
-            case MediaProperties.BITRATE_192K:
-                outBitrate = Bitrate.BR_192_KBPS;
-                break;
-            case MediaProperties.BITRATE_256K:
-                outBitrate = Bitrate.BR_256_KBPS;
-                break;
-            case MediaProperties.BITRATE_384K:
-                outBitrate = Bitrate.BR_384_KBPS;
-                break;
-            case MediaProperties.BITRATE_512K:
-                outBitrate = Bitrate.BR_512_KBPS;
-                break;
-            case MediaProperties.BITRATE_800K:
-                outBitrate = Bitrate.BR_800_KBPS;
-                break;
-            case MediaProperties.BITRATE_2M:
-                outBitrate = Bitrate.BR_2_MBPS;
-                break;
-            case MediaProperties.BITRATE_5M:
-                outBitrate = Bitrate.BR_5_MBPS;
-                break;
-            case MediaProperties.BITRATE_8M:
-                outBitrate = Bitrate.BR_8_MBPS;
-                break;
-
-            default:
-                throw new IllegalArgumentException("Argument Bitrate incorrect");
-        }
-        mPreviewEditSettings.videoFrameRate = VideoFrameRate.FR_30_FPS;
-        mPreviewEditSettings.outputFile = mOutputFilename = filePath;
-
-        int aspectRatio = mVideoEditor.getAspectRatio();
-        mPreviewEditSettings.videoFrameSize = findVideoResolution(aspectRatio, height);
-        switch (audioCodec) {
-            case MediaProperties.ACODEC_AAC_LC:
-                mPreviewEditSettings.audioFormat = AudioFormat.AAC;
-                break;
-            case MediaProperties.ACODEC_AMRNB:
-                mPreviewEditSettings.audioFormat = AudioFormat.AMR_NB;
-                break;
-        }
-
-        switch (videoCodec) {
-            case MediaProperties.VCODEC_H263:
-                mPreviewEditSettings.videoFormat = VideoFormat.H263;
-                break;
-            case MediaProperties.VCODEC_H264BP:
-                mPreviewEditSettings.videoFormat = VideoFormat.H264;
-                break;
-            case MediaProperties.VCODEC_MPEG4:
-                mPreviewEditSettings.videoFormat = VideoFormat.MPEG4;
-                break;
-        }
-
-        mPreviewEditSettings.audioSamplingFreq = AudioSamplingFrequency.FREQ_32000;
-        mPreviewEditSettings.maxFileSize = 0;
-        mPreviewEditSettings.audioChannels = 2;
-        mPreviewEditSettings.videoBitrate = outBitrate;
-        mPreviewEditSettings.audioBitrate = Bitrate.BR_96_KBPS;
-
-        mPreviewEditSettings.transitionSettingsArray =
-                                        new TransitionSettings[mTotalClips - 1];
-        for (int index = 0; index < mTotalClips - 1; index++) {
-            mPreviewEditSettings.transitionSettingsArray[index] =
-                                                       new TransitionSettings();
-            mPreviewEditSettings.transitionSettingsArray[index].videoTransitionType =
-                                                                      VideoTransition.NONE;
-            mPreviewEditSettings.transitionSettingsArray[index].audioTransitionType =
-                                                                      AudioTransition.NONE;
-        }
-        for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length; clipCnt++) {
-            if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
-                mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath =
-                  mPreviewEditSettings.clipSettingsArray[clipCnt].clipOriginalPath;
-            }
-        }
-        nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
-
-        int err = 0;
-        try {
-            mProcessingState  = PROCESSING_EXPORT;
-            mProcessingObject = null;
-            err = generateClip(mPreviewEditSettings);
-            mProcessingState  = PROCESSING_NONE;
-        } catch (IllegalArgumentException ex) {
-            Log.e("MediaArtistNativeHelper", "IllegalArgument for generateClip");
-            throw ex;
-        } catch (IllegalStateException ex) {
-            Log.e("MediaArtistNativeHelper", "IllegalStateExceptiont for generateClip");
-            throw ex;
-        } catch (RuntimeException ex) {
-            Log.e("MediaArtistNativeHelper", "RuntimeException for generateClip");
-            throw ex;
-        }
-
-        if (err != 0) {
-            Log.e("MediaArtistNativeHelper", "RuntimeException for generateClip");
-            throw new RuntimeException("generateClip failed with error="+err );
-        }
-
-        mExportDone = true;
-        mExportProgressListener = null;
-    }
-
 
     /**
      * This methods takes care of stopping the Export process
      *
      * @param The input file name for which export has to be stopped
      */
-    public void stop(String filename) {
-        if (!mExportDone) {
-            try {
-                stopEncoding();
-            } catch (IllegalStateException ex) {
-                Log.e("MediaArtistNativeHelper", "Illegal state exception in unload settings");
-                throw ex;
-            } catch (RuntimeException ex) {
-                Log.e("MediaArtistNativeHelper", "Runtime exception in unload settings");
-                throw ex;
-            }
-
+    void stop(String filename) {
+        try {
+            stopEncoding();
             new File(mExportFilename).delete();
+        } catch (IllegalStateException ex) {
+            Log.e(TAG, "Illegal state exception in unload settings");
+            throw ex;
+        } catch (RuntimeException ex) {
+            Log.e(TAG, "Runtime exception in unload settings");
+            throw ex;
         }
     }
 
@@ -3885,9 +3690,9 @@ class MediaArtistNativeHelper {
      * @param inputFile The inputFile
      * @param width The width of the output frame
      * @param height The height of the output frame
-     * @param timeMS The time in ms at which the frame hass to be extracted
+     * @param timeMS The time in ms at which the frame has to be extracted
      */
-    public Bitmap getPixels(String inputFile, int width, int height, long timeMS) {
+    Bitmap getPixels(String inputFile, int width, int height, long timeMS) {
         if (inputFile == null) {
             throw new IllegalArgumentException();
         }
@@ -3918,8 +3723,7 @@ class MediaArtistNativeHelper {
             /* Create a canvas to resize */
             final Canvas canvas = new Canvas(bitmap);
             canvas.drawBitmap(tempBitmap, new Rect(0, 0, newWidth, newHeight),
-                                          new Rect(0, 0, width, height),
-                                          sResizePaint);
+                                          new Rect(0, 0, width, height), sResizePaint);
         }
 
         if (tempBitmap != null) {
@@ -3961,50 +3765,49 @@ class MediaArtistNativeHelper {
         }
         int i = 0;
         int deltaTime = (int)(endMs - startMs) / thumbnailCount;
-        Bitmap[] bitmap = null;
+        Bitmap[] bitmaps = null;
 
         try {
             // This may result in out of Memory Error
             rgb888 = new int[thumbnailSize * thumbnailCount];
-            bitmap = new Bitmap[thumbnailCount];
+            bitmaps = new Bitmap[thumbnailCount];
         } catch (Throwable e) {
             // Allocating to new size with Fixed count
             try {
                 System.gc();
                 rgb888 = new int[thumbnailSize * MAX_THUMBNAIL_PERMITTED];
-                bitmap = new Bitmap[MAX_THUMBNAIL_PERMITTED];
+                bitmaps = new Bitmap[MAX_THUMBNAIL_PERMITTED];
                 thumbnailCount = MAX_THUMBNAIL_PERMITTED;
             } catch (Throwable ex) {
                 throw new RuntimeException("Memory allocation fails, thumbnail count too large: "+thumbnailCount);
             }
         }
         IntBuffer tmpBuffer = IntBuffer.allocate(thumbnailSize);
-        nativeGetPixelsList(filename, rgb888, newWidth, newHeight, deltaTime, thumbnailCount, startMs,
-                endMs);
+        nativeGetPixelsList(filename, rgb888, newWidth, newHeight, deltaTime, thumbnailCount,
+                startMs, endMs);
 
         for (; i < thumbnailCount; i++) {
-            bitmap[i] = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            bitmaps[i] = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             tmpBuffer.put(rgb888, (i * thumbnailSize), thumbnailSize);
             tmpBuffer.rewind();
 
             if ((newWidth == width) && (newHeight == height)) {
-                bitmap[i].copyPixelsFromBuffer(tmpBuffer);
+                bitmaps[i].copyPixelsFromBuffer(tmpBuffer);
             } else {
                 /* Copy the out rgb buffer to temp bitmap */
                 tempBitmap.copyPixelsFromBuffer(tmpBuffer);
 
                 /* Create a canvas to resize */
-                final Canvas canvas = new Canvas(bitmap[i]);
+                final Canvas canvas = new Canvas(bitmaps[i]);
                 canvas.drawBitmap(tempBitmap, new Rect(0, 0, newWidth, newHeight),
-                                              new Rect(0, 0, width, height),
-                                              sResizePaint);
+                                              new Rect(0, 0, width, height), sResizePaint);
             }
         }
 
         if (tempBitmap != null) {
             tempBitmap.recycle();
         }
-        return bitmap;
+        return bitmaps;
     }
 
     /**
@@ -4020,7 +3823,7 @@ class MediaArtistNativeHelper {
      * @param isVideo The flag to indicate if the file is video file or not
      *
      **/
-    public void generateAudioGraph(String uniqueId, String inFileName, String OutAudiGraphFileName,
+    void generateAudioGraph(String uniqueId, String inFileName, String OutAudiGraphFileName,
             int frameDuration, int audioChannels, int samplesCount,
             ExtractAudioWaveformProgressListener listener, boolean isVideo) {
         String tempPCMFileName;
@@ -4028,7 +3831,7 @@ class MediaArtistNativeHelper {
         mExtractAudioWaveformProgressListener = listener;
 
         /**
-         * in case of Video , first call will generate the PCM file to make the
+         * In case of Video, first call will generate the PCM file to make the
          * audio graph
          */
         if (isVideo) {
@@ -4036,6 +3839,7 @@ class MediaArtistNativeHelper {
         } else {
             tempPCMFileName = mAudioTrackPCMFilePath;
         }
+
         /**
          * For Video item, generate the PCM
          */
@@ -4046,19 +3850,46 @@ class MediaArtistNativeHelper {
         nativeGenerateAudioGraph(tempPCMFileName, OutAudiGraphFileName, frameDuration,
                 audioChannels, samplesCount);
 
-        /* once the audio graph file is generated, delete the pcm file */
+        /**
+         * Once the audio graph file is generated, delete the pcm file
+         */
         if (isVideo) {
             new File(tempPCMFileName).delete();
         }
     }
 
-    public void clearPreviewSurface(Surface surface) {
-       nativeClearSurface(surface);
+    void clearPreviewSurface(Surface surface) {
+        nativeClearSurface(surface);
+    }
+
+    /**
+     * Grab the semaphore which arbitrates access to the editor
+     *
+     * @throws InterruptedException
+     */
+    void lock() throws InterruptedException {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbing semaphore", new Throwable());
+        }
+        mLock.acquire();
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbed semaphore");
+        }
+    }
+
+    /**
+     * Release the semaphore which arbitrates access to the editor
+     */
+    void unlock() {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "unlock: releasing semaphore");
+        }
+        mLock.release();
     }
 
     /**     Native Methods        */
     native Properties getMediaProperties(String file) throws IllegalArgumentException,
-    IllegalStateException, RuntimeException, Exception;
+            IllegalStateException, RuntimeException, Exception;
 
     /**
      * Get the version of ManualEdit.
@@ -4073,7 +3904,7 @@ class MediaArtistNativeHelper {
      * Returns the video thumbnail in an array of integers. Output format is
      * ARGB8888.
      *
-     * @param pixelArray the array that receives the pixelvalues
+     * @param pixelArray the array that receives the pixel values
      * @param width width of the video thumbnail
      * @param height height of the video thumbnail
      * @param timeMS desired time of the thumbnail in ms
@@ -4103,7 +3934,6 @@ class MediaArtistNativeHelper {
      */
     private native void nativeClearSurface(Surface surface);
 
-
     /**
      * Stops the encoding. This method should only be called after encoding has
      * started using method <code> startEncoding</code>
@@ -4113,7 +3943,6 @@ class MediaArtistNativeHelper {
     private native void stopEncoding() throws IllegalStateException, RuntimeException;
 
 
-
     private native void _init(String tempPath, String libraryPath)
             throws IllegalArgumentException, IllegalStateException, RuntimeException;
 
@@ -4121,7 +3950,7 @@ class MediaArtistNativeHelper {
             int callbackAfterFrameCount, boolean loop) throws IllegalArgumentException,
             IllegalStateException, RuntimeException;
 
-    private native void nativePopulateSettings(EditSettings mEditSettings,
+    private native void nativePopulateSettings(EditSettings editSettings,
             PreviewClipProperties mProperties, AudioSettings mAudioSettings)
     throws IllegalArgumentException, IllegalStateException, RuntimeException;
 

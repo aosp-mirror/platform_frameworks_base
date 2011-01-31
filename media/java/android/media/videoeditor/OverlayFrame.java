@@ -120,6 +120,10 @@ public class OverlayFrame extends Overlay {
      * @param bitmap The overlay bitmap.
      */
     public void setBitmap(Bitmap bitmap) {
+        getMediaItem().getNativeContext().setGeneratePreview(true);
+
+        invalidate();
+
         mBitmap = bitmap;
         if (mFilename != null) {
             /**
@@ -238,12 +242,16 @@ public class OverlayFrame extends Overlay {
      * Delete the overlay files
      */
     void invalidate() {
-        if (mFilename != null) {
-            new File(mFilename).delete();
-            mFilename = null;
+        if (mBitmap != null) {
             mBitmap.recycle();
             mBitmap = null;
         }
+
+        if (mFilename != null) {
+            new File(mFilename).delete();
+            mFilename = null;
+        }
+
         if (mBitmapFileName != null) {
             new File(mBitmapFileName).delete();
             mBitmapFileName = null;

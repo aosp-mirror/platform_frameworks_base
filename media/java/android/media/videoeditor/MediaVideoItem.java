@@ -198,6 +198,8 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("setExtractBoundaries: Start time or end time is negative");
         }
 
+        mMANativeHelper.setGeneratePreview(true);
+
         if (beginMs != mBeginBoundaryTimeMs) {
             if (mBeginTransition != null) {
                 mBeginTransition.invalidate();
@@ -212,7 +214,6 @@ public class MediaVideoItem extends MediaItem {
 
         mBeginBoundaryTimeMs = beginMs;
         mEndBoundaryTimeMs = endMs;
-        mMANativeHelper.setGeneratePreview(true);
         adjustTransitions();
         mVideoEditor.updateTimelineDuration();
         /**
@@ -260,12 +261,11 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("Invalid Time duration");
         }
 
-        if ((width <=0) || (height <= 0)) {
+        if ((width <= 0) || (height <= 0)) {
             throw new IllegalArgumentException("Invalid Dimensions");
         }
 
-        return mMANativeHelper.getPixels(super.getFilename(),
-                width, height,timeMs);
+        return mMANativeHelper.getPixels(super.getFilename(), width, height,timeMs);
     }
 
     /*
@@ -610,6 +610,7 @@ public class MediaVideoItem extends MediaItem {
      * @param muted true to mute the media item
      */
     public void setMute(boolean muted) {
+        mMANativeHelper.setGeneratePreview(true);
         mMuted = muted;
         if (mBeginTransition != null) {
             mBeginTransition.invalidate();
@@ -617,7 +618,6 @@ public class MediaVideoItem extends MediaItem {
         if (mEndTransition != null) {
             mEndTransition.invalidate();
         }
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**

@@ -27,19 +27,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.Xml;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-
-import android.graphics.Bitmap;
 
 /**
  * The VideoEditor implementation {@hide}
@@ -54,15 +51,6 @@ public class VideoEditorImpl implements VideoEditor {
      *  The project filename
      */
     private static final String PROJECT_FILENAME = "videoeditor.xml";
-    /*
-     *  Semaphore to control preview calls
-     */
-    final Semaphore mPreviewSemaphore = new Semaphore(1, true);
-
-    /*
-     *  Semaphore to control export calls
-     */
-    final Semaphore mExportSemaphore = new Semaphore(1, true);
 
     /*
      *  XML tags
@@ -74,8 +62,7 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String TAG_TRANSITION = "transition";
     private static final String TAG_OVERLAYS = "overlays";
     private static final String TAG_OVERLAY = "overlay";
-    private static final String TAG_OVERLAY_USER_ATTRIBUTES =
-                                                      "overlay_user_attributes";
+    private static final String TAG_OVERLAY_USER_ATTRIBUTES = "overlay_user_attributes";
     private static final String TAG_EFFECTS = "effects";
     private static final String TAG_EFFECT = "effect";
     private static final String TAG_AUDIO_TRACKS = "audio_tracks";
@@ -86,7 +73,6 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String ATTR_AUDIO_WAVEFORM_FILENAME = "waveform";
     private static final String ATTR_RENDERING_MODE = "rendering_mode";
     private static final String ATTR_ASPECT_RATIO = "aspect_ratio";
-    private static final String ATTR_PREVIEW_PREPARE = "preview_prepare_invalid";
     private static final String ATTR_REGENERATE_PCM = "regeneratePCMFlag";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_DURATION = "duration";
@@ -116,18 +102,12 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String ATTR_DUCK_ENABLED = "ducking_enabled";
     private static final String ATTR_DUCK_THRESHOLD = "ducking_threshold";
     private static final String ATTR_DUCKED_TRACK_VOLUME = "ducking_volume";
-    private static final String ATTR_GENERATED_IMAGE_CLIP =
-                                                         "generated_image_clip";
-    private static final String ATTR_GENERATED_TRANSITION_CLIP =
-                                                    "generated_transition_clip";
-    private static final String ATTR_IS_TRANSITION_GENERATED =
-                                                      "is_transition_generated";
-    private static final String ATTR_OVERLAY_RGB_FILENAME =
-                                                         "overlay_rgb_filename";
-    private static final String ATTR_OVERLAY_FRAME_WIDTH =
-                                                          "overlay_frame_width";
-    private static final String ATTR_OVERLAY_FRAME_HEIGHT =
-                                                         "overlay_frame_height";
+    private static final String ATTR_GENERATED_IMAGE_CLIP = "generated_image_clip";
+    private static final String ATTR_GENERATED_TRANSITION_CLIP = "generated_transition_clip";
+    private static final String ATTR_IS_TRANSITION_GENERATED = "is_transition_generated";
+    private static final String ATTR_OVERLAY_RGB_FILENAME = "overlay_rgb_filename";
+    private static final String ATTR_OVERLAY_FRAME_WIDTH = "overlay_frame_width";
+    private static final String ATTR_OVERLAY_FRAME_HEIGHT = "overlay_frame_height";
 
     /*
      *  Instance variables
@@ -143,7 +123,6 @@ public class VideoEditorImpl implements VideoEditor {
      * Private Object for calling native Methods via MediaArtistNativeHelper
      */
     private MediaArtistNativeHelper mMANativeHelper;
-    private VideoEditor veObject = null;
     private boolean mPreviewInProgress = false;
 
     /**
@@ -153,7 +132,6 @@ public class VideoEditorImpl implements VideoEditor {
      *        related to the project
      */
     public VideoEditorImpl(String projectPath) throws IOException {
-
         mMANativeHelper = new MediaArtistNativeHelper(projectPath, this);
         mProjectPath = projectPath;
         final File projectXml = new File(projectPath, PROJECT_FILENAME);
@@ -184,6 +162,7 @@ public class VideoEditorImpl implements VideoEditor {
         if (audioTrack == null) {
             throw new IllegalArgumentException("Audio Track is null");
         }
+
         if (mAudioTracks.size() == 1) {
             throw new IllegalArgumentException("No more tracks can be added");
         }
@@ -196,16 +175,16 @@ public class VideoEditorImpl implements VideoEditor {
         /*
          * Form the audio PCM file path
          */
-        String audioTrackPCMFilePath = String.format(mProjectPath + "/"
+        final String audioTrackPCMFilePath = String.format(mProjectPath + "/"
                     + "AudioPcm" + audioTrack.getId() + ".pcm");
 
         /*
          * Create PCM only if not generated in previous session
          */
-        if (new File(audioTrackPCMFilePath).exists())
-        {
+        if (new File(audioTrackPCMFilePath).exists()) {
             mMANativeHelper.setAudioflag(false);
         }
+
         mMANativeHelper.setGeneratePreview(true);
     }
 
@@ -223,15 +202,14 @@ public class VideoEditorImpl implements VideoEditor {
          * Add the Media item to MediaItem list
          */
         if (mMediaItems.contains(mediaItem)) {
-            throw new IllegalArgumentException("Media item already exists: " +
-            mediaItem.getId());
+            throw new IllegalArgumentException("Media item already exists: " + mediaItem.getId());
         }
 
         /*
          *  Invalidate the end transition if necessary
          */
         final int mediaItemsCount = mMediaItems.size();
-        if ( mediaItemsCount > 0) {
+        if (mediaItemsCount > 0) {
             removeTransitionAfter(mediaItemsCount - 1);
         }
 
@@ -258,6 +236,7 @@ public class VideoEditorImpl implements VideoEditor {
         if (transition == null) {
             throw new IllegalArgumentException("Null Transition");
         }
+
         final MediaItem beforeMediaItem = transition.getBeforeMediaItem();
         final MediaItem afterMediaItem = transition.getAfterMediaItem();
         /*
@@ -266,15 +245,16 @@ public class VideoEditorImpl implements VideoEditor {
         if (mMediaItems == null) {
             throw new IllegalArgumentException("No media items are added");
         }
-        if ((afterMediaItem != null) &&  (beforeMediaItem != null)) {
-            int afterMediaItemIndex = mMediaItems.indexOf(afterMediaItem);
-            int beforeMediaItemIndex = mMediaItems.indexOf(beforeMediaItem);
 
+        if ((afterMediaItem != null) &&  (beforeMediaItem != null)) {
+            final int afterMediaItemIndex = mMediaItems.indexOf(afterMediaItem);
+            final int beforeMediaItemIndex = mMediaItems.indexOf(beforeMediaItem);
 
             if ((afterMediaItemIndex == -1) || (beforeMediaItemIndex == -1)) {
                 throw new IllegalArgumentException
                     ("Either of the mediaItem is not found in the list");
             }
+
             if (afterMediaItemIndex != (beforeMediaItemIndex - 1) ) {
                 throw new IllegalArgumentException("MediaItems are not in sequence");
             }
@@ -334,9 +314,10 @@ public class VideoEditorImpl implements VideoEditor {
             case MediaProperties.ACODEC_AMRNB:
                 break;
 
-            default :
+            default: {
                 String message = "Unsupported audio codec type " + audioCodec;
                 throw new IllegalArgumentException(message);
+            }
         }
 
         switch (videoCodec) {
@@ -347,9 +328,10 @@ public class VideoEditorImpl implements VideoEditor {
             case MediaProperties.VCODEC_MPEG4:
                 break;
 
-            default :
+            default: {
                 String message = "Unsupported video codec type " + videoCodec;
                 throw new IllegalArgumentException(message);
+            }
         }
 
         export(filename, height, bitrate, listener);
@@ -360,13 +342,15 @@ public class VideoEditorImpl implements VideoEditor {
      */
     public void export(String filename, int height, int bitrate,
                        ExportProgressListener listener) throws IOException {
-        if ( filename == null) {
+        if (filename == null) {
             throw new IllegalArgumentException("export: filename is null");
         }
-        File tempPathFile = new File(filename);
+
+        final File tempPathFile = new File(filename);
         if (tempPathFile == null) {
             throw new IOException(filename + "can not be created");
         }
+
         if (mMediaItems.size() == 0) {
             throw new IllegalStateException("No MediaItems added");
         }
@@ -381,10 +365,12 @@ public class VideoEditorImpl implements VideoEditor {
             case MediaProperties.HEIGHT_720:
                 break;
 
-            default:
+            default: {
                 String message = "Unsupported height value " + height;
                 throw new IllegalArgumentException(message);
+            }
         }
+
         switch (bitrate) {
             case MediaProperties.BITRATE_28K:
                 break;
@@ -413,20 +399,24 @@ public class VideoEditorImpl implements VideoEditor {
             case MediaProperties.BITRATE_8M:
                 break;
 
-            default:
+            default: {
                 final String message = "Unsupported bitrate value " + bitrate;
                 throw new IllegalArgumentException(message);
+            }
         }
 
+        boolean semAcquireDone = false;
         try {
-            mExportSemaphore.acquire();
+            mMANativeHelper.lock();
+            semAcquireDone = true;
             mMANativeHelper.export(filename, mProjectPath, height,bitrate,
-                               mMediaItems, mTransitions, mAudioTracks,
-                               listener);
+                               mMediaItems, mTransitions, mAudioTracks, listener);
         } catch (InterruptedException  ex) {
             Log.e(TAG, "Sem acquire NOT successful in export");
         } finally {
-            mExportSemaphore.release();
+            if (semAcquireDone) {
+                mMANativeHelper.unlock();
+            }
         }
     }
 
@@ -436,18 +426,18 @@ public class VideoEditorImpl implements VideoEditor {
     public void generatePreview(MediaProcessingProgressListener listener) {
         boolean semAcquireDone = false;
         try {
-            mPreviewSemaphore.acquire();
+            mMANativeHelper.lock();
             semAcquireDone = true;
-            mMANativeHelper.setGeneratePreview(true);
+
             if ((mMediaItems.size() > 0) || (mAudioTracks.size() > 0)) {
-                mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
-                        mAudioTracks, listener);
+                mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions, mAudioTracks,
+                        listener);
             }
         } catch (InterruptedException  ex) {
             Log.e(TAG, "Sem acquire NOT successful in previewStoryBoard");
         } finally {
             if (semAcquireDone) {
-                mPreviewSemaphore.release();
+                mMANativeHelper.unlock();
             }
         }
     }
@@ -553,29 +543,28 @@ public class VideoEditorImpl implements VideoEditor {
 
         if (afterAudioTrackId == null) {
             mAudioTracks.add(0, audioTrack);
+            mMANativeHelper.setGeneratePreview(true);
         } else {
             final int audioTrackCount = mAudioTracks.size();
             for (int i = 0; i < audioTrackCount; i++) {
                 AudioTrack at = mAudioTracks.get(i);
                 if (at.getId().equals(afterAudioTrackId)) {
                     mAudioTracks.add(i + 1, audioTrack);
+                    mMANativeHelper.setGeneratePreview(true);
                     return;
                 }
             }
-            throw new IllegalArgumentException("AudioTrack not found: "
-                                                           + afterAudioTrackId);
+
+            throw new IllegalArgumentException("AudioTrack not found: " + afterAudioTrackId);
         }
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /*
      * {@inheritDoc}
      */
-    public synchronized void insertMediaItem(MediaItem mediaItem,
-                                             String afterMediaItemId) {
+    public synchronized void insertMediaItem(MediaItem mediaItem, String afterMediaItemId) {
         if (mMediaItems.contains(mediaItem)) {
-            throw new IllegalArgumentException("Media item already exists: "
-                                                           + mediaItem.getId());
+            throw new IllegalArgumentException("Media item already exists: " + mediaItem.getId());
         }
 
         if (afterMediaItemId == null) {
@@ -585,9 +574,11 @@ public class VideoEditorImpl implements VideoEditor {
                  */
                 removeTransitionBefore(0);
             }
+
             mMediaItems.add(0, mediaItem);
             computeTimelineDuration();
             generateProjectThumbnail();
+            mMANativeHelper.setGeneratePreview(true);
         } else {
             final int mediaItemCount = mMediaItems.size();
             for (int i = 0; i < mediaItemCount; i++) {
@@ -606,29 +597,25 @@ public class VideoEditorImpl implements VideoEditor {
                     return;
                 }
             }
-            throw new IllegalArgumentException("MediaItem not found: "
-                                                            + afterMediaItemId);
+
+            throw new IllegalArgumentException("MediaItem not found: " + afterMediaItemId);
         }
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /*
      * {@inheritDoc}
      */
-    public synchronized void moveAudioTrack(String audioTrackId,
-                                            String afterAudioTrackId) {
+    public synchronized void moveAudioTrack(String audioTrackId, String afterAudioTrackId) {
         throw new IllegalStateException("Not supported");
     }
 
     /*
      * {@inheritDoc}
      */
-    public synchronized void moveMediaItem(String mediaItemId,
-                                           String afterMediaItemId) {
+    public synchronized void moveMediaItem(String mediaItemId, String afterMediaItemId) {
         final MediaItem moveMediaItem = removeMediaItem(mediaItemId,true);
         if (moveMediaItem == null) {
-            throw new IllegalArgumentException("Target MediaItem not found: "
-                                                                 + mediaItemId);
+            throw new IllegalArgumentException("Target MediaItem not found: " + mediaItemId);
         }
 
         if (afterMediaItemId == null) {
@@ -643,6 +630,8 @@ public class VideoEditorImpl implements VideoEditor {
                  */
                 mMediaItems.add(0, moveMediaItem);
                 computeTimelineDuration();
+                mMANativeHelper.setGeneratePreview(true);
+
                 generateProjectThumbnail();
             } else {
                 throw new IllegalStateException("Cannot move media item (it is the only item)");
@@ -666,10 +655,8 @@ public class VideoEditorImpl implements VideoEditor {
                 }
             }
 
-            throw new IllegalArgumentException("MediaItem not found: "
-                                                            + afterMediaItemId);
+            throw new IllegalArgumentException("MediaItem not found: " + afterMediaItemId);
         }
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /*
@@ -681,16 +668,15 @@ public class VideoEditorImpl implements VideoEditor {
         mAudioTracks.clear();
         mTransitions.clear();
         mMANativeHelper.releaseNativeHelper();
-        if (mMANativeHelper!= null)
-            mMANativeHelper = null;
-        if (veObject != null)
-            veObject= null;
+        mMANativeHelper = null;
     }
 
     /*
      * {@inheritDoc}
      */
     public synchronized void removeAllMediaItems() {
+        mMANativeHelper.setGeneratePreview(true);
+
         mMediaItems.clear();
 
         /**
@@ -702,7 +688,6 @@ public class VideoEditorImpl implements VideoEditor {
         mTransitions.clear();
 
         mDurationMs = 0;
-        mMANativeHelper.setGeneratePreview(true);
         /**
          * If a thumbnail already exists, then delete it
          */
@@ -722,11 +707,10 @@ public class VideoEditorImpl implements VideoEditor {
             audioTrack.invalidate();
             mMANativeHelper.invalidatePcmFile();
             mMANativeHelper.setAudioflag(true);
-        }
-        else {
+            mMANativeHelper.setGeneratePreview(true);
+        } else {
             throw new IllegalArgumentException(" No more audio tracks");
         }
-        mMANativeHelper.setGeneratePreview(true);
         return audioTrack;
     }
 
@@ -737,6 +721,7 @@ public class VideoEditorImpl implements VideoEditor {
         final String firstItemString = mMediaItems.get(0).getId();
         final MediaItem mediaItem = getMediaItem(mediaItemId);
         if (mediaItem != null) {
+            mMANativeHelper.setGeneratePreview(true);
             /**
              *  Remove the media item
              */
@@ -760,10 +745,10 @@ public class VideoEditorImpl implements VideoEditor {
             removeAdjacentTransitions(mediaItem);
             computeTimelineDuration();
         }
-        mMANativeHelper.setGeneratePreview(true);
+
         /**
          * If string equals first mediaItem, then
-         * generate Project thumbail
+         * generate Project thumbnail
          */
         if (firstItemString.equals(mediaItemId)) {
             generateProjectThumbnail();
@@ -784,6 +769,7 @@ public class VideoEditorImpl implements VideoEditor {
 
         final MediaItem mediaItem = getMediaItem(mediaItemId);
         if (mediaItem != null) {
+            mMANativeHelper.setGeneratePreview(true);
             /**
              *  Remove the media item
              */
@@ -794,7 +780,6 @@ public class VideoEditorImpl implements VideoEditor {
             removeAdjacentTransitions(mediaItem);
             computeTimelineDuration();
         }
-        mMANativeHelper.setGeneratePreview(true);
 
         /**
          * If string equals first mediaItem, then
@@ -812,9 +797,10 @@ public class VideoEditorImpl implements VideoEditor {
     public synchronized Transition removeTransition(String transitionId) {
         final Transition transition = getTransition(transitionId);
         if (transition == null) {
-            throw new IllegalStateException("Transition not found: "
-                                                                + transitionId);
+            throw new IllegalStateException("Transition not found: " + transitionId);
         }
+
+        mMANativeHelper.setGeneratePreview(true);
 
         /**
          *  Remove the transition references
@@ -832,7 +818,6 @@ public class VideoEditorImpl implements VideoEditor {
         mTransitions.remove(transition);
         transition.invalidate();
         computeTimelineDuration();
-        mMANativeHelper.setGeneratePreview(true);
         return transition;
     }
 
@@ -841,13 +826,13 @@ public class VideoEditorImpl implements VideoEditor {
      */
     public long renderPreviewFrame(SurfaceHolder surfaceHolder, long timeMs,
                                     OverlayData overlayData) {
-        long result = 0;
-        int surfaceWidth = 0;
-        int surfaceHeight = 0;
-        Rect frame;
-
         if (surfaceHolder == null) {
             throw new IllegalArgumentException("Surface Holder is null");
+        }
+
+        final Surface surface = surfaceHolder.getSurface();
+        if (surface == null) {
+            throw new IllegalArgumentException("Surface could not be retrieved from Surface holder");
         }
 
         if (timeMs < 0) {
@@ -855,49 +840,29 @@ public class VideoEditorImpl implements VideoEditor {
         } else if (timeMs > mDurationMs) {
             throw new IllegalArgumentException("requested time more than duration");
         }
-        if (mMANativeHelper != null) {
-            if (mMANativeHelper.mInvalidatePreviewArray) {
-                return -1;
-            }
-        }
-        else {
-            return -1;
-        }
+
+        long result = 0;
+
         boolean semAcquireDone = false;
-
-        try{
-            mPreviewSemaphore.acquire();
+        try {
+            mMANativeHelper.lock();
             semAcquireDone = true;
-            Surface surface = surfaceHolder.getSurface();
-            frame = surfaceHolder.getSurfaceFrame();
-            surfaceWidth = frame.width();
-            surfaceHeight = frame.height();
 
-            if (surface == null) {
-                throw new RuntimeException("Surface could not be retrieved from Surface holder");
+            if (mMediaItems.size() > 0) {
+                final Rect frame = surfaceHolder.getSurfaceFrame();
+                result = mMANativeHelper.renderPreviewFrame(surface,
+                        timeMs, frame.width(), frame.height(), overlayData);
+            } else {
+                result = 0;
             }
-
-            if (!mMANativeHelper.mInvalidatePreviewArray) {
-                if (mMediaItems.size() > 0) {
-                    result = mMANativeHelper.renderPreviewFrame(surface,
-                                             timeMs,surfaceWidth,surfaceHeight, overlayData);
-                }
-                else {
-                    result = 0;
-                }
-            }
-            else {
-                result = -1;
-            }
-
         } catch (InterruptedException  ex) {
             Log.e(TAG, "Sem acquire NOT successful in renderPreviewFrame");
-        }
-        finally {
+        } finally {
             if (semAcquireDone) {
-                mPreviewSemaphore.release();
+                mMANativeHelper.unlock();
             }
         }
+
         return result;
     }
 
@@ -926,10 +891,6 @@ public class VideoEditorImpl implements VideoEditor {
                             mAspectRatio =
                                    Integer.parseInt(parser.getAttributeValue("",
                                    ATTR_ASPECT_RATIO));
-                            final boolean mInvalidatePreviewArray =
-                               Boolean.parseBoolean(parser.getAttributeValue("",
-                                    ATTR_PREVIEW_PREPARE));
-                            mMANativeHelper.setGeneratePreview(mInvalidatePreviewArray);
 
                             final boolean mRegenPCM =
                                Boolean.parseBoolean(parser.getAttributeValue("",
@@ -1126,7 +1087,7 @@ public class VideoEditorImpl implements VideoEditor {
             final String transitionFile = parser.getAttributeValue("",
                                                 ATTR_GENERATED_TRANSITION_CLIP);
 
-            if (new File(transitionFile).exists() == true) {
+            if (new File(transitionFile).exists()) {
                 transition.setFilename(transitionFile);
             } else {
                 transition.setFilename(null);
@@ -1300,8 +1261,6 @@ public class VideoEditorImpl implements VideoEditor {
         serializer.startTag("", TAG_PROJECT);
         serializer.attribute("",
                              ATTR_ASPECT_RATIO, Integer.toString(mAspectRatio));
-        serializer.attribute("", ATTR_PREVIEW_PREPARE,
-                        Boolean.toString(mMANativeHelper.getGeneratePreview()));
 
         serializer.attribute("", ATTR_REGENERATE_PCM,
                         Boolean.toString(mMANativeHelper.getAudioflag()));
@@ -1551,56 +1510,54 @@ public class VideoEditorImpl implements VideoEditor {
         if (surfaceHolder == null) {
             throw new IllegalArgumentException();
         }
+
+        final Surface surface = surfaceHolder.getSurface();
+        if (surface == null) {
+            throw new IllegalArgumentException("Surface could not be retrieved from surface holder");
+        }
+
         if (listener == null) {
             throw new IllegalArgumentException();
         }
+
         if (fromMs >= mDurationMs) {
-            throw new IllegalArgumentException("requested time not correct");
+            throw new IllegalArgumentException("Requested time not correct");
         }
 
         if (fromMs < 0) {
-            throw new IllegalArgumentException("requested time not correct");
+            throw new IllegalArgumentException("Requested time not correct");
         }
 
         boolean semAcquireDone = false;
         try{
-            mPreviewSemaphore.acquire();
+            mMANativeHelper.lock();
             semAcquireDone = true;
-        } catch (InterruptedException  ex) {
-            Log.e(TAG, "Sem acquire NOT successful in startPreview");
-        }
-
-        if (semAcquireDone) {
-            Surface mSurface = surfaceHolder.getSurface();
-
-            if (mSurface == null) {
-                throw new RuntimeException("Surface could not be retrieved from surface holder");
-            }
 
             if (mMediaItems.size() > 0) {
-                try {
-                    mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
-                                                      mAudioTracks, null);
-                    mMANativeHelper.doPreview(mSurface, fromMs, toMs, loop,
-                                     callbackAfterFrameCount, listener);
-                    mPreviewInProgress = true;
-                } catch (IllegalArgumentException ex) {
-                    mPreviewSemaphore.release();
-                    Log.e(TAG, "Illegal Argument exception in do preview");
-                    throw ex;
-                } catch (IllegalStateException ex) {
-                    mPreviewSemaphore.release();
-                    Log.e(TAG, "Illegal State exception in do preview");
-                    throw ex;
-                } catch (RuntimeException ex) {
-                    mPreviewSemaphore.release();
-                    Log.e(TAG, "Runtime exception in do preview");
-                    throw ex;
-                }
+                mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
+                                                  mAudioTracks, null);
+                mMANativeHelper.doPreview(surface, fromMs, toMs, loop,
+                                 callbackAfterFrameCount, listener);
+                mPreviewInProgress = true;
             }
             /**
              *  release on complete by calling stopPreview
              */
+        } catch (InterruptedException  ex) {
+            Log.e(TAG, "Sem acquire NOT successful in startPreview");
+        } catch (IllegalArgumentException ex) {
+            Log.e(TAG, "Illegal Argument exception in do preview");
+            throw ex;
+        } catch (IllegalStateException ex) {
+            Log.e(TAG, "Illegal State exception in do preview");
+            throw ex;
+        } catch (RuntimeException ex) {
+            Log.e(TAG, "Runtime exception in do preview");
+            throw ex;
+        } finally {
+            if (semAcquireDone) {
+                mMANativeHelper.unlock();
+            }
         }
     }
 
@@ -1614,10 +1571,9 @@ public class VideoEditorImpl implements VideoEditor {
             /**
              *  release the sem acquired in startPreview
              */
-            mPreviewSemaphore.release();
+            mMANativeHelper.unlock();
             return result;
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -1662,6 +1618,7 @@ public class VideoEditorImpl implements VideoEditor {
             Transition t = it.next();
             if (t.getBeforeMediaItem() == mediaItem) {
                 it.remove();
+                mMANativeHelper.setGeneratePreview(true);
                 t.invalidate();
                 mediaItem.setBeginTransition(null);
                 if (index > 0) {
@@ -1684,6 +1641,7 @@ public class VideoEditorImpl implements VideoEditor {
             Transition t = it.next();
             if (t.getAfterMediaItem() == mediaItem) {
                 it.remove();
+                mMANativeHelper.setGeneratePreview(true);
                 t.invalidate();
                 mediaItem.setEndTransition(null);
                 /**
@@ -1730,22 +1688,22 @@ public class VideoEditorImpl implements VideoEditor {
         if (mMediaItems.size() > 0) {
             MediaItem mI = mMediaItems.get(0);
             /*
-             * Lets initialiZe the width for default aspect ratio i.e 16:9
+             * Lets initialize the width for default aspect ratio i.e 16:9
              */
             int height = 480;
             int width = 854;
             switch (mI.getAspectRatio()) {
                 case MediaProperties.ASPECT_RATIO_3_2:
-                    width =  720;
+                    width = 720;
                     break;
                 case MediaProperties.ASPECT_RATIO_4_3:
-                    width =  640;
+                    width = 640;
                     break;
                 case MediaProperties.ASPECT_RATIO_5_3:
-                    width =  800;
+                    width = 800;
                     break;
                 case MediaProperties.ASPECT_RATIO_11_9:
-                    width =  586;
+                    width = 586;
                     break;
                 case MediaProperties.ASPECT_RATIO_16_9:
                 case MediaProperties.ASPECT_RATIO_UNDEFINED:
@@ -1756,10 +1714,11 @@ public class VideoEditorImpl implements VideoEditor {
             try {
                 projectBitmap = mI.getThumbnail(width, height, 500);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException ("Illegal Argument Error creating project thumbnail");
+                throw new IllegalArgumentException ("Illegal argument error creating project thumbnail");
             } catch (IOException e) {
                 throw new IllegalArgumentException ("IO Error creating project thumbnail");
             }
+
             try {
                 FileOutputStream stream = new FileOutputStream(mProjectPath + "/"
                                                           + THUMBNAIL_FILENAME);
@@ -1767,7 +1726,6 @@ public class VideoEditorImpl implements VideoEditor {
                 stream.flush();
                 stream.close();
             } catch (IOException e) {
-
                 throw new IllegalArgumentException ("Error creating project thumbnail");
             } finally {
                 projectBitmap.recycle();
@@ -1788,7 +1746,7 @@ public class VideoEditorImpl implements VideoEditor {
 
         final Surface surface = surfaceHolder.getSurface();
         if (surface == null) {
-            throw new RuntimeException("Surface could not be retrieved from surface holder");
+            throw new IllegalArgumentException("Surface could not be retrieved from surface holder");
         }
 
         if (mMANativeHelper != null) {

@@ -105,8 +105,7 @@ public abstract class Effect {
         final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs,
-                                         mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -130,11 +129,11 @@ public abstract class Effect {
             throw new IllegalArgumentException("Start time is too large");
         }
 
+        getMediaItem().getNativeContext().setGeneratePreview(true);
         final long oldStartTimeMs = mStartTimeMs;
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs,
-                                         mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -163,8 +162,7 @@ public abstract class Effect {
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs,
-                                         mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
