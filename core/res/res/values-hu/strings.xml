@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Lehetővé teszi az alkalmazás számára a vaku vezérlését."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"USB-eszközök elérése"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Lehetővé teszi az alkalmazások számára az USB-eszközök elérését."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP-protokoll megvalósítása"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Hozzáférést biztosít a kernel MTP driveréhez az MTP USB-protokoll megvalósításának céljából."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardver tesztelése"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Lehetővé teszi az alkalmazás számára különböző perifériák vezérlését hardvertesztelés céljából."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonszámok közvetlen hívása"</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Az eszköz globális proxyja lesz használatban, amíg az irányelv engedélyezve van. Csak az eszköz első rendszergazdája állíthatja be a tényleges globális proxyt."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Jelszó lejáratának beállítása"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Azt vezérli, mennyi időnként kell módosítani a képernyőt zároló jelszót"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Tárhelytitkosítás beállítása"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Megköveteli a tárolt alkalmazásadatok titkosítását"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Otthoni"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -608,8 +604,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Munkahely"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Egyéb"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Adja meg a PIN-kódot"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17"></font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"A feloldáshoz írja be a jelszót"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Feloldáshoz írja be a PIN kódot"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Helytelen PIN-kód."</string>
@@ -911,8 +906,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Válassza ezt az USB hibakeresés kikapcsolásához."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Válassza ki a beviteli módszert"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"Beviteli módok konfigurálása"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"jelöltek"</u></string>
@@ -1011,25 +1005,19 @@
     <string name="share" msgid="1778686618230011964">"Megosztás"</string>
     <string name="find" msgid="4808270900322985960">"Keresés"</string>
     <string name="websearch" msgid="4337157977400211589">"Webes keresés"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"Hely lekérése"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"Igen"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"Nem"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"A szinkronizálás elérte a törlésre vonatkozó korlátot"</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"Az elemek törlése."</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"Törlés visszavonása."</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"Most nem."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Helykérelem a következőtől: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Helykérelem"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Igénylő <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Igen"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Nem"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"A szinkronizálás elérte a törlésre vonatkozó korlátot"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> törölt elem van a(z) <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> szinkronizálásánál, a(z) <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> fiókban. Mit kíván tenni?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Az elemek törlése."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Törlés visszavonása."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Most nem."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Kapcsolódva a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózathoz"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Kapcsolat bontva a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózattal"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Érintse meg az újracsatlakozáshoz."</string>
     <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
