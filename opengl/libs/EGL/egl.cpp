@@ -1815,3 +1815,8 @@ EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
     }
     return setError(EGL_BAD_DISPLAY, NULL);
 }
+
+EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) { return 0; }
+EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list) { return 0; }
+EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) { return 0; }
+
