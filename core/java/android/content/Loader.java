@@ -45,6 +45,7 @@ public class Loader<D> {
     OnLoadCompleteListener<D> mListener;
     Context mContext;
     boolean mStarted = false;
+    boolean mAbandoned = false;
     boolean mReset = true;
     boolean mContentChanged = false;
 
@@ -151,6 +152,15 @@ public class Loader<D> {
     }
 
     /**
+     * Return whether this loader has been abandoned.  In this state, the
+     * loader <em>must not</em> report any new data, and <em>must</em> keep
+     * its last reported data valid until it is finally reset.
+     */
+    public boolean isAbandoned() {
+        return mAbandoned;
+    }
+
+    /**
      * Return whether this load has been reset.  That is, either the loader
      * has not yet been started for the first time, or its {@link #reset()}
      * has been called.
@@ -177,6 +187,7 @@ public class Loader<D> {
     public final void startLoading() {
         mStarted = true;
         mReset = false;
+        mAbandoned = false;
         onStartLoading();
     }
 
@@ -236,6 +247,28 @@ public class Loader<D> {
     }
 
     /**
+     * Tell the Loader that it is being abandoned.  This is called prior
+     * to {@link #reset} to have it retain its current data but not report
+     * any new data.
+     */
+    public void abandon() {
+        mAbandoned = true;
+        onAbandon();
+    }
+    
+    /**
+     * Subclasses implement this to take care of being abandoned.  This is
+     * an optional intermediate state prior to {@link #onReset()} -- it means that
+     * the client is no longer interested in any new data from the loader,
+     * so the loader must not report any further updates.  However, the
+     * loader <em>must</em> keep its last reported data valid until the final
+     * {@link #onReset()} happens.  You can retrieve the current abandoned
+     * state with {@link #isAbandoned}.
+     */
+    protected void onAbandon() {        
+    }
+    
+    /**
      * Resets the state of the Loader.  The Loader should at this point free
      * all of its resources, since it may never be called again; however, its
      * {@link #startLoading()} may later be called at which point it must be
@@ -251,6 +284,7 @@ public class Loader<D> {
         onReset();
         mReset = true;
         mStarted = false;
+        mAbandoned = false;
         mContentChanged = false;
     }
 
@@ -327,6 +361,7 @@ public class Loader<D> {
                 writer.print(" mListener="); writer.println(mListener);
         writer.print(prefix); writer.print("mStarted="); writer.print(mStarted);
                 writer.print(" mContentChanged="); writer.print(mContentChanged);
+                writer.print(" mAbandoned="); writer.print(mAbandoned);
                 writer.print(" mReset="); writer.println(mReset);
     }
 }
