@@ -1869,6 +1869,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * This view's request for the visibility of the status bar.
      * @hide
      */
+    @ViewDebug.ExportedProperty()
     int mSystemUiVisibility;
 
     /**
