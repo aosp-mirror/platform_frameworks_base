@@ -343,8 +343,9 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
     mData.putAUInt16(deviceProperties); // Device Properties Supported
     mData.putAUInt16(captureFormats); // Capture Formats
     mData.putAUInt16(playbackFormats);  // Playback Formats
-    // FIXME
-    string.set("Google, Inc.");
+
+    property_get("ro.product.manufacturer", prop_value, "unknown manufacturer");
+    string.set(prop_value);
     mData.putString(string);   // Manufacturer
 
     property_get("ro.product.model", prop_value, "MTP Device");
