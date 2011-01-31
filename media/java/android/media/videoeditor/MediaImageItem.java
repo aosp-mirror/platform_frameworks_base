@@ -294,6 +294,8 @@ public class MediaImageItem extends MediaItem {
             return;
         }
 
+        mMANativeHelper.setGeneratePreview(true);
+
         /**
          * Invalidate the end transitions if necessary.
          * This invalidation is necessary for the case in which an effect or
