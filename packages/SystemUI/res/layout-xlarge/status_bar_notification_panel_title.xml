@@ -86,7 +86,7 @@
         android:layout_alignBaseline="@id/battery"
         android:layout_alignParentRight="true"
         android:paddingRight="16dp"
-        android:src="@drawable/ic_notification_open"
+        android:src="@drawable/ic_sysbar_quicksettings"
         android:baseline="21dp"
         />
 
