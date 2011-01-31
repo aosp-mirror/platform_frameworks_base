@@ -165,7 +165,8 @@ jobject videoEditProp_getProperties(
             (VideoEditClasses_kFileType_MP4  == fileType) ||
             (VideoEditClasses_kFileType_3GPP == fileType) ||
             (VideoEditClasses_kFileType_AMR  == fileType) ||
-            (VideoEditClasses_kFileType_PCM  == fileType))
+            (VideoEditClasses_kFileType_PCM  == fileType) ||
+            (VideoEditClasses_kFileType_M4V  == fileType))
         {
             // Allocate a new clip properties structure.
             pClipProperties =
@@ -316,12 +317,13 @@ static void getFileAndMediaTypeFromExtension (
             extension[index] = M4OSA_chrToLower(pExtension[index]);
         }
 
-                // Check if the extension is ".mp3".
+        // Check if the extension is ".mp3".
         if (!(VideoEdit_chrCompare(extension, (M4OSA_Char*)"mp3", &cmpResult)))
         {
             *pFileType = VideoEditClasses_kFileType_MP3;
             *pClipType = M4VIDEOEDITING_kFileType_MP3;
-        }       // Check if the extension is ".mp4".
+        }
+        // Check if the extension is ".mp4".
         else if (!(VideoEdit_chrCompare(extension, (M4OSA_Char*)"mp4", &cmpResult)))
         {
             *pFileType = VideoEditClasses_kFileType_MP4;
@@ -333,7 +335,7 @@ static void getFileAndMediaTypeFromExtension (
             *pFileType = VideoEditClasses_kFileType_3GPP;
             *pClipType = M4VIDEOEDITING_kFileType_3GPP;
         }
-        // Check if the extension is ".3gp".
+        // Check if the extension is ".m4a".
         else if (!(VideoEdit_chrCompare(extension, (M4OSA_Char*)"m4a", &cmpResult)))
         {
             *pFileType = VideoEditClasses_kFileType_3GPP;
@@ -348,7 +350,6 @@ static void getFileAndMediaTypeFromExtension (
         // Check if the extension is ".amr".
         else if (!(VideoEdit_chrCompare(extension, (M4OSA_Char*)"amr", &cmpResult)))
         {
-
             *pFileType = VideoEditClasses_kFileType_AMR;
             *pClipType = M4VIDEOEDITING_kFileType_AMR;
         }
@@ -378,9 +379,13 @@ static void getFileAndMediaTypeFromExtension (
         {
             *pFileType = VideoEditClasses_kFileType_PNG;
         }
-
+        // Check if the extension is ".m4v".
+        else if (!(VideoEdit_chrCompare(extension, (M4OSA_Char*)"m4v", &cmpResult)))
+        {
+            *pFileType = VideoEditClasses_kFileType_M4V;
+            *pClipType = M4VIDEOEDITING_kFileType_M4V;
+        }
     }
-
 }
 
 static M4OSA_ERR getClipProperties(

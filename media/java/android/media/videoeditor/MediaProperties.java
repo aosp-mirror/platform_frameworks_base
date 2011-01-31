@@ -190,15 +190,20 @@ public class MediaProperties {
     public static final int FILE_MP3 = 3;
     // 4 is for PCM
     public static final int FILE_JPEG = 5;
-    // 6 is for GIF
-    public static final int FILE_PNG = 7;
+    // 6 is for BMP
+    // 7 is for GIF
+    public static final int FILE_PNG = 8;
+    // 9 is for ARGB8888
+    public static final int FILE_M4V = 10;
     public static final int FILE_UNSUPPORTED = 255;
+
     /**
      * The array of the supported file formats
      */
     private static final int[] SUPPORTED_VIDEO_FILE_FORMATS = new int[] {
         FILE_3GP,
-        FILE_MP4
+        FILE_MP4,
+        FILE_M4V
     };
 
     /**

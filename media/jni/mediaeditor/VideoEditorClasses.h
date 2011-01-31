@@ -91,8 +91,11 @@ typedef enum
     VideoEditClasses_kFileType_MP3,
     VideoEditClasses_kFileType_PCM,
     VideoEditClasses_kFileType_JPG,
+    VideoEditClasses_kFileType_BMP,
     VideoEditClasses_kFileType_GIF,
     VideoEditClasses_kFileType_PNG,
+    VideoEditClasses_kFileType_ARGB8888,
+    VideoEditClasses_kFileType_M4V,
     VideoEditClasses_kFileType_Unsupported
 } VideoEditClasses_FileType;
 

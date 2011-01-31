@@ -120,8 +120,8 @@ public class MediaVideoItem extends MediaItem {
 
         switch (mMANativeHelper.getFileType(properties.fileType)) {
             case MediaProperties.FILE_3GP:
-                break;
             case MediaProperties.FILE_MP4:
+            case MediaProperties.FILE_M4V:
                 break;
 
             default:
@@ -130,11 +130,8 @@ public class MediaVideoItem extends MediaItem {
 
         switch (mMANativeHelper.getVideoCodecType(properties.videoFormat)) {
             case MediaProperties.VCODEC_H263:
-                break;
             case MediaProperties.VCODEC_H264BP:
-                break;
             case MediaProperties.VCODEC_H264MP:
-                break;
             case MediaProperties.VCODEC_MPEG4:
                 break;
 
