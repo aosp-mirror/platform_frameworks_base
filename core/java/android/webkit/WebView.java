@@ -2506,6 +2506,7 @@ public class WebView extends AbsoluteLayout
         // Rect.equals() checks for null input.
         if (!rect.equals(mLastVisibleRectSent)) {
             Point pos = new Point(rect.left, rect.top);
+            mWebViewCore.removeMessages(EventHub.SET_SCROLL_OFFSET);
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
                     nativeMoveGeneration(), mUserScroll ? 1 : 0, pos);
             mLastVisibleRectSent = rect;
