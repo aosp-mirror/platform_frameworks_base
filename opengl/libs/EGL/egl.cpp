@@ -389,10 +389,9 @@ static tls_t* getTLS()
 }
 
 static inline void clearError() {
-    if (gEGLThreadLocalStorageKey != -1) {
-        tls_t* tls = getTLS();
-        tls->error = EGL_SUCCESS;
-    }
+    // This must clear the error from all the underlying EGL implementations as
+    // well as the EGL wrapper layer.
+    eglGetError();
 }
 
 template<typename T>
