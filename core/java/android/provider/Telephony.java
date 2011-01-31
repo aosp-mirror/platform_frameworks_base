@@ -114,8 +114,8 @@ public final class Telephony {
 
         public static final int STATUS_NONE = -1;
         public static final int STATUS_COMPLETE = 0;
-        public static final int STATUS_PENDING = 64;
-        public static final int STATUS_FAILED = 128;
+        public static final int STATUS_PENDING = 32;
+        public static final int STATUS_FAILED = 64;
 
         /**
          * The subject of the message, if present
