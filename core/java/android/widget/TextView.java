@@ -5772,11 +5772,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int want = width - getCompoundPaddingLeft() - getCompoundPaddingRight();
         int unpaddedWidth = want;
+
+        if (mHorizontallyScrolling) want = VERY_WIDE;
+
         int hintWant = want;
-
-        if (mHorizontallyScrolling)
-            want = VERY_WIDE;
-
         int hintWidth = mHintLayout == null ? hintWant : mHintLayout.getWidth();
 
         if (mLayout == null) {
