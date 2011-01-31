@@ -339,10 +339,13 @@ class MediaArtistNativeHelper {
         public static final int JPG = 5;
 
         /** GIF image file type. */
-        public static final int GIF = 6;
+        public static final int GIF = 7;
 
         /** PNG image file type. */
-        public static final int PNG = 7;
+        public static final int PNG = 8;
+
+        /** M4V file type. */
+        public static final int M4V = 10;
 
         /** Unsupported file type. */
         public static final int UNSUPPORTED = 255;
@@ -3256,6 +3259,9 @@ class MediaArtistNativeHelper {
             case FileType.MP3:
                 retValue = MediaProperties.FILE_MP3;
                 break;
+            case FileType.M4V:
+                retValue = MediaProperties.FILE_M4V;
+                break;
 
             default:
                 retValue = -1;
@@ -3385,6 +3391,9 @@ class MediaArtistNativeHelper {
                 break;
             case MediaProperties.FILE_PNG:
                 retValue = FileType.PNG;
+                break;
+            case MediaProperties.FILE_M4V:
+                retValue = FileType.M4V;
                 break;
 
             default:
