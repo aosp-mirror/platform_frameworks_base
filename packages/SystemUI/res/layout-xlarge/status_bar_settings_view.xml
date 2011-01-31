@@ -118,7 +118,7 @@
         <ImageView
                 android:id="@+id/do_not_disturb_icon"
                 style="@style/StatusBarPanelSettingsIcon"
-                android:src="@drawable/ic_sysbar_gps_on"
+                android:src="@drawable/ic_notification_open"
                 />
         <TextView
                 style="@style/StatusBarPanelSettingsContents"
