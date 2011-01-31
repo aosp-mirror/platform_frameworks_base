@@ -47,6 +47,7 @@ import com.android.server.am.BatteryStatsService;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -2758,6 +2759,15 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean displayed = false;
         boolean inTouchMode;
         boolean configChanged;
+
+        // if they don't have this permission, mask out the status bar bits
+        if (attrs != null) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                    != PackageManager.PERMISSION_GRANTED) {
+                attrs.systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+                attrs.subtreeSystemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+            }
+        }
         long origId = Binder.clearCallingIdentity();
 
         synchronized(mWindowMap) {
