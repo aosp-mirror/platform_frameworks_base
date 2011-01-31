@@ -6625,15 +6625,10 @@ public class WebView extends AbsoluteLayout
      * @param y New y position of the WebTextView in view coordinates
      */
     /* package */ void scrollFocusedTextInputY(int y) {
-        if (!inEditingMode()) {
+        if (!inEditingMode() || mWebViewCore == null) {
             return;
         }
-        int xPos = viewToContentX((mWebTextView.getLeft() + mWebTextView.getRight()) / 2);
-        int yPos = viewToContentY((mWebTextView.getTop() + mWebTextView.getBottom()) / 2);
-        int layer = nativeScrollableLayer(xPos, yPos, null, null);
-        if (layer != 0) {
-            nativeScrollLayer(layer, 0, viewToContentDimension(y));
-        }
+        mWebViewCore.sendMessage(EventHub.SCROLL_TEXT_INPUT, 0, viewToContentDimension(y));
     }
 
     /**
@@ -7980,18 +7975,15 @@ public class WebView extends AbsoluteLayout
      * @param node Pointer to the node touched.
      * @param x x-position of the touch.
      * @param y y-position of the touch.
-     * @param scrollY Only used when touching on a textarea.  Otherwise, use -1.
-     *      Tells how much the textarea is scrolled.
      */
     private void sendMotionUp(int touchGeneration,
-            int frame, int node, int x, int y, int scrollY) {
+            int frame, int node, int x, int y) {
         WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
         touchUpData.mMoveGeneration = touchGeneration;
         touchUpData.mFrame = frame;
         touchUpData.mNode = node;
         touchUpData.mX = x;
         touchUpData.mY = y;
-        touchUpData.mScrollY = scrollY;
         mWebViewCore.sendMessage(EventHub.TOUCH_UP, touchUpData);
     }
 
