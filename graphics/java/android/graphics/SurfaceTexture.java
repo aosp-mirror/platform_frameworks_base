@@ -32,6 +32,17 @@ import android.os.Message;
  * updated to contain the most recent image from the image stream.  This may cause some frames of
  * the stream to be skipped.
  *
+ * <p>When sampling from the texture one should first transform the texture coordinates using the
+ * matrix queried via {@link #getTransformMatrix}.  The transform matrix may change each time {@link
+ * #updateTexImage} is called, so it should be re-queried each time the texture image is updated.
+ * This matrix transforms traditional 2D OpenGL ES texture coordinate column vectors of the form (s,
+ * t, 0, 1) where s and t are on the inclusive interval [0, 1] to the proper sampling location in
+ * the streamed texture.  This transform compensates for any properties of the image stream source
+ * that cause it to appear different from a traditional OpenGL ES texture.  For example, sampling
+ * from the bottom left corner of the image can be accomplished by transforming the column vector
+ * (0, 0, 0, 1) using the queried matrix, while sampling from the top right corner of the image can
+ * be done by transforming (1, 1, 0, 1).
+ *
  * <p>The texture object uses the GL_TEXTURE_EXTERNAL_OES texture target, which is defined by the
  * OES_EGL_image_external OpenGL ES extension.  This limits how the texture may be used.
  *
