@@ -27,6 +27,8 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.util.ArrayList;
+
 /**
  * This method adapter rewrites a method by discarding the original code and generating
  * a call to a delegate. Original annotations are passed along unchanged.
@@ -124,7 +126,7 @@ class DelegateMethodAdapter implements MethodVisitor {
     public void generateCode() {
         /*
          * The goal is to generate a call to a static delegate method.
-         * If this method is not-static, the first parameter will be this.
+         * If this method is non-static, the first parameter will be 'this'.
          * All the parameters must be passed and then the eventual return type returned.
          *
          * Example, let's say we have a method such as
@@ -133,9 +135,19 @@ class DelegateMethodAdapter implements MethodVisitor {
          * We'll want to create a body that calls a delegate method like this:
          *   TheClass_Delegate.method_1(this, a, b, c);
          *
+         * If the method is non-static and the class name is an inner class (e.g. has $ in its
+         * last segment), we want to push the 'this' of the outer class first:
+         *   OuterClass_InnerClass_Delegate.method_1(
+         *     OuterClass.this,
+         *     OuterClass$InnerClass.this,
+         *     a, b, c);
+         *
+         * Only one level of inner class is supported right now, for simplicity and because
+         * we don't need more.
+         *
          * The generated class name is the current class name with "_Delegate" appended to it.
          * One thing to realize is that we don't care about generics -- since generic types
-         * are erased at runtime, they have no influence on the method being called.
+         * are erased at runtime, they have no influence on the method name being called.
          */
 
         // Add our annotation
@@ -151,34 +163,61 @@ class DelegateMethodAdapter implements MethodVisitor {
             mVisitCodeCalled = true;
         }
 
-        int numVars = 0;
+        ArrayList<Type> paramTypes = new ArrayList<Type>();
+        String delegateClassName = mClassName + DELEGATE_SUFFIX;
+        boolean pushedArg0 = false;
+        int maxStack = 0;
 
-        // Push "this" for an instance method, which is always ALOAD 0
+        // For an instance method (e.g. non-static), push the 'this' preceded
+        // by the 'this' of any outer class, if any.
         if (!mIsStatic) {
-            mParentVisitor.visitVarInsn(Opcodes.ALOAD, numVars++);
+            // Check if the last segment of the class name has inner an class.
+            // Right now we only support one level of inner classes.
+            int slash = mClassName.lastIndexOf('/');
+            int dol = mClassName.lastIndexOf('$');
+            if (dol != -1 && dol > slash && dol == mClassName.indexOf('$')) {
+                String outerClass = mClassName.substring(0, dol);
+                Type outerType = Type.getObjectType(outerClass);
+
+                // Change a delegate class name to "com/foo/Outer_Inner_Delegate"
+                delegateClassName = delegateClassName.replace('$', '_');
+
+                // The first-level inner class has a package-protected member called 'this$0'
+                // that points to the outer class.
+
+                // Push this.getField("this$0") on the call stack.
+                mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0); // var 0 = this
+                mParentVisitor.visitFieldInsn(Opcodes.GETFIELD,
+                        mClassName,                 // class where the field is defined
+                        "this$0",                   // field name
+                        outerType.getDescriptor()); // type of the field
+                maxStack++;
+                paramTypes.add(outerType);
+            }
+
+            // Push "this" for the instance method, which is always ALOAD 0
+            mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+            maxStack++;
+            pushedArg0 = true;
+            paramTypes.add(Type.getObjectType(mClassName));
         }
 
-        // Push all other arguments
+        // Push all other arguments. Start at arg 1 if we already pushed 'this' above.
         Type[] argTypes = Type.getArgumentTypes(mDesc);
+        int maxLocals = pushedArg0 ? 1 : 0;
         for (Type t : argTypes) {
             int size = t.getSize();
-            mParentVisitor.visitVarInsn(t.getOpcode(Opcodes.ILOAD), numVars);
-            numVars += size;
+            mParentVisitor.visitVarInsn(t.getOpcode(Opcodes.ILOAD), maxLocals);
+            maxLocals += size;
+            maxStack += size;
+            paramTypes.add(t);
         }
 
-        // Construct the descriptor of the delegate. For a static method, it's the same
-        // however for an instance method we need to pass the 'this' reference first
-        String desc = mDesc;
-        if (!mIsStatic) {
-            Type[] argTypes2 = new Type[argTypes.length + 1];
-
-            argTypes2[0] = Type.getObjectType(mClassName);
-            System.arraycopy(argTypes, 0, argTypes2, 1, argTypes.length);
-
-            desc = Type.getMethodDescriptor(Type.getReturnType(mDesc), argTypes2);
-        }
-
-        String delegateClassName = mClassName + DELEGATE_SUFFIX;
+        // Construct the descriptor of the delegate based on the parameters
+        // we pushed on the call stack. The return type remains unchanged.
+        String desc = Type.getMethodDescriptor(
+                Type.getReturnType(mDesc),
+                paramTypes.toArray(new Type[paramTypes.size()]));
 
         // Invoke the static delegate
         mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
@@ -189,7 +228,7 @@ class DelegateMethodAdapter implements MethodVisitor {
         Type returnType = Type.getReturnType(mDesc);
         mParentVisitor.visitInsn(returnType.getOpcode(Opcodes.IRETURN));
 
-        mParentVisitor.visitMaxs(numVars, numVars);
+        mParentVisitor.visitMaxs(maxStack, maxLocals);
         mParentVisitor.visitEnd();
 
         // For debugging now. Maybe we should collect these and store them in

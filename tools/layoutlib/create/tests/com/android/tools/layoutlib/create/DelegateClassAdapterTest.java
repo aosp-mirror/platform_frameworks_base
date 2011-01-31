@@ -24,25 +24,38 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.android.tools.layoutlib.create.dataclass.ClassWithNative;
+import com.android.tools.layoutlib.create.dataclass.OuterClass;
+import com.android.tools.layoutlib.create.dataclass.OuterClass.InnerClass;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class DelegateClassAdapterTest {
 
     private MockLog mLog;
 
-    private static final String CLASS_NAME =
-        DelegateClassAdapterTest.class.getCanonicalName() + "$" +
-        ClassWithNative.class.getSimpleName();
+    private static final String NATIVE_CLASS_NAME = ClassWithNative.class.getCanonicalName();
+    private static final String OUTER_CLASS_NAME = OuterClass.class.getCanonicalName();
+    private static final String INNER_CLASS_NAME = OuterClass.class.getCanonicalName() + "$" +
+                                                   InnerClass.class.getSimpleName();
 
     @Before
     public void setUp() throws Exception {
@@ -55,11 +68,11 @@ public class DelegateClassAdapterTest {
      */
     @SuppressWarnings("unchecked")
     @Test
-    public void testNoOp() throws Exception {
+    public void testNoOp() throws Throwable {
         // create an instance of the class that will be modified
         // (load the class in a distinct class loader so that we can trash its definition later)
         ClassLoader cl1 = new ClassLoader(this.getClass().getClassLoader()) { };
-        Class<ClassWithNative> clazz1 = (Class<ClassWithNative>) cl1.loadClass(CLASS_NAME);
+        Class<ClassWithNative> clazz1 = (Class<ClassWithNative>) cl1.loadClass(NATIVE_CLASS_NAME);
         ClassWithNative instance1 = clazz1.newInstance();
         assertEquals(42, instance1.add(20, 22));
         try {
@@ -73,42 +86,47 @@ public class DelegateClassAdapterTest {
         ClassWriter cw = new ClassWriter(0 /*flags*/);
 
         HashSet<String> delegateMethods = new HashSet<String>();
-        String internalClassName = CLASS_NAME.replace('.', '/');
+        String internalClassName = NATIVE_CLASS_NAME.replace('.', '/');
         DelegateClassAdapter cv = new DelegateClassAdapter(
                 mLog, cw, internalClassName, delegateMethods);
 
-        ClassReader cr = new ClassReader(CLASS_NAME);
+        ClassReader cr = new ClassReader(NATIVE_CLASS_NAME);
         cr.accept(cv, 0 /* flags */);
 
         // Load the generated class in a different class loader and try it again
-        final byte[] bytes = cw.toByteArray();
 
-        ClassLoader2 cl2 = new ClassLoader2(bytes) {
-            @Override
-            public void testModifiedInstance() throws Exception {
-                Class<?> clazz2 = loadClass(CLASS_NAME);
-                Object i2 = clazz2.newInstance();
-                assertNotNull(i2);
-                assertEquals(42, callAdd(i2, 20, 22));
+        ClassLoader2 cl2 = null;
+        try {
+            cl2 = new ClassLoader2() {
+                @Override
+                public void testModifiedInstance() throws Exception {
+                    Class<?> clazz2 = loadClass(NATIVE_CLASS_NAME);
+                    Object i2 = clazz2.newInstance();
+                    assertNotNull(i2);
+                    assertEquals(42, callAdd(i2, 20, 22));
 
-                try {
-                    callCallNativeInstance(i2, 10, 3.1415, new Object[0]);
-                    fail("Test should have failed to invoke callTheNativeMethod [2]");
-                } catch (InvocationTargetException e) {
-                    // This is expected to fail since the native method has NOT been
-                    // overridden here.
-                    assertEquals(UnsatisfiedLinkError.class, e.getCause().getClass());
+                    try {
+                        callCallNativeInstance(i2, 10, 3.1415, new Object[0]);
+                        fail("Test should have failed to invoke callTheNativeMethod [2]");
+                    } catch (InvocationTargetException e) {
+                        // This is expected to fail since the native method has NOT been
+                        // overridden here.
+                        assertEquals(UnsatisfiedLinkError.class, e.getCause().getClass());
+                    }
+
+                    // Check that the native method does NOT have the new annotation
+                    Method[] m = clazz2.getDeclaredMethods();
+                    assertEquals("native_instance", m[2].getName());
+                    assertTrue(Modifier.isNative(m[2].getModifiers()));
+                    Annotation[] a = m[2].getAnnotations();
+                    assertEquals(0, a.length);
                 }
-
-                // Check that the native method does NOT have the new annotation
-                Method[] m = clazz2.getDeclaredMethods();
-                assertEquals("native_instance", m[2].getName());
-                assertTrue(Modifier.isNative(m[2].getModifiers()));
-                Annotation[] a = m[2].getAnnotations();
-                assertEquals(0, a.length);
-            }
-        };
-        cl2.testModifiedInstance();
+            };
+            cl2.add(NATIVE_CLASS_NAME, cw);
+            cl2.testModifiedInstance();
+        } catch (Throwable t) {
+            throw dumpGeneratedClass(t, cl2);
+        }
     }
 
     /**
@@ -122,38 +140,37 @@ public class DelegateClassAdapterTest {
     public void testConstructorsNotSupported() throws IOException {
         ClassWriter cw = new ClassWriter(0 /*flags*/);
 
-        String internalClassName = CLASS_NAME.replace('.', '/');
+        String internalClassName = NATIVE_CLASS_NAME.replace('.', '/');
 
         HashSet<String> delegateMethods = new HashSet<String>();
         delegateMethods.add("<init>");
         DelegateClassAdapter cv = new DelegateClassAdapter(
                 mLog, cw, internalClassName, delegateMethods);
 
-        ClassReader cr = new ClassReader(CLASS_NAME);
+        ClassReader cr = new ClassReader(NATIVE_CLASS_NAME);
         cr.accept(cv, 0 /* flags */);
     }
 
     @Test
-    public void testDelegateNative() throws Exception {
+    public void testDelegateNative() throws Throwable {
         ClassWriter cw = new ClassWriter(0 /*flags*/);
-        String internalClassName = CLASS_NAME.replace('.', '/');
+        String internalClassName = NATIVE_CLASS_NAME.replace('.', '/');
 
         HashSet<String> delegateMethods = new HashSet<String>();
         delegateMethods.add(DelegateClassAdapter.ALL_NATIVES);
         DelegateClassAdapter cv = new DelegateClassAdapter(
                 mLog, cw, internalClassName, delegateMethods);
 
-        ClassReader cr = new ClassReader(CLASS_NAME);
+        ClassReader cr = new ClassReader(NATIVE_CLASS_NAME);
         cr.accept(cv, 0 /* flags */);
 
         // Load the generated class in a different class loader and try it
-        final byte[] bytes = cw.toByteArray();
-
+        ClassLoader2 cl2 = null;
         try {
-            ClassLoader2 cl2 = new ClassLoader2(bytes) {
+            cl2 = new ClassLoader2() {
                 @Override
                 public void testModifiedInstance() throws Exception {
-                    Class<?> clazz2 = loadClass(CLASS_NAME);
+                    Class<?> clazz2 = loadClass(NATIVE_CLASS_NAME);
                     Object i2 = clazz2.newInstance();
                     assertNotNull(i2);
 
@@ -173,48 +190,105 @@ public class DelegateClassAdapterTest {
                      assertEquals("LayoutlibDelegate", a[0].annotationType().getSimpleName());
                 }
             };
+            cl2.add(NATIVE_CLASS_NAME, cw);
             cl2.testModifiedInstance();
+        } catch (Throwable t) {
+            throw dumpGeneratedClass(t, cl2);
+        }
+    }
 
-        // This code block is useful for debugging. However to make it work you need to
-        // pull in the org.objectweb.asm.util.TraceClassVisitor class and associated
-        // utilities which are found in the ASM source jar.
-        //
-        // } catch (Throwable t) {
-        //     For debugging, dump the bytecode of the class in case of unexpected error.
-        //     StringWriter sw = new StringWriter();
-        //     PrintWriter pw = new PrintWriter(sw);
-        //     TraceClassVisitor tcv = new TraceClassVisitor(pw);
-        //     ClassReader cr2 = new ClassReader(bytes);
-        //     cr2.accept(tcv, 0 /* flags */);
-        //     String msg = "\n" + t.getClass().getCanonicalName();
-        //     if (t.getMessage() != null) {
-        //       msg += ": " + t.getMessage();
-        //     }
-        //     msg = msg + "\nBytecode dump:\n" + sw.toString();
-        //  // Re-throw exception with new message
-        //     RuntimeException ex = new RuntimeException(msg, t);
-        //     throw ex;
-        } finally {
+    @Test
+    public void testDelegateInner() throws Throwable {
+        // We'll delegate the "get" method of both the inner and outer class.
+        HashSet<String> delegateMethods = new HashSet<String>();
+        delegateMethods.add("get");
+
+        // Generate the delegate for the outer class.
+        ClassWriter cwOuter = new ClassWriter(0 /*flags*/);
+        String outerClassName = OUTER_CLASS_NAME.replace('.', '/');
+        DelegateClassAdapter cvOuter = new DelegateClassAdapter(
+                mLog, cwOuter, outerClassName, delegateMethods);
+        ClassReader cr = new ClassReader(OUTER_CLASS_NAME);
+        cr.accept(cvOuter, 0 /* flags */);
+
+        // Generate the delegate for the inner class.
+        ClassWriter cwInner = new ClassWriter(0 /*flags*/);
+        String innerClassName = INNER_CLASS_NAME.replace('.', '/');
+        DelegateClassAdapter cvInner = new DelegateClassAdapter(
+                mLog, cwInner, innerClassName, delegateMethods);
+        cr = new ClassReader(INNER_CLASS_NAME);
+        cr.accept(cvInner, 0 /* flags */);
+
+        // Load the generated classes in a different class loader and try them
+        ClassLoader2 cl2 = null;
+        try {
+            cl2 = new ClassLoader2() {
+                @Override
+                public void testModifiedInstance() throws Exception {
+
+                    // Check the outer class
+                    Class<?> outerClazz2 = loadClass(OUTER_CLASS_NAME);
+                    Object o2 = outerClazz2.newInstance();
+                    assertNotNull(o2);
+
+                    // The original Outer.get returns 1+10+20,
+                    // but the delegate makes it return 4+10+20
+                    assertEquals(4+10+20, callGet(o2, 10, 20));
+
+                    // Check the inner class. Since it's not a static inner class, we need
+                    // to use the hidden constructor that takes the outer class as first parameter.
+                    Class<?> innerClazz2 = loadClass(INNER_CLASS_NAME);
+                    Constructor<?> innerCons = innerClazz2.getConstructor(
+                                                                new Class<?>[] { outerClazz2 });
+                    Object i2 = innerCons.newInstance(new Object[] { o2 });
+                    assertNotNull(i2);
+
+                    // The original Inner.get returns 3+10+20,
+                    // but the delegate makes it return 6+10+20
+                    assertEquals(6+10+20, callGet(i2, 10, 20));
+                }
+            };
+            cl2.add(OUTER_CLASS_NAME, cwOuter.toByteArray());
+            cl2.add(INNER_CLASS_NAME, cwInner.toByteArray());
+            cl2.testModifiedInstance();
+        } catch (Throwable t) {
+            throw dumpGeneratedClass(t, cl2);
         }
     }
 
     //-------
 
     /**
-     * A class loader than can define and instantiate our dummy {@link ClassWithNative}.
+     * A class loader than can define and instantiate our modified classes.
      * <p/>
-     * The trick here is that this class loader will test our modified version of ClassWithNative.
+     * The trick here is that this class loader will test our <em>modified</em> version
+     * of the classes, the one with the delegate calls.
+     * <p/>
      * Trying to do so in the original class loader generates all sort of link issues because
      * there are 2 different definitions of the same class name. This class loader will
      * define and load the class when requested by name and provide helpers to access the
      * instance methods via reflection.
      */
     private abstract class ClassLoader2 extends ClassLoader {
-        private final byte[] mClassWithNative;
 
-        public ClassLoader2(byte[] classWithNative) {
+        private final Map<String, byte[]> mClassDefs = new HashMap<String, byte[]>();
+
+        public ClassLoader2() {
             super(null);
-            mClassWithNative = classWithNative;
+        }
+
+        public ClassLoader2 add(String className, byte[] definition) {
+            mClassDefs.put(className, definition);
+            return this;
+        }
+
+        public ClassLoader2 add(String className, ClassWriter rewrittenClass) {
+            mClassDefs.put(className, rewrittenClass.toByteArray());
+            return this;
+        }
+
+        private Set<Entry<String, byte[]>> getByteCode() {
+            return mClassDefs.entrySet();
         }
 
         @SuppressWarnings("unused")
@@ -224,9 +298,10 @@ public class DelegateClassAdapterTest {
                 return super.findClass(name);
             } catch (ClassNotFoundException e) {
 
-                if (CLASS_NAME.equals(name)) {
+                byte[] def = mClassDefs.get(name);
+                if (def != null) {
                     // Load the modified ClassWithNative from its bytes representation.
-                    return defineClass(CLASS_NAME, mClassWithNative, 0, mClassWithNative.length);
+                    return defineClass(name, def, 0, def.length);
                 }
 
                 try {
@@ -241,6 +316,17 @@ public class DelegateClassAdapterTest {
                     throw new RuntimeException(ioe);
                 }
             }
+        }
+
+        /**
+         * Accesses {@link OuterClass#get()} or {@link InnerClass#get() }via reflection.
+         */
+        public int callGet(Object instance, int a, long b) throws Exception {
+            Method m = instance.getClass().getMethod("get",
+                    new Class<?>[] { int.class, long.class } );
+
+            Object result = m.invoke(instance, new Object[] { a, b });
+            return ((Integer) result).intValue();
         }
 
         /**
@@ -271,34 +357,53 @@ public class DelegateClassAdapterTest {
     }
 
     /**
-     * Dummy test class with a native method.
-     * The native method is not defined and any attempt to invoke it will
-     * throw an {@link UnsatisfiedLinkError}.
+     * For debugging, it's useful to dump the content of the generated classes
+     * along with the exception that was generated.
+     *
+     * However to make it work you need to pull in the org.objectweb.asm.util.TraceClassVisitor
+     * class and associated utilities which are found in the ASM source jar. Since we don't
+     * want that dependency in the source code, we only put it manually for development and
+     * access the TraceClassVisitor via reflection if present.
+     *
+     * @param t The exception thrown by {@link ClassLoader2#testModifiedInstance()}
+     * @param cl2 The {@link ClassLoader2} instance with the generated bytecode.
+     * @return Either original {@code t} or a new wrapper {@link Throwable}
      */
-    public static class ClassWithNative {
-        public ClassWithNative() {
-        }
+    private Throwable dumpGeneratedClass(Throwable t, ClassLoader2 cl2) {
+        try {
+            // For debugging, dump the bytecode of the class in case of unexpected error
+            // if we can find the TraceClassVisitor class.
+            Class<?> tcvClass = Class.forName("org.objectweb.asm.util.TraceClassVisitor");
 
-        public int add(int a, int b) {
-            return a + b;
-        }
+            StringBuilder sb = new StringBuilder();
+            sb.append('\n').append(t.getClass().getCanonicalName());
+            if (t.getMessage() != null) {
+                sb.append(": ").append(t.getMessage());
+              }
 
-        public int callNativeInstance(int a, double d, Object[] o) {
-            return native_instance(a, d, o);
-        }
+            for (Entry<String, byte[]> entry : cl2.getByteCode()) {
+                String className = entry.getKey();
+                byte[] bytes = entry.getValue();
 
-        private native int native_instance(int a, double d, Object[] o);
-    }
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                // next 2 lines do: TraceClassVisitor tcv = new TraceClassVisitor(pw);
+                Constructor<?> cons = tcvClass.getConstructor(new Class<?>[] { pw.getClass() });
+                Object tcv = cons.newInstance(new Object[] { pw });
+                ClassReader cr2 = new ClassReader(bytes);
+                cr2.accept((ClassVisitor) tcv, 0 /* flags */);
 
-    /**
-     * The delegate that receives the call to {@link ClassWithNative}'s overridden methods.
-     */
-    public static class ClassWithNative_Delegate {
-        public static int native_instance(ClassWithNative instance, int a, double d, Object[] o) {
-            if (o != null && o.length > 0) {
-                o[0] = instance;
+                sb.append("\nBytecode dump: <").append(className).append(">:\n")
+                  .append(sw.toString());
             }
-            return (int)(a + d);
+
+            // Re-throw exception with new message
+            RuntimeException ex = new RuntimeException(sb.toString(), t);
+            return ex;
+        } catch (Throwable ignore) {
+            // In case of problem, just throw the original exception as-is.
+            return t;
         }
     }
+
 }
