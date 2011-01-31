@@ -219,7 +219,7 @@ public class TrafficStats {
     public static native long getUidTcpTxSegments(int uid);
 
     /**
-     * Get the number of TCP payload bytes received for this UID.
+     * Get the number of TCP segments received for this UID.
      * Does not include TCP control packets (SYN/ACKs/FIN/..).
      * The statistics are across all interfaces.
      *
