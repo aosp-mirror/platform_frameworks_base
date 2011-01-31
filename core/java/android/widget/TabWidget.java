@@ -66,6 +66,10 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     private final Rect mBounds = new Rect();
 
+    // When positive, the widths and heights of tabs will be imposed so that they fit in parent
+    private int mImposedTabsHeight = -1;
+    private int[] mImposedTabWidths;
+
     public TabWidget(Context context) {
         this(context, null);
     }
@@ -150,52 +154,62 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         setOnFocusChangeListener(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
-        // First measure with no constraint
-        final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        super.measureHorizontal(unspecifiedWidth, heightMeasureSpec);
+    void measureChildBeforeLayout(View child, int childIndex,
+            int widthMeasureSpec, int totalWidth,
+            int heightMeasureSpec, int totalHeight) {
 
-        final int count = getChildCount();
-        int totalWidth = 0;
-        int totalCount = 0;
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
-            final int childWidth = child.getMeasuredWidth();
-            totalWidth += childWidth;
-            totalCount++;
+        if (mImposedTabsHeight >= 0) {
+            widthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                    totalWidth + mImposedTabWidths[childIndex], MeasureSpec.EXACTLY);
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(mImposedTabsHeight,
+                    MeasureSpec.EXACTLY);
         }
 
-        final int width = MeasureSpec.getSize(widthMeasureSpec);
-        if (totalWidth > width && totalCount > 0) {
-            int extraWidth = totalWidth - width;
+        super.measureChildBeforeLayout(child, childIndex,
+                widthMeasureSpec, totalWidth, heightMeasureSpec, totalHeight);
+    }
+
+    @Override
+    void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
+        // First, measure with no constraint
+        final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        super.measureHorizontal(unspecifiedWidth, heightMeasureSpec);
+        mImposedTabsHeight = -1;
+
+        int extraWidth = getMeasuredWidth() - MeasureSpec.getSize(widthMeasureSpec);
+        if (extraWidth > 0) {
+            final int count = getChildCount();
+
+            int childCount = 0;
             for (int i = 0; i < count; i++) {
                 final View child = getChildAt(i);
-                if (child.getVisibility() == GONE) {
-                    continue;
-                }
-                final int childWidth = child.getMeasuredWidth();
-                final int delta = extraWidth / totalCount;
-                final int tabWidth = Math.max(0, childWidth - delta);
-
-                final int tabWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        tabWidth, MeasureSpec.EXACTLY);
-                final int tabHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        child.getMeasuredHeight(), MeasureSpec.EXACTLY);
-
-                child.measure(tabWidthMeasureSpec, tabHeightMeasureSpec);
-
-                // Make sure the extra width is evenly distributed, avoiding int division remainder
-                extraWidth -= delta;
-                totalCount--;
+                if (child.getVisibility() == GONE) continue;
+                childCount++;
             }
-            setMeasuredDimension(width, getMeasuredHeight());
+
+            if (childCount > 0) {
+                if (mImposedTabWidths == null || mImposedTabWidths.length != count) {
+                    mImposedTabWidths = new int[count];
+                }
+                for (int i = 0; i < count; i++) {
+                    final View child = getChildAt(i);
+                    if (child.getVisibility() == GONE) continue;
+                    final int childWidth = child.getMeasuredWidth();
+                    final int delta = extraWidth / childCount;
+                    final int newWidth = Math.max(0, childWidth - delta);
+                    mImposedTabWidths[i] = newWidth;
+                    // Make sure the extra width is evenly distributed, no int division remainder
+                    extraWidth -= childWidth - newWidth; // delta may have been clamped
+                    childCount--;
+                    mImposedTabsHeight = Math.max(mImposedTabsHeight, child.getMeasuredHeight());
+                }
+            }
+        }
+
+        // Measure again, this time with imposed tab widths and respecting initial spec request
+        if (mImposedTabsHeight >= 0 || unspecifiedWidth != widthMeasureSpec) {
+            super.measureHorizontal(widthMeasureSpec, heightMeasureSpec);
         }
     }
 
