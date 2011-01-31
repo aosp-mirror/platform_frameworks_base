@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#ifndef ANDROID_RS_SERIALIZE
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
-#else
-#include "rsContextHostStub.h"
-#include <OpenGL/gl.h>
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 
 using namespace android;
 using namespace android::renderscript;

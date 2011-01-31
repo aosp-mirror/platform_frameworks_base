@@ -15,12 +15,7 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-#else
-#include "rsContextHostStub.h"
-#endif
-
 #include "rsStream.h"
 
 using namespace android;

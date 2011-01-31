@@ -365,7 +365,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
 RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
                                                RsAllocationMipmapControl mips,
                                                const void *data, uint32_t usages);
-#ifdef ANDROID_RS_BUILD_FOR_HOST
+#ifdef ANDROID_RS_SERIALIZE
 #define NO_RS_FUNCS
 #endif
 

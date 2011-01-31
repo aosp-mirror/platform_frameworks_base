@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ANDROID_RS_BUILD_FOR_HOST
-#include "rsContext.h"
 
+#include "rsContext.h"
+#ifndef ANDROID_RS_SERIALIZE
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES/glext.h>
-#else
-#include "rsContextHostStub.h"
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 
 static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va);
 
@@ -78,7 +76,7 @@ Allocation::~Allocation() {
         mPtr = NULL;
     }
     freeScriptMemory();
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     if (mBufferID) {
         // Causes a SW crash....
         //LOGV(" mBufferID %i", mBufferID);
@@ -89,7 +87,7 @@ Allocation::~Allocation() {
         glDeleteTextures(1, &mTextureID);
         mTextureID = 0;
     }
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::setCpuWritable(bool) {
@@ -114,7 +112,7 @@ void Allocation::deferedUploadToTexture(const Context *rsc) {
 }
 
 uint32_t Allocation::getGLTarget() const {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     if (getIsTexture()) {
         if (mType->getDimFaces()) {
             return GL_TEXTURE_CUBE_MAP;
@@ -125,7 +123,7 @@ uint32_t Allocation::getGLTarget() const {
     if (getIsBufferObject()) {
         return GL_ARRAY_BUFFER;
     }
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
     return 0;
 }
 
@@ -156,7 +154,7 @@ void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
 }
 
 void Allocation::uploadToTexture(const Context *rsc) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
@@ -193,10 +191,10 @@ void Allocation::uploadToTexture(const Context *rsc) {
     }
 
     rsc->checkError("Allocation::uploadToTexture");
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
 const static GLenum gFaceOrder[] = {
     GL_TEXTURE_CUBE_MAP_POSITIVE_X,
     GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -205,12 +203,12 @@ const static GLenum gFaceOrder[] = {
     GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
     GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
 };
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 
 void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
                                  uint32_t lod, RsAllocationCubemapFace face,
                                  uint32_t w, uint32_t h) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
     GLenum target = (GLenum)getGLTarget();
@@ -222,11 +220,11 @@ void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
         t = gFaceOrder[face];
     }
     glTexSubImage2D(t, lod, xoff, yoff, w, h, format, type, ptr);
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::upload2DTexture(bool isFirstUpload) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     GLenum type = mType->getElement()->getComponent().getGLType();
     GLenum format = mType->getElement()->getComponent().getGLFormat();
 
@@ -264,7 +262,7 @@ void Allocation::upload2DTexture(bool isFirstUpload) {
     if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
         glGenerateMipmap(target);
     }
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc) {
@@ -273,7 +271,7 @@ void Allocation::deferedUploadToBufferObject(const Context *rsc) {
 }
 
 void Allocation::uploadToBufferObject(const Context *rsc) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     rsAssert(!mType->getDimY());
     rsAssert(!mType->getDimZ());
 
@@ -292,7 +290,7 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     glBufferData(target, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(target, 0);
     rsc->checkError("Allocation::uploadToBufferObject");
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::uploadCheck(Context *rsc) {
@@ -450,13 +448,13 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
 }
 
 void Allocation::addProgramToDirty(const Program *p) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     mToDirtyList.push(p);
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::removeProgramToDirty(const Program *p) {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         if (mToDirtyList[ct] == p) {
             mToDirtyList.removeAt(ct);
@@ -464,7 +462,7 @@ void Allocation::removeProgramToDirty(const Program *p) {
         }
     }
     rsAssert(0);
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::dumpLOGV(const char *prefix) const {
@@ -539,11 +537,11 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
 }
 
 void Allocation::sendDirty() const {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         mToDirtyList[ct]->forceDirty();
     }
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::incRefs(const void *ptr, size_t ct, size_t startOff) const {
@@ -602,7 +600,7 @@ void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {
 
 /////////////////
 //
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
 
 namespace android {
 namespace renderscript {
@@ -848,4 +846,4 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
     return texAlloc;
 }
 
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE

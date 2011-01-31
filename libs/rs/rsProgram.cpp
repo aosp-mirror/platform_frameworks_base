@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
+#ifndef ANDROID_RS_SERIALIZE
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#else
-#include "rsContextHostStub.h"
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
 
 #include "rsProgram.h"
 

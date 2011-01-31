@@ -16,7 +16,7 @@
 
 #include "rsComponent.h"
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
 #include <GLES/gl.h>
 #endif
 
@@ -181,7 +181,7 @@ bool Component::isReference() const {
 }
 
 uint32_t Component::getGLType() const {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     switch (mType) {
     case RS_TYPE_UNSIGNED_5_6_5:    return GL_UNSIGNED_SHORT_5_6_5;
     case RS_TYPE_UNSIGNED_5_5_5_1:  return GL_UNSIGNED_SHORT_5_5_5_1;
@@ -195,12 +195,12 @@ uint32_t Component::getGLType() const {
     case RS_TYPE_SIGNED_16:     return GL_SHORT;
     default:    break;
     }
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
     return 0;
 }
 
 uint32_t Component::getGLFormat() const {
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     switch (mKind) {
     case RS_KIND_PIXEL_L: return GL_LUMINANCE;
     case RS_KIND_PIXEL_A: return GL_ALPHA;
@@ -209,7 +209,7 @@ uint32_t Component::getGLFormat() const {
     case RS_KIND_PIXEL_RGBA: return GL_RGBA;
     default: break;
     }
-#endif //ANDROID_RS_BUILD_FOR_HOST
+#endif //ANDROID_RS_SERIALIZE
     return 0;
 }
 
