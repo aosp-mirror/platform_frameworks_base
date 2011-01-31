@@ -7388,12 +7388,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (!mInsertionControllerEnabled) {
             hideInsertionPointCursorController();
-            mInsertionPointCursorController = null;
+            if (mInsertionPointCursorController != null) {
+                mInsertionPointCursorController.onDetached();
+                mInsertionPointCursorController = null;
+            }
         }
 
         if (!mSelectionControllerEnabled) {
             stopSelectionActionMode();
-            mSelectionModifierCursorController = null;
+            if (mSelectionModifierCursorController != null) {
+                mSelectionModifierCursorController.onDetached();
+                mSelectionModifierCursorController = null;
+            }
         }
     }
 
