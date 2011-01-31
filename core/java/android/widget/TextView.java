@@ -3489,8 +3489,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     com.android.internal.R.layout.textview_hint, null);
 
             final float scale = getResources().getDisplayMetrics().density;
-            mPopup = new ErrorPopup(err, (int) (200 * scale + 0.5f),
-                    (int) (50 * scale + 0.5f));
+            mPopup = new ErrorPopup(err, (int) (200 * scale + 0.5f), (int) (50 * scale + 0.5f));
             mPopup.setFocusable(false);
             // The user is entering text, so the input method is needed.  We
             // don't want the popup to be displayed on top of it.
@@ -3514,6 +3513,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ErrorPopup(TextView v, int width, int height) {
             super(v, width, height);
             mView = v;
+            // Make sure the TextView has a background set as it will be used the first time it is
+            // shown and positionned. Initialized with below background, which should have
+            // dimensions identical to the above version for this to work (and is more likely).
+            mPopupInlineErrorBackgroundId = getResourceId(mPopupInlineErrorBackgroundId,
+                    com.android.internal.R.styleable.Theme_errorMessageBackground);
+            mView.setBackgroundResource(mPopupInlineErrorBackgroundId);
         }
 
         void fixDirection(boolean above) {
@@ -3521,18 +3526,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (above) {
                 mPopupInlineErrorAboveBackgroundId =
-                    getResourceId(mPopupInlineErrorAboveBackgroundId, com.android.internal.R.styleable.Theme_errorMessageAboveBackground);
+                    getResourceId(mPopupInlineErrorAboveBackgroundId,
+                            com.android.internal.R.styleable.Theme_errorMessageAboveBackground);
             } else {
-                mPopupInlineErrorBackgroundId =
-                    getResourceId(mPopupInlineErrorBackgroundId, com.android.internal.R.styleable.Theme_errorMessageBackground);
+                mPopupInlineErrorBackgroundId = getResourceId(mPopupInlineErrorBackgroundId,
+                        com.android.internal.R.styleable.Theme_errorMessageBackground);
             }
 
-            mView.setBackgroundResource(above ? mPopupInlineErrorAboveBackgroundId : mPopupInlineErrorBackgroundId);
+            mView.setBackgroundResource(above ? mPopupInlineErrorAboveBackgroundId :
+                mPopupInlineErrorBackgroundId);
         }
 
         private int getResourceId(int currentId, int index) {
             if (currentId == 0) {
-                TypedArray styledAttributes = mView.getContext().obtainStyledAttributes(R.styleable.Theme);
+                TypedArray styledAttributes = mView.getContext().obtainStyledAttributes(
+                        R.styleable.Theme);
                 currentId = styledAttributes.getResourceId(index, 0);
                 styledAttributes.recycle();
             }
@@ -3562,9 +3570,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final float scale = getResources().getDisplayMetrics().density;
 
         final Drawables dr = mDrawables;
-        return getWidth() - mPopup.getWidth()
-                - getPaddingRight()
-                - (dr != null ? dr.mDrawableSizeRight : 0) / 2 + (int) (25 * scale + 0.5f);
+        return getWidth() - mPopup.getWidth() - getPaddingRight() -
+                (dr != null ? dr.mDrawableSizeRight : 0) / 2 + (int) (25 * scale + 0.5f);
     }
 
     /**
@@ -3576,20 +3583,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * Compound, not extended, because the icon is not clipped
          * if the text height is smaller.
          */
-        int vspace = mBottom - mTop -
-                     getCompoundPaddingBottom() - getCompoundPaddingTop();
+        final int compoundPaddingTop = getCompoundPaddingTop();
+        int vspace = mBottom - mTop - getCompoundPaddingBottom() - compoundPaddingTop;
 
         final Drawables dr = mDrawables;
-        int icontop = getCompoundPaddingTop()
-                + (vspace - (dr != null ? dr.mDrawableHeightRight : 0)) / 2;
+        int icontop = compoundPaddingTop +
+                (vspace - (dr != null ? dr.mDrawableHeightRight : 0)) / 2;
 
         /*
          * The "2" is the distance between the point and the top edge
          * of the background.
          */
-
-        return icontop + (dr != null ? dr.mDrawableHeightRight : 0)
-                - getHeight() - 2;
+        final float scale = getResources().getDisplayMetrics().density;
+        return icontop + (dr != null ? dr.mDrawableHeightRight : 0) - getHeight() -
+                (int) (2 * scale + 0.5f);
     }
 
     private void hideError() {
