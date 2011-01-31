@@ -267,14 +267,16 @@ public class AudioTrack {
             throw new IllegalArgumentException("Volume set exceeds maximum allowed value");
         }
 
-         if (volumePercent < 0) {
+        if (volumePercent < 0) {
             throw new IllegalArgumentException("Invalid Volume ");
         }
-        mVolumePercent = volumePercent;
+
         /**
          *  Force update of preview settings
          */
         mMANativeHelper.setGeneratePreview(true);
+
+        mVolumePercent = volumePercent;
     }
 
     /**
@@ -294,11 +296,11 @@ public class AudioTrack {
      *         the volume of this Audio Track to 0.
      */
     public void setMute(boolean muted) {
-        mMuted = muted;
         /**
          *  Force update of preview settings
          */
         mMANativeHelper.setGeneratePreview(true);
+        mMuted = muted;
     }
 
     /**
@@ -363,14 +365,15 @@ public class AudioTrack {
             throw new IllegalArgumentException("Invalid end time; is < 0");
         }
 
-        mBeginBoundaryTimeMs = beginMs;
-        mEndBoundaryTimeMs = endMs;
-
-        mTimelineDurationMs = mEndBoundaryTimeMs - mBeginBoundaryTimeMs;
         /**
          *  Force update of preview settings
          */
         mMANativeHelper.setGeneratePreview(true);
+
+        mBeginBoundaryTimeMs = beginMs;
+        mEndBoundaryTimeMs = endMs;
+
+        mTimelineDurationMs = mEndBoundaryTimeMs - mBeginBoundaryTimeMs;
     }
 
     /**
@@ -412,11 +415,11 @@ public class AudioTrack {
      */
     public void disableLoop() {
         if (mLoop) {
-            mLoop = false;
             /**
              *  Force update of preview settings
              */
             mMANativeHelper.setGeneratePreview(true);
+            mLoop = false;
         }
     }
 
@@ -434,11 +437,11 @@ public class AudioTrack {
      */
     public void disableDucking() {
         if (mIsDuckingEnabled) {
-            mIsDuckingEnabled = false;
             /**
              *  Force update of preview settings
              */
             mMANativeHelper.setGeneratePreview(true);
+            mIsDuckingEnabled = false;
         }
     }
 
@@ -462,13 +465,14 @@ public class AudioTrack {
                     + duckedTrackVolume);
         }
 
-        mDuckingThreshold = threshold;
-        mDuckedTrackVolume = duckedTrackVolume;
-        mIsDuckingEnabled = true;
         /**
          *  Force update of preview settings
          */
         mMANativeHelper.setGeneratePreview(true);
+
+        mDuckingThreshold = threshold;
+        mDuckedTrackVolume = duckedTrackVolume;
+        mIsDuckingEnabled = true;
     }
 
     /**

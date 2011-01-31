@@ -106,7 +106,6 @@ public abstract class Overlay {
      * @param durationMs The duration in milliseconds
      */
     public void setDuration(long durationMs) {
-
         if (durationMs < 0) {
             throw new IllegalArgumentException("Invalid duration");
         }
@@ -115,11 +114,12 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Duration is too large");
         }
 
+        getMediaItem().getNativeContext().setGeneratePreview(true);
+
         final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs,
-                                         mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(mStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -143,11 +143,12 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Start time is too large");
         }
 
+        getMediaItem().getNativeContext().setGeneratePreview(true);
+
         final long oldStartTimeMs = mStartTimeMs;
         mStartTimeMs = startTimeMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs,
-                                         mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, mDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**
@@ -161,14 +162,15 @@ public abstract class Overlay {
             throw new IllegalArgumentException("Invalid start time or duration");
         }
 
+        getMediaItem().getNativeContext().setGeneratePreview(true);
+
         final long oldStartTimeMs = mStartTimeMs;
         final long oldDurationMs = mDurationMs;
 
         mStartTimeMs = startTimeMs;
         mDurationMs = durationMs;
 
-        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs,
-                                         mStartTimeMs, mDurationMs);
+        mMediaItem.invalidateTransitions(oldStartTimeMs, oldDurationMs, mStartTimeMs, mDurationMs);
     }
 
     /**

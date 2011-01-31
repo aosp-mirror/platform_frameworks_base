@@ -176,6 +176,9 @@ public abstract class MediaItem {
             default:
                 throw new IllegalArgumentException("Invalid Rendering Mode");
         }
+
+        mMANativeHelper.setGeneratePreview(true);
+
         mRenderingMode = renderingMode;
         if (mBeginTransition != null) {
             mBeginTransition.invalidate();
@@ -184,7 +187,6 @@ public abstract class MediaItem {
         if (mEndTransition != null) {
             mEndTransition.invalidate();
         }
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -296,12 +298,11 @@ public abstract class MediaItem {
         mEffects.add(effect);
 
         invalidateTransitions(effect.getStartTime(), effect.getDuration());
-        if (mMANativeHelper != null) {
-            if (effect instanceof EffectKenBurns) {
-                mRegenerateClip = true;
-            }
-            mMANativeHelper.setGeneratePreview(true);
+
+        if (effect instanceof EffectKenBurns) {
+            mRegenerateClip = true;
         }
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -318,23 +319,23 @@ public abstract class MediaItem {
     public Effect removeEffect(String effectId) {
         for (Effect effect : mEffects) {
             if (effect.getId().equals(effectId)) {
+                mMANativeHelper.setGeneratePreview(true);
+
                 mEffects.remove(effect);
+
                 invalidateTransitions(effect.getStartTime(), effect.getDuration());
-                if (mMANativeHelper != null) {
-                    if (effect instanceof EffectKenBurns) {
-                        if (mGeneratedImageClip != null) {
-                            /**
-                             *  Delete the file
-                             */
-                            new File(mGeneratedImageClip).delete();
-                            /**
-                             *  Invalidate the filename
-                             */
-                            mGeneratedImageClip = null;
-                        }
-                        mRegenerateClip = false;
+                if (effect instanceof EffectKenBurns) {
+                    if (mGeneratedImageClip != null) {
+                        /**
+                         *  Delete the file
+                         */
+                        new File(mGeneratedImageClip).delete();
+                        /**
+                         *  Invalidate the filename
+                         */
+                        mGeneratedImageClip = null;
                     }
-                    mMANativeHelper.setGeneratePreview(true);
+                    mRegenerateClip = false;
                 }
                 return effect;
             }
@@ -448,9 +449,7 @@ public abstract class MediaItem {
 
         mOverlays.add(overlay);
         invalidateTransitions(overlay.getStartTime(), overlay.getDuration());
-        if (mMANativeHelper != null) {
-            mMANativeHelper.setGeneratePreview(true);
-        }
+        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -483,10 +482,9 @@ public abstract class MediaItem {
     public Overlay removeOverlay(String overlayId) {
         for (Overlay overlay : mOverlays) {
             if (overlay.getId().equals(overlayId)) {
+                mMANativeHelper.setGeneratePreview(true);
+
                 mOverlays.remove(overlay);
-                if (mMANativeHelper != null) {
-                    mMANativeHelper.setGeneratePreview(true);
-                }
                 if (overlay instanceof OverlayFrame) {
                     ((OverlayFrame)overlay).invalidate();
                 }
