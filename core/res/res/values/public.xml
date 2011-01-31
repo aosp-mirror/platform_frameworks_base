@@ -1282,365 +1282,362 @@
      Resources added in version 11 of the platform (Honeycomb / 3.0).
      =============================================================== -->
   <eat-comment />
-  <public type="attr" name="allContactsName" />
-  <public type="attr" name="windowActionBar" />
-  <public type="attr" name="actionBarStyle" />
-  <public type="attr" name="navigationMode" />
-  <public type="attr" name="displayOptions" />
-  <public type="attr" name="subtitle" />
-  <public type="attr" name="customNavigationLayout" />
-  <public type="attr" name="hardwareAccelerated" />
-  <public type="attr" name="measureWithLargestChild" />
-  <public type="attr" name="animateFirstView" />
-  <public type="attr" name="dropDownSpinnerStyle" />
-  <public type="attr" name="actionDropDownStyle" />
-  <public type="attr" name="actionButtonStyle" />
-  <public type="attr" name="showAsAction" />
-  <public type="attr" name="previewImage" />
-  <public type="attr" name="actionModeBackground" />
-  <public type="attr" name="actionModeCloseDrawable" />
-  <public type="attr" name="windowActionModeOverlay" />
-  <public type="attr" name="valueFrom" />
-  <public type="attr" name="valueTo" />
-  <public type="attr" name="valueType" />
-  <public type="attr" name="propertyName" />
-  <public type="attr" name="ordering" />
-  <public type="attr" name="fragment" />
-  <public type="attr" name="windowActionBarOverlay" />
-  <public type="attr" name="fragmentOpenEnterAnimation" />
-  <public type="attr" name="fragmentOpenExitAnimation" />
-  <public type="attr" name="fragmentCloseEnterAnimation" />
-  <public type="attr" name="fragmentCloseExitAnimation" />
-  <public type="attr" name="fragmentFadeEnterAnimation" />
-  <public type="attr" name="fragmentFadeExitAnimation" />
-  <public type="attr" name="actionBarSize" />
-  <public type="attr" name="imeSubtypeLocale" />
-  <public type="attr" name="imeSubtypeMode" />
-  <public type="attr" name="imeSubtypeExtraValue" />
-  <public type="attr" name="splitMotionEvents" />
-  <public type="attr" name="listChoiceBackgroundIndicator" />
-  <public type="attr" name="spinnerMode" />
-  <public type="attr" name="animateLayoutChanges" />
-  <public type="attr" name="actionBarTabStyle" />
-  <public type="attr" name="actionBarTabBarStyle" />
-  <public type="attr" name="actionBarTabTextStyle" />
-  <public type="attr" name="actionOverflowButtonStyle" />
-  <public type="attr" name="actionModeCloseButtonStyle" />
-  <public type="attr" name="titleTextStyle" />
-  <public type="attr" name="subtitleTextStyle" />
-  <public type="attr" name="iconifiedByDefault" />
-  <public type="attr" name="actionLayout" />
-  <public type="attr" name="actionViewClass" />
-  <public type="attr" name="activatedBackgroundIndicator" />
-  <public type="attr" name="state_activated" />
-  <public type="attr" name="listPopupWindowStyle" />
-  <public type="attr" name="popupMenuStyle" />
-  <public type="attr" name="textAppearanceLargePopupMenu" />
-  <public type="attr" name="textAppearanceSmallPopupMenu" />
-  <public type="attr" name="breadCrumbTitle" />
-  <public type="attr" name="breadCrumbShortTitle" />
-  <public type="attr" name="listDividerAlertDialog" />
-  <public type="attr" name="textColorAlertDialogListItem" />
-  <public type="attr" name="loopViews" />
-  <public type="attr" name="dialogTheme" />
-  <public type="attr" name="alertDialogTheme" />
-  <public type="attr" name="dividerVertical" />
-  <public type="attr" name="homeAsUpIndicator" />
-  <public type="attr" name="enterFadeDuration" />
-  <public type="attr" name="exitFadeDuration" />
-  <public type="attr" name="selectableItemBackground" />
-  <public type="attr" name="autoAdvanceViewId" />
-  <public type="attr" name="useIntrinsicSizeAsMinimum" />
-  <public type="attr" name="actionModeCutDrawable" />
-  <public type="attr" name="actionModeCopyDrawable" />
-  <public type="attr" name="actionModePasteDrawable" />
-  <public type="attr" name="textEditPasteWindowLayout" />
-  <public type="attr" name="textEditNoPasteWindowLayout" />
-  <public type="attr" name="textIsSelectable" />
-  <public type="attr" name="windowEnableSplitTouch" />
-  <public type="attr" name="indeterminateProgressStyle" />
-  <public type="attr" name="progressBarPadding" />
-  <public type="attr" name="animationResolution" />
-  <public type="attr" name="state_accelerated" />
-  <public type="attr" name="baseline" />
-  <public type="attr" name="homeLayout" />
-  <public type="attr" name="opacity" />
-  <public type="attr" name="alpha"/>
-  <public type="attr" name="transformPivotX"/>
-  <public type="attr" name="transformPivotY"/>
-  <public type="attr" name="translationX"/>
-  <public type="attr" name="translationY"/>
-  <public type="attr" name="scaleX"/>
-  <public type="attr" name="scaleY"/>
-  <public type="attr" name="rotation"/>
-  <public type="attr" name="rotationX"/>
-  <public type="attr" name="rotationY"/>
-  <public type="attr" name="showDividers" />
-  <public type="attr" name="dividerPadding" />
-  <public type="attr" name="borderlessButtonStyle" />
-  <public type="attr" name="dividerHorizontal" />
-  <public type="attr" name="itemPadding" />
-  <public type="attr" name="buttonBarStyle" />
-  <public type="attr" name="buttonBarButtonStyle" />
-  <public type="attr" name="segmentedButtonStyle" />
-  <public type="attr" name="staticWallpaperPreview" />
-  <public type="attr" name="allowParallelSyncs" />
-  <public type="attr" name="isAlwaysSyncable" />
-  <public type="attr" name="verticalScrollbarPosition" />
-  <public type="attr" name="fastScrollAlwaysVisible" />
-  <public type="attr" name="fastScrollThumbDrawable" />
-  <public type="attr" name="fastScrollPreviewBackgroundLeft" />
-  <public type="attr" name="fastScrollPreviewBackgroundRight" />
-  <public type="attr" name="fastScrollTrackDrawable" />
-  <public type="attr" name="fastScrollOverlayPosition" />
-  <public type="attr" name="customTokens" />
-  <public type="attr" name="nextFocusForward" />
-  <public type="attr" name="firstDayOfWeek" />
-  <public type="attr" name="showWeekNumber" />
-  <public type="attr" name="minDate" />
-  <public type="attr" name="maxDate" />
-  <public type="attr" name="shownWeekCount" />
-  <public type="attr" name="selectedWeekBackgroundColor" />
-  <public type="attr" name="focusedMonthDateColor" />
-  <public type="attr" name="unfocusedMonthDateColor" />
-  <public type="attr" name="weekNumberColor" />
-  <public type="attr" name="weekSeparatorLineColor" />
-  <public type="attr" name="selectedDateVerticalBar" />
-  <public type="attr" name="weekDayTextAppearance" />
-  <public type="attr" name="dateTextAppearance" />
-  <public type="attr" name="solidColor" />
-  <public type="attr" name="spinnersShown" />
-  <public type="attr" name="calendarViewShown" />
-  <public type="attr" name="state_multiline" />
-  <public type="attr" name="detailsElementBackground" />
-  <public type="attr" name="textColorHighlightInverse" />
-  <public type="attr" name="textColorLinkInverse" />
-  <public type="attr" name="editTextColor" />
-  <public type="attr" name="editTextBackground" />
-  <public type="attr" name="horizontalScrollViewStyle" />
-  <public type="attr" name="layerType" />
-  <public type="attr" name="alertDialogIcon" />
-  <public type="attr" name="windowMinWidthMajor" />
-  <public type="attr" name="windowMinWidthMinor" />
-  <public type="attr" name="queryHint" />
-  <public type="attr" name="fastScrollTextColor" />
-  <public type="attr" name="largeHeap" />
-  <public type="attr" name="windowCloseOnTouchOutside" />
-  <public type="attr" name="datePickerStyle" />
-  <public type="attr" name="calendarViewStyle" />
-  <public type="attr" name="textEditSidePasteWindowLayout" />
-  <public type="attr" name="textEditSideNoPasteWindowLayout" />
-  <public type="attr" name="actionMenuTextAppearance" />
-  <public type="attr" name="actionMenuTextColor" />
+  <public type="attr" name="allContactsName" id="0x010102cc" />
+  <public type="attr" name="windowActionBar" id="0x010102cd" />
+  <public type="attr" name="actionBarStyle" id="0x010102ce" />
+  <public type="attr" name="navigationMode" id="0x010102cf" />
+  <public type="attr" name="displayOptions" id="0x010102d0" />
+  <public type="attr" name="subtitle" id="0x010102d1" />
+  <public type="attr" name="customNavigationLayout" id="0x010102d2" />
+  <public type="attr" name="hardwareAccelerated" id="0x010102d3" />
+  <public type="attr" name="measureWithLargestChild" id="0x010102d4" />
+  <public type="attr" name="animateFirstView" id="0x010102d5" />
+  <public type="attr" name="dropDownSpinnerStyle" id="0x010102d6" />
+  <public type="attr" name="actionDropDownStyle" id="0x010102d7" />
+  <public type="attr" name="actionButtonStyle" id="0x010102d8" />
+  <public type="attr" name="showAsAction" id="0x010102d9" />
+  <public type="attr" name="previewImage" id="0x010102da" />
+  <public type="attr" name="actionModeBackground" id="0x010102db" />
+  <public type="attr" name="actionModeCloseDrawable" id="0x010102dc" />
+  <public type="attr" name="windowActionModeOverlay" id="0x010102dd" />
+  <public type="attr" name="valueFrom" id="0x010102de" />
+  <public type="attr" name="valueTo" id="0x010102df" />
+  <public type="attr" name="valueType" id="0x010102e0" />
+  <public type="attr" name="propertyName" id="0x010102e1" />
+  <public type="attr" name="ordering" id="0x010102e2" />
+  <public type="attr" name="fragment" id="0x010102e3" />
+  <public type="attr" name="windowActionBarOverlay" id="0x010102e4" />
+  <public type="attr" name="fragmentOpenEnterAnimation" id="0x010102e5" />
+  <public type="attr" name="fragmentOpenExitAnimation" id="0x010102e6" />
+  <public type="attr" name="fragmentCloseEnterAnimation" id="0x010102e7" />
+  <public type="attr" name="fragmentCloseExitAnimation" id="0x010102e8" />
+  <public type="attr" name="fragmentFadeEnterAnimation" id="0x010102e9" />
+  <public type="attr" name="fragmentFadeExitAnimation" id="0x010102ea" />
+  <public type="attr" name="actionBarSize" id="0x010102eb" />
+  <public type="attr" name="imeSubtypeLocale" id="0x010102ec" />
+  <public type="attr" name="imeSubtypeMode" id="0x010102ed" />
+  <public type="attr" name="imeSubtypeExtraValue" id="0x010102ee" />
+  <public type="attr" name="splitMotionEvents" id="0x010102ef" />
+  <public type="attr" name="listChoiceBackgroundIndicator" id="0x010102f0" />
+  <public type="attr" name="spinnerMode" id="0x010102f1" />
+  <public type="attr" name="animateLayoutChanges" id="0x010102f2" />
+  <public type="attr" name="actionBarTabStyle" id="0x010102f3" />
+  <public type="attr" name="actionBarTabBarStyle" id="0x010102f4" />
+  <public type="attr" name="actionBarTabTextStyle" id="0x010102f5" />
+  <public type="attr" name="actionOverflowButtonStyle" id="0x010102f6" />
+  <public type="attr" name="actionModeCloseButtonStyle" id="0x010102f7" />
+  <public type="attr" name="titleTextStyle" id="0x010102f8" />
+  <public type="attr" name="subtitleTextStyle" id="0x010102f9" />
+  <public type="attr" name="iconifiedByDefault" id="0x010102fa" />
+  <public type="attr" name="actionLayout" id="0x010102fb" />
+  <public type="attr" name="actionViewClass" id="0x010102fc" />
+  <public type="attr" name="activatedBackgroundIndicator" id="0x010102fd" />
+  <public type="attr" name="state_activated" id="0x010102fe" />
+  <public type="attr" name="listPopupWindowStyle" id="0x010102ff" />
+  <public type="attr" name="popupMenuStyle" id="0x01010300" />
+  <public type="attr" name="textAppearanceLargePopupMenu" id="0x01010301" />
+  <public type="attr" name="textAppearanceSmallPopupMenu" id="0x01010302" />
+  <public type="attr" name="breadCrumbTitle" id="0x01010303" />
+  <public type="attr" name="breadCrumbShortTitle" id="0x01010304" />
+  <public type="attr" name="listDividerAlertDialog" id="0x01010305" />
+  <public type="attr" name="textColorAlertDialogListItem" id="0x01010306" />
+  <public type="attr" name="loopViews" id="0x01010307" />
+  <public type="attr" name="dialogTheme" id="0x01010308" />
+  <public type="attr" name="alertDialogTheme" id="0x01010309" />
+  <public type="attr" name="dividerVertical" id="0x0101030a" />
+  <public type="attr" name="homeAsUpIndicator" id="0x0101030b" />
+  <public type="attr" name="enterFadeDuration" id="0x0101030c" />
+  <public type="attr" name="exitFadeDuration" id="0x0101030d" />
+  <public type="attr" name="selectableItemBackground" id="0x0101030e" />
+  <public type="attr" name="autoAdvanceViewId" id="0x0101030f" />
+  <public type="attr" name="useIntrinsicSizeAsMinimum" id="0x01010310" />
+  <public type="attr" name="actionModeCutDrawable" id="0x01010311" />
+  <public type="attr" name="actionModeCopyDrawable" id="0x01010312" />
+  <public type="attr" name="actionModePasteDrawable" id="0x01010313" />
+  <public type="attr" name="textEditPasteWindowLayout" id="0x01010314" />
+  <public type="attr" name="textEditNoPasteWindowLayout" id="0x01010315" />
+  <public type="attr" name="textIsSelectable" id="0x01010316" />
+  <public type="attr" name="windowEnableSplitTouch" id="0x01010317" />
+  <public type="attr" name="indeterminateProgressStyle" id="0x01010318" />
+  <public type="attr" name="progressBarPadding" id="0x01010319" />
+  <public type="attr" name="animationResolution" id="0x0101031a" />
+  <public type="attr" name="state_accelerated" id="0x0101031b" />
+  <public type="attr" name="baseline" id="0x0101031c" />
+  <public type="attr" name="homeLayout" id="0x0101031d" />
+  <public type="attr" name="opacity" id="0x0101031e" />
+  <public type="attr" name="alpha" id="0x0101031f" />
+  <public type="attr" name="transformPivotX" id="0x01010320" />
+  <public type="attr" name="transformPivotY" id="0x01010321" />
+  <public type="attr" name="translationX" id="0x01010322" />
+  <public type="attr" name="translationY" id="0x01010323" />
+  <public type="attr" name="scaleX" id="0x01010324" />
+  <public type="attr" name="scaleY" id="0x01010325" />
+  <public type="attr" name="rotation" id="0x01010326" />
+  <public type="attr" name="rotationX" id="0x01010327" />
+  <public type="attr" name="rotationY" id="0x01010328" />
+  <public type="attr" name="showDividers" id="0x01010329" />
+  <public type="attr" name="dividerPadding" id="0x0101032a" />
+  <public type="attr" name="borderlessButtonStyle" id="0x0101032b" />
+  <public type="attr" name="dividerHorizontal" id="0x0101032c" />
+  <public type="attr" name="itemPadding" id="0x0101032d" />
+  <public type="attr" name="buttonBarStyle" id="0x0101032e" />
+  <public type="attr" name="buttonBarButtonStyle" id="0x0101032f" />
+  <public type="attr" name="segmentedButtonStyle" id="0x01010330" />
+  <public type="attr" name="staticWallpaperPreview" id="0x01010331" />
+  <public type="attr" name="allowParallelSyncs" id="0x01010332" />
+  <public type="attr" name="isAlwaysSyncable" id="0x01010333" />
+  <public type="attr" name="verticalScrollbarPosition" id="0x01010334" />
+  <public type="attr" name="fastScrollAlwaysVisible" id="0x01010335" />
+  <public type="attr" name="fastScrollThumbDrawable" id="0x01010336" />
+  <public type="attr" name="fastScrollPreviewBackgroundLeft" id="0x01010337" />
+  <public type="attr" name="fastScrollPreviewBackgroundRight" id="0x01010338" />
+  <public type="attr" name="fastScrollTrackDrawable" id="0x01010339" />
+  <public type="attr" name="fastScrollOverlayPosition" id="0x0101033a" />
+  <public type="attr" name="customTokens" id="0x0101033b" />
+  <public type="attr" name="nextFocusForward" id="0x0101033c" />
+  <public type="attr" name="firstDayOfWeek" id="0x0101033d" />
+  <public type="attr" name="showWeekNumber" id="0x0101033e" />
+  <public type="attr" name="minDate" id="0x0101033f" />
+  <public type="attr" name="maxDate" id="0x01010340" />
+  <public type="attr" name="shownWeekCount" id="0x01010341" />
+  <public type="attr" name="selectedWeekBackgroundColor" id="0x01010342" />
+  <public type="attr" name="focusedMonthDateColor" id="0x01010343" />
+  <public type="attr" name="unfocusedMonthDateColor" id="0x01010344" />
+  <public type="attr" name="weekNumberColor" id="0x01010345" />
+  <public type="attr" name="weekSeparatorLineColor" id="0x01010346" />
+  <public type="attr" name="selectedDateVerticalBar" id="0x01010347" />
+  <public type="attr" name="weekDayTextAppearance" id="0x01010348" />
+  <public type="attr" name="dateTextAppearance" id="0x01010349" />
+  <public type="attr" name="solidColor" id="0x0101034a" />
+  <public type="attr" name="spinnersShown" id="0x0101034b" />
+  <public type="attr" name="calendarViewShown" id="0x0101034c" />
+  <public type="attr" name="state_multiline" id="0x0101034d" />
+  <public type="attr" name="detailsElementBackground" id="0x0101034e" />
+  <public type="attr" name="textColorHighlightInverse" id="0x0101034f" />
+  <public type="attr" name="textColorLinkInverse" id="0x01010350" />
+  <public type="attr" name="editTextColor" id="0x01010351" />
+  <public type="attr" name="editTextBackground" id="0x01010352" />
+  <public type="attr" name="horizontalScrollViewStyle" id="0x01010353" />
+  <public type="attr" name="layerType" id="0x01010354" />
+  <public type="attr" name="alertDialogIcon" id="0x01010355" />
+  <public type="attr" name="windowMinWidthMajor" id="0x01010356" />
+  <public type="attr" name="windowMinWidthMinor" id="0x01010357" />
+  <public type="attr" name="queryHint" id="0x01010358" />
+  <public type="attr" name="fastScrollTextColor" id="0x01010359" />
+  <public type="attr" name="largeHeap" id="0x0101035a" />
+  <public type="attr" name="windowCloseOnTouchOutside" id="0x0101035b" />
+  <public type="attr" name="datePickerStyle" id="0x0101035c" />
+  <public type="attr" name="calendarViewStyle" id="0x0101035d" />
+  <public type="attr" name="textEditSidePasteWindowLayout" id="0x0101035e" />
+  <public type="attr" name="textEditSideNoPasteWindowLayout" id="0x0101035f" />
+  <public type="attr" name="actionMenuTextAppearance" id="0x01010360" />
+  <public type="attr" name="actionMenuTextColor" id="0x01010361" />
 
   <!-- A simple fade-in animation. -->
   <public type="animator" name="fade_in" id="0x010b0000" />
   <!-- A simple fade-out animation. -->
-  <public type="animator" name="fade_out" />
+  <public type="animator" name="fade_out" id="0x010b0001" />
 
   <!-- Acceleration curve matching a quadtratic ease out function. -->
   <public type="interpolator" name="accelerate_quad" id="0x010c0000" />
   <!-- Acceleration curve matching a quadtratic ease in function. -->
-  <public type="interpolator" name="decelerate_quad" />
+  <public type="interpolator" name="decelerate_quad" id="0x010c0001" />
   <!-- Acceleration curve matching a cubic ease out function. -->
-  <public type="interpolator" name="accelerate_cubic" />
+  <public type="interpolator" name="accelerate_cubic" id="0x010c0002" />
   <!-- Acceleration curve matching a cubic ease in function. -->
-  <public type="interpolator" name="decelerate_cubic" />
+  <public type="interpolator" name="decelerate_cubic" id="0x010c0003" />
   <!-- Acceleration curve matching a quint ease out function. -->
-  <public type="interpolator" name="accelerate_quint" />
+  <public type="interpolator" name="accelerate_quint" id="0x010c0004" />
   <!-- Acceleration curve matching a quint ease in function. -->
-  <public type="interpolator" name="decelerate_quint" />
+  <public type="interpolator" name="decelerate_quint" id="0x010c0005" />
   <!-- Acceleration curve matching an ease in + ease out function -->
-  <public type="interpolator" name="accelerate_decelerate" />
+  <public type="interpolator" name="accelerate_decelerate" id="0x010c0006" />
   <!-- An interpolator where the change starts backward then flings forward. -->
-  <public type="interpolator" name="anticipate" />
+  <public type="interpolator" name="anticipate" id="0x010c0007" />
   <!-- An interpolator where the change flings forward and overshoots the last
        value then comes back. -->
-  <public type="interpolator" name="overshoot" />
+  <public type="interpolator" name="overshoot" id="0x010c0008" />
   <!-- An interpolator where the change starts backward then flings forward and
        overshoots the target value and finally goes back to the final value. -->
-  <public type="interpolator" name="anticipate_overshoot" />
+  <public type="interpolator" name="anticipate_overshoot" id="0x010c0009" />
   <!-- An interpolator where the change bounces at the end. -->
-  <public type="interpolator" name="bounce" />
+  <public type="interpolator" name="bounce" id="0x010c000a" />
   <!-- An interpolator where the rate of change is constant. -->
-  <public type="interpolator" name="linear" />
+  <public type="interpolator" name="linear" id="0x010c000b" />
   <!-- Repeats the animation for one cycle. The rate of change follows a
        sinusoidal pattern. -->
-  <public type="interpolator" name="cycle" />
+  <public type="interpolator" name="cycle" id="0x010c000c" />
 
-  <public type="id" name="home" />
+  <public type="id" name="home" id="0x0102002c" />
   <!-- Context menu ID for the "Select text..." menu item to switch to text
        selection context mode in text views. -->
-  <public type="id" name="selectTextMode" />
+  <public type="id" name="selectTextMode" id="0x0102002d" />
 
-  <public type="dimen" name="dialog_min_width_major" />
-  <public type="dimen" name="dialog_min_width_minor" />
-  <public type="dimen" name="notification_large_icon_width" />
-  <public type="dimen" name="notification_large_icon_height" />
+  <public type="dimen" name="dialog_min_width_major" id="0x01050003" />
+  <public type="dimen" name="dialog_min_width_minor" id="0x01050004" />
+  <public type="dimen" name="notification_large_icon_width" id="0x01050005" />
+  <public type="dimen" name="notification_large_icon_height" id="0x01050006" />
 
   <!-- Standard content view for a {@link android.app.ListFragment}.
        If you are implementing a subclass of ListFragment with your
        own customized content, you can include this layout in that
        content to still retain all of the standard functionality of
        the base class. -->
-  <public type="layout" name="list_content" />
+  <public type="layout" name="list_content" id="0x01090014" />
 
   <!-- A simple ListView item layout which can contain text and support (single or multiple) item selection. -->
-  <public type="layout" name="simple_selectable_list_item" />
+  <public type="layout" name="simple_selectable_list_item" id="0x01090015" />
 
   <!-- A version of {@link #simple_list_item_1} that is able to change its
        background state to indicate when it is activated (that is checked by
        a ListView). -->
-  <public type="layout" name="simple_list_item_activated_1" />
+  <public type="layout" name="simple_list_item_activated_1" id="0x01090016" />
 
   <!-- A version of {@link #simple_list_item_2} that is able to change its
        background state to indicate when it is activated (that is checked by
        a ListView). -->
-  <public type="layout" name="simple_list_item_activated_2" />
+  <public type="layout" name="simple_list_item_activated_2" id="0x01090017" />
 
-  <public type="drawable" name="dialog_holo_dark_frame" />
-  <public type="drawable" name="dialog_holo_light_frame" />
+  <public type="drawable" name="dialog_holo_dark_frame" id="0x010800b2" />
+  <public type="drawable" name="dialog_holo_light_frame" id="0x010800b3" />
 
-  <public type="style" name="Theme.WithActionBar" />
-  <public type="style" name="Theme.NoTitleBar.OverlayActionModes" />
+  <public type="style" name="Theme.WithActionBar" id="0x01030069" />
+  <public type="style" name="Theme.NoTitleBar.OverlayActionModes" id="0x0103006a" />
+  <public type="style" name="Theme.Holo" id="0x0103006b" />
+  <public type="style" name="Theme.Holo.NoActionBar" id="0x0103006c" />
+  <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" id="0x0103006d" />
+  <public type="style" name="Theme.Holo.Light" id="0x0103006e" />
+  <public type="style" name="Theme.Holo.Dialog" id="0x0103006f" />
+  <public type="style" name="Theme.Holo.Dialog.MinWidth" id="0x01030070" />
+  <public type="style" name="Theme.Holo.Dialog.NoActionBar" id="0x01030071" />
+  <public type="style" name="Theme.Holo.Dialog.NoActionBar.MinWidth" id="0x01030072" />
+  <public type="style" name="Theme.Holo.Light.Dialog" id="0x01030073" />
+  <public type="style" name="Theme.Holo.Light.Dialog.MinWidth" id="0x01030074" />
+  <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar" id="0x01030075" />
+  <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth" id="0x01030076" />
+  <public type="style" name="Theme.Holo.DialogWhenLarge" id="0x01030077" />
+  <public type="style" name="Theme.Holo.DialogWhenLarge.NoActionBar" id="0x01030078" />
+  <public type="style" name="Theme.Holo.Light.DialogWhenLarge" id="0x01030079" />
+  <public type="style" name="Theme.Holo.Light.DialogWhenLarge.NoActionBar" id="0x0103007a" />
+  <public type="style" name="Theme.Holo.Panel" id="0x0103007b" />
+  <public type="style" name="Theme.Holo.Light.Panel" id="0x0103007c" />
+  <public type="style" name="Theme.Holo.Wallpaper" id="0x0103007d" />
+  <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" id="0x0103007e" />
+  <public type="style" name="Theme.Holo.InputMethod" id="0x0103007f" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Large" id="0x01030080" />
+  <public type="style" name="TextAppearance.Widget.PopupMenu.Small" id="0x01030081" />
+  <public type="style" name="Widget.ActionBar" id="0x01030082" />
+  <public type="style" name="Widget.Spinner.DropDown" id="0x01030083" />
+  <public type="style" name="Widget.ActionButton" id="0x01030084" />
+  <public type="style" name="Widget.ListPopupWindow" id="0x01030085" />
+  <public type="style" name="Widget.PopupMenu" id="0x01030086" />
+  <public type="style" name="Widget.ActionButton.Overflow" id="0x01030087" />
+  <public type="style" name="Widget.ActionButton.CloseMode" id="0x01030088" />
+  <public type="style" name="Widget.FragmentBreadCrumbs" id="0x01030089" />
+  <public type="style" name="Widget.Holo" id="0x0103008a" />
+  <public type="style" name="Widget.Holo.Button" id="0x0103008b" />
+  <public type="style" name="Widget.Holo.Button.Small" id="0x0103008c" />
+  <public type="style" name="Widget.Holo.Button.Inset" id="0x0103008d" />
+  <public type="style" name="Widget.Holo.Button.Toggle" id="0x0103008e" />
+  <public type="style" name="Widget.Holo.TextView" id="0x0103008f" />
+  <public type="style" name="Widget.Holo.AutoCompleteTextView" id="0x01030090" />
+  <public type="style" name="Widget.Holo.CompoundButton.CheckBox" id="0x01030091" />
+  <public type="style" name="Widget.Holo.ListView.DropDown" id="0x01030092" />
+  <public type="style" name="Widget.Holo.EditText" id="0x01030093" />
+  <public type="style" name="Widget.Holo.ExpandableListView" id="0x01030094" />
+  <public type="style" name="Widget.Holo.GridView" id="0x01030095" />
+  <public type="style" name="Widget.Holo.ImageButton" id="0x01030096" />
+  <public type="style" name="Widget.Holo.ListView" id="0x01030097" />
+  <public type="style" name="Widget.Holo.PopupWindow" id="0x01030098" />
+  <public type="style" name="Widget.Holo.ProgressBar" id="0x01030099" />
+  <public type="style" name="Widget.Holo.ProgressBar.Horizontal" id="0x0103009a" />
+  <public type="style" name="Widget.Holo.ProgressBar.Small" id="0x0103009b" />
+  <public type="style" name="Widget.Holo.ProgressBar.Small.Title" id="0x0103009c" />
+  <public type="style" name="Widget.Holo.ProgressBar.Large" id="0x0103009d" />
+  <public type="style" name="Widget.Holo.SeekBar" id="0x0103009e" />
+  <public type="style" name="Widget.Holo.RatingBar" id="0x0103009f" />
+  <public type="style" name="Widget.Holo.RatingBar.Indicator" id="0x010300a0" />
+  <public type="style" name="Widget.Holo.RatingBar.Small" id="0x010300a1" />
+  <public type="style" name="Widget.Holo.CompoundButton.RadioButton" id="0x010300a2" />
+  <public type="style" name="Widget.Holo.ScrollView" id="0x010300a3" />
+  <public type="style" name="Widget.Holo.HorizontalScrollView" id="0x010300a4" />
+  <public type="style" name="Widget.Holo.Spinner" id="0x010300a5" />
+  <public type="style" name="Widget.Holo.CompoundButton.Star" id="0x010300a6" />
+  <public type="style" name="Widget.Holo.TabWidget" id="0x010300a7" />
+  <public type="style" name="Widget.Holo.WebTextView" id="0x010300a8" />
+  <public type="style" name="Widget.Holo.WebView" id="0x010300a9" />
+  <public type="style" name="Widget.Holo.DropDownItem" id="0x010300aa" />
+  <public type="style" name="Widget.Holo.DropDownItem.Spinner" id="0x010300ab" />
+  <public type="style" name="Widget.Holo.TextView.SpinnerItem" id="0x010300ac" />
+  <public type="style" name="Widget.Holo.ListPopupWindow" id="0x010300ad" />
+  <public type="style" name="Widget.Holo.PopupMenu" id="0x010300ae" />
+  <public type="style" name="Widget.Holo.ActionButton" id="0x010300af" />
+  <public type="style" name="Widget.Holo.ActionButton.Overflow" id="0x010300b0" />
+  <public type="style" name="Widget.Holo.ActionButton.TextButton" id="0x010300b1" />
+  <public type="style" name="Widget.Holo.ActionMode" id="0x010300b2" />
+  <public type="style" name="Widget.Holo.ActionButton.CloseMode" id="0x010300b3" />
+  <public type="style" name="Widget.Holo.ActionBar" id="0x010300b4" />
+  <public type="style" name="Widget.Holo.Light" id="0x010300b5" />
+  <public type="style" name="Widget.Holo.Light.Button" id="0x010300b6" />
+  <public type="style" name="Widget.Holo.Light.Button.Small" id="0x010300b7" />
+  <public type="style" name="Widget.Holo.Light.Button.Inset" id="0x010300b8" />
+  <public type="style" name="Widget.Holo.Light.Button.Toggle" id="0x010300b9" />
+  <public type="style" name="Widget.Holo.Light.TextView" id="0x010300ba" />
+  <public type="style" name="Widget.Holo.Light.AutoCompleteTextView" id="0x010300bb" />
+  <public type="style" name="Widget.Holo.Light.CompoundButton.CheckBox" id="0x010300bc" />
+  <public type="style" name="Widget.Holo.Light.ListView.DropDown" id="0x010300bd" />
+  <public type="style" name="Widget.Holo.Light.EditText" id="0x010300be" />
+  <public type="style" name="Widget.Holo.Light.ExpandableListView" id="0x010300bf" />
+  <public type="style" name="Widget.Holo.Light.GridView" id="0x010300c0" />
+  <public type="style" name="Widget.Holo.Light.ImageButton" id="0x010300c1" />
+  <public type="style" name="Widget.Holo.Light.ListView" id="0x010300c2" />
+  <public type="style" name="Widget.Holo.Light.PopupWindow" id="0x010300c3" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar" id="0x010300c4" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Horizontal" id="0x010300c5" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Small" id="0x010300c6" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Small.Title" id="0x010300c7" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Large" id="0x010300c8" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Inverse" id="0x010300c9" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Small.Inverse" id="0x010300ca" />
+  <public type="style" name="Widget.Holo.Light.ProgressBar.Large.Inverse" id="0x010300cb" />
+  <public type="style" name="Widget.Holo.Light.SeekBar" id="0x010300cc" />
+  <public type="style" name="Widget.Holo.Light.RatingBar" id="0x010300cd" />
+  <public type="style" name="Widget.Holo.Light.RatingBar.Indicator" id="0x010300ce" />
+  <public type="style" name="Widget.Holo.Light.RatingBar.Small" id="0x010300cf" />
+  <public type="style" name="Widget.Holo.Light.CompoundButton.RadioButton" id="0x010300d0" />
+  <public type="style" name="Widget.Holo.Light.ScrollView" id="0x010300d1" />
+  <public type="style" name="Widget.Holo.Light.HorizontalScrollView" id="0x010300d2" />
+  <public type="style" name="Widget.Holo.Light.Spinner" id="0x010300d3" />
+  <public type="style" name="Widget.Holo.Light.CompoundButton.Star" id="0x010300d4" />
+  <public type="style" name="Widget.Holo.Light.TabWidget" id="0x010300d5" />
+  <public type="style" name="Widget.Holo.Light.WebTextView" id="0x010300d6" />
+  <public type="style" name="Widget.Holo.Light.WebView" id="0x010300d7" />
+  <public type="style" name="Widget.Holo.Light.DropDownItem" id="0x010300d8" />
+  <public type="style" name="Widget.Holo.Light.DropDownItem.Spinner" id="0x010300d9" />
+  <public type="style" name="Widget.Holo.Light.TextView.SpinnerItem" id="0x010300da" />
+  <public type="style" name="Widget.Holo.Light.ListPopupWindow" id="0x010300db" />
+  <public type="style" name="Widget.Holo.Light.PopupMenu" id="0x010300dc" />
+  <public type="style" name="Widget.Holo.Light.ActionButton" id="0x010300dd" />
+  <public type="style" name="Widget.Holo.Light.ActionButton.Overflow" id="0x010300de" />
+  <public type="style" name="Widget.Holo.Light.ActionMode" id="0x010300df" />
+  <public type="style" name="Widget.Holo.Light.ActionButton.CloseMode" id="0x010300e0" />
+  <public type="style" name="Widget.Holo.Light.ActionBar" id="0x010300e1" />
+  <public type="style" name="Widget.Holo.Button.Borderless" id="0x010300e2" />
+  <public type="style" name="Widget.Holo.Tab" id="0x010300e3" />
+  <public type="style" name="Widget.Holo.Light.Tab" id="0x010300e4" />
+  <public type="style" name="Holo.ButtonBar" id="0x010300e5" />
+  <public type="style" name="Holo.Light.ButtonBar" id="0x010300e6" />
+  <public type="style" name="Holo.ButtonBar.AlertDialog" id="0x010300e7" />
+  <public type="style" name="Holo.Light.ButtonBar.AlertDialog" id="0x010300e8" />
+  <public type="style" name="Holo.SegmentedButton" id="0x010300e9" />
+  <public type="style" name="Holo.Light.SegmentedButton" id="0x010300ea" />
+  <public type="style" name="Widget.CalendarView" id="0x010300eb" />
+  <public type="style" name="Widget.Holo.CalendarView" id="0x010300ec" />
+  <public type="style" name="Widget.Holo.Light.CalendarView" id="0x010300ed" />
+  <public type="style" name="Widget.DatePicker" id="0x010300ee" />
+  <public type="style" name="Widget.Holo.DatePicker" id="0x010300ef" />
 
-  <public type="style" name="Theme.Holo" />
-  <public type="style" name="Theme.Holo.NoActionBar" />
-  <public type="style" name="Theme.Holo.NoActionBar.Fullscreen" />
-  <public type="style" name="Theme.Holo.Light" />
-  <public type="style" name="Theme.Holo.Dialog" />
-  <public type="style" name="Theme.Holo.Dialog.MinWidth" />
-  <public type="style" name="Theme.Holo.Dialog.NoActionBar" />
-  <public type="style" name="Theme.Holo.Dialog.NoActionBar.MinWidth" />
-  <public type="style" name="Theme.Holo.Light.Dialog" />
-  <public type="style" name="Theme.Holo.Light.Dialog.MinWidth" />
-  <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar" />
-  <public type="style" name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth" />
-  <public type="style" name="Theme.Holo.DialogWhenLarge" />
-  <public type="style" name="Theme.Holo.DialogWhenLarge.NoActionBar" />
-  <public type="style" name="Theme.Holo.Light.DialogWhenLarge" />
-  <public type="style" name="Theme.Holo.Light.DialogWhenLarge.NoActionBar" />
-  <public type="style" name="Theme.Holo.Panel" />
-  <public type="style" name="Theme.Holo.Light.Panel" />
-  <public type="style" name="Theme.Holo.Wallpaper" />
-  <public type="style" name="Theme.Holo.Wallpaper.NoTitleBar" />
-  <public type="style" name="Theme.Holo.InputMethod" />
-
-  <public type="style" name="TextAppearance.Widget.PopupMenu.Large" />
-  <public type="style" name="TextAppearance.Widget.PopupMenu.Small" />
-
-  <public type="style" name="Widget.ActionBar" />
-  <public type="style" name="Widget.Spinner.DropDown" />
-  <public type="style" name="Widget.ActionButton" />
-  <public type="style" name="Widget.ListPopupWindow" />
-  <public type="style" name="Widget.PopupMenu" />
-  <public type="style" name="Widget.ActionButton.Overflow" />
-  <public type="style" name="Widget.ActionButton.CloseMode" />
-  <public type="style" name="Widget.FragmentBreadCrumbs" />
-  <public type="style" name="Widget.Holo" />
-  <public type="style" name="Widget.Holo.Button" />
-  <public type="style" name="Widget.Holo.Button.Small" />
-  <public type="style" name="Widget.Holo.Button.Inset" />
-  <public type="style" name="Widget.Holo.Button.Toggle" />
-  <public type="style" name="Widget.Holo.TextView" />
-  <public type="style" name="Widget.Holo.AutoCompleteTextView" />
-  <public type="style" name="Widget.Holo.CompoundButton.CheckBox" />
-  <public type="style" name="Widget.Holo.ListView.DropDown" />
-  <public type="style" name="Widget.Holo.EditText" />
-  <public type="style" name="Widget.Holo.ExpandableListView" />
-  <public type="style" name="Widget.Holo.GridView" />
-  <public type="style" name="Widget.Holo.ImageButton" />
-  <public type="style" name="Widget.Holo.ListView" />
-  <public type="style" name="Widget.Holo.PopupWindow" />
-  <public type="style" name="Widget.Holo.ProgressBar" />
-  <public type="style" name="Widget.Holo.ProgressBar.Horizontal" />
-  <public type="style" name="Widget.Holo.ProgressBar.Small" />
-  <public type="style" name="Widget.Holo.ProgressBar.Small.Title" />
-  <public type="style" name="Widget.Holo.ProgressBar.Large" />
-  <public type="style" name="Widget.Holo.SeekBar" />
-  <public type="style" name="Widget.Holo.RatingBar" />
-  <public type="style" name="Widget.Holo.RatingBar.Indicator" />
-  <public type="style" name="Widget.Holo.RatingBar.Small" />
-  <public type="style" name="Widget.Holo.CompoundButton.RadioButton" />
-  <public type="style" name="Widget.Holo.ScrollView" />
-  <public type="style" name="Widget.Holo.HorizontalScrollView" />
-  <public type="style" name="Widget.Holo.Spinner" />
-  <public type="style" name="Widget.Holo.CompoundButton.Star" />
-  <public type="style" name="Widget.Holo.TabWidget" />
-  <public type="style" name="Widget.Holo.WebTextView" />
-  <public type="style" name="Widget.Holo.WebView" />
-  <public type="style" name="Widget.Holo.DropDownItem" />
-  <public type="style" name="Widget.Holo.DropDownItem.Spinner" />
-  <public type="style" name="Widget.Holo.TextView.SpinnerItem" />
-  <public type="style" name="Widget.Holo.ListPopupWindow" />
-  <public type="style" name="Widget.Holo.PopupMenu" />
-  <public type="style" name="Widget.Holo.ActionButton" />
-  <public type="style" name="Widget.Holo.ActionButton.Overflow" />
-  <public type="style" name="Widget.Holo.ActionButton.TextButton" />
-  <public type="style" name="Widget.Holo.ActionMode" />
-  <public type="style" name="Widget.Holo.ActionButton.CloseMode" />
-  <public type="style" name="Widget.Holo.ActionBar" />
-  <public type="style" name="Widget.Holo.Light" />
-  <public type="style" name="Widget.Holo.Light.Button" />
-  <public type="style" name="Widget.Holo.Light.Button.Small" />
-  <public type="style" name="Widget.Holo.Light.Button.Inset" />
-  <public type="style" name="Widget.Holo.Light.Button.Toggle" />
-  <public type="style" name="Widget.Holo.Light.TextView" />
-  <public type="style" name="Widget.Holo.Light.AutoCompleteTextView" />
-  <public type="style" name="Widget.Holo.Light.CompoundButton.CheckBox" />
-  <public type="style" name="Widget.Holo.Light.ListView.DropDown" />
-  <public type="style" name="Widget.Holo.Light.EditText" />
-  <public type="style" name="Widget.Holo.Light.ExpandableListView" />
-  <public type="style" name="Widget.Holo.Light.GridView" />
-  <public type="style" name="Widget.Holo.Light.ImageButton" />
-  <public type="style" name="Widget.Holo.Light.ListView" />
-  <public type="style" name="Widget.Holo.Light.PopupWindow" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Horizontal" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Small" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Small.Title" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Large" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Inverse" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Small.Inverse" />
-  <public type="style" name="Widget.Holo.Light.ProgressBar.Large.Inverse" />
-  <public type="style" name="Widget.Holo.Light.SeekBar" />
-  <public type="style" name="Widget.Holo.Light.RatingBar" />
-  <public type="style" name="Widget.Holo.Light.RatingBar.Indicator" />
-  <public type="style" name="Widget.Holo.Light.RatingBar.Small" />
-  <public type="style" name="Widget.Holo.Light.CompoundButton.RadioButton" />
-  <public type="style" name="Widget.Holo.Light.ScrollView" />
-  <public type="style" name="Widget.Holo.Light.HorizontalScrollView" />
-  <public type="style" name="Widget.Holo.Light.Spinner" />
-  <public type="style" name="Widget.Holo.Light.CompoundButton.Star" />
-  <public type="style" name="Widget.Holo.Light.TabWidget" />
-  <public type="style" name="Widget.Holo.Light.WebTextView" />
-  <public type="style" name="Widget.Holo.Light.WebView" />
-  <public type="style" name="Widget.Holo.Light.DropDownItem" />
-  <public type="style" name="Widget.Holo.Light.DropDownItem.Spinner" />
-  <public type="style" name="Widget.Holo.Light.TextView.SpinnerItem" />
-  <public type="style" name="Widget.Holo.Light.ListPopupWindow" />
-  <public type="style" name="Widget.Holo.Light.PopupMenu" />
-  <public type="style" name="Widget.Holo.Light.ActionButton" />
-  <public type="style" name="Widget.Holo.Light.ActionButton.Overflow" />
-  <public type="style" name="Widget.Holo.Light.ActionMode" />
-  <public type="style" name="Widget.Holo.Light.ActionButton.CloseMode" />
-  <public type="style" name="Widget.Holo.Light.ActionBar" />
-  <public type="style" name="Widget.Holo.Button.Borderless" />
-  <public type="style" name="Widget.Holo.Tab" />
-  <public type="style" name="Widget.Holo.Light.Tab" />
-  <public type="style" name="Holo.ButtonBar" />
-  <public type="style" name="Holo.Light.ButtonBar" />
-  <public type="style" name="Holo.ButtonBar.AlertDialog" />
-  <public type="style" name="Holo.Light.ButtonBar.AlertDialog" />
-  <public type="style" name="Holo.SegmentedButton" />
-  <public type="style" name="Holo.Light.SegmentedButton" />
-  <public type="style" name="Widget.CalendarView" />
-  <public type="style" name="Widget.Holo.CalendarView" />
-  <public type="style" name="Widget.Holo.Light.CalendarView" />
-  <public type="style" name="Widget.DatePicker" />
-  <public type="style" name="Widget.Holo.DatePicker" />
-
-  <public type="string" name="selectTextMode" />
+  <public type="string" name="selectTextMode" id="0x01040016" />
 
   <!-- Default icon for applications that don't specify an icon. -->
   <public type="mipmap" name="sym_def_app_icon" id="0x010d0000" />
