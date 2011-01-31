@@ -307,7 +307,7 @@ static JNINativeMethod gManualEditMethods[] = {
 };
 
 // temp file name of VSS out file
-#define TEMP_MCS_OUT_FILE_PATH "/tmpOut.3gp"
+#define TEMP_MCS_OUT_FILE_PATH "tmpOut.3gp"
 
 void
 getClipSetting(
@@ -1144,13 +1144,13 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     // generate the path for temp 3gp output file
     pTemp3gpFilePath = (M4OSA_Char*) M4OSA_malloc (
         (M4OSA_chrLength((M4OSA_Char*)pContext->initParams.pTempPath)
-        + M4OSA_chrLength ((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH)) , 0x0,
+        + M4OSA_chrLength ((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH)) + 1 /* for null termination */ , 0x0,
         (M4OSA_Char*) "Malloc for temp 3gp file");
     if ( pTemp3gpFilePath != M4OSA_NULL )
     {
         M4OSA_memset(pTemp3gpFilePath  ,
             M4OSA_chrLength((M4OSA_Char*)pContext->initParams.pTempPath)
-            + M4OSA_chrLength((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH), 0);
+            + M4OSA_chrLength((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH) + 1, 0);
         M4OSA_chrNCat ( (M4OSA_Char*)pTemp3gpFilePath,
             (M4OSA_Char*)pContext->initParams.pTempPath  ,
             M4OSA_chrLength ((M4OSA_Char*)pContext->initParams.pTempPath));
@@ -2385,7 +2385,7 @@ M4OSA_ERR videoEditor_processClip(
                                              "not initialized");
 
     // We start in Analyzing state
-    pContext->state = ManualEditState_ANALYZING;
+    pContext->state = ManualEditState_INITIALIZED;
     M4OSA_ERR          completionResult = M4VSS3GPP_WAR_ANALYZING_DONE;
     ManualEditState    completionState  = ManualEditState_OPENED;
     ManualEditState    errorState       = ManualEditState_ANALYZING_ERROR;
@@ -2560,9 +2560,10 @@ videoEditor_generateClip(
     result = videoEditor_processClip(pEnv, thiz, 0 /*item id is unused*/);
     LOGV("videoEditor_generateClip videoEditor_processClip returned 0x%x", result);
 
-    // Free up memory (whatever the result)
-    videoEditor_unloadSettings(pEnv, thiz);
-    //LVME_release(pEnv, thiz);
+    if (pContext->state != ManualEditState_INITIALIZED) {
+        // Free up memory (whatever the result)
+        videoEditor_unloadSettings(pEnv, thiz);
+    }
 
     LOGV("videoEditor_generateClip END 0x%x", (unsigned int) result);
     return result;
