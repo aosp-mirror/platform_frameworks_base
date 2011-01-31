@@ -778,6 +778,7 @@ int Thread::_threadLoop(void* user)
             // called by a new thread using the same thread ID as this one.
             self->mThread = thread_id_t(-1);
             self->mThreadExitedCondition.broadcast();
+            self->mThread = thread_id_t(-1); // thread id could be reused
             self->mLock.unlock();
             break;
         }
