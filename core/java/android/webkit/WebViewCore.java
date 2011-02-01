@@ -578,8 +578,6 @@ final class WebViewCore {
 
     private native void nativeSetJsFlags(String flags);
 
-    private native void nativeSetExpandedTileBounds(boolean enabled);
-
     /**
      *  Delete text from start to end in the focused textfield. If there is no
      *  focus, or if start == end, silently fail.  If start and end are out of
@@ -1000,8 +998,6 @@ final class WebViewCore {
         static final int AUTOFILL_FORM = 192;
 
         static final int PROXY_CHANGED = 193;
-
-        static final int SET_EXPANDED_TILE_BOUNDS = 194;
 
         // private message ids
         private static final int DESTROY =     200;
@@ -1561,10 +1557,6 @@ final class WebViewCore {
                             nativeAutoFillForm(msg.arg1);
                             mWebView.mPrivateHandler.obtainMessage(WebView.AUTOFILL_COMPLETE, null)
                                     .sendToTarget();
-                            break;
-
-                        case EventHub.SET_EXPANDED_TILE_BOUNDS:
-                            nativeSetExpandedTileBounds(msg.arg1 == 1);
                             break;
                     }
                 }
