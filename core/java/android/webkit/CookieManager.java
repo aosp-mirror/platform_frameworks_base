@@ -293,13 +293,6 @@ public final class CookieManager {
      * @param value The value for set-cookie: in http response header
      */
     public void setCookie(String url, String value) {
-        if (JniUtil.useChromiumHttpStack()) {
-            if (url.indexOf("://") == -1)
-                url = "http://" + url;
-            nativeSetCookie(url, value);
-            return;
-        }
-
         WebAddress uri;
         try {
             uri = new WebAddress(url);
@@ -307,7 +300,12 @@ public final class CookieManager {
             Log.e(LOGTAG, "Bad address: " + url);
             return;
         }
-        setCookie(uri, value);
+
+        if (JniUtil.useChromiumHttpStack()) {
+            nativeSetCookie(uri.toString(), value);
+        } else {
+            setCookie(uri, value);
+        }
     }
 
     /**
@@ -426,12 +424,6 @@ public final class CookieManager {
      * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
      */
     public String getCookie(String url) {
-        if (JniUtil.useChromiumHttpStack()) {
-            if (url.indexOf("://") == -1)
-                url = "http://" + url;
-            return nativeGetCookie(url);
-        }
-
         WebAddress uri;
         try {
             uri = new WebAddress(url);
@@ -439,7 +431,12 @@ public final class CookieManager {
             Log.e(LOGTAG, "Bad address: " + url);
             return null;
         }
-        return getCookie(uri);
+
+        if (JniUtil.useChromiumHttpStack()) {
+            return nativeGetCookie(uri.toString());
+        } else {
+            return getCookie(uri);
+        }
     }
 
     /**
