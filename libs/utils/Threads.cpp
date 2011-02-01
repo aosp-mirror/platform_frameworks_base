@@ -675,6 +675,9 @@ Thread::Thread(bool canCallJava)
         mLock("Thread::mLock"),
         mStatus(NO_ERROR),
         mExitPending(false), mRunning(false)
+#ifdef HAVE_ANDROID_OS
+        , mTid(-1)
+#endif
 {
 }
 
@@ -715,6 +718,7 @@ status_t Thread::run(const char* name, int32_t priority, size_t stack)
         res = androidCreateRawThreadEtc(_threadLoop,
                 this, name, priority, stack, &mThread);
     }
+    // The new thread wakes up at _threadLoop, but immediately blocks on mLock
     
     if (res == false) {
         mStatus = UNKNOWN_ERROR;   // something happened!
@@ -730,11 +734,19 @@ status_t Thread::run(const char* name, int32_t priority, size_t stack)
     // here merely indicates successfully starting the thread and does not
     // imply successful termination/execution.
     return NO_ERROR;
+
+    // Exiting scope of mLock is a memory barrier and allows new thread to run
 }
 
 int Thread::_threadLoop(void* user)
 {
     Thread* const self = static_cast<Thread*>(user);
+
+    // force a memory barrier before reading any fields, in particular mHoldSelf
+    {
+    Mutex::Autolock _l(self->mLock);
+    }
+
     sp<Thread> strong(self->mHoldSelf);
     wp<Thread> weak(strong);
     self->mHoldSelf.clear();
@@ -753,7 +765,7 @@ int Thread::_threadLoop(void* user)
             self->mStatus = self->readyToRun();
             result = (self->mStatus == NO_ERROR);
 
-            if (result && !self->mExitPending) {
+            if (result && !self->exitPending()) {
                 // Binder threads (and maybe others) rely on threadLoop
                 // running at least once after a successful ::readyToRun()
                 // (unless, of course, the thread has already been asked to exit
@@ -770,17 +782,20 @@ int Thread::_threadLoop(void* user)
             result = self->threadLoop();
         }
 
+        // establish a scope for mLock
+        {
+        Mutex::Autolock _l(self->mLock);
         if (result == false || self->mExitPending) {
             self->mExitPending = true;
-            self->mLock.lock();
             self->mRunning = false;
             // clear thread ID so that requestExitAndWait() does not exit if
             // called by a new thread using the same thread ID as this one.
             self->mThread = thread_id_t(-1);
+            // note that interested observers blocked in requestExitAndWait are
+            // awoken by broadcast, but blocked on mLock until break exits scope
             self->mThreadExitedCondition.broadcast();
-            self->mThread = thread_id_t(-1); // thread id could be reused
-            self->mLock.unlock();
             break;
+        }
         }
         
         // Release our strong reference, to let a chance to the thread
@@ -795,6 +810,7 @@ int Thread::_threadLoop(void* user)
 
 void Thread::requestExit()
 {
+    Mutex::Autolock _l(mLock);
     mExitPending = true;
 }
 
@@ -815,6 +831,8 @@ status_t Thread::requestExitAndWait()
     while (mRunning == true) {
         mThreadExitedCondition.wait(mLock);
     }
+    // This next line is probably not needed any more, but is being left for
+    // historical reference. Note that each interested party will clear flag.
     mExitPending = false;
 
     return mStatus;
@@ -822,6 +840,7 @@ status_t Thread::requestExitAndWait()
 
 bool Thread::exitPending() const
 {
+    Mutex::Autolock _l(mLock);
     return mExitPending;
 }
 

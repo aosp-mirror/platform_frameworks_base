@@ -527,9 +527,10 @@ private:
     static  int             _threadLoop(void* user);
     const   bool            mCanCallJava;
             thread_id_t     mThread;
-            Mutex           mLock;
+    mutable Mutex           mLock;
             Condition       mThreadExitedCondition;
             status_t        mStatus;
+    // note that all accesses of mExitPending and mRunning need to hold mLock
     volatile bool           mExitPending;
     volatile bool           mRunning;
             sp<Thread>      mHoldSelf;
