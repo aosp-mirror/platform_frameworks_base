@@ -213,6 +213,19 @@ class UsbService extends IUsbManager.Stub {
         return false;
     }
 
+    private boolean isBlackListed(int clazz, int subClass, int protocol) {
+        // blacklist hubs
+        if (clazz == UsbConstants.USB_CLASS_HUB) return true;
+
+        // blacklist HID boot devices (mouse and keyboard)
+        if (clazz == UsbConstants.USB_CLASS_HID &&
+                subClass == UsbConstants.USB_INTERFACE_SUBCLASS_BOOT) {
+            return true;
+        }
+
+        return false;
+    }
+
     // called from JNI in monitorUsbHostBus()
     private void usbDeviceAdded(String deviceName, int vendorID, int productID,
             int deviceClass, int deviceSubclass, int deviceProtocol,
@@ -223,12 +236,8 @@ class UsbService extends IUsbManager.Stub {
               and interval for each endpoint */
             int[] endpointValues) {
 
-        // ignore hubs
-        if (deviceClass == UsbConstants.USB_CLASS_HUB) {
-            return;
-        }
-
-        if (isBlackListed(deviceName)) {
+        if (isBlackListed(deviceName) ||
+                isBlackListed(deviceClass, deviceSubclass, deviceProtocol)) {
             return;
         }
 
@@ -243,7 +252,6 @@ class UsbService extends IUsbManager.Stub {
             try {
                 // repackage interfaceValues as an array of UsbInterface
                 int intf, endp, ival = 0, eval = 0;
-                boolean hasGoodInterface = false;
                 for (intf = 0; intf < numInterfaces; intf++) {
                     int interfaceId = interfaceValues[ival++];
                     int interfaceClass = interfaceValues[ival++];
@@ -261,15 +269,12 @@ class UsbService extends IUsbManager.Stub {
                                 maxPacketSize, interval);
                     }
 
-                    if (interfaceClass != UsbConstants.USB_CLASS_HUB) {
-                        hasGoodInterface = true;
+                    // don't allow if any interfaces are blacklisted
+                    if (isBlackListed(interfaceClass, interfaceSubclass, interfaceProtocol)) {
+                        return;
                     }
                     interfaces[intf] = new UsbInterface(interfaceId, interfaceClass,
                             interfaceSubclass, interfaceProtocol, endpoints);
-                }
-
-                if (!hasGoodInterface) {
-                    return;
                 }
             } catch (Exception e) {
                 // beware of index out of bound exceptions, which might happen if
@@ -352,6 +357,10 @@ class UsbService extends IUsbManager.Stub {
             throw new SecurityException("USB device is on a restricted bus");
         }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
+        if (mDevices.get(deviceName) == null) {
+            // if it is not in mDevices, it either does not exist or is blacklisted
+            throw new IllegalArgumentException("device " + deviceName + " does not exist or is restricted");
+        }
         return nativeOpenDevice(deviceName);
     }
 
