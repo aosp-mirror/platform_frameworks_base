@@ -402,11 +402,11 @@ public class AudioTrack {
      */
     public void enableLoop() {
         if (!mLoop) {
-            mLoop = true;
             /**
              *  Force update of preview settings
              */
             mMANativeHelper.setGeneratePreview(true);
+            mLoop = true;
         }
     }
 

@@ -102,6 +102,8 @@ public abstract class Effect {
             throw new IllegalArgumentException("Duration is too large");
         }
 
+        getMediaItem().getNativeContext().setGeneratePreview(true);
+
         final long oldDurationMs = mDurationMs;
         mDurationMs = durationMs;
 
@@ -156,6 +158,7 @@ public abstract class Effect {
             throw new IllegalArgumentException("Invalid start time or duration");
         }
 
+        getMediaItem().getNativeContext().setGeneratePreview(true);
         final long oldStartTimeMs = mStartTimeMs;
         final long oldDurationMs = mDurationMs;
 

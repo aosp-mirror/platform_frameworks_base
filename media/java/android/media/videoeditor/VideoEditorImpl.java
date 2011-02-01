@@ -167,6 +167,8 @@ public class VideoEditorImpl implements VideoEditor {
             throw new IllegalArgumentException("No more tracks can be added");
         }
 
+        mMANativeHelper.setGeneratePreview(true);
+
         /*
          * Add the audio track to AudioTrack list
          */
@@ -185,7 +187,6 @@ public class VideoEditorImpl implements VideoEditor {
             mMANativeHelper.setAudioflag(false);
         }
 
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /*
@@ -205,6 +206,8 @@ public class VideoEditorImpl implements VideoEditor {
             throw new IllegalArgumentException("Media item already exists: " + mediaItem.getId());
         }
 
+        mMANativeHelper.setGeneratePreview(true);
+
         /*
          *  Invalidate the end transition if necessary
          */
@@ -219,7 +222,7 @@ public class VideoEditorImpl implements VideoEditor {
         mMediaItems.add(mediaItem);
 
         computeTimelineDuration();
-        mMANativeHelper.setGeneratePreview(true);
+
         /*
          *  Generate project thumbnail only from first media Item on storyboard
          */
@@ -258,7 +261,9 @@ public class VideoEditorImpl implements VideoEditor {
             if (afterMediaItemIndex != (beforeMediaItemIndex - 1) ) {
                 throw new IllegalArgumentException("MediaItems are not in sequence");
             }
-         }
+        }
+
+        mMANativeHelper.setGeneratePreview(true);
 
         mTransitions.add(transition);
         /*
@@ -289,7 +294,6 @@ public class VideoEditorImpl implements VideoEditor {
         }
 
         computeTimelineDuration();
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /*
@@ -542,15 +546,15 @@ public class VideoEditorImpl implements VideoEditor {
         }
 
         if (afterAudioTrackId == null) {
-            mAudioTracks.add(0, audioTrack);
             mMANativeHelper.setGeneratePreview(true);
+            mAudioTracks.add(0, audioTrack);
         } else {
             final int audioTrackCount = mAudioTracks.size();
             for (int i = 0; i < audioTrackCount; i++) {
                 AudioTrack at = mAudioTracks.get(i);
                 if (at.getId().equals(afterAudioTrackId)) {
-                    mAudioTracks.add(i + 1, audioTrack);
                     mMANativeHelper.setGeneratePreview(true);
+                    mAudioTracks.add(i + 1, audioTrack);
                     return;
                 }
             }
@@ -568,6 +572,7 @@ public class VideoEditorImpl implements VideoEditor {
         }
 
         if (afterMediaItemId == null) {
+            mMANativeHelper.setGeneratePreview(true);
             if (mMediaItems.size() > 0) {
                 /**
                  *  Invalidate the transition at the beginning of the timeline
@@ -578,12 +583,12 @@ public class VideoEditorImpl implements VideoEditor {
             mMediaItems.add(0, mediaItem);
             computeTimelineDuration();
             generateProjectThumbnail();
-            mMANativeHelper.setGeneratePreview(true);
         } else {
             final int mediaItemCount = mMediaItems.size();
             for (int i = 0; i < mediaItemCount; i++) {
                 final MediaItem mi = mMediaItems.get(i);
                 if (mi.getId().equals(afterMediaItemId)) {
+                    mMANativeHelper.setGeneratePreview(true);
                     /**
                      *  Invalidate the transition at this position
                      */
@@ -593,7 +598,6 @@ public class VideoEditorImpl implements VideoEditor {
                      */
                     mMediaItems.add(i + 1, mediaItem);
                     computeTimelineDuration();
-                    mMANativeHelper.setGeneratePreview(true);
                     return;
                 }
             }
@@ -620,6 +624,8 @@ public class VideoEditorImpl implements VideoEditor {
 
         if (afterMediaItemId == null) {
             if (mMediaItems.size() > 0) {
+                mMANativeHelper.setGeneratePreview(true);
+
                 /**
                  *  Invalidate adjacent transitions at the insertion point
                  */
@@ -630,7 +636,6 @@ public class VideoEditorImpl implements VideoEditor {
                  */
                 mMediaItems.add(0, moveMediaItem);
                 computeTimelineDuration();
-                mMANativeHelper.setGeneratePreview(true);
 
                 generateProjectThumbnail();
             } else {
@@ -641,6 +646,7 @@ public class VideoEditorImpl implements VideoEditor {
             for (int i = 0; i < mediaItemCount; i++) {
                 final MediaItem mi = mMediaItems.get(i);
                 if (mi.getId().equals(afterMediaItemId)) {
+                    mMANativeHelper.setGeneratePreview(true);
                     /**
                      *  Invalidate adjacent transitions at the insertion point
                      */
@@ -650,7 +656,6 @@ public class VideoEditorImpl implements VideoEditor {
                      */
                     mMediaItems.add(i + 1, moveMediaItem);
                     computeTimelineDuration();
-                    mMANativeHelper.setGeneratePreview(true);
                     return;
                 }
             }
@@ -703,11 +708,11 @@ public class VideoEditorImpl implements VideoEditor {
     public synchronized AudioTrack removeAudioTrack(String audioTrackId) {
         final AudioTrack audioTrack = getAudioTrack(audioTrackId);
         if (audioTrack != null) {
+            mMANativeHelper.setGeneratePreview(true);
             mAudioTracks.remove(audioTrack);
             audioTrack.invalidate();
             mMANativeHelper.invalidatePcmFile();
             mMANativeHelper.setAudioflag(true);
-            mMANativeHelper.setGeneratePreview(true);
         } else {
             throw new IllegalArgumentException(" No more audio tracks");
         }
@@ -840,7 +845,6 @@ public class VideoEditorImpl implements VideoEditor {
         } else if (timeMs > mDurationMs) {
             throw new IllegalArgumentException("requested time more than duration");
         }
-
         long result = 0;
 
         boolean semAcquireDone = false;
@@ -862,7 +866,7 @@ public class VideoEditorImpl implements VideoEditor {
                 mMANativeHelper.unlock();
             }
         }
-
+Log.i("VE_IMPL","renderPreviewFrame <--");
         return result;
     }
 
@@ -1617,8 +1621,8 @@ public class VideoEditorImpl implements VideoEditor {
         while (it.hasNext()) {
             Transition t = it.next();
             if (t.getBeforeMediaItem() == mediaItem) {
-                it.remove();
                 mMANativeHelper.setGeneratePreview(true);
+                it.remove();
                 t.invalidate();
                 mediaItem.setBeginTransition(null);
                 if (index > 0) {
@@ -1640,8 +1644,8 @@ public class VideoEditorImpl implements VideoEditor {
         while (it.hasNext()) {
             Transition t = it.next();
             if (t.getAfterMediaItem() == mediaItem) {
-                it.remove();
                 mMANativeHelper.setGeneratePreview(true);
+                it.remove();
                 t.invalidate();
                 mediaItem.setEndTransition(null);
                 /**

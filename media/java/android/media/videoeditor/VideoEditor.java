@@ -23,6 +23,7 @@ import java.util.concurrent.CancellationException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.SurfaceHolder;
 
@@ -153,6 +154,7 @@ public interface VideoEditor {
         private Bitmap mOverlayBitmap;
         private int mRenderingMode;
         private boolean mClear;
+        private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
         /**
          * Default constructor
@@ -290,7 +292,7 @@ public interface VideoEditor {
                 }
 
                 destBitmap.eraseColor(Color.TRANSPARENT);
-                overlayCanvas.drawBitmap(mOverlayBitmap, srcRect, destRect, null);
+                overlayCanvas.drawBitmap(mOverlayBitmap, srcRect, destRect, sResizePaint);
 
                 mOverlayBitmap.recycle();
             }
