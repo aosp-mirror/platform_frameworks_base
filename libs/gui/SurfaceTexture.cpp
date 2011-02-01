@@ -219,11 +219,19 @@ status_t SurfaceTexture::updateTexImage() {
             mSlots[mLastQueued].mEglImage = image;
             mSlots[mLastQueued].mEglDisplay = dpy;
         }
+
+        GLint error;
+        while ((error = glGetError()) != GL_NO_ERROR) {
+            LOGE("GL error cleared before updating SurfaceTexture: %#04x", error);
+        }
         glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, (GLeglImageOES)image);
-        GLint error = glGetError();
-        if (error != GL_NO_ERROR) {
+        bool failed = false;
+        while ((error = glGetError()) != GL_NO_ERROR) {
             LOGE("error binding external texture image %p (slot %d): %#04x",
                     image, mLastQueued, error);
+            failed = true;
+        }
+        if (failed) {
             return -EINVAL;
         }
 
