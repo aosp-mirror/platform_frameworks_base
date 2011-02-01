@@ -53,15 +53,7 @@ import java.io.IOException;
        }
     }
 
-    /**
-     * Helper to indicate if {@link #connect} has succeeded.
-     * <p>
-     * Does not cause RF activity, and does not block.
-     * @return true if {@link #connect} has completed successfully and the {@link Tag} is believed
-     * to be within range. Applications must still handle {@link java.io.IOException}
-     * while using methods that require a connection in case the connection is lost after this
-     * method returns.
-     */
+    @Override
     public boolean isConnected() {
         if (!mIsConnected) {
             return false;
@@ -94,6 +86,7 @@ import java.io.IOException;
         }
     }
 
+    /** @hide */
     @Override
     public void reconnect() throws IOException {
         if (!mIsConnected) {
