@@ -1295,6 +1295,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadStringSetting(stmt, Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
                     R.string.def_accessibility_web_content_key_bindings);
+
+            final int maxBytes = mContext.getResources().getInteger(
+                    R.integer.def_download_manager_max_bytes_over_mobile);
+            if (maxBytes > 0) {
+                loadSetting(stmt, Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE,
+                        Integer.toString(maxBytes));
+            }
+
+            final int recommendedMaxBytes = mContext.getResources().getInteger(
+                    R.integer.def_download_manager_recommended_max_bytes_over_mobile);
+            if (recommendedMaxBytes > 0) {
+                loadSetting(stmt, Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
+                        Integer.toString(recommendedMaxBytes));
+            }
         } finally {
             if (stmt != null) stmt.close();
         }
