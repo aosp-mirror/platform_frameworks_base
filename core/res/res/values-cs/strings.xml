@@ -138,7 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Vypínání..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet se vypne."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Váš telefon bude vypnut."</string>
-    <!-- outdated translation 4249474800794963142 -->     <string name="shutdown_confirm_question" msgid="6656441286856415014">"Chcete telefon vypnout?"</string>
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Chcete zařízení vypnout?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nejnovější"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Žádné nedávno použité aplikace."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Možnosti tabletu"</string>
@@ -289,7 +289,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat pouze výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"povolení či zakázání komponent aplikací"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce tabletu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
-    <!-- outdated translation 1791075936446230356 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto vypnout důležité funkce tabletu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou zneužitím tohoto oprávnění vypnout důležité funkce tabletu. S oprávněním je třeba zacházet opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"nastavení upřednostňovaných aplikací"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Umožňuje aplikaci změnit vaše upřednostňované aplikace. Toto nastavení může škodlivým aplikacím umožnit nepozorovaně změnit spouštěné aplikace a oklamat vaše existující aplikace tak, aby shromažďovaly vaše soukromá data."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"změna globálních nastavení systému"</string>
@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Umožňuje aplikaci ovládat kontrolku."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"přístup k zařízením USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Umožní aplikaci přístup k zařízením USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"implementace protokolu MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Povoluje přístup k ovladači protokolu MTP jádra za účelem implementace protokolu MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testování hardwaru"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Umožňuje aplikaci ovládat různé periferie pro účely testování hardwaru."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"přímé volání na telefonní čísla"</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globální proxy server, který se bude používat, když jsou zásady aktivní. Aktuální globální proxy server nastavuje pouze první správce zařízení."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Nastavit konec platnosti hesla"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Ovládání doby, po jejímž uplynutí je nutné změnit heslo pro odemknutí obrazovky"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavit šifrování úložiště"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Požadovat šifrování ukládaných dat"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -676,9 +672,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"Aut.vyp."</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Nast. aut. vypl."</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- outdated translation 7531610259426153850 -->     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
-    <!-- outdated translation 8398158823767723887 -->     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"čtení historie a záložek Prohlížeče"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Umožňuje aplikaci číst všechny navštívené adresy URL a záložky Prohlížeče."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"zápis do historie a záložek Prohlížeče"</string>
@@ -911,8 +907,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Vyberte, chcete-li zakázat ladění USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Výběr metody zadávání dat"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"Nakonfigurovat metody vstupu"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidáti"</u></string>
@@ -994,7 +989,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 shoda"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <!-- outdated translation 9218298627167585235 -->     <string name="action_mode_done" msgid="7217581640461922289">"Hotovo"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"Hotovo"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Odpojování úložiště USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Odpojování karty SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Mazání úložiště USB..."</string>
@@ -1011,19 +1006,16 @@
     <string name="share" msgid="1778686618230011964">"Sdílet"</string>
     <string name="find" msgid="4808270900322985960">"Najít"</string>
     <string name="websearch" msgid="4337157977400211589">"Vyhledat na webu"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"Požadavek informací o poloze"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"Ano"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"Ne"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Byl překročen limit mazání."</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"Smazat položky."</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"Vrátit mazání zpět."</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"Neprovádět akci."</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Požadavek na informace o poloze od uživatele<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Požadavek na informace o poloze"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Požadavek od uživatele <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Ano"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Ne"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Byl překročen limit mazání."</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Je <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> smazaných položek pro synchronizaci <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> a účet: <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Co chcete udělat?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Smazat položky."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Vrátit mazání zpět."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Neprovádět akci."</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->

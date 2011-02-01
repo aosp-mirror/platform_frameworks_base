@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"به برنامه کاربردی اجازه می دهد چراغ قوه را کنترل کند."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"دسترسی به دستگاه های USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"به برنامه کاربردی اجازه می دهد به دستگاه های USB دسترسی پیدا کند."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"اعمال پروتکل MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"دسترسی به درایور اصلی MTP جهت اعمال پروتکل MTP USB را اجازه می دهد."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"تست سخت افزار"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"به برنامه کاربردی اجازه می دهد سایر برنامه های جانبی را برای تست سخت افزاری کنترل کند."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"تماس مستقیم با شماره تلفن ها"</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"پروکسی جهانی دستگاه مورد نظر را جهت استفاده هنگام فعال بودن خط مشی تنظیم کنید. فقط اولین سرپرست دستگاه پروکسی جهانی مفید را تنظیم می کند."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"تنظیم زمان انقضای رمز ورود"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"کنترل مدت زمانی که رمز ورود صفحه قفل قبل از تغییر یافتن لازم دارد"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تنظیم رمزگذاری حافظه"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"نیاز به رمزگذاری داده های برنامه ذخیره شده دارد"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"خانه"</item>
     <item msgid="869923650527136615">"تلفن همراه"</item>
@@ -911,8 +907,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"رفع عیب USB متصل شد"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"انتخاب کنید تا رفع عیب USB غیرفعال شود."</string>
     <string name="select_input_method" msgid="6865512749462072765">"انتخاب روش ورودی"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"پیکربندی روش های ورودی"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"داوطلبین"</u></string>
@@ -1011,19 +1006,16 @@
     <string name="share" msgid="1778686618230011964">"اشتراک گذاری"</string>
     <string name="find" msgid="4808270900322985960">"یافتن"</string>
     <string name="websearch" msgid="4337157977400211589">"جستجوی وب"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"درخواست مکان"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"بله"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"خیر"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"از محدودیت حذف فراتر رفت"</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"موارد را حذف کنید."</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"واگرد موارد حذف شده."</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"اکنون هیچ کاری انجام نشود."</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"درخواست موقعیت مکانی از <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"درخواست موقعیت مکانی"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"درخواست شده توسط <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"بله"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"خیر"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"از حد مجاز حذف فراتر رفت"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می خواهید چه کاری انجام دهید؟"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"موارد را حذف کنید."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"واگرد موارد حذف شده."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"اکنون هیچ کاری انجام نشود."</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->

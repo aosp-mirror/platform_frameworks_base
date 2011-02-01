@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Дозволяє програмі контролювати світловий сигнал."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"отр.дост.до прист.USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Дозволяє програмі отрим. доступ до пристр. USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"впроваджувати протокол MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Дозволяє доступ до драйвера ядра MTP для впровадження протоколу MTP (USB)."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тест-ти обладн."</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Дозволяє програмі контрол. різні периферійні пристрої для тестування апаратного забезпечення."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"прямо набирати номери тел."</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Устан. використ. глоб. проксі, коли ввімкнено політику. Лише адміністратор першого пристрою встановлює активний глоб. проксі."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Установити термін дії пароля"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Регулює, за скільки часу перед блокуванням екрана треба змінювати пароль"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Установити шифрування носія"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Потрібно, щоб дані збереженої програми були зашифровані"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Дом."</item>
     <item msgid="869923650527136615">"Мобільний"</item>
@@ -911,8 +907,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Налагодження USB підключ."</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Вибер., щоб вимкн. налагодж. USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Виберіть метод введ-ня"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"Налаштувати методи введення"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"кандидати"</u></string>
@@ -1011,19 +1006,16 @@
     <string name="share" msgid="1778686618230011964">"Надіслати"</string>
     <string name="find" msgid="4808270900322985960">"Знайти"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб-пошук"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"Запит про місцезнаходження"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"Так"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"Ні"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Перевищено ліміт видалень"</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"Видалити елементи."</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"Скасувати видалення."</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"Наразі нічого не робити."</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Запит про місцезнаходження від користувача <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Запит про місцезнаходження"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Запит зроблено користувачем <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Так"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Ні"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Перевищено ліміт видалень"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Для <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, облікового запису <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>, існує стільки видалених елементів: <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>. Що робити?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Видалити елементи."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Скасувати видалення."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Наразі нічого не робіть."</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->

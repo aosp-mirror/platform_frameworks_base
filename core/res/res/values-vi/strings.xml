@@ -289,7 +289,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Cho phép ứng dụng đọc và ghi vào bất kỳ tài nguyên nào do nhóm chẩn đoán sở hữu; ví dụ: các tệp trong /dev. Quyền này có thể ảnh hưởng đến sự ổn định và bảo mật của hệ thống. CHỈ nên sử dụng quyền này cho các chẩn đoán phần cứng cụ thể bởi nhà sản xuất hoặc nhà cung cấp dịch vụ."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"bật hoặc vô hiệu hoá các thành phần ứng dụng"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Cho phép ứng dụng thay đổi việc có nên bật thành phần của ứng dụng khác hay không. Các ứng dụng độc hại có thể sử dụng quyền này để vô hiệu hóa các tính năng quan trọng của máy tính bảng. Phải cẩn thận khi sử dụng quyền này vì nó có thể khiến các thành phần rơi vào trạng thái không sử dụng được, không đồng nhất hoặc không ổn định."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Cho phép ứng dụng thay đổi việc có nên bật thành phần của ứng dụng khác hay không. Các ứng dụng độc hại có thể sử dụng quyền này để vô hiệu hóa các tính năng quan trọng của điện thoại. Phải cẩn thận khi sử dụng các quyền vì nó có thể khiến các thành phần ứng dụng rơi vào trạng thái không sử dụng được, không đồng nhất hoặc không ổn định."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Cho phép ứng dụng thay đổi việc có nên bật thành phần của ứng dụng khác hay không. Các ứng dụng độc hại có thể sử dụng quyền này để vô hiệu hóa các tính năng quan trọng của điện thoại. Phải cẩn thận khi sử dụng quyền này vì quyền này có thể khiến các thành phần ứng dụng rơi vào trạng thái không sử dụng được, không đồng nhất hoặc không ổn định."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"đặt ứng dụng ưa thích"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Cho phép ứng dụng sửa đổi các ứng dụng ưa thích của bạn. Quyền này có thể cho phép các ứng dụng độc hại ngầm thay đổi các ứng dụng đã được chạy, giả mạo các ứng dụng hiện có để thu thập dữ liệu cá nhân của bạn."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"sửa đổi cài đặt hệ thống chung"</string>
@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Cho phép ứng dụng kiểm soát đèn nháy."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"truy cập bộ nhớ USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Cho phép ứng dụng truy cập thiết bị USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"triển khai giao thức MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Cho phép truy cập tới trình điều khiển MTP nhân hệ điều hành để triển khai giao thức MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"kiểm tra phần cứng"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Cho phép ứng dụng kiểm soát các thiết bị ngoại vi khác nhau nhằm mục đích kiểm tra phần cứng."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Đặt proxy chung của điện thoại được sử dụng trong khi chính sách được bật. Chỉ quản trị viên đầu tiên của điện thoại mới có thể đặt proxy chung hiệu quả."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Đặt hết hạn mật khẩu"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Kiểm soát thời lượng trước khi mật khẩu khóa màn hình cần được thay đổi"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Đặt mã hóa dung lượng lưu trữ"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"ĐT di động"</item>
@@ -608,8 +604,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Cơ quan"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Khác"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Nhập mã PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Chạm để nhập mật khẩu"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Nhập mật khẩu để mở khoá"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Nhập PIN để mở khóa"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Mã PIN không chính xác!"</string>
@@ -911,8 +906,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Gỡ lỗi USB đã được kết nối"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Chọn để vô hiệu hoá gỡ lỗi USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Chọn phương thức nhập"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"Định cấu hình phương pháp nhập liệu"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ứng viên"</u></string>
@@ -1011,25 +1005,19 @@
     <string name="share" msgid="1778686618230011964">"Chia sẻ"</string>
     <string name="find" msgid="4808270900322985960">"Tìm"</string>
     <string name="websearch" msgid="4337157977400211589">"Tìm kiếm trên web"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"Yêu cầu vị trí"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"Có"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"Không"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Đã vượt quá giới hạn xóa"</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"Xóa mục."</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"Hoàn tác việc xóa."</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"Ngay bây giờ bạn không cần làm gì cả."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Yêu cầu vị trí từ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Yêu cầu vị trí"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Được yêu cầu bởi <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Có"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Không"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Đã vượt quá giới hạn xóa"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Có <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> mục bị xóa cho <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, tài khoản <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Bạn muốn làm gì?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Xóa mục."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Hoàn tác các tác vụ xóa."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Ngay bây giờ bạn không cần làm gì cả."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Đã kết nối VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Đã ngắt kết nối VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Chạm để kết nối lại với VPN."</string>
     <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
