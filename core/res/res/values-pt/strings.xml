@@ -138,7 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Encerrando…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Seu tablet será desligado."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"O seu telefone será desligado."</string>
-    <!-- outdated translation 4249474800794963142 -->     <string name="shutdown_confirm_question" msgid="6656441286856415014">"O que você deseja encerrar?"</string>
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Gostaria de desligar?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recente"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Nenhum aplicativo recente."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opções do tablet"</string>
@@ -151,7 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo de avião"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo de avião ATIVADO"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo de avião DESATIVADO"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100 +"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"Mais de cem"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serviços que geram gastos"</string>
@@ -289,7 +289,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Permite que um aplicativo leia e grave em qualquer recurso que pertença ao grupo de diagnósticos; por exemplo, arquivos em /dev. Isso possivelmente pode afetar a estabilidade e a segurança do sistema. Isso deve ser usado APENAS para diagnósticos específicos do hardware realizados pelo fabricante ou pelo operador."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"ativar ou desativar os componentes do aplicativo"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Permite que um aplicativo altere se um componente de outro aplicativo está ativado ou não. Aplicativos maliciosos podem usar isso para desativar recursos importantes do tablet. É preciso ter cuidado com essa permissão, pois é possível deixar os componentes do aplicativo em um estado inutilizável, inconsistente ou instável."</string>
-    <!-- outdated translation 1791075936446230356 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Permite que um aplicativo altere se um componente de outro aplicativo está ativado ou não. Aplicativos maliciosos podem usar isso para desativar recursos importantes do tablet. É preciso ter cuidado com essa permissão, pois é possível deixar os componentes do aplicativo em um estado inutilizável, inconsistente ou instável."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Permite que um aplicativo altere se um componente de outro aplicativo está ativado ou não. Aplicativos maliciosos podem usar isso para desativar recursos importantes do telefone. É preciso ter cuidado com essa permissão, pois é possível deixar os componentes do aplicativo em um estado inutilizável, inconsistente ou instável."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"definir os aplicativos preferidos"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Permite que um aplicativo modifique os seus aplicativos preferidos. Isso pode permitir que aplicativos maliciosos alterem silenciosamente os aplicativos em execução, falsificando os seus aplicativos existentes para coletar os seus dados particulares."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modificar configurações globais do sistema"</string>
@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permite que o aplicativo controle a lanterna."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"acessar dispositivos USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permitir que o aplicativo acesse dispositivos USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"implementar protocolo MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite acesso ao driver MTP do núcleo para implementar o protocolo USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permite que o aplicativo controle diversos periféricos para teste do hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"chamar diretamente os números de telefone"</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Configura o proxy global do dispositivo para ser usado enquanto a política estiver ativada. Somente o primeiro administrador do dispositivo pode configurar um verdadeiro proxy global."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Definir validade da senha"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Controle quanto tempo uma senha de bloqueio de tela deve ficar ativa antes de ser alterada"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Definir criptografia de armazenamento"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Exigir que os dados do aplicativo armazenado sejam criptografados"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Residencial"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -676,9 +672,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"Preenchimento automático"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Conf preen autom"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- outdated translation 7531610259426153850 -->     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
-    <!-- outdated translation 8398158823767723887 -->     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ler histórico e favoritos do Navegador"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Permite que o aplicativo leia todos os URLs visitados pelo Navegador e todos os favoritos do Navegador."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"gravar histórico e favoritos do Navegador"</string>
@@ -911,8 +907,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Selecione para desativar a depuração USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Selecionar método de entrada"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"Configurar métodos de entrada"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidatos"</u></string>
@@ -994,7 +989,7 @@
     <item quantity="one" msgid="8167147081136579439">"Uma correspondência"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <!-- outdated translation 9218298627167585235 -->     <string name="action_mode_done" msgid="7217581640461922289">"Concluído"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"Concluído"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Desconectando armazenamento USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Desconectando cartão SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Apagando o armazenamento USB..."</string>
@@ -1011,19 +1006,16 @@
     <string name="share" msgid="1778686618230011964">"Compartilhar"</string>
     <string name="find" msgid="4808270900322985960">"Localizar"</string>
     <string name="websearch" msgid="4337157977400211589">"Pesquisa na web do Google"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitação de localização"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limite de exclusão excedido"</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"Excluir os itens."</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"Desfazer as exclusões."</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"Não fazer nada por enquanto."</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Solicitação de local de <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Solicitação de local"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Solicitado por <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limite de exclusão excedido"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você deseja fazer?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Excluir os itens."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Desfazer as exclusões."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Não fazer nada por enquanto."</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->

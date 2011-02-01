@@ -138,7 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"シャットダウン中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"タブレットの電源をOFFにします。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"携帯電話の電源を切ります。"</string>
-    <!-- outdated translation 4249474800794963142 -->     <string name="shutdown_confirm_question" msgid="6656441286856415014">"シャットダウンしてもよろしいですか？"</string>
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"シャットダウンしますか？"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"新着"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"最近使ったアプリケーションはありません。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"タブレットオプション"</string>
@@ -289,7 +289,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"diagグループが所有するリソース（例:/dev内のファイル）への読み書きをアプリケーションに許可します。システムの安定性とセキュリティに影響する恐れがあります。メーカー/オペレーターによるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"アプリケーションのコンポーネントを有効/無効にする"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、タブレットの重要な機能が無効にされる恐れがあります。アプリケーションコンポーネントが利用できなくなる、整合性が取れなくなる、または不安定な状態になる恐れがあるので許可には注意が必要です。"</string>
-    <!-- outdated translation 1791075936446230356 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。悪意のあるアプリケーションがタブレットの重要な機能を無効にする恐れがあります。アプリケーションコンポーネントが利用できなくなる、整合性が取れなくなる、または不安定な状態になる恐れがあるので許可には注意が必要です。"</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"別アプリケーションのコンポーネントの有効/無効を変更することをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、端末の重要な機能が無効にされる恐れがあります。アプリケーションコンポーネントが利用できなくなる、整合性が取れなくなる、または不安定な状態になる恐れがあるので許可には注意が必要です。"</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"優先アプリケーションの設定"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"優先アプリケーションを変更することをアプリケーションに許可します。悪意のあるアプリケーションが実行中のアプリケーションを密かに変更し、既存のアプリケーションになりすまして非公開データを収集する恐れがあります。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"システムの全般設定の変更"</string>
@@ -365,10 +365,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"ライトの制御をアプリケーションに許可します。"</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"USBデバイスへのアクセス"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"USBデバイスへのアクセスをアプリケーションに許可します。"</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTPプロトコルの実装"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"カーネルMTPドライバにアクセスしてMTP USBプロトコルを実装することを許可します。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ハードウェアのテスト"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"ハードウェアのテストのためにさまざまな周辺機器を制御することをアプリケーションに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
@@ -468,7 +466,7 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"SDカードのコンテンツを修正/削除する"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"USBストレージへの書き込みをアプリケーションに許可します。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"SDカードへの書き込みをアプリケーションに許可します。"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"USBストレージの内容の変更/削除"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"内部メディアストレージの内容の変更/削除"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"内部メディアストレージの内容の変更をアプリケーションに許可します。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"キャッシュファイルシステムにアクセス"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"キャッシュファイルシステムへの読み書きをアプリケーションに許可します。"</string>
@@ -490,10 +488,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"パスワードの有効期限の設定"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"画面ロックパスワードの変更が必要になるまでの期間を指定します"</string>
-    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
-    <skip />
-    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
-    <skip />
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ストレージ暗号化の設定"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"保存したアプリケーションデータが暗号化されるようにする"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>
@@ -676,9 +672,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"自動入力"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"自動入力設定"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- outdated translation 7531610259426153850 -->     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"、 "</string>
-    <!-- outdated translation 8398158823767723887 -->     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ブラウザの履歴とブックマークを読み取る"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"ブラウザでアクセスしたすべてのURLおよびブラウザのすべてのブックマークの読み取りをアプリケーションに許可します。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"ブラウザの履歴とブックマークを書き込む"</string>
@@ -911,8 +907,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
     <string name="select_input_method" msgid="6865512749462072765">"入力方法の選択"</string>
-    <!-- no translation found for configure_input_methods (6324843080254191535) -->
-    <skip />
+    <string name="configure_input_methods" msgid="6324843080254191535">"入力方法の設定"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"候補"</u></string>
@@ -994,7 +989,7 @@
     <item quantity="one" msgid="8167147081136579439">"1件一致"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g>件"</item>
   </plurals>
-    <!-- outdated translation 9218298627167585235 -->     <string name="action_mode_done" msgid="7217581640461922289">"完了"</string>
+    <string name="action_mode_done" msgid="7217581640461922289">"完了"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"USBストレージのマウント解除中..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SDカードのマウント解除中..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USBストレージ内のデータを消去中..."</string>
@@ -1011,19 +1006,16 @@
     <string name="share" msgid="1778686618230011964">"共有"</string>
     <string name="find" msgid="4808270900322985960">"検索"</string>
     <string name="websearch" msgid="4337157977400211589">"ウェブ検索"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- outdated translation 7533028619350196545 -->     <string name="gpsNotifTitle" msgid="5446858717157416839">"現在地情報へのアクセス許可"</string>
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- outdated translation 1511016393202739483 -->     <string name="gpsVerifYes" msgid="2346566072867213563">"はい"</string>
-    <!-- outdated translation 661731239940896232 -->     <string name="gpsVerifNo" msgid="1146564937346454865">"いいえ"</string>
-    <!-- outdated translation 6088394702274114202 -->     <string name="sync_too_many_deletes" msgid="5296321850662746890">"削除の制限を超えました"</string>
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- outdated translation 7782215155483034729 -->     <string name="sync_really_delete" msgid="8933566316059338692">"項目を削除します。"</string>
-    <!-- outdated translation 6501390120900825477 -->     <string name="sync_undo_deletes" msgid="8610996708225006328">"削除を元に戻します。"</string>
-    <!-- outdated translation 612038572646360281 -->     <string name="sync_do_nothing" msgid="8717589462945226869">"今は何もしません。"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g>さんからの現在地情報リクエスト"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"現在地情報へのアクセス許可"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g>さん（<xliff:g id="SERVICE">%2$s</xliff:g>）からのリクエスト"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"はい"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"いいえ"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"削除の制限を超えました"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>アカウントの<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>で<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>件の削除があります。操作を選択してください。"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"項目を削除します。"</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"削除を元に戻します。"</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"今は何もしません。"</string>
     <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
     <skip />
     <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
