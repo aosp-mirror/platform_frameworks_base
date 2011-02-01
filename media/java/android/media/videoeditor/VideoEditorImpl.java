@@ -103,6 +103,7 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String ATTR_DUCK_THRESHOLD = "ducking_threshold";
     private static final String ATTR_DUCKED_TRACK_VOLUME = "ducking_volume";
     private static final String ATTR_GENERATED_IMAGE_CLIP = "generated_image_clip";
+    private static final String ATTR_IS_IMAGE_CLIP_GENERATED = "is_image_clip_generated";
     private static final String ATTR_GENERATED_TRANSITION_CLIP = "generated_transition_clip";
     private static final String ATTR_IS_TRANSITION_GENERATED = "is_transition_generated";
     private static final String ATTR_OVERLAY_RGB_FILENAME = "overlay_rgb_filename";
@@ -977,15 +978,28 @@ Log.i("VE_IMPL","renderPreviewFrame <--");
                                     currentMediaItem.addEffect(effect);
                                 }
                                 if (effect instanceof EffectKenBurns) {
-                                    String filename = parser.getAttributeValue("", ATTR_GENERATED_IMAGE_CLIP);
-
-                                    if (new File(filename).exists() == true) {
-                                        ((MediaImageItem)currentMediaItem).setGeneratedImageClip(filename);
-                                        ((MediaImageItem)currentMediaItem).setRegenerateClip(false);
-                                    }
-                                    else {
-                                        ((MediaImageItem)currentMediaItem).setGeneratedImageClip(null);
-                                        ((MediaImageItem)currentMediaItem).setRegenerateClip(true);
+                                    final boolean isImageClipGenerated =
+                                           Boolean.parseBoolean(parser.getAttributeValue("",
+                                                              ATTR_IS_IMAGE_CLIP_GENERATED));
+                                    if(isImageClipGenerated) {
+                                        String filename = parser.getAttributeValue("",
+                                                              ATTR_GENERATED_IMAGE_CLIP);
+                                        if (new File(filename).exists() == true) {
+                                            ((MediaImageItem)currentMediaItem).
+                                                        setGeneratedImageClip(filename);
+                                            ((MediaImageItem)currentMediaItem).
+                                                         setRegenerateClip(false);
+                                         } else {
+                                           ((MediaImageItem)currentMediaItem).
+                                                         setGeneratedImageClip(null);
+                                           ((MediaImageItem)currentMediaItem).
+                                                         setRegenerateClip(true);
+                                         }
+                                    } else {
+                                        ((MediaImageItem)currentMediaItem).
+                                                         setGeneratedImageClip(null);
+                                        ((MediaImageItem)currentMediaItem).
+                                                        setRegenerateClip(true);
                                     }
                                 }
                             }
@@ -1390,8 +1404,14 @@ Log.i("VE_IMPL","renderPreviewFrame <--");
                         serializer.attribute("", ATTR_END_RECT_BOTTOM,
                                 Integer.toString(endRect.bottom));
                         final MediaItem mItem = effect.getMediaItem();
-                        serializer.attribute("", ATTR_GENERATED_IMAGE_CLIP,
-                               ((MediaImageItem)mItem).getGeneratedImageClip());
+                           if(((MediaImageItem)mItem).getGeneratedImageClip() != null) {
+                               serializer.attribute("", ATTR_IS_IMAGE_CLIP_GENERATED,Boolean.toString(true));
+                               serializer.attribute("", ATTR_GENERATED_IMAGE_CLIP,
+                                     ((MediaImageItem)mItem).getGeneratedImageClip());
+                            } else {
+                                serializer.attribute("", ATTR_IS_IMAGE_CLIP_GENERATED,
+                                     Boolean.toString(false));
+                         }
                     }
 
                     serializer.endTag("", TAG_EFFECT);
