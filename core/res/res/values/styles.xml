@@ -1608,12 +1608,22 @@
     </style>
 
     <style name="Widget.Holo.RatingBar" parent="Widget.RatingBar">
+        <item name="android:progressDrawable">@android:drawable/ratingbar_full_holo_dark</item>
+        <item name="android:indeterminateDrawable">@android:drawable/ratingbar_full_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
+        <item name="android:progressDrawable">@android:drawable/ratingbar_holo_dark</item>
+        <item name="android:indeterminateDrawable">@android:drawable/ratingbar_holo_dark</item>
+        <item name="android:minHeight">35dip</item>
+        <item name="android:maxHeight">35dip</item>
     </style>
 
     <style name="Widget.Holo.RatingBar.Small" parent="Widget.RatingBar.Small">
+        <item name="android:progressDrawable">@android:drawable/ratingbar_small_holo_dark</item>
+        <item name="android:indeterminateDrawable">@android:drawable/ratingbar_small_holo_dark</item>
+        <item name="android:minHeight">16dip</item>
+        <item name="android:maxHeight">16dip</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
@@ -1956,12 +1966,22 @@
     </style>
 
     <style name="Widget.Holo.Light.RatingBar" parent="Widget.RatingBar">
+        <item name="android:progressDrawable">@android:drawable/ratingbar_full_holo_light</item>
+        <item name="android:indeterminateDrawable">@android:drawable/ratingbar_full_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
+        <item name="android:progressDrawable">@android:drawable/ratingbar_holo_light</item>
+        <item name="android:indeterminateDrawable">@android:drawable/ratingbar_holo_light</item>
+        <item name="android:minHeight">35dip</item>
+        <item name="android:maxHeight">35dip</item>
     </style>
 
     <style name="Widget.Holo.Light.RatingBar.Small" parent="Widget.RatingBar.Small">
+        <item name="android:progressDrawable">@android:drawable/ratingbar_small_holo_light</item>
+        <item name="android:indeterminateDrawable">@android:drawable/ratingbar_small_holo_light</item>
+        <item name="android:minHeight">16dip</item>
+        <item name="android:maxHeight">16dip</item>
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
