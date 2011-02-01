@@ -204,12 +204,6 @@ public abstract class WallpaperService extends Service {
                 return mIsCreating;
             }
 
-            @Override
-            public void setFixedSize(int width, int height) {
-                throw new UnsupportedOperationException(
-                        "Wallpapers currently only support sizing from layout");
-            }
-            
             public void setKeepScreenOn(boolean screenOn) {
                 throw new UnsupportedOperationException(
                         "Wallpapers do not support keep screen on");
