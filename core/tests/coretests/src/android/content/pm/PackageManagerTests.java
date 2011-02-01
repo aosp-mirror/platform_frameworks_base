@@ -3098,10 +3098,19 @@ public class PackageManagerTests extends AndroidTestCase {
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
+    /**
+     * Unknown features should be allowed to install. This prevents older phones
+     * from rejecting new packages that specify features that didn't exist when
+     * an older phone existed. All older phones are assumed to have those
+     * features.
+     * <p>
+     * Right now we allow all packages to be installed regardless of their
+     * features.
+     */
     @LargeTest
-    public void testUsesFeatureMissingFeature() {
-        int retCode = PackageManager.INSTALL_FAILED_MISSING_FEATURE;
-        installFromRawResource("install.apk", R.raw.install_uses_feature, 0, true, true, retCode,
+    public void testUsesFeatureUnknownFeature() {
+        int retCode = PackageManager.INSTALL_SUCCEEDED;
+        installFromRawResource("install.apk", R.raw.install_uses_feature, 0, true, false, retCode,
                 PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
     }
 
