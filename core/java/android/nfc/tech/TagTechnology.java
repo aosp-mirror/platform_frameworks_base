@@ -121,6 +121,7 @@ public interface TagTechnology extends Closeable {
      * @see #connect()
      * @see #close()
      * @throws IOException
+     * @hide
      */
     public void reconnect() throws IOException;
 
@@ -137,4 +138,15 @@ public interface TagTechnology extends Closeable {
      * @see #reconnect()
      */
     public void close() throws IOException;
+
+    /**
+     * Helper to indicate if {@link #connect} has succeeded.
+     * <p>
+     * Does not cause RF activity, and does not block.
+     * @return true if {@link #connect} has completed successfully and the {@link Tag} is believed
+     * to be within range. Applications must still handle {@link java.io.IOException}
+     * while using methods that require a connection in case the connection is lost after this
+     * method returns.
+     */
+    public boolean isConnected();
 }

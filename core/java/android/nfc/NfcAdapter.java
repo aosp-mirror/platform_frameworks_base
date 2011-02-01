@@ -44,10 +44,10 @@ public final class NfcAdapter {
     /**
      * Intent to start an activity when a tag with NDEF payload is discovered.
      * If the tag has and NDEF payload this intent is started before
-     * {@link #ACTION_TECHNOLOGY_DISCOVERED}.
+     * {@link #ACTION_TECH_DISCOVERED}.
      *
      * If any activities respond to this intent neither
-     * {@link #ACTION_TECHNOLOGY_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
+     * {@link #ACTION_TECH_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
@@ -63,7 +63,7 @@ public final class NfcAdapter {
      * If any activities respond to this intent {@link #ACTION_TAG_DISCOVERED} will not be started.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_TECHNOLOGY_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
+    public static final String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
 
     /**
      * Intent to start an activity when a tag is discovered.
