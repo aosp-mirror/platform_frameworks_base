@@ -98,7 +98,7 @@ public class StaticLayout extends Layout
 
         generate(source, bufstart, bufend, paint, outerwidth, align,
                  spacingmult, spacingadd, includepad, includepad,
-                 ellipsize != null, ellipsizedWidth, ellipsize);
+                 ellipsizedWidth, ellipsize);
 
         mMeasured = MeasuredText.recycle(mMeasured);
         mFontMetricsInt = null;
@@ -119,8 +119,7 @@ public class StaticLayout extends Layout
                         Alignment align,
                         float spacingmult, float spacingadd,
                         boolean includepad, boolean trackpad,
-                        boolean breakOnlyAtSpaces,
-                        float ellipsizedWidth, TextUtils.TruncateAt where) {
+                        float ellipsizedWidth, TextUtils.TruncateAt ellipsize) {
         mLineCount = 0;
 
         int v = 0;
@@ -281,8 +280,7 @@ public class StaticLayout extends Layout
                         int emoji = Character.codePointAt(chs, j - paraStart);
 
                         if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
-                            Bitmap bm = EMOJI_FACTORY.
-                                getBitmapFromAndroidPua(emoji);
+                            Bitmap bm = EMOJI_FACTORY.getBitmapFromAndroidPua(emoji);
 
                             if (bm != null) {
                                 Paint whichPaint;
@@ -362,7 +360,8 @@ public class StaticLayout extends Layout
                                 okbottom = fitbottom;
                         }
                     } else {
-                        if (breakOnlyAtSpaces) {
+                        if (ellipsize != null) {
+                            // Break only at spaces using ok indexes.
                             if (ok != here) {
                                 // Log.e("text", "output ok " + here + " to " +ok);
 
@@ -379,7 +378,7 @@ public class StaticLayout extends Layout
                                         needMultiply, paraStart, chdirs, dir, easy,
                                         ok == bufend, includepad, trackpad,
                                         chs, widths, here - paraStart,
-                                        where, ellipsizedWidth, okwidth,
+                                        ellipsize, ellipsizedWidth, okwidth,
                                         paint);
 
                                 here = ok;
@@ -415,7 +414,7 @@ public class StaticLayout extends Layout
                                         needMultiply, paraStart, chdirs, dir, easy,
                                         ok == bufend, includepad, trackpad,
                                         chs, widths, here - paraStart,
-                                        where, ellipsizedWidth, okwidth,
+                                        ellipsize, ellipsizedWidth, okwidth,
                                         paint);
 
                                 here = ok;
@@ -431,7 +430,7 @@ public class StaticLayout extends Layout
                                         needMultiply, paraStart, chdirs, dir, easy,
                                         fit == bufend, includepad, trackpad,
                                         chs, widths, here - paraStart,
-                                        where, ellipsizedWidth, fitwidth,
+                                        ellipsize, ellipsizedWidth, fitwidth,
                                         paint);
 
                                 here = fit;
@@ -453,7 +452,7 @@ public class StaticLayout extends Layout
                                         here + 1 == bufend, includepad,
                                         trackpad,
                                         chs, widths, here - paraStart,
-                                        where, ellipsizedWidth,
+                                        ellipsize, ellipsizedWidth,
                                         widths[here - paraStart], paint);
 
                                 here = here + 1;
@@ -502,7 +501,7 @@ public class StaticLayout extends Layout
                         needMultiply, paraStart, chdirs, dir, easy,
                         paraEnd == bufend, includepad, trackpad,
                         chs, widths, here - paraStart,
-                        where, ellipsizedWidth, w, paint);
+                        ellipsize, ellipsizedWidth, w, paint);
             }
 
             paraStart = paraEnd;
@@ -525,7 +524,7 @@ public class StaticLayout extends Layout
                     needMultiply, bufend, null, DEFAULT_DIR, true,
                     true, includepad, trackpad,
                     null, null, bufstart,
-                    where, ellipsizedWidth, 0, paint);
+                    ellipsize, ellipsizedWidth, 0, paint);
         }
     }
 
@@ -738,13 +737,13 @@ public class StaticLayout extends Layout
         } else {
             mLineDirections[j] = AndroidBidi.directions(dir, chdirs, widstart, chs,
                     widstart, end - start);
+        }
 
-            // If ellipsize is in marquee mode, do not apply ellipsis on the first line
-            if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
-                calculateEllipsis(start, end, widths, widstart,
-                                  ellipsiswidth, ellipsize, j,
-                                  textwidth, paint);
-            }
+        // If ellipsize is in marquee mode, do not apply ellipsis on the first line
+        if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
+            calculateEllipsis(start, end, widths, widstart,
+                    ellipsiswidth, ellipsize, j,
+                    textwidth, paint);
         }
 
         mLineCount++;
@@ -755,7 +754,6 @@ public class StaticLayout extends Layout
                                    float[] widths, int widstart,
                                    float avail, TextUtils.TruncateAt where,
                                    int line, float textwidth, TextPaint paint) {
-        int len = lineend - linestart;
 
         if (textwidth <= avail) {
             // Everything fits!
@@ -766,6 +764,7 @@ public class StaticLayout extends Layout
 
         float ellipsiswid = paint.measureText("\u2026");
         int ellipsisStart, ellipsisCount;
+        int len = lineend - linestart;
 
         if (where == TextUtils.TruncateAt.START) {
             float sum = 0;
@@ -865,12 +864,22 @@ public class StaticLayout extends Layout
 
     @Override
     public int getLineTop(int line) {
-        return mLines[mColumns * line + TOP];
+        int top = mLines[mColumns * line + TOP];
+        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount &&
+                line != mLineCount) {
+            top += getBottomPadding();
+        }
+        return top;
     }
 
     @Override
     public int getLineDescent(int line) {
-        return mLines[mColumns * line + DESCENT];
+        int descent = mLines[mColumns * line + DESCENT];
+        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount - 1 &&
+                line != mLineCount) {
+            descent += getBottomPadding();
+        }
+        return descent;
     }
 
     @Override
@@ -926,6 +935,14 @@ public class StaticLayout extends Layout
         return mEllipsizedWidth;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public void setMaximumVisibleLineCount(int line) {
+        mMaximumVisibleLineCount = line;
+    }
+
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
     private int mColumns;
@@ -943,6 +960,7 @@ public class StaticLayout extends Layout
 
     private int[] mLines;
     private Directions[] mLineDirections;
+    private int mMaximumVisibleLineCount = 0;
 
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;
