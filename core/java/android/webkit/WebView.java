@@ -8156,6 +8156,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Enable expanded tiles bound for smoother scrolling.
+     *
+     * @hide only used by the Browser
+     */
+    public void setExpandedTileBounds(boolean enabled) {
+        mWebViewCore.sendMessage(EventHub.SET_EXPANDED_TILE_BOUNDS, enabled ? 1 : 0, 0);
+    }
+
+    /**
      * Set the time to wait between passing touches to WebCore. See also the
      * TOUCH_SENT_INTERVAL member for further discussion.
      *
