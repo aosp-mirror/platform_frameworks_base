@@ -3146,11 +3146,6 @@
         <attr name="layout" />
     </declare-styleable>
 
-    <declare-styleable name="DatePicker">
-        <!-- @hide The layout of the time picker. -->
-        <attr name="layout" />
-    </declare-styleable>
-
     <!-- ========================= -->
     <!-- Drawable class attributes -->
     <!-- ========================= -->
