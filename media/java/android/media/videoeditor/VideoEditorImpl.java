@@ -1519,6 +1519,8 @@ Log.i("VE_IMPL","renderPreviewFrame <--");
         /**
          *  Invalidate all transitions
          */
+        mMANativeHelper.setGeneratePreview(true);
+
         for (Transition transition : mTransitions) {
             transition.invalidate();
         }
