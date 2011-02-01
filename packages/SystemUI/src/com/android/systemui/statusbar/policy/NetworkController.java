@@ -76,7 +76,9 @@ public class NetworkController extends BroadcastReceiver {
     int mPhoneSignalIconId;
     int mDataDirectionIconId;
     int mDataSignalIconId;
+    int mDataActiveSignalIconId;
     int mDataTypeIconId;
+    boolean mDataActive;
 
     // wifi
     final WifiManager mWifiManager;
@@ -365,15 +367,17 @@ public class NetworkController extends BroadcastReceiver {
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_flightmode;
-                mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
+                mDataActiveSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
             } else {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
+                // note we use 0 instead of null
+                mDataActiveSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_0;
             }
         } else {
             if (mSignalStrength == null) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
+                // note we use 0 instead of null
+                mDataActiveSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_0;
             } else if (isCdma()) {
                 // If 3G(EV) and 1x network are available than 3G should be
                 // displayed, displayed RSSI should be from the EV side.
@@ -392,6 +396,8 @@ public class NetworkController extends BroadcastReceiver {
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
+                mDataActiveSignalIconId
+                        = TelephonyIcons.DATA_SIGNAL_STRENGTH_ACTIVE[mInetCondition][iconLevel];
             } else {
                 int asu = mSignalStrength.getGsmSignalStrength();
 
@@ -415,6 +421,8 @@ public class NetworkController extends BroadcastReceiver {
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
+                mDataActiveSignalIconId
+                        = TelephonyIcons.DATA_SIGNAL_STRENGTH_ACTIVE[mInetCondition][iconLevel];
             }
         }
     }
@@ -691,7 +699,16 @@ public class NetworkController extends BroadcastReceiver {
             dataTypeIconId = 0;
         } else if (mDataConnected) {
             label = mNetworkName;
-            combinedSignalIconId = mDataSignalIconId;
+            switch (mDataActivity) {
+                case TelephonyManager.DATA_ACTIVITY_IN:
+                case TelephonyManager.DATA_ACTIVITY_OUT:
+                case TelephonyManager.DATA_ACTIVITY_INOUT:
+                    combinedSignalIconId = mDataActiveSignalIconId;
+                    break;
+                default:
+                    combinedSignalIconId = mDataSignalIconId;
+                    break;
+            }
             dataTypeIconId = mDataTypeIconId;
         } else if (mBluetoothTethered) {
             label = mContext.getString(R.string.bluetooth_tethered);
@@ -705,13 +722,16 @@ public class NetworkController extends BroadcastReceiver {
 
         if (false) {
             Slog.d(TAG, "refreshViews combinedSignalIconId=0x"
-                    + Integer.toHexString(mPhoneSignalIconId)
+                    + Integer.toHexString(combinedSignalIconId)
+                    + "/" + getResourceName(combinedSignalIconId)
+                    + " mDataActivity=" + mDataActivity
                     + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
                     + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
                     + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
+                    + " mDataActiveSignalIconId=0x" + Integer.toHexString(mDataActiveSignalIconId)
                     + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
                     + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
-                    + "mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
+                    + " mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
         }
 
         // the phone icon on phones
@@ -814,6 +834,10 @@ public class NetworkController extends BroadcastReceiver {
         pw.print(Integer.toHexString(mDataSignalIconId));
         pw.print("/");
         pw.println(getResourceName(mDataSignalIconId));
+        pw.print("  mDataActiveSignalIconId=");
+        pw.print(Integer.toHexString(mDataActiveSignalIconId));
+        pw.print("/");
+        pw.println(getResourceName(mDataActiveSignalIconId));
         pw.print("  mDataTypeIconId=");
         pw.print(Integer.toHexString(mDataTypeIconId));
         pw.print("/");
