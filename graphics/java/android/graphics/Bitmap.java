@@ -464,8 +464,8 @@ public final class Bitmap implements Parcelable {
         Rect srcR = new Rect(x, y, x + width, y + height);
         RectF dstR = new RectF(0, 0, width, height);
 
-        final Config newConfig = source.getConfig() == Config.ARGB_8888 ?
-                Config.ARGB_8888 : Config.RGB_565;
+        final Config newConfig = source.getConfig() == Config.ARGB_8888 ||
+                source.getConfig() == Config.ARGB_4444 ? Config.ARGB_8888 : Config.RGB_565;
 
         if (m == null || m.isIdentity()) {
             bitmap = createBitmap(neww, newh, newConfig, source.hasAlpha());
