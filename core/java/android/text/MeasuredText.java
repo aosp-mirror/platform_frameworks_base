@@ -28,6 +28,7 @@ import android.util.Log;
  * @hide
  */
 class MeasuredText {
+    private static final boolean localLOGV = false;
     /* package */ CharSequence mText;
     /* package */ int mTextStart;
     /* package */ float[] mWidths;
@@ -58,7 +59,9 @@ class MeasuredText {
             }
         }
         mt = new MeasuredText();
-        Log.e("MEAS", "new: " + mt);
+        if (localLOGV) {
+            Log.v("MEAS", "new: " + mt);
+        }
         return mt;
     }
 
