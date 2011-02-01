@@ -2898,28 +2898,43 @@ class MediaArtistNativeHelper {
 
                         if (bEffectKbPresent) {
                             try {
-                                mClipProperties.clipProperties[previewIndex]
-                                    = getMediaProperties(((MediaImageItem)lMediaItem).getGeneratedImageClip());
-                            } catch (Exception e) {
+                                  if(((MediaImageItem)lMediaItem).getGeneratedImageClip() != null) {
+                                     mClipProperties.clipProperties[previewIndex]
+                                        = getMediaProperties(((MediaImageItem)lMediaItem).
+                                                             getGeneratedImageClip());
+                                  }
+                                  else {
+                                   mClipProperties.clipProperties[previewIndex]
+                                      = getMediaProperties(((MediaImageItem)lMediaItem).
+                                                             getScaledImageFileName());
+                                   mClipProperties.clipProperties[previewIndex].width =
+                                             ((MediaImageItem)lMediaItem).getScaledWidth();
+                                   mClipProperties.clipProperties[previewIndex].height =
+                                             ((MediaImageItem)lMediaItem).getScaledHeight();
+                                  }
+                                } catch (Exception e) {
+                                   throw new IllegalArgumentException("Unsupported file or file not found");
+                                }
+                         } else {
+                              try {
+                                  mClipProperties.clipProperties[previewIndex]
+                                      = getMediaProperties(((MediaImageItem)lMediaItem).
+                                                               getScaledImageFileName());
+                              } catch (Exception e) {
                                 throw new IllegalArgumentException("Unsupported file or file not found");
-                            }
-                        } else {
-                            try {
-                                mClipProperties.clipProperties[previewIndex]
-                                    = getMediaProperties(((MediaImageItem)lMediaItem).getScaledImageFileName());
-                            } catch (Exception e) {
-                                throw new IllegalArgumentException("Unsupported file or file not found");
-                            }
-                            mClipProperties.clipProperties[previewIndex].width = ((MediaImageItem)lMediaItem).getScaledWidth();
-                            mClipProperties.clipProperties[previewIndex].height = ((MediaImageItem)lMediaItem).getScaledHeight();
+                              }
+                            mClipProperties.clipProperties[previewIndex].width =
+                                        ((MediaImageItem)lMediaItem).getScaledWidth();
+                            mClipProperties.clipProperties[previewIndex].height =
+                                        ((MediaImageItem)lMediaItem).getScaledHeight();
                         }
                     } else {
                         try {
                             mClipProperties.clipProperties[previewIndex]
                                  = getMediaProperties(lMediaItem.getFilename());
-                        } catch (Exception e) {
-                            throw new IllegalArgumentException("Unsupported file or file not found");
-                        }
+                            } catch (Exception e) {
+                              throw new IllegalArgumentException("Unsupported file or file not found");
+                          }
                     }
                     mClipProperties.clipProperties[previewIndex].Id = lMediaItem.getId();
                     checkOddSizeImage(lMediaItem, mClipProperties, previewIndex);
@@ -3632,6 +3647,7 @@ class MediaArtistNativeHelper {
             mPreviewEditSettings.transitionSettingsArray[index].audioTransitionType =
                 AudioTransition.NONE;
         }
+
         for (int clipCnt = 0; clipCnt < mPreviewEditSettings.clipSettingsArray.length; clipCnt++) {
             if (mPreviewEditSettings.clipSettingsArray[clipCnt].fileType == FileType.JPG) {
                 mPreviewEditSettings.clipSettingsArray[clipCnt].clipPath =
