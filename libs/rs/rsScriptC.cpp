@@ -485,12 +485,7 @@ bool ScriptCState::runCompiler(Context *rsc,
     }
 
 #if 1
-    if (bccLinkBC(s->mBccScript,
-                  resName,
-                  NULL /*rs_runtime_lib_bc*/,
-                  1 /*rs_runtime_lib_bc_size*/
-                    /*"1" means skip buffer here, and let libbcc decide*/,
-                  0) != 0) {
+    if (bccLinkFile(s->mBccScript, "/system/lib/libclcore.bc", 0) != 0) {
         LOGE("bcc: FAILS to link bitcode");
         return false;
     }
