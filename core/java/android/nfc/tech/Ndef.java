@@ -61,12 +61,31 @@ public final class Ndef extends BasicTagTechnology {
     /** @hide */
     public static final String EXTRA_NDEF_TYPE = "ndeftype";
 
-    public static final int OTHER = -1;
-    public static final int NFC_FORUM_TYPE_1 = 1;
-    public static final int NFC_FORUM_TYPE_2 = 2;
-    public static final int NFC_FORUM_TYPE_3 = 3;
-    public static final int NFC_FORUM_TYPE_4 = 4;
-    public static final int MIFARE_CLASSIC = 101;
+    /** @hide */
+    public static final int TYPE_OTHER = -1;
+    /** @hide */
+    public static final int TYPE_1 = 1;
+    /** @hide */
+    public static final int TYPE_2 = 2;
+    /** @hide */
+    public static final int TYPE_3 = 3;
+    /** @hide */
+    public static final int TYPE_4 = 4;
+    /** @hide */
+    public static final int TYPE_MIFARE_CLASSIC = 101;
+
+    /** @hide */
+    public static final String UNKNOWN = "android.ndef.unknown";
+
+    public static final String NFC_FORUM_TYPE_1 = "org.nfcforum.ndef.type1";
+
+    public static final String NFC_FORUM_TYPE_2 = "org.nfcforum.ndef.type2";
+
+    public static final String NFC_FORUM_TYPE_3 = "org.nfcforum.ndef.type3";
+
+    public static final String NFC_FORUM_TYPE_4 = "org.nfcforum.ndef.type4";
+
+    public static final String MIFARE_CLASSIC = "com.nxp.ndef.mifareclassic";
 
     private final int mMaxNdefSize;
     private final int mCardState;
@@ -118,18 +137,27 @@ public final class Ndef extends BasicTagTechnology {
      * Get NDEF tag type.
      * <p>Returns one of {@link #NFC_FORUM_TYPE_1}, {@link #NFC_FORUM_TYPE_2},
      * {@link #NFC_FORUM_TYPE_3}, {@link #NFC_FORUM_TYPE_4},
-     * {@link #MIFARE_CLASSIC} or {@link #OTHER}.
-     * <p>Platforms of this API revision will always return one of the above
-     * values. Platforms at future API revisions may return other values, which
-     * can be treated as {@link #OTHER} by applications targeting this API.
+     * {@link #MIFARE_CLASSIC} or another NDEF tag type that is not yet in the
+     * Android API.
      * <p>Android devices with NFC support must always correctly enumerate
      * NFC Forum tag types, and may optionally enumerate
      * {@link #MIFARE_CLASSIC} since it requires proprietary technology.
-     * Devices that cannot enumerate {@link #MIFARE_CLASSIC} will use
-     * {@link #OTHER} instead.
      */
-    public int getType() {
-        return mNdefType;
+    public String getType() {
+        switch (mNdefType) {
+            case TYPE_1:
+                return NFC_FORUM_TYPE_1;
+            case TYPE_2:
+                return NFC_FORUM_TYPE_2;
+            case TYPE_3:
+                return NFC_FORUM_TYPE_3;
+            case TYPE_4:
+                return NFC_FORUM_TYPE_4;
+            case TYPE_MIFARE_CLASSIC:
+                return MIFARE_CLASSIC;
+            default:
+                return UNKNOWN;
+        }
     }
 
     /**
@@ -217,10 +245,10 @@ public final class Ndef extends BasicTagTechnology {
 
     /**
      * Indicates whether a tag can be made read-only with
-     * {@link #makeReadonly()}
+     * {@link #makeReadOnly()}
      */
-    public boolean canMakeReadonly() {
-        if (mNdefType == NFC_FORUM_TYPE_1 || mNdefType == NFC_FORUM_TYPE_2) {
+    public boolean canMakeReadOnly() {
+        if (mNdefType == TYPE_1 || mNdefType == TYPE_2) {
             return true;
         } else {
             return false;
@@ -234,7 +262,7 @@ public final class Ndef extends BasicTagTechnology {
      * This is a one-way process and can not be reverted!
      * @throws IOException
      */
-    public boolean makeReadonly() throws IOException {
+    public boolean makeReadOnly() throws IOException {
         checkConnected();
 
         try {

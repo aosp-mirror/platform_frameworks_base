@@ -55,7 +55,7 @@ import java.util.Arrays;
  * not cause any further RF activity or block. Note however that arrays passed to and
  * returned by this class are *not* cloned, so be careful not to modify them.
  */
-public class Tag implements Parcelable {
+public final class Tag implements Parcelable {
     /*package*/ final byte[] mId;
     /*package*/ final int[] mTechList;
     /*package*/ final String[] mTechStringList;
@@ -93,6 +93,7 @@ public class Tag implements Parcelable {
      * @param id The tag identifier, can be null
      * @param techList must not be null
      * @return freshly constructed tag
+     * @hide
      */
     public static Tag createMockTag(byte[] id, int[] techList, Bundle[] techListExtras) {
         // set serviceHandle to 0 to indicate mock tag
