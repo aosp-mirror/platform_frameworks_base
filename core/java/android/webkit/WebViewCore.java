@@ -58,7 +58,11 @@ final class WebViewCore {
         // Load libwebcore during static initialization. This happens in the
         // zygote process so it will be shared read-only across all app
         // processes.
-        System.loadLibrary("webcore");
+        try {
+            System.loadLibrary("webcore");
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(LOGTAG, "Unable to load webcore library");
+        }
     }
 
     /*
