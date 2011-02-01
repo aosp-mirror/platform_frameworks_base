@@ -24,6 +24,7 @@ namespace android {
 
 struct AMessage;
 class String8;
+#define OFFSET_TABLE_LEN    300
 
 class AMRExtractor : public MediaExtractor {
 public:
@@ -42,8 +43,10 @@ private:
     sp<DataSource> mDataSource;
     sp<MetaData> mMeta;
     status_t mInitCheck;
-    size_t mFrameSize;
     bool mIsWide;
+
+    off64_t mOffsetTable[OFFSET_TABLE_LEN]; //5 min
+    size_t mOffsetTableLength;
 
     AMRExtractor(const AMRExtractor &);
     AMRExtractor &operator=(const AMRExtractor &);

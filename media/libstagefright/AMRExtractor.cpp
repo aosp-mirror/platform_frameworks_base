@@ -35,8 +35,9 @@ class AMRSource : public MediaSource {
 public:
     AMRSource(const sp<DataSource> &source,
               const sp<MetaData> &meta,
-              size_t frameSize,
-              bool isWide);
+              bool isWide,
+              const off64_t *offset_table,
+              size_t offset_table_length);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -52,13 +53,15 @@ protected:
 private:
     sp<DataSource> mDataSource;
     sp<MetaData> mMeta;
-    size_t mFrameSize;
     bool mIsWide;
 
     off64_t mOffset;
     int64_t mCurrentTimeUs;
     bool mStarted;
     MediaBufferGroup *mGroup;
+
+    off64_t mOffsetTable[OFFSET_TABLE_LEN];
+    size_t mOffsetTableLength;
 
     AMRSource(const AMRSource &);
     AMRSource &operator=(const AMRSource &);
@@ -67,12 +70,24 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 static size_t getFrameSize(bool isWide, unsigned FT) {
-    static const size_t kFrameSizeNB[8] = {
-        95, 103, 118, 134, 148, 159, 204, 244
+    static const size_t kFrameSizeNB[16] = {
+        95, 103, 118, 134, 148, 159, 204, 244,
+        39, 43, 38, 37, // SID
+        0, 0, 0, // future use
+        0 // no data
     };
-    static const size_t kFrameSizeWB[9] = {
-        132, 177, 253, 285, 317, 365, 397, 461, 477
+    static const size_t kFrameSizeWB[16] = {
+        132, 177, 253, 285, 317, 365, 397, 461, 477,
+        40, // SID
+        0, 0, 0, 0, // future use
+        0, // speech lost
+        0 // no data
     };
+
+    if (FT > 15 || (isWide && FT > 9 && FT < 14) || (!isWide && FT > 11 && FT < 15)) {
+        LOGE("illegal AMR frame type %d", FT);
+        return 0;
+    }
 
     size_t frameSize = isWide ? kFrameSizeWB[FT] : kFrameSizeNB[FT];
 
@@ -82,9 +97,26 @@ static size_t getFrameSize(bool isWide, unsigned FT) {
     return frameSize;
 }
 
+static status_t getFrameSizeByOffset(const sp<DataSource> &source,
+        off64_t offset, bool isWide, size_t *frameSize) {
+    uint8_t header;
+    if (source->readAt(offset, &header, 1) < 1) {
+        return ERROR_IO;
+    }
+
+    unsigned FT = (header >> 3) & 0x0f;
+
+    *frameSize = getFrameSize(isWide, FT);
+    if (*frameSize == 0) {
+        return ERROR_MALFORMED;
+    }
+    return OK;
+}
+
 AMRExtractor::AMRExtractor(const sp<DataSource> &source)
     : mDataSource(source),
-      mInitCheck(NO_INIT) {
+      mInitCheck(NO_INIT),
+      mOffsetTableLength(0) {
     String8 mimeType;
     float confidence;
     if (!SniffAMR(mDataSource, &mimeType, &confidence, NULL)) {
@@ -101,25 +133,29 @@ AMRExtractor::AMRExtractor(const sp<DataSource> &source)
     mMeta->setInt32(kKeyChannelCount, 1);
     mMeta->setInt32(kKeySampleRate, mIsWide ? 16000 : 8000);
 
-    size_t offset = mIsWide ? 9 : 6;
-    uint8_t header;
-    if (mDataSource->readAt(offset, &header, 1) != 1) {
-        return;
-    }
-
-    unsigned FT = (header >> 3) & 0x0f;
-
-    if (FT > 8 || (!mIsWide && FT > 7)) {
-        return;
-    }
-
-    mFrameSize = getFrameSize(mIsWide, FT);
-
+    off64_t offset = mIsWide ? 9 : 6;
     off64_t streamSize;
-    if (mDataSource->getSize(&streamSize) == OK) {
-        off64_t numFrames = streamSize / mFrameSize;
+    size_t frameSize, numFrames = 0;
+    int64_t duration = 0;
 
-        mMeta->setInt64(kKeyDuration, 20000ll * numFrames);
+    if (mDataSource->getSize(&streamSize) == OK) {
+         while (offset < streamSize) {
+            if (getFrameSizeByOffset(source, offset, mIsWide, &frameSize) != OK) {
+                return;
+            }
+
+            if ((numFrames % 50 == 0) && (numFrames / 50 < OFFSET_TABLE_LEN)) {
+                CHECK_EQ(mOffsetTableLength, numFrames / 50);
+                mOffsetTable[mOffsetTableLength] = offset - (mIsWide ? 9: 6);
+                mOffsetTableLength ++;
+            }
+
+            offset += frameSize;
+            duration += 20000;  // Each frame is 20ms
+            numFrames ++;
+        }
+
+        mMeta->setInt64(kKeyDuration, duration);
     }
 
     mInitCheck = OK;
@@ -149,7 +185,8 @@ sp<MediaSource> AMRExtractor::getTrack(size_t index) {
         return NULL;
     }
 
-    return new AMRSource(mDataSource, mMeta, mFrameSize, mIsWide);
+    return new AMRSource(mDataSource, mMeta, mIsWide,
+            mOffsetTable, mOffsetTableLength);
 }
 
 sp<MetaData> AMRExtractor::getTrackMetaData(size_t index, uint32_t flags) {
@@ -164,15 +201,18 @@ sp<MetaData> AMRExtractor::getTrackMetaData(size_t index, uint32_t flags) {
 
 AMRSource::AMRSource(
         const sp<DataSource> &source, const sp<MetaData> &meta,
-        size_t frameSize, bool isWide)
+        bool isWide, const off64_t *offset_table, size_t offset_table_length)
     : mDataSource(source),
       mMeta(meta),
-      mFrameSize(frameSize),
       mIsWide(isWide),
       mOffset(mIsWide ? 9 : 6),
       mCurrentTimeUs(0),
       mStarted(false),
-      mGroup(NULL) {
+      mGroup(NULL),
+      mOffsetTableLength(offset_table_length) {
+    if (mOffsetTableLength > 0 && mOffsetTableLength <= OFFSET_TABLE_LEN) {
+        memcpy ((char*)mOffsetTable, (char*)offset_table, sizeof(off64_t) * mOffsetTableLength);
+    }
 }
 
 AMRSource::~AMRSource() {
@@ -214,9 +254,25 @@ status_t AMRSource::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     if (options && options->getSeekTo(&seekTimeUs, &mode)) {
+        size_t size;
         int64_t seekFrame = seekTimeUs / 20000ll;  // 20ms per frame.
         mCurrentTimeUs = seekFrame * 20000ll;
-        mOffset = seekFrame * mFrameSize + (mIsWide ? 9 : 6);
+
+        int index = seekFrame / 50;
+        if (index >= mOffsetTableLength) {
+            index = mOffsetTableLength - 1;
+        }
+
+        mOffset = mOffsetTable[index] + (mIsWide ? 9 : 6);
+
+        for (int i = 0; i< seekFrame - index * 50; i++) {
+            status_t err;
+            if ((err = getFrameSizeByOffset(mDataSource, mOffset,
+                            mIsWide, &size)) != OK) {
+                return err;
+            }
+            mOffset += size;
+        }
     }
 
     uint8_t header;
@@ -236,15 +292,10 @@ status_t AMRSource::read(
 
     unsigned FT = (header >> 3) & 0x0f;
 
-    if (FT > 8 || (!mIsWide && FT > 7)) {
-
-        LOGE("illegal AMR frame type %d", FT);
-
+    size_t frameSize = getFrameSize(mIsWide, FT);
+    if (frameSize == 0) {
         return ERROR_MALFORMED;
     }
-
-    size_t frameSize = getFrameSize(mIsWide, FT);
-    CHECK_EQ(frameSize, mFrameSize);
 
     MediaBuffer *buffer;
     status_t err = mGroup->acquire_buffer(&buffer);
