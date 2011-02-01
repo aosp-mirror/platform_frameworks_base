@@ -54,7 +54,7 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
     static Mesh *createFromStream(Context *rsc, IStream *stream);
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     void render(Context *) const;
     void renderPrimitive(Context *, uint32_t primIndex) const;
     void renderPrimitiveRange(Context *, uint32_t primIndex, uint32_t start, uint32_t len) const;

@@ -18,16 +18,16 @@
 #define ANDROID_RS_CONTEXT_H
 
 #include "rsUtils.h"
-#include "rsMutex.h"
-
-#include "rsThreadIO.h"
 #include "rsType.h"
-#include "rsMatrix.h"
 #include "rsAllocation.h"
 #include "rsMesh.h"
+
+#ifndef ANDROID_RS_SERIALIZE
+#include "rsMutex.h"
+#include "rsThreadIO.h"
+#include "rsMatrix.h"
 #include "rsDevice.h"
 #include "rsScriptC.h"
-#include "rsAllocation.h"
 #include "rsAdapter.h"
 #include "rsSampler.h"
 #include "rsFont.h"
@@ -42,6 +42,7 @@
 #include "rsLocklessFifo.h"
 
 #include <ui/egl/android_natives.h>
+#endif // ANDROID_RS_SERIALIZE
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -65,6 +66,8 @@ namespace renderscript {
 #define CHECK_OBJ(o)
 #define CHECK_OBJ_OR_NULL(o)
 #endif
+
+#ifndef ANDROID_RS_SERIALIZE
 
 class Context {
 public:
@@ -321,6 +324,39 @@ private:
     uint32_t mAverageFPS;
 };
 
-}
-}
+#else
+
+class Context {
+public:
+    Context() {
+        mObjHead = NULL;
+    }
+    ~Context() {
+        ObjectBase::zeroAllUserRef(this);
+    }
+
+    ElementState mStateElement;
+    TypeState mStateType;
+
+    struct {
+        bool mLogTimes;
+        bool mLogScripts;
+        bool mLogObjects;
+        bool mLogShaders;
+        bool mLogShadersAttr;
+        bool mLogShadersUniforms;
+        bool mLogVisual;
+    } props;
+
+    void setError(RsError e, const char *msg = NULL) {  }
+
+    mutable const ObjectBase * mObjHead;
+
+protected:
+
+};
+#endif //ANDROID_RS_SERIALIZE
+
+} // renderscript
+} // android
 #endif

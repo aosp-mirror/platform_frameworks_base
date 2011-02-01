@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
 #include "rsContext.h"
-
+#ifndef ANDROID_RS_SERIALIZE
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES/glext.h>
-#else
-#include "rsContextHostStub.h"
 #endif
 
 using namespace android;
@@ -33,7 +30,7 @@ Mesh::Mesh(Context *rsc) : ObjectBase(rsc) {
     mVertexBuffers = NULL;
     mVertexBufferCount = 0;
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     mAttribs = NULL;
     mAttribAllocationIndex = NULL;
 
@@ -53,7 +50,7 @@ Mesh::~Mesh() {
         delete[] mPrimitives;
     }
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     if (mAttribs) {
         delete[] mAttribs;
         delete[] mAttribAllocationIndex;
@@ -134,7 +131,7 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream) {
         }
     }
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
     mesh->updateGLPrimitives();
     mesh->initVertexAttribs();
     mesh->uploadAll(rsc);
@@ -142,7 +139,7 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream) {
     return mesh;
 }
 
-#ifndef ANDROID_RS_BUILD_FOR_HOST
+#ifndef ANDROID_RS_SERIALIZE
 
 bool Mesh::isValidGLComponent(const Element *elem, uint32_t fieldIdx) {
     // Do not create attribs for padding

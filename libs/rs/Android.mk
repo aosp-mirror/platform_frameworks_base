@@ -132,7 +132,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 # Now build a host version for serialization
 include $(CLEAR_VARS)
-LOCAL_CFLAGS += -DANDROID_RS_BUILD_FOR_HOST
+LOCAL_CFLAGS += -DANDROID_RS_SERIALIZE
 
 LOCAL_SRC_FILES:= \
 	rsAllocation.cpp \
