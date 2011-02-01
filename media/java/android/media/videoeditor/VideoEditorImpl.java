@@ -109,6 +109,8 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String ATTR_OVERLAY_RGB_FILENAME = "overlay_rgb_filename";
     private static final String ATTR_OVERLAY_FRAME_WIDTH = "overlay_frame_width";
     private static final String ATTR_OVERLAY_FRAME_HEIGHT = "overlay_frame_height";
+    private static final String ATTR_OVERLAY_RESIZED_RGB_FRAME_WIDTH = "resized_RGBframe_width";
+    private static final String ATTR_OVERLAY_RESIZED_RGB_FRAME_HEIGHT = "resized_RGBframe_height";
 
     /*
      *  Instance variables
@@ -867,7 +869,6 @@ public class VideoEditorImpl implements VideoEditor {
                 mMANativeHelper.unlock();
             }
         }
-Log.i("VE_IMPL","renderPreviewFrame <--");
         return result;
     }
 
@@ -1154,6 +1155,15 @@ Log.i("VE_IMPL","renderPreviewFrame <--");
 
             ((OverlayFrame)overlay).setOverlayFrameWidth(overlayFrameWidth);
             ((OverlayFrame)overlay).setOverlayFrameHeight(overlayFrameHeight);
+
+            final int resizedRGBFrameWidth =
+                                   Integer.parseInt(parser.getAttributeValue("",
+                                   ATTR_OVERLAY_RESIZED_RGB_FRAME_WIDTH));
+            final int resizedRGBFrameHeight =
+                                   Integer.parseInt(parser.getAttributeValue("",
+                                   ATTR_OVERLAY_RESIZED_RGB_FRAME_HEIGHT));
+
+            ((OverlayFrame)overlay).setResizedRGBSize(resizedRGBFrameWidth, resizedRGBFrameHeight);
         }
 
         return overlay;
@@ -1340,6 +1350,11 @@ Log.i("VE_IMPL","renderPreviewFrame <--");
                                                  Integer.toString(overlayFrame.getOverlayFrameWidth()));
                             serializer.attribute("", ATTR_OVERLAY_FRAME_HEIGHT,
                                                  Integer.toString(overlayFrame.getOverlayFrameHeight()));
+                            serializer.attribute("", ATTR_OVERLAY_RESIZED_RGB_FRAME_WIDTH,
+                                                 Integer.toString(overlayFrame.getResizedRGBSizeWidth()));
+                            serializer.attribute("", ATTR_OVERLAY_RESIZED_RGB_FRAME_HEIGHT,
+                                                 Integer.toString(overlayFrame.getResizedRGBSizeHeight()));
+
                         }
 
                     }
@@ -1523,6 +1538,17 @@ Log.i("VE_IMPL","renderPreviewFrame <--");
 
         for (Transition transition : mTransitions) {
             transition.invalidate();
+        }
+
+        final Iterator<MediaItem> it = mMediaItems.iterator();
+
+        while (it.hasNext()) {
+            final MediaItem t = it.next();
+            List<Overlay> overlayList = t.getAllOverlays();
+            for (Overlay overlay : overlayList) {
+
+                ((OverlayFrame)overlay).invalidateGeneratedFiles();
+            }
         }
     }
 
