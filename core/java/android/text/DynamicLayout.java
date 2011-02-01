@@ -92,7 +92,7 @@ extends Layout
         } else {
             mInts = new PackedIntVector(COLUMNS_NORMAL);
             mEllipsizedWidth = width;
-            mEllipsizeAt = ellipsize;
+            mEllipsizeAt = null;
         }
 
         mObjects = new PackedObjectVector<Directions>(1);
@@ -259,10 +259,9 @@ extends Layout
             reflowed = new StaticLayout(true);
 
         reflowed.generate(text, where, where + after,
-                                      getPaint(), getWidth(), getAlignment(),
-                                      getSpacingMultiplier(), getSpacingAdd(),
-                                      false, true, mEllipsize,
-                                      mEllipsizedWidth, mEllipsizeAt);
+                getPaint(), getWidth(), getAlignment(),
+                getSpacingMultiplier(), getSpacingAdd(),
+                false, true, mEllipsizedWidth, mEllipsizeAt);
         int n = reflowed.getLineCount();
 
         // If the new layout has a blank line at the end, but it is not
@@ -391,9 +390,7 @@ extends Layout
         return mEllipsizedWidth;
     }
 
-    private static class ChangeWatcher
-    implements TextWatcher, SpanWatcher
-    {
+    private static class ChangeWatcher implements TextWatcher, SpanWatcher {
         public ChangeWatcher(DynamicLayout layout) {
             mLayout = new WeakReference<DynamicLayout>(layout);
         }
@@ -407,12 +404,10 @@ extends Layout
                 ((Spannable) s).removeSpan(this);
         }
 
-        public void beforeTextChanged(CharSequence s,
-                                      int where, int before, int after) {
+        public void beforeTextChanged(CharSequence s, int where, int before, int after) {
         }
 
-        public void onTextChanged(CharSequence s,
-                                  int where, int before, int after) {
+        public void onTextChanged(CharSequence s, int where, int before, int after) {
             reflow(s, where, before, after);
         }
 
@@ -429,8 +424,7 @@ extends Layout
                 reflow(s, start, end - start, end - start);
         }
 
-        public void onSpanChanged(Spannable s, Object o, int start, int end,
-                                  int nstart, int nend) {
+        public void onSpanChanged(Spannable s, Object o, int start, int end, int nstart, int nend) {
             if (o instanceof UpdateLayout) {
                 reflow(s, start, end - start, end - start);
                 reflow(s, nstart, nend - nstart, nend - nstart);
