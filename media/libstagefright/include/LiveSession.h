@@ -87,6 +87,7 @@ private:
     Condition mCondition;
     int64_t mDurationUs;
     bool mSeekDone;
+    bool mDisconnectPending;
 
     int32_t mMonitorQueueGeneration;
 
