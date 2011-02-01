@@ -16,6 +16,8 @@
 
 package com.android.internal.telephony.cdma;
 
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
+
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
@@ -794,6 +796,18 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                 String opNames[] = (String[])ar.result;
 
                 if (opNames != null && opNames.length >= 3) {
+                    // If the NUMERIC field isn't valid use PROPERTY_CDMA_HOME_OPERATOR_NUMERIC
+                    if ((opNames[2] == null) || (opNames[2].length() < 5)
+                            || ("00000".equals(opNames[2]))) {
+                        opNames[2] = SystemProperties.get(
+                                CDMAPhone.PROPERTY_CDMA_HOME_OPERATOR_NUMERIC, "00000");
+                        if (DBG) {
+                            log("RIL_REQUEST_OPERATOR.response[2], the numeric, " +
+                                    " is bad. Using SystemProperties '" +
+                                            CDMAPhone.PROPERTY_CDMA_HOME_OPERATOR_NUMERIC +
+                                    "'= " + opNames[2]);
+                        }
+                    }
                     if (cm.getRadioState().isNVReady()) {
                         // In CDMA in case on NV, the ss.mOperatorAlphaLong is set later with the
                         // ERI text, so here it is ignored what is coming from the modem.
