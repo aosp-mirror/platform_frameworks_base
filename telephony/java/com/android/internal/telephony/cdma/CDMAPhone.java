@@ -136,6 +136,7 @@ public class CDMAPhone extends PhoneBase {
 
     Registrant mPostDialHandler;
 
+    static String PROPERTY_CDMA_HOME_OPERATOR_NUMERIC = "ro.cdma.home.operator.numeric";
 
     // Constructors
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
@@ -195,7 +196,7 @@ public class CDMAPhone extends PhoneBase {
         setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, operatorAlpha);
 
         // Sets operator numeric property by retrieving from build-time system property
-        String operatorNumeric = SystemProperties.get("ro.cdma.home.operator.numeric");
+        String operatorNumeric = SystemProperties.get(PROPERTY_CDMA_HOME_OPERATOR_NUMERIC);
         setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, operatorNumeric);
 
         // Sets iso country property by retrieving from build-time system property
