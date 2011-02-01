@@ -51,6 +51,7 @@ LiveSession::LiveSession()
       mNumRetries(0),
       mDurationUs(-1),
       mSeekDone(false),
+      mDisconnectPending(false),
       mMonitorQueueGeneration(0) {
 }
 
@@ -68,6 +69,11 @@ void LiveSession::connect(const char *url) {
 }
 
 void LiveSession::disconnect() {
+    Mutex::Autolock autoLock(mLock);
+    mDisconnectPending = true;
+
+    mHTTPDataSource->disconnect();
+
     (new AMessage(kWhatDisconnect, id()))->post();
 }
 
@@ -138,7 +144,13 @@ void LiveSession::onConnect(const sp<AMessage> &msg) {
     mMasterURL = url;
 
     sp<M3UParser> playlist = fetchPlaylist(url.c_str());
-    CHECK(playlist != NULL);
+
+    if (playlist == NULL) {
+        LOGE("unable to fetch master playlist '%s'.", url.c_str());
+
+        mDataSource->queueEOS(ERROR_IO);
+        return;
+    }
 
     if (playlist->isVariantPlaylist()) {
         for (size_t i = 0; i < playlist->size(); ++i) {
@@ -177,6 +189,9 @@ void LiveSession::onDisconnect() {
     LOGI("onDisconnect");
 
     mDataSource->queueEOS(ERROR_END_OF_STREAM);
+
+    Mutex::Autolock autoLock(mLock);
+    mDisconnectPending = false;
 }
 
 status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
@@ -189,6 +204,14 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
     } else if (strncasecmp(url, "http://", 7)) {
         return ERROR_UNSUPPORTED;
     } else {
+        {
+            Mutex::Autolock autoLock(mLock);
+
+            if (mDisconnectPending) {
+                return ERROR_IO;
+            }
+        }
+
         status_t err = mHTTPDataSource->connect(url);
 
         if (err != OK) {
