@@ -229,36 +229,34 @@ public class DatePicker extends FrameLayout {
         } else {
             setSpinnersShown(spinnersShown);
             setCalendarViewShown(calendarViewShown);
+        }
 
-            // set the min date giving priority of the minDate over startYear
-            mTempDate.clear();
-            if (!TextUtils.isEmpty(minDate)) {
-                if (!parseDate(minDate, mTempDate)) {
-                    mTempDate.set(startYear, 0, 1);
-                }
-            } else {
+        // set the min date giving priority of the minDate over startYear
+        mTempDate.clear();
+        if (!TextUtils.isEmpty(minDate)) {
+            if (!parseDate(minDate, mTempDate)) {
                 mTempDate.set(startYear, 0, 1);
             }
-            mMinDate.clear();
-            setMinDate(mTempDate.getTimeInMillis());
+        } else {
+            mTempDate.set(startYear, 0, 1);
+        }
+        setMinDate(mTempDate.getTimeInMillis());
 
-            // set the max date giving priority of the minDate over startYear
-            mTempDate.clear();
-            if (!TextUtils.isEmpty(maxDate)) {
-                if (!parseDate(maxDate, mTempDate)) {
-                    mTempDate.set(endYear, 11, 31);
-                }
-            } else {
+        // set the max date giving priority of the maxDate over endYear
+        mTempDate.clear();
+        if (!TextUtils.isEmpty(maxDate)) {
+            if (!parseDate(maxDate, mTempDate)) {
                 mTempDate.set(endYear, 11, 31);
             }
-            mMaxDate.clear();
-            setMaxDate(mTempDate.getTimeInMillis());
-
-            // initialize to current date
-            mCurrentDate.setTimeInMillis(System.currentTimeMillis());
-            init(mCurrentDate.get(Calendar.YEAR), mCurrentDate.get(Calendar.MONTH), mCurrentDate
-                    .get(Calendar.DAY_OF_MONTH), null);
+        } else {
+            mTempDate.set(endYear, 11, 31);
         }
+        setMaxDate(mTempDate.getTimeInMillis());
+
+        // initialize to current date
+        mCurrentDate.setTimeInMillis(System.currentTimeMillis());
+        init(mCurrentDate.get(Calendar.YEAR), mCurrentDate.get(Calendar.MONTH), mCurrentDate
+                .get(Calendar.DAY_OF_MONTH), null);
 
         // re-order the number spinners to match the current date format
         reorderSpinners();
