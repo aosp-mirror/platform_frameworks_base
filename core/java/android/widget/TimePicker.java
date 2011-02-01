@@ -132,12 +132,8 @@ public class TimePicker extends FrameLayout {
         mHourSpinner.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             public void onValueChange(NumberPicker spinner, int oldVal, int newVal) {
                 if (!is24HourView()) {
-                    int minValue = mHourSpinner.getMinValue();
-                    int maxValue = mHourSpinner.getMaxValue();
-                    // toggle AM/PM if the spinner has wrapped and not in 24
-                    // format
-                    if ((oldVal == maxValue && newVal == minValue)
-                            || (oldVal == minValue && newVal == maxValue)) {
+                    if ((oldVal == HOURS_IN_HALF_DAY - 1 && newVal == HOURS_IN_HALF_DAY)
+                            || (oldVal == HOURS_IN_HALF_DAY && newVal == HOURS_IN_HALF_DAY - 1)) {
                         mIsAm = !mIsAm;
                         updateAmPmControl();
                     }
@@ -163,21 +159,19 @@ public class TimePicker extends FrameLayout {
                 int minValue = mMinuteSpinner.getMinValue();
                 int maxValue = mMinuteSpinner.getMaxValue();
                 if (oldVal == maxValue && newVal == minValue) {
-                    int currentHour = mHourSpinner.getValue();
-                    // toggle AM/PM if the spinner is about to wrap
-                    if (!is24HourView() && currentHour == mHourSpinner.getMaxValue()) {
+                    int newHour = mHourSpinner.getValue() + 1;
+                    if (!is24HourView() && newHour == HOURS_IN_HALF_DAY) {
                         mIsAm = !mIsAm;
                         updateAmPmControl();
                     }
-                    mHourSpinner.setValue(currentHour + 1);
+                    mHourSpinner.setValue(newHour);
                 } else if (oldVal == minValue && newVal == maxValue) {
-                    int currentHour = mHourSpinner.getValue();
-                    // toggle AM/PM if the spinner is about to wrap
-                    if (!is24HourView() && currentHour == mHourSpinner.getMinValue()) {
+                    int newHour = mHourSpinner.getValue() - 1;
+                    if (!is24HourView() && newHour == HOURS_IN_HALF_DAY - 1) {
                         mIsAm = !mIsAm;
                         updateAmPmControl();
                     }
-                    mHourSpinner.setValue(currentHour - 1);
+                    mHourSpinner.setValue(newHour);
                 }
                 onTimeChanged();
             }
@@ -330,10 +324,12 @@ public class TimePicker extends FrameLayout {
      */
     public Integer getCurrentHour() {
         int currentHour = mHourSpinner.getValue();
-        if (is24HourView() || mIsAm) {
+        if (is24HourView()) {
             return currentHour;
+        } else if (mIsAm) {
+            return currentHour % HOURS_IN_HALF_DAY;
         } else {
-            return (currentHour == HOURS_IN_HALF_DAY) ? 0 : currentHour + HOURS_IN_HALF_DAY;
+            return (currentHour % HOURS_IN_HALF_DAY) + HOURS_IN_HALF_DAY;
         }
     }
 
@@ -347,14 +343,16 @@ public class TimePicker extends FrameLayout {
         }
         if (!is24HourView()) {
             // convert [0,23] ordinal to wall clock display
-            if (currentHour > HOURS_IN_HALF_DAY) {
-                currentHour -= HOURS_IN_HALF_DAY;
+            if (currentHour >= HOURS_IN_HALF_DAY) {
                 mIsAm = false;
+                if (currentHour > HOURS_IN_HALF_DAY) {
+                    currentHour = currentHour - HOURS_IN_HALF_DAY;
+                }
             } else {
+                mIsAm = true;
                 if (currentHour == 0) {
                     currentHour = HOURS_IN_HALF_DAY;
                 }
-                mIsAm = true;
             }
             updateAmPmControl();
         }
