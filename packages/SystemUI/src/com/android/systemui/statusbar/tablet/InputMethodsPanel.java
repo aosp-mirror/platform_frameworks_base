@@ -34,7 +34,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -48,8 +47,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, View.OnClickListener,
-        CompoundButton.OnCheckedChangeListener {
+public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
+        View.OnClickListener {
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final String TAG = "InputMethodsPanel";
 
@@ -86,6 +85,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, V
     private View mConfigureImeShortcut;
 
     private class InputMethodComparator implements Comparator<InputMethodInfo> {
+        @Override
         public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
             if (imi2 == null) return 0;
             if (imi1 == null) return 1;
@@ -142,7 +142,6 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, V
         mInputMethodMenuList = (LinearLayout) findViewById(R.id.input_method_menu_list);
         mHardKeyboardSection = (LinearLayout) findViewById(R.id.hard_keyboard_section);
         mHardKeyboardSwitch = (Switch) findViewById(R.id.hard_keyboard_switch);
-        mHardKeyboardSwitch.setOnCheckedChangeListener(this);
         mConfigureImeShortcut = findViewById(R.id.ime_settings_shortcut);
         mConfigureImeShortcut.setOnClickListener(this);
         // TODO: If configurations for IME are not changed, do not update
@@ -156,33 +155,16 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, V
     }
 
     @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (changedView == this) {
-            if (visibility == View.VISIBLE) {
-                updateUiElements();
-                if (mInputMethodSwitchButton != null) {
-                    mInputMethodSwitchButton.setIconImage(R.drawable.ic_sysbar_ime_pressed);
-                }
-            } else {
-                if (mInputMethodSwitchButton != null) {
-                    mInputMethodSwitchButton.setIconImage(R.drawable.ic_sysbar_ime);
-                }
-            }
-        }
-    }
-
-    @Override
     public void onClick(View view) {
         if (view == mConfigureImeShortcut) {
             showConfigureInputMethods();
-            onFinishPanel(true);
+            closePanel(true);
         }
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton button, boolean checked) {
-        if (button == mHardKeyboardSwitch) {
+    private void updateHardKeyboardEnabled() {
+        if (mHardKeyboardAvailable) {
+            final boolean checked = mHardKeyboardSwitch.isChecked();
             if (mHardKeyboardEnabled != checked) {
                 mHardKeyboardEnabled = checked;
                 if (mHardKeyboardEnabledChangeListener != null)
@@ -191,11 +173,23 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, V
         }
     }
 
-    private void onFinishPanel(boolean closeKeyboard) {
+    public void openPanel() {
+        setVisibility(View.VISIBLE);
+        updateUiElements();
+        if (mInputMethodSwitchButton != null) {
+            mInputMethodSwitchButton.setIconImage(R.drawable.ic_sysbar_ime_pressed);
+        }
+    }
+
+    public void closePanel(boolean closeKeyboard) {
         setVisibility(View.GONE);
+        if (mInputMethodSwitchButton != null) {
+            mInputMethodSwitchButton.setIconImage(R.drawable.ic_sysbar_ime);
+        }
         if (closeKeyboard) {
             mImm.hideSoftInputFromWindow(getWindowToken(), 0);
         }
+        updateHardKeyboardEnabled();
     }
 
     private void startActivity(Intent intent) {
@@ -241,7 +235,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, V
                             | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                             | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
-                    onFinishPanel(true);
+                    closePanel(true);
                 }
             });
         } else {
@@ -256,7 +250,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel, V
             public void onClick(View v) {
                 Pair<InputMethodInfo, InputMethodSubtype> imiAndSubtype =
                         updateRadioButtonsByView(v);
-                onFinishPanel(false);
+                closePanel(false);
                 setInputMethodAndSubtype(imiAndSubtype.first, imiAndSubtype.second);
             }
         });
