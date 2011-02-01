@@ -1764,4 +1764,15 @@ public abstract class Layout {
         new Directions(new int[] { 0, RUN_LENGTH_MASK });
     /* package */ static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
+
+    /**
+     * Inform this layout that not all of its lines will be displayed, because a maximum number of
+     * lines has been set on the associated TextView.
+     *
+     * A non positive value means that all lines are displayed.
+     *
+     * @param line line number of the last visible line (line numbers start at 1 for the first line)
+     * @hide
+     */
+    public void setMaximumVisibleLineCount(int line) {}
 }
