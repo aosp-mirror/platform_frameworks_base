@@ -83,6 +83,9 @@ class UsbService extends IUsbManager.Stub {
 
     private final HashMap<String,UsbDevice> mDevices = new HashMap<String,UsbDevice>();
 
+    // USB busses to exclude from USB host support
+    private final String[] mHostBlacklist;
+
     private boolean mSystemReady;
 
     private final Context mContext;
@@ -143,6 +146,9 @@ class UsbService extends IUsbManager.Stub {
 
     public UsbService(Context context) {
         mContext = context;
+        mHostBlacklist = context.getResources().getStringArray(
+                com.android.internal.R.array.config_usbHostBlacklist);
+
         init();  // set initial status
 
         if (mConfiguration >= 0) {
@@ -197,6 +203,16 @@ class UsbService extends IUsbManager.Stub {
         }
     }
 
+    private boolean isBlackListed(String deviceName) {
+        int count = mHostBlacklist.length;
+        for (int i = 0; i < count; i++) {
+            if (deviceName.startsWith(mHostBlacklist[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // called from JNI in monitorUsbHostBus()
     private void usbDeviceAdded(String deviceName, int vendorID, int productID,
             int deviceClass, int deviceSubclass, int deviceProtocol,
@@ -209,6 +225,10 @@ class UsbService extends IUsbManager.Stub {
 
         // ignore hubs
         if (deviceClass == UsbConstants.USB_CLASS_HUB) {
+            return;
+        }
+
+        if (isBlackListed(deviceName)) {
             return;
         }
 
@@ -328,6 +348,9 @@ class UsbService extends IUsbManager.Stub {
     }
 
     public ParcelFileDescriptor openDevice(String deviceName) {
+        if (isBlackListed(deviceName)) {
+            throw new SecurityException("USB device is on a restricted bus");
+        }
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
         return nativeOpenDevice(deviceName);
     }

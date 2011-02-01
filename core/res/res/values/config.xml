@@ -284,6 +284,14 @@
     <!-- Indicate whether the device has USB host support. -->
     <bool name="config_hasUsbHostSupport">false</bool>
 
+    <!-- List of file paths for USB host busses to exclude from USB host support.
+         For example, if the first USB bus on the device is used to communicate
+         with the modem or some other restricted hardware, add "/dev/bus/usb/001/"
+         to this list.  If this is empty, no parts of the host USB bus will be excluded.
+    -->
+    <string-array name="config_usbHostBlacklist">
+    </string-array>
+
     <!-- Vibrator pattern for feedback about a long screen/key press -->
     <integer-array name="config_longPressVibePattern">
         <item>0</item>
