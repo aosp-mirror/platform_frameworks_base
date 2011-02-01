@@ -57,21 +57,6 @@ public class EffectKenBurns extends Effect {
         mEndRect = endRect;
     }
 
-    /**
-     * Set the start rectangle.
-     *
-     * @param startRect The start rectangle
-     *
-     * @throws IllegalArgumentException if start rectangle is incorrectly set.
-     */
-    public void setStartRect(Rect startRect) {
-        if ( (startRect.left == 0) && (startRect.right == 0)
-            && (startRect.bottom == 0) && (startRect.top == 0) ) {
-            throw new IllegalArgumentException("Invalid Rectangle");
-        }
-
-        mStartRect = startRect;
-    }
 
     /**
      * Get the start rectangle.
@@ -82,21 +67,6 @@ public class EffectKenBurns extends Effect {
         return mStartRect;
     }
 
-    /**
-     * Set the end rectangle.
-     *
-     * @param endRect The end rectangle
-     *
-     * @throws IllegalArgumentException if end rectangle is incorrectly set.
-     */
-    public void setEndRect(Rect endRect) {
-        if ( (endRect.left == 0) && (endRect.right == 0)
-           && (endRect.bottom == 0) && (endRect.top == 0) ) {
-            throw new IllegalArgumentException("Invalid Rectangle");
-        }
-
-        mEndRect = endRect;
-    }
 
     /**
      * Get the end rectangle.

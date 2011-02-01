@@ -295,6 +295,8 @@ public abstract class MediaItem {
             "Effect start time + effect duration > media clip duration");
         }
 
+        mMANativeHelper.setGeneratePreview(true);
+
         mEffects.add(effect);
 
         invalidateTransitions(effect.getStartTime(), effect.getDuration());
@@ -302,7 +304,6 @@ public abstract class MediaItem {
         if (effect instanceof EffectKenBurns) {
             mRegenerateClip = true;
         }
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
@@ -424,8 +425,6 @@ public abstract class MediaItem {
                 throw new IllegalArgumentException("Overlay bitmap not specified");
             }
 
-            ((OverlayFrame)overlay).save(mProjectPath);
-
             final int scaledWidth, scaledHeight;
             if (this instanceof MediaVideoItem) {
                 scaledWidth = getWidth();
@@ -443,13 +442,16 @@ public abstract class MediaItem {
                 throw new IllegalArgumentException(
                 "Bitmap dimensions must match media item dimensions");
             }
+
+            mMANativeHelper.setGeneratePreview(true);
+            ((OverlayFrame)overlay).save(mProjectPath);
+
+            mOverlays.add(overlay);
+            invalidateTransitions(overlay.getStartTime(), overlay.getDuration());
+
         } else {
             throw new IllegalArgumentException("Overlay not supported");
         }
-
-        mOverlays.add(overlay);
-        invalidateTransitions(overlay.getStartTime(), overlay.getDuration());
-        mMANativeHelper.setGeneratePreview(true);
     }
 
     /**
