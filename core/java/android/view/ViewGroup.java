@@ -2444,17 +2444,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 layerType != LAYER_TYPE_NONE) {
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
-                        if (layerType != LAYER_TYPE_NONE) {
-                            child.mLayerPaint.setAlpha(multipliedAlpha);
-                        } else {
+                        if (layerType == LAYER_TYPE_NONE) {
                             canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct,
                                     multipliedAlpha, layerFlags);
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
-                        if (layerType != LAYER_TYPE_NONE) {
-                            child.mLayerPaint.setAlpha(255);
-                        }
                         child.mPrivateFlags |= ALPHA_SET;
                     }
                 }
@@ -2485,6 +2480,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (layerType == LAYER_TYPE_HARDWARE) {
                 final HardwareLayer layer = child.getHardwareLayer();
                 if (layer != null && layer.isValid()) {
+                    child.mLayerPaint.setAlpha((int) (alpha * 255));                    
                     ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, child.mLayerPaint);
                     layerRendered = true;
                 } else {
