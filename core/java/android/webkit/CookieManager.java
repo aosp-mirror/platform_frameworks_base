@@ -294,6 +294,8 @@ public final class CookieManager {
      */
     public void setCookie(String url, String value) {
         if (JniUtil.useChromiumHttpStack()) {
+            if (url.indexOf("://") == -1)
+                url = "http://" + url;
             nativeSetCookie(url, value);
             return;
         }
@@ -425,6 +427,8 @@ public final class CookieManager {
      */
     public String getCookie(String url) {
         if (JniUtil.useChromiumHttpStack()) {
+            if (url.indexOf("://") == -1)
+                url = "http://" + url;
             return nativeGetCookie(url);
         }
 
