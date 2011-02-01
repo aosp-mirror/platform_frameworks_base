@@ -84,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textSize="40sp"
-                android:textColor="#8cffffff" />
+                android:textColor="#8cccdaff" />
         </com.android.systemui.statusbar.tablet.HoloClock>
 
         <TextView
