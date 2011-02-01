@@ -286,6 +286,9 @@ public class TelephonyManager {
      */
     public int getPhoneType() {
         try{
+            if (!isVoiceCapable()) {
+                return PHONE_TYPE_NONE;
+            }
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getActivePhoneType();
