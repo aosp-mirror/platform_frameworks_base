@@ -65,8 +65,25 @@ public final class NdefFormatable extends BasicTagTechnology {
     /**
      * Formats a tag as NDEF, if possible. You may supply a first
      * NdefMessage to be written on the tag.
+     * <p>Either all steps succeed, or an IOException is thrown if any one step
+     * fails.
      */
     public void format(NdefMessage firstMessage) throws IOException, FormatException {
+        format(firstMessage, false);
+    }
+
+    /**
+     * Formats a tag as NDEF, if possible. You may supply a first
+     * NdefMessage to be written on the tag.
+     * <p>Either all steps succeed, or an IOException is thrown if any one step
+     * fails.
+     */
+    public void formatReadOnly(NdefMessage firstMessage) throws IOException, FormatException {
+        format(firstMessage, true);
+    }
+
+    /*package*/ void format(NdefMessage firstMessage, boolean makeReadOnly) throws IOException,
+            FormatException {
         checkConnected();
 
         try {
@@ -100,6 +117,21 @@ public final class NdefFormatable extends BasicTagTechnology {
                 }
             } else {
                 throw new IOException();
+            }
+            // optionally make read-only
+            if (makeReadOnly) {
+                errorCode = tagService.ndefMakeReadOnly(serviceHandle);
+                switch (errorCode) {
+                    case ErrorCodes.SUCCESS:
+                        break;
+                    case ErrorCodes.ERROR_IO:
+                        throw new IOException();
+                    case ErrorCodes.ERROR_INVALID_PARAM:
+                        throw new IOException();
+                    default:
+                        // Should not happen
+                        throw new IOException();
+                }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
