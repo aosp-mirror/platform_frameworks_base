@@ -731,7 +731,7 @@
     <string name="capital_off" msgid="6815870386972805832">"AV"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Slutför åtgärd genom att använda"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Använd som standard för denna åtgärd."</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Rensa standardinställning i Startinställningar &gt; Program &gt; Hantera program."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Rensa standardinställning i Startinställningar &gt; Appar &gt; Hantera appar."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Välj en åtgärd"</string>
     <string name="noApplications" msgid="1691104391758345586">"Inga program kan utföra den här åtgärden."</string>
     <string name="aerr_title" msgid="653922989522758100">"Tyvärr!"</string>
