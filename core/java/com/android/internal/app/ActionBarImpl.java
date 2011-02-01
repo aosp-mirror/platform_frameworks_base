@@ -480,11 +480,11 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void show() {
-        if (mContainerView.getVisibility() == View.VISIBLE) {
-            return;
-        }
         if (mCurrentAnim != null) {
             mCurrentAnim.end();
+        }
+        if (mContainerView.getVisibility() == View.VISIBLE) {
+            return;
         }
         mContainerView.setVisibility(View.VISIBLE);
         mContainerView.setAlpha(0);
