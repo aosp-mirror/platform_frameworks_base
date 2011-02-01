@@ -5787,11 +5787,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         config.screenLayout = mScreenLayout;
 
-        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
-        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
-        mPolicy.adjustConfigurationLw(config);
-
-        // Adjust the hard keyboard configuration based on whether the hard keyboard is enabled.
+        // Determine whether a hard keyboard is available and enabled.
         boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
         if (hardKeyboardAvailable != mHardKeyboardAvailable) {
             mHardKeyboardAvailable = hardKeyboardAvailable;
@@ -5802,8 +5798,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (!mHardKeyboardEnabled) {
             config.keyboard = Configuration.KEYBOARD_NOKEYS;
-            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
         }
+
+        // Update value of keyboardHidden, hardKeyboardHidden and navigationHidden
+        // based on whether a hard or soft keyboard is present, whether navigation keys
+        // are present and the lid switch state.
+        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+        config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
+        mPolicy.adjustConfigurationLw(config);
         return true;
     }
 
