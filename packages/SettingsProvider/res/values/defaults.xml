@@ -116,4 +116,9 @@
 
     <!-- Default for Settings.System.USER_ROTATION -->
     <integer name="def_user_rotation">0</integer>
+
+    <!-- Default for Settings.Secure.DOWNLOAD_MAX_BYTES_OVER_MOBILE. <=0 if no limit -->
+    <integer name="def_download_manager_max_bytes_over_mobile">-1</integer>
+    <!-- Default for Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE. <=0 if no limit -->
+    <integer name="def_download_manager_recommended_max_bytes_over_mobile">-1</integer>
 </resources>
