@@ -19,12 +19,9 @@ package com.android.systemui.statusbar.tablet;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.IdentityHashMap;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.animation.AnimatorSet;
 import android.app.ActivityManagerNative;
 import android.app.PendingIntent;
 import android.app.Notification;
@@ -36,7 +33,6 @@ import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.IBinder;
@@ -45,8 +41,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -58,12 +52,10 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.ScrollView;
-import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -271,7 +263,6 @@ public class TabletStatusBar extends StatusBar implements
         mInputMethodsPanel = (InputMethodsPanel) View.inflate(context,
                 R.layout.status_bar_input_methods_panel, null);
         mInputMethodsPanel.setHardKeyboardEnabledChangeListener(this);
-        mInputMethodsPanel.setVisibility(View.GONE);
         mInputMethodsPanel.setOnTouchListener(new TouchOutsideListener(
                 MSG_CLOSE_INPUT_METHODS_PANEL, mInputMethodsPanel));
         mInputMethodsPanel.setImeSwitchButton(mInputMethodSwitchButton);
@@ -565,11 +556,11 @@ public class TabletStatusBar extends StatusBar implements
                     break;
                 case MSG_OPEN_INPUT_METHODS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening input methods panel");
-                    if (mInputMethodsPanel != null) mInputMethodsPanel.setVisibility(View.VISIBLE);
+                    if (mInputMethodsPanel != null) mInputMethodsPanel.openPanel();
                     break;
                 case MSG_CLOSE_INPUT_METHODS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing input methods panel");
-                    if (mInputMethodsPanel != null) mInputMethodsPanel.setVisibility(View.GONE);
+                    if (mInputMethodsPanel != null) mInputMethodsPanel.closePanel(false);
                     break;
                 case MSG_SHOW_CHROME:
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");

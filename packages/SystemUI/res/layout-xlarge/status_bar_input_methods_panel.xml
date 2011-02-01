@@ -22,7 +22,8 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:paddingBottom="28dip"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="gone">
     <View
         android:layout_width="match_parent"
         android:layout_height="0dip"
