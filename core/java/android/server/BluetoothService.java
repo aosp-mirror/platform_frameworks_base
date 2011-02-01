@@ -115,8 +115,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final int MESSAGE_FINISH_DISABLE = 1;
     private static final int MESSAGE_UUID_INTENT = 2;
-    private static final int MESSAGE_DISCOVERABLE_TIMEOUT = 3;
-    private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 4;
+    private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 3;
 
     // The time (in millisecs) to delay the pairing attempt after the first
     // auto pairing attempt fails. We use an exponential delay with
@@ -533,15 +532,6 @@ public class BluetoothService extends IBluetooth.Stub {
                 if (address != null) {
                     sendUuidIntent(address);
                     makeServiceChannelCallbacks(address);
-                }
-                break;
-            case MESSAGE_DISCOVERABLE_TIMEOUT:
-                int mode = msg.arg1;
-                if (isEnabledInternal()) {
-                    // TODO: Switch back to the previous scan mode
-                    // This is ok for now, because we only use
-                    // CONNECTABLE and CONNECTABLE_DISCOVERABLE
-                    setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE, -1);
                 }
                 break;
             case MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY:
@@ -1163,21 +1153,16 @@ public class BluetoothService extends IBluetooth.Stub {
 
         switch (mode) {
         case BluetoothAdapter.SCAN_MODE_NONE:
-            mHandler.removeMessages(MESSAGE_DISCOVERABLE_TIMEOUT);
             pairable = false;
             discoverable = false;
             break;
         case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
-            mHandler.removeMessages(MESSAGE_DISCOVERABLE_TIMEOUT);
             pairable = true;
             discoverable = false;
             break;
         case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
-            mHandler.removeMessages(MESSAGE_DISCOVERABLE_TIMEOUT);
             pairable = true;
             discoverable = true;
-            Message msg = mHandler.obtainMessage(MESSAGE_DISCOVERABLE_TIMEOUT);
-            mHandler.sendMessageDelayed(msg, duration * 1000);
             if (DBG) Log.d(TAG, "BT Discoverable for " + duration + " seconds");
             break;
         default:
