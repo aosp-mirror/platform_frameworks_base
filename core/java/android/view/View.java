@@ -9332,6 +9332,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // the DRAWN bit.
                 mPrivateFlags |= DRAWN;
                 invalidate(true);
+                // parent display list may need to be recreated based on a change in the bounds
+                // of any child
+                invalidateParentCaches();
             }
 
             // Reset drawn bit to original value (invalidate turns it off)
