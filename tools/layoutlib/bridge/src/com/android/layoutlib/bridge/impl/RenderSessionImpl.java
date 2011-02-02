@@ -334,7 +334,10 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         Bridge.setLog(null);
         mContext.getRenderResources().setFrameworkResourceIdProvider(null);
         mContext.getRenderResources().setLogger(null);
+    }
 
+    public static BridgeContext getCurrentContext() {
+        return sCurrentContext;
     }
 
     /**
