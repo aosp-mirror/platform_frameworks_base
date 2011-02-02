@@ -404,6 +404,9 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_LTE = 13;
     /** Current network is eHRPD */
     public static final int NETWORK_TYPE_EHRPD = 14;
+    /** Current network is HSPA+
+     * @hide */
+    public static final int NETWORK_TYPE_HSPAP = 15;
 
     /**
      * Returns a constant indicating the radio technology (network type)
