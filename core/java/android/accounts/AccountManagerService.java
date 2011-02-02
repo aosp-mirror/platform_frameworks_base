@@ -1781,7 +1781,7 @@ public class AccountManagerService
             // will return a different value, but we *don't* erase the
             // passwords.  We only erase them if it has a different
             // subscriber ID once it's provisioned.
-            if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
+            if (telephonyManager.getCurrentPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
                 IBinder service = ServiceManager.checkService(Context.TELEPHONY_SERVICE);
                 if (service == null) {
                     Log.w(TAG, "call to checkService(TELEPHONY_SERVICE) failed");
