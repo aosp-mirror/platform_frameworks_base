@@ -3550,6 +3550,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // Make sure we do not set both flags at the same time
                 int opaqueFlag = isOpaque ? DIRTY_OPAQUE : DIRTY;
 
+                if (child.mLayerType != LAYER_TYPE_NONE) {
+                    mPrivateFlags |= INVALIDATED;
+                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                    child.mLocalDirtyRect.union(dirty);
+                }
+
                 final int[] location = attachInfo.mInvalidateChildLocation;
                 location[CHILD_LEFT_INDEX] = child.mLeft;
                 location[CHILD_TOP_INDEX] = child.mTop;
@@ -3561,12 +3567,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     dirty.set((int) boundingRect.left, (int) boundingRect.top,
                             (int) (boundingRect.right + 0.5f),
                             (int) (boundingRect.bottom + 0.5f));
-                }
-
-                if (child.mLayerType != LAYER_TYPE_NONE) {
-                    mPrivateFlags |= INVALIDATED;
-                    mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                    child.mLocalDirtyRect.union(dirty);
                 }
 
                 do {
@@ -3652,7 +3652,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (mLayerType != LAYER_TYPE_NONE) {
                         mLocalDirtyRect.union(dirty);
                     }
-                    
+
                     return mParent;
                 }
             } else {
