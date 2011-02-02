@@ -7144,6 +7144,16 @@ public class WebView extends AbsoluteLayout
                     setContentScrollTo(msg.arg1, msg.arg2);
                     break;
                 case SCROLL_TO_MSG_ID:
+                    if (((Boolean) msg.obj).booleanValue()) {
+                        // This scroll is intended to bring the textfield into
+                        // view, but is only necessary if the IME is showing
+                        InputMethodManager imm = InputMethodManager.peekInstance();
+                        if (imm == null || !imm.isAcceptingText()
+                                || (!imm.isActive(WebView.this) && (!inEditingMode()
+                                || !imm.isActive(mWebTextView)))) {
+                            break;
+                        }
+                    }
                     if (setContentScrollTo(msg.arg1, msg.arg2)) {
                         // if we can't scroll to the exact position due to pin,
                         // send a message to WebCore to re-scroll when we get a
