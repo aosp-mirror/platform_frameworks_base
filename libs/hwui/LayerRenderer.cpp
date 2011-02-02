@@ -16,8 +16,11 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include <ui/Rect.h>
+
 #include "LayerRenderer.h"
 #include "Properties.h"
+#include "Rect.h"
 
 namespace android {
 namespace uirenderer {
@@ -30,12 +33,24 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
 #if RENDER_LAYERS_AS_REGIONS
-    mLayer->region.clear();
+    Rect dirty(left, top, right, bottom);
+    if (dirty.isEmpty() || (dirty.left <= 0 && dirty.top <= 0 &&
+            dirty.right >= mLayer->width && dirty.bottom >= mLayer->height)) {
+        mLayer->region.clear();
+        dirty.set(0.0f, 0.0f, mLayer->width, mLayer->height);
+    } else {
+        android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
+        mLayer->region.subtractSelf(r);
+    }
 #endif
 
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
+#if RENDER_LAYERS_AS_REGIONS
+    OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
+#else
     OpenGLRenderer::prepareDirty(0.0f, 0.0f, mLayer->width, mLayer->height, opaque);
+#endif
 }
 
 void LayerRenderer::finish() {
