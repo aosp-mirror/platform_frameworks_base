@@ -341,54 +341,6 @@ int64_t ElementaryStreamQueue::fetchTimestamp(size_t size) {
     return timeUs;
 }
 
-// static
-sp<MetaData> ElementaryStreamQueue::MakeAACCodecSpecificData(
-        unsigned profile, unsigned sampling_freq_index,
-        unsigned channel_configuration) {
-    sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
-
-    CHECK_LE(sampling_freq_index, 11u);
-    static const int32_t kSamplingFreq[] = {
-        96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050,
-        16000, 12000, 11025, 8000
-    };
-    meta->setInt32(kKeySampleRate, kSamplingFreq[sampling_freq_index]);
-    meta->setInt32(kKeyChannelCount, channel_configuration);
-
-    static const uint8_t kStaticESDS[] = {
-        0x03, 22,
-        0x00, 0x00,     // ES_ID
-        0x00,           // streamDependenceFlag, URL_Flag, OCRstreamFlag
-
-        0x04, 17,
-        0x40,                       // Audio ISO/IEC 14496-3
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-
-        0x05, 2,
-        // AudioSpecificInfo follows
-
-        // oooo offf fccc c000
-        // o - audioObjectType
-        // f - samplingFreqIndex
-        // c - channelConfig
-    };
-    sp<ABuffer> csd = new ABuffer(sizeof(kStaticESDS) + 2);
-    memcpy(csd->data(), kStaticESDS, sizeof(kStaticESDS));
-
-    csd->data()[sizeof(kStaticESDS)] =
-        ((profile + 1) << 3) | (sampling_freq_index >> 1);
-
-    csd->data()[sizeof(kStaticESDS) + 1] =
-        ((sampling_freq_index << 7) & 0x80) | (channel_configuration << 3);
-
-    meta->setData(kKeyESDS, 0, csd->data(), csd->size());
-
-    return meta;
-}
-
 struct NALPosition {
     size_t nalOffset;
     size_t nalSize;

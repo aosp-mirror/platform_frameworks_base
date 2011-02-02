@@ -36,6 +36,7 @@ const char *MEDIA_MIMETYPE_AUDIO_G711_ALAW = "audio/g711-alaw";
 const char *MEDIA_MIMETYPE_AUDIO_G711_MLAW = "audio/g711-mlaw";
 const char *MEDIA_MIMETYPE_AUDIO_RAW = "audio/raw";
 const char *MEDIA_MIMETYPE_AUDIO_FLAC = "audio/flac";
+const char *MEDIA_MIMETYPE_AUDIO_AAC_ADTS = "audio/aac-adts";
 
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG4 = "video/mpeg4";
 const char *MEDIA_MIMETYPE_CONTAINER_WAV = "audio/wav";

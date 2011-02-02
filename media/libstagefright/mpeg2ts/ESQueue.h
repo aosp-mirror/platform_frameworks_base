@@ -61,10 +61,6 @@ private:
     // returns its timestamp in us (or -1 if no time information).
     int64_t fetchTimestamp(size_t size);
 
-    static sp<MetaData> MakeAACCodecSpecificData(
-            unsigned profile, unsigned sampling_freq_index,
-            unsigned channel_configuration);
-
     DISALLOW_EVIL_CONSTRUCTORS(ElementaryStreamQueue);
 };
 

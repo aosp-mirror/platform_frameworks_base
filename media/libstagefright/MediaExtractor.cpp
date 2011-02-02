@@ -27,6 +27,7 @@
 #include "include/DRMExtractor.h"
 #include "include/WVMExtractor.h"
 #include "include/FLACExtractor.h"
+#include "include/AACExtractor.h"
 
 #include "matroska/MatroskaExtractor.h"
 
@@ -98,6 +99,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new MPEG2TSExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
         return new WVMExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
+        return new AACExtractor(source);
     }
 
     return NULL;
