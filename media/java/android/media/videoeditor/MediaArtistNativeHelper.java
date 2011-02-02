@@ -23,6 +23,7 @@ import java.nio.IntBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -3058,6 +3059,8 @@ class MediaArtistNativeHelper {
                 Log.e(TAG, "Runtime exception in nativeStartPreview");
                 throw ex;
             }
+        } else {
+            throw new IllegalStateException("generatePreview is in progress");
         }
     }
 
@@ -3085,7 +3088,10 @@ class MediaArtistNativeHelper {
     long renderPreviewFrame(Surface surface, long time, int surfaceWidth,
             int surfaceHeight, VideoEditor.OverlayData overlayData) {
         if (mInvalidatePreviewArray) {
-            throw new RuntimeException("Call generate preview first");
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Call generate preview first");
+            }
+            throw new IllegalStateException("Call generate preview first");
         }
 
         long timeMs = 0;
@@ -3910,6 +3916,27 @@ class MediaArtistNativeHelper {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "lock: grabbed semaphore");
         }
+    }
+
+    /**
+     * Tries to grab the semaphore with a specified time out which arbitrates access to the editor
+     *
+     * @param timeoutMs time out in ms.
+     *
+     * @return true if the semaphore is acquired, false otherwise
+     * @throws InterruptedException
+     */
+    boolean lock(long timeoutMs) throws InterruptedException {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbing semaphore with timeout " + timeoutMs, new Throwable());
+        }
+
+        boolean acquireSem = mLock.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS);
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbed semaphore status " + acquireSem);
+        }
+
+        return acquireSem;
     }
 
     /**
