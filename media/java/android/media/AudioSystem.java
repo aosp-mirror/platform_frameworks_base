@@ -158,7 +158,7 @@ public class AudioSystem
      *
      * return true if any track playing on this stream is active.
      */
-    public static native boolean isStreamActive(int stream);
+    public static native boolean isStreamActive(int stream, int inPastMs);
 
     /*
      * Sets a group generic audio configuration parameters. The use of these parameters

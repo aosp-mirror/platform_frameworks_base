@@ -624,17 +624,6 @@ bool AudioFlinger::streamMute(int stream) const
     return mStreamTypes[stream].mute;
 }
 
-bool AudioFlinger::isStreamActive(int stream) const
-{
-    Mutex::Autolock _l(mLock);
-    for (uint32_t i = 0; i < mPlaybackThreads.size(); i++) {
-        if (mPlaybackThreads.valueAt(i)->isStreamActive(stream)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
 {
     status_t result;
@@ -1289,20 +1278,6 @@ float AudioFlinger::PlaybackThread::streamVolume(int stream) const
 bool AudioFlinger::PlaybackThread::streamMute(int stream) const
 {
     return mStreamTypes[stream].mute;
-}
-
-bool AudioFlinger::PlaybackThread::isStreamActive(int stream) const
-{
-    Mutex::Autolock _l(mLock);
-    size_t count = mActiveTracks.size();
-    for (size_t i = 0 ; i < count ; ++i) {
-        sp<Track> t = mActiveTracks[i].promote();
-        if (t == 0) continue;
-        Track* const track = t.get();
-        if (t->type() == stream)
-            return true;
-    }
-    return false;
 }
 
 // addTrack_l() must be called with ThreadBase::mLock held

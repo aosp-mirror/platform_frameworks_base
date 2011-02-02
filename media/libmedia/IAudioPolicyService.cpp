@@ -48,7 +48,8 @@ enum {
     GET_STRATEGY_FOR_STREAM,
     GET_OUTPUT_FOR_EFFECT,
     REGISTER_EFFECT,
-    UNREGISTER_EFFECT
+    UNREGISTER_EFFECT,
+    IS_STREAM_ACTIVE
 };
 
 class BpAudioPolicyService : public BpInterface<IAudioPolicyService>
@@ -297,6 +298,15 @@ public:
         return static_cast <status_t> (reply.readInt32());
     }
 
+    virtual bool isStreamActive(int stream, uint32_t inPastMs) const
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
+        data.writeInt32(stream);
+        data.writeInt32(inPastMs);
+        remote()->transact(IS_STREAM_ACTIVE, data, &reply);
+        return reply.readInt32();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioPolicyService, "android.media.IAudioPolicyService");
@@ -514,6 +524,14 @@ status_t BnAudioPolicyService::onTransact(
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
             int id = data.readInt32();
             reply->writeInt32(static_cast <int32_t>(unregisterEffect(id)));
+            return NO_ERROR;
+        } break;
+
+        case IS_STREAM_ACTIVE: {
+            CHECK_INTERFACE(IAudioPolicyService, data, reply);
+            int stream = data.readInt32();
+            uint32_t inPastMs = (uint32_t)data.readInt32();
+            reply->writeInt32( isStreamActive(stream, inPastMs) );
             return NO_ERROR;
         } break;
 
