@@ -107,9 +107,9 @@ public class TimePickerDialog extends AlertDialog
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
 
         // initialize state
+        mTimePicker.setIs24HourView(mIs24HourView);
         mTimePicker.setCurrentHour(mInitialHourOfDay);
         mTimePicker.setCurrentMinute(mInitialMinute);
-        mTimePicker.setIs24HourView(mIs24HourView);
         mTimePicker.setOnTimeChangedListener(this);
     }
 
@@ -144,8 +144,8 @@ public class TimePickerDialog extends AlertDialog
         super.onRestoreInstanceState(savedInstanceState);
         int hour = savedInstanceState.getInt(HOUR);
         int minute = savedInstanceState.getInt(MINUTE);
+        mTimePicker.setIs24HourView(savedInstanceState.getBoolean(IS_24_HOUR));
         mTimePicker.setCurrentHour(hour);
         mTimePicker.setCurrentMinute(minute);
-        mTimePicker.setIs24HourView(savedInstanceState.getBoolean(IS_24_HOUR));
     }
 }
