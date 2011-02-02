@@ -3500,16 +3500,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (child.mLayerType != LAYER_TYPE_NONE) {
                     mPrivateFlags |= INVALIDATED;
                     mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                    child.mLocalDirtyRect.setEmpty();
                 }
                 do {
                     View view = null;
                     if (parent instanceof View) {
                         view = (View) parent;
-                        if (view.mLayerType != LAYER_TYPE_NONE &&
-                                view.getParent() instanceof View) {
-                            final View grandParent = (View) view.getParent();
-                            grandParent.mPrivateFlags |= INVALIDATED;
-                            grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                        if (view.mLayerType != LAYER_TYPE_NONE) {
+                            view.mLocalDirtyRect.setEmpty();
+                            if (view.getParent() instanceof View) {
+                                final View grandParent = (View) view.getParent();
+                                grandParent.mPrivateFlags |= INVALIDATED;
+                                grandParent.mPrivateFlags &= ~DRAWING_CACHE_VALID;
+                            }
                         }
                         if ((view.mPrivateFlags & DIRTY_MASK) != 0) {
                             // already marked dirty - we're done
@@ -3563,7 +3566,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (child.mLayerType != LAYER_TYPE_NONE) {
                     mPrivateFlags |= INVALIDATED;
                     mPrivateFlags &= ~DRAWING_CACHE_VALID;
-                }                
+                    child.mLocalDirtyRect.union(dirty);
+                }
+
                 do {
                     View view = null;
                     if (parent instanceof View) {
@@ -3644,6 +3649,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     location[CHILD_LEFT_INDEX] = left;
                     location[CHILD_TOP_INDEX] = top;
 
+                    if (mLayerType != LAYER_TYPE_NONE) {
+                        mLocalDirtyRect.union(dirty);
+                    }
+                    
                     return mParent;
                 }
             } else {
@@ -3652,8 +3661,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 location[CHILD_LEFT_INDEX] = mLeft;
                 location[CHILD_TOP_INDEX] = mTop;
 
-                dirty.set(0, 0, mRight - location[CHILD_LEFT_INDEX],
-                        mBottom - location[CHILD_TOP_INDEX]);
+                dirty.set(0, 0, mRight - mLeft, mBottom - mTop);
+
+                if (mLayerType != LAYER_TYPE_NONE) {
+                    mLocalDirtyRect.union(dirty);
+                }
 
                 return mParent;
             }

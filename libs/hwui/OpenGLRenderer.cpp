@@ -671,31 +671,39 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         finishDrawTexture();
 
 #if DEBUG_LAYERS_AS_REGIONS
-        uint32_t colors[] = {
-                0x7fff0000, 0x7f00ff00,
-                0x7f0000ff, 0x7fff00ff,
-        };
-
-        int offset = 0;
-        int32_t top = rects[0].top;
-        int i = 0;
-
-        for (size_t i = 0; i < count; i++) {
-            if (top != rects[i].top) {
-                offset ^= 0x2;
-                top = rects[i].top;
-            }
-
-            Rect r(rects[i].left, rects[i].top, rects[i].right, rects[i].bottom);
-            drawColorRect(r.left, r.top, r.right, r.bottom, colors[offset + (i & 0x1)],
-                    SkXfermode::kSrcOver_Mode);
-        }
+        drawRegionRects(layer->region);
 #endif
 
         layer->region.clear();
     }
 #else
     composeLayerRect(layer, rect);
+#endif
+}
+
+void OpenGLRenderer::drawRegionRects(const Region& region) {
+#if DEBUG_LAYERS_AS_REGIONS
+    size_t count;
+    const android::Rect* rects = region.getArray(&count);
+
+    uint32_t colors[] = {
+            0x7fff0000, 0x7f00ff00,
+            0x7f0000ff, 0x7fff00ff,
+    };
+
+    int offset = 0;
+    int32_t top = rects[0].top;
+
+    for (size_t i = 0; i < count; i++) {
+        if (top != rects[i].top) {
+            offset ^= 0x2;
+            top = rects[i].top;
+        }
+
+        Rect r(rects[i].left, rects[i].top, rects[i].right, rects[i].bottom);
+        drawColorRect(r.left, r.top, r.right, r.bottom, colors[offset + (i & 0x1)],
+                SkXfermode::kSrcOver_Mode);
+    }
 #endif
 }
 
@@ -1626,6 +1634,10 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
                     GL_UNSIGNED_SHORT, layer->meshIndices);
 
             finishDrawTexture();
+
+#if DEBUG_LAYERS_AS_REGIONS
+            drawRegionRects(layer->region);
+#endif
         }
     }
 #else
