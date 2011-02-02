@@ -1,0 +1,262 @@
+page.title=In-app Billing Reference
+@jd:body
+
+<style type="text/css">
+  #jd-content {
+    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
+  }
+</style>
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-codes">Server Response Codes for In-app Billing</a></li>
+    <li><a href="#billing-interface">In-app Billing Service Interface</a></li>
+    <li><a href="#billing-intents">In-app Billing Broadcast Intents</a></li>
+    
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">Sample Application</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_overview.html">Overview of In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html">Implementing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_testing.html">Testing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_admin.html">Administering In-app Billing</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="special" style="margin-right:345px">
+  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+</div>
+
+<p>The following document provides technical reference information for the following:</p>
+
+<ul>
+  <li><a href="#billing-codes">Android Market Server Response Codes for In-app Billing</a></li>
+  <li><a href="#billing-interface">In-app Billing Interface Parameters</a></li>
+  <li><a href="billing-intents">In-app Billing Broadcast Intents</a></li>
+</ul>
+
+<h2 id="billing-codes">Android Market Server Response Codes for In-app Billing</h2>
+
+<p>The following table lists all of the server response codes that are sent from Android Market to your application. Android Market sends these response codes asynchronously as <code>INAPP_RESPONSE_CODE</code> extras in the <code>ACTION_RESPONSE_CODE</code> broadcast intent. Your application must handle all of these response codes.</p>
+
+<p class="table-caption" id="response-codes-table"><strong>Table 1.</strong> Summary of response codes returned by Android Market.</p>
+
+<table>
+
+<tr>
+<th>Response Code</th>
+<th>Description</th>
+</tr>
+<tr>
+  <td><code>RESULT_OK</code></td>
+  <td>Indicates that the request was sent to the server successfully. When this code is returned in response to a <code>CHECK_BILLING_SUPPORTED</code> request, indicates that billing is supported.</td>
+</tr>
+<tr>
+  <td><code>RESULT_USER_CANCELED</code></td>
+  <td>Indicates that the user pressed the back button on the checkout page instead of buying the item.</td>
+</tr>
+<tr>
+  <td><code>RESULT_SERVICE_UNAVAILABLE</code></td>
+  <td>Indicates that the network connection is down.</td>
+</tr>
+<tr>
+  <td><code>RESULT_BILLING_UNAVAILABLE</code></td>
+  <td>Indicates that the <code>BILLING_API_VERSION</code> that you specified is not recognized by the Android Market application and that the Android Market application may have to be updated. Can also indicate that the user is ineligible for in-app billing. For example, the user resides in a country that does not allow in-app purchases.</td>
+</tr>
+<tr>
+  <td><code>RESULT_ITEM_UNAVAILABLE</code></td>
+  <td>Indicates that Android Market cannot find the requested item in the application's product list. This can happen if the product ID is misspelled in your <code>REQUEST_PURCHASE</code> request or if an item is unpublished in the application's product list.</td>
+</tr>
+<tr>
+  <td><code>RESULT_ERROR</code></td>
+  <td>Indicates an unexpected server error.</td>
+</tr>
+
+<tr>
+  <td><code>RESULT_DEVELOPER_ERROR</code></td>
+  <td>Indicates that an application is trying to make an in-app billing request but the application has not declared the com.android.vending.BILLING permission in its manifest. Can also indicate that an application is not properly signed, or that you sent a malformed request, such as a request with missing Bundle keys or a request that uses an unrecognized request type.</td>
+</tr>
+</table>
+
+<h2 id="billing-interface">In-app Billing Service Interface</h2>
+
+<p>The following section describes the interface for the Android Market In-app Billing service. The interface is defined in the <code>IMarketBillingService.aidl</code> file, which is included with the in-app billing <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>.</p>
+<p>The interface consists of a single request method <code>sendBillingRequest()</code>. This method takes a single {@link android.os.Bundle} parameter. The Bundle parameter includes several key-value pairs, which are summarized in Table 2.</p>
+
+<p class="table-caption"><strong>Table 2.</strong> Description of Bundle keys passed in a <code>sendBillingRequest()</code> request.</p>
+
+<table>
+
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Possible Values</th>
+<th>Required?</th>
+<th>Description</th>
+</tr>
+<tr>
+  <td><code>BILLING_REQUEST</code></td>
+  <td>String</td>
+  <td><code>CHECK_BILLING_SUPPORTED</code>, <code>REQUEST_PURCHASE</code>, <code>GET_PURCHASE_INFORMATION</code>, <code>CONFIRM_NOTIFICATIONS</code>, or <code>RESTORE_TRANSACTIONS</code></td>
+  <td>Yes</td>
+  <td>The type of billing request you are making with the <code>sendBillingRequest()</code> request. The possible values are discussed more below this table.</td>
+</tr>
+<tr>
+  <td><code>BILLING_API_VERSION</code></td>
+  <td>int</td>
+  <td>0 (for alpha release); 1 (for beta release)</td>
+  <td>Yes</td>
+  <td>The version of the in-app billing service you are using.</td>
+</tr>
+<tr>
+  <td><code>PACKAGE_NAME</code></td>
+  <td>String</td>
+  <td>A valid package name.</td>
+  <td>Yes</td>
+  <td>The name of the application that is making the request.</td>
+</tr>
+<tr>
+  <td><code>ITEM_ID</code></td>
+  <td>String</td>
+  <td>Any valid product identifier.</td>
+  <td>Required for <code>REQUEST_PURCHASE</code> requests.</td>
+  <td>The product ID of the item you are making a billing request for. Every in-app item that you sell using the in-app billing service must have a unique product ID, which you specify on the Android Market publisher site.</td>
+</tr>
+<tr>
+  <td><code>NONCE</code></td>
+  <td>long</td>
+  <td>Any valid long value.</td>
+  <td>Required for <code>GET_PURCHASE_INFORMATION</code> and <code>RESTORE_TRANSACTIONS</code> requests.</td>
+  <td>A number used once. Your application must generate and send a nonce with each <code>GET_PURCHASE_INFORMATION</code> and <code>RESTORE_TRANSACTIONS</code> request. The nonce is returned with the <code>ACTION_PURCHASE_STATE_CHANGED</code> intent, so you can use this value to verify the integrity of transaction responses form Android Market.</td>
+</tr>
+<tr>
+  <td><code>NOTIFY_IDS</code></td>
+  <td>Array of long values</td>
+  <td>Any valid array of long values</td>
+  <td>Required for <code>GET_PURCHASE_INFORMATION</code> and <code>CONFIRM_NOTIFICATIONS</code> requests.</td>
+  <td>An array of notification identifiers. A notification ID is sent to your application in an <code>ACTION_NOTIFY</code> intent every time a purchase changes state. You use the notification to retrieve the details of the purchase state change.</td>
+</tr>
+<tr>
+  <td><code>DEVELOPER_PAYLOAD</code></td>
+  <td>String</td>
+  <td>Any valid String less than 256 characters long.</td>
+  <td>No</td>
+  <td>A developer-specified string that is associated with an order. This field is returned in the JSON string that contains transaction information for an order. You can use this field to send information with an order. For example, you can use this field to send index keys with an order, which is useful if you are using a database to store purchase information. We recommend that you do not use this field to send data or content.</td> 
+</tr>
+</table>
+
+<p>The <code>BILLING_REQUEST</code> key can have the following values:</p>
+
+<ul>
+  <li><code>CHECK_BILLING_SUPPORTED</code>
+    <p>This request verifies that the Android Market application supports in-app billing. You usually send this request when your application first starts up. This request is useful if you want to enable or disable certain UI features that are relevant only to in-app billing.</p>
+  </li>
+  <li><code>REQUEST_PURCHASE</code>
+    <p>This request sends a purchase message to the Android Market application and is the foundation of in-app billing. You send this request when a user indicates that he or she wants to purchase an item in your application. Android Market then handles the financial transaction by displaying the checkout user interface.</p>
+  </li>
+  <li><code>GET_PURCHASE_INFORMATION</code>
+    <p>This request retrieves the details of a purchase state change. A purchase state change can occur when a purchase request is billed successfully or when a user cancels a transaction during checkout. It can also occur when a previous purchase is refunded. Android Market notifies your application when a purchase changes state, so you only need to send this request when there is transaction information to retrieve.</p>
+  </li>
+  <li><code>CONFIRM_NOTIFICATIONS</code>
+    <p>This request acknowledges that your application received the details of a purchase state change. That is, this message confirms that you sent a <code>GET_PURCHASE_INFORMATION</code> request for a given notification and that you received the purchase information for the notification.</p>
+  </li>
+  <li><code>RESTORE_TRANSACTIONS</code>
+    <p>This request retrieves a user's transaction status for managed purchases (see <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-purchase-type">Choosing a Purchase Type</a> for more information). You should send this message only when you need to retrieve a user's transaction status, which is usually only when your application is reinstalled or installed for the first time on a device.</p>
+  </li>
+</ul>
+
+<p>Every in-app billing request generates a synchronous response. The response is a {@link android.os.Bundle} and can include one or more of the following keys:</p>
+
+<ul>
+  <li><code>RESPONSE_CODE</code>
+    <p>This key provides status information and error information about a request.</p>
+  </li>
+  <li><code>PURCHASE_INTENT</code>
+    <p>This key provides a {@link android.app.PendingIntent}, which you use to launch the checkout activity.</p>
+  </li>
+  <li><code>REQUEST_ID</code>
+    <p>This key provides you with a request identifier, which you can use to match asynchronous responses with requests.</p>
+  </li>
+</ul>
+
+<p>Some of these keys are not relevant to certain types of requests. Table 3 shows which keys are returned for each request type.</p>
+
+<p class="table-caption"><strong>Table 3.</strong> Description of Bundle keys that are returned with each in-app billing request type.</p>
+
+<table>
+
+<tr>
+<th>Request Type</th>
+<th>Keys Returned</th>
+<th>Possible Response Codes</th>
+</tr>
+<tr>
+  <td><code>CHECK_BILLING_SUPPORTED</code></td>
+  <td><code>RESPONSE_CODE</code></td>
+  <td><code>RESULT_OK</code>, <code>RESULT_BILLING_UNAVAILABLE</code>, <code>RESULT_ERROR</code>, <code>RESULT_DEVELOPER_ERROR</code></td>
+</tr>
+<tr>
+  <td><code>REQUEST_PURCHASE</code></td>
+  <td><code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, <code>REQUEST_ID</code></td>
+  <td><code>RESULT_OK</code>, <code>RESULT_ERROR</code>, <code>RESULT_DEVELOPER_ERROR</code></td>
+</tr>
+<tr>
+  <td><code>GET_PURCHASE_INFORMATION</code></td>
+  <td><code>RESPONSE_CODE</code>, <code>REQUEST_ID</code></td>
+  <td><code>RESULT_OK</code>, <code>RESULT_ERROR</code>, <code>RESULT_DEVELOPER_ERROR</code></td>
+</tr>
+<tr>
+  <td><code>CONFIRM_NOTIFICATIONS</code></td>
+  <td><code>RESPONSE_CODE</code>, <code>REQUEST_ID</code></td>
+  <td><code>RESULT_OK</code>, <code>RESULT_ERROR</code>, <code>RESULT_DEVELOPER_ERROR</code></td>
+</tr>
+<tr>
+  <td><code>RESTORE_TRANSACTIONS</code></td>
+  <td><code>RESPONSE_CODE</code>, <code>REQUEST_ID</code></td>
+  <td><code>RESULT_OK</code>, <code>RESULT_ERROR</code>, <code>RESULT_DEVELOPER_ERROR</code></td>
+</tr>
+</table>
+
+<h2 id="billing-intents">In-app Billing Broadcast Intents</h2>
+
+<p>The following section describes the in-app billing broadcast intents that are sent by the Android Market application. These broadcast intents inform your application about in-app billing actions that have occurred. Your application must implement a {@link android.content.BroadcastReceiver} to receive these broadcast intents, such as the <code>BillingReceiver</code> that's shown in the in-app billing <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>.</p>
+
+<h4>ACTION_RESPONSE_CODE</h4>
+
+<p>This broadcast intent contains an Android Market response code, and is sent after you make an in-app billing request. A server response code can indicate that a billing request was successfully sent to Android Market or it can indicate that some error occurred during a billing request. This intent is not used to report any purchase state changes (such as refund or purchase information). For more information about the response codes that are sent with this response, see <a href="#billing-codes">Android Market Response Codes for In-app Billing</a>.</p>
+
+<h5>Extras</h5>
+
+<ul type="none">
+  <li><code>INAPP_REQUEST_ID</code>&mdash;a long representing a request ID. A request ID identifies a specific billing request and is returned by Android Market at the time a request is made.</li>
+  <li><code>INAPP_RESPONSE_CODE</code>&mdash;an int representing the Android Market server response code.</li>
+</ul>
+
+<h4>ACTION_NOTIFY</h4>
+
+<p>This response indicates that a purchase has changed state, which means a purchase succeeded, was canceled, or was refunded. This response contains one or more notification IDs. Each notification ID corresponds to a specific server-side message, and each messages contains information about one or more transactions. After your application receives an <code>ACTION_NOTIFY</code> broadcast intent, you send a <code>GET_PURCHASE_INFORMATION</code> request with the notification IDs to retrieve the message details.</p>
+
+<h5>Extras</h5>
+
+<ul type="none">
+  <li><code>NOTIFICATION_ID</code>&mdash;a string representing the notification ID for a given purchase state change. Android Market notifies you when there is a purchase state change and the notification includes a unique notification ID. To get the details of the purchase state change, you send the notification ID with the <code>GET_PURCHASE_INFORMATION</code> request.</li>
+</ul>
+
+<h4>ACTION_PURCHASE_STATE_CHANGED</h4>
+
+<p>This broadcast intent contains detailed information about one or more transactions. The transaction information is contained in a JSON string. The JSON string is signed and the signature is sent to your application along with the JSON string (unencrypted). To help ensure the security of your in-app billing messages, your application can verify the signature of this JSON string.</p>
+
+<h5>Extras</h5>
+
+<ul type="none">
+  <li><code>INAPP_SIGNED_DATA</code>&mdash;a string representing the signed JSON string.</li>
+  <li><code>INAPP_SIGNATURE</code>&mdash;a string representing the signature.</li>
+</ul>

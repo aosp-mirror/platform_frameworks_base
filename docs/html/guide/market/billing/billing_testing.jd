@@ -1,0 +1,180 @@
+page.title=Testing In-app Billing
+@jd:body
+
+<style type="text/css">
+  #jd-content {
+    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
+  }
+</style>
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-testing-static">Testing in-app purchases with static responses</a></li>
+    <li><a href="#billing-testing-real">Testing in-app purchases using your own product IDs</a></li>
+
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">Sample Application</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_overview.html">Overview of In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html">Implementing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_admin.html">Administering In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_reference.html">In-app Billing Reference</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="special" style="margin-right:345px">
+  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+</div>
+
+<p>The Android Market publisher site provides several tools that help you test your in-app billing implementation before it is published. You can use these tools to create test accounts and purchase special reserved items that send static billing responses to your application.</p>
+
+<p>To test in-app billing in an application you must install the application on an Android-powered device. You cannot use the Android emulator to test in-app billing.  The device you use for testing must run a standard version of the Android 1.6 or later platform (API level 4 or higher), and have the most current version of the Android Market application installed. If a device is not running the most current Android Market application, your application won't be able to send in-app billing requests to Android Market. For general information about how to set up a device for use in developing Android applications, see <a
+href="{@docRoot}guide/developing/device.html">Developing on a Device</a>.</p>
+
+<p>The following section shows you how to set up and use the in-app billing test tools.</p>
+
+<p class="note"><strong>Note</strong>: Debug log messages are turned off by default in the sample application. You can turn them on by setting the variable <code>DEBUG</code> to <code>true</code> in the <code>Consts.java</code> file.</p>
+
+<h2 id="billing-testing-static">Testing in-app purchases with static responses</h2>
+
+<p>We recommend that you first test your in-app billing implementation using static responses from Android Market. This enables you to verify that your application is handling the primary Android Market responses correctly and that your application is able to verify the signature correctly.</p>
+
+<p>To test your implementation with static responses, you make an in-app billing request using a special item that has a reserved product ID. Each reserved product ID returns a specific static response from Android Market. No money is transferred when you make in-app billing requests with the reserved product IDs. Also, you cannot specify the form of payment when you make a billing request with a reserved product ID. Figure 1 shows the checkout flow for the reserved item that has the product ID android.test.purchased.</p>
+
+<div style="margin:2em 1em 1em 1em;">
+<img src="{@docRoot}images/billing_test_flow.png" style="text-align:left;" />
+<div style="margin:.25em 1.25em;padding:0"><strong>Figure 1.</strong> Checkout flow for the special reserved item android.test.purchased.</div>
+</div>
+
+<p>You do not need to list the reserved products in your application's product list. Android Market already knows about the reserved product IDs. Also, you do not need to upload your application to the publisher site to perform static response tests with the reserved product IDs. You can simply install your application on a device, log into the device, and make billing requests using the reserved product IDs.</p>
+
+<p>There are four reserved product IDs for testing static in-app billing responses:</p>
+
+<ul>
+  <li><strong>android.test.purchased</strong>
+    <p>When you make an in-app billing request with this product ID, Android Market responds as though you successfully purchased an item. The response includes a JSON string, which contains fake purchase information (for example, a fake order ID). In some cases, the JSON string is signed and the response includes the signature so you can test your signature verification implementation using these responses.</p>
+  </li>
+  <li><strong>android.test.canceled</strong>
+    <p>When you make an in-app billing request with this product ID Android Market responds as though the purchase was canceled. This can occur when an error is encountered in the order process, such as an invalid credit card, or when you cancel a user's order before it is charged.</p>
+  </li>
+  <li><strong>android.test.refunded</strong>
+    <p>When you make an in-app billing request with this product ID, Android Market responds as though the purchase was refunded. Refunds cannot be initiated through the in-app billing feature. Refunds must be initiated by you (the merchant). A refund message is sent to your app by Android Market only when Android Market gets notification from Google Checkout that a refund has been made.</p>
+  </li>
+  <li><strong>android.test.item_unavailable</strong>
+    <p>When you make an in-app billing request with this product ID Android Market responds as though the item being purchased was not listed in your app's product list.</p>
+  </li>
+</ul>
+
+<p>In some cases, the reserved items may return signed static responses, which lets you test signature verification in your application. To test signature verification with the special reserved product IDs, you may need to set up <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-testing-setup">trusted tester accounts</a> or upload your application as a unpublished draft application. The following table (Table 1) shows you the conditions under which static responses are signed.</p>
+
+<p class="table-caption" id="static-responses-table"><strong>Table 1.</strong>
+Conditions under which static responses are signed.</p>
+
+<table>
+<tr>
+<th>Application ever been published?</th>
+<th>Draft application uploaded and unpublished?</th>
+<th>User who is running the application</th>
+<th>Static response signature</th>
+</tr>
+
+<tr>
+<td>No</td>
+<td>No</td>
+<td>Any</td>
+<td>Unsigned</td>
+</tr>
+
+<tr>
+<td>No</td>
+<td>No</td>
+<td>Developer</td>
+<td>Signed</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>Any</td>
+<td>Unsigned</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>Developer</td>
+<td>Signed</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>No</td>
+<td>Trusted tester</td>
+<td>Signed</td>
+</tr>
+
+<tr>
+<td>Yes</td>
+<td>Yes</td>
+<td>Any</td>
+<td>Signed</td>
+</tr>
+
+</table>
+
+<p>To make an in-app billing request with a reserved product ID, you simply construct a normal <code>REQUEST_PURCHASE</code> request, but instead of using a real product ID from your application's product list you use one of the reserved product IDs.</p>
+
+<p class="note"><strong>Note</strong>: Making in-app billing requests with the reserved product IDs overrides the usual Android Market production system. When you send an in-app billing request for a reserved product ID, the quality of service will not be comparable to the production environment.</p>
+
+<h2 id="billing-testing-real">Testing In-app Purchases Using Your Own Product IDs</h2>
+
+<p>After you finish your static response testing, and you verify that signature verification is working in your application, you can test your in-app billing implementation by making actual in-app purchases. Testing real in-app purchases enables you to test the end-to-end in-app billing experience, including the actual responses from Android Market and the actual checkout flow that users will experience in your application.</p>
+
+<p class="note"><strong>Note</strong>: You do not need to publish your application to do end-to-end testing. You only need to upload your draft application to perform end-to-end testing.</p>
+
+<p>To test your in-app billing implementation with actual in-app purchases, you will need to register at least one test account on the Android Market publisher site. You cannot use your developer account to test the complete in-app purchase process because Google Checkout does not let you buy items from yourself. If you have not set up test accounts before, see <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-testing-setup">Setting up test accounts</a>.</p>
+
+<p>Also, a test account can purchase an item in your product list only if the item is published. The application does not need to be published, but the item does need to be published.</p>
+
+<p>When you use a test account to purchase items, the account is billed through Google Checkout and your Google Checkout merchant account receives a payout for the purchase. Therefore, you need to refund purchases that are made with test accounts, otherwise the purchases will show up as actual payouts to your merchant account.</p>
+
+<p>To test your in-app billing implementation with actual purchases, follow these steps:</p>
+
+<ol>
+  <li>Upload your application as a draft application to the publisher site. You do not need to publish your application to perform end-to-end testing with real product IDs.</li>
+  <li>Add items to the application's product list. Make sure that you publish the items (the application can remain unpublished).
+    <p>See <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-catalog">Creating a product list</a> to learn how to do this.</p>
+  </li>
+  <li>Install your application on an Android-powered device.
+    <p>See <a href="{@docRoot}guide/developing/device.html">Developing on a Device</a> for more information about how to do this.</p>
+  </li>
+  <li>Sign in to the device using one of the <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-testing-setup">trusted tester accounts</a> that you registered on the Android Market site.
+    <p>We recommend that you make the test account the primary account on the device. To sign in to a device, do the following:</p>
+    <ol>
+      <li>Open Settings &gt; Accounts &amp; sync</li>
+      <li>Select <strong>Add Account</strong> and choose to add a "Google" account.</li>
+      <li>Select <strong>Next</strong> and then <strong>Sign in</strong>.</li>
+      <li>Enter the username and password of the test account.</li>
+      <li>Select <strong>Sign in</strong>. The system signs you in to the new account.</li>
+    </ol>
+  </li>
+  <li>Make in-app purchases in your application.</li>
+</ol>
+
+<p class="note"><strong>Note:</strong> The only way to change the primary account on a device is to do a factory reset, making sure you log on with your primary account first.</p>
+
+<p>When you are finished testing your in-app billing implementation, you are ready to
+publish your application on Android Market. You can follow the normal steps for <a
+href="{@docRoot}guide/publishing/preparing.html">preparing</a>, <a
+href="{@docRoot}guide/publishing/app-signing.html">signing</a>, and <a
+href="{@docRoot}guide/publishing/publishing.html">publishing your application</a>.
+</p>
+

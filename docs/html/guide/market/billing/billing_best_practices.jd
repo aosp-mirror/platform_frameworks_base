@@ -1,0 +1,79 @@
+page.title=Security and Design
+@jd:body
+
+<style type="text/css">
+  #jd-content {
+    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
+  }
+</style>
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-security">Security Best Practices</a></li>
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">Sample Application</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_overview.html">Overview of In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html">Implementing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_testing.html">Testing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_admin.html">Administering In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_reference.html">In-app Billing Reference</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="special" style="margin-right:345px">
+  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+</div>
+<p>As you design your in-app billing implementation, be sure to follow the security and design guidelines that are discussed in this document. These guidelines are recommended best practices for anyone who is using the Android Market In-app Billing service and can be incorporated into any in-app billing implementation.</p>
+
+<h2>Security Best Practices</h2>
+
+<h4>Perform signature verification tasks on a server</h4>
+<p>If practical, you should perform signature verification on a remote server and not on a device. Implementing the verification process on a server makes it difficult for attackers to break the verification process by reverse engineering your .apk file. If you do offload security processing to a remote server, be sure that the device-server handshake is secure.</p>
+
+<h4>Protect your unlocked content</h4>
+<p>To prevent malicious users from redistributing your unlocked content, do not bundle it in your .apk file. Instead, do one of the following:</p>
+  <ul>
+    <li>Use a real-time service to deliver your content, such as a content feed. Delivering content through a real-time service allows you to keep your content fresh.</li>
+    <li>Use a remote server to deliver your content.</li>
+  </ul>
+<p>When you deliver content from a remote server or a real-time service, you can store the unlocked content in device memory or store it on the device's SD card. If you store content on an SD card, be sure to encrypt the content and use a device-specific encryption key.</p>
+
+<h4>Obfuscate your code</h4>
+<p>You should obfuscate your in-app billing code so it is difficult for an attacker to reverse engineer security protocols and other application components. At a minimum, we recommend that you run an  obfuscation tool like <a href="http://developer.android.com/guide/developing/tools/proguard.html">Proguard</a> on your code.</p>
+<p>In addition to running an obfuscation program, we recommend that you use the following techniques to obfuscate your in-app billing code.</p>
+<ul>
+  <li>Inline methods into other methods.</li>
+  <li>Construct strings on the fly instead of defining them as constants.</li>
+  <li>Use Java reflection to call methods.</li>
+</ul>
+<p>Using these techniques can help reduce the attack surface of your application and help minimize attacks that can compromise your in-app billing implementation.</p>
+<div class="note">
+  <p><strong>Note:</strong> If you use Proguard to obfuscate your code, you must add the following line to your Proguard configuration file:</p>    
+  <p><code>-keep class com.android.vending.billing.**</code></p>
+</div>
+  
+<h4>Modify all sample application code</h4>
+<p>The in-app billing sample application is publicly distributed and can be downloaded by anyone, which means it is relatively easy for an attacker to reverse engineer your application if you use the sample code exactly as it is published. The sample application is intended to be used only as an example. If you use any part of the sample application, you must modify it before you publish it or release it as part of a production application.</p>
+<p>In particular, attackers look for known entry points and exit points in an application, so it is important that you modify these parts of your code that are identical to the sample application.</p>
+
+<h4>Use secure random nonces</h4>
+<p>Nonces must not be predictable or reused. Always use a cryptographically secure random number generator (like {@link java.security.SecureRandom}) when you generate nonces. This can help reduce replay attacks.</p>
+<p>Also, if you are performing nonce verification on a server, make sure that you generate the nonces on the server.</p>
+
+<h4>Take action against trademark and copyright infringement</h4>
+<p>If you see your content being redistributed on Android Market, act quickly and decisively. File a <a href="http://market.android.com/support/bin/answer.py?hl=en&amp;answer=141511">trademark notice of infringement</a> or a <a href="http://www.google.com/android_dmca.html">copyright notice of infringement</a>.</p>
+
+<h4>Implement a revocability scheme for unlocked content</h4>
+<p>If you are using a remote server to deliver or manage content, have your application verify the purchase state of the unlocked content whenever a user accesses the content. This allows you to revoke use when necessary and minimize piracy.</p>
+
+<h4>Protect your Android Market public key</h4>
+<p>To keep your public key safe from malicious users and hackers, do not embed it in any code as a literal string. Instead, construct the string at runtime from pieces or use bit manipulation (for example, XOR with some other string) to hide the actual key. The key itself is not secret information, but you do not want to make it easy for a hacker or malicious user to replace the public key with another key.</p>
+
