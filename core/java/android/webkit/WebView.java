@@ -636,13 +636,7 @@ public class WebView extends AbsoluteLayout
     /*
      * Package message ids
      */
-    //! arg1=x, arg2=y
     static final int SCROLL_TO_MSG_ID                   = 101;
-    static final int SCROLL_BY_MSG_ID                   = 102;
-    //! arg1=x, arg2=y
-    static final int SPAWN_SCROLL_TO_MSG_ID             = 103;
-    //! arg1=x, arg2=y
-    static final int SYNC_SCROLL_TO_MSG_ID              = 104;
     static final int NEW_PICTURE_MSG_ID                 = 105;
     static final int UPDATE_TEXT_ENTRY_MSG_ID           = 106;
     static final int WEBCORE_INITIALIZED_MSG_ID         = 107;
@@ -698,9 +692,9 @@ public class WebView extends AbsoluteLayout
 
     static final String[] HandlerPackageDebugString = {
         "SCROLL_TO_MSG_ID", //               = 101;
-        "SCROLL_BY_MSG_ID", //               = 102;
-        "SPAWN_SCROLL_TO_MSG_ID", //         = 103;
-        "SYNC_SCROLL_TO_MSG_ID", //          = 104;
+        "102", //                            = 102;
+        "103", //                            = 103;
+        "104", //                            = 104;
         "NEW_PICTURE_MSG_ID", //             = 105;
         "UPDATE_TEXT_ENTRY_MSG_ID", //       = 106;
         "WEBCORE_INITIALIZED_MSG_ID", //     = 107;
@@ -748,7 +742,9 @@ public class WebView extends AbsoluteLayout
     // initial scale in percent. 0 means using default.
     private int mInitialScaleInPercent = 0;
 
-    private boolean mUserScroll = false;
+    // Whether or not a scroll event should be sent to webkit.  This is only set
+    // to false when restoring the scroll position.
+    private boolean mSendScrollEvent = true;
 
     private int mSnapScrollMode = SNAP_NONE;
     private static final int SNAP_NONE = 0;
@@ -2055,7 +2051,6 @@ public class WebView extends AbsoluteLayout
         } else {
             y = -h / 2;
         }
-        mUserScroll = true;
         return mScroller.isFinished() ? pinScrollBy(0, y, true, 0)
                 : extendScroll(y);
     }
@@ -2081,7 +2076,6 @@ public class WebView extends AbsoluteLayout
         } else {
             y = h / 2;
         }
-        mUserScroll = true;
         return mScroller.isFinished() ? pinScrollBy(0, y, true, 0)
                 : extendScroll(y);
     }
@@ -2515,7 +2509,7 @@ public class WebView extends AbsoluteLayout
             Point pos = new Point(rect.left, rect.top);
             mWebViewCore.removeMessages(EventHub.SET_SCROLL_OFFSET);
             mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
-                    nativeMoveGeneration(), mUserScroll ? 1 : 0, pos);
+                    nativeMoveGeneration(), mSendScrollEvent ? 1 : 0, pos);
             mLastVisibleRectSent = rect;
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         }
@@ -3182,6 +3176,9 @@ public class WebView extends AbsoluteLayout
                 WebViewCore.resumePriority();
                 if (!mSelectingText) {
                     WebViewCore.resumeUpdatePicture(mWebViewCore);
+                }
+                if (oldX != mScrollX || oldY != mScrollY) {
+                    sendOurVisibleRect();
                 }
             }
         } else {
@@ -4161,9 +4158,6 @@ public class WebView extends AbsoluteLayout
             mScrollX = pinLocX(mScrollX);
             mScrollY = pinLocY(mScrollY);
             if (oldScrollX != mScrollX || oldScrollY != mScrollY) {
-                mUserScroll = false;
-                mWebViewCore.sendMessage(EventHub.SYNC_SCROLL, oldScrollX,
-                        oldScrollY);
                 onScrollChanged(mScrollX, mScrollY, oldScrollX, oldScrollY);
             } else {
                 sendOurVisibleRect();
@@ -5704,7 +5698,6 @@ public class WebView extends AbsoluteLayout
                         mHeldMotionless = MOTIONLESS_FALSE;
                     }
                     mLastTouchTime = eventTime;
-                    mUserScroll = true;
                 }
 
                 doDrag(deltaX, deltaY);
@@ -6405,7 +6398,6 @@ public class WebView extends AbsoluteLayout
             if (xMove != 0 || yMove != 0) {
                 pinScrollBy(xMove, yMove, true, 0);
             }
-            mUserScroll = true;
         }
     }
 
@@ -7156,20 +7148,10 @@ public class WebView extends AbsoluteLayout
                     doShortPress();
                     break;
                 }
-                case SCROLL_BY_MSG_ID:
-                    setContentScrollBy(msg.arg1, msg.arg2, (Boolean) msg.obj);
-                    break;
-                case SYNC_SCROLL_TO_MSG_ID:
-                    if (mUserScroll) {
-                        // if user has scrolled explicitly, don't sync the
-                        // scroll position any more
-                        mUserScroll = false;
-                        break;
-                    }
-                    setContentScrollTo(msg.arg1, msg.arg2);
-                    break;
-                case SCROLL_TO_MSG_ID:
-                    if (((Boolean) msg.obj).booleanValue()) {
+                case SCROLL_TO_MSG_ID: {
+                    // arg1 = animate, arg2 = onlyIfImeIsShowing
+                    // obj = Point(x, y)
+                    if (msg.arg2 == 1) {
                         // This scroll is intended to bring the textfield into
                         // view, but is only necessary if the IME is showing
                         InputMethodManager imm = InputMethodManager.peekInstance();
@@ -7179,18 +7161,14 @@ public class WebView extends AbsoluteLayout
                             break;
                         }
                     }
-                    if (setContentScrollTo(msg.arg1, msg.arg2)) {
-                        // if we can't scroll to the exact position due to pin,
-                        // send a message to WebCore to re-scroll when we get a
-                        // new picture
-                        mUserScroll = false;
-                        mWebViewCore.sendMessage(EventHub.SYNC_SCROLL,
-                                msg.arg1, msg.arg2);
+                    final Point p = (Point) msg.obj;
+                    if (msg.arg1 == 1) {
+                        spawnContentScrollTo(p.x, p.y);
+                    } else {
+                        setContentScrollTo(p.x, p.y);
                     }
                     break;
-                case SPAWN_SCROLL_TO_MSG_ID:
-                    spawnContentScrollTo(msg.arg1, msg.arg2);
-                    break;
+                }
                 case UPDATE_ZOOM_RANGE: {
                     WebViewCore.ViewState viewState = (WebViewCore.ViewState) msg.obj;
                     // mScrollX contains the new minPrefWidth
@@ -7203,7 +7181,6 @@ public class WebView extends AbsoluteLayout
                 }
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
-                    mUserScroll = false;
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
                     setBaseLayer(draw.mBaseLayer, draw.mInvalRegion.getBounds());
                     final Point viewSize = draw.mViewSize;
@@ -7214,7 +7191,14 @@ public class WebView extends AbsoluteLayout
                         mLastWidthSent = 0;
                         mZoomManager.onFirstLayout(draw);
                         if (!mDrawHistory) {
+                            // Do not send the scroll event for this particular
+                            // scroll message.  Note that a scroll event may
+                            // still be fired if the user scrolls before the
+                            // message can be handled.
+                            mSendScrollEvent = false;
                             setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
+                            mSendScrollEvent = true;
+
                             // As we are on a new page, remove the WebTextView. This
                             // is necessary for page loads driven by webkit, and in
                             // particular when the user was on a password field, so
@@ -8140,7 +8124,6 @@ public class WebView extends AbsoluteLayout
                     + contentCursorRingBounds);
         }
         requestRectangleOnScreen(viewCursorRingBounds);
-        mUserScroll = true;
         return keyHandled;
     }
 
