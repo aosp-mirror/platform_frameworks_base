@@ -56,8 +56,9 @@ public class TestDelegates extends TestCase {
 
             // extract the class name
             String className = methodName.substring(0, methodName.indexOf('#'));
+            String targetClassName = className.replace('$', '_') + "_Delegate";
 
-            loadAndCompareClasses(className, className + "_Delegate");
+            loadAndCompareClasses(className, targetClassName);
         }
     }
 
@@ -94,6 +95,16 @@ public class TestDelegates extends TestCase {
 
                 Class<?>[] newParameters = new Class<?>[parameters.length + 1];
                 newParameters[0] = originalClass;
+                System.arraycopy(parameters, 0, newParameters, 1, parameters.length);
+                parameters = newParameters;
+            }
+
+            // if the original class is an inner class that's not static, then
+            // we add this on the enclosing class at the beginning
+            if (originalClass.getEnclosingClass() != null &&
+                    (originalClass.getModifiers() & Modifier.STATIC) == 0) {
+                Class<?>[] newParameters = new Class<?>[parameters.length + 1];
+                newParameters[0] = originalClass.getEnclosingClass();
                 System.arraycopy(parameters, 0, newParameters, 1, parameters.length);
                 parameters = newParameters;
             }
