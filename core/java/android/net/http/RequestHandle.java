@@ -18,7 +18,6 @@ package android.net.http;
 
 import android.net.ParseException;
 import android.net.WebAddress;
-import android.security.Md5MessageDigest;
 import junit.framework.Assert;
 import android.webkit.CookieManager;
 
@@ -26,6 +25,8 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.io.InputStream;
 import java.lang.Math;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -377,11 +378,15 @@ public class RequestHandle {
      */
     private String H(String param) {
         if (param != null) {
-            Md5MessageDigest md5 = new Md5MessageDigest();
+            try {
+                MessageDigest md5 = MessageDigest.getInstance("MD5");
 
-            byte[] d = md5.digest(param.getBytes());
-            if (d != null) {
-                return bufferToHex(d);
+                byte[] d = md5.digest(param.getBytes());
+                if (d != null) {
+                    return bufferToHex(d);
+                }
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
             }
         }
 

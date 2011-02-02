@@ -75,7 +75,6 @@ LOCAL_SRC_FILES:= \
 	android_nfc_NdefRecord.cpp \
 	android_pim_EventRecurrence.cpp \
 	android_text_format_Time.cpp \
-	android_security_Md5MessageDigest.cpp \
 	android_util_AssetManager.cpp \
 	android_util_Binder.cpp \
 	android_util_EventLog.cpp \
@@ -138,7 +137,6 @@ LOCAL_SRC_FILES:= \
 	android_server_BluetoothEventLoop.cpp \
 	android_server_BluetoothA2dpService.cpp \
 	android_server_Watchdog.cpp \
-	android_message_digest_sha1.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
 	com_android_internal_graphics_NativeUtils.cpp \
