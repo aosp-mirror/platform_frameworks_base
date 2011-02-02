@@ -454,7 +454,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
         case MSG_TYPE_OVERLAY_CLEAR:
             isSendProgress = false;
             pContext->mOverlayFileName = NULL;
-            LOGI("MSG_TYPE_OVERLAY_CLEAR");
+            LOGV("MSG_TYPE_OVERLAY_CLEAR");
             //argc is not used
             pContext->mIsUpdateOverlay = true;
             break;
@@ -1102,7 +1102,7 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
 {
     bool                            needToBeLoaded = true;
     M4OSA_ERR                       result = M4NO_ERROR;
-    M4MCS_Context                   mcsContext;
+    M4MCS_Context                   mcsContext = M4OSA_NULL;
     M4OSA_Char*                     pInputFile = M4OSA_NULL;
     M4OSA_Char*                     pOutputFile = M4OSA_NULL;
     M4OSA_Char*                     pTempPath = M4OSA_NULL;
@@ -1126,6 +1126,9 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
         (M4OSA_NULL == pOutputParams),
         "not initialized");
+    if (needToBeLoaded == false) {
+        return M4ERR_ALLOC;
+    }
 
     pEncodingParams = (M4MCS_EncodingParams *)M4OSA_malloc(
         sizeof(M4MCS_EncodingParams),0x00,
@@ -1133,6 +1136,12 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
         (M4OSA_NULL == pEncodingParams),
         "not initialized");
+    if (needToBeLoaded == false) {
+        M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+        pEncodingParams = M4OSA_NULL;
+        return M4ERR_ALLOC;
+    }
+
     // Initialize the MCS library.
     result = M4MCS_init(&mcsContext, pContext->initParams.pFileReadPtr,
         pContext->initParams.pFileWritePtr);
@@ -1141,6 +1150,14 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
         (M4OSA_NULL == mcsContext),
         "not initialized");
+     if(needToBeLoaded == false) {
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+         return result;
+     }
+
     // generate the path for temp 3gp output file
     pTemp3gpFilePath = (M4OSA_Char*) M4OSA_malloc (
         (M4OSA_chrLength((M4OSA_Char*)pContext->initParams.pTempPath)
@@ -1156,6 +1173,14 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
             M4OSA_chrLength ((M4OSA_Char*)pContext->initParams.pTempPath));
         M4OSA_chrNCat ( pTemp3gpFilePath , (M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH,
             M4OSA_chrLength ((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH));
+    }
+    else {
+         M4MCS_abort(mcsContext);
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+         return M4ERR_ALLOC;
     }
 
     pInputFile = (M4OSA_Char *) infilePath; //pContext->mAudioSettings->pFile;
@@ -1177,6 +1202,16 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
         pOutputFile, pTempPath);
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
         (M4NO_ERROR != result), result);
+    if(needToBeLoaded == false) {
+         M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
+         pTemp3gpFilePath = M4OSA_NULL;
+         M4MCS_abort(mcsContext);
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+         return result;
+    }
 
     pOutputParams->OutputFileType
         = (M4VIDEOEDITING_FileType)M4VIDEOEDITING_kFileType_3GPP;
@@ -1217,7 +1252,16 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     result = M4MCS_setOutputParams(mcsContext, pOutputParams);
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
                                         (M4NO_ERROR != result), result);
-
+    if (needToBeLoaded == false) {
+         M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
+         pTemp3gpFilePath = M4OSA_NULL;
+         M4MCS_abort(mcsContext);
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+        return result;
+    }
     // Set the video bitrate.
     pEncodingParams->OutputVideoBitrate =
     (M4VIDEOEDITING_Bitrate)M4VIDEOEDITING_kUndefinedBitrate;
@@ -1238,12 +1282,32 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     result = M4MCS_setEncodingParams(mcsContext, pEncodingParams);
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
         (M4NO_ERROR != result), result);
+    if (needToBeLoaded == false) {
+         M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
+         pTemp3gpFilePath = M4OSA_NULL;
+         M4MCS_abort(mcsContext);
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+         return result;
+    }
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR",
                             "M4MCS_checkParamsAndStart()");
     result = M4MCS_checkParamsAndStart(mcsContext);
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
         (M4NO_ERROR != result), result);
+    if (needToBeLoaded == false) {
+         M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
+         pTemp3gpFilePath = M4OSA_NULL;
+         M4MCS_abort(mcsContext);
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+        return result;
+    }
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", "M4MCS_step()");
 
@@ -1286,6 +1350,16 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
 
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
         (M4MCS_WAR_TRANSCODING_DONE != result), result);
+    if (needToBeLoaded == false) {
+         M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
+         pTemp3gpFilePath = M4OSA_NULL;
+         M4MCS_abort(mcsContext);
+         M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+         pOutputParams = M4OSA_NULL;
+         M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+         pEncodingParams = M4OSA_NULL;
+        return result;
+    }
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", "M4MCS_abort()");
     result = M4MCS_abort(mcsContext);
@@ -1296,9 +1370,15 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     M4OSA_fileExtraDelete((const M4OSA_Char *) pTemp3gpFilePath);
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", "videoEditor_generateAudio() EXIT ");
 
-    M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
-    M4OSA_free((M4OSA_MemAddr32)pOutputParams);
-    M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+    if (pTemp3gpFilePath != M4OSA_NULL) {
+        M4OSA_free((M4OSA_MemAddr32)pTemp3gpFilePath);
+    }
+    if (pOutputParams != M4OSA_NULL) {
+       M4OSA_free((M4OSA_MemAddr32)pOutputParams);
+    }
+    if(pEncodingParams != M4OSA_NULL) {
+       M4OSA_free((M4OSA_MemAddr32)pEncodingParams);
+    }
     return result;
 }
 
@@ -1439,14 +1519,33 @@ videoEditor_populateSettings(
         videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
                              (pContext->state != ManualEditState_INITIALIZED),
                              "settings already loaded");
-        // Retrieve the edit settings.
-        if (pContext->pEditSettings != M4OSA_NULL) {
-            videoEditClasses_freeEditSettings(&pContext->pEditSettings);
-            pContext->pEditSettings = M4OSA_NULL;
+        if (needToBeLoaded) {
+            // Retrieve the edit settings.
+            if (pContext->pEditSettings != M4OSA_NULL) {
+                videoEditClasses_freeEditSettings(&pContext->pEditSettings);
+                pContext->pEditSettings = M4OSA_NULL;
+            }
+            videoEditClasses_getEditSettings(&needToBeLoaded, pEnv,
+                settings, &pContext->pEditSettings,false);
         }
-        videoEditClasses_getEditSettings(&needToBeLoaded, pEnv,
-            settings, &pContext->pEditSettings,false);
     }
+
+    if (needToBeLoaded == false) {
+        j = 0;
+        while (j < pContext->pEditSettings->nbEffects)
+        {
+            if (pContext->pEditSettings->Effects[j].xVSS.pFramingFilePath != M4OSA_NULL) {
+                if (pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer != M4OSA_NULL) {
+                    M4OSA_free((M4OSA_MemAddr32)pContext->pEditSettings->\
+                    Effects[j].xVSS.pFramingBuffer);
+                    pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer = M4OSA_NULL;
+                }
+            }
+          j++;
+        }
+        return;
+    }
+
     M4OSA_TRACE1_0("videoEditorC_getEditSettings done");
 
     pContext->previewFrameEditInfoId = pEnv->GetMethodID(engineClass,
@@ -1459,43 +1558,49 @@ videoEditor_populateSettings(
         if(mEditClazz == M4OSA_NULL)
         {
             M4OSA_TRACE1_0("cannot find object field for mEditClazz");
-            return;
+            goto videoEditor_populateSettings_cleanup;
         }
         jclass mEffectsClazz = pEnv->FindClass(EFFECT_SETTINGS_CLASS_NAME);
         if(mEffectsClazz == M4OSA_NULL)
         {
             M4OSA_TRACE1_0("cannot find object field for mEffectsClazz");
-            return;
+            goto videoEditor_populateSettings_cleanup;
         }
         fid = pEnv->GetFieldID(mEditClazz,"effectSettingsArray", "[L"EFFECT_SETTINGS_CLASS_NAME";"  );
         if(fid == M4OSA_NULL)
         {
             M4OSA_TRACE1_0("cannot find field for effectSettingsArray Array");
-            return;
+            goto videoEditor_populateSettings_cleanup;
         }
         effectSettingsArray = (jobjectArray)pEnv->GetObjectField(settings, fid);
         if(effectSettingsArray == M4OSA_NULL)
         {
             M4OSA_TRACE1_0("cannot find object field for effectSettingsArray");
-            return;
+            goto videoEditor_populateSettings_cleanup;
         }
-        i = 0;
-        j = 0;
+
         //int overlayIndex[pContext->pEditSettings->nbEffects];
-        if ( pContext->pEditSettings->nbEffects )
+        if (pContext->pEditSettings->nbEffects > 0)
         {
             pOverlayIndex
             = (int*) M4OSA_malloc(pContext->pEditSettings->nbEffects * sizeof(int), 0,
                 (M4OSA_Char*)"pOverlayIndex");
+            if (pOverlayIndex == M4OSA_NULL) {
+                videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                    M4OSA_TRUE, M4ERR_ALLOC);
+                goto videoEditor_populateSettings_cleanup;
+            }
         }
 
+        i = 0;
+        j = 0;
         M4OSA_TRACE1_1("no of effects = %d",pContext->pEditSettings->nbEffects);
         while (j < pContext->pEditSettings->nbEffects)
         {
             if (pContext->pEditSettings->Effects[j].xVSS.pFramingFilePath != M4OSA_NULL)
             {
                 pOverlayIndex[nbOverlays] = j;
-                nbOverlays++;
+
                 M4xVSS_FramingStruct *aFramingCtx = M4OSA_NULL;
                 aFramingCtx
                 = (M4xVSS_FramingStruct*)M4OSA_malloc(sizeof(M4xVSS_FramingStruct), M4VS,
@@ -1503,7 +1608,11 @@ videoEditor_populateSettings(
                 if (aFramingCtx == M4OSA_NULL)
                 {
                     M4OSA_TRACE1_0("Allocation error in videoEditor_populateSettings");
+                    videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                        M4OSA_TRUE, M4ERR_ALLOC);
+                    goto videoEditor_populateSettings_cleanup;
                 }
+
                 aFramingCtx->pCurrent = M4OSA_NULL; /* Only used by the first element of the chain */
                 aFramingCtx->previousClipTime = -1;
                 aFramingCtx->FramingYuv = M4OSA_NULL;
@@ -1524,7 +1633,6 @@ videoEditor_populateSettings(
                  aFramingCtx->width = pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_width;
                  aFramingCtx->height = pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_height;
 
-
                 result = M4xVSS_internalConvertARGB888toYUV420_FrammingEffect(pContext->engineContext,
                     &(pContext->pEditSettings->Effects[j]),aFramingCtx,
                 pContext->pEditSettings->Effects[j].xVSS.framingScaledSize);
@@ -1536,7 +1644,7 @@ videoEditor_populateSettings(
                         M4OSA_free((M4OSA_MemAddr32)aFramingCtx);
                         aFramingCtx = M4OSA_NULL;
                     }
-                    return;
+                    goto videoEditor_populateSettings_cleanup;
                 }
 
                 //framing buffers are resized to fit the output video resolution.
@@ -1544,7 +1652,6 @@ videoEditor_populateSettings(
                     aFramingCtx->FramingRgb->u_width;
                 pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_height =
                     aFramingCtx->FramingRgb->u_height;
-
 
                 VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", "A framing Context aFramingCtx->width = %d",
                     aFramingCtx->FramingRgb->u_width);
@@ -1557,13 +1664,20 @@ videoEditor_populateSettings(
                 height = pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_height;
 
                 //RGB 565
-                pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_stride = width*2;
+                pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_stride = width * 2;
 
                 //for RGB565
                 pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->u_topleft = 0;
                 pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->pac_data =
                             (M4VIFI_UInt8 *)M4OSA_malloc(width*height*2,
                             0x00,(M4OSA_Char *)"pac_data buffer");
+
+                if (pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer->pac_data == M4OSA_NULL) {
+                    M4OSA_TRACE1_0("Failed to allocate memory for framing buffer");
+                    videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                                            M4OSA_TRUE, M4ERR_ALLOC);
+                    goto videoEditor_populateSettings_cleanup;
+                }
 
                 M4OSA_memcpy((M4OSA_Int8 *)&pContext->pEditSettings->\
                     Effects[j].xVSS.pFramingBuffer->\
@@ -1596,6 +1710,7 @@ videoEditor_populateSettings(
                     M4OSA_free((M4OSA_MemAddr32)aFramingCtx);
                     aFramingCtx = M4OSA_NULL;
                 }
+                nbOverlays++;
             }
             j++;
         }
@@ -1608,7 +1723,11 @@ videoEditor_populateSettings(
             videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
                 (M4OSA_NULL == properties),
                 "not initialized");
-            getClipSetting(pEnv,properties, pContext->pEditSettings->pClipList[i]);
+            if (needToBeLoaded) {
+                getClipSetting(pEnv,properties, pContext->pEditSettings->pClipList[i]);
+            } else {
+                goto videoEditor_populateSettings_cleanup;
+            }
         }
 
         if (needToBeLoaded) {
@@ -1626,6 +1745,10 @@ videoEditor_populateSettings(
         videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
                                      (M4OSA_NULL == pContext->mAudioSettings),
                                      "not initialized");
+
+        if (needToBeLoaded == false) {
+            goto videoEditor_populateSettings_cleanup;
+        }
 
         fid = pEnv->GetFieldID(audioSettingClazz,"bRemoveOriginal","Z");
         pContext->mAudioSettings->bRemoveOriginal = pEnv->GetIntField(audioSettingObject,fid);
@@ -1681,37 +1804,51 @@ videoEditor_populateSettings(
         M4OSA_TRACE1_1("file name = %s",pContext->mAudioSettings->pFile);
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "regenerateAudio() file name = %s",\
         pContext->mAudioSettings->pFile);
+
         fid = pEnv->GetFieldID(audioSettingClazz,"pcmFilePath","Ljava/lang/String;");
         str = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
+
         pContext->mAudioSettings->pPCMFilePath =
         (M4OSA_Char*)pEnv->GetStringUTFChars(str, M4OSA_NULL);
+
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "pPCMFilePath -- %s ",\
         pContext->mAudioSettings->pPCMFilePath);
+
         fid = pEnv->GetFieldID(engineClass,"mRegenerateAudio","Z");
         bool regenerateAudio = pEnv->GetBooleanField(thiz,fid);
+
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "regenerateAudio -- %d ",\
         regenerateAudio);
+
         if (regenerateAudio) {
             M4OSA_TRACE1_0("Calling Generate Audio now");
             result = videoEditor_generateAudio(pEnv,
                         pContext,
                         (M4OSA_Char*)pContext->mAudioSettings->pFile,
                         (M4OSA_Char*)pContext->mAudioSettings->pPCMFilePath);
+
+            videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                (M4NO_ERROR != result), result);
+            if (needToBeLoaded == false) {
+                goto videoEditor_populateSettings_cleanup;
+            }
+
             regenerateAudio = false;
             pEnv->SetBooleanField(thiz,fid,regenerateAudio);
         }
-        VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "regenerateAudio()");
 
         /* Audio mix and duck */
         fid = pEnv->GetFieldID(audioSettingClazz,"ducking_threshold","I");
         pContext->mAudioSettings->uiInDucking_threshold
             = pEnv->GetIntField(audioSettingObject,fid);
+
         M4OSA_TRACE1_1("ducking threshold = %d",
             pContext->mAudioSettings->uiInDucking_threshold);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"ducking_lowVolume","I");
         pContext->mAudioSettings->uiInDucking_lowVolume
             = pEnv->GetIntField(audioSettingObject,fid);
+
         M4OSA_TRACE1_1("ducking lowVolume = %d",
             pContext->mAudioSettings->uiInDucking_lowVolume);
 
@@ -1720,6 +1857,7 @@ videoEditor_populateSettings(
             = pEnv->GetBooleanField(audioSettingObject,fid);
         M4OSA_TRACE1_1("ducking lowVolume = %d",
             pContext->mAudioSettings->bInDucking_enable);
+
     } else {
         if (pContext->mAudioSettings != M4OSA_NULL) {
             pContext->mAudioSettings->pFile = M4OSA_NULL;
@@ -1740,22 +1878,27 @@ videoEditor_populateSettings(
 
             fid = pEnv->GetFieldID(engineClass,"mRegenerateAudio","Z");
             bool regenerateAudio = pEnv->GetBooleanField(thiz,fid);
-            if(!regenerateAudio) {
+            if (!regenerateAudio) {
                 regenerateAudio = true;
                 pEnv->SetBooleanField(thiz,fid,regenerateAudio);
             }
         }
     }
-    if (pContext->pEditSettings != NULL )
+
+    if (pContext->pEditSettings != NULL)
     {
         result = pContext->mPreviewController->loadEditSettings(pContext->pEditSettings,
-        pContext->mAudioSettings);
+            pContext->mAudioSettings);
         videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
                                             (M4NO_ERROR != result), result);
 
-        pContext->mPreviewController->setJniCallback((void*)pContext,
-         (jni_progress_callback_fct)jniPreviewProgressCallback);
+        if (needToBeLoaded) {
+            pContext->mPreviewController->setJniCallback((void*)pContext,
+            (jni_progress_callback_fct)jniPreviewProgressCallback);
+        }
+    }
 
+videoEditor_populateSettings_cleanup:
         j = 0;
         while (j < nbOverlays)
         {
@@ -1766,14 +1909,22 @@ videoEditor_populateSettings(
                 pContext->pEditSettings->\
                 Effects[pOverlayIndex[j]].xVSS.pFramingBuffer->pac_data = M4OSA_NULL;
             }
-            if (pContext->pEditSettings->Effects[pOverlayIndex[j]].xVSS.pFramingBuffer != M4OSA_NULL) {
-                M4OSA_free((M4OSA_MemAddr32)pContext->pEditSettings->\
-                Effects[pOverlayIndex[j]].xVSS.pFramingBuffer);
-                pContext->pEditSettings->Effects[pOverlayIndex[j]].xVSS.pFramingBuffer = M4OSA_NULL;
-            }
             j++;
         }
-    }
+
+        j = 0;
+        while (j < pContext->pEditSettings->nbEffects)
+        {
+            if (pContext->pEditSettings->Effects[j].xVSS.pFramingFilePath != M4OSA_NULL) {
+                if (pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer != M4OSA_NULL) {
+                    M4OSA_free((M4OSA_MemAddr32)pContext->pEditSettings->\
+                    Effects[j].xVSS.pFramingBuffer);
+                    pContext->pEditSettings->Effects[j].xVSS.pFramingBuffer = M4OSA_NULL;
+                }
+            }
+          j++;
+        }
+
     if (pOverlayIndex != M4OSA_NULL)
     {
         M4OSA_free((M4OSA_MemAddr32)pOverlayIndex);
