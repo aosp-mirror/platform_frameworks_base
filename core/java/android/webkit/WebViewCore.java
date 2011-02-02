@@ -2124,7 +2124,7 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void contentScrollTo(int x, int y) {
+    private void contentScrollTo(int x, int y, boolean onlyIfImeIsShowing) {
         if (!mBrowserFrame.firstLayoutDone()) {
             /*
              * WebKit restore state will be called before didFirstLayout(),
@@ -2137,7 +2137,8 @@ final class WebViewCore {
         }
         if (mWebView != null) {
             Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_TO_MSG_ID, x, y);
+                    WebView.SCROLL_TO_MSG_ID, x, y,
+                    Boolean.valueOf(onlyIfImeIsShowing));
             if (mDrawIsScheduled) {
                 mEventHub.sendMessage(Message.obtain(null,
                         EventHub.MESSAGE_RELAY, msg));
