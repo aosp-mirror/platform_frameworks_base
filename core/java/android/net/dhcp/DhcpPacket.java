@@ -561,7 +561,7 @@ abstract class DhcpPacket {
         InetAddress nextIp;
         InetAddress relayIp;
         byte[] clientMac;
-        List<InetAddress> dnsServers = null;
+        List<InetAddress> dnsServers = new ArrayList<InetAddress>();
         InetAddress gateway = null; // aka router
         Integer leaseTime = null;
         InetAddress serverIdentifier = null;
@@ -684,7 +684,6 @@ abstract class DhcpPacket {
                         expectedLen = 4;
                         break;
                     case DHCP_DNS_SERVER:
-                        dnsServers = new ArrayList<InetAddress>();
                         expectedLen = 0;
 
                         for (expectedLen = 0; expectedLen < optionLen;
