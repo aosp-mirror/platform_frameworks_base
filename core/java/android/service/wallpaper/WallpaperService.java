@@ -214,6 +214,7 @@ public abstract class WallpaperService extends Service {
                     throw new UnsupportedOperationException(
                             "Wallpapers currently only support sizing from layout");
                 }
+                super.setFixedSize(width, height);
             }
             
             public void setKeepScreenOn(boolean screenOn) {
