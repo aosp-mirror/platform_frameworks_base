@@ -56,6 +56,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -77,7 +78,6 @@ import java.util.Map.Entry;
 public final class BridgeContext extends Activity {
 
     private Resources mSystemResources;
-    private Theme mTheme;
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
@@ -87,7 +87,7 @@ public final class BridgeContext extends Activity {
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
 
-    // maps for dynamically generated id representing style objects (IStyleResourceValue)
+    // maps for dynamically generated id representing style objects (StyleResourceValue)
     private Map<Integer, StyleResourceValue> mDynamicIdToStyleMap;
     private Map<StyleResourceValue, Integer> mStyleToDynamicIdMap;
     private int mDynamicIdGenerator = 0x01030000; // Base id for framework R.style
@@ -222,6 +222,50 @@ public final class BridgeContext extends Activity {
         return mParserStack.get(mParserStack.size() - 2);
     }
 
+    public boolean resolveThemeAttribute(int resid, TypedValue outValue, boolean resolveRefs) {
+        Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(resid);
+        if (resourceInfo == null) {
+            resourceInfo = mProjectCallback.resolveResourceId(resid);
+        }
+
+        if (resourceInfo == null) {
+            return false;
+        }
+
+        ResourceValue value = mRenderResources.findItemInTheme(resourceInfo.getSecond());
+        if (resolveRefs) {
+            value = mRenderResources.resolveResValue(value);
+        }
+
+        // check if this is a style resource
+        if (value instanceof StyleResourceValue) {
+            // get the id that will represent this style.
+            outValue.resourceId = getDynamicIdByStyle((StyleResourceValue)value);
+            return true;
+        }
+
+
+        int a;
+        // if this is a framework value.
+        if (value.isFramework()) {
+            // look for idName in the android R classes.
+            // use 0 a default res value as it's not a valid id value.
+            a = getFrameworkResourceValue(value.getResourceType(), value.getName(), 0 /*defValue*/);
+        } else {
+            // look for idName in the project R class.
+            // use 0 a default res value as it's not a valid id value.
+            a = getProjectResourceValue(value.getResourceType(), value.getName(), 0 /*defValue*/);
+        }
+
+        if (a != 0) {
+            outValue.resourceId = a;
+            return true;
+        }
+
+        return false;
+    }
+
+
     // ------------- Activity Methods
 
     @Override
@@ -275,7 +319,7 @@ public final class BridgeContext extends Activity {
     @Override
     public final TypedArray obtainStyledAttributes(int resid, int[] attrs)
             throws Resources.NotFoundException {
-        // get the IStyleResourceValue based on the resId;
+        // get the StyleResourceValue based on the resId;
         StyleResourceValue style = getStyleByDynamicId(resid);
 
         if (style == null) {
