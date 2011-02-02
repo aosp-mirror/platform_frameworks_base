@@ -37,7 +37,7 @@ page.title=Building and Running Apps
   
   <p>The following diagram depicts the components involved in building and running an application:</p>
 
-  <img src="/images/build-simplified.png" />
+  <img src="{@docRoot}images/build-simplified.png" />
 
   <h2 id="detailed-build">A Detailed Look at the Build Process</h2>
 
@@ -49,7 +49,7 @@ page.title=Building and Running Apps
   tools and processes are masked from you. The following diagram depicts the different tools and
   processes that are involved in a build:</p>
 
-  <p><img src="/images/build.png" /></p>
+  <p><img src="{@docRoot}images/build.png" /></p>
 
   <p>The general process for a typical build is outlined below:</p>
 

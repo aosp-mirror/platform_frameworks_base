@@ -471,7 +471,7 @@ in figure 1, with two linked folders (in this example, <code>MyLibrary</code> an
 <code>MyLibrary/src</code>. Eclipse shows an error on one of them because they
 are duplicate links to a single class.</p> 
  
-<img src="/images/developing/lib-migration-0.png" alt=""> 
+<img src="{@docRoot}images/developing/lib-migration-0.png" alt=""> 
 <p class="img-caption"><strong>Figure 1.</strong> Library project migration error</p>
 <p>To fix the error, remove the linked folder that <em>does not</em> contain the
 <code>_src</code> suffix. </p> 
@@ -481,14 +481,14 @@ are duplicate links to a single class.</p>
 <code>MyLibrary</code> folder) and choose <strong>Build Path</strong> &gt;
 <strong>Remove from Build Path</strong>, as shown in figure 2.</li> 
  
-<img src="/images/developing/lib-migration-1.png" style="height:600px"
+<img src="{@docRoot}images/developing/lib-migration-1.png" style="height:600px"
 alt=""> 
 <p class="img-caption"><strong>Figure 2.</strong> Remove from Build Path menu item</p>
  
 <li>Next, when asked about unlinking the folder from the project, select
 <strong>Yes</strong>, as shown in figure 3.</li> 
  
-<img src="/images/developing/lib-migration-2.png" alt=""> 
+<img src="{@docRoot}images/developing/lib-migration-2.png" alt=""> 
 
 <p class="img-caption"><strong>Figure 3.</strong> Unlink folder confirmation window</p>
 </ol> 
