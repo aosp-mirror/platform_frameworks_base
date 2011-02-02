@@ -16,8 +16,8 @@
 
 package android.core;
 
-import android.security.MessageDigest;
 import android.test.suitebuilder.annotation.SmallTest;
+import java.security.MessageDigest;
 import junit.framework.TestCase;
 
 /**

@@ -86,8 +86,6 @@ extern int register_android_media_AudioTrack(JNIEnv *env);
 extern int register_android_media_JetPlayer(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
 
-extern int register_android_message_digest_sha1(JNIEnv *env);
-
 extern int register_android_util_FloatMath(JNIEnv* env);
 
 namespace android {
@@ -149,7 +147,6 @@ extern int register_android_net_LocalSocketImpl(JNIEnv* env);
 extern int register_android_net_NetworkUtils(JNIEnv* env);
 extern int register_android_net_TrafficStats(JNIEnv* env);
 extern int register_android_net_wifi_WifiManager(JNIEnv* env);
-extern int register_android_security_Md5MessageDigest(JNIEnv *env);
 extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_AndroidBidi(JNIEnv *env);
 extern int register_android_text_KeyCharacterMap(JNIEnv *env);
@@ -1202,7 +1199,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_content_StringBlock),
     REG_JNI(register_android_content_XmlBlock),
     REG_JNI(register_android_emoji_EmojiFactory),
-    REG_JNI(register_android_security_Md5MessageDigest),
     REG_JNI(register_android_text_AndroidCharacter),
     REG_JNI(register_android_text_AndroidBidi),
     REG_JNI(register_android_text_KeyCharacterMap),
@@ -1293,7 +1289,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_server_BluetoothEventLoop),
     REG_JNI(register_android_server_BluetoothA2dpService),
     REG_JNI(register_android_server_Watchdog),
-    REG_JNI(register_android_message_digest_sha1),
     REG_JNI(register_android_ddm_DdmHandleNativeHeap),
     REG_JNI(register_android_backup_BackupDataInput),
     REG_JNI(register_android_backup_BackupDataOutput),

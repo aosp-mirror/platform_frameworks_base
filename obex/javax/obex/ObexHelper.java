@@ -32,11 +32,11 @@
 
 package javax.obex;
 
-import android.security.Md5MessageDigest;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -916,8 +916,12 @@ public final class ObexHelper {
      * @return the MD5 hash of the byte array
      */
     public static byte[] computeMd5Hash(byte[] in) {
-        Md5MessageDigest md5 = new Md5MessageDigest();
-        return md5.digest(in);
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            return md5.digest(in);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

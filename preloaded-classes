@@ -556,9 +556,6 @@ android.provider.Settings$NameValueTable
 android.provider.Settings$Secure
 android.provider.Settings$System
 android.renderscript.RenderScript
-android.security.Md5MessageDigest
-android.security.MessageDigest
-android.security.Sha1MessageDigest
 android.server.BluetoothA2dpService
 android.server.BluetoothEventLoop
 android.server.BluetoothService
@@ -1907,6 +1904,7 @@ com.android.org.bouncycastle.crypto.Digest
 com.android.org.bouncycastle.crypto.ExtendedDigest
 com.android.org.bouncycastle.crypto.Mac
 com.android.org.bouncycastle.crypto.digests.OpenSSLDigest
+com.android.org.bouncycastle.crypto.digests.OpenSSLDigest$MD5
 com.android.org.bouncycastle.crypto.digests.OpenSSLDigest$SHA1
 com.android.org.bouncycastle.crypto.macs.HMac
 com.android.org.bouncycastle.jce.ProviderConfigurationPermission
