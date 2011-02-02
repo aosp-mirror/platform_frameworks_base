@@ -117,7 +117,11 @@ public class ImageWallpaper extends WallpaperService {
             synchronized (mLock) {
                 updateWallpaperLocked();
             }
-            surfaceHolder.setSizeFromLayout();
+            surfaceHolder.setFixedSize(getDesiredMinimumWidth(), getDesiredMinimumHeight());
+            // Used a fixed size surface, because we are special.  We can do
+            // this because we know the current design of window animations doesn't
+            // cause this to break.
+            //surfaceHolder.setSizeFromLayout();
         }
 
         @Override
