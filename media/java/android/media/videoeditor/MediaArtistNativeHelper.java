@@ -2064,6 +2064,20 @@ class MediaArtistNativeHelper {
             effectSettings.alphaBlendingFadeInTimePercent = 100;
             effectSettings.alphaBlendingFadeOutTimePercent = 100;
             effectSettings.framingBuffer = null;
+
+            /*
+             * Set the resized RGB file dimensions
+             */
+            effectSettings.width = overlay.getResizedRGBSizeWidth();
+            if(effectSettings.width == 0) {
+                effectSettings.width = bitmap.getWidth();
+            }
+
+            effectSettings.height = overlay.getResizedRGBSizeHeight();
+            if(effectSettings.height == 0) {
+                effectSettings.height = bitmap.getHeight();
+            }
+
         }
 
         effectSettings.topLeftX = 0;
@@ -2096,6 +2110,11 @@ class MediaArtistNativeHelper {
         }
         effectSettings.framingScaledSize = findVideoResolution(aspectRatio, mediaItemHeight);
         return effectSettings;
+    }
+
+     /* get Video Editor aspect ratio */
+    int nativeHelperGetAspectRatio() {
+        return mVideoEditor.getAspectRatio();
     }
 
     /**

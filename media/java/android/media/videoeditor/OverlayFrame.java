@@ -21,14 +21,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.CompressFormat;
-
 import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
+import android.util.Pair;
+
 
 /**
  * This class is used to overlay an image on top of a media item.
@@ -44,6 +48,17 @@ public class OverlayFrame extends Overlay {
 
     private int mOFWidth;
     private int mOFHeight;
+
+    /**
+     * resized RGB Image dimensions
+     */
+    private int mResizedRGBWidth;
+    private int mResizedRGBHeight;
+
+    /**
+     *  The resize paint
+     */
+    private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
     /**
      * An object of this type cannot be instantiated by using the default
@@ -74,6 +89,8 @@ public class OverlayFrame extends Overlay {
         mBitmap = bitmap;
         mFilename = null;
         mBitmapFileName = null;
+        mResizedRGBWidth = 0;
+        mResizedRGBHeight = 0;
     }
 
     /**
@@ -95,6 +112,8 @@ public class OverlayFrame extends Overlay {
         mBitmapFileName = filename;
         mBitmap = BitmapFactory.decodeFile(mBitmapFileName);
         mFilename = null;
+        mResizedRGBWidth = 0;
+        mResizedRGBHeight = 0;
     }
 
     /**
@@ -182,32 +201,23 @@ public class OverlayFrame extends Overlay {
         mOFHeight = mBitmap.getHeight();
 
         mFilename = path + "/" + "Overlay" + getId() + ".rgb";
-        if (!(new File(mFilename).exists())) {
-            /**
-             * Save the image to a file ; as a rgb
-             */
-            final FileOutputStream fl = new FileOutputStream(mFilename);
-            final DataOutputStream dos = new DataOutputStream(fl);
 
-            /**
-             * populate the rgb file with bitmap data
-             */
-            final int [] framingBuffer = new int[mOFWidth];
-            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
-            IntBuffer intBuffer;
+        /* resize and save rgb as per project aspect ratio */
+        MediaArtistNativeHelper nativeHelper = (super.getMediaItem()).getNativeContext();
 
-            byte[] array = byteBuffer.array();
-            int tmp = 0;
-            while(tmp < mOFHeight) {
-                mBitmap.getPixels(framingBuffer,0,mOFWidth,0,tmp,mOFWidth,1);
-                intBuffer = byteBuffer.asIntBuffer();
-                intBuffer.put(framingBuffer,0,mOFWidth);
-                dos.write(array);
-                tmp += 1;
-            }
-            fl.flush();
-            fl.close();
-        }
+        /* get height and width for story board aspect ratio */
+        final Pair<Integer, Integer> maxResolution;
+        final Pair<Integer, Integer>[] resolutions;
+        resolutions = MediaProperties.getSupportedResolutions(nativeHelper.nativeHelperGetAspectRatio());
+
+        // Get the highest resolution
+        maxResolution = resolutions[resolutions.length - 1];
+
+        /* Generate the rgb file with rendering mode */
+        generateOverlayWithRenderingMode (super.getMediaItem(), this,
+                maxResolution.second /* max Height */ ,
+                maxResolution.first /* max Width */);
+
         return mFilename;
     }
 
@@ -238,6 +248,30 @@ public class OverlayFrame extends Overlay {
      void setOverlayFrameWidth(int width) {
          mOFWidth = width;
      }
+
+    /*
+     * Set the resized RGB widht and height
+     */
+     void setResizedRGBSize(int width, int height) {
+        mResizedRGBWidth = width;
+        mResizedRGBHeight = height;
+     }
+
+    /*
+     * Get the resized RGB Height
+     */
+     int getResizedRGBSizeHeight() {
+         return mResizedRGBHeight;
+     }
+
+    /*
+     * Get the resized RGB Width
+     */
+     int getResizedRGBSizeWidth() {
+         return mResizedRGBWidth;
+     }
+
+
     /**
      * Delete the overlay files
      */
@@ -255,6 +289,176 @@ public class OverlayFrame extends Overlay {
         if (mBitmapFileName != null) {
             new File(mBitmapFileName).delete();
             mBitmapFileName = null;
+        }
+    }
+
+     /**
+     * Delete the overlay related files
+     */
+    void invalidateGeneratedFiles() {
+        if (mFilename != null) {
+            new File(mFilename).delete();
+            mFilename = null;
+        }
+
+        if (mBitmapFileName != null) {
+            new File(mBitmapFileName).delete();
+            mBitmapFileName = null;
+        }
+    }
+
+    void generateOverlayWithRenderingMode (MediaItem mediaItemsList, OverlayFrame overlay, int height , int width)
+        throws FileNotFoundException, IOException {
+
+        final MediaItem t = mediaItemsList;
+
+        /* get the rendering mode */
+        int renderMode = t.getRenderingMode();
+
+        Bitmap overlayBitmap = ((OverlayFrame)overlay).getBitmap();
+
+        /*
+         * Check if the resize of Overlay is needed with rendering mode applied
+         * because of change in export dimensions
+         */
+        int resizedRGBFileHeight = ((OverlayFrame)overlay).getResizedRGBSizeHeight();
+        int resizedRGBFileWidth = ((OverlayFrame)overlay).getResizedRGBSizeWidth();
+
+        /* Get original bitmap width if it is not resized */
+        if(resizedRGBFileWidth == 0) {
+            resizedRGBFileWidth = overlayBitmap.getWidth();
+        }
+        /* Get original bitmap height if it is not resized */
+        if(resizedRGBFileHeight == 0) {
+            resizedRGBFileHeight = overlayBitmap.getHeight();
+        }
+
+        if (resizedRGBFileWidth != width || resizedRGBFileHeight != height
+            || (!(new File(((OverlayFrame)overlay).getFilename()).exists()))) {
+            /*
+             *  Create the canvas bitmap
+             */
+            final Bitmap destBitmap = Bitmap.createBitmap((int)width,
+                                                      (int)height,
+                                                      Bitmap.Config.ARGB_8888);
+            final Canvas overlayCanvas = new Canvas(destBitmap);
+            final Rect destRect;
+            final Rect srcRect;
+
+            switch (renderMode) {
+                case MediaItem.RENDERING_MODE_STRETCH: {
+                    destRect = new Rect(0, 0, overlayCanvas.getWidth(),
+                                             overlayCanvas.getHeight());
+                    srcRect = new Rect(0, 0, overlayBitmap.getWidth(),
+                                             overlayBitmap.getHeight());
+                    break;
+                }
+
+                case MediaItem.RENDERING_MODE_BLACK_BORDER: {
+                    int left, right, top, bottom;
+                    float aROverlayImage, aRCanvas;
+                    aROverlayImage = (float)(overlayBitmap.getWidth()) /
+                                     (float)(overlayBitmap.getHeight());
+
+                    aRCanvas = (float)(overlayCanvas.getWidth()) /
+                                     (float)(overlayCanvas.getHeight());
+
+                    if (aROverlayImage > aRCanvas) {
+                        int newHeight = ((overlayCanvas.getWidth() * overlayBitmap.getHeight())
+                                         / overlayBitmap.getWidth());
+                        left = 0;
+                        top  = (overlayCanvas.getHeight() - newHeight) / 2;
+                        right = overlayCanvas.getWidth();
+                        bottom = top + newHeight;
+                    } else {
+                        int newWidth = ((overlayCanvas.getHeight() * overlayBitmap.getWidth())
+                                            / overlayBitmap.getHeight());
+                        left = (overlayCanvas.getWidth() - newWidth) / 2;
+                        top  = 0;
+                        right = left + newWidth;
+                        bottom = overlayCanvas.getHeight();
+                    }
+
+                    destRect = new Rect(left, top, right, bottom);
+                    srcRect = new Rect(0, 0, overlayBitmap.getWidth(), overlayBitmap.getHeight());
+                    break;
+                }
+
+                case MediaItem.RENDERING_MODE_CROPPING: {
+                    // Calculate the source rect
+                    int left, right, top, bottom;
+                    float aROverlayImage, aRCanvas;
+                    aROverlayImage = (float)(overlayBitmap.getWidth()) /
+                                     (float)(overlayBitmap.getHeight());
+                    aRCanvas = (float)(overlayCanvas.getWidth()) /
+                                    (float)(overlayCanvas.getHeight());
+                    if (aROverlayImage < aRCanvas) {
+                        int newHeight = ((overlayBitmap.getWidth() * overlayCanvas.getHeight())
+                                   / overlayCanvas.getWidth());
+
+                        left = 0;
+                        top  = (overlayBitmap.getHeight() - newHeight) / 2;
+                        right = overlayBitmap.getWidth();
+                        bottom = top + newHeight;
+                    } else {
+                        int newWidth = ((overlayBitmap.getHeight() * overlayCanvas.getWidth())
+                                    / overlayCanvas.getHeight());
+                        left = (overlayBitmap.getWidth() - newWidth) / 2;
+                        top  = 0;
+                        right = left + newWidth;
+                        bottom = overlayBitmap.getHeight();
+                    }
+
+                    srcRect = new Rect(left, top, right, bottom);
+                    destRect = new Rect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
+                    break;
+                }
+
+                default: {
+                    throw new IllegalStateException("Rendering mode: " + renderMode);
+                }
+            }
+
+            overlayCanvas.drawBitmap(overlayBitmap, srcRect, destRect, sResizePaint);
+
+            /*
+             * Write to the dest file
+             */
+            String outFileName = ((OverlayFrame)overlay).getFilename();
+
+            /*
+             * Save the image to same rgb file
+             */
+            if (outFileName != null) {
+                new File(outFileName).delete();
+            }
+
+            final FileOutputStream fl = new FileOutputStream(outFileName);
+            final DataOutputStream dos = new DataOutputStream(fl);
+
+            /*
+             * Populate the rgb file with bitmap data
+             */
+            final int [] framingBuffer = new int[width];
+            ByteBuffer byteBuffer = ByteBuffer.allocate(framingBuffer.length * 4);
+            IntBuffer intBuffer;
+
+            byte[] array = byteBuffer.array();
+            int tmp = 0;
+            while(tmp < height) {
+                destBitmap.getPixels(framingBuffer,0,width,0,tmp,width,1);
+                intBuffer = byteBuffer.asIntBuffer();
+                intBuffer.put(framingBuffer,0,width);
+                dos.write(array);
+                tmp += 1;
+            }
+            fl.flush();
+            fl.close();
+
+            /*
+             * Set the resized RGB width and height
+             */
+            ((OverlayFrame)overlay).setResizedRGBSize(width, height);
         }
     }
 }

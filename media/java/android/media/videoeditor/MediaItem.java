@@ -187,6 +187,10 @@ public abstract class MediaItem {
         if (mEndTransition != null) {
             mEndTransition.invalidate();
         }
+
+        for (Overlay overlay : mOverlays) {
+            ((OverlayFrame)overlay).invalidateGeneratedFiles();
+        }
     }
 
     /**
