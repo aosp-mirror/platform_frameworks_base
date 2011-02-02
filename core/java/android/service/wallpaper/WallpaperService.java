@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -204,6 +205,17 @@ public abstract class WallpaperService extends Service {
                 return mIsCreating;
             }
 
+            @Override
+            public void setFixedSize(int width, int height) {
+                if (Process.myUid() != Process.SYSTEM_UID) {
+                    // Regular apps can't do this.  It can only work for
+                    // certain designs of window animations, so you can't
+                    // rely on it.
+                    throw new UnsupportedOperationException(
+                            "Wallpapers currently only support sizing from layout");
+                }
+            }
+            
             public void setKeepScreenOn(boolean screenOn) {
                 throw new UnsupportedOperationException(
                         "Wallpapers do not support keep screen on");
