@@ -296,12 +296,12 @@ public final class BluetoothAdapter {
      * can use this intent.
      *
      * <p>This intent will have 3 extras:
-     * {@link #EXTRA_STATE} - The current state.
-     * {@link #EXTRA_PREVIOUS_STATE}- The previous.
+     * {@link #EXTRA_CONNECTION_STATE} - The current connection state.
+     * {@link #EXTRA_PREVIOUS_CONNECTION_STATE}- The previous connection state.
      * {@link BluetoothDevice#EXTRA_DEVICE} - The remote device.
      *
-     * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
-     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #EXTRA_CONNECTION_STATE} or {@link #EXTRA_PREVIOUS_CONNECTION_STATE}
+     * can be any of {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
      * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
