@@ -373,4 +373,8 @@
     <!-- Boolean indicating if restoring network selection should be skipped -->
     <!-- The restoring is handled by modem if it is true-->
     <bool translatable="false" name="skip_restoring_network_selection">false</bool>
+
+    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
+    <string-array name="config_twoDigitNumberPattern">
+    </string-array>
 </resources>
