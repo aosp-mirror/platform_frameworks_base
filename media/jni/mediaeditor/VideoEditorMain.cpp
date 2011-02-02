@@ -454,7 +454,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
         case MSG_TYPE_OVERLAY_CLEAR:
             isSendProgress = false;
             pContext->mOverlayFileName = NULL;
-            LOGI("MSG_TYPE_OVERLAY_CLEAR");
+            LOGV("MSG_TYPE_OVERLAY_CLEAR");
             //argc is not used
             pContext->mIsUpdateOverlay = true;
             break;
