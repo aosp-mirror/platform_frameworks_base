@@ -791,6 +791,9 @@ public class WebView extends AbsoluteLayout
     // The value of 1 means the accessibility script is already injected
     private static final String PATTERN_MATCH_AXS_URL_PARAMETER = "(\\?axs=(0|1))|(&axs=(0|1))";
 
+    // TextToSpeech instance exposed to JavaScript to the injected screenreader.
+    private TextToSpeech mTextToSpeech;
+
     // variable to cache the above pattern in case accessibility is enabled.
     private Pattern mMatchAxsUrlParameterPattern;
 
@@ -980,13 +983,6 @@ public class WebView extends AbsoluteLayout
 
         // Used by the chrome stack to find application paths
         JniUtil.setContext(context);
-
-        if (AccessibilityManager.getInstance(context).isEnabled()) {
-            if (javaScriptInterfaces == null) {
-                javaScriptInterfaces = new HashMap<String, Object>();
-            }
-            exposeAccessibilityJavaScriptApi(javaScriptInterfaces);
-        }
 
         mCallbackProxy = new CallbackProxy(context, this);
         mViewManager = new ViewManager(this);
@@ -1183,23 +1179,30 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Exposes accessibility APIs to JavaScript by appending them to the JavaScript
-     * interfaces map provided by the WebView client. In case of conflicting
-     * alias with the one of the accessibility API the user specified one wins.
+     * Adds accessibility APIs to JavaScript.
      *
-     * @param javaScriptInterfaces A map with interfaces to be exposed to JavaScript.
+     * Note: This method is responsible to performing the necessary
+     *       check if the accessibility APIs should be exposed.
      */
-    private void exposeAccessibilityJavaScriptApi(Map<String, Object> javaScriptInterfaces) {
-        if (javaScriptInterfaces.containsKey(ALIAS_ACCESSIBILITY_JS_INTERFACE)) {
-            Log.w(LOGTAG, "JavaScript interface mapped to \"" + ALIAS_ACCESSIBILITY_JS_INTERFACE
-                    + "\" overrides the accessibility API JavaScript interface. No accessibility"
-                    + "API will be exposed to JavaScript!");
-            return;
+    private void addAccessibilityApisToJavaScript() {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()
+                && getSettings().getJavaScriptEnabled()) {
+            // exposing the TTS for now ...
+            mTextToSpeech = new TextToSpeech(getContext(), null); 
+            addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
         }
+    }
 
-        // expose the TTS for now ...
-        javaScriptInterfaces.put(ALIAS_ACCESSIBILITY_JS_INTERFACE,
-                new TextToSpeech(getContext(), null));
+    /**
+     * Removes accessibility APIs from JavaScript.
+     */
+    private void removeAccessibilityApisFromJavaScript() {
+        // exposing the TTS for now ...
+        if (mTextToSpeech != null) {
+            removeJavascriptInterface(ALIAS_ACCESSIBILITY_JS_INTERFACE);
+            mTextToSpeech.shutdown();
+            mTextToSpeech = null;
+        }
     }
 
     @Override
@@ -4996,6 +4999,8 @@ public class WebView extends AbsoluteLayout
                 treeObserver.addOnScrollChangedListener(mScrollChangedListener);
             }
         }
+
+        addAccessibilityApisToJavaScript();
     }
 
     @Override
@@ -5015,6 +5020,8 @@ public class WebView extends AbsoluteLayout
                 mScrollChangedListener = null;
             }
         }
+
+        removeAccessibilityApisFromJavaScript();
 
         super.onDetachedFromWindow();
     }
