@@ -8161,7 +8161,7 @@ public class WebView extends AbsoluteLayout
      * @hide only used by the Browser
      */
     public void setExpandedTileBounds(boolean enabled) {
-        mWebViewCore.sendMessage(EventHub.SET_EXPANDED_TILE_BOUNDS, enabled ? 1 : 0, 0);
+        nativeSetExpandedTileBounds(enabled);
     }
 
     /**
@@ -8319,6 +8319,8 @@ public class WebView extends AbsoluteLayout
     // return NO_LEFTEDGE means failure.
     static final int NO_LEFTEDGE = -1;
     native int nativeGetBlockLeftEdge(int x, int y, float scale);
+
+    private native void nativeSetExpandedTileBounds(boolean enabled);
 
     // Returns a pointer to the scrollable LayerAndroid at the given point.
     private native int      nativeScrollableLayer(int x, int y, Rect scrollRect,
