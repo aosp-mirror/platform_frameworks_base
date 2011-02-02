@@ -306,6 +306,9 @@ class BluetoothEventLoop {
                 value = str.toString();
             }
             mBluetoothService.setProperty(name, value);
+            if (name.equals("UUIDs")) {
+                mBluetoothService.updateBluetoothState(value);
+            }
         } else if (name.equals("Powered")) {
             // bluetoothd has restarted, re-read all our properties.
             // Note: bluez only sends this property change when it restarts.
