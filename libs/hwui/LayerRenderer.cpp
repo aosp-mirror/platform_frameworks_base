@@ -39,6 +39,7 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
         mLayer->region.clear();
         dirty.set(0.0f, 0.0f, mLayer->width, mLayer->height);
     } else {
+        dirty.intersect(0.0f, 0.0f, mLayer->width, mLayer->height);
         android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
         mLayer->region.subtractSelf(r);
     }
