@@ -33,7 +33,7 @@ page.title=Using the Android Emulator
 </div>
 </div>
 
-<img src="/images/emulator-wvga800l.png" alt="Image of the Android Emulator"
+<img src="{@docRoot}images/emulator-wvga800l.png" alt="Image of the Android Emulator"
 width="367" height="349" style="margin-left:2em;float:right;"/>
 <p>The Android SDK includes a virtual mobile device emulator
 that runs on your computer. The emulator lets you prototype, develop, and test
