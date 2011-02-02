@@ -9,6 +9,7 @@ page.title=&lt;supports-screens&gt;
 &lt;supports-screens android:<a href="#small">smallScreens</a>=["true" | "false"] 
                   android:<a href="#normal">normalScreens</a>=["true" | "false"] 
                   android:<a href="#large">largeScreens</a>=["true" | "false"] 
+                  android:<a href="#xlarge">xlargeScreens</a>=["true" | "false"]
                   android:<a href="#any">anyDensity</a>=["true" | "false"] /&gt;
 </pre>
 </dd>
@@ -31,7 +32,7 @@ or scale them up by a factor of 1.5 (high dpi screens).
 The screen density is expressed as dots-per-inch (dpi).</p>
 
 <p>For more information, see 
-<a href="{@docRoot}guide/practices/screens_support.html">Multiple Screens Support</a>.</p>
+<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
 
 <dt>attributes:</dt>
@@ -43,8 +44,10 @@ The screen density is expressed as dots-per-inch (dpi).</p>
      the "normal" (traditional HVGA) screen.  An application that does
      not support small screens <em>will not be available</em> for
      small screen devices, because there is little the platform can do
-     to make such an application work on a smaller screen. Applications using
-     API Level 4 or higher default this to "true", others are "false".
+     to make such an application work on a smaller screen. If the application has set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element's
+{@code android:minSdkVersion} or {@code android:targetSdkVersion} attribute to "4" or higher,
+the default value for this is "true", any value less than "4" results in this set to "false".
   </dd>
   
   <dt><a name="normal"></a>{@code android:normalScreens}</dt>
@@ -60,15 +63,33 @@ The screen density is expressed as dots-per-inch (dpi).</p>
      A large screen is defined as a screen that is significantly larger
      than a "normal" phone screen, and thus may require some special care
      on the application's part to make good use of it. An application that 
-     does not support large screens will be placed as a "postage stamp" on 
-     such a screen, so that it retains the dimensions it was originally
-     designed for. Applications using API Level 4 or higher default 
-     to "true", others are "false".
+     does not support large screens (declares this "false")&mdash;but does support "normal" or
+"small" screens&mdash;will be placed as a "postage stamp" on 
+     a large screen, so that it retains the dimensions it was originally
+     designed for. If the application has set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element's
+{@code android:minSdkVersion} or {@code android:targetSdkVersion} attribute to "4" or higher,
+the default value for this is "true", any value less than "4" results in this set to "false".
+  </dd>
+  
+  <dt><a name="xlarge"></a>{@code android:xlargeScreens}</dt>
+  <dd>Indicates whether the application supports extra large screen form-factors.
+     An xlarge screen is defined as a screen that is significantly larger
+     than a "large" screen, such as a tablet (or something larger) and may require special care
+     on the application's part to make good use of it. An application that 
+     does not support xlarge screens (declares this "false")&mdash;but does support "large",
+"normal", or "small" screens&mdash;will be placed as a "postage stamp" on 
+     an xlarge screen, so that it retains the dimensions it was originally
+     designed for. If the application has set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element's
+{@code android:minSdkVersion} or {@code android:targetSdkVersion} attribute to "4" or higher,
+the default value for this is "true", any value less than "4" results in this set to "false".
+     <p>This attribute was introduced in API Level 9.</p>
   </dd>
   
   <dt><a name="any"></a>{@code android:anyDensity}</dt>
-  <dd>Indicates whether the application can accommodate any screen
-     density.  Older applications (pre API Level 4) are assumed unable to
+  <dd>Indicates whether the application includes resources to accommodate any screen
+     density.  Older applications (before API Level 4) are assumed unable to
      accomodate all densities and this is "false" by default. Applications using 
      API Level 4 or higher are assumed able to and this is "true" by default. 
      You can explicitly supply your abilities here.
@@ -84,7 +105,8 @@ The screen density is expressed as dots-per-inch (dpi).</p>
 <dt>see also:</dt>
 <dd>
   <ul>
-    <li><a href="{@docRoot}guide/practices/screens_support.html">Multiple Screens Support</a></li>
+    <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a></li>
     <li>{@link android.util.DisplayMetrics}</li>
   </ul>
 </dd>
