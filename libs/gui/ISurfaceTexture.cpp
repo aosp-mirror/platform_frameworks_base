@@ -38,6 +38,7 @@ enum {
     CANCEL_BUFFER,
     SET_CROP,
     SET_TRANSFORM,
+    GET_ALLOCATOR,
 };
 
 
@@ -123,6 +124,13 @@ public:
         status_t result = reply.readInt32();
         return result;
     }
+
+    virtual sp<IBinder> getAllocator() {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        remote()->transact(GET_ALLOCATOR, data, &reply);
+        return reply.readStrongBinder();
+    }
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceTexture, "android.gui.SurfaceTexture");
@@ -193,6 +201,12 @@ status_t BnSurfaceTexture::onTransact(
             uint32_t transform = data.readInt32();
             status_t result = setTransform(transform);
             reply->writeInt32(result);
+            return NO_ERROR;
+        } break;
+        case GET_ALLOCATOR: {
+            CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            sp<IBinder> result = getAllocator();
+            reply->writeStrongBinder(result);
             return NO_ERROR;
         } break;
     }
