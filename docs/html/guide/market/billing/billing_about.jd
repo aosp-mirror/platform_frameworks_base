@@ -1,0 +1,73 @@
+page.title=About this Release
+@jd:body
+
+<style type="text/css">
+  #jd-content {
+    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
+  }
+</style>
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-about">About this Release</a></li>
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">Sample Application</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_overview.html">Overview of In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_integrate.html">Implementing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_testing.html">Testing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_admin.html">Administering In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_reference.html">In-app Billing Reference</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="special" style="margin-right:345px">
+  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+</div>
+
+<p>This documentation gives you an early look at the Android Market In-app Billing service. We are providing this documentation to help you get started designing your in-app billing implementation. </p>
+
+<p>In addition to this documentation, we are providing a <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a> that shows you how to implement in-app billing. Although you can compile the sample application, load it on a device, and run it, you cannot use it to make purchases at this time. In-app billing relies on version 2.3.0 (and higher) of the Android Market application, which may not be available yet.</p>
+
+<p>In the coming weeks we plan to launch the testing phase of the in-app billing release. Following the testing phase we will launch in-app billing to the general public (see table 1 for a summary of upcoming launch milestones).
+
+<p class="table-caption"><strong>Table 1.</strong> Summary of launch milestones for in-app billing.</p>
+
+<table>
+
+<tr>
+<th>Release Phase</th>
+<th>Android Market Application</th>
+<th>Description</th>
+</tr>
+<tr>
+  <td>Early Development</td>
+  <td>Version 2.3.0 not available</td>
+  <td>Provides an early look at documentation and sample application.</td>
+</tr>
+<tr>
+  <td>Test Development</td>
+  <td>Version 2.3.0 available to developers and users</td>
+  <td>In-app billing service allows static testing with reserved product IDs. You cannot publish applications that use in-app billing.</td>
+</tr>
+<tr>
+  <td>Final Release</td>
+  <td>Version 2.3.0 available to developers and users</td>
+  <td>In-app billing service allows end-to-end testing of in-app billing. You can publish applications that use in-app billing.</td>
+</tr>
+
+</table>
+
+<p>During the testing phase we will release version 2.3.0 of the Android Market application. This will allow you to test your in-app billing implementation using the <a href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-static">reserved product IDs and test responses</a>. However, you will not be able to test end-to-end in-app purchases during the testing phase, and you will not be able to publish an application that uses in in-app billing. </p>
+
+<p>After the testing phase is complete, we will release in-app billing to the general public. This will enable you to perform end-to-end tests of your in-app billing implementation using your actual in-app products. You will also be able to publish applications that use in-app billing.</p>
+
+<p>This documentation may change in the coming weeks as we move from the preview phase to the testing phase of this beta release. Be sure to check this documentation frequently for updates.</p>

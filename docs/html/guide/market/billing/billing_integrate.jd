@@ -1,0 +1,617 @@
+page.title=Implementing In-app Billing
+@jd:body
+
+<style type="text/css">
+  #jd-content {
+    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
+  }
+</style>
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#billing-download">Downloading the Sample Application</a></li>
+    <li><a href="#billing-add-aidl">Adding the AIDL file to your project</a></li>
+    <li><a href="#billing-permission">Updating Your Application's Manifest</a></li>
+    <li><a href="#billing-service">Creating a Service</a></li>  
+    <li><a href="#billing-broadcast-receiver">Creating a BroadcastReceiver</a></li>
+    <li><a href="#billing-signatures">Creating a security processing component</a></li>
+    <li><a href="#billing-implement">Modifying Your Application Code</a></li>
+  </ol>
+  <h2>Downloads</h2>
+  <ol>
+    <li><a href="#billing-download">Sample Application</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/market/billing/billing_overview.html">Overview of In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_testing.html">Testing In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_admin.html">Administering In-app Billing</a></li>
+    <li><a href="{@docRoot}guide/market/billing/billing_reference.html">In-app Billing Reference</a></li>
+  </ol>
+</div>
+</div>
+
+<div class="special" style="margin-right:345px">
+  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+</div>
+
+<p>The Android Market In-app Billing service provides a straightforward, simple interface for sending in-app billing requests and managing in-app billing transactions using Android Market. This document helps you implement in-app billing by stepping through the primary implementation tasks, using the in-app billing sample application as an example.</p>
+
+<p>Before you implement in-app billing in your own application, be sure that you read <a href="{@docRoot}guide/market/billing/billing_overview.html">Overview of In-app Billing</a> and <a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a>. These documents provide background information that will make it easier for you to implement in-app billing.</p>
+
+<p>To implement in-app billing in your application, you need to do the following:</p>
+<ol>
+  <li><a href="#billing-download">Download the in-app billing sample application</a>.</li>
+  <li><a href="#billing-add-aidl">Add the IMarketBillingService.aidl file</a> to your project.</li>
+  <li><a href="#billing-permission">Update your AndroidManifest.xml file</a>.</li>
+  <li><a href="#billing-service">Create a Service</a> and bind it to the <code>MarketBillingService</code> so your application can send billing requests and receive billing responses from the Android Market application.</li>
+  <li><a href="#billing-broadcast-receiver">Create a BroadcastReceiver</a> to handle broadcast intents from the Android Market application.</li>
+  <li><a href="#billing-signatures">Create a security processing component</a> to verify the integrity of the transaction messages that are sent by Android Market .</li>
+  <li><a href="#billing-implement">Modify your application code</a> to support in-app billing.</li>
+</ol>
+
+<h2 id="billing-download">Downloading the Sample Application</h2>
+
+<p>The in-app billing sample application shows you how to perform several tasks that are common to all in-app billing implementations, including:</p>
+
+<ul>
+  <li>Sending in-app billing requests to the Android Market application.</li>
+  <li>Handling synchronous responses from the Android Market application.</li>
+  <li>Handling broadcast intents (asynchronous responses) from the Android Market application.</li>
+  <li>Using in-app billing security mechanisms to verify the integrity of billing responses.</li>
+  <li>Creating a user interface that lets users select items for purchase.</li>
+</ul>
+
+<p>The sample application includes an application file (<code><code>Dungeons.java</code></code>), the AIDL file for the <code>MarketBillingService</code> (<code>IMarketBillingService.aidl</code>), and several classes that demonstrate in-app billing messaging. It also includes a class that demonstrates basic security tasks, such as signature verification.</p>
+
+<p>Table 1 lists the source files that are included with the sample application.</p>
+<p class="table-caption" id="source-files-table"><strong>Table 1.</strong>
+In-app billing sample application source files.</p>
+
+<table>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>IMarketBillingService.aidl</td>
+<td>Android Interface Definition Library (AIDL) file that defines the IPC interface to the Android Market in-app billing service (<code>MarketBillingService</code>).</td>
+</tr>
+
+<tr>
+<td>Dungeons.java</td>
+<td>Sample application file that provides a UI for making purchases and diplaying purchase history.</td>
+</tr>
+
+<tr>
+<td>PurchaseDatabase.java</td>
+<td>A local database for storing purchase information.</td>
+</tr>
+
+<tr>
+  <td>BillingReceiver.java</td>
+  <td>A {@link android.content.BroadcastReceiver} that receives asynchronous response messages (broadcast intents) from Android Market. Forwards all messages to the <code>BillingService</code>.</td>
+</tr>
+<tr>
+  <td>BillingService.java</td>
+  <td>A {@link android.app.Service} that sends messages to Android Market on behalf of the application by connecting (binding) to the <code>MarketBillingService</code>.</td>
+</tr>
+
+<tr>
+  <td>ResponseHandler.java</td>
+  <td>A {@link android.os.Handler} that contains methods for updating the purchases database and the UI.</td>
+</tr>
+
+<tr>
+  <td>PurchaseObserver.java</td>
+  <td>An abstract class for observing changes related to purchases.</td>
+</tr>
+
+<tr>
+<td>Security.java</td>
+<td>Provides various security-related methods.</td>
+</tr>
+
+<tr>
+<td>Consts.java</td>
+<td>Defines various Android Market constants and sample application constants. All constants that are defined by Android Market must be defined the same way in your application.</td>
+</tr>
+
+<tr>
+<td>Base64.java and Base64DecoderException.java</td>
+<td>Provides conversion services from binary to Base64 encoding. The <code>Security</code> class relies on these utility classes.</td>
+</tr>
+
+</table>
+
+<p>The in-app billing sample application is available as a downloadable component of the Android SDK. To download the sample application component, launch the Android SDK and AVD Manager and then select the "Market Billing package, revision 1" component (see figure 1), and click <strong>Install Selected</strong> to begin the download.</p>
+
+<div style="margin-bottom:2em;">
+
+<img src="{@docRoot}images/billing_package.png" style="text-align:left;margin-bottom:0;" />
+<div style="margin:0 2em;padding:0"><strong>Figure 1.</strong> The Google Market
+Billing package contains the sample application and the AIDL file. </div>
+</div>
+
+<p>When the download is complete, the Android SDK and AVD Manager saves the component into the following directory:</p>
+
+<p><code>&lt;sdk&gt;/google-market_billing/</code></p>
+
+<h2 id="billing-add-aidl">Adding the AIDL file to your project</h2>
+
+<p>The sample application contains an Android Interface Definition Language (AIDL) file,  which defines the interface to the Android Market in-app billing service <code>MarketBillingService</code>). When you add this file to your project, the Android build environment creates an interface file (<code>IMarketBillingService.java</code>). You can then use this interface to make billing requests by invoking IPC method calls.</p>
+
+<p>If you are using the ADT plug-in with Eclipse, you can just add this file to your <code>/src</code> directory. Eclipse will automatically generate the interface file when you build your project (which should happen immediately). If you are not using the ADT plug-in, you can put the AIDL file into your project and use the Ant tool to build your project so that the <code>IMarketBillingService.java</code> file gets generated.</p>
+
+<p>To add the <code>IMarketBillingService.aidl</code> file to your project, do the following:</p>
+
+<ol>
+  <li>Create the following directory in your application's <code>/src</code> directory:
+    <p><code>com/android/vending/billing/</code></p>
+  </li>
+  <li>Copy the <code>IMarketBillingService.aidl</code> file into the <code>sample/src/com/android/vending/billing/</code> directory.</li>
+  <li>Build your application.</li>
+</ol>
+
+<p>You should now find a generated interface file named <code><code>IMarketBillingService.java</code></code> in the <code>gen</code> folder of your project.</p>
+
+<h2 id="billing-permission">Updating Your Application's Manifest</h2>
+
+<p>In-app billing relies on the Android Market application, which handles all communication between your application and the Android Market server. To use the Android Market application, your application must request the proper permission. You can do this by adding the <code>com.android.vending.BILLING</code> permission to your AndroidManifest.xml file. If your application does not declare the in-app billing permission, but attempts to send billing requests, Android Market will refuse the requests and respond with a <code>RESULT_DEVELOPER_ERROR</code> response code.</p>
+
+<p>In addition to the billing permission, you need to declare the {@link android.content.BroadcastReceiver} that you will use to receive asynchronous response messages (broadcast intents) from Android Market, and you need to declare the {@link android.app.Service} that you will use to bind with the <code>IMarketBillingService</code> and send messages to Android Market. You must also declare <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">intent filters</a> for the {@link android.content.BroadcastReceiver} so that the Android system knows how to handle broadcast intents that are sent from the Android Market application.</p>
+
+<p>For example, here's how the in-app billing sample application declares the billing permission, the {@link android.content.BroadcastReceiver}, the {@link android.app.Service}, and the intent filters. In the sample application, <code>BillingReceiver</code> is the {@link android.content.BroadcastReceiver} that handles broadcast intents from the Android Market application and <code>BillingService</code> is the {@link android.app.Service} that sends requests to the Android Market application.</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.example.dungeons"
+  android:versionCode="1"
+  android:versionName="1.0"&gt;
+
+  &lt;uses-permission android:name="com.android.vending.BILLING" /&gt;
+
+  &lt;application android:icon="@drawable/icon" android:label="@string/app_name"&gt;
+    &lt;activity android:name=".Dungeons" android:label="@string/app_name"&gt;
+      &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+      &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+
+    &lt;service android:name="BillingService" /&gt;
+
+    &lt;receiver android:name="BillingReceiver"&gt;
+      &lt;intent-filter&gt;
+        &lt;action android:name="com.android.vending.billing.IN_APP_NOTIFY" /&gt;
+        &lt;action android:name="com.android.vending.billing.RESPONSE_CODE" /&gt;
+        &lt;action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" /&gt;
+      &lt;/intent-filter&gt;
+    &lt;/receiver&gt;
+
+  &lt;/application&gt;
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="billing-service">Creating a Local Service</h2>
+
+<p>Your application must have a local {@link android.app.Service} to facilitate messaging between your application and Android Market. At a minimum, this service must do the following:</p>
+
+<ul>
+  <li>Bind to the <code>MarketBillingService</code>.
+  <li>Send billing requests (as IPC method calls) to the Android Market application. The five types of billing requests include:
+    <ul>
+      <li><code>CHECK_BILLING_SUPPORTED</code> requests</li>
+      <li><code>REQUEST_PURCHASE</code> requests</li>
+      <li><code>GET_PURCHASE_INFORMATION</code> requests</li>
+      <li><code>CONFIRM_NOTIFICATIONS</code> requests</li>
+      <li><code>RESTORE_TRANSACTIONS</code> requests</li>
+    </ul>
+  </li>
+  <li>Handle the synchronous response messages that are returned with each billing request.</li>
+</ul>
+
+<h3>Binding to the MarketBillingService</h3>
+
+<p>Binding to the <code>MarketBillingService</code> is relatively easy if you've already added the <code>IMarketBillingService.aidl</code> file to your project. The following code sample shows how to use the {@link android.content.Context#bindService bindService()} method to bind a service to the <code>MarketBillingService</code>. You could put this code in your service's {@link android.app.Activity#onCreate onCreate()} method.</p>
+
+<pre>
+try {
+  boolean bindResult = mContext.bindService(
+    new Intent(IMarketBillingService.class.getName()), this, Context.BIND_AUTO_CREATE);
+  if (bindResult) {
+    Log.i(TAG, "Service bind successful.");
+  } else {
+    Log.e(TAG, "Could not bind to the MarketBillingService.");
+  }
+} catch (SecurityException e) {
+  Log.e(TAG, "Security exception: " + e);
+}
+</pre>
+
+<p>After you bind to the service, you need to create a reference to the <code>IMarketBillingService</code> interface so you can make billing requests via IPC method calls. The following code shows you how to do this using the {@link android.content.ServiceConnection#onServiceConnected onServiceConnected()} callback method.</p> 
+
+<pre>
+/**
+  * The Android system calls this when we are connected to the MarketBillingService.
+  */
+  public void onServiceConnected(ComponentName name, IBinder service) {
+    Log.i(TAG, "MarketBillingService connected.");
+    mService = IMarketBillingService.Stub.asInterface(service);
+  }
+</pre>
+
+<p>You can now use the <code>mService</code> reference to invoke the <code>sendBillingRequest()</code> method.</p>
+
+<p>For a complete implementation of a service that binds to the <code>MarketBillingService</code>, see the <code>BillingService</code> class in the sample application.</p>
+
+<h3>Sending billing requests to the MarketBillingService</h3>
+
+<p>Now that your {@link android.app.Service} has a reference to the <code>IMarketBillingService</code> interface, you can use that reference to send billing requests (via IPC method calls) to the <code>MarketBillingService</code>. The <code>MarketBillingService</code> IPC interface exposes a single public method (<code>sendBillingRequest()</code>), which takes a single {@link android.os.Bundle} parameter. The Bundle that you deliver with this method specifies the type of request you want to perform, using various key-value pairs. For instance, one key indicates the type of request you are making, another indicates the item being purchased, and another identifies your application. The <code>sendBillingRequest()</code> method immediately returns a Bundle containing an initial response code. However, this is not the complete purchase response; the complete response is delivered with an asynchronous broadcast intent. For more information about the various Bundle keys that are supported by the <code>MarketBillingService</code>, see <a href="{@docRoot}guide/market/billing/billing_reference.html#billing-interface">In-app Billing Service Interface</a>.</p>
+
+<p>You can use the <code>sendBillingRequest()</code> method to send five types of billing requests. The five request types are specified using the <code>BILLING_REQUEST</code> Bundle key. This Bundle key can have the following five values:</p>
+
+<ul>
+  <li><code>CHECK_BILLING_SUPPORTED</code>&mdash;verifies that the Android Market application supports in-app billing.</li>
+  <li><code>REQUEST_PURCHASE</code>&mdash;sends a purchase request for an in-app item.</li>  <li><code>GET_PURCHASE_INFORMATION</code>&mdash;retrieves transaction information for a purchase or refund.</li>
+  <li><code>CONFIRM_NOTIFICATIONS</code>&mdash;acknowledges that you received the transaction information for a purchase or refund.</li>
+  <li><code>RESTORE_TRANSACTIONS</code>&mdash;retrieves a user's transaction history for <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-purchase-type">managed purchases</a>.</li>
+</ul>
+
+<p>To make any of these billing requests, you first need to build an initial Bundle that contains the three keys that are required for all requests: <code>BILLING_REQUEST</code>, <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The following code sample shows you how to create a helper method named <code>makeRequestBundle()</code> that does this.</p>
+
+<pre>
+protected Bundle makeRequestBundle(String method) {
+  Bundle request = new Bundle();
+  request.putString(BILLING_REQUEST, method);
+  request.putInt(API_VERSION, 1);
+  request.putString(PACKAGE_NAME, getPackageName());
+  return request;
+</pre>
+
+<p>To use this helper method, you pass in a <code>String</code> that corresponds to one of the five types of billing requests. The method returns a Bundle that has the three required keys defined. The following sections show you how to use this helper method when you send a billing request.<p>
+
+<p class="caution"><strong>Important</strong>: You must make all in-app billing requests from your application's main thread.</p>
+
+<h4>Verifying that in-app billing is supported (CHECK_BILLING_SUPPPORTED)</h4>
+
+<p>The following code sample shows how to verify whether the Android Market application supports in-app billing. In the sample, <code>mService</code> is an instance of the <code>MarketBillingService</code> interface.</p>
+
+<pre>
+/**
+* Request type is CHECK_BILLING_SUPPORTED
+*/
+  Bundle request = makeRequestBundle("CHECK_BILLING_SUPPORTED");
+  Bundle response = mService.sendBillingRequest(request);
+  // Do something with this response.
+}
+</pre>
+<p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the three keys that are required for all requests: <code>BILLING_REQUEST</code>, <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The request returns a synchronous {@link android.os.Bundle} response, which contains only a single key: <code>RESPONSE_CODE</code>. The <code>RESPONSE_CODE</code> key can have the following values:</p>
+<ul>
+  <li><code>RESULT_OK</code>&mdash;in-app billing is supported.</li>
+  <li><code>RESULT_BILLING_UNAVAILABLE</code>&mdash;in-app billing is not supported or the in-app billing API version you specified is not recognized.</li>
+  <li><code>RESULT_ERROR</code>&mdash;there was an error connecting with the Android Market appliction.</li>
+  <li><code>RESULT_DEVELOPER_ERROR</code>&mdash;the application is trying to make an in-app billing request but the application has not declared the com.android.vending.BILLING permission in its manifest. Can also indicate that an application is not properly signed, or that you sent a malformed request.</li>
+</ul>
+
+<p>The <code>CHECK_BILLING_SUPPORTED</code> request does not trigger any asynchronous responses (broadcast intents).</p>
+
+<h4>Making a purchase request (REQUEST_PURCHASE)</h4>
+
+<p>To make a purchase request you must do the following:</p>
+
+<ul>
+  <li>Send the <code>REQUEST_PURCHASE</code> request.</li>
+  <li>Launch the {@link android.app.PendingIntent} that is returned from the Android Market application.</li>
+  <li>Handle the broadcast intents that are sent by the Android Market application.</li>
+</ul>
+
+<h5>Making the request</h5>
+
+<p>You must specify four keys in the request {@link android.os.Bundle}. The following code sample shows how to set these keys and make a purchase request for a single in-app item. In the sample, <code>mProductId</code> is the Android Market product ID of an in-app item (which is listed in the application's <a href="{@docRoot}guide/market/billing/billing_admin.html#billing-list-setup">product list</a>), and <code>mService</code> is an instance of the <code>MarketBillingService</code> interface.</p>
+
+<pre>
+/**
+* Request type is REQUEST_PURCHASE
+*/
+  Bundle request = makeRequestBundle("REQUEST_PURCHASE");
+  request.putString(ITEM_ID, mProductId);
+  // Note that the developer payload is optional.
+  if (mDeveloperPayload != null) {
+    request.putString(DEVELOPER_PAYLOAD, mDeveloperPayload);
+  Bundle response = mService.sendBillingRequest(request);
+  // Do something with this response.
+  }
+</pre>
+<p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the three keys that are required for all requests: <code>BILLING_REQUEST</code>, <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The <code>ITEM_ID</code> key is then added to the Bundle prior to invoking the <code>sendBillingRequest()</code> method.</p>
+
+<p>The request returns a synchronous {@link android.os.Bundle} response, which contains three keys: <code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, and <code>REQUEST_ID</code>. The <code>RESPONSE_CODE</code> key provides you with the status of the request and the <code>REQUEST_ID</code> key provides you with a unique request identifier for the request. The <code>PURCHASE_INTENT</code> key provides you with a {@link android.app.PendingIntent}, which you can use to launch the checkout UI.</p>
+
+<h5>Launching the pending intent</h5>
+
+<p>How you use the pending intent depends on which version of Android a device is running. On Android 1.6, you must use the pending intent to launch the checkout UI in its own separate task instead of your application's activity stack. On Android 2.0 and higher, you can use the pending intent to launch the checkout UI on your application's activity stack. The following code shows you how to do this. You can find this code in the PurchaseObserver.java file in the sample application.</p> 
+
+<pre>
+void startBuyPageActivity(PendingIntent pendingIntent, Intent intent) {
+  if (mStartIntentSender != null) {
+    // This is on Android 2.0 and beyond.  The in-app checkout page activity
+    // will be on the activity stack of the application.
+    try {
+      // This implements the method call:
+      // mActivity.startIntentSender(pendingIntent.getIntentSender(),
+      //     intent, 0, 0, 0);
+      mStartIntentSenderArgs[0] = pendingIntent.getIntentSender();
+      mStartIntentSenderArgs[1] = intent;
+      mStartIntentSenderArgs[2] = Integer.valueOf(0);
+      mStartIntentSenderArgs[3] = Integer.valueOf(0);
+      mStartIntentSenderArgs[4] = Integer.valueOf(0);
+      mStartIntentSender.invoke(mActivity, mStartIntentSenderArgs);
+    } catch (Exception e) {
+      Log.e(TAG, "error starting activity", e);
+      }
+  } else {
+    // This is on Android 1.6. The in-app checkout page activity will be on its
+    // own separate activity stack instead of on the activity stack of
+    // the application.
+    try {
+      pendingIntent.send(mActivity, 0 /* code */, intent);
+    } catch (CanceledException e) {
+      Log.e(TAG, "error starting activity", e);
+      }
+  }
+}
+</pre>
+
+<p class="note">You must launch the pending intent from an activity context and not an application context.</p>
+
+<h5>Handling broadcast intents</h5>
+
+<p>A <code>REQUEST_PURCHASE</code> request also triggers two asynchronous responses (broadcast intents). First, the Android Market application sends an <code>ACTION_RESPONSE_CODE</code> broadcast intent, which provides error information about the request. Next, if the request was successful, the Android Market application sends an <code>ACTION_NOTIFY</code> broadcast intent. This message contains a notification ID, which you can use to retrieve the transaction details for the <code>REQUEST_PURCHASE</code> request.</p>
+
+<p>Keep in mind, the Android Market application also sends an <code>ACTION_NOTIFY</code> for refunds. For more information, see <a href="{@docRoot}guide/market/billing/billing_overview.html#billing-action-notify">Handling ACTION_NOTIFY messages</a>.</p> 
+
+<h4>Retrieving transaction information for a purchase or refund (GET_PURCHASE_INFORMATION)</h4>
+
+<p>You retrieve transaction information in response to an <code>ACTION_NOTIFY</code> broadcast intent. The <code>ACTION_NOTIFY</code> message contains a notification ID, which you can use to retrieve transaction information.</p>
+
+<p>To retrieve transaction information for a purchase or refund you must specify five keys in the request {@link android.os.Bundle}. The following code sample shows how to set these keys and make the request. In the sample, <code>mService</code> is an instance of the <code>MarketBillingService</code> interface.</p>
+
+<pre>
+/**
+* Request type is GET_PURCHASE_INFORMATION
+*/
+  Bundle request = makeRequestBundle("GET_PURCHASE_INFORMATION");
+  request.putLong(REQUEST_NONCE, mNonce);
+  request.putStringArray(NOTIFY_IDS, mNotifyIds);
+  Bundle response = mService.sendBillingRequest(request);
+  // Do something with this response.
+}
+</pre>
+<p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the three keys that are required for all requests: <code>BILLING_REQUEST</code>, <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The additional keys are then added to the bundle prior to invoking the <code>sendBillingRequest()</code> method. The <code>REQUEST_NONCE</code> key contains a cryptographically secure nonce (number used once) that you must generate. The Android Market application returns this nonce with the <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent so you can verify the integrity of the transaction information. The <code>NOTIFY_IDS</code> key contains an array of notification IDs, which you received in the <code>ACTION_NOTIFY</code> broadcast intent.</p>
+
+<p>The request returns a synchronous {@link android.os.Bundle} response, which contains two keys: <code>RESPONSE_CODE</code> and <code>REQUEST_ID</code>. The <code>RESPONSE_CODE</code> key provides you with the status of the request and the <code>REQUEST_ID</code> key provides you with a unique request identifier for the request.</p>
+
+<p>A <code>GET_PURCHASE_INFORMATION</code> request also triggers two asynchronous responses (broadcast intents). First, the Android Market application sends an <code>ACTION_RESPONSE_CODE</code> broadcast intent, which provides status and error information about the request. Next, if the request was successful, the Android Market application sends an <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent. This message contains detailed transaction information. The transaction information is contained in a signed JSON string (unencrypted). The message includes the signature so you can verify the integrity of the signed string.</p>
+
+<h4>Acknowledging transaction information (CONFIRM_NOTIFICATIONS)</h4>
+
+<p>To acknowledge that you received transaction information you send a <code>CONFIRM_NOTIFICATIONS</code> request. You must specify four keys in the request {@link android.os.Bundle}. The following code sample shows how to set these keys and make the request. In the sample, <code>mService</code> is an instance of the <code>MarketBillingService</code> interface.</p>
+
+<pre>
+/**
+* Request type is CONFIRM_NOTIFICATIONS
+*/
+  Bundle request = makeRequestBundle("CONFIRM_NOTIFICATIONS");
+  request.putStringArray(NOTIFY_IDS, mNotifyIds);
+  Bundle response = mService.sendBillingRequest(request);
+  // Do something with this response.
+}
+</pre>
+<p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the three keys that are required for all requests: <code>BILLING_REQUEST</code>, <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The additional <code>NOTIFY_IDS</code> key is then added to the bundle prior to invoking the <code>sendBillingRequest()</code> method. The <code>NOTIFY_IDS</code> key contains an array of notification IDs, which you received in an <code>ACTION_NOTIFY</code> broadcast intent and also used in a <code>GET_PURCHASE_INFORMATION</code> request.</p>
+
+<p>The request returns a synchronous {@link android.os.Bundle} response, which contains two keys: <code>RESPONSE_CODE</code> and <code>REQUEST_ID</code>. The <code>RESPONSE_CODE</code> key provides you with the status of the request and the <code>REQUEST_ID</code> key provides you with a unique request identifier for the request.</p>
+
+<p>A <code>CONFIRM_NOTIFICATIONS</code> request triggers a single asynchronous response&mdash;an <code>ACTION_RESPONSE_CODE</code> broadcast intent. This broadcast intent provides status and error information about the request.</p>
+
+<h4>Restoring transaction information (RESTORE_TRANSACTIONS)</h4>
+
+<p>To restore a user's transaction information, you send a <code>RESTORE_TRANSACTIONS</code> request. You must specify four keys in the request {@link android.os.Bundle}. The following code sample shows how to set these keys and make the request. In the sample, <code>mService</code> is an instance of the <code>MarketBillingService</code> interface.</p>
+
+<pre>
+/**
+* Request type is RESTORE_TRANSACTIONS
+*/
+  Bundle request = makeRequestBundle("RESTORE_TRANSACTIONS");
+  request.putLong(REQUEST_NONCE, mNonce);
+  Bundle response = mService.sendBillingRequest(request);
+  // Do something with this response.
+}
+</pre>
+<p>The <code>makeRequestBundle()</code> method constructs an initial Bundle, which contains the three keys that are required for all requests: <code>BILLING_REQUEST</code>, <code>API_VERSION</code>, and <code>PACKAGE_NAME</code>. The additional <code>REQUEST_NONCE</code> key is then added to the bundle prior to invoking the <code>sendBillingRequest()</code> method. The <code>REQUEST_NONCE</code> key contains a cryptographically secure nonce (number used once) that you must generate. The Android Market application returns this nonce with the transactions information contained in the <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent so you can verify the integrity of the transaction information.</p>
+
+<p>The request returns a synchronous {@link android.os.Bundle} response, which contains two keys: <code>RESPONSE_CODE</code> and <code>REQUEST_ID</code>. The <code>RESPONSE_CODE</code> key provides you with the status of the request and the <code>REQUEST_ID</code> key provides you with a unique request identifier for the request.</p>
+
+<p>A <code>RESTORE_TRANSACTIONS</code> request also triggers two asynchronous responses (broadcast intents). First, the Android Market application sends an <code>ACTION_RESPONSE_CODE</code> broadcast intent, which provides status and error information about the request. Next, if the request was successful, the Android Market application sends an <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent. This message contains the detailed transaction information. The transaction information is contained in a signed JSON string (unencrypted). The message includes the signature so you can verify the integrity of the signed string.</p>
+
+
+<h3>Other service tasks</h3>
+
+<p>You may also want your {@link android.app.Service} to receive intent messages from your {@link android.content.BroadcastReceiver}. You can use these intent messages to convey the information that was sent asynchronously from the Android Market application to your {@link android.content.BroadcastReceiver}. To see an example of how you can send and receive these intent messages, see the BillingReceiver.java and BillingService.java files in the sample application. You can use these samples as a basis for your own implementation. However, if you use any of the code from the sample application, be sure you follow the guidelines in <a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a>.</p>
+
+<h2 id="billing-broadcast-receiver">Creating a BroadcastReceiver</h2>
+
+<p>The Android Market application uses broadcast intents to send asynchronous billing responses to your application. To receive these intent messages, you need to create a {@link android.content.BroadcastReceiver} that can handle the following intents:</p>
+
+<ul>
+  <li>ACTION_RESPONSE_CODE
+  <p>This broadcast intent contains an Android Market response code, and is sent after you make an in-app billing request. For more information about the response codes that are sent with this response, see <a href="{@docRoot}guide/market/billing/billing_reference.html#billing-codes">Android Market Response Codes for In-app Billing</a>.</p>
+  </li>
+  <li>ACTION_NOTIFY
+  <p>This response indicates that a purchase has changed state, which means a purchase succeeded, was canceled, or was refunded. For more information about notification messages, see <a href="{@docRoot}guide/market/billing/billing_reference.html#billing-intents">In-app Billing Broadcast Intents</a></p>
+  </li>
+  <li>ACTION_PURCHASE_STATE_CHANGED
+  <p>This broadcast intent contains detailed information about one or more transactions. For more information about purchase state messages, see <a href="{@docRoot}guide/market/billing/billing_reference.html#billing-intents">In-app Billing Broadcast Intents</a></p>
+  </li>
+</ul>
+
+<p>Each of these broadcast intents provide intent extras, which your {@link android.content.BroadcastReceiver} must handle. The intent extras are listed in the following table (see table 1).</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Description of broadcast intent extras that are sent in response to billing requests.</p>
+
+<table>
+
+<tr>
+<th>Intent</th>
+<th>Extra</th>
+<th>Description</th>
+</tr>
+<tr>
+  <td><code>ACTION_RESPONSE_CODE</code></td>
+  <td><code>INAPP_REQUEST_ID</code></td>
+  <td>A <code>long</code> representing a request ID. A request ID identifies a specific billing request and is returned by Android Market at the time a request is made.</td>
+</tr>
+<tr>
+  <td><code>ACTION_RESPONSE_CODE</code></td>
+  <td><code>INAPP_RESPONSE_CODE</code></td>
+  <td>An <code>int</code> representing the actual Android Market server response code.</td>
+</tr>
+<tr>
+  <td><code>ACTION_NOTIFY</code></td>
+  <td><code>NOTIFICATION_ID</code></td>
+  <td>A <code>String</code> representing the notification ID for a given purchase state change. Android Market notifies you when there is a purchase state change and the notification includes a unique notification ID. To get the details of the purchase state change, you send the notification ID with the <code>GET_PURCHASE_INFORMATION</code> request.</td>
+</tr>
+<tr>
+  <td><code>ACTION_PURCHASE_STATE_CHANGED</code></td>
+  <td><code>INAPP_SIGNED_DATA</code></td>
+  <td>A <code>String</code> representing the signed JSON string. The JSON string contains information about the billing transaction, such as order number, amount, and the item that was purchased or refunded.</td>
+</tr>
+<tr>
+  <td><code>ACTION_PURCHASE_STATE_CHANGED</code></td>
+  <td><code>INAPP_SIGNATURE</code></td>
+  <td>A <code>String</code> representing the signature of the JSON string.</td>
+</tr>
+</table>
+
+<p>The following code sample shows how to handle these broadcast intents and intent extras within a {@link android.content.BroadcastReceiver}. The BroadcastReceiver in this case is named <code>BillingReceiver</code>, just as it is in the sample application.</p>
+
+<pre>
+public class BillingReceiver extends BroadcastReceiver {
+  
+  private static final String TAG = "BillingReceiver";
+  
+  // Intent actions that we receive in the BillingReceiver from Android Market.
+  // These are defined by Android Market and cannot be changed.
+  // The sample application defines these in the Consts.java file.
+  public static final String ACTION_NOTIFY = "com.android.vending.billing.IN_APP_NOTIFY";
+  public static final String ACTION_RESPONSE_CODE = "com.android.vending.billing.RESPONSE_CODE";
+  public static final String ACTION_PURCHASE_STATE_CHANGED =
+    "com.android.vending.billing.PURCHASE_STATE_CHANGED";
+    
+  // The intent extras that are passed in an intent from Android Market.
+  // These are defined by Android Market and cannot be changed.
+  // The sample application defines these in the Consts.java file.
+  public static final String NOTIFICATION_ID = "notification_id";
+  public static final String INAPP_SIGNED_DATA = "inapp_signed_data";
+  public static final String INAPP_SIGNATURE = "inapp_signature";
+  public static final String INAPP_REQUEST_ID = "request_id";
+  public static final String INAPP_RESPONSE_CODE = "response_code";
+
+
+  &#64;Override
+  public void onReceive(Context context, Intent intent) {
+    String action = intent.getAction();
+    if (ACTION_PURCHASE_STATE_CHANGED.equals(action)) {
+      String signedData = intent.getStringExtra(INAPP_SIGNED_DATA);
+      String signature = intent.getStringExtra(INAPP_SIGNATURE);
+      // Do something with the signedData and the signature.
+    } else if (ACTION_NOTIFY.equals(action)) {
+      String notifyId = intent.getStringExtra(NOTIFICATION_ID);
+      // Do something with the notifyId.
+    } else if (ACTION_RESPONSE_CODE.equals(action)) {
+      long requestId = intent.getLongExtra(INAPP_REQUEST_ID, -1);
+      int responseCodeIndex = intent.getIntExtra(INAPP_RESPONSE_CODE,
+        ResponseCode.RESULT_ERROR.ordinal());
+      // Do something with the requestId and the responseCodeIndex.
+    } else {
+      Log.w(TAG, "unexpected action: " + action);
+    }
+  }
+  // Perform other processing here, such as forwarding intent messages to your local service.
+}
+</pre>
+
+<p>In addition to receiving broadcast intents from the Android Market application, your {@link android.content.BroadcastReceiver} must handle the information it received in the broadcast intents. Usually, your {@link android.content.BroadcastReceiver} does this by sending the information to a local service (discussed in the next section). The BillingReceiver.java file in the sample application shows you how to do this. You can use this sample as a basis for your own {@link android.content.BroadcastReceiver}. However, if you use any of the code from the sample application, be sure you follow the guidelines that are discussed in <a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design </a>.</p>
+
+<h2 id="billing-signatures">Verifying Signatures and Nonces</h2>
+
+<p>The in-app billing service uses two mechanisms to help verify the integrity of the transaction information you receive from Android Market: nonces and signatures. A nonce (number used once) is a cryptographically secure number that your application generates and sends with every <code>GET_PURCHASE_INFORMATION</code> and <code>RESTORE_TRANSACTIONS</code> request. The nonce is returned with the <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent, enabling you to verify that any given <code>ACTION_PURCHASE_STATE_CHANGED</code> response corresponds to an actual request that you made. Every <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent also includes a signed JSON string and a signature, which you can use to verify the integrity of the response.</p>
+
+<p>Your application must provide a way to generate, manage, and verify nonces. The following sample code shows some simple methods you can use to do this.</p>
+
+<pre>
+  private static final SecureRandom RANDOM = new SecureRandom();
+  private static HashSet&lt;Long&gt; sKnownNonces = new HashSet&lt;Long&gt;();   
+
+  public static long generateNonce() {
+    long nonce = RANDOM.nextLong();
+    sKnownNonces.add(nonce);
+    return nonce;
+  }
+
+  public static void removeNonce(long nonce) {
+    sKnownNonces.remove(nonce);
+  }
+
+  public static boolean isNonceKnown(long nonce) {
+    return sKnownNonces.contains(nonce);
+  }
+</pre>
+
+<p>Your application must also provide a way to verify the signatures that accompany every <code>ACTION_PURCHASE_STATE_CHANGED</code> broadcast intent. The Security.java file in the sample application shows you how to do this. If you use this file as a basis for your own security implementation, be sure to follow the guidelines in <a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a> and obfuscate your code.</p> 
+
+<p>You will need to use your Android Market public key to perform the signature verification. The following procedure shows you how to retrieve Base64-encoded public key from the Android Market publisher site.</p>
+
+<ol>
+  <li>Log in to your <a href="http://market.android.com/publish">publisher account</a>.</li>
+  <li>On the upper left part of the page, under your name, click <strong>Edit profile</strong>.</li>
+  <li>On the Edit Profile page, scroll down to the Licensing &amp; In-app Billing panel (see figure 2).</li>
+  <li>Copy your public key to the clipboard.</li>
+</ol>
+
+<p class="caution"><strong>Important</strong>: To keep your public key safe from malicious users and hackers, do not embed your public key as an entire literal string. Instead, construct the string at runtime from pieces or use bit manipulation (for example, XOR with some other string) to hide the actual key. The key itself is not secret information, but you do not want to make it easy for a hacker or malicious user to replace the public key with another key.</p>
+
+<div style="margin-bottom:2em;">
+
+<img src="{@docRoot}images/billing_public_key.png" style="text-align:left;margin-bottom:0;" />
+<div style="margin:0 2em;padding:0"><strong>Figure 2.</strong> The Licensing and In-app Billing
+panel of your account's Edit Profile page lets you see your public key.</div>
+</div>
+
+<h2 id="billing-implement">Modifying Your Application Code</h2>
+
+<p>After you finish adding in-app billing components to your project, you are ready to modify your application's code. For a typical implementation, like the one that is demonstrated in the sample application, this means you need to write code to do the following: </p>
+
+<ul>
+  <li>Create a storage mechanism for storing users' purchase information.</li>
+  <li>Create a user interface that lets users select items for purchase.</li>
+</ul>
+
+<p>The sample code in <code>Dungeons.java</code> shows you how to do both of these tasks.</p>
+
+<h3>Creating a storage mechanism for storing purchase information</h3>
+
+<p>You must set up a database or some other mechanism for storing users' purchase information. The sample application provides an example database (PurchaseDatabase.java); however, the example database has been simplified for clarity and does not exhibit the security best practices that we recommend. If you have a remote server, we recommend that you store purchase information on your server instead of in a local database on a device. For more information about security best practices, see <a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a>.</p>
+
+<p class="note"><strong>Note</strong>: If you store any purchase information on a device, be sure to encrypt the data and use a device-specific encryption key.</p>
+
+<h3>Creating a user interface for selecting items</h3>
+
+<p>You must provide users with a means for selecting items that they want to purchase. Android Market provides the checkout user interface (which is where the user provides a form of payment and approves the purchase), but your application must provide a control (widget) that invokes the <code>sendBillingRequest()</code> method when a user selects an item for purchase.</p>
+
+<p>You can render the control and trigger the <code>sendBillingRequest()</code> method any way you want. The sample application uses a spinner widget and a button to present items to a user and trigger a billing request (see <code>Dungeons.java</code>). The user interface also shows a list of recently purchased items.</p>
+
