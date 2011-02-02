@@ -25,6 +25,11 @@ string provided by the web browser. To determine whether to serve a mobile versi
 should simply look for the "mobile" string in the User Agent, which matches a wide variety of mobile
 devices. If necessary, you can also identify the specific operating system in the User Agent string
 (such as "Android 2.1").</p>
+  <p class="note"><strong>Note:</strong> Large screen Android-powered devices that should be served
+full-size web sites (such as tablets) do <em>not</em> include the "mobile" string in the user agent,
+while the rest of the user agent string is mostly the same. As such, it's important that you deliver
+the mobile version of your web site based on whether the "mobile" string exists in the user
+agent.</p>
 </li>
 
 
