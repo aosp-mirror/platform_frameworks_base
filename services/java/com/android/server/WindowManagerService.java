@@ -5101,6 +5101,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             Binder.restoreCallingIdentity(ident);
 
+            // Constrain frame to the screen size.
+            frame.intersect(0, 0, dw, dh);
+            
             if (frame.isEmpty() || maxLayer == 0) {
                 return null;
             }
