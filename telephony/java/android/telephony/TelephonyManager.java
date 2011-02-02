@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.util.Log;
 
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
@@ -55,14 +56,21 @@ import java.util.List;
 public class TelephonyManager {
     private static final String TAG = "TelephonyManager";
 
-    private Context mContext;
-    private ITelephonyRegistry mRegistry;
+    private static Context sContext;
+    private static ITelephonyRegistry sRegistry;
 
     /** @hide */
     public TelephonyManager(Context context) {
-        mContext = context;
-        mRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
+        if (sContext == null) {
+            sContext = context;
+
+            sRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
+        } else {
+            Log.e(TAG, "Hidden constructor called more than once per process!");
+            Log.e(TAG, "Original: " + sContext.getPackageName() + ", new: " +
+                    context.getPackageName());
+        }
     }
 
     /** @hide */
@@ -71,7 +79,8 @@ public class TelephonyManager {
 
     private static TelephonyManager sInstance = new TelephonyManager();
 
-    /** @hide */
+    /** @hide
+    /* @deprecated - use getSystemService as described above */
     public static TelephonyManager getDefault() {
         return sInstance;
     }
@@ -889,10 +898,10 @@ public class TelephonyManager {
      *               LISTEN_ flags.
      */
     public void listen(PhoneStateListener listener, int events) {
-        String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
+        String pkgForDebug = sContext != null ? sContext.getPackageName() : "<unknown>";
         try {
             Boolean notifyNow = (getITelephony() != null);
-            mRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
+            sRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
         } catch (NullPointerException ex) {
@@ -967,7 +976,8 @@ public class TelephonyManager {
      * @hide pending API review
      */
     public boolean isVoiceCapable() {
-        return mContext.getResources().getBoolean(
+        if (sContext == null) return true;
+        return sContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
     }
 
@@ -983,7 +993,8 @@ public class TelephonyManager {
      * @hide pending API review
      */
     public boolean isSmsCapable() {
-        return mContext.getResources().getBoolean(
+        if (sContext == null) return true;
+        return sContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sms_capable);
     }
 }
