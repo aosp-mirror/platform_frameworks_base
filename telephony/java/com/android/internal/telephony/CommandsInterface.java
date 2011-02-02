@@ -1305,18 +1305,25 @@ public interface CommandsInterface {
     void setCdmaSubscription(int cdmaSubscriptionType, Message response);
 
     /**
-     *  Set the TTY mode for the CDMA phone
+     *  Set the TTY mode
      *
-     * @param enable is true to enable, false to disable
+     * @param ttyMode one of the following:
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_OFF}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_FULL}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_HCO}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      * @param response is callback message
      */
     void setTTYMode(int ttyMode, Message response);
 
     /**
-     *  Query the TTY mode for the CDMA phone
+     *  Query the TTY mode
      * (AsyncResult)response.obj).result is an int[] with element [0] set to
-     * 0 for disabled, 1 for enabled.
-     *
+     * tty mode:
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_OFF}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_FULL}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_HCO}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      * @param response is callback message
      */
     void queryTTYMode(Message response);
