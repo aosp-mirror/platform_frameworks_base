@@ -547,7 +547,7 @@ public abstract class HardwareRenderer {
                     }
 
                     onPreDraw(dirty);
-    
+
                     HardwareCanvas canvas = mCanvas;
                     attachInfo.mHardwareCanvas = canvas;
 
