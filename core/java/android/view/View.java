@@ -73,7 +73,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.WeakHashMap;
 
 /**
@@ -2375,6 +2374,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     })
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
+    Rect mLocalDirtyRect;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -8173,7 +8173,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         mLayerType = layerType;
-        mLayerPaint = mLayerType == LAYER_TYPE_NONE ? null : (paint == null ? new Paint() : paint);
+        final boolean layerDisabled = mLayerType == LAYER_TYPE_NONE;
+        mLayerPaint = layerDisabled ? null : (paint == null ? new Paint() : paint);
+        mLocalDirtyRect = layerDisabled ? null : new Rect();
 
         invalidateParentCaches();
         invalidate(true);
@@ -8228,8 +8230,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mAttachInfo.mHardwareCanvas = canvas;
             try {
                 canvas.setViewport(width, height);
-                // TODO: We should pass the dirty rect
-                canvas.onPreDraw(null);
+                canvas.onPreDraw(mLocalDirtyRect);
 
                 final int restoreCount = canvas.save();
 
@@ -8251,6 +8252,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.onPostDraw();
                 mHardwareLayer.end(currentCanvas);
                 mAttachInfo.mHardwareCanvas = currentCanvas;
+                mLocalDirtyRect.setEmpty();
             }
         }
 

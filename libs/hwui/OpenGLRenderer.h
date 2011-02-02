@@ -455,6 +455,8 @@ private:
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void finishDrawTexture();
 
+    void drawRegionRects(const Region& region);
+
     /**
      * Should be invoked every time the glScissor is modified.
      */
