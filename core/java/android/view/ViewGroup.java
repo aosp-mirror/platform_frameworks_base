@@ -347,6 +347,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // views during a transition when they otherwise would have become gone/invisible
     private ArrayList<View> mVisibilityChangingChildren;
 
+    // Indicates whether this container will use its children layers to draw
+    @ViewDebug.ExportedProperty(category = "drawing")
+    private boolean mDrawLayers = true;
+
     public ViewGroup(Context context) {
         super(context);
         initViewGroup();
@@ -2160,7 +2164,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         flags = mGroupFlags;
 
         if ((flags & FLAG_INVALIDATE_REQUIRED) == FLAG_INVALIDATE_REQUIRED) {
-            invalidate();
+            invalidate(true);
         }
 
         if ((flags & FLAG_ANIMATION_DONE) == 0 && (flags & FLAG_NOTIFY_ANIMATION_LISTENER) == 0 &&
@@ -2216,7 +2220,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        invalidate();
+        invalidate(true);
     }
 
     /**
@@ -2275,7 +2279,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         boolean scalingRequired = false;
         boolean caching;
-        int layerType = child.getLayerType();
+        int layerType = mDrawLayers ? child.getLayerType() : LAYER_TYPE_NONE;
 
         final boolean hardwareAccelerated = canvas.isHardwareAccelerated();
         if ((flags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE ||
@@ -2552,16 +2556,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // invalidation is the trigger to recreate display lists, so if we're using
             // display lists to render, force an invalidate to allow the animation to
             // continue drawing another frame
-            invalidate();
+            invalidate(true);
             if (a instanceof AlphaAnimation) {
                 // alpha animations should cause the child to recreate its display list
-                child.invalidate();
+                child.invalidate(true);
             }
         }
 
         child.mRecreateDisplayList = false;
 
         return more;
+    }
+
+    /**
+     * 
+     * @param enabled True if children should be drawn with layers, false otherwise.
+     * 
+     * @hide
+     */
+    public void setChildrenLayersEnabled(boolean enabled) {
+        mDrawLayers = enabled;
+        invalidate(true);
     }
 
     /**
@@ -2596,7 +2611,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
-
             children[i].setSelected(selected);
         }
     }
@@ -2609,7 +2623,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
-
             children[i].setActivated(activated);
         }
     }
@@ -2802,7 +2815,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // therefore, we call requestLayout() on ourselves before, so that the child's request
         // will be blocked at our level
         requestLayout();
-        invalidate();
+        invalidate(true);
         addViewInner(child, index, params, false);
     }
 
@@ -3084,7 +3097,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void removeView(View view) {
         removeViewInternal(view);
         requestLayout();
-        invalidate();
+        invalidate(true);
     }
 
     /**
@@ -3116,7 +3129,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void removeViewAt(int index) {
         removeViewInternal(index, getChildAt(index));
         requestLayout();
-        invalidate();
+        invalidate(true);
     }
 
     /**
@@ -3128,7 +3141,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void removeViews(int start, int count) {
         removeViewsInternal(start, count);
         requestLayout();
-        invalidate();
+        invalidate(true);
     }
 
     private void removeViewInternal(View view) {
@@ -3253,7 +3266,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void removeAllViews() {
         removeAllViewsInLayout();
         requestLayout();
-        invalidate();
+        invalidate(true);
     }
 
     /**

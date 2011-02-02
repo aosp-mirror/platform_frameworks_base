@@ -6953,7 +6953,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * well. This is usually true for a full invalidate, but may be set to false if the
      * View's contents or dimensions have not changed.
      */
-    private void invalidate(boolean invalidateCache) {
+    void invalidate(boolean invalidateCache) {
         if (ViewDebug.TRACE_HIERARCHY) {
             ViewDebug.trace(this, ViewDebug.HierarchyTraceType.INVALIDATE);
         }
