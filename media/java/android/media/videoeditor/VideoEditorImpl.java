@@ -112,6 +112,7 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String ATTR_OVERLAY_RESIZED_RGB_FRAME_WIDTH = "resized_RGBframe_width";
     private static final String ATTR_OVERLAY_RESIZED_RGB_FRAME_HEIGHT = "resized_RGBframe_height";
 
+    private static final int ENGINE_ACCESS_MAX_TIMEOUT_MS = 500;
     /*
      *  Instance variables
      */
@@ -852,8 +853,10 @@ public class VideoEditorImpl implements VideoEditor {
 
         boolean semAcquireDone = false;
         try {
-            mMANativeHelper.lock();
-            semAcquireDone = true;
+            semAcquireDone = mMANativeHelper.lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
+            if (semAcquireDone == false) {
+                throw new IllegalStateException("Timeout waiting for semaphore");
+            }
 
             if (mMediaItems.size() > 0) {
                 final Rect frame = surfaceHolder.getSurfaceFrame();
@@ -862,8 +865,9 @@ public class VideoEditorImpl implements VideoEditor {
             } else {
                 result = 0;
             }
-        } catch (InterruptedException  ex) {
-            Log.e(TAG, "Sem acquire NOT successful in renderPreviewFrame");
+        } catch (InterruptedException ex) {
+            Log.w(TAG, "The thread was interrupted", new Throwable());
+            throw new IllegalStateException("The thread was interrupted");
         } finally {
             if (semAcquireDone) {
                 mMANativeHelper.unlock();
@@ -1582,8 +1586,10 @@ public class VideoEditorImpl implements VideoEditor {
 
         boolean semAcquireDone = false;
         try{
-            mMANativeHelper.lock();
-            semAcquireDone = true;
+            semAcquireDone = mMANativeHelper.lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
+            if (semAcquireDone == false) {
+                throw new IllegalStateException("Timeout waiting for semaphore");
+            }
 
             if (mMediaItems.size() > 0) {
                 mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
@@ -1595,17 +1601,9 @@ public class VideoEditorImpl implements VideoEditor {
             /**
              *  release on complete by calling stopPreview
              */
-        } catch (InterruptedException  ex) {
-            Log.e(TAG, "Sem acquire NOT successful in startPreview");
-        } catch (IllegalArgumentException ex) {
-            Log.e(TAG, "Illegal Argument exception in do preview");
-            throw ex;
-        } catch (IllegalStateException ex) {
-            Log.e(TAG, "Illegal State exception in do preview");
-            throw ex;
-        } catch (RuntimeException ex) {
-            Log.e(TAG, "Runtime exception in do preview");
-            throw ex;
+        } catch (InterruptedException ex) {
+            Log.w(TAG, "The thread was interrupted", new Throwable());
+            throw new IllegalStateException("The thread was interrupted");
         } finally {
             if (semAcquireDone) {
                 mMANativeHelper.unlock();
