@@ -67,7 +67,7 @@ page.title=Profiling with Traceview and dmtracedump
   selected method. The method in this case is <code>LoadListener.nativeFinished()</code> and it was selected in
   the profile view.</p>
 
-  <img src="/images/traceview_timeline.png"
+  <img src="{@docRoot}images/traceview_timeline.png"
        alt="Traceview timeline panel"
        width="893"
        height="284" />
@@ -87,7 +87,7 @@ page.title=Profiling with Traceview and dmtracedump
   <code>LoadListener.nativeFinished();</code> looking at the timeline panel shows that one of those calls took
   an unusually long time.</p>
 
-  <img src="/images/traceview_profile.png"
+  <img src="{@docRoot}images/traceview_profile.png"
        alt="Traceview profile panel."
        width="892"
        height="630" />
