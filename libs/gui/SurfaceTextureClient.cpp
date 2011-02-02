@@ -25,8 +25,8 @@ namespace android {
 
 SurfaceTextureClient::SurfaceTextureClient(
         const sp<ISurfaceTexture>& surfaceTexture):
-        mSurfaceTexture(surfaceTexture), mReqWidth(1), mReqHeight(1),
-        mReqFormat(DEFAULT_FORMAT), mReqUsage(0), mMutex() {
+        mSurfaceTexture(surfaceTexture), mAllocator(0), mReqWidth(1),
+        mReqHeight(1), mReqFormat(DEFAULT_FORMAT), mReqUsage(0), mMutex() {
     // Initialize the ANativeWindow function pointers.
     ANativeWindow::setSwapInterval  = setSwapInterval;
     ANativeWindow::dequeueBuffer    = dequeueBuffer;
@@ -35,6 +35,9 @@ SurfaceTextureClient::SurfaceTextureClient(
     ANativeWindow::queueBuffer      = queueBuffer;
     ANativeWindow::query            = query;
     ANativeWindow::perform          = perform;
+
+    // Get a reference to the allocator.
+    mAllocator = mSurfaceTexture->getAllocator();
 }
 
 int SurfaceTextureClient::setSwapInterval(ANativeWindow* window, int interval) {
