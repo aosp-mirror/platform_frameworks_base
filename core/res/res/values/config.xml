@@ -396,4 +396,7 @@
          Build.MODEL. The format string shall not be escaped. -->
     <string name="config_useragentprofile_url"></string>
 
+    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
+    <string-array name="config_twoDigitNumberPattern">
+    </string-array>
 </resources>
