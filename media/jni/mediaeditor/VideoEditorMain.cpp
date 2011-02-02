@@ -1485,7 +1485,7 @@ videoEditor_populateSettings(
         if ( pContext->pEditSettings->nbEffects )
         {
             pOverlayIndex
-            = (int*) M4OSA_malloc(pContext->pEditSettings->nbEffects, 0,
+            = (int*) M4OSA_malloc(pContext->pEditSettings->nbEffects * sizeof(int), 0,
                 (M4OSA_Char*)"pOverlayIndex");
         }
 
@@ -1528,9 +1528,15 @@ videoEditor_populateSettings(
                 result = M4xVSS_internalConvertARGB888toYUV420_FrammingEffect(pContext->engineContext,
                     &(pContext->pEditSettings->Effects[j]),aFramingCtx,
                 pContext->pEditSettings->Effects[j].xVSS.framingScaledSize);
-                if (result != M4NO_ERROR)
-                {
+                videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                                            (M4NO_ERROR != result), result);
+                if (needToBeLoaded == false) {
                     M4OSA_TRACE1_1("M4xVSS_internalConvertARGB888toYUV420_FrammingEffect returned 0x%x", result);
+                    if (aFramingCtx != M4OSA_NULL) {
+                        M4OSA_free((M4OSA_MemAddr32)aFramingCtx);
+                        aFramingCtx = M4OSA_NULL;
+                    }
+                    return;
                 }
 
                 //framing buffers are resized to fit the output video resolution.
