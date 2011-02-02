@@ -583,7 +583,7 @@ public class NumberPicker extends LinearLayout {
         updateInputTextView();
         updateIncrementAndDecrementButtonsVisibilityState();
 
-        if (mFlingable) {
+        if (mFlingable && !isInEditMode()) {
             // Start with shown selector wheel and hidden controls. When made
             // visible hide the selector and fade-in the controls to suggest
             // fling interaction.
@@ -1056,7 +1056,7 @@ public class NumberPicker extends LinearLayout {
         super.onAttachedToWindow();
         // make sure we show the controls only the very
         // first time the user sees this widget
-        if (mFlingable) {
+        if (mFlingable && !isInEditMode()) {
             // animate a bit slower the very first time
             showInputControls(mShowInputControlsAnimimationDuration * 2);
         }
