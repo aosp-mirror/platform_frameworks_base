@@ -276,19 +276,18 @@ public class TelephonyManager {
     public static final int PHONE_TYPE_SIP = Phone.PHONE_TYPE_SIP;
 
     /**
-     * Returns a constant indicating the device phone type.  This
-     * indicates the type of radio used to transmit voice calls.
+     * Returns the current phone type.
+     * TODO: This is a last minute change and hence hidden.
      *
      * @see #PHONE_TYPE_NONE
      * @see #PHONE_TYPE_GSM
      * @see #PHONE_TYPE_CDMA
      * @see #PHONE_TYPE_SIP
+     *
+     * {@hide}
      */
-    public int getPhoneType() {
+    public int getCurrentPhoneType() {
         try{
-            if (!isVoiceCapable()) {
-                return PHONE_TYPE_NONE;
-            }
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getActivePhoneType();
@@ -307,6 +306,21 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Returns a constant indicating the device phone type.  This
+     * indicates the type of radio used to transmit voice calls.
+     *
+     * @see #PHONE_TYPE_NONE
+     * @see #PHONE_TYPE_GSM
+     * @see #PHONE_TYPE_CDMA
+     * @see #PHONE_TYPE_SIP
+     */
+    public int getPhoneType() {
+        if (!isVoiceCapable()) {
+            return PHONE_TYPE_NONE;
+        }
+        return getCurrentPhoneType();
+    }
 
     private int getPhoneTypeFromProperty() {
         int type =

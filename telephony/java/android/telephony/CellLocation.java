@@ -61,9 +61,9 @@ public abstract class CellLocation {
      * @hide
      */
     public static CellLocation newFromBundle(Bundle bundle) {
-        // TelephonyManager.getDefault().getPhoneType() handles the case when
+        // TelephonyManager.getDefault().getCurrentPhoneType() handles the case when
         // ITelephony interface is not up yet.
-        switch(TelephonyManager.getDefault().getPhoneType()) {
+        switch(TelephonyManager.getDefault().getCurrentPhoneType()) {
         case Phone.PHONE_TYPE_CDMA:
             return new CdmaCellLocation(bundle);
         case Phone.PHONE_TYPE_GSM:
@@ -89,9 +89,9 @@ public abstract class CellLocation {
      *
      */
     public static CellLocation getEmpty() {
-        // TelephonyManager.getDefault().getPhoneType() handles the case when
+        // TelephonyManager.getDefault().getCurrentPhoneType() handles the case when
         // ITelephony interface is not up yet.
-        switch(TelephonyManager.getDefault().getPhoneType()) {
+        switch(TelephonyManager.getDefault().getCurrentPhoneType()) {
         case Phone.PHONE_TYPE_CDMA:
             return new CdmaCellLocation();
         case Phone.PHONE_TYPE_GSM:
