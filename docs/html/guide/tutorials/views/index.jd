@@ -12,7 +12,7 @@ these kinds of boring bits so you can focus on developing the code that makes yo
 Of course, we'll discuss some of the given code so that it all makes sense.</p>
 
 <p>Note that a certain amount of knowledge is assumed for these tutorials. If you haven't
-completed the <a href="{@docRoot}guide/tutorials/hello-world.html">Hello, World</a> tutorial, 
+completed the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello, World</a> tutorial, 
 please do so&mdash;it will teach you many things you should know about basic 
 Android development and Eclipse features. More specifically, you should know:</p>
 <ul>
