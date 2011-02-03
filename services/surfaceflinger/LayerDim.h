@@ -31,11 +31,6 @@ namespace android {
 
 class LayerDim : public LayerBaseClient
 {
-    static bool sUseTexture;
-    static GLuint sTexId;
-    static EGLImageKHR sImage;
-    static int32_t sWidth;
-    static int32_t sHeight;
 public:    
                 LayerDim(SurfaceFlinger* flinger, DisplayID display,
                         const sp<Client>& client);
@@ -47,8 +42,6 @@ public:
     virtual bool isProtectedByApp() const { return false; }
     virtual bool isProtectedByDRM() const { return false; }
     virtual const char* getTypeId() const { return "LayerDim"; }
-
-    static void initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h);
 };
 
 // ---------------------------------------------------------------------------
