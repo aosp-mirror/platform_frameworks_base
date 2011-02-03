@@ -704,6 +704,9 @@ public class WindowManagerService extends IWindowManager.Stub
             Surface.openTransaction();
             try {
                 mSurface.setPosition((int)(x - mThumbOffsetX), (int)(y - mThumbOffsetY));
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
+                        + mSurface + ": pos=(" +
+                        (int)(x - mThumbOffsetX) + "," + (int)(y - mThumbOffsetY) + ")");
             } finally {
                 Surface.closeTransaction();
                 if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION notifyMoveLw");
@@ -911,7 +914,7 @@ public class WindowManagerService extends IWindowManager.Stub
     Rect mCompatibleScreenFrame = new Rect();
     // The surface used to fill the outer rim of the app running in compatibility mode.
     Surface mBackgroundFillerSurface = null;
-    boolean mBackgroundFillerShown = false;
+    WindowState mBackgroundFillerTarget = null;
 
     public static WindowManagerService main(Context context,
             PowerManagerService pm, boolean haveInputMethods) {
@@ -5876,6 +5879,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (mDragState == null) {
                         Surface surface = new Surface(session, callerPid, "drag surface", 0,
                                 width, height, PixelFormat.TRANSLUCENT, Surface.HIDDEN);
+                        if (SHOW_TRANSACTIONS) Slog.i(TAG, "  DRAG "
+                                + surface + ": CREATE");
                         outSurface.copyFrom(surface);
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
@@ -8099,9 +8104,7 @@ public class WindowManagerService extends IWindowManager.Stub
                  mFrame.left <= mCompatibleScreenFrame.left &&
                  mFrame.top <= mCompatibleScreenFrame.top &&
                  mFrame.right >= mCompatibleScreenFrame.right &&
-                 mFrame.bottom >= mCompatibleScreenFrame.bottom &&
-                 // and starting window do not need background filler
-                 mAttrs.type != mAttrs.TYPE_APPLICATION_STARTING;
+                 mFrame.bottom >= mCompatibleScreenFrame.bottom;
         }
 
         boolean isFullscreen(int screenWidth, int screenHeight) {
@@ -10432,7 +10435,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean dimming = false;
             boolean covered = false;
             boolean syswin = false;
-            boolean backgroundFillerShown = false;
+            boolean backgroundFillerWasShown = mBackgroundFillerTarget != null;
+            mBackgroundFillerTarget = null;
 
             final int N = mWindows.size();
 
@@ -10734,6 +10738,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 final boolean obscuredChanged = w.mObscured != obscured;
 
+                if (mBackgroundFillerTarget != null) {
+                    if (w.isAnimating()) {
+                        // Background filler is below all other windows that
+                        // are animating.
+                        mBackgroundFillerTarget = w;
+                    } else if (w.mIsWallpaper) {
+                        mBackgroundFillerTarget = w;
+                    }
+                }
+
                 // Update effect.
                 if (!(w.mObscured=obscured)) {
                     if (w.mSurface != null) {
@@ -10762,33 +10776,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         // so we want to leave all of them as unblurred (for
                         // performance reasons).
                         obscured = true;
-                    } else if (opaqueDrawn && w.needsBackgroundFiller(dw, dh)) {
-                        if (SHOW_TRANSACTIONS) Slog.d(TAG, "showing background filler");
+                    } else if (w.needsBackgroundFiller(dw, dh) && (canBeSeen || w.isAnimating())) {
                         // This window is in compatibility mode, and needs background filler.
                         obscured = true;
-                        if (mBackgroundFillerSurface == null) {
-                            try {
-                                mBackgroundFillerSurface = new Surface(mFxSession, 0,
-                                        "BackGroundFiller",
-                                        0, dw, dh,
-                                        PixelFormat.OPAQUE,
-                                        Surface.FX_SURFACE_NORMAL);
-                            } catch (Exception e) {
-                                Slog.e(TAG, "Exception creating filler surface", e);
-                            }
-                        }
-                        try {
-                            mBackgroundFillerSurface.setPosition(0, 0);
-                            mBackgroundFillerSurface.setSize(dw, dh);
-                            // Using the same layer as Dim because they will never be shown at the
-                            // same time.
-                            mBackgroundFillerSurface.setLayer(w.mAnimLayer - 1);
-                            mBackgroundFillerSurface.show();
-                        } catch (RuntimeException e) {
-                            Slog.e(TAG, "Exception showing filler surface");
-                        }
-                        backgroundFillerShown = true;
-                        mBackgroundFillerShown = true;
+                        mBackgroundFillerTarget = w;
                     } else if (canBeSeen && !obscured &&
                             (attrFlags&FLAG_BLUR_BEHIND|FLAG_DIM_BEHIND) != 0) {
                         if (localLOGV) Slog.v(TAG, "Win " + w
@@ -10812,8 +10803,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                 //Slog.i(TAG, "BLUR BEHIND: " + w);
                                 blurring = true;
                                 if (mBlurSurface == null) {
-                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
-                                            + mBlurSurface + ": CREATE");
                                     try {
                                         mBlurSurface = new Surface(mFxSession, 0,
                                                 "BlurSurface",
@@ -10823,6 +10812,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                     } catch (Exception e) {
                                         Slog.e(TAG, "Exception creating Blur surface", e);
                                     }
+                                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
+                                            + mBlurSurface + ": CREATE");
                                 }
                                 if (mBlurSurface != null) {
                                     if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
@@ -10855,9 +10846,39 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (backgroundFillerShown == false && mBackgroundFillerShown) {
-                mBackgroundFillerShown = false;
-                if (SHOW_TRANSACTIONS) Slog.d(TAG, "hiding background filler");
+            if (mBackgroundFillerTarget != null) {
+                if (mBackgroundFillerSurface == null) {
+                    try {
+                        mBackgroundFillerSurface = new Surface(mFxSession, 0,
+                                "BackGroundFiller",
+                                0, dw, dh,
+                                PixelFormat.OPAQUE,
+                                Surface.FX_SURFACE_NORMAL);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Exception creating filler surface", e);
+                    }
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BG FILLER "
+                            + mBackgroundFillerSurface + ": CREATE");
+                }
+                try {
+                    if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BG FILLER "
+                            + mBackgroundFillerSurface + " SHOW: pos=(0,0) ("
+                            + dw + "x" + dh + ") layer="
+                            + (mBackgroundFillerTarget.mLayer - 1));
+                    mBackgroundFillerSurface.setPosition(0, 0);
+                    mBackgroundFillerSurface.setSize(dw, dh);
+                    // Using the same layer as Dim because they will never be shown at the
+                    // same time.  NOTE: we do NOT use mAnimLayer, because we don't
+                    // want this surface dragged up in front of stuff that is animating.
+                    mBackgroundFillerSurface.setLayer(mBackgroundFillerTarget.mLayer - 1);
+                    mBackgroundFillerSurface.show();
+                } catch (RuntimeException e) {
+                    Slog.e(TAG, "Exception showing filler surface");
+                }
+            } else if (backgroundFillerWasShown) {
+                mBackgroundFillerTarget = null;
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BG FILLER "
+                        + mBackgroundFillerSurface + " HIDE");
                 try {
                     mBackgroundFillerSurface.hide();
                 } catch (RuntimeException e) {
@@ -12040,7 +12061,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * This is used for opening/closing transition for apps in compatible mode.
      */
     private static class FadeInOutAnimation extends Animation {
-        int mWidth;
         boolean mFadeIn;
 
         public FadeInOutAnimation(boolean fadeIn) {
@@ -12055,24 +12075,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!mFadeIn) {
                 x = 1.0f - x; // reverse the interpolation for fade out
             }
-            if (x < 0.5) {
-                // move the window out of the screen.
-                t.getMatrix().setTranslate(mWidth, 0);
-            } else {
-                t.getMatrix().setTranslate(0, 0);// show
-                t.setAlpha((x - 0.5f) * 2);
-            }
-        }
-
-        @Override
-        public void initialize(int width, int height, int parentWidth, int parentHeight) {
-            // width is the screen width {@see AppWindowToken#stepAnimatinoLocked}
-            mWidth = width;
-        }
-
-        @Override
-        public int getZAdjustment() {
-            return Animation.ZORDER_TOP;
+            t.setAlpha(x);
         }
     }
 
