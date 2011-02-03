@@ -413,6 +413,9 @@ public final class BridgeContext extends Activity {
             ResourceValue item = mRenderResources.findResValue(customStyle,
                     false /*forceFrameworkOnly*/);
 
+            // resolve it in case it links to something else
+            item = mRenderResources.resolveResValue(item);
+
             if (item instanceof StyleResourceValue) {
                 defStyleValues = (StyleResourceValue)item;
             }
