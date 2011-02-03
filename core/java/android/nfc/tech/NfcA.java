@@ -23,18 +23,14 @@ import android.os.RemoteException;
 import java.io.IOException;
 
 /**
- * A low-level connection to a {@link Tag} using the NFC-A technology, also known as
- * ISO1443-3A.
+ * Provides access to NFC-A (ISO 14443-3A) properties and I/O operations on a {@link Tag}.
  *
- * <p>You can acquire this kind of connection with {@link #get}.
- * Use this class to send and receive data with {@link #transceive transceive()}.
+ * <p>Acquire a {@link NfcA} object using {@link #get}.
+ * <p>The primary NFC-A I/O operation is {@link #transceive}. Applications must
+ * implement their own protocol stack on top of {@link #transceive}.
  *
- * <p>Applications must implement their own protocol stack on top of
- * {@link #transceive transceive()}.
- *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class NfcA extends BasicTagTechnology {
     /** @hide */
@@ -46,10 +42,13 @@ public final class NfcA extends BasicTagTechnology {
     private byte[] mAtqa;
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link NfcA} for the given tag.
+     * <p>Returns null if {@link NfcA} was not enumerated in {@link Tag#getTechList}.
+     * This indicates the tag does not support NFC-A.
+     * <p>Does not cause any RF activity and does not block.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an NFC-A compatible tag
+     * @return NFC-A object
      */
     public static NfcA get(Tag tag) {
         if (!tag.hasTech(TagTechnology.NFC_A)) return null;
@@ -69,29 +68,46 @@ public final class NfcA extends BasicTagTechnology {
     }
 
     /**
-     * Returns the ATQA/SENS_RES bytes discovered at tag discovery.
+     * Return the ATQA/SENS_RES bytes from tag discovery.
+     *
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return ATQA/SENS_RES bytes
      */
     public byte[] getAtqa() {
         return mAtqa;
     }
 
     /**
-     * Returns the SAK/SEL_RES discovered at tag discovery.
+     * Return the SAK/SEL_RES bytes from tag discovery.
+     *
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return SAK bytes
      */
     public short getSak() {
         return mSak;
     }
 
     /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * Send raw NFC-A commands to the tag and receive the response.
+     *
+     * <p>Applications must not append the EoD (CRC) to the payload,
+     * it will be automatically calculated.
+     * <p>Applications must only send commands that are complete bytes,
+     * for example a SENS_REQ is not possible (these are used to
+     * manage tag polling and initialization).
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param data bytes to send
      * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or this operation is canceled
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);

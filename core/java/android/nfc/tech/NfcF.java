@@ -23,18 +23,14 @@ import android.os.RemoteException;
 import java.io.IOException;
 
 /**
- * A low-level connection to a {@link Tag} using the NFC-F technology, also known as
- * JIS6319-4.
+ * Provides access to NFC-F (JIS 6319-4) properties and I/O operations on a {@link Tag}.
  *
- * <p>You can acquire this kind of connection with {@link #get}.
- * Use this class to send and receive data with {@link #transceive transceive()}.
+ * <p>Acquire a {@link NfcF} object using {@link #get}.
+ * <p>The primary NFC-F I/O operation is {@link #transceive}. Applications must
+ * implement their own protocol stack on top of {@link #transceive}.
  *
- * <p>Applications must implement their own protocol stack on top of
- * {@link #transceive transceive()}.
- *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class NfcF extends BasicTagTechnology {
     /** @hide */
@@ -46,10 +42,13 @@ public final class NfcF extends BasicTagTechnology {
     private byte[] mManufacturer = null;
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link NfcF} for the given tag.
+     * <p>Returns null if {@link NfcF} was not enumerated in {@link Tag#getTechList}.
+     * This indicates the tag does not support NFC-F.
+     * <p>Does not cause any RF activity and does not block.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an NFC-F compatible tag
+     * @return NFC-F object
      */
     public static NfcF get(Tag tag) {
         if (!tag.hasTech(TagTechnology.NFC_F)) return null;
@@ -70,24 +69,44 @@ public final class NfcF extends BasicTagTechnology {
         }
     }
 
+    /**
+     * Return the System Code bytes from tag discovery.
+     *
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return System Code bytes
+     */
     public byte[] getSystemCode() {
       return mSystemCode;
     }
 
+    /**
+     * Return the Manufacturer bytes from tag discovery.
+     *
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return Manufacturer bytes
+     */
     public byte[] getManufacturer() {
       return mManufacturer;
     }
 
     /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * Send raw NFC-F commands to the tag and receive the response.
+     *
+     * <p>Applications must not append the SoD (length) or EoD (CRC) to the payload,
+     * it will be automatically calculated.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param data bytes to send
      * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or this operation is canceled
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);

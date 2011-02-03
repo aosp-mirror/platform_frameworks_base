@@ -26,14 +26,17 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NfcA;
+import android.nfc.tech.NfcF;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
 /**
- * Represents the device's local NFC adapter.
+ * Represents the local NFC adapter.
  * <p>
  * Use the helper {@link #getDefaultAdapter(Context)} to get the default NFC
  * adapter for this Android device.
@@ -43,30 +46,85 @@ public final class NfcAdapter {
 
     /**
      * Intent to start an activity when a tag with NDEF payload is discovered.
-     * If the tag has and NDEF payload this intent is started before
-     * {@link #ACTION_TECH_DISCOVERED}.
      *
-     * If any activities respond to this intent neither
+     * <p>The system inspects the first {@link NdefRecord} in the first {@link NdefMessage} and
+     * looks for a URI, SmartPoster, or MIME record. If a URI or SmartPoster record is found the
+     * intent will contain the URI in its data field. If a MIME record is found the intent will
+     * contain the MIME type in its type field. This allows activities to register
+     * {@link IntentFilter}s targeting specific content on tags. Activities should register the
+     * most specific intent filters possible to avoid the activity chooser dialog, which can
+     * disrupt the interaction with the tag as the user interacts with the screen.
+     *
+     * <p>If the tag has an NDEF payload this intent is started before
+     * {@link #ACTION_TECH_DISCOVERED}. If any activities respond to this intent neither
      * {@link #ACTION_TECH_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
 
     /**
-     * Intent to started when a tag is discovered. The data URI is formated as
-     * {@code vnd.android.nfc://tag/} with the path having a directory entry for each technology
-     * in the {@link Tag#getTechList()} is sorted ascending order.
+     * Intent to start an activity when a tag is discovered and activities are registered for the
+     * specific technologies on the tag.
      *
-     * This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
-     * {@link #ACTION_TAG_DISCOVERED}
+     * <p>To receive this intent an activity must include an intent filter
+     * for this action and specify the desired tech types in a
+     * manifest <code>meta-data</code> entry. Here is an example manfiest entry:
+     * <pre>
+     *   &lt;activity android:name=".nfc.TechFilter" android:label="NFC/TechFilter"&gt;
+     *       &lt;!-- Add a technology filter --&gt;
+     *       &lt;intent-filter&gt;
+     *           &lt;action android:name="android.nfc.action.TECH_DISCOVERED" /&gt;
+     *       &lt;/intent-filter&gt;
      *
-     * If any activities respond to this intent {@link #ACTION_TAG_DISCOVERED} will not be started.
+     *       &lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+     *           android:resource="@xml/filter_nfc"
+     *       /&gt;
+     *   &lt;/activity&gt;
+     * </pre>
+     *
+     * <p>The meta-data XML file should contain one or more <code>tech-list</code> entries
+     * each consisting or one or more <code>tech</code> entries. The <code>tech</code> entries refer
+     * to the qualified class name implementing the technology, for example "android.nfc.tech.NfcA".
+     *
+     * <p>A tag matches if any of the
+     * <code>tech-list</code> sets is a subset of {@link Tag#getTechList() Tag.getTechList()}. Each
+     * of the <code>tech-list</code>s is considered independently and the
+     * activity is considered a match is any single <code>tech-list</code> matches the tag that was
+     * discovered. This provides AND and OR semantics for filtering desired techs. Here is an
+     * example that will match any tag using {@link NfcF} or any tag using {@link NfcA},
+     * {@link MifareClassic}, and {@link Ndef}:
+     *
+     * <pre>
+     * &lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+     *     &lt;!-- capture anything using NfcF --&gt;
+     *     &lt;tech-list&gt;
+     *         &lt;tech&gt;android.nfc.tech.NfcF&lt;/tech&gt;
+     *     &lt;/tech-list&gt;
+     *
+     *     &lt;!-- OR --&gt;
+     *
+     *     &lt;!-- capture all MIFARE Classics with NDEF payloads --&gt;
+     *     &lt;tech-list&gt;
+     *         &lt;tech&gt;android.nfc.tech.NfcA&lt;/tech&gt;
+     *         &lt;tech&gt;android.nfc.tech.MifareClassic&lt;/tech&gt;
+     *         &lt;tech&gt;android.nfc.tech.Ndef&lt;/tech&gt;
+     *     &lt;/tech-list&gt;
+     * &lt;/resources&gt;
+     * </pre>
+     *
+     * <p>This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
+     * {@link #ACTION_TAG_DISCOVERED}. If any activities respond to {@link #ACTION_NDEF_DISCOVERED}
+     * this intent will not be started. If any activities respond to this intent
+     * {@link #ACTION_TAG_DISCOVERED} will not be started.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
 
     /**
      * Intent to start an activity when a tag is discovered.
+     *
+     * <p>This intent will not be started when a tag is discovered if any activities respond to
+     * {@link #ACTION_NDEF_DISCOVERED} or {@link #ACTION_TECH_DISCOVERED} for the current tag. 
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
@@ -78,17 +136,23 @@ public final class NfcAdapter {
     public static final String ACTION_TAG_LEFT_FIELD = "android.nfc.action.TAG_LOST";
 
     /**
-     * Mandatory Tag extra for the ACTION_TAG intents.
+     * Mandatory extra containing the {@link Tag} that was discovered for the
+     * {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.
      */
     public static final String EXTRA_TAG = "android.nfc.extra.TAG";
 
     /**
-     * Optional NdefMessage[] extra for the ACTION_TAG intents.
+     * Optional extra containing an array of {@link NdefMessage} present on the discovered tag for
+     * the {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.
      */
     public static final String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
 
     /**
-     * Optional byte[] extra for the tag identifier.
+     * Optional extra containing a byte array containing the ID of the discovered tag for
+     * the {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.
      */
     public static final String EXTRA_ID = "android.nfc.extra.ID";
 
@@ -359,14 +423,13 @@ public final class NfcAdapter {
 
     /**
      * Return true if this NFC Adapter has any features enabled.
-     * <p>
-     * If this method returns false, then applications should request the user
-     * turn on NFC tag discovery in Settings.
-     * <p>
-     * If this method returns false, the NFC hardware is guaranteed not to
-     * perform or respond to any NFC communication.
      *
-     * @return true if this NFC Adapter is enabled to discover new tags
+     * <p>Application may use this as a helper to suggest that the user
+     * should turn on NFC in Settings.
+     * <p>If this method returns false, the NFC hardware is guaranteed not to
+     * generate or respond to any NFC transactions.
+     *
+     * @return true if this NFC Adapter has any features enabled
      */
     public boolean isEnabled() {
         try {
@@ -414,17 +477,37 @@ public final class NfcAdapter {
     }
 
     /**
-     * Enables foreground dispatching to the given Activity. This will force all NFC Intents that
-     * match the given filters to be delivered to the activity bypassing the standard dispatch
-     * mechanism. If no IntentFilters are given all the PendingIntent will be invoked for every
-     * dispatch Intent.
+     * Enable foreground dispatch to the given Activity.
      *
-     * This method must be called from the main thread.
+     * <p>This will give give priority to the foreground activity when
+     * dispatching a discovered {@link Tag} to an application.
+     *
+     * <p>If any IntentFilters are provided to this method they are used to match dispatch Intents
+     * for both the {@link NfcAdapter#ACTION_NDEF_DISCOVERED} and
+     * {@link NfcAdapter#ACTION_TAG_DISCOVERED}. Since {@link NfcAdapter#ACTION_TECH_DISCOVERED}
+     * relies on meta data outside of the IntentFilter matching for that dispatch Intent is handled
+     * by passing in the tech lists separately. Each first level entry in the tech list represents
+     * an array of technologies that must all be present to match. If any of the first level sets
+     * match then the dispatch is routed through the given PendingIntent. In other words, the second
+     * level is ANDed together and the first level entries are ORed together.
+     *
+     * <p>If you pass {@code null} for both the {@code filters} and {@code techLists} parameters
+     * that acts a wild card and will cause the foreground activity to receive all tags via the
+     * {@link NfcAdapter#ACTION_TAG_DISCOVERED} intent.
+     *
+     * <p>This method must be called from the main thread, and only when the activity is in the
+     * foreground (resumed). Also, activities must call {@link #disableForegroundDispatch} before
+     * the completion of their {@link Activity#onPause} callback to disable foreground dispatch
+     * after it has been enabled.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param activity the Activity to dispatch to
      * @param intent the PendingIntent to start for the dispatch
      * @param filters the IntentFilters to override dispatching for, or null to always dispatch
-     * @throws IllegalStateException
+     * @param techLists the tech lists used to perform matching for dispatching of the
+     *      {@link NfcAdapter#ACTION_TECH_DISCOVERED} intent
+     * @throws IllegalStateException if the Activity is not currently in the foreground
      */
     public void enableForegroundDispatch(Activity activity, PendingIntent intent,
             IntentFilter[] filters, String[][] techLists) {
@@ -450,13 +533,18 @@ public final class NfcAdapter {
     }
 
     /**
-     * Disables foreground activity dispatching setup with
-     * {@link #enableForegroundDispatch}.
+     * Disable foreground dispatch to the given activity.
      *
-     * <p>This must be called before the Activity returns from
-     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     * <p>After calling {@link #enableForegroundDispatch}, an activity
+     * must call this method before its {@link Activity#onPause} callback
+     * completes.
      *
      * <p>This method must be called from the main thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param activity the Activity to disable dispatch to
+     * @throws IllegalStateException if the Activity has already been paused
      */
     public void disableForegroundDispatch(Activity activity) {
         ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
@@ -484,13 +572,24 @@ public final class NfcAdapter {
     }
 
     /**
-     * Enable NDEF message push over P2P while this Activity is in the foreground. For this to
-     * function properly the other NFC device being scanned must support the "com.android.npp"
-     * NDEF push protocol.
+     * Enable NDEF message push over P2P while this Activity is in the foreground.
      *
-     * <p><em>NOTE</em> While foreground NDEF push is active standard tag dispatch is disabled.
+     * <p>For this to function properly the other NFC device being scanned must
+     * support the "com.android.npp" NDEF push protocol. Support for this
+     * protocol is currently optional for Android NFC devices.
+     *
+     * <p>This method must be called from the main thread.
+     *
+     * <p class="note"><em>NOTE:</em> While foreground NDEF push is active standard tag dispatch is disabled.
      * Only the foreground activity may receive tag discovered dispatches via
      * {@link #enableForegroundDispatch}.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param activity the foreground Activity
+     * @param msg a NDEF Message to push over P2P
+     * @throws IllegalStateException if the Activity is not currently in the foreground
+     * @throws OperationNotSupportedException if this Android device does not support NDEF push
      */
     public void enableForegroundNdefPush(Activity activity, NdefMessage msg) {
         if (activity == null || msg == null) {
@@ -510,13 +609,19 @@ public final class NfcAdapter {
     }
 
     /**
-     * Disables foreground NDEF push setup with
-     * {@link #enableForegroundNdefPush}.
+     * Disable NDEF message push over P2P.
      *
-     * <p>This must be called before the Activity returns from
-     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     * <p>After calling {@link #enableForegroundNdefPush}, an activity
+     * must call this method before its {@link Activity#onPause} callback
+     * completes.
      *
      * <p>This method must be called from the main thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param activity the Foreground activity
+     * @throws IllegalStateException if the Activity has already been paused
+     * @throws OperationNotSupportedException if this Android device does not support NDEF push
      */
     public void disableForegroundNdefPush(Activity activity) {
         ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,

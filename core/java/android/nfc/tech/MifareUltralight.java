@@ -17,6 +17,7 @@
 package android.nfc.tech;
 
 import android.nfc.Tag;
+import android.nfc.TagLostException;
 import android.os.RemoteException;
 
 import java.io.IOException;
@@ -24,14 +25,13 @@ import java.io.IOException;
 //TOOD: Ultralight C 3-DES authentication, one-way counter
 
 /**
- * Technology class representing MIFARE Ultralight and MIFARE Ultralight C tags.
+ * Provides access to MIFARE Ultralight properties and I/O operations on a {@link Tag}.
  *
- * <p>Support for this technology type is optional. If the NFC stack doesn't support this technology
- * MIFARE Ultralight class tags will still be scanned, but will only show the NfcA technology.
+ * <p>Acquire a {@link MifareUltralight} object using {@link #get}.
  *
- * <p>MIFARE Ultralight compatible tags have 4 byte pages. The read command
- * returns 4 pages (16 bytes) at a time, for speed. The write command operates
- * on a single page (4 bytes) to minimize EEPROM write cycles.
+ * <p>MIFARE Ultralight compatible tags have 4 byte pages {@link #PAGE_SIZE}.
+ * The primary operations on an Ultralight tag are {@link #readPages} and
+ * {@link #writePage}.
  *
  * <p>The original MIFARE Ultralight consists of a 64 byte EEPROM. The first
  * 4 pages are for the OTP area, manufacturer data, and locking bits. They are
@@ -44,6 +44,16 @@ import java.io.IOException;
  * and authentication configuration and are readable. The final 4 pages are for
  * the authentication key and are not readable. For more information see the
  * NXP data sheet MF0ICU2.
+ *
+ * <p>Implementation of this class on a Android NFC device is optional.
+ * If it is not implemented, then
+ * {@link MifareUltralight} will never be enumerated in {@link Tag#getTechList}.
+ * If it is enumerated, then all {@link MifareUltralight} I/O operations will be supported.
+ * In either case, {@link NfcA} will also be enumerated on the tag,
+ * because all MIFARE Ultralight tags are also {@link NfcA} tags.
+ *
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class MifareUltralight extends BasicTagTechnology {
     /** A MIFARE Ultralight compatible tag of unknown type */
@@ -62,10 +72,15 @@ public final class MifareUltralight extends BasicTagTechnology {
     private int mType;
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link MifareUltralight} for the given tag.
+     * <p>Returns null if {@link MifareUltralight} was not enumerated in
+     * {@link Tag#getTechList} - this indicates the tag is not MIFARE
+     * Ultralight compatible, or that this Android
+     * device does not implement MIFARE Ultralight.
+     * <p>Does not cause any RF activity and does not block.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an MIFARE Ultralight compatible tag
+     * @return MIFARE Ultralight object
      */
     public static MifareUltralight get(Tag tag) {
         if (!tag.hasTech(TagTechnology.MIFARE_ULTRALIGHT)) return null;
@@ -93,28 +108,43 @@ public final class MifareUltralight extends BasicTagTechnology {
         }
     }
 
-    /** Returns the type of the tag.
-     * <p>It is very hard to always accurately classify a MIFARE Ultralight
-     * compatible tag as Ultralight original or Ultralight C. So consider
-     * {@link #getType} a hint. */
+    /**
+     * Return the MIFARE Ultralight type of the tag.
+     * <p>One of {@link #TYPE_ULTRALIGHT} or {@link #TYPE_ULTRALIGHT_C} or
+     * {@link #TYPE_UNKNOWN}.
+     * <p>Depending on how the tag has been formatted, it can be impossible
+     * to accurately classify between original MIFARE Ultralight and
+     * Ultralight C. So treat this method as a hint.
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return the type
+     */
     public int getType() {
         return mType;
     }
 
-    // Methods that require connect()
     /**
      * Read 4 pages (16 bytes).
-     * <p>The MIFARE Ultralight protocol always reads 4 pages at a time.
-     * <p>If the read spans past the last readable block, then the tag will
+     *
+     * <p>The MIFARE Ultralight protocol always reads 4 pages at a time, to
+     * reduce the number of commands required to read an entire tag.
+     * <p>If a read spans past the last readable block, then the tag will
      * return pages that have been wrapped back to the first blocks. MIFARE
      * Ultralight tags have readable blocks 0x00 through 0x0F. So a read to
      * block offset 0x0E would return blocks 0x0E, 0x0F, 0x00, 0x01. MIFARE
      * Ultralight C tags have readable blocks 0x00 through 0x2B. So a read to
      * block 0x2A would return blocks 0x2A, 0x2B, 0x00, 0x01.
-     * <p>This requires that the tag be connected.
      *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param pageOffset index of first page to read, starting from 0
      * @return 4 pages (16 bytes)
-     * @throws IOException
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public byte[] readPages(int pageOffset) throws IOException {
         validatePageOffset(pageOffset);
@@ -126,12 +156,20 @@ public final class MifareUltralight extends BasicTagTechnology {
 
     /**
      * Write 1 page (4 bytes).
-     * <p>The MIFARE Ultralight protocol always writes 1 page at a time.
-     * <p>This requires that the tag be connected.
      *
-     * @param pageOffset The offset of the page to write
-     * @param data The data to write
-     * @throws IOException
+     * <p>The MIFARE Ultralight protocol always writes 1 page at a time, to
+     * minimize EEPROM write cycles.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param pageOffset index of page to write, starting from 0
+     * @param data 4 bytes to write
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public void writePage(int pageOffset, byte[] data) throws IOException {
         validatePageOffset(pageOffset);
@@ -147,15 +185,18 @@ public final class MifareUltralight extends BasicTagTechnology {
 
     /**
      * Send raw NfcA data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * <p>This requires a that the tag be connected.
      *
-     * @param data bytes to send
-     * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
+     * <p>This is equivalent to connecting to this tag via {@link NfcA}
+     * and calling {@link NfcA#transceive}. Note that all MIFARE Classic
+     * tags are based on {@link NfcA} technology.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @see NfcA#transceive
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
