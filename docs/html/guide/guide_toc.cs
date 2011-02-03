@@ -301,6 +301,50 @@
   </li>
 
   <li>
+    <h2>
+      <span class="en">Android Market Topics</span>
+    </h2>
+    <ul>
+      <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
+          <span class="en">Application Licensing</span></a>
+      </li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot?>guide/market/billing/index.html">
+            <span class="en">In-app Billing</span></a>
+          <span class="new">new!</span>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_about.html">
+              <span class="en">About this Release</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_overview.html">
+              <span class="en">In-app Billing Overview</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_integrate.html">
+              <span class="en">Implementing In-app Billing</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_best_practices.html">
+              <span class="en">Security and Design</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_testing.html">
+              <span class="en">Testing In-app Billing</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_admin.html">
+              <span class="en">Administering In-app Billing</span></a>
+          </li>
+          <li><a href="<?cs var:toroot?>guide/market/billing/billing_reference.html">
+              <span class="en">In-app Billing Reference</span></a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
+          <span class="en">Market Filters</span></a>
+      </li>
+    </ul>
+  </li>
+
+
+  <li>
     <h2><span class="en">Developing</span>
                <span class="de" style="display:none">Entwicklung</span>
                <span class="es" style="display:none">Desarrollo</span>
@@ -531,9 +575,6 @@
             <span class="zh-CN" style="display:none">应用程序版本控制</span>
             <span class="zh-TW" style="display:none">應用程式版本設定</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/publishing/licensing.html">
-            <span class="en">Licensing Your Applications</span>
-          </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/preparing.html">
             <span class="en">Preparing to Publish</span>
             <span class="de" style="display:none">Vorbereitung auf die Veröffentlichung</span>
@@ -658,9 +699,6 @@
       <li><a href="<?cs var:toroot ?>guide/appendix/api-levels.html">
             <span class="en">Android API Levels</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
-            <span class="en">Market Filters</span>
-           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/install-location.html">
             <span class="en">App Install Location</span>
           </a></li>
