@@ -148,7 +148,7 @@ last step in setting up your Android SDK.</p>
 <p>If you prefer to work in a different IDE, you do not need to
 install Eclipse or ADT, instead, you can directly use the SDK tools to build and
 debug your application. The <a href="{@docRoot}guide/developing/index.html">Overview</a>
-section of the developer guide outlines the major steps that you need to complete 
+section of the developer guide outlines the major steps that you need to complete
 when developing in Eclipse or other IDEs.</p>
 
 
@@ -177,7 +177,7 @@ better understand the components available from the Android SDK and AVD Manager.
 <p>You can launch the Android SDK and AVD Manager in one of the following ways:</p>
 <ul>
   <li>From within Eclipse, select <strong>Window &gt; Android SDK and AVD Manager</strong>.</li>
-  <li>On Windows, double-click the <code>SDK Manager.ext</code> file at the root of the Android
+  <li>On Windows, double-click the <code>SDK Manager.exe</code> file at the root of the Android
 SDK directory.</li>
   <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the
 Android SDK, then execute: <pre>android</pre> </li>
@@ -444,6 +444,7 @@ version.</td>
 <td colspan="3"><code>samples/</code></td>
 <td>Sample code and apps that are specific to platform version.</td>
 </tr>
+<tr>
 <td colspan="3"><code>tools/</code></td>
 <td>Contains the set of development and profiling tools that are platform-independent, such
 as the emulator, the AVD and SDK Manager, ddms, hierarchyviewer and more. The tools in
@@ -548,7 +549,7 @@ first step in getting started with Android development. </p>
   href="{@docRoot}guide/developing/tools/index.html">development
   tools</a> that are available to you</li>
   <li>Read the <a
-  href="{@docRoot}guide/developing/index.html">Overview</a> 
+  href="{@docRoot}guide/developing/index.html">Overview</a>
   for how to develop an Android application.
   </li>
   <li>Read <a href="{@docRoot}guide/developing/device.html">Developing on a Device</a> to set up an
