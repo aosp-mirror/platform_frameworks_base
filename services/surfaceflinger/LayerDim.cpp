@@ -30,27 +30,10 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-bool LayerDim::sUseTexture;
-GLuint LayerDim::sTexId;
-EGLImageKHR LayerDim::sImage;
-int32_t LayerDim::sWidth;
-int32_t LayerDim::sHeight;
-
-// ---------------------------------------------------------------------------
-
 LayerDim::LayerDim(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client)
     : LayerBaseClient(flinger, display, client)
 {
-}
-
-void LayerDim::initDimmer(SurfaceFlinger* flinger, uint32_t w, uint32_t h)
-{
-    sTexId = -1;
-    sImage = EGL_NO_IMAGE_KHR;
-    sWidth = w;
-    sHeight = h;
-    sUseTexture = false;
 }
 
 LayerDim::~LayerDim()
@@ -84,15 +67,7 @@ void LayerDim::onDraw(const Region& clip) const
 #endif
         glDisable(GL_TEXTURE_2D);
 
-        GLshort w = sWidth;
-        GLshort h = sHeight;
-        const GLshort vertices[4][2] = {
-                { 0, 0 },
-                { 0, h },
-                { w, h },
-                { w, 0 }
-        };
-        glVertexPointer(2, GL_SHORT, 0, vertices);
+        glVertexPointer(2, GL_FLOAT, 0, mVertices);
 
         while (it != end) {
             const Rect& r = *it++;
