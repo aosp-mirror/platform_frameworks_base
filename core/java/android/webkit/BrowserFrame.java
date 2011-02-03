@@ -21,7 +21,6 @@ import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.ParseException;
 import android.net.Uri;
@@ -29,10 +28,8 @@ import android.net.WebAddress;
 import android.net.http.ErrorStrings;
 import android.net.http.SslCertificate;
 import android.net.http.SslError;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Surface;
@@ -41,7 +38,6 @@ import android.view.WindowManager;
 
 import junit.framework.Assert;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -399,20 +395,31 @@ class BrowserFrame extends Handler {
                 // set to true in didFirstLayout()
                 mWebViewCore.removeMessages(WebViewCore.EventHub.WEBKIT_DRAW);
             }
+        }
+    }
 
-            // Note: only saves committed form data in standard load
-            if (loadType == FRAME_LOADTYPE_STANDARD
-                    && mSettings.getSaveFormData()) {
-                final WebHistoryItem h = mCallbackProxy.getBackForwardList()
-                        .getCurrentItem();
-                if (h != null) {
-                    String currentUrl = h.getUrl();
-                    if (currentUrl != null) {
-                        mDatabase.setFormData(currentUrl, getFormTextData());
-                    }
+    @SuppressWarnings("unused")
+    private void saveFormData(HashMap<String, String> data) {
+        if (mSettings.getSaveFormData()) {
+            final WebHistoryItem h = mCallbackProxy.getBackForwardList()
+                    .getCurrentItem();
+            if (h != null) {
+                String currentUrl = h.getUrl();
+                if (currentUrl != null) {
+                    mDatabase.setFormData(currentUrl, data);
                 }
             }
         }
+    }
+
+    @SuppressWarnings("unused")
+    private boolean shouldSaveFormData() {
+        if (mSettings.getSaveFormData()) {
+            final WebHistoryItem h = mCallbackProxy.getBackForwardList()
+                    .getCurrentItem();
+            return h != null && h.getUrl() != null;
+        }
+        return false;
     }
 
     /**
@@ -1315,13 +1322,6 @@ class BrowserFrame extends Handler {
      * @param password
      */
     private native void setUsernamePassword(String username, String password);
-
-    /**
-     * Get form's "text" type data associated with the current frame.
-     * @return HashMap If succeed, returns a list of name/value pair. Otherwise
-     *         returns null.
-     */
-    private native HashMap getFormTextData();
 
     private native String nativeSaveWebArchive(String basename, boolean autoname);
 
