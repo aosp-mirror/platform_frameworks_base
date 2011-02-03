@@ -2572,6 +2572,7 @@ public class WebView extends AbsoluteLayout
     static class ViewSizeData {
         int mWidth;
         int mHeight;
+        float mHeightWidthRatio;
         int mTextWrapWidth;
         int mAnchorX;
         int mAnchorY;
@@ -2593,7 +2594,11 @@ public class WebView extends AbsoluteLayout
 
         int viewWidth = getViewWidth();
         int newWidth = Math.round(viewWidth * mZoomManager.getInvScale());
-        int newHeight = Math.round((getViewHeightWithTitle() - getTitleHeight()) * mZoomManager.getInvScale());
+        int viewHeight = getViewHeightWithTitle() - getTitleHeight();
+        int newHeight = Math.round(viewHeight * mZoomManager.getInvScale());
+        // Make the ratio more accurate than (newHeight / newWidth), since the
+        // latter both are calculated and rounded.
+        float heightWidthRatio = (float) viewHeight / viewWidth;
         /*
          * Because the native side may have already done a layout before the
          * View system was able to measure us, we have to send a height of 0 to
@@ -2604,12 +2609,14 @@ public class WebView extends AbsoluteLayout
          */
         if (newWidth > mLastWidthSent && mWrapContent) {
             newHeight = 0;
+            heightWidthRatio = 0;
         }
         // Avoid sending another message if the dimensions have not changed.
         if (newWidth != mLastWidthSent || newHeight != mLastHeightSent || force) {
             ViewSizeData data = new ViewSizeData();
             data.mWidth = newWidth;
             data.mHeight = newHeight;
+            data.mHeightWidthRatio = heightWidthRatio;
             data.mTextWrapWidth = Math.round(viewWidth / mZoomManager.getTextWrapScale());
             data.mScale = mZoomManager.getScale();
             data.mIgnoreHeight = mZoomManager.isFixedLengthAnimationInProgress()
