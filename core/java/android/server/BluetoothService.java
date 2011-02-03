@@ -47,6 +47,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources.NotFoundException;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
+import android.net.LinkAddress;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1682,12 +1683,15 @@ public class BluetoothService extends IBluetooth.Stub {
         try {
             ifcg = service.getInterfaceConfig(iface);
             if (ifcg != null) {
-                ifcg.mask = InetAddress.getByName(BLUETOOTH_NETMASK);
-
-                if (ifcg.addr == null || ifcg.addr.equals(InetAddress.getByName("0.0.0.0"))) {
-                    ifcg.addr = InetAddress.getByName(address);
-                    ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                InetAddress mask = InetAddress.getByName(BLUETOOTH_NETMASK);
+                InetAddress addr = null;
+                if (ifcg.addr == null || (addr = ifcg.addr.getAddress()) == null ||
+                        addr.equals(InetAddress.getByName("0.0.0.0")) ||
+                        addr.equals(InetAddress.getByName("::0"))) {
+                    addr = InetAddress.getByName(address);
                 }
+                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                ifcg.addr = new LinkAddress(addr, mask);
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
                 service.setInterfaceConfig(iface, ifcg);

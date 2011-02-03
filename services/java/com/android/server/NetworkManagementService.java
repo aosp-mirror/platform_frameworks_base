@@ -26,6 +26,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.LinkAddress;
+import android.net.NetworkUtils;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.INetworkManagementService;
@@ -265,18 +267,21 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
             cfg = new InterfaceConfiguration();
             cfg.hwAddr = st.nextToken(" ");
+            InetAddress addr = null;
+            InetAddress mask = null;
             try {
-                cfg.addr = InetAddress.getByName(st.nextToken(" "));
+                addr = InetAddress.getByName(st.nextToken(" "));
             } catch (UnknownHostException uhe) {
                 Slog.e(TAG, "Failed to parse ipaddr", uhe);
             }
 
             try {
-                cfg.mask = InetAddress.getByName(st.nextToken(" "));
+                mask = InetAddress.getByName(st.nextToken(" "));
             } catch (UnknownHostException uhe) {
                 Slog.e(TAG, "Failed to parse netmask", uhe);
             }
 
+            cfg.addr = new LinkAddress(addr, mask);
             cfg.interfaceFlags = st.nextToken("]").trim() +"]";
         } catch (NoSuchElementException nsee) {
             throw new IllegalStateException(
@@ -288,9 +293,20 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     public void setInterfaceConfig(
             String iface, InterfaceConfiguration cfg) throws IllegalStateException {
+        LinkAddress linkAddr = cfg.addr;
+        if (linkAddr == null) throw new IllegalStateException("Null LinkAddress given");
+        InetAddress addr = linkAddr.getAddress();
+        // TODO - fix this to pass prefixlength and be v6 capapble
+        InetAddress mask = null;
+        try {
+            mask = NetworkUtils.intToInetAddress(NetworkUtils.prefixLengthToNetmaskInt(
+                    linkAddr.getNetworkPrefixLength()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(e);
+        }
+        if (addr == null || mask == null) throw new IllegalStateException("Null Address given");
         String cmd = String.format("interface setcfg %s %s %s %s", iface,
-                cfg.addr.getHostAddress(), cfg.mask.getHostAddress(),
-                cfg.interfaceFlags);
+                addr.getHostAddress(), mask.getHostAddress(), cfg.interfaceFlags);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
