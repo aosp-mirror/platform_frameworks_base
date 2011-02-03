@@ -6407,6 +6407,53 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * @hide
+     */
+    public void setFastX(float x) {
+        mTranslationX = x - mLeft;
+        mMatrixDirty = true;
+    }
+
+    /**
+     * @hide
+     */
+    public void setFastY(float y) {
+        mTranslationY = y - mTop;
+        mMatrixDirty = true;
+    }
+    
+    /**
+     * @hide
+     */
+    public void setFastScaleX(float x) {
+        mScaleX = x;
+        mMatrixDirty = true;
+    }
+
+    /**
+     * @hide
+     */
+    public void setFastScaleY(float y) {
+        mScaleY = y;
+        mMatrixDirty = true;
+    }
+
+    /**
+     * @hide
+     */
+    public void setFastAlpha(float alpha) {
+        mAlpha = alpha;
+    }
+    
+    /**
+     * @hide
+     */
+    public void setFastRotationY(float y) {
+        mRotationY = y;
+        mMatrixDirty = true;
+    }
+    
+    /**
      * Hit rectangle in parent's coordinates
      *
      * @param outRect The hit rectangle of the view.
@@ -6942,6 +6989,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // Don't call invalidate -- we don't want to internally scroll
                 // our own bounds
                 p.invalidateChild(this, r);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void fastInvalidate() {
+        if ((mPrivateFlags & (DRAWN | HAS_BOUNDS)) == (DRAWN | HAS_BOUNDS) ||
+            (mPrivateFlags & DRAWING_CACHE_VALID) == DRAWING_CACHE_VALID ||
+            (mPrivateFlags & INVALIDATED) != INVALIDATED) {
+            if (mParent instanceof View) {
+                ((View) mParent).mPrivateFlags |= INVALIDATED;
+            }
+            mPrivateFlags &= ~DRAWN;
+            mPrivateFlags |= INVALIDATED;
+            mPrivateFlags &= ~DRAWING_CACHE_VALID;
+            if (mParent != null && mAttachInfo != null && mAttachInfo.mHardwareAccelerated) {
+                mParent.invalidateChild(this, null);
             }
         }
     }
