@@ -339,7 +339,6 @@ public class DownloadManager {
         private boolean mIsVisibleInDownloadsUi = true;
         private boolean mScannable = false;
         private boolean mUseSystemCache = false;
-        private boolean mOtaUpdate = false;
         /** if a file is designated as a MediaScanner scannable file, the following value is
          * stored in the database column {@link Downloads.Impl#COLUMN_MEDIA_SCANNED}.
          */
@@ -606,13 +605,6 @@ public class DownloadManager {
         }
 
         /**
-         * Set whether the download request is OTA Update. By default, it is set to false.
-         */
-        public void setDownloadToBeOtaUpdate() {
-            mOtaUpdate = true;
-        }
-
-        /**
          * Set whether this download should be displayed in the system's Downloads UI. True by
          * default.
          * @param isVisible whether to display this download in the Downloads UI
@@ -658,7 +650,6 @@ public class DownloadManager {
             values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
             values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
             values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
-            values.put(Downloads.Impl.COLUMN_IGNORE_SIZE_LIMITS, mOtaUpdate);
 
             return values;
         }
