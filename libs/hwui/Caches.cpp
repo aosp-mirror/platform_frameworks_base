@@ -20,6 +20,7 @@
 
 #include "Caches.h"
 #include "Properties.h"
+#include "LayerRenderer.h"
 
 namespace android {
 
@@ -116,12 +117,7 @@ void Caches::clearGarbage() {
     size_t count = mLayerGarbage.size();
     for (size_t i = 0; i < count; i++) {
         Layer* layer = mLayerGarbage.itemAt(i);
-        if (layer) {
-            if (layer->fbo) glDeleteFramebuffers(1, &layer->fbo);
-            if (layer->texture) glDeleteTextures(1, &layer->texture);
-
-            delete layer;
-        }
+        LayerRenderer::destroyLayer(layer);
     }
     mLayerGarbage.clear();
 }
