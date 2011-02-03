@@ -361,9 +361,6 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
             View view = mInflater.inflate(mBlockParser, mViewRoot);
 
-            // post-inflate process. For now this supports TabHost/TabWidget
-            postInflateProcess(view, mParams.getProjectCallback());
-
             Fragment_Delegate.setProjectCallback(null);
 
             // set the AttachInfo on the root view.
@@ -374,6 +371,9 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             info.mInTouchMode = false; // this is so that we can display selections.
             info.mHardwareAccelerated = false;
             mViewRoot.dispatchAttachedToWindow(info, 0);
+
+            // post-inflate process. For now this supports TabHost/TabWidget
+            postInflateProcess(view, mParams.getProjectCallback());
 
             // get the background drawable
             if (mWindowBackground != null) {
@@ -461,12 +461,13 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             // remeasure with the size we need
             // This must always be done before the call to layout
             w_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenWidth, MeasureSpec.EXACTLY);
-            h_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenHeight,
-                    MeasureSpec.EXACTLY);
+            h_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenHeight, MeasureSpec.EXACTLY);
             mViewRoot.measure(w_spec, h_spec);
 
             // now do the layout.
             mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+
+            mViewRoot.mAttachInfo.mTreeObserver.dispatchOnPreDraw();
 
             // draw the views
             // create the BufferedImage into which the layout will be rendered.
