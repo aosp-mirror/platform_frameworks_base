@@ -65,6 +65,7 @@ import static android.telephony.SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE;
 
 public abstract class SMSDispatcher extends Handler {
     private static final String TAG = "SMS";
+    private static final String SEND_NEXT_MSG_EXTRA = "SendNextMsg";
 
     /** Default checking period for SMS sent without user permit */
     private static final int DEFAULT_SMS_CHECK_PERIOD = 3600000;
@@ -152,6 +153,8 @@ public abstract class SMSDispatcher extends Handler {
 
     protected boolean mStorageAvailable = true;
     protected boolean mReportMemoryStatusPending = false;
+
+    protected static int mRemainingMessages = -1;
 
     protected static int getNextConcatenatedRef() {
         sConcatenatedRef += 1;
@@ -463,7 +466,17 @@ public abstract class SMSDispatcher extends Handler {
 
             if (sentIntent != null) {
                 try {
-                    sentIntent.send(Activity.RESULT_OK);
+                    if (mRemainingMessages > -1) {
+                        mRemainingMessages--;
+                    }
+
+                    if (mRemainingMessages == 0) {
+                        Intent sendNext = new Intent();
+                        sendNext.putExtra(SEND_NEXT_MSG_EXTRA, true);
+                        sentIntent.send(mContext, Activity.RESULT_OK, sendNext);
+                    } else {
+                        sentIntent.send(Activity.RESULT_OK);
+                    }
                 } catch (CanceledException ex) {}
             }
         } else {
@@ -502,8 +515,15 @@ public abstract class SMSDispatcher extends Handler {
                     if (ar.result != null) {
                         fillIn.putExtra("errorCode", ((SmsResponse)ar.result).errorCode);
                     }
-                    tracker.mSentIntent.send(mContext, error, fillIn);
+                    if (mRemainingMessages > -1) {
+                        mRemainingMessages--;
+                    }
 
+                    if (mRemainingMessages == 0) {
+                        fillIn.putExtra(SEND_NEXT_MSG_EXTRA, true);
+                    }
+
+                    tracker.mSentIntent.send(mContext, error, fillIn);
                 } catch (CanceledException ex) {}
             }
         }
