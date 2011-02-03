@@ -41,6 +41,7 @@ public final class UsbConstants {
     public static final int USB_ENDPOINT_XFER_BULK = 2;
     public static final int USB_ENDPOINT_XFER_INT = 3;
 
+    // USB classes
     public static final int USB_CLASS_PER_INTERFACE = 0;
     public static final int USB_CLASS_AUDIO = 1;
     public static final int USB_CLASS_COMM = 2;
@@ -58,6 +59,8 @@ public final class UsbConstants {
     public static final int USB_CLASS_MISC = 0xef;
     public static final int USB_CLASS_APP_SPEC = 0xfe;
     public static final int USB_CLASS_VENDOR_SPEC = 0xff;
-    public static final int USB_SUBCLASS_VENDOR_SPEC = 0xff;
 
+    // USB subclasses
+    public static final int USB_INTERFACE_SUBCLASS_BOOT = 1;    // for HID class
+    public static final int USB_SUBCLASS_VENDOR_SPEC = 0xff;
 }
