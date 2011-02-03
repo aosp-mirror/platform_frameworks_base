@@ -33,6 +33,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.media.videoeditor.MediaImageItem;
+import android.media.videoeditor.MediaItem;
 import android.util.Log;
 import android.util.Xml;
 import android.view.Surface;
@@ -772,8 +774,7 @@ public class VideoEditorImpl implements VideoEditor {
         return mediaItem;
     }
 
-    private synchronized MediaItem removeMediaItem(String mediaItemId,
-                                                   boolean flag) {
+    private synchronized MediaItem removeMediaItem(String mediaItemId, boolean flag) {
         final String firstItemString = mMediaItems.get(0).getId();
 
         final MediaItem mediaItem = getMediaItem(mediaItemId);
@@ -879,14 +880,15 @@ public class VideoEditorImpl implements VideoEditor {
     /**
      *  the project form XML
      */
-    private void load() throws FileNotFoundException, XmlPullParserException,
-                               IOException {
+    private void load() throws FileNotFoundException, XmlPullParserException, IOException {
         final File file = new File(mProjectPath, PROJECT_FILENAME);
         /**
          *  Load the metadata
          */
         final FileInputStream fis = new FileInputStream(file);
         try {
+            final List<String> ignoredMediaItems = new ArrayList<String>();
+
             final XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, "UTF-8");
             int eventType = parser.getEventType();
@@ -898,74 +900,43 @@ public class VideoEditorImpl implements VideoEditor {
                     case XmlPullParser.START_TAG: {
                         name = parser.getName();
                         if (TAG_PROJECT.equals(name)) {
-                            mAspectRatio =
-                                   Integer.parseInt(parser.getAttributeValue("",
+                            mAspectRatio = Integer.parseInt(parser.getAttributeValue("",
                                    ATTR_ASPECT_RATIO));
 
                             final boolean mRegenPCM =
-                               Boolean.parseBoolean(parser.getAttributeValue("",
+                                Boolean.parseBoolean(parser.getAttributeValue("",
                                     ATTR_REGENERATE_PCM));
                             mMANativeHelper.setAudioflag(mRegenPCM);
-
                         } else if (TAG_MEDIA_ITEM.equals(name)) {
-                            final String mediaItemId =
-                                          parser.getAttributeValue("", ATTR_ID);
-                            final String type =
-                                        parser.getAttributeValue("", ATTR_TYPE);
-                            final String filename =
-                                    parser.getAttributeValue("", ATTR_FILENAME);
-                            final int renderingMode =
-                                   Integer.parseInt(parser.getAttributeValue("",
-                                   ATTR_RENDERING_MODE));
-
-                            if (MediaImageItem.class.getSimpleName().equals(type)) {
-                                final long durationMs = Long.parseLong(parser.getAttributeValue("",
-                                        ATTR_DURATION));
-                                currentMediaItem = new MediaImageItem(this, mediaItemId, filename,
-                                        durationMs, renderingMode);
-                            } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
-                                final long beginMs = Long.parseLong(parser.getAttributeValue("",
-                                        ATTR_BEGIN_TIME));
-                                final long endMs = Long.parseLong(parser.getAttributeValue("",
-                                        ATTR_END_TIME));
-                                final int volume = Integer.parseInt(parser.getAttributeValue("",
-                                        ATTR_VOLUME));
-                                final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("",
-                                        ATTR_MUTED));
-                                final String audioWaveformFilename = parser.getAttributeValue("",
-                                        ATTR_AUDIO_WAVEFORM_FILENAME);
-                                currentMediaItem = new MediaVideoItem(this, mediaItemId, filename,
-                                        renderingMode, beginMs, endMs, volume, muted,
-                                        audioWaveformFilename);
-
-                                final long beginTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                        ATTR_BEGIN_TIME));
-                                final long endTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                        ATTR_END_TIME));
-                                ((MediaVideoItem)currentMediaItem).setExtractBoundaries(beginTimeMs,
-                                        endTimeMs);
-
-                                final int volumePercent = Integer.parseInt(parser.getAttributeValue("",
-                                        ATTR_VOLUME));
-                                ((MediaVideoItem)currentMediaItem).setVolume(volumePercent);
-                            } else {
-                                Log.e(TAG, "Unknown media item type: " + type);
-                                currentMediaItem = null;
-                            }
-
-                            if (currentMediaItem != null) {
+                            final String mediaItemId = parser.getAttributeValue("", ATTR_ID);
+                            try {
+                                currentMediaItem = parseMediaItem(parser);
                                 mMediaItems.add(currentMediaItem);
+                            } catch (Exception ex) {
+                                Log.w(TAG, "Cannot load media item: " + mediaItemId, ex);
+                                currentMediaItem = null;
+                                // Ignore the media item
+                                ignoredMediaItems.add(mediaItemId);
                             }
                         } else if (TAG_TRANSITION.equals(name)) {
-                            final Transition transition = parseTransition(parser);
-                            if (transition != null) {
-                                mTransitions.add(transition);
+                            try {
+                                final Transition transition = parseTransition(parser,
+                                        ignoredMediaItems);
+                                // The transition will be null if the bounding
+                                // media items are ignored
+                                if (transition != null) {
+                                    mTransitions.add(transition);
+                                }
+                            } catch (Exception ex) {
+                                Log.w(TAG, "Cannot load transition", ex);
                             }
                         } else if (TAG_OVERLAY.equals(name)) {
                             if (currentMediaItem != null) {
-                                currentOverlay = parseOverlay(parser, currentMediaItem);
-                                if (currentOverlay != null) {
+                                try {
+                                    currentOverlay = parseOverlay(parser, currentMediaItem);
                                     currentMediaItem.addOverlay(currentOverlay);
+                                } catch (Exception ex) {
+                                    Log.w(TAG, "Cannot load overlay", ex);
                                 }
                             }
                         } else if (TAG_OVERLAY_USER_ATTRIBUTES.equals(name)) {
@@ -978,40 +949,45 @@ public class VideoEditorImpl implements VideoEditor {
                             }
                         } else if (TAG_EFFECT.equals(name)) {
                             if (currentMediaItem != null) {
-                                final Effect effect = parseEffect(parser, currentMediaItem);
-                                if (effect != null) {
+                                try {
+                                    final Effect effect = parseEffect(parser, currentMediaItem);
                                     currentMediaItem.addEffect(effect);
-                                }
-                                if (effect instanceof EffectKenBurns) {
-                                    final boolean isImageClipGenerated =
-                                           Boolean.parseBoolean(parser.getAttributeValue("",
-                                                              ATTR_IS_IMAGE_CLIP_GENERATED));
-                                    if(isImageClipGenerated) {
-                                        String filename = parser.getAttributeValue("",
-                                                              ATTR_GENERATED_IMAGE_CLIP);
-                                        if (new File(filename).exists() == true) {
+
+                                    if (effect instanceof EffectKenBurns) {
+                                        final boolean isImageClipGenerated =
+                                               Boolean.parseBoolean(parser.getAttributeValue("",
+                                                                  ATTR_IS_IMAGE_CLIP_GENERATED));
+                                        if(isImageClipGenerated) {
+                                            final String filename = parser.getAttributeValue("",
+                                                                  ATTR_GENERATED_IMAGE_CLIP);
+                                            if (new File(filename).exists() == true) {
+                                                ((MediaImageItem)currentMediaItem).
+                                                            setGeneratedImageClip(filename);
+                                                ((MediaImageItem)currentMediaItem).
+                                                             setRegenerateClip(false);
+                                             } else {
+                                               ((MediaImageItem)currentMediaItem).
+                                                             setGeneratedImageClip(null);
+                                               ((MediaImageItem)currentMediaItem).
+                                                             setRegenerateClip(true);
+                                             }
+                                        } else {
                                             ((MediaImageItem)currentMediaItem).
-                                                        setGeneratedImageClip(filename);
+                                                             setGeneratedImageClip(null);
                                             ((MediaImageItem)currentMediaItem).
-                                                         setRegenerateClip(false);
-                                         } else {
-                                           ((MediaImageItem)currentMediaItem).
-                                                         setGeneratedImageClip(null);
-                                           ((MediaImageItem)currentMediaItem).
-                                                         setRegenerateClip(true);
-                                         }
-                                    } else {
-                                        ((MediaImageItem)currentMediaItem).
-                                                         setGeneratedImageClip(null);
-                                        ((MediaImageItem)currentMediaItem).
-                                                        setRegenerateClip(true);
+                                                            setRegenerateClip(true);
+                                        }
                                     }
+                                } catch (Exception ex) {
+                                    Log.w(TAG, "Cannot load effect", ex);
                                 }
                             }
                         } else if (TAG_AUDIO_TRACK.equals(name)) {
-                            final AudioTrack audioTrack = parseAudioTrack(parser);
-                            if (audioTrack != null) {
+                            try {
+                                final AudioTrack audioTrack = parseAudioTrack(parser);
                                 addAudioTrack(audioTrack);
+                            } catch (Exception ex) {
+                                Log.w(TAG, "Cannot load audio track", ex);
                             }
                         }
                         break;
@@ -1042,34 +1018,81 @@ public class VideoEditorImpl implements VideoEditor {
     }
 
     /**
+     * Parse the media item
+     *
+     * @param parser The parser
+     * @return The media item
+     */
+    private MediaItem parseMediaItem(XmlPullParser parser) throws IOException {
+        final String mediaItemId = parser.getAttributeValue("", ATTR_ID);
+        final String type = parser.getAttributeValue("", ATTR_TYPE);
+        final String filename = parser.getAttributeValue("", ATTR_FILENAME);
+        final int renderingMode = Integer.parseInt(parser.getAttributeValue("",
+                ATTR_RENDERING_MODE));
+
+        final MediaItem currentMediaItem;
+        if (MediaImageItem.class.getSimpleName().equals(type)) {
+            final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+            currentMediaItem = new MediaImageItem(this, mediaItemId, filename,
+                    durationMs, renderingMode);
+        } else if (MediaVideoItem.class.getSimpleName().equals(type)) {
+            final long beginMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
+            final long endMs = Long.parseLong(parser.getAttributeValue("", ATTR_END_TIME));
+            final int volume = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
+            final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_MUTED));
+            final String audioWaveformFilename = parser.getAttributeValue("",
+                    ATTR_AUDIO_WAVEFORM_FILENAME);
+            currentMediaItem = new MediaVideoItem(this, mediaItemId, filename,
+                    renderingMode, beginMs, endMs, volume, muted, audioWaveformFilename);
+
+            final long beginTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
+            final long endTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_END_TIME));
+            ((MediaVideoItem)currentMediaItem).setExtractBoundaries(beginTimeMs, endTimeMs);
+
+            final int volumePercent = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
+            ((MediaVideoItem)currentMediaItem).setVolume(volumePercent);
+        } else {
+            throw new IllegalArgumentException("Unknown media item type: " + type);
+        }
+
+        return currentMediaItem;
+    }
+
+    /**
      * Parse the transition
      *
      * @param parser The parser
+     * @param ignoredMediaItems The list of ignored media items
+     *
      * @return The transition
      */
-    private Transition parseTransition(XmlPullParser parser) {
+    private Transition parseTransition(XmlPullParser parser, List<String> ignoredMediaItems) {
         final String transitionId = parser.getAttributeValue("", ATTR_ID);
         final String type = parser.getAttributeValue("", ATTR_TYPE);
-        final long durationMs = Long.parseLong(parser.getAttributeValue("",
-                                               ATTR_DURATION));
-        final int behavior = Integer.parseInt(parser.getAttributeValue("",
-                                              ATTR_BEHAVIOR));
-        final boolean isTransitionGenerated;
+        final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+        final int behavior = Integer.parseInt(parser.getAttributeValue("", ATTR_BEHAVIOR));
 
-
-        final String beforeMediaItemId = parser.getAttributeValue("",
-                                                     ATTR_BEFORE_MEDIA_ITEM_ID);
+        final String beforeMediaItemId = parser.getAttributeValue("", ATTR_BEFORE_MEDIA_ITEM_ID);
         final MediaItem beforeMediaItem;
         if (beforeMediaItemId != null) {
+            if (ignoredMediaItems.contains(beforeMediaItemId)) {
+                // This transition is ignored
+                return null;
+            }
+
             beforeMediaItem = getMediaItem(beforeMediaItemId);
         } else {
             beforeMediaItem = null;
         }
 
-        final String afterMediaItemId = parser.getAttributeValue("",
-                                                      ATTR_AFTER_MEDIA_ITEM_ID);
+        final String afterMediaItemId = parser.getAttributeValue("", ATTR_AFTER_MEDIA_ITEM_ID);
         final MediaItem afterMediaItem;
         if (afterMediaItemId != null) {
+            if (ignoredMediaItems.contains(afterMediaItemId)) {
+                // This transition is ignored
+                return null;
+            }
+
             afterMediaItem = getMediaItem(afterMediaItemId);
         } else {
             afterMediaItem = null;
@@ -1093,18 +1116,10 @@ public class VideoEditorImpl implements VideoEditor {
             transition = new TransitionFadeBlack(transitionId, afterMediaItem, beforeMediaItem,
                     durationMs, behavior);
         } else {
-            transition = null;
+            throw new IllegalArgumentException("Invalid transition type: " + type);
         }
 
-        if (beforeMediaItem != null) {
-            beforeMediaItem.setBeginTransition(transition);
-        }
-
-        if (afterMediaItem != null) {
-            afterMediaItem.setEndTransition(transition);
-        }
-
-        isTransitionGenerated = Boolean.parseBoolean(parser.getAttributeValue("",
+        final boolean isTransitionGenerated = Boolean.parseBoolean(parser.getAttributeValue("",
                                                  ATTR_IS_TRANSITION_GENERATED));
         if (isTransitionGenerated == true) {
             final String transitionFile = parser.getAttributeValue("",
@@ -1116,9 +1131,18 @@ public class VideoEditorImpl implements VideoEditor {
                 transition.setFilename(null);
             }
         }
+
+        // Use the transition
+        if (beforeMediaItem != null) {
+            beforeMediaItem.setBeginTransition(transition);
+        }
+
+        if (afterMediaItem != null) {
+            afterMediaItem.setEndTransition(transition);
+        }
+
         return transition;
     }
-
 
     /**
      * Parse the overlay
@@ -1131,40 +1155,32 @@ public class VideoEditorImpl implements VideoEditor {
     private Overlay parseOverlay(XmlPullParser parser, MediaItem mediaItem) {
         final String overlayId = parser.getAttributeValue("", ATTR_ID);
         final String type = parser.getAttributeValue("", ATTR_TYPE);
-        final long durationMs = Long.parseLong(parser.getAttributeValue("",
-                                                                ATTR_DURATION));
-        final long startTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                                              ATTR_BEGIN_TIME));
+        final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+        final long startTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
 
         final Overlay overlay;
         if (OverlayFrame.class.getSimpleName().equals(type)) {
             final String filename = parser.getAttributeValue("", ATTR_FILENAME);
-            overlay = new OverlayFrame(mediaItem, overlayId, filename,
-                                       startTimeMs, durationMs);
+            overlay = new OverlayFrame(mediaItem, overlayId, filename, startTimeMs, durationMs);
         } else {
-            overlay = null;
+            throw new IllegalArgumentException("Invalid overlay type: " + type);
         }
 
-        final String overlayRgbFileName = parser.getAttributeValue("",
-                                                     ATTR_OVERLAY_RGB_FILENAME);
+        final String overlayRgbFileName = parser.getAttributeValue("", ATTR_OVERLAY_RGB_FILENAME);
         if (overlayRgbFileName != null) {
             ((OverlayFrame)overlay).setFilename(overlayRgbFileName);
 
-            final int overlayFrameWidth =
-                                   Integer.parseInt(parser.getAttributeValue("",
+            final int overlayFrameWidth = Integer.parseInt(parser.getAttributeValue("",
                                    ATTR_OVERLAY_FRAME_WIDTH));
-            final int overlayFrameHeight =
-                                   Integer.parseInt(parser.getAttributeValue("",
+            final int overlayFrameHeight = Integer.parseInt(parser.getAttributeValue("",
                                    ATTR_OVERLAY_FRAME_HEIGHT));
 
             ((OverlayFrame)overlay).setOverlayFrameWidth(overlayFrameWidth);
             ((OverlayFrame)overlay).setOverlayFrameHeight(overlayFrameHeight);
 
-            final int resizedRGBFrameWidth =
-                                   Integer.parseInt(parser.getAttributeValue("",
+            final int resizedRGBFrameWidth = Integer.parseInt(parser.getAttributeValue("",
                                    ATTR_OVERLAY_RESIZED_RGB_FRAME_WIDTH));
-            final int resizedRGBFrameHeight =
-                                   Integer.parseInt(parser.getAttributeValue("",
+            final int resizedRGBFrameHeight = Integer.parseInt(parser.getAttributeValue("",
                                    ATTR_OVERLAY_RESIZED_RGB_FRAME_HEIGHT));
 
             ((OverlayFrame)overlay).setResizedRGBSize(resizedRGBFrameWidth, resizedRGBFrameHeight);
@@ -1184,21 +1200,17 @@ public class VideoEditorImpl implements VideoEditor {
     private Effect parseEffect(XmlPullParser parser, MediaItem mediaItem) {
         final String effectId = parser.getAttributeValue("", ATTR_ID);
         final String type = parser.getAttributeValue("", ATTR_TYPE);
-        final long durationMs = Long.parseLong(parser.getAttributeValue("",
-                                                                ATTR_DURATION));
-        final long startTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                                              ATTR_BEGIN_TIME));
+        final long durationMs = Long.parseLong(parser.getAttributeValue("", ATTR_DURATION));
+        final long startTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
 
         final Effect effect;
         if (EffectColor.class.getSimpleName().equals(type)) {
-            final int colorEffectType =
-                Integer.parseInt(parser.getAttributeValue("",
+            final int colorEffectType = Integer.parseInt(parser.getAttributeValue("",
                                                        ATTR_COLOR_EFFECT_TYPE));
             final int color;
             if (colorEffectType == EffectColor.TYPE_COLOR
                     || colorEffectType == EffectColor.TYPE_GRADIENT) {
-                color = Integer.parseInt(parser.getAttributeValue("",
-                                                      ATTR_COLOR_EFFECT_VALUE));
+                color = Integer.parseInt(parser.getAttributeValue("", ATTR_COLOR_EFFECT_VALUE));
             } else {
                 color = 0;
             }
@@ -1206,27 +1218,19 @@ public class VideoEditorImpl implements VideoEditor {
                     durationMs, colorEffectType, color);
         } else if (EffectKenBurns.class.getSimpleName().equals(type)) {
             final Rect startRect = new Rect(
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                         ATTR_START_RECT_LEFT)),
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                          ATTR_START_RECT_TOP)),
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                        ATTR_START_RECT_RIGHT)),
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                      ATTR_START_RECT_BOTTOM)));
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_LEFT)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_TOP)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_RIGHT)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_START_RECT_BOTTOM)));
             final Rect endRect = new Rect(
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                           ATTR_END_RECT_LEFT)),
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                            ATTR_END_RECT_TOP)),
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                          ATTR_END_RECT_RIGHT)),
-                    Integer.parseInt(parser.getAttributeValue("",
-                                                        ATTR_END_RECT_BOTTOM)));
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_LEFT)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_TOP)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_RIGHT)),
+                    Integer.parseInt(parser.getAttributeValue("", ATTR_END_RECT_BOTTOM)));
             effect = new EffectKenBurns(mediaItem, effectId, startRect, endRect,
                                         startTimeMs, durationMs);
         } else {
-            effect = null;
+            throw new IllegalArgumentException("Invalid effect type: " + type);
         }
 
         return effect;
@@ -1239,48 +1243,34 @@ public class VideoEditorImpl implements VideoEditor {
      *
      * @return The audio track
      */
-    private AudioTrack parseAudioTrack(XmlPullParser parser) {
+    private AudioTrack parseAudioTrack(XmlPullParser parser) throws IOException {
         final String audioTrackId = parser.getAttributeValue("", ATTR_ID);
         final String filename = parser.getAttributeValue("", ATTR_FILENAME);
-        final long startTimeMs = Long.parseLong(parser.getAttributeValue("",
-                                                              ATTR_START_TIME));
-        final long beginMs = Long.parseLong(parser.getAttributeValue("",
-                                                              ATTR_BEGIN_TIME));
-        final long endMs = Long.parseLong(parser.getAttributeValue("",
-                                                                ATTR_END_TIME));
-        final int volume = Integer.parseInt(parser.getAttributeValue("",
-                                                                  ATTR_VOLUME));
-        final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("",
-                                                                   ATTR_MUTED));
-        final boolean loop = Boolean.parseBoolean(parser.getAttributeValue("",
-                                                                    ATTR_LOOP));
-        final boolean duckingEnabled =
-                               Boolean.parseBoolean(parser.getAttributeValue("",
-                                                    ATTR_DUCK_ENABLED));
-        final int duckThreshold = Integer.parseInt(parser.getAttributeValue("",
-                                                          ATTR_DUCK_THRESHOLD));
-        final int duckedTrackVolume =
-                                   Integer.parseInt(parser.getAttributeValue("",
+        final long startTimeMs = Long.parseLong(parser.getAttributeValue("", ATTR_START_TIME));
+        final long beginMs = Long.parseLong(parser.getAttributeValue("", ATTR_BEGIN_TIME));
+        final long endMs = Long.parseLong(parser.getAttributeValue("", ATTR_END_TIME));
+        final int volume = Integer.parseInt(parser.getAttributeValue("", ATTR_VOLUME));
+        final boolean muted = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_MUTED));
+        final boolean loop = Boolean.parseBoolean(parser.getAttributeValue("", ATTR_LOOP));
+        final boolean duckingEnabled = Boolean.parseBoolean(
+                parser.getAttributeValue("", ATTR_DUCK_ENABLED));
+        final int duckThreshold = Integer.parseInt(
+                parser.getAttributeValue("", ATTR_DUCK_THRESHOLD));
+        final int duckedTrackVolume = Integer.parseInt(parser.getAttributeValue("",
                                                      ATTR_DUCKED_TRACK_VOLUME));
 
-        final String waveformFilename = parser.getAttributeValue("",
-                                                  ATTR_AUDIO_WAVEFORM_FILENAME);
-        try {
-            final AudioTrack audioTrack = new AudioTrack(this, audioTrackId,
-                                                         filename, startTimeMs,
-                                                         beginMs, endMs, loop,
-                                                         volume, muted,
-                                                         duckingEnabled,
-                                                         duckThreshold,
-                                                         duckedTrackVolume,
-                                                         waveformFilename);
+        final String waveformFilename = parser.getAttributeValue("", ATTR_AUDIO_WAVEFORM_FILENAME);
+        final AudioTrack audioTrack = new AudioTrack(this, audioTrackId,
+                                                     filename, startTimeMs,
+                                                     beginMs, endMs, loop,
+                                                     volume, muted,
+                                                     duckingEnabled,
+                                                     duckThreshold,
+                                                     duckedTrackVolume,
+                                                     waveformFilename);
 
-            return audioTrack;
-        } catch (IOException ex) {
-            return null;
-        }
+        return audioTrack;
     }
-
 
     /*
      * {@inheritDoc}
@@ -1424,7 +1414,8 @@ public class VideoEditorImpl implements VideoEditor {
                                 Integer.toString(endRect.bottom));
                         final MediaItem mItem = effect.getMediaItem();
                            if(((MediaImageItem)mItem).getGeneratedImageClip() != null) {
-                               serializer.attribute("", ATTR_IS_IMAGE_CLIP_GENERATED,Boolean.toString(true));
+                               serializer.attribute("", ATTR_IS_IMAGE_CLIP_GENERATED,
+                                       Boolean.toString(true));
                                serializer.attribute("", ATTR_GENERATED_IMAGE_CLIP,
                                      ((MediaImageItem)mItem).getGeneratedImageClip());
                             } else {
@@ -1447,28 +1438,22 @@ public class VideoEditorImpl implements VideoEditor {
         for (Transition transition : mTransitions) {
             serializer.startTag("", TAG_TRANSITION);
             serializer.attribute("", ATTR_ID, transition.getId());
-            serializer.attribute("", ATTR_TYPE,
-                                         transition.getClass().getSimpleName());
-            serializer.attribute("", ATTR_DURATION,
-                                       Long.toString(transition.getDuration()));
-            serializer.attribute("", ATTR_BEHAVIOR,
-                                    Integer.toString(transition.getBehavior()));
+            serializer.attribute("", ATTR_TYPE, transition.getClass().getSimpleName());
+            serializer.attribute("", ATTR_DURATION, Long.toString(transition.getDuration()));
+            serializer.attribute("", ATTR_BEHAVIOR, Integer.toString(transition.getBehavior()));
             serializer.attribute("", ATTR_IS_TRANSITION_GENERATED,
                                     Boolean.toString(transition.isGenerated()));
             if (transition.isGenerated() == true) {
-                serializer.attribute("", ATTR_GENERATED_TRANSITION_CLIP,
-                                                          transition.mFilename);
+                serializer.attribute("", ATTR_GENERATED_TRANSITION_CLIP, transition.mFilename);
             }
             final MediaItem afterMediaItem = transition.getAfterMediaItem();
             if (afterMediaItem != null) {
-                serializer.attribute("", ATTR_AFTER_MEDIA_ITEM_ID,
-                                                        afterMediaItem.getId());
+                serializer.attribute("", ATTR_AFTER_MEDIA_ITEM_ID, afterMediaItem.getId());
             }
 
             final MediaItem beforeMediaItem = transition.getBeforeMediaItem();
             if (beforeMediaItem != null) {
-                serializer.attribute("", ATTR_BEFORE_MEDIA_ITEM_ID,
-                                                       beforeMediaItem.getId());
+                serializer.attribute("", ATTR_BEFORE_MEDIA_ITEM_ID, beforeMediaItem.getId());
             }
 
             if (transition instanceof TransitionSliding) {
@@ -1492,14 +1477,10 @@ public class VideoEditorImpl implements VideoEditor {
             serializer.startTag("", TAG_AUDIO_TRACK);
             serializer.attribute("", ATTR_ID, at.getId());
             serializer.attribute("", ATTR_FILENAME, at.getFilename());
-            serializer.attribute("", ATTR_START_TIME,
-                                              Long.toString(at.getStartTime()));
-            serializer.attribute("", ATTR_BEGIN_TIME,
-                                      Long.toString(at.getBoundaryBeginTime()));
-            serializer.attribute("", ATTR_END_TIME,
-                                        Long.toString(at.getBoundaryEndTime()));
-            serializer.attribute("", ATTR_VOLUME,
-                                              Integer.toString(at.getVolume()));
+            serializer.attribute("", ATTR_START_TIME, Long.toString(at.getStartTime()));
+            serializer.attribute("", ATTR_BEGIN_TIME, Long.toString(at.getBoundaryBeginTime()));
+            serializer.attribute("", ATTR_END_TIME, Long.toString(at.getBoundaryEndTime()));
+            serializer.attribute("", ATTR_VOLUME, Integer.toString(at.getVolume()));
             serializer.attribute("", ATTR_DUCK_ENABLED,
                                        Boolean.toString(at.isDuckingEnabled()));
             serializer.attribute("", ATTR_DUCKED_TRACK_VOLUME,
