@@ -6409,6 +6409,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * @hide
      */
+    public void setFastTranslationX(float x) {
+        mTranslationX = x;
+        mMatrixDirty = true;
+    }
+
+    /**
+     * @hide
+     */
+    public void setFastTranslationY(float y) {
+        mTranslationY = y;
+        mMatrixDirty = true;
+    }
+
+    /**
+     * @hide
+     */
     public void setFastX(float x) {
         mTranslationX = x - mLeft;
         mMatrixDirty = true;
