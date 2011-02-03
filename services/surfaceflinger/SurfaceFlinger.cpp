@@ -259,8 +259,6 @@ status_t SurfaceFlinger::readyToRun()
     glLoadIdentity();
     glOrthof(0, w, h, 0, 0, 1);
 
-   LayerDim::initDimmer(this, w, h);
-
     mReadyToRunBarrier.open();
 
     /*
