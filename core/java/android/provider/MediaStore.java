@@ -2029,7 +2029,6 @@ public final class MediaStore {
      * as needed. No other assumptions should be made about the meaning of the version.
      * @param context Context to use for performing the query.
      * @return A version string, or null if the version could not be determined.
-     * @hide
      */
     public static String getVersion(Context context) {
         Cursor c = context.getContentResolver().query(
