@@ -1461,6 +1461,7 @@ public class WebView extends AbsoluteLayout
             mListBoxDialog.dismiss();
             mListBoxDialog = null;
         }
+        if (mNativeClass != 0) nativeStopGL();
         if (mWebViewCore != null) {
             // Set the handlers to null before destroying WebViewCore so no
             // more messages will be posted.
@@ -8299,6 +8300,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetSelectionPointer(boolean set,
             float scale, int x, int y);
     private native boolean  nativeStartSelection(int x, int y);
+    private native void     nativeStopGL();
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
     // Never call this version except by updateCachedTextfield(String) -
