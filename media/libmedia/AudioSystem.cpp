@@ -169,15 +169,6 @@ status_t AudioSystem::setMode(int mode)
     return af->setMode(mode);
 }
 
-
-status_t AudioSystem::isStreamActive(int stream, bool* state) {
-    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
-    if (af == 0) return PERMISSION_DENIED;
-    *state = af->isStreamActive(stream);
-    return NO_ERROR;
-}
-
-
 status_t AudioSystem::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs) {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
@@ -701,6 +692,14 @@ status_t AudioSystem::unregisterEffect(int id)
     if (aps == 0) return PERMISSION_DENIED;
     return aps->unregisterEffect(id);
 }
+
+status_t AudioSystem::isStreamActive(int stream, bool* state, uint32_t inPastMs) {
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return PERMISSION_DENIED;
+    *state = aps->isStreamActive(stream, inPastMs);
+    return NO_ERROR;
+}
+
 
 // ---------------------------------------------------------------------------
 
