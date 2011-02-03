@@ -1177,13 +1177,7 @@ final class WebViewCore {
                             break;
 
                         case VIEW_SIZE_CHANGED: {
-                            WebView.ViewSizeData data =
-                                    (WebView.ViewSizeData) msg.obj;
-                            viewSizeChanged(data.mWidth, data.mHeight,
-                                    data.mHeightWidthRatio,
-                                    data.mTextWrapWidth, data.mScale,
-                                    data.mAnchorX, data.mAnchorY,
-                                    data.mIgnoreHeight);
+                            viewSizeChanged((WebView.ViewSizeData) msg.obj);
                             break;
                         }
                         case SET_SCROLL_OFFSET:
@@ -1817,8 +1811,11 @@ final class WebViewCore {
     private float mCurrentViewScale = 1.0f;
 
     // notify webkit that our virtual view size changed size (after inv-zoom)
-    private void viewSizeChanged(int w, int h, float heightWidthRatio, int textwrapWidth,
-            float scale, int anchorX, int anchorY, boolean ignoreHeight) {
+    private void viewSizeChanged(WebView.ViewSizeData data) {
+        int w = data.mWidth;
+        int h = data.mHeight;
+        int textwrapWidth = data.mTextWrapWidth;
+        float scale = data.mScale;
         if (DebugFlags.WEB_VIEW_CORE) {
             Log.v(LOGTAG, "viewSizeChanged w=" + w + "; h=" + h
                     + "; textwrapWidth=" + textwrapWidth + "; scale=" + scale);
@@ -1865,11 +1862,13 @@ final class WebViewCore {
         }
         int height = h;
         if (width != w) {
+            float heightWidthRatio = data.mHeightWidthRatio;
             float ratio = (heightWidthRatio > 0) ? heightWidthRatio : (float) h / w;
             height = Math.round(ratio * width);
         }
-        nativeSetSize(width, height,
-                textwrapWidth, scale, w, h, anchorX, anchorY, ignoreHeight);
+        nativeSetSize(width, height, textwrapWidth, scale, w,
+                data.mActualViewHeight > 0 ? data.mActualViewHeight : h,
+                data.mAnchorX, data.mAnchorY, data.mIgnoreHeight);
         // Remember the current width and height
         boolean needInvalidate = (mCurrentViewWidth == 0);
         mCurrentViewWidth = w;
