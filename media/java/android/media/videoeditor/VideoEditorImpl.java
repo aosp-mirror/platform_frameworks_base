@@ -1566,29 +1566,29 @@ public class VideoEditorImpl implements VideoEditor {
         }
 
         boolean semAcquireDone = false;
-        try{
-            semAcquireDone = mMANativeHelper.lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
-            if (semAcquireDone == false) {
-                throw new IllegalStateException("Timeout waiting for semaphore");
-            }
+        if (!mPreviewInProgress) {
+            try{
+                semAcquireDone = mMANativeHelper.lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
+                if (semAcquireDone == false) {
+                    throw new IllegalStateException("Timeout waiting for semaphore");
+                }
 
-            if (mMediaItems.size() > 0) {
-                mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
-                                                  mAudioTracks, null);
-                mMANativeHelper.doPreview(surface, fromMs, toMs, loop,
-                                 callbackAfterFrameCount, listener);
-                mPreviewInProgress = true;
+                if (mMediaItems.size() > 0) {
+                    mPreviewInProgress = true;
+                    mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions,
+                                                      mAudioTracks, null);
+                    mMANativeHelper.doPreview(surface, fromMs, toMs, loop,
+                                     callbackAfterFrameCount, listener);
+                }
+                /**
+                 *  release on complete by calling stopPreview
+                 */
+            } catch (InterruptedException ex) {
+                Log.w(TAG, "The thread was interrupted", new Throwable());
+                throw new IllegalStateException("The thread was interrupted");
             }
-            /**
-             *  release on complete by calling stopPreview
-             */
-        } catch (InterruptedException ex) {
-            Log.w(TAG, "The thread was interrupted", new Throwable());
-            throw new IllegalStateException("The thread was interrupted");
-        } finally {
-            if (semAcquireDone) {
-                mMANativeHelper.unlock();
-            }
+         } else {
+            throw new IllegalStateException("Preview already in progress");
         }
     }
 
@@ -1596,15 +1596,20 @@ public class VideoEditorImpl implements VideoEditor {
      * {@inheritDoc}
      */
     public long stopPreview() {
+        long result = 0;
         if (mPreviewInProgress) {
-            long result = mMANativeHelper.stopPreview();
-            mPreviewInProgress = false;
-            /**
-             *  release the sem acquired in startPreview
-             */
-            mMANativeHelper.unlock();
+            try {
+                result = mMANativeHelper.stopPreview();
+                /**
+                 *  release on complete by calling stopPreview
+                 */
+                } finally {
+                    mPreviewInProgress = false;
+                    mMANativeHelper.unlock();
+                }
             return result;
-        } else {
+        }
+        else {
             return 0;
         }
     }
