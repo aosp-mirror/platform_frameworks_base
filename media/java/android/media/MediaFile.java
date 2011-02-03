@@ -46,8 +46,9 @@ public class MediaFile {
     public static final int FILE_TYPE_OGG     = 7;
     public static final int FILE_TYPE_AAC     = 8;
     public static final int FILE_TYPE_MKA     = 9;
+    public static final int FILE_TYPE_FLAC    = 10;
     private static final int FIRST_AUDIO_FILE_TYPE = FILE_TYPE_MP3;
-    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_MKA;
+    private static final int LAST_AUDIO_FILE_TYPE = FILE_TYPE_FLAC;
 
     // MIDI file types
     public static final int FILE_TYPE_MID     = 11;
@@ -99,8 +100,7 @@ public class MediaFile {
     public static final int FILE_TYPE_MS_WORD       = 104;
     public static final int FILE_TYPE_MS_EXCEL      = 105;
     public static final int FILE_TYPE_MS_POWERPOINT = 106;
-    public static final int FILE_TYPE_FLAC          = 107;
-    public static final int FILE_TYPE_ZIP           = 108;
+    public static final int FILE_TYPE_ZIP           = 107;
     
     static class MediaFileType {
     

@@ -114,13 +114,15 @@ private:
             MediaBuffer *buffer, uint8_t type);
 
     void parseFileMetaData();
-    void extractAlbumArt(const void *data, size_t size);
 
     uint64_t findPrevGranulePosition(off64_t pageOffset);
 
     MyVorbisExtractor(const MyVorbisExtractor &);
     MyVorbisExtractor &operator=(const MyVorbisExtractor &);
 };
+
+static void extractAlbumArt(
+        const sp<MetaData> &fileMeta, const void *data, size_t size);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -654,6 +656,17 @@ void MyVorbisExtractor::parseFileMetaData() {
     mFileMeta = new MetaData;
     mFileMeta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_CONTAINER_OGG);
 
+    for (int i = 0; i < mVc.comments; ++i) {
+        const char *comment = mVc.user_comments[i];
+        size_t commentLength = mVc.comment_lengths[i];
+        parseVorbisComment(mFileMeta, comment, commentLength);
+        //LOGI("comment #%d: '%s'", i + 1, mVc.user_comments[i]);
+    }
+}
+
+void parseVorbisComment(
+        const sp<MetaData> &fileMeta, const char *comment, size_t commentLength)
+{
     struct {
         const char *const mTag;
         uint32_t mKey;
@@ -675,33 +688,25 @@ void MyVorbisExtractor::parseFileMetaData() {
         { "ANDROID_LOOP", kKeyAutoLoop },
     };
 
-    for (int i = 0; i < mVc.comments; ++i) {
-        const char *comment = mVc.user_comments[i];
-
         for (size_t j = 0; j < sizeof(kMap) / sizeof(kMap[0]); ++j) {
             size_t tagLen = strlen(kMap[j].mTag);
             if (!strncasecmp(kMap[j].mTag, comment, tagLen)
                     && comment[tagLen] == '=') {
                 if (kMap[j].mKey == kKeyAlbumArt) {
                     extractAlbumArt(
+                            fileMeta,
                             &comment[tagLen + 1],
-                            mVc.comment_lengths[i] - tagLen - 1);
+                            commentLength - tagLen - 1);
                 } else if (kMap[j].mKey == kKeyAutoLoop) {
                     if (!strcasecmp(&comment[tagLen + 1], "true")) {
-                        mFileMeta->setInt32(kKeyAutoLoop, true);
+                        fileMeta->setInt32(kKeyAutoLoop, true);
                     }
                 } else {
-                    mFileMeta->setCString(kMap[j].mKey, &comment[tagLen + 1]);
+                    fileMeta->setCString(kMap[j].mKey, &comment[tagLen + 1]);
                 }
             }
         }
-    }
 
-#if 0
-    for (int i = 0; i < mVc.comments; ++i) {
-        LOGI("comment #%d: '%s'", i + 1, mVc.user_comments[i]);
-    }
-#endif
 }
 
 // The returned buffer should be free()d.
@@ -769,7 +774,8 @@ static uint8_t *DecodeBase64(const char *s, size_t size, size_t *outSize) {
     return (uint8_t *)buffer;
 }
 
-void MyVorbisExtractor::extractAlbumArt(const void *data, size_t size) {
+static void extractAlbumArt(
+        const sp<MetaData> &fileMeta, const void *data, size_t size) {
     LOGV("extractAlbumArt from '%s'", (const char *)data);
 
     size_t flacSize;
@@ -833,10 +839,10 @@ void MyVorbisExtractor::extractAlbumArt(const void *data, size_t size) {
     LOGV("got image data, %d trailing bytes",
          flacSize - 32 - typeLen - descLen - dataLen);
 
-    mFileMeta->setData(
+    fileMeta->setData(
             kKeyAlbumArt, 0, &flac[8 + typeLen + 4 + descLen + 20], dataLen);
 
-    mFileMeta->setCString(kKeyAlbumArtMIME, type);
+    fileMeta->setCString(kKeyAlbumArtMIME, type);
 
 exit:
     free(flac);

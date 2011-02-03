@@ -17,6 +17,7 @@ LOCAL_SRC_FILES:=                         \
         DRMExtractor.cpp                  \
         ESDS.cpp                          \
         FileSource.cpp                    \
+        FLACExtractor.cpp                 \
         HTTPStream.cpp                    \
         JPEGSource.cpp                    \
         MP3Extractor.cpp                  \
@@ -54,6 +55,7 @@ LOCAL_SRC_FILES:=                         \
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
         $(TOP)/frameworks/base/include/media/stagefright/openmax \
+        $(TOP)/external/flac/include \
         $(TOP)/external/tremolo \
         $(TOP)/frameworks/base/media/libstagefright/rtsp
 
@@ -93,6 +95,7 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp \
         libstagefright_id3 \
         libstagefright_g711dec \
+        libFLAC \
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \

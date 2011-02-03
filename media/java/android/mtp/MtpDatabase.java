@@ -309,6 +309,7 @@ public class MtpDatabase {
             MtpConstants.FORMAT_M3U_PLAYLIST,
             MtpConstants.FORMAT_PLS_PLAYLIST,
             MtpConstants.FORMAT_XML_DOCUMENT,
+            MtpConstants.FORMAT_FLAC,
         };
     }
 

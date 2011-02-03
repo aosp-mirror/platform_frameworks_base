@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef OGG_EXTRACTOR_H_
+#ifndef FLAC_EXTRACTOR_H_
+#define FLAC_EXTRACTOR_H_
 
-#define OGG_EXTRACTOR_H_
-
+#include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaExtractor.h>
+#include <utils/String8.h>
 
 namespace android {
 
-struct AMessage;
-class DataSource;
-class String8;
+class FLACParser;
 
-struct MyVorbisExtractor;
-struct OggSource;
+class FLACExtractor : public MediaExtractor {
 
-struct OggExtractor : public MediaExtractor {
-    OggExtractor(const sp<DataSource> &source);
+public:
+    // Extractor assumes ownership of source
+    FLACExtractor(const sp<DataSource> &source);
 
     virtual size_t countTracks();
     virtual sp<MediaSource> getTrack(size_t index);
@@ -39,27 +38,27 @@ struct OggExtractor : public MediaExtractor {
     virtual sp<MetaData> getMetaData();
 
 protected:
-    virtual ~OggExtractor();
+    virtual ~FLACExtractor();
 
 private:
-    friend struct OggSource;
-
     sp<DataSource> mDataSource;
+    sp<FLACParser> mParser;
     status_t mInitCheck;
+    sp<MetaData> mFileMetadata;
 
-    MyVorbisExtractor *mImpl;
+    // There is only one track
+    sp<MetaData> mTrackMetadata;
 
-    OggExtractor(const OggExtractor &);
-    OggExtractor &operator=(const OggExtractor &);
+    status_t init();
+
+    FLACExtractor(const FLACExtractor &);
+    FLACExtractor &operator=(const FLACExtractor &);
+
 };
 
-bool SniffOgg(
-        const sp<DataSource> &source, String8 *mimeType, float *confidence,
-        sp<AMessage> *);
-
-void parseVorbisComment(
-        const sp<MetaData> &fileMeta, const char *comment, size_t commentLength);
+bool SniffFLAC(const sp<DataSource> &source, String8 *mimeType,
+        float *confidence, sp<AMessage> *);
 
 }  // namespace android
 
-#endif  // OGG_EXTRACTOR_H_
+#endif  // FLAC_EXTRACTOR_H_

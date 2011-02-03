@@ -26,6 +26,7 @@
 #include "include/MPEG2TSExtractor.h"
 #include "include/DRMExtractor.h"
 #include "include/WVMExtractor.h"
+#include "include/FLACExtractor.h"
 
 #include "matroska/MatroskaExtractor.h"
 
@@ -85,6 +86,8 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
             || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
         return new AMRExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)) {
+        return new FLACExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WAV)) {
         return new WAVExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
