@@ -104,7 +104,7 @@ public class Canvas {
     public Canvas() {
         // 0 means no native bitmap
         mNativeCanvas = initRaster(0);
-        mFinalizer = new CanvasFinalizer(0);
+        mFinalizer = new CanvasFinalizer(mNativeCanvas);
     }
 
     /**

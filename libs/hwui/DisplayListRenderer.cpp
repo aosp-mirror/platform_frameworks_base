@@ -22,62 +22,6 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Defines
-///////////////////////////////////////////////////////////////////////////////
-
-#define PATH_HEAP_SIZE 64
-
-///////////////////////////////////////////////////////////////////////////////
-// Helpers
-///////////////////////////////////////////////////////////////////////////////
-
-PathHeap::PathHeap(): mHeap(PATH_HEAP_SIZE * sizeof(SkPath)) {
-}
-
-PathHeap::PathHeap(SkFlattenableReadBuffer& buffer): mHeap(PATH_HEAP_SIZE * sizeof(SkPath)) {
-    int count = buffer.readS32();
-
-    mPaths.setCount(count);
-    SkPath** ptr = mPaths.begin();
-    SkPath* p = (SkPath*) mHeap.allocThrow(count * sizeof(SkPath));
-
-    for (int i = 0; i < count; i++) {
-        new (p) SkPath;
-        p->unflatten(buffer);
-        *ptr++ = p;
-        p++;
-    }
-}
-
-PathHeap::~PathHeap() {
-    SkPath** iter = mPaths.begin();
-    SkPath** stop = mPaths.end();
-    while (iter < stop) {
-        (*iter)->~SkPath();
-        iter++;
-    }
-}
-
-int PathHeap::append(const SkPath& path) {
-    SkPath* p = (SkPath*) mHeap.allocThrow(sizeof(SkPath));
-    new (p) SkPath(path);
-    *mPaths.append() = p;
-    return mPaths.count();
-}
-
-void PathHeap::flatten(SkFlattenableWriteBuffer& buffer) const {
-    int count = mPaths.count();
-
-    buffer.write32(count);
-    SkPath** iter = mPaths.begin();
-    SkPath** stop = mPaths.end();
-    while (iter < stop) {
-        (*iter)->flatten(buffer);
-        iter++;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Display list
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -143,17 +87,15 @@ DisplayList::~DisplayList() {
     }
     mPaints.clear();
 
+    for (size_t i = 0; i < mPaths.size(); i++) {
+        delete mPaths.itemAt(i);
+    }
+    mPaths.clear();
+
     for (size_t i = 0; i < mMatrices.size(); i++) {
         delete mMatrices.itemAt(i);
     }
     mMatrices.clear();
-
-    if (mPathHeap) {
-        for (int i = 0; i < mPathHeap->count(); i++) {
-            caches.pathCache.removeDeferred(&(*mPathHeap)[i]);
-        }
-        mPathHeap->safeUnref();
-    }
 }
 
 void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorder) {
@@ -168,12 +110,6 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     void* buffer = sk_malloc_throw(size);
     writer.flatten(buffer);
     mReader.setMemory(buffer, size);
-
-    mRCPlayback.reset(&recorder.mRCRecorder);
-    mRCPlayback.setupBuffer(mReader);
-
-    mTFPlayback.reset(&recorder.mTFRecorder);
-    mTFPlayback.setupBuffer(mReader);
 
     Caches& caches = Caches::getInstance();
 
@@ -196,19 +132,18 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
         mPaints.add(paints.itemAt(i));
     }
 
+    const Vector<SkPath*> &paths = recorder.getPaths();
+    for (size_t i = 0; i < paths.size(); i++) {
+        mPaths.add(paths.itemAt(i));
+    }
+
     const Vector<SkMatrix*> &matrices = recorder.getMatrices();
     for (size_t i = 0; i < matrices.size(); i++) {
         mMatrices.add(matrices.itemAt(i));
     }
-
-    mPathHeap = recorder.mPathHeap;
-    if (mPathHeap) {
-        mPathHeap->safeRef();
-    }
 }
 
 void DisplayList::init() {
-    mPathHeap = NULL;
 }
 
 bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
@@ -557,9 +492,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
 // Base structure
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayListRenderer::DisplayListRenderer():
-        mHeap(HEAP_BLOCK_SIZE), mWriter(MIN_WRITER_SIZE) {
-    mPathHeap = NULL;
+DisplayListRenderer::DisplayListRenderer(): mWriter(MIN_WRITER_SIZE) {
     mDisplayList = NULL;
 }
 
@@ -568,16 +501,7 @@ DisplayListRenderer::~DisplayListRenderer() {
 }
 
 void DisplayListRenderer::reset() {
-    if (mPathHeap) {
-        mPathHeap->unref();
-        mPathHeap = NULL;
-    }
-
     mWriter.reset();
-    mHeap.reset();
-
-    mRCRecorder.reset();
-    mTFRecorder.reset();
 
     Caches& caches = Caches::getInstance();
     for (size_t i = 0; i < mBitmapResources.size(); i++) {
@@ -594,6 +518,8 @@ void DisplayListRenderer::reset() {
 
     mPaints.clear();
     mPaintMap.clear();
+    mPaths.clear();
+    mPathMap.clear();
     mMatrices.clear();
 }
 
