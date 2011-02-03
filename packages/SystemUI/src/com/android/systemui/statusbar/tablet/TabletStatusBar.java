@@ -64,6 +64,7 @@ import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.*;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.recent.RecentApplicationsActivity;
 
@@ -133,6 +134,7 @@ public class TabletStatusBar extends StatusBar implements
 
     HeightReceiver mHeightReceiver;
     BatteryController mBatteryController;
+    BluetoothController mBluetoothController;
     NetworkController mNetworkController;
 
     View mBarContents;
@@ -170,10 +172,14 @@ public class TabletStatusBar extends StatusBar implements
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
+        mBluetoothController.addIconView(
+                (ImageView)mNotificationPanel.findViewById(R.id.bluetooth));
         mNetworkController.addCombinedSignalIconView(
                 (ImageView)mNotificationPanel.findViewById(R.id.network_signal));
         mNetworkController.addDataTypeIconView(
                 (ImageView)mNotificationPanel.findViewById(R.id.network_type));
+        mNetworkController.addDataDirectionOverlayIconView(
+                (ImageView)mNotificationPanel.findViewById(R.id.network_direction));
         mNetworkController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.network_text));
         mNetworkController.addLabelView(
@@ -355,11 +361,15 @@ public class TabletStatusBar extends StatusBar implements
         // The icons
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
+        mBluetoothController = new BluetoothController(mContext);
+        mBluetoothController.addIconView((ImageView)sb.findViewById(R.id.bluetooth));
         mNetworkController = new NetworkController(mContext);
         mNetworkController.addCombinedSignalIconView(
                 (ImageView)sb.findViewById(R.id.network_signal));
         mNetworkController.addDataTypeIconView(
                 (ImageView)sb.findViewById(R.id.network_type));
+        mNetworkController.addDataDirectionOverlayIconView(
+                (ImageView)sb.findViewById(R.id.network_direction));
 
         // The navigation buttons
         mBackButton = (ImageView)sb.findViewById(R.id.back);

@@ -75,8 +75,8 @@ public class NetworkController extends BroadcastReceiver {
     String mNetworkNameSeparator;
     int mPhoneSignalIconId;
     int mDataDirectionIconId;
+    int mDataDirectionOverlayIconId;
     int mDataSignalIconId;
-    int mDataActiveSignalIconId;
     int mDataTypeIconId;
     boolean mDataActive;
 
@@ -101,12 +101,14 @@ public class NetworkController extends BroadcastReceiver {
     Context mContext;
     ArrayList<ImageView> mPhoneSignalIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mDataDirectionIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mDataDirectionOverlayIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mWifiIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mCombinedSignalIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mDataTypeIconViews = new ArrayList<ImageView>();
     ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
     int mLastPhoneSignalIconId = -1;
     int mLastDataDirectionIconId = -1;
+    int mLastDataDirectionOverlayIconId = -1;
     int mLastWifiIconId = -1;
     int mLastCombinedSignalIconId = -1;
     int mLastDataTypeIconId = -1;
@@ -161,6 +163,10 @@ public class NetworkController extends BroadcastReceiver {
 
     public void addDataDirectionIconView(ImageView v) {
         mDataDirectionIconViews.add(v);
+    }
+
+    public void addDataDirectionOverlayIconView(ImageView v) {
+        mDataDirectionOverlayIconViews.add(v);
     }
 
     public void addWifiIconView(ImageView v) {
@@ -367,17 +373,15 @@ public class NetworkController extends BroadcastReceiver {
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_flightmode;
-                mDataActiveSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
+                mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
             } else {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-                // note we use 0 instead of null
-                mDataActiveSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_0;
+                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
             }
         } else {
             if (mSignalStrength == null) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-                // note we use 0 instead of null
-                mDataActiveSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_0;
+                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
             } else if (isCdma()) {
                 // If 3G(EV) and 1x network are available than 3G should be
                 // displayed, displayed RSSI should be from the EV side.
@@ -396,8 +400,6 @@ public class NetworkController extends BroadcastReceiver {
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
-                mDataActiveSignalIconId
-                        = TelephonyIcons.DATA_SIGNAL_STRENGTH_ACTIVE[mInetCondition][iconLevel];
             } else {
                 int asu = mSignalStrength.getGsmSignalStrength();
 
@@ -421,8 +423,6 @@ public class NetworkController extends BroadcastReceiver {
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
-                mDataActiveSignalIconId
-                        = TelephonyIcons.DATA_SIGNAL_STRENGTH_ACTIVE[mInetCondition][iconLevel];
             }
         }
     }
@@ -685,6 +685,7 @@ public class NetworkController extends BroadcastReceiver {
         Context context = mContext;
 
         int combinedSignalIconId;
+        int dataDirectionOverlayIconId = 0;
         int dataTypeIconId;
         String label;
         int N;
@@ -699,16 +700,22 @@ public class NetworkController extends BroadcastReceiver {
             dataTypeIconId = 0;
         } else if (mDataConnected) {
             label = mNetworkName;
+            combinedSignalIconId = mDataSignalIconId;
             switch (mDataActivity) {
                 case TelephonyManager.DATA_ACTIVITY_IN:
+                    dataDirectionOverlayIconId = R.drawable.stat_sys_signal_in;
+                    break;
                 case TelephonyManager.DATA_ACTIVITY_OUT:
+                    dataDirectionOverlayIconId = R.drawable.stat_sys_signal_out;
+                    break;
                 case TelephonyManager.DATA_ACTIVITY_INOUT:
-                    combinedSignalIconId = mDataActiveSignalIconId;
+                    dataDirectionOverlayIconId = R.drawable.stat_sys_signal_inout;
                     break;
                 default:
-                    combinedSignalIconId = mDataSignalIconId;
+                    dataDirectionOverlayIconId = 0;
                     break;
             }
+            combinedSignalIconId = mDataSignalIconId;
             dataTypeIconId = mDataTypeIconId;
         } else if (mBluetoothTethered) {
             label = mContext.getString(R.string.bluetooth_tethered);
@@ -724,11 +731,11 @@ public class NetworkController extends BroadcastReceiver {
             Slog.d(TAG, "refreshViews combinedSignalIconId=0x"
                     + Integer.toHexString(combinedSignalIconId)
                     + "/" + getResourceName(combinedSignalIconId)
+                    + " dataDirectionOverlayIconId=0x" + Integer.toHexString(dataDirectionOverlayIconId)
                     + " mDataActivity=" + mDataActivity
                     + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
                     + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
                     + " mDataSignalIconId=0x" + Integer.toHexString(mDataSignalIconId)
-                    + " mDataActiveSignalIconId=0x" + Integer.toHexString(mDataActiveSignalIconId)
                     + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
                     + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
                     + " mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
@@ -789,6 +796,22 @@ public class NetworkController extends BroadcastReceiver {
             }
         }
 
+        // the data direction overlay
+        if (mLastDataDirectionOverlayIconId != dataDirectionOverlayIconId) {
+            Slog.d(TAG, "changing data overlay icon id to " + dataDirectionOverlayIconId);
+            mLastDataDirectionOverlayIconId = dataDirectionOverlayIconId;
+            N = mDataDirectionOverlayIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mDataDirectionOverlayIconViews.get(i);
+                if (dataDirectionOverlayIconId == 0) {
+                    v.setVisibility(View.INVISIBLE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(dataDirectionOverlayIconId);
+                }
+            }
+        }
+
         // the label in the notification panel
         if (!mLastLabel.equals(label)) {
             mLastLabel = label;
@@ -834,10 +857,6 @@ public class NetworkController extends BroadcastReceiver {
         pw.print(Integer.toHexString(mDataSignalIconId));
         pw.print("/");
         pw.println(getResourceName(mDataSignalIconId));
-        pw.print("  mDataActiveSignalIconId=");
-        pw.print(Integer.toHexString(mDataActiveSignalIconId));
-        pw.print("/");
-        pw.println(getResourceName(mDataActiveSignalIconId));
         pw.print("  mDataTypeIconId=");
         pw.print(Integer.toHexString(mDataTypeIconId));
         pw.print("/");
@@ -872,6 +891,10 @@ public class NetworkController extends BroadcastReceiver {
         pw.print(Integer.toHexString(mLastDataDirectionIconId));
         pw.print("/");
         pw.println(getResourceName(mLastDataDirectionIconId));
+        pw.print("  mLastDataDirectionOverlayIconId=0x");
+        pw.print(Integer.toHexString(mLastDataDirectionOverlayIconId));
+        pw.print("/");
+        pw.println(getResourceName(mLastDataDirectionOverlayIconId));
         pw.print("  mLastWifiIconId=0x");
         pw.print(Integer.toHexString(mLastWifiIconId));
         pw.print("/");

@@ -23,67 +23,89 @@
     android:orientation="vertical"
     android:background="@drawable/notify_panel_clock_bg"
     >
-    <ImageView
-        android:id="@+id/network_signal"
-        android:layout_height="32dp"
-        android:layout_width="32dp"
-        android:scaleType="centerInside"
+    <LinearLayout
+        android:id="@+id/icons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:baseline="22dp"
+        android:baselineAlignedChildIndex="0"
         android:layout_marginLeft="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        />
+        >
+        <ImageView
+            android:id="@+id/bluetooth"
+            android:layout_height="32dp"
+            android:layout_width="32dp"
+            android:scaleType="centerInside"
+            android:baseline="22dp"
+            android:visibility="gone"
+            />
 
-    <ImageView
-        android:id="@+id/network_type"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_alignLeft="@id/network_signal"
-        android:layout_alignBottom="@id/network_signal"
-        android:layout_marginRight="8dp"
-        />
+        <FrameLayout
+            android:id="@+id/netwerk"
+            android:layout_height="32dp"
+            android:layout_width="32dp"
+            android:layout_marginRight="4dp"
+            >
+            <ImageView
+                android:id="@+id/network_signal"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                />
+            <ImageView
+                android:id="@+id/network_type"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                />
+            <ImageView
+                android:id="@+id/network_direction"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                />
+        </FrameLayout>
+            
+        <TextView
+            android:id="@+id/network_text"
+            style="@style/StatusBarNotificationText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/netwerk"
+            android:layout_marginRight="8dp"
+            android:layout_alignBaseline="@id/network_signal"
+            android:singleLine="true"
+            android:text="@string/status_bar_settings_settings_button"
+            />
 
-    <TextView
-        android:id="@+id/network_text"
-        style="@style/StatusBarNotificationText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/network_signal"
-        android:layout_marginRight="8dp"
-        android:layout_alignBaseline="@id/network_signal"
-        android:singleLine="true"
-        android:text="@string/status_bar_settings_settings_button"
-        />
+        <ImageView
+            android:id="@+id/battery"
+            android:layout_height="32dp"
+            android:layout_width="32dp"
+            android:scaleType="centerInside"
+            android:layout_toRightOf="@id/network_text"
+            android:layout_alignBaseline="@id/network_signal"
+            android:baseline="22dp"
+            />
 
-    <ImageView
-        android:id="@+id/battery"
-        android:layout_height="32dp"
-        android:layout_width="32dp"
-        android:scaleType="centerInside"
-        android:layout_toRightOf="@id/network_text"
-        android:layout_alignBaseline="@id/network_signal"
-        android:baseline="22dp"
-        />
-
-    <TextView
-        android:id="@+id/battery_text"
-        style="@style/StatusBarNotificationText"
-        android:layout_width="56dp"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/battery"
-        android:layout_alignBaseline="@id/battery"
-        android:layout_marginRight="8dp"
-        android:singleLine="true"
-        android:text="@string/status_bar_settings_settings_button"
-        />
+        <TextView
+            android:id="@+id/battery_text"
+            style="@style/StatusBarNotificationText"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/battery"
+            android:layout_alignBaseline="@id/battery"
+            android:layout_marginRight="8dp"
+            android:singleLine="true"
+            android:text="@string/status_bar_settings_settings_button"
+            />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/battery"
+        android:layout_alignBaseline="@id/icons"
         android:layout_alignParentRight="true"
         android:paddingRight="16dp"
         android:src="@drawable/ic_sysbar_quicksettings"
