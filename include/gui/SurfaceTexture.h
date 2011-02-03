@@ -101,6 +101,12 @@ public:
     // when a new frame becomes available.
     void setFrameAvailableListener(const sp<FrameAvailableListener>& l);
 
+    // getAllocator retrieves the binder object that must be referenced as long
+    // as the GraphicBuffers dequeued from this SurfaceTexture are referenced.
+    // Holding this binder reference prevents SurfaceFlinger from freeing the
+    // buffers before the client is done with them.
+    sp<IBinder> getAllocator();
+
 private:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
