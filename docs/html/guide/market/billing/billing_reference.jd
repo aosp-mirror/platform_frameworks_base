@@ -40,7 +40,7 @@ page.title=In-app Billing Reference
 <ul>
   <li><a href="#billing-codes">Android Market Server Response Codes for In-app Billing</a></li>
   <li><a href="#billing-interface">In-app Billing Interface Parameters</a></li>
-  <li><a href="billing-intents">In-app Billing Broadcast Intents</a></li>
+  <li><a href="#billing-intents">In-app Billing Broadcast Intents</a></li>
 </ul>
 
 <h2 id="billing-codes">Android Market Server Response Codes for In-app Billing</h2>
