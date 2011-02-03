@@ -35,8 +35,8 @@ public final class NfcSecureElement {
     private static final String TAG = "NfcSecureElement";
 
     private INfcSecureElement mService;
-    
-       
+
+
     /**
      * @hide
      */
@@ -68,7 +68,7 @@ public final class NfcSecureElement {
 
 
     public byte [] exchangeAPDU(int handle,byte [] data) throws IOException {
-        
+
 
         // Perform exchange APDU
         try {
@@ -85,7 +85,7 @@ public final class NfcSecureElement {
     }
 
     public void closeSecureElementConnection(int handle) throws IOException {
-         
+
         try {
             int status = mService.closeSecureElementConnection(handle);
             // Handle potential errors
@@ -96,14 +96,14 @@ public final class NfcSecureElement {
             Log.e(TAG, "RemoteException in closeSecureElement(): ", e);
         }
     }
-    
-    
+
+
     /**
      * Returns target type. constants.
-     * 
+     *
      * @return Secure Element technology type. The possible values are defined in
      * {@link TagTechnology}
-     * 
+     *
      */
     public int[] getSecureElementTechList(int handle) throws IOException {
         try {
@@ -113,16 +113,16 @@ public final class NfcSecureElement {
             return null;
         }
     }
-    
+
     /**
      * Returns Secure Element UID.
-     * 
+     *
      * @return Secure Element UID.
      */
     public byte[] getSecureElementUid(int handle) throws IOException {
-        
+
         byte[] uid = null;
-        try {            
+        try {
             uid = mService.getSecureElementUid(handle);
             // Handle potential errors
             if (uid == null) {

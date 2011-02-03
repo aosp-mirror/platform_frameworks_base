@@ -24,18 +24,14 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * A low-level connection to a {@link Tag} using the ISO-DEP technology, also known as
- * ISO1443-4.
+ * Provides access to ISO-DEP (ISO 14443-4) properties and I/O operations on a {@link Tag}.
  *
- * <p>You can acquire this kind of connection with {@link #get}.
- * Use this class to send and receive data with {@link #transceive transceive()}.
- *
- * <p>Applications must implement their own protocol stack on top of
- * {@link #transceive transceive()}.
- *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
+ * <p>Acquire a {@link IsoDep} object using {@link #get}.
+ * <p>The primary ISO-DEP I/O operation is {@link #transceive}. Applications must
+ * implement their own protocol stack on top of {@link #transceive}.
+ * <p>Tags that enumerate the {@link IsoDep} technology in {@link Tag#getTechList}
+ * will also enumerate
+ * {@link NfcA} or {@link NfcB} (since IsoDep builds on top of either of these).
  */
 public final class IsoDep extends BasicTagTechnology {
     private static final String TAG = "NFC";
@@ -49,10 +45,13 @@ public final class IsoDep extends BasicTagTechnology {
     private byte[] mHistBytes = null;
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link IsoDep} for the given tag.
+     * <p>Does not cause any RF activity and does not block.
+     * <p>Returns null if {@link IsoDep} was not enumerated in {@link Tag#getTechList}.
+     * This indicates the tag does not support ISO-DEP.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an ISO-DEP compatible tag
+     * @return ISO-DEP object
      */
     public static IsoDep get(Tag tag) {
         if (!tag.hasTech(TagTechnology.ISO_DEP)) return null;
@@ -62,7 +61,7 @@ public final class IsoDep extends BasicTagTechnology {
             return null;
         }
     }
-    
+
     /** @hide */
     public IsoDep(Tag tag)
             throws RemoteException {
@@ -75,13 +74,13 @@ public final class IsoDep extends BasicTagTechnology {
     }
 
     /**
-     * Sets the timeout of an IsoDep transceive transaction in milliseconds.
-     * If the transaction has not completed before the timeout,
-     * any ongoing {@link #transceive} operation will be
-     * aborted and the connection to the tag is lost. This setting is applied
-     * only to the {@link Tag} object linked to this technology and will be
-     * reset when {@link IsoDep#close} is called.
-     * The default transaction timeout is 300 milliseconds.
+     * Set the timeout of {@link #transceive} in milliseconds.
+     * <p>The timeout only applies to ISO-DEP {@link #transceive}, and is
+     * reset to a default value when {@link #close} is called.
+     * <p>Setting a longer timeout may be useful when performing
+     * transactions that require a long processing time on the tag
+     * such as key generation.
+     * @param timeout timeout value in milliseconds
      */
     public void setTimeout(int timeout) {
         try {
@@ -102,29 +101,51 @@ public final class IsoDep extends BasicTagTechnology {
     }
 
     /**
-     * Return the historical bytes if the tag is using {@link NfcA}, null otherwise.
+     * Return the ISO-DEP historical bytes for {@link NfcA} tags.
+     * <p>Does not cause any RF activity and does not block.
+     * <p>The historical bytes can be used to help identify a tag. They are present
+     * only on {@link IsoDep} tags that are based on {@link NfcA} RF technology.
+     * If this tag is not {@link NfcA} then null is returned.
+     * <p>In ISO 14443-4 terminology, the historical bytes are a subset of the RATS
+     * response.
+     *
+     * @return ISO-DEP historical bytes, or null if this is not a {@link NfcA} tag
      */
     public byte[] getHistoricalBytes() {
         return mHistBytes;
     }
 
     /**
-     * Return the hi layer response bytes if the tag is using {@link NfcB}, null otherwise.
+     * Return the higher layer response bytes for {@link NfcB} tags.
+     * <p>Does not cause any RF activity and does not block.
+     * <p>The higher layer response bytes can be used to help identify a tag.
+     * They are present only on {@link IsoDep} tags that are based on {@link NfcB}
+     * RF technology. If this tag is not {@link NfcB} then null is returned.
+     * <p>In ISO 14443-4 terminology, the higher layer bytes are a subset of the
+     * ATTRIB response.
+     *
+     * @return ISO-DEP historical bytes, or null if this is not a {@link NfcB} tag
      */
     public byte[] getHiLayerResponse() {
         return mHiLayerResponse;
     }
 
     /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * Send raw ISO-DEP data to the tag and receive the response.
      *
-     * @param data bytes to send
-     * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
+     * <p>Applications must only send the INF payload, and not the start of frame and
+     * end of frame indicators. Applications do not need to fragment the payload, it
+     * will be automatically fragmented and defragmented by {@link #transceive} if
+     * it exceeds FSD/FSC limits.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param data command bytes to send, must not be null
+     * @return response bytes received, will not be null
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or this operation is canceled
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
