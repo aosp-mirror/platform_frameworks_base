@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.ContentUris;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteException;
@@ -2020,4 +2021,30 @@ public final class MediaStore {
      * the Music app.
      */
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia";
+
+    /**
+     * Get the media provider's version.
+     * Applications that import data from the media provider into their own caches
+     * can use this to detect that the media provider changed, and reimport data
+     * as needed. No other assumptions should be made about the meaning of the version.
+     * @param context Context to use for performing the query.
+     * @return A version string, or null if the version could not be determined.
+     * @hide
+     */
+    public static String getVersion(Context context) {
+        Cursor c = context.getContentResolver().query(
+                Uri.parse(CONTENT_AUTHORITY_SLASH + "none/version"),
+                null, null, null, null);
+        if (c != null) {
+            try {
+                if (c.moveToFirst()) {
+                    return c.getString(0);
+                }
+            } finally {
+                c.close();
+            }
+        }
+        return null;
+    }
+
 }
