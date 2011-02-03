@@ -2562,8 +2562,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     public void setChildrenLayersEnabled(boolean enabled) {
-        mDrawLayers = enabled;
-        invalidate(true);
+        if (enabled != mDrawLayers) {
+            mDrawLayers = enabled;
+            invalidate(true);
+
+            // We need to invalidate any child with a layer. For instance,
+            // if a child is backed by a hardware layer and we disable layers
+            // the child is marked as not dirty (flags cleared the last time
+            // the child was drawn inside its layer.) However, that child might
+            // never have created its own display list or have an obsolete
+            // display list. By invalidating the child we ensure the display
+            // list is in sync with the content of the hardware layer.
+            for (int i = 0; i < mChildrenCount; i++) {
+                View child = mChildren[i];
+                if (child.mLayerType != LAYER_TYPE_NONE) {
+                    child.invalidate(true);
+                }
+            }
+        }
     }
 
     /**
