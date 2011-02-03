@@ -188,6 +188,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         int msgCount = parts.size();
         int encoding = android.telephony.SmsMessage.ENCODING_UNKNOWN;
 
+        mRemainingMessages = msgCount;
+
         for (int i = 0; i < msgCount; i++) {
             TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
             if (encoding != details.codeUnitSize
@@ -276,6 +278,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         int refNumber = getNextConcatenatedRef() & 0x00FF;
         int msgCount = parts.size();
         int encoding = android.telephony.SmsMessage.ENCODING_UNKNOWN;
+
+        mRemainingMessages = msgCount;
 
         for (int i = 0; i < msgCount; i++) {
             TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
