@@ -360,8 +360,6 @@ public class StaticLayout extends Layout
                                 okbottom = fitbottom;
                         }
                     } else {
-                        if (ellipsize != null) {
-                            // Break only at spaces using ok indexes.
                             if (ok != here) {
                                 // Log.e("text", "output ok " + here + " to " +ok);
 
@@ -377,43 +375,7 @@ public class StaticLayout extends Layout
                                         choosehtv, fm, hasTabOrEmoji,
                                         needMultiply, paraStart, chdirs, dir, easy,
                                         ok == bufend, includepad, trackpad,
-                                        chs, widths, here - paraStart,
-                                        ellipsize, ellipsizedWidth, okwidth,
-                                        paint);
-
-                                here = ok;
-                            } else {
-                                // Act like it fit even though it didn't.
-
-                                fitwidth = w;
-                                here = fit = j + 1;
-
-                                if (fmtop < fittop)
-                                    fittop = fmtop;
-                                if (fmascent < fitascent)
-                                    fitascent = fmascent;
-                                if (fmdescent > fitdescent)
-                                    fitdescent = fmdescent;
-                                if (fmbottom > fitbottom)
-                                    fitbottom = fmbottom;
-                            }
-                        } else {
-                            if (ok != here) {
-                                // Log.e("text", "output ok " + here + " to " +ok);
-
-                                while (ok < spanEnd && chs[ok - paraStart] == ' ') {
-                                    ok++;
-                                }
-
-                                v = out(source,
-                                        here, ok,
-                                        okascent, okdescent, oktop, okbottom,
-                                        v,
-                                        spacingmult, spacingadd, chooseht,
-                                        choosehtv, fm, hasTabOrEmoji,
-                                        needMultiply, paraStart, chdirs, dir, easy,
-                                        ok == bufend, includepad, trackpad,
-                                        chs, widths, here - paraStart,
+                                        chs, widths, paraStart,
                                         ellipsize, ellipsizedWidth, okwidth,
                                         paint);
 
@@ -429,7 +391,7 @@ public class StaticLayout extends Layout
                                         choosehtv, fm, hasTabOrEmoji,
                                         needMultiply, paraStart, chdirs, dir, easy,
                                         fit == bufend, includepad, trackpad,
-                                        chs, widths, here - paraStart,
+                                        chs, widths, paraStart,
                                         ellipsize, ellipsizedWidth, fitwidth,
                                         paint);
 
@@ -451,13 +413,12 @@ public class StaticLayout extends Layout
                                         needMultiply, paraStart, chdirs, dir, easy,
                                         here + 1 == bufend, includepad,
                                         trackpad,
-                                        chs, widths, here - paraStart,
+                                        chs, widths, paraStart,
                                         ellipsize, ellipsizedWidth,
                                         widths[here - paraStart], paint);
 
                                 here = here + 1;
                             }
-                        }
 
                         if (here < spanStart) {
                             // didn't output all the text for this span
@@ -500,7 +461,7 @@ public class StaticLayout extends Layout
                         choosehtv, fm, hasTabOrEmoji,
                         needMultiply, paraStart, chdirs, dir, easy,
                         paraEnd == bufend, includepad, trackpad,
-                        chs, widths, here - paraStart,
+                        chs, widths, paraStart,
                         ellipsize, ellipsizedWidth, w, paint);
             }
 
@@ -620,19 +581,6 @@ public class StaticLayout extends Layout
         return false;
     }
 
-/*
-    private static void dump(byte[] data, int count, String label) {
-        if (false) {
-            System.out.print(label);
-
-            for (int i = 0; i < count; i++)
-                System.out.print(" " + data[i]);
-
-            System.out.println();
-        }
-    }
-*/
-
     private int out(CharSequence text, int start, int end,
                       int above, int below, int top, int bottom, int v,
                       float spacingmult, float spacingadd,
@@ -735,8 +683,8 @@ public class StaticLayout extends Layout
         if (easy) {
             mLineDirections[j] = linedirs;
         } else {
-            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, widstart, chs,
-                    widstart, end - start);
+            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, start - widstart, chs,
+                    start - widstart, end - start);
         }
 
         // If ellipsize is in marquee mode, do not apply ellipsis on the first line
@@ -875,7 +823,7 @@ public class StaticLayout extends Layout
     @Override
     public int getLineDescent(int line) {
         int descent = mLines[mColumns * line + DESCENT];
-        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount - 1 &&
+        if (mMaximumVisibleLineCount > 0 && line >= mMaximumVisibleLineCount - 1 && // -1 intended
                 line != mLineCount) {
             descent += getBottomPadding();
         }
@@ -939,8 +887,8 @@ public class StaticLayout extends Layout
      * @hide
      */
     @Override
-    public void setMaximumVisibleLineCount(int line) {
-        mMaximumVisibleLineCount = line;
+    public void setMaximumVisibleLineCount(int lineCount) {
+        mMaximumVisibleLineCount = lineCount;
     }
 
     private int mLineCount;
