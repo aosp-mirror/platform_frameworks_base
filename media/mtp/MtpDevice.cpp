@@ -68,17 +68,29 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
                 interface->bInterfaceSubClass == 1 && // Still Image Capture
                 interface->bInterfaceProtocol == 1)     // Picture Transfer Protocol (PIMA 15470)
             {
-                LOGD("Found camera: \"%s\" \"%s\"\n", usb_device_get_manufacturer_name(device),
-                        usb_device_get_product_name(device));
+                char* manufacturerName = usb_device_get_manufacturer_name(device);
+                char* productName = usb_device_get_product_name(device);
+                LOGD("Found camera: \"%s\" \"%s\"\n", manufacturerName, productName);
+                free(manufacturerName);
+                free(productName);
             } else if (interface->bInterfaceClass == 0xFF &&
                     interface->bInterfaceSubClass == 0xFF &&
                     interface->bInterfaceProtocol == 0) {
                 char* interfaceName = usb_device_get_string(device, interface->iInterface);
-                if (!interfaceName || strcmp(interfaceName, "MTP"))
+                if (!interfaceName) {
                     continue;
+                } else if (strcmp(interfaceName, "MTP")) {
+                    free(interfaceName);
+                    continue;
+                }
+                free(interfaceName);
+
                 // Looks like an android style MTP device
-                LOGD("Found MTP device: \"%s\" \"%s\"\n", usb_device_get_manufacturer_name(device),
-                        usb_device_get_product_name(device));
+                char* manufacturerName = usb_device_get_manufacturer_name(device);
+                char* productName = usb_device_get_product_name(device);
+                LOGD("Found MTP device: \"%s\" \"%s\"\n", manufacturerName, productName);
+                free(manufacturerName);
+                free(productName);
             } else {
                 // look for special cased devices based on vendor/product ID
                 // we are doing this mainly for testing purposes
@@ -119,6 +131,7 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
                 ep = (struct usb_endpoint_descriptor *)usb_descriptor_iter_next(&iter);
                 if (!ep || ep->bDescriptorType != USB_DT_ENDPOINT) {
                     LOGE("endpoints not found\n");
+                    usb_device_close(device);
                     return NULL;
                 }
                 if (ep->bmAttributes == USB_ENDPOINT_XFER_BULK) {
@@ -133,11 +146,13 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
             }
             if (!ep_in_desc || !ep_out_desc || !ep_intr_desc) {
                 LOGE("endpoints not found\n");
+                usb_device_close(device);
                 return NULL;
             }
 
             if (usb_device_claim_interface(device, interface->bInterfaceNumber)) {
                 LOGE("usb_device_claim_interface failed errno: %d\n", errno);
+                usb_device_close(device);
                 return NULL;
             }
 
@@ -220,6 +235,7 @@ void MtpDevice::print() {
                 MtpProperty* property = getDevicePropDesc(propCode);
                 if (property) {
                     property->print();
+                    delete property;
                 }
             }
         }
@@ -236,11 +252,13 @@ void MtpDevice::print() {
                 for (int j = 0; j < props->size(); j++) {
                     MtpObjectProperty prop = (*props)[j];
                     MtpProperty* property = getObjectPropDesc(prop, format);
-                    if (property)
+                    if (property) {
                         property->print();
-                    else
+                        delete property;
+                    } else {
                         LOGE("could not fetch property: %s",
                                 MtpDebug::getObjectPropCodeName(prop));
+                    }
                 }
             }
         }
@@ -476,18 +494,24 @@ bool MtpDevice::deleteObject(MtpObjectHandle handle) {
 
 MtpObjectHandle MtpDevice::getParent(MtpObjectHandle handle) {
     MtpObjectInfo* info = getObjectInfo(handle);
-    if (info)
-        return info->mParent;
-    else
+    if (info) {
+        MtpObjectHandle parent = info->mParent;
+        delete info;
+        return parent;
+    } else {
         return -1;
+    }
 }
 
 MtpObjectHandle MtpDevice::getStorageID(MtpObjectHandle handle) {
     MtpObjectInfo* info = getObjectInfo(handle);
-    if (info)
-        return info->mStorageID;
-    else
+    if (info) {
+        MtpObjectHandle storageId = info->mStorageID;
+        delete info;
+        return storageId;
+    } else {
         return -1;
+    }
 }
 
 MtpObjectPropertyList* MtpDevice::getObjectPropsSupported(MtpObjectFormat format) {
@@ -668,8 +692,10 @@ bool MtpDevice::readObject(MtpObjectHandle handle, const char* destPath, int gro
         void* initialData = mData.getData(initialDataLength);
         if (initialData) {
             if (initialDataLength > 0) {
-                if (write(fd, initialData, initialDataLength) != initialDataLength)
+                if (write(fd, initialData, initialDataLength) != initialDataLength) {
+                    free(initialData);
                     goto fail;
+                }
                 remaining -= initialDataLength;
             }
             free(initialData);
