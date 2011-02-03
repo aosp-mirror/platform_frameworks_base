@@ -7842,7 +7842,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (selfTransformation) {
                     tmpMatrix.postConcat(mTransformation.getMatrix());
                 }
-                tmpMatrix.postTranslate(frame.left, frame.top);
+                tmpMatrix.postTranslate(frame.left + mXOffset, frame.top + mYOffset);
                 if (attachedTransformation != null) {
                     tmpMatrix.postConcat(attachedTransformation.getMatrix());
                 }
@@ -7866,8 +7866,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mDtDx = tmpFloats[Matrix.MSKEW_Y];
                 mDsDy = tmpFloats[Matrix.MSKEW_X];
                 mDtDy = tmpFloats[Matrix.MSCALE_Y];
-                int x = (int)tmpFloats[Matrix.MTRANS_X] + mXOffset;
-                int y = (int)tmpFloats[Matrix.MTRANS_Y] + mYOffset;
+                int x = (int)tmpFloats[Matrix.MTRANS_X];
+                int y = (int)tmpFloats[Matrix.MTRANS_Y];
                 int w = frame.width();
                 int h = frame.height();
                 mShownFrame.set(x, y, x+w, y+h);
@@ -9783,6 +9783,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean animating = false;
         boolean createWatermark = false;
         boolean updateRotation = false;
+        boolean screenRotationFinished = false;
 
         if (mFxSession == null) {
             mFxSession = new SurfaceSession();
@@ -9879,7 +9880,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mScreenRotationAnimation.stepAnimation(currentTime)) {
                             animating = true;
                         } else {
-                            mScreenRotationAnimation = null;
+                            screenRotationFinished = true;
                             updateRotation = true;
                         }
                     }
@@ -11043,6 +11044,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mTurnOnScreen = false;
         }
         
+        if (screenRotationFinished && mScreenRotationAnimation != null) {
+            mScreenRotationAnimation.kill();
+            mScreenRotationAnimation = null;
+        }
+
         if (updateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
             boolean changed = setRotationUncheckedLocked(
@@ -11382,7 +11388,7 @@ public class WindowManagerService extends IWindowManager.Stub
         
         if (CUSTOM_SCREEN_ROTATION) {
             if (mScreenRotationAnimation != null) {
-                if (mScreenRotationAnimation.dismiss(MAX_ANIMATION_DURATION,
+                if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
                         mTransitionAnimationScale)) {
                     requestAnimationLocked(0);
                 } else {
