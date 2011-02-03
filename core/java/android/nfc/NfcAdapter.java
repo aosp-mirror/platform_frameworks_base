@@ -33,10 +33,11 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 /**
- * Represents the device's local NFC adapter.
+ * Represents the local NFC adapter.
  * <p>
  * Use the helper {@link #getDefaultAdapter(Context)} to get the default NFC
  * adapter for this Android device.
+ * <p>
  */
 public final class NfcAdapter {
     private static final String TAG = "NFC";
@@ -359,14 +360,13 @@ public final class NfcAdapter {
 
     /**
      * Return true if this NFC Adapter has any features enabled.
-     * <p>
-     * If this method returns false, then applications should request the user
-     * turn on NFC tag discovery in Settings.
-     * <p>
-     * If this method returns false, the NFC hardware is guaranteed not to
-     * perform or respond to any NFC communication.
      *
-     * @return true if this NFC Adapter is enabled to discover new tags
+     * <p>Application may use this as a helper to suggest that the user
+     * should turn on NFC in Settings.
+     * <p>If this method returns false, the NFC hardware is guaranteed not to
+     * generate or respond to any NFC transactions.
+     *
+     * @return true if this NFC Adapter has any features enabled
      */
     public boolean isEnabled() {
         try {
@@ -414,17 +414,24 @@ public final class NfcAdapter {
     }
 
     /**
-     * Enables foreground dispatching to the given Activity. This will force all NFC Intents that
-     * match the given filters to be delivered to the activity bypassing the standard dispatch
-     * mechanism. If no IntentFilters are given all the PendingIntent will be invoked for every
-     * dispatch Intent.
+     * Enable foreground dispatch to the given Activity.
      *
-     * This method must be called from the main thread.
+     * <p>This will give give priority to the foreground activity when
+     * dispatching a discovered {@link Tag} to an application.
+     *
+     * <p>Activities must call {@link #disableForegroundDispatch} in
+     * their {@link Activity#onPause} callback.
+     *
+     * <p>a null set of intent filters will cause the forground activity
+     * to receive all tags.
+     *
+     * <p>This method must be called from the main thread, and
+     * only when the activity is in the foreground (resumed).     *
      *
      * @param activity the Activity to dispatch to
      * @param intent the PendingIntent to start for the dispatch
      * @param filters the IntentFilters to override dispatching for, or null to always dispatch
-     * @throws IllegalStateException
+     * @throws IllegalStateException if the Activity is not currently in the foreground
      */
     public void enableForegroundDispatch(Activity activity, PendingIntent intent,
             IntentFilter[] filters, String[][] techLists) {
@@ -450,13 +457,16 @@ public final class NfcAdapter {
     }
 
     /**
-     * Disables foreground activity dispatching setup with
-     * {@link #enableForegroundDispatch}.
+     * Disable foreground dispatch to the given activity.
      *
-     * <p>This must be called before the Activity returns from
-     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     * <p>After calling {@link #enableForegroundDispatch}, an activity
+     * must call this method before its {@link Activity#onPause} callback
+     * completes.
      *
      * <p>This method must be called from the main thread.
+     *
+     * @param activity the Activity to disable dispatch to
+     * @throws IllegalStateException if the Activity has already been paused
      */
     public void disableForegroundDispatch(Activity activity) {
         ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
@@ -484,13 +494,22 @@ public final class NfcAdapter {
     }
 
     /**
-     * Enable NDEF message push over P2P while this Activity is in the foreground. For this to
-     * function properly the other NFC device being scanned must support the "com.android.npp"
-     * NDEF push protocol.
+     * Enable NDEF message push over P2P while this Activity is in the foreground.
+     *
+     * <p>For this to function properly the other NFC device being scanned must
+     * support the "com.android.npp" NDEF push protocol. Support for this
+     * protocol is currently optional for Android NFC devices.
+     *
+     * <p>This method must be called from the main thread.
      *
      * <p><em>NOTE</em> While foreground NDEF push is active standard tag dispatch is disabled.
      * Only the foreground activity may receive tag discovered dispatches via
      * {@link #enableForegroundDispatch}.
+     *
+     * @param activity the foreground Activity
+     * @param msg a NDEF Message to push over P2P
+     * @throws IllegalStateException if the Activity is not currently in the foreground
+     * @throws OperationNotSupportedException if this Android device does not support NDEF push
      */
     public void enableForegroundNdefPush(Activity activity, NdefMessage msg) {
         if (activity == null || msg == null) {
@@ -510,13 +529,17 @@ public final class NfcAdapter {
     }
 
     /**
-     * Disables foreground NDEF push setup with
-     * {@link #enableForegroundNdefPush}.
+     * Disable NDEF message push over P2P.
      *
-     * <p>This must be called before the Activity returns from
-     * it's <code>onPause()</code> or this method will throw an IllegalStateException.
+     * <p>After calling {@link #enableForegroundNdefPush}, an activity
+     * must call this method before its {@link Activity#onPause} callback
+     * completes.
      *
      * <p>This method must be called from the main thread.
+     *
+     * @param activity the Foreground activity
+     * @throws IllegalStateException if the Activity has already been paused
+     * @throws OperationNotSupportedException if this Android device does not support NDEF push
      */
     public void disableForegroundNdefPush(Activity activity) {
         ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,

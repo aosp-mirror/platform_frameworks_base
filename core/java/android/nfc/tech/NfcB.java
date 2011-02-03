@@ -23,18 +23,11 @@ import android.os.RemoteException;
 import java.io.IOException;
 
 /**
- * A low-level connection to a {@link Tag} using the NFC-B technology, also known as
- * ISO1443-3B.
+ * Provides access to NFC-B (ISO 14443-3B) properties and I/O operations on a {@link Tag}.
  *
- * <p>You can acquire this kind of connection with {@link #get}.
- * Use this class to send and receive data with {@link #transceive transceive()}.
- *
- * <p>Applications must implement their own protocol stack on top of
- * {@link #transceive transceive()}.
- *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
+ * <p>Acquire a {@link NfcB} object using {@link #get}.
+ * <p>The primary NFC-B I/O operation is {@link #transceive}. Applications must
+ * implement their own protocol stack on top of {@link #transceive}.
  */
 public final class NfcB extends BasicTagTechnology {
     /** @hide */
@@ -46,10 +39,13 @@ public final class NfcB extends BasicTagTechnology {
     private byte[] mProtInfo;
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link NfcB} for the given tag.
+     * <p>Returns null if {@link NfcB} was not enumerated in {@link Tag#getTechList}.
+     * This indicates the tag does not support NFC-B.
+     * <p>Does not cause any RF activity and does not block.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an NFC-B compatible tag
+     * @return NFC-B object
      */
     public static NfcB get(Tag tag) {
         if (!tag.hasTech(TagTechnology.NFC_B)) return null;
@@ -69,31 +65,43 @@ public final class NfcB extends BasicTagTechnology {
     }
 
     /**
-     * Returns the Application Data bytes from the ATQB/SENSB_RES
-     * bytes discovered at tag discovery.
+     * Return the Application Data bytes from ATQB/SENSB_RES at tag discovery.
+     *
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return Application Data bytes from ATQB/SENSB_RES bytes
      */
     public byte[] getApplicationData() {
         return mAppData;
     }
 
     /**
-     * Returns the Protocol Info bytes from the ATQB/SENSB_RES
-     * bytes discovered at tag discovery.
+     * Return the Protocol Info bytes from ATQB/SENSB_RES at tag discovery.
+     *
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return Protocol Info bytes from ATQB/SENSB_RES bytes
      */
     public byte[] getProtocolInfo() {
         return mProtInfo;
     }
 
     /**
-     * Send data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
+     * Send raw NFC-B commands to the tag and receive the response.
+     *
+     * <p>Applications must not append the EoD (CRC) to the payload,
+     * it will be automatically calculated.
+     * <p>Applications must not send commands that manage the polling
+     * loop and initialization (SENSB_REQ, SLOT_MARKER etc).
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
      *
      * @param data bytes to send
      * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or this operation is canceled
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
