@@ -12,8 +12,11 @@ parent.link=available-resources.html
   </div>
 </div>
 
-<p>A menu resource defines an application menu (Options Menu, Context Menu, or Sub Menu) that
+<p>A menu resource defines an application menu (Options Menu, Context Menu, or submenu) that
 can be inflated with {@link android.view.MenuInflater}.</p>
+
+<p>For a guide to using menus, see the <a href="{@docRoot}guide/topics/ui/menus.html">Creating
+Menus</a> document.</p>
 
 <dl class="xml">
 
@@ -110,12 +113,12 @@ example at the bottom.
 href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
 be sure to exclude the method you specify in this attribute from renaming, because it can break the
 functionality.</p>
-          <p>Introduced in API Level HONEYCOMB.</p></dd>
+          <p>Introduced in API Level 11.</p></dd>
 
         <dt><code>android:showAsAction</code></dt>
           <dd><em>Keyword</em>. When and how this item should appear as an action item in the Action
 Bar. A menu item can appear as an action item only when the activity includes an {@link
-android.app.ActionBar} (introduced in API Level HONEYCOMB). Valid values:
+android.app.ActionBar} (introduced in API Level 11). Valid values:
           <table>
             <tr><th>Value</th><th>Description</th></tr>
             <tr><td><code>ifRoom</code></td><td>Only place this item in the Action Bar if
@@ -131,14 +134,14 @@ with other UI in the action bar.</td></tr>
           </table>
           <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
 more information.</p>
-          <p>Introduced in API Level HONEYCOMB.</p>
+          <p>Introduced in API Level 11.</p>
         </dd>
 
         <dt><code>android:actionViewLayout</code></dt>
           <dd><em>Layout resource</em>. A layout to use as the action view.
           <p>See <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the Action Bar</a> for
 more information.</p>
-          <p>Introduced in API Level HONEYCOMB.</p></dd>
+          <p>Introduced in API Level 11.</p></dd>
 
         <dt><code>android:actionViewClassName</code></dt>
           <dd><em>Class name</em>. A fully-qualified class name for the {@link android.view.View}
@@ -149,7 +152,7 @@ more information.</p>
 href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a> (or a similar tool),
 be sure to exclude the class you specify in this attribute from renaming, because it can break the
 functionality.</p>
-          <p>Introduced in API Level HONEYCOMB.</p></dd>
+          <p>Introduced in API Level 11.</p></dd>
 
 
         <dt><code>android:alphabeticShortcut</code></dt>
@@ -277,7 +280,7 @@ public void onGroupItemClick(MenuItem item) {
 }
 </pre>
 <p class="note"><strong>Note:</strong> The {@code android:showAsAction} attribute is
-available only on Android X.X (API Level HONEYCOMB) and greater.</p>
+available only on Android 3.0 (API Level 11) and greater.</p>
 </dd> <!-- end example -->
 
 
