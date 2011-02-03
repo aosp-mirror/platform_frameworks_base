@@ -46,6 +46,9 @@ public:
 
     status_t setTimeToSampleParams(off64_t data_offset, size_t data_size);
 
+    status_t setCompositionTimeToSampleParams(
+            off64_t data_offset, size_t data_size);
+
     status_t setSyncSampleParams(off64_t data_offset, size_t data_size);
 
     ////////////////////////////////////////////////////////////////////////////
@@ -104,6 +107,9 @@ private:
     uint32_t mTimeToSampleCount;
     uint32_t *mTimeToSample;
 
+    uint32_t *mCompositionTimeDeltaEntries;
+    size_t mNumCompositionTimeDeltaEntries;
+
     off64_t mSyncSampleOffset;
     uint32_t mNumSyncSamples;
     uint32_t *mSyncSamples;
@@ -121,6 +127,8 @@ private:
     friend struct SampleIterator;
 
     status_t getSampleSize_l(uint32_t sample_index, size_t *sample_size);
+
+    uint32_t getCompositionTimeOffset(uint32_t sampleIndex) const;
 
     SampleTable(const SampleTable &);
     SampleTable &operator=(const SampleTable &);
