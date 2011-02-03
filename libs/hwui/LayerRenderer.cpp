@@ -18,6 +18,7 @@
 
 #include <ui/Rect.h>
 
+#include "LayerCache.h"
 #include "LayerRenderer.h"
 #include "Properties.h"
 #include "Rect.h"
@@ -34,21 +35,24 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
 
     glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
 
+    const float width = mLayer->layer.getWidth();
+    const float height = mLayer->layer.getHeight();
+
 #if RENDER_LAYERS_AS_REGIONS
     Rect dirty(left, top, right, bottom);
     if (dirty.isEmpty() || (dirty.left <= 0 && dirty.top <= 0 &&
-            dirty.right >= mLayer->width && dirty.bottom >= mLayer->height)) {
+            dirty.right >= width && dirty.bottom >= height)) {
         mLayer->region.clear();
-        dirty.set(0.0f, 0.0f, mLayer->width, mLayer->height);
+        dirty.set(0.0f, 0.0f, width, height);
     } else {
-        dirty.intersect(0.0f, 0.0f, mLayer->width, mLayer->height);
+        dirty.intersect(0.0f, 0.0f, width, height);
         android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
         mLayer->region.subtractSelf(r);
     }
 
     OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 #else
-    OpenGLRenderer::prepareDirty(0.0f, 0.0f, mLayer->width, mLayer->height, opaque);
+    OpenGLRenderer::prepareDirty(0.0f, 0.0f, width, height, opaque);
 #endif
 }
 
@@ -162,63 +166,55 @@ void LayerRenderer::generateMesh() {
 Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
     LAYER_RENDERER_LOGD("Creating new layer %dx%d", width, height);
 
-    Layer* layer = new Layer(width, height);
+    GLuint fbo = Caches::getInstance().fboCache.get();
+    if (!fbo) {
+        LOGW("Could not obtain an FBO");
+        return NULL;
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    Layer* layer = Caches::getInstance().layerCache.get(width, height);
+    if (!layer) {
+        LOGW("Could not obtain a layer");
+        return NULL;
+    }
+
+    layer->fbo = fbo;
+    layer->layer.set(0.0f, 0.0f, width, height);
+    layer->texCoords.set(0.0f, height / float(layer->height),
+            width / float(layer->width), 0.0f);
+    layer->alpha = 255;
+    layer->mode = SkXfermode::kSrcOver_Mode;
+    layer->blend = !isOpaque;
+    layer->colorFilter = NULL;
+    layer->region.clear();
 
     GLuint previousFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
 
-    glGenFramebuffers(1, &layer->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
-
-    if (glGetError() != GL_NO_ERROR) {
-        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteBuffers(1, &layer->fbo);
-        return 0;
-    }
-
-    glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, &layer->texture);
     glBindTexture(GL_TEXTURE_2D, layer->texture);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    // Initialize the texture if needed
+    if (layer->empty) {
+        layer->empty = false;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layer->width, layer->height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-    if (glGetError() != GL_NO_ERROR) {
-        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteBuffers(1, &layer->fbo);
-        glDeleteTextures(1, &layer->texture);
-        delete layer;
-        return 0;
+        if (glGetError() != GL_NO_ERROR) {
+            LOGD("Could not allocate texture");
+            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+            glDeleteTextures(1, &layer->texture);
+            Caches::getInstance().fboCache.put(fbo);
+            delete layer;
+            return NULL;
+        }
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->texture, 0);
 
-    if (glGetError() != GL_NO_ERROR) {
-        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteBuffers(1, &layer->fbo);
-        glDeleteTextures(1, &layer->texture);
-        delete layer;
-        return 0;
-    }
-
     glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-
-    layer->layer.set(0.0f, 0.0f, width, height);
-    layer->texCoords.set(0.0f, 1.0f, 1.0f, 0.0f);
-    layer->alpha = 255;
-    layer->mode = SkXfermode::kSrcOver_Mode;
-    layer->blend = !isOpaque;
-    layer->empty = false;
-    layer->colorFilter = NULL;
 
     return layer;
 }
@@ -227,27 +223,17 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
     if (layer) {
         LAYER_RENDERER_LOGD("Resizing layer fbo = %d to %dx%d", layer->fbo, width, height);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, layer->texture);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-        if (glGetError() != GL_NO_ERROR) {
-            glDeleteBuffers(1, &layer->fbo);
-            glDeleteTextures(1, &layer->texture);
-
-            layer->width = 0;
-            layer->height = 0;
-            layer->fbo = 0;
-            layer->texture = 0;
-
+        if (Caches::getInstance().layerCache.resize(layer, width, height)) {
+            layer->layer.set(0.0f, 0.0f, width, height);
+            layer->texCoords.set(0.0f, height / float(layer->height),
+                    width / float(layer->width), 0.0f);
+        } else {
+            if (layer->texture) glDeleteTextures(1, &layer->texture);
+            delete layer;
             return false;
         }
-
-        layer->width = width;
-        layer->height = height;
     }
+
     return true;
 }
 
@@ -255,10 +241,16 @@ void LayerRenderer::destroyLayer(Layer* layer) {
     if (layer) {
         LAYER_RENDERER_LOGD("Destroying layer, fbo = %d", layer->fbo);
 
-        if (layer->fbo) glDeleteFramebuffers(1, &layer->fbo);
-        if (layer->texture) glDeleteTextures(1, &layer->texture);
+        if (layer->fbo) {
+            Caches::getInstance().fboCache.put(layer->fbo);
+        }
 
-        delete layer;
+        if (!Caches::getInstance().layerCache.put(layer)) {
+            if (layer->texture) glDeleteTextures(1, &layer->texture);
+            delete layer;
+        } else {
+            layer->region.clear();
+        }
     }
 }
 

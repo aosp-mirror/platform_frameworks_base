@@ -66,10 +66,11 @@ class GLES20Layer extends HardwareLayer {
     @Override
     void resize(int width, int height) {
         if (!isValid() || width <= 0 || height <= 0) return;
-        if (width > mLayerWidth || height > mLayerHeight) {
-            mWidth = width;
-            mHeight = height;
 
+        mWidth = width;
+        mHeight = height;
+        
+        if (width != mLayerWidth || height != mLayerHeight) {
             int[] layerInfo = new int[2];
 
             GLES20Canvas.nResizeLayer(mLayer, width, height, layerInfo);

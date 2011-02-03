@@ -128,6 +128,31 @@ Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
     return layer;
 }
 
+bool LayerCache::resize(Layer* layer, const uint32_t width, const uint32_t height) {
+    // TODO: We should be smarter and see if we have a texture of the appropriate
+    //       size already in the cache, and reuse it instead of creating a new one
+
+    LayerEntry entry(width, height);
+    if (entry.mWidth <= layer->width && entry.mHeight <= layer->height) {
+        return true;
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, layer->texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, entry.mWidth, entry.mHeight, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    if (glGetError() != GL_NO_ERROR) {
+        return false;
+    }
+
+    layer->width = entry.mWidth;
+    layer->height = entry.mHeight;
+
+    return true;
+}
+
 bool LayerCache::put(Layer* layer) {
     const uint32_t size = layer->width * layer->height * 4;
     // Don't even try to cache a layer that's bigger than the cache
