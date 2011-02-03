@@ -8264,8 +8264,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (mHardwareLayer == null) {
                 mHardwareLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
                         width, height, isOpaque());
+                mLocalDirtyRect.setEmpty();
             } else if (mHardwareLayer.getWidth() != width || mHardwareLayer.getHeight() != height) {
                 mHardwareLayer.resize(width, height);
+                mLocalDirtyRect.setEmpty();
             }
 
             Canvas currentCanvas = mAttachInfo.mHardwareCanvas;
@@ -8274,6 +8276,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             try {
                 canvas.setViewport(width, height);
                 canvas.onPreDraw(mLocalDirtyRect);
+                mLocalDirtyRect.setEmpty();
 
                 final int restoreCount = canvas.save();
 
@@ -8295,7 +8298,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.onPostDraw();
                 mHardwareLayer.end(currentCanvas);
                 mAttachInfo.mHardwareCanvas = currentCanvas;
-                mLocalDirtyRect.setEmpty();
             }
         }
 
