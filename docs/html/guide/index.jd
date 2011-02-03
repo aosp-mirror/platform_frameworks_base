@@ -2,9 +2,9 @@ page.title=The Developer's Guide
 @jd:body
 
 <p>
-Welcome to the <i>Android Dev Guide</i>! The Dev Guide is 
-a practical introduction to developing applications for Android.  
-It explores the concepts behind Android, the framework for 
+Welcome to the <i>Android Dev Guide</i>! The Dev Guide provides 
+a practical introduction to developing applications for Android and documentation about major
+platform features. It explores the concepts behind Android, the framework for 
 constructing an application, and the tools for developing, 
 testing, and publishing software for the platform.
 </p>
@@ -13,12 +13,12 @@ testing, and publishing software for the platform.
 The Dev Guide holds most of the documentation for the Android
 platform, except for reference material on the framework API.  
 For API specifications, go to the 
-<a href="{@docRoot}reference/packages.html">Reference</a> tab above.
+<a href="{@docRoot}reference/packages.html">Reference</a>.
 </p>  
 
 <p>
 As you can see in the panel on the left, the Dev Guide is 
-divided into a handful of sections.  They are:
+divided into several sections:
 <p>
 
 <dl>
@@ -34,6 +34,10 @@ Fundamentals</a>.  Then explore other topics &mdash; from
 designing a user interface and setting up resources to storing 
 data and using permissions &mdash; as needed.</dd>
 
+<dt><b>Android Market Topics</b></dt>
+<dd>Documentation for topics that concern publishing and monetizing applications on Android
+Market, such as how to enforce licensing policies and implement in-app billing.</dd>
+
 <dt><b>Developing</b></dt>
 <dd>Directions for using Android's development and debugging tools, 
 and for testing the results.</dd>
@@ -47,9 +51,9 @@ and how to publish it when it's ready.</dd>
 applications that perform efficiently and work well for the
 user.</dd>
 
-<dt><b>Tutorials and Samples</b></dt> 
-<dd>Step-by-step tutorials and sample code demonstrating how 
-an Android application is constructed.</dd>
+<dt><b>Web Applications</b></dt> 
+<dd>Documentation about how to create web applications that work seamlessly on Android-powered
+devices and create Android applications that embed web-based content.</dd>
 
 <dt><b>Appendix</b></dt>
 <dd>Reference information and specifications, as well as FAQs, 
@@ -58,26 +62,26 @@ a glossary of terms, and other information.</dd>
 
 <p>
 The first step in programming for Android is downloading the SDK
-(software development kit).  For instructions and information about
-the kit, go to the <a href="{@docRoot}sdk/index.html">SDK</a> tab above.
+(software development kit).  For instructions and information, visit the <a
+href="{@docRoot}sdk/index.html">SDK</a> tab.
 </p>
 
 <p>
-After you have the SDK, begin by looking over the Dev Guide.
-If you want to start by getting a quick look at the code, the short 
-<a href="{@docRoot}guide/tutorials/hello-world.html">Hello World</a>
-tutorial walks you through a standard "Hello, World" application as 
-it would be written for the Android platform.  The 
+After you have the SDK, begin by looking through the Dev Guide.
+If you want to start by getting a quick look at some code, the 
+<a href="{@docRoot}resources/tutorials/hello-world.html">Hello World</a>
+tutorial walks you through a standard "Hello, World" application to introduce some basics of an
+Android application. The 
 <a href="{@docRoot}guide/topics/fundamentals.html">Application
-Fundamentals</a> document is a good place to start for an 
-understanding of the application framework.
+Fundamentals</a> document is a good place to start learning the basics about the application
+framework.
 </p>
 
 
 <p>
 For additional help, consider joining one or more of the Android 
 discussion groups.  Go to the 
-<a href="{@docRoot}resources/community-groups.html">Community</a> pages 
+<a href="{@docRoot}resources/community-groups.html">Developer Forums</a> page
 for more information.
 </p>
 
