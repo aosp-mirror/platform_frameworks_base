@@ -13,8 +13,8 @@ page.title=Developing on a Device
   </ol>
   <h2>See also</h2>
   <ol>
-    <li><a
-    href="{@docRoot}sdk/win-usb.html">USB Driver for Windows</a></li>
+    <li><a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a></li>
+    <li><a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a></li>
     <li><a
 href="{@docRoot}guide/developing/eclipse-adt.html">Developing in Eclipse, with ADT</a></li>
     <li><a
@@ -73,8 +73,10 @@ would on the emulator. Before you can start, there are just a few things to do:<
   <li>Setup your system to detect your device.
     <ul>
       <li>If you're developing on Windows, you need to install a USB driver
-      for adb. See the <a href="{@docRoot}sdk/win-usb.html">Windows USB
-      Driver</a> documentation.</li>
+      for adb. If you're using an Android Developer Phone (ADP), Nexus One, or Nexus S,
+      see the <a href="{@docRoot}sdk/win-usb.html">Google Windows USB
+      Driver</a>. Otherwise, you can find a link to the appropriate OEM driver in the
+  <a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a> document.</li>
       <li>If you're developing on Mac OS X, it just works. Skip this step.</li>
       <li>If you're developing on Ubuntu Linux, you need to add a rules file
 that contains a USB configuration for each type of device you want to use for

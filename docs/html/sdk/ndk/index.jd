@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r5-windows.zip
-ndk.win_bytes=62217450
-ndk.win_checksum=59cbb02d91d74e9c5c7278d94c989e80
+ndk.win_download=android-ndk-r5b-windows.zip
+ndk.win_bytes=61299831
+ndk.win_checksum=87745ada305ab639399161ab4faf684c
 
-ndk.mac_download=android-ndk-r5-darwin-x86.tar.bz2
+ndk.mac_download=android-ndk-r5b-darwin-x86.tar.bz2
 ndk.mac_bytes=50210863
-ndk.mac_checksum=9dee8e4cb529a5619e9b8d1707478c32
+ndk.mac_checksum=019a14622a377b3727ec789af6707037
 
-ndk.linux_download=android-ndk-r5-linux-x86.tar.bz2
-ndk.linux_bytes=44362746
-ndk.linux_checksum=49d5c35ec02bafc074842542c58b7eb3
+ndk.linux_download=android-ndk-r5b-linux-x86.tar.bz2
+ndk.linux_bytes=44138539
+ndk.linux_checksum=4c0045ddc2bfd657be9d5177d0e0b7e7
 
 page.title=Android NDK
 @jd:body
@@ -59,9 +59,62 @@ padding: .25em 1em;
 }
 </style>
 
+
 <div class="toggleable open">
     <a href="#"
          onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-opened.png"
+         class="toggle-img"
+         height="9px"
+         width="9px" /> Android NDK, Revision 5b</a> <em>(January 2011)</em>
+
+    <div class="toggleme">
+      <p>This release of the NDK does not include any new features compared to r5. The r5b release addresses the
+      following problems in the r5 release:
+      </p>
+      <ul>
+    <li>The r5 binaries required glibc 2.11, but the r5b binaries are generated with a special
+    toolchain that targets glibc 2.7 or higher instead. The Linux toolchain binaries now run on Ubuntu 8.04 or higher. </li>
+    <li>Fixes a compiler bug in the arm-linux-androideabi-4.4.3 toolchain.
+    The previous binary generated invalid thumb instruction sequences when
+    dealing with signed chars.</li>
+    <li>Adds missing documentation for the
+    "gnustl_static" value for APP_STL, that allows you to link against
+    a static library version of GNU libstdc++. </li>
+    <li>The following <code>ndk-build</code> issues are fixed:
+      <ul>
+        <li>A bug that created inconsistent dependency files when a
+        compilation error occured on Windows. This prevented a proper build after
+        the error was fixed in the source code.</li>
+        <li>A Cygwin-specific bug where using very short paths for
+        the Android NDK installation or the project path led to the
+        generation of invalid dependency files. This made incremental builds
+        impossible.</li>
+        <li>A typo that prevented the cpufeatures library from working correctly
+        with the new NDK toolchain.</li>
+        <li>Builds in Cygwin are faster by avoiding calls to <code>cygpath -m</code>
+        from GNU Make for every source or object file, which caused problems
+        with very large source trees. In case this doesn't work properly, define <code>NDK_USE_CYGPATH=1</code> in your
+        environment to use <code>cygpath -m</code> again.</li>
+        <li>The Cygwin installation now notifies the user of invalid installation paths that contain spaces. Previously, an invalid path
+        would output an error that complained about an incorrect version of GNU Make, even if the right one was installed.
+      </ul>
+    </li>
+  <li>Fixed a typo that prevented the <code>NDK_MODULE_PATH</code> environment variable from working properly when
+  it contained multiple directories separated with a colon. </li>
+  <li>The <code>prebuilt-common.sh</code> script contains fixes to check the compiler for 64-bit
+  generated machine code, instead of relying on the host tag, which
+  allows the 32-bit toolchain to rebuild properly on Snow Leopard. The toolchain rebuild scripts now also support
+  using a 32-bit host toolchain.</li>
+  <li>A missing declaration for <code>INET_ADDRSTRLEN</code> was added to <code>&lt;netinet/in.h&gt;</code>.</li>
+  <li>Missing declarations for <code>IN6_IS_ADDR_MC_NODELOCAL</code> and <code>IN6_IS_ADDR_MC_GLOBAL</code> were added to <code>&lt;netinet/in6.h&gt;</code>.</li>
+  <li>'asm' was replaced with '__asm__' in <code>&lt;asm/byteorder.h&gt;</code> to allow compilation with <code>-std=c99</code>.</li>
+  </ul>
+  </div>
+  </div>
+
+<div class="toggleable closed">
+    <a href="#"
+         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
          class="toggle-img"
          height="9px"
          width="9px" /> Android NDK, Revision 5</a> <em>(December 2010)</em>
@@ -73,7 +126,7 @@ padding: .25em 1em;
          graphics and window management, assets, and storage. Developers can also implement the
          Android application lifecycle in native code with help from the new
          {@link android.app.NativeActivity} class. For detailed information describing the changes in this
-         release, read the CHANGES.HTML document included in the downloaded NDK package.
+         release, read the <code>CHANGES.HTML</code> document included in the downloaded NDK package.
       </p>
       <dl>
         <dt>General notes:</dt>
