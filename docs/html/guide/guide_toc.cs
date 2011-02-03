@@ -465,27 +465,34 @@
           <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/logcat.html">logcat</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/mksdcard.html">mksdcard</a></li>
-
-          <li><a href="/guide/developing/tools/monkey.html">Monkey</a></li>
-          <li class="toggle-list">
-            <div><a href="/guide/developing/tools/monkeyrunner_concepts.html">
-              <span class="en">monkeyrunner</span>
-            </a></div>
-            <ul>
-              <li><a href="/guide/developing/tools/MonkeyDevice.html">
-                <span class="en">MonkeyDevice</span>
-                </a></li>
-              <li><a href="/guide/developing/tools/MonkeyImage.html">
-                <span class="en">MonkeyImage</span>
-                </a></li>
-              <li><a href="/guide/developing/tools/MonkeyRunner.html">
-                <span class="en">MonkeyRunner</span>
-                </a></li>
-            </ul>
-          </li>
-          <li><a href="/guide/developing/tools/proguard.html">ProGuard</a></li>
-          <li><a href="/guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
-          <li><a href="/guide/developing/tools/traceview.html">Traceview</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
+              <li class="toggle-list">
+                 <div>
+                     <a href="<?cs var:toroot ?>guide/developing/tools/monkeyrunner_concepts.html">
+                     <span class="en">monkeyrunner</span>
+                  </a>
+                  </div>
+                  <ul>
+                      <li>
+                          <a href="<?cs var:toroot ?>guide/developing/tools/MonkeyDevice.html">
+                                <span class="en">MonkeyDevice</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>guide/developing/tools/MonkeyImage.html">
+                            <span class="en">MonkeyImage</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>guide/developing/tools/MonkeyRunner.html">
+                            <span class="en">MonkeyRunner</span>
+                        </a>
+                    </li>
+                  </ul>
+              </li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">ProGuard</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html">Traceview</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html">zipalign</a></li>
         </ul>
       </li>

@@ -62,7 +62,7 @@ page.title=Debugging
 
   <p>Figure 1 shows how the various debugging tools work together in a typical
   debugging environment.</p>
-  <img src="/images/debugging.png"
+  <img src="{@docRoot}images/debugging.png"
         alt="Debugging workflow" />
   <p class="img-caption><strong>Figure 1. </strong> Debugging Workflow</p>
 
