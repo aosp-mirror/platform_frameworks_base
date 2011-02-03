@@ -142,6 +142,9 @@ public final class GLUtils {
         if (bitmap == null) {
             throw new NullPointerException("texImage2D can't be used with a null Bitmap");
         }
+        if (bitmap.isRecycled()) {
+            throw new IllegalArgumentException("bitmap is recycled");
+        }
         if (native_texImage2D(target, level, -1, bitmap, -1, border)!=0) {
             throw new IllegalArgumentException("invalid Bitmap format");
         }
