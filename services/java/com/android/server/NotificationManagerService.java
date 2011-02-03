@@ -156,10 +156,11 @@ public class NotificationManagerService extends INotificationManager.Stub
         final int id;
         final int uid;
         final int initialPid;
+        final int priority;
         final Notification notification;
         IBinder statusBarKey;
 
-        NotificationRecord(String pkg, String tag, int id, int uid, int initialPid,
+        NotificationRecord(String pkg, String tag, int id, int uid, int initialPid, int priority,
                 Notification notification)
         {
             this.pkg = pkg;
@@ -167,6 +168,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             this.id = id;
             this.uid = uid;
             this.initialPid = initialPid;
+            this.priority = priority;
             this.notification = notification;
         }
 
@@ -194,7 +196,9 @@ public class NotificationManagerService extends INotificationManager.Stub
                 + Integer.toHexString(System.identityHashCode(this))
                 + " pkg=" + pkg
                 + " id=" + Integer.toHexString(id)
-                + " tag=" + tag + "}";
+                + " tag=" + tag 
+                + " pri=" + priority 
+                + "}";
         }
     }
 
@@ -649,10 +653,26 @@ public class NotificationManagerService extends INotificationManager.Stub
                 tag, id, notification, idOut);
     }
 
+    public void enqueueNotificationWithTagPriority(String pkg, String tag, int id, int priority,
+            Notification notification, int[] idOut)
+    {
+        enqueueNotificationInternal(pkg, Binder.getCallingUid(), Binder.getCallingPid(),
+                tag, id, priority, notification, idOut);
+    }
+
     // Not exposed via Binder; for system use only (otherwise malicious apps could spoof the
     // uid/pid of another application)
     public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
             String tag, int id, Notification notification, int[] idOut)
+    {
+        enqueueNotificationInternal(pkg, callingUid, callingPid, tag, id, 
+                ((notification.flags & Notification.FLAG_ONGOING_EVENT) != 0)
+                    ? StatusBarNotification.PRIORITY_ONGOING
+                    : StatusBarNotification.PRIORITY_NORMAL,
+                notification, idOut);
+    }
+    public void enqueueNotificationInternal(String pkg, int callingUid, int callingPid,
+            String tag, int id, int priority, Notification notification, int[] idOut)
     {
         checkIncomingCall(pkg);
 
@@ -695,8 +715,10 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         synchronized (mNotificationList) {
-            NotificationRecord r = new NotificationRecord(pkg, tag, id,
-                    callingUid, callingPid, notification);
+            NotificationRecord r = new NotificationRecord(pkg, tag, id, 
+                    callingUid, callingPid, 
+                    priority,
+                    notification);
             NotificationRecord old = null;
 
             int index = indexOfNotificationLocked(pkg, tag, id);
@@ -722,6 +744,8 @@ public class NotificationManagerService extends INotificationManager.Stub
             if (notification.icon != 0) {
                 StatusBarNotification n = new StatusBarNotification(pkg, id, tag,
                         r.uid, r.initialPid, notification);
+                n.priority = r.priority;
+
                 if (old != null && old.statusBarKey != null) {
                     r.statusBarKey = old.statusBarKey;
                     long identity = Binder.clearCallingIdentity();
@@ -743,6 +767,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                 }
                 sendAccessibilityEvent(notification, pkg);
             } else {
+                Slog.e(TAG, "Ignoring notification with icon==0: " + notification);
                 if (old != null && old.statusBarKey != null) {
                     long identity = Binder.clearCallingIdentity();
                     try {
