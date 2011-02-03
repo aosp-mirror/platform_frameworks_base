@@ -32,6 +32,8 @@ namespace uirenderer {
 void LayerRenderer::prepareDirty(float left, float top, float right, float bottom, bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->fbo);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
+
 #if RENDER_LAYERS_AS_REGIONS
     Rect dirty(left, top, right, bottom);
     if (dirty.isEmpty() || (dirty.left <= 0 && dirty.top <= 0 &&
@@ -43,11 +45,7 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
         android::Rect r(dirty.left, dirty.top, dirty.right, dirty.bottom);
         mLayer->region.subtractSelf(r);
     }
-#endif
 
-    glBindFramebuffer(GL_FRAMEBUFFER, mLayer->fbo);
-
-#if RENDER_LAYERS_AS_REGIONS
     OpenGLRenderer::prepareDirty(dirty.left, dirty.top, dirty.right, dirty.bottom, opaque);
 #else
     OpenGLRenderer::prepareDirty(0.0f, 0.0f, mLayer->width, mLayer->height, opaque);
