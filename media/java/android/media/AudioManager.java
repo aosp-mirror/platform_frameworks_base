@@ -394,10 +394,10 @@ public class AudioManager {
                  */
                 adjustSuggestedStreamVolume(
                         keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                ? AudioManager.ADJUST_RAISE
-                                : AudioManager.ADJUST_LOWER,
+                                ? ADJUST_RAISE
+                                : ADJUST_LOWER,
                         stream,
-                        AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
+                        FLAG_SHOW_UI | FLAG_VIBRATE);
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 // TODO: Actually handle MUTE.
@@ -416,7 +416,11 @@ public class AudioManager {
                  * Play a sound. This is done on key up since we don't want the
                  * sound to play when a user holds down volume down to mute.
                  */
-                adjustSuggestedStreamVolume(ADJUST_SAME, stream, FLAG_PLAY_SOUND);
+                adjustSuggestedStreamVolume(
+                        ADJUST_SAME,
+                        stream,
+                        FLAG_PLAY_SOUND);
+
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
@@ -555,6 +559,21 @@ public class AudioManager {
     }
 
     /**
+     * Get last audible volume before stream was muted.
+     *
+     * @hide
+     */
+    public int getLastAudibleStreamVolume(int streamType) {
+        IAudioService service = getService();
+        try {
+            return service.getLastAudibleStreamVolume(streamType);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getLastAudibleStreamVolume", e);
+            return 0;
+        }
+    }
+
+    /**
      * Sets the ringer mode.
      * <p>
      * Silent mode will mute the volume and will not vibrate. Vibrate mode will
@@ -645,6 +664,21 @@ public class AudioManager {
             service.setStreamMute(streamType, state, mICallBack);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setStreamMute", e);
+        }
+    }
+
+    /**
+     * get stream mute state.
+     *
+     * @hide
+     */
+    public boolean isStreamMute(int streamType) {
+        IAudioService service = getService();
+        try {
+            return service.isStreamMute(streamType);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isStreamMute", e);
+            return false;
         }
     }
 
@@ -1124,7 +1158,7 @@ public class AudioManager {
      * @return true if any music tracks are active.
      */
     public boolean isMusicActive() {
-        return AudioSystem.isStreamActive(STREAM_MUSIC);
+        return AudioSystem.isStreamActive(STREAM_MUSIC, 0);
     }
 
     /*

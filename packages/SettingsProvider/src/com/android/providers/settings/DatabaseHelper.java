@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 63;
+    private static final int DATABASE_VERSION = 64;
 
     private Context mContext;
 
@@ -797,6 +797,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 63;
         }
 
+        if (upgradeVersion == 63) {
+            // This upgrade adds the STREAM_MUSIC type to the list of
+             // types affected by ringer modes (silent, vibrate, etc.)
+             db.beginTransaction();
+             try {
+                 db.execSQL("DELETE FROM system WHERE name='"
+                         + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
+                 int newValue = (1 << AudioManager.STREAM_RING)
+                         | (1 << AudioManager.STREAM_NOTIFICATION)
+                         | (1 << AudioManager.STREAM_SYSTEM)
+                         | (1 << AudioManager.STREAM_SYSTEM_ENFORCED)
+                         | (1 << AudioManager.STREAM_MUSIC);
+                 db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                         + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
+                         + String.valueOf(newValue) + "')");
+                 db.setTransactionSuccessful();
+             } finally {
+                 db.endTransaction();
+             }
+             upgradeVersion = 64;
+         }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1057,10 +1079,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadVibrateSetting(db, false);
     
-            // By default, only the ring/notification and system streams are affected
+            // By default, only the ring/notification, system and music streams are affected
             loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                     (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
-                    (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED));
+                    (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED) |
+                    (1 << AudioManager.STREAM_MUSIC));
     
             loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
                     ((1 << AudioManager.STREAM_MUSIC) |

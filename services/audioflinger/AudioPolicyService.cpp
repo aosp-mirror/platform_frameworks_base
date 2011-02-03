@@ -394,6 +394,15 @@ status_t AudioPolicyService::unregisterEffect(int id)
     return mpPolicyManager->unregisterEffect(id);
 }
 
+bool AudioPolicyService::isStreamActive(int stream, uint32_t inPastMs) const
+{
+    if (mpPolicyManager == NULL) {
+        return 0;
+    }
+    Mutex::Autolock _l(mLock);
+    return mpPolicyManager->isStreamActive(stream, inPastMs);
+}
+
 void AudioPolicyService::binderDied(const wp<IBinder>& who) {
     LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(),
             IPCThreadState::self()->getCallingPid());

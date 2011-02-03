@@ -47,7 +47,6 @@ enum {
     SET_MODE,
     SET_MIC_MUTE,
     GET_MIC_MUTE,
-    IS_STREAM_ACTIVE,
     SET_PARAMETERS,
     GET_PARAMETERS,
     REGISTER_CLIENT,
@@ -313,15 +312,6 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
         remote()->transact(GET_MIC_MUTE, data, &reply);
-        return reply.readInt32();
-    }
-
-    virtual bool isStreamActive(int stream) const
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(stream);
-        remote()->transact(IS_STREAM_ACTIVE, data, &reply);
         return reply.readInt32();
     }
 
@@ -824,12 +814,6 @@ status_t BnAudioFlinger::onTransact(
         case GET_MIC_MUTE: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             reply->writeInt32( getMicMute() );
-            return NO_ERROR;
-        } break;
-        case IS_STREAM_ACTIVE: {
-            CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int stream = data.readInt32();
-            reply->writeInt32( isStreamActive(stream) );
             return NO_ERROR;
         } break;
         case SET_PARAMETERS: {

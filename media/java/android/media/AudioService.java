@@ -284,6 +284,15 @@ public class AudioService extends IAudioService.Stub {
     private SoundPoolListenerThread mSoundPoolListenerThread;
     // message looper for SoundPool listener
     private Looper mSoundPoolLooper = null;
+    // default volume applied to sound played with playSoundEffect()
+    private static final int SOUND_EFFECT_DEFAULT_VOLUME_DB = -20;
+    // volume applied to sound played with playSoundEffect() read from ro.config.sound_fx_volume
+    private int SOUND_EFFECT_VOLUME_DB;
+    // getActiveStreamType() will return STREAM_NOTIFICATION during this period after a notification
+    // stopped
+    private static final int NOTIFICATION_VOLUME_DELAY_MS = 5000;
+    // previous volume adjustment direction received by checkForRingerModeChange()
+    private int mPrevVolDirection = AudioManager.ADJUST_SAME;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -300,6 +309,10 @@ public class AudioService extends IAudioService.Stub {
         MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
             "ro.config.vc_call_vol_steps",
            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
+
+        SOUND_EFFECT_VOLUME_DB = SystemProperties.getInt(
+                "ro.config.sound_fx_volume",
+                SOUND_EFFECT_DEFAULT_VOLUME_DB);
 
         mVolumePanel = new VolumePanel(context, this);
         mSettingsObserver = new SettingsObserver();
@@ -401,14 +414,19 @@ public class AudioService extends IAudioService.Stub {
         mRingerModeAffectedStreams = Settings.System.getInt(cr,
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)));
+                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)|
+                 (1 << AudioSystem.STREAM_MUSIC)));
 
         mMuteAffectedStreams = System.getInt(cr,
                 System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_MUSIC)|(1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_SYSTEM)));
 
-        mNotificationsUseRingVolume = System.getInt(cr,
-                Settings.System.NOTIFICATIONS_USE_RING_VOLUME, 1);
+        if (mVoiceCapable) {
+            mNotificationsUseRingVolume = System.getInt(cr,
+                    Settings.System.NOTIFICATIONS_USE_RING_VOLUME, 1);
+        } else {
+            mNotificationsUseRingVolume = 1;
+        }
 
         if (mNotificationsUseRingVolume == 1) {
             STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
@@ -465,8 +483,10 @@ public class AudioService extends IAudioService.Stub {
 
         // If either the client forces allowing ringer modes for this adjustment,
         // or the stream type is one that is affected by ringer modes
-        if ((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0
-                || streamType == AudioSystem.STREAM_RING) {
+        if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
+             (!mVoiceCapable && streamType != AudioSystem.STREAM_VOICE_CALL &&
+               streamType != AudioSystem.STREAM_BLUETOOTH_SCO) ||
+                (mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
             adjustVolume = checkForRingerModeChange(oldIndex, direction);
@@ -491,10 +511,8 @@ public class AudioService extends IAudioService.Stub {
             }
             index = streamState.mIndex;
         }
-        // UI
-        mVolumePanel.postVolumeChanged(streamType, flags);
-        // Broadcast Intent
-        sendVolumeUpdate(streamType, oldIndex, index);
+
+        sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
@@ -509,21 +527,23 @@ public class AudioService extends IAudioService.Stub {
 
         index = (streamState.muteCount() != 0) ? streamState.mLastAudibleIndex : streamState.mIndex;
 
-        // UI, etc.
-        mVolumePanel.postVolumeChanged(streamType, flags);
-        // Broadcast Intent
-        sendVolumeUpdate(streamType, oldIndex, index);
+        sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
 
-    private void sendVolumeUpdate(int streamType, int oldIndex, int index) {
+    // UI update and Broadcast Intent
+    private void sendVolumeUpdate(int streamType, int oldIndex, int index, int flags) {
+        if (!mVoiceCapable && (streamType == AudioSystem.STREAM_RING)) {
+            streamType = AudioSystem.STREAM_NOTIFICATION;
+        }
+
+        mVolumePanel.postVolumeChanged(streamType, flags);
+
         oldIndex = (oldIndex + 5) / 10;
         index = (index + 5) / 10;
-
         Intent intent = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
         intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
         intent.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
-
         mContext.sendBroadcast(intent);
     }
 
@@ -575,6 +595,11 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    /** get stream mute state. */
+    public boolean isStreamMute(int streamType) {
+        return (mStreamStates[streamType].muteCount() != 0);
+    }
+
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
@@ -585,6 +610,13 @@ public class AudioService extends IAudioService.Stub {
     public int getStreamMaxVolume(int streamType) {
         ensureValidStreamType(streamType);
         return (mStreamStates[streamType].getMaxIndex() + 5) / 10;
+    }
+
+
+    /** Get last audible volume before stream was muted. */
+    public int getLastAudibleStreamVolume(int streamType) {
+        ensureValidStreamType(streamType);
+        return (mStreamStates[streamType].mLastAudibleIndex + 5) / 10;
     }
 
     /** @see AudioManager#getRingerMode() */
@@ -1383,8 +1415,9 @@ public class AudioService extends IAudioService.Stub {
 
         if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
             // audible mode, at the bottom of the scale
-            if (direction == AudioManager.ADJUST_LOWER
-                    && (oldIndex + 5) / 10 == 1) {
+            if ((direction == AudioManager.ADJUST_LOWER &&
+                 mPrevVolDirection != AudioManager.ADJUST_LOWER) &&
+                ((oldIndex + 5) / 10 == 0)) {
                 // "silent mode", but which one?
                 newRingerMode = System.getInt(mContentResolver, System.VIBRATE_IN_SILENT, 1) == 1
                     ? AudioManager.RINGER_MODE_VIBRATE
@@ -1410,6 +1443,8 @@ public class AudioService extends IAudioService.Stub {
              */
             adjustVolumeIndex = false;
         }
+
+        mPrevVolDirection = direction;
 
         return adjustVolumeIndex;
     }
@@ -1439,36 +1474,61 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private int getActiveStreamType(int suggestedStreamType) {
-        boolean isOffhook = false;
-        try {
-            ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-            if (phone != null) isOffhook = phone.isOffhook();
-        } catch (RemoteException e) {
-            Log.w(TAG, "Couldn't connect to phone service", e);
-        }
 
-        if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION) == AudioSystem.FORCE_BT_SCO) {
-            // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
-            return AudioSystem.STREAM_BLUETOOTH_SCO;
-        } else if (isOffhook || getMode() == AudioManager.MODE_IN_COMMUNICATION) {
-            // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
-            return AudioSystem.STREAM_VOICE_CALL;
-        } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC)) {
-            // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC...");
-            return AudioSystem.STREAM_MUSIC;
-        } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-            if (mVoiceCapable) {
+        if (mVoiceCapable) {
+            boolean isOffhook = false;
+            try {
+                ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
+                if (phone != null) isOffhook = phone.isOffhook();
+            } catch (RemoteException e) {
+                Log.w(TAG, "Couldn't connect to phone service", e);
+            }
+
+            if (isOffhook || getMode() == AudioManager.MODE_IN_COMMUNICATION) {
+                if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
+                        == AudioSystem.FORCE_BT_SCO) {
+                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
+                    return AudioSystem.STREAM_BLUETOOTH_SCO;
+                } else {
+                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
+                    return AudioSystem.STREAM_VOICE_CALL;
+                }
+            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC...");
+                return AudioSystem.STREAM_MUSIC;
+            } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
                 // Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING..."
                 //        + " b/c USE_DEFAULT_STREAM_TYPE...");
                 return AudioSystem.STREAM_RING;
             } else {
+                // Log.v(TAG, "getActiveStreamType: Returning suggested type " + suggestedStreamType);
+                return suggestedStreamType;
+            }
+        } else {
+            if (getMode() == AudioManager.MODE_IN_COMMUNICATION) {
+                if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
+                        == AudioSystem.FORCE_BT_SCO) {
+                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
+                    return AudioSystem.STREAM_BLUETOOTH_SCO;
+                } else {
+                    // Log.v(TAG, "getActiveStreamType: Forcing STREAM_VOICE_CALL...");
+                    return AudioSystem.STREAM_VOICE_CALL;
+                }
+            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_NOTIFICATION,
+                            NOTIFICATION_VOLUME_DELAY_MS) ||
+                       AudioSystem.isStreamActive(AudioSystem.STREAM_RING,
+                            NOTIFICATION_VOLUME_DELAY_MS)) {
+                // Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION...");
+                return AudioSystem.STREAM_NOTIFICATION;
+            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0) ||
+                       (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE)) {
                 // Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC "
                 //        + " b/c USE_DEFAULT_STREAM_TYPE...");
                 return AudioSystem.STREAM_MUSIC;
+            } else {
+                // Log.v(TAG, "getActiveStreamType: Returning suggested type " + suggestedStreamType);
+                return suggestedStreamType;
             }
-        } else {
-            // Log.v(TAG, "getActiveStreamType: Returning suggested type " + suggestedStreamType);
-            return suggestedStreamType;
         }
     }
 
@@ -1801,13 +1861,9 @@ public class AudioService extends IAudioService.Stub {
                     return;
                 }
                 float volFloat;
-                // use STREAM_MUSIC volume attenuated by 3 dB if volume is not specified by caller
+                // use default if volume is not specified by caller
                 if (volume < 0) {
-                    // Same linear to log conversion as in native AudioSystem::linearToLog() (AudioSystem.cpp)
-                    float dBPerStep = (float)((0.5 * 100) / MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
-                    int musicVolIndex = (mStreamStates[AudioSystem.STREAM_MUSIC].mIndex + 5) / 10;
-                    float musicVoldB = dBPerStep * (musicVolIndex - MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
-                    volFloat = (float)Math.pow(10, (musicVoldB - 3)/20);
+                    volFloat = (float)Math.pow(10, SOUND_EFFECT_VOLUME_DB/20);
                 } else {
                     volFloat = (float) volume / 1000.0f;
                 }
@@ -1884,7 +1940,7 @@ public class AudioService extends IAudioService.Stub {
                     // Force creation of new IAudioflinger interface
                     if (!mMediaServerOk) {
                         Log.e(TAG, "Media server died.");
-                        AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC);
+                        AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0);
                         sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
                                 null, 500);
                     }
@@ -1981,21 +2037,23 @@ public class AudioService extends IAudioService.Stub {
                 int notificationsUseRingVolume = Settings.System.getInt(mContentResolver,
                         Settings.System.NOTIFICATIONS_USE_RING_VOLUME,
                         1);
-                if (notificationsUseRingVolume != mNotificationsUseRingVolume) {
-                    mNotificationsUseRingVolume = notificationsUseRingVolume;
-                    if (mNotificationsUseRingVolume == 1) {
-                        STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-                        mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
-                                System.VOLUME_SETTINGS[AudioSystem.STREAM_RING]);
-                    } else {
-                        STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
-                        mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
-                                System.VOLUME_SETTINGS[AudioSystem.STREAM_NOTIFICATION]);
-                        // Persist notification volume volume as it was not persisted while aliased to ring volume
-                        //  and persist with no delay as there might be registered observers of the persisted
-                        //  notification volume.
-                        sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, AudioSystem.STREAM_NOTIFICATION,
-                                SENDMSG_REPLACE, 1, 1, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
+                if (mVoiceCapable) {
+                    if (notificationsUseRingVolume != mNotificationsUseRingVolume) {
+                        mNotificationsUseRingVolume = notificationsUseRingVolume;
+                        if (mNotificationsUseRingVolume == 1) {
+                            STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+                            mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
+                                    System.VOLUME_SETTINGS[AudioSystem.STREAM_RING]);
+                        } else {
+                            STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+                            mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
+                                    System.VOLUME_SETTINGS[AudioSystem.STREAM_NOTIFICATION]);
+                            // Persist notification volume volume as it was not persisted while aliased to ring volume
+                            //  and persist with no delay as there might be registered observers of the persisted
+                            //  notification volume.
+                            sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, AudioSystem.STREAM_NOTIFICATION,
+                                    SENDMSG_REPLACE, 1, 1, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
+                        }
                     }
                 }
             }
