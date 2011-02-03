@@ -248,7 +248,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
         Slog.d(TAG, String.format("rsp <%s>", rsp));
 
-        // Rsp: 213 xx:xx:xx:xx:xx:xx yyy.yyy.yyy.yyy zzz.zzz.zzz.zzz [flag1 flag2 flag3]
+        // Rsp: 213 xx:xx:xx:xx:xx:xx yyy.yyy.yyy.yyy zzz [flag1 flag2 flag3]
         StringTokenizer st = new StringTokenizer(rsp);
 
         InterfaceConfiguration cfg;
@@ -268,7 +268,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             cfg = new InterfaceConfiguration();
             cfg.hwAddr = st.nextToken(" ");
             InetAddress addr = null;
-            InetAddress mask = null;
+            int prefixLength = 0;
             try {
                 addr = InetAddress.getByName(st.nextToken(" "));
             } catch (UnknownHostException uhe) {
@@ -276,12 +276,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             }
 
             try {
-                mask = InetAddress.getByName(st.nextToken(" "));
-            } catch (UnknownHostException uhe) {
-                Slog.e(TAG, "Failed to parse netmask", uhe);
+                prefixLength = Integer.parseInt(st.nextToken(" "));
+            } catch (NumberFormatException nfe) {
+                Slog.e(TAG, "Failed to parse prefixLength", nfe);
             }
 
-            cfg.addr = new LinkAddress(addr, mask);
+            cfg.addr = new LinkAddress(addr, prefixLength);
             cfg.interfaceFlags = st.nextToken("]").trim() +"]";
         } catch (NoSuchElementException nsee) {
             throw new IllegalStateException(
@@ -294,19 +294,13 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public void setInterfaceConfig(
             String iface, InterfaceConfiguration cfg) throws IllegalStateException {
         LinkAddress linkAddr = cfg.addr;
-        if (linkAddr == null) throw new IllegalStateException("Null LinkAddress given");
-        InetAddress addr = linkAddr.getAddress();
-        // TODO - fix this to pass prefixlength and be v6 capapble
-        InetAddress mask = null;
-        try {
-            mask = NetworkUtils.intToInetAddress(NetworkUtils.prefixLengthToNetmaskInt(
-                    linkAddr.getNetworkPrefixLength()));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(e);
+        if (linkAddr == null || linkAddr.getAddress() == null) {
+            throw new IllegalStateException("Null LinkAddress given");
         }
-        if (addr == null || mask == null) throw new IllegalStateException("Null Address given");
-        String cmd = String.format("interface setcfg %s %s %s %s", iface,
-                addr.getHostAddress(), mask.getHostAddress(), cfg.interfaceFlags);
+        String cmd = String.format("interface setcfg %s %s %d %s", iface,
+                linkAddr.getAddress().getHostAddress(),
+                linkAddr.getNetworkPrefixLength(),
+                cfg.interfaceFlags);
         try {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
