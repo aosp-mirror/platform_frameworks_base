@@ -3831,6 +3831,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hideError();
         }
 
+        if (mBlink != null) {
+            mBlink.cancel();
+        }
+
+        if (mInsertionPointCursorController != null) {
+            mInsertionPointCursorController.onDetached();
+        }
+
+        if (mSelectionModifierCursorController != null) {
+            mSelectionModifierCursorController.onDetached();
+        }
+
         hideControllers();
     }
 
@@ -7740,6 +7752,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * @param event The touch event
          */
         public boolean onTouchEvent(MotionEvent event);
+
+        /**
+         * Called when the view is detached from window. Perform house keeping task, such as
+         * stopping Runnable thread that would otherwise keep a reference on the context, thus
+         * preventing the activity to be recycled.
+         */
+        public void onDetached();
     }
 
     private class HandleView extends View {
@@ -8017,12 +8036,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void hide() {
             mHandle.hide();
-            TextView.this.removeCallbacks(mHider);
+            removeCallbacks(mHider);
         }
 
         private void hideDelayed(int msec) {
-            TextView.this.removeCallbacks(mHider);
-            TextView.this.postDelayed(mHider, msec);
+            removeCallbacks(mHider);
+            postDelayed(mHider, msec);
         }
 
         public boolean isShowing() {
@@ -8061,6 +8080,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!isInTouchMode) {
                 hide();
             }
+        }
+
+        @Override
+        public void onDetached() {
+            removeCallbacks(mHider);
         }
     }
 
@@ -8218,6 +8242,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!isInTouchMode) {
                 hide();
             }
+        }
+
+        @Override
+        public void onDetached() {
+            removeCallbacks(mHider);
         }
     }
 
