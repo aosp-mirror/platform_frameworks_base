@@ -56,8 +56,8 @@ page.title=Service Testing
 </p>
 <p>
     This document describes techniques for testing Service objects. If you aren't familiar with the
-    Service class, please read <a href="{@docRoot}guide/topics/fundamentals.html">
-    Application Fundamentals</a>. If you aren't familiar with Android testing, please read
+    Service class, please read the <a href="{@docRoot}guide/topics/fundamentals/services.html">
+    Services</a> document. If you aren't familiar with Android testing, please read
     <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
     the introduction to the Android testing and instrumentation framework.
 </p>

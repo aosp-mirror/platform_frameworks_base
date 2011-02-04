@@ -333,10 +333,10 @@ of the App Widget is added one hour after the first one, then they will both be 
 on the period defined by the first one and the second update period will be ignored 
 (they'll both be updated every two hours, not every hour).</p>
 
-<p class="note"><strong>Note:</strong> Because the AppWidgetProvider is a BroadcastReceiver,
-your process is not guaranteed to keep running after the callback methods return (see
-<a href="{@docRoot}guide/topics/fundamentals.html#broadlife">Application Fundamentals &gt;
-Broadcast Receiver Lifecycle</a> for more information). If your App Widget setup process can take several
+<p class="note"><strong>Note:</strong> Because {@link android.appwidget.AppWidgetProvider} is an
+extension of {@link android.content.BroadcastReceiver}, your process is not guaranteed to keep
+running after the callback methods return (see {@link android.content.BroadcastReceiver} for
+information about the broadcast lifecycle). If your App Widget setup process can take several
 seconds (perhaps while performing web requests) and you require that your process continues, 
 consider starting a {@link android.app.Service} 
 in the {@link android.appwidget.AppWidgetProvider#onUpdate(Context,AppWidgetManager,int[])

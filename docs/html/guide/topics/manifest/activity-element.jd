@@ -458,9 +458,7 @@ other activities and tasks using the BACK key. </p>
 
 <p>For more information on launch modes and their interaction with Intent
 flags, see the 
-<a href="{@docRoot}guide/topics/fundamentals.html#acttask">Activities and 
-Tasks</a> section of the 
-<a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>
+<a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
 document.
 </p>
 </dd>

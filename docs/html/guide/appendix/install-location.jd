@@ -193,7 +193,7 @@ applications that should allow installation on external storage, because games d
 provide additional services when innactive. When external storage becomes unavailable and a game
 process is killed, there should be no visible effect when the storage becomes available again and
 the user restarts the game (assuming that the game properly saved its state during the normal
-<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity lifecycle</a>).</p>
+<a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activity lifecycle</a>).</p>
 
 <p>If your application requires several megabytes for the APK file, you should
 carefully consider whether to enable the application to install on the external storage so that
