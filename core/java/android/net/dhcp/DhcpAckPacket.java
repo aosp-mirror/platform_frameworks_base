@@ -33,7 +33,7 @@ class DhcpAckPacket extends DhcpPacket {
 
     DhcpAckPacket(int transId, boolean broadcast, InetAddress serverAddress,
                   InetAddress clientIp, byte[] clientMac) {
-        super(transId, Inet4Address.ANY, clientIp, Inet4Address.ANY,
+        super(transId, Inet4Address.ANY, clientIp, serverAddress,
             Inet4Address.ANY, clientMac, broadcast);
         mBroadcast = broadcast;
         mSrcIp = serverAddress;
