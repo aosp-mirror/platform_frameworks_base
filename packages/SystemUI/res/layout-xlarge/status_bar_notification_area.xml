@@ -84,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textSize="40sp"
-                android:textColor="#8cccdaff" />
+                android:textColor="#ff525e79" />
         </com.android.systemui.statusbar.tablet.HoloClock>
 
         <TextView
@@ -104,7 +104,7 @@
             android:id="@+id/signal_battery_cluster"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="16dp"
             android:orientation="horizontal"
             android:gravity="center"
             >
