@@ -297,7 +297,7 @@ static void updateModelMatrix(rs_matrix4x4 *matrix, void *buffer) {
     if (buffer == 0) {
         rsgProgramVertexLoadModelMatrix(matrix);
     } else {
-        rsAllocationMarkDirty(rsGetAllocation(buffer));
+        rsgAllocationSyncAll(rsGetAllocation(buffer));
     }
 }
 
@@ -409,7 +409,7 @@ static void setupCustomShaderLights() {
     gVSConstants->light1_Diffuse = 1.0f;
     gVSConstants->light1_Specular = 0.7f;
     gVSConstants->light1_CosinePower = 25.0f;
-    rsAllocationMarkDirty(rsGetAllocation(gVSConstants));
+    rsgAllocationSyncAll(rsGetAllocation(gVSConstants));
 
     // Update fragment shader constants
     // Set light 0 colors
@@ -418,7 +418,7 @@ static void setupCustomShaderLights() {
     // Set light 1 colors
     gFSConstants->light1_DiffuseColor = light1DiffCol;
     gFSConstants->light1_SpecularColor = light1SpecCol;
-    rsAllocationMarkDirty(rsGetAllocation(gFSConstants));
+    rsgAllocationSyncAll(rsGetAllocation(gFSConstants));
 
     // Set light 0 properties for per pixel lighting
     gFSConstPixel->light0_Posision = light0Pos;
@@ -434,7 +434,7 @@ static void setupCustomShaderLights() {
     gFSConstPixel->light1_CosinePower = 25.0f;
     gFSConstPixel->light1_DiffuseColor = light1DiffCol;
     gFSConstPixel->light1_SpecularColor = light1SpecCol;
-    rsAllocationMarkDirty(rsGetAllocation(gFSConstPixel));
+    rsgAllocationSyncAll(rsGetAllocation(gFSConstPixel));
 }
 
 static void displayCustomShaderSamples(int numMeshes) {
