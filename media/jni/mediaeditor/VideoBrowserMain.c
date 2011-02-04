@@ -246,9 +246,13 @@ M4OSA_ERR videoBrowserCreate(
                     pContext->m_pCodecLoaderContext = M4OSA_NULL;
                     decoderType = M4DECODER_kVideoTypeMPEG4;
 
-                    err = VideoEditorVideoDecoder_getInterface_MPEG4(
-                        &decoderType, &pContext->m_pDecoder);
-
+#ifdef USE_SOFTWARE_DECODER
+                        err = VideoEditorVideoDecoder_getSoftwareInterface_MPEG4(
+                            &decoderType, &pContext->m_pDecoder);
+#else
+                        err = VideoEditorVideoDecoder_getInterface_MPEG4(
+                            &decoderType, &pContext->m_pDecoder);
+#endif
                     CHECK_ERR(videoBrowserCreate, err) ;
 
                     err = pContext->m_pDecoder->m_pFctCreate(
@@ -267,8 +271,14 @@ M4OSA_ERR videoBrowserCreate(
                     pContext->m_pCodecLoaderContext = M4OSA_NULL;
 
                     decoderType = M4DECODER_kVideoTypeAVC;
-                    err = VideoEditorVideoDecoder_getInterface_H264(
-                        &decoderType, &pContext->m_pDecoder);
+
+#ifdef USE_SOFTWARE_DECODER
+                        err = VideoEditorVideoDecoder_getSoftwareInterface_H264(
+                            &decoderType, &pContext->m_pDecoder);
+#else
+                        err = VideoEditorVideoDecoder_getInterface_H264(
+                            &decoderType, &pContext->m_pDecoder);
+#endif
                    CHECK_ERR(videoBrowserCreate, err) ;
 
                     err = pContext->m_pDecoder->m_pFctCreate(
