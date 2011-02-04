@@ -180,9 +180,7 @@ instance, it might initiate a service to perform some work based on the event.
 
 <p>A broadcast receiver is implemented as a subclass of {@link android.content.BroadcastReceiver}
 and each broadcast is delivered as an {@link android.content.Intent} object. For more information,
-see the <a
-href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>
-developer guide.</p>
+see the {@link android.content.BroadcastReceiver} class.</p>
 </dd>
 
 </dl>
@@ -220,35 +218,56 @@ Intents bind individual components to each other at runtime (you can think of th
 as the messengers that request an action from other components), whether the component belongs
 to your application or another.</p>
 
-<p>An intent is defined by an {@link android.content.Intent} object, which defines a message to
+<p>An intent is created with an {@link android.content.Intent} object, which defines a message to
 activate either a specific component or a specific <em>type</em> of component&mdash;an intent
 can be either explicit or implicit, respectively.</p>
 
 <p>For activities and services, an intent defines the action to perform (for example, to "view" or
 "send" something) and may specify the URI of the data to act on (among other things that the
 component being started might need to know). For example, an intent might convey a request for an
-activity to present an image to the user or to open a web page. In some cases, you can start a
-component in order to receive a result, in which case, the component that is started also returns
-the result in an {@link android.content.Intent} object (for example, you can issue an intent to let
+activity to show an image or to open a web page. In some cases, you can start an
+activity to receive a result, in which case, the activity also returns
+the result in an {@link android.content.Intent} (for example, you can issue an intent to let
 the user pick a personal contact and have it returned to you&mdash;the return intent includes a
-URI pointing to the chosen contact). For broadcast receivers, the intent simply defines the
+URI pointing to the chosen contact).</p>
+
+<p>For broadcast receivers, the intent simply defines the
 announcement being broadcast (for example, a broadcast to indicate the device battery is low
 includes only a known action string that indicates "battery is low").</p>
 
-<p>The remaining type of component, content provider, is not activated by intents. Rather, it is
+<p>The other component type, content provider, is not activated by intents. Rather, it is
 activated when targeted by a request from a {@link android.content.ContentResolver}. The content
 resolver handles all direct transactions with the content provider so that the component that's
 performing transactions with the provider doesn't need to and instead calls methods on the {@link
 android.content.ContentResolver} object. This leaves a layer of abstraction between the content
 provider and the component requesting information (for security).</p>
 
+<p>There are separate methods for activiting each type of component:</p>
+<ul>
+  <li>You can start an activity (or give it something new to do) by
+passing an {@link android.content.Intent} to {@link android.content.Context#startActivity
+startActivity()} or {@link android.app.Activity#startActivityForResult startActivityForResult()}
+(when you want the activity to return a result).</li>
+  <li>You can start a service (or give new instructions to an ongoing service) by
+passing an {@link android.content.Intent} to {@link android.content.Context#startService
+startService()}. Or you can bind to the service by passing an {@link android.content.Intent} to
+{@link android.content.Context#bindService bindService()}.</li>
+  <li>You can initiate a broadcast by passing an {@link android.content.Intent} to methods like
+{@link android.content.Context#sendBroadcast(Intent) sendBroadcast()}, {@link
+android.content.Context#sendOrderedBroadcast(Intent, String) sendOrderedBroadcast()}, or {@link
+android.content.Context#sendStickyBroadcast sendStickyBroadcast()}.</li>
+  <li>You can perform a query to a content provider by calling {@link
+android.content.ContentProvider#query query()} on a {@link android.content.ContentResolver}.</li>
+</ul>
+
 <p>For more information about using intents, see the <a
 href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and
 Intent Filters</a> document. More information about activating specific components is also provided
-in the <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>, <a
-href="{@docRoot}guide/topics/fundamentals/services.html">Services</a>, and <a
-href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a> developer
-guides.</p>
+in the following documents: <a
+href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>, <a
+href="{@docRoot}guide/topics/fundamentals/services.html">Services</a>, {@link
+android.content.BroadcastReceiver} and <a
+href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a>.</p>
 
 
 <h2 id="Manifest">The Manifest File</h2>
