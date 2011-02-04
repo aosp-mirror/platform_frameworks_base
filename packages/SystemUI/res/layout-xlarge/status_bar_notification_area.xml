@@ -75,7 +75,7 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="2dip"
+            android:layout_marginBottom="3dip"
             android:layout_marginLeft="4dip"
             android:layout_marginRight="4dip"
             >
