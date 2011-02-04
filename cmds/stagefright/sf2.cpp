@@ -170,6 +170,7 @@ protected:
                     mCodec->signalResume();
 
                     (new AMessage(kWhatSeek, id()))->post(5000000ll);
+                } else if (what == ACodec::kWhatOutputFormatChanged) {
                 } else {
                     CHECK_EQ(what, (int32_t)ACodec::kWhatShutdownCompleted);
 
