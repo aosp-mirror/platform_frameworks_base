@@ -190,6 +190,7 @@ private:
 
     Vector<SkPaint*> mPaints;
     Vector<SkPath*> mPaths;
+    Vector<SkPath*> mOriginalPaths;
     Vector<SkMatrix*> mMatrices;
     Vector<SkiaShader*> mShaders;
 
@@ -293,6 +294,10 @@ public:
         return mPaths;
     }
 
+    const Vector<SkPath*>& getOriginalPaths() const {
+        return mOriginalPaths;
+    }
+
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
     }
@@ -371,6 +376,9 @@ private:
         if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
             if (pathCopy == NULL) {
                 pathCopy = path;
+                mOriginalPaths.add(path);
+                Caches& caches = Caches::getInstance();
+                caches.resourceCache.incrementRefcount(path);
             } else {
                 pathCopy = new SkPath(*path);
                 mPaths.add(pathCopy);
@@ -452,6 +460,7 @@ private:
     Vector<SkPaint*> mPaints;
     DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;
 
+    Vector<SkPath*> mOriginalPaths;
     Vector<SkPath*> mPaths;
     DefaultKeyedVector<SkPath*, SkPath*> mPathMap;
 
