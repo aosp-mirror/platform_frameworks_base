@@ -248,13 +248,5 @@ rsgMeshComputeBoundingBox(rs_mesh mesh, float3 *bBoxMin, float3 *bBoxMax) {
     bBoxMax->z = z2;
 }
 
-
-/**
- * @hide
- * Deprecated, do not use.
- *
- */
-extern void __attribute__((overloadable)) color(float, float, float, float);
-
 #endif
 

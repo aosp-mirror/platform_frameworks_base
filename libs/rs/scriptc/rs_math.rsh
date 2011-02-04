@@ -97,13 +97,6 @@ extern rs_allocation __attribute__((overloadable))
     rsGetAllocation(const void *);
 
 /**
- * Mark the contents of an allocation as dirty.  This forces any other scripts
- * using the allocation to receive the updated
- */
-extern void __attribute__((overloadable))
-    rsAllocationMarkDirty(rs_allocation);
-
-/**
  * Query the dimension of an allocation.
  *
  * @return uint32_t The X dimension of the allocation.
