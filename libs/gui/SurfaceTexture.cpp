@@ -77,7 +77,8 @@ static void mtxMul(float out[16], const float a[16], const float b[16]);
 
 SurfaceTexture::SurfaceTexture(GLuint tex) :
     mBufferCount(MIN_BUFFER_SLOTS), mCurrentTexture(INVALID_BUFFER_SLOT),
-    mLastQueued(INVALID_BUFFER_SLOT), mTexName(tex) {
+    mCurrentTransform(0), mLastQueued(INVALID_BUFFER_SLOT),
+    mLastQueuedTransform(0), mNextTransform(0), mTexName(tex) {
     LOGV("SurfaceTexture::SurfaceTexture");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
