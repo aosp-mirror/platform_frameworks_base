@@ -48,7 +48,12 @@ public class NotificationData {
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
     private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
         public int compare(Entry a, Entry b) {
-            return (int)(a.notification.notification.when - b.notification.notification.when);
+            final StatusBarNotification na = a.notification;
+            final StatusBarNotification nb = b.notification;
+            int priDiff = na.priority - nb.priority;
+            return (priDiff != 0)
+                ? priDiff
+                : (int)(na.notification.when - nb.notification.when);
         }
     };
 

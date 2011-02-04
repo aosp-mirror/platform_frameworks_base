@@ -670,7 +670,8 @@ public class TabletStatusBar extends StatusBar implements
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
         boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
-                && notification.isOngoing() == oldNotification.isOngoing();
+                && notification.priority == oldNotification.priority; 
+                // priority now encompasses isOngoing()
         boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
         if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {
             if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
@@ -1187,7 +1188,10 @@ public class TabletStatusBar extends StatusBar implements
         }
 
         // Add the icon.
-        mNotns.add(entry);
+        int pos = mNotns.add(entry);
+        if (DEBUG) {
+            Slog.d(TAG, "addNotificationViews: added at " + pos);
+        }
         updateNotificationIcons();
 
         return iconView;
@@ -1274,7 +1278,7 @@ public class TabletStatusBar extends StatusBar implements
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             if (v.getParent() == null) {
-                mPile.addView(toShow.get(i));
+                mPile.addView(v, N-1-i); // the notification panel has newest at the bottom
             }
         }
 
