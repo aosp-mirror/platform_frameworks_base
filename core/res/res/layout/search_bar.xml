@@ -75,6 +75,7 @@
                 android:drawablePadding="2dip"
                 android:singleLine="true"
                 android:ellipsize="end"
+                android:selectAllOnFocus="true"
                 android:inputType="text|textAutoComplete"
                 android:dropDownWidth="match_parent"
                 android:dropDownHeight="match_parent"
