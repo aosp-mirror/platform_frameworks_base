@@ -25,32 +25,61 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * Technology class representing MIFARE Classic tags (also known as MIFARE Standard).
+ * Provides access to MIFARE Classic properties and I/O operations on a {@link Tag}.
  *
- * <p>Support for this technology type is optional. If the NFC stack doesn't support this technology
- * MIFARE Classic tags will still be scanned, but will only show the NfcA technology.
+ * <p>Acquire a {@link MifareClassic} object using {@link #get}.
  *
- * <p>MIFARE Classic tags have sectors that each contain blocks. The block size is constant at
- * 16 bytes, but the number of sectors and the sector size varies by product. MIFARE has encryption
- * built in and each sector has two keys associated with it, as well as ACLs to determine what
- * level acess each key grants. Before operating on a sector you must call either
- * {@link #authenticateSectorWithKeyA(int, byte[])} or
- * {@link #authenticateSectorWithKeyB(int, byte[])} to gain authorization for your request.
+ * <p>MIFARE Classic is also known as MIFARE Standard.
+ * <p>MIFARE Classic tags are divided into sectors, and each sector is sub-divided into
+ * blocks. Block size is always 16 bytes ({@link #BLOCK_SIZE}. Sector size varies.
+ * <ul>
+ * <li>MIFARE Classic Mini are 320 bytes ({@link #SIZE_MINI}), with 5 sectors each of 4 blocks.
+ * <li>MIFARE Classic 1k are 1024 bytes ({@link #SIZE_1K}), with 16 sectors each of 4 blocks.
+ * <li>MIFARE Classic 2k are 2048 bytes ({@link #SIZE_2K}), with 32 sectors each of 4 blocks.
+ * <li>MIFARE Classic 4k} are 4096 bytes ({@link #SIZE_4K}). The first 32 sectors contain 4 blocks
+ * and the last 8 sectors contain 16 blocks.
+ * </ul>
+ *
+ * <p>MIFARE Classic tags require authentication on a per-sector basis before any
+ * other I/O operations on that sector can be performed. There are two keys per sector,
+ * and ACL bits determine what I/O operations are allowed on that sector after
+ * authenticating with a key. {@see #authenticateSectorWithKeyA} and
+ * {@see #authenticateSectorWithKeyB}.
+ *
+ * <p>Three well-known authentication keys are defined in this class:
+ * {@link #KEY_DEFAULT}, {@link #KEY_MIFARE_APPLICATION_DIRECTORY},
+ * {@link #KEY_NFC_FORUM}.
+ * <ul>
+ * <li>{@link #KEY_DEFAULT} is the default factory key for MIFARE Classic.
+ * <li>{@link #KEY_MIFARE_APPLICATION_DIRECTORY} is the well-known key for
+ * MIFARE Classic cards that have been formatted according to the
+ * MIFARE Application Directory (MAD) specification.
+ * <li>{@link #KEY_NFC_FORUM} is the well-known key for MIFARE Classic cards that
+ * have been formatted according to the NFC
+ *
+ * <p>Implementation of this class on a Android NFC device is optional.
+ * If it is not implemented, then
+ * {@link MifareClassic} will never be enumerated in {@link Tag#getTechList}.
+ * If it is enumerated, then all {@link MifareClassic} I/O operations will be supported,
+ * and {@link Ndef#MIFARE_CLASSIC} NDEF tags will also be supported. In either case,
+ * {@link NfcA} will also be enumerated on the tag, because all MIFARE Classic tags are also
+ * {@link NfcA}.
  */
 public final class MifareClassic extends BasicTagTechnology {
     /**
-     * The well-known default MIFARE read key. All keys are set to this at the factory.
-     * Using this key will effectively make the payload in the sector public.
+     * The default factory key.
      */
     public static final byte[] KEY_DEFAULT =
             {(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF};
     /**
-     * The well-known, default MIFARE Application Directory read key.
+     * The well-known key for tags formatted according to the
+     * MIFARE Application Directory (MAD) specification.
      */
     public static final byte[] KEY_MIFARE_APPLICATION_DIRECTORY =
             {(byte)0xA0,(byte)0xA1,(byte)0xA2,(byte)0xA3,(byte)0xA4,(byte)0xA5};
     /**
-     * The well-known, default read key for NDEF data on a MIFARE Classic
+     * The well-known key for tags formatted according to the
+     * NDEF on Mifare Classic specification.
      */
     public static final byte[] KEY_NFC_FORUM =
             {(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7};
@@ -64,19 +93,19 @@ public final class MifareClassic extends BasicTagTechnology {
     /** A MIFARE Pro tag */
     public static final int TYPE_PRO = 2;
 
-    /** The tag contains 16 sectors, each holding 4 blocks. */
+    /** Tag contains 16 sectors, each with 4 blocks. */
     public static final int SIZE_1K = 1024;
-    /** The tag contains 32 sectors, each holding 4 blocks. */
+    /** Tag contains 32 sectors, each with 4 blocks. */
     public static final int SIZE_2K = 2048;
     /**
-     * The tag contains 40 sectors. The first 32 sectors contain 4 blocks and the last 8 sectors
+     * Tag contains 40 sectors. The first 32 sectors contain 4 blocks and the last 8 sectors
      * contain 16 blocks.
      */
     public static final int SIZE_4K = 4096;
-    /** The tag contains 5 sectors, each holding 4 blocks. */
+    /** Tag contains 5 sectors, each with 4 blocks. */
     public static final int SIZE_MINI = 320;
 
-    /** Size of a Mifare Classic block (in bytes) */
+    /** Size of a MIFARE Classic block (in bytes) */
     public static final int BLOCK_SIZE = 16;
 
     private static final int MAX_BLOCK_COUNT = 256;
@@ -87,10 +116,14 @@ public final class MifareClassic extends BasicTagTechnology {
     private int mSize;
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link MifareClassic} for the given tag.
+     * <p>Does not cause any RF activity and does not block.
+     * <p>Returns null if {@link MifareClassic} was not enumerated in {@link Tag#getTechList}.
+     * This indicates the tag is not MIFARE Classic compatible, or this Android
+     * device does not support MIFARE Classic.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an MIFARE Classic compatible tag
+     * @return MIFARE Classic object
      */
     public static MifareClassic get(Tag tag) {
         if (!tag.hasTech(TagTechnology.MIFARE_CLASSIC)) return null;
@@ -160,17 +193,31 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
-    /** Returns the type of the tag, determined at discovery time */
+    /**
+     * Return the type of this MIFARE Classic compatible tag.
+     * <p>One of {@link #TYPE_UNKNOWN}, {@link #TYPE_CLASSIC}, {@link #TYPE_PLUS} or
+     * {@link #TYPE_PRO}.
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @return type
+     */
     public int getType() {
         return mType;
     }
 
-    /** Returns the size of the tag in bytes, determined at discovery time */
+    /**
+     * Return the size of the tag in bytes
+     * <p>One of {@link #SIZE_MINI}, {@link #SIZE_1K}, {@link #SIZE_2K}, {@link #SIZE_4K}.
+     * These constants are equal to their respective size in bytes.
+     * <p>Does not cause any RF activity and does not block.
+     * @return size in bytes
+     */
     public int getSize() {
         return mSize;
     }
 
-    /** Returns true if the tag is emulated, determined at discovery time.
+    /**
+     * Return true if the tag is emulated, determined at discovery time.
      * These are actually smart-cards that emulate a Mifare Classic interface.
      * They can be treated identically to a Mifare Classic tag.
      * @hide
@@ -179,7 +226,11 @@ public final class MifareClassic extends BasicTagTechnology {
         return mIsEmulated;
     }
 
-    /** Returns the number of sectors on this tag, determined at discovery time */
+    /**
+     * Return the number of MIFARE Classic sectors.
+     * <p>Does not cause any RF activity and does not block.
+     * @return number of sectors
+     */
     public int getSectorCount() {
         switch (mSize) {
         case SIZE_1K:
@@ -195,12 +246,21 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
-    /** Returns the total block count, determined at discovery time */
+    /**
+     * Return the total number of MIFARE Classic blocks.
+     * <p>Does not cause any RF activity and does not block.
+     * @return total number of blocks
     public int getBlockCount() {
         return mSize / BLOCK_SIZE;
     }
 
-    /** Returns the block count for the given sector, determined at discovery time */
+    /**
+     * Return the number of blocks in the given sector.
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @param sectorIndex index of sector, starting from 0
+     * @return number of blocks in the sector
+     */
     public int getBlockCountInSector(int sectorIndex) {
         validateSector(sectorIndex);
 
@@ -211,7 +271,13 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
-    /** Return the sector index of a given block */
+    /**
+     * Return the sector that contains a given block.
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @param blockIndex index of block to lookup, starting from 0
+     * @return sector index that contains the block
+     */
     public int blockToSector(int blockIndex) {
         validateBlock(blockIndex);
 
@@ -222,7 +288,13 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
-    /** Return the first block of a given sector */
+    /**
+     * Return the first block of a given sector.
+     * <p>Does not cause any RF activity and does not block.
+     *
+     * @param sectorIndex index of sector to lookup, starting from 0
+     * @return block index of first block in sector
+     */
     public int sectorToBlock(int sectorIndex) {
         if (sectorIndex < 32) {
             return sectorIndex * 4;
@@ -231,22 +303,51 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
-    // Methods that require connect()
     /**
-     * Authenticate a sector.
-     * <p>Every sector has an A and B key with different access privileges,
-     * this method attempts to authenticate against the A key.
-     * <p>This requires a that the tag be connected.
+     * Authenticate a sector with key A.
+     *
+     * <p>Successful authentication of a sector with key A enables other
+     * I/O operations on that sector. The set of operations granted by key A
+     * key depends on the ACL bits set in that sector. For more information
+     * see the MIFARE Classic specification on {@see http://www.nxp.com}.
+     *
+     * <p>A failed authentication attempt causes an implicit reconnection to the
+     * tag, so authentication to other sectors will be lost.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param sectorIndex index of sector to authenticate, starting from 0
+     * @param key 6-byte authentication key
+     * @return true on success, false on authentication failure
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public boolean authenticateSectorWithKeyA(int sectorIndex, byte[] key) throws IOException {
         return authenticate(sectorIndex, key, true);
     }
 
     /**
-     * Authenticate a sector.
-     * <p>Every sector has an A and B key with different access privileges,
-     * this method attempts to authenticate against the B key.
-     * <p>This requires a that the tag be connected.
+     * Authenticate a sector with key B.
+     *
+     * <p>Successful authentication of a sector with key B enables other
+     * I/O operations on that sector. The set of operations granted by key B
+     * depends on the ACL bits set in that sector. For more information
+     * see the MIFARE Classic specification on {@see http://www.nxp.com}.
+     *
+     * <p>A failed authentication attempt causes an implicit reconnection to the
+     * tag, so authentication to other sectors will be lost.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param sectorIndex index of sector to authenticate, starting from 0
+     * @param key 6-byte authentication key
+     * @return true on success, false on authentication failure
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public boolean authenticateSectorWithKeyB(int sectorIndex, byte[] key) throws IOException {
         return authenticate(sectorIndex, key, false);
@@ -291,8 +392,15 @@ public final class MifareClassic extends BasicTagTechnology {
 
     /**
      * Read 16-byte block.
-     * <p>This requires a that the tag be connected.
-     * @throws IOException
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param blockIndex index of block to read, starting from 0
+     * @return 16 byte block
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public byte[] readBlock(int blockIndex) throws IOException {
         validateBlock(blockIndex);
@@ -304,8 +412,15 @@ public final class MifareClassic extends BasicTagTechnology {
 
     /**
      * Write 16-byte block.
-     * <p>This requires a that the tag be connected.
-     * @throws IOException
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param blockIndex index of block to write, starting from 0
+     * @param data 16 bytes of data to write
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public void writeBlock(int blockIndex, byte[] data) throws IOException {
         validateBlock(blockIndex);
@@ -323,9 +438,16 @@ public final class MifareClassic extends BasicTagTechnology {
     }
 
     /**
-     * Increment a value block, and store the result in temporary memory.
-     * @param blockIndex
-     * @throws IOException
+     * Increment a value block, storing the result in the temporary block on the tag.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param blockIndex index of block to increment, starting from 0
+     * @param value non-negative to increment by
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public void increment(int blockIndex, int value) throws IOException {
         validateBlock(blockIndex);
@@ -342,9 +464,16 @@ public final class MifareClassic extends BasicTagTechnology {
     }
 
     /**
-     * Decrement a value block, and store the result in temporary memory.
-     * @param blockIndex
-     * @throws IOException
+     * Decrement a value block, storing the result in the temporary block on the tag.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param blockIndex index of block to decrement, starting from 0
+     * @param value non-negative to decrement by
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public void decrement(int blockIndex, int value) throws IOException {
         validateBlock(blockIndex);
@@ -361,9 +490,15 @@ public final class MifareClassic extends BasicTagTechnology {
     }
 
     /**
-     * Copy from temporary memory to value block.
-     * @param blockIndex
-     * @throws IOException
+     * Copy from the temporary block to a value block.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param blockIndex index of block to copy to
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public void transfer(int blockIndex) throws IOException {
         validateBlock(blockIndex);
@@ -375,9 +510,15 @@ public final class MifareClassic extends BasicTagTechnology {
     }
 
     /**
-     * Copy from value block to temporary memory.
-     * @param blockIndex
-     * @throws IOException
+     * Copy from a value block to the temporary block.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param blockIndex index of block to copy from
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
      */
     public void restore(int blockIndex) throws IOException {
         validateBlock(blockIndex);
@@ -390,15 +531,16 @@ public final class MifareClassic extends BasicTagTechnology {
 
     /**
      * Send raw NfcA data to a tag and receive the response.
-     * <p>
-     * This method will block until the response is received. It can be canceled
-     * with {@link #close}.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     * <p>This requires a that the tag be connected.
      *
-     * @param data bytes to send
-     * @return bytes received in response
-     * @throws IOException if the target is lost or connection closed
+     * <p>This is equivalent to connecting to this tag via {@link NfcA}
+     * and calling {@link NfcA#transceive}. Note that all MIFARE Classic
+     * tags are based on {@link NfcA} technology.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @see NfcA#transceive
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
