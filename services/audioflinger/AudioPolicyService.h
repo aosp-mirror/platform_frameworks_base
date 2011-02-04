@@ -88,6 +88,7 @@ public:
                                     int session,
                                     int id);
     virtual status_t unregisterEffect(int id);
+    virtual bool isStreamActive(int stream, uint32_t inPastMs = 0) const;
 
     virtual     status_t    onTransact(
                                 uint32_t code,
@@ -230,8 +231,8 @@ private:
     status_t dumpPermissionDenial(int fd);
 
 
-    Mutex   mLock;      // prevents concurrent access to AudioPolicy manager functions changing device
-                        // connection stated our routing
+    mutable Mutex mLock;    // prevents concurrent access to AudioPolicy manager functions changing
+                            // device connection state  or routing
     AudioPolicyInterface* mpPolicyManager;          // the platform specific policy manager
     sp <AudioCommandThread> mAudioCommandThread;    // audio commands thread
     sp <AudioCommandThread> mTonePlaybackThread;     // tone playback thread

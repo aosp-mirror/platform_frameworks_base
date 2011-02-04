@@ -313,8 +313,7 @@ void AudioPolicyManagerBase::setPhoneState(int state)
 
     // Flag that ringtone volume must be limited to music volume until we exit MODE_RINGTONE
     if (state == AudioSystem::MODE_RINGTONE &&
-        (hwOutputDesc->mRefCount[AudioSystem::MUSIC] ||
-        (systemTime() - mMusicStopTime) < seconds(SONIFICATION_HEADSET_MUSIC_DELAY))) {
+        isStreamActive(AudioSystem::MUSIC, SONIFICATION_HEADSET_MUSIC_DELAY)) {
         mLimitRingtoneVolume = true;
     } else {
         mLimitRingtoneVolume = false;
@@ -479,6 +478,7 @@ audio_io_handle_t AudioPolicyManagerBase::getOutput(AudioSystem::stream_type str
         outputDesc->mLatency = 0;
         outputDesc->mFlags = (AudioSystem::output_flags)(flags | AudioSystem::OUTPUT_FLAG_DIRECT);
         outputDesc->mRefCount[stream] = 0;
+        outputDesc->mStopTime[stream] = 0;
         output = mpClientInterface->openOutput(&outputDesc->mDevice,
                                         &outputDesc->mSamplingRate,
                                         &outputDesc->mFormat,
@@ -607,10 +607,8 @@ status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output,
     if (outputDesc->mRefCount[stream] > 0) {
         // decrement usage count of this stream on the output
         outputDesc->changeRefCount(stream, -1);
-        // store time at which the last music track was stopped - see computeVolume()
-        if (stream == AudioSystem::MUSIC) {
-            mMusicStopTime = systemTime();
-        }
+        // store time at which the stream was stopped - see isStreamActive()
+        outputDesc->mStopTime[stream] = systemTime();
 
         setOutputDevice(output, getNewDevice(output));
 
@@ -920,6 +918,19 @@ status_t AudioPolicyManagerBase::unregisterEffect(int id)
     return NO_ERROR;
 }
 
+bool AudioPolicyManagerBase::isStreamActive(int stream, uint32_t inPastMs) const
+{
+    nsecs_t sysTime = systemTime();
+    for (size_t i = 0; i < mOutputs.size(); i++) {
+        if (mOutputs.valueAt(i)->mRefCount[stream] != 0 ||
+            ns2ms(sysTime - mOutputs.valueAt(i)->mStopTime[stream]) < inPastMs) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 status_t AudioPolicyManagerBase::dump(int fd)
 {
     const size_t SIZE = 256;
@@ -1010,7 +1021,7 @@ AudioPolicyManagerBase::AudioPolicyManagerBase(AudioPolicyClientInterface *clien
     Thread(false),
 #endif //AUDIO_POLICY_TEST
     mPhoneState(AudioSystem::MODE_NORMAL), mRingerMode(0),
-    mMusicStopTime(0), mLimitRingtoneVolume(false), mLastVoiceVolume(-1.0f),
+    mLimitRingtoneVolume(false), mLastVoiceVolume(-1.0f),
     mTotalEffectsCpuLoad(0), mTotalEffectsMemory(0),
     mA2dpSuspended(false)
 {
@@ -2094,6 +2105,7 @@ AudioPolicyManagerBase::AudioOutputDescriptor::AudioOutputDescriptor()
         mRefCount[i] = 0;
         mCurVolume[i] = -1.0;
         mMuteCount[i] = 0;
+        mStopTime[i] = 0;
     }
 }
 
@@ -2143,7 +2155,6 @@ uint32_t AudioPolicyManagerBase::AudioOutputDescriptor::strategyRefCount(routing
     }
     return refCount;
 }
-
 
 status_t AudioPolicyManagerBase::AudioOutputDescriptor::dump(int fd)
 {
