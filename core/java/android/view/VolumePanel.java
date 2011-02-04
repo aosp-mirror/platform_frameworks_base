@@ -403,7 +403,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             case AudioManager.STREAM_MUSIC: {
 //                message = MUSIC_VOLUME_TEXT;
                 // Special case for when Bluetooth is active for music
-                if (mAudioManager.isBluetoothA2dpOn()) {
+                if ((mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC) &
+                        (AudioManager.DEVICE_OUT_BLUETOOTH_A2DP |
+                        AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
+                        AudioManager.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)) != 0) {
 //                    additionalMessage =
 //                        com.android.internal.R.string.volume_music_hint_playing_through_bluetooth;
 //                    setLargeIcon(com.android.internal.R.drawable.ic_volume_bluetooth_ad2p);

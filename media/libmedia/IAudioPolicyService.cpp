@@ -49,7 +49,8 @@ enum {
     GET_OUTPUT_FOR_EFFECT,
     REGISTER_EFFECT,
     UNREGISTER_EFFECT,
-    IS_STREAM_ACTIVE
+    IS_STREAM_ACTIVE,
+    GET_DEVICES_FOR_STREAM,
 };
 
 class BpAudioPolicyService : public BpInterface<IAudioPolicyService>
@@ -261,6 +262,15 @@ public:
         data.writeInt32(static_cast <uint32_t>(stream));
         remote()->transact(GET_STRATEGY_FOR_STREAM, data, &reply);
         return reply.readInt32();
+    }
+
+    virtual uint32_t getDevicesForStream(AudioSystem::stream_type stream)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
+        data.writeInt32(static_cast <uint32_t>(stream));
+        remote()->transact(GET_DEVICES_FOR_STREAM, data, &reply);
+        return (uint32_t) reply.readInt32();
     }
 
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc)
@@ -492,6 +502,14 @@ status_t BnAudioPolicyService::onTransact(
             AudioSystem::stream_type stream =
                     static_cast <AudioSystem::stream_type>(data.readInt32());
             reply->writeInt32(getStrategyForStream(stream));
+            return NO_ERROR;
+        } break;
+
+        case GET_DEVICES_FOR_STREAM: {
+            CHECK_INTERFACE(IAudioPolicyService, data, reply);
+            AudioSystem::stream_type stream =
+                    static_cast <AudioSystem::stream_type>(data.readInt32());
+            reply->writeInt32(static_cast <int>(getDevicesForStream(stream)));
             return NO_ERROR;
         } break;
 

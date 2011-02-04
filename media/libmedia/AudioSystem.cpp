@@ -668,6 +668,13 @@ uint32_t AudioSystem::getStrategyForStream(AudioSystem::stream_type stream)
     return aps->getStrategyForStream(stream);
 }
 
+uint32_t AudioSystem::getDevicesForStream(AudioSystem::stream_type stream)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return 0;
+    return aps->getDevicesForStream(stream);
+}
+
 audio_io_handle_t AudioSystem::getOutputForEffect(effect_descriptor_t *desc)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
