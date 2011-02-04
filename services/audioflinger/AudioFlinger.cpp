@@ -47,10 +47,6 @@
 #include "A2dpAudioInterface.h"
 #endif
 
-#ifdef LVMX
-#include "lifevibes.h"
-#endif
-
 #include <media/EffectsFactoryApi.h>
 #include <media/EffectVisualizerApi.h>
 
@@ -149,10 +145,6 @@ AudioFlinger::AudioFlinger()
     } else {
         LOGE("Couldn't even initialize the stubbed audio hardware!");
     }
-#ifdef LVMX
-    LifeVibes::init();
-    mLifeVibesClientPid = -1;
-#endif
 }
 
 AudioFlinger::~AudioFlinger()
@@ -485,9 +477,6 @@ status_t AudioFlinger::setMode(int mode)
         mMode = mode;
         for (uint32_t i = 0; i < mPlaybackThreads.size(); i++)
            mPlaybackThreads.valueAt(i)->setMode(mode);
-#ifdef LVMX
-        LifeVibes::setMode(mode);
-#endif
     }
 
     return ret;
@@ -646,39 +635,11 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         return PERMISSION_DENIED;
     }
 
-#ifdef LVMX
-    AudioParameter param = AudioParameter(keyValuePairs);
-    LifeVibes::setParameters(ioHandle,keyValuePairs);
-    String8 key = String8(AudioParameter::keyRouting);
-    int device;
-    if (NO_ERROR != param.getInt(key, device)) {
-        device = -1;
-    }
-
-    key = String8(LifevibesTag);
-    String8 value;
-    int musicEnabled = -1;
-    if (NO_ERROR == param.get(key, value)) {
-        if (value == LifevibesEnable) {
-            mLifeVibesClientPid = IPCThreadState::self()->getCallingPid();
-            musicEnabled = 1;
-        } else if (value == LifevibesDisable) {
-            mLifeVibesClientPid = -1;
-            musicEnabled = 0;
-        }
-    }
-#endif
-
     // ioHandle == 0 means the parameters are global to the audio hardware interface
     if (ioHandle == 0) {
         AutoMutex lock(mHardwareLock);
         mHardwareStatus = AUDIO_SET_PARAMETER;
         result = mAudioHardware->setParameters(keyValuePairs);
-#ifdef LVMX
-        if (musicEnabled != -1) {
-            LifeVibes::enableMusic((bool) musicEnabled);
-        }
-#endif
         mHardwareStatus = AUDIO_HW_IDLE;
         return result;
     }
@@ -695,11 +656,6 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
     }
     if (thread != NULL) {
         result = thread->setParameters(keyValuePairs);
-#ifdef LVMX
-        if ((NO_ERROR == result) && (device != -1)) {
-            LifeVibes::setDevice(LifeVibes::threadIdToAudioOutputType(thread->id()), device);
-        }
-#endif
         return result;
     }
     return BAD_VALUE;
@@ -813,13 +769,6 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
     if (index >= 0) {
         sp <NotificationClient> client = mNotificationClients.valueFor(pid);
         LOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
-#ifdef LVMX
-        if (pid == mLifeVibesClientPid) {
-            LOGV("Disabling lifevibes");
-            LifeVibes::enableMusic(false);
-            mLifeVibesClientPid = -1;
-        }
-#endif
         mNotificationClients.removeItem(pid);
     }
 }
@@ -1225,24 +1174,12 @@ uint32_t AudioFlinger::PlaybackThread::latency() const
 
 status_t AudioFlinger::PlaybackThread::setMasterVolume(float value)
 {
-#ifdef LVMX
-    int audioOutputType = LifeVibes::getMixerType(mId, mType);
-    if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType)) {
-        LifeVibes::setMasterVolume(audioOutputType, value);
-    }
-#endif
     mMasterVolume = value;
     return NO_ERROR;
 }
 
 status_t AudioFlinger::PlaybackThread::setMasterMute(bool muted)
 {
-#ifdef LVMX
-    int audioOutputType = LifeVibes::getMixerType(mId, mType);
-    if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType)) {
-        LifeVibes::setMasterMute(audioOutputType, muted);
-    }
-#endif
     mMasterMute = muted;
     return NO_ERROR;
 }
@@ -1259,24 +1196,12 @@ bool AudioFlinger::PlaybackThread::masterMute() const
 
 status_t AudioFlinger::PlaybackThread::setStreamVolume(int stream, float value)
 {
-#ifdef LVMX
-    int audioOutputType = LifeVibes::getMixerType(mId, mType);
-    if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType)) {
-        LifeVibes::setStreamVolume(audioOutputType, stream, value);
-    }
-#endif
     mStreamTypes[stream].volume = value;
     return NO_ERROR;
 }
 
 status_t AudioFlinger::PlaybackThread::setStreamMute(int stream, bool muted)
 {
-#ifdef LVMX
-    int audioOutputType = LifeVibes::getMixerType(mId, mType);
-    if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType)) {
-        LifeVibes::setStreamMute(audioOutputType, stream, muted);
-    }
-#endif
     mStreamTypes[stream].mute = muted;
     return NO_ERROR;
 }
@@ -1618,12 +1543,6 @@ bool AudioFlinger::MixerThread::threadLoop()
              }
              // enable changes in effect chain
              unlockEffectChains(effectChains);
-#ifdef LVMX
-            int audioOutputType = LifeVibes::getMixerType(mId, mType);
-            if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType)) {
-               LifeVibes::process(audioOutputType, mMixBuffer, mixBufferSize);
-            }
-#endif
             mLastWriteTime = systemTime();
             mInWrite = true;
             mBytesWritten += mixBufferSize;
@@ -1686,24 +1605,6 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
     if (masterMute) {
         masterVolume = 0;
     }
-#ifdef LVMX
-    bool tracksConnectedChanged = false;
-    bool stateChanged = false;
-
-    int audioOutputType = LifeVibes::getMixerType(mId, mType);
-    if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType))
-    {
-        int activeTypes = 0;
-        for (size_t i=0 ; i<count ; i++) {
-            sp<Track> t = activeTracks[i].promote();
-            if (t == 0) continue;
-            Track* const track = t.get();
-            int iTracktype=track->type();
-            activeTypes |= 1<<track->type();
-        }
-        LifeVibes::computeVolumes(audioOutputType, activeTypes, tracksConnectedChanged, stateChanged, masterVolume, masterMute);
-    }
-#endif
     // Delegate master volume control to effect in output mix effect chain if needed
     sp<EffectChain> chain = getEffectChain_l(AudioSystem::SESSION_OUTPUT_MIX);
     if (chain != 0) {
@@ -1771,17 +1672,6 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
                 // read original volumes with volume control
                 float typeVolume = mStreamTypes[track->type()].volume;
-#ifdef LVMX
-                bool streamMute=false;
-                // read the volume from the LivesVibes audio engine.
-                if (LifeVibes::audioOutputTypeIsLifeVibes(audioOutputType))
-                {
-                    LifeVibes::getStreamVolumes(audioOutputType, track->type(), &typeVolume, &streamMute);
-                    if (streamMute) {
-                        typeVolume = 0;
-                    }
-                }
-#endif
                 float v = masterVolume * typeVolume;
                 vl = (uint32_t)(v * cblk->volume[0]) << 12;
                 vr = (uint32_t)(v * cblk->volume[1]) << 12;
@@ -1813,14 +1703,6 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
 
             if (va > MAX_GAIN_INT) va = MAX_GAIN_INT;
             aux = int16_t(va);
-
-#ifdef LVMX
-            if ( tracksConnectedChanged || stateChanged )
-            {
-                 // only do the ramp when the volume is changed by the user / application
-                 param = AudioMixer::VOLUME;
-            }
-#endif
 
             // XXX: these things DON'T need to be done each time
             mAudioMixer->setBufferProvider(track);
@@ -4317,18 +4199,6 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
         } else {
             thread = new MixerThread(this, output, id, *pDevices);
             LOGV("openOutput() created mixer output: ID %d thread %p", id, thread);
-
-#ifdef LVMX
-            unsigned bitsPerSample =
-                (format == AudioSystem::PCM_16_BIT) ? 16 :
-                    ((format == AudioSystem::PCM_8_BIT) ? 8 : 0);
-            unsigned channelCount = (channels == AudioSystem::CHANNEL_OUT_STEREO) ? 2 : 1;
-            int audioOutputType = LifeVibes::threadIdToAudioOutputType(thread->id());
-
-            LifeVibes::init_aot(audioOutputType, samplingRate, bitsPerSample, channelCount);
-            LifeVibes::setDevice(audioOutputType, *pDevices);
-#endif
-
         }
         mPlaybackThreads.add(id, thread);
 
