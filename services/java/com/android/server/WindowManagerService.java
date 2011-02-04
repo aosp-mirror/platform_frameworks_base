@@ -692,7 +692,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean changed = setRotationUncheckedLocked(
                     WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
             if (changed) {
-                sendNewConfiguration();
+                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             }
         }
 
@@ -11075,7 +11075,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean changed = setRotationUncheckedLocked(
                     WindowManagerPolicy.USE_LAST_ROTATION, 0, false);
             if (changed) {
-                sendNewConfiguration();
+                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
             }
         }
         
