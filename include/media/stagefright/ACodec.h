@@ -109,7 +109,7 @@ private:
 
     status_t allocateOutputBuffersFromNativeWindow();
     status_t cancelBufferToNativeWindow(BufferInfo *info);
-    status_t freeOutputBuffersOwnedByNativeWindow();
+    status_t freeOutputBuffersNotOwnedByComponent();
     BufferInfo *dequeueBufferFromNativeWindow();
 
     BufferInfo *findBufferByID(
