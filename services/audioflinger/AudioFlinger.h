@@ -1181,9 +1181,6 @@ private:
 
                 DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 volatile int32_t                    mNextUniqueId;
-#ifdef LVMX
-                int mLifeVibesClientPid;
-#endif
                 uint32_t mMode;
 
 };

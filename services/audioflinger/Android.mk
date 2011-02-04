@@ -120,12 +120,4 @@ ifeq ($(TARGET_SIMULATOR),true)
     endif
 endif
 
-ifeq ($(BOARD_USE_LVMX),true)
-    LOCAL_CFLAGS += -DLVMX
-    LOCAL_C_INCLUDES += vendor/nxp
-    LOCAL_STATIC_LIBRARIES += liblifevibes
-    LOCAL_SHARED_LIBRARIES += liblvmxservice
-#    LOCAL_SHARED_LIBRARIES += liblvmxipc
-endif
-
 include $(BUILD_SHARED_LIBRARY)
