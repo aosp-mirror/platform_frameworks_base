@@ -150,6 +150,10 @@ public:
                 break;
             case SkRegion::kIntersect_Op:
                 clipped = clipRect->intersect(r);
+                if (!clipped) {
+                    clipRect->setEmpty();
+                    clipped = true;
+                }
                 break;
             case SkRegion::kUnion_Op:
                 clipped = clipRect->unionWith(r);
