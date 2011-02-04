@@ -500,7 +500,7 @@ public class StaticLayout extends Layout
                         choosehtv, fm, hasTabOrEmoji,
                         needMultiply, paraStart, chdirs, dir, easy,
                         paraEnd == bufend, includepad, trackpad,
-                        chs, widths, here - paraStart,
+                        chs, widths, paraStart,
                         ellipsize, ellipsizedWidth, w, paint);
             }
 
