@@ -208,6 +208,11 @@
         <item name="windowExitAnimation">@anim/fade_out</item>
     </style>
 
+    <!-- Window animations used for volume panel. -->
+    <style name="Animation.VolumePanel">
+        <item name="windowEnterAnimation">@null</item>
+        <item name="windowExitAnimation">@anim/fade_out</item>
+    </style>
     <!-- Status Bar Styles -->
 
     <style name="TextAppearance.StatusBar">
