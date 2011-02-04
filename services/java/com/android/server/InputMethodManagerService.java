@@ -330,6 +330,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ENABLED_INPUT_METHODS), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this);
         }
 
