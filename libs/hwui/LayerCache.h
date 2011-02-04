@@ -76,6 +76,17 @@ public:
      * Clears the cache. This causes all layers to be deleted.
      */
     void clear();
+    /**
+     * Resize the specified layer if needed.
+     *
+     * @param layer The layer to resize
+     * @param width The new width of the layer
+     * @param height The new height of the layer
+     *
+     * @return True if the layer was resized or nothing happened, false if
+     *         a failure occurred during the resizing operation
+     */
+    bool resize(Layer* layer, const uint32_t width, const uint32_t height);
 
     /**
      * Sets the maximum size of the cache in bytes.
