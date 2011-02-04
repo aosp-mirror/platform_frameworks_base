@@ -20,11 +20,13 @@ import java.util.ArrayList;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.View;
 import android.widget.ImageView;
@@ -83,10 +85,15 @@ public class LocationController extends BroadcastReceiver {
         
         try {
             if (visible) {
+                Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                gpsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, gpsIntent, 0);
+
                 Notification n = new Notification.Builder(mContext)
                     .setSmallIcon(iconId)
                     .setContentTitle(mContext.getText(textResId))
                     .setOngoing(true)
+                    .setContentIntent(pendingIntent)
                     .getNotification();
 
                 // Notification.Builder will helpfully fill these out for you no matter what you do
