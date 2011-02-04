@@ -2123,7 +2123,7 @@ returned by the Android Market server in a license response.</p>
 <tr>
 <td>LICENSED</td>
 <td>The application is licensed to the user. The user has purchased the
-application or the application is free.</td>
+application or the application only exists as a draft.</td>
 <td>Yes</td>
 <td><code>VT</code>,&nbsp;<code>GT</code>, <code>GR</code></td>
 <td><em>Allow access according to Policy constraints.</em></td>
@@ -2201,6 +2201,17 @@ implementation.</p>
 
 </table>
 
+<p class="note"><strong>Note:</strong> As documented in <a href="#test-env">
+Setting Up The Testing Environment</a>, the response code can be manually
+overridden for the application developer and any registered test users via the
+Android Market publisher site.
+<br/><br/>
+Additionally, as noted above, applications that are in draft mode (in other
+words, applicaitons that have been uploaded but have <em>never</em> been
+published) will return LICENSED for all users, even if not listed as a test
+user. Since the application has never been offered for download, it is assumed
+that any users running it must have obtained it from an authorized channel for
+testing purposes.</p>
 
 <h2 id="extras">Server Response Extras</h2>
 
