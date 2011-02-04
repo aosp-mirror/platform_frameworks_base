@@ -397,12 +397,6 @@ public final class Downloads {
          */
         public static final String COLUMN_LAST_UPDATESRC = "lastUpdateSrc";
 
-        /** Set this column to true if the given download should ignore the mobile network
-         * download limits.
-         * <P>Type: Boolean</P>
-         */
-        public static final String COLUMN_IGNORE_SIZE_LIMITS = "otaupdate";
-
         /**
          * default value for {@link #COLUMN_LAST_UPDATESRC}.
          * This value is used when this column's value is not relevant.
