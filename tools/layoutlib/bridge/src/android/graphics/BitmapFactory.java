@@ -18,6 +18,9 @@ package android.graphics;
 
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.android.BridgeResources.NinePatchInputStream;
+import com.android.ninepatch.NinePatch;
+import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.Density;
 
 import android.content.res.AssetManager;
@@ -438,6 +441,8 @@ public class BitmapFactory {
             return null;
         }
 
+        boolean isNinePatch = is instanceof NinePatchInputStream;
+
         // we need mark/reset to work properly
 
         if (!is.markSupported()) {
@@ -466,7 +471,29 @@ public class BitmapFactory {
                 if (opts != null) {
                     density = Density.getEnum(opts.inDensity);
                 }
-                bm = Bitmap_Delegate.createBitmap(is, true, density);
+
+                if (isNinePatch) {
+                    // load the bitmap as a nine patch
+                    NinePatch ninePatch = NinePatch.load(is, true /*is9Patch*/, false /*convert*/);
+
+                    // get the bitmap and chunk objects.
+                    bm = Bitmap_Delegate.createBitmap(ninePatch.getImage(), true /*isMutable*/,
+                            density);
+                    NinePatchChunk chunk = ninePatch.getChunk();
+
+                    // put the chunk in the bitmap
+                    bm.setNinePatchChunk(NinePatch_Delegate.serialize(chunk));
+
+                    // read the padding
+                    int[] padding = chunk.getPadding();
+                    outPadding.left = padding[0];
+                    outPadding.top = padding[1];
+                    outPadding.right = padding[2];
+                    outPadding.bottom = padding[3];
+                } else {
+                    // load the bitmap directly.
+                    bm = Bitmap_Delegate.createBitmap(is, true, density);
+                }
             } catch (IOException e) {
                 return null;
             }

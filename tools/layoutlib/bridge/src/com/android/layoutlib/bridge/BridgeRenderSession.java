@@ -18,7 +18,7 @@ package com.android.layoutlib.bridge;
 
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
-import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.ViewInfo;
@@ -128,7 +128,7 @@ public class BridgeRenderSession extends RenderSession {
             boolean isFrameworkAnimation, IAnimationListener listener) {
         try {
             Bridge.prepareThread();
-            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(RenderParams.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
                 mLastResult = mSession.animate(targetObject, animationName, isFrameworkAnimation,
                         listener);
@@ -150,7 +150,7 @@ public class BridgeRenderSession extends RenderSession {
 
         try {
             Bridge.prepareThread();
-            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(RenderParams.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
                 mLastResult = mSession.insertChild((ViewGroup) parentView, childXml, index,
                         listener);
@@ -176,7 +176,7 @@ public class BridgeRenderSession extends RenderSession {
 
         try {
             Bridge.prepareThread();
-            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(RenderParams.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
                 mLastResult = mSession.moveChild((ViewGroup) parentView, (View) childView, index,
                         layoutParams, listener);
@@ -197,7 +197,7 @@ public class BridgeRenderSession extends RenderSession {
 
         try {
             Bridge.prepareThread();
-            mLastResult = mSession.acquire(Params.DEFAULT_TIMEOUT);
+            mLastResult = mSession.acquire(RenderParams.DEFAULT_TIMEOUT);
             if (mLastResult.isSuccess()) {
                 mLastResult = mSession.removeChild((View) childView, listener);
             }
