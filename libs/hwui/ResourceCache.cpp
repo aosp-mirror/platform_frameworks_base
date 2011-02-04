@@ -65,6 +65,10 @@ void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
     incrementRefcount((void*)bitmapResource, kBitmap);
 }
 
+void ResourceCache::incrementRefcount(SkPath* pathResource) {
+    incrementRefcount((void*)pathResource, kPath);
+}
+
 void ResourceCache::incrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeRef();
     incrementRefcount((void*) shaderResource, kShader);
@@ -94,6 +98,10 @@ void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
     decrementRefcount((void*) bitmapResource);
 }
 
+void ResourceCache::decrementRefcount(SkPath* pathResource) {
+    decrementRefcount((void*) pathResource);
+}
+
 void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
     shaderResource->getSkShader()->safeUnref();
     decrementRefcount((void*) shaderResource);
@@ -119,6 +127,24 @@ void ResourceCache::recycle(SkBitmap* resource) {
     ref->recycled = true;
     if (ref->refCount == 0) {
         deleteResourceReference(resource, ref);
+    }
+}
+
+void ResourceCache::destructor(SkPath* resource) {
+    Mutex::Autolock _l(mLock);
+    ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
+    if (ref == NULL) {
+        // If we're not tracking this resource, just delete it
+        if (Caches::hasInstance()) {
+            Caches::getInstance().pathCache.removeDeferred(resource);
+        }
+        delete resource;
+        return;
+    }
+    ref->destroyed = true;
+    if (ref->refCount == 0) {
+        deleteResourceReference(resource, ref);
+        return;
     }
 }
 
@@ -190,6 +216,15 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
                     Caches::getInstance().textureCache.removeDeferred(bitmap);
                 }
                 delete bitmap;
+            }
+            break;
+            case kPath:
+            {
+                SkPath* path = (SkPath*)resource;
+                if (Caches::hasInstance()) {
+                    Caches::getInstance().pathCache.removeDeferred(path);
+                }
+                delete path;
             }
             break;
             case kShader:

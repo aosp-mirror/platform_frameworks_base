@@ -32,6 +32,7 @@ enum ResourceType {
     kBitmap,
     kShader,
     kColorFilter,
+    kPath,
 };
 
 class ResourceReference {
@@ -53,15 +54,18 @@ class ResourceCache {
 public:
     ResourceCache();
     ~ResourceCache();
+    void incrementRefcount(SkPath* resource);
     void incrementRefcount(SkBitmap* resource);
     void incrementRefcount(SkiaShader* resource);
     void incrementRefcount(SkiaColorFilter* resource);
     void incrementRefcount(const void* resource, ResourceType resourceType);
     void decrementRefcount(void* resource);
     void decrementRefcount(SkBitmap* resource);
+    void decrementRefcount(SkPath* resource);
     void decrementRefcount(SkiaShader* resource);
     void decrementRefcount(SkiaColorFilter* resource);
     void recycle(SkBitmap* resource);
+    void destructor(SkPath* resource);
     void destructor(SkBitmap* resource);
     void destructor(SkiaShader* resource);
     void destructor(SkiaColorFilter* resource);

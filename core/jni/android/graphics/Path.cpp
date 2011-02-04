@@ -36,7 +36,8 @@ public:
     static void finalizer(JNIEnv* env, jobject clazz, SkPath* obj) {
 #ifdef USE_OPENGL_RENDERER
         if (android::uirenderer::Caches::hasInstance()) {
-            android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
+            android::uirenderer::Caches::getInstance().resourceCache.destructor(obj);
+            return;
         }
 #endif
         delete obj;
