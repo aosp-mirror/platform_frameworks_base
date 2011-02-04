@@ -21,6 +21,7 @@
 #include <hardware_legacy/AudioPolicyInterface.h>
 #include <media/ToneGenerator.h>
 #include <utils/Vector.h>
+#include <binder/BinderService.h>
 
 namespace android {
 
@@ -28,12 +29,17 @@ class String8;
 
 // ----------------------------------------------------------------------------
 
-class AudioPolicyService: public BnAudioPolicyService, public AudioPolicyClientInterface,
+class AudioPolicyService :
+    public BinderService<AudioPolicyService>,
+    public BnAudioPolicyService,
+    public AudioPolicyClientInterface,
     public IBinder::DeathRecipient
 {
+    friend class BinderService<AudioPolicyService>;
 
 public:
-    static  void        instantiate();
+    // for BinderService
+    static const char *getServiceName() { return "media.audio_policy"; }
 
     virtual status_t    dump(int fd, const Vector<String16>& args);
 
@@ -241,11 +247,3 @@ private:
 }; // namespace android
 
 #endif // ANDROID_AUDIOPOLICYSERVICE_H
-
-
-
-
-
-
-
-
