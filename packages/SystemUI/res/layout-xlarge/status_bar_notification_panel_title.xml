@@ -116,12 +116,12 @@
         android:id="@+id/notification_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/icons"
         android:layout_alignParentRight="true"
-        android:layout_alignBaseline="@id/battery"
         android:paddingRight="16dp"
-        android:visibility="invisible"
         android:src="@drawable/ic_notification_open"
         android:baseline="21dp"
+        android:visibility="invisible"
         />
 
     <View
