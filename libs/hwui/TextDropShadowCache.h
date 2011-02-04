@@ -32,7 +32,7 @@ namespace android {
 namespace uirenderer {
 
 struct ShadowText {
-    ShadowText(): radius(0), len(0), hash(0), textSize(0.0f), typeface(NULL) {
+    ShadowText(): radius(0), len(0), textSize(0.0f), typeface(NULL) {
     }
 
     ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText):
@@ -42,20 +42,11 @@ struct ShadowText {
 
         textSize = paint->getTextSize();
         typeface = paint->getTypeface();
-
-        hash = 0;
-        uint32_t multiplier = 1;
-        const char* text = str.string();
-        for (uint32_t i = 0; i < len; i++) {
-            hash += text[i] * multiplier;
-            uint32_t shifted = multiplier << 5;
-            multiplier = shifted - multiplier;
-        }
     }
 
     ShadowText(const ShadowText& shadow):
-            radius(shadow.radius), len(shadow.len), hash(shadow.hash),
-            textSize(shadow.textSize), typeface(shadow.typeface), str(shadow.str) {
+            radius(shadow.radius), len(shadow.len), textSize(shadow.textSize),
+            typeface(shadow.typeface), str(shadow.str) {
     }
 
     ~ShadowText() {
@@ -63,20 +54,17 @@ struct ShadowText {
 
     uint32_t radius;
     uint32_t len;
-    uint32_t hash;
     float textSize;
     SkTypeface* typeface;
     String8 str;
 
     bool operator<(const ShadowText& rhs) const {
-        LTE_INT(hash) {
-            LTE_INT(len) {
-                LTE_INT(radius) {
-                    LTE_FLOAT(textSize) {
-                        if (typeface < rhs.typeface) return true;
-                        else if (typeface == rhs.typeface) {
-                            return str.compare(rhs.str) < 0;
-                        }
+        LTE_INT(len) {
+            LTE_INT(radius) {
+                LTE_FLOAT(textSize) {
+                    if (typeface < rhs.typeface) return true;
+                    else if (typeface == rhs.typeface) {
+                        return str.compare(rhs.str) < 0;
                     }
                 }
             }
