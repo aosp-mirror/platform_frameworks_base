@@ -114,20 +114,34 @@ public class ImageWallpaper extends WallpaperService {
             mReceiver = new WallpaperObserver();
             registerReceiver(mReceiver, filter);
 
+            updateSurfaceSize(surfaceHolder);
+
             synchronized (mLock) {
                 updateWallpaperLocked();
             }
-            surfaceHolder.setFixedSize(getDesiredMinimumWidth(), getDesiredMinimumHeight());
-            // Used a fixed size surface, because we are special.  We can do
-            // this because we know the current design of window animations doesn't
-            // cause this to break.
-            //surfaceHolder.setSizeFromLayout();
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
             unregisterReceiver(mReceiver);
+        }
+
+        @Override
+        public void onDesiredSizeChanged(int desiredWidth, int desiredHeight) {
+            onDesiredSizeChanged(desiredWidth, desiredHeight);
+            SurfaceHolder surfaceHolder = getSurfaceHolder();
+            if (surfaceHolder != null) {
+                updateSurfaceSize(surfaceHolder);
+            }
+        }
+
+        void updateSurfaceSize(SurfaceHolder surfaceHolder) {
+            surfaceHolder.setFixedSize(getDesiredMinimumWidth(), getDesiredMinimumHeight());
+            // Used a fixed size surface, because we are special.  We can do
+            // this because we know the current design of window animations doesn't
+            // cause this to break.
+            //surfaceHolder.setSizeFromLayout();
         }
 
         @Override
