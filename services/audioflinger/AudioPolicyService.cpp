@@ -479,13 +479,6 @@ status_t AudioPolicyService::onTransact(
 
 
 // ----------------------------------------------------------------------------
-void AudioPolicyService::instantiate() {
-    defaultServiceManager()->addService(
-            String16("media.audio_policy"), new AudioPolicyService());
-}
-
-
-// ----------------------------------------------------------------------------
 // AudioPolicyClientInterface implementation
 // ----------------------------------------------------------------------------
 
