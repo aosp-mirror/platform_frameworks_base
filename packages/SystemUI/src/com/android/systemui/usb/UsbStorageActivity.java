@@ -71,6 +71,7 @@ public class UsbStorageActivity extends Activity
     private static final int DLG_CONFIRM_KILL_STORAGE_USERS = 1;
     private static final int DLG_ERROR_SHARING = 2;
     static final boolean localLOGV = false;
+    private boolean mDestroyed;
 
     // UI thread
     private Handler mUIHandler;
@@ -134,6 +135,12 @@ public class UsbStorageActivity extends Activity
         mUnmountButton = (Button) findViewById(com.android.internal.R.id.unmount_button);
         mUnmountButton.setOnClickListener(this);
         mProgressBar = (ProgressBar) findViewById(com.android.internal.R.id.progress);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mDestroyed = true;
     }
 
     private void switchDisplay(final boolean usbStorageInUse) {
@@ -232,9 +239,16 @@ public class UsbStorageActivity extends Activity
         return null;
     }
 
-    private void showDialogInner(int id) {
-        removeDialog(id);
-        showDialog(id);
+    private void scheduleShowDialog(final int id) {
+        mUIHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!mDestroyed) {
+                    removeDialog(id);
+                    showDialog(id);
+                }
+            }
+        });
     }
 
     private void switchUsbMassStorage(final boolean on) {
@@ -276,7 +290,7 @@ public class UsbStorageActivity extends Activity
         IMountService ims = getMountService();
         if (ims == null) {
             // Display error dialog
-            showDialogInner(DLG_ERROR_SHARING);
+            scheduleShowDialog(DLG_ERROR_SHARING);
         }
         String extStoragePath = Environment.getExternalStorageDirectory().toString();
         boolean showDialog = false;
@@ -294,11 +308,11 @@ public class UsbStorageActivity extends Activity
             }
         } catch (RemoteException e) {
             // Display error dialog
-            showDialogInner(DLG_ERROR_SHARING);
+            scheduleShowDialog(DLG_ERROR_SHARING);
         }
         if (showDialog) {
             // Display dialog to user
-            showDialogInner(DLG_CONFIRM_KILL_STORAGE_USERS);
+            scheduleShowDialog(DLG_CONFIRM_KILL_STORAGE_USERS);
         } else {
             if (localLOGV) Log.i(TAG, "Enabling UMS");
             switchUsbMassStorage(true);
