@@ -401,22 +401,26 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                 try {
                     cid = response.cid;
                     linkProperties.setInterfaceName(response.ifname);
-                    for (String addr : response.addresses) {
-                        LinkAddress la;
-                        if (!InetAddress.isNumeric(addr)) {
-                            EventLogTags.writeBadIpAddress(addr);
-                            throw new UnknownHostException("Non-numeric ip addr=" + addr);
+                    if (response.addresses != null && response.addresses.length > 0) {
+                        for (String addr : response.addresses) {
+                            LinkAddress la;
+                            if (!InetAddress.isNumeric(addr)) {
+                                EventLogTags.writeBadIpAddress(addr);
+                                throw new UnknownHostException("Non-numeric ip addr=" + addr);
+                            }
+                            InetAddress ia = InetAddress.getByName(addr);
+                            if (ia instanceof Inet4Address) {
+                                la = new LinkAddress(ia, 32);
+                            } else {
+                                la = new LinkAddress(ia, 128);
+                            }
+                            linkProperties.addLinkAddress(la);
                         }
-                        InetAddress ia = InetAddress.getByName(addr);
-                        if (ia instanceof Inet4Address) {
-                            la = new LinkAddress(ia, 32);
-                        } else {
-                            la = new LinkAddress(ia, 128);
-                        }
-                        linkProperties.addLinkAddress(la);
+                    } else {
+                        EventLogTags.writeBadIpAddress("no address for ifname=" + response.ifname);
+                        throw new UnknownHostException("no address for ifname=" + response.ifname);
                     }
-
-                    if (response.dnses.length != 0) {
+                    if (response.dnses != null && response.dnses.length > 0) {
                         for (String addr : response.dnses) {
                             if (!InetAddress.isNumeric(addr)) {
                                 EventLogTags.writePdpBadDnsAddress("dns=" + addr); 
