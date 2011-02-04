@@ -44,6 +44,7 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.text.TextUtils;
 import android.util.Config;
 import android.util.Log;
 
@@ -2945,7 +2946,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dataCall.type = p.readString();
             p.readString(); // Ignore apn
             String addresses = p.readString();
-            if (addresses != null) {
+            if (TextUtils.isEmpty(addresses)) {
                 dataCall.addresses = addresses.split(" ");
             }
         } else {
@@ -2954,12 +2955,15 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dataCall.active = p.readInt();
             dataCall.type = p.readString();
             dataCall.ifname = p.readString();
+            if (TextUtils.isEmpty(dataCall.ifname)) {
+              throw new RuntimeException("getDataCallState, no ifname");
+            }
             String addresses = p.readString();
-            if (addresses != null) {
+            if (!TextUtils.isEmpty(addresses)) {
                 dataCall.addresses = addresses.split(" ");
             }
             String dnses = p.readString();
-            if (addresses != null) {
+            if (!TextUtils.isEmpty(dnses)) {
                 dataCall.dnses = dnses.split(" ");
             }
         }
@@ -2991,23 +2995,25 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         DataCallState dataCall;
 
         if (ver < 5) {
-            if (num != 3) {
-                throw new RuntimeException(
-                        "RIL_REQUEST_SETUP_DATA_CALL response expecting 3 strings got " + num);
-            }
             dataCall = new DataCallState();
+            dataCall.version = ver;
             dataCall.cid = Integer.parseInt(p.readString());
             dataCall.ifname = p.readString();
-            if (dataCall.ifname == null) {
+            if (TextUtils.isEmpty(dataCall.ifname)) {
                 throw new RuntimeException(
-                        "RIL_REQUEST_SETUP_DATA_CALL response ifname");
+                        "RIL_REQUEST_SETUP_DATA_CALL response, no ifname");
             }
             String addresses = p.readString();
-            if (addresses == null) {
-                throw new RuntimeException(
-                "RIL_REQUEST_SETUP_DATA_CALL response no addresses");
+            if (!TextUtils.isEmpty(addresses)) {
+              dataCall.addresses = addresses.split(" ");
             }
-            dataCall.addresses = addresses.split(" ");
+            if (num >= 4) {
+                String dnses = p.readString();
+                Log.d(LOG_TAG, "responseSetupDataCall got dnses=" + dnses);
+                if (!TextUtils.isEmpty(dnses)) {
+                    dataCall.dnses = dnses.split(" ");
+                }
+            }
         } else {
             if (num != 1) {
                 throw new RuntimeException(
