@@ -102,12 +102,14 @@ public:
 
     static const char* OP_NAMES[];
 
-    void initFromDisplayListRenderer(const DisplayListRenderer& recorder);
+    void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
     bool replay(OpenGLRenderer& renderer, uint32_t level = 0);
 
 private:
     void init();
+
+    void clearResources();
 
     class TextContainer {
     public:
