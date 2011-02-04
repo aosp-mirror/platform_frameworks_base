@@ -18,6 +18,7 @@ package com.android.layoutlib.bridge.impl;
 
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -28,7 +29,9 @@ import com.android.resources.Density;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.NinePatch_Delegate;
@@ -108,19 +111,63 @@ public final class ResourceHelper {
         throw new NumberFormatException();
     }
 
+    public static ColorStateList getColorStateList(ResourceValue resValue, BridgeContext context) {
+        String value = resValue.getValue();
+        if (value != null) {
+            // first check if the value is a file (xml most likely)
+            File f = new File(value);
+            if (f.isFile()) {
+                try {
+                    // let the framework inflate the ColorStateList from the XML file, by
+                    // providing an XmlPullParser
+                    KXmlParser parser = new KXmlParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                    parser.setInput(new FileReader(f));
+
+                    return ColorStateList.createFromXml(context.getResources(),
+                            new BridgeXmlBlockParser(parser, context, resValue.isFramework()));
+                } catch (XmlPullParserException e) {
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                            "Failed to configure parser for " + value, e, null /*data*/);
+                    // we'll return null below.
+                } catch (Exception e) {
+                    // this is an error and not warning since the file existence is
+                    // checked before attempting to parse it.
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
+                            "Failed to parse file " + value, e, null /*data*/);
+
+                    return null;
+                }
+            } else {
+                // try to load the color state list from an int
+                try {
+                    int color = ResourceHelper.getColor(value);
+                    return ColorStateList.valueOf(color);
+                } catch (NumberFormatException e) {
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
+                            "Failed to convert " + value + " into a ColorStateList", e,
+                            null /*data*/);
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Returns a drawable from the given value.
      * @param value The value that contains a path to a 9 patch, a bitmap or a xml based drawable,
      * or an hexadecimal color
-     * @param context
-     * @param isFramework indicates whether the resource is a framework resources.
-     * Framework resources are cached, and loaded only once.
+     * @param context the current context
      */
-    public static Drawable getDrawable(ResourceValue value, BridgeContext context,
-            boolean isFramework) {
+    public static Drawable getDrawable(ResourceValue value, BridgeContext context) {
         Drawable d = null;
 
         String stringValue = value.getValue();
+        if (RenderResources.REFERENCE_NULL.equals(stringValue)) {
+            return null;
+        }
 
         String lowerCaseValue = stringValue.toLowerCase();
 
@@ -129,9 +176,9 @@ public final class ResourceHelper {
             if (file.isFile()) {
                 // see if we still have both the chunk and the bitmap in the caches
                 NinePatchChunk chunk = Bridge.getCached9Patch(stringValue,
-                        isFramework ? null : context.getProjectKey());
+                        value.isFramework() ? null : context.getProjectKey());
                 Bitmap bitmap = Bridge.getCachedBitmap(stringValue,
-                        isFramework ? null : context.getProjectKey());
+                        value.isFramework() ? null : context.getProjectKey());
 
                 // if either chunk or bitmap is null, then we reload the 9-patch file.
                 if (chunk == null || bitmap == null) {
@@ -143,7 +190,7 @@ public final class ResourceHelper {
                                 chunk = ninePatch.getChunk();
 
                                 Bridge.setCached9Patch(stringValue, chunk,
-                                        isFramework ? null : context.getProjectKey());
+                                        value.isFramework() ? null : context.getProjectKey());
                             }
 
                             if (bitmap == null) {
@@ -158,7 +205,7 @@ public final class ResourceHelper {
                                         density);
 
                                 Bridge.setCachedBitmap(stringValue, bitmap,
-                                        isFramework ? null : context.getProjectKey());
+                                        value.isFramework() ? null : context.getProjectKey());
                             }
                         }
                     } catch (MalformedURLException e) {
@@ -192,7 +239,7 @@ public final class ResourceHelper {
                     parser.setInput(new FileReader(f));
 
                     d = Drawable.createFromXml(context.getResources(),
-                            new BridgeXmlBlockParser(parser, context, isFramework));
+                            new BridgeXmlBlockParser(parser, context, value.isFramework()));
                     return d;
                 } catch (Exception e) {
                     // this is an error and not warning since the file existence is checked before
@@ -212,7 +259,7 @@ public final class ResourceHelper {
             if (bmpFile.isFile()) {
                 try {
                     Bitmap bitmap = Bridge.getCachedBitmap(stringValue,
-                            isFramework ? null : context.getProjectKey());
+                            value.isFramework() ? null : context.getProjectKey());
 
                     if (bitmap == null) {
                         Density density = Density.MEDIUM;
@@ -223,7 +270,7 @@ public final class ResourceHelper {
                         bitmap = Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/,
                                 density);
                         Bridge.setCachedBitmap(stringValue, bitmap,
-                                isFramework ? null : context.getProjectKey());
+                                value.isFramework() ? null : context.getProjectKey());
                     }
 
                     return new BitmapDrawable(context.getResources(), bitmap);
