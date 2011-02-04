@@ -975,7 +975,6 @@ void AudioMixer::process__genericResampling(state_t* state)
 {
     int32_t* const outTemp = state->outputTemp;
     const size_t size = sizeof(int32_t) * MAX_NUM_CHANNELS * state->frameCount;
-    memset(outTemp, 0, size);
 
     size_t numFrames = state->frameCount;
 
@@ -997,6 +996,7 @@ void AudioMixer::process__genericResampling(state_t* state)
         }
         e0 &= ~(e1);
         int32_t *out = t1.mainBuffer;
+        memset(outTemp, 0, size);
         while (e1) {
             const int i = 31 - __builtin_clz(e1);
             e1 &= ~(1<<i);
