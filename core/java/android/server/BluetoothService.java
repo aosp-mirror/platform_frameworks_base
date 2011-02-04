@@ -97,8 +97,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private boolean mRestart = false;  // need to call enable() after disable()
     private boolean mIsDiscovering;
     private boolean mTetheringOn;
-    private int[] mAdapterSdpUuids;
     private int[] mAdapterSdpHandles;
+    private ParcelUuid[] mAdapterUuids;
 
     private BluetoothAdapter mAdapter;  // constant after init()
     private final BondState mBondState = new BondState();  // local cache of bondings
@@ -439,6 +439,8 @@ public class BluetoothService extends IBluetooth.Stub {
         mProfilesConnecting = 0;
         mProfilesDisconnecting = 0;
         mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
+        mAdapterUuids = null;
+        mAdapterSdpHandles = null;
 
         if (saveSetting) {
             persistBluetoothOnSetting(false);
@@ -580,7 +582,6 @@ public class BluetoothService extends IBluetooth.Stub {
                 }
             }
 
-
             if (res) {
                 if (!setupNativeDataNative()) {
                     return;
@@ -588,33 +589,8 @@ public class BluetoothService extends IBluetooth.Stub {
                 if (mSaveSetting) {
                     persistBluetoothOnSetting(true);
                 }
-                //Register SDP records.
-                if (mContext.getResources().
-                        getBoolean(com.android.internal.R.bool.config_voice_capable)) {
-                     int[] uuids = {
-                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                            BluetoothUuid.Handsfree_AG),
-                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                            BluetoothUuid.HSP_AG),
-                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                             BluetoothUuid.PBAP_PSE),
-                        BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                             BluetoothUuid.ObexObjectPush),
-                        };
-                     mAdapterSdpUuids = uuids;
 
-                } else {
-                     int[] uuids = {
-                         BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                             BluetoothUuid.HSP_AG),
-                         BluetoothUuid.getServiceIdentifierFromParcelUuid(
-                             BluetoothUuid.ObexObjectPush),
-                         };
-                      mAdapterSdpUuids = uuids;
-                }
-
-                mAdapterSdpHandles = addReservedServiceRecordsNative(mAdapterSdpUuids);
-                setBluetoothTetheringNative(true, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
+                updateSdpRecords();
 
                 mIsDiscovering = false;
                 mBondState.readAutoPairingData();
@@ -629,24 +605,67 @@ public class BluetoothService extends IBluetooth.Stub {
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
+            } else {
+                setBluetoothState(BluetoothAdapter.STATE_OFF);
             }
-
             mEnableThread = null;
+        }
+    }
 
-            setBluetoothState(res ?
-                              BluetoothAdapter.STATE_ON :
-                              BluetoothAdapter.STATE_OFF);
+    private synchronized void addReservedSdpRecords(final ArrayList<ParcelUuid> uuids) {
+        //Register SDP records.
+        int[] svcIdentifiers = new int[uuids.size()];
+        for (int i = 0; i < uuids.size(); i++) {
+            svcIdentifiers[i] = BluetoothUuid.getServiceIdentifierFromParcelUuid(uuids.get(i));
+        }
+        mAdapterSdpHandles = addReservedServiceRecordsNative(svcIdentifiers);
+    }
 
-            if (res) {
-                // Update mode
+    private synchronized void updateSdpRecords() {
+        ArrayList<ParcelUuid> uuids = new ArrayList<ParcelUuid>();
+
+        // Add the default records
+        uuids.add(BluetoothUuid.HSP_AG);
+        uuids.add(BluetoothUuid.ObexObjectPush);
+
+        if (mContext.getResources().
+                getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+            uuids.add(BluetoothUuid.Handsfree_AG);
+            uuids.add(BluetoothUuid.PBAP_PSE);
+        }
+
+        // Add SDP records for profiles maintained by Android userspace
+        addReservedSdpRecords(uuids);
+
+        // Enable profiles maintained by Bluez userspace.
+        setBluetoothTetheringNative(true, BluetoothPan.NAP_ROLE, BluetoothPan.NAP_BRIDGE);
+
+        // Add SDP records for profiles maintained by Bluez userspace
+        uuids.add(BluetoothUuid.AudioSource);
+        uuids.add(BluetoothUuid.AvrcpTarget);
+        uuids.add(BluetoothUuid.NAP);
+
+        // Cannot cast uuids.toArray directly since ParcelUuid is parcelable
+        mAdapterUuids = new ParcelUuid[uuids.size()];
+        for (int i = 0; i < uuids.size(); i++) {
+            mAdapterUuids[i] = uuids.get(i);
+        }
+    }
+
+    synchronized void updateBluetoothState(String uuids) {
+        if (mBluetoothState == BluetoothAdapter.STATE_TURNING_ON) {
+            ParcelUuid[] adapterUuids = convertStringToParcelUuid(uuids);
+
+            if (mAdapterUuids != null &&
+                    BluetoothUuid.containsAllUuids(adapterUuids, mAdapterUuids)) {
+                setBluetoothState(BluetoothAdapter.STATE_ON);
                 String[] propVal = {"Pairable", getProperty("Pairable")};
                 mEventLoop.onPropertyChanged(propVal);
-            }
 
-            if (mIsAirplaneSensitive && isAirplaneModeOn() && !mIsAirplaneToggleable) {
-                disable(false);
+                if (mIsAirplaneSensitive && isAirplaneModeOn() && !mIsAirplaneToggleable) {
+                    disable(false);
+                }
             }
-
         }
     }
 
@@ -1202,7 +1221,10 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         String value =  getProperty("UUIDs");
         if (value == null) return null;
+        return convertStringToParcelUuid(value);
+    }
 
+    private synchronized ParcelUuid[] convertStringToParcelUuid(String value) {
         String[] uuidStrings = null;
         // The UUIDs are stored as a "," separated string.
         uuidStrings = value.split(",");
@@ -1212,7 +1234,6 @@ public class BluetoothService extends IBluetooth.Stub {
             uuids[i] = ParcelUuid.fromString(uuidStrings[i]);
         }
         return uuids;
-
     }
 
 
