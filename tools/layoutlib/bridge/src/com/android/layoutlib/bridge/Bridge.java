@@ -21,9 +21,9 @@ import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
 import com.android.ide.common.rendering.api.Capability;
 import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
+import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
@@ -295,13 +295,13 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * Starts a layout session by inflating and rendering it. The method returns a
      * {@link RenderSession} on which further actions can be taken.
      *
-     * @param params the {@link RenderParams} object with all the information necessary to create
+     * @param params the {@link SessionParams} object with all the information necessary to create
      *           the scene.
      * @return a new {@link RenderSession} object that contains the result of the layout.
      * @since 5
      */
     @Override
-    public RenderSession createSession(RenderParams params) {
+    public RenderSession createSession(SessionParams params) {
         try {
             Result lastResult = SUCCESS.createResult();
             RenderSessionImpl scene = new RenderSessionImpl(params);
