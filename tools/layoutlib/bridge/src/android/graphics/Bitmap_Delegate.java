@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.resources.Density;
 
+import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Parcel;
 
