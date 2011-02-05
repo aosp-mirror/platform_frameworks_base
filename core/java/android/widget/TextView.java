@@ -8246,9 +8246,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void onDetached() {
-            removeCallbacks(mHider);
-        }
+        public void onDetached() {}
     }
 
     private void hideInsertionPointCursorController() {
