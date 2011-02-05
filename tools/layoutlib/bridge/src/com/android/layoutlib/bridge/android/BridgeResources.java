@@ -65,8 +65,25 @@ public final class BridgeResources extends Resources {
      * to know whether this is 9-patch or not, such as BitmapFactory.
      */
     public class NinePatchInputStream extends FileInputStream {
+        private boolean mFakeMarkSupport = true;
         public NinePatchInputStream(File file) throws FileNotFoundException {
             super(file);
+        }
+
+        @Override
+        public boolean markSupported() {
+            if (mFakeMarkSupport) {
+                // this is needed so that BitmapFactory doesn't wrap this in a BufferedInputStream.
+                return true;
+            }
+
+            return super.markSupported();
+        }
+
+        public void disableFakeMarkSupport() {
+            // disable fake mark support so that in case codec actually try to use them
+            // we don't lie to them.
+            mFakeMarkSupport = false;
         }
     }
 

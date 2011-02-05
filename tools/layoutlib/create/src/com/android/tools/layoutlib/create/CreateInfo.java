@@ -112,6 +112,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.animation.PropertyValuesHolder",
         "android.graphics.AvoidXfermode",
         "android.graphics.Bitmap",
+        "android.graphics.BitmapFactory",
         "android.graphics.BitmapShader",
         "android.graphics.BlurMaskFilter",
         "android.graphics.Canvas",
@@ -164,7 +165,6 @@ public final class CreateInfo implements ICreateInfo {
      */
     private final static String[] RENAMED_CLASSES =
         new String[] {
-            "android.graphics.BitmapFactory",       "android.graphics._Original_BitmapFactory",
             "android.os.ServiceManager",            "android.os._Original_ServiceManager",
             "android.view.SurfaceView",             "android.view._Original_SurfaceView",
             "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
