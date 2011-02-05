@@ -176,6 +176,10 @@ public final class BridgeContext extends Activity {
         return mProjectKey;
     }
 
+    public DisplayMetrics getMetrics() {
+        return mMetrics;
+    }
+
     public IProjectCallback getProjectCallback() {
         return mProjectCallback;
     }
