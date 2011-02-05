@@ -20,12 +20,14 @@ import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
 import com.android.ide.common.rendering.api.Capability;
+import com.android.ide.common.rendering.api.DrawableParams;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
+import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.ResourceType;
@@ -328,6 +330,33 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             }
             return new BridgeRenderSession(null,
                     ERROR_UNKNOWN.createResult(t2.getMessage(), t));
+        }
+    }
+
+    @Override
+    public Result renderDrawable(DrawableParams params) {
+        try {
+            Result lastResult = SUCCESS.createResult();
+            RenderDrawable action = new RenderDrawable(params);
+            try {
+                prepareThread();
+                lastResult = action.init(params.getTimeout());
+                if (lastResult.isSuccess()) {
+                    lastResult = action.render();
+                }
+            } finally {
+                action.release();
+                cleanupThread();
+            }
+
+            return lastResult;
+        } catch (Throwable t) {
+            // get the real cause of the exception.
+            Throwable t2 = t;
+            while (t2.getCause() != null) {
+                t2 = t.getCause();
+            }
+            return ERROR_UNKNOWN.createResult(t2.getMessage(), t);
         }
     }
 

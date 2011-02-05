@@ -35,16 +35,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Class implementing the render session.
+ * Base class for rendering action.
  *
- * A session is a stateful representation of a layout file. It is initialized with data coming
- * through the {@link Bridge} API to inflate the layout. Further actions and rendering can then
- * be done on the layout.
+ * It provides life-cycle methods to init and stop the rendering.
+ * The most important methods are:
+ * {@link #init(long)} and {@link #acquire(long)} to start a rendering and {@link #release()}
+ * after the rendering.
+ *
  *
  * @param <T> the {@link RenderParams} implementation
  *
  */
-public class RenderAction<T extends RenderParams> extends FrameworkResourceIdProvider {
+public abstract class RenderAction<T extends RenderParams> extends FrameworkResourceIdProvider {
 
     /**
      * The current context being rendered. This is set through {@link #acquire(long)} and
@@ -65,7 +67,7 @@ public class RenderAction<T extends RenderParams> extends FrameworkResourceIdPro
      * @param params the RenderParams. This must be a copy that the action can keep
      *
      */
-    public RenderAction(T params) {
+    protected RenderAction(T params) {
         mParams = params;
     }
 
