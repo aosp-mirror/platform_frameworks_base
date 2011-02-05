@@ -34,10 +34,11 @@ import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
+import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.ViewInfo;
-import com.android.ide.common.rendering.api.RenderParams.RenderingMode;
 import com.android.ide.common.rendering.api.RenderResources.FrameworkResourceIdProvider;
 import com.android.ide.common.rendering.api.Result.Status;
+import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -109,7 +110,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      */
     private static BridgeContext sCurrentContext = null;
 
-    private final RenderParams mParams;
+    private final SessionParams mParams;
 
     // scene state
     private RenderSession mScene;
@@ -151,9 +152,9 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      *
      * @see LayoutBridge#createScene(com.android.layoutlib.api.SceneParams)
      */
-    public RenderSessionImpl(RenderParams params) {
+    public RenderSessionImpl(SessionParams params) {
         // copy the params.
-        mParams = new RenderParams(params);
+        mParams = new SessionParams(params);
     }
 
     /**
