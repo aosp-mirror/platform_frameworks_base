@@ -288,6 +288,16 @@ public abstract class Transition {
         List<EffectSettings> effectSettings = new ArrayList<EffectSettings>();
         EffectSettings tmpEffectSettings;
 
+        overlays = m.getAllOverlays();
+        for (Overlay overlay : overlays) {
+            tmpEffectSettings = mNativeHelper.getOverlaySettings((OverlayFrame)overlay);
+            mNativeHelper.adjustEffectsStartTimeAndDuration(tmpEffectSettings,
+                    clipSettings.beginCutTime, clipSettings.endCutTime);
+            if (tmpEffectSettings.duration != 0) {
+                effectSettings.add(tmpEffectSettings);
+            }
+        }
+
         effects = m.getAllEffects();
         for (Effect effect : effects) {
             if (effect instanceof EffectColor) {
@@ -303,15 +313,7 @@ public abstract class Transition {
                 }
             }
         }
-        overlays = m.getAllOverlays();
-        for (Overlay overlay : overlays) {
-            tmpEffectSettings = mNativeHelper.getOverlaySettings((OverlayFrame)overlay);
-            mNativeHelper.adjustEffectsStartTimeAndDuration(tmpEffectSettings,
-                    clipSettings.beginCutTime, clipSettings.endCutTime);
-            if (tmpEffectSettings.duration != 0) {
-                effectSettings.add(tmpEffectSettings);
-            }
-        }
+
          return effectSettings;
     }
 
