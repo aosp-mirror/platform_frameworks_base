@@ -2984,27 +2984,28 @@ class MediaArtistNativeHelper {
                         }
                     }
                 }
-            }
-            if (!mErrorFlagSet) {
-                mPreviewEditSettings.videoFrameSize = findVideoResolution(mVideoEditor
-                        .getAspectRatio(), maxHeight);
-                populateBackgroundMusicProperties(mediaBGMList);
 
-                /** call to native populate settings */
-                try {
-                    nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
-                } catch (IllegalArgumentException ex) {
-                    Log.e(TAG, "Illegal argument exception in nativePopulateSettings");
-                    throw ex;
-                } catch (IllegalStateException ex) {
-                    Log.e(TAG, "Illegal state exception in nativePopulateSettings");
-                    throw ex;
-                } catch (RuntimeException ex) {
-                    Log.e(TAG, "Runtime exception in nativePopulateSettings");
-                    throw ex;
+                if (!mErrorFlagSet) {
+                    mPreviewEditSettings.videoFrameSize = findVideoResolution(mVideoEditor
+                            .getAspectRatio(), maxHeight);
+                    populateBackgroundMusicProperties(mediaBGMList);
+
+                    /** call to native populate settings */
+                    try {
+                        nativePopulateSettings(mPreviewEditSettings, mClipProperties, mAudioSettings);
+                    } catch (IllegalArgumentException ex) {
+                        Log.e(TAG, "Illegal argument exception in nativePopulateSettings");
+                        throw ex;
+                    } catch (IllegalStateException ex) {
+                        Log.e(TAG, "Illegal state exception in nativePopulateSettings");
+                        throw ex;
+                    } catch (RuntimeException ex) {
+                        Log.e(TAG, "Runtime exception in nativePopulateSettings");
+                        throw ex;
+                    }
+                    mInvalidatePreviewArray = false;
+                    mProcessingState  = PROCESSING_NONE;
                 }
-                mInvalidatePreviewArray = false;
-                mProcessingState  = PROCESSING_NONE;
             }
             if (mErrorFlagSet) {
                 mErrorFlagSet = false;
