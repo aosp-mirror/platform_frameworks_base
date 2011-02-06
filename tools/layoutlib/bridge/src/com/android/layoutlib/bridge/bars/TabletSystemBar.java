@@ -17,10 +17,13 @@
 package com.android.layoutlib.bridge.bars;
 
 import com.android.resources.Density;
+import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.widget.TextView;
 
 public class TabletSystemBar extends CustomBar {
@@ -36,6 +39,10 @@ public class TabletSystemBar extends CustomBar {
         loadIcon(2, "ic_sysbar_recent_default.png", density);
         // 3 is the spacer
         loadIcon(4, "stat_sys_wifi_signal_4_fully.png", density);
+        Drawable drawable = loadIcon(5, ResourceType.DRAWABLE, "stat_sys_battery_charge");
+        if (drawable instanceof LevelListDrawable) {
+            ((LevelListDrawable) drawable).setLevel(100);
+        }
     }
 
     @Override

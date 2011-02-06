@@ -40,6 +40,46 @@ import java.io.InputStream;
  */
 /*package*/ class BitmapFactory_Delegate {
 
+    // ------ Java delegates ------
+
+    /*package*/ static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
+        if (bm == null || opts == null) {
+            return bm;
+        }
+
+        final int density = opts.inDensity;
+        if (density == 0) {
+            return bm;
+        }
+
+        bm.setDensity(density);
+        final int targetDensity = opts.inTargetDensity;
+        if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
+            return bm;
+        }
+
+        byte[] np = bm.getNinePatchChunk();
+        final boolean isNinePatch = np != null && NinePatch.isNinePatchChunk(np);
+        // DELEGATE CHANGE: never scale 9-patch
+        if (opts.inScaled && isNinePatch == false) {
+            float scale = targetDensity / (float)density;
+            // TODO: This is very inefficient and should be done in native by Skia
+            final Bitmap oldBitmap = bm;
+            bm = Bitmap.createScaledBitmap(oldBitmap, (int) (bm.getWidth() * scale + 0.5f),
+                    (int) (bm.getHeight() * scale + 0.5f), true);
+            oldBitmap.recycle();
+
+            if (isNinePatch) {
+                np = nativeScaleNinePatch(np, scale, outPadding);
+                bm.setNinePatchChunk(np);
+            }
+            bm.setDensity(targetDensity);
+        }
+
+        return bm;
+    }
+
+
     // ------ Native Delegates ------
 
     /*package*/ static void nativeSetDefaultConfig(int nativeConfig) {
@@ -107,7 +147,8 @@ import java.io.InputStream;
     }
 
     /*package*/ static byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad) {
-        // don't scale for now.
+        // don't scale for now. This should not be called anyway since we re-implement
+        // BitmapFactory.finishDecode();
         return chunk;
     }
 

@@ -17,10 +17,14 @@
 package com.android.layoutlib.bridge.bars;
 
 import com.android.resources.Density;
+import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
+import android.view.Gravity;
 import android.widget.TextView;
 
 public class PhoneSystemBar extends CustomBar {
@@ -28,11 +32,17 @@ public class PhoneSystemBar extends CustomBar {
     public PhoneSystemBar(Context context, Density density) throws XmlPullParserException {
         super(context, density, "/bars/tablet_system_bar.xml");
 
+        setGravity(mGravity | Gravity.RIGHT);
+
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
         // 0 is the spacer
         loadIcon(1, "stat_sys_wifi_signal_4_fully.png", density);
+        Drawable drawable = loadIcon(2, ResourceType.DRAWABLE, "stat_sys_battery_charge");
+        if (drawable instanceof LevelListDrawable) {
+            ((LevelListDrawable) drawable).setLevel(100);
+        }
     }
 
     @Override

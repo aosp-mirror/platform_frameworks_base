@@ -15,6 +15,10 @@
 			android:layout_weight="1"/>
 	<ImageView
 			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"/>
+	<ImageView
+			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:layout_gravity="center"/>
+			android:layout_marginLeft="3dip"
+			android:layout_marginRight="15dip"/>
 </merge>
