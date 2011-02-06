@@ -3,8 +3,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.rs.image">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />    
+    <uses-sdk android:minSdkVersion="11" />
     <application android:label="Image Processing">
         <activity android:name="ImageProcessingActivity"
                   android:screenOrientation="portrait">
