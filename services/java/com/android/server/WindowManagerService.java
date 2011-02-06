@@ -285,6 +285,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final IBatteryStats mBatteryStats;
 
+    private static final boolean mInEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
+
     /**
      * All currently active sessions with clients.
      */
@@ -5186,7 +5188,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setRotationUnchecked(int rotation,
             boolean alwaysSendConfiguration, int animFlags) {
         if(DEBUG_ORIENTATION) Slog.v(TAG,
-                "alwaysSendConfiguration set to "+alwaysSendConfiguration);
+                   "setRotationUnchecked(rotation=" + rotation +
+                   " alwaysSendConfiguration=" + alwaysSendConfiguration +
+                   " animFlags=" + animFlags);
 
         long origId = Binder.clearCallingIdentity();
         boolean changed;
@@ -5257,7 +5261,9 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mInputManager.setDisplayOrientation(0, rotation);
             if (mDisplayEnabled) {
-                if (CUSTOM_SCREEN_ROTATION) {
+                // NOTE: We disable the rotation in the emulator because
+                //       it doesn't support hardware OpenGL emulation yet.
+                if (CUSTOM_SCREEN_ROTATION && !mInEmulator) {
                     Surface.freezeDisplay(0);
                     if (!inTransaction) {
                         if (SHOW_TRANSACTIONS) Slog.i(TAG,
