@@ -330,8 +330,8 @@ public class SearchView extends LinearLayout {
 
     /**
      * Sets a listener to inform when the search button is pressed. This is only
-     * relevant when the text field is not visible by default. Calling #setIconified(false)
-     * can also cause this listener to be informed.
+     * relevant when the text field is not visible by default. Calling {@link #setIconified
+     * setIconified(false)} can also cause this listener to be informed.
      *
      * @param listener the listener to inform when the search button is clicked or
      * the text field is programmatically de-iconified.
@@ -386,7 +386,7 @@ public class SearchView extends LinearLayout {
      * if the default state is iconified, then it collapses to that state when the close button
      * is pressed. Changes to this property will take effect immediately.
      *
-     * <p>The default value is false.</p>
+     * <p>The default value is true.</p>
      *
      * @param iconified whether the search field should be iconified by default
      */
