@@ -43,8 +43,10 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.util.TypedValue;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -171,59 +173,24 @@ public final class ResourceHelper {
 
         String lowerCaseValue = stringValue.toLowerCase();
 
+        Density density = Density.MEDIUM;
+        if (value instanceof DensityBasedResourceValue) {
+            density =
+                ((DensityBasedResourceValue)value).getResourceDensity();
+        }
+
+
         if (lowerCaseValue.endsWith(NinePatch.EXTENSION_9PATCH)) {
             File file = new File(stringValue);
             if (file.isFile()) {
-                // see if we still have both the chunk and the bitmap in the caches
-                NinePatchChunk chunk = Bridge.getCached9Patch(stringValue,
-                        value.isFramework() ? null : context.getProjectKey());
-                Bitmap bitmap = Bridge.getCachedBitmap(stringValue,
-                        value.isFramework() ? null : context.getProjectKey());
-
-                // if either chunk or bitmap is null, then we reload the 9-patch file.
-                if (chunk == null || bitmap == null) {
-                    try {
-                        NinePatch ninePatch = NinePatch.load(file.toURI().toURL(),
-                                false /* convert */);
-                        if (ninePatch != null) {
-                            if (chunk == null) {
-                                chunk = ninePatch.getChunk();
-
-                                Bridge.setCached9Patch(stringValue, chunk,
-                                        value.isFramework() ? null : context.getProjectKey());
-                            }
-
-                            if (bitmap == null) {
-                                Density density = Density.MEDIUM;
-                                if (value instanceof DensityBasedResourceValue) {
-                                    density =
-                                        ((DensityBasedResourceValue)value).getResourceDensity();
-                                }
-
-                                bitmap = Bitmap_Delegate.createBitmap(ninePatch.getImage(),
-                                        false /*isMutable*/,
-                                        density);
-
-                                Bridge.setCachedBitmap(stringValue, bitmap,
-                                        value.isFramework() ? null : context.getProjectKey());
-                            }
-                        }
-                    } catch (MalformedURLException e) {
-                        // URL is wrong, we'll return null below
-                    } catch (IOException e) {
-                        // failed to read the file, we'll return null below.
-                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                                "Failed lot load " + file.getAbsolutePath(), e, null /*data*/);
-                    }
-                }
-
-                if (chunk != null && bitmap != null) {
-                    int[] padding = chunk.getPadding();
-                    Rect paddingRect = new Rect(padding[0], padding[1], padding[2], padding[3]);
-
-                    return new NinePatchDrawable(context.getResources(), bitmap,
-                            NinePatch_Delegate.serialize(chunk),
-                            paddingRect, null);
+                try {
+                    return getNinePatchDrawable(
+                            new FileInputStream(file), density, value.isFramework(),
+                            stringValue, context);
+                } catch (IOException e) {
+                    // failed to read the file, we'll return null below.
+                    Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
+                            "Failed lot load " + file.getAbsolutePath(), e, null /*data*/);
                 }
             }
 
@@ -262,11 +229,6 @@ public final class ResourceHelper {
                             value.isFramework() ? null : context.getProjectKey());
 
                     if (bitmap == null) {
-                        Density density = Density.MEDIUM;
-                        if (value instanceof DensityBasedResourceValue) {
-                            density = ((DensityBasedResourceValue)value).getResourceDensity();
-                        }
-
                         bitmap = Bitmap_Delegate.createBitmap(bmpFile, false /*isMutable*/,
                                 density);
                         Bridge.setCachedBitmap(stringValue, bitmap,
@@ -296,6 +258,52 @@ public final class ResourceHelper {
         return null;
     }
 
+    private static Drawable getNinePatchDrawable(InputStream inputStream, Density density,
+            boolean isFramework, String cacheKey, BridgeContext context) throws IOException {
+        // see if we still have both the chunk and the bitmap in the caches
+        NinePatchChunk chunk = Bridge.getCached9Patch(cacheKey,
+                isFramework ? null : context.getProjectKey());
+        Bitmap bitmap = Bridge.getCachedBitmap(cacheKey,
+                isFramework ? null : context.getProjectKey());
+
+        // if either chunk or bitmap is null, then we reload the 9-patch file.
+        if (chunk == null || bitmap == null) {
+            try {
+                NinePatch ninePatch = NinePatch.load(inputStream, true /*is9Patch*/,
+                        false /* convert */);
+                if (ninePatch != null) {
+                    if (chunk == null) {
+                        chunk = ninePatch.getChunk();
+
+                        Bridge.setCached9Patch(cacheKey, chunk,
+                                isFramework ? null : context.getProjectKey());
+                    }
+
+                    if (bitmap == null) {
+                        bitmap = Bitmap_Delegate.createBitmap(ninePatch.getImage(),
+                                false /*isMutable*/,
+                                density);
+
+                        Bridge.setCachedBitmap(cacheKey, bitmap,
+                                isFramework ? null : context.getProjectKey());
+                    }
+                }
+            } catch (MalformedURLException e) {
+                // URL is wrong, we'll return null below
+            }
+        }
+
+        if (chunk != null && bitmap != null) {
+            int[] padding = chunk.getPadding();
+            Rect paddingRect = new Rect(padding[0], padding[1], padding[2], padding[3]);
+
+            return new NinePatchDrawable(context.getResources(), bitmap,
+                    NinePatch_Delegate.serialize(chunk),
+                    paddingRect, null);
+        }
+
+        return null;
+    }
 
     // ------- TypedValue stuff
     // This is taken from //device/libs/utils/ResourceTypes.cpp
@@ -458,3 +466,4 @@ public final class ResourceHelper {
         return false;
     }
 }
+
