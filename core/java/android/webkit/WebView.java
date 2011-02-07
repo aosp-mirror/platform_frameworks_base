@@ -557,6 +557,9 @@ public class WebView extends AbsoluteLayout
     // sending the same dimensions more than once.
     int mLastWidthSent;
     int mLastHeightSent;
+    // Since view height sent to webkit could be fixed to avoid relayout, this
+    // value records the last sent actual view height.
+    int mLastActualHeightSent;
 
     private int mContentWidth;   // cache of value from WebViewCore
     private int mContentHeight;  // cache of value from WebViewCore
@@ -2574,6 +2577,7 @@ public class WebView extends AbsoluteLayout
         int mWidth;
         int mHeight;
         float mHeightWidthRatio;
+        int mActualViewHeight;
         int mTextWrapWidth;
         int mAnchorX;
         int mAnchorY;
@@ -2595,6 +2599,7 @@ public class WebView extends AbsoluteLayout
 
         int viewWidth = getViewWidth();
         int newWidth = Math.round(viewWidth * mZoomManager.getInvScale());
+        // This height could be fixed and be different from actual visible height.
         int viewHeight = getViewHeightWithTitle() - getTitleHeight();
         int newHeight = Math.round(viewHeight * mZoomManager.getInvScale());
         // Make the ratio more accurate than (newHeight / newWidth), since the
@@ -2612,12 +2617,16 @@ public class WebView extends AbsoluteLayout
             newHeight = 0;
             heightWidthRatio = 0;
         }
+        // Actual visible height.
+        int actualViewHeight = getViewHeight();
         // Avoid sending another message if the dimensions have not changed.
-        if (newWidth != mLastWidthSent || newHeight != mLastHeightSent || force) {
+        if (newWidth != mLastWidthSent || newHeight != mLastHeightSent || force ||
+                actualViewHeight != mLastActualHeightSent) {
             ViewSizeData data = new ViewSizeData();
             data.mWidth = newWidth;
             data.mHeight = newHeight;
             data.mHeightWidthRatio = heightWidthRatio;
+            data.mActualViewHeight = actualViewHeight;
             data.mTextWrapWidth = Math.round(viewWidth / mZoomManager.getTextWrapScale());
             data.mScale = mZoomManager.getScale();
             data.mIgnoreHeight = mZoomManager.isFixedLengthAnimationInProgress()
@@ -2627,6 +2636,7 @@ public class WebView extends AbsoluteLayout
             mWebViewCore.sendMessage(EventHub.VIEW_SIZE_CHANGED, data);
             mLastWidthSent = newWidth;
             mLastHeightSent = newHeight;
+            mLastActualHeightSent = actualViewHeight;
             mZoomManager.clearDocumentAnchor();
             return true;
         }
