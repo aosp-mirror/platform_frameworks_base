@@ -95,6 +95,10 @@ void DisplayList::clearResources() {
         delete mPaths.itemAt(i);
     }
     mPaths.clear();
+    for (size_t i = 0; i < mOriginalPaths.size(); i++) {
+        caches.resourceCache.decrementRefcount(mOriginalPaths.itemAt(i));
+    }
+    mOriginalPaths.clear();
 
     for (size_t i = 0; i < mMatrices.size(); i++) {
         delete mMatrices.itemAt(i);
@@ -144,6 +148,13 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     const Vector<SkPath*> &paths = recorder.getPaths();
     for (size_t i = 0; i < paths.size(); i++) {
         mPaths.add(paths.itemAt(i));
+    }
+
+    const Vector<SkPath*> &originalPaths = recorder.getOriginalPaths();
+    for (size_t i = 0; i < originalPaths.size(); i++) {
+        SkPath* path = originalPaths.itemAt(i);
+        mOriginalPaths.add(path);
+        caches.resourceCache.incrementRefcount(path);
     }
 
     const Vector<SkMatrix*> &matrices = recorder.getMatrices();
@@ -518,6 +529,12 @@ void DisplayListRenderer::reset() {
         caches.resourceCache.decrementRefcount(resource);
     }
     mBitmapResources.clear();
+
+    for (size_t i = 0; i < mOriginalPaths.size(); i++) {
+        SkPath* resource = mOriginalPaths.itemAt(i);
+        caches.resourceCache.decrementRefcount(resource);
+    }
+    mOriginalPaths.clear();
 
     for (size_t i = 0; i < mShaders.size(); i++) {
        caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
