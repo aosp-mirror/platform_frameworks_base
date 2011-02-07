@@ -526,7 +526,7 @@ static void displayCubemapShaderSample() {
     // Setup the projectioni matrix
     float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
     rsMatrixLoadPerspective(&gVSConstants->proj, 30.0f, aspect, 0.1f, 100.0f);
-    rsAllocationMarkDirty(rsGetAllocation(gFSConstants));
+    rsgAllocationSyncAll(rsGetAllocation(gFSConstants));
 
     rsgBindProgramVertex(gProgVertexCube);
 
