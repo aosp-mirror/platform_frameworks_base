@@ -191,13 +191,12 @@ public abstract class AbstractThreadedSyncAdapter {
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-            if (isCanceled()) {
-                return;
-            }
-
             SyncResult syncResult = new SyncResult();
             ContentProviderClient provider = null;
             try {
+                if (isCanceled()) {
+                    return;
+                }
                 provider = mContext.getContentResolver().acquireContentProviderClient(mAuthority);
                 if (provider != null) {
                     AbstractThreadedSyncAdapter.this.onPerformSync(mAccount, mExtras,
