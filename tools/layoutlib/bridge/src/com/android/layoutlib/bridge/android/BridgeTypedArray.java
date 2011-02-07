@@ -270,13 +270,10 @@ public final class BridgeTypedArray extends TypedArray {
             return defValue;
         }
 
-        String s = mResourceData[index].getValue();
-        try {
-            return ResourceHelper.getColor(s);
-        } catch (NumberFormatException e) {
-            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null /*data*/);
-
-            // we'll return the default value below.
+        ColorStateList colorStateList = ResourceHelper.getColorStateList(
+                mResourceData[index], mContext);
+        if (colorStateList != null) {
+            return colorStateList.getDefaultColor();
         }
 
         return defValue;
