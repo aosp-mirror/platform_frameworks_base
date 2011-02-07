@@ -29,25 +29,30 @@ import android.widget.SeekBar;
  */
 public class SeekBarPreference extends DialogPreference {
     private static final String TAG = "SeekBarPreference";
-    
+
     private Drawable mMyIcon;
 
     public SeekBarPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         setDialogLayoutResource(com.android.internal.R.layout.seekbar_dialog);
-        setPositiveButtonText(android.R.string.ok);
-        setNegativeButtonText(android.R.string.cancel);
-        
+        createActionButtons();
+
         // Steal the XML dialogIcon attribute's value
         mMyIcon = getDialogIcon();
         setDialogIcon(null);
     }
 
+    // Allow subclasses to override the action buttons
+    public void createActionButtons() {
+        setPositiveButtonText(android.R.string.ok);
+        setNegativeButtonText(android.R.string.cancel);
+    }
+
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-        
+
         final ImageView iconView = (ImageView) view.findViewById(android.R.id.icon);
         if (mMyIcon != null) {
             iconView.setImageDrawable(mMyIcon);
