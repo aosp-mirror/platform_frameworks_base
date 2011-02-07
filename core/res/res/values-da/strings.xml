@@ -608,7 +608,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Aldrig"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"Du har ikke tilladelse til at åbne denne side."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teksten er kopieret til udklipsholderen."</string>
-    <string name="more_item_label" msgid="4650918923083320495">"Flere"</string>
+    <string name="more_item_label" msgid="4650918923083320495">"Mere"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"plads"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"indtast"</string>

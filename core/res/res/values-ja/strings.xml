@@ -539,7 +539,7 @@
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"<xliff:g id="SOURCE">%1$s</xliff:g>経由"</string>
     <string name="contact_status_update_attribution_with_date" msgid="5945386376369979909">"<xliff:g id="DATE">%1$s</xliff:g>、更新元: <xliff:g id="SOURCE">%2$s</xliff:g>"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PINコードを入力"</string>
-    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"ロックを解除するにはパスワードを入力"</string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"パスワードを入力"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"MENU、0キーでロック解除"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急通報番号"</string>
@@ -547,15 +547,15 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"画面ロック中"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"MENUキーでロック解除"</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ロックを解除するパターンを入力"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"パターンを入力"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"緊急通報"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"通話に戻る"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"一致しました"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"やり直してください"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"充電中（<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>）"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"充電完了。"</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"充電完了"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"充電してください。"</string>
+    <string name="lockscreen_low_battery" msgid="1482873981919249740">"充電してください"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"SIMカードを挿入してください。"</string>
