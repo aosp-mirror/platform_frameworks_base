@@ -198,6 +198,11 @@ public class MediaProperties {
     public static final int FILE_UNSUPPORTED = 255;
 
     /**
+     * Undefined video codec profiles
+     */
+    public static final int UNDEFINED_VIDEO_PROFILE = 255;
+
+    /**
      * The array of the supported file formats
      */
     private static final int[] SUPPORTED_VIDEO_FILE_FORMATS = new int[] {

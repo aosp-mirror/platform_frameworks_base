@@ -139,6 +139,11 @@ public class MediaVideoItem extends MediaItem {
                 throw new IllegalArgumentException("Unsupported Video Codec Format in Input File");
         }
 
+        /* Check if the profile is unsupported. */
+        if (properties.profileAndLevel == MediaProperties.UNDEFINED_VIDEO_PROFILE) {
+            throw new IllegalArgumentException("Unsupported Video Codec Profile in Input File");
+        }
+
         mWidth = properties.width;
         mHeight = properties.height;
         mAspectRatio = mMANativeHelper.getAspectRatio(properties.width,
