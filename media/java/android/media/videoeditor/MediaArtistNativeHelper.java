@@ -2555,6 +2555,14 @@ class MediaArtistNativeHelper {
 
         final List<Effect> effects = m.getAllEffects();
         final List<Overlay> overlays = m.getAllOverlays();
+
+        for (Overlay overlay : overlays) {
+            effectSettings[i] = getOverlaySettings((OverlayFrame)overlay);
+            adjustEffectsStartTimeAndDuration(effectSettings[i], beginCutTime, endCutTime);
+            effectSettings[i].startTime += storyBoardTime;
+            i++;
+        }
+
         for (Effect effect : effects) {
             if (effect instanceof EffectColor) {
                 effectSettings[i] = getEffectSettings((EffectColor)effect);
@@ -2564,12 +2572,6 @@ class MediaArtistNativeHelper {
             }
         }
 
-        for (Overlay overlay : overlays) {
-            effectSettings[i] = getOverlaySettings((OverlayFrame)overlay);
-            adjustEffectsStartTimeAndDuration(effectSettings[i], beginCutTime, endCutTime);
-            effectSettings[i].startTime += storyBoardTime;
-            i++;
-        }
         return i;
     }
 
