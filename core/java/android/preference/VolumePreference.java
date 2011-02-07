@@ -236,14 +236,11 @@ public class VolumePreference extends SeekBarPreference implements
             @Override
             public void onChange(boolean selfChange) {
                 super.onChange(selfChange);
-                if (mSeekBar != null) {
-                    int volume = System.getInt(mContext.getContentResolver(),
-                            System.VOLUME_SETTINGS[mStreamType], -1);
-                    // Works around an atomicity problem with volume updates
-                    // TODO: Fix the actual issue, probably in AudioService
-                    if (volume >= 0) {
-                        mSeekBar.setProgress(volume);
-                    }
+                if (mSeekBar != null && mAudioManager != null) {
+                    int volume = mAudioManager.isStreamMute(mStreamType) ?
+                            mAudioManager.getLastAudibleStreamVolume(mStreamType)
+                            : mAudioManager.getStreamVolume(mStreamType);
+                    mSeekBar.setProgress(volume);
                 }
             }
         };
