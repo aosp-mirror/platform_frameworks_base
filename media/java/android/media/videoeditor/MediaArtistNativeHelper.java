@@ -23,7 +23,6 @@ import java.nio.IntBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -58,6 +57,10 @@ class MediaArtistNativeHelper {
     private static final Paint sResizePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
     private final VideoEditor mVideoEditor;
+    /*
+     *  Semaphore to control preview calls
+     */
+    private final Semaphore mLock;
 
     private EditSettings mStoryBoardSettings;
 
@@ -78,11 +81,6 @@ class MediaArtistNativeHelper {
     private String mExportFilename = null;
 
     private int mProgressToApp;
-
-    /*
-     *  Semaphore to control preview calls
-     */
-    private final Semaphore mLock = new Semaphore(1, true);
 
     private String mRenderPreviewOverlayFile;
     private int mRenderPreviewRenderingMode;
@@ -1775,9 +1773,10 @@ class MediaArtistNativeHelper {
      *
      * @param projectPath The path where the VideoEditor stores all files
      *        related to the project
+     * @param lock The semaphore
      * @param veObj The video editor reference
      */
-    public MediaArtistNativeHelper(String projectPath, VideoEditor veObj) {
+    public MediaArtistNativeHelper(String projectPath, Semaphore lock, VideoEditor veObj) {
         mProjectPath = projectPath;
         if (veObj != null) {
             mVideoEditor = veObj;
@@ -1785,8 +1784,11 @@ class MediaArtistNativeHelper {
             mVideoEditor = null;
             throw new IllegalArgumentException("video editor object is null");
         }
-        if (mStoryBoardSettings == null)
+        if (mStoryBoardSettings == null) {
             mStoryBoardSettings = new EditSettings();
+        }
+
+        mLock = lock;
 
         _init(mProjectPath, "null");
         mAudioTrackPCMFilePath = null;
@@ -1932,16 +1934,8 @@ class MediaArtistNativeHelper {
     /**
      * Release the native helper object
      */
-    void releaseNativeHelper() {
-        try {
-            release();
-        } catch (IllegalStateException ex) {
-            Log.e(TAG, "Illegal State exeption caught in releaseNativeHelper");
-            throw ex;
-        } catch (RuntimeException ex) {
-            Log.e(TAG, "Runtime exeption caught in releaseNativeHelper");
-            throw ex;
-        }
+    void releaseNativeHelper() throws InterruptedException {
+        release();
     }
 
     /**
@@ -3735,18 +3729,15 @@ class MediaArtistNativeHelper {
      */
     Bitmap getPixels(String inputFile, int width, int height, long timeMS) {
         if (inputFile == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid input file");
         }
 
-        int newWidth = 0;
-        int newHeight = 0;
-        Bitmap tempBitmap = null;
-
         /* Make width and height as even */
-        newWidth = (width + 1) & 0xFFFFFFFE;
-        newHeight = (height + 1) & 0xFFFFFFFE;
+        final int newWidth = (width + 1) & 0xFFFFFFFE;
+        final int newHeight = (height + 1) & 0xFFFFFFFE;
 
         /* Create a temp bitmap for resized thumbnails */
+        Bitmap tempBitmap = null;
         if ((newWidth != width) || (newHeight != height)) {
              tempBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
         }
@@ -3770,6 +3761,7 @@ class MediaArtistNativeHelper {
         if (tempBitmap != null) {
             tempBitmap.recycle();
         }
+
         return bitmap;
     }
 
@@ -3787,17 +3779,15 @@ class MediaArtistNativeHelper {
      *
      * @return The frames as bitmaps in bitmap array
      **/
-    public Bitmap[] getPixelsList(String filename, int width, int height, long startMs, long endMs,
+    Bitmap[] getPixelsList(String filename, int width, int height, long startMs, long endMs,
             int thumbnailCount) {
         int[] rgb888 = null;
         int thumbnailSize = 0;
-        int newWidth = 0;
-        int newHeight = 0;
         Bitmap tempBitmap = null;
 
         /* Make width and height as even */
-        newWidth = (width + 1) & 0xFFFFFFFE;
-        newHeight = (height + 1) & 0xFFFFFFFE;
+        final int newWidth = (width + 1) & 0xFFFFFFFE;
+        final int newHeight = (height + 1) & 0xFFFFFFFE;
         thumbnailSize = newWidth * newHeight * 4;
 
         /* Create a temp bitmap for resized thumbnails */
@@ -3820,7 +3810,8 @@ class MediaArtistNativeHelper {
                 bitmaps = new Bitmap[MAX_THUMBNAIL_PERMITTED];
                 thumbnailCount = MAX_THUMBNAIL_PERMITTED;
             } catch (Throwable ex) {
-                throw new RuntimeException("Memory allocation fails, thumbnail count too large: "+thumbnailCount);
+                throw new RuntimeException("Memory allocation fails, thumbnail count too large: "
+                        + thumbnailCount);
             }
         }
         IntBuffer tmpBuffer = IntBuffer.allocate(thumbnailSize);
@@ -3848,6 +3839,7 @@ class MediaArtistNativeHelper {
         if (tempBitmap != null) {
             tempBitmap.recycle();
         }
+
         return bitmaps;
     }
 
@@ -3908,7 +3900,7 @@ class MediaArtistNativeHelper {
      *
      * @throws InterruptedException
      */
-    void lock() throws InterruptedException {
+    private void lock() throws InterruptedException {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "lock: grabbing semaphore", new Throwable());
         }
@@ -3919,30 +3911,9 @@ class MediaArtistNativeHelper {
     }
 
     /**
-     * Tries to grab the semaphore with a specified time out which arbitrates access to the editor
-     *
-     * @param timeoutMs time out in ms.
-     *
-     * @return true if the semaphore is acquired, false otherwise
-     * @throws InterruptedException
-     */
-    boolean lock(long timeoutMs) throws InterruptedException {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "lock: grabbing semaphore with timeout " + timeoutMs, new Throwable());
-        }
-
-        boolean acquireSem = mLock.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS);
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "lock: grabbed semaphore status " + acquireSem);
-        }
-
-        return acquireSem;
-    }
-
-    /**
      * Release the semaphore which arbitrates access to the editor
      */
-    void unlock() {
+    private void unlock() {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "unlock: releasing semaphore");
         }

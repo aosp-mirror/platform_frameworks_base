@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -118,11 +121,12 @@ public class VideoEditorImpl implements VideoEditor {
     /*
      *  Instance variables
      */
-    private long mDurationMs;
+    private final Semaphore mLock;
     private final String mProjectPath;
     private final List<MediaItem> mMediaItems = new ArrayList<MediaItem>();
     private final List<AudioTrack> mAudioTracks = new ArrayList<AudioTrack>();
     private final List<Transition> mTransitions = new ArrayList<Transition>();
+    private long mDurationMs;
     private int mAspectRatio;
 
     /*
@@ -138,7 +142,8 @@ public class VideoEditorImpl implements VideoEditor {
      *        related to the project
      */
     public VideoEditorImpl(String projectPath) throws IOException {
-        mMANativeHelper = new MediaArtistNativeHelper(projectPath, this);
+        mLock = new Semaphore(1, true);
+        mMANativeHelper = new MediaArtistNativeHelper(projectPath, mLock, this);
         mProjectPath = projectPath;
         final File projectXml = new File(projectPath, PROJECT_FILENAME);
         if (projectXml.exists()) {
@@ -417,15 +422,20 @@ public class VideoEditorImpl implements VideoEditor {
 
         boolean semAcquireDone = false;
         try {
-            mMANativeHelper.lock();
+            lock();
             semAcquireDone = true;
+
+            if (mMANativeHelper == null) {
+                throw new IllegalStateException("The video editor is not initialized");
+            }
+
             mMANativeHelper.export(filename, mProjectPath, height,bitrate,
                                mMediaItems, mTransitions, mAudioTracks, listener);
         } catch (InterruptedException  ex) {
             Log.e(TAG, "Sem acquire NOT successful in export");
         } finally {
             if (semAcquireDone) {
-                mMANativeHelper.unlock();
+                unlock();
             }
         }
     }
@@ -436,8 +446,12 @@ public class VideoEditorImpl implements VideoEditor {
     public void generatePreview(MediaProcessingProgressListener listener) {
         boolean semAcquireDone = false;
         try {
-            mMANativeHelper.lock();
+            lock();
             semAcquireDone = true;
+
+            if (mMANativeHelper == null) {
+                throw new IllegalStateException("The video editor is not initialized");
+            }
 
             if ((mMediaItems.size() > 0) || (mAudioTracks.size() > 0)) {
                 mMANativeHelper.previewStoryBoard(mMediaItems, mTransitions, mAudioTracks,
@@ -447,7 +461,7 @@ public class VideoEditorImpl implements VideoEditor {
             Log.e(TAG, "Sem acquire NOT successful in previewStoryBoard");
         } finally {
             if (semAcquireDone) {
-                mMANativeHelper.unlock();
+                unlock();
             }
         }
     }
@@ -675,11 +689,26 @@ public class VideoEditorImpl implements VideoEditor {
      */
     public void release() {
         stopPreview();
-        mMediaItems.clear();
-        mAudioTracks.clear();
-        mTransitions.clear();
-        mMANativeHelper.releaseNativeHelper();
-        mMANativeHelper = null;
+
+        boolean semAcquireDone = false;
+        try {
+            lock();
+            semAcquireDone = true;
+
+            if (mMANativeHelper != null) {
+                mMediaItems.clear();
+                mAudioTracks.clear();
+                mTransitions.clear();
+                mMANativeHelper.releaseNativeHelper();
+                mMANativeHelper = null;
+            }
+        } catch (Exception  ex) {
+            Log.e(TAG, "Sem acquire NOT successful in export", ex);
+        } finally {
+            if (semAcquireDone) {
+                unlock();
+            }
+        }
     }
 
     /*
@@ -854,9 +883,13 @@ public class VideoEditorImpl implements VideoEditor {
 
         boolean semAcquireDone = false;
         try {
-            semAcquireDone = mMANativeHelper.lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
+            semAcquireDone = lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
             if (semAcquireDone == false) {
                 throw new IllegalStateException("Timeout waiting for semaphore");
+            }
+
+            if (mMANativeHelper == null) {
+                throw new IllegalStateException("The video editor is not initialized");
             }
 
             if (mMediaItems.size() > 0) {
@@ -871,7 +904,7 @@ public class VideoEditorImpl implements VideoEditor {
             throw new IllegalStateException("The thread was interrupted");
         } finally {
             if (semAcquireDone) {
-                mMANativeHelper.unlock();
+                unlock();
             }
         }
         return result;
@@ -1568,9 +1601,13 @@ public class VideoEditorImpl implements VideoEditor {
         boolean semAcquireDone = false;
         if (!mPreviewInProgress) {
             try{
-                semAcquireDone = mMANativeHelper.lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
+                semAcquireDone = lock(ENGINE_ACCESS_MAX_TIMEOUT_MS);
                 if (semAcquireDone == false) {
                     throw new IllegalStateException("Timeout waiting for semaphore");
+                }
+
+                if (mMANativeHelper == null) {
+                    throw new IllegalStateException("The video editor is not initialized");
                 }
 
                 if (mMediaItems.size() > 0) {
@@ -1581,7 +1618,7 @@ public class VideoEditorImpl implements VideoEditor {
                                      callbackAfterFrameCount, listener);
                 }
                 /**
-                 *  release on complete by calling stopPreview
+                 *  Release The lock on complete by calling stopPreview
                  */
             } catch (InterruptedException ex) {
                 Log.w(TAG, "The thread was interrupted", new Throwable());
@@ -1605,7 +1642,7 @@ public class VideoEditorImpl implements VideoEditor {
                  */
                 } finally {
                     mPreviewInProgress = false;
-                    mMANativeHelper.unlock();
+                    unlock();
                 }
             return result;
         }
@@ -1790,5 +1827,51 @@ public class VideoEditorImpl implements VideoEditor {
         } else {
             Log.w(TAG, "Native helper was not ready!");
         }
+    }
+
+    /**
+     * Grab the semaphore which arbitrates access to the editor
+     *
+     * @throws InterruptedException
+     */
+    private void lock() throws InterruptedException {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbing semaphore", new Throwable());
+        }
+        mLock.acquire();
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbed semaphore");
+        }
+    }
+
+    /**
+     * Tries to grab the semaphore with a specified time out which arbitrates access to the editor
+     *
+     * @param timeoutMs time out in ms.
+     *
+     * @return true if the semaphore is acquired, false otherwise
+     * @throws InterruptedException
+     */
+    private boolean lock(long timeoutMs) throws InterruptedException {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbing semaphore with timeout " + timeoutMs, new Throwable());
+        }
+
+        boolean acquireSem = mLock.tryAcquire(timeoutMs, TimeUnit.MILLISECONDS);
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "lock: grabbed semaphore status " + acquireSem);
+        }
+
+        return acquireSem;
+    }
+
+    /**
+     * Release the semaphore which arbitrates access to the editor
+     */
+    private void unlock() {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "unlock: releasing semaphore");
+        }
+        mLock.release();
     }
 }
