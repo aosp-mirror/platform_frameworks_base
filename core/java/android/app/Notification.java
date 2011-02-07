@@ -82,6 +82,7 @@ public class Notification implements Parcelable
 
     /**
      * The resource id of a drawable to use as the icon in the status bar.
+     * This is required; notifications with an invalid icon resource will not be shown.
      */
     public int icon;
 
