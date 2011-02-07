@@ -190,7 +190,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         // with newer, unsupported capabilities.
         mCapabilities = EnumSet.of(
                 Capability.UNBOUND_RENDERING,
-                Capability.TRANSPARENCY,
+                Capability.CUSTOM_BACKGROUND_COLOR,
                 Capability.RENDER,
                 Capability.EMBEDDED_LAYOUT,
                 Capability.VIEW_MANIPULATION,
