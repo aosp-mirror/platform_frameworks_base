@@ -75,7 +75,7 @@ public:
     static void RegisterDefaultSniffers();
 
     // for DRM
-    virtual DecryptHandle* DrmInitialization(DrmManagerClient *client) {
+    virtual DecryptHandle* DrmInitialization() {
         return NULL;
     }
     virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {};

@@ -392,7 +392,6 @@ void AwesomePlayer::reset_l() {
     if (mDecryptHandle != NULL) {
             mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
                     Playback::STOP, 0);
-            mDrmManagerClient->closeDecryptSession(mDecryptHandle);
             mDecryptHandle = NULL;
             mDrmManagerClient = NULL;
     }

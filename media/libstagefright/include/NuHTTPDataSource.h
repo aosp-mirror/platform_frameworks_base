@@ -31,7 +31,7 @@ struct NuHTTPDataSource : public DataSource {
     // false otherwise.
     bool estimateBandwidth(int32_t *bandwidth_bps);
 
-    virtual DecryptHandle* DrmInitialization(DrmManagerClient *client);
+    virtual DecryptHandle* DrmInitialization();
     virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
     virtual String8 getUri();
 
