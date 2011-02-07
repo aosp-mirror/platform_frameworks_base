@@ -83,12 +83,14 @@ public class NotificationManager
     }
 
     /**
-     * Persistent notification on the status bar, 
+     * Post a notification to be shown in the status bar. If a notification with
+     * the same id has already been posted by your application and has not yet been canceled, it
+     * will be replaced by the updated information.
      *
      * @param id An identifier for this notification unique within your
      *        application.
-     * @param notification A {@link Notification} object describing how to
-     *        notify the user, other than the view you're providing. Must not be null.
+     * @param notification A {@link Notification} object describing what to show the user. Must not
+     *        be null.
      */
     public void notify(int id, Notification notification)
     {
@@ -96,13 +98,15 @@ public class NotificationManager
     }
 
     /**
-     * Persistent notification on the status bar,
+     * Post a notification to be shown in the status bar. If a notification with
+     * the same tag and id has already been posted by your application and has not yet been
+     * canceled, it will be replaced by the updated information.
      *
      * @param tag A string identifier for this notification.  May be {@code null}.
      * @param id An identifier for this notification.  The pair (tag, id) must be unique
      *        within your application.
-     * @param notification A {@link Notification} object describing how to
-     *        notify the user, other than the view you're providing. Must not be null.
+     * @param notification A {@link Notification} object describing what to
+     *        show the user. Must not be null.
      */
     public void notify(String tag, int id, Notification notification)
     {
