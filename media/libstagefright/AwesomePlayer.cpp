@@ -766,6 +766,8 @@ status_t AwesomePlayer::play() {
 }
 
 status_t AwesomePlayer::play_l() {
+    mFlags &= ~SEEK_PREVIEW;
+
     if (mFlags & PLAYING) {
         return OK;
     }
@@ -1079,6 +1081,11 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
 
         notifyListener_l(MEDIA_SEEK_COMPLETE);
         mSeekNotificationSent = true;
+
+        if ((mFlags & PREPARED) && mVideoSource != NULL) {
+            mFlags |= SEEK_PREVIEW;
+            postVideoEvent_l();
+        }
     }
 
     return OK;
@@ -1181,7 +1188,7 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
 }
 
 void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
-    if (!mSeeking) {
+    if (!mSeeking || (mFlags & SEEK_PREVIEW)) {
         return;
     }
 
@@ -1228,7 +1235,8 @@ void AwesomePlayer::onVideoEvent() {
             mVideoBuffer = NULL;
         }
 
-        if (mCachedSource != NULL && mAudioSource != NULL) {
+        if (mCachedSource != NULL && mAudioSource != NULL
+                && !(mFlags & SEEK_PREVIEW)) {
             // We're going to seek the video source first, followed by
             // the audio source.
             // In order to avoid jumps in the DataSource offset caused by
@@ -1322,41 +1330,36 @@ void AwesomePlayer::onVideoEvent() {
         mTimeSourceDeltaUs = realTimeUs - mediaTimeUs;
     }
 
-    int64_t nowUs = ts->getRealTimeUs() - mTimeSourceDeltaUs;
-
-    int64_t latenessUs = nowUs - timeUs;
-
-    if (wasSeeking) {
+    if (!wasSeeking && mRTPSession == NULL) {
         // Let's display the first frame after seeking right away.
-        latenessUs = 0;
-    }
-
-    if (mRTPSession != NULL) {
         // We'll completely ignore timestamps for gtalk videochat
         // and we'll play incoming video as fast as we get it.
-        latenessUs = 0;
-    }
 
-    if (latenessUs > 40000) {
-        // We're more than 40ms late.
-        LOGV("we're late by %lld us (%.2f secs)", latenessUs, latenessUs / 1E6);
-        if ( mSinceLastDropped > FRAME_DROP_FREQ)
-        {
-            LOGV("we're late by %lld us (%.2f secs) dropping one after %d frames", latenessUs, latenessUs / 1E6, mSinceLastDropped);
-            mSinceLastDropped = 0;
-            mVideoBuffer->release();
-            mVideoBuffer = NULL;
+        int64_t nowUs = ts->getRealTimeUs() - mTimeSourceDeltaUs;
 
-            postVideoEvent_l();
+        int64_t latenessUs = nowUs - timeUs;
+
+        if (latenessUs > 40000) {
+            // We're more than 40ms late.
+            LOGV("we're late by %lld us (%.2f secs)", latenessUs, latenessUs / 1E6);
+            if ( mSinceLastDropped > FRAME_DROP_FREQ)
+            {
+                LOGV("we're late by %lld us (%.2f secs) dropping one after %d frames", latenessUs, latenessUs / 1E6, mSinceLastDropped);
+                mSinceLastDropped = 0;
+                mVideoBuffer->release();
+                mVideoBuffer = NULL;
+
+                postVideoEvent_l();
+                return;
+            }
+        }
+
+        if (latenessUs < -10000) {
+            // We're more than 10ms early.
+
+            postVideoEvent_l(10000);
             return;
         }
-    }
-
-    if (latenessUs < -10000) {
-        // We're more than 10ms early.
-
-        postVideoEvent_l(10000);
-        return;
     }
 
     if (mVideoRendererIsPreview || mVideoRenderer == NULL) {
@@ -1372,6 +1375,11 @@ void AwesomePlayer::onVideoEvent() {
 
     mVideoBuffer->release();
     mVideoBuffer = NULL;
+
+    if (wasSeeking && (mFlags & SEEK_PREVIEW)) {
+        mFlags &= ~SEEK_PREVIEW;
+        return;
+    }
 
     postVideoEvent_l();
 }
