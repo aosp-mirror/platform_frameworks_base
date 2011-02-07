@@ -97,6 +97,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         "android.content.res.Resources$Theme#obtainStyledAttributes",
         "android.content.res.Resources$Theme#resolveAttribute",
+        "android.graphics.BitmapFactory#finishDecode",
         "android.os.Handler#sendMessageAtTime",
         "android.os.Build#getString",
         "android.view.LayoutInflater#rInflate",
