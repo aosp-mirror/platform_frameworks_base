@@ -13,4 +13,10 @@
     <string name="status_bar_settings_signal_meter_disconnected" msgid="4866302415753953027">"Sin conexión a Internet"</string>
     <!-- XL xlarge -->
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="3832182580451976589">"Wi-Fi conectado"</string>
+
+    <!-- manually translated -->
+    <string name="gps_notification_searching_text">Buscando señal de GPS</string>
+
+    <!-- manually translated -->
+    <string name="gps_notification_found_text">Ubicación establecida por el GPS</string>
 </resources>

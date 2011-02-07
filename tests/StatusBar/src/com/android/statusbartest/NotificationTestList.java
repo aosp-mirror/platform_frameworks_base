@@ -35,6 +35,10 @@ import android.widget.TextView;
 import android.widget.ProgressBar;
 import android.os.PowerManager;
 
+// private NM API
+import android.app.INotificationManager;
+import com.android.internal.statusbar.StatusBarNotification;
+
 public class NotificationTestList extends TestActivity
 {
     private final static String TAG = "NotificationTestList";
@@ -199,6 +203,15 @@ public class NotificationTestList extends TestActivity
             public void run() {
                 Notification n = new Notification(R.layout.chrono_notification /* not an icon */,
                         null, System.currentTimeMillis());
+                n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
+                            "This is the same notification!!!", makeIntent());
+                mNM.notify(1, n);
+            }
+        },
+
+        new Test("Null Icon #1 (when=now)") {
+            public void run() {
+                Notification n = new Notification(0, null, System.currentTimeMillis());
                 n.setLatestEventInfo(NotificationTestList.this, "Persistent #1",
                             "This is the same notification!!!", makeIntent());
                 mNM.notify(1, n);
@@ -749,6 +762,30 @@ public class NotificationTestList extends TestActivity
         new Test("Persistent with numbers 4444") {
             public void run() {
                 mNM.notify(1, notificationWithNumbers(4444));
+            }
+        },
+
+        new Test("System priority notification") {
+            public void run() {
+                Notification n = new Notification.Builder(NotificationTestList.this)
+                    .setSmallIcon(R.drawable.notification1)
+                    .setContentTitle("System priority")
+                    .setContentText("This should appear before all others")
+                    .getNotification();
+
+                int[] idOut = new int[1];
+                try {
+                    INotificationManager directLine = mNM.getService();
+                    directLine.enqueueNotificationWithTagPriority(
+                            getPackageName(),
+                            null, 
+                            1, 
+                            StatusBarNotification.PRIORITY_SYSTEM,
+                            n,
+                            idOut);
+                } catch (android.os.RemoteException ex) {
+                    // oh well
+                }
             }
         },
 

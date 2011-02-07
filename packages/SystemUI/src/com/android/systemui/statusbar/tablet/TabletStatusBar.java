@@ -65,6 +65,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.*;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.recent.RecentApplicationsActivity;
 
@@ -135,6 +136,7 @@ public class TabletStatusBar extends StatusBar implements
     HeightReceiver mHeightReceiver;
     BatteryController mBatteryController;
     BluetoothController mBluetoothController;
+    LocationController mLocationController;
     NetworkController mNetworkController;
 
     View mBarContents;
@@ -359,6 +361,8 @@ public class TabletStatusBar extends StatusBar implements
         mTicker = new TabletTicker(this);
 
         // The icons
+        mLocationController = new LocationController(mContext); // will post a notification
+
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
         mBluetoothController = new BluetoothController(mContext);
