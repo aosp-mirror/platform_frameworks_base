@@ -856,6 +856,8 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "__modsi3", (void *)&SC_modsi3, true },
     { "__udivsi3", (void *)&SC_udivsi3, true },
     { "__umodsi3", (void *)&SC_umodsi3, true },
+    { "memset", (void *)&memset, true },
+    { "memcpy", (void *)&memcpy, true },
 
     // allocation
     { "_Z19rsAllocationGetDimX13rs_allocation", (void *)&SC_allocGetDimX, true },
