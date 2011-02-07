@@ -195,13 +195,31 @@ jobject videoEditProp_getProperties(
                         &gotten, pEnv,(M4NO_ERROR != result),
                         "Invalid File or File not found");
 
-                if (pClipProperties->uiVideoWidth >= 1920)
+                /**
+                 * Max resolution supported is 1280 x 720.
+                 */
+                if ( (pClipProperties->uiVideoWidth > 1280)
+                    || (pClipProperties->uiVideoHeight > 720) )
                 {
-                    result = M4MCS_ERR_INPUT_FILE_CONTAINS_NO_SUPPORTED_STREAM;
+                    result = M4MCS_ERR_INVALID_INPUT_VIDEO_FRAME_SIZE;
                     videoEditJava_checkAndThrowIllegalArgumentException(
                             &gotten, pEnv, (M4NO_ERROR != result),
-                            "HD Content (1080p) is not supported");
+                            "Unsupported input video frame size");
                 }
+
+#ifdef USE_SOFTWARE_DECODER
+                /**
+                 * Input clip with non-multiples of 16 is not supported.
+                 */
+                if ( (pClipProperties->uiVideoWidth %16)
+                    || (pClipProperties->uiVideoHeight %16) )
+                {
+                    result = M4MCS_ERR_INPUT_VIDEO_SIZE_NON_X16;
+                    videoEditJava_checkAndThrowIllegalArgumentException(
+                            &gotten, pEnv, (M4NO_ERROR != result),
+                            "non x16 input video frame size is not supported");
+                }
+#endif /* USE_SOFTWARE_DECODER */
             }
 
             // Check if the properties could be retrieved.
