@@ -367,7 +367,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     protected void onShowVolumeChanged(int streamType, int flags) {
-        int index = mAudioService.getStreamVolume(streamType);
+        int index = mAudioService.isStreamMute(streamType) ?
+                mAudioService.getLastAudibleStreamVolume(streamType)
+                : mAudioService.getStreamVolume(streamType);
+
 //        int message = UNKNOWN_VOLUME_TEXT;
 //        int additionalMessage = 0;
         mRingIsSilent = false;
