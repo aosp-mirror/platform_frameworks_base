@@ -136,16 +136,16 @@ public final class MifareUltralight extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
-     * @param pageIndex index of first page to read, starting from 0
+     * @param pageOffset index of first page to read, starting from 0
      * @return 4 pages (16 bytes)
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      */
-    public byte[] readPages(int pageIndex) throws IOException {
-        validatePageIndex(pageIndex);
+    public byte[] readPages(int pageOffset) throws IOException {
+        validatePageIndex(pageOffset);
         checkConnected();
 
-        byte[] cmd = { 0x30, (byte) pageIndex};
+        byte[] cmd = { 0x30, (byte) pageOffset};
         return transceive(cmd, false);
     }
 
@@ -159,18 +159,18 @@ public final class MifareUltralight extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
-     * @param pageIndex index of page to write, starting from 0
+     * @param pageOffset index of page to write, starting from 0
      * @param data 4 bytes to write
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      */
-    public void writePage(int pageIndex, byte[] data) throws IOException {
-        validatePageIndex(pageIndex);
+    public void writePage(int pageOffset, byte[] data) throws IOException {
+        validatePageIndex(pageOffset);
         checkConnected();
 
         byte[] cmd = new byte[data.length + 2];
         cmd[0] = (byte) 0xA2;
-        cmd[1] = (byte) pageIndex;
+        cmd[1] = (byte) pageOffset;
         System.arraycopy(data, 0, cmd, 2, data.length);
 
         transceive(cmd, false);

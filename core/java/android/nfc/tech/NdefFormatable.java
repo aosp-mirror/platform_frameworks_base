@@ -85,13 +85,13 @@ public final class NdefFormatable extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
-     * @param msg the NDEF message to write after formatting
+     * @param firstMessage the NDEF message to write after formatting
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message to write is malformed
      */
-    public void format(NdefMessage msg) throws IOException, FormatException {
-        format(msg, false);
+    public void format(NdefMessage firstMessage) throws IOException, FormatException {
+        format(firstMessage, false);
     }
 
     /**
@@ -105,13 +105,13 @@ public final class NdefFormatable extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
-     * @param msg the NDEF message to write after formatting
+     * @param firstMessage the NDEF message to write after formatting
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message to write is malformed
      */
-    public void formatReadOnly(NdefMessage msg) throws IOException, FormatException {
-        format(msg, true);
+    public void formatReadOnly(NdefMessage firstMessage) throws IOException, FormatException {
+        format(firstMessage, true);
     }
 
     /*package*/ void format(NdefMessage firstMessage, boolean makeReadOnly) throws IOException,

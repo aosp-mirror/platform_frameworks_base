@@ -250,6 +250,7 @@ public final class MifareClassic extends BasicTagTechnology {
      * Return the total number of MIFARE Classic blocks.
      * <p>Does not cause any RF activity and does not block.
      * @return total number of blocks
+     */
     public int getBlockCount() {
         return mSize / BLOCK_SIZE;
     }
