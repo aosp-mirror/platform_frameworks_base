@@ -60,11 +60,10 @@ class MtpPropertyGroup {
     private String[]             mColumns;
 
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
-    private static final String ID_FORMAT_WHERE = ID_WHERE + " AND "
-                                            + Files.FileColumns.FORMAT + "=?";
+    private static final String FORMAT_WHERE = Files.FileColumns.FORMAT + "=?";
+    private static final String ID_FORMAT_WHERE = ID_WHERE + " AND " + FORMAT_WHERE;
     private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
-    private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
-                                            + Files.FileColumns.FORMAT + "=?";
+    private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND " + FORMAT_WHERE;
     // constructs a property group for a list of properties
     public MtpPropertyGroup(MtpDatabase database, IContentProvider provider, String volume,
             int[] properties) {
@@ -292,25 +291,37 @@ class MtpPropertyGroup {
         String where;
         String[] whereArgs;
         if (format == 0) {
-            whereArgs = new String[] { Integer.toString(handle) };
-            if (depth == 1) {
-                where = PARENT_WHERE;
+            if (handle == 0xFFFFFFFF) {
+                // select all objects
+                where = null;
+                whereArgs = null;
             } else {
-                where = ID_WHERE;
+                whereArgs = new String[] { Integer.toString(handle) };
+                if (depth == 1) {
+                    where = PARENT_WHERE;
+                } else {
+                    where = ID_WHERE;
+                }
             }
         } else {
-            whereArgs = new String[] { Integer.toString(handle), Integer.toString(format) };
-            if (depth == 1) {
-                where = PARENT_FORMAT_WHERE;
+            if (handle == 0xFFFFFFFF) {
+                // select all objects with given format
+                where = FORMAT_WHERE;
+                whereArgs = new String[] { Integer.toString(format) };
             } else {
-                where = ID_FORMAT_WHERE;
+                whereArgs = new String[] { Integer.toString(handle), Integer.toString(format) };
+                if (depth == 1) {
+                    where = PARENT_FORMAT_WHERE;
+                } else {
+                    where = ID_FORMAT_WHERE;
+                }
             }
         }
 
         Cursor c = null;
         try {
             // don't query if not necessary
-            if (depth > 0 || mColumns.length > 1) {
+            if (depth > 0 || handle == 0xFFFFFFFF || mColumns.length > 1) {
                 c = mProvider.query(mUri, mColumns, where, whereArgs, null);
                 if (c == null) {
                     return new MtpPropertyList(0, MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
@@ -318,6 +329,7 @@ class MtpPropertyGroup {
             }
 
             int count = (c == null ? 1 : c.getCount());
+            Log.d(TAG, "count: " + count);
             MtpPropertyList result = new MtpPropertyList(count * mProperties.length,
                     MtpConstants.RESPONSE_OK);
 
@@ -326,9 +338,7 @@ class MtpPropertyGroup {
                 if (c != null) {
                     c.moveToNext();
                 }
-                if (depth == 1) {
-                    handle = (int)c.getLong(0);
-                }
+                handle = (int)c.getLong(0);
 
                 // iterate over all properties in the query for the given object
                 for (int propertyIndex = 0; propertyIndex < mProperties.length; propertyIndex++) {
