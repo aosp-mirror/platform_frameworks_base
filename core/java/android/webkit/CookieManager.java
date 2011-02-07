@@ -516,11 +516,17 @@ public final class CookieManager {
         }
     }
 
-    synchronized void waitForCookieOperationsToComplete() {
-        while (pendingCookieOperations > 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) { }
+    /**
+     * Waits for pending operations to completed.
+     * {@hide}  Too late to release publically.
+     */
+    public void waitForCookieOperationsToComplete() {
+        synchronized (this) {
+            while (pendingCookieOperations > 0) {
+                try {
+                    wait();
+                } catch (InterruptedException e) { }
+            }
         }
     }
 
