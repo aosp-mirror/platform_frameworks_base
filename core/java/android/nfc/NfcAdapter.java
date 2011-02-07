@@ -37,7 +37,6 @@ import android.util.Log;
  * <p>
  * Use the helper {@link #getDefaultAdapter(Context)} to get the default NFC
  * adapter for this Android device.
- * <p>
  */
 public final class NfcAdapter {
     private static final String TAG = "NFC";
@@ -437,6 +436,8 @@ public final class NfcAdapter {
      * the completion of their {@link Activity#onPause} callback to disable foreground dispatch
      * after it has been enabled.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param activity the Activity to dispatch to
      * @param intent the PendingIntent to start for the dispatch
      * @param filters the IntentFilters to override dispatching for, or null to always dispatch
@@ -476,6 +477,8 @@ public final class NfcAdapter {
      *
      * <p>This method must be called from the main thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param activity the Activity to disable dispatch to
      * @throws IllegalStateException if the Activity has already been paused
      */
@@ -513,9 +516,11 @@ public final class NfcAdapter {
      *
      * <p>This method must be called from the main thread.
      *
-     * <p><em>NOTE</em> While foreground NDEF push is active standard tag dispatch is disabled.
+     * <p class="note"><em>NOTE:</em> While foreground NDEF push is active standard tag dispatch is disabled.
      * Only the foreground activity may receive tag discovered dispatches via
      * {@link #enableForegroundDispatch}.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param activity the foreground Activity
      * @param msg a NDEF Message to push over P2P
@@ -547,6 +552,8 @@ public final class NfcAdapter {
      * completes.
      *
      * <p>This method must be called from the main thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param activity the Foreground activity
      * @throws IllegalStateException if the Activity has already been paused

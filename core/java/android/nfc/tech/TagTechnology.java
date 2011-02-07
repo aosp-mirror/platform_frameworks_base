@@ -75,6 +75,9 @@ import java.io.IOException;
  * <li>I/O operations may block, and should never be called on the main application
  * thread.
  * </ul>
+ *
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public interface TagTechnology extends Closeable {
     /**
@@ -158,6 +161,8 @@ public interface TagTechnology extends Closeable {
      * <p>Only one {@link TagTechnology} object can be connected to a {@link Tag} at a time.
      * <p>Applications must call {@link #close} when I/O operations are complete.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @see #close()
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or connect is canceled
@@ -172,6 +177,8 @@ public interface TagTechnology extends Closeable {
      * from the main application thread. A blocked call will be canceled with
      * {@link IOException} by calling {@link #close} from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @see #connect()
      * @see #close()
      * @throws TagLostException if the tag leaves the field
@@ -185,6 +192,8 @@ public interface TagTechnology extends Closeable {
      * <p>Also causes all blocked I/O operations on other thread to be canceled and
      * return with {@link IOException}.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @see #connect()
      */
     public void close() throws IOException;
@@ -195,6 +204,7 @@ public interface TagTechnology extends Closeable {
      * <p>Returns true if {@link #connect} has completed, and {@link #close} has not been
      * called, and the {@link Tag} is not known to be out of range.
      * <p>Does not cause RF activity, and does not block.
+     *
      * @return true if I/O operations should be possible
      */
     public boolean isConnected();

@@ -41,9 +41,8 @@ import java.io.IOException;
  * there is no mandatory set of tags for which all Android devices with NFC
  * must support {@link NdefFormatable}.
  *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class NdefFormatable extends BasicTagTechnology {
     private static final String TAG = "NFC";
@@ -85,7 +84,9 @@ public final class NdefFormatable extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
-     * @param firstMessage the NDEF message to write after formatting
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param firstMessage the NDEF message to write after formatting, can be null
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
      * @throws FormatException if the NDEF Message to write is malformed
@@ -104,6 +105,8 @@ public final class NdefFormatable extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param firstMessage the NDEF message to write after formatting
      * @throws TagLostException if the tag leaves the field

@@ -55,7 +55,7 @@ import java.nio.ByteOrder;
  * MIFARE Classic cards that have been formatted according to the
  * MIFARE Application Directory (MAD) specification.
  * <li>{@link #KEY_NFC_FORUM} is the well-known key for MIFARE Classic cards that
- * have been formatted according to the NFC
+ * have been formatted according to the NXP specification for NDEF on MIFARE Classic.
  *
  * <p>Implementation of this class on a Android NFC device is optional.
  * If it is not implemented, then
@@ -64,6 +64,9 @@ import java.nio.ByteOrder;
  * and {@link Ndef#MIFARE_CLASSIC} NDEF tags will also be supported. In either case,
  * {@link NfcA} will also be enumerated on the tag, because all MIFARE Classic tags are also
  * {@link NfcA}.
+ *
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class MifareClassic extends BasicTagTechnology {
     /**
@@ -319,6 +322,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param sectorIndex index of sector to authenticate, starting from 0
      * @param key 6-byte authentication key
      * @return true on success, false on authentication failure
@@ -343,6 +348,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param sectorIndex index of sector to authenticate, starting from 0
      * @param key 6-byte authentication key
@@ -398,6 +405,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param blockIndex index of block to read, starting from 0
      * @return 16 byte block
      * @throws TagLostException if the tag leaves the field
@@ -417,6 +426,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param blockIndex index of block to write, starting from 0
      * @param data 16 bytes of data to write
@@ -445,6 +456,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param blockIndex index of block to increment, starting from 0
      * @param value non-negative to increment by
      * @throws TagLostException if the tag leaves the field
@@ -470,6 +483,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param blockIndex index of block to decrement, starting from 0
      * @param value non-negative to decrement by
@@ -497,6 +512,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param blockIndex index of block to copy to
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
@@ -516,6 +533,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param blockIndex index of block to copy from
      * @throws TagLostException if the tag leaves the field
@@ -540,6 +559,8 @@ public final class MifareClassic extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @see NfcA#transceive
      */
