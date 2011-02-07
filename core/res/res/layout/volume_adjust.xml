@@ -17,56 +17,48 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@android:drawable/dialog_full_holo_dark"
     android:gravity="left">
 
     <LinearLayout
-        android:layout_width="416dip"
-        android:layout_height="wrap_content"
-        android:paddingLeft="16dip"
-        android:paddingTop="16dip"
-        android:paddingRight="16dip"
-        android:paddingBottom="8dip"
-        android:orientation="vertical">
-
-    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dip"
-        android:gravity="left">
-    
+        android:layout_marginTop="80dip"
+        android:background="@android:drawable/dialog_full_holo_dark"
+        android:orientation="horizontal"
+        >
+
+        <LinearLayout
+            android:id="@+id/slider_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <!-- Sliders go here -->
+        </LinearLayout>
+
         <ImageView
-            android:id="@+id/other_stream_icon"
+            android:id="@+id/expand_button_divider"
+            android:src="?attr/dividerVertical"
+            android:layout_width="wrap_content"
+            android:layout_height="32dip"
+            android:scaleType="fitXY"
+            android:layout_gravity="top"
+            android:layout_marginTop="16dip"
+            android:layout_marginBottom="16dip"
+            />
+
+        <ImageView
+            android:id="@+id/expand_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="16dip" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/message"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
+            android:layout_gravity="top"
+            android:padding="16dip"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_sysbar_quicksettings"
+            />
+        
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/additional_message"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <ImageView
-        android:id="@+id/ringer_stream_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dip" />
-
-    <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:id="@+id/level"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    </LinearLayout>
 </FrameLayout>
 
 
