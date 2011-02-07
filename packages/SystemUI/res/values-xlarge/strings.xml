@@ -38,4 +38,9 @@
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false">" – "</string>
 
+    <!-- Notification text: when GPS is getting a fix [CHAR LIMIT=50] -->
+    <string name="gps_notification_searching_text">Searching for GPS</string>
+
+    <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
+    <string name="gps_notification_found_text">Location set by GPS</string>
 </resources>

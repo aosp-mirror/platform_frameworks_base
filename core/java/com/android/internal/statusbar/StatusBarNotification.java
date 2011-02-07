@@ -63,8 +63,7 @@ public class StatusBarNotification implements Parcelable {
         this.initialPid = initialPid;
         this.notification = notification;
 
-        this.priority = ((notification.flags & Notification.FLAG_ONGOING_EVENT) != 0)
-            ? PRIORITY_ONGOING : PRIORITY_NORMAL;
+        this.priority = PRIORITY_NORMAL;
     }
 
     public StatusBarNotification(Parcel in) {
