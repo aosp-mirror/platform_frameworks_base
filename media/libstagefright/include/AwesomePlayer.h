@@ -119,6 +119,10 @@ private:
         // sufficient data to begin playback and finish the preparation phase
         // for good.
         PREPARING_CONNECTED = 2048,
+
+        // We're triggering a single video event to display the first frame
+        // after the seekpoint.
+        SEEK_PREVIEW        = 4096,
     };
 
     mutable Mutex mLock;
