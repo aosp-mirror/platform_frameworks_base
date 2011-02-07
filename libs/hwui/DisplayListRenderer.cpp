@@ -68,6 +68,10 @@ DisplayList::DisplayList(const DisplayListRenderer& recorder) {
 }
 
 DisplayList::~DisplayList() {
+    clearResources();
+}
+
+void DisplayList::clearResources() {
     sk_free((void*) mReader.base());
 
     Caches& caches = Caches::getInstance();
@@ -98,12 +102,17 @@ DisplayList::~DisplayList() {
     mMatrices.clear();
 }
 
-void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorder) {
+void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing) {
     const SkWriter32& writer = recorder.writeStream();
     init();
 
     if (writer.size() == 0) {
         return;
+    }
+
+    if (reusing) {
+        // re-using display list - clear out previous allocations
+        clearResources();
     }
 
     size_t size = writer.size();
@@ -531,7 +540,7 @@ DisplayList* DisplayListRenderer::getDisplayList() {
     if (mDisplayList == NULL) {
         mDisplayList = new DisplayList(*this);
     } else {
-        mDisplayList->initFromDisplayListRenderer(*this);
+        mDisplayList->initFromDisplayListRenderer(*this, true);
     }
     return mDisplayList;
 }
