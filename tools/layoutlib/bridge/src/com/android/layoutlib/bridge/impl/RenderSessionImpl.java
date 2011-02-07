@@ -18,9 +18,7 @@ package com.android.layoutlib.bridge.impl;
 
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_ANIM_NOT_FOUND;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_INFLATION;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_LOCK_INTERRUPTED;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_NOT_INFLATED;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_TIMEOUT;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
@@ -28,7 +26,6 @@ import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
-import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
@@ -36,7 +33,6 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.ViewInfo;
-import com.android.ide.common.rendering.api.RenderResources.FrameworkResourceIdProvider;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
 import com.android.internal.util.XmlUtils;
@@ -88,8 +84,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Class implementing the render session.
@@ -99,22 +93,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * be done on the layout.
  *
  */
-public class RenderSessionImpl extends FrameworkResourceIdProvider {
+public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     private static final int DEFAULT_TITLE_BAR_HEIGHT = 25;
     private static final int DEFAULT_STATUS_BAR_HEIGHT = 25;
 
-    /**
-     * The current context being rendered. This is set through {@link #acquire(long)} and
-     * {@link #init(long)}, and unset in {@link #release()}.
-     */
-    private static BridgeContext sCurrentContext = null;
-
-    private final SessionParams mParams;
-
     // scene state
     private RenderSession mScene;
-    private BridgeContext mContext;
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
     private ResourceValue mWindowBackground;
@@ -153,8 +138,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @see LayoutBridge#createScene(com.android.layoutlib.api.SceneParams)
      */
     public RenderSessionImpl(SessionParams params) {
-        // copy the params.
-        mParams = new SessionParams(params);
+        super(new SessionParams(params));
     }
 
     /**
@@ -168,29 +152,18 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @see #acquire(long)
      * @see #release()
      */
+    @Override
     public Result init(long timeout) {
-        // acquire the lock. if the result is null, lock was just acquired, otherwise, return
-        // the result.
-        Result result = acquireLock(timeout);
-        if (result != null) {
+        Result result = super.init(timeout);
+        if (result.isSuccess() == false) {
             return result;
         }
 
-        // setup the display Metrics.
-        DisplayMetrics metrics = new DisplayMetrics();
-        metrics.densityDpi = mParams.getDensity().getDpiValue();
-        metrics.density = metrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT;
-        metrics.scaledDensity = metrics.density;
-        metrics.widthPixels = mParams.getScreenWidth();
-        metrics.heightPixels = mParams.getScreenHeight();
-        metrics.xdpi = mParams.getXdpi();
-        metrics.ydpi = mParams.getYdpi();
+        SessionParams params = getParams();
+        BridgeContext context = getContext();
 
-        RenderResources resources = mParams.getResources();
-
-        // build the context
-        mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getProjectCallback(), mParams.getTargetSdkVersion());
+        RenderResources resources = getParams().getResources();
+        DisplayMetrics metrics = getContext().getMetrics();
 
         // use default of true in case it's not found to use alpha by default
         mIsAlphaChannelImage  = getBooleanThemeValue(resources,
@@ -199,150 +172,20 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         mWindowIsFloating = getBooleanThemeValue(resources, "windowIsFloating",
                 true /*defaultValue*/);
 
-        setUp();
-
         findBackground(resources);
         findStatusBar(resources, metrics);
         findActionBar(resources, metrics);
         findSystemBar(resources, metrics);
 
         // build the inflater and parser.
-        mInflater = new BridgeInflater(mContext, mParams.getProjectCallback());
-        mContext.setBridgeInflater(mInflater);
-        mInflater.setFactory2(mContext);
+        mInflater = new BridgeInflater(context, params.getProjectCallback());
+        context.setBridgeInflater(mInflater);
+        mInflater.setFactory2(context);
 
-        mBlockParser = new BridgeXmlBlockParser(mParams.getLayoutDescription(),
-                mContext, false /* platformResourceFlag */);
-
-        return SUCCESS.createResult();
-    }
-
-    /**
-     * Prepares the scene for action.
-     * <p>
-     * This call is blocking if another rendering/inflating is currently happening, and will return
-     * whether the preparation worked.
-     *
-     * The preparation can fail if another rendering took too long and the timeout was elapsed.
-     *
-     * More than one call to this from the same thread will have no effect and will return
-     * {@link Result#SUCCESS}.
-     *
-     * After scene actions have taken place, only one call to {@link #release()} must be
-     * done.
-     *
-     * @param timeout the time to wait if another rendering is happening.
-     *
-     * @return whether the scene was prepared
-     *
-     * @see #release()
-     *
-     * @throws IllegalStateException if {@link #init(long)} was never called.
-     */
-    public Result acquire(long timeout) {
-        if (mContext == null) {
-            throw new IllegalStateException("After scene creation, #init() must be called");
-        }
-
-        // acquire the lock. if the result is null, lock was just acquired, otherwise, return
-        // the result.
-        Result result = acquireLock(timeout);
-        if (result != null) {
-            return result;
-        }
-
-        setUp();
+        mBlockParser = new BridgeXmlBlockParser(params.getLayoutDescription(),
+                context, false /* platformResourceFlag */);
 
         return SUCCESS.createResult();
-    }
-
-    /**
-     * Acquire the lock so that the scene can be acted upon.
-     * <p>
-     * This returns null if the lock was just acquired, otherwise it returns
-     * {@link Result#SUCCESS} if the lock already belonged to that thread, or another
-     * instance (see {@link Result#getStatus()}) if an error occurred.
-     *
-     * @param timeout the time to wait if another rendering is happening.
-     * @return null if the lock was just acquire or another result depending on the state.
-     *
-     * @throws IllegalStateException if the current context is different than the one owned by
-     *      the scene.
-     */
-    private Result acquireLock(long timeout) {
-        ReentrantLock lock = Bridge.getLock();
-        if (lock.isHeldByCurrentThread() == false) {
-            try {
-                boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
-
-                if (acquired == false) {
-                    return ERROR_TIMEOUT.createResult();
-                }
-            } catch (InterruptedException e) {
-                return ERROR_LOCK_INTERRUPTED.createResult();
-            }
-        } else {
-            // This thread holds the lock already. Checks that this wasn't for a different context.
-            // If this is called by init, mContext will be null and so should sCurrentContext
-            // anyway
-            if (mContext != sCurrentContext) {
-                throw new IllegalStateException("Acquiring different scenes from same thread without releases");
-            }
-            return SUCCESS.createResult();
-        }
-
-        return null;
-    }
-
-    /**
-     * Cleans up the scene after an action.
-     */
-    public void release() {
-        ReentrantLock lock = Bridge.getLock();
-
-        // with the use of finally blocks, it is possible to find ourself calling this
-        // without a successful call to prepareScene. This test makes sure that unlock() will
-        // not throw IllegalMonitorStateException.
-        if (lock.isHeldByCurrentThread()) {
-            tearDown();
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Sets up the session for rendering.
-     * <p/>
-     * The counterpart is {@link #tearDown()}.
-     */
-    private void setUp() {
-        // make sure the Resources object references the context (and other objects) for this
-        // scene
-        mContext.initResources();
-        sCurrentContext = mContext;
-
-        LayoutLog currentLog = mParams.getLog();
-        Bridge.setLog(currentLog);
-        mContext.getRenderResources().setFrameworkResourceIdProvider(this);
-        mContext.getRenderResources().setLogger(currentLog);
-    }
-
-    /**
-     * Tear down the session after rendering.
-     * <p/>
-     * The counterpart is {@link #setUp()}.
-     */
-    private void tearDown() {
-        // Make sure to remove static references, otherwise we could not unload the lib
-        mContext.disposeResources();
-        sCurrentContext = null;
-
-        Bridge.setLog(null);
-        mContext.getRenderResources().setFrameworkResourceIdProvider(null);
-        mContext.getRenderResources().setLogger(null);
-    }
-
-    public static BridgeContext getCurrentContext() {
-        return sCurrentContext;
     }
 
     /**
@@ -358,8 +201,11 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
         try {
 
-            if (mWindowIsFloating || mParams.isForceNoDecor()) {
-                mViewRoot = mContentRoot = new FrameLayout(mContext);
+            SessionParams params = getParams();
+            BridgeContext context = getContext();
+
+            if (mWindowIsFloating || params.isForceNoDecor()) {
+                mViewRoot = mContentRoot = new FrameLayout(context);
             } else {
                 /*
                  * we're creating the following layout
@@ -377,15 +223,15 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
                  */
 
-                LinearLayout topLayout = new LinearLayout(mContext);
+                LinearLayout topLayout = new LinearLayout(context);
                 mViewRoot = topLayout;
                 topLayout.setOrientation(LinearLayout.VERTICAL);
 
                 if (mStatusBarSize > 0) {
                     // system bar
                     try {
-                        PhoneSystemBar systemBar = new PhoneSystemBar(mContext,
-                                mParams.getDensity());
+                        PhoneSystemBar systemBar = new PhoneSystemBar(context,
+                                params.getDensity());
                         systemBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mStatusBarSize));
@@ -398,9 +244,9 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
                     try {
-                        FakeActionBar actionBar = new FakeActionBar(mContext,
-                                mParams.getDensity(),
-                                mParams.getAppLabel(), mParams.getAppIcon());
+                        FakeActionBar actionBar = new FakeActionBar(context,
+                                params.getDensity(),
+                                params.getAppLabel(), params.getAppIcon());
                         actionBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mActionBarSize));
@@ -410,8 +256,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                     }
                 } else if (mTitleBarSize > 0) {
                     try {
-                        TitleBar titleBar = new TitleBar(mContext,
-                                mParams.getDensity(), mParams.getAppLabel());
+                        TitleBar titleBar = new TitleBar(context,
+                                params.getDensity(), params.getAppLabel());
                         titleBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mTitleBarSize));
@@ -423,18 +269,18 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
 
                 // content frame
-                mContentRoot = new FrameLayout(mContext);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                mContentRoot = new FrameLayout(context);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                         LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-                params.weight = 1;
-                mContentRoot.setLayoutParams(params);
+                layoutParams.weight = 1;
+                mContentRoot.setLayoutParams(layoutParams);
                 topLayout.addView(mContentRoot);
 
                 if (mSystemBarSize > 0) {
                     // system bar
                     try {
-                        TabletSystemBar systemBar = new TabletSystemBar(mContext,
-                                mParams.getDensity());
+                        TabletSystemBar systemBar = new TabletSystemBar(context,
+                                params.getDensity());
                         systemBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mSystemBarSize));
@@ -449,7 +295,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
             // Sets the project callback (custom view loader) to the fragment delegate so that
             // it can instantiate the custom Fragment.
-            Fragment_Delegate.setProjectCallback(mParams.getProjectCallback());
+            Fragment_Delegate.setProjectCallback(params.getProjectCallback());
 
             View view = mInflater.inflate(mBlockParser, mContentRoot);
 
@@ -465,11 +311,11 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             mViewRoot.dispatchAttachedToWindow(info, 0);
 
             // post-inflate process. For now this supports TabHost/TabWidget
-            postInflateProcess(view, mParams.getProjectCallback());
+            postInflateProcess(view, params.getProjectCallback());
 
             // get the background drawable
             if (mWindowBackground != null) {
-                Drawable d = ResourceHelper.getDrawable(mWindowBackground, mContext);
+                Drawable d = ResourceHelper.getDrawable(mWindowBackground, context);
                 mContentRoot.setBackgroundDrawable(d);
             }
 
@@ -505,6 +351,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
     public Result render(boolean freshRender) {
         checkLock();
 
+        SessionParams params = getParams();
+
         try {
             if (mViewRoot == null) {
                 return ERROR_NOT_INFLATED.createResult();
@@ -512,14 +360,14 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             // measure the views
             int w_spec, h_spec;
 
-            RenderingMode renderingMode = mParams.getRenderingMode();
+            RenderingMode renderingMode = params.getRenderingMode();
 
             // only do the screen measure when needed.
             boolean newRenderSize = false;
             if (mMeasuredScreenWidth == -1) {
                 newRenderSize = true;
-                mMeasuredScreenWidth = mParams.getScreenWidth();
-                mMeasuredScreenHeight = mParams.getScreenHeight();
+                mMeasuredScreenWidth = params.getScreenWidth();
+                mMeasuredScreenHeight = params.getScreenHeight();
 
                 if (renderingMode != RenderingMode.NORMAL) {
                     // measure the full size needed by the layout.
@@ -564,8 +412,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             // create the BufferedImage into which the layout will be rendered.
             boolean newImage = false;
             if (newRenderSize || mCanvas == null) {
-                if (mParams.getImageFactory() != null) {
-                    mImage = mParams.getImageFactory().getImage(
+                if (params.getImageFactory() != null) {
+                    mImage = params.getImageFactory().getImage(
                             mMeasuredScreenWidth,
                             mMeasuredScreenHeight);
                 } else {
@@ -576,11 +424,11 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                     newImage = true;
                 }
 
-                if (mParams.isBgColorOverridden()) {
+                if (params.isBgColorOverridden()) {
                     // since we override the content, it's the same as if it was a new image.
                     newImage = true;
                     Graphics2D gc = mImage.createGraphics();
-                    gc.setColor(new Color(mParams.getOverrideBgColor(), true));
+                    gc.setColor(new Color(params.getOverrideBgColor(), true));
                     gc.setComposite(AlphaComposite.Src);
                     gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
                     gc.dispose();
@@ -588,11 +436,11 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
                 // create an Android bitmap around the BufferedImage
                 Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
-                        true /*isMutable*/, mParams.getDensity());
+                        true /*isMutable*/, params.getDensity());
 
                 // create a Canvas around the Android bitmap
                 mCanvas = new Canvas(bitmap);
-                mCanvas.setDensity(mParams.getDensity().getDpiValue());
+                mCanvas.setDensity(params.getDensity().getDpiValue());
             }
 
             if (freshRender && newImage == false) {
@@ -638,27 +486,29 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             boolean isFrameworkAnimation, IAnimationListener listener) {
         checkLock();
 
+        BridgeContext context = getContext();
+
         // find the animation file.
         ResourceValue animationResource = null;
         int animationId = 0;
         if (isFrameworkAnimation) {
-            animationResource = mContext.getRenderResources().getFrameworkResource(
+            animationResource = context.getRenderResources().getFrameworkResource(
                     ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
                 animationId = Bridge.getResourceId(ResourceType.ANIMATOR, animationName);
             }
         } else {
-            animationResource = mContext.getRenderResources().getProjectResource(
+            animationResource = context.getRenderResources().getProjectResource(
                     ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = mContext.getProjectCallback().getResourceId(
+                animationId = context.getProjectCallback().getResourceId(
                         ResourceType.ANIMATOR, animationName);
             }
         }
 
         if (animationResource != null) {
             try {
-                Animator anim = AnimatorInflater.loadAnimator(mContext, animationId);
+                Animator anim = AnimatorInflater.loadAnimator(context, animationId);
                 if (anim != null) {
                     anim.setTarget(targetObject);
 
@@ -694,8 +544,10 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             final int index, IAnimationListener listener) {
         checkLock();
 
+        BridgeContext context = getContext();
+
         // create a block parser for the XML
-        BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(childXml, mContext,
+        BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(childXml, context,
                 false /* platformResourceFlag */);
 
         // inflate the child without adding it to the root since we want to control where it'll
@@ -1018,37 +870,9 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         }
     }
 
-    /**
-     * Returns the log associated with the session.
-     * @return the log or null if there are none.
-     */
-    public LayoutLog getLog() {
-        if (mParams != null) {
-            return mParams.getLog();
-        }
-
-        return null;
-    }
-
-    /**
-     * Checks that the lock is owned by the current thread and that the current context is the one
-     * from this scene.
-     *
-     * @throws IllegalStateException if the current context is different than the one owned by
-     *      the scene, or if {@link #acquire(long)} was not called.
-     */
-    private void checkLock() {
-        ReentrantLock lock = Bridge.getLock();
-        if (lock.isHeldByCurrentThread() == false) {
-            throw new IllegalStateException("scene must be acquired first. see #acquire(long)");
-        }
-        if (sCurrentContext != mContext) {
-            throw new IllegalStateException("Thread acquired a scene but is rendering a different one");
-        }
-    }
 
     private void findBackground(RenderResources resources) {
-        if (mParams.isBgColorOverridden() == false) {
+        if (getParams().isBgColorOverridden() == false) {
             mWindowBackground = resources.findItemInTheme("windowBackground");
             if (mWindowBackground != null) {
                 mWindowBackground = resources.resolveResValue(mWindowBackground);
@@ -1057,7 +881,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
     }
 
     private boolean isTabletUi() {
-        return mParams.getConfigScreenSize() == ScreenSize.XLARGE;
+        return getParams().getConfigScreenSize() == ScreenSize.XLARGE;
     }
 
     private void findStatusBar(RenderResources resources, DisplayMetrics metrics) {
@@ -1254,7 +1078,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                     tabHost.getResources().getDrawable(android.R.drawable.ic_menu_info_details))
                     .setContent(new TabHost.TabContentFactory() {
                         public View createTabContent(String tag) {
-                            return new LinearLayout(mContext);
+                            return new LinearLayout(getContext());
                         }
                     });
             tabHost.addTab(spec);
@@ -1316,7 +1140,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         }
 
         ViewInfo result = new ViewInfo(view.getClass().getName(),
-                mContext.getViewKey(view),
+                getContext().getViewKey(view),
                 view.getLeft(), view.getTop() + offset, view.getRight(), view.getBottom() + offset,
                 view, view.getLayoutParams());
 
@@ -1364,7 +1188,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
     }
 
     public Map<String, String> getDefaultProperties(Object viewObject) {
-        return mContext.getDefaultPropMap(viewObject);
+        return getContext().getDefaultPropMap(viewObject);
     }
 
     public void setScene(RenderSession session) {
@@ -1373,12 +1197,5 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
     public RenderSession getSession() {
         return mScene;
-    }
-
-    // --- FrameworkResourceIdProvider methods
-
-    @Override
-    public Integer getId(ResourceType resType, String resName) {
-        return Bridge.getResourceId(resType, resName);
     }
 }
