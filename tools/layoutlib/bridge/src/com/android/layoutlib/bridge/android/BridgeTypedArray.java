@@ -690,7 +690,7 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        return ResourceHelper.getDrawable(value, mContext, mResourceData[index].isFramework());
+        return ResourceHelper.getDrawable(value, mContext);
     }
 
 

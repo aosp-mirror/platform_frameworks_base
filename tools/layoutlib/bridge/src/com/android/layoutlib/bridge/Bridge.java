@@ -21,7 +21,7 @@ import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
 import com.android.ide.common.rendering.api.Capability;
 import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
@@ -293,15 +293,15 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
     /**
      * Starts a layout session by inflating and rendering it. The method returns a
-     * {@link ILayoutScene} on which further actions can be taken.
+     * {@link RenderSession} on which further actions can be taken.
      *
-     * @param params the {@link SceneParams} object with all the information necessary to create
+     * @param params the {@link RenderParams} object with all the information necessary to create
      *           the scene.
-     * @return a new {@link ILayoutScene} object that contains the result of the layout.
+     * @return a new {@link RenderSession} object that contains the result of the layout.
      * @since 5
      */
     @Override
-    public RenderSession createSession(Params params) {
+    public RenderSession createSession(RenderParams params) {
         try {
             Result lastResult = SUCCESS.createResult();
             RenderSessionImpl scene = new RenderSessionImpl(params);
@@ -331,10 +331,6 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.android.layoutlib.api.ILayoutLibBridge#clearCaches(java.lang.Object)
-     */
     @Override
     public void clearCaches(Object projectKey) {
         if (projectKey != null) {

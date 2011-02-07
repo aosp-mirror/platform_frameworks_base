@@ -29,14 +29,13 @@ import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
-import com.android.ide.common.rendering.api.Params;
+import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
-import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.ide.common.rendering.api.ViewInfo;
-import com.android.ide.common.rendering.api.Params.RenderingMode;
+import com.android.ide.common.rendering.api.RenderParams.RenderingMode;
 import com.android.ide.common.rendering.api.RenderResources.FrameworkResourceIdProvider;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.internal.util.XmlUtils;
@@ -47,10 +46,15 @@ import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeWindow;
 import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.resources.Density;
+import com.android.layoutlib.bridge.bars.FakeActionBar;
+import com.android.layoutlib.bridge.bars.PhoneSystemBar;
+import com.android.layoutlib.bridge.bars.TabletSystemBar;
+import com.android.layoutlib.bridge.bars.TitleBar;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenSize;
 import com.android.util.Pair;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -105,7 +109,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      */
     private static BridgeContext sCurrentContext = null;
 
-    private final Params mParams;
+    private final RenderParams mParams;
 
     // scene state
     private RenderSession mScene;
@@ -113,17 +117,18 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
     private BridgeXmlBlockParser mBlockParser;
     private BridgeInflater mInflater;
     private ResourceValue mWindowBackground;
-    private FrameLayout mViewRoot;
+    private ViewGroup mViewRoot;
+    private FrameLayout mContentRoot;
     private Canvas mCanvas;
     private int mMeasuredScreenWidth = -1;
     private int mMeasuredScreenHeight = -1;
-    private boolean mIsAlphaChannelImage = true;
+    private boolean mIsAlphaChannelImage;
+    private boolean mWindowIsFloating;
 
     private int mStatusBarSize;
-    private int mTopBarSize;
     private int mSystemBarSize;
-    private int mTopOffset;
-    private int mTotalBarSize;
+    private int mTitleBarSize;
+    private int mActionBarSize;
 
 
     // information being returned through the API
@@ -146,9 +151,9 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      *
      * @see LayoutBridge#createScene(com.android.layoutlib.api.SceneParams)
      */
-    public RenderSessionImpl(Params params) {
+    public RenderSessionImpl(RenderParams params) {
         // copy the params.
-        mParams = new Params(params);
+        mParams = new RenderParams(params);
     }
 
     /**
@@ -172,8 +177,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
         // setup the display Metrics.
         DisplayMetrics metrics = new DisplayMetrics();
-        metrics.densityDpi = mParams.getDensity();
-        metrics.density = mParams.getDensity() / (float) DisplayMetrics.DENSITY_DEFAULT;
+        metrics.densityDpi = mParams.getDensity().getDpiValue();
+        metrics.density = metrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT;
         metrics.scaledDensity = metrics.density;
         metrics.widthPixels = mParams.getScreenWidth();
         metrics.heightPixels = mParams.getScreenHeight();
@@ -190,16 +195,15 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         mIsAlphaChannelImage  = getBooleanThemeValue(resources,
                 "windowIsFloating", true /*defaultValue*/);
 
+        mWindowIsFloating = getBooleanThemeValue(resources, "windowIsFloating",
+                true /*defaultValue*/);
 
         setUp();
 
         findBackground(resources);
         findStatusBar(resources, metrics);
-        findTopBar(resources, metrics);
+        findActionBar(resources, metrics);
         findSystemBar(resources, metrics);
-
-        mTopOffset = mStatusBarSize + mTopBarSize;
-        mTotalBarSize = mTopOffset + mSystemBarSize;
 
         // build the inflater and parser.
         mInflater = new BridgeInflater(mContext, mParams.getProjectCallback());
@@ -353,13 +357,100 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
         try {
 
-            mViewRoot = new FrameLayout(mContext);
+            if (mWindowIsFloating || mParams.isForceNoDecor()) {
+                mViewRoot = mContentRoot = new FrameLayout(mContext);
+            } else {
+                /*
+                 * we're creating the following layout
+                 *
+                   +-------------------------------------------------+
+                   | System bar (only in phone UI)                   |
+                   +-------------------------------------------------+
+                   | Title/Action bar (optional)                     |
+                   +-------------------------------------------------+
+                   | Content, vertical extending                     |
+                   |                                                 |
+                   +-------------------------------------------------+
+                   | System bar (only in tablet UI)                  |
+                   +-------------------------------------------------+
+
+                 */
+
+                LinearLayout topLayout = new LinearLayout(mContext);
+                mViewRoot = topLayout;
+                topLayout.setOrientation(LinearLayout.VERTICAL);
+
+                if (mStatusBarSize > 0) {
+                    // system bar
+                    try {
+                        PhoneSystemBar systemBar = new PhoneSystemBar(mContext,
+                                mParams.getDensity());
+                        systemBar.setLayoutParams(
+                                new LinearLayout.LayoutParams(
+                                        LayoutParams.MATCH_PARENT, mStatusBarSize));
+                        topLayout.addView(systemBar);
+                    } catch (XmlPullParserException e) {
+
+                    }
+                }
+
+                // if the theme says no title/action bar, then the size will be 0
+                if (mActionBarSize > 0) {
+                    try {
+                        FakeActionBar actionBar = new FakeActionBar(mContext,
+                                mParams.getDensity(),
+                                mParams.getAppLabel(), mParams.getAppIcon());
+                        actionBar.setLayoutParams(
+                                new LinearLayout.LayoutParams(
+                                        LayoutParams.MATCH_PARENT, mActionBarSize));
+                        topLayout.addView(actionBar);
+                    } catch (XmlPullParserException e) {
+
+                    }
+                } else if (mTitleBarSize > 0) {
+                    try {
+                        TitleBar titleBar = new TitleBar(mContext,
+                                mParams.getDensity(), mParams.getAppLabel());
+                        titleBar.setLayoutParams(
+                                new LinearLayout.LayoutParams(
+                                        LayoutParams.MATCH_PARENT, mTitleBarSize));
+                        topLayout.addView(titleBar);
+                    } catch (XmlPullParserException e) {
+
+                    }
+                }
+
+
+                // content frame
+                mContentRoot = new FrameLayout(mContext);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                params.weight = 1;
+                mContentRoot.setLayoutParams(params);
+                topLayout.addView(mContentRoot);
+
+                if (mSystemBarSize > 0) {
+                    // system bar
+                    try {
+                        TabletSystemBar systemBar = new TabletSystemBar(mContext,
+                                mParams.getDensity());
+                        systemBar.setLayoutParams(
+                                new LinearLayout.LayoutParams(
+                                        LayoutParams.MATCH_PARENT, mSystemBarSize));
+                        topLayout.addView(systemBar);
+                    } catch (XmlPullParserException e) {
+
+                    }
+                }
+
+            }
+
 
             // Sets the project callback (custom view loader) to the fragment delegate so that
             // it can instantiate the custom Fragment.
             Fragment_Delegate.setProjectCallback(mParams.getProjectCallback());
 
-            View view = mInflater.inflate(mBlockParser, mViewRoot);
+            View view = mInflater.inflate(mBlockParser, mContentRoot);
 
             Fragment_Delegate.setProjectCallback(null);
 
@@ -377,9 +468,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
             // get the background drawable
             if (mWindowBackground != null) {
-                Drawable d = ResourceHelper.getDrawable(mWindowBackground,
-                        mContext, true /* isFramework */);
-                mViewRoot.setBackgroundDrawable(d);
+                Drawable d = ResourceHelper.getDrawable(mWindowBackground, mContext);
+                mContentRoot.setBackgroundDrawable(d);
             }
 
             return SUCCESS.createResult();
@@ -408,8 +498,8 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see SceneParams#getRenderingMode()
-     * @see LayoutScene#render(long)
+     * @see RenderParams#getRenderingMode()
+     * @see RenderSession#render(long)
      */
     public Result render(boolean freshRender) {
         checkLock();
@@ -428,7 +518,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
             if (mMeasuredScreenWidth == -1) {
                 newRenderSize = true;
                 mMeasuredScreenWidth = mParams.getScreenWidth();
-                mMeasuredScreenHeight = mParams.getScreenHeight() - mTotalBarSize;
+                mMeasuredScreenHeight = mParams.getScreenHeight();
 
                 if (renderingMode != RenderingMode.NORMAL) {
                     // measure the full size needed by the layout.
@@ -476,11 +566,11 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 if (mParams.getImageFactory() != null) {
                     mImage = mParams.getImageFactory().getImage(
                             mMeasuredScreenWidth,
-                            mMeasuredScreenHeight + mTotalBarSize);
+                            mMeasuredScreenHeight);
                 } else {
                     mImage = new BufferedImage(
                             mMeasuredScreenWidth,
-                            mMeasuredScreenHeight + mTotalBarSize,
+                            mMeasuredScreenHeight,
                             BufferedImage.TYPE_INT_ARGB);
                     newImage = true;
                 }
@@ -491,46 +581,26 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                     Graphics2D gc = mImage.createGraphics();
                     gc.setColor(new Color(mParams.getOverrideBgColor(), true));
                     gc.setComposite(AlphaComposite.Src);
-                    gc.fillRect(0, 0, mMeasuredScreenWidth,
-                            mMeasuredScreenHeight + mTotalBarSize);
+                    gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
                     gc.dispose();
                 }
 
                 // create an Android bitmap around the BufferedImage
                 Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
-                        true /*isMutable*/,
-                        Density.getEnum(mParams.getDensity()));
+                        true /*isMutable*/, mParams.getDensity());
 
                 // create a Canvas around the Android bitmap
                 mCanvas = new Canvas(bitmap);
-                mCanvas.setDensity(mParams.getDensity());
-                mCanvas.translate(0, mTopOffset);
+                mCanvas.setDensity(mParams.getDensity().getDpiValue());
             }
 
             if (freshRender && newImage == false) {
                 Graphics2D gc = mImage.createGraphics();
                 gc.setComposite(AlphaComposite.Src);
 
-                if (mStatusBarSize > 0) {
-                    gc.setColor(new Color(0xFF3C3C3C, true));
-                    gc.fillRect(0, 0, mMeasuredScreenWidth, mStatusBarSize);
-                }
-
-                if (mTopBarSize > 0) {
-                    gc.setColor(new Color(0xFF7F7F7F, true));
-                    gc.fillRect(0, mStatusBarSize, mMeasuredScreenWidth, mTopOffset);
-                }
-
-                // erase the rest
                 gc.setColor(new Color(0x00000000, true));
-                gc.fillRect(0, mTopOffset,
-                        mMeasuredScreenWidth, mMeasuredScreenHeight + mTopOffset);
-
-                if (mSystemBarSize > 0) {
-                    gc.setColor(new Color(0xFF3C3C3C, true));
-                    gc.fillRect(0, mMeasuredScreenHeight + mTopOffset,
-                            mMeasuredScreenWidth, mMeasuredScreenHeight + mTotalBarSize);
-                }
+                gc.fillRect(0, 0,
+                        mMeasuredScreenWidth, mMeasuredScreenHeight);
 
                 // done
                 gc.dispose();
@@ -538,7 +608,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
 
             mViewRoot.draw(mCanvas);
 
-            mViewInfoList = visitAllChildren((ViewGroup)mViewRoot, mContext, mTopOffset);
+            mViewInfoList = startVisitingViews(mViewRoot, 0);
 
             // success!
             return SUCCESS.createResult();
@@ -561,7 +631,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see LayoutScene#animate(Object, String, boolean, IAnimationListener)
+     * @see RenderSession#animate(Object, String, boolean, IAnimationListener)
      */
     public Result animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
@@ -617,7 +687,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see LayoutScene#insertChild(Object, ILayoutPullParser, int, IAnimationListener)
+     * @see RenderSession#insertChild(Object, ILayoutPullParser, int, IAnimationListener)
      */
     public Result insertChild(final ViewGroup parentView, ILayoutPullParser childXml,
             final int index, IAnimationListener listener) {
@@ -696,7 +766,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see LayoutScene#moveChild(Object, Object, int, Map, IAnimationListener)
+     * @see RenderSession#moveChild(Object, Object, int, Map, IAnimationListener)
      */
     public Result moveChild(final ViewGroup newParentView, final View childView, final int index,
             Map<String, String> layoutParamsMap, final IAnimationListener listener) {
@@ -892,7 +962,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
      * @throws IllegalStateException if the current context is different than the one owned by
      *      the scene, or if {@link #acquire(long)} was not called.
      *
-     * @see LayoutScene#removeChild(Object, IAnimationListener)
+     * @see RenderSession#removeChild(Object, IAnimationListener)
      */
     public Result removeChild(final View childView, IAnimationListener listener) {
         checkLock();
@@ -989,40 +1059,12 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         return mParams.getConfigScreenSize() == ScreenSize.XLARGE;
     }
 
-    private boolean isHCApp() {
-        RenderResources resources = mContext.getRenderResources();
-
-        // the app must say it targets 11+ and the theme name must extend Theme.Holo or
-        // Theme.Holo.Light (which does not extend Theme.Holo, but Theme.Light)
-        if (mParams.getTargetSdkVersion() < 11) {
-            return false;
-        }
-
-        StyleResourceValue currentTheme = resources.getCurrentTheme();
-        StyleResourceValue holoTheme = resources.getTheme("Theme.Holo", true /*frameworkTheme*/);
-
-        if (currentTheme == holoTheme ||
-                resources.themeIsParentOf(holoTheme, currentTheme)) {
-            return true;
-        }
-
-        StyleResourceValue holoLightTheme = resources.getTheme("Theme.Holo.Light",
-                true /*frameworkTheme*/);
-
-        if (currentTheme == holoLightTheme ||
-                resources.themeIsParentOf(holoLightTheme, currentTheme)) {
-            return true;
-        }
-
-        return false;
-    }
-
     private void findStatusBar(RenderResources resources, DisplayMetrics metrics) {
         if (isTabletUi() == false) {
             boolean windowFullscreen = getBooleanThemeValue(resources,
                     "windowFullscreen", false /*defaultValue*/);
 
-            if (windowFullscreen == false) {
+            if (windowFullscreen == false && mWindowIsFloating == false) {
                 // default value
                 mStatusBarSize = DEFAULT_STATUS_BAR_HEIGHT;
 
@@ -1041,20 +1083,11 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         }
     }
 
-    private void findTopBar(RenderResources resources, DisplayMetrics metrics) {
-        boolean windowIsFloating = getBooleanThemeValue(resources,
-                "windowIsFloating", true /*defaultValue*/);
-
-        if (windowIsFloating == false) {
-            if (isHCApp()) {
-                findActionBar(resources, metrics);
-            } else {
-                findTitleBar(resources, metrics);
-            }
-        }
-    }
-
     private void findActionBar(RenderResources resources, DisplayMetrics metrics) {
+        if (mWindowIsFloating) {
+            return;
+        }
+
         boolean windowActionBar = getBooleanThemeValue(resources,
                 "windowActionBar", true /*defaultValue*/);
 
@@ -1062,7 +1095,7 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         if (windowActionBar) {
 
             // default size of the window title bar
-            mTopBarSize = DEFAULT_TITLE_BAR_HEIGHT;
+            mActionBarSize = DEFAULT_TITLE_BAR_HEIGHT;
 
             // get value from the theme.
             ResourceValue value = resources.findItemInTheme("actionBarSize");
@@ -1075,44 +1108,43 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
                     // compute the pixel value based on the display metrics
-                    mTopBarSize = (int)typedValue.getDimension(metrics);
+                    mActionBarSize = (int)typedValue.getDimension(metrics);
                 }
             }
-        }
-    }
+        } else {
+            // action bar overrides title bar so only look for this one if action bar is hidden
+            boolean windowNoTitle = getBooleanThemeValue(resources,
+                    "windowNoTitle", false /*defaultValue*/);
 
-    private void findTitleBar(RenderResources resources, DisplayMetrics metrics) {
-        boolean windowNoTitle = getBooleanThemeValue(resources,
-                "windowNoTitle", false /*defaultValue*/);
+            if (windowNoTitle == false) {
 
-        if (windowNoTitle == false) {
+                // default size of the window title bar
+                mTitleBarSize = DEFAULT_TITLE_BAR_HEIGHT;
 
-            // default size of the window title bar
-            mTopBarSize = DEFAULT_TITLE_BAR_HEIGHT;
+                // get value from the theme.
+                ResourceValue value = resources.findItemInTheme("windowTitleSize");
 
-            // get value from the theme.
-            ResourceValue value = resources.findItemInTheme("windowTitleSize");
+                // resolve it
+                value = resources.resolveResValue(value);
 
-            // resolve it
-            value = resources.resolveResValue(value);
-
-            if (value != null) {
-                // get the numerical value, if available
-                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    mTopBarSize = (int)typedValue.getDimension(metrics);
+                if (value != null) {
+                    // get the numerical value, if available
+                    TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                    if (typedValue != null) {
+                        // compute the pixel value based on the display metrics
+                        mTitleBarSize = (int)typedValue.getDimension(metrics);
+                    }
                 }
             }
+
         }
     }
 
     private void findSystemBar(RenderResources resources, DisplayMetrics metrics) {
-        if (isTabletUi() && getBooleanThemeValue(
-                resources, "windowIsFloating", true /*defaultValue*/) == false) {
+        if (isTabletUi() && mWindowIsFloating == false) {
 
             // default value
-            mSystemBarSize = 56; // ??
+            mSystemBarSize = 48; // ??
 
             // get the real value
             ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
@@ -1244,40 +1276,71 @@ public class RenderSessionImpl extends FrameworkResourceIdProvider {
         }
     }
 
+    private List<ViewInfo> startVisitingViews(View view, int offset) {
+        if (view == null) {
+            return null;
+        }
+
+        // adjust the offset to this view.
+        offset += view.getTop();
+
+        if (view == mContentRoot) {
+            return visitAllChildren(mContentRoot, offset);
+        }
+
+        // otherwise, look for mContentRoot in the children
+        if (view instanceof ViewGroup) {
+            ViewGroup group = ((ViewGroup) view);
+
+            for (int i = 0; i < group.getChildCount(); i++) {
+                List<ViewInfo> list = startVisitingViews(group.getChildAt(i), offset);
+                if (list != null) {
+                    return list;
+                }
+            }
+        }
+
+        return null;
+    }
 
     /**
      * Visits a View and its children and generate a {@link ViewInfo} containing the
      * bounds of all the views.
      * @param view the root View
-     * @param context the context.
+     * @param offset an offset for the view bounds.
      */
-    private ViewInfo visit(View view, BridgeContext context, int offset) {
+    private ViewInfo visit(View view, int offset) {
         if (view == null) {
             return null;
         }
 
         ViewInfo result = new ViewInfo(view.getClass().getName(),
-                context.getViewKey(view),
+                mContext.getViewKey(view),
                 view.getLeft(), view.getTop() + offset, view.getRight(), view.getBottom() + offset,
                 view, view.getLayoutParams());
 
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
-            result.setChildren(visitAllChildren(group, context, 0 /*offset*/));
+            result.setChildren(visitAllChildren(group, 0 /*offset*/));
         }
 
         return result;
     }
 
-    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, BridgeContext context,
-            int offset) {
+    /**
+     * Visits all the children of a given ViewGroup generate a list of {@link ViewInfo}
+     * containing the bounds of all the views.
+     * @param view the root View
+     * @param offset an offset for the view bounds.
+     */
+    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset) {
         if (viewGroup == null) {
             return null;
         }
 
         List<ViewInfo> children = new ArrayList<ViewInfo>();
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            children.add(visit(viewGroup.getChildAt(i), context, offset));
+            children.add(visit(viewGroup.getChildAt(i), offset));
         }
         return children;
     }

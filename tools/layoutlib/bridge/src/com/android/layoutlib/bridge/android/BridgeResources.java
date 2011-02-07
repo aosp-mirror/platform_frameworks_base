@@ -22,6 +22,7 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
+import com.android.ninepatch.NinePatch;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
@@ -56,6 +57,18 @@ public final class BridgeResources extends Resources {
     private BridgeContext mContext;
     private IProjectCallback mProjectCallback;
     private boolean[] mPlatformResourceFlag = new boolean[1];
+
+    /**
+     * Simpler wrapper around FileInputStream. This is used when the input stream represent
+     * not a normal bitmap but a nine patch.
+     * This is useful when the InputStream is created in a method but used in another that needs
+     * to know whether this is 9-patch or not, such as BitmapFactory.
+     */
+    public class NinePatchInputStream extends FileInputStream {
+        public NinePatchInputStream(File file) throws FileNotFoundException {
+            super(file);
+        }
+    }
 
     /**
      * This initializes the static field {@link Resources#mSystem} which is used
@@ -129,7 +142,7 @@ public final class BridgeResources extends Resources {
         ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            return ResourceHelper.getDrawable(value, mContext, value.isFramework());
+            return ResourceHelper.getDrawable(value, mContext);
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
@@ -165,44 +178,9 @@ public final class BridgeResources extends Resources {
         ResourceValue resValue = getResourceValue(id, mPlatformResourceFlag);
 
         if (resValue != null) {
-            String value = resValue.getValue();
-            if (value != null) {
-                // first check if the value is a file (xml most likely)
-                File f = new File(value);
-                if (f.isFile()) {
-                    try {
-                        // let the framework inflate the ColorStateList from the XML file, by
-                        // providing an XmlPullParser
-                        KXmlParser parser = new KXmlParser();
-                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileReader(f));
-
-                        return ColorStateList.createFromXml(this,
-                                new BridgeXmlBlockParser(parser, mContext, resValue.isFramework()));
-                    } catch (XmlPullParserException e) {
-                        Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                                "Failed to configure parser for " + value, e, null /*data*/);
-                        // we'll return null below.
-                    } catch (Exception e) {
-                        // this is an error and not warning since the file existence is
-                        // checked before attempting to parse it.
-                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                                "Failed to parse file " + value, e, null /*data*/);
-
-                        return null;
-                    }
-                } else {
-                    // try to load the color state list from an int
-                    try {
-                        int color = ResourceHelper.getColor(value);
-                        return ColorStateList.valueOf(color);
-                    } catch (NumberFormatException e) {
-                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
-                                "Failed to convert " + value + " into a ColorStateList", e,
-                                null /*data*/);
-                        return null;
-                    }
-                }
+            ColorStateList stateList = ResourceHelper.getColorStateList(resValue, mContext);
+            if (stateList != null) {
+                return stateList;
             }
         }
 
@@ -562,13 +540,19 @@ public final class BridgeResources extends Resources {
         ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getValue();
+            String path = value.getValue();
 
-            if (v != null) {
+            if (path != null) {
                 // check this is a file
-                File f = new File(value.getValue());
+                File f = new File(path);
                 if (f.isFile()) {
                     try {
+                        // if it's a nine-patch return a custom input stream so that
+                        // other methods (mainly bitmap factory) can detect it's a 9-patch
+                        // and actually load it as a 9-patch instead of a normal bitmap
+                        if (path.toLowerCase().endsWith(NinePatch.EXTENSION_9PATCH)) {
+                            return new NinePatchInputStream(f);
+                        }
                         return new FileInputStream(f);
                     } catch (FileNotFoundException e) {
                         NotFoundException newE = new NotFoundException();
@@ -590,9 +574,17 @@ public final class BridgeResources extends Resources {
     public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
         getValue(id, value, true);
 
-        File f = new File(value.string.toString());
+        String path = value.string.toString();
+
+        File f = new File(path);
         if (f.isFile()) {
             try {
+                // if it's a nine-patch return a custom input stream so that
+                // other methods (mainly bitmap factory) can detect it's a 9-patch
+                // and actually load it as a 9-patch instead of a normal bitmap
+                if (path.toLowerCase().endsWith(NinePatch.EXTENSION_9PATCH)) {
+                    return new NinePatchInputStream(f);
+                }
                 return new FileInputStream(f);
             } catch (FileNotFoundException e) {
                 NotFoundException exception = new NotFoundException();
