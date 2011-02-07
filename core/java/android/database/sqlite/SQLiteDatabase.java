@@ -48,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
@@ -198,7 +199,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private boolean mTransactionUsingExecSql;
 
     /** Synchronize on this when accessing the database */
-    private final ReentrantLock mLock = new ReentrantLock(true);
+    private final DatabaseReentrantLock mLock = new DatabaseReentrantLock(true);
 
     private long mLockAcquiredWallTime = 0L;
     private long mLockAcquiredThreadTime = 0L;
@@ -414,6 +415,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     /* package */ void lock() {
         lock(false);
     }
+    private static final long LOCK_WAIT_PERIOD = 30L;
     private void lock(boolean forced) {
         // make sure this method is NOT being called from a 'synchronized' method
         if (Thread.holdsLock(this)) {
@@ -421,7 +423,22 @@ public class SQLiteDatabase extends SQLiteClosable {
         }
         verifyDbIsOpen();
         if (!forced && !mLockingEnabled) return;
-        mLock.lock();
+        boolean done = false;
+        while (!done) {
+            try {
+                // wait for 30sec to acquire the lock
+                done = mLock.tryLock(LOCK_WAIT_PERIOD, TimeUnit.SECONDS);
+                if (!done) {
+                    // lock not acquired in NSec. print a message and stacktrace saying the lock
+                    // has not been available for 30sec.
+                    Log.w(TAG, "database lock has not been available for " + LOCK_WAIT_PERIOD +
+                            " sec. Current Owner of the lock is " + mLock.getOwnerDescription() +
+                            ". Continuing to wait");
+                }
+            } catch (InterruptedException e) {
+                // ignore the interruption
+            }
+        }
         if (SQLiteDebug.DEBUG_LOCK_TIME_TRACKING) {
             if (mLock.getHoldCount() == 1) {
                 // Use elapsed real-time since the CPU may sleep when waiting for IO
@@ -430,6 +447,20 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
         }
     }
+    private static class DatabaseReentrantLock extends ReentrantLock {
+        DatabaseReentrantLock(boolean fair) {
+            super(fair);
+        }
+        @Override
+        public Thread getOwner() {
+            return super.getOwner();
+        }
+        public String getOwnerDescription() {
+            Thread t = getOwner();
+            return (t== null) ? "none" : String.valueOf(t.getId());
+        }
+    }
+
     /**
      * Locks the database for exclusive access. The database lock must be held when
      * touch the native sqlite3* object since it is single threaded and uses
