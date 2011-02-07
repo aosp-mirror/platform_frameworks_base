@@ -129,7 +129,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDesiredSizeChanged(int desiredWidth, int desiredHeight) {
-            onDesiredSizeChanged(desiredWidth, desiredHeight);
+            super.onDesiredSizeChanged(desiredWidth, desiredHeight);
             SurfaceHolder surfaceHolder = getSurfaceHolder();
             if (surfaceHolder != null) {
                 updateSurfaceSize(surfaceHolder);
