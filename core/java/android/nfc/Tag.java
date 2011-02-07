@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.content.Context;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.MifareUltralight;
@@ -33,27 +34,69 @@ import android.os.Parcelable;
 import java.util.Arrays;
 
 /**
- * Represents a (generic) discovered tag.
+ * Represents an NFC tag that has been discovered.
  * <p>
- * A tag is a passive NFC element, such as NFC Forum Tag's, MIFARE class Tags,
- * Sony FeliCa Tags, etc.
- * <p>
- * Tag's have a type and usually have a UID.
- * <p>
- * {@link Tag} objects are passed to applications via the {@link NfcAdapter#EXTRA_TAG} extra
- * in {@link NfcAdapter#ACTION_TAG_DISCOVERED} intents. A {@link Tag} object is immutable
- * and represents the state of the tag at the time of discovery. It can be
- * directly queried for its UID and Type, or used to create a {@link TagTechnology} using the
- * static <code>get()</code> methods on the varios tech classes.
- * <p>
- * A {@link Tag} can  be used to create a {@link TagTechnology} only while the tag is in
- * range. If it is removed and then returned to range, then the most recent
- * {@link Tag} object (in {@link NfcAdapter#ACTION_TAG_DISCOVERED}) should be used to create a
- * {@link TagTechnology}.
- * <p>This is an immutable data class. All properties are set at Tag discovery
- * time and calls on this class will retrieve those read-only properties, and
- * not cause any further RF activity or block. Note however that arrays passed to and
+ * {@link Tag} is an immutable object that represents the state of a NFC tag at
+ * the time of discovery. It can be used as a handle to {@link TagTechnology} classes
+ * to perform advanced operations, or directly queried for its ID ({@link #getId} and the
+ * set of technologies it contains ({@link #getTechList}). Arrays passed to and
  * returned by this class are *not* cloned, so be careful not to modify them.
+ * <p>
+ * A new tag object is created every time a tag is discovered (comes into range), even
+ * if it is the same physical tag. If a tag is removed and then returned into range, then
+ * only the most recent tag object can be successfully used to create a {@link TagTechnology}.
+ *
+ * <h3>Tag Dispatch</h3>
+ * When a tag is discovered, a {@link Tag} object is created and passed to a
+ * single application via the {@link NfcAdapter#EXTRA_TAG} extra in a
+ * {@link Context#startActivity} {@link android.content.Intent}. A four stage dispatch is used to select the
+ * most appropriate application to handle the tag. The Android OS executes each stage in order,
+ * and completes dispatch as soon as a single matching application is found. If there are multiple
+ * matching applications found at any one stage then the Android Activity Chooser dialog is shown
+ * to allow the user to select the application.
+ * <h4>1. Foreground activity dispatch</h4>
+ * A foreground activity that has called {@link NfcAdapter#enableForegroundDispatch} is
+ * given priority. See the documentation on {#link NfcAdapter#enableForegroundDispatch} for
+ * its usage.
+ * <h4>2. NDEF data dispatch</h4>
+ * If the tag contains NDEF data, then {@link Context#startActivity} is called with
+ * {@link NfcAdapter#ACTION_NDEF_DISCOVERED} and a data URI determined from the
+ * first NDEF Record in the first NDEF Message in the Tag. This allows NDEF tags to be given
+ * priority dispatch to applications that can handle the content.
+ * See {@link NfcAdapter#ACTION_NDEF_DISCOVERED} for more detail. If the tag does not contain
+ * NDEF data, or if no application is registered
+ * for {@link NfcAdapter#ACTION_NDEF_DISCOVERED} with a matching data URI then dispatch moves
+ * to stage 3.
+ * <h4>3. Tag Technology dispatch</h4>
+ * {@link Context#startActivity} is called with {@link NfcAdapter#ACTION_TECH_DISCOVERED} to
+ * dispatch the tag to an application that can handle the technologies present on the tag.
+ * Technologies are defined as sub-classes of {@link TagTechnology}, see the package
+ * {@link android.nfc.tech}. The Android OS looks for an application that can handle one or
+ * more technologies in the tag. See {@link NfcAdapter#ACTION_TECH_DISCOVERED for more detail.
+ * <h4>4. Fall-back dispatch</h4>
+ * If no application has been matched, then {@link Context#startActivity} is called with
+ * {@link NfcAdapter#ACTION_TAG_DISCOVERED}. This is intended as a fall-back mechanism.
+ * See {@link NfcAdapter#ACTION_TAG_DISCOVERED}.
+ *
+ * <p>
+ * <i>The Tag dispatch mechanism was designed to give a high probability of dispatching
+ * a tag to the correct application without showing the user an Application Chooser dialog.
+ * This is important for NFC interactions because they are very transient - if a user has to
+ * move the Android device to choose an application then the connection is broken.</i>
+ *
+ * <h3>NFC Tag Background</h3>
+ * An NFC tag is a passive NFC device, powered by the NFC field of this Android device while
+ * it is in range. Tag's can come in many forms, such as stickers, cards, key fob, or
+ * even embedded in a more sophisticated device.
+ * <p>
+ * Tags can have a wide range of capabilities. Simple tags just offer read/write semantics,
+ * and contain some one time
+ * programmable areas to make read-only. More complex tags offer math operations
+ * and per-sector access control and authentication. The most sophisticated tags
+ * contain operating environments such as Javacard, allowing complex interactions with the
+ * applets executing on the tag. Use {@link TagTechnology} classes to access a broad
+ * range of capabilities available in NFC tags.
+ * <p>
  */
 public final class Tag implements Parcelable {
     /*package*/ final byte[] mId;
@@ -149,21 +192,35 @@ public final class Tag implements Parcelable {
 
     /**
      * Get the Tag Identifier (if it has one).
-     * <p>Tag ID is usually a serial number for the tag.
-     *
-     * @return ID, or null if it does not exist
+     * <p>The tag identifier is a low level serial number, used for anti-collision
+     * and identification.
+     * <p> Most tags have a stable unique identifier
+     * (UID), but some tags will generate a random ID every time they are discovered
+     * (RID), and there are some tags with no ID at all (the byte array will be zero-sized).
+     * <p> The size and format of an ID is specific to the RF technology used by the tag.
+     * <p> This function retrieves the ID as determined at discovery time, and does not
+     * perform any further RF communication or block.
+     * @return ID as byte array, never null
      */
     public byte[] getId() {
         return mId;
     }
 
     /**
-     * Returns technologies present in the tag that this implementation understands,
-     * or a zero length array if there are no supported technologies on this tag.
-     *
-     * The elements of the list are the names of the classes implementing the technology. 
-     *
+     * Get the technologies available in this tag, as fully qualified class names.
+     * <p>
+     * A technology is an implementation of the {@link TagTechnology} interface,
+     * and can be instantiated by calling the static <code>get(Tag)</code>
+     * method on the implementation with this Tag. The {@link TagTechnology}
+     * object can then be used to perform advanced, technology-specific operations on a tag.
+     * <p>
+     * Android defines a mandatory set of technologies that must be correctly
+     * enumerated by all Android NFC devices, and an optional
+     * set of proprietary technologies.
+     * See {@link TagTechnology} for more details.
+     * <p>
      * The ordering of the returned array is undefined and should not be relied upon.
+     * @return an array of fully-qualified {@link TagTechnology} class-names.
      */
     public String[] getTechList() {
         return mTechStringList;
@@ -176,7 +233,7 @@ public final class Tag implements Parcelable {
         }
         return false;
     }
-    
+
     /** @hide */
     public Bundle getTechExtras(int tech) {
         int pos = -1;
@@ -198,6 +255,9 @@ public final class Tag implements Parcelable {
         return mTagService;
     }
 
+    /**
+     * Human-readable description of the tag, for debugging.
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("TAG ")

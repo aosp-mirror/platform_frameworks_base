@@ -22,15 +22,24 @@ import android.nfc.INfcTag;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.TagLostException;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.IOException;
 
 /**
- * An interface to a {@link Tag} allowing to format the tag as NDEF.
+ * Provide access to NDEF format operations on a {@link Tag}.
  *
- * <p>You can acquire this kind of connection with {@link #get}.
+ * <p>Acquire a {@link NdefFormatable} object using {@link #get}.
+ *
+ * <p>Android devices with NFC must only enumerate and implement this
+ * class for tags for which it can format to NDEF.
+ *
+ * <p>Unfortunately the procedures to convert unformated tags to NDEF formatted
+ * tags are not specified by NFC Forum, and are not generally well-known. So
+ * there is no mandatory set of tags for which all Android devices with NFC
+ * must support {@link NdefFormatable}.
  *
  * <p class="note"><strong>Note:</strong>
  * Use of this class requires the {@link android.Manifest.permission#NFC}
@@ -40,10 +49,13 @@ public final class NdefFormatable extends BasicTagTechnology {
     private static final String TAG = "NFC";
 
     /**
-     * Returns an instance of this tech for the given tag. If the tag doesn't support
-     * this tech type null is returned.
+     * Get an instance of {@link NdefFormatable} for the given tag.
+     * <p>Does not cause any RF activity and does not block.
+     * <p>Returns null if {@link NdefFormatable} was not enumerated in {@link Tag#getTechList}.
+     * This indicates the tag is not NDEF formatable by this Android device.
      *
-     * @param tag The tag to get the tech from
+     * @param tag an NDEF formatable tag
+     * @return NDEF formatable object
      */
     public static NdefFormatable get(Tag tag) {
         if (!tag.hasTech(TagTechnology.NDEF_FORMATABLE)) return null;
@@ -63,23 +75,43 @@ public final class NdefFormatable extends BasicTagTechnology {
     }
 
     /**
-     * Formats a tag as NDEF, if possible. You may supply a first
-     * NdefMessage to be written on the tag.
-     * <p>Either all steps succeed, or an IOException is thrown if any one step
-     * fails.
+     * Format a tag as NDEF, and write a {@link NdefMessage}.
+     *
+     * <p>This is a multi-step process, an IOException is thrown
+     * if any one step fails.
+     * <p>The card is left in a read-write state after this operation.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param msg the NDEF message to write after formatting
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
+     * @throws FormatException if the NDEF Message to write is malformed
      */
-    public void format(NdefMessage firstMessage) throws IOException, FormatException {
-        format(firstMessage, false);
+    public void format(NdefMessage msg) throws IOException, FormatException {
+        format(msg, false);
     }
 
     /**
-     * Formats a tag as NDEF, if possible. You may supply a first
-     * NdefMessage to be written on the tag.
-     * <p>Either all steps succeed, or an IOException is thrown if any one step
-     * fails.
+     * Formats a tag as NDEF, write a {@link NdefMessage}, and make read-only.
+     *
+     * <p>This is a multi-step process, an IOException is thrown
+     * if any one step fails.
+     * <p>The card is left in a read-only state if this method returns successfully.
+     *
+     * <p>This is an I/O operation and will block until complete. It must
+     * not be called from the main application thread. A blocked call will be canceled with
+     * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * @param msg the NDEF message to write after formatting
+     * @throws TagLostException if the tag leaves the field
+     * @throws IOException if there is an I/O failure, or the operation is canceled
+     * @throws FormatException if the NDEF Message to write is malformed
      */
-    public void formatReadOnly(NdefMessage firstMessage) throws IOException, FormatException {
-        format(firstMessage, true);
+    public void formatReadOnly(NdefMessage msg) throws IOException, FormatException {
+        format(msg, true);
     }
 
     /*package*/ void format(NdefMessage firstMessage, boolean makeReadOnly) throws IOException,
