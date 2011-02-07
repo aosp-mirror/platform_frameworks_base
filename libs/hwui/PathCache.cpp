@@ -65,7 +65,6 @@ void PathCache::clearGarbage() {
 
 PathTexture* PathCache::get(SkPath* path, SkPaint* paint) {
     PathCacheEntry entry(path, paint);
-
     PathTexture* texture = mCache.get(entry);
 
     if (!texture) {

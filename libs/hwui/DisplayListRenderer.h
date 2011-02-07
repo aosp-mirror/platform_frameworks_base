@@ -38,7 +38,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define MIN_WRITER_SIZE 16384
-#define HEAP_BLOCK_SIZE 4096
 
 // Debug
 #if DEBUG_DISPLAY_LIST
@@ -46,31 +45,6 @@ namespace uirenderer {
 #else
     #define DISPLAY_LIST_LOGD(...)
 #endif
-
-///////////////////////////////////////////////////////////////////////////////
-// Helpers
-///////////////////////////////////////////////////////////////////////////////
-
-class PathHeap: public SkRefCnt {
-public:
-    PathHeap();
-    PathHeap(SkFlattenableReadBuffer& buffer);
-    ~PathHeap();
-
-    int append(const SkPath& path);
-
-    int count() const { return mPaths.count(); }
-
-    SkPath& operator[](int index) const {
-        return *mPaths[index];
-    }
-
-    void flatten(SkFlattenableWriteBuffer& buffer) const;
-
-private:
-    SkChunkAlloc mHeap;
-    SkTDArray<SkPath*> mPaths;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Display list
@@ -174,7 +148,7 @@ private:
     }
 
     SkPath* getPath() {
-        return &(*mPathHeap)[getInt() - 1];
+        return (SkPath*) getInt();
     }
 
     SkPaint* getPaint() {
@@ -209,19 +183,15 @@ private:
         text->mText = (const char*) mReader.skip(length);
     }
 
-    PathHeap* mPathHeap;
-
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
+    Vector<SkPath*> mPaths;
     Vector<SkMatrix*> mMatrices;
     Vector<SkiaShader*> mShaders;
 
     mutable SkFlattenableReadBuffer mReader;
-
-    SkRefCntPlayback mRCPlayback;
-    SkTypefacePlayback mTFPlayback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -317,6 +287,10 @@ public:
         return mPaints;
     }
 
+    const Vector<SkPath*>& getPaths() const {
+        return mPaths;
+    }
+
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
     }
@@ -385,11 +359,24 @@ private:
         mWriter.writePad(text, byteLength);
     }
 
-    inline void addPath(const SkPath* path) {
-        if (mPathHeap == NULL) {
-            mPathHeap = new PathHeap();
+    inline void addPath(SkPath* path) {
+        if (!path) {
+            addInt((int) NULL);
+            return;
         }
-        addInt(mPathHeap->append(*path));
+
+        SkPath* pathCopy = mPathMap.valueFor(path);
+        if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
+            if (pathCopy == NULL) {
+                pathCopy = path;
+            } else {
+                pathCopy = new SkPath(*path);
+                mPaths.add(pathCopy);
+            }
+            mPathMap.add(path, pathCopy);
+        }
+
+        addInt((int) pathCopy);
     }
 
     inline void addPaint(SkPaint* paint) {
@@ -457,24 +444,21 @@ private:
         caches.resourceCache.incrementRefcount(colorFilter);
     }
 
-    SkChunkAlloc mHeap;
-
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
 
     Vector<SkPaint*> mPaints;
     DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;
 
+    Vector<SkPath*> mPaths;
+    DefaultKeyedVector<SkPath*, SkPath*> mPathMap;
+
     Vector<SkiaShader*> mShaders;
     DefaultKeyedVector<SkiaShader*, SkiaShader*> mShaderMap;
 
     Vector<SkMatrix*> mMatrices;
 
-    PathHeap* mPathHeap;
     SkWriter32 mWriter;
-
-    SkRefCntRecorder mRCRecorder;
-    SkRefCntRecorder mTFRecorder;
 
     DisplayList *mDisplayList;
 

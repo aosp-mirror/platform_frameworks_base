@@ -76,8 +76,14 @@ void Caches::dumpMemoryUsage() {
     LOGD("  PathCache            %8d / %8d", pathCache.getSize(), pathCache.getMaxSize());
     LOGD("  CircleShapeCache     %8d / %8d",
             circleShapeCache.getSize(), circleShapeCache.getMaxSize());
+    LOGD("  OvalShapeCache       %8d / %8d",
+            ovalShapeCache.getSize(), ovalShapeCache.getMaxSize());
     LOGD("  RoundRectShapeCache  %8d / %8d",
             roundRectShapeCache.getSize(), roundRectShapeCache.getMaxSize());
+    LOGD("  RectShapeCache       %8d / %8d",
+            rectShapeCache.getSize(), rectShapeCache.getMaxSize());
+    LOGD("  ArcShapeCache        %8d / %8d",
+            arcShapeCache.getSize(), arcShapeCache.getMaxSize());
     LOGD("  TextDropShadowCache  %8d / %8d", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
@@ -94,6 +100,11 @@ void Caches::dumpMemoryUsage() {
     total += gradientCache.getSize();
     total += pathCache.getSize();
     total += dropShadowCache.getSize();
+    total += roundRectShapeCache.getSize();
+    total += circleShapeCache.getSize();
+    total += ovalShapeCache.getSize();
+    total += rectShapeCache.getSize();
+    total += arcShapeCache.getSize();
     for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
         total += fontRenderer.getFontRendererSize(i);
     }
