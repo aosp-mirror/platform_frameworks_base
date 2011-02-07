@@ -48,7 +48,7 @@ public class AudioManager {
     private final Context mContext;
     private final Handler mHandler;
     private long mVolumeKeyUpTime;
-
+    private int  mVolumeControlStream = -1;
     private static String TAG = "AudioManager";
     private static boolean DEBUG = false;
     private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
@@ -263,6 +263,13 @@ public class AudioManager {
     public static final int FLAG_VIBRATE = 1 << 4;
 
     /**
+     * forces use of specified stream
+     * @hide
+     */
+    public static final int FLAG_FORCE_STREAM = 1 << 5;
+
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -392,12 +399,17 @@ public class AudioManager {
                  * Adjust the volume in on key down since it is more
                  * responsive to the user.
                  */
+                int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
+                if (mVolumeControlStream != -1) {
+                    stream = mVolumeControlStream;
+                    flags |= FLAG_FORCE_STREAM;
+                }
                 adjustSuggestedStreamVolume(
                         keyCode == KeyEvent.KEYCODE_VOLUME_UP
                                 ? ADJUST_RAISE
                                 : ADJUST_LOWER,
                         stream,
-                        FLAG_SHOW_UI | FLAG_VIBRATE);
+                        flags);
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 // TODO: Actually handle MUTE.
@@ -416,10 +428,15 @@ public class AudioManager {
                  * Play a sound. This is done on key up since we don't want the
                  * sound to play when a user holds down volume down to mute.
                  */
+                int flags = FLAG_PLAY_SOUND;
+                if (mVolumeControlStream != -1) {
+                    stream = mVolumeControlStream;
+                    flags |= FLAG_FORCE_STREAM;
+                }
                 adjustSuggestedStreamVolume(
                         ADJUST_SAME,
                         stream,
-                        FLAG_PLAY_SOUND);
+                        flags);
 
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
                 break;
@@ -680,6 +697,17 @@ public class AudioManager {
             Log.e(TAG, "Dead object in isStreamMute", e);
             return false;
         }
+    }
+
+    /**
+     * forces the stream controlled by hard volume keys
+     * specifying streamType == -1 releases control to the
+     * logic.
+     *
+     * @hide
+     */
+    public void forceVolumeControlStream(int streamType) {
+        mVolumeControlStream = streamType;
     }
 
     /**

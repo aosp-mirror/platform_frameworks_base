@@ -190,6 +190,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mDialog.setOnDismissListener(new OnDismissListener() {
             public void onDismiss(DialogInterface dialog) {
                 mActiveStreamType = -1;
+                mAudioManager.forceVolumeControlStream(mActiveStreamType);
             }
         });
         // Change some window properties
@@ -483,6 +484,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         }
 
         if (!mDialog.isShowing()) {
+            mAudioManager.forceVolumeControlStream(streamType);
             mDialog.setContentView(mView);
             // Showing dialog - use collapsed state
             collapse();

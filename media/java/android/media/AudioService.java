@@ -417,6 +417,9 @@ public class AudioService extends IAudioService.Stub {
                  (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)|
                  (1 << AudioSystem.STREAM_MUSIC)));
 
+        if (!mVoiceCapable) {
+            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+        }
         mMuteAffectedStreams = System.getInt(cr,
                 System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_MUSIC)|(1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_SYSTEM)));
@@ -461,7 +464,12 @@ public class AudioService extends IAudioService.Stub {
     /** @see AudioManager#adjustVolume(int, int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
 
-        int streamType = getActiveStreamType(suggestedStreamType);
+        int streamType;
+        if ((flags & AudioManager.FLAG_FORCE_STREAM) != 0) {
+            streamType = suggestedStreamType;
+        } else {
+            streamType = getActiveStreamType(suggestedStreamType);
+        }
 
         // Don't play sound on other streams
         if (streamType != AudioSystem.STREAM_RING && (flags & AudioManager.FLAG_PLAY_SOUND) != 0) {
@@ -2025,6 +2033,10 @@ public class AudioService extends IAudioService.Stub {
                 int ringerModeAffectedStreams = Settings.System.getInt(mContentResolver,
                         Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                         0);
+                if (!mVoiceCapable) {
+                    ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+                }
+
                 if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
                     /*
                      * Ensure all stream types that should be affected by ringer mode
