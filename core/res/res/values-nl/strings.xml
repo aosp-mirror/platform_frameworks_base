@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Hiermee staat u de houder toe zich te verbinden met de hoofdinterface van een invoermethode. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"verbinden met een achtergrond"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Hiermee staat u de houder toe zich te verbinden met de hoofdinterface van een achtergrond. Nooit vereist voor normale toepassingen."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"verbinden met een widgetservice"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Hiermee staat u de houder toe verbinding te maken met de hoofdinterface van een widgetservice. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactie met apparaatbeheer"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Staat de houder toe intenties te verzenden naar een apparaatbeheerder. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"schermstand wijzigen"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Werk"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Overig"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN-code invoeren"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Raak aan om wachtwoord op te geven"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Voer het wachtwoord in om te ontgrendelen"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Voer de PIN-code in om te ontgrendelen"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Onjuiste PIN-code!"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Aanmelden"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Gebruikersnaam of wachtwoord ongeldig."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Bent u uw gebruikersnaam of wachtwoord vergeten?"\n"Ga naar "<b>"https://www.google.com/accounts/recovery?hl=nl"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controleren..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ontgrendelen"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Geluid aan"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"De items verwijderen."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Verwijderingen ongedaan maken."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Nu niets doen."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> verbonden via VPN"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN-verbinding met <xliff:g id="PROFILENAME">%s</xliff:g> verbroken"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Raak aan om opnieuw verbinding te maken met een VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Selecteer een account"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

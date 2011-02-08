@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"מאפשר למחזיק להכפיף לממשק ברמה עליונה של שיטת קלט. לא אמור להידרש לעולם ביישומים רגילים."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"קשור לטפט"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"מאפשר למחזיק לקשור לממשק ברמה עליונה של טפט. לא אמור להידרש לעולם ביישומים רגילים."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"הכפפה לשירות Widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"מאפשר למחזיק להכפיף לממשק ברמה עליונה של שירות Widget. יישומים רגילים לעולם לא יזדקקו לו."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"קיים אינטראקציה עם מנהל מכשיר"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"מאפשר למשתמש לשלוח כוונות למנהל התקן. לא אמור להידרש לעולם ביישומים רגילים."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"שנה את כיוון המסך"</string>
@@ -366,7 +364,7 @@
     <string name="permlab_accessUsb" msgid="7362327818655760496">"גישה להתקני USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"מאפשר ליישום גישה להתקני USB."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"יישם פרוטוקול MTP"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"מאפשר גישה למנהל התקן MTP של הליבה כדי ליישם את פרוטוקול USB של MTP."</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"מאפשר גישה למנהל התקן MTP של הליבה כדי ליישם פרוטוקול USB של MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"בדוק חומרה"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"מאפשר ליישום לשלוט בציוד היקפי מסוגים שונים לצורך בדיקת חומרה."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"התקשר ישירות למספרי טלפון"</string>
@@ -489,7 +487,7 @@
     <string name="policylab_expirePassword" msgid="2314569545488269564">"הגדר תפוגת תוקף של סיסמה"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"שלוט בפרק הזמן הדרוש לשינוי הסיסמה של נעילת המסך"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"הגדר הצפנת אחסון"</string>
-    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"דרוש שנתוני היישום המאוחסנים יהיו מוצפנים"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"דורש שנתוני היישום המאוחסנים יהיו מוצפנים"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"דף הבית"</item>
     <item msgid="869923650527136615">"נייד"</item>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"סיסמה"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"כניסה"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"שם משתמש או סיסמה לא חוקיים."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"שכחת את שם המשתמש או הסיסמה?"\n"בקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"בודק..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"בטל נעילה"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"קול פועל"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN של <xliff:g id="PROFILENAME">%s</xliff:g> מחובר"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN של <xliff:g id="PROFILENAME">%s</xliff:g> נותק"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"גע כדי להתחבר שוב ל-VPN."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"בחר חשבון"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Leidžia savininkui susisaistyti su įvesties būdo aukščiausio lygio sąsaja. Neturėtų reikėti įprastoms programoms."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"susaistyti su darbalaukio fonu"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Leidžia savininkui susisaistyti su aukščiausio lygio darbalaukio fono sąsaja. Neturėtų reikėti įprastose programose."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"susaistyti su valdiklio paslauga"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Leidžiama savininkui susisaistyti su aukščiausio lygio valdiklio paslaugos sąsaja. Neturėtų reikėti įprastose programose."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"sąveikauti su įrenginio administratoriumi"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Leidžia savininkui siųsti tikslus įrenginio administratoriui. Neturėtų reikėti įprastose programose."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"keisti ekrano padėtį"</string>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Slaptažodis"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Prisijungti"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neteisingas naudotojo vardas ar slaptažodis."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Pamiršote naudotojo vardą ar slaptažodį?"\n"Apsilankykite šiuo adresu: "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Tikrinama..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Atblokuoti"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Garsas įjungtas"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT prijungtas"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT atjungtas"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Jei norite iš naujo prisijungti prie VPT, palieskite."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Pasirinkti paskyrą"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

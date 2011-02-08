@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"связать с фоновым рисунком"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Разрешает выполнять привязку к интерфейсу фонового рисунка верхнего уровня. Не требуется для обычных приложений."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"привязка к службе виджетов"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Разрешает выполнять привязку к интерфейсу верхнего уровня службы виджетов. Не требуется для обычных приложений."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаимодействовать с администратором устройства"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Позволяет владельцу отправлять целевые значения администратору устройства. Никогда не используется обычными приложениями."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"изменять ориентацию экрана"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Рабочий"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Другой"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Введите PIN-код"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Нажмите для ввода пароля"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Введите пароль для разблокировки"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Введите PIN-код для разблокировки"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неверный PIN-код!"</string>
@@ -629,7 +626,7 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставьте SIM-карту."</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренный вызов"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренные вызовы"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Вход"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неверное имя пользователя или пароль."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Забыли имя пользователя или пароль?"\n"Перейдите на страницу "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Проверка..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Разблокировать"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Вкл. звук"</string>
@@ -848,8 +844,8 @@
     <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Воспроизведение по каналу Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Выбран режим \"Без звука\""</string>
-    <string name="volume_call" msgid="3941680041282788711">"Громкость входящего вызова"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Громкость входящего вызова Bluetooth"</string>
+    <string name="volume_call" msgid="3941680041282788711">"Громкость при разговоре"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Громкость при разговоре"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Громкость сигнала предупреждения"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Удалить элементы."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Отменить удаления."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ничего не делать сейчас."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Сеть VPN (<xliff:g id="PROFILENAME">%s</xliff:g>) подключена"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Сеть VPN (<xliff:g id="PROFILENAME">%s</xliff:g>) отключена"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Нажмите для повторного подключения к VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Выберите аккаунт"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

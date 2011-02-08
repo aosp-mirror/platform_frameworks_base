@@ -42,7 +42,7 @@
     <string name="recent_tasks_empty" msgid="1905484479067697884">"Няма скорошни приложения."</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"Приложения"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth има връзка с тетъринг"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Методи за въвеждане – конфиг."</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Конфигуриране на въвеждането"</string>
     <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
     <skip />
 </resources>

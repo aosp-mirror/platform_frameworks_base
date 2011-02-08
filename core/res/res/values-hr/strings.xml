@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Nositelju omogućuje da se veže uz sučelje najviše razine za metodu unosa. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"povezano s pozadinskom slikom"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Nositelju omogućuje da se veže uz sučelje najviše razine za pozadinsku sliku. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vezanje na uslugu widgeta"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge widgeta. Nije potrebno za uobičajene aplikacije."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s administratorom uređaja"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Nositelju omogućuje slanje namjera administratoru uređaja. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"promjena orijentacije zaslona"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Posao"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Drugo"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Unesite PIN kôd"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Dodir. za unos zaporke"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Unesite zaporku za otključavanje"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Unesite PIN za otključavanje"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Netočan PIN kôd!"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Zaporka"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Prijava"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nevažeće korisničko ime ili zaporka."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Zaboravili ste korisničko ime ili zaporku?"\n"Posjetite "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Provjera..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Otključaj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zvuk je uključen"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Izbriši ove stavke."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Poništi brisanja."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Za sad nemoj ništa učiniti."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN priključen"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN je isključen"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Dotaknite za ponovno povezivanje s VPN-om."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Odaberite račun"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

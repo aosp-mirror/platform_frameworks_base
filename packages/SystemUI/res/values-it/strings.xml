@@ -41,7 +41,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recenti"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"Nessuna applicazione recente."</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"Applicazioni"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth vincolato"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth con tethering"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Configura metodi di input"</string>
     <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
     <skip />

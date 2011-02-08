@@ -138,7 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Spegnimento..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Il tablet verrà spento."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Il telefono verrà spento."</string>
-    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Eseguire l\'arresto?"</string>
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Spegnere?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recenti"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Nessuna applicazione recente."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opzioni tablet"</string>
@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Consente l\'associazione all\'interfaccia principale di un metodo di inserimento. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"associazione a sfondo"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Consente l\'associazione di uno sfondo all\'interfaccia principale. Non dovrebbe mai essere necessario per le normali applicazioni."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associazione a un servizio widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Consente l\'associazione all\'interfaccia principale di un servizio widget. Non dovrebbe mai essere necessario per le normali applicazioni."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interazione con un amministratore dispositivo"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Consente l\'invio di intent a un amministratore del dispositivo. L\'autorizzazione non deve mai essere necessaria per le normali applicazioni."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modifica orientamento dello schermo"</string>
@@ -488,7 +486,7 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale effettivo è impostabile solo dal primo amministratore del dispositivo."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Imposta scadenza password"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Stabilisci la scadenza della password di blocco dello schermo"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Imposta crittografia archiviazione"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Imposta crittografia archivio"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Richiede la crittografia dei dati applicazione memorizzati"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Lavoro"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Altro"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Inserisci il PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Tocca per inserire pw"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Inserisci password per sbloccare"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Inserisci PIN per sbloccare"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Codice PIN errato."</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Password"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Accedi"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Password o nome utente non valido."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Hai dimenticato il nome utente o la password?"\n"Visita "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controllo in corso..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Sblocca"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Audio attivato"</string>
@@ -1012,18 +1008,14 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sì"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"No"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limite di eliminazioni superato"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Esistono <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementi eliminati per <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Specifica l\'operazione da eseguire."</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Esistono <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elementi eliminati per <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Cosa vuoi fare?"</string>
     <string name="sync_really_delete" msgid="8933566316059338692">"Elimina gli elementi."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Annulla le eliminazioni."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Non fare nulla per ora."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> collegata"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> scollegata"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Tocca per riconnetterti a una rete VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Seleziona un account"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

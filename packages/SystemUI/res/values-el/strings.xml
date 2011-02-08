@@ -40,8 +40,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Ειδοποιήσεις"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Πρόσφατα"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"Δεν υπάρχουν πρόσφατες εφαρμογές."</string>
-    <string name="recent_tasks_app_label" msgid="3796483981246752469">"Εφαρμογές"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Το Bluetooth συνδέθηκε"</string>
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"Google Apps"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Έγινε σύνδεση μέσω Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Διαμόρφωση μεθόδων εισαγωγής"</string>
     <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
     <skip />

@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Allows the holder to bind to the top-level interface of an input method. Should never be needed for normal applications."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind to wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Allows the holder to bind to the top-level interface of wallpaper. Should never be needed for normal applications."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind to a widget service"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Allows the holder to bind to the top-level interface of a widget service. Should never be needed for normal applications."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interact with device admin"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Allows the holder to send intents to a device administrator. Should never be needed for normal applications."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"change screen orientation"</string>
@@ -289,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Allows an application to read and write to any resource owned by the diag group; for example, files in /dev. This could potentially affect system stability and security. This should ONLY be used for hardware-specific diagnostics by the manufacturer or operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"enable or disable application components"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Allows an application to change whether a component of another application is enabled or not. Malicious applications can use this to disable important tablet capabilities. Care must be used with this permission, as it is possible to get application components into an unusable, inconsistent or unstable state."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Allows an application to change whether a component of another application is enabled or not. Malicious applications can use this to disable important phone capabilities. Care must be used with this permission, as it is possible to get application components into an unusable, inconsistent or unstable state."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Allows an application to change whether a component of another application is enabled or not. Malicious applications can use this to disable important phone capabilities. Care must be used with this permission, as it is possible to render application components into an unusable, inconsistent or unstable condition."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"set preferred applications"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Allows an application to modify your preferred applications. This can allow malicious applications to silently change the applications that are run, spoofing your existing applications to collect private data from you."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"modify global system settings"</string>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Password"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Sign in"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Invalid username or password."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Forgotten your username or password?"\n"Visit "<b>"google.co.uk/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Checking..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Unlock"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sound on"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN connected"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN disconnected"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Touch to reconnect to a VPN."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Select an account"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

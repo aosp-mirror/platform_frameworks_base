@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"允许手机用户绑定至输入法的顶级界面。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允许手机用户绑定到壁纸的顶级界面。应该从不需要将此权限授予普通应用程序。"</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到窗口小部件服务"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"允许手机用户绑定到窗口小部件服务的顶级界面。普通应用程序一律无需此权限。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"与设备管理器交互"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允许持有对象将意向发送到设备管理器。普通的应用程序一律无需此权限。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"更改屏幕显示方向"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"单位"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"输入 PIN 码"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"触摸可输入密码"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"输入密码进行解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"输入 PIN 进行解锁"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 码不正确！"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密码"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登录"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"用户名或密码无效。"</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"忘记了您的用户名或密码？"\n"请访问 "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"正在检查..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解锁"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"打开声音"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"删除这些项。"</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"撤消删除。"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"目前不进行任何操作。"</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN“<xliff:g id="PROFILENAME">%s</xliff:g>”已连接"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN“<xliff:g id="PROFILENAME">%s</xliff:g>”已断开连接"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"触摸可重新连接到 VPN。"</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"选择帐户"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

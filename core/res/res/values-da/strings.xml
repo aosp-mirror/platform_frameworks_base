@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Tillader, at brugeren forpligter sig til en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"forpligt til et tapet"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Tillader, at brugeren forpligter sig til et tapets grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"forpligt til en widgettjeneste"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Tillader, at brugeren forpligter sig til en widgettjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige applikationer."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikere med en enhedsadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillader brugeren at sende hensigter til en enhedsadministrator. Bør aldrig være nødvendigt for almindelige programmer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"skift skærmretning"</string>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Adgangskode"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Log ind"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldigt brugernavn eller ugyldig adgangskode."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Har du glemt dit brugernavn eller din adgangskode?"\n"Besøg "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerer ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås op"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Lyd slået til"</string>
@@ -689,7 +686,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Aldrig"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"Du har ikke tilladelse til at åbne denne side."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teksten er kopieret til udklipsholderen."</string>
-    <string name="more_item_label" msgid="4650918923083320495">"Flere"</string>
+    <string name="more_item_label" msgid="4650918923083320495">"Mere"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"plads"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"indtast"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN forbundet"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN afbrudt"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Tryk for at oprette forbindelse til et VPN igen."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Vælg en konto"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
