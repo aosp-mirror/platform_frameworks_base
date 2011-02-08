@@ -203,7 +203,8 @@ and populate the View elements with them.</p>
     have to store enough state to come back up later, preferably in the same
     state it was in when it was killed.</p>
     <p>
-    Android has a <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">well-defined life
+    Activities have a <a
+href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">well-defined life
 cycle</a>.
     Lifecycle events can happen even if you are not handing off control to
     another Activity explicitly. For example, perhaps a call comes in to the

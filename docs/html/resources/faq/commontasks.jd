@@ -124,8 +124,9 @@ It is not necessary to put external JARs in the assets folder.
 <h2>Implementing Activity Callbacks</h2>
 <p>Android calls a number of callbacks to let you draw your screen, store data before
     pausing, and refresh data after closing. You must implement at least some of
-    these methods. See <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Lifecycles</a>
-    discussion in Application Fundamentals to learn when and in what order these methods 
+    these methods. Read the <a
+href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+    document to learn when and in what order these methods 
     are called. Here are some of the standard types of screen classes that Android provides:</p>
 <ul>
     <li>{@link android.app.Activity android.app.Activity} - This is a standard screen,
@@ -150,9 +151,9 @@ It is not necessary to put external JARs in the assets folder.
 <p>When you open a new screen you can decide whether to make it transparent or floating,
     or full-screen. The choice of new screen affects the event sequence of events
     in the old screen (if the new screen obscures the old screen, a different
-    series of events is called in the old screen). See <a
-    href="{@docRoot}guide/topics/fundamentals.html#lcycles">Lifecycles</a> discussion
-    in Application Fundamentals for details. </p> 
+    series of events is called in the old screen). See the <a
+    href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a> document for
+details. </p> 
 <p>Transparent or floating windows are implemented in three
     standard ways: </p>
 <ul>
@@ -309,7 +310,8 @@ loopback interface.
     the application is finalized. See the topics for {@link android.app.Activity#onSaveInstanceState} and
     {@link android.app.Activity#onCreate} for
     examples of storing and retrieving state.</p>
-<p>Read more about the lifecycle of an application in <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>.</p>
+<p>Read more about the lifecycle of an activity in <a
+href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a> document.</p>
 <h3>Storing and Retrieving Larger or More Complex Persistent Data<a name="storingandretrieving" id="storingandretrieving"></a></h3>
 <p>Your application can store files or complex collection objects, and reserve them
     for private use by itself or other activities in the application, or it can expose

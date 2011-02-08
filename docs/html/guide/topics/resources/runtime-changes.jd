@@ -31,7 +31,8 @@ application adapt to new configurations by automatically reloading your applicat
 alternative resources.</p>
 
 <p>To properly handle a restart, it is important that your Activity restores its previous
-state through the normal <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity
+state through the normal <a
+href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activity
 lifecycle</a>, in which Android calls
 {@link android.app.Activity#onSaveInstanceState(Bundle) onSaveInstanceState()} before it destroys
 your Activity so that you can save data about the application state. You can then restore the state
@@ -44,7 +45,7 @@ tasks in your application.</p>
 <p>Your application should be able to restart at any time without loss of user data or
 state in order to handle events such as when the user receives an incoming phone call and then
 returns to your application (read about the
-<a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Activity lifecycle</a>).</p>
+<a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activity lifecycle</a>).</p>
 
 <p>However, you might encounter a situation in which restarting your application and
 restoring significant amounts of data can be costly and create a poor user experience. In such a

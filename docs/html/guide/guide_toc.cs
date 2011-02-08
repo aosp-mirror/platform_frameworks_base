@@ -28,6 +28,16 @@
         <span class="zh-CN" style="display:none">Android 是什么？</span>
         <span class="zh-TW" style="display:none">什麼是 Android？</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/fundamentals.html">
+        <span class="en">Application Fundamentals</span>
+        <span class="de" style="display:none">Anwendungsgrundlagen</span>
+        <span class="es" style="display:none">Fundamentos de las aplicaciones</span>
+        <span class="fr" style="display:none">Principes de base des applications</span>
+        <span class="it" style="display:none">Concetti fondamentali sulle applicazioni</span>
+        <span class="ja" style="display:none">開発の基礎</span>
+        <span class="zh-CN" style="display:none">应用程序基础</span>
+        <span class="zh-TW" style="display:none">應用程式基本原理</span>
+      </a></li>
 
   <!--  <li><a style="color:gray;">The Android SDK</a></li> -->
   <!--  <li><a style="color:gray;">Walkthrough for Developers</a></li> -->
@@ -47,21 +57,41 @@
       <span class="zh-TW" style="display:none">架構主題</span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>guide/topics/fundamentals.html">
-            <span class="en">Application Fundamentals</span>
-            <span class="de" style="display:none">Anwendungsgrundlagen</span>
-            <span class="es" style="display:none">Fundamentos de las aplicaciones</span>
-            <span class="fr" style="display:none">Principes de base des applications</span>
-            <span class="it" style="display:none">Concetti fondamentali sulle applicazioni</span>
-            <span class="ja" style="display:none">開発の基礎</span>
-            <span class="zh-CN" style="display:none">应用程序基础</span>
-            <span class="zh-TW" style="display:none">應用程式基本原理</span>
-
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/activities.html">
+          <span class="en">Activities</span>
+        </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
             <span class="en">Fragments</span>
           </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
+            <span class="en">Tasks and Back Stack</span>
+          </a></li>
+        </ul>
+      </li>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/services.html">
+          <span class="en">Services</span>
+        </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/bound-services.html">
+            <span class="en">Bound Services</span>
+          </a></li>
+        </ul>
+      </li>
+      <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
+            <span class="en">Content Providers</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
+            <span class="en">Intents and Intent Filters</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/processes-and-threads.html">
+            <span class="en">Processes and Threads</span>
+          </a></li>
     </ul>
+
+
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/ui/index.html">
@@ -95,7 +125,7 @@
                 <span class="en">Creating Status Bar Notifications</span>
               </a></li>
             </ul>
-          </li>
+          </li><!-- end of notifying the user -->
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
                 <span class="en">Applying Styles and Themes</span>
               </a></li>
@@ -112,7 +142,8 @@
                 <span class="en">How Android Draws Views</span>
               </a></li>
         </ul>
-      </li>
+      </li><!-- end of User Interface -->
+      
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
                <span class="en">Application Resources</span>
@@ -144,12 +175,9 @@
               <li><a href="<?cs var:toroot ?>guide/topics/resources/style-resource.html">Style</a></li>
               <li><a href="<?cs var:toroot ?>guide/topics/resources/more-resources.html">More Types</a></li>
             </ul>
-          </li>
+          </li><!-- end of resource types -->
         </ul>
-      </li>
-      <li><a href="<?cs var:toroot ?>guide/topics/intents/intents-filters.html">
-            <span class="en">Intents and Intent Filters</span>
-          </a></li>
+      </li><!-- end of app resources -->
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/data/data-storage.html">
             <span class="en">Data Storage</span>
@@ -161,18 +189,13 @@
             </li>
           </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
-            <span class="en">Content Providers</span>
-          </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/security/security.html">
             <span class="en">Security and Permissions</span>
           </a></li>
-  <!--  <li><a style="color:gray;">Processes and Threads</a></li> -->
-  <!--  <li><a style="color:gray;">Interprocess Communication</a></li> -->
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/manifest/manifest-intro.html">
-               <span class="en">The AndroidManifest.xml File</span>
-             </a></div>
+          <span class="en">The AndroidManifest.xml File</span>
+        </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/action-element.html">&lt;action&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></li>
@@ -199,8 +222,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-permission-element.html">&lt;uses-permission&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
         </ul>
-      </li>
-    </ul>
+      </li><!-- end of the manifest file -->
+    </ul>  
+      
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
@@ -510,33 +534,25 @@
           <li><a href="<?cs var:toroot ?>guide/developing/tools/logcat.html">logcat</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/mksdcard.html">mksdcard</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/monkey.html">Monkey</a></li>
-              <li class="toggle-list">
-                 <div>
-                     <a href="<?cs var:toroot ?>guide/developing/tools/monkeyrunner_concepts.html">
-                     <span class="en">monkeyrunner</span>
-                  </a>
-                  </div>
-                  <ul>
-                      <li>
-                          <a href="<?cs var:toroot ?>guide/developing/tools/MonkeyDevice.html">
-                                <span class="en">MonkeyDevice</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?cs var:toroot ?>guide/developing/tools/MonkeyImage.html">
-                            <span class="en">MonkeyImage</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?cs var:toroot ?>guide/developing/tools/MonkeyRunner.html">
-                            <span class="en">MonkeyRunner</span>
-                        </a>
-                    </li>
-                  </ul>
-              </li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">ProGuard</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
-              <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html">Traceview</a></li>
+          <li class="toggle-list">
+            <div><a href="<?cs var:toroot ?>guide/developing/tools/monkeyrunner_concepts.html">
+              <span class="en">monkeyrunner</span>
+            </a></div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/MonkeyDevice.html">
+                <span class="en">MonkeyDevice</span>
+                </a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/MonkeyImage.html">
+                <span class="en">MonkeyImage</span>
+                </a></li>
+              <li><a href="<?cs var:toroot ?>guide/developing/tools/MonkeyRunner.html">
+                <span class="en">MonkeyRunner</span>
+                </a></li>
+            </ul>
+          </li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/proguard.html">ProGuard</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html#sqlite">sqlite3</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/traceview.html">Traceview</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/zipalign.html">zipalign</a></li>
         </ul>
       </li>
