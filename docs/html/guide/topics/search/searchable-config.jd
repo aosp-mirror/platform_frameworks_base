@@ -7,19 +7,20 @@ parent.link=index.html
 <div id="qv">
 <h2>See also</h2>
 <ol>
-  <li><a href="search-dialog.html">Using the Android Search Dialog</a></li>
+  <li><a href="search-dialog.html">Creating a Search Interface</a></li>
   <li><a href="adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
   <li><a href="adding-custom-suggestions.html">Adding Custom Suggestions</a></li>
 </ol>
 </div>
 </div>
 
-<p>To utilize the Android search framework and provide a custom search dialog, your
-application must provide a search
-configuration in the form of an XML resource. This document describes the search configuration XML
-in terms of its syntax and usage. For more information about how to implement search
-features for your application, see the developer guide about <a
-href="index.html">Search</a>.</p>
+<p>In order to implement search with assistance from the Android system (to deliver search queries
+to an activity and provide search suggestions), your application must provide a search configuration
+in the form of an XML file.</p>
+
+<p>This page describes the search configuration file in terms of its syntax and usage. For more
+information about how to implement search features for your application, begin with the developer
+guide about <a href="search-dialog.html">Creating a Search Interface</a>.</p>
 
 <dl class="xml">
 
@@ -66,7 +67,7 @@ Android uses the filename as the resource ID.</dd>
 <dd>
 <dl class="tag-list">
   <dt id="searchable-element"><code>&lt;searchable&gt;</code></dt>
-  <dd>Defines all search configurations used with the search dialog.
+  <dd>Defines all search configurations used by the Android system to provide assisted search.
     <p class="caps">attributes:</p>
       <dl class="atn-list">
       <dt><code>android:label</code></dt>
@@ -86,21 +87,21 @@ string for {@code android:hint} as "Search <em>&lt;content-or-product&gt;</em>".
 "Search songs and artists" or "Search YouTube".</dd>
 
       <dt><code>android:searchMode</code></dt>
-      <dd><em>Keyword</em>. Sets additional modes that control the search dialog presentation.
-Currently available modes define how the query text that appears in the search dialog
-should be rewritten when a custom suggestion receives focus. The following mode values are accepted:
+      <dd><em>Keyword</em>. Sets additional modes that control the search presentation.
+Currently available modes define how the query text should be rewritten when a custom suggestion
+receives focus. The following mode values are accepted:
         <table>
           <tr><th>Value</th><th>Description</th></tr>
           <tr>
             <td><code>"queryRewriteFromText"</code></td>
             <td>Use the value from the {@link android.app.SearchManager#SUGGEST_COLUMN_TEXT_1}
-colum to rewrite the query text in the search dialog.</td>
+column to rewrite the query text.</td>
           </tr>
           <tr>
             <td><code>"queryRewriteFromData"</code></td>
             <td>Use the value from the
             {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column to rewrite the
-query text in the search dialog. This should only be used when the values in
+query text. This should only be used when the values in
             {@link android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} are suitable for user
 inspection and editing, typically HTTP URI's.</td>
           </tr>
@@ -117,7 +118,7 @@ behavior is something other than a search (such as a URL request in a web browse
 
       <dt><code>android:inputType</code></dt>
       <dd><em>Keyword</em>. Defines the type of input method (such as the type of soft keyboard)
-to use with the search dialog. For most searches, in which free-form text is expected, you don't 
+to use. For most searches, in which free-form text is expected, you don't 
 need this attribute. See {@link android.R.attr#inputType} for a list of suitable values for this
 attribute.</dd>
 
@@ -161,14 +162,14 @@ can also use any non-null value to trigger the delivery of the query text via th
 selectionArgs} parameter (and then ignore the {@code selection} parameter).</dd>
 
       <dt><code>android:searchSuggestIntentAction</code></dt>
-        <dd><em>String</em>. The default Intent action to be used when a user
+        <dd><em>String</em>. The default intent action to be used when a user
         clicks on a custom search suggestion (such as {@code "android.intent.action.VIEW"}).
         If this is not overridden by the selected suggestion (via the {@link
 android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column), this value is placed in the action
 field of the {@link android.content.Intent} when the user clicks a suggestion.</dd>
 
       <dt><code>android:searchSuggestIntentData</code></dt>
-        <dd><em>String</em>. The default Intent data to be used when a user
+        <dd><em>String</em>. The default intent data to be used when a user
         clicks on a custom search suggestion.
         If not overridden by the selected suggestion (via the {@link
 android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column), this value is
@@ -177,7 +178,7 @@ android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column), this value is
 
       <dt><code>android:searchSuggestThreshold</code></dt>
         <dd><em>Integer</em>. The minimum number of characters needed to
-        trigger a suggestion look-up. Only guarantees that the Search Manager will not query your
+        trigger a suggestion look-up. Only guarantees that the system will not query your
         content provider for anything shorter than the threshold. The default value is 0.</dd>
       </dl>
 
@@ -210,20 +211,21 @@ albums, and tracks" for a music application, or "Saved notes" for a notepad appl
         supersets of queries that have returned zero results in the past. For example, if
 your content provider returned zero results for "bo", it should be requiried for "bob". If set to
 "false", supersets are ignored for a single session ("bob" does not invoke a requery). This lasts
-only for the life of the search dialog (when the search dialog is reopened, "bo" queries your
+only for the life of the search dialog or the life of the activity when using the search widget
+(when the search dialog or activity is reopened, "bo" queries your
 content provider again). The default value is false.</dd>
       </dl>
 
 
     <h4>Voice search attributes</h4>
 
-    <p>To enable voice search for your search dialog, you'll need some of the
+    <p>To enable voice search, you'll need some of the
     following {@code &lt;searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
         <dt><code>android:voiceSearchMode</code></dt>
         <dd><em>Keyword</em>. (Required to provide voice search capabilities.)
-          Enables voice search for the search dialog, with a specific mode for voice search.
+          Enables voice search, with a specific mode for voice search.
           (Voice search may not be provided by the device, in which case these flags
           have no effect.) The following mode values are accepted:
           <table>
@@ -238,14 +240,14 @@ then either {@code "launchWebSearch"} or {@code "launchRecognizer"} must also be
               <td><code>"launchWebSearch"</code></td>
               <td>The voice search button takes the user directly
               to a built-in voice web search activity. Most applications don't need this flag, as
-              it takes the user away from the Activity in which search was invoked.</td>
+              it takes the user away from the activity in which search was invoked.</td>
             </tr>
             <tr>
               <td><code>"launchRecognizer"</code></td>
               <td>The voice search button takes
-              the user directly to a built-in voice recording activity. This Activity
+              the user directly to a built-in voice recording activity. This activity
               prompts the user to speak, transcribes the spoken text, and forwards the resulting
-              query text to the searchable Activity, just as if the user typed it into the
+              query text to the searchable activity, just as if the user typed it into the
               search UI and clicked the search button.</td>
             </tr>
           </table>
@@ -283,9 +285,9 @@ java.util.Locale#getDefault() Locale.getDefault()}.</dd>
         <dt><code>android:voiceMaxResults</code></dt>
           <dd><em>Integer</em>. Forces the maximum number of results to return,
           including the "best" result which is always provided as the {@link
-android.content.Intent#ACTION_SEARCH} Intent's primary
+android.content.Intent#ACTION_SEARCH} intent's primary
           query. Must be 1 or greater. Use {@link android.speech.RecognizerIntent#EXTRA_RESULTS} to
-get the results from the Intent.
+get the results from the intent.
           If not provided, the recognizer chooses how many results to return.</dd>
       </dl>
   </dd> <!-- end searchable element -->
@@ -311,8 +313,8 @@ other three attributes in order to define the search action.</p>
         <dd><em>String</em>. (Required.) A key code from {@link
 android.view.KeyEvent} that represents the action key
         you wish to respond to (for example {@code "KEYCODE_CALL"}). This is added to the
-        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent that is passed to your
-        searchable Activity. To examine the key code, use
+        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} intent that is passed to your
+        searchable activity. To examine the key code, use
         {@link android.content.Intent#getIntExtra getIntExtra(SearchManager.ACTION_KEY)}. Not all
 keys are supported for a search action, as many of them are used for typing, navigation, or system
 functions.</dd>
@@ -320,15 +322,15 @@ functions.</dd>
       <dt><code>android:queryActionMsg</code></dt>
         <dd><em>String</em>. An action message to be sent if the action key is pressed while the
 user is entering query text. This is added to the
-        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} Intent that the Search Manager
-        passes to your searchable Activity. To examine the string, use
+        {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} intent that the system
+        passes to your searchable activity. To examine the string, use
         {@link android.content.Intent#getStringExtra
         getStringExtra(SearchManager.ACTION_MSG)}.</dd>
 
       <dt><code>android:suggestActionMsg</code></dt>
         <dd><em>String</em>. An action message to be sent if the action key is pressed while a
         suggestion is in focus. This is added to the
-        Intent that that the Search Manager passes to your searchable Activity (using the action
+        intent that that the system passes to your searchable activity (using the action
 you've defined for the suggestion). To examine the string,
         use {@link android.content.Intent#getStringExtra 
         getStringExtra(SearchManager.ACTION_MSG)}. This should only be used if all your
@@ -344,10 +346,10 @@ android:suggestActionMsg} attribute to define the action message for all suggest
 your content provider provides its own action message.
         <p>First, you must define a column in your
 content provider for each suggestion to provide an action message, then provide the name of that
-column in this attribute. The Search Manager looks at your suggestion cursor,
+column in this attribute. The system looks at your suggestion cursor,
         using the string provided here to select your action message column, and
         then select the action message string from the Cursor. That string is added to the
-        Intent that the Search Manager passes to your searchable Activity (using the action you've
+        intent that the system passes to your searchable activity (using the action you've
 defined for suggestions). To examine the string, use {@link
 android.content.Intent#getStringExtra getStringExtra(SearchManager.ACTION_MSG)}. If the data
 does not exist for the selected suggestion, the action key is ignored.</dd>

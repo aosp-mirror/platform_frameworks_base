@@ -5,7 +5,7 @@ page.title=Search
 <div id="qv">
 <h2>Topics</h2>
 <ol>
-<li><a href="search-dialog.html">Using the Android Search Dialog</a></li>
+<li><a href="search-dialog.html">Creating a Search Interface</a></li>
 <li><a href="adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
 <li><a href="adding-custom-suggestions.html">Adding Custom Suggestions</a></li>
 </ol>
@@ -24,9 +24,8 @@ Dictionary</a></li>
 
 <p>Search is a core user feature on Android. Users should be able
 to search any data that is available to them, whether the content is located on the device or
-the Internet. The search experience should be seamless and consistent across the entire
-system, which is why Android provides a search framework to help you provide users with
-a familiar search dialog and a great search experience.</p>
+the Internet. To help create a consistent search experience for users, Android provides a
+search framework that helps you implement search for your application.</p>
 
 <div class="figure" style="width:250px">
 <img src="{@docRoot}images/search/search-suggest-custom.png" alt="" height="417" />
@@ -34,16 +33,14 @@ a familiar search dialog and a great search experience.</p>
 search suggestions.</p>
 </div>
 
-<p>Android's search framework provides a user interface in which users can perform a search and
-an interaction layer that communicates with your application, so you don't have to build
-your own search Activity. Instead, a search dialog appears at the top of the screen at the user's
-command without interrupting the current Activity.</p>
+<p>The search framework offers two modes of search input: a search dialog at the top of the
+screen or a search widget ({@link android.widget.SearchView}) that you can embed in your activity
+layout. In either case, the Android system will assist your search implementation by
+delivering search queries to a specific activity that performs searchs. You can also enable either
+the search dialog or widget to provide search suggestions as the user types. Figure 1 shows an
+example of the search dialog with optional search suggestions.</p>
 
-<p>The search framework manages the life of the search dialog. When users execute a search, the
-search framework passes the query text to your application so your application can perform a
-search. Figure 1 shows an example of the search dialog with optional search suggestions.</p>
-
-<p>Once your application is set up to use the search dialog, you can:</p>
+<p>Once you've set up either the search dialog or the search widget, you can:</p>
 
 <ul>
 <li>Enable voice search</li>
@@ -57,19 +54,19 @@ search your data. To perform a search, you need to use APIs appropriate for your
 if your data is stored in an SQLite database, you should use the {@link android.database.sqlite}
 APIs to perform searches.</p>
 
-<p>The following documents show you how to use the search dialog in your application:</p>
+<p>The following documents show you how to use Android's framework to implement search:</p>
 
 <dl>
-  <dt><strong><a href="search-dialog.html">Using the Android Search Dialog</a></strong></dt>
-  <dd>How to set up your application to use the search dialog. </dd>
+  <dt><strong><a href="search-dialog.html">Creating a Search Interface</a></strong></dt>
+  <dd>How to set up your application to use the search dialog or search widget. </dd>
   <dt><strong><a href="adding-recent-query-suggestions.html">Adding Recent Query
 Suggestions</a></strong></dt>
-  <dd>How to show suggestions based on queries previously used in the search dialog.</dd>
+  <dd>How to provide suggestions based on queries previously used.</dd>
   <dt><strong><a href="adding-custom-suggestions.html">Adding Custom Suggestions</a></strong></dt>
-  <dd>How to show suggestions based on custom data from your application and offer your suggestions
+  <dd>How to provide suggestions based on custom data from your application and also offer them
 in the system-wide Quick Search Box.</dd>
   <dt><strong><a href="searchable-config.html">Searchable Configuration</a></strong></dt>
-  <dd>A reference for the searchable configuration file (though the other
+  <dd>A reference document for the searchable configuration file (though the other
 documents also discuss the configuration file in terms of specific behaviors).</dd>
 </dl>
 
@@ -92,17 +89,17 @@ you don't need to send the user ID as well; send only the zip code to the server
 send the personal information, you should not log it. If you must log it, protect that data
 very carefully and erase it as soon as possible.</p>
 </li>
-<li><strong>Provide the user with a way to clear their search history.</strong>
+<li><strong>Provide users with a way to clear their search history.</strong>
 <p>The search framework helps your application provide context-specific suggestions while the user
 types. Sometimes these
 suggestions are based on previous searches or other actions taken by the user in an earlier
 session. A user might not wish for previous searches to be revealed to other device users, for
-instance, if they share their phone with a friend. If your application provides suggestions that can
-reveal previous activities, you should implement the ability for the user to clear the search
-history. If you are using {@link android.provider.SearchRecentSuggestions}, you can simply call the
-{@link android.provider.SearchRecentSuggestions#clearHistory()} method. If you are implementing
-custom suggestions, you'll need to provide a similar "clear history" method in your provider that
-the user can execute.</p>
+instance, if the user shares the device with a friend. If your application provides suggestions that
+can reveal previous search activities, you should implement the ability for the user to clear the
+search history. If you are using {@link android.provider.SearchRecentSuggestions}, you can simply
+call the {@link android.provider.SearchRecentSuggestions#clearHistory()} method. If you are
+implementing custom suggestions, you'll need to provide a similar "clear history" method in your
+content provider that the user can execute.</p>
 </li>
 </ul>
 
