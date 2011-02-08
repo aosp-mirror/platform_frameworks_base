@@ -54,18 +54,16 @@ import android.widget.TextView.OnEditorActionListener;
 import java.util.WeakHashMap;
 
 /**
- * Provides the user interface elements for the user to enter a search query and submit a
+ * A widget that provides a user interface for the user to enter a search query and submit a
  * request to a search provider. Shows a list of query suggestions or results, if
- * available and allows the user to pick a suggestion or result to launch into.
+ * available, and allows the user to pick a suggestion or result to launch into.
  *
- * <p>
- * <b>XML attributes</b>
- * <p>
- * See {@link android.R.styleable#SearchView SearchView Attributes},
- * {@link android.R.styleable#View View Attributes}
+ * <p>For more information, see the <a href="{@docRoot}guide/topics/search/index.html">Search</a>
+ * documentation.<p>
  *
  * @attr ref android.R.styleable#SearchView_iconifiedByDefault
  * @attr ref android.R.styleable#SearchView_maxWidth
+ * @attr ref android.R.styleable#SearchView_queryHint
  */
 public class SearchView extends LinearLayout {
 
@@ -374,6 +372,8 @@ public class SearchView extends LinearLayout {
      * in the SearchableInfo.
      *
      * @param hint the hint text to display
+     *
+     * @attr ref android.R.styleable#SearchView_queryHint
      */
     public void setQueryHint(CharSequence hint) {
         mQueryHint = hint;
@@ -389,6 +389,8 @@ public class SearchView extends LinearLayout {
      * <p>The default value is true.</p>
      *
      * @param iconified whether the search field should be iconified by default
+     *
+     * @attr ref android.R.styleable#SearchView_iconifiedByDefault
      */
     public void setIconifiedByDefault(boolean iconified) {
         if (mIconifiedByDefault == iconified) return;

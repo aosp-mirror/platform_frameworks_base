@@ -310,7 +310,7 @@
             <span class="en">Search</span>
           </a></div>
           <ul>
-            <li><a href="<?cs var:toroot?>guide/topics/search/search-dialog.html">Using the Android Search Dialog</a></li>
+            <li><a href="<?cs var:toroot?>guide/topics/search/search-dialog.html">Creating a Search Interface</a></li>
             <li><a href="<?cs var:toroot?>guide/topics/search/adding-recent-query-suggestions.html">Adding Recent Query Suggestions</a></li>
             <li><a href="<?cs var:toroot?>guide/topics/search/adding-custom-suggestions.html">Adding Custom Suggestions</a></li>
             <li><a href="<?cs var:toroot?>guide/topics/search/searchable-config.html">Searchable Configuration</a></li>
