@@ -250,6 +250,8 @@ public class ActionBarView extends ViewGroup {
     }
 
     public void setMenu(Menu menu) {
+        if (menu == mOptionsMenu) return;
+
         MenuBuilder builder = (MenuBuilder) menu;
         mOptionsMenu = builder;
         if (mMenuView != null) {

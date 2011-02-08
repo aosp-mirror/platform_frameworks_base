@@ -25,7 +25,6 @@ import android.view.Gravity;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -193,61 +192,125 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         menu.setActionWidthLimit(width);
 
         menu.setMaxActionItems(mMaxItems);
+        final boolean cleared = mMenu != menu;
         mMenu = menu;
-        updateChildren(true);
+        updateChildren(cleared);
     }
 
     public void updateChildren(boolean cleared) {
-        final boolean reserveOverflow = mReserveOverflow;
-        removeAllViews();
-        
-        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getActionItems(reserveOverflow);
+        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getActionItems(mReserveOverflow);
         final int itemCount = itemsToShow.size();
         
         boolean needsDivider = false;
+        int childIndex = 0;
         for (int i = 0; i < itemCount; i++) {
             final MenuItemImpl itemData = itemsToShow.get(i);
             boolean hasDivider = false;
 
             if (needsDivider) {
-                addView(makeDividerView(), makeDividerLayoutParams());
+                if (!isDivider(getChildAt(childIndex))) {
+                    addView(makeDividerView(), childIndex, makeDividerLayoutParams());
+                }
                 hasDivider = true;
+                childIndex++;
             }
 
-            View actionView = itemData.getActionView();
-
-            if (actionView != null) {
-                final ViewParent parent = actionView.getParent();
-                if (parent instanceof ViewGroup) {
-                    ((ViewGroup) parent).removeView(actionView);
-                }
-                addView(actionView, makeActionViewLayoutParams(actionView));
+            View childToAdd = itemData.getActionView();
+            boolean needsPreDivider = false;
+            if (childToAdd != null) {
+                childToAdd.setLayoutParams(makeActionViewLayoutParams(childToAdd));
             } else {
                 ActionMenuItemView view = (ActionMenuItemView) itemData.getItemView(
                         MenuBuilder.TYPE_ACTION_BUTTON, this);
                 view.setItemInvoker(this);
-                if (i > 0 && !hasDivider && view.hasText() && itemData.getIcon() == null) {
-                    addView(makeDividerView(), makeDividerLayoutParams());
-                }
-                addView(view);
+                needsPreDivider = i > 0 && !hasDivider && view.hasText() &&
+                        itemData.getIcon() == null;
                 needsDivider = view.hasText();
+                childToAdd = view;
             }
+
+            boolean addPreDivider = removeChildrenUntil(childIndex, childToAdd, needsPreDivider);
+
+            if (addPreDivider) addView(makeDividerView(), childIndex, makeDividerLayoutParams());
+            if (needsPreDivider) childIndex++;
+
+            if (getChildAt(childIndex) != childToAdd) {
+                addView(childToAdd, childIndex);
+            }
+            childIndex++;
         }
 
-        if (reserveOverflow) {
-            if (mMenu.getNonActionItems(true).size() > 0) {
-                if (itemCount > 0) {
-                    addView(makeDividerView(), makeDividerLayoutParams());
-                }
+        final boolean hasOverflow = mOverflowButton != null && mOverflowButton.getParent() == this;
+        final boolean needsOverflow = mReserveOverflow && mMenu.getNonActionItems(true).size() > 0;
+
+        if (hasOverflow != needsOverflow) {
+            if (needsOverflow) {
                 if (mOverflowButton == null) {
                     OverflowMenuButton button = new OverflowMenuButton(mContext);
                     mOverflowButton = button;
                 }
-                addView(mOverflowButton);
+                boolean addDivider = removeChildrenUntil(childIndex, mOverflowButton, true);
+                if (addDivider && itemCount > 0) {
+                    addView(makeDividerView(), childIndex, makeDividerLayoutParams());
+                    childIndex++;
+                }
+                addView(mOverflowButton, childIndex);
+                childIndex++;
             } else {
-                mOverflowButton = null;
+                removeView(mOverflowButton);
+            }
+        } else {
+            if (needsOverflow) {
+                boolean overflowDivider = itemCount > 0;
+                boolean addDivider = removeChildrenUntil(childIndex, mOverflowButton,
+                        overflowDivider);
+                if (addDivider && itemCount > 0) {
+                    addView(makeDividerView(), childIndex, makeDividerLayoutParams());
+                }
+                if (overflowDivider) {
+                    childIndex += 2;
+                } else {
+                    childIndex++;
+                }
             }
         }
+
+        while (getChildCount() > childIndex) {
+            removeViewAt(childIndex);
+        }
+    }
+
+    private boolean removeChildrenUntil(int start, View targetChild, boolean needsPreDivider) {
+        final int childCount = getChildCount();
+        boolean found = false;
+        for (int i = start; i < childCount; i++) {
+            final View child = getChildAt(i);
+            if (child == targetChild) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            return needsPreDivider;
+        }
+
+        for (int i = start; i < getChildCount(); ) {
+            final View child = getChildAt(i);
+            if (needsPreDivider && isDivider(child)) {
+                needsPreDivider = false;
+                i++;
+                continue;
+            }
+            if (child == targetChild) break;
+            removeViewAt(i);
+        }
+
+        return needsPreDivider;
+    }
+
+    private static boolean isDivider(View v) {
+        return v != null && v.getId() == com.android.internal.R.id.action_menu_divider;
     }
 
     public boolean showOverflowMenu() {
@@ -302,6 +365,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         ImageView result = new ImageView(mContext);
         result.setImageDrawable(mDivider);
         result.setScaleType(ImageView.ScaleType.FIT_XY);
+        result.setId(com.android.internal.R.id.action_menu_divider);
         return result;
     }
 
