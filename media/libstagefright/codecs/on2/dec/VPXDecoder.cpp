@@ -205,7 +205,9 @@ status_t VPXDecoder::read(
     vpx_image_t *img = vpx_codec_get_frame((vpx_codec_ctx_t *)mCtx, &iter);
 
     if (img == NULL) {
-        LOGI("on2 decoder did not return a frame.");
+        // The VPX format supports "internal-only" frames that are
+        // referenced by future content but never actually displayed, so
+        // this is a perfectly valid scenario.
 
         *out = new MediaBuffer(0);
         return OK;
