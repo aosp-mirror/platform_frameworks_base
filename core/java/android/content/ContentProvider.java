@@ -389,8 +389,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Return the name of the permission required for read-only access to
      * this content provider.  This method can be called from multiple
      * threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      */
     public final String getReadPermission() {
         return mReadPermission;
@@ -411,8 +411,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Return the name of the permission required for read/write access to
      * this content provider.  This method can be called from multiple
      * threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      */
     public final String getWritePermission() {
         return mWritePermission;
@@ -433,8 +433,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Return the path-based permissions required for read and/or write access to
      * this content provider.  This method can be called from multiple
      * threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      */
     public final PathPermission[] getPathPermissions() {
         return mPathPermissions;
@@ -494,8 +494,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
     /**
      * Implement this to handle query requests from clients.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      * <p>
      * Example client call:<p>
      * <pre>// Request a specific record.
@@ -555,8 +555,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * <code>vnd.android.cursor.item</code> for a single record,
      * or <code>vnd.android.cursor.dir/</code> for multiple items.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * <p>Note that there are no permissions needed for an application to
      * access this information; if your content provider requires read and/or
@@ -574,8 +574,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after inserting.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
      * @return The URI for the newly inserted item.
@@ -589,8 +589,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after inserting.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * @param uri The content:// URI of the insertion request.
      * @param values An array of sets of column_name/value pairs to add to the database.
@@ -611,8 +611,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyDelete()}
      * after deleting.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * <p>The implementation is responsible for parsing out a row ID at the end
      * of the URI, if a specific row is being deleted. That is, the client would
@@ -633,8 +633,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
      * after updating.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * @param uri The URI to query. This can potentially have a record ID if this
      * is an update request for a specific record.
@@ -650,8 +650,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Override this to handle requests to open a file blob.
      * The default implementation always throws {@link FileNotFoundException}.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * <p>This method returns a ParcelFileDescriptor, which is returned directly
      * to the caller.  This way large data (such as images and documents) can be
@@ -688,8 +688,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * that need to be able to return sub-sections of files, often assets
      * inside of their .apk.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * <p>If you implement this, your clients must be able to deal with such
      * file slices, either directly with
@@ -965,8 +965,8 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * elements as there were operations will be returned.  If any of the calls
      * fail, it is up to the implementation how many of the others take effect.
      * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals.html#procthread">Application Fundamentals:
-     * Processes and Threads</a>.
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
      *
      * @param operations the operations to apply
      * @return the results of the applications
