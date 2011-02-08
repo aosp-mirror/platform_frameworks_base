@@ -48,5 +48,4 @@ public class NinePatchTest extends TestCase {
         assertEquals(36, mPatch.getWidth());
         assertEquals(25, mPatch.getHeight());
     }
-
 }
