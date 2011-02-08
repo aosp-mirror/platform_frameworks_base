@@ -63,6 +63,7 @@ FileSource::~FileSource() {
 
     if (mDecryptHandle != NULL) {
         // To release mDecryptHandle
+        CHECK(mDrmManagerClient);
         mDrmManagerClient->closeDecryptSession(mDecryptHandle);
         mDecryptHandle = NULL;
     }

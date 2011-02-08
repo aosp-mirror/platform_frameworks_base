@@ -79,6 +79,7 @@ DRMSource::DRMSource(const sp<MediaSource> &mediaSource,
       mTrackId(trackId),
       mNALLengthSize(0),
       mWantsNALFragments(false) {
+    CHECK(mDrmManagerClient);
     mDrmManagerClient->initializeDecryptUnit(
             mDecryptHandle, trackId, ipmpBox);
 
