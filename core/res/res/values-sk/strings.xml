@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania metódy vstupu. Bežné aplikácie by toto nastavenie nemali vôbec využívať."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"väzba na tapetu"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania tapety. Bežné aplikácie by toto nastavenie vôbec nemali využívať."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"viazať sa k službe miniaplikácie"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby miniaplikácie. Bežné aplikácie by toto nastavenie vôbec nemali používať."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovať so správcom zariadenia"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Umožňuje držiteľovi odosielať informácie správcovi zariadenia. Bežné aplikácie by toto oprávnenie nemali nikdy požadovať."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmena orientácie obrazovky"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Práca"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Iné"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadajte kód PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Po dotyku môžete zadať heslo"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Zadajte heslo pre odomknutie"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Zadajte kód PIN pre odomknutie"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Nesprávny kód PIN"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Heslo"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Prihlásiť sa"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neplatné používateľské meno alebo heslo."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Zabudli ste používateľské meno alebo heslo?"\n"navštívte stránky "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Prebieha kontrola..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odomknúť"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnúť zvuk"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Odstrániť položky."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Vrátiť späť odstránenia."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Nevykonať akciu."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Sieť VPN <xliff:g id="PROFILENAME">%s</xliff:g> je pripojená"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Sieť VPN <xliff:g id="PROFILENAME">%s</xliff:g> odpojená"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Dotykom sa znova pripojíte k sieti VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Vybrať účet"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

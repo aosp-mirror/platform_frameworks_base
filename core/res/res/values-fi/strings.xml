@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Antaa sovelluksen sitoutua syöttötavan ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sido taustakuvaan"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Antaa sovelluksen sitoutua taustakuvan ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"sitoudu widget-palveluun"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Antaa sovelluksen sitoutua widget-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikoi laitteen järjestelmänvalvojan kanssa"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Antaa sovelluksen lähettää kyselyitä laitteen järjestelmänvalvojalle. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuta näytön suuntaa"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Työ"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Muu"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Anna PIN-koodi"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Kosketa ja anna salasana"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Poista lukitus antamalla salasana"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Poista lukitus antamalla PIN-koodi"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Virheellinen PIN-koodi!"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Salasana"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Kirjaudu sisään"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Virheellinen käyttäjänimi tai salasana."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Unohditko käyttäjänimesi tai salasanasi?"\n"Käy osoitteessa "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Tarkistetaan..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Poista lukitus"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ääni käytössä"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Poista kohteet."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Kumoa poistot."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Älä tee mitään."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g>: VPN-yhteys muodostettu"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g>: VPN-yhteys katkaistu"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Yhdistä VPN-verkkoon uudelleen koskettamalla."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Valitse tili"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

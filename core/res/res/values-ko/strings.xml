@@ -193,7 +193,7 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"애플리케이션이 SMS 메시지를 보낼 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS 또는 MMS 읽기"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"애플리케이션이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 기밀 메시지를 읽을 수 있습니다."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"애플리케이션이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 기밀 메시지를 읽을 수도 있습니다."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"애플리케이션이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 기밀 메시지를 읽을 수 있습니다."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS 또는 MMS 편집"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"애플리케이션이 태블릿 또는 SIM 카드에 저장된 SMS 메시지에 쓸 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 메시지를 삭제할 수 있습니다."</string>
@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"배경화면 연결"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"권한을 가진 프로그램이 배경화면에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"위젯 서비스와 연결"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"보유자가 위젯 서비스에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 필요하지 않습니다."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"기기 관리자와 상호 작용"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"보유자가 기기 관리자에게 인텐트를 보낼 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"화면 방향 변경"</string>
@@ -289,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"애플리케이션이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"애플리케이션 구성 요소 사용 또는 사용 안함"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"애플리케이션이 다른 애플리케이션 구성 요소 사용 여부를 변경할 수 있도록 합니다. 악성 애플리케이션이 이를 악용하여 중요한 태블릿 기능을 중지시킬 수 있습니다. 이 권한을 허용할 경우 애플리케이션 구성 요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"애플리케이션이 다른 애플리케이션 구성 요소 사용 여부를 변경할 수 있도록 합니다. 악성 애플리케이션이 이를 악용하여 중요한 전화 기능을 중지시킬 수 있습니다. 이 권한을 허용할 경우 애플리케이션 구성 요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"애플리케이션이 다른 애플리케이션 구성 요소 사용 여부를 변경할 수 있도록 합니다. 악성 애플리케이션이 이를 악용하여 중요한 휴대전화 기능을 중지시킬 수 있습니다. 이 권한을 허용할 경우 애플리케이션 구성 요소가 사용 불가능하게 되거나 일관성이 맞지 않거나 불안정해질 수 있으므로 주의해야 합니다."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"기본 애플리케이션 설정"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"애플리케이션이 기본 애플리케이션을 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 개인 정보를 수집하기 위해 기존 애플리케이션으로 위장하도록 실행되는 애플리케이션을 몰래 변경할 수 있습니다."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"전체 시스템 설정 수정"</string>
@@ -322,7 +320,7 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"위치 정보 공급자 설치 권한"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"테스트용 가짜 위치 정보제공자를 만듭니다. 단, 악성 애플리케이션이 이 기능을 이용하여 GPS, 네트워크 공급업체 같은 실제 위치 소스에서 반환한 위치 및/또는 상태를 덮어쓰거나 사용자의 위치를 모니터링하여 외부 소스로 보고할 수 있습니다."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"자세한 (GPS) 위치"</string>
-    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"태블릿에서 GPS 등의 자세한 위치 정보를 사용합니다. 이 경우 악성 애플리케이션이 사용자의 위치를 확인하고 추가 배터리 전원을 소비할 수 있습니다."</string>
+    <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"태블릿에서 GPS 등의 자세한 위치 정보를 사용합니다. 이 경우 악성 애플리케이션이 사용자의 위치를 확인하고 추가 배터리 전원을 소비할 수도 있습니다."</string>
     <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"GPS 등의 자세한 위치 정보가 사용 가능한 경우 휴대전화에서 이를 사용합니다. 이 경우 악성 애플리케이션이 사용자의 위치를 확인하고 추가 배터리 전원을 소비할 수 있습니다."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"네트워크 기반의 대략적인 위치"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"태블릿의 대략적인 위치를 측정하기 위해 셀룰러 네트워크 데이터베이스와 같은 광범위한 위치 정보를 사용합니다. 이 경우 악성 애플리케이션이 사용자의 위치를 대략적으로 측정할 수 있습니다."</string>
@@ -388,7 +386,7 @@
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"애플리케이션이 장치의 휴대전화 기능에 접근할 수 있도록 합니다. 이 권한을 갖는 애플리케이션은 휴대전화의 전화번호 및 일련번호, 통화가 활성인지 여부, 해당 통화가 연결된 번호 등을 확인할 수 있습니다."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"애플리케이션에서 태블릿이 절전 모드로 전환되지 않도록 합니다."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"애플리케이션이 태블릿의 절전 모드를 사용중지할 수 있습니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"애플리케이션이 휴대전화가 절전 모드로 전환되지 않도록 합니다."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"태블릿 전원 켜고 끄기"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"휴대전화 전원 켜고 끄기"</string>
@@ -482,8 +480,8 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"화면 잠금"</string>
     <string name="policydesc_forceLock" msgid="5696964126226028442">"화면을 잠그는 방법과 시기를 제어합니다."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"모든 데이터 삭제"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"초기화를 수행하여 경고 없이 태블릿 데이터를 지웁니다."</string>
-    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"공장 초기화를 수행하여 경고 없이 태블릿 데이터를 지웁니다."</string>
+    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"공장 초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"기기 전체 프록시 설정"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 전체 프록시만 유효합니다."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"비밀번호 만료 설정"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"기타"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN 코드 입력"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"비밀번호를 입력하려면 터치하세요."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"잠금을 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"잠금을 해제하려면 PIN 입력"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 코드가 잘못되었습니다."</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"비밀번호"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"로그인"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"사용자 이름이나 비밀번호를 잊어버렸습니까?"\n<b>"google.com/accounts/recovery"</b>"를 방문하세요."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"확인 중..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"잠금해제"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"사운드 켜기"</string>
@@ -672,7 +668,7 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"자동완성"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"자동완성 설정"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$3$2$1"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"브라우저의 기록 및 북마크 읽기"</string>
@@ -1015,15 +1011,11 @@
     <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 계정에 대해 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>개의 삭제된 항목이 있습니다. 어떻게 하시겠습니까?"</string>
     <string name="sync_really_delete" msgid="8933566316059338692">"항목 삭제"</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"삭제 실행취소"</string>
-    <string name="sync_do_nothing" msgid="8717589462945226869">"지금은 아무 작업도 안함"</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="sync_do_nothing" msgid="8717589462945226869">"나중에 작업"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN 연결됨"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN 연결 끊김"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"VPN에 다시 연결하려면 터치하세요."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"계정 선택"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

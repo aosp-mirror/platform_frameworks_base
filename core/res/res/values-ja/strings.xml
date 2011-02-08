@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"入力方法のトップレベルインターフェースに関連付けることを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"壁紙にバインド"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"壁紙のトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ウィジェットサービスにバインド"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"ウィジェットサービスのトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"デバイス管理者との通信"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"デバイス管理者へのintentの送信を所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"画面の向きの変更"</string>
@@ -604,10 +602,9 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"勤務先"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"その他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PINコードを入力"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
-    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"ロックを解除するにはパスワードを入力"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"ロックを解除するにはPINを入力"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"タップしてパスワードを入力"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"パスワードを入力"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"PINを入力"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PINコードが正しくありません。"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"MENU、0キーでロック解除"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"緊急通報番号"</string>
@@ -615,16 +612,16 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"画面ロック中"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"MENUキーでロック解除(または緊急通報)"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"MENUキーでロック解除"</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ロックを解除するパターンを入力"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"パターンを入力"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"緊急通報"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"通話に戻る"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"一致しました"</string>
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"やり直してください"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"やり直してください"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"充電中（<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>）"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"充電完了。"</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"充電完了"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"充電してください。"</string>
+    <string name="lockscreen_low_battery" msgid="1482873981919249740">"充電してください"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"SIMカードが挿入されていません"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"パスワード"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ログイン"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ユーザー名またはパスワードが正しくありません。"</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"ユーザー名またはパスワードを忘れた場合は"\n<b>"google.com/accounts/recovery"</b>" にアクセス"</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"確認中..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ロック解除"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"サウンドON"</string>
@@ -1012,18 +1008,14 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"はい"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"いいえ"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"削除の制限を超えました"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>アカウントの<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>で<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>件の削除があります。操作を選択してください。"</string>
-    <string name="sync_really_delete" msgid="8933566316059338692">"項目を削除します。"</string>
-    <string name="sync_undo_deletes" msgid="8610996708225006328">"削除を元に戻します。"</string>
-    <string name="sync_do_nothing" msgid="8717589462945226869">"今は何もしません。"</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>アカウントの<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>で<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g>件の削除が指定されています。操作を選択してください。"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"アイテムを削除する"</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"削除を元に戻す"</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"今は何もしない"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPNが接続されました"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPNが切断されました"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"タップしてVPNに再接続してください。"</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"アカウントを選択"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

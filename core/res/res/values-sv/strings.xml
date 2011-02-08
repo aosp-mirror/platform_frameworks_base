@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en inmatningsmetod. Ska inte behövas för vanliga program."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"binda till en bakgrund"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en bakgrund. Ska inte behövas för vanliga program."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind till en widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en widget. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"arbeta med en enhetsadministratör"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga program behöver aldrig göra detta."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ändra bildskärmens rikting"</string>
@@ -649,8 +647,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Lösenord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logga in"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ogiltigt användarnamn eller lösenord."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Har du glömt ditt användarnamn eller lösenord?"\n"Besök "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerar ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås upp"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ljud på"</string>
@@ -1022,8 +1019,7 @@
     <skip />
     <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
     <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Välj ett konto"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

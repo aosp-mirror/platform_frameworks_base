@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Lehetővé teszi a használó számára a beviteli módszer legfelső szintű kezelőfelületéhez való csatlakozást. A normál alkalmazások soha nem használják ezt."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"összekapcsolás háttérképpel"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Lehetővé teszi a használó számára, hogy csatlakozzon egy háttérkép legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szüksége."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"csatlakozás modulszolgáltatáshoz"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Lehetővé teszi a használó számára, hogy csatlakozzon egy modulszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"az eszközkezelő használata"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Lehetővé teszi a használó számára, hogy célokat küldjön egy eszközkezelőnek. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"képernyő irányának módosítása"</string>
@@ -366,7 +364,7 @@
     <string name="permlab_accessUsb" msgid="7362327818655760496">"USB-eszközök elérése"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Lehetővé teszi az alkalmazások számára az USB-eszközök elérését."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP-protokoll megvalósítása"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Hozzáférést biztosít a kernel MTP driveréhez az MTP USB-protokoll megvalósításának céljából."</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Hozzáférést biztosít a kernel MTP illesztőprogramjához az MTP USB-protokoll megvalósításának céljából."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardver tesztelése"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Lehetővé teszi az alkalmazás számára különböző perifériák vezérlését hardvertesztelés céljából."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonszámok közvetlen hívása"</string>
@@ -604,7 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Munkahely"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Egyéb"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Adja meg a PIN-kódot"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17"></font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Érintse meg jelszóhoz"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"A feloldáshoz írja be a jelszót"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Feloldáshoz írja be a PIN kódot"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Helytelen PIN-kód."</string>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Jelszó"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Bejelentkezés"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Érvénytelen felhasználónév vagy jelszó."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Elfelejtette a felhasználónevét vagy jelszavát?"\n"Keresse fel a "<b>"google.com/accounts/recovery"</b>" webhelyet"</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Ellenőrzés..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Feloldás"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Hang bekapcsolása"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Kapcsolódva a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózathoz"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Kapcsolat bontva a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózattal"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Érintse meg az újracsatlakozáshoz."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Fiók kiválasztása"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Tutucunun bir giriş yönteminin en üst düzey arayüzüne bağlanmasına izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bir duvar kağıdına tabi kıl"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Hesap sahibine bir duvar kağıdının en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bir widget hizmetine bağla"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Hesap sahibine bir widget hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"bir cihaz yöneticisi ile etkileşimde bulun"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Cihazın sahibinin cihaz yöneticisine amaç göndermesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran yönünü değiştir"</string>
@@ -366,7 +364,7 @@
     <string name="permlab_accessUsb" msgid="7362327818655760496">"USB cihazlarına erişme"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Uygulamaların USB cihazlarına erişimine izin verir"</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP protokolünü uygula"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTB USB protokolünü uygulamak için çekirdekteki MTP sürücüsüne erişim izni ver."</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB protokolünü uygulamak için çekirdekteki MTP sürücüsüne erişim izni ver."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"donanımı test et"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Uygulamanın donanım testi için çeşitli çevre birimlerini denetlemesine izin verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"İş"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Diğer"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN kodunu gir"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Şifre girmek için dokunun"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Kilidi açmak için şifreyi girin"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Kilidi açmak için PIN\'i girin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Yanlış PIN kodu!"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Şifre"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Oturum aç"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Geçersiz kullanıcı adı veya şifre."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Kullanıcı adınızı veya şifrenizi mi unuttunuz?"\n<b>"google.com/accounts/recovery"</b>" adresini ziyaret edin"</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrol ediliyor..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Kilit Aç"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sesi aç"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Öğeleri sil."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Silme işlemlerini geri alın."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Şimdilik bir şey yapma."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN bağlandı"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN bağlantısı kesildi"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"VPN\'ye tekrar bağlanmak için dokunun."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Bir hesap seçin"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
