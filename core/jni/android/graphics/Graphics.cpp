@@ -502,6 +502,8 @@ void AndroidPixelRef::globalUnref() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+extern "C" jbyte* jniGetNonMovableArrayElements(C_JNIEnv* env, jarray arrayObj);
+
 jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                              SkColorTable* ctable) {
     Sk64 size64 = bitmap->getSize64();
@@ -514,8 +516,8 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
     size_t size = size64.get32();
     jbyteArray arrayObj = env->NewByteArray(size);
     if (arrayObj) {
-        jbyte *addr = env->GetByteArrayElements(arrayObj, NULL);
-        env->ReleaseByteArrayElements(arrayObj, addr, 0);
+        // TODO: make this work without jniGetNonMovableArrayElements
+        jbyte* addr = jniGetNonMovableArrayElements(&env->functions, arrayObj);
         if (addr) {
             SkPixelRef* pr = new AndroidPixelRef(env, (void*) addr, size, arrayObj, ctable);
             bitmap->setPixelRef(pr)->unref();
