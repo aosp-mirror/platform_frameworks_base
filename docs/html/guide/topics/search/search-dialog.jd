@@ -423,8 +423,8 @@ case, the search dialog naturally disappears).</p>
 <p>If the current Activity is not the searchable Activity, then the normal Activity lifecycle
 events are triggered once the user executes a search (the current Activity receives {@link
 android.app.Activity#onPause()} and so forth, as
-described in <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Application
-Fundamentals</a>). If, however, the current Activity is the searchable Activity, then one of two
+described in <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+document). If, however, the current Activity is the searchable Activity, then one of two
 things happens:</p>
 
 <ol type="a">

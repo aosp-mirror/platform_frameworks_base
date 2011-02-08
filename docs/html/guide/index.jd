@@ -28,7 +28,7 @@ what it offers, and how your application fits in.</dd>
 
 <dt><b>Framework Topics</b></dt>
 <dd>Discussions of particular parts of the Android framework
-and API.  For an overview of the framework, begin with
+and API.  For an introduction to the framework, begin with
 <a href="{@docRoot}guide/topics/fundamentals.html">Application
 Fundamentals</a>.  Then explore other topics &mdash; from 
 designing a user interface and setting up resources to storing 
@@ -73,8 +73,8 @@ If you want to start by getting a quick look at some code, the
 tutorial walks you through a standard "Hello, World" application to introduce some basics of an
 Android application. The 
 <a href="{@docRoot}guide/topics/fundamentals.html">Application
-Fundamentals</a> document is a good place to start learning the basics about the application
-framework.
+Fundamentals</a> documentation is a good place to start for an 
+understanding of the application framework.
 </p>
 
 

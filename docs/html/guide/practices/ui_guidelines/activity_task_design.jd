@@ -81,8 +81,10 @@ page.title=Activity and Task Design Guidelines
 <p>
   Be sure to look at the <a href="#design_tips">Design Tips</a> section
   for guidelines, tips, and things to avoid. This document is a
-  complement to <a href={@docRoot}guide/topics/fundamentals.html
-  title="Application Fundamentals">Application Fundamentals</a>, 
+  complement to the <a href="{@docRoot}guide/topics/fundamentals.html">Application
+Fundamentals</a> documentation (particularly the <a
+href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+document),
   which covers the underlying mechanics for programmers.
 </p>
 
@@ -146,9 +148,9 @@ page.title=Activity and Task Design Guidelines
   
 <p>
   An activity handles a particular type of content (data) and accepts a
-  set of related user actions. In general, each activity has a 
-  <a href={@docRoot}guide/topics/fundamentals.html#actlife
-  title=lifecycle>lifecycle</a> that is independent of the other
+  set of related user actions. Each activity has a 
+  <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">lifecycle</a> that is
+independent of the other
   activities in its application or task &mdash; each activity is
   launched (started) independently, and the user or system can start,
   run, pause, resume, stop and restart it as needed. Because of this
@@ -225,9 +227,8 @@ page.title=Activity and Task Design Guidelines
 <p>
   An activity is the most prominent of four <em>components</em> of an
   application. The other components are service, content provider and
-  broadcast receiver. For more details on activities, see Activity in
-  <a href={@docRoot}guide/topics/fundamentals.html#appcomp
-  title="Application Components">Application Components</a>.
+  broadcast receiver. For more details on activities, see the
+  <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a> document.
 </p>
 
 
@@ -553,15 +554,6 @@ itself.
       network connection and allows the map to continue loading in the
       background.
 
-      <p>
-      Note that when you write an activity, you can make it stop or
-      continue running when it is moved to the background (see
-      onStop() in <a href={@docRoot}guide/topics/fundamentals.html#actlife
-      title="Activity Lifecycle">Activity Lifecycle</a>).
-      For activities that download data from the network, it's recommended
-      to let them continue downloading so the user can multi-task.
-      </p>
-
     </li>
 
     <li>
@@ -715,9 +707,8 @@ itself.
     </p>
 
     <p>
-      For more on intents, see {@link android.content.Intent Intent class} and
-      <a href={@docRoot}guide/topics/fundamentals.html#ifilters
-      title="intent filters">intent filters</a>.
+      For more about intents, see <a
+href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent Filters</a>.
     </p>
 
 
@@ -914,8 +905,8 @@ itself.
         Home screen), or from a shortcut icon on the Home screen, or
         from the task switcher.  (The mechanism for this is for the
         activity to have an 
-        <a href={@docRoot}guide/topics/fundamentals.html#ifilters
-        title="Intent filter">intent filter</a> with action MAIN and
+        <a href={@docRoot}guide/topics/intents/intents-filters.html>intent filter</a> with action
+MAIN and
         category LAUNCHER.)
       </li>
     </ul>

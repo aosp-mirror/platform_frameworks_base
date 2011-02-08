@@ -787,8 +787,8 @@ import android.widget.SpinnerAdapter;
 <p>
   <strong>Note:</strong> If you would like to learn more about the difference between losing
   focus/pausing and killing an application,
-  refer to the <a href="{@docRoot}guide/topics/fundamentals.html#actlife">Activity Lifecycle</a>
-  section.
+  read about the <a href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">activity
+lifecycle</a>.
 </p>
 <p>
   The first test verifies that the spinner selection is maintained after the entire application is shut down and then restarted. The test uses instrumentation to
