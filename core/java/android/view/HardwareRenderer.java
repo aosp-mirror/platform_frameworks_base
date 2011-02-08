@@ -42,8 +42,21 @@ public abstract class HardwareRenderer {
 
     /**
      * Turn on to only refresh the parts of the screen that need updating.
+     * When turned on the property defined by {@link #RENDER_DIRTY_REGIONS_PROPERTY}
+     * must also have the value "true". 
      */
     public static final boolean RENDER_DIRTY_REGIONS = true;
+
+    /**
+     * System property used to enable or disable dirty regions invalidation.
+     * This property is only queried if {@link #RENDER_DIRTY_REGIONS} is true.
+     * The default value of this property is assumed to be true.
+     * 
+     * Possible values:
+     * "true", to enable partial invalidates
+     * "false", to disable partial invalidates
+     */
+    static final String RENDER_DIRTY_REGIONS_PROPERTY = "hwui.render_dirty_regions";
 
     /**
      * Turn on to draw dirty regions every other frame.
@@ -113,8 +126,23 @@ public abstract class HardwareRenderer {
      */
     abstract void setup(int width, int height);
 
+    /**
+     * Interface used to receive callbacks whenever a view is drawn by
+     * a hardware renderer instance.
+     */
     interface HardwareDrawCallbacks {
+        /**
+         * Invoked before a view is drawn by a hardware renderer.
+         * 
+         * @param canvas The Canvas used to render the view.
+         */
         void onHardwarePreDraw(Canvas canvas);
+
+        /**
+         * Invoked after a view is drawn by a hardware renderer.
+         * 
+         * @param canvas The Canvas used to render the view.
+         */
         void onHardwarePostDraw(Canvas canvas);
     }
 
@@ -250,6 +278,7 @@ public abstract class HardwareRenderer {
         int mFrameCount;
         Paint mDebugPaint;
 
+        boolean mDirtyRegions;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -259,6 +288,9 @@ public abstract class HardwareRenderer {
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
             mTranslucent = translucent;
+            final String dirtyProperty = System.getProperty(RENDER_DIRTY_REGIONS_PROPERTY, "true");
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            mDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
         }
 
         /**
@@ -388,10 +420,24 @@ public abstract class HardwareRenderer {
             // We can now initialize EGL for that display
             int[] version = new int[2];
             if (!sEgl.eglInitialize(sEglDisplay, version)) {
-                throw new RuntimeException("eglInitialize failed "
-                        + getEGLErrorString(sEgl.eglGetError()));
+                throw new RuntimeException("eglInitialize failed " +
+                        getEGLErrorString(sEgl.eglGetError()));
             }
+
             sEglConfig = getConfigChooser(mGlVersion).chooseConfig(sEgl, sEglDisplay);
+            if (sEglConfig == null) {
+                // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
+                if (mDirtyRegions) {
+                    mDirtyRegions = false;
+
+                    sEglConfig = getConfigChooser(mGlVersion).chooseConfig(sEgl, sEglDisplay);
+                    if (sEglConfig == null) {
+                        throw new RuntimeException("eglConfig not initialized");
+                    }
+                } else {
+                    throw new RuntimeException("eglConfig not initialized");
+                }
+            }
             
             /*
             * Create an EGL context. We want to do this as rarely as we can, because an
@@ -409,7 +455,7 @@ public abstract class HardwareRenderer {
                 throw new RuntimeException("eglDisplay not initialized");
             }
             if (sEglConfig == null) {
-                throw new RuntimeException("mEglConfig not initialized");
+                throw new RuntimeException("eglConfig not initialized");
             }
             if (Thread.currentThread() != sEglThread) {
                 throw new IllegalStateException("HardwareRenderer cannot be used " 
@@ -452,7 +498,7 @@ public abstract class HardwareRenderer {
                         + getEGLErrorString(sEgl.eglGetError()));
             }
             
-            if (RENDER_DIRTY_REGIONS) {
+            if (mDirtyRegions) {
                 if (!GLES20Canvas.preserveBackBuffer()) {
                     Log.w(LOG_TAG, "Backbuffer cannot be preserved");
                 }
@@ -518,15 +564,14 @@ public abstract class HardwareRenderer {
          * @return An {@link android.view.HardwareRenderer.GlRenderer.EglConfigChooser}.
          */
         EglConfigChooser getConfigChooser(int glVersion) {
-            return new ComponentSizeChooser(glVersion, 8, 8, 8, 8, 0, 0);
+            return new ComponentSizeChooser(glVersion, 8, 8, 8, 8, 0, 0, mDirtyRegions);
         }
 
         @Override
         void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
                 Rect dirty) {
             if (canDraw()) {
-                //noinspection PointlessBooleanExpression,ConstantConditions
-                if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
+                if (!mDirtyRegions) {
                     dirty = null;
                 }
 
@@ -676,16 +721,16 @@ public abstract class HardwareRenderer {
         static class ComponentSizeChooser extends EglConfigChooser {
             private int[] mValue;
 
-            private int mRedSize;
-            private int mGreenSize;
-            private int mBlueSize;
-            private int mAlphaSize;
-            private int mDepthSize;
-            private int mStencilSize;
+            private final int mRedSize;
+            private final int mGreenSize;
+            private final int mBlueSize;
+            private final int mAlphaSize;
+            private final int mDepthSize;
+            private final int mStencilSize;
+            private final boolean mDirtyRegions;
 
             ComponentSizeChooser(int glVersion, int redSize, int greenSize, int blueSize,
-                    int alphaSize, int depthSize, int stencilSize) {
-                //noinspection PointlessBitwiseExpression
+                    int alphaSize, int depthSize, int stencilSize, boolean dirtyRegions) {
                 super(glVersion, new int[] {
                         EGL10.EGL_RED_SIZE, redSize,
                         EGL10.EGL_GREEN_SIZE, greenSize,
@@ -694,7 +739,7 @@ public abstract class HardwareRenderer {
                         EGL10.EGL_DEPTH_SIZE, depthSize,
                         EGL10.EGL_STENCIL_SIZE, stencilSize,
                         EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT |
-                                (RENDER_DIRTY_REGIONS ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
+                                (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
                         EGL10.EGL_NONE });
                 mValue = new int[1];
                 mRedSize = redSize;
@@ -703,7 +748,8 @@ public abstract class HardwareRenderer {
                 mAlphaSize = alphaSize;
                 mDepthSize = depthSize;
                 mStencilSize = stencilSize;
-           }
+                mDirtyRegions = dirtyRegions;
+            }
 
             @Override
             EGLConfig chooseConfig(EGL10 egl, EGLDisplay display, EGLConfig[] configs) {
@@ -716,7 +762,7 @@ public abstract class HardwareRenderer {
                         int b = findConfigAttrib(egl, display, config, EGL10.EGL_BLUE_SIZE, 0);
                         int a = findConfigAttrib(egl, display, config, EGL10.EGL_ALPHA_SIZE, 0);
                         boolean backBuffer;
-                        if (RENDER_DIRTY_REGIONS) {
+                        if (mDirtyRegions) {
                             int surfaceType = findConfigAttrib(egl, display, config,
                                     EGL_SURFACE_TYPE, 0);
                             backBuffer = (surfaceType & EGL_SWAP_BEHAVIOR_PRESERVED_BIT) != 0;
