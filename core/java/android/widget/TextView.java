@@ -8012,11 +8012,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_SELECT_ALL:
+                // This does not enter text selection mode. Text is highlighted, so that it can be
+                // bulk edited, like selectAllOnFocus does.
                 selectAll();
-                // Update controller positions after selection change.
-                if (hasSelectionController()) {
-                    getSelectionController().show();
-                }
                 return true;
 
             case ID_PASTE:
@@ -8134,6 +8132,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
+        boolean handled = false;
+
         // Long press in empty space moves cursor and shows the Paste affordance if available.
         if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
                 mInsertionControllerEnabled) {
@@ -8141,11 +8141,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             stopSelectionActionMode();
             Selection.setSelection((Spannable)mText, offset);
             getInsertionController().show(0);
-            mDiscardNextActionUp = true;
-            return true;
+            handled = true;
         }
 
-        if (mSelectionActionMode != null) {
+        if (!handled && mSelectionActionMode != null) {
             if (touchPositionIsInSelection()) {
                 // Start a drag
                 final int start = getSelectionStart();
@@ -8156,21 +8155,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 startDrag(data, getTextThumbnailBuilder(selectedText), localState, 0);
                 stopSelectionActionMode();
             } else {
+                // New selection at touch position
                 updateSelectedRegion();
             }
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            mDiscardNextActionUp = true;
-            return true;
+            handled = true;
         }
 
         // Start a new selection
-        if (startSelectionActionMode()) {
+        handled |= !handled && startSelectionActionMode();
+
+        if (handled) {
             performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             mDiscardNextActionUp = true;
-            return true;
         }
 
-        return false;
+        return handled;
     }
 
     /**
