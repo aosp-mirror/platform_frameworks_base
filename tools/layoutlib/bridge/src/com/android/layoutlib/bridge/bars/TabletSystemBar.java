@@ -31,6 +31,8 @@ public class TabletSystemBar extends CustomBar {
     public TabletSystemBar(Context context, Density density) throws XmlPullParserException {
         super(context, density, "/bars/tablet_system_bar.xml");
 
+        setBackgroundColor(0xFF000000);
+
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
         // We do know the order though.
