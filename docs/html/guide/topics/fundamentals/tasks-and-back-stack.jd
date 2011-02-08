@@ -1,6 +1,6 @@
 page.title=Tasks and Back Stack
-parent.title=Application Fundamentals
-parent.link=index.html
+parent.title=Activities
+parent.link=activities.html
 @jd:body
 
 <div id="qv-wrapper">
@@ -558,7 +558,7 @@ href="#Clearing">Clearing the stack</a>).</p>
 
 
 
-
+<!--
 <h2>Beginner's Path</h2>
 
 <p>For more information about how to use intents to
@@ -566,3 +566,4 @@ activate other application components and publish the intents to which your comp
 respond, continue with the <b><a
 href="{@docRoot}guide/topics/intents/intents-filters.html">Intents and Intent
 Filters</a></b> document.</p>
+-->

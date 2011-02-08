@@ -1,6 +1,4 @@
 page.title=Services
-parent.title=Application Fundamentals
-parent.link=index.html
 @jd:body
 
 <div id="qv-wrapper">
@@ -851,10 +849,11 @@ href="{@docRoot}guide/topics/fundamentals/bound-services.html#Lifecycle">Managin
 a Bound Service</a>.</p>
 
 
-
+<!--
 <h2>Beginner's Path</h2>
 
 <p>To learn how to query data from the system or other applications (such as contacts or media
 stored on the device), continue with the <b><a
 href="{@docRoot}guide/topics/providers/content-providers.html">Content Providers</a></b>
 document.</p>
+-->
