@@ -1,4 +1,4 @@
-page.title=Building and Running Apps
+page.title=Building and Running
 @jd:body
 
 <div id="qv-wrapper">
@@ -49,7 +49,7 @@ page.title=Building and Running Apps
   tools and processes are masked from you. The following diagram depicts the different tools and
   processes that are involved in a build:</p>
 
-  <p><img src="{@docRoot}images/build.png" /></p>
+  <img src="{@docRoot}images/build.png" />
 
   <p>The general process for a typical build is outlined below:</p>
 

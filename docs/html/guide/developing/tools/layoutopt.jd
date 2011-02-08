@@ -5,8 +5,9 @@ page.title=layoutopt
 layouts and layout hierarchies of your applications.<p>
 
 <p>This document is a reference to the available command line options. For more information and sample
-output of the tool, see <a href="{@docRoot}guide/developing/debugging/debugging-ui.html#layoutopt.html">
-Optimizing layouts with layoutopt</a>.</p>
+output of the tool, see <a
+href="{@docRoot}guide/developing/debugging/debugging-ui.html#layoutopt">Optimizing layouts with
+layoutopt</a>.</p>
 
 <h3>Usage</h3>
 

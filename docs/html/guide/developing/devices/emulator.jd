@@ -121,7 +121,7 @@ the emulator stores the user data, SD card data, and cache in the AVD directory.
 <p>To create and manage AVDs you use the AVD Manager UI or the <code>android</code> tool
 that is included in the SDK. 
 For complete information about how to set up AVDs, see <a
-href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>.</p>
+href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>.</p>
 
 <a name="starting"></a>
 
@@ -352,7 +352,7 @@ Here's the command-line usage for launching the emulator with options: </p>
   <td><strong>Required</strong>. Specifies the AVD to load for this emulator
       instance.</td>
   <td>You must create an AVD configuration before launching the emulator. For
-      information, see <a href="{@docRoot}guide/developing/devices/managing-avds.html">Creating and Managing
+      information, see <a href="{@docRoot}guide/developing/devices/managing-avds.html">Managing
       Virtual Devices with AVD Manager</a>.</td>
 <tr>
   <td rowspan="7">Disk Images</td>
@@ -708,7 +708,7 @@ option. Using this option may yield unexpected and in some cases misleading
 results, since the density with which to render the skin may not be defined.
 AVDs let you associate each skin with a default density and override the default
 as needed. For more information, see <a
-href="{@docRoot}guide/developing/devices/managing-avds.html">Creating and Managing Virtual Devices
+href="{@docRoot}guide/developing/devices/managing-avds.html">Managing Virtual Devices
 with AVD Manager</a>.
 </td>
 </tr>
@@ -884,7 +884,8 @@ emulated SD card and load it in the emulator, see <a href="#sdcard">SD Card Emul
 
 <p>You can also use the android tool to automatically create an SD Card image
 for you, when creating an AVD. For more information, see <a 
-href="{@docRoot}guide/developing/devices/managing-avds.html">Creating and Managing Virtual Devices with AVD Manager</a>.
+href="{@docRoot}guide/developing/devices/managing-avds.html">Managing Virtual Devices with AVD
+Manager</a>.
 
 <a name="temporaryimages"></a>
 <h3>Temporary Images</h3>
@@ -1635,7 +1636,7 @@ kilobits/sec):</p>
 <h2>Using Emulator Skins</h2>
 
 <p>The Android SDK includes several Emulator skins that you can use to control the resolution and density of the emulated device's screen. To select a specific skin for running the emulator, create an AVD that uses that skin. Please do not use deprecated emulator options such as <code>-skin</code> to control the skin used by an emulator instance. For more information about AVDs, see <a
-href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>.</p>
+href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>.</p>
 
 
 <a name="multipleinstances"></a>
@@ -1699,7 +1700,8 @@ creating an AVD, you simply specify the <code>-c</code> option, like this: </p>
 
 <p>You can also use the <code>-c</code> option to specify a path to an SD card
 image to use in the new AVD. For more information, see <a
-href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Creating and Managing Virtual Devices on the Command Line</a>.
+href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing Virtual Devices
+from the Command Line</a>.
 </p>
 
 <h3 id="creatingm">Creating an SD card image using mksdcard</h3>

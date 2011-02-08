@@ -387,13 +387,13 @@
       signing, upgrading, selecting a package name, select device profile, touch, trackball, dpad available, etc. -->
       <li>
         <a href="<?cs var:toroot ?>guide/developing/index.html">
-        <span class="en">Overview</span></a>
+        <span class="en">Introduction</span></a>
       </li>
 
       <li class="toggle-list">
         <div>
            <a href="<?cs var:toroot ?>guide/developing/devices/index.html">
-        	     <span class="en">Creating and Managing Virtual Devices</span>
+        	     <span class="en">Managing Virtual Devices</span>
          	 </a>
         </div>
         <ul>
@@ -404,7 +404,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/devices/managing-avds-cmdline.html">
-              <span class="en">On the Command Line</span>
+              <span class="en">From the Command Line</span>
          	 </a>
           </li>
           <li>
@@ -416,25 +416,25 @@
       </li>
       <li>
         <a href="<?cs var:toroot ?>guide/developing/device.html">
-          <span class="en">Connecting Hardware Devices</span>
+          <span class="en">Using Hardware Devices</span>
         </a>
       </li>
       
       <li class="toggle-list">
         <div>
           <a href="<?cs var:toroot ?>guide/developing/projects/index.html">
-            <span class="en">Creating and Managing Projects</span>
+            <span class="en">Managing Projects</span>
           </a>
         </div>
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/projects/projects-eclipse.html">
-              <span class="en">In Eclipse with ADT</span>
+              <span class="en">From Eclipse with ADT</span>
             </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/projects/projects-cmdline.html">
-        	    <span class="en">On the Command Line</span>
+        	    <span class="en">From the Command Line</span>
             </a>
           </li>
         </ul>
@@ -443,14 +443,15 @@
       <li class="toggle-list">
         <div>
           <a href="<?cs var:toroot ?>guide/developing/building/index.html">
-            <span class="en">Building and Running Apps</span>
+            <span class="en">Building and Running</span>
           </a>
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/developing/building/building-eclipse.html">
-          <span class="en">In Eclipse with ADT</span>
+            <span class="en">From Eclipse with ADT</span>
           </a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html"><span class="en">On the Command Line</span></a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/building/building-cmdline.html">
+            <span class="en">From the Command Line</span></a></li>
         </ul>
       </li>
 
@@ -463,12 +464,12 @@
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects.html">
-         	    <span class="en">In Eclipse with ADT</span>
+         	    <span class="en">From Eclipse with ADT</span>
             </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects-cmdline.html">
-         	    <span class="en">In Other IDEs</span>
+         	    <span class="en">From Other IDEs</span>
             </a>
           </li>
           <li>
@@ -478,7 +479,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-log.html">
-         	    <span class="en">Reading and Writing Log Messages</span>
+         	    <span class="en">Reading and Writing Logs</span>
             </a>
           </li>
           <li>
@@ -508,13 +509,13 @@
            <ul>
               <li>
                 <a href="<?cs var:toroot ?>guide/developing/testing/testing_eclipse.html">
-                  <span class="en">In Eclipse with ADT</span>
+                  <span class="en">From Eclipse with ADT</span>
                 </a>
               </li>
 
               <li>
                 <a href="<?cs var:toroot ?>guide/developing/testing/testing_otheride.html">
-                  <span class="en">In Other IDEs</span>
+                  <span class="en">From Other IDEs</span>
                 </a>
               </li>
            </ul>

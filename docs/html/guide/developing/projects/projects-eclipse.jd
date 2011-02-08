@@ -1,4 +1,4 @@
-page.title=Creating and Managing Projects in Eclipse
+page.title=Managing Projects from Eclipse
 @jd:body
 
  <div id="qv-wrapper">
@@ -18,7 +18,7 @@ page.title=Creating and Managing Projects in Eclipse
       <ol>
         <li><a href=
         "{@docRoot}guide/developing/testing/testing_eclipse.html#CreateTestProjectEclipse">Testing
-        in Eclipse, with ADT</a></li>
+        from Eclipse with ADT</a></li>
       </ol>
     </div>
   </div>
@@ -37,7 +37,7 @@ page.title=Creating and Managing Projects in Eclipse
 
   <li>Test projects extend JUnit test functionality to include Android specific functionality. For
   more information on creating a test project, see <a href=
-  "{@docRoot}guide/developing/testing/testing_eclipse.html">Testing in Eclipse</a></li>
+  "{@docRoot}guide/developing/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.</li>
   </ul>
 
   <h2 id="CreatingAProject">Creating an Android Project</h2>

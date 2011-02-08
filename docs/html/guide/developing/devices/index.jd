@@ -1,4 +1,4 @@
-page.title=Creating and Managing Virtual Devices
+page.title=Managing Virtual Devices
 @jd:body
 
 
@@ -13,8 +13,8 @@ page.title=Creating and Managing Virtual Devices
 
   <p>You can also create AVDs on the command line by passing the <code>android</code> tool options.
   For more information on how to create AVDs in this manner, see <a href= 
-  "{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Creating and Managing Virtual
-  Devices on the Command Line</a>.</p>
+  "{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing Virtual
+  Devices from the Command Line</a>.</p>
 
   <p>An AVD consists of:</p>
 
@@ -66,10 +66,10 @@ page.title=Creating and Managing Virtual Devices
   </ul>
 
   <p>To learn how to manage AVDs using a graphical tool, read <a href=
-  "{@docRoot}guide/developing/devices/managing-avds.html">
-  Creating and Managing AVDs with AVD Manager</a>. To learn how to manage AVDs on the command line, read
-  <a href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Creating and Managing AVDs
-  on the Command Line</a>.</p>
+  "{@docRoot}guide/developing/devices/managing-avds.html">Managing AVDs with AVD Manager</a>. To
+learn how to manage AVDs on the command line, read
+  <a href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">Managing AVDs
+  from the Command Line</a>.</p>
 
 
 
