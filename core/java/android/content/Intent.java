@@ -2462,8 +2462,8 @@ public class Intent implements Parcelable, Cloneable {
      * user can move to.  Tasks can be moved to the foreground and background;
      * all of the activities inside of a particular task always remain in
      * the same order.  See
-     * <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
-     * Activities and Tasks</a> for more details on tasks.
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+     * Stack</a> for more information about tasks.
      *
      * <p>This flag is generally used by activities that want
      * to present a "launcher" style behavior: they give the user a list of
@@ -2496,8 +2496,9 @@ public class Intent implements Parcelable, Cloneable {
      * <p>This flag is ignored if
      * {@link #FLAG_ACTIVITY_NEW_TASK} is not set.
      *
-     * <p>See <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
-     * Activities and Tasks</a> for more details on tasks.
+     * <p>See
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+     * Stack</a> for more information about tasks.
      */
     public static final int FLAG_ACTIVITY_MULTIPLE_TASK = 0x08000000;
     /**
@@ -2527,8 +2528,9 @@ public class Intent implements Parcelable, Cloneable {
      * especially useful, for example, when launching an activity from the
      * notification manager.
      *
-     * <p>See <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
-     * Activities and Tasks</a> for more details on tasks.
+     * <p>See
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+     * Stack</a> for more information about tasks.
      */
     public static final int FLAG_ACTIVITY_CLEAR_TOP = 0x04000000;
     /**
@@ -4938,8 +4940,9 @@ public class Intent implements Parcelable, Cloneable {
      * FLAG_RECEIVER_* flags are all for use with
      * {@link Context#sendBroadcast(Intent) Context.sendBroadcast()}.
      *
-     * <p>See the <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals:
-     * Activities and Tasks</a> documentation for important information on how some of these options impact
+     * <p>See the
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+     * Stack</a> documentation for important information on how some of these options impact
      * the behavior of your application.
      *
      * @param flags The desired flags.

@@ -111,9 +111,15 @@ import java.util.HashMap;
  * 
  * <p>The Activity class is an important part of an application's overall lifecycle,
  * and the way activities are launched and put together is a fundamental
- * part of the platform's application model. For a detailed perspective on the structure of
- * Android applications and lifecycles, please read the <em>Dev Guide</em> document on 
- * <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a>.</p>
+ * part of the platform's application model. For a detailed perspective on the structure of an
+ * Android application and how activities behave, please read the
+ * <a href="{@docRoot}guide/topics/fundamentals.html">Application Fundamentals</a> and
+ * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a>
+ * documents.</p>
+ *
+ * <p>You can also find a detailed discussion about how to create activities in the
+ * <a href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a>
+ * document.</p>
  * 
  * <p>Topics covered here:
  * <ol>
