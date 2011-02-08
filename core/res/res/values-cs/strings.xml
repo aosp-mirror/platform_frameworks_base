@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní pro zadávání dat. Běžné aplikace by toto nastavení nikdy neměly využívat."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vazba na tapetu"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění nikdy neměly potřebovat."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"navázat se na službu widgetu"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Umožňuje držiteli navázat se na nejvyšší úroveň služby widgetu. Běžné aplikace by toto oprávnění nikdy neměly potřebovat."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovat se správcem zařízení"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Umožňuje držiteli oprávnění odesílat informace správci zařízení. Běžné aplikace by toto oprávnění nikdy neměly požadovat."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"změna orientace obrazovky"</string>
@@ -289,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat pouze výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"povolení či zakázání komponent aplikací"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou pomocí tohoto nastavení vypnout důležité funkce tabletu. Je třeba postupovat opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou zneužitím tohoto oprávnění vypnout důležité funkce tabletu. S oprávněním je třeba zacházet opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Umožňuje aplikaci změnit, zda je komponenta jiné aplikace povolena nebo ne. Škodlivé aplikace mohou zneužitím tohoto oprávnění vypnout důležité funkce telefonu. S oprávněním je třeba zacházet opatrně, protože je možné způsobit nepoužitelnost, nekonzistenci či nestabilitu komponent aplikací."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"nastavení upřednostňovaných aplikací"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Umožňuje aplikaci změnit vaše upřednostňované aplikace. Toto nastavení může škodlivým aplikacím umožnit nepozorovaně změnit spouštěné aplikace a oklamat vaše existující aplikace tak, aby shromažďovaly vaše soukromá data."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"změna globálních nastavení systému"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Práce"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Jiné"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Zadejte kód PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Dotknete-li se tohoto pole, budete moci zadat heslo"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Zadejte heslo pro odblokování"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Zadejte kód PIN pro odblokování"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Nesprávný kód PIN"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Heslo"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Přihlásit se"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neplatné uživatelské jméno nebo heslo."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Zapomněli jste uživatelské jméno nebo heslo?"\n"Přejděte na stránku "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Probíhá kontrola..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odemknout"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zapnout zvuk"</string>
@@ -1006,7 +1002,7 @@
     <string name="share" msgid="1778686618230011964">"Sdílet"</string>
     <string name="find" msgid="4808270900322985960">"Najít"</string>
     <string name="websearch" msgid="4337157977400211589">"Vyhledat na webu"</string>
-    <string name="gpsNotifTicker" msgid="5622683912616496172">"Požadavek na informace o poloze od uživatele<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Požadavek na informace o poloze od uživatele <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Požadavek na informace o poloze"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Požadavek od uživatele <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Ano"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Smazat položky."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Vrátit mazání zpět."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Neprovádět akci."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Síť VPN <xliff:g id="PROFILENAME">%s</xliff:g> je připojena"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Síť VPN <xliff:g id="PROFILENAME">%s</xliff:g> je odpojena"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Dotykem se znovu připojíte k síti VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Vybrat účet"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

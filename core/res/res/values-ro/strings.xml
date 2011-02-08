@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permite deţinătorului să se conecteze la interfaţa de nivel superior a unei metode de intrare. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"conectare la o imagine de fundal"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unui serviciu widget. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacţionare cu administratorul unui dispozitiv"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permite proprietarului să trimită intenţii către un administrator al dispozitivului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modificare orientare ecran"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Serviciu"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Altul"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Introduceţi codul PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Ating. şi intr. parola"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Introduceţi parola pentru a debloca"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Introduceţi PIN pentru deblocare"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Cod PIN incorect!"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Parolă"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Conectaţi-vă"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nume de utilizator sau parolă nevalide."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Aţi uitat numele de utilizator sau parola?"\n"Accesaţi "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Se verifică..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Deblocaţi"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sunet activat"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Ştergeţi elementele."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Anulaţi aceste ştergeri."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Pentru moment, nu efectuaţi nicio acţiune."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> conectat"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> deconectat"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Atingeţi pentru a vă reconecta la o reţea VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Selectaţi un cont"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Pozwala na tworzenie powiązania z interfejsem najwyższego poziomu metody wejściowej. To uprawnienie nie powinno być nigdy wymagane przez zwykłe aplikacje."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"powiązanie z tapetą"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umożliwia posiadaczowi powiązać interfejs najwyższego poziomu dla tapety. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"powiązanie z usługą widżetów"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Zezwala posiadaczowi na powiązanie z interfejsem najwyższego poziomu usługi widżetów. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcja z administratorem urządzenia"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Zezwala posiadaczowi na wysyłanie informacji o zamiarach do administratora urządzenia. Opcja nie powinna być nigdy potrzebna w przypadku zwykłych aplikacji."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmienianie orientacji ekranu"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Służbowy"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Inny"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Wprowadź kod PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Dotknij, aby podać hasło"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Wprowadź hasło, aby odblokować"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Wprowadź kod PIN, aby odblokować"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Błędny kod PIN!"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Hasło"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Zaloguj się"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Błędna nazwa użytkownika lub hasło."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Nie pamiętasz nazwy użytkownika lub hasła?"\n"Odwiedź stronę "<b>"google.pl/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Trwa sprawdzanie..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Odblokuj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Włącz dźwięk"</string>
@@ -711,7 +707,7 @@
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godzin temu"</item>
   </plurals>
   <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Ostatnie dni (<xliff:g id="COUNT">%d</xliff:g>)"</item>
+    <item quantity="other" msgid="3069992808164318268">"Ostatnie (<xliff:g id="COUNT">%d</xliff:g>) dni"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Ostatni miesiąc"</string>
     <string name="older" msgid="5211975022815554840">"Starsze"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Usuń elementy."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Cofnij usunięcie."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Nie wykonuj teraz żadnych czynności."</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Połączono z siecią VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Rozłączono z siecią VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Dotknij, aby ponownie połączyć się z siecią VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Wybierz konto"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

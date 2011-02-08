@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Lar applikasjonen binde til toppnivågrensesnittet for en inndatametode. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind til bakgrunnsbilde"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Lar innehaveren binde det øverste nivået av grensesnittet til en bakgrunnsbilder. Skal ikke være nødvendig for vanlige programmer."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind til modultjenste"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Lar innehaveren binde til det øverste nivået av grensesnittet for en modultjeneste. Skal aldri være nødvendig for normale programmer."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommuniser med enhetsadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillater innehaveren å sende hensikter til enhetsadministrator. Bør aldri være nødvendig for normale programmer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"snu skjermen"</string>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Passord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logg på"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldig brukernavn eller passord."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Har du glemt brukernavnet eller passordet?"\n"Gå til"<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerer ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås opp"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Lyd på"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> er tilkoblet VPN"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> er frakoblet VPN"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Trykk for å koble til et VPN på nytt."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Velg en konto"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

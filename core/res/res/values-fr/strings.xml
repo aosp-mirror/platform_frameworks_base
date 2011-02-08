@@ -71,11 +71,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"Le service de données est bloqué."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Le service d\'appel d\'urgence est bloqué."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Le service vocal est bloqué."</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Tous les services vocaux sont bloqués."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Tous les services voix sont bloqués."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"Le service SMS est bloqué."</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Les services vocaux/de données sont bloqués."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Les services vocaux/SMS sont bloqués."</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"Tous les services vocaux/de données/SMS sont bloqués."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Les services voix/données sont bloqués."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Les services voix/SMS sont bloqués."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Tous les services voix/données/SMS sont bloqués."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voix"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Données"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Télécopie"</string>
@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permet au support de se connecter à l\'interface de plus haut niveau d\'un mode de saisie. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"Se fixer sur un fond d\'écran"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permet au support de se fixer sur l\'interface de plus haut niveau d\'un fond d\'écran. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associer à un service widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service widget. Les applications standard ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur du périphérique"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur du périphérique. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Changement d\'orientation de l\'écran"</string>
@@ -604,8 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Professionnelle"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Autre"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Saisissez le code PIN"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Appuyez saisir mot passe"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Saisissez le mot de passe pour procéder au déverrouillage."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Saisissez le code PIN pour procéder au déverrouillage."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Le code PIN est incorrect !"</string>
@@ -649,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Mot de passe"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Se connecter"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nom d\'utilisateur ou mot de passe incorrect."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Vous avez oublié votre nom d\'utilisateur ou votre mot de passe ?"\n"Accédez à la page "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Vérification..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Débloquer"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Son activé"</string>
@@ -1016,14 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Supprimer les éléments"</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Annuler les suppressions"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Ne rien faire pour l\'instant"</string>
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> connecté"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> déconnecté"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Appuyez ici pour vous reconnecter à un VPN"</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Sélectionner un compte"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->

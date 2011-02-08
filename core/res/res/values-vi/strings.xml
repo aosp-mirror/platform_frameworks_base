@@ -255,10 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Cho phép chủ nhân ràng buộc với giao diện cấp cao nhất của phương thức nhập. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"liên kết với hình nền"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Cho phép chủ nhân ràng buộc với giao diện cấp cao nhất của hình nền. Không cần thiết cho các ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
-    <skip />
-    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
-    <skip />
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"liên kết với dịch vụ tiện ích con"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Cho phép chủ nhân liên kết với giao diện cấp cao nhất của dịch vụ tiện ích con. Không cần thiết đối với ứng dụng thông thường."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"tương tác với quản trị viên thiết bị"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Cho phép chủ nhân gửi các ý định đến quản trị viên thiết bị. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"thay đổi hướng màn hình"</string>
@@ -648,8 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Mật khẩu"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Đăng nhập"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Tên người dùng hoặc mật khẩu không hợp lệ."</string>
-    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
-    <skip />
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Bạn quên tên người dùng hoặc mật khẩu?"\n"Hãy truy cập "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Đang kiểm tra..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Mở khoá"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Bật âm thanh"</string>
@@ -1018,8 +1015,7 @@
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Đã kết nối VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Đã ngắt kết nối VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Chạm để kết nối lại với VPN."</string>
-    <!-- no translation found for choose_account_label (4191313562041125787) -->
-    <skip />
+    <string name="choose_account_label" msgid="4191313562041125787">"Chọn tài khoản"</string>
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
