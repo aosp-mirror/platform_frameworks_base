@@ -200,8 +200,6 @@ public final class Bitmap implements Parcelable {
      * check if a bitmap has changed.
      * 
      * @return The current generation ID for this bitmap.
-     * 
-     * @hide
      */
     public int getGenerationId() {
         return nativeGenerationId(mNativeBitmap);
@@ -752,7 +750,7 @@ public final class Bitmap implements Parcelable {
         }
         
         // Scale by tdensity / sdensity, rounding up.
-        return ( (size * tdensity) + (sdensity >> 1) ) / sdensity;
+        return ((size * tdensity) + (sdensity >> 1)) / sdensity;
     }
     
     /**
@@ -790,14 +788,12 @@ public final class Bitmap implements Parcelable {
     /**
      * Tell the bitmap if all of the pixels are known to be opaque (false)
      * or if some of the pixels may contain non-opaque alpha values (true).
-     * Note, for some configs (e.g. RGB_565) this call is ignore, since it does
-     * not support per-pixel alpha values.
+     * Note, for some configs (e.g. RGB_565) this call is ignored, since it
+     * does not support per-pixel alpha values.
      *
      * This is meant as a drawing hint, as in some cases a bitmap that is known
      * to be opaque can take a faster drawing case than one that may have
      * non-opaque per-pixel alpha values.
-     *
-     * @hide
      */
     public void setHasAlpha(boolean hasAlpha) {
         nativeSetHasAlpha(mNativeBitmap, hasAlpha);
@@ -1066,13 +1062,9 @@ public final class Bitmap implements Parcelable {
      *  Given another bitmap, return true if it has the same dimensions, config,
      *  and pixel data as this bitmap. If any of those differ, return false.
      *  If other is null, return false.
-     *
-     * @hide (just needed internally right now)
      */
     public boolean sameAs(Bitmap other) {
-        return this == other ||
-              (other != null &&
-               nativeSameAs(mNativeBitmap, other.mNativeBitmap));
+        return this == other || (other != null && nativeSameAs(mNativeBitmap, other.mNativeBitmap));
     }
 
     /**
@@ -1099,7 +1091,13 @@ public final class Bitmap implements Parcelable {
 
         @Override
         public void finalize() {
-            nativeDestructor(mNativeBitmap);
+            try {
+                super.finalize();
+            } catch (Throwable t) {
+                // Ignore
+            } finally {
+                nativeDestructor(mNativeBitmap);
+            }
         }
     }
 
