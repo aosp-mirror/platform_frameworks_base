@@ -629,7 +629,7 @@
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godzin temu"</item>
   </plurals>
   <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Ostatnie dni (<xliff:g id="COUNT">%d</xliff:g>)"</item>
+    <item quantity="other" msgid="3069992808164318268">"Ostatnie (<xliff:g id="COUNT">%d</xliff:g>) dni"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Ostatni miesiąc"</string>
     <string name="older" msgid="5211975022815554840">"Starsze"</string>

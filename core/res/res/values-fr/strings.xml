@@ -71,11 +71,11 @@
     <string name="RestrictedOnData" msgid="8653794784690065540">"Le service de données est bloqué."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Le service d\'appel d\'urgence est bloqué."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Le service vocal est bloqué."</string>
-    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Tous les services vocaux sont bloqués."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Tous les services voix sont bloqués."</string>
     <string name="RestrictedOnSms" msgid="8314352327461638897">"Le service SMS est bloqué."</string>
-    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Les services vocaux/de données sont bloqués."</string>
-    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Les services vocaux/SMS sont bloqués."</string>
-    <string name="RestrictedOnAll" msgid="2714924667937117304">"Tous les services vocaux/de données/SMS sont bloqués."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Les services voix/données sont bloqués."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Les services voix/SMS sont bloqués."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Tous les services voix/données/SMS sont bloqués."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voix"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Données"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Télécopie"</string>
