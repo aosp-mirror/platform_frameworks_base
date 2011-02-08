@@ -23,10 +23,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
-import android.graphics.drawable.Drawable;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +65,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     
     private SpinnerPopup mPopup;
     private DropDownAdapter mTempAdapter;
+    int mDropDownWidth;
 
     private int mGravity;
 
@@ -160,9 +160,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         case MODE_DROPDOWN: {
             DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
 
-            popup.setWidth(a.getLayoutDimension(
+            mDropDownWidth = a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
             popup.setBackgroundDrawable(a.getDrawable(
                     com.android.internal.R.styleable.Spinner_popupBackground));
             popup.setVerticalOffset(a.getDimensionPixelOffset(
@@ -704,8 +704,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         @Override
         public void show() {
-            setWidth(Math.max(measureContentWidth((SpinnerAdapter) mAdapter),
-                    Spinner.this.getWidth()));
+            if (mDropDownWidth == WRAP_CONTENT) {
+                setWidth(Math.max(measureContentWidth((SpinnerAdapter) mAdapter),
+                        Spinner.this.getWidth()));
+            } else if (mDropDownWidth == MATCH_PARENT) {
+                setWidth(Spinner.this.getWidth());
+            } else {
+                setWidth(mDropDownWidth);
+            }
             setInputMethodMode(ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
