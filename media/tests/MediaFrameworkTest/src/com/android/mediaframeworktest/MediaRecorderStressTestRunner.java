@@ -20,7 +20,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import com.android.mediaframeworktest.stress.MediaPlayerStressTest;
+import com.android.mediaframeworktest.stress.MediaRecorderStressTest;
 
 import junit.framework.TestSuite;
 
