@@ -204,8 +204,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             SessionParams params = getParams();
             BridgeContext context = getContext();
 
+            // the view group that receives the window background.
+            ViewGroup backgroundView = null;
+
             if (mWindowIsFloating || params.isForceNoDecor()) {
-                mViewRoot = mContentRoot = new FrameLayout(context);
+                backgroundView = mViewRoot = mContentRoot = new FrameLayout(context);
             } else {
                 /*
                  * we're creating the following layout
@@ -213,10 +216,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                    +-------------------------------------------------+
                    | System bar (only in phone UI)                   |
                    +-------------------------------------------------+
-                   | Title/Action bar (optional)                     |
-                   +-------------------------------------------------+
-                   | Content, vertical extending                     |
-                   |                                                 |
+                   | (Layout with background drawable)               |
+                   | +---------------------------------------------+ |
+                   | | Title/Action bar (optional)                 | |
+                   | +---------------------------------------------+ |
+                   | | Content, vertical extending                 | |
+                   | |                                             | |
+                   | +---------------------------------------------+ |
                    +-------------------------------------------------+
                    | System bar (only in tablet UI)                  |
                    +-------------------------------------------------+
@@ -241,6 +247,16 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     }
                 }
 
+                LinearLayout backgroundLayout = new LinearLayout(context);
+                backgroundView = backgroundLayout;
+                backgroundLayout.setOrientation(LinearLayout.VERTICAL);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+                layoutParams.weight = 1;
+                backgroundLayout.setLayoutParams(layoutParams);
+                topLayout.addView(backgroundLayout);
+
+
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
                     try {
@@ -250,7 +266,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         actionBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mActionBarSize));
-                        topLayout.addView(actionBar);
+                        backgroundLayout.addView(actionBar);
                     } catch (XmlPullParserException e) {
 
                     }
@@ -261,7 +277,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         titleBar.setLayoutParams(
                                 new LinearLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, mTitleBarSize));
-                        topLayout.addView(titleBar);
+                        backgroundLayout.addView(titleBar);
                     } catch (XmlPullParserException e) {
 
                     }
@@ -270,11 +286,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 // content frame
                 mContentRoot = new FrameLayout(context);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                layoutParams = new LinearLayout.LayoutParams(
                         LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                 layoutParams.weight = 1;
                 mContentRoot.setLayoutParams(layoutParams);
-                topLayout.addView(mContentRoot);
+                backgroundLayout.addView(mContentRoot);
 
                 if (mSystemBarSize > 0) {
                     // system bar
@@ -289,7 +305,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                     }
                 }
-
             }
 
 
@@ -314,9 +329,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             postInflateProcess(view, params.getProjectCallback());
 
             // get the background drawable
-            if (mWindowBackground != null) {
+            if (mWindowBackground != null && backgroundView != null) {
                 Drawable d = ResourceHelper.getDrawable(mWindowBackground, context);
-                mContentRoot.setBackgroundDrawable(d);
+                backgroundView.setBackgroundDrawable(d);
             }
 
             return SUCCESS.createResult();

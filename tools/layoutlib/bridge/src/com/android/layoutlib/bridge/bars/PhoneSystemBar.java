@@ -33,6 +33,7 @@ public class PhoneSystemBar extends CustomBar {
         super(context, density, "/bars/tablet_system_bar.xml");
 
         setGravity(mGravity | Gravity.RIGHT);
+        setBackgroundColor(0xFF000000);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
