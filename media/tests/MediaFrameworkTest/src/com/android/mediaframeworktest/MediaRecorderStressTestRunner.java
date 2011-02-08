@@ -20,7 +20,6 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import com.android.mediaframeworktest.stress.MediaRecorderStressTest;
 import com.android.mediaframeworktest.stress.MediaPlayerStressTest;
 
 import junit.framework.TestSuite;
@@ -42,7 +41,6 @@ public class MediaRecorderStressTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(MediaRecorderStressTest.class);
-        suite.addTestSuite(MediaPlayerStressTest.class);
         return suite;
     }
 
