@@ -441,8 +441,8 @@
     <attr name="priority" format="integer" />
     
     <!-- Specify how an activity should be launched.  See the
-         <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals</a>
-         documentation for important information on how these options impact
+         <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+         Stack</a> document for important information on how these options impact
          the behavior of your application.
          
          <p>If this attribute is not specified, <code>standard</code> launch
@@ -478,8 +478,8 @@
             of the activity being started at the top of the stack, it will
             receive the Intent as described there (without the
             FLAG_ACTIVITY_BROUGHT_TO_FRONT flag set).  See the
-            <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals</a>
-            documentation for more details on tasks.-->
+            <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+            Stack</a> document for more details about tasks.-->
         <enum name="singleTask" value="2" />
         <!-- Only allow one instance of this activity to ever be 
             running.  This activity gets a unique task with only itself running 
@@ -489,8 +489,8 @@
             method called.  If this 
             activity tries to start a new activity, that new activity will be 
             launched in a separate task.  See the
-            <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application Fundamentals</a>
-            documentation for more details on tasks. -->
+            <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+            Stack</a> document for more details about tasks.-->
         <enum name="singleInstance" value="3" />
     </attr>
     

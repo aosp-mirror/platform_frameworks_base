@@ -36,9 +36,9 @@ import java.util.Random;
  *
  * <p><b>Lifecycle Support.</b>
  * A Service is accessed with a specific sequence of
- * calls, as documented in the section
- * <a href="http://developer.android.com/guide/topics/fundamentals.html#servlife">
- * Service lifecycle</a> in the Developer Guide. In order to support the lifecycle of a Service,
+ * calls, as described in the
+ * <a href="http://developer.android.com/guide/topics/fundamentals/services.html">Services</a>
+ * document. In order to support the lifecycle of a Service,
  * <code>ServiceTestCase</code> enforces this protocol:
  *
  * <ul>

@@ -106,9 +106,9 @@ public class Notification implements Parcelable
      * The intent to execute when the expanded status entry is clicked.  If
      * this is an activity, it must include the
      * {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} flag, which requires
-     * that you take care of task management as described in the <em>Activities and Tasks</em>
-     * section of the <a href="{@docRoot}guide/topics/fundamentals.html#acttask">Application 
-     * Fundamentals</a> document.
+     * that you take care of task management as described in the
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+     * Stack</a> document.
      */
     public PendingIntent contentIntent;
 
@@ -540,8 +540,9 @@ public class Notification implements Parcelable
      * @param contentIntent The intent to launch when the user clicks the expanded notification.
      * If this is an activity, it must include the
      * {@link android.content.Intent#FLAG_ACTIVITY_NEW_TASK} flag, which requires
-     * that you take care of task management as described in 
-     * <a href="{@docRoot}guide/topics/fundamentals.html#lcycles">Application Fundamentals: Activities and Tasks</a>.
+     * that you take care of task management as described in the
+     * <a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
+     * Stack</a> document.
      * 
      * @deprecated Use {@link Builder} instead.
      */
