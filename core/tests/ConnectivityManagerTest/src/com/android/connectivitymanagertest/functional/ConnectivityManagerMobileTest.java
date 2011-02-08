@@ -101,29 +101,39 @@ public class ConnectivityManagerMobileTest
         assertTrue("not connected to cellular network", extraNetInfo.isConnected());
     }
 
-    // Test case 1: Test enabling Wifi without associating with any AP
+    // Test case 1: Test enabling Wifi without associating with any AP, no broadcast on network
+    //              event should be expected.
     @LargeTest
     public void test3GToWifiNotification() {
+        // Enable Wi-Fi to avoid initial UNKNOWN state
         cmActivity.enableWifi();
         try {
             Thread.sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT);
         } catch (Exception e) {
             Log.v(LOG_TAG, "exception: " + e.toString());
         }
-
+        // Wi-Fi is disabled
         cmActivity.disableWifi();
 
-        cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
-                State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT);
-        // As Wifi stays in DISCONNETED, the connectivity manager will not broadcast
-        // any network connectivity event for Wifi
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_WIFI,
+                State.DISCONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        assertTrue(cmActivity.waitForNetworkState(ConnectivityManager.TYPE_MOBILE,
+                State.CONNECTED, ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        // Wait for 10 seconds for broadcasts to be sent out
+        try {
+            Thread.sleep(10 * 1000);
+        } catch (Exception e) {
+            fail("thread in sleep is interrupted.");
+        }
+        // As Wifi stays in DISCONNETED, Mobile statys in CONNECTED,
+        // the connectivity manager will not broadcast any network connectivity event for Wifi
         NetworkInfo networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_MOBILE, networkInfo.getState(),
                 NetworkState.DO_NOTHING, State.CONNECTED);
         networkInfo = cmActivity.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         cmActivity.setStateTransitionCriteria(ConnectivityManager.TYPE_WIFI, networkInfo.getState(),
                 NetworkState.DO_NOTHING, State.DISCONNECTED);
-        // Eanble Wifi
+        // Eanble Wifi without associating with any AP
         cmActivity.enableWifi();
         try {
             Thread.sleep(2 * ConnectivityManagerTestActivity.SHORT_TIMEOUT);
