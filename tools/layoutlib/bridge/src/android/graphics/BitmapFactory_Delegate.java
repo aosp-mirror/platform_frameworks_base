@@ -136,20 +136,17 @@ import java.io.InputStream;
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts) {
-        opts.inBitmap = null;
         return null;
     }
 
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts) {
-        opts.inBitmap = null;
         return null;
     }
 
     @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts) {
-        opts.inBitmap = null;
         return null;
     }
 
@@ -158,10 +155,5 @@ import java.io.InputStream;
         // don't scale for now. This should not be called anyway since we re-implement
         // BitmapFactory.finishDecode();
         return chunk;
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static boolean nativeIsSeekable(FileDescriptor fd) {
-        return true;
     }
 }

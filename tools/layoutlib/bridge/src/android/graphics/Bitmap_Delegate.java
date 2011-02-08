@@ -62,8 +62,6 @@ public final class Bitmap_Delegate {
     private final Config mConfig;
     private BufferedImage mImage;
     private boolean mHasAlpha = true;
-    private int mGenerationId = 0;
-
 
     // ---- Public Helper methods ----
 
@@ -184,15 +182,6 @@ public final class Bitmap_Delegate {
      */
     public boolean hasAlpha() {
         return mHasAlpha && mConfig != Config.RGB_565;
-    }
-
-    /**
-     * Update the generationId.
-     *
-     * @see Bitmap#getGenerationId()
-     */
-    public void change() {
-        mGenerationId++;
     }
 
     // ---- native methods ----
@@ -395,16 +384,6 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static int nativeGenerationId(int nativeBitmap) {
-        Bitmap_Delegate delegate = sManager.getDelegate(nativeBitmap);
-        if (delegate == null) {
-            return 0;
-        }
-
-        return delegate.mGenerationId;
-    }
-
-    @LayoutlibDelegate
     /*package*/ static Bitmap nativeCreateFromParcel(Parcel p) {
         // This is only called by Bitmap.CREATOR (Parcelable.Creator<Bitmap>), which is only
         // used during aidl call so really this should not be called.
@@ -525,7 +504,7 @@ public final class Bitmap_Delegate {
         int nativeInt = sManager.addNewDelegate(delegate);
 
         // and create/return a new Bitmap with it
-        return new Bitmap(nativeInt, null /* buffer */, isMutable, null /*ninePatchChunk*/, density);
+        return new Bitmap(nativeInt, isMutable, null /*ninePatchChunk*/, density);
     }
 
     /**

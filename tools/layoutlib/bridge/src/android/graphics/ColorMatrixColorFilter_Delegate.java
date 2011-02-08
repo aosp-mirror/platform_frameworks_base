@@ -60,11 +60,5 @@ public class ColorMatrixColorFilter_Delegate extends ColorFilter_Delegate {
         return sManager.addNewDelegate(newDelegate);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static int nColorMatrixFilter(int nativeFilter, float[] array) {
-        // pass
-        return 0;
-    }
-
     // ---- Private delegate/helper methods ----
 }
