@@ -39,7 +39,7 @@ import java.util.Map;
  * <pre>   {@code
  * int cacheSize = 4 * 1024 * 1024; // 4MiB
  * LruCache<String, Bitmap> bitmapCache = new LruCache<String, Bitmap>(cacheSize) {
- *     @Override protected int sizeOf(String key, Bitmap value) {
+ *     protected int sizeOf(String key, Bitmap value) {
  *         return value.getByteCount();
  *     }
  * }}</pre>
