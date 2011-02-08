@@ -39,8 +39,6 @@ struct NuCachedSource2;
 
 struct ALooper;
 struct ARTSPController;
-struct ARTPSession;
-struct UDPPusher;
 
 class DrmManagerClinet;
 class DecryptHandle;
@@ -204,8 +202,6 @@ private:
 
     sp<ALooper> mLooper;
     sp<ARTSPController> mRTSPController;
-    sp<ARTPSession> mRTPSession;
-    sp<UDPPusher> mRTPPusher, mRTCPPusher;
 
     sp<LiveSession> mLiveSession;
 

@@ -65,13 +65,9 @@ void ARTPAssembler::onPacketReceived(const sp<ARTPSource> &source) {
 
 // static
 void ARTPAssembler::CopyTimes(const sp<ABuffer> &to, const sp<ABuffer> &from) {
-    uint64_t ntpTime;
-    CHECK(from->meta()->findInt64("ntp-time", (int64_t *)&ntpTime));
-
     uint32_t rtpTime;
     CHECK(from->meta()->findInt32("rtp-time", (int32_t *)&rtpTime));
 
-    to->meta()->setInt64("ntp-time", ntpTime);
     to->meta()->setInt32("rtp-time", rtpTime);
 
     // Copy the seq number.

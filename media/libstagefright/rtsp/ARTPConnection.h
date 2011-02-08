@@ -29,7 +29,6 @@ struct ASessionDescription;
 
 struct ARTPConnection : public AHandler {
     enum Flags {
-        kFakeTimestamps      = 1,
         kRegularlyRequestFIR = 2,
     };
 
@@ -51,8 +50,6 @@ struct ARTPConnection : public AHandler {
     static void MakePortPair(
             int *rtpSocket, int *rtcpSocket, unsigned *rtpPort);
 
-    void fakeTimestamps();
-
 protected:
     virtual ~ARTPConnection();
     virtual void onMessageReceived(const sp<AMessage> &msg);
@@ -63,7 +60,6 @@ private:
         kWhatRemoveStream,
         kWhatPollStreams,
         kWhatInjectPacket,
-        kWhatFakeTimestamps,
     };
 
     static const int64_t kSelectTimeoutUs;
@@ -81,7 +77,6 @@ private:
     void onPollStreams();
     void onInjectPacket(const sp<AMessage> &msg);
     void onSendReceiverReports();
-    void onFakeTimestamps();
 
     status_t receive(StreamInfo *info, bool receiveRTP);
 

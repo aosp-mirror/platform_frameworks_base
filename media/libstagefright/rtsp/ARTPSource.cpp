@@ -42,12 +42,12 @@ ARTPSource::ARTPSource(
     : mID(id),
       mHighestSeqNumber(0),
       mNumBuffersReceived(0),
-      mNumTimes(0),
       mLastNTPTime(0),
       mLastNTPTimeUpdateUs(0),
       mIssueFIRRequests(false),
       mLastFIRRequestUs(-1),
-      mNextFIRSeqNo((rand() * 256.0) / RAND_MAX) {
+      mNextFIRSeqNo((rand() * 256.0) / RAND_MAX),
+      mNotify(notify) {
     unsigned long PT;
     AString desc;
     AString params;
@@ -80,51 +80,24 @@ static uint32_t AbsDiff(uint32_t seq1, uint32_t seq2) {
 }
 
 void ARTPSource::processRTPPacket(const sp<ABuffer> &buffer) {
-    if (queuePacket(buffer)
-            && mNumTimes == 2
-            && mAssembler != NULL) {
+    if (queuePacket(buffer) && mAssembler != NULL) {
         mAssembler->onPacketReceived(this);
     }
 }
 
 void ARTPSource::timeUpdate(uint32_t rtpTime, uint64_t ntpTime) {
-    LOGV("timeUpdate");
-
     mLastNTPTime = ntpTime;
     mLastNTPTimeUpdateUs = ALooper::GetNowUs();
 
-    if (mNumTimes == 2) {
-        mNTPTime[0] = mNTPTime[1];
-        mRTPTime[0] = mRTPTime[1];
-        mNumTimes = 1;
-    }
-    mNTPTime[mNumTimes] = ntpTime;
-    mRTPTime[mNumTimes++] = rtpTime;
-
-    if (timeEstablished()) {
-        for (List<sp<ABuffer> >::iterator it = mQueue.begin();
-             it != mQueue.end(); ++it) {
-            sp<AMessage> meta = (*it)->meta();
-
-            uint32_t rtpTime;
-            CHECK(meta->findInt32("rtp-time", (int32_t *)&rtpTime));
-
-            meta->setInt64("ntp-time", RTP2NTP(rtpTime));
-        }
-    }
+    sp<AMessage> notify = mNotify->dup();
+    notify->setInt32("time-update", true);
+    notify->setInt32("rtp-time", rtpTime);
+    notify->setInt64("ntp-time", ntpTime);
+    notify->post();
 }
 
 bool ARTPSource::queuePacket(const sp<ABuffer> &buffer) {
     uint32_t seqNum = (uint32_t)buffer->int32Data();
-
-    if (mNumTimes == 2) {
-        sp<AMessage> meta = buffer->meta();
-
-        uint32_t rtpTime;
-        CHECK(meta->findInt32("rtp-time", (int32_t *)&rtpTime));
-
-        meta->setInt64("ntp-time", RTP2NTP(rtpTime));
-    }
 
     if (mNumBuffersReceived++ == 0) {
         mHighestSeqNumber = seqNum;
@@ -178,14 +151,6 @@ bool ARTPSource::queuePacket(const sp<ABuffer> &buffer) {
     mQueue.insert(it, buffer);
 
     return true;
-}
-
-uint64_t ARTPSource::RTP2NTP(uint32_t rtpTime) const {
-    CHECK_EQ(mNumTimes, 2u);
-
-    return mNTPTime[0] + (double)(mNTPTime[1] - mNTPTime[0])
-            * ((double)rtpTime - (double)mRTPTime[0])
-            / (double)(mRTPTime[1] - mRTPTime[0]);
 }
 
 void ARTPSource::byeReceived() {

@@ -11,13 +11,11 @@ LOCAL_SRC_FILES:=       \
         APacketSource.cpp           \
         ARTPAssembler.cpp           \
         ARTPConnection.cpp          \
-        ARTPSession.cpp             \
         ARTPSource.cpp              \
         ARTPWriter.cpp              \
         ARTSPConnection.cpp         \
         ARTSPController.cpp         \
         ASessionDescription.cpp     \
-        UDPPusher.cpp               \
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
