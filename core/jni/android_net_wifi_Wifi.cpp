@@ -411,7 +411,7 @@ static jint android_net_wifi_getRssiHelper(const char *cmd)
 
         char* lastSpace = strrchr(reply, ' ');
         // lastSpace should be preceded by "rssi" and followed by the value
-        if (lastSpace && !strncmp(lastSpace - 4, "rssi", 4)) {
+        if (lastSpace && !strncasecmp(lastSpace - 4, "rssi", 4)) {
             sscanf(lastSpace + 1, "%d", &rssi);
         }
     }
