@@ -175,6 +175,7 @@ private:
     int64_t mSeekTimeUs;
     ReadOptions::SeekMode mSeekMode;
     int64_t mTargetTimeUs;
+    bool mOutputPortSettingsChangedPending;
 
     MediaBuffer *mLeftOverBuffer;
 
