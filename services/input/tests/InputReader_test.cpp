@@ -878,7 +878,8 @@ public:
     InstrumentedInputReader(const sp<EventHubInterface>& eventHub,
             const sp<InputReaderPolicyInterface>& policy,
             const sp<InputDispatcherInterface>& dispatcher) :
-            InputReader(eventHub, policy, dispatcher) {
+            InputReader(eventHub, policy, dispatcher),
+            mNextDevice(NULL) {
     }
 
     virtual ~InstrumentedInputReader() {
