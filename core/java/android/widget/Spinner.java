@@ -69,6 +69,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
     private int mGravity;
 
+    private Rect mTempRect = new Rect();
+
     /**
      * Construct a new spinner with the given context's theme.
      *
@@ -260,8 +262,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (mPopup != null && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
             final int measuredWidth = getMeasuredWidth();
-            setMeasuredDimension(Math.min(Math.max(measuredWidth, mPopup.measureContentWidth()),
-                    MeasureSpec.getSize(widthMeasureSpec)),
+            setMeasuredDimension(Math.min(Math.max(measuredWidth,
+                    measureContentWidth(getAdapter())), MeasureSpec.getSize(widthMeasureSpec)),
                     getMeasuredHeight());
         }
     }
@@ -455,7 +457,50 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public CharSequence getPrompt() {
         return mPopup.getHintText();
     }
-    
+
+    private int measureContentWidth(SpinnerAdapter adapter) {
+        if (adapter == null) {
+            return 0;
+        }
+
+        int width = 0;
+        View itemView = null;
+        int itemType = 0;
+        final int widthMeasureSpec =
+            MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        final int heightMeasureSpec =
+            MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+        // Make sure the number of items we'll measure is capped. If it's a huge data set
+        // with wildly varying sizes, oh well.
+        final int start = Math.max(0, getSelectedItemPosition());
+        final int count = Math.min(adapter.getCount(), start + MAX_ITEMS_MEASURED);
+        for (int i = start; i < count; i++) {
+            final int positionType = adapter.getItemViewType(i);
+            if (positionType != itemType) {
+                itemType = positionType;
+                itemView = null;
+            }
+            itemView = adapter.getView(i, itemView, this);
+            if (itemView.getLayoutParams() == null) {
+                itemView.setLayoutParams(new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+            }
+            itemView.measure(widthMeasureSpec, heightMeasureSpec);
+            width = Math.max(width, itemView.getMeasuredWidth());
+        }
+
+        // Add background padding to measured width
+        Drawable popupBackground = getBackground();
+        if (popupBackground != null) {
+            popupBackground.getPadding(mTempRect);
+            width += mTempRect.left + mTempRect.right;
+        }
+
+        return width;
+    }
+
     /**
      * <p>Wrapper class for an Adapter. Transforms the embedded Adapter instance
      * into a ListAdapter.</p>
@@ -581,8 +626,6 @@ public class Spinner extends AbsSpinner implements OnClickListener {
          */
         public void setPromptText(CharSequence hintText);
         public CharSequence getHintText();
-
-        public int measureContentWidth();
     }
     
     private class DialogPopup implements SpinnerPopup, DialogInterface.OnClickListener {
@@ -624,23 +667,14 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             setSelection(which);
             dismiss();
         }
-
-        public int measureContentWidth() {
-            // Doesn't matter for dialog mode
-            return 0;
-        }
     }
     
     private class DropdownPopup extends ListPopupWindow implements SpinnerPopup {
         private CharSequence mHintText;
-        private int mPopupMaxWidth;
-        private Rect mTempRect = new Rect();
+        private ListAdapter mAdapter;
 
         public DropdownPopup(Context context, AttributeSet attrs, int defStyleRes) {
             super(context, attrs, 0, defStyleRes);
-            
-            final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-            mPopupMaxWidth = metrics.widthPixels / 2;
 
             setAnchorView(Spinner.this);
             setModal(true);
@@ -653,6 +687,12 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             });
         }
         
+        @Override
+        public void setAdapter(ListAdapter adapter) {
+            super.setAdapter(adapter);
+            mAdapter = adapter;
+        }
+
         public CharSequence getHintText() {
             return mHintText;
         }
@@ -664,59 +704,12 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         @Override
         public void show() {
-            setWidth(Spinner.this.getWidth());
+            setWidth(Math.max(measureContentWidth((SpinnerAdapter) mAdapter),
+                    Spinner.this.getWidth()));
             setInputMethodMode(ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             setSelection(Spinner.this.getSelectedItemPosition());
-        }
-
-        @Override
-        public int measureContentWidth() {
-            final SpinnerAdapter adapter = getAdapter();
-            if (adapter == null) {
-                return 0;
-            }
-
-            int width = 0;
-            View itemView = null;
-            int itemType = 0;
-            final int widthMeasureSpec =
-                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            final int heightMeasureSpec =
-                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-
-            // Make sure the number of items we'll measure is capped. If it's a huge data set
-            // with wildly varying sizes, oh well.
-            final int start = Math.max(0, getSelectedItemPosition());
-            final int count = Math.min(adapter.getCount(), start + MAX_ITEMS_MEASURED);
-            for (int i = start; i < count; i++) {
-                final int positionType = adapter.getItemViewType(i);
-                if (positionType != itemType) {
-                    itemType = positionType;
-                    itemView = null;
-                }
-                itemView = adapter.getDropDownView(i, itemView, Spinner.this);
-                if (itemView.getLayoutParams() == null) {
-                    itemView.setLayoutParams(generateDefaultLayoutParams());
-                }
-                itemView.measure(widthMeasureSpec, heightMeasureSpec);
-                width = Math.max(width, itemView.getMeasuredWidth());
-            }
-
-            // Add background padding to measured width
-            Drawable popupBackground = getBackground();
-            if (popupBackground != null) {
-                popupBackground.getPadding(mTempRect);
-                width += mTempRect.left + mTempRect.right;
-            }
-
-            return width;
-        }
-
-        private ViewGroup.LayoutParams generateDefaultLayoutParams() {
-            return new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
 }
