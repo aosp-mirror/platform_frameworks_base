@@ -402,8 +402,8 @@ web_docs_sample_code_flags := \
                 resources/samples/CubeLiveWallpaper "Cube Live Wallpaper" \
 		-samplecode $(sample_dir)/Home \
 		            resources/samples/Home "Home" \
-                -samplecode $(sample_dir)/Honeycomb-Gallery \
-                            resources/samples/Honeycomb-Gallery "Honeycomb Gallery" \
+                -samplecode $(sample_dir)/HoneycombGallery \
+                            resources/samples/HoneycombGallery "Honeycomb Gallery" \
 		-samplecode $(sample_dir)/JetBoy \
 		            resources/samples/JetBoy "JetBoy" \
 		-samplecode $(sample_dir)/LunarLander \
