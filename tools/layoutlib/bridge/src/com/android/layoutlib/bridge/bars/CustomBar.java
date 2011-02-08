@@ -65,7 +65,6 @@ abstract class CustomBar extends LinearLayout {
         super(context);
         setOrientation(LinearLayout.HORIZONTAL);
         setGravity(Gravity.CENTER_VERTICAL);
-        setBackgroundColor(0xFF000000);
 
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
