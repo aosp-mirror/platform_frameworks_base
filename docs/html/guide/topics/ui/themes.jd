@@ -17,6 +17,7 @@ parent.link=index.html
       <ol>
         <li><a href="#ApplyAStyle">Apply a style to a View</a></li>
         <li><a href="#ApplyATheme">Apply a theme to an Activity or application</a></li>
+        <li><a href="#SelectATheme">Select a theme based on platform version</a></li>
       </ol>
     </li>
     <li><a href="#PlatformStyles">Using Platform Styles and Themes</a></li>
@@ -303,21 +304,57 @@ appear like a dialog box:</p>
 </pre>
 
 <p>If you like a theme, but want to tweak it, just add the theme as the <code>parent</code>
-of your custom theme. For example, you can modify the traditional dialog theme to use your own
-background image like this:</p>
+of your custom theme. For example, you can modify the traditional light theme to use your own
+color like this:</p>
 <pre>
-&lt;style name="CustomDialogTheme" parent="@android:style/Theme.Dialog">
-    &lt;item name="android:windowBackground">@drawable/custom_dialog_background&lt;/item>
+&lt;color name="custom_theme_color">#b0b0ff&lt;/color>
+&lt;style name="CustomTheme" parent="android:Theme.Light">
+    &lt;item name="android:windowBackground">@color/custom_theme_color&lt;/item>
+    &lt;item name="android:colorBackground">@color/custom_theme_color&lt;/item>
 &lt;/style>
 </pre>
 
-<p>Now use {@code CustomDialogTheme} instead of {@code Theme.Dialog} inside the Android
+<p>(Note that the color needs to supplied as a separate resource here because
+the <code>android:windowBackground</code> attribute only supports a reference to
+another resource; unlike <code>android:colorBackground</code>, it can not be given
+a color literal.)</p>
+
+<p>Now use {@code CustomTheme} instead of {@code Theme.Light} inside the Android
 Manifest:</p>
 
 <pre>
-&lt;activity android:theme="@style/CustomDialogTheme">
+&lt;activity android:theme="@style/CustomTheme">
 </pre>
 
+<h3 id="SelectATheme">Select a theme based on platform version</h3>
+
+<p>Newer versions of Android have additional themes available to applications,
+and you may want to use these while running on those platforms while still being
+compatible with older versions.  You can accomplish this through a custom theme
+that uses resource selection to switch between different parent themes.</p>
+
+<p>For example, here is the declaration for a custom theme which is simply
+the standard platforms default light theme.  It would go in an XML file under
+<code>res/values</code> (typically <code>res/values/styles.xml</code>):
+<pre>
+&lt;style name="LightThemeSelector" parent="android:Theme.Light">
+&lt;/style>
+</pre>
+
+<p>To have this theme use the newer "holo" theme when the application is running
+on {@link android.os.Build.VERSION_CODES#HONEYCOMB}, you can place another
+declaration for it in a file in <code>res/values-11</code>:</p>
+<pre>
+&lt;style name="LightThemeSelector" parent="android:Theme.Holo.Light">
+&lt;/style>
+</pre>
+
+<p>Now use this theme like you would any other, and your application will
+automatically switch to the holo theme if running on
+{@link android.os.Build.VERSION_CODES#HONEYCOMB} or later.</p>
+
+<p>A list of the standard attributes that you can use in themes can be
+found at {@link android.R.styleable#Theme R.styleable.Theme}.</p>
 
 <!-- This currently has some bugs
 
