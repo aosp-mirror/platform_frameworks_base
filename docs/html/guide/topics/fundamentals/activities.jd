@@ -1,6 +1,4 @@
 page.title=Activities
-parent.title=Application Fundamentals
-parent.link=index.html
 @jd:body
 
 <div id="qv-wrapper">
@@ -753,10 +751,11 @@ first activity stops so that the following activity can read it, then you should
 database during {@link android.app.Activity#onPause onPause()} instead of during {@link
 android.app.Activity#onStop onStop()}.</p>
 
-
+<!--
 <h2>Beginner's Path</h2>
 
 <p>For more information about how Android maintains a history of activities and
 enables user multitasking, continue with the <b><a
 href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
 Stack</a></b> document.</p>
+-->

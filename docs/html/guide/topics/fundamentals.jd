@@ -89,11 +89,12 @@ application.</li>
 gracefully optimize its behavior for a variety of device configurations.</li>
 </ul>
 
+<!--
 <p class="note"><strong>Tip:</strong> If you're new to Android development, we suggest that you
 follow the Beginner's Path link at the bottom of this page. For each document in the Application
 Fundamentals, the Beginner's Path points you to the document we suggest you read next, in order
 to get up to speed on the core Android concepts.</p>
-
+-->
 
 
 <h2 id="Components">Application Components</h2>
@@ -507,9 +508,10 @@ to create alternative resources for various device configurations, see the <a
 href="{@docRoot}guide/topics/resources/index.html">Application Resources</a> developer guide.</p>
 
 
+<!--
 <h2>Beginner's Path</h2>
 
 <p>For a close look at implementing activities&mdash;the components your users use to
 interact with your application&mdash;continue with the <b><a
 href="{@docRoot}guide/topics/fundamentals/activities.html">Activities</a></b> document.</p>
-
+-->

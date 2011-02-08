@@ -1,6 +1,4 @@
 page.title=Processes and Threads
-parent.title=Application Fundamentals
-parent.link=index.html
 @jd:body
 
 <div id="qv-wrapper">
@@ -417,9 +415,10 @@ android.content.Context#bindService bindService()}. For more information, see th
 href="{@docRoot}guide/topics/fundamentals/services.html">Services</a> developer guide.</p>
 
 
+<!--
 <h2>Beginner's Path</h2>
 
 <p>For information about how to perform work in the background for an indefinite period of time
 (without a user interface), continue with the <b><a
 href="{@docRoot}guide/topics/fundamentals/services.html">Services</a></b> document.</p>
-
+-->
