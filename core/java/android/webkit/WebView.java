@@ -2617,8 +2617,8 @@ public class WebView extends AbsoluteLayout
             newHeight = 0;
             heightWidthRatio = 0;
         }
-        // Actual visible height.
-        int actualViewHeight = getViewHeight();
+        // Actual visible content height.
+        int actualViewHeight = Math.round(getViewHeight() * mZoomManager.getInvScale());
         // Avoid sending another message if the dimensions have not changed.
         if (newWidth != mLastWidthSent || newHeight != mLastHeightSent || force ||
                 actualViewHeight != mLastActualHeightSent) {
