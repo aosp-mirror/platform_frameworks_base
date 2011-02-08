@@ -180,7 +180,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['article', 'ui', 'newfeature'],
+    tags: ['article', 'ui'],
     path: 'articles/live-folders.html',
     title: {
       en: 'Live Folders'
@@ -190,7 +190,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['article', 'ui', 'newfeature'],
+    tags: ['article', 'ui'],
     path: 'articles/live-wallpapers.html',
     title: {
       en: 'Live Wallpapers'
@@ -250,7 +250,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['article', 'newfeature'],
+    tags: ['article'],
     path: 'articles/ui-1.5.html',
     title: {
       en: 'UI Framework Changes in Android 1.5'
@@ -260,7 +260,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['article', 'newfeature'],
+    tags: ['article'],
     path: 'articles/ui-1.6.html',
     title: {
       en: 'UI Framework Changes in Android 1.6'
@@ -435,13 +435,13 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new'],
-    path: 'samples/Honeycomb-Gallery/index.html',
+    tags: ['sample', 'new', 'newfeature', 'ui'],
+    path: 'samples/HoneycombGallery/index.html',
     title: {
       en: 'Honeycomb Gallery'
     },
     description: {
-      en: 'An image gallery application using Honeycomb-specific APIs.'
+      en: 'An image gallery application using APIs that are new in Android 3.0 (a.k.a. Honeycomb).'
     }
   },
   {
