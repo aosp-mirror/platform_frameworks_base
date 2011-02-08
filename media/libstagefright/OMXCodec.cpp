@@ -1434,6 +1434,7 @@ OMXCodec::OMXCodec(
       mSeekTimeUs(-1),
       mSeekMode(ReadOptions::SEEK_CLOSEST_SYNC),
       mTargetTimeUs(-1),
+      mOutputPortSettingsChangedPending(false),
       mLeftOverBuffer(NULL),
       mPaused(false),
       mNativeWindow(nativeWindow) {
@@ -2344,6 +2345,14 @@ void OMXCodec::onCmdComplete(OMX_COMMANDTYPE cmd, OMX_U32 data) {
                     drainInputBuffers();
                     fillOutputBuffers();
                 }
+
+                if (mOutputPortSettingsChangedPending) {
+                    CODEC_LOGV(
+                            "Honoring deferred output port settings change.");
+
+                    mOutputPortSettingsChangedPending = false;
+                    onPortSettingsChanged(kPortIndexOutput);
+                }
             }
 
             break;
@@ -2406,6 +2415,8 @@ void OMXCodec::onStateChange(OMX_STATETYPE newState) {
             CHECK_EQ((int)mState, (int)IDLE_TO_EXECUTING);
 
             CODEC_LOGV("Now Executing.");
+
+            mOutputPortSettingsChangedPending = false;
 
             setState(EXECUTING);
 
@@ -2520,6 +2531,14 @@ void OMXCodec::onPortSettingsChanged(OMX_U32 portIndex) {
 
     CHECK_EQ((int)mState, (int)EXECUTING);
     CHECK_EQ(portIndex, (OMX_U32)kPortIndexOutput);
+    CHECK(!mOutputPortSettingsChangedPending);
+
+    if (mPortStatus[kPortIndexOutput] != ENABLED) {
+        CODEC_LOGV("Deferring output port settings change.");
+        mOutputPortSettingsChangedPending = true;
+        return;
+    }
+
     setState(RECONFIGURING);
 
     if (mQuirks & kNeedsFlushBeforeDisable) {
@@ -2712,6 +2731,7 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
                 if (srcBuffer->meta_data()->findInt64(
                             kKeyTargetTime, &targetTimeUs)
                         && targetTimeUs >= 0) {
+                    CODEC_LOGV("targetTimeUs = %lld us", targetTimeUs);
                     mTargetTimeUs = targetTimeUs;
                 } else {
                     mTargetTimeUs = -1;
@@ -3385,6 +3405,14 @@ status_t OMXCodec::read(
     }
 
     if (seeking) {
+        while (mState == RECONFIGURING) {
+            mBufferFilled.wait(mLock);
+        }
+
+        if (mState != EXECUTING) {
+            return UNKNOWN_ERROR;
+        }
+
         CODEC_LOGV("seeking to %lld us (%.2f secs)", seekTimeUs, seekTimeUs / 1E6);
 
         mSignalledEOS = false;
