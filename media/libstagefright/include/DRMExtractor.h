@@ -46,6 +46,7 @@ private:
 
     sp<MediaExtractor> mOriginalExtractor;
     DecryptHandle* mDecryptHandle;
+    DrmManagerClient* mDrmManagerClient;
 
     DRMExtractor(const DRMExtractor &);
     DRMExtractor &operator=(const DRMExtractor &);

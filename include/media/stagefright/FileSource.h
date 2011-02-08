@@ -38,7 +38,7 @@ public:
 
     virtual status_t getSize(off64_t *size);
 
-    virtual DecryptHandle* DrmInitialization(DrmManagerClient *client);
+    virtual DecryptHandle* DrmInitialization();
 
     virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
 

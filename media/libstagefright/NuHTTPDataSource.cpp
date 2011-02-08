@@ -79,6 +79,16 @@ NuHTTPDataSource::NuHTTPDataSource()
 }
 
 NuHTTPDataSource::~NuHTTPDataSource() {
+    if (mDecryptHandle != NULL) {
+        // To release mDecryptHandle
+        mDrmManagerClient->closeDecryptSession(mDecryptHandle);
+        mDecryptHandle = NULL;
+    }
+
+    if (mDrmManagerClient != NULL) {
+        delete mDrmManagerClient;
+        mDrmManagerClient = NULL;
+    }
 }
 
 status_t NuHTTPDataSource::connect(
@@ -486,11 +496,14 @@ void NuHTTPDataSource::addBandwidthMeasurement_l(
     }
 }
 
-DecryptHandle* NuHTTPDataSource::DrmInitialization(DrmManagerClient* client) {
-    if (client == NULL) {
+DecryptHandle* NuHTTPDataSource::DrmInitialization() {
+    if (mDrmManagerClient == NULL) {
+        mDrmManagerClient = new DrmManagerClient();
+    }
+
+    if (mDrmManagerClient == NULL) {
         return NULL;
     }
-    mDrmManagerClient = client;
 
     if (mDecryptHandle == NULL) {
         /* Note if redirect occurs, mUri is the redirect uri instead of the
@@ -500,6 +513,7 @@ DecryptHandle* NuHTTPDataSource::DrmInitialization(DrmManagerClient* client) {
     }
 
     if (mDecryptHandle == NULL) {
+        delete mDrmManagerClient;
         mDrmManagerClient = NULL;
     }
 

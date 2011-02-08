@@ -60,6 +60,17 @@ FileSource::~FileSource() {
         delete[] mDrmBuf;
         mDrmBuf = NULL;
     }
+
+    if (mDecryptHandle != NULL) {
+        // To release mDecryptHandle
+        mDrmManagerClient->closeDecryptSession(mDecryptHandle);
+        mDecryptHandle = NULL;
+    }
+
+    if (mDrmManagerClient != NULL) {
+        delete mDrmManagerClient;
+        mDrmManagerClient = NULL;
+    }
 }
 
 status_t FileSource::initCheck() const {
@@ -113,11 +124,14 @@ status_t FileSource::getSize(off64_t *size) {
     return OK;
 }
 
-DecryptHandle* FileSource::DrmInitialization(DrmManagerClient* client) {
-    if (client == NULL) {
+DecryptHandle* FileSource::DrmInitialization() {
+    if (mDrmManagerClient == NULL) {
+        mDrmManagerClient = new DrmManagerClient();
+    }
+
+    if (mDrmManagerClient == NULL) {
         return NULL;
     }
-    mDrmManagerClient = client;
 
     if (mDecryptHandle == NULL) {
         mDecryptHandle = mDrmManagerClient->openDecryptSession(
@@ -125,6 +139,7 @@ DecryptHandle* FileSource::DrmInitialization(DrmManagerClient* client) {
     }
 
     if (mDecryptHandle == NULL) {
+        delete mDrmManagerClient;
         mDrmManagerClient = NULL;
     }
 

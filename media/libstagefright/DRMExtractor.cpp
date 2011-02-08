@@ -38,12 +38,12 @@
 
 namespace android {
 
-DrmManagerClient* gDrmManagerClient = NULL;
-
 class DRMSource : public MediaSource {
 public:
     DRMSource(const sp<MediaSource> &mediaSource,
-            DecryptHandle* decryptHandle, int32_t trackId, DrmBuffer* ipmpBox);
+            DecryptHandle *decryptHandle,
+            DrmManagerClient *managerClient,
+            int32_t trackId, DrmBuffer *ipmpBox);
 
     virtual status_t start(MetaData *params = NULL);
     virtual status_t stop();
@@ -57,6 +57,7 @@ protected:
 private:
     sp<MediaSource> mOriginalMediaSource;
     DecryptHandle* mDecryptHandle;
+    DrmManagerClient* mDrmManagerClient;
     size_t mTrackId;
     mutable Mutex mDRMLock;
     size_t mNALLengthSize;
@@ -69,13 +70,16 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 DRMSource::DRMSource(const sp<MediaSource> &mediaSource,
-        DecryptHandle* decryptHandle, int32_t trackId, DrmBuffer* ipmpBox)
+        DecryptHandle *decryptHandle,
+        DrmManagerClient *managerClient,
+        int32_t trackId, DrmBuffer *ipmpBox)
     : mOriginalMediaSource(mediaSource),
       mDecryptHandle(decryptHandle),
+      mDrmManagerClient(managerClient),
       mTrackId(trackId),
       mNALLengthSize(0),
       mWantsNALFragments(false) {
-    gDrmManagerClient->initializeDecryptUnit(
+    mDrmManagerClient->initializeDecryptUnit(
             mDecryptHandle, trackId, ipmpBox);
 
     const char *mime;
@@ -100,7 +104,7 @@ DRMSource::DRMSource(const sp<MediaSource> &mediaSource,
 
 DRMSource::~DRMSource() {
     Mutex::Autolock autoLock(mDRMLock);
-    gDrmManagerClient->finalizeDecryptUnit(mDecryptHandle, mTrackId);
+    mDrmManagerClient->finalizeDecryptUnit(mDecryptHandle, mTrackId);
 }
 
 status_t DRMSource::start(MetaData *params) {
@@ -140,7 +144,7 @@ status_t DRMSource::read(MediaBuffer **buffer, const ReadOptions *options) {
     decryptedDrmBuffer.data = new char[len];
     DrmBuffer *pDecryptedDrmBuffer = &decryptedDrmBuffer;
 
-    if ((err = gDrmManagerClient->decrypt(mDecryptHandle, mTrackId,
+    if ((err = mDrmManagerClient->decrypt(mDecryptHandle, mTrackId,
             &encryptedDrmBuffer, &pDecryptedDrmBuffer)) != DRM_NO_ERROR) {
 
         if (decryptedDrmBuffer.data) {
@@ -234,12 +238,12 @@ status_t DRMSource::read(MediaBuffer **buffer, const ReadOptions *options) {
 
 DRMExtractor::DRMExtractor(const sp<DataSource> &source, const char* mime)
     : mDataSource(source),
-      mDecryptHandle(NULL) {
+      mDecryptHandle(NULL),
+      mDrmManagerClient(NULL) {
     mOriginalExtractor = MediaExtractor::Create(source, mime);
     mOriginalExtractor->setDrmFlag(true);
 
-    DrmManagerClient *client;
-    source->getDrmInfo(&mDecryptHandle, &client);
+    source->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
 }
 
 DRMExtractor::~DRMExtractor() {
@@ -260,7 +264,8 @@ sp<MediaSource> DRMExtractor::getTrack(size_t index) {
     ipmpBox.data = mOriginalExtractor->getDrmTrackInfo(trackID, &(ipmpBox.length));
     CHECK(ipmpBox.length > 0);
 
-    return new DRMSource(originalMediaSource, mDecryptHandle, trackID, &ipmpBox);
+    return new DRMSource(originalMediaSource, mDecryptHandle, mDrmManagerClient,
+            trackID, &ipmpBox);
 }
 
 sp<MetaData> DRMExtractor::getTrackMetaData(size_t index, uint32_t flags) {
@@ -271,22 +276,10 @@ sp<MetaData> DRMExtractor::getMetaData() {
     return mOriginalExtractor->getMetaData();
 }
 
-static Mutex gDRMSnifferMutex;
 bool SniffDRM(
     const sp<DataSource> &source, String8 *mimeType, float *confidence,
         sp<AMessage> *) {
-    {
-        Mutex::Autolock autoLock(gDRMSnifferMutex);
-        if (gDrmManagerClient == NULL) {
-            gDrmManagerClient = new DrmManagerClient();
-        }
-
-        if (gDrmManagerClient == NULL) {
-            return false;
-        }
-    }
-
-    DecryptHandle *decryptHandle = source->DrmInitialization(gDrmManagerClient);
+    DecryptHandle *decryptHandle = source->DrmInitialization();
 
     if (decryptHandle != NULL) {
         if (decryptHandle->decryptApiType == DecryptApiType::CONTAINER_BASED) {
