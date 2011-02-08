@@ -45,7 +45,7 @@ import java.util.Random;
  
  */  
 public class CodecTest {    
-    private static String TAG = "MediaPlayerApiTest";
+    private static String TAG = "CodecTest";
     private static MediaPlayer mMediaPlayer;
     private MediaPlayer.OnPreparedListener mOnPreparedListener;
     
@@ -58,7 +58,13 @@ public class CodecTest {
     private static final Object videoSizeChanged = new Object();
     private static final Object onCompletion = new Object();
     private static boolean onPrepareSuccess = false;
-    private static boolean onCompleteSuccess = false;
+    public static boolean onCompleteSuccess = false;
+    public static boolean mPlaybackError = false;
+    public static boolean mIsMediaInfoUnknown = false;
+    public static boolean mIsMediaInfoVideoTrackLagging = false;
+    public static boolean mIsMediaInfoBadInterleaving = false;
+    public static boolean mIsMediaInfoNotSeekable = false;
+    public static boolean mIsMediaInfoMetdataUpdate = false;
 
     public static String printCpuInfo(){      
         String cm = "dumpsys cpuinfo";
@@ -747,13 +753,52 @@ public class CodecTest {
         }
     };
 
+    static MediaPlayer.OnErrorListener mOnErrorListener = new MediaPlayer.OnErrorListener() {
+        public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
+            mPlaybackError = true;
+            mp.reset();
+            return true;
+        }
+    };
+
+    static MediaPlayer.OnInfoListener mInfoListener = new MediaPlayer.OnInfoListener() {
+        public boolean onInfo(MediaPlayer mp, int what, int extra) {
+            switch (what){
+                case MediaPlayer.MEDIA_INFO_UNKNOWN:
+                    mIsMediaInfoUnknown = true;
+                    break;
+                case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
+                    mIsMediaInfoVideoTrackLagging = true;
+                    break;
+                case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
+                    mIsMediaInfoBadInterleaving = true;
+                    break;
+                case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
+                    mIsMediaInfoNotSeekable = true;
+                    break;
+                case MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
+                    mIsMediaInfoMetdataUpdate = true;
+                    break;
+            }
+            return true;
+        }
+    };
+
     // For each media file, forward twice and backward once, then play to the end
     public static boolean playMediaSamples(String filePath) throws Exception {
         int duration = 0;
         int curPosition = 0;
         int nextPosition = 0;
         int waittime = 0;
-        Random r = new Random();
+        onCompleteSuccess = false;
+        mIsMediaInfoUnknown = false;
+        mIsMediaInfoVideoTrackLagging = false;
+        mIsMediaInfoBadInterleaving = false;
+        mIsMediaInfoNotSeekable = false;
+        mIsMediaInfoMetdataUpdate = false;
+        mPlaybackError = false;
+        String testResult;
+
         initializeMessageLooper();
         synchronized (lock) {
             try {
@@ -765,37 +810,18 @@ public class CodecTest {
         }
         try {
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
+            mMediaPlayer.setOnErrorListener(mOnErrorListener);
             Log.v(TAG, "playMediaSamples: sample file name " + filePath);
             mMediaPlayer.setDataSource(filePath);
             mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
             mMediaPlayer.prepare();
             duration = mMediaPlayer.getDuration();
-            Log.v(TAG, "playMediaSamples: duration = " + duration);
             // start to play
             mMediaPlayer.start();
-            // randomly play for time within (0, duration/3)
-            Thread.sleep(r.nextInt(duration/3));
-            mMediaPlayer.pause();
-            Log.v(TAG, "playMediaSamples: current position after pause: "
-                        + mMediaPlayer.getCurrentPosition());
-            // seek to position (0, 2/3*duration)
-            nextPosition = mMediaPlayer.getCurrentPosition() + r.nextInt(duration/3);
-            mMediaPlayer.seekTo(nextPosition);
-            Log.v(TAG, "playMediaSamples: current position after the first seek:"
-                        + mMediaPlayer.getCurrentPosition());
-            // play for another short time
-            mMediaPlayer.start();
-            Thread.sleep(r.nextInt(duration/6));
-            Log.v(TAG, "playMediaSamples: position after the second play:"
-                        + mMediaPlayer.getCurrentPosition());
-            // seek to a random position (0, duration)
-            mMediaPlayer.seekTo(r.nextInt(duration));
-            Log.v(TAG, "playMediaSamples: current position after the second seek:"
-                        + mMediaPlayer.getCurrentPosition());
             waittime = duration - mMediaPlayer.getCurrentPosition();
             synchronized(onCompletion){
                 try {
-                    onCompletion.wait(waittime + 30000);
+                    onCompletion.wait(waittime + 2000);
                 }catch (Exception e) {
                     Log.v(TAG, "playMediaSamples are interrupted");
                     return false;

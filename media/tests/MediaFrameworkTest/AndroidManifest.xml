@@ -58,4 +58,9 @@
          android:label="Media Power tests InstrumentationRunner">
      </instrumentation>
 
+     <instrumentation android:name=".MediaPlayerStressTestRunner"
+         android:targetPackage="com.android.mediaframeworktest"
+         android:label="Media Power tests InstrumentationRunner">
+     </instrumentation>
+
 </manifest>
