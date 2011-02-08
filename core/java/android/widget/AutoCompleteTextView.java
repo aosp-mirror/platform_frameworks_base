@@ -204,7 +204,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     private void onClickImpl() {
         // If the dropdown is showing, bring the keyboard to the front
         // when the user touches the text field.
-        if (mPopup.isShowing()) {
+        if (isPopupShowing()) {
             ensureImeVisible(true);
         }
     }
@@ -1008,7 +1008,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     protected boolean setFrame(final int l, int t, final int r, int b) {
         boolean result = super.setFrame(l, t, r, b);
 
-        if (mPopup.isShowing()) {
+        if (isPopupShowing()) {
             showDropDown();
         }
 
@@ -1053,6 +1053,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
             } else {
                 mPopup.setAnchorView(this);
             }
+        }
+        if (!isPopupShowing()) {
+            // Make sure the list does not obscure the IME when shown for the first time.
+            mPopup.setInputMethodMode(ListPopupWindow.INPUT_METHOD_NEEDED);
         }
         mPopup.show();
     }

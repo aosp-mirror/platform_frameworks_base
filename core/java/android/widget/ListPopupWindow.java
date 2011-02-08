@@ -26,10 +26,10 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.view.View.MeasureSpec;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 
 /**
  * A ListPopupWindow anchors itself to a host view and displays a
@@ -1222,7 +1222,7 @@ public class ListPopupWindow {
             
             if (action == MotionEvent.ACTION_DOWN &&
                     mPopup != null && mPopup.isShowing() &&
-                    (x >= 0 && x < getWidth() && y >= 0 && y < getHeight())) {
+                    (x >= 0 && x < mPopup.getWidth() && y >= 0 && y < mPopup.getHeight())) {
                 mHandler.postDelayed(mResizePopupRunnable, EXPAND_LIST_TIMEOUT);
             } else if (action == MotionEvent.ACTION_UP) {
                 mHandler.removeCallbacks(mResizePopupRunnable);
