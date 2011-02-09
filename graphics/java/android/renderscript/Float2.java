@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the rs float2 type back to java applications.
+ * Class for exposing the native Renderscript float2 type back to the Android system.
  *
  **/
 public class Float2 {

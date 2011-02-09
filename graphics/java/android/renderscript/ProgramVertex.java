@@ -14,6 +14,27 @@
  * limitations under the License.
  */
 
+ /**
+ * <p>The Renderscript vertex program, also known as a vertex shader, describes a stage in
+ * the graphics pipeline responsible for manipulating geometric data in a user-defined way.
+ * The object is constructed by providing the Renderscript system with the following data:</p>
+ * <ul>
+ *   <li>Element describing its varying inputs or attributes</li>
+ *   <li>GLSL shader string that defines the body of the program</li>
+ *   <li>a Type that describes the layout of an Allocation containing constant or uniform inputs</li>
+ * </ul>
+ *
+ * <p>Once the program is created, you bind it to the graphics context, RenderScriptGL, and it will be used for
+ * all subsequent draw calls until you bind a new program. If the program has constant inputs,
+ * the user needs to bind an allocation containing those inputs. The allocation's type must match
+ * the one provided during creation. The Renderscript library then does all the necessary plumbing
+ * to send those constants to the graphics hardware. Varying inputs to the shader, such as position, normal,
+ * and texture coordinates are matched by name between the input Element and the Mesh object being drawn.
+ * The signatures don't have to be exact or in any strict order. As long as the input name in the shader
+ * matches a channel name and size available on the mesh, the runtime takes care of connecting the
+ * two. Unlike OpenGL, there is no need to link the vertex and fragment programs.</p>
+ *
+ **/
 package android.renderscript;
 
 

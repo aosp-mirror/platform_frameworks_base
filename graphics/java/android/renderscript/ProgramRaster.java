@@ -22,7 +22,8 @@ import android.util.Log;
 
 
 /**
- *
+ * Program raster is primarily used to specify whether point sprites are enabled and to control
+ * the culling mode. By default, back faces are culled.
  **/
 public class ProgramRaster extends BaseObj {
 
