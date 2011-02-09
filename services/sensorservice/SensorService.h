@@ -129,7 +129,7 @@ class SensorService :
 public:
     static char const* getServiceName() { return "sensorservice"; }
 
-    void cleanupConnection(const wp<SensorEventConnection>& connection);
+    void cleanupConnection(SensorEventConnection* connection);
     status_t enable(const sp<SensorEventConnection>& connection, int handle);
     status_t disable(const sp<SensorEventConnection>& connection, int handle);
     status_t setEventRate(const sp<SensorEventConnection>& connection, int handle, nsecs_t ns);
