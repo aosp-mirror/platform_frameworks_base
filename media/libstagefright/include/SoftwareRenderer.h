@@ -20,16 +20,16 @@
 
 #include <media/stagefright/ColorConverter.h>
 #include <utils/RefBase.h>
+#include <ui/android_native_buffer.h>
 
 namespace android {
 
 struct MetaData;
-class Surface;
 
 class SoftwareRenderer {
 public:
     SoftwareRenderer(
-            const sp<Surface> &surface, const sp<MetaData> &meta);
+            const sp<ANativeWindow> &nativeWindow, const sp<MetaData> &meta);
 
     ~SoftwareRenderer();
 
@@ -44,7 +44,7 @@ private:
     OMX_COLOR_FORMATTYPE mColorFormat;
     ColorConverter *mConverter;
     YUVMode mYUVMode;
-    sp<Surface> mSurface;
+    sp<ANativeWindow> mNativeWindow;
     int32_t mWidth, mHeight;
     int32_t mCropLeft, mCropTop, mCropRight, mCropBottom;
 

@@ -201,6 +201,16 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
     return mPlayer->setVideoSurface(surface);
 }
 
+status_t MediaPlayer::setVideoSurfaceTexture(
+        const sp<ISurfaceTexture>& surfaceTexture)
+{
+    LOGV("setVideoSurfaceTexture");
+    Mutex::Autolock _l(mLock);
+    if (mPlayer == 0) return NO_INIT;
+
+    return mPlayer->setVideoSurfaceTexture(surfaceTexture);
+}
+
 // must call with lock held
 status_t MediaPlayer::prepareAsync_l()
 {

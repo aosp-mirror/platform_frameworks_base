@@ -236,6 +236,8 @@ private:
         // IMediaPlayer interface
         virtual void            disconnect();
         virtual status_t        setVideoSurface(const sp<Surface>& surface);
+        virtual status_t        setVideoSurfaceTexture(
+                                        const sp<ISurfaceTexture>& surfaceTexture);
         virtual status_t        prepareAsync();
         virtual status_t        start();
         virtual status_t        stop();

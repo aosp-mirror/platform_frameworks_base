@@ -25,8 +25,8 @@
 #include <utils/Errors.h>
 
 using android::INVALID_OPERATION;
-using android::ISurface;
 using android::Surface;
+using android::ISurfaceTexture;
 using android::MediaPlayerBase;
 using android::OK;
 using android::Parcel;
@@ -69,6 +69,8 @@ class Player: public MediaPlayerBase
 
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) {return OK;}
     virtual status_t    setVideoSurface(const sp<Surface>& surface) {return OK;}
+    virtual status_t    setVideoSurfaceTexture(
+                                const sp<ISurfaceTexture>& surfaceTexture) {return OK;}
     virtual status_t    prepare() {return OK;}
     virtual status_t    prepareAsync() {return OK;}
     virtual status_t    start() {return OK;}

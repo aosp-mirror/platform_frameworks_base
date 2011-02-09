@@ -28,7 +28,8 @@ struct ABuffer;
 struct DecoderWrapper;
 
 struct NuPlayer::Decoder : public AHandler {
-    Decoder(const sp<AMessage> &notify, const sp<Surface> &surface = NULL);
+    Decoder(const sp<AMessage> &notify,
+            const sp<NativeWindowWrapper> &nativeWindow = NULL);
 
     void configure(const sp<MetaData> &meta);
 
@@ -47,7 +48,7 @@ private:
     };
 
     sp<AMessage> mNotify;
-    sp<Surface> mSurface;
+    sp<NativeWindowWrapper> mNativeWindow;
 
     sp<ACodec> mCodec;
     sp<DecoderWrapper> mWrapper;

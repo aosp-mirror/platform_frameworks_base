@@ -20,6 +20,9 @@
 
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/foundation/AHandler.h>
+#include <media/stagefright/NativeWindowWrapper.h>
+#include <gui/SurfaceTextureClient.h>
+#include <surfaceflinger/Surface.h>
 
 namespace android {
 
@@ -38,6 +41,7 @@ struct NuPlayer : public AHandler {
             const char *url, const KeyedVector<String8, String8> *headers);
 
     void setVideoSurface(const sp<Surface> &surface);
+    void setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &sink);
     void start();
 
@@ -65,7 +69,7 @@ private:
 
     enum {
         kWhatSetDataSource,
-        kWhatSetVideoSurface,
+        kWhatSetVideoNativeWindow,
         kWhatSetAudioSink,
         kWhatMoreDataQueued,
         kWhatStart,
@@ -81,7 +85,7 @@ private:
 
     wp<NuPlayerDriver> mDriver;
     sp<Source> mSource;
-    sp<Surface> mSurface;
+    sp<NativeWindowWrapper> mNativeWindow;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
     sp<Decoder> mVideoDecoder;
     sp<Decoder> mAudioDecoder;

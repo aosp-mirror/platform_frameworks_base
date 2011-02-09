@@ -74,7 +74,8 @@ LOCAL_SHARED_LIBRARIES := \
         libcamera_client \
         libdrmframework  \
         libcrypto        \
-        libssl
+        libssl           \
+        libgui
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \

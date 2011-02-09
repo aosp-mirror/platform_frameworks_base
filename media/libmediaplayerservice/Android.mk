@@ -32,7 +32,8 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libstagefright        			\
 	libstagefright_omx    			\
 	libstagefright_foundation               \
-	libsurfaceflinger_client
+	libsurfaceflinger_client                \
+	libgui
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp                     \

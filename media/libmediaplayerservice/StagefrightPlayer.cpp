@@ -55,6 +55,14 @@ status_t StagefrightPlayer::setVideoSurface(const sp<Surface> &surface) {
     return OK;
 }
 
+status_t StagefrightPlayer::setVideoSurfaceTexture(
+        const sp<ISurfaceTexture> &surfaceTexture) {
+    LOGV("setVideoSurfaceTexture");
+
+    mPlayer->setSurfaceTexture(surfaceTexture);
+    return OK;
+}
+
 status_t StagefrightPlayer::prepare() {
     return mPlayer->prepare();
 }

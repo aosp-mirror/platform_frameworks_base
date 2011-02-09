@@ -78,6 +78,10 @@ class TestPlayerStub : public MediaPlayerInterface {
     virtual status_t setVideoSurface(const android::sp<android::Surface>& s)  {
         return mPlayer->setVideoSurface(s);
     }
+    virtual status_t setVideoSurfaceTexture(
+            const android::sp<android::ISurfaceTexture>& st)  {
+        return mPlayer->setVideoSurfaceTexture(st);
+    }
     virtual status_t prepare() {return mPlayer->prepare();}
     virtual status_t prepareAsync()  {return mPlayer->prepareAsync();}
     virtual status_t start()  {return mPlayer->start();}
