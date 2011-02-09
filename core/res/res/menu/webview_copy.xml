@@ -15,6 +15,10 @@
 -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/select_all"
+        android:title="@string/selectAll"
+        android:showAsAction="ifRoom|withText"
+        />
     <item android:id="@+id/copy"
         android:icon="?android:attr/actionModeCopyDrawable"
         android:title="@string/copy"
@@ -23,10 +27,6 @@
     <item android:id="@+id/share"
         android:icon="@drawable/ic_menu_share"
         android:title="@string/share"
-        android:showAsAction="ifRoom|withText"
-        />
-    <item android:id="@+id/select_all"
-        android:title="@string/selectAll"
         android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/find"
