@@ -92,6 +92,7 @@ public class ActionBarImpl extends ActionBar {
     final Handler mHandler = new Handler();
 
     private Animator mCurrentAnim;
+    private boolean mShowHideAnimationEnabled;
 
     private static final TimeInterpolator sFadeOutInterpolator = new DecelerateInterpolator();
 
@@ -215,6 +216,20 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setContextView(mUpperContextView);
         mContextDisplayMode = mLowerContextView == null ?
                 CONTEXT_DISPLAY_NORMAL : CONTEXT_DISPLAY_SPLIT;
+    }
+
+    /**
+     * Enables or disables animation between show/hide states.
+     * If animation is disabled using this method, animations in progress
+     * will be finished.
+     *
+     * @param enabled true to animate, false to not animate.
+     */
+    public void setShowHideAnimationEnabled(boolean enabled) {
+        mShowHideAnimationEnabled = enabled;
+        if (!enabled && mCurrentAnim != null) {
+            mCurrentAnim.end();
+        }
     }
 
     public void addOnMenuVisibilityListener(OnMenuVisibilityListener listener) {
@@ -361,6 +376,7 @@ public class ActionBarImpl extends ActionBar {
                 mLowerContextView.setVisibility(View.VISIBLE);
             }
             mActionMode = mode;
+            show();
             return mode;
         }
         return null;
@@ -487,18 +503,23 @@ public class ActionBarImpl extends ActionBar {
             return;
         }
         mContainerView.setVisibility(View.VISIBLE);
-        mContainerView.setAlpha(0);
-        AnimatorSet anim = new AnimatorSet();
-        AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 1));
-        if (mContentView != null) {
-            b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
-                    -mContainerView.getHeight(), 0));
-            mContainerView.setTranslationY(-mContainerView.getHeight());
-            b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
+
+        if (mShowHideAnimationEnabled) {
+            mContainerView.setAlpha(0);
+            AnimatorSet anim = new AnimatorSet();
+            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 1));
+            if (mContentView != null) {
+                b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
+                        -mContainerView.getHeight(), 0));
+                mContainerView.setTranslationY(-mContainerView.getHeight());
+                b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
+            }
+            anim.addListener(mShowListener);
+            mCurrentAnim = anim;
+            anim.start();
+        } else {
+            mShowListener.onAnimationEnd(null);
         }
-        anim.addListener(mShowListener);
-        mCurrentAnim = anim;
-        anim.start();
     }
 
     @Override
@@ -509,18 +530,23 @@ public class ActionBarImpl extends ActionBar {
         if (mContainerView.getVisibility() == View.GONE) {
             return;
         }
-        mContainerView.setAlpha(1);
-        AnimatorSet anim = new AnimatorSet();
-        AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
-        if (mContentView != null) {
-            b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
-                    0, -mContainerView.getHeight()));
-            b.with(ObjectAnimator.ofFloat(mContainerView, "translationY",
-                    -mContainerView.getHeight()));
+
+        if (mShowHideAnimationEnabled) {
+            mContainerView.setAlpha(1);
+            AnimatorSet anim = new AnimatorSet();
+            AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
+            if (mContentView != null) {
+                b.with(ObjectAnimator.ofFloat(mContentView, "translationY",
+                        0, -mContainerView.getHeight()));
+                b.with(ObjectAnimator.ofFloat(mContainerView, "translationY",
+                        -mContainerView.getHeight()));
+            }
+            anim.addListener(mHideListener);
+            mCurrentAnim = anim;
+            anim.start();
+        } else {
+            mHideListener.onAnimationEnd(null);
         }
-        anim.addListener(mHideListener);
-        mCurrentAnim = anim;
-        anim.start();
     }
 
     public boolean isShowing() {
