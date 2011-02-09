@@ -438,7 +438,7 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"화면 잠금"</string>
     <string name="policydesc_forceLock" msgid="5696964126226028442">"화면을 잠그는 방법과 시기를 제어합니다."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"모든 데이터 삭제"</string>
-    <string name="policydesc_wipeData" msgid="7669895333814222586">"초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"공장 초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>

@@ -559,7 +559,7 @@
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты."</string>
     <string name="lockscreen_missing_sim_message" msgid="2186920585695169078">"SIM-карта не установлена."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Вставьте SIM-карту."</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренный вызов"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Только экстренные вызовы"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Сеть заблокирована"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта заблокирована с помощью кода PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"См. руководство пользователя или свяжитесь со службой поддержки."</string>
@@ -763,8 +763,8 @@
     <string name="volume_music" msgid="5421651157138628171">"Громкость мультимедиа"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Воспроизведение по каналу Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Выбран режим \"Без звука\""</string>
-    <string name="volume_call" msgid="3941680041282788711">"Громкость входящего вызова"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Громкость входящего вызова Bluetooth"</string>
+    <string name="volume_call" msgid="3941680041282788711">"Громкость при разговоре"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Громкость при разговоре"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Громкость сигнала предупреждения"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
