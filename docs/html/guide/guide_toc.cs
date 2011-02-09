@@ -243,7 +243,7 @@
       <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
             <span class="en">Bluetooth</span>
           </a></li>
-       <li><a href="<?cs var:toroot?>guide/topics/sip/SIP.html">
+       <li><a href="<?cs var:toroot?>guide/topics/network/sip.html">
             <span class="en">Session Initiation Protocol</span></a>
             <span class="new">new!</span>
           </li>
