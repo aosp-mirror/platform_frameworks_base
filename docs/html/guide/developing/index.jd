@@ -1,4 +1,4 @@
-page.title=Overview
+page.title=Introduction
 @jd:body
 
 <p>Developing applications for Android devices is facilitated by a group of tools that are
@@ -28,8 +28,9 @@ page.title=Overview
       <p>You need to create Android Virtual Devices (AVD) or connect hardware devices on which
       you will install your applications.</p>
       
-      <p>See <a href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>
-      and <a href="{@docRoot}guide/developing/device.html">Connecting Hardware Devices</a> for more information.
+      <p>See <a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>
+      and <a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> for more
+information.
     </li>
 
     <li>

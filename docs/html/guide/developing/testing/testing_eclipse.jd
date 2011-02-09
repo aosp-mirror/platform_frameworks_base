@@ -1,4 +1,4 @@
-page.title=Testing In Eclipse, with ADT
+page.title=Testing from Eclipse with ADT
 @jd:body
 <div id="qv-wrapper">
     <div id="qv">
@@ -14,8 +14,10 @@ page.title=Testing In Eclipse, with ADT
     This topic explains how create and run tests of Android applications in Eclipse with ADT.
     Before you read this topic, you should read about how to create an Android application with the
     basic processes for creating and running applications with ADT, as described in
-    <a href="{@docRoot}guide/developing/projects/projects-eclipse.html">Creating and Managing Projects in Eclipse</a>
-    and <a href="guide/developing/building/building-eclipse.html">Building and Running Apps in Eclipse</a>.
+    <a href="{@docRoot}guide/developing/projects/projects-eclipse.html">Managing Projects from
+Eclipse</a>
+    and <a href="guide/developing/building/building-eclipse.html">Building and Running from
+Eclipse</a>.
     You may also want to read
     <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
     which provides an overview of the Android testing framework.
@@ -48,7 +50,7 @@ page.title=Testing In Eclipse, with ADT
 <p>
     If you are not developing in Eclipse or you want to learn how to create and run tests from the
     command line, see
-    <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing in Other IDEs</a>.
+    <a href="{@docRoot}guide/developing/testing/testing_otheride.html">Testing from Other IDEs</a>.
 </p>
 <h2 id="CreateTestProjectEclipse">Creating a Test Project</h2>
 <p>

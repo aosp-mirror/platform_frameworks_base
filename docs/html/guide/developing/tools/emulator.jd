@@ -86,7 +86,7 @@ Here's the command-line usage for launching the emulator with options: </p>
       instance.</td>
   <td>You must create an AVD configuration before launching the emulator. For
       information, see <a href="{@docRoot}guide/developing/devices/managing-avds.html#createavd">
-      Creating and Managing AVDs with AVD Manager</a>.</td>
+      Managing AVDs with AVD Manager</a>.</td>
 <tr>
   <td rowspan="7">Disk Images</td>
   <td><code>-cache&nbsp;&lt;filepath&gt;</code></td>
@@ -440,7 +440,7 @@ results, since the density with which to render the skin may not be defined.
 AVDs let you associate each skin with a default density and override the default
 as needed. For more information, see <a
 href="{@docRoot}guide/developing/devices/managing-avds.html#createavd">
-Creating and Managing Virtual Devices with AVD Manager</a>.
+Managing Virtual Devices with AVD Manager</a>.
 </td>
 </tr>
 <tr>

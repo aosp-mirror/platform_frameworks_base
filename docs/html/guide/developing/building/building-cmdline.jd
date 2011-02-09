@@ -1,4 +1,4 @@
-page.title=Building and Running Apps on the Command Line
+page.title=Building and Running from the Command Line
 @jd:body
 
  <div id="qv-wrapper">
@@ -46,10 +46,9 @@ page.title=Building and Running Apps on the Command Line
   <p class="note"><strong>Note:</strong> When installing JDK on Windows, the default is to install
   in the "Program Files" directory. This location will cause <code>ant</code> to fail, because of
   the space. To fix the problem, you can specify the JAVA_HOME variable like this: 
-  <pre>set JAVA_HOME=c:\Progra~1\Java\&lt;jdkdir&gt;
-  </pre>
+  <pre>set JAVA_HOME=c:\Progra~1\Java\&lt;jdkdir&gt;</pre>
   
-  The easiest solution, however, is to install JDK in a non-space directory, for example:
+  <p>The easiest solution, however, is to install JDK in a non-space directory, for example:</p>
   
   <pre>c:\java\jdk1.6.0_02</pre>
 
