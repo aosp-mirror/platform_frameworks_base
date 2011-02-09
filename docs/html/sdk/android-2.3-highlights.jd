@@ -336,11 +336,14 @@ can create new applications that offer proximity-based information and services
 to users, organizations, merchants, and advertisers. </p>
 
 <p>Using the NFC API,
-applications can respond to NFC tags “discovered” as the user “touches” an
+applications can read and respond to NFC tags “discovered” as the user “touches” an
 NFC-enabled device to elements embedded in stickers, smart posters, and even
 other devices. When a tag of interest is collected, applications can respond to
 the tag, read messages from it, and then store the messages, prompting
 the user as needed. </p>
+
+<p>Starting from Android 2.3.3, applications can also write to tags and
+set up peer-to-peer connections with other NFC devices.</p>
 
 <p>NFC communication relies on wireless technology in the device hardware, so
 support for the platform's NFC features on specific devices is determined by
