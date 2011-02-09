@@ -3807,58 +3807,96 @@ public final class ContactsContract {
     }
 
     /**
-     * Additional columns returned by the {@link Contacts#CONTENT_FILTER_URI} providing the
-     * explanation of why the filter matched the contact.  Specifically, they contain the
-     * data type and element that was used for matching.
-     * <p>
-     * This is temporary API, it will need to change when we move to FTS.
+     * Additional column returned by the {@link Contacts#CONTENT_FILTER_URI} providing the
+     * explanation of why the filter matched the contact.  Specifically, it contains the
+     * data elements that matched the query.  The overall number of words in the snippet
+     * can be capped.
      *
      * @hide
      */
     public static class SearchSnippetColumns {
 
         /**
-         * The ID of the data row that was matched by the filter.
+         * The search snippet constructed according to the SQLite rules, see
+         * http://www.sqlite.org/fts3.html#snippet
+         * <p>
+         * The snippet may contain (parts of) several data elements comprising
+         * the contact.
          *
          * @hide
          */
+        public static final String SNIPPET = "snippet";
+
+
+        /**
+         * Comma-separated parameters for the generation of the snippet:
+         * <ul>
+         * <li>The "start match" text. Default is &lt;b&gt;</li>
+         * <li>The "end match" text. Default is &lt;/b&gt;</li>
+         * <li>The "ellipsis" text. Default is &lt;b&gt;...&lt;/b&gt;</li>
+         * <li>Maximum number of tokens to include in the snippet. Can be either
+         * a positive or a negative number: A positive number indicates how many
+         * tokens can be returned in total. A negative number indicates how many
+         * tokens can be returned per occurrence of the search terms.</li>
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
+
+        /**
+         * The ID of the data row that was matched by the filter.
+         *
+         * @hide
+         * @deprecated
+         */
+        @Deprecated
         public static final String SNIPPET_DATA_ID = "snippet_data_id";
 
         /**
          * The type of data that was matched by the filter.
          *
          * @hide
+         * @deprecated
          */
+        @Deprecated
         public static final String SNIPPET_MIMETYPE = "snippet_mimetype";
 
         /**
          * The {@link Data#DATA1} field of the data row that was matched by the filter.
          *
          * @hide
+         * @deprecated
          */
+        @Deprecated
         public static final String SNIPPET_DATA1 = "snippet_data1";
 
         /**
          * The {@link Data#DATA2} field of the data row that was matched by the filter.
          *
          * @hide
+         * @deprecated
          */
+        @Deprecated
         public static final String SNIPPET_DATA2 = "snippet_data2";
 
         /**
          * The {@link Data#DATA3} field of the data row that was matched by the filter.
          *
          * @hide
+         * @deprecated
          */
+        @Deprecated
         public static final String SNIPPET_DATA3 = "snippet_data3";
 
         /**
          * The {@link Data#DATA4} field of the data row that was matched by the filter.
          *
          * @hide
+         * @deprecated
          */
+        @Deprecated
         public static final String SNIPPET_DATA4 = "snippet_data4";
-
     }
 
     /**
