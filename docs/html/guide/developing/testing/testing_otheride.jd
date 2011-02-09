@@ -1,4 +1,4 @@
-page.title=Testing In Other IDEs
+page.title=Testing from Other IDEs
 @jd:body
 
 <div id="qv-wrapper">
@@ -67,7 +67,7 @@ page.title=Testing In Other IDEs
     If you are developing in Eclipse with ADT, you can set up and run your tests
     directly in Eclipse. For more information, please read
     <a href="{@docRoot}guide/developing/testing/testing_eclipse.html">
-    Testing in Eclipse, with ADT</a>.
+    Testing from Eclipse with ADT</a>.
 </p>
 <h2 id="CreateTestProjectCommand">Working with Test Projects</h2>
 <p>
@@ -133,7 +133,7 @@ android create test-project -m &lt;main_path&gt; -n &lt;project_name&gt; -p &lt;
     This creates a new test project with the appropriate directories and build files. The directory
     structure and build file contents are identical to those in a regular Android application
     project. They are described in detail in the topic
-    <a href="{@docRoot}guide/developing/projects/index.html">Creating and Managing Projects</a>.
+    <a href="{@docRoot}guide/developing/projects/index.html">Managing Projects</a>.
 </p>
 <p>
     The operation also creates an <code>AndroidManifest.xml</code> file with instrumentation

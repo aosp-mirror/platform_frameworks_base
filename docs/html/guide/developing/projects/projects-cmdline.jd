@@ -1,4 +1,4 @@
-page.title=Creating and Managing Projects on the Command Line
+page.title=Managing Projects from the Command Line
 @jd:body
 
   <div id="qv-wrapper">
@@ -21,7 +21,7 @@ page.title=Creating and Managing Projects on the Command Line
       <ol>
         <li><a href=
         "{@docRoot}guide/developing/testing/testing_otheride.html#CreateTestProjectCommand">Testing
-        in Other IDEs</a></li>
+        from Other IDEs</a></li>
       </ol>
     </div>
   </div>
@@ -41,7 +41,7 @@ page.title=Creating and Managing Projects on the Command Line
 
   <li>Test projects extend JUnit test functionality to include Android specific functionality. For
   more information on creating a test project, see <a href=
-  "{@docRoot}guide/developing/testing/testing_otheride.html">Testing in other IDEs</a>.</li>
+  "{@docRoot}guide/developing/testing/testing_otheride.html">Testing from other IDEs</a>.</li>
   </ul>
 
 
@@ -279,7 +279,7 @@ android.library.reference.1=path/to/library_projectC
 
   <p>To build an application project that depends on one or more library projects, you can use the
   standard Ant build commands and compile modes, as described in <a href=
-  "{@docRoot}guide/developing/building/index.html">Building Your Application</a>, earlier in this
-  document. The tools compile and merge all libraries referenced by the application as part of
+  "{@docRoot}guide/developing/building/index.html">Building and Running</a>. The tools
+compile and merge all libraries referenced by the application as part of
   compiling the dependent application project. No additional commands or steps are necessary.</p>
 
