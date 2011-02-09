@@ -137,7 +137,6 @@ public final class Ndef extends BasicTagTechnology {
      * @param tag an MIFARE Classic compatible tag
      * @return MIFARE Classic object
      */
-
     public static Ndef get(Tag tag) {
         if (!tag.hasTech(TagTechnology.NDEF)) return null;
         try {

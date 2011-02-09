@@ -26,8 +26,11 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NfcA;
+import android.nfc.tech.NfcF;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -44,30 +47,85 @@ public final class NfcAdapter {
 
     /**
      * Intent to start an activity when a tag with NDEF payload is discovered.
-     * If the tag has and NDEF payload this intent is started before
-     * {@link #ACTION_TECH_DISCOVERED}.
      *
-     * If any activities respond to this intent neither
+     * <p>The system inspects the first {@link NdefRecord} in the first {@link NdefMessage} and
+     * looks for a URI, SmartPoster, or MIME record. If a URI or SmartPoster record is found the
+     * intent will contain the URI in its data field. If a MIME record is found the intent will
+     * contain the MIME type in its type field. This allows activities to register
+     * {@link IntentFilter}s targeting specific content on tags. Activities should register the
+     * most specific intent filters possible to avoid the activity chooser dialog, which can
+     * disrupt the interaction with the tag as the user interacts with the screen.
+     *
+     * <p>If the tag has an NDEF payload this intent is started before
+     * {@link #ACTION_TECH_DISCOVERED}. If any activities respond to this intent neither
      * {@link #ACTION_TECH_DISCOVERED} or {@link #ACTION_TAG_DISCOVERED} will be started.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NDEF_DISCOVERED = "android.nfc.action.NDEF_DISCOVERED";
 
     /**
-     * Intent to started when a tag is discovered. The data URI is formated as
-     * {@code vnd.android.nfc://tag/} with the path having a directory entry for each technology
-     * in the {@link Tag#getTechList()} is sorted ascending order.
+     * Intent to start an activity when a tag is discovered and activities are registered for the
+     * specific technologies on the tag.
      *
-     * This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
-     * {@link #ACTION_TAG_DISCOVERED}
+     * <p>To receive this intent an activity must include an intent filter
+     * for this action and specify the desired tech types in a
+     * manifest <code>meta-data</code> entry. Here is an example manfiest entry:
+     * <pre>
+     *   &lt;activity android:name=".nfc.TechFilter" android:label="NFC/TechFilter"&gt;
+     *       &lt;!-- Add a technology filter --&gt;
+     *       &lt;intent-filter&gt;
+     *           &lt;action android:name="android.nfc.action.TECH_DISCOVERED" /&gt;
+     *       &lt;/intent-filter&gt;
      *
-     * If any activities respond to this intent {@link #ACTION_TAG_DISCOVERED} will not be started.
+     *       &lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+     *           android:resource="@xml/filter_nfc"
+     *       /&gt;
+     *   &lt;/activity&gt;
+     * </pre>
+     *
+     * <p>The meta-data XML file should contain one or more <code>tech-list</code> entries
+     * each consisting or one or more <code>tech</code> entries. The <code>tech</code> entries refer
+     * to the qualified class name implementing the technology, for example "android.nfc.tech.NfcA".
+     *
+     * <p>A tag matches if any of the
+     * <code>tech-list</code> sets is a subset of {@link Tag#getTechList() Tag.getTechList()}. Each
+     * of the <code>tech-list</code>s is considered independently and the
+     * activity is considered a match is any single <code>tech-list</code> matches the tag that was
+     * discovered. This provides AND and OR semantics for filtering desired techs. Here is an
+     * example that will match any tag using {@link NfcF} or any tag using {@link NfcA},
+     * {@link MifareClassic}, and {@link Ndef}:
+     *
+     * <pre>
+     * &lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+     *     &lt;!-- capture anything using NfcF --&gt;
+     *     &lt;tech-list&gt;
+     *         &lt;tech&gt;android.nfc.tech.NfcF&lt;/tech&gt;
+     *     &lt;/tech-list&gt;
+     *
+     *     &lt;!-- OR --&gt;
+     *
+     *     &lt;!-- capture all MIFARE Classics with NDEF payloads --&gt;
+     *     &lt;tech-list&gt;
+     *         &lt;tech&gt;android.nfc.tech.NfcA&lt;/tech&gt;
+     *         &lt;tech&gt;android.nfc.tech.MifareClassic&lt;/tech&gt;
+     *         &lt;tech&gt;android.nfc.tech.Ndef&lt;/tech&gt;
+     *     &lt;/tech-list&gt;
+     * &lt;/resources&gt;
+     * </pre>
+     *
+     * <p>This intent is started after {@link #ACTION_NDEF_DISCOVERED} and before
+     * {@link #ACTION_TAG_DISCOVERED}. If any activities respond to {@link #ACTION_NDEF_DISCOVERED}
+     * this intent will not be started. If any activities respond to this intent
+     * {@link #ACTION_TAG_DISCOVERED} will not be started.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TECH_DISCOVERED = "android.nfc.action.TECH_DISCOVERED";
 
     /**
      * Intent to start an activity when a tag is discovered.
+     *
+     * <p>This intent will not be started when a tag is discovered if any activities respond to
+     * {@link #ACTION_NDEF_DISCOVERED} or {@link #ACTION_TECH_DISCOVERED} for the current tag. 
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
@@ -79,17 +137,23 @@ public final class NfcAdapter {
     public static final String ACTION_TAG_LEFT_FIELD = "android.nfc.action.TAG_LOST";
 
     /**
-     * Mandatory Tag extra for the ACTION_TAG intents.
+     * Mandatory extra containing the {@link Tag} that was discovered for the
+     * {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.
      */
     public static final String EXTRA_TAG = "android.nfc.extra.TAG";
 
     /**
-     * Optional NdefMessage[] extra for the ACTION_TAG intents.
+     * Optional extra containing an array of {@link NdefMessage} present on the discovered tag for
+     * the {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.
      */
     public static final String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
 
     /**
-     * Optional byte[] extra for the tag identifier.
+     * Optional extra containing a byte array containing the ID of the discovered tag for
+     * the {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED}, and
+     * {@link #ACTION_TAG_DISCOVERED} intents.
      */
     public static final String EXTRA_ID = "android.nfc.extra.ID";
 
