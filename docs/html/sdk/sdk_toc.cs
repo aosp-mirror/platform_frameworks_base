@@ -87,6 +87,13 @@ class="new">new!</span></li>
     </ul>
     <ul>
       <li class="toggle-list">
+      <div><a href="<?cs var:toroot ?>sdk/android-2.3.3.html">
+      <span class="en">Android 2.3.3 Platform</span></a>  <span class="new">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/10/changes.html">API Differences Report &raquo;</a></li> 
+        </ul>
+      </li>
+      <li class="toggle-list">
       <div><a href="<?cs var:toroot ?>sdk/android-2.3.html">
       <span class="en">Android 2.3 Platform</span></a></div>
         <ul>
