@@ -567,6 +567,19 @@ public final class Downloads {
         public static final int STATUS_QUEUED_FOR_WIFI = 196;
 
         /**
+         * This download couldn't be completed due to insufficient storage
+         * space.  Typically, this is because the SD card is full.
+         */
+        public static final int STATUS_INSUFFICIENT_SPACE_ERROR = 198;
+
+        /**
+         * This download couldn't be completed because no external storage
+         * device was found.  Typically, this is because the SD card is not
+         * mounted.
+         */
+        public static final int STATUS_DEVICE_NOT_FOUND_ERROR = 199;
+
+        /**
          * This download has successfully completed.
          * Warning: there might be other status values that indicate success
          * in the future.
@@ -669,19 +682,6 @@ public final class Downloads {
          * too many redirects.
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
-
-        /**
-         * This download couldn't be completed due to insufficient storage
-         * space.  Typically, this is because the SD card is full.
-         */
-        public static final int STATUS_INSUFFICIENT_SPACE_ERROR = 498;
-
-        /**
-         * This download couldn't be completed because no external storage
-         * device was found.  Typically, this is because the SD card is not
-         * mounted.
-         */
-        public static final int STATUS_DEVICE_NOT_FOUND_ERROR = 499;
 
         /**
          * This download is visible but only shows in the notifications
