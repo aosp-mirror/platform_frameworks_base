@@ -357,7 +357,7 @@ public class Camera {
         }
     }
 
-    private native final void setPreviewDisplay(Surface surface);
+    private native final void setPreviewDisplay(Surface surface) throws IOException;
 
     /**
      * Sets the {@link SurfaceTexture} to be used for live preview.
@@ -380,7 +380,7 @@ public class Camera {
      * @throws IOException if the method fails (for example, if the surface
      *     texture is unavailable or unsuitable).
      */
-    public native final void setPreviewTexture(SurfaceTexture surfaceTexture);
+    public native final void setPreviewTexture(SurfaceTexture surfaceTexture) throws IOException;
 
     /**
      * Callback interface used to deliver copies of preview frames as
