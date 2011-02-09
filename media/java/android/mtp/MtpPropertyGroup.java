@@ -337,8 +337,8 @@ class MtpPropertyGroup {
             for (int objectIndex = 0; objectIndex < count; objectIndex++) {
                 if (c != null) {
                     c.moveToNext();
+                    handle = (int)c.getLong(0);
                 }
-                handle = (int)c.getLong(0);
 
                 // iterate over all properties in the query for the given object
                 for (int propertyIndex = 0; propertyIndex < mProperties.length; propertyIndex++) {
