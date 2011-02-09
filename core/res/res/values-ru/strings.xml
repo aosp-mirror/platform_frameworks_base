@@ -962,14 +962,14 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Изменить фоновый рисунок"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Протокол PPTP"</string>
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Протокол L2TP"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN (на основе предв. общ. ключа)"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN (на основе сертификата)"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN с использованием общего ключа"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN с использованием сертификатов"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выбрать файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Не выбран файл"</string>
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим громкой связи включен"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Выберите для выхода из режима громкой связи."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Чтобы закрыть приложение, нажмите здесь."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем или точка доступа Wi-Fi активны"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
