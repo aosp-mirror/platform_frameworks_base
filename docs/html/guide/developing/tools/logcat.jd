@@ -8,7 +8,8 @@ page.title=logcat
   <code>logcat</code> from an ADB shell to view the log messages.</p>
 
   <p>This document is a reference to the available command line options. For more information on <code>logcat</code>, see
-  <a href="{@docRoot}guide/developing/debugging/debugging-log.html">Reading and Writing Log Messages</a>. For more
+  <a href="{@docRoot}guide/developing/debugging/debugging-log.html">Reading and Writing Logs</a>.
+For more
   information on accessing <code>logcat</code> from DDMS, instead of the command line, see the documentation for the
   <a href="{@docRoot}guide/developing/debugging/ddms.html">Dalvik Debug Monitor Server</a>.
   </p>

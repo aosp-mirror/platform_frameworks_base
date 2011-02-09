@@ -1,4 +1,4 @@
-page.title=Connecting Hardware Devices
+page.title=Using Hardware Devices
 @jd:body
 
 <div id="qv-wrapper">
@@ -15,10 +15,6 @@ page.title=Connecting Hardware Devices
   <ol>
     <li><a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a></li>
     <li><a href="{@docRoot}sdk/oem-usb.html">OEM USB Drivers</a></li>
-    <li><a
-href="{@docRoot}guide/developing/eclipse-adt.html">Developing in Eclipse, with ADT</a></li>
-    <li><a
-href="{@docRoot}guide/developing/other-ide.html">Developing in other IDEs</a></li>
   </ol>
 </div>
 </div>

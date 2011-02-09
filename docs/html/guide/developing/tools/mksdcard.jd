@@ -13,7 +13,7 @@ mksdcard -l &lt;label&gt; &lt;size&gt; &lt;file&gt;
 </pre>
 
   <h3>Options</h3>
-  The following table describes the command-line options of <code>mksdcard</code>
+  <p>The following table describes the command-line options of <code>mksdcard</code></p>
   <table>
     <tr>
       <th>Option</th>
@@ -50,4 +50,4 @@ mksdcard -l &lt;label&gt; &lt;size&gt; &lt;file&gt;
   <pre>emulator -sdcard &lt;file&gt;</pre>
 
 <h3>Example</h3>
-mksdcard -l mySdCard 1024M mySdCardFile.img
+<pre>mksdcard -l mySdCard 1024M mySdCardFile.img</pre>
