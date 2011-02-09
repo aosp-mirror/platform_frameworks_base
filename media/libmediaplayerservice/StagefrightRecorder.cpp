@@ -244,6 +244,10 @@ status_t StagefrightRecorder::setOutputFileAuxiliary(int fd) {
 // returns true on success, false otherwise.
 static bool safe_strtoi64(const char *s, int64_t *val) {
     char *end;
+
+    // It is lame, but according to man page, we have to set errno to 0
+    // before calling strtoll().
+    errno = 0;
     *val = strtoll(s, &end, 10);
 
     if (end == s || errno == ERANGE) {
