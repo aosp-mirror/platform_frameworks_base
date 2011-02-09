@@ -63,7 +63,10 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << AlarmManager.ELAPSED_REALTIME_WAKEUP; 
     private static final int ELAPSED_REALTIME_MASK = 1 << AlarmManager.ELAPSED_REALTIME;
     private static final int TIME_CHANGED_MASK = 1 << 16;
-    
+
+    // Alignment quantum for inexact repeating alarms
+    private static final long QUANTUM = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+
     private static final String TAG = "AlarmManager";
     private static final String ClockReceiver_TAG = "ClockReceiver";
     private static final boolean localLOGV = false;
@@ -82,17 +85,6 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private final ArrayList<Alarm> mElapsedRealtimeWakeupAlarms = new ArrayList<Alarm>();
     private final ArrayList<Alarm> mElapsedRealtimeAlarms = new ArrayList<Alarm>();
     private final IncreasingTimeOrder mIncreasingTimeOrder = new IncreasingTimeOrder();
-    
-    // slots corresponding with the inexact-repeat interval buckets,
-    // ordered from shortest to longest
-    private static final long sInexactSlotIntervals[] = {
-        AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-        AlarmManager.INTERVAL_HALF_HOUR,
-        AlarmManager.INTERVAL_HOUR,
-        AlarmManager.INTERVAL_HALF_DAY,
-        AlarmManager.INTERVAL_DAY
-    };
-    private long mInexactDeliveryTimes[] = { 0, 0, 0, 0, 0};
     
     private int mDescriptor;
     private int mBroadcastRefCount = 0;
@@ -199,58 +191,40 @@ class AlarmManagerService extends IAlarmManager.Stub {
             return;
         }
 
-        // find the slot in the delivery-times array that we will use
-        int intervalSlot;
-        for (intervalSlot = 0; intervalSlot < sInexactSlotIntervals.length; intervalSlot++) {
-            if (sInexactSlotIntervals[intervalSlot] == interval) {
-                break;
-            }
+        if (interval <= 0) {
+            Slog.w(TAG, "setInexactRepeating ignored because interval " + interval
+                    + " is invalid");
+            return;
         }
-        
-        // Non-bucket intervals just fall back to the less-efficient
-        // unbucketed recurring alarm implementation
-        if (intervalSlot >= sInexactSlotIntervals.length) {
+
+        // If the requested interval isn't a multiple of 15 minutes, just treat it as exact
+        if (interval % QUANTUM != 0) {
+            if (localLOGV) Slog.v(TAG, "Interval " + interval + " not a quantum multiple");
             setRepeating(type, triggerAtTime, interval, operation);
             return;
         }
 
-        // Align bucketed alarm deliveries by trying to match
-        // the shortest-interval bucket already scheduled
-        long bucketTime = 0;
-        for (int slot = 0; slot < mInexactDeliveryTimes.length; slot++) {
-            if (mInexactDeliveryTimes[slot] > 0) {
-                bucketTime = mInexactDeliveryTimes[slot];
-                break;
-            }
-        }
-        
-        if (bucketTime == 0) {
-            // If nothing is scheduled yet, just start at the requested time
-            bucketTime = triggerAtTime;
+        // Translate times into the ELAPSED timebase for alignment purposes so that
+        // alignment never tries to match against wall clock times.
+        final boolean isRtc = (type == AlarmManager.RTC || type == AlarmManager.RTC_WAKEUP);
+        final long skew = (isRtc)
+                ? System.currentTimeMillis() - SystemClock.elapsedRealtime()
+                : 0;
+
+        // Slip forward to the next ELAPSED-timebase quantum after the stated time.  If
+        // we're *at* a quantum point, leave it alone.
+        final long adjustedTriggerTime;
+        long offset = (triggerAtTime - skew) % QUANTUM;
+        if (offset != 0) {
+            adjustedTriggerTime = triggerAtTime - offset + QUANTUM;
         } else {
-            // Align the new alarm with the existing bucketed sequence.  To achieve
-            // alignment, we slide the start time around by min{interval, slot interval}
-            long adjustment = (interval <= sInexactSlotIntervals[intervalSlot])
-                    ? interval : sInexactSlotIntervals[intervalSlot];
-
-            // The bucket may have started in the past; adjust
-            while (bucketTime < triggerAtTime) {
-                bucketTime += adjustment;
-            }
-
-            // Or the bucket may be set to start more than an interval beyond
-            // our requested trigger time; pull it back to meet our needs
-            while (bucketTime > triggerAtTime + adjustment) {
-                bucketTime -= adjustment;
-            }
+            adjustedTriggerTime = triggerAtTime;
         }
 
-        // Remember where this bucket started (reducing the amount of later 
-        // fixup required) and set the alarm with the new, bucketed start time.
-        if (localLOGV) Slog.v(TAG, "setInexactRepeating: interval=" + interval
-                + " bucketTime=" + bucketTime);
-        mInexactDeliveryTimes[intervalSlot] = bucketTime;
-        setRepeating(type, bucketTime, interval, operation);
+        // Set the alarm based on the quantum-aligned start time
+        if (localLOGV) Slog.v(TAG, "setInexactRepeating: type=" + type + " interval=" + interval
+                + " trigger=" + adjustedTriggerTime + " orig=" + triggerAtTime);
+        setRepeating(type, adjustedTriggerTime, interval, operation);
     }
 
     public void setTime(long millis) {
