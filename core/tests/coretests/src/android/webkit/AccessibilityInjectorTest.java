@@ -25,13 +25,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.test.AndroidTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 /**
  * This is a test for the behavior of the {@link AccessibilityInjector}
@@ -42,7 +40,8 @@ import android.webkit.WebViewClient;
  *       to so it also checks if the test for announcing navigation axis and
  *       status messages as appropriate.
  */
-public class AccessibilityInjectorTest extends AndroidTestCase {
+public class AccessibilityInjectorTest
+    extends ActivityInstrumentationTestCase2<AccessibilityInjectorTestActivity> {
 
     /** The timeout to wait for the expected selection. */
     private static final long TIMEOUT_WAIT_FOR_SELECTION_STRING = 1000;
@@ -51,7 +50,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     private static final long TIMEOUT_ENABLE_ACCESSIBILITY_AND_MOCK_SERVICE = 1000;
 
     /** The count of tests to detect when to shut down the service. */
-    private static final int TEST_CASE_COUNT = 16;
+    private static final int TEST_CASE_COUNT = 19;
 
     /** The meta state for pressed left ALT. */
     private static final int META_STATE_ALT_LEFT_ON = KeyEvent.META_ALT_ON
@@ -95,6 +94,10 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     /** The received selection string for assertion checking. */
     private static String sReceivedSelectionString = SELECTION_STRING_UNKNOWN;
 
+    public AccessibilityInjectorTest() {
+        super(AccessibilityInjectorTestActivity.class);
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -136,17 +139,16 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
                "</head>" +
                "<body>" +
                    "<p>" +
-                      "a <b>b</b> c" +
+                      "a<b>b</b>c" +
                    "</p>" +
                    "<p>" +
                      "d" +
-                     "<p/>" +
-                     "e" +
-                   "</p>" +
+                   "<p/>" +
+                   "e" +
                "</body>" +
              "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
@@ -241,7 +243,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
                "</body>" +
              "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
@@ -368,7 +370,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // Sentence axis is the default
 
@@ -471,7 +473,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to heading
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_RIGHT, META_STATE_ALT_LEFT_ON);
@@ -559,7 +561,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to heading
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_RIGHT, META_STATE_ALT_LEFT_ON);
@@ -631,7 +633,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to document
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_LEFT, META_STATE_ALT_LEFT_ON);
@@ -689,7 +691,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to document
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_LEFT, META_STATE_ALT_LEFT_ON);
@@ -733,7 +735,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
@@ -792,11 +794,11 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
-        assertSelectionString("First");
+        assertSelectionString("<div>First</div>");
 
         // go to the second sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -828,7 +830,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
-        assertSelectionString("First");
+        assertSelectionString("<div>First</div>");
     }
 
     /**
@@ -855,7 +857,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -931,7 +933,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -991,7 +993,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
@@ -1047,7 +1049,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // change navigation axis to word
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, META_STATE_ALT_LEFT_ON);
@@ -1107,7 +1109,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -1179,7 +1181,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -1250,7 +1252,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
               "</body>" +
             "</html>";
 
-        WebView webView = createWebVewWithHtml(html);
+        WebView webView = loadHTML(html);
 
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
@@ -1296,8 +1298,242 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
         assertSelectionString("<input type=\"text\">");
 
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"text\">");
+
         // go to the first sentence
         sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+    }
+
+    /**
+     * Tests traversing of input controls.
+     */
+    @LargeTest
+    public void testSelectionOfInputElements3() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<input type=\"text\"/>" +
+                "<button type=\"button\">Click Me!</button>" +
+                "<select>" +
+                  "<option value=\"volvo\">Volvo</option>" +
+                  "<option value=\"saab\">Saab</option>" +
+                "</select>" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = loadHTML(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<button type=\"button\">Click Me!</button>");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<select><option value=\"volvo\">Volvo</option>" +
+                "<option value=\"saab\">Saab</option></select>");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<select><option value=\"volvo\">Volvo</option>" +
+                "<option value=\"saab\">Saab</option></select>");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<button type=\"button\">Click Me!</button>");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\">");
+    }
+
+    /**
+     * Tests traversing of input controls.
+     */
+    @LargeTest
+    public void testSelectionOfInputElements4() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "Start" +
+                "<span>" +
+                  "<span>" +
+                    "<input type=\"submit\">" +
+                  "</span>" +
+                "</span>" +
+                "<input type=\"text\" size=\"30\">" +
+                "<span>" +
+                  "<span>" +
+                    "<input type=\"submit\" size=\"30\">" +
+                  "</span>" +
+                "</span>" +
+                "End" +
+              "</body>" +
+            "</html>";
+
+        WebView webView = loadHTML(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Start");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"submit\">");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\" size=\"30\">");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"submit\" size=\"30\">");
+
+        // go to the fifth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("End");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the fifth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("End");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"submit\" size=\"30\">");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"text\" size=\"30\">");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"submit\">");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Start");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Start");
+    }
+
+    /**
+     * Tests traversing of input controls.
+     */
+    @LargeTest
+    public void testSelectionOfInputElements5() throws Exception {
+        // a bit ugly but helps detect beginning and end of all tests so accessibility
+        // and the mock service are not toggled on every test (expensive)
+        sExecutedTestCount++;
+
+        String html =
+            "<!DOCTYPE html>" +
+            "<html>" +
+              "<head>" +
+              "</head>" +
+              "<body>" +
+                "<div>" +
+                  "First" +
+                  "<input type=\"hidden\">" +
+                  "<input type=\"hidden\">" +
+                  "<input type=\"hidden\">" +
+                  "<input type=\"hidden\">" +
+                  "<input type=\"text\">" +
+                  "<span>" +
+                    "<span>" +
+                      "<input type=\"submit\">" +
+                    "</span>" +
+                  "</span>" +
+                "</div>" +
+              "</body>" +
+              "Second" +
+            "</html>";
+
+        WebView webView = loadHTML(html);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("First");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("<input type=\"submit\">");
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString("Second");
+
+        // go to past the last sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
+        assertSelectionString(null);
+
+        // go to the fourth sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("Second");
+
+        // go to the third sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"submit\">");
+
+        // go to the second sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("<input type=\"text\">");
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString("First");
+
+        // go to before the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_UP, 0);
+        assertSelectionString(null);
+
+        // go to the first sentence
+        sendKeyEvent(webView, KeyEvent.KEYCODE_DPAD_DOWN, 0);
         assertSelectionString("First");
     }
 
@@ -1306,14 +1542,14 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
      */
     private void enableAccessibilityAndMockAccessibilityService() {
         // make sure the manager is instantiated so the system initializes it
-        AccessibilityManager.getInstance(getContext());
+        AccessibilityManager.getInstance(getActivity());
 
         // enable accessibility and the mock accessibility service
-        Settings.Secure.putInt(getContext().getContentResolver(),
+        Settings.Secure.putInt(getActivity().getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_ENABLED, 1);
-        String enabledServices = new ComponentName(getContext().getPackageName(),
+        String enabledServices = new ComponentName(getActivity().getPackageName(),
                 MockAccessibilityService.class.getName()).flattenToShortString();
-        Settings.Secure.putString(getContext().getContentResolver(),
+        Settings.Secure.putString(getActivity().getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, enabledServices);
 
         // poll within a timeout and let be interrupted in case of success
@@ -1346,9 +1582,9 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
      */
     private void disableAccessibilityAndMockAccessibilityService() {
         // disable accessibility and the mock accessibility service
-        Settings.Secure.putInt(getContext().getContentResolver(),
+        Settings.Secure.putInt(getActivity().getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_ENABLED, 0);
-        Settings.Secure.putString(getContext().getContentResolver(),
+        Settings.Secure.putString(getActivity().getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "");
     }
 
@@ -1391,28 +1627,30 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
     }
 
     /**
-     * Creates a {@link WebView} with with a given HTML content.
+     * Loads HTML content in a {@link WebView}.
      *
      * @param html The HTML content;
-     * @return The created view.
+     * @return The {@link WebView} view.
      */
-    private WebView createWebVewWithHtml(final String html) {
+    private WebView loadHTML(final String html) {
         mWorker.getHandler().post(new Runnable() {
             public void run() {
-                mWebView = new WebView(getContext());
-                mWebView.loadData(html, "text/html", "utf-8");
-                mWebView.setWebViewClient(new WebViewClient() {
-                    @Override
-                    public void onPageFinished(WebView view, String url) {
-                        mWorker.getHandler().post(new Runnable() {
-                            public void run() {
-                                synchronized (sTestLock) {
-                                    sTestLock.notifyAll();
+                if (mWebView == null) {
+                    mWebView = getActivity().getWebView();
+                    mWebView.setWebViewClient(new WebViewClient() {
+                        @Override
+                        public void onPageFinished(WebView view, String url) {
+                            mWorker.getHandler().post(new Runnable() {
+                                public void run() {
+                                    synchronized (sTestLock) {
+                                        sTestLock.notifyAll();
+                                    }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
+                mWebView.loadData(html, "text/html", "utf-8");
             }
         });
         synchronized (sTestLock) {
@@ -1430,7 +1668,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
      * to ensure that this test will be agnostic to changes of the bindings.
      */
     private void injectTestWebContentKeyBindings() {
-        ContentResolver contentResolver = getContext().getContentResolver();
+        ContentResolver contentResolver = getActivity().getContentResolver();
         mDefaultKeyBindings = Settings.Secure.getString(contentResolver,
                 Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS);
         Settings.Secure.putString(contentResolver,
@@ -1441,7 +1679,7 @@ public class AccessibilityInjectorTest extends AndroidTestCase {
      * Restores the default web content key bindings.
      */
     private void restoreDefaultWebContentKeyBindings() {
-        Settings.Secure.putString(getContext().getContentResolver(),
+        Settings.Secure.putString(getActivity().getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
                 mDefaultKeyBindings);
     }
