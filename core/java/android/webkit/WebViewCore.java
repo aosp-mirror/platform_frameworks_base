@@ -124,9 +124,6 @@ final class WebViewCore {
     private int mRestoredX = 0;
     private int mRestoredY = 0;
 
-    private int mWebkitScrollX = 0;
-    private int mWebkitScrollY = 0;
-
     private DeviceMotionAndOrientationManager mDeviceMotionAndOrientationManager =
             new DeviceMotionAndOrientationManager(this);
     private DeviceMotionService mDeviceMotionService;
@@ -868,7 +865,7 @@ final class WebViewCore {
             "SAVE_DOCUMENT_STATE", // = 128;
             "129", // = 129;
             "WEBKIT_DRAW", // = 130;
-            "SYNC_SCROLL", // = 131;
+            "131", // = 131;
             "POST_URL", // = 132;
             "SPLIT_PICTURE_SET", // = 133;
             "CLEAR_CONTENT", // = 134;
@@ -926,7 +923,6 @@ final class WebViewCore {
         static final int SAVE_DOCUMENT_STATE = 128;
 
         static final int WEBKIT_DRAW = 130;
-        static final int SYNC_SCROLL = 131;
         static final int POST_URL = 132;
         static final int SPLIT_PICTURE_SET = 133;
         static final int CLEAR_CONTENT = 134;
@@ -1184,7 +1180,8 @@ final class WebViewCore {
                             // note: these are in document coordinates
                             // (inv-zoom)
                             Point pt = (Point) msg.obj;
-                            nativeSetScrollOffset(msg.arg1, msg.arg2, pt.x, pt.y);
+                            nativeSetScrollOffset(msg.arg1, msg.arg2 == 1,
+                                    pt.x, pt.y);
                             break;
 
                         case SET_GLOBAL_BOUNDS:
@@ -1476,11 +1473,6 @@ final class WebViewCore {
                                     data.mAllow, data.mRemember);
                             break;
 
-                        case SYNC_SCROLL:
-                            mWebkitScrollX = msg.arg1;
-                            mWebkitScrollY = msg.arg2;
-                            break;
-
                         case SPLIT_PICTURE_SET:
                             nativeSplitContent(msg.arg1);
                             mWebView.mPrivateHandler.obtainMessage(
@@ -1496,9 +1488,7 @@ final class WebViewCore {
                             break;
 
                         case MESSAGE_RELAY:
-                            if (msg.obj instanceof Message) {
-                                ((Message) msg.obj).sendToTarget();
-                            }
+                            ((Message) msg.obj).sendToTarget();
                             break;
 
                         case POPULATE_VISITED_LINKS:
@@ -2002,13 +1992,6 @@ final class WebViewCore {
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
                     WebView.NEW_PICTURE_MSG_ID, draw).sendToTarget();
-            if (mWebkitScrollX != 0 || mWebkitScrollY != 0) {
-                // as we have the new picture, try to sync the scroll position
-                Message.obtain(mWebView.mPrivateHandler,
-                        WebView.SYNC_SCROLL_TO_MSG_ID, mWebkitScrollX,
-                        mWebkitScrollY).sendToTarget();
-                mWebkitScrollX = mWebkitScrollY = 0;
-            }
         }
     }
 
@@ -2111,25 +2094,8 @@ final class WebViewCore {
     }
 
     // called by JNI
-    private void contentScrollBy(int dx, int dy, boolean animate) {
-        if (!mBrowserFrame.firstLayoutDone()) {
-            // Will this happen? If yes, we need to do something here.
-            return;
-        }
-        if (mWebView != null) {
-            Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_BY_MSG_ID, dx, dy, Boolean.valueOf(animate));
-            if (mDrawIsScheduled) {
-                mEventHub.sendMessage(Message.obtain(null,
-                        EventHub.MESSAGE_RELAY, msg));
-            } else {
-                msg.sendToTarget();
-            }
-        }
-    }
-
-    // called by JNI
-    private void contentScrollTo(int x, int y, boolean onlyIfImeIsShowing) {
+    private void contentScrollTo(int x, int y, boolean animate,
+            boolean onlyIfImeIsShowing) {
         if (!mBrowserFrame.firstLayoutDone()) {
             /*
              * WebKit restore state will be called before didFirstLayout(),
@@ -2142,32 +2108,8 @@ final class WebViewCore {
         }
         if (mWebView != null) {
             Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SCROLL_TO_MSG_ID, x, y,
-                    Boolean.valueOf(onlyIfImeIsShowing));
-            if (mDrawIsScheduled) {
-                mEventHub.sendMessage(Message.obtain(null,
-                        EventHub.MESSAGE_RELAY, msg));
-            } else {
-                msg.sendToTarget();
-            }
-        }
-    }
-
-    // called by JNI
-    private void contentSpawnScrollTo(int x, int y) {
-        if (!mBrowserFrame.firstLayoutDone()) {
-            /*
-             * WebKit restore state will be called before didFirstLayout(),
-             * remember the position as it has to be applied after restoring
-             * zoom factor which is controlled by screenWidth.
-             */
-            mRestoredX = x;
-            mRestoredY = y;
-            return;
-        }
-        if (mWebView != null) {
-            Message msg = Message.obtain(mWebView.mPrivateHandler,
-                    WebView.SPAWN_SCROLL_TO_MSG_ID, x, y);
+                    WebView.SCROLL_TO_MSG_ID, animate ? 1 : 0,
+                    onlyIfImeIsShowing ? 1 : 0, new Point(x, y));
             if (mDrawIsScheduled) {
                 mEventHub.sendMessage(Message.obtain(null,
                         EventHub.MESSAGE_RELAY, msg));
@@ -2244,7 +2186,7 @@ final class WebViewCore {
         }
 
         // reset the scroll position, the restored offset and scales
-        mWebkitScrollX = mWebkitScrollY = mRestoredX = mRestoredY = 0;
+        mRestoredX = mRestoredY = 0;
         mRestoredScale = mRestoredTextWrapScale = 0;
     }
 
@@ -2506,7 +2448,7 @@ final class WebViewCore {
     private native void nativeScrollFocusedTextInput(float xPercent, int y);
 
     // these must be in document space (i.e. not scaled/zoomed).
-    private native void nativeSetScrollOffset(int gen, int userScrolled, int dx, int dy);
+    private native void nativeSetScrollOffset(int gen, boolean sendScrollEvent, int dx, int dy);
 
     private native void nativeSetGlobalBounds(int x, int y, int w, int h);
 
