@@ -352,12 +352,14 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Called when the dialog is starting.
      */
     protected void onStart() {
+        if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
     }
 
     /**
      * Called to tell you that you're stopping.
      */
     protected void onStop() {
+        if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
     }
 
     private static final String DIALOG_SHOWING_TAG = "android:dialogShowing";

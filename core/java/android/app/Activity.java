@@ -1067,6 +1067,7 @@ public class Activity extends ContextThemeWrapper
     protected void onPostResume() {
         final Window win = getWindow();
         if (win != null) win.makeActive();
+        if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
         mCalled = true;
     }
 
@@ -1319,6 +1320,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onDestroy
      */
     protected void onStop() {
+        if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         mCalled = true;
     }
 
