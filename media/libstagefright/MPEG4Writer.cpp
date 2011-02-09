@@ -1122,41 +1122,41 @@ void MPEG4Writer::bufferChunk(const Chunk& chunk) {
     CHECK("Received a chunk for a unknown track" == 0);
 }
 
-void MPEG4Writer::writeFirstChunk(ChunkInfo* info) {
-    LOGV("writeFirstChunk: %p", info->mTrack);
+void MPEG4Writer::writeChunkToFile(Chunk* chunk) {
+    LOGV("writeChunkToFile: %lld from %s track",
+        chunk.mTimestampUs, chunk.mTrack->isAudio()? "audio": "video");
 
-    List<Chunk>::iterator chunkIt = info->mChunks.begin();
-    for (List<MediaBuffer *>::iterator it = chunkIt->mSamples.begin();
-         it != chunkIt->mSamples.end(); ++it) {
+    int32_t isFirstSample = true;
+    while (!chunk->mSamples.empty()) {
+        List<MediaBuffer *>::iterator it = chunk->mSamples.begin();
 
-        off64_t offset = info->mTrack->isAvc()
-                            ? addLengthPrefixedSample_l(*it)
-                            : addSample_l(*it);
-        if (it == chunkIt->mSamples.begin()) {
-            info->mTrack->addChunkOffset(offset);
+        off64_t offset = chunk->mTrack->isAvc()
+                                ? addLengthPrefixedSample_l(*it)
+                                : addSample_l(*it);
+
+        if (isFirstSample) {
+            chunk->mTrack->addChunkOffset(offset);
+            isFirstSample = false;
         }
-    }
 
-    // Done with the current chunk.
-    // Release all the samples in this chunk.
-    while (!chunkIt->mSamples.empty()) {
-        List<MediaBuffer *>::iterator it = chunkIt->mSamples.begin();
         (*it)->release();
         (*it) = NULL;
-        chunkIt->mSamples.erase(it);
+        chunk->mSamples.erase(it);
     }
-    chunkIt->mSamples.clear();
-    info->mChunks.erase(chunkIt);
+    chunk->mSamples.clear();
 }
 
-void MPEG4Writer::writeChunks() {
-    LOGV("writeChunks");
+void MPEG4Writer::writeAllChunks() {
+    LOGV("writeAllChunks");
     size_t outstandingChunks = 0;
     while (!mChunkInfos.empty()) {
         List<ChunkInfo>::iterator it = mChunkInfos.begin();
         while (!it->mChunks.empty()) {
-            CHECK_EQ(OK, writeOneChunk());
-            ++outstandingChunks;
+            Chunk chunk;
+            if (findChunkToWrite(&chunk)) {
+                writeChunkToFile(&chunk);
+                ++outstandingChunks;
+            }
         }
         it->mTrack = NULL;
         mChunkInfos.erase(it);
@@ -1165,8 +1165,8 @@ void MPEG4Writer::writeChunks() {
     LOGD("%d chunks are written in the last batch", outstandingChunks);
 }
 
-status_t MPEG4Writer::writeOneChunk() {
-    LOGV("writeOneChunk");
+bool MPEG4Writer::findChunkToWrite(Chunk *chunk) {
+    LOGV("findChunkToWrite");
 
     // Find the smallest timestamp, and write that chunk out
     // XXX: What if some track is just too slow?
@@ -1185,38 +1185,50 @@ status_t MPEG4Writer::writeOneChunk() {
 
     if (track == NULL) {
         LOGV("Nothing to be written after all");
-        return OK;
+        return false;
     }
 
     if (mIsFirstChunk) {
         mIsFirstChunk = false;
     }
+
     for (List<ChunkInfo>::iterator it = mChunkInfos.begin();
          it != mChunkInfos.end(); ++it) {
         if (it->mTrack == track) {
-            writeFirstChunk(&(*it));
+            *chunk = *(it->mChunks.begin());
+            it->mChunks.erase(it->mChunks.begin());
+            CHECK_EQ(chunk->mTrack, track);
+            return true;
         }
     }
-    return OK;
+
+    return false;
 }
 
 void MPEG4Writer::threadFunc() {
     LOGV("threadFunc");
 
     prctl(PR_SET_NAME, (unsigned long)"MPEG4Writer", 0, 0, 0);
+
+    Mutex::Autolock autoLock(mLock);
     while (!mDone) {
-        {
-            Mutex::Autolock autolock(mLock);
+        Chunk chunk;
+        bool chunkFound = false;
+
+        while (!mDone && !(chunkFound = findChunkToWrite(&chunk))) {
             mChunkReadyCondition.wait(mLock);
-            CHECK_EQ(writeOneChunk(), OK);
+        }
+
+        // Actual write without holding the lock in order to
+        // reduce the blocking time for media track threads.
+        if (chunkFound) {
+            mLock.unlock();
+            writeChunkToFile(&chunk);
+            mLock.lock();
         }
     }
 
-    {
-        // Write ALL samples
-        Mutex::Autolock autolock(mLock);
-        writeChunks();
-    }
+    writeAllChunks();
 }
 
 status_t MPEG4Writer::startWriterThread() {

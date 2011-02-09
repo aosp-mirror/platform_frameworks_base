@@ -98,6 +98,8 @@ private:
         List<MediaBuffer *> mSamples;       // Sample data
 
         // Convenient constructor
+        Chunk(): mTrack(NULL), mTimeStampUs(0) {}
+
         Chunk(Track *track, int64_t timeUs, List<MediaBuffer *> samples)
             : mTrack(track), mTimeStampUs(timeUs), mSamples(samples) {
         }
@@ -124,13 +126,14 @@ private:
     void bufferChunk(const Chunk& chunk);
 
     // Write all buffered chunks from all tracks
-    void writeChunks();
+    void writeAllChunks();
 
-    // Write a chunk if there is one
-    status_t writeOneChunk();
+    // Retrieve the proper chunk to write if there is one
+    // Return true if a chunk is found; otherwise, return false.
+    bool findChunkToWrite(Chunk *chunk);
 
-    // Write the first chunk from the given ChunkInfo.
-    void writeFirstChunk(ChunkInfo* info);
+    // Actually write the given chunk to the file.
+    void writeChunkToFile(Chunk* chunk);
 
     // Adjust other track media clock (presumably wall clock)
     // based on audio track media clock with the drift time.
