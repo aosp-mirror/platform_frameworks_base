@@ -37,7 +37,6 @@ int textPos = 0;
 int root(int launchID) {
 
     rsgClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    rsgClearDepth(1.0f);
 
     textPos -= (int)gDY*2;
     gDY *= 0.95;

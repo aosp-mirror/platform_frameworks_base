@@ -16,8 +16,6 @@
 
 package com.android.samples;
 
-import java.io.Writer;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -39,16 +37,25 @@ public class RsRenderStatesRS {
     public RsRenderStatesRS() {
     }
 
-    public void init(RenderScriptGL rs, Resources res, int width, int height) {
+    public void init(RenderScriptGL rs, Resources res) {
         mRS = rs;
+        mWidth = mRS.getWidth();
+        mHeight = mRS.getHeight();
         mRes = res;
-        mWidth = width;
-        mHeight = height;
         mOptionsARGB.inScaled = false;
         mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mMode = 0;
         mMaxModes = 0;
         initRS();
+    }
+
+    public void surfaceChanged() {
+        mWidth = mRS.getWidth();
+        mHeight = mRS.getHeight();
+
+        Matrix4f proj = new Matrix4f();
+        proj.loadOrthoWindow(mWidth, mHeight);
+        mPVA.setProjection(proj);
     }
 
     private Resources mRes;
