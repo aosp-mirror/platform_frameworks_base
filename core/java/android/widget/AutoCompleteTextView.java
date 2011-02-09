@@ -648,6 +648,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                 return true;
             }
         }
+
+        if (isPopupShowing() && keyCode == KeyEvent.KEYCODE_TAB && event.hasNoModifiers()) {
+            performCompletion();
+            return true;
+        }
+
         return super.onKeyUp(keyCode, event);
     }
 
@@ -664,6 +670,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
                     performValidation();
                 }
             }
+        }
+
+        if (isPopupShowing() && keyCode == KeyEvent.KEYCODE_TAB && event.hasNoModifiers()) {
+            return true;
         }
 
         mLastKeyCode = keyCode;

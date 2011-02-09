@@ -17,24 +17,13 @@
 package android.widget;
 
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.text.Editable;
-import android.text.Selection;
-import android.text.Spanned;
-import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.QwertyKeyListener;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.android.internal.R;
+import android.widget.MultiAutoCompleteTextView.Tokenizer;
 
 /**
  * An editable text view, extending {@link AutoCompleteTextView}, that
