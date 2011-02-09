@@ -108,6 +108,14 @@ public class WifiApStress
                 fail("thread in sleep is interrupted");
             }
             assertTrue(mAct.mWifiManager.setWifiApEnabled(config, false));
+            // Wait for 30 seconds until Wi-Fi tethering is stopped
+            try {
+                Thread.sleep(30 * 1000);
+                Log.v(TAG, "wait for Wi-Fi tethering to be disabled.");
+            } catch (Exception e) {
+                fail("thread in sleep is interrupted");
+            }
+            assertFalse("Wi-Fi AP disable failed", mAct.mWifiManager.isWifiApEnabled());
         }
         if (i == iterations) {
             mLastIteration = iterations;
