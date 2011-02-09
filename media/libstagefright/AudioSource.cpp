@@ -235,7 +235,6 @@ status_t AudioSource::read(
             timestampUs += ((1000000LL * (numLostBytes >> 1)) +
                     (sampleRate >> 1)) / sampleRate;
 
-            CHECK(timestampUs > mPrevSampleTimeUs);
             if (mCollectStats) {
                 mTotalLostFrames += (numLostBytes >> 1);
             }
@@ -252,9 +251,10 @@ status_t AudioSource::read(
         }
 
         ssize_t n = mRecord->read(buffer->data(), buffer->size());
-        if (n < 0) {
+        if (n <= 0) {
             buffer->release();
-            return (status_t)n;
+            LOGE("Read from AudioRecord returns %d", n);
+            return UNKNOWN_ERROR;
         }
 
         int64_t recordDurationUs = (1000000LL * n >> 1) / sampleRate;
@@ -283,7 +283,6 @@ status_t AudioSource::read(
 
         buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs + mPrevSampleTimeUs);
         buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
-        CHECK(timestampUs > mPrevSampleTimeUs);
         mPrevSampleTimeUs = timestampUs;
         LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
                 mStartTimeUs, sampleRate, timestampUs);
