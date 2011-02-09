@@ -445,7 +445,10 @@ class WifiConfigStore {
             if (iter.hasNext()) {
                 LinkAddress linkAddress = iter.next();
                 dhcpInfoInternal.ipAddress = linkAddress.getAddress().getHostAddress();
-                dhcpInfoInternal.gateway = linkProperties.getGateway().getHostAddress();
+                Iterator<InetAddress>gateways = linkProperties.getGateways().iterator();
+                if (gateways.hasNext()) {
+                    dhcpInfoInternal.gateway = gateways.next().getHostAddress();
+                }
                 dhcpInfoInternal.prefixLength = linkAddress.getNetworkPrefixLength();
                 Iterator<InetAddress> dnsIterator = linkProperties.getDnses().iterator();
                 dhcpInfoInternal.dns1 = dnsIterator.next().getHostAddress();
@@ -582,8 +585,7 @@ class WifiConfigStore {
                                     out.writeUTF(linkAddr.getAddress().getHostAddress());
                                     out.writeInt(linkAddr.getNetworkPrefixLength());
                                 }
-                                InetAddress gateway = linkProperties.getGateway();
-                                if (gateway != null) {
+                                for (InetAddress gateway : linkProperties.getGateways()) {
                                     out.writeUTF(GATEWAY_KEY);
                                     out.writeUTF(gateway.getHostAddress());
                                 }
@@ -688,7 +690,7 @@ class WifiConfigStore {
                                     in.readUTF()), in.readInt());
                             linkProperties.addLinkAddress(linkAddr);
                         } else if (key.equals(GATEWAY_KEY)) {
-                            linkProperties.setGateway(InetAddress.getByName(in.readUTF()));
+                            linkProperties.addGateway(InetAddress.getByName(in.readUTF()));
                         } else if (key.equals(DNS_KEY)) {
                             linkProperties.addDns(InetAddress.getByName(in.readUTF()));
                         } else if (key.equals(PROXY_SETTINGS_KEY)) {
@@ -999,15 +1001,17 @@ class WifiConfigStore {
                         .getLinkAddresses();
                 Collection<InetAddress> currentDnses = currentConfig.linkProperties.getDnses();
                 Collection<InetAddress> newDnses = newConfig.linkProperties.getDnses();
-                InetAddress currentGateway = currentConfig.linkProperties.getGateway();
-                InetAddress newGateway = newConfig.linkProperties.getGateway();
+                Collection<InetAddress> currentGateways =
+                        currentConfig.linkProperties.getGateways();
+                Collection<InetAddress> newGateways = newConfig.linkProperties.getGateways();
 
-                boolean linkAddressesDiffer = !currentLinkAddresses.containsAll(newLinkAddresses) ||
-                        (currentLinkAddresses.size() != newLinkAddresses.size());
-                boolean dnsesDiffer = !currentDnses.containsAll(newDnses) ||
-                        (currentDnses.size() != newDnses.size());
-                boolean gatewaysDiffer = (currentGateway == null) ||
-                        !currentGateway.equals(newGateway);
+                boolean linkAddressesDiffer =
+                        (currentLinkAddresses.size() != newLinkAddresses.size()) ||
+                        !currentLinkAddresses.containsAll(newLinkAddresses);
+                boolean dnsesDiffer = (currentDnses.size() != newDnses.size()) ||
+                        !currentDnses.containsAll(newDnses);
+                boolean gatewaysDiffer = (currentGateways.size() != newGateways.size()) ||
+                        !currentGateways.containsAll(newGateways);
 
                 if ((currentConfig.ipAssignment != newConfig.ipAssignment) ||
                         linkAddressesDiffer ||
@@ -1087,7 +1091,9 @@ class WifiConfigStore {
         for (LinkAddress linkAddr : config.linkProperties.getLinkAddresses()) {
             linkProperties.addLinkAddress(linkAddr);
         }
-        linkProperties.setGateway(config.linkProperties.getGateway());
+        for (InetAddress gateway : config.linkProperties.getGateways()) {
+            linkProperties.addGateway(gateway);
+        }
         for (InetAddress dns : config.linkProperties.getDnses()) {
             linkProperties.addDns(dns);
         }

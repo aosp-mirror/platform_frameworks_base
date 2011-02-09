@@ -1414,13 +1414,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         LinkProperties p = nt.getLinkProperties();
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
-        InetAddress defaultGatewayAddr = p.getGateway();
+        if (TextUtils.isEmpty(interfaceName)) return;
+        for (InetAddress gateway : p.getGateways()) {
 
-        if ((interfaceName != null) && (defaultGatewayAddr != null )) {
-            if (!NetworkUtils.addDefaultRoute(interfaceName, defaultGatewayAddr) && DBG) {
+            if (!NetworkUtils.addDefaultRoute(interfaceName, gateway) && DBG) {
                 NetworkInfo networkInfo = nt.getNetworkInfo();
                 log("addDefaultRoute for " + networkInfo.getTypeName() +
-                        " (" + interfaceName + "), GatewayAddr=" + defaultGatewayAddr);
+                        " (" + interfaceName + "), GatewayAddr=" + gateway.getHostAddress());
             }
         }
     }

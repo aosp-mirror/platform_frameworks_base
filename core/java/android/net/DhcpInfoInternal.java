@@ -44,12 +44,14 @@ public class DhcpInfoInternal {
     }
 
     private int convertToInt(String addr) {
-        try {
-            InetAddress inetAddress = NetworkUtils.numericToInetAddress(addr);
-            if (inetAddress instanceof Inet4Address) {
-                return NetworkUtils.inetAddressToInt(inetAddress);
-            }
-        } catch (IllegalArgumentException e) {}
+        if (addr != null) {
+            try {
+                InetAddress inetAddress = NetworkUtils.numericToInetAddress(addr);
+                if (inetAddress instanceof Inet4Address) {
+                    return NetworkUtils.inetAddressToInt(inetAddress);
+                }
+            } catch (IllegalArgumentException e) {}
+        }
         return 0;
     }
 
@@ -80,19 +82,17 @@ public class DhcpInfoInternal {
         LinkProperties p = new LinkProperties();
         p.addLinkAddress(makeLinkAddress());
         if (TextUtils.isEmpty(gateway) == false) {
-            p.setGateway(NetworkUtils.numericToInetAddress(gateway));
-        } else {
-            Log.e(TAG, "makeLinkProperties with empty gateway!");
+            p.addGateway(NetworkUtils.numericToInetAddress(gateway));
         }
         if (TextUtils.isEmpty(dns1) == false) {
             p.addDns(NetworkUtils.numericToInetAddress(dns1));
         } else {
-            Log.e(TAG, "makeLinkProperties with empty dns1!");
+            Log.d(TAG, "makeLinkProperties with empty dns1!");
         }
         if (TextUtils.isEmpty(dns2) == false) {
             p.addDns(NetworkUtils.numericToInetAddress(dns2));
         } else {
-            Log.e(TAG, "makeLinkProperties with empty dns2!");
+            Log.d(TAG, "makeLinkProperties with empty dns2!");
         }
         return p;
     }

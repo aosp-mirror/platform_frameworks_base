@@ -31,7 +31,24 @@ import java.util.Collections;
 
 /**
  * Describes the properties of a network link.
- * TODO - consider adding optional fields like Apn and ApnType
+ *
+ * A link represents a connection to a network.
+ * It may have multiple addresses and multiple gateways,
+ * multiple dns servers but only one http proxy.
+ *
+ * Because it's a single network, the dns's
+ * are interchangeable and don't need associating with
+ * particular addresses.  The gateways similarly don't
+ * need associating with particular addresses.
+ *
+ * A dual stack interface works fine in this model:
+ * each address has it's own prefix length to describe
+ * the local network.  The dns servers all return
+ * both v4 addresses and v6 addresses regardless of the
+ * address family of the server itself (rfc4213) and we
+ * don't care which is used.  The gateways will be
+ * selected based on the destination address and the
+ * source address has no relavence.
  * @hide
  */
 public class LinkProperties implements Parcelable {
@@ -39,7 +56,7 @@ public class LinkProperties implements Parcelable {
     String mIfaceName;
     private Collection<LinkAddress> mLinkAddresses;
     private Collection<InetAddress> mDnses;
-    private InetAddress mGateway;
+    private Collection<InetAddress> mGateways;
     private ProxyProperties mHttpProxy;
 
     public LinkProperties() {
@@ -52,7 +69,7 @@ public class LinkProperties implements Parcelable {
             mIfaceName = source.getInterfaceName();
             mLinkAddresses = source.getLinkAddresses();
             mDnses = source.getDnses();
-            mGateway = source.getGateway();
+            mGateways = source.getGateways();
             mHttpProxy = new ProxyProperties(source.getHttpProxy());
         }
     }
@@ -89,11 +106,11 @@ public class LinkProperties implements Parcelable {
         return Collections.unmodifiableCollection(mDnses);
     }
 
-    public void setGateway(InetAddress gateway) {
-        mGateway = gateway;
+    public void addGateway(InetAddress gateway) {
+        mGateways.add(gateway);
     }
-    public InetAddress getGateway() {
-        return mGateway;
+    public Collection<InetAddress> getGateways() {
+        return Collections.unmodifiableCollection(mGateways);
     }
 
     public void setHttpProxy(ProxyProperties proxy) {
@@ -107,7 +124,7 @@ public class LinkProperties implements Parcelable {
         mIfaceName = null;
         mLinkAddresses = new ArrayList<LinkAddress>();
         mDnses = new ArrayList<InetAddress>();
-        mGateway = null;
+        mGateways = new ArrayList<InetAddress>();
         mHttpProxy = null;
     }
 
@@ -131,10 +148,12 @@ public class LinkProperties implements Parcelable {
         for (InetAddress addr : mDnses) dns += addr.getHostAddress() + ",";
         dns += "] ";
 
+        String gateways = "Gateways: [";
+        for (InetAddress gw : mGateways) gateways += gw.getHostAddress() + ",";
+        gateways += "] ";
         String proxy = (mHttpProxy == null ? "" : "HttpProxy: " + mHttpProxy.toString() + " ");
-        String gateway = (mGateway == null ? "" : "Gateway: " + mGateway.getHostAddress() + " ");
 
-        return ifaceName + linkAddresses + gateway + dns + proxy;
+        return ifaceName + linkAddresses + gateways + dns + proxy;
     }
 
     /**
@@ -152,12 +171,12 @@ public class LinkProperties implements Parcelable {
         for(InetAddress d : mDnses) {
             dest.writeByteArray(d.getAddress());
         }
-        if (mGateway != null) {
-            dest.writeByte((byte)1);
-            dest.writeByteArray(mGateway.getAddress());
-        } else {
-            dest.writeByte((byte)0);
+
+        dest.writeInt(mGateways.size());
+        for(InetAddress gw : mGateways) {
+            dest.writeByteArray(gw.getAddress());
         }
+
         if (mHttpProxy != null) {
             dest.writeByte((byte)1);
             dest.writeParcelable(mHttpProxy, flags);
@@ -192,10 +211,11 @@ public class LinkProperties implements Parcelable {
                         netProp.addDns(InetAddress.getByAddress(in.createByteArray()));
                     } catch (UnknownHostException e) { }
                 }
-                if (in.readByte() == 1) {
+                addressCount = in.readInt();
+                for (int i=0; i<addressCount; i++) {
                     try {
-                        netProp.setGateway(InetAddress.getByAddress(in.createByteArray()));
-                    } catch (UnknownHostException e) {}
+                        netProp.addGateway(InetAddress.getByAddress(in.createByteArray()));
+                    } catch (UnknownHostException e) { }
                 }
                 if (in.readByte() == 1) {
                     netProp.setHttpProxy((ProxyProperties)in.readParcelable(null));
