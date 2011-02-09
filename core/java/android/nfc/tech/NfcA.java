@@ -28,6 +28,9 @@ import java.io.IOException;
  * <p>Acquire a {@link NfcA} object using {@link #get}.
  * <p>The primary NFC-A I/O operation is {@link #transceive}. Applications must
  * implement their own protocol stack on top of {@link #transceive}.
+ *
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class NfcA extends BasicTagTechnology {
     /** @hide */
@@ -98,6 +101,8 @@ public final class NfcA extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param data bytes to send
      * @return bytes received in response
