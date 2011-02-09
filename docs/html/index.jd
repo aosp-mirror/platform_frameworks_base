@@ -129,17 +129,16 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 2.3",
+      'name':"Android 2.3.3",
       'img':"gingerdroid.png",
-      'title':"Android 2.3 is here!",
-      'desc': "<p>Android 2.3 is now available for the Android SDK. In addition, new "
-+ "tools and documentation are available, plus a new NDK that offers more than ever. "
-+ "For more information about what's in Android 2.3, read the "
-+ "<a href='{@docRoot}sdk/android-2.3.html'>version notes</a>.</p>"
-+ "<p>If you have an existing SDK, add Android 2.3 as an "
-+ "<a href='{@docRoot}sdk/adding-components.html'>SDK "
-+ "component</a>. If you're new to Android, install the "
-+ "<a href='{@docRoot}sdk/index.html'>SDK starter package</a>."
+      'title':"Android 2.3.3, more NFC!",
+      'desc': "<p>Android 2.3.3 is now available for the Android SDK. "
++ "This update adds new NFC capabilities for developers, including advanced tag dispatching APIs "
++ "and the ability to write to tags.</p>"
++ "<p>The new APIs enable exciting new applications, such as for ticketing, "
++ "ratings, check-ins, advertising, and data exchange with other devices. "
++ "For more information about Android 2.3.3, read the "
++ "<a href='/sdk/android-2.3.3.html'>version notes</a>.</p>"
     },
 
     'tv': {
