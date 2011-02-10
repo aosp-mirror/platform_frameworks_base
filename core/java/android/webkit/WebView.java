@@ -4656,7 +4656,7 @@ public class WebView extends AbsoluteLayout
             return false;
         }
 
-        if (isEnterActionKey(keyCode)) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             switchOutDrawHistory();
             boolean wantsKeyEvents = nativeCursorNodePointer() == 0
                 || nativeCursorWantsKeyEvents();
