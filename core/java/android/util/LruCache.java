@@ -34,15 +34,23 @@ import java.util.Map;
  * assume a value will always be returned, even when there's a cache miss.
  *
  * <p>By default, the cache size is measured in the number of entries. Override
- * {@link #sizeOf} to size the cache in different units. For, this cache is
- * limited to 4MiB of bitmaps:
+ * {@link #sizeOf} to size the cache in different units. For example, this cache
+ * is limited to 4MiB of bitmaps:
  * <pre>   {@code
- * int cacheSize = 4 * 1024 * 1024; // 4MiB
- * LruCache<String, Bitmap> bitmapCache = new LruCache<String, Bitmap>(cacheSize) {
- *     protected int sizeOf(String key, Bitmap value) {
- *         return value.getByteCount();
+ *   int cacheSize = 4 * 1024 * 1024; // 4MiB
+ *   LruCache<String, Bitmap> bitmapCache = new LruCache<String, Bitmap>(cacheSize) {
+ *       protected int sizeOf(String key, Bitmap value) {
+ *           return value.getByteCount();
+ *       }
+ *   }}</pre>
+ *
+ * <p>This class is thread-safe. Perform multiple cache operations atomically by
+ * synchronizing on the cache: <pre>   {@code
+ *   synchronized (cache) {
+ *     if (cache.get(key) == null) {
+ *         cache.put(key, value);
  *     }
- * }}</pre>
+ *   }}</pre>
  */
 public class LruCache<K, V> {
     private final LinkedHashMap<K, V> map;
