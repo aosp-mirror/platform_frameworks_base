@@ -21,19 +21,19 @@ import java.lang.reflect.Field;
 import android.util.Log;
 
 /**
- * Type is an allocation template.  It consists of an Element and one or more
- * dimensions.  It describes only the layout of memory but does not allocate and
- * storage for the data thus described.
+ * <p>Type is an allocation template. It consists of an Element and one or more
+ * dimensions. It describes only the layout of memory but does not allocate any
+ * storage for the data that is described.</p>
  *
- * A Type consists of several dimensions.  Those are X, Y, Z, LOD (level of
+ * <p>A Type consists of several dimensions. Those are X, Y, Z, LOD (level of
  * detail), Faces (faces of a cube map).  The X,Y,Z dimensions can be assigned
  * any positive integral value within the constraints of available memory.  A
  * single dimension allocation would have an X dimension of greater than zero
  * while the Y and Z dimensions would be zero to indicate not present.  In this
  * regard an allocation of x=10, y=1 would be considered 2 dimensionsal while
- * x=10, y=0 would be considered 1 dimensional.
+ * x=10, y=0 would be considered 1 dimensional.</p>
  *
- * The LOD and Faces dimensions are booleans to indicate present or not present.
+ * <p>The LOD and Faces dimensions are booleans to indicate present or not present.</p>
  *
  **/
 public class Type extends BaseObj {

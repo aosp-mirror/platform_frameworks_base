@@ -22,13 +22,11 @@ import android.util.Log;
 
 
 /**
- * ProgramFragmentFixedFunction is a helper class that provides
+ * <p>ProgramFragmentFixedFunction is a helper class that provides
  * a way to make a simple fragment shader without writing any
- * GLSL code.
- *
- * This class allows for display of constant color, interpolated
- * color from vertex shader, or combinations of the above
- * blended with results of up to two texture lookups.
+ * GLSL code. This class allows for display of constant color, interpolated
+ * color from the vertex shader, or combinations of the both
+ * blended with results of up to two texture lookups.</p
  *
  **/
 public class ProgramFragmentFixedFunction extends ProgramFragment {

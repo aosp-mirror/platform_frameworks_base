@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the rs byte4 type back to java applications.
+ * Class for exposing the native Renderscript byte4 type back to the Android system.
  *
  **/
 public class Byte4 {

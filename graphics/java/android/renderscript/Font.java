@@ -30,7 +30,20 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
- *
+ * <p>This class gives users a simple way to draw hardware accelerated text. 
+ * Internally, the glyphs are rendered using the Freetype library and an internal cache of
+ * rendered glyph bitmaps is maintained. Each font object represents a combination of a typeface,
+ * and point size. You can create multiple font objects to represent styles such as bold or italic text,
+ * faces, and different font sizes. During creation, the Android system quieries device's screen DPI to
+ * ensure proper sizing across multiple device configurations.</p>
+ * <p>Fonts are rendered using screen-space positions and no state setup beyond binding a
+ * font to the Renderscript is required. A note of caution on performance, though the state changes
+ * are transparent to the user, they do happen internally, and it is more efficient to
+ * render large batches of text in sequence. It is also more efficient to render multiple
+ * characters at once instead of one by one to improve draw call batching.</p>
+ * <p>Font color and transparency are not part of the font object and you can freely modify
+ * them in the script to suit the user's rendering needs. Font colors work as a state machine. 
+ * Every new call to draw text uses the last color set in the script.</p>
  **/
 public class Font extends BaseObj {
 

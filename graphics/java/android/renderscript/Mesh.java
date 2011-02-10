@@ -22,22 +22,21 @@ import android.util.Config;
 import android.util.Log;
 
 /**
- * Mesh class is a container for geometric data displayed in
- * renderscript.
- *
- * Internally, mesh is a collection of allocations that
+ * <p>This class is a container for geometric data displayed with
+ * Renderscript. Internally, a mesh is a collection of allocations that
  * represent vertex data (positions, normals, texture
- * coordinates) and index data such as triangles and lines.
- *
- * Vertex data could either be interlieved within one
- * allocation, provided separately as multiple allocation
- * objects or done as a combination of the above. When a
+ * coordinates) and index data such as triangles and lines. </p>
+ * <p>
+ * Vertex data could either be interleaved within one
+ * allocation that is provided separately, as multiple allocation
+ * objects, or done as a combination of both. When a
  * vertex channel name matches an input in the vertex program,
- * renderscript will automatically connect the two together.
- *
- *  Parts of the mesh could be rendered with either explicit
+ * Renderscript automatically connects the two together.
+ * </p>
+ * <p>
+ *  Parts of the mesh can be rendered with either explicit
  *  index sets or primitive types.
- *
+ * </p>
  **/
 public class Mesh extends BaseObj {
 
@@ -170,9 +169,9 @@ public class Mesh extends BaseObj {
     }
 
     /**
-    * Mesh builder object. It starts empty and requires the user to
+    * Mesh builder object. It starts empty and requires you to
     * add the types necessary to create vertex and index
-    * allocations
+    * allocations.
     *
     */
     public static class Builder {

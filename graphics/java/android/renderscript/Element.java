@@ -20,25 +20,26 @@ import java.lang.reflect.Field;
 import android.util.Log;
 
 /**
- * Element is the basic data type of RenderScript.  An element can be of 2
- * forms.  Basic elements contain a single component of data.  This can be of
- * any of the legal RS types.  Examples of basic element types.
- * Single float value
- * 4 element float vector
- * single RGB-565 color
- * single unsigned int 16
- *
- * Complex elements will contain a list of sub-elements and names.  This in
- * effect represents a structure of data.  The fields can be accessed by name
- * from a script or shader.  The memory layout is defined and ordered.  Data
- * alignment is determinied by the most basic primitive type.  i.e. a float4
+ * <p>The most basic data type. An element represents one cell of a memory allocation.
+ * Element is the basic data type of Renderscript. An element can be of two forms: Basic elements or Complex forms. 
+ * Examples of basic elements are:</p>
+ * <ul>
+ *  <li>Single float value</li>
+ *  <li>4 element float vector</li>
+ *  <li>single RGB-565 color</li>
+ *  <li>single unsigned int 16</li>
+ * </ul>
+ * <p>Complex elements contain a list of sub-elements and names that 
+ * represents a structure of data. The fields can be accessed by name
+ * from a script or shader. The memory layout is defined and ordered. Data
+ * alignment is determinied by the most basic primitive type. i.e. a float4
  * vector will be alligned to sizeof(float) and not sizeof(float4).  The
  * ordering of elements in memory will be the order in which they were added
- * with each component aligned as necessary. No re-ordering will be done.
+ * with each component aligned as necessary. No re-ordering will be done.</p>
  *
- * The primary source of elements will be from scripts.  A script that exports a
- * bind point for a data structure will generate a RS element to represent the
- * data exported by the script.
+ * <p>The primary source of elements are from scripts. A script that exports a
+ * bind point for a data structure generates a Renderscript element to represent the
+ * data exported by the script. The other common source of elements is from bitmap formats.</p>
  **/
 public class Element extends BaseObj {
     int mSize;
