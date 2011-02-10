@@ -617,7 +617,6 @@ public class LayoutTransition {
                         Animator prevAnimation = currentChangingAnimations.get(child);
                         if (prevAnimation != null) {
                             prevAnimation.cancel();
-                            currentChangingAnimations.remove(child);
                         }
                         Animator pendingAnimation = pendingAnimations.get(child);
                         if (pendingAnimation != null) {
@@ -639,7 +638,6 @@ public class LayoutTransition {
                 };
                 // Remove the animation from the cache when it ends
                 anim.addListener(new AnimatorListenerAdapter() {
-                    private boolean canceled = false;
 
                     @Override
                     public void onAnimationStart(Animator animator) {
@@ -654,17 +652,13 @@ public class LayoutTransition {
 
                     @Override
                     public void onAnimationCancel(Animator animator) {
-                        // we remove canceled animations immediately, not here
-                        canceled = true;
                         child.removeOnLayoutChangeListener(listener);
                         layoutChangeListenerMap.remove(child);
                     }
 
                     @Override
                     public void onAnimationEnd(Animator animator) {
-                        if (!canceled) {
-                            currentChangingAnimations.remove(child);
-                        }
+                        currentChangingAnimations.remove(child);
                         if (mListeners != null) {
                             for (TransitionListener listener : mListeners) {
                                 listener.endTransition(LayoutTransition.this, parent, child,
@@ -716,6 +710,28 @@ public class LayoutTransition {
      */
     public boolean isRunning() {
         return (currentChangingAnimations.size() > 0 || currentVisibilityAnimations.size() > 0);
+    }
+
+    /**
+     * Cancels the currently running transition. Note that we cancel() the changing animations
+     * but end() the visibility animations. This is because this method is currently called
+     * in the context of starting a new transition, so we want to move things from their mid-
+     * transition positions, but we want them to have their end-transition visibility.
+     *
+     * @hide
+     */
+    public void cancel() {
+        HashMap<View, Animator> currentAnimCopy =
+                (HashMap<View, Animator>) currentChangingAnimations.clone();
+        for (Animator anim : currentAnimCopy.values()) {
+            anim.cancel();
+        }
+        currentChangingAnimations.clear();
+        currentAnimCopy = (HashMap<View, Animator>) currentVisibilityAnimations.clone();
+        for (Animator anim : currentAnimCopy.values()) {
+            anim.end();
+        }
+        currentVisibilityAnimations.clear();
     }
 
     /**
@@ -810,6 +826,9 @@ public class LayoutTransition {
      * @param child The View being added to the ViewGroup.
      */
     public void addChild(ViewGroup parent, View child) {
+        if (isRunning()) {
+            cancel();
+        }
         if (mListeners != null) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, APPEARING);
@@ -842,6 +861,9 @@ public class LayoutTransition {
      * @param child The View being removed from the ViewGroup.
      */
     public void removeChild(ViewGroup parent, View child) {
+        if (isRunning()) {
+            cancel();
+        }
         if (mListeners != null) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, DISAPPEARING);

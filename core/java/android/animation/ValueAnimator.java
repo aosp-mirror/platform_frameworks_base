@@ -895,7 +895,14 @@ public class ValueAnimator extends Animator {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
         mPlayingBackwards = playBackwards;
+        mCurrentIteration = 0;
+        mPlayingState = STOPPED;
+        mStartedDelay = false;
+        sPendingAnimations.get().add(this);
         if (mStartDelay == 0) {
+            // This sets the initial value of the animation, prior to actually starting it running
+            setCurrentPlayTime(getCurrentPlayTime());
+
             if (mListeners != null) {
                 ArrayList<AnimatorListener> tmpListeners =
                         (ArrayList<AnimatorListener>) mListeners.clone();
@@ -904,13 +911,7 @@ public class ValueAnimator extends Animator {
                     tmpListeners.get(i).onAnimationStart(this);
                 }
             }
-            // This sets the initial value of the animation, prior to actually starting it running
-            setCurrentPlayTime(getCurrentPlayTime());
         }
-        mCurrentIteration = 0;
-        mPlayingState = STOPPED;
-        mStartedDelay = false;
-        sPendingAnimations.get().add(this);
         AnimationHandler animationHandler = sAnimationHandler.get();
         if (animationHandler == null) {
             animationHandler = new AnimationHandler();
@@ -947,6 +948,8 @@ public class ValueAnimator extends Animator {
             // Special case if the animation has not yet started; get it ready for ending
             mStartedDelay = false;
             startAnimation();
+        } else if (!mInitialized) {
+            initAnimation();
         }
         // The final value set on the target varies, depending on whether the animation
         // was supposed to repeat an odd number of times
