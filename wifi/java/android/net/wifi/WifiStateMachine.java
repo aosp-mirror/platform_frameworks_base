@@ -39,38 +39,36 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.net.LinkAddress;
-import android.net.NetworkInfo;
+import android.app.backup.IBackupManager;
+import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.DhcpInfoInternal;
-import android.net.NetworkUtils;
-import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
-import android.net.LinkProperties;
-import android.net.wifi.NetworkUpdateResult;
 import android.net.wifi.WpsResult.Status;
-import android.net.InterfaceConfiguration;
 import android.os.Binder;
-import android.os.Message;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
+import android.os.Message;
 import android.os.PowerManager;
-import android.os.SystemProperties;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.Process;
+import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
-import android.app.backup.IBackupManager;
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Intent;
-import android.content.Context;
-import android.content.IntentFilter;
+import android.util.LruCache;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
@@ -79,9 +77,7 @@ import com.android.internal.util.HierarchicalStateMachine;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -108,7 +104,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private List<ScanResult> mScanResults;
     private static final Pattern scanResultPattern = Pattern.compile("\t+");
     private static final int SCAN_RESULT_CACHE_SIZE = 80;
-    private final LinkedHashMap<String, ScanResult> mScanResultCache;
+    private final LruCache<String, ScanResult> mScanResultCache;
 
     private String mInterfaceName;
 
@@ -491,17 +487,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 },
                 new IntentFilter(ACTION_START_SCAN));
 
-        mScanResultCache = new LinkedHashMap<String, ScanResult>(
-            SCAN_RESULT_CACHE_SIZE, 0.75f, true) {
-                /*
-                 * Limit the cache size by SCAN_RESULT_CACHE_SIZE
-                 * elements
-                 */
-                @Override
-                public boolean removeEldestEntry(Map.Entry eldest) {
-                    return SCAN_RESULT_CACHE_SIZE < this.size();
-                }
-        };
+        mScanResultCache = new LruCache<String, ScanResult>(SCAN_RESULT_CACHE_SIZE);
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
