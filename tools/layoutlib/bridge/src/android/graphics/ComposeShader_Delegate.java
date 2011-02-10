@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.Paint;
 
@@ -61,6 +62,7 @@ public class ComposeShader_Delegate extends Shader_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate1(int native_shaderA, int native_shaderB,
             int native_mode) {
         // FIXME not supported yet.
@@ -68,6 +70,7 @@ public class ComposeShader_Delegate extends Shader_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate2(int native_shaderA, int native_shaderB,
             int porterDuffMode) {
         // FIXME not supported yet.
@@ -75,18 +78,19 @@ public class ComposeShader_Delegate extends Shader_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate1(int native_shader, int native_skiaShaderA,
             int native_skiaShaderB, int native_mode) {
         // pass, not needed.
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate2(int native_shader, int native_skiaShaderA,
             int native_skiaShaderB, int porterDuffMode) {
         // pass, not needed.
         return 0;
     }
-
 
     // ---- Private delegate/helper methods ----
 

@@ -17,6 +17,7 @@
 package android.util;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.util.FloatMath
@@ -40,6 +41,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
      * @param value to be converted
      * @return the floor of value
      */
+    @LayoutlibDelegate
     /*package*/ static float floor(float value) {
         return (float)Math.floor(value);
     }
@@ -51,6 +53,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
      * @param value to be converted
      * @return the ceiling of value
      */
+    @LayoutlibDelegate
     /*package*/ static float ceil(float value) {
         return (float)Math.ceil(value);
     }
@@ -61,6 +64,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
      * @param angle to compute the cosine of, in radians
      * @return the sine of angle
      */
+    @LayoutlibDelegate
     /*package*/ static  float sin(float angle) {
         return (float)Math.sin(angle);
     }
@@ -71,6 +75,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
      * @param angle to compute the cosine of, in radians
      * @return the cosine of angle
      */
+    @LayoutlibDelegate
     /*package*/ static float cos(float angle) {
         return (float)Math.cos(angle);
     }
@@ -82,6 +87,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
      * @param value to compute sqrt of
      * @return the square root of value
      */
+    @LayoutlibDelegate
     /*package*/ static float sqrt(float value) {
         return (float)Math.sqrt(value);
     }

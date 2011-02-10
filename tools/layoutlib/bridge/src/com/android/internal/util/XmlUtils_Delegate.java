@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+
 
 /**
  * Delegate used to provide new implementation of a select few methods of {@link XmlUtils}
@@ -25,6 +27,8 @@ package com.android.internal.util;
  *
  */
 public class XmlUtils_Delegate {
+
+    @LayoutlibDelegate
     /*package*/ static final int convertValueToInt(CharSequence charSeq, int defaultValue) {
         if (null == charSeq)
             return defaultValue;

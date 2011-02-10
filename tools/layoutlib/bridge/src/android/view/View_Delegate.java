@@ -16,6 +16,8 @@
 
 package android.view;
 
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+
 /**
  * Delegate used to provide new implementation of a select few methods of {@link View}
  *
@@ -25,6 +27,7 @@ package android.view;
  */
 public class View_Delegate {
 
+    @LayoutlibDelegate
     /*package*/ static boolean isInEditMode(View thisView) {
         return true;
     }

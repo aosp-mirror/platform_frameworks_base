@@ -16,6 +16,8 @@
 
 package libcore.icu;
 
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+
 import java.util.Locale;
 
 /**
@@ -27,80 +29,101 @@ import java.util.Locale;
  */
 public class ICU_Delegate {
 
+    // --- Java delegates
+
+    @LayoutlibDelegate
     /*package*/ static String toLowerCase(String s, String localeName) {
         return s.toLowerCase();
     }
 
+    @LayoutlibDelegate
     /*package*/ static String toUpperCase(String s, String localeName) {
         return s.toUpperCase();
     }
 
     // --- Native methods accessing ICU's database.
 
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableBreakIteratorLocalesNative() {
         return new String[0];
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableCalendarLocalesNative() {
         return new String[0];
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableCollatorLocalesNative() {
         return new String[0];
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableDateFormatLocalesNative() {
         return new String[0];
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableLocalesNative() {
         return new String[0];
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableNumberFormatLocalesNative() {
         return new String[0];
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getCurrencyCodeNative(String locale) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static int getCurrencyFractionDigitsNative(String currencyCode) {
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getCurrencySymbolNative(String locale, String currencyCode) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getDisplayCountryNative(String countryCode, String locale) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getDisplayLanguageNative(String languageCode, String locale) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getDisplayVariantNative(String variantCode, String locale) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getISO3CountryNative(String locale) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static String getISO3LanguageNative(String locale) {
         return "";
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getISOLanguagesNative() {
         return Locale.getISOLanguages();
     }
 
+    @LayoutlibDelegate
     /*package*/ static String[] getISOCountriesNative() {
         return Locale.getISOCountries();
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean initLocaleDataImpl(String locale, LocaleData result) {
 
         // Used by Calendar.

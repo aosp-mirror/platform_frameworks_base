@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.Composite;
 
@@ -59,6 +60,7 @@ public class AvoidXfermode_Delegate extends Xfermode_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate(int opColor, int tolerance, int nativeMode) {
         AvoidXfermode_Delegate newDelegate = new AvoidXfermode_Delegate();
         return sManager.addDelegate(newDelegate);

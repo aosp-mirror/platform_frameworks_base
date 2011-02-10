@@ -21,6 +21,8 @@ import com.android.tools.layoutlib.create.CreateInfo;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -78,10 +80,15 @@ public class TestDelegates extends TestCase {
     }
 
     private void compare(Class<?> originalClass, Class<?> delegateClass) throws SecurityException {
-        Method[] originalMethods = originalClass.getDeclaredMethods();
+        List<Method> checkedDelegateMethods = new ArrayList<Method>();
 
+        // loop on the methods of the original class, and for the ones that are annotated
+        // with @LayoutlibDelegate, look for a matching method in the delegate class.
+        // The annotation is automatically added by layoutlib_create when it replace a method
+        // by a call to a delegate
+        Method[] originalMethods = originalClass.getDeclaredMethods();
         for (Method originalMethod : originalMethods) {
-            // look for methods that were native: they have the LayoutlibDelegate annotation
+            // look for methods that are delegated: they have the LayoutlibDelegate annotation
             if (originalMethod.getAnnotation(LayoutlibDelegate.class) == null) {
                 continue;
             }
@@ -114,6 +121,14 @@ public class TestDelegates extends TestCase {
                 Method delegateMethod = delegateClass.getDeclaredMethod(originalMethod.getName(),
                         parameters);
 
+                // check that the method has the annotation
+                assertNotNull(
+                        String.format(
+                                "Delegate method %1$s for class %2$s does not have the @LayoutlibDelegate annotation",
+                                delegateMethod.getName(),
+                                originalClass.getName()),
+                        delegateMethod.getAnnotation(LayoutlibDelegate.class));
+
                 // check that the method is static
                 assertTrue(
                         String.format(
@@ -121,28 +136,62 @@ public class TestDelegates extends TestCase {
                                 delegateMethod.getName(),
                                 originalClass.getName()),
                         (delegateMethod.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
-            } catch (NoSuchMethodException e) {
-                // compute a full class name that's long but not too long.
-                StringBuilder sb = new StringBuilder(originalMethod.getName() + "(");
-                for (int j = 0; j < parameters.length; j++) {
-                    Class<?> theClass = parameters[j];
-                    sb.append(theClass.getName());
-                    int dimensions = 0;
-                    while (theClass.isArray()) {
-                        dimensions++;
-                        theClass = theClass.getComponentType();
-                    }
-                    for (int i = 0; i < dimensions; i++) {
-                        sb.append("[]");
-                    }
-                    if (j < (parameters.length - 1)) {
-                        sb.append(",");
-                    }
-                }
-                sb.append(")");
 
-                fail(String.format("Missing %1$s.%2$s", delegateClass.getName(), sb.toString()));
+                // add the method as checked.
+                checkedDelegateMethods.add(delegateMethod);
+            } catch (NoSuchMethodException e) {
+                String name = getMethodName(originalMethod, parameters);
+                fail(String.format("Missing %1$s.%2$s", delegateClass.getName(), name));
             }
         }
+
+        // look for dead (delegate) code.
+        // This looks for all methods in the delegate class, and if they have the
+        // @LayoutlibDelegate annotation, make sure they have been previously found as a
+        // match for a method in the original class.
+        // If not, this means the method is a delegate for a method that either doesn't exist
+        // anymore or is not delegated anymore.
+        Method[] delegateMethods = delegateClass.getDeclaredMethods();
+        for (Method delegateMethod : delegateMethods) {
+            // look for methods that are delegates: they have the LayoutlibDelegate annotation
+            if (delegateMethod.getAnnotation(LayoutlibDelegate.class) == null) {
+                continue;
+            }
+
+            assertTrue(
+                    String.format(
+                            "Delegate method %1$s.%2$s is not used anymore and must be removed",
+                            delegateClass.getName(),
+                            getMethodName(delegateMethod)),
+                    checkedDelegateMethods.contains(delegateMethod));
+        }
+
+    }
+
+    private String getMethodName(Method method) {
+        return getMethodName(method, method.getParameterTypes());
+    }
+
+    private String getMethodName(Method method, Class<?>[] parameters) {
+        // compute a full class name that's long but not too long.
+        StringBuilder sb = new StringBuilder(method.getName() + "(");
+        for (int j = 0; j < parameters.length; j++) {
+            Class<?> theClass = parameters[j];
+            sb.append(theClass.getName());
+            int dimensions = 0;
+            while (theClass.isArray()) {
+                dimensions++;
+                theClass = theClass.getComponentType();
+            }
+            for (int i = 0; i < dimensions; i++) {
+                sb.append("[]");
+            }
+            if (j < (parameters.length - 1)) {
+                sb.append(",");
+            }
+        }
+        sb.append(")");
+
+        return sb.toString();
     }
 }

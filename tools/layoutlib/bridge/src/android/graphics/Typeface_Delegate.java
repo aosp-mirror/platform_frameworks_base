@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.res.AssetManager;
 
@@ -88,6 +89,7 @@ public final class Typeface_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreate(String familyName, int style) {
         if (familyName == null) {
             familyName = DEFAULT_FAMILY;
@@ -106,6 +108,7 @@ public final class Typeface_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreateFromTypeface(int native_instance, int style) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
@@ -125,22 +128,26 @@ public final class Typeface_Delegate {
         return sManager.addDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromAsset() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreateFromFile(String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromFile() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeUnref(int native_instance) {
         sManager.removeDelegate(native_instance);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativeGetStyle(int native_instance) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
@@ -150,6 +157,7 @@ public final class Typeface_Delegate {
         return delegate.mStyle;
     }
 
+    @LayoutlibDelegate
     /*package*/ static void setGammaForText(float blackGamma, float whiteGamma) {
         // This is for device testing only: pass
     }

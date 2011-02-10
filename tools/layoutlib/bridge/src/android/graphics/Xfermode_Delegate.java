@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.Composite;
 
@@ -58,6 +59,7 @@ public abstract class Xfermode_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance) {
         sManager.removeDelegate(native_instance);
     }

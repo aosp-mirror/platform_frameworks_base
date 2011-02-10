@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.Stroke;
 
@@ -60,6 +61,7 @@ public class DiscretePathEffect_Delegate extends PathEffect_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate(float length, float deviation) {
         DiscretePathEffect_Delegate newDelegate = new DiscretePathEffect_Delegate();
         return sManager.addDelegate(newDelegate);

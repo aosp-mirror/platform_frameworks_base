@@ -17,6 +17,7 @@
 package android.view;
 
 import com.android.layoutlib.bridge.android.BridgeInflater;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -38,6 +39,7 @@ public class LayoutInflater_Delegate {
      * Recursive method used to descend down the xml hierarchy and instantiate
      * views, instantiate their children, and then call onFinishInflate().
      */
+    @LayoutlibDelegate
     /*package*/ static void rInflate(LayoutInflater thisInflater,
             XmlPullParser parser, View parent, final AttributeSet attrs,
             boolean finishInflate) throws XmlPullParserException, IOException {
