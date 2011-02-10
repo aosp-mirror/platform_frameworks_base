@@ -6843,11 +6843,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
 
-        if (mInsertionPointCursorController != null) {
-            mInsertionPointCursorController.onTouchEvent(event);
+        if (hasInsertionController()) {
+            getInsertionController().onTouchEvent(event);
         }
-        if (mSelectionModifierCursorController != null) {
-            mSelectionModifierCursorController.onTouchEvent(event);
+        if (hasSelectionController()) {
+            getSelectionController().onTouchEvent(event);
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -7346,9 +7346,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             minOffset = getSelectionStart();
             maxOffset = getSelectionEnd();
         } else {
-            // selectionModifierCursorController is not null at that point
+            // hasSelectionController is true since we canSelectText.
             SelectionModifierCursorController selectionModifierCursorController =
-                ((SelectionModifierCursorController) mSelectionModifierCursorController);
+                (SelectionModifierCursorController) getSelectionController();
             minOffset = selectionModifierCursorController.getMinTouchOffset();
             maxOffset = selectionModifierCursorController.getMaxTouchOffset();
         }
