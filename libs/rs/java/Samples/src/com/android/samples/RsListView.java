@@ -15,55 +15,40 @@
  */
 
 package com.android.samples;
-
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
-
 import android.renderscript.RSSurfaceView;
-import android.renderscript.RenderScript;
 import android.renderscript.RenderScriptGL;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 public class RsListView extends RSSurfaceView {
 
     public RsListView(Context context) {
         super(context);
-        //setFocusable(true);
+        ensureRenderScript();
     }
 
     private RenderScriptGL mRS;
     private RsListRS mRender;
 
-
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        super.surfaceChanged(holder, format, w, h);
+    private void ensureRenderScript() {
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-            sc.setDepth(16, 24);
             mRS = createRenderScriptGL(sc);
-            mRS.setSurface(holder, w, h);
             mRender = new RsListRS();
-            mRender.init(mRS, getResources(), w, h);
+            mRender.init(mRS, getResources());
         }
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ensureRenderScript();
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
+        mRender = null;
         if (mRS != null) {
             mRS = null;
             destroyRenderScriptGL();
@@ -71,23 +56,14 @@ public class RsListView extends RSSurfaceView {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        // break point at here
-        // this method doesn't work when 'extends View' include 'extends ScrollView'.
-        return super.onKeyDown(keyCode, event);
-    }
-
-
-    @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
         boolean ret = false;
         int act = ev.getAction();
-        if (act == ev.ACTION_DOWN) {
+        if (act == MotionEvent.ACTION_DOWN) {
             mRender.onActionDown((int)ev.getX(), (int)ev.getY());
             ret = true;
-        } else if (act == ev.ACTION_MOVE) {
+        } else if (act == MotionEvent.ACTION_MOVE) {
             mRender.onActionMove((int)ev.getX(), (int)ev.getY());
             ret = true;
         }

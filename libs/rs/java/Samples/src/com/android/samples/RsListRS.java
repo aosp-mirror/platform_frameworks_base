@@ -73,17 +73,12 @@ public class RsListRS {
     "Yemen", "Yugoslavia", "Zambia", "Zimbabwe"
     };
 
-    int mWidth;
-    int mHeight;
-
     public RsListRS() {
     }
 
-    public void init(RenderScriptGL rs, Resources res, int width, int height) {
+    public void init(RenderScriptGL rs, Resources res) {
         mRS = rs;
         mRes = res;
-        mWidth = width;
-        mHeight = height;
         initRS();
     }
 
