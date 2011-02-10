@@ -23,7 +23,7 @@ LOCAL_JAVA_RESOURCE_DIRS := resources
 LOCAL_JAVA_LIBRARIES := \
 	kxml2-2.3.0 \
 	layoutlib_api-prebuilt \
-	common-prebuilt
+	tools-common-prebuilt
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
 	temp_layoutlib \
