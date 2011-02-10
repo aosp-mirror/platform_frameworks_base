@@ -1945,10 +1945,11 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_MEDIA_SERVER_DIED:
-                    // Force creation of new IAudioflinger interface
                     if (!mMediaServerOk) {
                         Log.e(TAG, "Media server died.");
-                        AudioSystem.isMicrophoneMuted();
+                        // Force creation of new IAudioFlinger interface so that we are notified
+                        // when new media_server process is back to life.
+                        AudioSystem.setErrorCallback(mAudioSystemCallback);
                         sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SHARED_MSG, SENDMSG_NOOP, 0, 0,
                                 null, 500);
                     }
