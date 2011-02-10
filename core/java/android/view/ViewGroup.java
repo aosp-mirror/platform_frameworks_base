@@ -2938,6 +2938,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private void addViewInner(View child, int index, LayoutParams params,
             boolean preventRequestLayout) {
 
+        if (mTransition != null && mTransition.isRunning()) {
+            mTransition.cancel();
+        }
+
         if (child.getParent() != null) {
             throw new IllegalStateException("The specified child already has a parent. " +
                     "You must call removeView() on the child's parent first.");
