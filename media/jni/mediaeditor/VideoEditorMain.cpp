@@ -1053,6 +1053,10 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
 
     ThumbnailClose(tnContext);
 
+    if (pString != NULL) {
+        pEnv->ReleaseStringUTFChars(filePath, pString);
+    }
+
     return timeMs;
 }
 
@@ -1092,6 +1096,13 @@ int videoEditor_generateAudioRawFile(   JNIEnv*     pEnv,
 
     result = videoEditor_generateAudio( pEnv, pContext, (M4OSA_Char*)pInputFile,
         (M4OSA_Char*)pStringOutPCMFilePath);
+
+    if (pInputFile != NULL) {
+        pEnv->ReleaseStringUTFChars(infilePath, pInputFile);
+    }
+    if (pStringOutPCMFilePath != NULL) {
+        pEnv->ReleaseStringUTFChars(pcmfilePath, pStringOutPCMFilePath);
+    }
 
     return result;
 }
@@ -1458,7 +1469,8 @@ videoEditor_populateSettings(
     bool                needToBeLoaded  = true;
     ManualEditContext*  pContext        = M4OSA_NULL;
     M4OSA_ERR           result          = M4NO_ERROR;
-    jstring             str             = M4OSA_NULL;
+    jstring             strPath         = M4OSA_NULL;
+    jstring             strPCMPath      = M4OSA_NULL;
     jobjectArray        propertiesClipsArray           = M4OSA_NULL;
     jobject             properties      = M4OSA_NULL;
     jint*               bitmapArray     =  M4OSA_NULL;
@@ -1798,18 +1810,18 @@ videoEditor_populateSettings(
             = pEnv->GetIntField(audioSettingObject,fid);
         M4OSA_TRACE1_1("fileType = %d",pContext->mAudioSettings->fileType);
         fid = pEnv->GetFieldID(audioSettingClazz,"pFile","Ljava/lang/String;");
-        str = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
+        strPath = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
         pContext->mAudioSettings->pFile
-                = (M4OSA_Char*)pEnv->GetStringUTFChars(str, M4OSA_NULL);
+                = (M4OSA_Char*)pEnv->GetStringUTFChars(strPath, M4OSA_NULL);
         M4OSA_TRACE1_1("file name = %s",pContext->mAudioSettings->pFile);
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "regenerateAudio() file name = %s",\
         pContext->mAudioSettings->pFile);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"pcmFilePath","Ljava/lang/String;");
-        str = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
+        strPCMPath = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
 
         pContext->mAudioSettings->pPCMFilePath =
-        (M4OSA_Char*)pEnv->GetStringUTFChars(str, M4OSA_NULL);
+        (M4OSA_Char*)pEnv->GetStringUTFChars(strPCMPath, M4OSA_NULL);
 
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "pPCMFilePath -- %s ",\
         pContext->mAudioSettings->pPCMFilePath);
@@ -1835,6 +1847,15 @@ videoEditor_populateSettings(
 
             regenerateAudio = false;
             pEnv->SetBooleanField(thiz,fid,regenerateAudio);
+        }
+
+        if (strPath != NULL) {
+            pEnv->ReleaseStringUTFChars(strPath,
+                (const char *)pContext->mAudioSettings->pFile);
+        }
+        if (strPCMPath != NULL) {
+            pEnv->ReleaseStringUTFChars(strPCMPath,
+                (const char *)pContext->mAudioSettings->pPCMFilePath);
         }
 
         /* Audio mix and duck */
@@ -3348,6 +3369,10 @@ static int videoEditor_generateAudioWaveFormSync (JNIEnv*  pEnv, jobject thiz,
 
     if (pStringOutAudioGraphFile != NULL) {
         pEnv->ReleaseStringUTFChars(outGraphfilePath, pStringOutAudioGraphFile);
+    }
+
+    if (pPCMFilePath != NULL) {
+        pEnv->ReleaseStringUTFChars(pcmfilePath, pPCMFilePath);
     }
 
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR",
