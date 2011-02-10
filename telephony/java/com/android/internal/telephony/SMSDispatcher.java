@@ -412,6 +412,7 @@ public abstract class SMSDispatcher extends Handler {
                 mCm.reportSmsMemoryStatus(mStorageAvailable,
                         obtainMessage(EVENT_REPORT_MEMORY_STATUS_DONE));
             }
+            break;
 
         case EVENT_NEW_BROADCAST_SMS:
             handleBroadcastSms((AsyncResult)msg.obj);
