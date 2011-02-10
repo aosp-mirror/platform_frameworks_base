@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,12 @@ import android.os.Bundle;
 import android.view.View;
 
 @SuppressWarnings({"UnusedDeclaration"})
-public class BitmapMeshActivity extends Activity {
+public class BitmapMeshLayerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final BitmapMeshView view = new BitmapMeshView(this);
+        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setContentView(view);
     }
 
@@ -67,7 +68,6 @@ public class BitmapMeshActivity extends Activity {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
-            canvas.drawARGB(255, 255, 255, 255);
             canvas.translate(100, 100);
             canvas.drawBitmapMesh(mBitmap1, 3, 3, mVertices, 0, null, 0, null);
 
