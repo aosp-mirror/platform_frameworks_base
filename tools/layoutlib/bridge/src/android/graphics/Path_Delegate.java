@@ -332,39 +332,45 @@ public final class Path_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_addOval(int nPath, RectF oval, int dir) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addOval is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addCircle(int nPath, float x, float y, float radius, int dir) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addCircle is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addArc(int nPath, RectF oval,
             float startAngle, float sweepAngle) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addArc is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addRoundRect(int nPath, RectF rect,
             float rx, float ry, int dir) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addRoundRect is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addRoundRect(int nPath, RectF r, float[] radii, int dir) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addRoundRect is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addPath(int nPath, int src, float dx, float dy) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -375,7 +381,8 @@ public final class Path_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_addPath(int nPath, int src, int matrix) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Path.addPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate

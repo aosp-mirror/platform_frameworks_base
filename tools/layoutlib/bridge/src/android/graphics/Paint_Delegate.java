@@ -568,14 +568,18 @@ public class Paint_Delegate {
     /*package*/ static int native_breakText(Paint thisPaint, char[] text, int index, int count,
             float maxWidth, float[] measuredWidth) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.native_breakText is not supported.", null, null /*data*/);
+        return 0;
     }
 
     @LayoutlibDelegate
     /*package*/ static int native_breakText(Paint thisPaint, String text, boolean measureForwards,
             float maxWidth, float[] measuredWidth) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.native_breakText is not supported.", null, null /*data*/);
+        return 0;
     }
 
     @LayoutlibDelegate
@@ -859,14 +863,18 @@ public class Paint_Delegate {
     /*package*/ static int native_getTextWidths(int native_object, char[] text, int index,
             int count, float[] widths) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getTextWidths is not supported.", null, null /*data*/);
+        return 0;
     }
 
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, String text, int start,
             int end, float[] widths) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getTextWidths is not supported.", null, null /*data*/);
+        return 0;
     }
 
     @LayoutlibDelegate
@@ -930,42 +938,50 @@ public class Paint_Delegate {
     /*package*/ static int native_getTextRunCursor(Paint thisPaint, int native_object, char[] text,
             int contextStart, int contextLength, int flags, int offset, int cursorOpt) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getTextRunCursor is not supported.", null, null /*data*/);
+        return 0;
     }
 
     @LayoutlibDelegate
     /*package*/ static int native_getTextRunCursor(Paint thisPaint, int native_object, String text,
             int contextStart, int contextEnd, int flags, int offset, int cursorOpt) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getTextRunCursor is not supported.", null, null /*data*/);
+        return 0;
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_getTextPath(int native_object, int bidiFlags,
                 char[] text, int index, int count, float x, float y, int path) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getTextPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_getTextPath(int native_object, int bidiFlags,
             String text, int start, int end, float x, float y, int path) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getTextPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeGetStringBounds(int nativePaint, String text, int start,
             int end, Rect bounds) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getStringBounds is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeGetCharArrayBounds(int nativePaint, char[] text, int index,
             int count, Rect bounds) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Paint.getCharArrayBounds is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate

@@ -273,13 +273,15 @@ public final class Canvas_Delegate {
     /*package*/ static void drawPoints(Canvas thisCanvas, float[] pts, int offset, int count,
             Paint paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawPoint is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void drawPoint(Canvas thisCanvas, float x, float y, Paint paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawPoint is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -645,7 +647,8 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawPaint(int nativeCanvas, int paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawPaint is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -718,20 +721,19 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawCircle(int nativeCanvas, float cx,
-                                                 float cy, float radius,
-                                                 int paint) {
+    /*package*/ static void native_drawCircle(int nativeCanvas,
+            float cx, float cy, float radius, int paint) {
         native_drawOval(nativeCanvas,
                 new RectF(cx - radius, cy - radius, radius*2, radius*2),
                 paint);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawArc(int nativeCanvas, RectF oval,
-                                              float startAngle, float sweep,
-                                              boolean useCenter, int paint) {
+    /*package*/ static void native_drawArc(int nativeCanvas,
+            RectF oval, float startAngle, float sweep, boolean useCenter, int paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawArc is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -764,8 +766,7 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPath(int nativeCanvas, int path,
-                                               int paint) {
+    /*package*/ static void native_drawPath(int nativeCanvas, int path, int paint) {
         final Path_Delegate pathDelegate = Path_Delegate.getDelegate(path);
         if (pathDelegate == null) {
             return;
@@ -929,20 +930,23 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeDrawBitmapMesh(int nCanvas, int nBitmap,
-                                                    int meshWidth, int meshHeight,
-                                                    float[] verts, int vertOffset,
-                                                    int[] colors, int colorOffset, int nPaint) {
+            int meshWidth, int meshHeight, float[] verts, int vertOffset, int[] colors,
+            int colorOffset, int nPaint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawBitmapMesh is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeDrawVertices(int nCanvas, int mode, int n,
-                   float[] verts, int vertOffset, float[] texs, int texOffset,
-                   int[] colors, int colorOffset, short[] indices,
-                   int indexOffset, int indexCount, int nPaint) {
+            float[] verts, int vertOffset,
+            float[] texs, int texOffset,
+            int[] colors, int colorOffset,
+            short[] indices, int indexOffset,
+            int indexCount, int nPaint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawVertices is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -1080,7 +1084,8 @@ public final class Canvas_Delegate {
                                                   int count, float[] pos,
                                                   int paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawPosText is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -1088,7 +1093,8 @@ public final class Canvas_Delegate {
                                                   String text, float[] pos,
                                                   int paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawPosText is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -1099,7 +1105,8 @@ public final class Canvas_Delegate {
                                                      float vOffset, int bidiFlags,
                                                      int paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
@@ -1109,14 +1116,16 @@ public final class Canvas_Delegate {
                                                      float vOffset,
                                                      int flags, int paint) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawTextOnPath is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_drawPicture(int nativeCanvas,
                                                   int nativePicture) {
         // FIXME
-        throw new UnsupportedOperationException();
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Canvas.drawPicture is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
