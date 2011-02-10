@@ -22,16 +22,17 @@ import android.util.Log;
 
 
 /**
- * ProgarmStore contains a set of parameters that control how
+ * <p>ProgramStore contains a set of parameters that control how
  * the graphics hardware handles writes to the framebuffer.
- *
- * It could be used to:
- *   - enable/diable depth testing
- *   - specify wheather depth writes are performed
- *   - setup various blending modes for use in effects like
- *     transparency
- *   - define write masks for color components written into the
- *     framebuffer
+ * It could be used to:</p>
+ * <ul>
+ *   <li>enable/disable depth testing</li>
+ *   <li>specify wheather depth writes are performed</li>
+ *   <li>setup various blending modes for use in effects like
+ *     transparency</li>
+ *   <li>define write masks for color components written into the
+ *     framebuffer</li>
+ *  </ul>
  *
  **/
 public class ProgramStore extends BaseObj {

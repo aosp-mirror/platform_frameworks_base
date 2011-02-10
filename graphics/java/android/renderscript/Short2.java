@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the rs short2 type back to java applications.
+ * Class for exposing the native Renderscript Short2 type back to the Android system.
  *
  **/
 public class Short2 {

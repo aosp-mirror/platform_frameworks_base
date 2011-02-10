@@ -30,7 +30,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
- *
+ * The Surface View for a graphics renderscript (RenderScriptGL) to draw on. 
  */
 public class RSSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mSurfaceHolder;

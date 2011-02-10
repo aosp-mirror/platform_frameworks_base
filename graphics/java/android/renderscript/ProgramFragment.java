@@ -22,9 +22,19 @@ import android.util.Log;
 
 
 /**
- * ProgramFragment, also know as a fragment shader, describes a
- * stage in the graphics pipeline responsible for manipulating
- * pixel data in a user-defined way.
+ * <p>The Renderscript fragment program, also known as fragment shader is responsible
+ * for manipulating pixel data in a user defined way. It's constructed from a GLSL
+ * shader string containing the program body, textures inputs, and a Type object
+ * that describes the constants used by the program. Similar to the vertex programs,
+ * when an allocation with constant input values is bound to the shader, its values
+ * are sent to the graphics program automatically.</p>
+ * <p> The values inside the allocation are not explicitly tracked. If they change between two draw
+ * calls using the same program object, the runtime needs to be notified of that
+ * change by calling rsgAllocationSyncAll so it could send the new values to hardware.
+ * Communication between the vertex and fragment programs is handled internally in the
+ * GLSL code. For example, if the fragment program is expecting a varying input called
+ * varTex0, the GLSL code inside the program vertex must provide it.
+ * </p>
  *
  **/
 public class ProgramFragment extends Program {
