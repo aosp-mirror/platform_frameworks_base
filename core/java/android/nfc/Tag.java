@@ -38,9 +38,9 @@ import java.util.Arrays;
  * <p>
  * {@link Tag} is an immutable object that represents the state of a NFC tag at
  * the time of discovery. It can be used as a handle to {@link TagTechnology} classes
- * to perform advanced operations, or directly queried for its ID ({@link #getId} and the
- * set of technologies it contains ({@link #getTechList}). Arrays passed to and
- * returned by this class are *not* cloned, so be careful not to modify them.
+ * to perform advanced operations, or directly queried for its ID via {@link #getId} and the
+ * set of technologies it contains via {@link #getTechList}. Arrays passed to and
+ * returned by this class are <em>not</em> cloned, so be careful not to modify them.
  * <p>
  * A new tag object is created every time a tag is discovered (comes into range), even
  * if it is the same physical tag. If a tag is removed and then returned into range, then
@@ -48,53 +48,60 @@ import java.util.Arrays;
  *
  * <h3>Tag Dispatch</h3>
  * When a tag is discovered, a {@link Tag} object is created and passed to a
- * single application via the {@link NfcAdapter#EXTRA_TAG} extra in a
- * {@link Context#startActivity} {@link android.content.Intent}. A four stage dispatch is used to select the
- * most appropriate application to handle the tag. The Android OS executes each stage in order,
- * and completes dispatch as soon as a single matching application is found. If there are multiple
- * matching applications found at any one stage then the Android Activity Chooser dialog is shown
- * to allow the user to select the application.
+ * single activity via the {@link NfcAdapter#EXTRA_TAG} extra in an
+ * {@link android.content.Intent} via {@link Context#startActivity}. A four stage dispatch is used
+ * to select the
+ * most appropriate activity to handle the tag. The Android OS executes each stage in order,
+ * and completes dispatch as soon as a single matching activity is found. If there are multiple
+ * matching activities found at any one stage then the Android activity chooser dialog is shown
+ * to allow the user to select the activity to receive the tag.
+ *
+ * <p>The Tag dispatch mechanism was designed to give a high probability of dispatching
+ * a tag to the correct activity without showing the user an activity chooser dialog.
+ * This is important for NFC interactions because they are very transient -- if a user has to
+ * move the Android device to choose an application then the connection will likely be broken.
+ *
  * <h4>1. Foreground activity dispatch</h4>
- * A foreground activity that has called {@link NfcAdapter#enableForegroundDispatch} is
- * given priority. See the documentation on {#link NfcAdapter#enableForegroundDispatch} for
+ * A foreground activity that has called
+ * {@link NfcAdapter#enableForegroundDispatch NfcAdapter.enableForegroundDispatch()} is
+ * given priority. See the documentation on
+ * {@link NfcAdapter#enableForegroundDispatch NfcAdapter.enableForegroundDispatch()} for
  * its usage.
  * <h4>2. NDEF data dispatch</h4>
- * If the tag contains NDEF data, then {@link Context#startActivity} is called with
- * {@link NfcAdapter#ACTION_NDEF_DISCOVERED} and a data URI determined from the
- * first NDEF Record in the first NDEF Message in the Tag. This allows NDEF tags to be given
- * priority dispatch to applications that can handle the content.
+ * If the tag contains NDEF data the system inspects the first {@link NdefRecord} in the first
+ * {@link NdefMessage}. If the record is a URI, SmartPoster, or MIME data
+ * {@link Context#startActivity} is called with {@link NfcAdapter#ACTION_NDEF_DISCOVERED}. For URI
+ * and SmartPoster records the URI is put into the intent's data field. For MIME records the MIME
+ * type is put in the intent's type field. This allows activities to register to be launched only
+ * when data they know how to handle is present on a tag. This is the preferred method of handling
+ * data on a tag since NDEF data can be stored on many types of tags and doesn't depend on a
+ * specific tag technology. 
  * See {@link NfcAdapter#ACTION_NDEF_DISCOVERED} for more detail. If the tag does not contain
- * NDEF data, or if no application is registered
- * for {@link NfcAdapter#ACTION_NDEF_DISCOVERED} with a matching data URI then dispatch moves
- * to stage 3.
+ * NDEF data, or if no activity is registered
+ * for {@link NfcAdapter#ACTION_NDEF_DISCOVERED} with a matching data URI or MIME type then dispatch
+ * moves to stage 3.
  * <h4>3. Tag Technology dispatch</h4>
  * {@link Context#startActivity} is called with {@link NfcAdapter#ACTION_TECH_DISCOVERED} to
- * dispatch the tag to an application that can handle the technologies present on the tag.
+ * dispatch the tag to an activity that can handle the technologies present on the tag.
  * Technologies are defined as sub-classes of {@link TagTechnology}, see the package
- * {@link android.nfc.tech}. The Android OS looks for an application that can handle one or
- * more technologies in the tag. See {@link NfcAdapter#ACTION_TECH_DISCOVERED for more detail.
+ * {@link android.nfc.tech}. The Android OS looks for an activity that can handle one or
+ * more technologies in the tag. See {@link NfcAdapter#ACTION_TECH_DISCOVERED} for more detail.
  * <h4>4. Fall-back dispatch</h4>
- * If no application has been matched, then {@link Context#startActivity} is called with
+ * If no activity has been matched then {@link Context#startActivity} is called with
  * {@link NfcAdapter#ACTION_TAG_DISCOVERED}. This is intended as a fall-back mechanism.
  * See {@link NfcAdapter#ACTION_TAG_DISCOVERED}.
  *
- * <p>
- * <i>The Tag dispatch mechanism was designed to give a high probability of dispatching
- * a tag to the correct application without showing the user an Application Chooser dialog.
- * This is important for NFC interactions because they are very transient - if a user has to
- * move the Android device to choose an application then the connection is broken.</i>
- *
  * <h3>NFC Tag Background</h3>
  * An NFC tag is a passive NFC device, powered by the NFC field of this Android device while
- * it is in range. Tag's can come in many forms, such as stickers, cards, key fob, or
+ * it is in range. Tag's can come in many forms, such as stickers, cards, key fobs, or
  * even embedded in a more sophisticated device.
  * <p>
  * Tags can have a wide range of capabilities. Simple tags just offer read/write semantics,
  * and contain some one time
  * programmable areas to make read-only. More complex tags offer math operations
  * and per-sector access control and authentication. The most sophisticated tags
- * contain operating environments such as Javacard, allowing complex interactions with the
- * applets executing on the tag. Use {@link TagTechnology} classes to access a broad
+ * contain operating environments allowing complex interactions with the
+ * code executing on the tag. Use {@link TagTechnology} classes to access a broad
  * range of capabilities available in NFC tags.
  * <p>
  */
