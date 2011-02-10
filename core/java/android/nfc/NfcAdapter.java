@@ -419,18 +419,29 @@ public final class NfcAdapter {
      * <p>This will give give priority to the foreground activity when
      * dispatching a discovered {@link Tag} to an application.
      *
-     * <p>Activities must call {@link #disableForegroundDispatch} in
-     * their {@link Activity#onPause} callback.
+     * <p>If any IntentFilters are provided to this method they are used to match dispatch Intents
+     * for both the {@link NfcAdapter#ACTION_NDEF_DISCOVERED} and
+     * {@link NfcAdapter#ACTION_TAG_DISCOVERED}. Since {@link NfcAdapter#ACTION_TECH_DISCOVERED}
+     * relies on meta data outside of the IntentFilter matching for that dispatch Intent is handled
+     * by passing in the tech lists separately. Each first level entry in the tech list represents
+     * an array of technologies that must all be present to match. If any of the first level sets
+     * match then the dispatch is routed through the given PendingIntent. In other words, the second
+     * level is ANDed together and the first level entries are ORed together.
      *
-     * <p>a null set of intent filters will cause the forground activity
-     * to receive all tags.
+     * <p>If you pass {@code null} for both the {@code filters} and {@code techLists} parameters
+     * that acts a wild card and will cause the foreground activity to receive all tags via the
+     * {@link NfcAdapter#ACTION_TAG_DISCOVERED} intent.
      *
-     * <p>This method must be called from the main thread, and
-     * only when the activity is in the foreground (resumed).     *
+     * <p>This method must be called from the main thread, and only when the activity is in the
+     * foreground (resumed). Also, activities must call {@link #disableForegroundDispatch} before
+     * the completion of their {@link Activity#onPause} callback to disable foreground dispatch
+     * after it has been enabled.
      *
      * @param activity the Activity to dispatch to
      * @param intent the PendingIntent to start for the dispatch
      * @param filters the IntentFilters to override dispatching for, or null to always dispatch
+     * @param techLists the tech lists used to perform matching for dispatching of the
+     *      {@link NfcAdapter#ACTION_TECH_DISCOVERED} intent
      * @throws IllegalStateException if the Activity is not currently in the foreground
      */
     public void enableForegroundDispatch(Activity activity, PendingIntent intent,
