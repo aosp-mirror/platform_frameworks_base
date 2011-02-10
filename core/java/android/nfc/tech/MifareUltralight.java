@@ -51,6 +51,9 @@ import java.io.IOException;
  * If it is enumerated, then all {@link MifareUltralight} I/O operations will be supported.
  * In either case, {@link NfcA} will also be enumerated on the tag,
  * because all MIFARE Ultralight tags are also {@link NfcA} tags.
+ *
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class MifareUltralight extends BasicTagTechnology {
     /** A MIFARE Ultralight compatible tag of unknown type */
@@ -136,6 +139,8 @@ public final class MifareUltralight extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param pageOffset index of first page to read, starting from 0
      * @return 4 pages (16 bytes)
      * @throws TagLostException if the tag leaves the field
@@ -158,6 +163,8 @@ public final class MifareUltralight extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param pageOffset index of page to write, starting from 0
      * @param data 4 bytes to write
@@ -186,6 +193,8 @@ public final class MifareUltralight extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @see NfcA#transceive
      */

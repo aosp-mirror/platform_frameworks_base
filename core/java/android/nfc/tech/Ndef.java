@@ -44,7 +44,7 @@ import java.io.IOException;
  * formatted to contain NDEF data.
  * <ul>
  * <li>NFC Forum Type 1 Tag ({@link #NFC_FORUM_TYPE_1}), such as the Innovision Topaz
- * <li>NFC Forum Type 2 Tag ({@link #NFC_FORUM_TYPE_2}), such as the NXP Mifare Ultralight
+ * <li>NFC Forum Type 2 Tag ({@link #NFC_FORUM_TYPE_2}), such as the NXP MIFARE Ultralight
  * <li>NFC Forum Type 3 Tag ({@link #NFC_FORUM_TYPE_3}), such as Sony Felica
  * <li>NFC Forum Type 4 Tag ({@link #NFC_FORUM_TYPE_4}), such as NXP MIFARE Desfire
  * </ul>
@@ -66,9 +66,8 @@ import java.io.IOException;
  * recommended to use NFC Forum Types 1-4 in new deployments of NFC tags
  * with NDEF payload. Vendor NDEF formats will not work on all Android devices.
  *
- * <p class="note"><strong>Note:</strong>
- * Use of this class requires the {@link android.Manifest.permission#NFC}
- * permission.
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class Ndef extends BasicTagTechnology {
     private static final String TAG = "NFC";
@@ -284,6 +283,8 @@ public final class Ndef extends BasicTagTechnology {
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
      *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param msg the NDEF Message to write, must not be null
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or the operation is canceled
@@ -343,6 +344,8 @@ public final class Ndef extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @return true on success, false if it is not possible to make this tag read-only
      * @throws TagLostException if the tag leaves the field
