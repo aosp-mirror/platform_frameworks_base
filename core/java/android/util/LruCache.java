@@ -57,7 +57,7 @@ public class LruCache<K, V> {
 
     /** Size of this cache in units. Not necessarily the number of elements. */
     private int size;
-    private final int maxSize;
+    private int maxSize;
 
     private int putCount;
     private int createCount;
@@ -155,6 +155,23 @@ public class LruCache<K, V> {
     }
 
     /**
+     * Sets the maximum size of this cache. Decreasing the maximum size may
+     * evict entries from this cache.
+     *
+     * @param maxSize for caches that do not override {@link #sizeOf}, this is
+     *     the maximum number of entries in the cache. For all other caches,
+     *     this is the maximum sum of the sizes of the entries in this cache.
+     */
+    public synchronized final void setMaxSize(int maxSize) {
+        if (maxSize <= 0) {
+            throw new IllegalArgumentException("maxSize <= 0");
+        }
+
+        trimToSize(maxSize);
+        this.maxSize = maxSize;
+    }
+
+    /**
      * Called for entries that have reached the tail of the least recently used
      * queue and are be removed. The default implementation does nothing.
      */
@@ -196,12 +213,21 @@ public class LruCache<K, V> {
     }
 
     /**
-     * For caches that do not override {@link #sizeOf}, this is the number of
-     * entries in the cache. For all other caches, this is the sum of the sizes
-     * of the entries in this cache.
+     * For caches that do not override {@link #sizeOf}, this returns the number
+     * of entries in the cache. For all other caches, this returns the sum of
+     * the sizes of the entries in this cache.
      */
     public synchronized final int size() {
         return size;
+    }
+
+    /**
+     * For caches that do not override {@link #sizeOf}, this returns the maximum
+     * number of entries in the cache. For all other caches, this returns the
+     * maximum sum of the sizes of the entries in this cache.
+     */
+    public synchronized final int maxSize() {
+        return maxSize;
     }
 
     /**
