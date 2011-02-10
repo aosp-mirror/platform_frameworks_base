@@ -19,6 +19,7 @@ package com.android.internal.app;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
@@ -65,7 +66,7 @@ public class ActionBarImpl extends ActionBar {
     private Activity mActivity;
     private Dialog mDialog;
 
-    private FrameLayout mContainerView;
+    private ActionBarContainer mContainerView;
     private ActionBarView mActionView;
     private ActionBarContextView mUpperContextView;
     private LinearLayout mLowerContextView;
@@ -151,6 +152,7 @@ public class ActionBarImpl extends ActionBar {
                 mContentView.setTranslationY(0);
             }
             mContainerView.setVisibility(View.GONE);
+            mContainerView.setTransitioning(false);
             mCurrentAnim = null;
         }
 
@@ -205,7 +207,7 @@ public class ActionBarImpl extends ActionBar {
                 com.android.internal.R.id.action_context_bar);
         mLowerContextView = (LinearLayout) decor.findViewById(
                 com.android.internal.R.id.lower_action_context_bar);
-        mContainerView = (FrameLayout) decor.findViewById(
+        mContainerView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.action_bar_container);
 
         if (mActionView == null || mUpperContextView == null || mContainerView == null) {
@@ -533,6 +535,7 @@ public class ActionBarImpl extends ActionBar {
 
         if (mShowHideAnimationEnabled) {
             mContainerView.setAlpha(1);
+            mContainerView.setTransitioning(true);
             AnimatorSet anim = new AnimatorSet();
             AnimatorSet.Builder b = anim.play(ObjectAnimator.ofFloat(mContainerView, "alpha", 0));
             if (mContentView != null) {

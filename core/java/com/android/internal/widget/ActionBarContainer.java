@@ -28,6 +28,8 @@ import android.widget.FrameLayout;
  * @hide
  */
 public class ActionBarContainer extends FrameLayout {
+    private boolean mIsTransitioning;
+
     public ActionBarContainer(Context context) {
         this(context, null);
     }
@@ -39,6 +41,25 @@ public class ActionBarContainer extends FrameLayout {
                 com.android.internal.R.styleable.ActionBar);
         setBackgroundDrawable(a.getDrawable(com.android.internal.R.styleable.ActionBar_background));
         a.recycle();
+    }
+
+    /**
+     * Set the action bar into a "transitioning" state. While transitioning
+     * the bar will block focus and touch from all of its descendants. This
+     * prevents the user from interacting with the bar while it is animating
+     * in or out.
+     *
+     * @param isTransitioning true if the bar is currently transitioning, false otherwise.
+     */
+    public void setTransitioning(boolean isTransitioning) {
+        mIsTransitioning = isTransitioning;
+        setDescendantFocusability(isTransitioning ? FOCUS_BLOCK_DESCENDANTS
+                : FOCUS_AFTER_DESCENDANTS);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mIsTransitioning || super.onInterceptTouchEvent(ev);
     }
 
     @Override
