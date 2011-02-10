@@ -79,7 +79,6 @@ public class FileFilter {
         "fast/js/regexp-overflow.html", // Result is too large, causing OOM when reading by DRT, http://b/2697589
         "fast/regex/test1.html", // Causes DumpRenderTree to hang with V8
         "fast/regex/slow.html", // Causes DumpRenderTree to hang with V8
-        "http/tests/xmlhttprequest/simple-cross-origin-progress-events.html", // runs webcore into bad state, http://b/2929261
     };
 
     static void fillIgnoreResultList() {
