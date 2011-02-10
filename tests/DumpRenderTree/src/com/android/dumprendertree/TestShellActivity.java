@@ -941,7 +941,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     private boolean mDumpWebKitData = false;
 
     static final String TIMEOUT_STR = "**Test timeout";
-    static final long DUMP_TIMEOUT_MS = 20000; //20s timeout for dumping webview content
+    static final long DUMP_TIMEOUT_MS = 100000; // 100s timeout for dumping webview content
 
     static final int MSG_TIMEOUT = 0;
     static final int MSG_WEBKIT_DATA = 1;
