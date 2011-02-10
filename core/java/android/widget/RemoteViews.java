@@ -1056,21 +1056,31 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Equivalent to calling {@link AdapterViewFlipper#showNext()}
+     * Equivalent to calling {@link AdapterViewAnimator#showNext()}
      *
-     * @param viewId The id of the view on which to call {@link AdapterViewFlipper#showNext()}
+     * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showNext()}
      */
     public void showNext(int viewId) {
         addAction(new ReflectionActionWithoutParams(viewId, "showNext"));
     }
 
     /**
-     * Equivalent to calling {@link AdapterViewFlipper#showPrevious()}
+     * Equivalent to calling {@link AdapterViewAnimator#showPrevious()}
      *
-     * @param viewId The id of the view on which to call {@link AdapterViewFlipper#showPrevious()}
+     * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showPrevious()}
      */
     public void showPrevious(int viewId) {
         addAction(new ReflectionActionWithoutParams(viewId, "showPrevious"));
+    }
+
+    /**
+     * Equivalent to calling {@link AdapterViewAnimator#setDisplayedChild(int)}
+     *
+     * @param viewId The id of the view on which to call
+     *               {@link AdapterViewAnimator#setDisplayedChild(int)}
+     */
+    public void setDisplayedChild(int viewId, int childIndex) {
+        setInt(viewId, "setDisplayedChild", childIndex);
     }
 
     /**
