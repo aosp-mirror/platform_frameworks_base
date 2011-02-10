@@ -1121,7 +1121,7 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Called by JNI when the native HTTP(S) stack gets a invalid cert chain.
+     * Called by JNI when the native HTTP(S) stack gets an invalid cert chain.
      *
      * We delegate the request to CallbackProxy, and route its response to
      * {@link #nativeSslCertErrorProceed(int)} or
@@ -1133,8 +1133,8 @@ class BrowserFrame extends Handler {
             X509Certificate cert = new X509CertImpl(cert_der);
             ssl_error = new SslError(cert_error, cert);
         } catch (IOException e) {
-            // Can't get the cert, not much to do.
-            Log.e(LOGTAG, "Can't get the certificate from WebKit, cancling");
+            // Can't get the certificate, not much to do.
+            Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");
             nativeSslCertErrorCancel(handle, cert_error);
             return;
         }
@@ -1209,12 +1209,15 @@ class BrowserFrame extends Handler {
     /**
      * Called by JNI when we load a page over SSL.
      */
-    private void setCertificate(String issuedTo, String issuedBy,
-            long validNotBeforeMillis, long validNotAfterMillis) {
-        Date validNotBefore = new Date(validNotBeforeMillis);
-        Date validNotAfter = new Date(validNotAfterMillis);
-        mCallbackProxy.onReceivedCertificate(new SslCertificate(
-                issuedTo, issuedBy, validNotBefore, validNotAfter));
+    private void setCertificate(byte cert_der[]) {
+        try {
+            X509Certificate cert = new X509CertImpl(cert_der);
+            mCallbackProxy.onReceivedCertificate(new SslCertificate(cert));
+        } catch (IOException e) {
+            // Can't get the certificate, not much to do.
+            Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");
+            return;
+        }
     }
 
     //==========================================================================
