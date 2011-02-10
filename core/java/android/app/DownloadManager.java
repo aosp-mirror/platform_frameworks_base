@@ -373,8 +373,17 @@ public class DownloadManager {
          */
         public static final int VISIBILITY_HIDDEN = 2;
 
+        /**
+         * This download shows in the notifications after completion ONLY.
+         * It is usuable only with
+         * {@link DownloadManager#completedDownload(String, String, boolean, String,
+         * String, long, boolean)}.
+         */
+        public static final int VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION = 3;
+
         /** can take any of the following values: {@link #VISIBILITY_HIDDEN}
-         * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE}
+         * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE},
+         * {@link #VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION}
          */
         private int mNotificationVisibility = VISIBILITY_VISIBLE;
 
@@ -1098,11 +1107,13 @@ public class DownloadManager {
      * be managed by the Downloads App and any other app that is used to read it (for example,
      * Gallery app to display the file, if the file contents represent a video/image).
      * @param length length of the downloaded file
+     * @param showNotification true if a notification is to be sent, false otherwise
      * @return  an ID for the download entry added to the downloads app, unique across the system
      * This ID is used to make future calls related to this download.
      */
     public long completedDownload(String title, String description,
-            boolean isMediaScannerScannable, String mimeType, String path, long length) {
+            boolean isMediaScannerScannable, String mimeType, String path, long length,
+            boolean showNotification) {
         // make sure the input args are non-null/non-zero
         validateArgumentIsNonEmpty("title", title);
         validateArgumentIsNonEmpty("description", description);
@@ -1126,6 +1137,8 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED,
                 (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES :
                         Request.SCANNABLE_VALUE_NO);
+        values.put(Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
+                Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION : Request.VISIBILITY_HIDDEN);
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         if (downloadUri == null) {
             return -1;
