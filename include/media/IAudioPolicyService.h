@@ -74,6 +74,7 @@ public:
     virtual status_t setStreamVolumeIndex(AudioSystem::stream_type stream, int index) = 0;
     virtual status_t getStreamVolumeIndex(AudioSystem::stream_type stream, int *index) = 0;
     virtual uint32_t getStrategyForStream(AudioSystem::stream_type stream) = 0;
+    virtual uint32_t getDevicesForStream(AudioSystem::stream_type stream) = 0;
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc) = 0;
     virtual status_t registerEffect(effect_descriptor_t *desc,
                                     audio_io_handle_t output,

@@ -392,6 +392,7 @@ public:
     static status_t getStreamVolumeIndex(stream_type stream, int *index);
 
     static uint32_t getStrategyForStream(stream_type stream);
+    static uint32_t getDevicesForStream(stream_type stream);
 
     static audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
     static status_t registerEffect(effect_descriptor_t *desc,

@@ -365,6 +365,14 @@ uint32_t AudioPolicyService::getStrategyForStream(AudioSystem::stream_type strea
     return mpPolicyManager->getStrategyForStream(stream);
 }
 
+uint32_t AudioPolicyService::getDevicesForStream(AudioSystem::stream_type stream)
+{
+    if (mpPolicyManager == NULL) {
+        return 0;
+    }
+    return mpPolicyManager->getDevicesForStream(stream);
+}
+
 audio_io_handle_t AudioPolicyService::getOutputForEffect(effect_descriptor_t *desc)
 {
     if (mpPolicyManager == NULL) {

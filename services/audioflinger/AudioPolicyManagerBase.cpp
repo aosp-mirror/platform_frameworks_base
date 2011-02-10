@@ -1543,6 +1543,20 @@ uint32_t AudioPolicyManagerBase::getStrategyForStream(AudioSystem::stream_type s
     return (uint32_t)getStrategy(stream);
 }
 
+uint32_t AudioPolicyManagerBase::getDevicesForStream(AudioSystem::stream_type stream) {
+    uint32_t devices;
+    // By checking the range of stream before calling getStrategy, we avoid
+    // getStrategy's behavior for invalid streams.  getStrategy would do a LOGE
+    // and then return STRATEGY_MEDIA, but we want to return the empty set.
+    if (stream < (AudioSystem::stream_type) 0 || stream >= AudioSystem::NUM_STREAM_TYPES) {
+        devices = 0;
+    } else {
+        AudioPolicyManagerBase::routing_strategy strategy = getStrategy(stream);
+        devices = getDeviceForStrategy(strategy, true);
+    }
+    return devices;
+}
+
 AudioPolicyManagerBase::routing_strategy AudioPolicyManagerBase::getStrategy(
         AudioSystem::stream_type stream) {
     // stream to strategy mapping
