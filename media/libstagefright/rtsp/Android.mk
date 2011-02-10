@@ -55,4 +55,4 @@ LOCAL_MODULE_TAGS := debug
 
 LOCAL_MODULE:= rtp_test
 
-include $(BUILD_EXECUTABLE)
+# include $(BUILD_EXECUTABLE)
