@@ -1110,6 +1110,17 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
 
     const uint32_t count = meshWidth * meshHeight * 6;
 
+    float left = FLT_MAX;
+    float top = FLT_MAX;
+    float right = FLT_MIN;
+    float bottom = FLT_MIN;
+
+#if RENDER_LAYERS_AS_REGIONS
+    bool hasActiveLayer = hasLayer();
+#else
+    bool hasActiveLayer = false;
+#endif
+
     // TODO: Support the colors array
     TextureVertex mesh[count];
     TextureVertex* vertex = mesh;
@@ -1138,12 +1149,28 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
             TextureVertex::set(vertex++, vertices[ax], vertices[ay], u1, v2);
             TextureVertex::set(vertex++, vertices[cx], vertices[cy], u2, v1);
             TextureVertex::set(vertex++, vertices[dx], vertices[dy], u2, v2);
+
+#if RENDER_LAYERS_AS_REGIONS
+            if (hasActiveLayer) {
+                // TODO: This could be optimized to avoid unnecessary ops
+                left = fminf(left, fminf(vertices[ax], fminf(vertices[bx], vertices[cx])));
+                top = fminf(top, fminf(vertices[ay], fminf(vertices[by], vertices[cy])));
+                right = fmaxf(right, fmaxf(vertices[ax], fmaxf(vertices[bx], vertices[cx])));
+                bottom = fmaxf(bottom, fmaxf(vertices[ay], fmaxf(vertices[by], vertices[cy])));
+            }
+#endif
         }
     }
 
+#if RENDER_LAYERS_AS_REGIONS
+    if (hasActiveLayer) {
+        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+    }
+#endif
+
     drawTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
             mode, texture->blend, &mesh[0].position[0], &mesh[0].texture[0],
-            GL_TRIANGLES, count);
+            GL_TRIANGLES, count, false, false, 0, false, false);
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
