@@ -36,6 +36,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.webkit.CookieManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
@@ -141,6 +142,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         contentView.setOrientation(LinearLayout.VERTICAL);
         setContentView(contentView);
 
+        CookieManager.setAcceptFileSchemeCookies(true);
         mWebView = new WebView(this);
         mEventSender = new WebViewEventSender(mWebView);
         mCallbackProxy = new CallbackProxy(mEventSender, this);
