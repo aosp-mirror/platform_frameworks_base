@@ -344,6 +344,45 @@ void Layer::onDraw(const Region& clip) const
     drawWithOpenGL(clip, tex);
 }
 
+// As documented in libhardware header, formats in the range
+// 0x100 - 0x1FF are specific to the HAL implementation, and
+// are known to have no alpha channel
+// TODO: move definition for device-specific range into
+// hardware.h, instead of using hard-coded values here.
+#define HARDWARE_IS_DEVICE_FORMAT(f) ((f) >= 0x100 && (f) <= 0x1FF)
+
+bool Layer::needsBlending(const sp<GraphicBuffer>& buffer) const
+{
+    // If buffers where set with eOpaque flag, all buffers are known to
+    // be opaque without having to check their actual format
+    if (mNeedsBlending && buffer != NULL) {
+        PixelFormat format = buffer->getPixelFormat();
+
+        if (HARDWARE_IS_DEVICE_FORMAT(format)) {
+            return false;
+        }
+
+        PixelFormatInfo info;
+        status_t err = getPixelFormatInfo(format, &info);
+        if (!err && info.h_alpha <= info.l_alpha) {
+            return false;
+        }
+    }
+
+    // Return opacity as determined from flags and format options
+    // passed to setBuffers()
+    return mNeedsBlending;
+}
+
+bool Layer::needsBlending() const
+{
+    if (mBufferManager.hasActiveBuffer()) {
+        return needsBlending(mBufferManager.getActiveBuffer());
+    }
+
+    return mNeedsBlending;
+}
+
 bool Layer::needsFiltering() const
 {
     if (!(mFlags & DisplayHardware::SLOW_CONFIG)) {
@@ -591,6 +630,9 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
     // we retired a buffer, which becomes the new front buffer
 
     const bool noActiveBuffer = !mBufferManager.hasActiveBuffer();
+    const bool activeBlending =
+            noActiveBuffer ? true : needsBlending(mBufferManager.getActiveBuffer());
+
     if (mBufferManager.setActiveBufferIndex(buf) < NO_ERROR) {
         LOGE("retireAndLock() buffer index (%d) out of range", int(buf));
         mPostedDirtyRegion.clear();
@@ -605,6 +647,12 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
     sp<GraphicBuffer> newFrontBuffer(getBuffer(buf));
     if (newFrontBuffer != NULL) {
+        if (!noActiveBuffer && activeBlending != needsBlending(newFrontBuffer)) {
+            // new buffer has different opacity than previous active buffer, need
+            // to recompute visible regions accordingly
+            recomputeVisibleRegions = true;
+        }
+
         // get the dirty region
         // compute the posted region
         const Region dirty(lcblk->getDirtyRegion(buf));
