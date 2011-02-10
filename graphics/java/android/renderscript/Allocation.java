@@ -26,19 +26,41 @@ import android.util.Log;
 import android.util.TypedValue;
 
 /**
- * Memory allocation class for renderscript.  An allocation combines a Type with
- * memory to provide storage for user data and objects.
+ * <p>
+ * Memory allocation class for renderscript.  An allocation combines a
+ * {@link android.renderscript.Type} with the memory to provide storage for user data and objects.
+ * This implies that all memory in Renderscript is typed.
+ * </p>
  *
- * Allocations may exist in one or more memory spaces.  Currently those are
- * Script: accessable by RS scripts.
- * Graphics Texture: accessable as a graphics texture.
- * Graphics Vertex: accessable as graphical vertex data.
- * Graphics Constants: Accessable as constants in user shaders
+ * <p>Allocations are the primary way data moves into and out of scripts. Memory is user
+ * synchronized and it's possible for allocations to exist in multiple memory spaces
+ * concurrently. Currently those spaces are:</p>
+ * <ul>
+ * <li>Script: accessable by RS scripts.</li>
+ * <li>Graphics Texture: accessable as a graphics texture.</li>
+ * <li>Graphics Vertex: accessable as graphical vertex data.</li>
+ * <li>Graphics Constants: Accessable as constants in user shaders</li>
+ * </ul>
+ * </p>
+ * <p>
+ * For example, when creating a allocation for a texture, the user can
+ * specify its memory spaces as both script and textures. This means that it can both
+ * be used as script binding and as a GPU texture for rendering. To maintain
+ * synchronization if a script modifies an allocation used by other targets it must
+ * call a synchronizing function to push the updates to the memory, otherwise the results
+ * are undefined.
+ * </p>
+ * <p>By default, Android system side updates are always applied to the script accessable
+ * memory. If this is not present, they are then applied to the various HW
+ * memory types.  A {@link android.renderscript.Allocation#syncAll syncAll()}
+ * call is necessary after the script data is updated to
+ * keep the other memory spaces in sync.</p>
  *
- * By default java side updates are always applied to the script accessable
- * memory.  If this is not present they are then applied to the various HW
- * memory types.  A syncAll call is necessary after the script data is update to
- * keep the other memory spaces in sync.
+ * <p>Allocation data is uploaded in one of two primary ways. For simple
+ * arrays there are copyFrom() functions that take an array from the control code and
+ * copy it to the slave memory store. Both type checked and unchecked copies are provided.
+ * The unchecked variants exist to allow apps to copy over arrays of structures from a
+ * control language that does not support structures.</p>
  *
  **/
 public class Allocation extends BaseObj {

@@ -21,7 +21,7 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the rs_matrix3x3 type back to java applications.
+ * Class for exposing the native Renderscript rs_matrix3x3 type back to the Android system.
  *
  **/
 public class Matrix3f {
