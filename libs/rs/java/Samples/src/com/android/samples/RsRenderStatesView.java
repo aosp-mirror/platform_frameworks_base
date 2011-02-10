@@ -16,54 +16,48 @@
 
 package com.android.samples;
 
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
-
 import android.renderscript.RSSurfaceView;
-import android.renderscript.RenderScript;
 import android.renderscript.RenderScriptGL;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Message;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 public class RsRenderStatesView extends RSSurfaceView {
 
     public RsRenderStatesView(Context context) {
         super(context);
-        //setFocusable(true);
+        ensureRenderScript();
     }
 
     private RenderScriptGL mRS;
     private RsRenderStatesRS mRender;
 
-
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        super.surfaceChanged(holder, format, w, h);
+    private void ensureRenderScript() {
         if (mRS == null) {
             RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
             sc.setDepth(16, 24);
             mRS = createRenderScriptGL(sc);
-            mRS.setSurface(holder, w, h);
             mRender = new RsRenderStatesRS();
-            mRender.init(mRS, getResources(), w, h);
+            mRender.init(mRS, getResources());
         }
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ensureRenderScript();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        super.surfaceChanged(holder, format, w, h);
+        mRender.surfaceChanged();
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
+        mRender = null;
         if (mRS != null) {
             mRS = null;
             destroyRenderScriptGL();
@@ -71,25 +65,13 @@ public class RsRenderStatesView extends RSSurfaceView {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        // break point at here
-        // this method doesn't work when 'extends View' include 'extends ScrollView'.
-        return super.onKeyDown(keyCode, event);
-    }
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev)
-    {
-        boolean ret = false;
-        int act = ev.getAction();
-        if (act == ev.ACTION_DOWN) {
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mRender.onActionDown((int)ev.getX(), (int)ev.getY());
-            ret = true;
+            return true;
         }
 
-        return ret;
+        return false;
     }
 }
 
