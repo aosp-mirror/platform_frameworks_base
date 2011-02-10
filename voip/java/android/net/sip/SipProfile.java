@@ -150,9 +150,8 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
         /**
          * Sets the username used for authentication.
          *
-         * @param name auth. name of the profile
+         * @param name authentication username of the profile
          * @return this builder object
-         * @hide // TODO: remove when we make it public
          */
         public Builder setAuthUserName(String name) {
             mProfile.mAuthUserName = name;
@@ -391,10 +390,10 @@ public class SipProfile implements Parcelable, Serializable, Cloneable {
 
     /**
      * Gets the username for authentication. If it is null, then the username
-     * should be used in authentication instead.
+     * is used in authentication instead.
      *
-     * @return the auth. username
-     * @hide // TODO: remove when we make it public
+     * @return the authentication username
+     * @see #getUserName
      */
     public String getAuthUserName() {
         return mAuthUserName;
