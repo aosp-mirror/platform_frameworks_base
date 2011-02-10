@@ -27,11 +27,6 @@
 #include "include/ThrottledSource.h"
 #include "include/MPEG2TSExtractor.h"
 
-#include "ARTPSession.h"
-#include "APacketSource.h"
-#include "ASessionDescription.h"
-#include "UDPPusher.h"
-
 #include <binder/IPCThreadState.h>
 #include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -58,6 +53,7 @@ namespace android {
 
 static int64_t kLowWaterMarkUs = 2000000ll;  // 2secs
 static int64_t kHighWaterMarkUs = 10000000ll;  // 10secs
+static int64_t kHighWaterMarkRTSPUs = 4000000ll;  // 4secs
 static const size_t kLowWaterMarkBytes = 40000;
 static const size_t kHighWaterMarkBytes = 200000;
 
@@ -463,10 +459,6 @@ void AwesomePlayer::reset_l() {
         mLiveSession.clear();
     }
 
-    mRTPPusher.clear();
-    mRTCPPusher.clear();
-    mRTPSession.clear();
-
     if (mVideoSource != NULL) {
         mVideoSource->stop();
 
@@ -644,6 +636,9 @@ void AwesomePlayer::onBufferingUpdate() {
         LOGV("cachedDurationUs = %.2f secs, eos=%d",
              cachedDurationUs / 1E6, eos);
 
+        int64_t highWaterMarkUs =
+            (mRTSPController != NULL) ? kHighWaterMarkRTSPUs : kHighWaterMarkUs;
+
         if ((mFlags & PLAYING) && !eos
                 && (cachedDurationUs < kLowWaterMarkUs)) {
             LOGI("cache is running low (%.2f secs) , pausing.",
@@ -652,7 +647,7 @@ void AwesomePlayer::onBufferingUpdate() {
             pause_l();
             ensureCacheIsFetching_l();
             notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
-        } else if (eos || cachedDurationUs > kHighWaterMarkUs) {
+        } else if (eos || cachedDurationUs > highWaterMarkUs) {
             if (mFlags & CACHE_UNDERRUN) {
                 LOGI("cache has filled up (%.2f secs), resuming.",
                      cachedDurationUs / 1E6);
@@ -1331,10 +1326,8 @@ void AwesomePlayer::onVideoEvent() {
         mTimeSourceDeltaUs = realTimeUs - mediaTimeUs;
     }
 
-    if (!wasSeeking && mRTPSession == NULL) {
+    if (!wasSeeking) {
         // Let's display the first frame after seeking right away.
-        // We'll completely ignore timestamps for gtalk videochat
-        // and we'll play incoming video as fast as we get it.
 
         int64_t nowUs = ts->getRealTimeUs() - mTimeSourceDeltaUs;
 
@@ -1594,118 +1587,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             ->setLiveSession(mLiveSession);
 
         return setDataSource_l(extractor);
-    } else if (!strncmp("rtsp://gtalk/", mUri.string(), 13)) {
-        if (mLooper == NULL) {
-            mLooper = new ALooper;
-            mLooper->setName("gtalk rtp");
-            mLooper->start(
-                    false /* runOnCallingThread */,
-                    false /* canCallJava */,
-                    PRIORITY_HIGHEST);
-        }
-
-        const char *startOfCodecString = &mUri.string()[13];
-        const char *startOfSlash1 = strchr(startOfCodecString, '/');
-        if (startOfSlash1 == NULL) {
-            return BAD_VALUE;
-        }
-        const char *startOfWidthString = &startOfSlash1[1];
-        const char *startOfSlash2 = strchr(startOfWidthString, '/');
-        if (startOfSlash2 == NULL) {
-            return BAD_VALUE;
-        }
-        const char *startOfHeightString = &startOfSlash2[1];
-
-        String8 codecString(startOfCodecString, startOfSlash1 - startOfCodecString);
-        String8 widthString(startOfWidthString, startOfSlash2 - startOfWidthString);
-        String8 heightString(startOfHeightString);
-
-#if 0
-        mRTPPusher = new UDPPusher("/data/misc/rtpout.bin", 5434);
-        mLooper->registerHandler(mRTPPusher);
-
-        mRTCPPusher = new UDPPusher("/data/misc/rtcpout.bin", 5435);
-        mLooper->registerHandler(mRTCPPusher);
-#endif
-
-        mRTPSession = new ARTPSession;
-        mLooper->registerHandler(mRTPSession);
-
-#if 0
-        // My AMR SDP
-        static const char *raw =
-            "v=0\r\n"
-            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
-            "s=QuickTime\r\n"
-            "t=0 0\r\n"
-            "a=range:npt=0-315\r\n"
-            "a=isma-compliance:2,2.0,2\r\n"
-            "m=audio 5434 RTP/AVP 97\r\n"
-            "c=IN IP4 127.0.0.1\r\n"
-            "b=AS:30\r\n"
-            "a=rtpmap:97 AMR/8000/1\r\n"
-            "a=fmtp:97 octet-align\r\n";
-#elif 1
-        String8 sdp;
-        sdp.appendFormat(
-            "v=0\r\n"
-            "o=- 64 233572944 IN IP4 127.0.0.0\r\n"
-            "s=QuickTime\r\n"
-            "t=0 0\r\n"
-            "a=range:npt=0-315\r\n"
-            "a=isma-compliance:2,2.0,2\r\n"
-            "m=video 5434 RTP/AVP 97\r\n"
-            "c=IN IP4 127.0.0.1\r\n"
-            "b=AS:30\r\n"
-            "a=rtpmap:97 %s/90000\r\n"
-            "a=cliprect:0,0,%s,%s\r\n"
-            "a=framesize:97 %s-%s\r\n",
-
-            codecString.string(),
-            heightString.string(), widthString.string(),
-            widthString.string(), heightString.string()
-            );
-        const char *raw = sdp.string();
-
-#endif
-
-        sp<ASessionDescription> desc = new ASessionDescription;
-        CHECK(desc->setTo(raw, strlen(raw)));
-
-        CHECK_EQ(mRTPSession->setup(desc), (status_t)OK);
-
-        if (mRTPPusher != NULL) {
-            mRTPPusher->start();
-        }
-
-        if (mRTCPPusher != NULL) {
-            mRTCPPusher->start();
-        }
-
-        CHECK_EQ(mRTPSession->countTracks(), 1u);
-        sp<MediaSource> source = mRTPSession->trackAt(0);
-
-#if 0
-        bool eos;
-        while (((APacketSource *)source.get())
-                ->getQueuedDuration(&eos) < 5000000ll && !eos) {
-            usleep(100000ll);
-        }
-#endif
-
-        const char *mime;
-        CHECK(source->getFormat()->findCString(kKeyMIMEType, &mime));
-
-        if (!strncasecmp("video/", mime, 6)) {
-            setVideoSource(source);
-        } else {
-            CHECK(!strncasecmp("audio/", mime, 6));
-            setAudioSource(source);
-        }
-
-        mExtractorFlags = MediaExtractor::CAN_PAUSE;
-
-        return OK;
     } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;

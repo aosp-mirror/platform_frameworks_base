@@ -39,9 +39,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-// If no access units are received within 3 secs, assume that the rtp
+// If no access units are received within 5 secs, assume that the rtp
 // stream has ended and signal end of stream.
-static int64_t kAccessUnitTimeoutUs = 3000000ll;
+static int64_t kAccessUnitTimeoutUs = 5000000ll;
 
 // If no access units arrive for the first 10 secs after starting the
 // stream, assume none ever will and signal EOS or switch transports.
@@ -101,7 +101,9 @@ struct MyHandler : public AHandler {
           mSetupTracksSuccessful(false),
           mSeekPending(false),
           mFirstAccessUnit(true),
-          mFirstAccessUnitNTP(0),
+          mNTPAnchorUs(-1),
+          mMediaAnchorUs(-1),
+          mLastMediaTimeUs(0),
           mNumAccessUnitsReceived(0),
           mCheckPending(false),
           mCheckGeneration(0),
@@ -551,7 +553,8 @@ struct MyHandler : public AHandler {
                 mSetupTracksSuccessful = false;
                 mSeekPending = false;
                 mFirstAccessUnit = true;
-                mFirstAccessUnitNTP = 0;
+                mNTPAnchorUs = -1;
+                mMediaAnchorUs = -1;
                 mNumAccessUnitsReceived = 0;
                 mReceivedFirstRTCPPacket = false;
                 mReceivedFirstRTPPacket = false;
@@ -632,6 +635,20 @@ struct MyHandler : public AHandler {
 
             case 'accu':
             {
+                int32_t timeUpdate;
+                if (msg->findInt32("time-update", &timeUpdate) && timeUpdate) {
+                    size_t trackIndex;
+                    CHECK(msg->findSize("track-index", &trackIndex));
+
+                    uint32_t rtpTime;
+                    uint64_t ntpTime;
+                    CHECK(msg->findInt32("rtp-time", (int32_t *)&rtpTime));
+                    CHECK(msg->findInt64("ntp-time", (int64_t *)&ntpTime));
+
+                    onTimeUpdate(trackIndex, rtpTime, ntpTime);
+                    break;
+                }
+
                 int32_t first;
                 if (msg->findInt32("first-rtcp", &first)) {
                     mReceivedFirstRTCPPacket = true;
@@ -683,51 +700,11 @@ struct MyHandler : public AHandler {
                     break;
                 }
 
-                uint64_t ntpTime;
-                CHECK(accessUnit->meta()->findInt64(
-                            "ntp-time", (int64_t *)&ntpTime));
-
-                uint32_t rtpTime;
-                CHECK(accessUnit->meta()->findInt32(
-                            "rtp-time", (int32_t *)&rtpTime));
-
                 if (track->mNewSegment) {
                     track->mNewSegment = false;
-
-                    LOGV("first segment unit ntpTime=0x%016llx rtpTime=%u seq=%d",
-                         ntpTime, rtpTime, seqNum);
                 }
 
-                if (mFirstAccessUnit) {
-                    mDoneMsg->setInt32("result", OK);
-                    mDoneMsg->post();
-                    mDoneMsg = NULL;
-
-                    mFirstAccessUnit = false;
-                    mFirstAccessUnitNTP = ntpTime;
-                }
-
-                if (ntpTime >= mFirstAccessUnitNTP) {
-                    ntpTime -= mFirstAccessUnitNTP;
-                } else {
-                    ntpTime = 0;
-                }
-
-                int64_t timeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
-
-                accessUnit->meta()->setInt64("timeUs", timeUs);
-
-#if 0
-                int32_t damaged;
-                if (accessUnit->meta()->findInt32("damaged", &damaged)
-                        && damaged != 0) {
-                    LOGI("ignoring damaged AU");
-                } else
-#endif
-                {
-                    TrackInfo *track = &mTracks.editItemAt(trackIndex);
-                    track->mPacketSource->queueAccessUnit(accessUnit);
-                }
+                onAccessUnitComplete(trackIndex, accessUnit);
                 break;
             }
 
@@ -778,8 +755,14 @@ struct MyHandler : public AHandler {
             {
                 // Session is paused now.
                 for (size_t i = 0; i < mTracks.size(); ++i) {
-                    mTracks.editItemAt(i).mPacketSource->flushQueue();
+                    TrackInfo *info = &mTracks.editItemAt(i);
+
+                    info->mPacketSource->flushQueue();
+                    info->mRTPAnchor = 0;
+                    info->mNTPAnchorUs = -1;
                 }
+
+                mNTPAnchorUs = -1;
 
                 int64_t timeUs;
                 CHECK(msg->findInt64("time", &timeUs));
@@ -831,6 +814,11 @@ struct MyHandler : public AHandler {
                     } else {
                         parsePlayResponse(response);
 
+                        ssize_t i = response->mHeaders.indexOfKey("rtp-info");
+                        CHECK_GE(i, 0);
+
+                        LOGV("rtp-info: %s", response->mHeaders.valueAt(i).c_str());
+
                         LOGI("seek completed.");
                     }
                 }
@@ -875,7 +863,6 @@ struct MyHandler : public AHandler {
                         mTryFakeRTCP = true;
 
                         mReceivedFirstRTCPPacket = true;
-                        mRTPConn->fakeTimestamps();
                     } else {
                         LOGW("Never received any data, switching transports.");
 
@@ -980,7 +967,7 @@ struct MyHandler : public AHandler {
 
             uint32_t rtpTime = strtoul(val.c_str(), &end, 10);
 
-            LOGV("track #%d: rtpTime=%u <=> ntp=%.2f", n, rtpTime, npt1);
+            LOGV("track #%d: rtpTime=%u <=> npt=%.2f", n, rtpTime, npt1);
 
             info->mPacketSource->setNormalPlayTimeMapping(
                     rtpTime, (int64_t)(npt1 * 1E6));
@@ -1003,6 +990,25 @@ struct MyHandler : public AHandler {
     }
 
 private:
+    struct TrackInfo {
+        AString mURL;
+        int mRTPSocket;
+        int mRTCPSocket;
+        bool mUsingInterleavedTCP;
+        uint32_t mFirstSeqNumInSegment;
+        bool mNewSegment;
+
+        uint32_t mRTPAnchor;
+        int64_t mNTPAnchorUs;
+        int32_t mTimeScale;
+
+        sp<APacketSource> mPacketSource;
+
+        // Stores packets temporarily while no notion of time
+        // has been established yet.
+        List<sp<ABuffer> > mPackets;
+    };
+
     sp<ALooper> mLooper;
     sp<ALooper> mNetLooper;
     sp<ARTSPConnection> mConn;
@@ -1015,7 +1021,11 @@ private:
     bool mSetupTracksSuccessful;
     bool mSeekPending;
     bool mFirstAccessUnit;
-    uint64_t mFirstAccessUnitNTP;
+
+    int64_t mNTPAnchorUs;
+    int64_t mMediaAnchorUs;
+    int64_t mLastMediaTimeUs;
+
     int64_t mNumAccessUnitsReceived;
     bool mCheckPending;
     int32_t mCheckGeneration;
@@ -1025,16 +1035,6 @@ private:
     bool mReceivedFirstRTPPacket;
     bool mSeekable;
 
-    struct TrackInfo {
-        AString mURL;
-        int mRTPSocket;
-        int mRTCPSocket;
-        bool mUsingInterleavedTCP;
-        uint32_t mFirstSeqNumInSegment;
-        bool mNewSegment;
-
-        sp<APacketSource> mPacketSource;
-    };
     Vector<TrackInfo> mTracks;
 
     sp<AMessage> mDoneMsg;
@@ -1066,6 +1066,20 @@ private:
         info->mUsingInterleavedTCP = false;
         info->mFirstSeqNumInSegment = 0;
         info->mNewSegment = true;
+        info->mRTPAnchor = 0;
+        info->mNTPAnchorUs = -1;
+
+        unsigned long PT;
+        AString formatDesc;
+        AString formatParams;
+        mSessionDesc->getFormatType(index, &PT, &formatDesc, &formatParams);
+
+        int32_t timescale;
+        int32_t numChannels;
+        ASessionDescription::ParseFormatDesc(
+                formatDesc.c_str(), &timescale, &numChannels);
+
+        info->mTimeScale = timescale;
 
         LOGV("track #%d URL=%s", mTracks.size(), trackURL.c_str());
 
@@ -1143,6 +1157,90 @@ private:
 
         return true;
     }
+
+    void onTimeUpdate(int32_t trackIndex, uint32_t rtpTime, uint64_t ntpTime) {
+        LOGV("onTimeUpdate track %d, rtpTime = 0x%08x, ntpTime = 0x%016llx",
+             trackIndex, rtpTime, ntpTime);
+
+        int64_t ntpTimeUs = (int64_t)(ntpTime * 1E6 / (1ll << 32));
+
+        TrackInfo *track = &mTracks.editItemAt(trackIndex);
+
+        track->mRTPAnchor = rtpTime;
+        track->mNTPAnchorUs = ntpTimeUs;
+
+        if (mNTPAnchorUs < 0) {
+            mNTPAnchorUs = ntpTimeUs;
+            mMediaAnchorUs = mLastMediaTimeUs;
+        }
+    }
+
+    void onAccessUnitComplete(
+            int32_t trackIndex, const sp<ABuffer> &accessUnit) {
+        LOGV("onAccessUnitComplete track %d", trackIndex);
+
+        if (mFirstAccessUnit) {
+            mDoneMsg->setInt32("result", OK);
+            mDoneMsg->post();
+            mDoneMsg = NULL;
+
+            mFirstAccessUnit = false;
+        }
+
+        TrackInfo *track = &mTracks.editItemAt(trackIndex);
+
+        if (mNTPAnchorUs < 0 || mMediaAnchorUs < 0 || track->mNTPAnchorUs < 0) {
+            LOGV("storing accessUnit, no time established yet");
+            track->mPackets.push_back(accessUnit);
+            return;
+        }
+
+        while (!track->mPackets.empty()) {
+            sp<ABuffer> accessUnit = *track->mPackets.begin();
+            track->mPackets.erase(track->mPackets.begin());
+
+            if (addMediaTimestamp(trackIndex, track, accessUnit)) {
+                track->mPacketSource->queueAccessUnit(accessUnit);
+            }
+        }
+
+        if (addMediaTimestamp(trackIndex, track, accessUnit)) {
+            track->mPacketSource->queueAccessUnit(accessUnit);
+        }
+    }
+
+    bool addMediaTimestamp(
+            int32_t trackIndex, const TrackInfo *track,
+            const sp<ABuffer> &accessUnit) {
+        uint32_t rtpTime;
+        CHECK(accessUnit->meta()->findInt32(
+                    "rtp-time", (int32_t *)&rtpTime));
+
+        int64_t relRtpTimeUs =
+            (((int64_t)rtpTime - (int64_t)track->mRTPAnchor) * 1000000ll)
+                / track->mTimeScale;
+
+        int64_t ntpTimeUs = track->mNTPAnchorUs + relRtpTimeUs;
+
+        int64_t mediaTimeUs = mMediaAnchorUs + ntpTimeUs - mNTPAnchorUs;
+
+        if (mediaTimeUs > mLastMediaTimeUs) {
+            mLastMediaTimeUs = mediaTimeUs;
+        }
+
+        if (mediaTimeUs < 0) {
+            LOGV("dropping early accessUnit.");
+            return false;
+        }
+
+        LOGV("track %d rtpTime=%d mediaTimeUs = %lld us (%.2f secs)",
+             trackIndex, rtpTime, mediaTimeUs, mediaTimeUs / 1E6);
+
+        accessUnit->meta()->setInt64("timeUs", mediaTimeUs);
+
+        return true;
+    }
+
 
     DISALLOW_EVIL_CONSTRUCTORS(MyHandler);
 };

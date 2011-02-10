@@ -169,12 +169,6 @@ void ARTPConnection::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
-        case kWhatFakeTimestamps:
-        {
-            onFakeTimestamps();
-            break;
-        }
-
         default:
         {
             TRESPASS();
@@ -461,12 +455,6 @@ status_t ARTPConnection::parseRTP(StreamInfo *s, const sp<ABuffer> &buffer) {
     buffer->setInt32Data(u16at(&data[2]));
     buffer->setRange(payloadOffset, size - payloadOffset);
 
-    if ((mFlags & kFakeTimestamps) && !source->timeEstablished()) {
-        source->timeUpdate(rtpTime, 0);
-        source->timeUpdate(rtpTime + 90000, 0x100000000ll);
-        CHECK(source->timeEstablished());
-    }
-
     source->processRTPPacket(buffer);
 
     return OK;
@@ -592,9 +580,7 @@ status_t ARTPConnection::parseSR(
 
     sp<ARTPSource> source = findSource(s, id);
 
-    if ((mFlags & kFakeTimestamps) == 0) {
-        source->timeUpdate(rtpTime, ntpTime);
-    }
+    source->timeUpdate(rtpTime, ntpTime);
 
     return 0;
 }
@@ -649,28 +635,6 @@ void ARTPConnection::onInjectPacket(const sp<AMessage> &msg) {
         err = parseRTP(s, buffer);
     } else {
         err = parseRTCP(s, buffer);
-    }
-}
-
-void ARTPConnection::fakeTimestamps() {
-    (new AMessage(kWhatFakeTimestamps, id()))->post();
-}
-
-void ARTPConnection::onFakeTimestamps() {
-    List<StreamInfo>::iterator it = mStreams.begin();
-    while (it != mStreams.end()) {
-        StreamInfo &info = *it++;
-
-        for (size_t j = 0; j < info.mSources.size(); ++j) {
-            sp<ARTPSource> source = info.mSources.valueAt(j);
-
-            if (!source->timeEstablished()) {
-                source->timeUpdate(0, 0);
-                source->timeUpdate(0 + 90000, 0x100000000ll);
-
-                mFlags |= kFakeTimestamps;
-            }
-        }
     }
 }
 
