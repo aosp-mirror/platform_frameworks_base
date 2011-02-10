@@ -91,15 +91,6 @@
         </RelativeLayout>
     </FrameLayout>
 
-    <view
-        class="com.android.systemui.statusbar.tablet.ShirtPocket$DropZone"
-        android:id="@+id/drop_target"
-        android:layout_width="512dp"
-        android:layout_height="@*android:dimen/status_bar_height"
-        android:background="@drawable/pocket_drag_bg"
-        android:layout_gravity="right"
-        />
-
     <FrameLayout
         android:id="@+id/bar_shadow_holder"
         android:layout_width="match_parent"
