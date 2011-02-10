@@ -218,13 +218,26 @@ public class AudioSystem
      */
     public static void setErrorCallback(ErrorCallback cb)
     {
-        mErrorCallback = cb;
+        synchronized (AudioSystem.class) {
+            mErrorCallback = cb;
+        }
+        // Calling a method on AudioFlinger here makes sure that we bind to IAudioFlinger
+        // binder interface death. Not doing that would result in not being notified of
+        // media_server process death if no other method is called on AudioSystem that reaches
+        // to AudioFlinger.
+        isMicrophoneMuted();
     }
 
     private static void errorCallbackFromNative(int error)
     {
-        if (mErrorCallback != null) {
-            mErrorCallback.onError(error);
+        ErrorCallback errorCallback = null;
+        synchronized (AudioSystem.class) {
+            if (mErrorCallback != null) {
+                errorCallback = mErrorCallback;
+            }
+        }
+        if (errorCallback != null) {
+            errorCallback.onError(error);
         }
     }
 
