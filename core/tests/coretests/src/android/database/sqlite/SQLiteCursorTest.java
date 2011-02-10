@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.io.File;
@@ -54,6 +55,7 @@ public class SQLiteCursorTest extends AndroidTestCase {
         super.tearDown();
     }
 
+    @Suppress
     @SmallTest
     public void testQueryObjReassignment() {
         mDatabase.enableWriteAheadLogging();
