@@ -276,7 +276,31 @@ public class MediaScanner
         "Drum Solo",
         "A capella",
         "Euro-House",
-        "Dance Hall"
+        "Dance Hall",
+        // The following ones seem to be fairly widely supported as well
+        "Goa",
+        "Drum & Bass",
+        "Club-House",
+        "Hardcore",
+        "Terror",
+        "Indie",
+        "Britpop",
+        "Negerpunk",
+        "Polsk Punk",
+        "Beat",
+        "Christian Gangsta",
+        "Heavy Metal",
+        "Black Metal",
+        "Crossover",
+        "Contemporary Christian",
+        "Christian Rock",
+        "Merengue",
+        "Salsa",
+        "Thrash Metal",
+        "Anime",
+        "JPop",
+        "Synthpop",
+        // 148 and up don't seem to have been defined yet.
     };
 
     private int mNativeContext;
@@ -588,23 +612,7 @@ public class MediaScanner
             } else if (name.equalsIgnoreCase("composer") || name.startsWith("composer;")) {
                 mComposer = value.trim();
             } else if (name.equalsIgnoreCase("genre") || name.startsWith("genre;")) {
-                // handle numeric genres, which PV sometimes encodes like "(20)"
-                if (value.length() > 0) {
-                    int genreCode = -1;
-                    char ch = value.charAt(0);
-                    if (ch == '(') {
-                        genreCode = parseSubstring(value, 1, -1);
-                    } else if (ch >= '0' && ch <= '9') {
-                        genreCode = parseSubstring(value, 0, -1);
-                    }
-                    if (genreCode >= 0 && genreCode < ID3_GENRES.length) {
-                        value = ID3_GENRES[genreCode];
-                    } else if (genreCode == 255) {
-                        // 255 is defined to be unknown
-                        value = null;
-                    }
-                }
-                mGenre = value;
+                mGenre = getGenreName(value);
             } else if (name.equalsIgnoreCase("year") || name.startsWith("year;")) {
                 mYear = parseSubstring(value, 0, 0);
             } else if (name.equalsIgnoreCase("tracknumber") || name.startsWith("tracknumber;")) {
@@ -625,6 +633,49 @@ public class MediaScanner
             } else if (name.equalsIgnoreCase("compilation")) {
                 mCompilation = parseSubstring(value, 0, 0);
             }
+        }
+
+        public String getGenreName(String genreTagValue) {
+
+            if (genreTagValue == null) {
+                return null;
+            }
+            final int length = genreTagValue.length();
+
+            if (length > 0 && genreTagValue.charAt(0) == '(') {
+                StringBuffer number = new StringBuffer();
+                int i = 1;
+                for (; i < length - 1; ++i) {
+                    char c = genreTagValue.charAt(i);
+                    if (Character.isDigit(c)) {
+                        number.append(c);
+                    } else {
+                        break;
+                    }
+                }
+                if (genreTagValue.charAt(i) == ')') {
+                    try {
+                        short genreIndex = Short.parseShort(number.toString());
+                        if (genreIndex >= 0) {
+                            if (genreIndex < ID3_GENRES.length) {
+                                return ID3_GENRES[genreIndex];
+                            } else if (genreIndex == 0xFF) {
+                                return null;
+                            } else if (genreIndex < 0xFF && (i + 1) < length) {
+                                // genre is valid but unknown,
+                                // if there is a string after the value we take it
+                                return genreTagValue.substring(i + 1);
+                            } else {
+                                // else return the number, without parentheses
+                                return number.toString();
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            }
+
+            return genreTagValue;
         }
 
         public void setMimeType(String mimeType) {
