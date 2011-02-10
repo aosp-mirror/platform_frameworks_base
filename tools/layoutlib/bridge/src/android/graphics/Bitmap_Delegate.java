@@ -383,13 +383,15 @@ public final class Bitmap_Delegate {
     @LayoutlibDelegate
     /*package*/ static void nativeCopyPixelsToBuffer(int nativeBitmap, Buffer dst) {
         // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeCopyPixelsToBuffer");
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Bitmap.copyPixelsToBuffer is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeCopyPixelsFromBuffer(int nb, Buffer src) {
         // FIXME implement native delegate
-        throw new UnsupportedOperationException("Native delegate needed for Bitmap.nativeCopyPixelsFromBuffer");
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Bitmap.copyPixelsFromBuffer is not supported.", null, null /*data*/);
     }
 
     @LayoutlibDelegate

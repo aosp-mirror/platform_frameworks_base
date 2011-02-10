@@ -485,8 +485,11 @@ public final class BridgeTypedArray extends TypedArray {
         if (f == 0) return 0;
         if (f > 0) return 1;
 
-        throw new UnsupportedOperationException("Can't convert to dimension: " +
-                Integer.toString(index));
+        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
+                "Can't convert to dimension: " + Integer.toString(index),
+                null, null /*data*/);
+
+        return defValue;
     }
 
     /**
