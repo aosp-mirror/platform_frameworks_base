@@ -26,12 +26,15 @@ import java.io.IOException;
 /**
  * Provides access to ISO-DEP (ISO 14443-4) properties and I/O operations on a {@link Tag}.
  *
- * <p>Acquire a {@link IsoDep} object using {@link #get}.
+ * <p>Acquire an {@link IsoDep} object using {@link #get}.
  * <p>The primary ISO-DEP I/O operation is {@link #transceive}. Applications must
  * implement their own protocol stack on top of {@link #transceive}.
  * <p>Tags that enumerate the {@link IsoDep} technology in {@link Tag#getTechList}
  * will also enumerate
  * {@link NfcA} or {@link NfcB} (since IsoDep builds on top of either of these).
+ *
+ * <p class="note"><strong>Note:</strong> Methods that perform I/O operations
+ * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class IsoDep extends BasicTagTechnology {
     private static final String TAG = "NFC";
@@ -80,6 +83,9 @@ public final class IsoDep extends BasicTagTechnology {
      * <p>Setting a longer timeout may be useful when performing
      * transactions that require a long processing time on the tag
      * such as key generation.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
      * @param timeout timeout value in milliseconds
      */
     public void setTimeout(int timeout) {
@@ -141,6 +147,8 @@ public final class IsoDep extends BasicTagTechnology {
      * <p>This is an I/O operation and will block until complete. It must
      * not be called from the main application thread. A blocked call will be canceled with
      * {@link IOException} if {@link #close} is called from another thread.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @param data command bytes to send, must not be null
      * @return response bytes received, will not be null
