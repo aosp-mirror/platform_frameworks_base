@@ -67,8 +67,14 @@ void LayerDim::onDraw(const Region& clip) const
         const GLfloat alpha = s.alpha/255.0f;
         const uint32_t fbHeight = hw.getHeight();
         glDisable(GL_DITHER);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+        if (s.alpha == 0xFF) {
+            glDisable(GL_BLEND);
+        } else {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        }
+
         glColor4f(0, 0, 0, alpha);
 
 #if defined(GL_OES_EGL_image_external)
