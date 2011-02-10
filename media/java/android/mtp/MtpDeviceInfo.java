@@ -20,8 +20,6 @@ package android.mtp;
  * This class encapsulates information about an MTP device.
  * This corresponds to the DeviceInfo Dataset described in
  * section 5.1.1 of the MTP specification.
- *
- * {@hide}
  */
 public class MtpDeviceInfo {
 

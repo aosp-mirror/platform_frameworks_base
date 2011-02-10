@@ -20,8 +20,6 @@ package android.mtp;
  * This class encapsulates information about a storage unit on an MTP device.
  * This corresponds to the StorageInfo Dataset described in
  * section 5.2.2 of the MTP specification.
- *
- * {@hide}
  */
 public final class MtpStorageInfo {
 

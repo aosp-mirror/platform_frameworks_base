@@ -32,10 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class helps an application manage a list of connected MTP devices.
+ * This class helps an application manage a list of connected MTP or PTP devices.
  * It listens for MTP devices being attached and removed from the USB host bus
  * and notifies the application when the MTP device list changes.
- * {@hide}
  */
 public class MtpClient {
 
@@ -76,12 +75,34 @@ public class MtpClient {
         }
     };
 
+    /**
+     * An interface for being notified when MTP or PTP devices are attached
+     * or removed.  In the current implementation, only PTP devices are supported.
+     */
     public interface Listener {
+        /**
+         * Called when a new device has been added
+         *
+         * @param device the new device that was added
+         */
         public void deviceAdded(MtpDevice device);
+
+        /**
+         * Called when a new device has been removed
+         *
+         * @param device the device that was removed
+         */
         public void deviceRemoved(MtpDevice device);
     }
 
-   static public boolean isCamera(UsbDevice device) {
+    /**
+     * Tests to see if a {@link android.hardware.UsbDevice}
+     * supports the PTP protocol (typically used by digital cameras)
+     *
+     * @param device the device to test
+     * @return true if the device is a PTP device.
+     */
+    static public boolean isCamera(UsbDevice device) {
         int count = device.getInterfaceCount();
         for (int i = 0; i < count; i++) {
             UsbInterface intf = device.getInterface(i);
@@ -94,16 +115,11 @@ public class MtpClient {
         return false;
     }
 
-    private MtpDevice openDevice(UsbDevice usbDevice) {
-        if (isCamera(usbDevice)) {
-            MtpDevice mtpDevice = new MtpDevice(usbDevice);
-            if (mtpDevice.open(mUsbManager)) {
-                return mtpDevice;
-            }
-        }
-        return null;
-    }
-
+    /**
+     * MtpClient constructor
+     *
+     * @param context the {@link android.content.Context} to use for the MtpClient
+     */
     public MtpClient(Context context) {
         mContext = context;
         mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
@@ -124,6 +140,26 @@ public class MtpClient {
         }
     }
 
+    /**
+     * Opens the {@link android.hardware.UsbDevice} for an MTP or PTP
+     * device and return an {@link android.mtp.MtpDevice} for it.
+     *
+     * @param device the device to open
+     * @return an MtpDevice for the device.
+     */
+    private MtpDevice openDevice(UsbDevice usbDevice) {
+        if (isCamera(usbDevice)) {
+            MtpDevice mtpDevice = new MtpDevice(usbDevice);
+            if (mtpDevice.open(mUsbManager)) {
+                return mtpDevice;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Closes all resources related to the MtpClient object
+     */
     public void close() {
         mContext.unregisterReceiver(mUsbReceiver);
     }
@@ -137,6 +173,12 @@ public class MtpClient {
         }
     }
 
+    /**
+     * Registers a {@link android.mtp.MtpClient.Listener} interface to receive
+     * notifications when MTP or PTP devices are added or removed.
+     *
+     * @param listener the listener to register
+     */
     public void addListener(Listener listener) {
         synchronized (mDeviceList) {
             if (!mListeners.contains(listener)) {
@@ -145,18 +187,37 @@ public class MtpClient {
         }
     }
 
+    /**
+     * Unregisters a {@link android.mtp.MtpClient.Listener} interface.
+     *
+     * @param listener the listener to unregister
+     */
     public void removeListener(Listener listener) {
         synchronized (mDeviceList) {
             mListeners.remove(listener);
         }
     }
 
+    /**
+     * Retrieves an {@link android.mtp.MtpDevice} object for the USB device
+     * with the given name.
+     *
+     * @param deviceName the name of the USB device
+     * @return the MtpDevice, or null if it does not exist
+     */
     public MtpDevice getDevice(String deviceName) {
         synchronized (mDeviceList) {
             return getDeviceLocked(deviceName);
         }
     }
 
+    /**
+     * Retrieves an {@link android.mtp.MtpDevice} object for the USB device
+     * with the given ID.
+     *
+     * @param id the ID of the USB device
+     * @return the MtpDevice, or null if it does not exist
+     */
     public MtpDevice getDevice(int id) {
         synchronized (mDeviceList) {
             return getDeviceLocked(UsbDevice.getDeviceName(id));
@@ -172,12 +233,24 @@ public class MtpClient {
         return null;
     }
 
+    /**
+     * Retrieves a list of all currently connected {@link android.mtp.MtpDevice}.
+     *
+     * @return the list of MtpDevices
+     */
     public List<MtpDevice> getDeviceList() {
         synchronized (mDeviceList) {
             return new ArrayList<MtpDevice>(mDeviceList);
         }
     }
 
+    /**
+     * Retrieves a list of all {@link android.mtp.MtpStorageInfo}
+     * for the MTP or PTP device with the given USB device name
+     *
+     * @param deviceName the name of the USB device
+     * @return the list of MtpStorageInfo
+     */
     public List<MtpStorageInfo> getStorageList(String deviceName) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {
@@ -201,6 +274,15 @@ public class MtpClient {
         return storageList;
     }
 
+    /**
+     * Retrieves the {@link android.mtp.MtpObjectInfo} for an object on
+     * the MTP or PTP device with the given USB device name with the given
+     * object handle
+     *
+     * @param deviceName the name of the USB device
+     * @param objectHandle handle of the object to query
+     * @return the MtpObjectInfo
+     */
     public MtpObjectInfo getObjectInfo(String deviceName, int objectHandle) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {
@@ -209,6 +291,13 @@ public class MtpClient {
         return device.getObjectInfo(objectHandle);
     }
 
+    /**
+     * Deletes an object on the MTP or PTP device with the given USB device name.
+     *
+     * @param deviceName the name of the USB device
+     * @param objectHandle handle of the object to delete
+     * @return true if the deletion succeeds
+     */
     public boolean deleteObject(String deviceName, int objectHandle) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {
@@ -217,6 +306,19 @@ public class MtpClient {
         return device.deleteObject(objectHandle);
     }
 
+    /**
+     * Retrieves a list of {@link android.mtp.MtpObjectInfo} for all objects
+     * on the MTP or PTP device with the given USB device name and given storage ID
+     * and/or object handle.
+     * If the object handle is zero, then all objects in the root of the storage unit
+     * will be returned. Otherwise, all immediate children of the object will be returned.
+     * If the storage ID is also zero, then all objects on all storage units will be returned.
+     *
+     * @param deviceName the name of the USB device
+     * @param storageId the ID of the storage unit to query, or zero for all
+     * @param objectHandle the handle of the parent object to query, or zero for the storage root
+     * @return the list of MtpObjectInfo
+     */
     public List<MtpObjectInfo> getObjectList(String deviceName, int storageId, int objectHandle) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {
@@ -244,6 +346,15 @@ public class MtpClient {
         return objectList;
     }
 
+    /**
+     * Returns the data for an object as a byte array.
+     *
+     * @param deviceName the name of the USB device containing the object
+     * @param objectHandle handle of the object to read
+     * @param objectSize the size of the object (this should match
+     *      {@link android.mtp.MtpObjectInfo#getCompressedSize}
+     * @return the object's data, or null if reading fails
+     */
     public byte[] getObject(String deviceName, int objectHandle, int objectSize) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {
@@ -252,6 +363,13 @@ public class MtpClient {
         return device.getObject(objectHandle, objectSize);
     }
 
+    /**
+     * Returns the thumbnail data for an object as a byte array.
+     *
+     * @param deviceName the name of the USB device containing the object
+     * @param objectHandle handle of the object to read
+     * @return the object's thumbnail, or null if reading fails
+     */
     public byte[] getThumbnail(String deviceName, int objectHandle) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {
@@ -260,6 +378,16 @@ public class MtpClient {
         return device.getThumbnail(objectHandle);
     }
 
+    /**
+     * Copies the data for an object to a file in external storage.
+     *
+     * @param deviceName the name of the USB device containing the object
+     * @param objectHandle handle of the object to read
+     * @param destPath path to destination for the file transfer.
+     *      This path should be in the external storage as defined by
+     *      {@link android.os.Environment#getExternalStorageDirectory}
+     * @return true if the file transfer succeeds
+     */
     public boolean importFile(String deviceName, int objectHandle, String destPath) {
         MtpDevice device = getDevice(deviceName);
         if (device == null) {

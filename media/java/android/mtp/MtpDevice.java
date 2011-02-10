@@ -22,9 +22,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 /**
- * This class represents an MTP device connected on the USB host bus.
- *
- * {@hide}
+ * This class represents an MTP or PTP device connected on the USB host bus.
  */
 public final class MtpDevice {
 
@@ -36,10 +34,21 @@ public final class MtpDevice {
         System.loadLibrary("media_jni");
     }
 
+    /**
+     * MtpClient constructor
+     *
+     * @param device the {@link android.hardware.UsbDevice} for the MTP or PTP device
+     */
     public MtpDevice(UsbDevice device) {
         mDevice = device;
     }
 
+    /**
+     * Opens the MTP or PTP device and return an {@link android.mtp.MtpDevice} for it.
+     *
+     * @param manager reference to {@link android.hardware.UsbManager}
+     * @return true if the device was successfully opened.
+     */
     public boolean open(UsbManager manager) {
         if (manager.openDevice(mDevice)) {
             return native_open(mDevice.getDeviceName(), mDevice.getFileDescriptor());
@@ -48,14 +57,15 @@ public final class MtpDevice {
         }
     }
 
+    /**
+     * Closes all resources related to the MtpDevice object
+     */
     public void close() {
-        Log.d(TAG, "close");
         native_close();
     }
 
     @Override
     protected void finalize() throws Throwable {
-        Log.d(TAG, "finalize");
         try {
             native_close();
         } finally {
@@ -63,10 +73,20 @@ public final class MtpDevice {
         }
     }
 
+    /**
+     * Returns the name of the USB device
+     *
+     * @return the device name
+     */
     public String getDeviceName() {
         return mDevice.getDeviceName();
     }
 
+    /**
+     * Returns the ID of the USB device
+     *
+     * @return the device ID
+     */
     public int getDeviceId() {
         return mDevice.getDeviceId();
     }
@@ -76,48 +96,118 @@ public final class MtpDevice {
         return mDevice.getDeviceName();
     }
 
+    /**
+     * Returns the {@link android.mtp.MtpDeviceInfo} for this device
+     *
+     * @return the device info
+     */
     public MtpDeviceInfo getDeviceInfo() {
         return native_get_device_info();
     }
 
+    /**
+     * Returns the list of IDs for all storage units on this device
+     *
+     * @return the storage IDs
+     */
     public int[] getStorageIds() {
         return native_get_storage_ids();
     }
 
+    /**
+     * Returns the list of object handles for all objects on the given storage unit,
+     * with the given format and parent.
+     *
+     * @param storageId the storage unit to query
+     * @param format the format of the object to return, or zero for all formats
+     * @param objectHandle the parent object to query, or zero for the storage root
+     * @return the object handles
+     */
     public int[] getObjectHandles(int storageId, int format, int objectHandle) {
         return native_get_object_handles(storageId, format, objectHandle);
     }
 
+    /**
+     * Returns the data for an object as a byte array.
+     *
+     * @param objectHandle handle of the object to read
+     * @param objectSize the size of the object (this should match
+     *      {@link android.mtp.MtpObjectInfo#getCompressedSize}
+     * @return the object's data, or null if reading fails
+     */
     public byte[] getObject(int objectHandle, int objectSize) {
         return native_get_object(objectHandle, objectSize);
     }
 
+    /**
+     * Returns the thumbnail data for an object as a byte array.
+     *
+     * @param objectHandle handle of the object to read
+     * @return the object's thumbnail, or null if reading fails
+     */
     public byte[] getThumbnail(int objectHandle) {
         return native_get_thumbnail(objectHandle);
     }
 
+    /**
+     * Retrieves the {@link android.mtp.MtpStorageInfo} for a storage unit.
+     *
+     * @param storageId the ID of the storage unit
+     * @return the MtpStorageInfo
+     */
     public MtpStorageInfo getStorageInfo(int storageId) {
         return native_get_storage_info(storageId);
     }
 
+    /**
+     * Retrieves the {@link android.mtp.MtpObjectInfo} for an object.
+     *
+     * @param objectHandle the handle of the object
+     * @return the MtpObjectInfo
+     */
     public MtpObjectInfo getObjectInfo(int objectHandle) {
         return native_get_object_info(objectHandle);
     }
 
+    /**
+     * Deletes an object on the device.
+     *
+     * @param objectHandle handle of the object to delete
+     * @return true if the deletion succeeds
+     */
     public boolean deleteObject(int objectHandle) {
         return native_delete_object(objectHandle);
     }
 
+    /**
+     * Retrieves the object handle for the parent of an object on the device.
+     *
+     * @param objectHandle handle of the object to query
+     * @return the parent's handle, or zero if it is in the root of the storage
+     */
     public long getParent(int objectHandle) {
         return native_get_parent(objectHandle);
     }
 
+    /**
+     * Retrieves the ID of the storage unit containing the given object on the device.
+     *
+     * @param objectHandle handle of the object to query
+     * @return the object's storage unit ID
+     */
     public long getStorageID(int objectHandle) {
         return native_get_storage_id(objectHandle);
     }
 
-    // Reads a file from device to host to the specified destination.
-    // Returns true if the transfer succeeds.
+    /**
+     * Copies the data for an object to a file in external storage.
+     *
+     * @param objectHandle handle of the object to read
+     * @param destPath path to destination for the file transfer.
+     *      This path should be in the external storage as defined by
+     *      {@link android.os.Environment#getExternalStorageDirectory}
+     * @return true if the file transfer succeeds
+     */
     public boolean importFile(int objectHandle, String destPath) {
         return native_import_file(objectHandle, destPath);
     }

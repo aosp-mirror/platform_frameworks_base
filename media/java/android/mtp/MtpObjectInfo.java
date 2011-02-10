@@ -20,8 +20,6 @@ package android.mtp;
  * This class encapsulates information about an object on an MTP device.
  * This corresponds to the ObjectInfo Dataset described in
  * section 5.3.1 of the MTP specification.
- *
- * {@hide}
  */
 public final class MtpObjectInfo {
     private int mHandle;
