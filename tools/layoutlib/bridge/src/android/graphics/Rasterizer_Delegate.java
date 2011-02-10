@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.Rasterizer
@@ -54,6 +55,7 @@ public abstract class Rasterizer_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance) {
         sManager.removeDelegate(native_instance);
     }

@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.android.BridgeResources.NinePatchInputStream
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.Density;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.BitmapFactory.Options;
 
@@ -42,6 +43,7 @@ import java.io.InputStream;
 
     // ------ Java delegates ------
 
+    @LayoutlibDelegate
     /*package*/ static Bitmap finishDecode(Bitmap bm, Rect outPadding, Options opts) {
         if (bm == null || opts == null) {
             return bm;
@@ -82,10 +84,12 @@ import java.io.InputStream;
 
     // ------ Native Delegates ------
 
+    @LayoutlibDelegate
     /*package*/ static void nativeSetDefaultConfig(int nativeConfig) {
         // pass
     }
 
+    @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts) {
         Bitmap bm = null;
@@ -129,29 +133,34 @@ import java.io.InputStream;
         return bm;
     }
 
+    @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts) {
         opts.inBitmap = null;
         return null;
     }
 
+    @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts) {
         opts.inBitmap = null;
         return null;
     }
 
+    @LayoutlibDelegate
     /*package*/ static Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts) {
         opts.inBitmap = null;
         return null;
     }
 
+    @LayoutlibDelegate
     /*package*/ static byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad) {
         // don't scale for now. This should not be called anyway since we re-implement
         // BitmapFactory.finishDecode();
         return chunk;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeIsSeekable(FileDescriptor fd) {
         return true;
     }

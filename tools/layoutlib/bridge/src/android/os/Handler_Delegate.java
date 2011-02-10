@@ -16,6 +16,8 @@
 
 package android.os;
 
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+
 
 /**
  * Delegate overriding selected methods of android.os.Handler
@@ -29,6 +31,7 @@ public class Handler_Delegate {
 
     // -------- Delegate methods
 
+    @LayoutlibDelegate
     /*package*/ static boolean sendMessageAtTime(Handler handler, Message msg, long uptimeMillis) {
         // get the callback
         IHandlerCallback callback = sCallbacks.get();

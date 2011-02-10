@@ -17,6 +17,7 @@
 package android.content.res;
 
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
@@ -32,12 +33,14 @@ import android.util.TypedValue;
  */
 public class Resources_Theme_Delegate {
 
+    @LayoutlibDelegate
     /*package*/ static TypedArray obtainStyledAttributes(
             Resources thisResources, Theme thisTheme,
             int[] attrs) {
         return RenderSessionImpl.getCurrentContext().obtainStyledAttributes(attrs);
     }
 
+    @LayoutlibDelegate
     /*package*/ static TypedArray obtainStyledAttributes(
             Resources thisResources, Theme thisTheme,
             int resid, int[] attrs)
@@ -45,6 +48,7 @@ public class Resources_Theme_Delegate {
         return RenderSessionImpl.getCurrentContext().obtainStyledAttributes(resid, attrs);
     }
 
+    @LayoutlibDelegate
     /*package*/ static TypedArray obtainStyledAttributes(
             Resources thisResources, Theme thisTheme,
             AttributeSet set, int[] attrs, int defStyleAttr, int defStyleRes) {
@@ -52,6 +56,7 @@ public class Resources_Theme_Delegate {
                 set, attrs, defStyleAttr, defStyleRes);
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean resolveAttribute(
             Resources thisResources, Theme thisTheme,
             int resid, TypedValue outValue,

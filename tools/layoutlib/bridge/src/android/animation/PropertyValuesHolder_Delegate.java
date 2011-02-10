@@ -17,6 +17,7 @@
 package android.animation;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.animation.PropertyValuesHolder
@@ -34,20 +35,24 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
  */
 /*package*/ class PropertyValuesHolder_Delegate {
 
+    @LayoutlibDelegate
     /*package*/ static int nGetIntMethod(Class<?> targetClass, String methodName) {
         // return 0 to force PropertyValuesHolder to use Java reflection.
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nGetFloatMethod(Class<?> targetClass, String methodName) {
         // return 0 to force PropertyValuesHolder to use Java reflection.
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nCallIntMethod(Object target, int methodID, int arg) {
         // do nothing
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nCallFloatMethod(Object target, int methodID, float arg) {
         // do nothing
     }

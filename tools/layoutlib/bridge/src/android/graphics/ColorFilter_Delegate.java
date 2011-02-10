@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.ColorFilter
@@ -54,6 +55,7 @@ public abstract class ColorFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance, int nativeColorFilter) {
         sManager.removeDelegate(native_instance);
     }

@@ -18,6 +18,7 @@ package android.os;
 
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import java.util.Map;
  */
 public class Build_Delegate {
 
+    @LayoutlibDelegate
     /*package*/ static String getString(String property) {
         Map<String, String> properties = Bridge.getPlatformProperties();
         String value = properties.get(property);

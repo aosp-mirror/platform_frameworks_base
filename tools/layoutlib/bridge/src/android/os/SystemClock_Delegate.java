@@ -17,6 +17,7 @@
 package android.os;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.os.SystemClock
@@ -31,6 +32,7 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
 public class SystemClock_Delegate {
     private static long sBootTime = System.currentTimeMillis();
 
+    @LayoutlibDelegate
     /*package*/ static boolean setCurrentTimeMillis(long millis) {
         return true;
     }
@@ -42,6 +44,7 @@ public class SystemClock_Delegate {
      *
      * @return milliseconds of non-sleep uptime since boot.
      */
+    @LayoutlibDelegate
     /*package*/ static long uptimeMillis() {
         return System.currentTimeMillis() - sBootTime;
     }
@@ -51,6 +54,7 @@ public class SystemClock_Delegate {
      *
      * @return elapsed milliseconds since boot.
      */
+    @LayoutlibDelegate
     /*package*/ static long elapsedRealtime() {
         return System.currentTimeMillis() - sBootTime;
     }
@@ -60,6 +64,7 @@ public class SystemClock_Delegate {
      *
      * @return elapsed milliseconds in the thread
      */
+    @LayoutlibDelegate
     /*package*/ static long currentThreadTimeMillis() {
         return System.currentTimeMillis();
     }
