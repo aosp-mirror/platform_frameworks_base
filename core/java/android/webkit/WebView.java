@@ -7213,8 +7213,13 @@ public class WebView extends AbsoluteLayout
                     // received in the fixed dimension.
                     final boolean updateLayout = viewSize.x == mLastWidthSent
                             && viewSize.y == mLastHeightSent;
+                    // Don't send scroll event for picture coming from webkit,
+                    // since the new picture may cause a scroll event to override
+                    // the saved history scroll position.
+                    mSendScrollEvent = false;
                     recordNewContentSize(draw.mContentSize.x,
                             draw.mContentSize.y, updateLayout);
+                    mSendScrollEvent = true;
                     if (DebugFlags.WEB_VIEW) {
                         Rect b = draw.mInvalRegion.getBounds();
                         Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
