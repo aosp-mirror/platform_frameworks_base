@@ -263,7 +263,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         if (mPopup != null && MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST) {
             final int measuredWidth = getMeasuredWidth();
             setMeasuredDimension(Math.min(Math.max(measuredWidth,
-                    measureContentWidth(getAdapter())), MeasureSpec.getSize(widthMeasureSpec)),
+                    measureContentWidth(getAdapter(), getBackground())),
+                    MeasureSpec.getSize(widthMeasureSpec)),
                     getMeasuredHeight());
         }
     }
@@ -458,7 +459,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return mPopup.getHintText();
     }
 
-    private int measureContentWidth(SpinnerAdapter adapter) {
+    int measureContentWidth(SpinnerAdapter adapter, Drawable background) {
         if (adapter == null) {
             return 0;
         }
@@ -473,9 +474,11 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         // Make sure the number of items we'll measure is capped. If it's a huge data set
         // with wildly varying sizes, oh well.
-        final int start = Math.max(0, getSelectedItemPosition());
-        final int count = Math.min(adapter.getCount(), start + MAX_ITEMS_MEASURED);
-        for (int i = start; i < count; i++) {
+        int start = Math.max(0, getSelectedItemPosition());
+        final int end = Math.min(adapter.getCount(), start + MAX_ITEMS_MEASURED);
+        final int count = end - start;
+        start = Math.max(0, start - (MAX_ITEMS_MEASURED - count));
+        for (int i = start; i < end; i++) {
             final int positionType = adapter.getItemViewType(i);
             if (positionType != itemType) {
                 itemType = positionType;
@@ -492,9 +495,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         // Add background padding to measured width
-        Drawable popupBackground = getBackground();
-        if (popupBackground != null) {
-            popupBackground.getPadding(mTempRect);
+        if (background != null) {
+            background.getPadding(mTempRect);
             width += mTempRect.left + mTempRect.right;
         }
 
@@ -705,7 +707,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         @Override
         public void show() {
             if (mDropDownWidth == WRAP_CONTENT) {
-                setWidth(Math.max(measureContentWidth((SpinnerAdapter) mAdapter),
+                setWidth(Math.max(measureContentWidth((SpinnerAdapter) mAdapter, getBackground()),
                         Spinner.this.getWidth()));
             } else if (mDropDownWidth == MATCH_PARENT) {
                 setWidth(Spinner.this.getWidth());
