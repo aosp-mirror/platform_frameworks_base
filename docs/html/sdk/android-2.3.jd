@@ -51,7 +51,7 @@ href="{@docRoot}sdk/index.html">download the SDK Starter Package</a>
 first.</p>
 
 <p>For a high-level introduction to Android {@sdkPlatformVersion}, see the <a
-href="http://developer.android.com/sdk/android-{@sdkPlatformVersion}-highlights.html">Platform Highlights</a>.</p>
+href="{@docRoot}sdk/android-{@sdkPlatformVersion}-highlights.html">Platform Highlights</a>.</p>
 
 
 <h2 id="relnotes">Revisions</h2>
