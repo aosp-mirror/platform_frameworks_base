@@ -1164,6 +1164,30 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             break;
         }
 
+        case FOURCC('d', '2', '6', '3'):
+        {
+            // d263 contains fixed 7 bytes:
+            // vendor - 4 bytes
+            // version - 1 byte
+            // level - 1 byte
+            // profile - 1 byte
+            char buffer[7];
+            if (chunk_data_size != (off64_t) sizeof(buffer)) {
+                LOGE("Incorrect D263 box size %lld", chunk_data_size);
+                return ERROR_MALFORMED;
+            }
+
+            if (mDataSource->readAt(
+                    data_offset, buffer, chunk_data_size) < chunk_data_size) {
+                return ERROR_IO;
+            }
+
+            mLastTrack->meta->setData(kKeyD263, kTypeD263, buffer, chunk_data_size);
+
+            *offset += chunk_size;
+            break;
+        }
+
         case FOURCC('m', 'e', 't', 'a'):
         {
             uint8_t buffer[4];

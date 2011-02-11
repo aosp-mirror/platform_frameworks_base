@@ -48,6 +48,7 @@ enum {
     kKeyBitRate           = 'brte',  // int32_t (bps)
     kKeyESDS              = 'esds',  // raw data
     kKeyAVCC              = 'avcc',  // raw data
+    kKeyD263              = 'd263',  // raw data
     kKeyVorbisInfo        = 'vinf',  // raw data
     kKeyVorbisBooks       = 'vboo',  // raw data
     kKeyWantsNALFragments = 'NALf',
@@ -118,6 +119,7 @@ enum {
 enum {
     kTypeESDS        = 'esds',
     kTypeAVCC        = 'avcc',
+    kTypeD263        = 'd263',
 };
 
 class MetaData : public RefBase {
