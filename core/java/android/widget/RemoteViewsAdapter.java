@@ -914,7 +914,9 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 // view and queueing it to be loaded if it has not already been loaded.
                 Context context = parent.getContext();
                 RemoteViews rv = mCache.getRemoteViewsAt(position);
-                int typeId = mCache.getMetaDataAt(position).typeId;
+                RemoteViewsIndexMetaData indexMetaData = mCache.getMetaDataAt(position);
+                indexMetaData.isRequested = true;
+                int typeId = indexMetaData.typeId;
 
                 // Reuse the convert view where possible
                 if (layout != null) {
