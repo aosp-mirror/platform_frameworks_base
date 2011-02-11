@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,75 @@ public class MediaProperties {
         VCODEC_MPEG4,
     };
 
+    /* H.263 Profiles and levels */
+    public static final int     H263_PROFILE_0_LEVEL_10   = 0;
+    public static final int     H263_PROFILE_0_LEVEL_20   = 1;
+    public static final int     H263_PROFILE_0_LEVEL_30   = 2;
+    public static final int     H263_PROFILE_0_LEVEL_40   = 3;
+    public static final int     H263_PROFILE_0_LEVEL_45   = 4;
+    /* MPEG-4 Profiles and levels */
+    public static final int     MPEG4_SP_LEVEL_0          = 50;
+    public static final int     MPEG4_SP_LEVEL_0B         = 51;
+    public static final int     MPEG4_SP_LEVEL_1          = 52;
+    public static final int     MPEG4_SP_LEVEL_2          = 53;
+    public static final int     MPEG4_SP_LEVEL_3          = 54;
+    public static final int     MPEG4_SP_LEVEL_4A         = 55;
+    public static final int     MPEG4_SP_LEVEL_5          = 56;
+    /* AVC Profiles and levels */
+    public static final int     H264_PROFILE_0_LEVEL_1    = 150;
+    public static final int     H264_PROFILE_0_LEVEL_1B   = 151;
+    public static final int     H264_PROFILE_0_LEVEL_1_1  = 152;
+    public static final int     H264_PROFILE_0_LEVEL_1_2  = 153;
+    public static final int     H264_PROFILE_0_LEVEL_1_3  = 154;
+    public static final int     H264_PROFILE_0_LEVEL_2    = 155;
+    public static final int     H264_PROFILE_0_LEVEL_2_1  = 156;
+    public static final int     H264_PROFILE_0_LEVEL_2_2  = 157;
+    public static final int     H264_PROFILE_0_LEVEL_3    = 158;
+    public static final int     H264_PROFILE_0_LEVEL_3_1  = 159;
+    public static final int     H264_PROFILE_0_LEVEL_3_2  = 160;
+    public static final int     H264_PROFILE_0_LEVEL_4    = 161;
+    public static final int     H264_PROFILE_0_LEVEL_4_1  = 162;
+    public static final int     H264_PROFILE_0_LEVEL_4_2  = 163;
+    public static final int     H264_PROFILE_0_LEVEL_5    = 164;
+    public static final int     H264_PROFILE_0_LEVEL_5_1  = 165;
+    /* Unsupported profile and level */
+    public static final int     UNSUPPORTED_PROFILE_LEVEL = 255;
+
+    /**
+     *  The array of supported video codec Profile and Levels
+     */
+    private static final int[] SUPPORTED_VCODEC_PROFILE_LEVELS = new int[] {
+        H263_PROFILE_0_LEVEL_10,
+        H263_PROFILE_0_LEVEL_20,
+        H263_PROFILE_0_LEVEL_30,
+        H263_PROFILE_0_LEVEL_40,
+        H263_PROFILE_0_LEVEL_45,
+        MPEG4_SP_LEVEL_0,
+        MPEG4_SP_LEVEL_0B,
+        MPEG4_SP_LEVEL_1,
+        MPEG4_SP_LEVEL_2,
+        MPEG4_SP_LEVEL_3,
+        MPEG4_SP_LEVEL_4A,
+        MPEG4_SP_LEVEL_5,
+        H264_PROFILE_0_LEVEL_1,
+        H264_PROFILE_0_LEVEL_1B,
+        H264_PROFILE_0_LEVEL_1_1,
+        H264_PROFILE_0_LEVEL_1_2,
+        H264_PROFILE_0_LEVEL_1_3,
+        H264_PROFILE_0_LEVEL_2,
+        H264_PROFILE_0_LEVEL_2_1,
+        H264_PROFILE_0_LEVEL_2_2,
+        H264_PROFILE_0_LEVEL_3,
+        H264_PROFILE_0_LEVEL_3_1,
+        H264_PROFILE_0_LEVEL_3_2,
+        H264_PROFILE_0_LEVEL_4,
+        H264_PROFILE_0_LEVEL_4_1,
+        H264_PROFILE_0_LEVEL_4_2,
+        H264_PROFILE_0_LEVEL_5,
+        H264_PROFILE_0_LEVEL_5_1,
+        UNSUPPORTED_PROFILE_LEVEL
+    };
+
     /**
      *  Audio codec types
      */
@@ -161,7 +230,7 @@ public class MediaProperties {
     public static final int ACODEC_OGG = 9;
 
     /**
-     *  The array of supported video codecs
+     *  The array of supported audio codecs
      */
     private static final int[] SUPPORTED_ACODECS = new int[] {
         ACODEC_AAC_LC,
