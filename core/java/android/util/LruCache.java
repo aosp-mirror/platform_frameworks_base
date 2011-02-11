@@ -51,6 +51,10 @@ import java.util.Map;
  *         cache.put(key, value);
  *     }
  *   }}</pre>
+ *
+ * <p>This class does not allow null to be used as a key or value. A return
+ * value of null from {@link #get}, {@link #put} or {@link #remove} is
+ * unambiguous: the key was not in the cache.
  */
 public class LruCache<K, V> {
     private final LinkedHashMap<K, V> map;
@@ -86,7 +90,7 @@ public class LruCache<K, V> {
      */
     public synchronized final V get(K key) {
         if (key == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("key == null");
         }
 
         V result = map.get(key);
@@ -118,7 +122,7 @@ public class LruCache<K, V> {
      */
     public synchronized final V put(K key, V value) {
         if (key == null || value == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("key == null || value == null");
         }
 
         putCount++;
@@ -133,7 +137,7 @@ public class LruCache<K, V> {
 
     private void trimToSize(int maxSize) {
         while (size > maxSize) {
-            Map.Entry<K, V> toEvict = map.eldest();
+            Map.Entry<K, V> toEvict = map.eldest(); // equal to map.entrySet().iterator().next();
             if (toEvict == null) {
                 break; // map is empty; if size is not 0 then throw an error below
             }
@@ -152,6 +156,24 @@ public class LruCache<K, V> {
             throw new IllegalStateException(getClass().getName()
                     + ".sizeOf() is reporting inconsistent results!");
         }
+    }
+
+    /**
+     * Removes the entry for {@code key} if it exists.
+     *
+     * @return the previous value mapped by {@code key}. Although that entry is
+     *     no longer cached, it has not been passed to {@link #entryEvicted}.
+     */
+    public synchronized final V remove(K key) {
+        if (key == null) {
+            throw new NullPointerException("key == null");
+        }
+
+        V previous = map.remove(key);
+        if (previous != null) {
+            size -= safeSizeOf(key, previous);
+        }
+        return previous;
     }
 
     /**

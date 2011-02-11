@@ -337,6 +337,45 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache);
     }
 
+    public void testRemoveDoesNotCallEntryEvicted() {
+        LruCache<String, String> cache = new LruCache<String, String>(10) {
+            @Override protected void entryEvicted(String key, String value) {
+                fail();
+            }
+        };
+        cache.put("a", "A");
+        assertEquals("A", cache.remove("a"));
+    }
+
+    public void testRemoveWithCustomSizes() {
+        LruCache<String, String> cache = new LruCache<String, String>(10) {
+            @Override protected int sizeOf(String key, String value) {
+                return value.length();
+            }
+        };
+        cache.put("a", "123456");
+        cache.put("b", "1234");
+        cache.remove("a");
+        assertEquals(4, cache.size());
+    }
+
+    public void testRemoveAbsentElement() {
+        LruCache<String, String> cache = new LruCache<String, String>(10);
+        cache.put("a", "A");
+        cache.put("b", "B");
+        assertEquals(null, cache.remove("c"));
+        assertEquals(2, cache.size());
+    }
+
+    public void testRemoveNullThrows() {
+        LruCache<String, String> cache = new LruCache<String, String>(10);
+        try {
+            cache.remove(null);
+            fail();
+        } catch (NullPointerException expected) {
+        }
+    }
+
     private LruCache<String, String> newCreatingCache() {
         return new LruCache<String, String>(3) {
             @Override protected String create(String key) {
