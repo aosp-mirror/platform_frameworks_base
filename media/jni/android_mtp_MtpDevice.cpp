@@ -496,7 +496,7 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
         LOGE("Can't find MtpDeviceInfo.mSerialNumber");
         return -1;
     }
-    clazz_deviceInfo = clazz;
+    clazz_deviceInfo = (jclass)env->NewGlobalRef(clazz);
 
     clazz = env->FindClass("android/mtp/MtpStorageInfo");
     if (clazz == NULL) {
@@ -533,7 +533,7 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
         LOGE("Can't find MtpStorageInfo.mVolumeIdentifier");
         return -1;
     }
-    clazz_storageInfo = clazz;
+    clazz_storageInfo = (jclass)env->NewGlobalRef(clazz);
 
     clazz = env->FindClass("android/mtp/MtpObjectInfo");
     if (clazz == NULL) {
@@ -645,7 +645,7 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
         LOGE("Can't find MtpObjectInfo.mKeywords");
         return -1;
     }
-    clazz_objectInfo = clazz;
+    clazz_objectInfo = (jclass)env->NewGlobalRef(clazz);
 
     clazz = env->FindClass("android/mtp/MtpDevice");
     if (clazz == NULL) {
