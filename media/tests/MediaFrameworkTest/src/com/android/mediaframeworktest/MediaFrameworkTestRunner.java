@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import com.android.mediaframeworktest.functional.MediaEqualizerTest;
 import com.android.mediaframeworktest.functional.MediaPresetReverbTest;
 import com.android.mediaframeworktest.functional.MediaVirtualizerTest;
 import com.android.mediaframeworktest.functional.MediaVisualizerTest;
+/*import for VideoEditor Test cases*/
+import com.android.mediaframeworktest.functional.VideoEditorAPITest;
+
 import junit.framework.TestSuite;
 
 import android.test.InstrumentationTestRunner;
@@ -69,6 +72,8 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaPresetReverbTest.class);
         suite.addTestSuite(MediaVirtualizerTest.class);
         suite.addTestSuite(MediaVisualizerTest.class);
+        /*Test for Video Editor*/
+        suite.addTestSuite(VideoEditorAPITest.class);
         return suite;
     }
 
