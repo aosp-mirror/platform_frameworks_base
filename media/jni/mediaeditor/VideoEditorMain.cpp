@@ -1483,6 +1483,7 @@ videoEditor_populateSettings(
     int nbOverlays = 0;
     int i,j = 0;
     int *pOverlayIndex = M4OSA_NULL;
+    M4OSA_Char* pTempChar = M4OSA_NULL;
 
     // Add a code marker (the condition must always be true).
     ADD_CODE_MARKER_FUN(NULL != pEnv)
@@ -1810,20 +1811,63 @@ videoEditor_populateSettings(
         pContext->mAudioSettings->fileType
             = pEnv->GetIntField(audioSettingObject,fid);
         M4OSA_TRACE1_1("fileType = %d",pContext->mAudioSettings->fileType);
+
+        /* free previous allocations , if any */
+        if (pContext->mAudioSettings->pFile != NULL) {
+            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pFile);
+            pContext->mAudioSettings->pFile = M4OSA_NULL;
+        }
+        if (pContext->mAudioSettings->pPCMFilePath != NULL) {
+            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pPCMFilePath);
+            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
+        }
+
         fid = pEnv->GetFieldID(audioSettingClazz,"pFile","Ljava/lang/String;");
         strPath = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
-        pContext->mAudioSettings->pFile
-                = (M4OSA_Char*)pEnv->GetStringUTFChars(strPath, M4OSA_NULL);
+        pTempChar = (M4OSA_Char*)pEnv->GetStringUTFChars(strPath, M4OSA_NULL);
+        if (pTempChar != NULL) {
+            pContext->mAudioSettings->pFile = (M4OSA_Char*) M4OSA_malloc(
+                (M4OSA_UInt32)(strlen((const char*)pTempChar))+1 /* +1 for NULL termination */, 0,
+                (M4OSA_Char*)"strPath allocation " );
+            if (pContext->mAudioSettings->pFile != M4OSA_NULL) {
+                M4OSA_memcpy((M4OSA_Int8 *)pContext->mAudioSettings->pFile ,
+                    (M4OSA_Int8 *)pTempChar , strlen((const char*)pTempChar));
+                ((M4OSA_Int8 *)(pContext->mAudioSettings->pFile))[strlen((const char*)pTempChar)] = '\0';
+                pEnv->ReleaseStringUTFChars(strPath,(const char *)pTempChar);
+            } else {
+                pEnv->ReleaseStringUTFChars(strPath,(const char *)pTempChar);
+                VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR",
+                    "regenerateAudio() Malloc failed for pContext->mAudioSettings->pFile ");
+                videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                    M4OSA_TRUE, M4ERR_ALLOC);
+                goto videoEditor_populateSettings_cleanup;
+            }
+        }
         M4OSA_TRACE1_1("file name = %s",pContext->mAudioSettings->pFile);
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "regenerateAudio() file name = %s",\
         pContext->mAudioSettings->pFile);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"pcmFilePath","Ljava/lang/String;");
         strPCMPath = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
-
-        pContext->mAudioSettings->pPCMFilePath =
-        (M4OSA_Char*)pEnv->GetStringUTFChars(strPCMPath, M4OSA_NULL);
-
+        pTempChar = (M4OSA_Char*)pEnv->GetStringUTFChars(strPCMPath, M4OSA_NULL);
+        if (pTempChar != NULL) {
+            pContext->mAudioSettings->pPCMFilePath = (M4OSA_Char*) M4OSA_malloc(
+                (M4OSA_UInt32)(strlen((const char*)pTempChar))+1 /* +1 for NULL termination */, 0,
+                (M4OSA_Char*)"strPCMPath allocation " );
+            if (pContext->mAudioSettings->pPCMFilePath != M4OSA_NULL) {
+                M4OSA_memcpy((M4OSA_Int8 *)pContext->mAudioSettings->pPCMFilePath ,
+                    (M4OSA_Int8 *)pTempChar , strlen((const char*)pTempChar));
+                ((M4OSA_Int8 *)(pContext->mAudioSettings->pPCMFilePath))[strlen((const char*)pTempChar)] = '\0';
+                pEnv->ReleaseStringUTFChars(strPCMPath,(const char *)pTempChar);
+            } else {
+                pEnv->ReleaseStringUTFChars(strPCMPath,(const char *)pTempChar);
+                VIDEOEDIT_LOG_ERROR(ANDROID_LOG_INFO, "VIDEO_EDITOR",
+                    "regenerateAudio() Malloc failed for pContext->mAudioSettings->pPCMFilePath ");
+                videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
+                    M4OSA_TRUE, M4ERR_ALLOC);
+                goto videoEditor_populateSettings_cleanup;
+            }
+        }
         VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEOEDITOR", "pPCMFilePath -- %s ",\
         pContext->mAudioSettings->pPCMFilePath);
 
@@ -1850,15 +1894,6 @@ videoEditor_populateSettings(
             pEnv->SetBooleanField(thiz,fid,regenerateAudio);
         }
 
-        if (strPath != NULL) {
-            pEnv->ReleaseStringUTFChars(strPath,
-                (const char *)pContext->mAudioSettings->pFile);
-        }
-        if (strPCMPath != NULL) {
-            pEnv->ReleaseStringUTFChars(strPCMPath,
-                (const char *)pContext->mAudioSettings->pPCMFilePath);
-        }
-
         /* Audio mix and duck */
         fid = pEnv->GetFieldID(audioSettingClazz,"ducking_threshold","I");
         pContext->mAudioSettings->uiInDucking_threshold
@@ -1883,6 +1918,7 @@ videoEditor_populateSettings(
     } else {
         if (pContext->mAudioSettings != M4OSA_NULL) {
             pContext->mAudioSettings->pFile = M4OSA_NULL;
+            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
             pContext->mAudioSettings->bRemoveOriginal = 0;
             pContext->mAudioSettings->uiNbChannels = 0;
             pContext->mAudioSettings->uiSamplingFrequency = 0;
@@ -1891,7 +1927,7 @@ videoEditor_populateSettings(
             pContext->mAudioSettings->uiAddVolume = 0;
             pContext->mAudioSettings->beginCutMs = 0;
             pContext->mAudioSettings->endCutMs = 0;
-               pContext->mAudioSettings->fileType = 0;
+            pContext->mAudioSettings->fileType = 0;
             pContext->mAudioSettings->bLoop = 0;
             pContext->mAudioSettings->uiInDucking_lowVolume  = 0;
             pContext->mAudioSettings->bInDucking_enable  = 0;
@@ -2505,6 +2541,7 @@ videoEditor_init(
                                      (M4OSA_NULL == pContext->mAudioSettings),
                                      "not initialized");
             pContext->mAudioSettings->pFile = M4OSA_NULL;
+            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
             pContext->mAudioSettings->bRemoveOriginal = 0;
             pContext->mAudioSettings->uiNbChannels = 0;
             pContext->mAudioSettings->uiSamplingFrequency = 0;
@@ -2994,6 +3031,15 @@ videoEditor_release(
         {
             delete pContext->mPreviewController;
             pContext->mPreviewController = M4OSA_NULL;
+        }
+
+        if (pContext->mAudioSettings->pFile != NULL) {
+            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pFile);
+            pContext->mAudioSettings->pFile = M4OSA_NULL;
+        }
+        if (pContext->mAudioSettings->pPCMFilePath != NULL) {
+            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pPCMFilePath);
+            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
         }
 
         // Free the context.
