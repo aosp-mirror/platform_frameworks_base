@@ -605,6 +605,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'widgets', 'newfeature', 'new'],
+    path: 'samples/WeatherListWidget/index.html',
+    title: {
+      en: 'Weather List Widget Sample'
+    },
+    description: {
+      en: 'A more complex collection-widget example which uses a ContentProvider as its data source.'
+    }
+  },
+  {
     tags: ['sample', 'layout'],
     path: 'samples/XmlAdapters/index.html',
     title: {
