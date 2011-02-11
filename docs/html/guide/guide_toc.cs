@@ -241,8 +241,11 @@
                 <span class="en">3D with Renderscript</span>
               </a><span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
-                <span class="en">Animation</span>
+                <span class="en">Property Animation</span>
               </a><span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/graphics/view-animation.html">
+                <span class="en">View Animation</span>
+              </a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
