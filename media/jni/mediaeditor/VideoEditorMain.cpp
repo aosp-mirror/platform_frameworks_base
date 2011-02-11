@@ -444,7 +444,7 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
 
                 pContext->mOverlayRenderingMode = pContext->pEditSettings->\
                          pClipList[pCurrEditInfo->clipIndex]->xVSS.MediaRendering;
-                LOGI("rendering mode %d ", pContext->mOverlayRenderingMode);
+                LOGV("rendering mode %d ", pContext->mOverlayRenderingMode);
 
             }
 
@@ -653,7 +653,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
         }
 
         for (i = 0; i < uiNumberOfClipsInStoryBoard; i++) {
-            if (timeMs < (iIncrementedDuration +
+            if (timeMs <= (iIncrementedDuration +
                           (pContext->pEditSettings->pClipList[i]->uiEndCutTime -
                            pContext->pEditSettings->pClipList[i]->uiBeginCutTime)))
             {
@@ -696,6 +696,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
             pContext->pEditSettings->pClipList[iCurrentClipIndex]->ClipProperties.uiVideoHeight,
             pContext->pEditSettings->pClipList[iCurrentClipIndex]->ClipProperties.uiVideoWidth,
             (M4OSA_Void **)&frameStr.pBuffer);
+            tnTimeMs = (M4OSA_UInt32)timeMs;
     } else {
         /* Handle 3gp/mp4 Clips here */
         /* get thumbnail*/
