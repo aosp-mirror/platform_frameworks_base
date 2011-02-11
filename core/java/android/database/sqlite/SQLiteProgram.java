@@ -18,7 +18,6 @@ package android.database.sqlite;
 
 import android.database.DatabaseUtils;
 import android.database.Cursor;
-import android.util.Log;
 
 import java.util.HashMap;
 
@@ -184,7 +183,7 @@ public abstract class SQLiteProgram extends SQLiteClosable {
         if (mCompiledSql == null) {
             return;
         }
-        mDatabase.releaseCompiledSqlObj(mCompiledSql);
+        mDatabase.releaseCompiledSqlObj(mSql, mCompiledSql);
         mCompiledSql = null;
         nStatement = 0;
     }

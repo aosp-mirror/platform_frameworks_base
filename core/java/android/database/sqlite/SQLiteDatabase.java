@@ -33,17 +33,15 @@ import android.text.TextUtils;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.LruCache;
 import android.util.Pair;
-
 import dalvik.system.BlockGuard;
-
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -262,6 +260,9 @@ public class SQLiteDatabase extends SQLiteClosable {
 
     private final WeakHashMap<SQLiteClosable, Object> mPrograms;
 
+    /** Default statement-cache size per database connection ( = instance of this class) */
+    public static final int DEFAULT_SQL_CACHE_SIZE = 25;
+
     /**
      * for each instance of this class, a LRU cache is maintained to store
      * the compiled query statement ids returned by sqlite database.
@@ -274,32 +275,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      * struct created when {@link SQLiteDatabase#openDatabase(String, CursorFactory, int)} is
      * invoked.
      *
-     * this cache has an upper limit of mMaxSqlCacheSize (settable by calling the method
+     * this cache's max size is settable by calling the method
      * (@link #setMaxSqlCacheSize(int)}).
      */
-    // default statement-cache size per database connection ( = instance of this class)
-    private int mMaxSqlCacheSize = 25;
     // guarded by itself
-    /* package */ final Map<String, SQLiteCompiledSql> mCompiledQueries =
-        new LinkedHashMap<String, SQLiteCompiledSql>(mMaxSqlCacheSize + 1, 0.75f, true) {
+    /* package */ final LruCache<String, SQLiteCompiledSql> mCompiledQueries =
+        new LruCache<String, SQLiteCompiledSql>(DEFAULT_SQL_CACHE_SIZE) {
             @Override
-            public boolean removeEldestEntry(Map.Entry<String, SQLiteCompiledSql> eldest) {
-                // eldest = least-recently used entry
-                // if it needs to be removed to accommodate a new entry,
-                //     close {@link SQLiteCompiledSql} represented by this entry, if not in use
-                //     and then let it be removed from the Map.
-                // when this is called, the caller must be trying to add a just-compiled stmt
-                // to cache; i.e., caller should already have acquired database lock AND
-                // the lock on mCompiledQueries. do as assert of these two 2 facts.
+            protected void entryEvicted(String key, SQLiteCompiledSql value) {
                 verifyLockOwner();
-                if (this.size() <= mMaxSqlCacheSize) {
-                    // cache is not full. nothing needs to be removed
-                    return false;
-                }
-                // cache is full. eldest will be removed.
-                eldest.getValue().releaseIfNotInUse();
-                // return true, so that this entry is removed automatically by the caller.
-                return true;
+                value.releaseIfNotInUse();
             }
         };
     /**
@@ -309,11 +294,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int MAX_SQL_CACHE_SIZE = 100;
     private boolean mCacheFullWarning;
-
-    /** Number of cache hits on this database connection. guarded by {@link #mCompiledQueries}. */
-    private int mNumCacheHits;
-    /** Number of cache misses on this database connection. guarded by {@link #mCompiledQueries}. */
-    private int mNumCacheMisses;
 
     /** Used to find out where this object was created in case it never got closed. */
     private final Throwable mStackTrace;
@@ -2168,12 +2148,12 @@ public class SQLiteDatabase extends SQLiteClosable {
     /* package */ void addToCompiledQueries(String sql, SQLiteCompiledSql compiledStatement) {
         synchronized(mCompiledQueries) {
             // don't insert the new mapping if a mapping already exists
-            if (mCompiledQueries.containsKey(sql)) {
+            if (mCompiledQueries.get(sql) != null) {
                 return;
             }
 
-            int maxCacheSz = (mConnectionNum == 0) ? mMaxSqlCacheSize :
-                    mParentConnObj.mMaxSqlCacheSize;
+            int maxCacheSz = (mConnectionNum == 0) ? mCompiledQueries.maxSize() :
+                    mParentConnObj.mCompiledQueries.maxSize();
 
             if (SQLiteDebug.DEBUG_SQL_CACHE) {
                 boolean printWarning = (mConnectionNum == 0)
@@ -2190,8 +2170,8 @@ public class SQLiteDatabase extends SQLiteClosable {
                             getPath() + ". Use setMaxSqlCacheSize() to increase cachesize. ");
                     mCacheFullWarning = true;
                     Log.d(TAG, "Here are the SQL statements in Cache of database: " + mPath);
-                    for (String s : mCompiledQueries.keySet()) {
-                        Log.d(TAG, "Sql stament in Cache: " + s);
+                    for (String s : mCompiledQueries.snapshot().keySet()) {
+                        Log.d(TAG, "Sql statement in Cache: " + s);
                     }
                 }
             }
@@ -2206,10 +2186,10 @@ public class SQLiteDatabase extends SQLiteClosable {
     /** package-level access for testing purposes */
     /* package */ void deallocCachedSqlStatements() {
         synchronized (mCompiledQueries) {
-            for (SQLiteCompiledSql compiledSql : mCompiledQueries.values()) {
+            for (SQLiteCompiledSql compiledSql : mCompiledQueries.snapshot().values()) {
                 compiledSql.releaseSqlStatement();
             }
-            mCompiledQueries.clear();
+            mCompiledQueries.evictAll();
         }
     }
 
@@ -2218,15 +2198,7 @@ public class SQLiteDatabase extends SQLiteClosable {
      * Returns null, if not found in the cache.
      */
     /* package */ SQLiteCompiledSql getCompiledStatementForSql(String sql) {
-        synchronized (mCompiledQueries) {
-            SQLiteCompiledSql compiledStatement = mCompiledQueries.get(sql);
-            if (compiledStatement == null) {
-                mNumCacheMisses++;
-                return null;
-            }
-            mNumCacheHits++;
-            return compiledStatement;
-        }
+        return mCompiledQueries.get(sql);
     }
 
     /**
@@ -2247,23 +2219,23 @@ public class SQLiteDatabase extends SQLiteClosable {
         synchronized(mCompiledQueries) {
             if (cacheSize > MAX_SQL_CACHE_SIZE || cacheSize < 0) {
                 throw new IllegalStateException("expected value between 0 and " + MAX_SQL_CACHE_SIZE);
-            } else if (cacheSize < mMaxSqlCacheSize) {
+            } else if (cacheSize < mCompiledQueries.maxSize()) {
                 throw new IllegalStateException("cannot set cacheSize to a value less than the value " +
                         "set with previous setMaxSqlCacheSize() call.");
             }
-            mMaxSqlCacheSize = cacheSize;
+            mCompiledQueries.setMaxSize(cacheSize);
         }
     }
 
     /* package */ boolean isInStatementCache(String sql) {
         synchronized (mCompiledQueries) {
-            return mCompiledQueries.containsKey(sql);
+            return mCompiledQueries.get(sql) != null;
         }
     }
 
-    /* package */ void releaseCompiledSqlObj(SQLiteCompiledSql compiledSql) {
+    /* package */ void releaseCompiledSqlObj(String sql, SQLiteCompiledSql compiledSql) {
         synchronized (mCompiledQueries) {
-            if (mCompiledQueries.containsValue(compiledSql)) {
+            if (mCompiledQueries.get(sql) == compiledSql) {
                 // it is in cache - reset its inUse flag
                 compiledSql.release();
             } else {
@@ -2274,21 +2246,15 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     private int getCacheHitNum() {
-        synchronized(mCompiledQueries) {
-            return mNumCacheHits;
-        }
+        return mCompiledQueries.hitCount();
     }
 
     private int getCacheMissNum() {
-        synchronized(mCompiledQueries) {
-            return mNumCacheMisses;
-        }
+        return mCompiledQueries.missCount();
     }
 
     private int getCachesize() {
-        synchronized(mCompiledQueries) {
-            return mCompiledQueries.size();
-        }
+        return mCompiledQueries.size();
     }
 
     /* package */ void finalizeStatementLater(int id) {
