@@ -304,15 +304,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
     InputMethodState mInputMethodState;
 
-    int mTextSelectHandleLeftRes;
-    int mTextSelectHandleRightRes;
-    int mTextSelectHandleRes;
-    int mTextEditPasteWindowLayout, mTextEditSidePasteWindowLayout;
-    int mTextEditNoPasteWindowLayout, mTextEditSideNoPasteWindowLayout;
+    private int mTextSelectHandleLeftRes;
+    private int mTextSelectHandleRightRes;
+    private int mTextSelectHandleRes;
+    private int mTextEditPasteWindowLayout, mTextEditSidePasteWindowLayout;
+    private int mTextEditNoPasteWindowLayout, mTextEditSideNoPasteWindowLayout;
 
-    Drawable mSelectHandleLeft;
-    Drawable mSelectHandleRight;
-    Drawable mSelectHandleCenter;
+    private int mCursorDrawableRes;
+    private final Drawable[] mCursorDrawable = new Drawable[2];
+    private int mCursorCount; // Actual current number of used mCursorDrawable: 0, 1 or 2
+
+    private Drawable mSelectHandleLeft;
+    private Drawable mSelectHandleRight;
+    private Drawable mSelectHandleCenter;
 
     private int mLastDownPositionX, mLastDownPositionY;
     private Callback mCustomSelectionActionModeCallback;
@@ -740,6 +744,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } catch (IOException e) {
                     Log.w(LOG_TAG, "Failure reading input extras", e);
                 }
+                break;
+
+            case com.android.internal.R.styleable.TextView_textCursorDrawable:
+                mCursorDrawableRes = a.getResourceId(attr, 0);
                 break;
 
             case com.android.internal.R.styleable.TextView_textSelectHandleLeft:
@@ -3770,33 +3778,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mHighlightPathBogus) {
             invalidateCursor();
         } else {
-            synchronized (sTempRect) {
-                /*
-                 * The reason for this concern about the thickness of the
-                 * cursor and doing the floor/ceil on the coordinates is that
-                 * some EditTexts (notably textfields in the Browser) have
-                 * anti-aliased text where not all the characters are
-                 * necessarily at integer-multiple locations.  This should
-                 * make sure the entire cursor gets invalidated instead of
-                 * sometimes missing half a pixel.
-                 */
+            final int horizontalPadding = getCompoundPaddingLeft();
+            final int verticalPadding = getExtendedPaddingTop() + getVerticalOffset(true);
 
-                float thick = FloatMath.ceil(mTextPaint.getStrokeWidth());
-                if (thick < 1.0f) {
-                    thick = 1.0f;
+            if (mCursorCount == 0) {
+                synchronized (sTempRect) {
+                    /*
+                     * The reason for this concern about the thickness of the
+                     * cursor and doing the floor/ceil on the coordinates is that
+                     * some EditTexts (notably textfields in the Browser) have
+                     * anti-aliased text where not all the characters are
+                     * necessarily at integer-multiple locations.  This should
+                     * make sure the entire cursor gets invalidated instead of
+                     * sometimes missing half a pixel.
+                     */
+                    float thick = FloatMath.ceil(mTextPaint.getStrokeWidth());
+                    if (thick < 1.0f) {
+                        thick = 1.0f;
+                    }
+
+                    thick /= 2.0f;
+
+                    mHighlightPath.computeBounds(sTempRect, false);
+
+                    invalidate((int) FloatMath.floor(horizontalPadding + sTempRect.left - thick),
+                            (int) FloatMath.floor(verticalPadding + sTempRect.top - thick),
+                            (int) FloatMath.ceil(horizontalPadding + sTempRect.right + thick),
+                            (int) FloatMath.ceil(verticalPadding + sTempRect.bottom + thick));
                 }
-
-                thick /= 2;
-
-                mHighlightPath.computeBounds(sTempRect, false);
-
-                int left = getCompoundPaddingLeft();
-                int top = getExtendedPaddingTop() + getVerticalOffset(true);
-
-                invalidate((int) FloatMath.floor(left + sTempRect.left - thick),
-                           (int) FloatMath.floor(top + sTempRect.top - thick),
-                           (int) FloatMath.ceil(left + sTempRect.right + thick),
-                           (int) FloatMath.ceil(top + sTempRect.bottom + thick));
+            } else {
+                for (int i = 0; i < mCursorCount; i++) {
+                    Rect bounds = mCursorDrawable[i].getBounds();
+                    invalidate(bounds.left + horizontalPadding, bounds.top + verticalPadding,
+                            bounds.right + horizontalPadding, bounds.bottom + verticalPadding);
+                }
             }
         }
     }
@@ -3836,13 +3851,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     line2 = mLayout.getLineForOffset(last);
 
                 int bottom = mLayout.getLineTop(line2 + 1);
-                int voffset = getVerticalOffset(true);
 
-                int left = getCompoundPaddingLeft() + mScrollX;
-                invalidate(left, top + voffset + getExtendedPaddingTop(),
-                           left + getWidth() - getCompoundPaddingLeft() -
-                           getCompoundPaddingRight(),
-                           bottom + voffset + getExtendedPaddingTop());
+                final int horizontalPadding = getCompoundPaddingLeft();
+                final int verticalPadding = getExtendedPaddingTop() + getVerticalOffset(true);
+                
+                // If used, the cursor drawables can have an arbitrary dimension that can go beyond
+                // the invalidated lines specified above.
+                for (int i = 0; i < mCursorCount; i++) {
+                    Rect bounds = mCursorDrawable[i].getBounds();
+                    top = Math.min(top, bounds.top);
+                    bottom = Math.max(bottom, bounds.bottom);
+                    // Horizontal bounds are already full width, no need to update
+                }
+
+                invalidate(horizontalPadding + mScrollX, top + verticalPadding,
+                        horizontalPadding + mScrollX + getWidth() -
+                        getCompoundPaddingLeft() - getCompoundPaddingRight(),
+                        bottom + verticalPadding);
             }
         }
     }
@@ -4346,6 +4371,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Path highlight = null;
         int selStart = -1, selEnd = -1;
+        boolean drawCursor = false;
 
         //  If there is no movement method, then there can be no selection.
         //  Check that first and attempt to skip everything having to do with
@@ -4366,6 +4392,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         if (mHighlightPathBogus) {
                             mHighlightPath.reset();
                             mLayout.getCursorPath(selStart, mHighlightPath, mText);
+                            updateCursorsPositions();
                             mHighlightPathBogus = false;
                         }
 
@@ -4377,7 +4404,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                         mHighlightPaint.setStyle(Paint.Style.STROKE);
 
-                        highlight = mHighlightPath;
+                        if (mCursorCount > 0) {
+                            drawCursor = true;
+                        } else {
+                            highlight = mHighlightPath;
+                        }
                     }
                 } else {
                     if (mHighlightPathBogus) {
@@ -4460,6 +4491,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
         }
 
+        if (drawCursor) drawCursor(canvas, cursorOffsetVertical);
+
         layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
 
         if (mMarquee != null && mMarquee.shouldDrawGhost()) {
@@ -4476,6 +4509,52 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         canvas.restore();
 
         updateCursorControllerPositions();
+    }
+
+    private void updateCursorsPositions() {
+        if (mCursorDrawableRes == 0) return;
+
+        final int offset = getSelectionStart();
+        final int line = mLayout.getLineForOffset(offset);
+        final int top = mLayout.getLineTop(line);
+        final int bottom = mLayout.getLineTop(line + 1);
+
+        mCursorCount = mLayout.isLevelBoundary(offset) ? 2 : 1;
+
+        int middle = bottom;
+        if (mCursorCount == 2) {
+            // Similar to what is done in {@link Layout.#getCursorPath(int, Path, CharSequence)}
+            middle = (top + bottom) >> 1;
+        }
+
+        updateCursorPosition(0, top, middle, mLayout.getPrimaryHorizontal(offset));
+
+        if (mCursorCount == 2) {
+            updateCursorPosition(1, middle, bottom, mLayout.getSecondaryHorizontal(offset));
+        }
+    }
+
+    private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
+        if (mCursorDrawable[cursorIndex] == null)
+            mCursorDrawable[cursorIndex] = mContext.getResources().getDrawable(mCursorDrawableRes);
+
+        if (mTempRect == null) mTempRect = new Rect();
+
+        mCursorDrawable[cursorIndex].getPadding(mTempRect);
+        final int width = mCursorDrawable[cursorIndex].getIntrinsicWidth();
+        horizontal = Math.max(0.5f, horizontal - 0.5f);
+        final int left = (int) (horizontal) - mTempRect.left;
+        mCursorDrawable[cursorIndex].setBounds(left, top - mTempRect.top, left + width,
+                bottom + mTempRect.bottom);
+    }
+
+    private void drawCursor(Canvas canvas, int cursorOffsetVertical) {
+        final boolean translate = cursorOffsetVertical != 0;
+        if (translate) canvas.translate(0, cursorOffsetVertical);
+        for (int i = 0; i < mCursorCount; i++) {
+            mCursorDrawable[i].draw(canvas);
+        }
+        if (translate) canvas.translate(0, -cursorOffsetVertical);
     }
 
     /**
@@ -8699,7 +8778,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 mDrawable = mSelectHandleLeft;
                 handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = (handleWidth * 3) / 4;
+                mHotspotX = handleWidth * 3.0f / 4.0f;
                 break;
             }
 
@@ -8710,7 +8789,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 mDrawable = mSelectHandleRight;
                 handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = handleWidth / 4;
+                mHotspotX = handleWidth / 4.0f;
                 break;
             }
 
@@ -8722,7 +8801,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 mDrawable = mSelectHandleCenter;
                 handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = handleWidth / 2;
+                mHotspotX = handleWidth / 2.0f;
                 mIsInsertionHandle = true;
                 break;
             }
@@ -8937,8 +9016,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int lineBottom = mLayout.getLineBottom(line);
 
             final Rect bounds = sCursorControllerTempRect;
-            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - mHotspotX)
-                + TextView.this.mScrollX;
+            bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX) +
+                    TextView.this.mScrollX;
             bounds.top = (bottom ? lineBottom : lineTop - mHeight) + TextView.this.mScrollY;
 
             bounds.right = bounds.left + width;
