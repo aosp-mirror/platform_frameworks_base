@@ -3894,18 +3894,14 @@ public class WebView extends AbsoluteLayout
      * Select the word at the indicated content coordinates.
      */
     boolean selectText(int x, int y) {
-        if (!setUpSelect()) {
+        if (!setUpSelect(true, x, y)) {
             return false;
         }
-        if (mNativeClass != 0 && nativeWordSelection(x, y)) {
-            nativeSetExtendSelection();
-            mDrawSelectionPointer = false;
-            mSelectionStarted = true;
-            mTouchMode = TOUCH_DRAG_MODE;
-            return true;
-        }
-        selectionDone();
-        return false;
+        nativeSetExtendSelection();
+        mDrawSelectionPointer = false;
+        mSelectionStarted = true;
+        mTouchMode = TOUCH_DRAG_MODE;
+        return true;
     }
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
@@ -4857,19 +4853,32 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
-     * Enter selecting text mode.  Returns true if the WebView is now in
+     * Enter selecting text mode, and see if CAB should be shown.
+     * Returns true if the WebView is now in
      * selecting text mode (including if it was already in that mode, and this
      * method did nothing).
      */
-    private boolean setUpSelect() {
+    private boolean setUpSelect(boolean selectWord, int x, int y) {
         if (0 == mNativeClass) return false; // client isn't initialized
         if (inFullScreenMode()) return false;
         if (mSelectingText) return true;
+        nativeResetSelection();
+        if (selectWord && !nativeWordSelection(x, y)) {
+            selectionDone();
+            return false;
+        }
+        mSelectCallback = new SelectActionModeCallback();
+        mSelectCallback.setWebView(this);
+        if (startActionMode(mSelectCallback) == null) {
+            // There is no ActionMode, so do not allow the user to modify a
+            // selection.
+            selectionDone();
+            return false;
+        }
         mExtendSelection = false;
         mSelectingText = mDrawSelectionPointer = true;
         // don't let the picture change during text selection
         WebViewCore.pauseUpdatePicture(mWebViewCore);
-        nativeResetSelection();
         if (nativeHasCursorNode()) {
             Rect rect = nativeCursorNodeBounds();
             mSelectX = contentToViewX(rect.left);
@@ -4882,14 +4891,6 @@ public class WebView extends AbsoluteLayout
             mSelectY = mScrollY + getViewHeightWithTitle() / 2;
         }
         nativeHideCursor();
-        mSelectCallback = new SelectActionModeCallback();
-        mSelectCallback.setWebView(this);
-        if (startActionMode(mSelectCallback) == null) {
-            // There is no ActionMode, so do not allow the user to modify a
-            // selection.
-            selectionDone();
-            return false;
-        }
         mMinAutoScrollX = 0;
         mMaxAutoScrollX = getViewWidth();
         mMinAutoScrollY = 0;
@@ -4923,7 +4924,7 @@ public class WebView extends AbsoluteLayout
      * Do not rely on this functionality; it will be deprecated in the future.
      */
     public void emulateShiftHeld() {
-        setUpSelect();
+        setUpSelect(false, 0, 0);
     }
 
     /**
