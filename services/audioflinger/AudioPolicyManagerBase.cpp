@@ -1608,12 +1608,6 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             if (device) break;
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
             if (device) break;
-            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
-            if (device) break;
-            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
-            if (device) break;
-            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
-            if (device) break;
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to A2DP
             if (!isInCall()) {
@@ -1623,6 +1617,12 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
                 if (device) break;
             }
 #endif
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
+            if (device) break;
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
+            if (device) break;
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
+            if (device) break;
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_EARPIECE;
             if (device == 0) {
                 LOGE("getDeviceForStrategy() earpiece device not found");
@@ -1630,12 +1630,6 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             break;
 
         case AudioSystem::FORCE_SPEAKER:
-            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
-            if (device) break;
-            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
-            if (device) break;
-            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
-            if (device) break;
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to
             // A2DP speaker when forcing to speaker output
@@ -1644,6 +1638,12 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
                 if (device) break;
             }
 #endif
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
+            if (device) break;
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
+            if (device) break;
+            device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
+            if (device) break;
             device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_SPEAKER;
             if (device == 0) {
                 LOGE("getDeviceForStrategy() speaker device not found");
@@ -1672,20 +1672,9 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
         if (device2 == 0) {
             device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
         }
-        if (device2 == 0) {
-            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
-        }
-        if (device2 == 0) {
-            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
-        }
-        if (device2 == 0) {
-            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
-        }
 #ifdef WITH_A2DP
-        if (mA2dpOutput != 0) {
-            if (strategy == STRATEGY_SONIFICATION && !a2dpUsedForSonification()) {
-                break;
-            }
+        if ((mA2dpOutput != 0) &&
+                (strategy != STRATEGY_SONIFICATION || a2dpUsedForSonification())) {
             if (device2 == 0) {
                 device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP;
             }
@@ -1697,6 +1686,15 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             }
         }
 #endif
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_AUX_DIGITAL;
+        }
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET;
+        }
+        if (device2 == 0) {
+            device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET;
+        }
         if (device2 == 0) {
             device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_SPEAKER;
         }
@@ -1901,9 +1899,7 @@ float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_hand
         (AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP |
         AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
         AudioSystem::DEVICE_OUT_WIRED_HEADSET |
-        AudioSystem::DEVICE_OUT_WIRED_HEADPHONE |
-        AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET |
-        AudioSystem::DEVICE_OUT_DGTL_DOCK_HEADSET)) &&
+        AudioSystem::DEVICE_OUT_WIRED_HEADPHONE)) &&
         ((getStrategy((AudioSystem::stream_type)stream) == STRATEGY_SONIFICATION) ||
          (stream == AudioSystem::SYSTEM)) &&
         streamDesc.mCanBeMuted) {
