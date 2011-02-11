@@ -303,7 +303,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(gwAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.setGateway(InetAddress.getByName(gwAddr));
+                    mLinkProperties.addGateway(InetAddress.getByName(gwAddr));
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }
