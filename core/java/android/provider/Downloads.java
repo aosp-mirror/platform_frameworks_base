@@ -528,6 +528,17 @@ public final class Downloads {
         }
 
         /**
+         * this method determines if a notification should be displayed for a
+         * given {@link #COLUMN_VISIBILITY} value
+         * @param visibility the value of {@link #COLUMN_VISIBILITY}.
+         * @return true if the notification should be displayed. false otherwise.
+         */
+        public static boolean isNotificationToBeDisplayed(int visibility) {
+            return visibility == DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED ||
+                    visibility == DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION;
+        }
+
+        /**
          * Returns whether the download has completed (either with success or
          * error).
          */
