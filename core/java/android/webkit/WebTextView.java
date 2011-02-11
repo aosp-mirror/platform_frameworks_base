@@ -67,7 +67,8 @@ import junit.framework.Assert;
  * to overlay html textfields (and textareas) to use our standard
  * text editing.
  */
-/* package */ class WebTextView extends AutoCompleteTextView {
+/* package */ class WebTextView extends AutoCompleteTextView
+        implements AdapterView.OnItemClickListener {
 
     static final String LOGTAG = "webtextview";
 
@@ -558,6 +559,27 @@ import junit.framework.Assert;
         mFromFocusChange = false;
     }
 
+    // AdapterView.OnItemClickListener implementation
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (id == 0 && position == 0) {
+            // Blank out the text box while we wait for WebCore to fill the form.
+            replaceText("");
+            WebSettings settings = mWebView.getSettings();
+            if (mAutoFillProfileIsSet) {
+                // Call a webview method to tell WebCore to autofill the form.
+                mWebView.autoFillForm(mQueryId);
+            } else {
+                // There is no autofill profile setup yet and the user has
+                // elected to try and set one up. Call through to the
+                // embedder to action that.
+                mWebView.getWebChromeClient().setupAutoFill(
+                        mHandler.obtainMessage(AUTOFILL_FORM));
+            }
+        }
+    }
+
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
@@ -814,33 +836,16 @@ import junit.framework.Assert;
             setInputType(getInputType()
                     | EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
             adapter.setTextView(this);
+            if (mAutoFillable) {
+                setOnItemClickListener(this);
+            } else {
+                setOnItemClickListener(null);
+            }
+            showDropDown();
+        } else {
+            dismissDropDown();
         }
         super.setAdapter(adapter);
-        if (mAutoFillable) {
-            setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (id == 0 && position == 0) {
-                        // Blank out the text box while we wait for WebCore to fill the form.
-                        replaceText("");
-                        WebSettings settings = mWebView.getSettings();
-                        if (mAutoFillProfileIsSet) {
-                            // Call a webview method to tell WebCore to autofill the form.
-                            mWebView.autoFillForm(mQueryId);
-                        } else {
-                            // There is no autofill profile setup yet and the user has
-                            // elected to try and set one up. Call through to the
-                            // embedder to action that.
-                            mWebView.getWebChromeClient().setupAutoFill(
-                                    mHandler.obtainMessage(AUTOFILL_FORM));
-                        }
-                    }
-                }
-            });
-        } else {
-            setOnItemClickListener(null);
-        }
-        showDropDown();
     }
 
     /**
@@ -858,6 +863,7 @@ import junit.framework.Assert;
         /**
          * {@inheritDoc}
          */
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             TextView tv =
                     (TextView) super.getView(position, convertView, parent);
