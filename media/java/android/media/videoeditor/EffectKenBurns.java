@@ -53,6 +53,13 @@ public class EffectKenBurns extends Effect {
                          Rect endRect, long startTimeMs, long durationMs) {
         super(mediaItem, effectId, startTimeMs, durationMs);
 
+        if ( (startRect.width() <= 0) || (startRect.height() <= 0) ) {
+            throw new IllegalArgumentException("Invalid Start rectangle");
+        }
+        if ( (endRect.width() <= 0) || (endRect.height() <= 0) ) {
+            throw new IllegalArgumentException("Invalid End rectangle");
+        }
+
         mStartRect = startRect;
         mEndRect = endRect;
     }
