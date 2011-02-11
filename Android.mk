@@ -428,6 +428,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/Spinner "Spinner" \
 		-samplecode $(sample_dir)/SpinnerTest \
 		            resources/samples/SpinnerTest "SpinnerTest" \
+		-samplecode $(sample_dir)/StackWidget \
+		            resources/samples/StackWidget "StackWidget" \
 		-samplecode $(sample_dir)/TicTacToeLib  \
 		            resources/samples/TicTacToeLib "TicTacToeLib" \
 		-samplecode $(sample_dir)/TicTacToeMain \

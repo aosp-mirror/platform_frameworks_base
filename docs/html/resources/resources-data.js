@@ -565,6 +565,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new', 'newfeature'],
+    path: 'samples/StackWidget/index.html',
+    title: {
+      en: 'StackView App Widget'
+    },
+    description: {
+      en: 'Demonstrates how to create a simple collection widget containing a StackView.'
+    }
+  },
+  {
     tags: ['sample', 'newfeature'],
     path: 'samples/TicTacToeLib/index.html',
     title: {
