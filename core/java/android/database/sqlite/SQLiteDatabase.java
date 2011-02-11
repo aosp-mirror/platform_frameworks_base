@@ -261,7 +261,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private final WeakHashMap<SQLiteClosable, Object> mPrograms;
 
     /** Default statement-cache size per database connection ( = instance of this class) */
-    public static final int DEFAULT_SQL_CACHE_SIZE = 25;
+    private static final int DEFAULT_SQL_CACHE_SIZE = 25;
 
     /**
      * for each instance of this class, a LRU cache is maintained to store

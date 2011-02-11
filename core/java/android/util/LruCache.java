@@ -158,6 +158,8 @@ public class LruCache<K, V> {
      * Sets the maximum size of this cache. Decreasing the maximum size may
      * evict entries from this cache.
      *
+     * @hide
+     *
      * @param maxSize for caches that do not override {@link #sizeOf}, this is
      *     the maximum number of entries in the cache. For all other caches,
      *     this is the maximum sum of the sizes of the entries in this cache.
