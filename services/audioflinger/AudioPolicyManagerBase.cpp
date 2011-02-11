@@ -610,7 +610,7 @@ status_t AudioPolicyManagerBase::stopOutput(audio_io_handle_t output,
         // store time at which the stream was stopped - see isStreamActive()
         outputDesc->mStopTime[stream] = systemTime();
 
-        setOutputDevice(output, getNewDevice(output));
+        setOutputDevice(output, getNewDevice(output), false, outputDesc->mLatency*2);
 
 #ifdef WITH_A2DP
         if (mA2dpOutput != 0 && !a2dpUsedForSonification() &&
