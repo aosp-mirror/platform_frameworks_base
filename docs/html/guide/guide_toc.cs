@@ -282,10 +282,13 @@
       <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
             <span class="en">Bluetooth</span>
           </a></li>
-      <li><a href="<?cs var:toroot?>guide/topics/network/sip.html">
-          <span class="en">Session Initiation Protocol</span></a>
-          <span class="new">new!</span>
-        </li>
+      <li><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
+            <span class="en">Near Field Communication</span></a>
+            <span class="new">new!</span></li>
+       <li><a href="<?cs var:toroot?>guide/topics/network/sip.html">
+            <span class="en">Session Initiation Protocol</span></a>
+            <span class="new">new!</span>
+          </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/topics/search/index.html">
             <span class="en">Search</span>
