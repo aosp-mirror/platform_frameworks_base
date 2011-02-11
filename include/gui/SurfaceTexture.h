@@ -20,10 +20,14 @@
 namespace android {
 
 struct SurfaceTexture {
+    struct FrameAvailableListener : public virtual RefBase {};
+
     SurfaceTexture(GLuint) {}
     void updateTexImage() {}
     void decStrong(android::sp<android::SurfaceTexture>* const) {}
     void incStrong(android::sp<android::SurfaceTexture>* const) {}
+    void getTransformMatrix(float mtx[16]) {}
+    void setFrameAvailableListener(const sp<FrameAvailableListener>&) {}
 };
 
 }
