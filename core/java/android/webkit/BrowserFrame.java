@@ -44,6 +44,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
+import java.nio.charset.Charsets;
+import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1141,7 +1144,7 @@ class BrowserFrame extends Handler {
     }
 
     /**
-     * Called by JNI when the native HTTP(S) stack gets an invalid cert chain.
+     * Called by JNI when the native HTTPS stack gets an invalid cert chain.
      *
      * We delegate the request to CallbackProxy, and route its response to
      * {@link #nativeSslCertErrorProceed(int)} or
@@ -1178,6 +1181,32 @@ class BrowserFrame extends Handler {
             nativeSslCertErrorProceed(handle);
         } else {
             mCallbackProxy.onReceivedSslError(handler, ssl_error);
+        }
+    }
+
+    /**
+     * Called by JNI when the native HTTPS stack gets a client
+     * certificate request.
+     *
+     * We delegate the request to CallbackProxy, and route its response to
+     * {@link #nativeSslClientCert(int, X509Certificate)}.
+     */
+    private void requestClientCert(int handle, byte[] host_and_port_bytes) {
+        String host_and_port = new String(host_and_port_bytes, Charsets.UTF_8);
+        SslClientCertLookupTable table = SslClientCertLookupTable.getInstance();
+        if (table.IsAllowed(host_and_port)) {
+            // previously allowed
+            nativeSslClientCert(handle,
+                                table.PrivateKey(host_and_port),
+                                table.CertificateChain(host_and_port));
+        } else if (table.IsDenied(host_and_port)) {
+            // previously denied
+            nativeSslClientCert(handle, null, null);
+        } else {
+            // previously ignored or new
+            mCallbackProxy.onReceivedClientCertRequest(
+                    new ClientCertRequestHandler(this, handle, host_and_port, table),
+                    host_and_port);
         }
     }
 
@@ -1366,4 +1395,8 @@ class BrowserFrame extends Handler {
 
     private native void nativeSslCertErrorProceed(int handle);
     private native void nativeSslCertErrorCancel(int handle, int cert_error);
+
+    native void nativeSslClientCert(int handle,
+                                    byte[] pkcs8EncodedPrivateKey,
+                                    byte[][] asn1DerEncodedCertificateChain);
 }

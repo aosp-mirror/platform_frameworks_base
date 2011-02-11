@@ -19,11 +19,11 @@ package android.webkit;
 import android.os.Bundle;
 import android.net.http.SslError;
 
-/*
+/**
  * A simple class to store the wrong certificates that user is aware but
  * chose to proceed.
  */
-class SslCertLookupTable {
+final class SslCertLookupTable {
     private static SslCertLookupTable sTable;
     private final Bundle table;
 
