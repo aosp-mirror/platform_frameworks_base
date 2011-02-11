@@ -424,9 +424,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public final void openPanel(int featureId, KeyEvent event) {
         if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
                 mActionBar.isOverflowReserved()) {
-            // Invalidate the options menu, we want a prepare event that the app can respond to.
-            invalidatePanelMenu(FEATURE_OPTIONS_PANEL);
-            mActionBar.showOverflowMenu();
+            if (mActionBar.getVisibility() == View.VISIBLE) {
+                // Invalidate the options menu, we want a prepare event that the app can respond to.
+                invalidatePanelMenu(FEATURE_OPTIONS_PANEL);
+                mActionBar.showOverflowMenu();
+            }
         } else {
             openPanel(getPanelState(featureId, true), event);
         }
@@ -696,14 +698,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             final PanelFeatureState st = getPanelState(featureId, true);
             if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
                     mActionBar.isOverflowReserved()) {
-                if (!mActionBar.isOverflowMenuShowing()) {
-                    final Callback cb = getCallback();
-                    if (cb != null &&
-                            cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
-                        playSoundEffect = mActionBar.showOverflowMenu();
+                if (mActionBar.getVisibility() == View.VISIBLE) {
+                    if (!mActionBar.isOverflowMenuShowing()) {
+                        final Callback cb = getCallback();
+                        if (cb != null &&
+                                cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
+                            playSoundEffect = mActionBar.showOverflowMenu();
+                        }
+                    } else {
+                        playSoundEffect = mActionBar.hideOverflowMenu();
                     }
-                } else {
-                    playSoundEffect = mActionBar.hideOverflowMenu();
                 }
             } else {
                 if (st.isOpen || st.isHandled) {
@@ -911,7 +915,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mActionBar != null) {
             final Callback cb = getCallback();
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
-                if (cb != null) {
+                if (cb != null && mActionBar.getVisibility() == View.VISIBLE) {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
                     if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
