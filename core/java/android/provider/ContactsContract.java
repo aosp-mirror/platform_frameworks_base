@@ -3843,60 +3843,6 @@ public final class ContactsContract {
          * @hide
          */
         public static final String SNIPPET_ARGS_PARAM_KEY = "snippet_args";
-
-        /**
-         * The ID of the data row that was matched by the filter.
-         *
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public static final String SNIPPET_DATA_ID = "snippet_data_id";
-
-        /**
-         * The type of data that was matched by the filter.
-         *
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public static final String SNIPPET_MIMETYPE = "snippet_mimetype";
-
-        /**
-         * The {@link Data#DATA1} field of the data row that was matched by the filter.
-         *
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public static final String SNIPPET_DATA1 = "snippet_data1";
-
-        /**
-         * The {@link Data#DATA2} field of the data row that was matched by the filter.
-         *
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public static final String SNIPPET_DATA2 = "snippet_data2";
-
-        /**
-         * The {@link Data#DATA3} field of the data row that was matched by the filter.
-         *
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public static final String SNIPPET_DATA3 = "snippet_data3";
-
-        /**
-         * The {@link Data#DATA4} field of the data row that was matched by the filter.
-         *
-         * @hide
-         * @deprecated
-         */
-        @Deprecated
-        public static final String SNIPPET_DATA4 = "snippet_data4";
     }
 
     /**
