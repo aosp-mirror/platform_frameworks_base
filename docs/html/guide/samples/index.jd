@@ -4,11 +4,11 @@ page.title=Sample Code
 
 
 <script type="text/javascript">
-  window.location = toRoot + "resources/samples/index.html";
+  window.location = toRoot + "resources/browser.html?tag=sample";
 </script>
 
 <p><strong>This document has moved. Please go to <a
-href="http://developer.android.com/resources/samples/index.html">List of Sample
+href="http://developer.android.com/resources/browser.html?tag=sample">List of Sample
 Apps</a>.</strong></p>
 
 

@@ -25,7 +25,8 @@ var ANDROID_TAGS = {
     'search': 'Search',
     'testing': 'Testing',
     'ui': 'User Interface',
-    'web': 'Web Content'
+    'web': 'Web Content',
+    'widgets': 'App Widgets'
   },
   misc: {
     'external': 'External',
@@ -345,17 +346,17 @@ var ANDROID_RESOURCES = [
 ///////////////////
  
   {
-    tags: ['sample'],
+    tags: ['sample', 'new'],
     path: 'samples/AccelerometerPlay/index.html',
     title: {
       en: 'Accelerometer Play'
     },
     description: {
-      en: ''
+      en: 'An example of using the accelerometer to integrate the device\'s acceleration to a position using the Verlet method. This is illustrated with a very simple particle system comprised of a few iron balls freely moving on an inclined wooden table. The inclination of the virtual table is controlled by the device\'s accelerometer.'
     }
   },
   {
-    tags: ['sample'],
+    tags: ['sample', 'new', 'accessibility'],
     path: 'samples/AccessibilityService/index.html',
     title: {
       en: 'Accessibility Service'
@@ -565,7 +566,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'new', 'newfeature'],
+    tags: ['sample', 'new', 'newfeature', 'widgets'],
     path: 'samples/StackWidget/index.html',
     title: {
       en: 'StackView App Widget'
@@ -595,7 +596,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'ui'],
+    tags: ['sample', 'ui', 'widgets'],
     path: 'samples/Wiktionary/index.html',
     title: {
       en: 'Wiktionary'
@@ -605,7 +606,7 @@ var ANDROID_RESOURCES = [
     }
   },
   {
-    tags: ['sample', 'ui'],
+    tags: ['sample', 'ui', 'widgets'],
     path: 'samples/WiktionarySimple/index.html',
     title: {
       en: 'Wiktionary (Simplified)'
