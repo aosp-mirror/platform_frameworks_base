@@ -87,7 +87,7 @@ class FloatKeyframeSet extends KeyframeSet {
             }
             float intervalFraction = (fraction - prevFraction) / (nextFraction - prevFraction);
             return mEvaluator == null ?
-                    prevValue + fraction * (nextValue - prevValue) :
+                    prevValue + intervalFraction * (nextValue - prevValue) :
                     ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).
                             floatValue();
         } else if (fraction >= 1f) {
@@ -103,7 +103,7 @@ class FloatKeyframeSet extends KeyframeSet {
             }
             float intervalFraction = (fraction - prevFraction) / (nextFraction - prevFraction);
             return mEvaluator == null ?
-                    prevValue + fraction * (nextValue - prevValue) :
+                    prevValue + intervalFraction * (nextValue - prevValue) :
                     ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).
                             floatValue();
         }
@@ -120,7 +120,7 @@ class FloatKeyframeSet extends KeyframeSet {
                 float prevValue = prevKeyframe.getFloatValue();
                 float nextValue = nextKeyframe.getFloatValue();
                 return mEvaluator == null ?
-                        prevValue + fraction * (nextValue - prevValue) :
+                        prevValue + intervalFraction * (nextValue - prevValue) :
                         ((Number)mEvaluator.evaluate(intervalFraction, prevValue, nextValue)).
                             floatValue();
             }
