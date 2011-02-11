@@ -432,6 +432,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/TicTacToeLib "TicTacToeLib" \
 		-samplecode $(sample_dir)/TicTacToeMain \
 		            resources/samples/TicTacToeMain "TicTacToeMain" \
+		-samplecode $(sample_dir)/WeatherListWidget \
+		            resources/samples/WeatherListWidget "Weather List Widget Sample" \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \
