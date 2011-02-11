@@ -1,0 +1,190 @@
+page.title=View Animation
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>       
+       <li><a href="#tween-animation">Tween animation</a></li>
+       <li><a href="#frame-animation">Frame animation</a></li>
+     </ol>
+
+    </div>
+  </div>
+
+  You can use View Animation in any View object to
+  perform tweened animation and frame by frame animation. Tween animation calculates the animation
+  given information such as the start point, end point, size, rotation, and other common aspects of
+  an animation. Frame by frame animation lets you load a series of Drawable resources one after
+  another to create an animation.
+
+  <h2 id="tween-animation">Tween Animation</h2>
+
+  <p>A tween animation can perform a series of simple transformations (position, size, rotation,
+  and transparency) on the contents of a View object. So, if you have a {@link
+  android.widget.TextView} object, you can move, rotate, grow, or shrink the text. If it has a
+  background image, the background image will be transformed along with the text. The {@link
+  android.view.animation animation package} provides all the classes used in a tween animation.</p>
+
+  <p>A sequence of animation instructions defines the tween animation, defined by either XML or
+  Android code. As with defining a layout, an XML file is recommended because it's more readable,
+  reusable, and swappable than hard-coding the animation. In the example below, we use XML. (To
+  learn more about defining an animation in your application code, instead of XML, refer to the
+  {@link android.view.animation.AnimationSet} class and other {@link
+  android.view.animation.Animation} subclasses.)</p>
+
+  <p>The animation instructions define the transformations that you want to occur, when they will
+  occur, and how long they should take to apply. Transformations can be sequential or simultaneous
+  - for example, you can have the contents of a TextView move from left to right, and then rotate
+  180 degrees, or you can have the text move and rotate simultaneously. Each transformation takes a
+  set of parameters specific for that transformation (starting size and ending size for size
+  change, starting angle and ending angle for rotation, and so on), and also a set of common
+  parameters (for instance, start time and duration). To make several transformations happen
+  simultaneously, give them the same start time; to make them sequential, calculate the start time
+  plus the duration of the preceding transformation.</p>
+
+  <p>The animation XML file belongs in the <code>res/anim/</code> directory of your Android
+  project. The file must have a single root element: this will be either a single
+  <code>&lt;alpha&gt;</code>, <code>&lt;scale&gt;</code>, <code>&lt;translate&gt;</code>,
+  <code>&lt;rotate&gt;</code>, interpolator element, or <code>&lt;set&gt;</code> element that holds
+  groups of these elements (which may include another <code>&lt;set&gt;</code>). By default, all
+  animation instructions are applied simultaneously. To make them occur sequentially, you must
+  specify the <code>startOffset</code> attribute, as shown in the example below.</p>
+
+  <p>The following XML from one of the ApiDemos is used to stretch, then simultaneously spin and
+  rotate a View object.</p>
+  <pre>
+&lt;set android:shareInterpolator="false"&gt;
+    &lt;scale
+        android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+        android:fromXScale="1.0"
+        android:toXScale="1.4"
+        android:fromYScale="1.0"
+        android:toYScale="0.6"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:fillAfter="false"
+        android:duration="700" /&gt;
+    &lt;set android:interpolator="@android:anim/decelerate_interpolator"&gt;
+        &lt;scale
+           android:fromXScale="1.4"
+           android:toXScale="0.0"
+           android:fromYScale="0.6"
+           android:toYScale="0.0"
+           android:pivotX="50%"
+           android:pivotY="50%"
+           android:startOffset="700"
+           android:duration="400"
+           android:fillBefore="false" /&gt;
+        &lt;rotate
+           android:fromDegrees="0"
+           android:toDegrees="-45"
+           android:toYScale="0.0"
+           android:pivotX="50%"
+           android:pivotY="50%"
+           android:startOffset="700"
+           android:duration="400" /&gt;
+    &lt;/set&gt;
+&lt;/set&gt;
+</pre>
+
+  <p>Screen coordinates (not used in this example) are (0,0) at the upper left hand corner, and
+  increase as you go down and to the right.</p>
+
+  <p>Some values, such as pivotX, can be specified relative to the object itself or relative to the
+  parent. Be sure to use the proper format for what you want ("50" for 50% relative to the parent,
+  or "50%" for 50% relative to itself).</p>
+
+  <p>You can determine how a transformation is applied over time by assigning an {@link
+  android.view.animation.Interpolator}. Android includes several Interpolator subclasses that
+  specify various speed curves: for instance, {@link android.view.animation.AccelerateInterpolator}
+  tells a transformation to start slow and speed up. Each one has an attribute value that can be
+  applied in the XML.</p>
+
+  <p>With this XML saved as <code>hyperspace_jump.xml</code> in the <code>res/anim/</code>
+  directory of the project, the following code will reference it and apply it to an {@link
+  android.widget.ImageView} object from the layout.</p>
+  <pre>
+ImageView spaceshipImage = (ImageView) findViewById(R.id.spaceshipImage);
+Animation hyperspaceJumpAnimation = AnimationUtils.loadAnimation(this, R.anim.hyperspace_jump);
+spaceshipImage.startAnimation(hyperspaceJumpAnimation);
+</pre>
+
+  <p>As an alternative to <code>startAnimation()</code>, you can define a starting time for the
+  animation with <code>{@link android.view.animation.Animation#setStartTime(long)
+  Animation.setStartTime()}</code>, then assign the animation to the View with <code>{@link
+  android.view.View#setAnimation(android.view.animation.Animation) View.setAnimation()}</code>.</p>
+
+  <p>For more information on the XML syntax, available tags and attributes, see <a href=
+  "{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
+
+  <p class="note"><strong>Note:</strong> Regardless of how your animation may move or resize, the
+  bounds of the View that holds your animation will not automatically adjust to accommodate it.
+  Even so, the animation will still be drawn beyond the bounds of its View and will not be clipped.
+  However, clipping <em>will occur</em> if the animation exceeds the bounds of the parent View.</p>
+
+  <h2 id="frame-animation">Frame Animation</h2>
+
+  <p>This is a traditional animation in the sense that it is created with a sequence of different
+  images, played in order, like a roll of film. The {@link
+  android.graphics.drawable.AnimationDrawable} class is the basis for frame animations.</p>
+
+  <p>While you can define the frames of an animation in your code, using the {@link
+  android.graphics.drawable.AnimationDrawable} class API, it's more simply accomplished with a
+  single XML file that lists the frames that compose the animation. Like the tween animation above,
+  the XML file for this kind of animation belongs in the <code>res/drawable/</code> directory of
+  your Android project. In this case, the instructions are the order and duration for each frame of
+  the animation.</p>
+
+  <p>The XML file consists of an <code>&lt;animation-list&gt;</code> element as the root node and a
+  series of child <code>&lt;item&gt;</code> nodes that each define a frame: a drawable resource for
+  the frame and the frame duration. Here's an example XML file for a frame-by-frame animation:</p>
+  <pre>
+&lt;animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true"&gt;
+    &lt;item android:drawable="@drawable/rocket_thrust1" android:duration="200" /&gt;
+    &lt;item android:drawable="@drawable/rocket_thrust2" android:duration="200" /&gt;
+    &lt;item android:drawable="@drawable/rocket_thrust3" android:duration="200" /&gt;
+&lt;/animation-list&gt;
+</pre>
+
+  <p>This animation runs for just three frames. By setting the <code>android:oneshot</code>
+  attribute of the list to <var>true</var>, it will cycle just once then stop and hold on the last
+  frame. If it is set <var>false</var> then the animation will loop. With this XML saved as
+  <code>rocket_thrust.xml</code> in the <code>res/drawable/</code> directory of the project, it can
+  be added as the background image to a View and then called to play. Here's an example Activity,
+  in which the animation is added to an {@link android.widget.ImageView} and then animated when the
+  screen is touched:</p>
+  <pre>
+AnimationDrawable rocketAnimation;
+
+public void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
+  setContentView(R.layout.main);
+
+  ImageView rocketImage = (ImageView) findViewById(R.id.rocket_image);
+  rocketImage.setBackgroundResource(R.drawable.rocket_thrust);
+  rocketAnimation = (AnimationDrawable) rocketImage.getBackground();
+}
+
+public boolean onTouchEvent(MotionEvent event) {
+  if (event.getAction() == MotionEvent.ACTION_DOWN) {
+    rocketAnimation.start();
+    return true;
+  }
+  return super.onTouchEvent(event);
+}
+</pre>
+
+  <p>It's important to note that the <code>start()</code> method called on the AnimationDrawable
+  cannot be called during the <code>onCreate()</code> method of your Activity, because the
+  AnimationDrawable is not yet fully attached to the window. If you want to play the animation
+  immediately, without requiring interaction, then you might want to call it from the <code>{@link
+  android.app.Activity#onWindowFocusChanged(boolean) onWindowFocusChanged()}</code> method in your
+  Activity, which will get called when Android brings your window into focus.</p>
+
+  <p>For more information on the XML syntax, available tags and attributes, see <a href=
+  "{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
+</body>
+</html>
