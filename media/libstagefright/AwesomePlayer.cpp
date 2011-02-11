@@ -794,25 +794,6 @@ status_t AwesomePlayer::play_l() {
                 mAudioPlayer = new AudioPlayer(mAudioSink, this);
                 mAudioPlayer->setSource(mAudioSource);
 
-                // We've already started the MediaSource in order to enable
-                // the prefetcher to read its data.
-                status_t err = mAudioPlayer->start(
-                        true /* sourceAlreadyStarted */);
-
-                if (err != OK) {
-                    delete mAudioPlayer;
-                    mAudioPlayer = NULL;
-
-                    mFlags &= ~(PLAYING | FIRST_FRAME);
-
-                    if (mDecryptHandle != NULL) {
-                        mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
-                                 Playback::STOP, 0);
-                    }
-
-                    return err;
-                }
-
                 mTimeSource = mAudioPlayer;
 
                 deferredAudioSeek = true;
@@ -820,8 +801,26 @@ status_t AwesomePlayer::play_l() {
                 mWatchForAudioSeekComplete = false;
                 mWatchForAudioEOS = true;
             }
-        } else {
-            mAudioPlayer->resume();
+        }
+
+        CHECK(!(mFlags & AUDIO_RUNNING));
+
+        if (mVideoSource == NULL) {
+            status_t err = startAudioPlayer_l();
+
+            if (err != OK) {
+                delete mAudioPlayer;
+                mAudioPlayer = NULL;
+
+                mFlags &= ~(PLAYING | FIRST_FRAME);
+
+                if (mDecryptHandle != NULL) {
+                    mDrmManagerClient->setPlaybackStatus(
+                            mDecryptHandle, Playback::STOP, 0);
+                }
+
+                return err;
+            }
         }
     }
 
@@ -849,6 +848,36 @@ status_t AwesomePlayer::play_l() {
         // is started again, we play from the start...
         seekTo_l(0);
     }
+
+    return OK;
+}
+
+status_t AwesomePlayer::startAudioPlayer_l() {
+    CHECK(!(mFlags & AUDIO_RUNNING));
+
+    if (mAudioSource == NULL || mAudioPlayer == NULL) {
+        return OK;
+    }
+
+    if (!(mFlags & AUDIOPLAYER_STARTED)) {
+        mFlags |= AUDIOPLAYER_STARTED;
+
+        // We've already started the MediaSource in order to enable
+        // the prefetcher to read its data.
+        status_t err = mAudioPlayer->start(
+                true /* sourceAlreadyStarted */);
+
+        if (err != OK) {
+            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+            return err;
+        }
+    } else {
+        mAudioPlayer->resume();
+    }
+
+    mFlags |= AUDIO_RUNNING;
+
+    mWatchForAudioEOS = true;
 
     return OK;
 }
@@ -954,7 +983,7 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
 
     cancelPlayerEvents(true /* keepBufferingGoing */);
 
-    if (mAudioPlayer != NULL) {
+    if (mAudioPlayer != NULL && (mFlags & AUDIO_RUNNING)) {
         if (at_eos) {
             // If we played the audio stream to completion we
             // want to make sure that all samples remaining in the audio
@@ -963,6 +992,8 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
         } else {
             mAudioPlayer->pause();
         }
+
+        mFlags &= ~AUDIO_RUNNING;
     }
 
     mFlags &= ~PLAYING;
@@ -1195,9 +1226,7 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
         // requested seek time instead.
 
         mAudioPlayer->seekTo(videoTimeUs < 0 ? mSeekTimeUs : videoTimeUs);
-        mAudioPlayer->resume();
         mWatchForAudioSeekComplete = true;
-        mWatchForAudioEOS = true;
     } else if (!mSeekNotificationSent) {
         // If we're playing video only, report seek complete now,
         // otherwise audio player will notify us later.
@@ -1241,8 +1270,10 @@ void AwesomePlayer::onVideoEvent() {
             // locations, we'll "pause" the audio source, causing it to
             // stop reading input data until a subsequent seek.
 
-            if (mAudioPlayer != NULL) {
+            if (mAudioPlayer != NULL && (mFlags & AUDIO_RUNNING)) {
                 mAudioPlayer->pause();
+
+                mFlags &= ~AUDIO_RUNNING;
             }
             mAudioSource->pause();
         }
@@ -1311,6 +1342,14 @@ void AwesomePlayer::onVideoEvent() {
 
     bool wasSeeking = mSeeking;
     finishSeekIfNecessary(timeUs);
+
+    if (mAudioPlayer != NULL && !(mFlags & (AUDIO_RUNNING | SEEK_PREVIEW))) {
+        status_t err = startAudioPlayer_l();
+        if (err != OK) {
+            LOGE("Startung the audio player failed w/ err %d", err);
+            return;
+        }
+    }
 
     TimeSource *ts = (mFlags & AUDIO_AT_EOS) ? &mSystemTimeSource : mTimeSource;
 
