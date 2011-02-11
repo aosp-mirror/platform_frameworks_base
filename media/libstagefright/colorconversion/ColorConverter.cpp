@@ -187,7 +187,7 @@ status_t ColorConverter::convertCbYCrY(
 
 status_t ColorConverter::convertYUV420Planar(
         const BitmapParams &src, const BitmapParams &dst) {
-    if (!((dst.mWidth & 3) == 0
+    if (!((dst.mWidth & 1) == 0
             && (src.mCropLeft & 1) == 0
             && src.cropWidth() == dst.cropWidth()
             && src.cropHeight() == dst.cropHeight())) {
