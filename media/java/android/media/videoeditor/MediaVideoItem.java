@@ -150,7 +150,7 @@ public class MediaVideoItem extends MediaItem {
                 properties.height);
         mFileType = mMANativeHelper.getFileType(properties.fileType);
         mVideoType = mMANativeHelper.getVideoCodecType(properties.videoFormat);
-        mVideoProfile = 0;
+        mVideoProfile = properties.profileAndLevel;
         mDurationMs = properties.videoDuration;
         mVideoBitrate = properties.videoBitrate;
         mAudioBitrate = properties.audioBitrate;
