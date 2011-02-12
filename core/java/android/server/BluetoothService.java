@@ -561,21 +561,16 @@ public class BluetoothService extends IBluetooth.Stub {
                     persistBluetoothOnSetting(true);
                 }
 
-                updateSdpRecords();
-
                 mIsDiscovering = false;
                 mBondState.readAutoPairingData();
                 mBondState.loadBondState();
                 initProfileState();
 
-                // Log bluetooth on to battery stats.
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    mBatteryStats.noteBluetoothOn();
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+                // This should be the last step of the the enable thread.
+                // Because this adds SDP records which asynchronously
+                // broadcasts the Bluetooth On State in updateBluetoothState.
+                // So we want all internal state setup before this.
+                updateSdpRecords();
             } else {
                 setBluetoothState(BluetoothAdapter.STATE_OFF);
             }
@@ -623,6 +618,11 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
+    /**
+     * This function is called from Bluetooth Event Loop when onPropertyChanged
+     * for adapter comes in with UUID property.
+     * @param uuidsThe uuids of adapter as reported by Bluez.
+     */
     synchronized void updateBluetoothState(String uuids) {
         if (mBluetoothState == BluetoothAdapter.STATE_TURNING_ON) {
             ParcelUuid[] adapterUuids = convertStringToParcelUuid(uuids);
@@ -632,6 +632,15 @@ public class BluetoothService extends IBluetooth.Stub {
                 setBluetoothState(BluetoothAdapter.STATE_ON);
                 String[] propVal = {"Pairable", getProperty("Pairable")};
                 mEventLoop.onPropertyChanged(propVal);
+
+                // Log bluetooth on to battery stats.
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    mBatteryStats.noteBluetoothOn();
+                } catch (RemoteException e) {
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
 
                 if (mIsAirplaneSensitive && isAirplaneModeOn() && !mIsAirplaneToggleable) {
                     disable(false);
