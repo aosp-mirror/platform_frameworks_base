@@ -59,10 +59,58 @@ padding: .25em 1em;
 }
 </style>
 
-
 <div class="toggleable open">
     <a href="#"
          onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-opened.png"
+         class="toggle-img"
+         height="9px"
+         width="9px" /> Android NDK, Revision 6</a> <em>(February 2011)</em>
+
+    <div class="toggleme">
+      <p>This release of the NDK introduces the following header files:</p>
+        <ul>
+          <li><p><code>&lt;android/asset_manager.h&gt;</code>: Allows access to assets
+          using 64-bit file offsets and sizes. This is useful for very large assets that exceed
+          2GB, as required by some games. The following APIs are provided:<p>
+              <ul>
+                <li><code>AAsset_getLength64</code></li>
+                <li><code>AAsset_getRemainingLength64</code></li>
+                <li><code>AAsset_openFileDescriptor64</code></li>
+                <li><code>AAsset_seek64</code></li>
+              </ul>
+          </li>
+          
+          <li><code>&lt;android/input.h&gt;</code>: Provides the following AMETA_XXX constants 
+          that are related to the new input framework in Honeycomb:
+<pre>              
+AMETA_FUNCTION_ON = 0x08,
+AMETA_CTRL_ON = 0x1000,
+AMETA_CTRL_LEFT_ON = 0x2000,
+AMETA_CTRL_RIGHT_ON = 0x4000,
+AMETA_META_ON = 0x10000,
+AMETA_META_LEFT_ON = 0x20000,
+AMETA_META_RIGHT_ON = 0x40000,
+AMETA_CAPS_LOCK_ON = 0x100000,
+AMETA_NUM_LOCK_ON = 0x200000,
+AMETA_SCROLL_LOCK_ON = 0x400000,
+</pre>
+          </li>
+          
+          <li><code>&lt;android/keycodes&gt;</code>: Provides <code>AKEYCODE_XXX</code>
+          constants that are related to the new input framework in Honeycomb.
+          </li>
+          
+          <li><code>&lt;android/native_activity.h&gt;</code>: Adds a new field to the
+          system-allocated <code>ANativeActivity</code> structure named <code>obbPath</code> that
+          contains the path of your application's OBB files, if any.
+          </li>
+  </ul>
+  </div>
+  </div>
+
+<div class="toggleable closed">
+    <a href="#"
+         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
          class="toggle-img"
          height="9px"
          width="9px" /> Android NDK, Revision 5b</a> <em>(January 2011)</em>
