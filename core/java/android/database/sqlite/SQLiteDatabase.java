@@ -407,7 +407,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     // has not been available for 30sec.
                     Log.w(TAG, "database lock has not been available for " + LOCK_WAIT_PERIOD +
                             " sec. Current Owner of the lock is " + mLock.getOwnerDescription() +
-                            ". Continuing to wait");
+                            ". Continuing to wait in thread: " + Thread.currentThread().getId());
                 }
             } catch (InterruptedException e) {
                 // ignore the interruption
