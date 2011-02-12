@@ -52,7 +52,7 @@ void initParts(int w, int h)
 int root() {
     rsgClearColor(0.f, 0.f, 0.f, 1.f);
 
-    BallControl_t bc = {0};
+    BallControl_t bc;
     Ball_t *bout;
 
     if (frame & 1) {
