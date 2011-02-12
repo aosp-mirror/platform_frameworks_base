@@ -1,29 +1,72 @@
 page.title=Android Supported Media Formats
 @jd:body
 
-<p>The <a href="#core">Core Media Formats</a> table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed in the table. </p>
+<div id="qv-wrapper">
+<div id="qv">
 
-<p>As an application developer, you are free to make use of any media codec that is available on any Android-powered device, including those provided by the Android platform and those that are device-specific.</p>
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#network">Network Protocols</a></li>
+<li><a href="#core">Core Media Formats</a></li>
+<li><a href="#recommendations">Video Encoding Recommendations</a></li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+<li><a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a></li>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.media.MediaPlayer MediaPlayer}</li>
+<li>{@link android.media.MediaRecorder MediaRecorder}</li>
+</ol>
+
+</div>
+</div>
+
+<p>This document describes the media codec, container, and network protocol support provided by the Android platform.</p>
+
+<p>As an application developer, you are free to make use of any media codec that is available on any Android-powered device, including those provided by the Android platform and those that are device-specific. <strong>However, it is a best practice to use media encoding profiles that are device-agnostic</strong>.</p>
+
+
+<h2 id="network">Network Protocols</h2>
+
+<p>The following network protocols are supported for audio and video playback:</p>
+
+<ul>
+  <li>RTSP (RTP, SDP)</li>
+  <li>HTTP progressive streaming</li>
+  <li>HTTP live streaming <a href="http://tools.ietf.org/html/draft-pantos-http-live-streaming-05">draft protocol</a> (Android 3.0 and above)</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> HTTPS is not supported at this time.</p>
+
 
 <h2 id="core">Core Media Formats</h2>
+
+<p>The table below describes the media format support built into the Android platform. Note that any given mobile device may provide support for additional formats or file types not listed in the table.</p>
+
+<p class="note"><strong>Note:</strong> Media codecs that are not guaranteed to be available on all Android platform versions are accordingly noted in parentheses&mdash;for example &quot;(Android 3.0+)&quot;.</p>
 
 <table>
 <tbody>
 <tr>
 
 <th>Type</th>
-<th>Format</th>
+<th>Format / Codec</th>
 <th>Encoder</th>
 <th>Decoder</th>
 <th>Details</th>
-<th>File Type(s) Supported</th>
+<th>Supported File Type(s) / Container Formats</th>
 </tr>
 
 <tr>
 <td rowspan="9">Audio</td>
 <td>AAC LC/LTP</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td rowspan="3">Mono/Stereo content in any combination of standard bit rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
 <td rowspan="3">3GPP (.3gp) and MPEG-4 (.mp4, .m4a). No support for raw AAC (.aac)</td>
 </tr>
@@ -31,19 +74,19 @@ page.title=Android Supported Media Formats
 <tr>
 <td>HE-AACv1 (AAC+)</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>HE-AACv2 (enhanced AAC+)</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 </tr>
 
 <tr>
 <td>AMR-NB</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>4.75 to 12.2 kbps sampled @ 8kHz</td>
 <td>3GPP (.3gp)
 </td>
@@ -51,8 +94,8 @@ page.title=Android Supported Media Formats
 
 <tr>
 <td>AMR-WB</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>9 rates from 6.60 kbit/s to 23.85 kbit/s sampled @ 16kHz</td>
 <td>3GPP (.3gp)</td>
 </tr>
@@ -60,7 +103,7 @@ page.title=Android Supported Media Formats
 <tr>
 <td>MP3</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>Mono/Stereo 8-320Kbps constant (CBR) or variable bit-rate (VBR)
 </td>
 <td>MP3 (.mp3)</td>
@@ -69,7 +112,7 @@ page.title=Android Supported Media Formats
 <tr>
 <td>MIDI</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>MIDI Type 0 and 1. DLS Version 1 and 2. XMF and Mobile XMF. Support for ringtone formats RTTTL/RTX, OTA, and iMelody </td>
 <td>Type 0 and 1 (.mid, .xmf, .mxmf). Also RTTTL/RTX (.rtttl, .rtx), OTA (.ota), and iMelody (.imy)</td>
 </tr>
@@ -77,7 +120,7 @@ page.title=Android Supported Media Formats
 <tr>
 <td>Ogg Vorbis</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>Ogg (.ogg)</td>
 </tr>
@@ -85,7 +128,7 @@ page.title=Android Supported Media Formats
 <tr>
 <td>PCM/WAVE</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>8- and 16-bit linear PCM (rates up to limit of hardware)</td>
 <td>WAVE (.wav)</td>
 </tr>
@@ -93,8 +136,8 @@ page.title=Android Supported Media Formats
 <tr>
 <td rowspan="4">Image</td>
 <td>JPEG</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>Base+progressive</td>
 <td>JPEG (.jpg)</td>
 </tr>
@@ -102,15 +145,15 @@ page.title=Android Supported Media Formats
 <tr>
 <td>GIF</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>GIF (.gif)</td>
 </tr>
 
 <tr>
 <td>PNG</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>PNG (.png)</td>
 </tr>
@@ -118,33 +161,33 @@ page.title=Android Supported Media Formats
 <tr>
 <td>BMP</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>BMP (.bmp)</td>
 </tr>
 
- 
+
 <tr>
 <td rowspan="3">Video</td>
 <td>H.263</td>
-<td style="text-align: center;">X</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
 </tr>
 
 <tr>
 <td>H.264 AVC</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">X</td>
-<td>&nbsp;</td>
+<td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 3.0+)</small></td>
+<td style="text-align: center;"><big>&bull;</big></td>
+<td>Baseline Profile (BP)</td>
 <td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
 </tr>
 
 <tr>
 <td>MPEG-4 SP</td>
 <td>&nbsp;</td>
-<td style="text-align: center;">X</td>
+<td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp)</td>
 </tr>
@@ -152,7 +195,83 @@ page.title=Android Supported Media Formats
 </tbody></table>
 
 
+<h2 id="recommendations">Video Encoding Recommendations</h2>
 
+<p>Below are examples of video encoding profiles and parameters that the Android media framework supports for playback.</p>
 
+<ul>
+  <li><strong>Lower quality video</strong><br>
 
+    <table style="margin-top: 4px">
+    <tbody>
+    <tr>
+      <th>Video codec</th>
+      <td>H.264 Baseline Profile</th>
+    </tr>
+    <tr>
+      <th>Video resolution</th>
+      <td>176 x 144 px</th>
+    </tr>
+    <tr>
+      <th>Video frame rate</th>
+      <td>12 fps</th>
+    </tr>
+    <tr>
+      <th>Video bitrate</th>
+      <td>56 Kbps</th>
+    </tr>
+    <tr>
+      <th>Audio codec</th>
+      <td>AAC-LC</th>
+    </tr>
+    <tr>
+      <th>Audio channels</th>
+      <td>1 (mono)</th>
+    </tr>
+    <tr>
+      <th>Audio bitrate</th>
+      <td>24 Kbps</th>
+    </tr>
+    </tbody>
+    </table>
+  </li>
 
+  <li><strong>Higher quality video</strong><br>
+
+    <table style="margin-top: 4px">
+    <tbody>
+    <tr>
+      <th>Video codec</th>
+      <td>H.264 Baseline Profile</th>
+    </tr>
+    <tr>
+      <th>Video resolution</th>
+      <td>480 x 360 px</th>
+    </tr>
+    <tr>
+      <th>Video frame rate</th>
+      <td>30 fps</th>
+    </tr>
+    <tr>
+      <th>Video bitrate</th>
+      <td>500 Kbps</th>
+    </tr>
+    <tr>
+      <th>Audio codec</th>
+      <td>AAC-LC</th>
+    </tr>
+    <tr>
+      <th>Audio channels</th>
+      <td>2 (stereo)</th>
+    </tr>
+    <tr>
+      <th>Audio bitrate</th>
+      <td>128 Kbps</th>
+    </tr>
+    </tbody>
+    </table>
+
+  </li>
+</ul>
+
+<p>In addition to the encoding parameters above, a device's available video recording profiles can be used as a proxy for media playback capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile CamcorderProfile} class, which is available since API level 8.</p>
