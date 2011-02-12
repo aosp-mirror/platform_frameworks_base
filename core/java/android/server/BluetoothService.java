@@ -24,17 +24,17 @@
 
 package android.server;
 
+import com.android.internal.app.IBatteryStats;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothDeviceProfileState;
 import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfileState;
 import android.bluetooth.BluetoothSocket;
-import android.bluetooth.BluetoothTetheringDataTracker;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
@@ -44,14 +44,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources.NotFoundException;
-import android.net.ConnectivityManager;
-import android.net.InterfaceConfiguration;
-import android.net.LinkAddress;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -59,8 +54,6 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
-
-import com.android.internal.app.IBatteryStats;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -76,7 +69,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -147,10 +139,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private final HashMap<String, BluetoothDeviceProfileState> mDeviceProfileState;
     private final BluetoothProfileState mA2dpProfileState;
     private final BluetoothProfileState mHfpProfileState;
-    private final BluetoothProfileState mHidProfileState;
 
     private BluetoothA2dpService mA2dpService;
-    private final HashMap<BluetoothDevice, Integer> mInputDevices;
     private final HashMap<String, Pair<byte[], byte[]>> mDeviceOobData;
 
     private int mProfilesConnected = 0, mProfilesConnecting = 0, mProfilesDisconnecting = 0;
@@ -160,6 +150,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private int mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
     private BluetoothPanProfileHandler mBluetoothPanProfileHandler;
+    private BluetoothInputProfileHandler mBluetoothInputProfileHandler;
 
     private static class RemoteService {
         public String address;
@@ -220,18 +211,16 @@ public class BluetoothService extends IBluetooth.Stub {
         mDeviceProfileState = new HashMap<String, BluetoothDeviceProfileState>();
         mA2dpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.A2DP);
         mHfpProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HFP);
-        mHidProfileState = new BluetoothProfileState(mContext, BluetoothProfileState.HID);
 
         mHfpProfileState.start();
         mA2dpProfileState.start();
-        mHidProfileState.start();
 
         IntentFilter filter = new IntentFilter();
         registerForAirplaneMode(filter);
 
         filter.addAction(Intent.ACTION_DOCK_EVENT);
         mContext.registerReceiver(mReceiver, filter);
-        mInputDevices = new HashMap<BluetoothDevice, Integer>();
+        mBluetoothInputProfileHandler = BluetoothInputProfileHandler.getInstance(mContext, this);
         mBluetoothPanProfileHandler = BluetoothPanProfileHandler.getInstance(mContext, this);
     }
 
@@ -807,7 +796,8 @@ public class BluetoothService extends IBluetooth.Stub {
 
             // HID is handled by BluetoothService, other profiles
             // will be handled by their respective services.
-            setInitialInputDevicePriority(mAdapter.getRemoteDevice(address), state);
+            mBluetoothInputProfileHandler.setInitialInputDevicePriority(
+                    mAdapter.getRemoteDevice(address), state);
 
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
                          reason + ")");
@@ -1452,218 +1442,6 @@ public class BluetoothService extends IBluetooth.Stub {
                 mContext.MODE_PRIVATE);
 
         return sp.contains(SHARED_PREFERENCE_DOCK_ADDRESS + address);
-    }
-
-    public synchronized boolean isTetheringOn() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.isTetheringOn();
-    }
-
-    /*package*/ synchronized boolean allowIncomingTethering() {
-        return mBluetoothPanProfileHandler.allowIncomingTethering();
-    }
-
-    public synchronized void setBluetoothTethering(boolean value) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        mBluetoothPanProfileHandler.setBluetoothTethering(value);
-    }
-
-    public synchronized int getPanDeviceState(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.getPanDeviceState(device);
-    }
-
-    public synchronized boolean connectPanDevice(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-            "Need BLUETOOTH_ADMIN permission");
-        return mBluetoothPanProfileHandler.connectPanDevice(device);
-    }
-
-    public synchronized List<BluetoothDevice> getConnectedPanDevices() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.getConnectedPanDevices();
-    }
-
-    public synchronized boolean disconnectPanDevice(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-            "Need BLUETOOTH_ADMIN permission");
-        return mBluetoothPanProfileHandler.disconnectPanDevice(device);
-    }
-
-    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
-                                                             String iface,
-                                                             int state,
-                                                             int role) {
-        mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, iface, state, role);
-    }
-
-    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
-                                                             int state, int role) {
-        mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, null, state, role);
-    }
-
-    public synchronized boolean connectInputDevice(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-
-        String objectPath = getObjectPathFromAddress(device.getAddress());
-        if (objectPath == null ||
-            getInputDeviceState(device) != BluetoothInputDevice.STATE_DISCONNECTED ||
-            getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_OFF) {
-            return false;
-        }
-        BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
-        if (state != null) {
-            Message msg = new Message();
-            msg.arg1 = BluetoothDeviceProfileState.CONNECT_HID_OUTGOING;
-            msg.obj = state;
-            mHidProfileState.sendMessage(msg);
-            return true;
-        }
-        return false;
-    }
-
-    public synchronized boolean connectInputDeviceInternal(BluetoothDevice device) {
-        String objectPath = getObjectPathFromAddress(device.getAddress());
-        handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_CONNECTING);
-        if (!connectInputDeviceNative(objectPath)) {
-            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_DISCONNECTED);
-            return false;
-        }
-        return true;
-    }
-
-    public synchronized boolean disconnectInputDevice(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-
-        String objectPath = getObjectPathFromAddress(device.getAddress());
-        if (objectPath == null ||
-                getInputDeviceState(device) == BluetoothInputDevice.STATE_DISCONNECTED) {
-            return false;
-        }
-        BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
-        if (state != null) {
-            Message msg = new Message();
-            msg.arg1 = BluetoothDeviceProfileState.DISCONNECT_HID_OUTGOING;
-            msg.obj = state;
-            mHidProfileState.sendMessage(msg);
-            return true;
-        }
-        return false;
-    }
-
-    public synchronized boolean disconnectInputDeviceInternal(BluetoothDevice device) {
-        String objectPath = getObjectPathFromAddress(device.getAddress());
-        handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_DISCONNECTING);
-        if (!disconnectInputDeviceNative(objectPath)) {
-            handleInputDeviceStateChange(device, BluetoothInputDevice.STATE_CONNECTED);
-            return false;
-        }
-        return true;
-    }
-
-    public synchronized int getInputDeviceState(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-
-        if (mInputDevices.get(device) == null) {
-            return BluetoothInputDevice.STATE_DISCONNECTED;
-        }
-        return mInputDevices.get(device);
-    }
-
-    public synchronized List<BluetoothDevice> getConnectedInputDevices() {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        List<BluetoothDevice> devices = lookupInputDevicesMatchingStates(
-            new int[] {BluetoothInputDevice.STATE_CONNECTED});
-        return devices;
-    }
-
-    public synchronized int getInputDevicePriority(BluetoothDevice device) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.getBluetoothInputDevicePriorityKey(device.getAddress()),
-                BluetoothInputDevice.PRIORITY_UNDEFINED);
-    }
-
-    public synchronized boolean setInputDevicePriority(BluetoothDevice device, int priority) {
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                                                "Need BLUETOOTH_ADMIN permission");
-        if (!BluetoothAdapter.checkBluetoothAddress(device.getAddress())) {
-            return false;
-        }
-        return Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.getBluetoothInputDevicePriorityKey(device.getAddress()),
-                priority);
-    }
-
-    /*package*/synchronized List<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
-        List<BluetoothDevice> inputDevices = new ArrayList<BluetoothDevice>();
-
-        for (BluetoothDevice device: mInputDevices.keySet()) {
-            int inputDeviceState = getInputDeviceState(device);
-            for (int state : states) {
-                if (state == inputDeviceState) {
-                    inputDevices.add(device);
-                    break;
-                }
-            }
-        }
-        return inputDevices;
-    }
-
-    private synchronized void handleInputDeviceStateChange(BluetoothDevice device, int state) {
-        int prevState;
-        if (mInputDevices.get(device) == null) {
-            prevState = BluetoothInputDevice.STATE_DISCONNECTED;
-        } else {
-            prevState = mInputDevices.get(device);
-        }
-        if (prevState == state) return;
-
-        mInputDevices.put(device, state);
-
-        if (getInputDevicePriority(device) >
-              BluetoothInputDevice.PRIORITY_OFF &&
-            state == BluetoothInputDevice.STATE_CONNECTING ||
-            state == BluetoothInputDevice.STATE_CONNECTED) {
-            // We have connected or attempting to connect.
-            // Bump priority
-            setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_AUTO_CONNECT);
-        }
-
-        Intent intent = new Intent(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
-        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
-        intent.putExtra(BluetoothInputDevice.EXTRA_PREVIOUS_INPUT_DEVICE_STATE, prevState);
-        intent.putExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, state);
-        mContext.sendBroadcast(intent, BLUETOOTH_PERM);
-
-        if (DBG) log("InputDevice state : device: " + device + " State:" + prevState + "->" + state);
-        sendConnectionStateChange(device, state, prevState);
-    }
-
-    /*package*/ void handleInputDevicePropertyChange(String address, boolean connected) {
-        int state = connected ? BluetoothInputDevice.STATE_CONNECTED :
-            BluetoothInputDevice.STATE_DISCONNECTED;
-        BluetoothDevice device = mAdapter.getRemoteDevice(address);
-        handleInputDeviceStateChange(device, state);
-    }
-
-    private void setInitialInputDevicePriority(BluetoothDevice device, int state) {
-        switch (state) {
-            case BluetoothDevice.BOND_BONDED:
-                if (getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_UNDEFINED) {
-                    setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_ON);
-                }
-                break;
-            case BluetoothDevice.BOND_NONE:
-                setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_UNDEFINED);
-                break;
-        }
-    }
-
-    /*package*/ boolean isRemoteDeviceInCache(String address) {
-        return (mDeviceProperties.get(address) != null);
     }
 
     /*package*/ String[] getRemoteDeviceProperties(String address) {
@@ -2450,6 +2228,114 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!result) log("Set Link Timeout to:" + num_slots + " slots failed");
     }
 
+    /**** Handlers for PAN  Profile ****/
+
+    public synchronized boolean isTetheringOn() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothPanProfileHandler.isTetheringOn();
+    }
+
+    /*package*/ synchronized boolean allowIncomingTethering() {
+        return mBluetoothPanProfileHandler.allowIncomingTethering();
+    }
+
+    public synchronized void setBluetoothTethering(boolean value) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        mBluetoothPanProfileHandler.setBluetoothTethering(value);
+    }
+
+    public synchronized int getPanDeviceState(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothPanProfileHandler.getPanDeviceState(device);
+    }
+
+    public synchronized boolean connectPanDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+            "Need BLUETOOTH_ADMIN permission");
+        return mBluetoothPanProfileHandler.connectPanDevice(device);
+    }
+
+    public synchronized List<BluetoothDevice> getConnectedPanDevices() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothPanProfileHandler.getConnectedPanDevices();
+    }
+
+    public synchronized boolean disconnectPanDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+            "Need BLUETOOTH_ADMIN permission");
+        return mBluetoothPanProfileHandler.disconnectPanDevice(device);
+    }
+
+    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+                                                             String iface,
+                                                             int state,
+                                                             int role) {
+        mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, iface, state, role);
+    }
+
+    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+                                                             int state, int role) {
+        mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, null, state, role);
+    }
+
+    /**** Handlers for Input Device Profile ****/
+
+    public synchronized boolean connectInputDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
+        return mBluetoothInputProfileHandler.connectInputDevice(device, state);
+    }
+
+    public synchronized boolean connectInputDeviceInternal(BluetoothDevice device) {
+        return mBluetoothInputProfileHandler.connectInputDeviceInternal(device);
+    }
+
+    public synchronized boolean disconnectInputDevice(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
+        return mBluetoothInputProfileHandler.disconnectInputDevice(device, state);
+    }
+
+    public synchronized boolean disconnectInputDeviceInternal(BluetoothDevice device) {
+        return mBluetoothInputProfileHandler.disconnectInputDeviceInternal(device);
+    }
+
+    public synchronized int getInputDeviceState(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothInputProfileHandler.getInputDeviceState(device);
+
+    }
+
+    public synchronized List<BluetoothDevice> getConnectedInputDevices() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothInputProfileHandler.getConnectedInputDevices();
+    }
+
+    public synchronized int getInputDevicePriority(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothInputProfileHandler.getInputDevicePriority(device);
+    }
+
+    public synchronized boolean setInputDevicePriority(BluetoothDevice device, int priority) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        return mBluetoothInputProfileHandler.setInputDevicePriority(device, priority);
+    }
+
+    /*package*/synchronized List<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
+        return mBluetoothInputProfileHandler.lookupInputDevicesMatchingStates(states);
+    }
+
+    /*package*/ synchronized void handleInputDevicePropertyChange(String address, boolean connected) {
+        mBluetoothInputProfileHandler.handleInputDevicePropertyChange(address, connected);
+    }
+
+    /*package*/ boolean isRemoteDeviceInCache(String address) {
+        return (mDeviceProperties.get(address) != null);
+    }
+
     public boolean connectHeadset(String address) {
         if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
 
@@ -2703,8 +2589,8 @@ public class BluetoothService extends IBluetooth.Stub {
             short channel);
     private native boolean removeServiceRecordNative(int handle);
     private native boolean setLinkTimeoutNative(String path, int num_slots);
-    private native boolean connectInputDeviceNative(String path);
-    private native boolean disconnectInputDeviceNative(String path);
+    native boolean connectInputDeviceNative(String path);
+    native boolean disconnectInputDeviceNative(String path);
 
     native boolean setBluetoothTetheringNative(boolean value, String nap, String bridge);
     native boolean connectPanDeviceNative(String path, String dstRole);

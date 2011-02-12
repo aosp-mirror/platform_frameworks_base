@@ -74,21 +74,17 @@ public class BluetoothPanProfileHandler {
         }
     }
 
-    public static synchronized BluetoothPanProfileHandler getInstance(Context context,
+    static synchronized BluetoothPanProfileHandler getInstance(Context context,
             BluetoothService service) {
         if (sInstance == null) sInstance = new BluetoothPanProfileHandler(context, service);
         return sInstance;
     }
 
-    public Object Clone() throws CloneNotSupportedException {
-        throw new CloneNotSupportedException();
-    }
-
-    public synchronized boolean isTetheringOn() {
+    synchronized boolean isTetheringOn() {
         return mTetheringOn;
     }
 
-    /*package*/ synchronized boolean allowIncomingTethering() {
+    synchronized boolean allowIncomingTethering() {
         if (isTetheringOn() && getConnectedPanDevices().size() < mMaxPanDevices)
             return true;
         return false;
@@ -295,8 +291,8 @@ public class BluetoothPanProfileHandler {
         mBluetoothService.sendConnectionStateChange(device, state, prevState);
     }
 
-    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
-                                                             int state, int role) {
+    synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+                                                 int state, int role) {
         handlePanDeviceStateChange(device, null, state, role);
     }
 
