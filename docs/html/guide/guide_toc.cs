@@ -733,7 +733,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
-          </a></li>
+          </a> <span class="new">updated</span></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/g-app-intents.html">
             <span class="en">Intents List: Google Apps</span>
           </a></li>
