@@ -90,7 +90,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private BroadcastReceiver mStateReceiver;
 
     private static final String USB_NEAR_IFACE_ADDR      = "192.168.42.129";
-    private static final String USB_NETMASK              = "255.255.255.0";
+    private static final int USB_PREFIX_LENGTH        = 24;
 
     // USB is  192.168.42.1 and 255.255.255.0
     // Wifi is 192.168.43.1 and 255.255.255.0
@@ -568,8 +568,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     ifcg = service.getInterfaceConfig(iface);
                     if (ifcg != null) {
                         InetAddress addr = InetAddress.getByName(USB_NEAR_IFACE_ADDR);
-                        InetAddress mask = InetAddress.getByName(USB_NETMASK);
-                        ifcg.addr = new LinkAddress(addr, mask);
+                        ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
                         if (enabled) {
                             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                         } else {

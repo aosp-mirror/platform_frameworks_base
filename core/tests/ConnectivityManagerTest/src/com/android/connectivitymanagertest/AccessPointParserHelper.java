@@ -46,8 +46,8 @@ import java.util.List;
  * <accesspoint></accesspoint>. The supported configuration includes: ssid,
  * security, eap, phase2, identity, password, anonymousidentity, cacert, usercert,
  * in which each is included in the corresponding tags. Static IP setting is also supported.
- * Tags that can be used include: ip, gateway, netmask, dns1, dns2. All access points have to be
- * enclosed in tags of <resources></resources>.
+ * Tags that can be used include: ip, gateway, networkprefixlength, dns1, dns2. All access points
+ * have to be enclosed in tags of <resources></resources>.
  *
  * The following is a sample configuration file for an access point using EAP-PEAP with MSCHAP2.
  * <resources>
@@ -62,7 +62,8 @@ import java.util.List;
  * </resources>
  *
  * Note:ssid and security have to be the first two tags
- *      for static ip setting, tag "ip" should be listed before other fields: dns, gateway, netmask.
+ *      for static ip setting, tag "ip" should be listed before other fields: dns, gateway,
+ *      networkprefixlength.
  */
 public class AccessPointParserHelper {
     private static final String KEYSTORE_SPACE = "keystore://";
@@ -106,7 +107,6 @@ public class AccessPointParserHelper {
         boolean ip = false;
         boolean gateway = false;
         boolean networkprefix = false;
-        boolean netmask = false;
         boolean dns1 = false;
         boolean dns2 = false;
         boolean eap = false;
@@ -162,9 +162,6 @@ public class AccessPointParserHelper {
             }
             if (tagName.equalsIgnoreCase("networkprefixlength")) {
                 networkprefix = true;
-            }
-            if (tagName.equalsIgnoreCase("netmask")) {
-                netmask = true;
             }
             if (tagName.equalsIgnoreCase("dns1")) {
                 dns1 = true;
@@ -320,19 +317,6 @@ public class AccessPointParserHelper {
                     throw new SAXException();
                 }
                 networkprefix = false;
-            }
-            if (netmask) {
-                try {
-                    String netMaskStr = new String(ch, start, length);
-                    if (!InetAddress.isNumeric(netMaskStr)) {
-                        throw new SAXException();
-                    }
-                    InetAddress netMaskAddr = InetAddress.getByName(netMaskStr);
-                    mLinkProperties.addLinkAddress(new LinkAddress(mInetAddr, netMaskAddr));
-                } catch (UnknownHostException e) {
-                    throw new SAXException();
-                }
-                netmask = false;
             }
             if (dns1) {
                 try {
