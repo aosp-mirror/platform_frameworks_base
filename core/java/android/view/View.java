@@ -1421,55 +1421,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is showing the last item.
-     * @hide
-     */
-    protected static final int[] LAST_STATE_SET = {R.attr.state_last};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is showing the first item.
-     * @hide
-     */
-    protected static final int[] FIRST_STATE_SET = {R.attr.state_first};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is showing the middle item.
-     * @hide
-     */
-    protected static final int[] MIDDLE_STATE_SET = {R.attr.state_middle};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is showing only one item.
-     * @hide
-     */
-    protected static final int[] SINGLE_STATE_SET = {R.attr.state_single};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is pressed and showing the last item.
-     * @hide
-     */
-    protected static final int[] PRESSED_LAST_STATE_SET = {R.attr.state_last, R.attr.state_pressed};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is pressed and showing the first item.
-     * @hide
-     */
-    protected static final int[] PRESSED_FIRST_STATE_SET = {R.attr.state_first, R.attr.state_pressed};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is pressed and showing the middle item.
-     * @hide
-     */
-    protected static final int[] PRESSED_MIDDLE_STATE_SET = {R.attr.state_middle, R.attr.state_pressed};
-    /**
-     * Used by views that contain lists of items. This state indicates that
-     * the view is pressed and showing only one item.
-     * @hide
-     */
-    protected static final int[] PRESSED_SINGLE_STATE_SET = {R.attr.state_single, R.attr.state_pressed};
-
-    /**
      * Temporary Rect currently for use in setBackground().  This will probably
      * be extended in the future to hold our own class with more than just
      * a Rect. :)
@@ -1497,14 +1448,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "measurement")
-    /*package*/ int mMeasuredWidth;
+    int mMeasuredWidth;
 
     /**
      * Height as measured during measure pass.
      * {@hide}
      */
     @ViewDebug.ExportedProperty(category = "measurement")
-    /*package*/ int mMeasuredHeight;
+    int mMeasuredHeight;
 
     /**
      * Flag to indicate that this view was marked INVALIDATED, or had its display list
@@ -3746,16 +3697,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return true;
         }
         return false;
-    }
-
-    /**
-     * Determine if this view has the FITS_SYSTEM_WINDOWS flag set.
-     * @return True if window has FITS_SYSTEM_WINDOWS set
-     *
-     * @hide
-     */
-    public boolean isFitsSystemWindowsFlagSet() {
-        return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
     }
 
     /**
@@ -8436,6 +8377,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @hide
      */
+    @SuppressWarnings({"UnusedDeclaration"})
     public void outputDirtyFlags(String indent, boolean clear, int clearMask) {
         Log.d("View", indent + this + "             DIRTY(" + (mPrivateFlags & View.DIRTY_MASK) +
                 ") DRAWN(" + (mPrivateFlags & DRAWN) + ")" + " CACHE_VALID(" +
@@ -8473,10 +8415,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     public boolean canHaveDisplayList() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
-            return false;
-        }
-        return true;
+        return !(mAttachInfo == null || mAttachInfo.mHardwareRenderer == null);
     }
 
     /**
@@ -8719,12 +8658,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
                 Bitmap.Config quality;
                 if (!opaque) {
+                    // Never pick ARGB_4444 because it looks awful
+                    // Keep the DRAWING_CACHE_QUALITY_LOW flag just in case
                     switch (mViewFlags & DRAWING_CACHE_QUALITY_MASK) {
                         case DRAWING_CACHE_QUALITY_AUTO:
                             quality = Bitmap.Config.ARGB_8888;
                             break;
                         case DRAWING_CACHE_QUALITY_LOW:
-                            quality = Bitmap.Config.ARGB_4444;
+                            quality = Bitmap.Config.ARGB_8888;
                             break;
                         case DRAWING_CACHE_QUALITY_HIGH:
                             quality = Bitmap.Config.ARGB_8888;
@@ -11324,6 +11265,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * </p>
      */
     public boolean dispatchDragEvent(DragEvent event) {
+        //noinspection SimplifiableIfStatement
         if (mOnDragListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnDragListener.onDrag(this, event)) {
             return true;

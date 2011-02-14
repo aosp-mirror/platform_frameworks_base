@@ -245,25 +245,80 @@ public final class Bitmap implements Parcelable {
         }
     }
 
+    /**
+     * Possible bitmap configurations. A bitmap configuration describes
+     * how pixels are stored. This affects the quality (color depth) as
+     * well as the ability to display transparent/translucent colors.
+     */
     public enum Config {
         // these native values must match up with the enum in SkBitmap.h
+
+        /**
+         * Each pixel is stored as a single translucency (alpha) channel.
+         * This is very useful to efficiently store masks for instance.
+         * No color information is stored.
+         * With this configuration, each pixel requires 1 byte of memory.
+         */
         ALPHA_8     (2),
+
+        /**
+         * Each pixel is stored on 2 bytes and only the RGB channels are
+         * encoded: red is stored with 5 bits of precision (32 possible
+         * values), green is stored with 6 bits of precision (64 possible
+         * values) and blue is stored with 5 bits of precision.
+         * 
+         * This configuration can produce slight visual artifacts depending
+         * on the configuration of the source. For instance, without
+         * dithering, the result might show a greenish tint. To get better
+         * results dithering should be applied.
+         * 
+         * This configuration may be useful when using opaque bitmaps
+         * that do not require high color fidelity.
+         */
         RGB_565     (4),
+
+        /**
+         * Each pixel is stored on 2 bytes. The three RGB color channels
+         * and the alpha channel (translucency) are stored with a 4 bits
+         * precision (16 possible values.)
+         * 
+         * This configuration is mostly useful if the application needs
+         * to store translucency information but also needs to save
+         * memory.
+         * 
+         * It is recommended to use {@link #ARGB_8888} instead of this
+         * configuration.
+         * 
+         * @deprecated Because of the poor quality of this configuration,
+         *             it is advised to use {@link #ARGB_8888} instead.
+         */
+        @Deprecated
         ARGB_4444   (5),
+
+        /**
+         * Each pixel is stored on 4 bytes. Each channel (RGB and alpha
+         * for translucency) is stored with 8 bits of precision (256
+         * possible values.)
+         * 
+         * This configuration is very flexible and offers the best
+         * quality. It should be used whenever possible.
+         */
         ARGB_8888   (6);
 
-        Config(int ni) {
-            this.nativeInt = ni;
-        }
         final int nativeInt;
 
-        /* package */ static Config nativeToConfig(int ni) {
-            return sConfigs[ni];
-        }
-
+        @SuppressWarnings({"deprecation"})
         private static Config sConfigs[] = {
             null, null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888
         };
+        
+        Config(int ni) {
+            this.nativeInt = ni;
+        }
+
+        static Config nativeToConfig(int ni) {
+            return sConfigs[ni];
+        }
     }
 
     /**
@@ -473,6 +528,7 @@ public final class Bitmap implements Parcelable {
                 case ALPHA_8:
                     newConfig = Config.ALPHA_8;
                     break;
+                //noinspection deprecation
                 case ARGB_4444:
                 case ARGB_8888:
                 default:
