@@ -194,6 +194,14 @@
             </li>
           </ul>
       </li>
+
+      <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
+            <span class="en">Content Providers</span>
+          </a></li>
+      <li><a href="<?cs var:toroot ?>guide/topics/providers/loaders.html">
+            <span class="en">Loaders</span>
+          </a><span class="new">new!</span></li>
+
       <li><a href="<?cs var:toroot ?>guide/topics/security/security.html">
             <span class="en">Security and Permissions</span>
           </a></li>
