@@ -18,14 +18,14 @@ page.title=Testing
     which guides you through a more complex testing scenario.
 </p>
 <dl>
-  <dt><a href="testing_eclipse.html">Testing in Eclipse, with ADT</a></dt>
+  <dt><a href="testing_eclipse.html">Testing from Eclipse, with ADT</a></dt>
           <dd>
             The ADT plugin lets you quickly set up and manage test projects directly in
             the Eclipse UI. Once you have written your tests, you can build and run them and
             then see the results in the Eclipse JUnit view. You can also use the SDK command-line
             tools to execute your tests if needed.
           </dd>
-  <dt><a href="testing_otheride.html">Testing in Other IDEs</a></dt>
+  <dt><a href="testing_otheride.html">Testing from Other IDEs</a></dt>
     <dd>
         The SDK command-line tools provide the same capabilities as the ADT plugin. You can
         use them to set up and manage test projects, build your test application,
