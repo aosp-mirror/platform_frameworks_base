@@ -41,10 +41,8 @@ import java.util.List;
 /**
  * This handles the PAN profile. All calls into this are made
  * from Bluetooth Service.
- * @hide
  */
-
-public class BluetoothPanProfileHandler {
+final class BluetoothPanProfileHandler {
     private static final String TAG = "BluetoothPanProfileHandler";
     private static final boolean DBG = true;
 
@@ -53,7 +51,7 @@ public class BluetoothPanProfileHandler {
 
     private static final String BLUETOOTH_IFACE_ADDR_START= "192.168.44.1";
     private static final int BLUETOOTH_MAX_PAN_CONNECTIONS = 5;
-    private static final String BLUETOOTH_NETMASK        = "255.255.255.0";
+    private static final int BLUETOOTH_PREFIX_LENGTH        = 24;
     public static BluetoothPanProfileHandler sInstance;
     private final HashMap<BluetoothDevice, BluetoothPanDevice> mPanDevices;
     private boolean mTetheringOn;
@@ -300,7 +298,7 @@ public class BluetoothPanProfileHandler {
         private int mState;
         private String mIfaceAddr;
         private String mIface;
-        private int mLocalRole; // Which local role is this PAN device bound too
+        private int mLocalRole; // Which local role is this PAN device bound to
 
         BluetoothPanDevice(int state, String ifaceAddr, String iface, int localRole) {
             mState = state;
@@ -365,7 +363,6 @@ public class BluetoothPanProfileHandler {
         try {
             ifcg = service.getInterfaceConfig(iface);
             if (ifcg != null) {
-                InetAddress mask = InetAddress.getByName(BLUETOOTH_NETMASK);
                 InetAddress addr = null;
                 if (ifcg.addr == null || (addr = ifcg.addr.getAddress()) == null ||
                         addr.equals(InetAddress.getByName("0.0.0.0")) ||
@@ -373,7 +370,7 @@ public class BluetoothPanProfileHandler {
                     addr = InetAddress.getByName(address);
                 }
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-                ifcg.addr = new LinkAddress(addr, mask);
+                ifcg.addr = new LinkAddress(addr, BLUETOOTH_PREFIX_LENGTH);
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
                 service.setInterfaceConfig(iface, ifcg);

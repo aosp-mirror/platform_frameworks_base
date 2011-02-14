@@ -35,10 +35,8 @@ import java.util.List;
  * This handles all the operations on the HID profile.
  * All functions are called by BluetoothService, as Bluetooth Service
  * is the Service handler for the HID profile.
- *
- * @hide
  */
-public class BluetoothInputProfileHandler {
+final class BluetoothInputProfileHandler {
     private static final String TAG = "BluetoothInputProfileHandler";
     private static final boolean DBG = true;
 
