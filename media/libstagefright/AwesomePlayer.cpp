@@ -399,6 +399,9 @@ void AwesomePlayer::reset_l() {
         if (mConnectingDataSource != NULL) {
             LOGI("interrupting the connection process");
             mConnectingDataSource->disconnect();
+        } else if (mConnectingRTSPController != NULL) {
+            LOGI("interrupting the connection process");
+            mConnectingRTSPController->disconnect();
         }
 
         if (mFlags & PREPARING_CONNECTED) {
@@ -409,7 +412,7 @@ void AwesomePlayer::reset_l() {
     }
 
     if (mFlags & PREPARING) {
-        LOGI("waiting until preparation is completes.");
+        LOGI("waiting until preparation is completed.");
     }
 
     while (mFlags & PREPARING) {
@@ -1633,7 +1636,13 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             mLooper->start();
         }
         mRTSPController = new ARTSPController(mLooper);
+        mConnectingRTSPController = mRTSPController;
+
+        mLock.unlock();
         status_t err = mRTSPController->connect(mUri.string());
+        mLock.lock();
+
+        mConnectingRTSPController.clear();
 
         LOGI("ARTSPController::connect returned %d", err);
 

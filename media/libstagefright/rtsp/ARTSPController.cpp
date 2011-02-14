@@ -69,7 +69,14 @@ status_t ARTSPController::connect(const char *url) {
 void ARTSPController::disconnect() {
     Mutex::Autolock autoLock(mLock);
 
-    if (mState != CONNECTED) {
+    if (mState == CONNECTING) {
+        mState = DISCONNECTED;
+        mConnectionResult = ERROR_IO;
+        mCondition.broadcast();
+
+        mHandler.clear();
+        return;
+    } else if (mState != CONNECTED) {
         return;
     }
 
