@@ -54,7 +54,7 @@ href="{@docRoot}sdk/index.html">download the SDK Starter Package</a>
 first.</p>
 
 <p>For a high-level introduction to Android 2.3, see the <a
-href="http://developer.android.com/sdk/android-2.3-highlights.html">Platform Highlights</a>.</p>
+href="{@docRoot}sdk/android-2.3-highlights.html">Platform Highlights</a>.</p>
 
 
 <h2 id="relnotes">Revisions</h2>
