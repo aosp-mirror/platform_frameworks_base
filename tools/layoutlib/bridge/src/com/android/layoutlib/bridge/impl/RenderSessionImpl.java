@@ -182,8 +182,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         context.setBridgeInflater(mInflater);
         mInflater.setFactory2(context);
 
-        mBlockParser = new BridgeXmlBlockParser(params.getLayoutDescription(),
-                context, false /* platformResourceFlag */);
+        mBlockParser = new BridgeXmlBlockParser(
+                params.getLayoutDescription(), context, false /* platformResourceFlag */);
 
         return SUCCESS.createResult();
     }
@@ -562,13 +562,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         BridgeContext context = getContext();
 
         // create a block parser for the XML
-        BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(childXml, context,
-                false /* platformResourceFlag */);
+        BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
+                childXml, context, false /* platformResourceFlag */);
 
         // inflate the child without adding it to the root since we want to control where it'll
         // get added. We do pass the parentView however to ensure that the layoutParams will
         // be created correctly.
         final View child = mInflater.inflate(blockParser, parentView, false /*attachToRoot*/);
+        blockParser.ensurePopped();
 
         invalidateRenderingSize();
 
