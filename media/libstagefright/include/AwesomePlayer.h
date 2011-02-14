@@ -205,6 +205,7 @@ private:
 
     sp<ALooper> mLooper;
     sp<ARTSPController> mRTSPController;
+    sp<ARTSPController> mConnectingRTSPController;
 
     sp<LiveSession> mLiveSession;
 
