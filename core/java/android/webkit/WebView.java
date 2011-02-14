@@ -1187,7 +1187,7 @@ public class WebView extends AbsoluteLayout
         if (AccessibilityManager.getInstance(mContext).isEnabled()
                 && getSettings().getJavaScriptEnabled()) {
             // exposing the TTS for now ...
-            mTextToSpeech = new TextToSpeech(getContext(), null); 
+            mTextToSpeech = new TextToSpeech(getContext(), null);
             addJavascriptInterface(mTextToSpeech, ALIAS_ACCESSIBILITY_JS_INTERFACE);
         }
     }
@@ -2323,6 +2323,11 @@ public class WebView extends AbsoluteLayout
     private View mTitleBar;
 
     /**
+     * the title bar rendering gravity
+     */
+    private int mTitleGravity;
+
+    /**
      * Add or remove a title bar to be embedded into the WebView, and scroll
      * along with it vertically, while remaining in view horizontally. Pass
      * null to remove the title bar from the WebView, and return to drawing
@@ -2340,6 +2345,16 @@ public class WebView extends AbsoluteLayout
                     ViewGroup.LayoutParams.WRAP_CONTENT, 0, 0));
         }
         mTitleBar = v;
+    }
+
+    /**
+     * Set where to render the embedded title bar
+     * NO_GRAVITY at the top of the page
+     * TOP        at the top of the screen
+     * @hide
+     */
+    public void setTitleBarGravity(int gravity) {
+        mTitleGravity = gravity;
     }
 
     /**
@@ -3683,7 +3698,12 @@ public class WebView extends AbsoluteLayout
             // When drawing the title bar, move it horizontally to always show
             // at the top of the WebView.
             mTitleBar.offsetLeftAndRight(mScrollX - mTitleBar.getLeft());
-            int newTop = Math.min(0, mScrollY);
+            int newTop = 0;
+            if (mTitleGravity == Gravity.NO_GRAVITY) {
+                newTop = Math.min(0, mScrollY);
+            } else if (mTitleGravity == Gravity.TOP) {
+                newTop = mScrollY;
+            }
             mTitleBar.setBottom(newTop + getTitleHeight());
             mTitleBar.setTop(newTop);
         }
@@ -3842,7 +3862,7 @@ public class WebView extends AbsoluteLayout
         if (detector != null && detector.isInProgress()) {
             return false;
         }
-        
+
         if (mNativeClass != 0 && nativeCursorIsTextInput()) {
             // Send the click so that the textfield is in focus
             centerKeyPressOnTextField();
