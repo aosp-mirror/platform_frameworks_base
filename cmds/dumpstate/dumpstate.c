@@ -116,9 +116,7 @@ static void dumpstate() {
 
 #ifdef FWDUMP_bcm4329
     run_command("DUMP WIFI STATUS", 20,
-            "su", "root", "dhdutil", "-i", "eth0", "dump", NULL);
-    run_command("DUMP WIFI FIRMWARE LOG", 60,
-            "su", "root", "dhdutil", "-i", "eth0", "upload", "/data/local/tmp/wlan_crash.dump", NULL);
+            "su", "root", "dhdutil", "-i", "wlan0", "dump", NULL);
     run_command("DUMP WIFI INTERNAL COUNTERS", 20,
             "su", "root", "wlutil", "counters", NULL);
 #endif
