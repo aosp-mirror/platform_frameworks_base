@@ -3,7 +3,7 @@ sdk.redirect=0
 
 sdk.win_installer=installer_r09-windows.exe
 sdk.win_installer_bytes=32828818
-sdk.win_installer_checksum=a0185701ac0d635a4fbf8169ac949a3c5b3d31e0 
+sdk.win_installer_checksum=ef92e643731f820360e036eb11658656
 
 sdk.win_download=android-sdk_r09-windows.zip
 sdk.win_bytes=32779808
