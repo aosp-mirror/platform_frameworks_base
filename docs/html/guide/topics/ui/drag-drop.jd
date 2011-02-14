@@ -88,8 +88,8 @@ page.title=Dragging and Dropping
         <h2>Related Samples</h2>
         <ol>
             <li>
-                <a href="{@docRoot}resources/samples/Honeycomb-Gallery/index.html">
-                Honeycomb-Gallery</a> sample application.
+                <a href="{@docRoot}resources/samples/HoneycombGallery/index.html">
+                Honeycomb Gallery</a>.
             </li>
             <li>
                 <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/DragAndDropDemo.html">
