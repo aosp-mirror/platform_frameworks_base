@@ -19,6 +19,8 @@ package com.android.mediaframeworktest;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 import com.android.mediaframeworktest.stress.MediaPlayerStressTest;
+/** Import for Video Editor Stress Test cases*/
+import com.android.mediaframeworktest.stress.VideoEditorStressTest;
 
 import junit.framework.TestSuite;
 
@@ -28,6 +30,8 @@ public class MediaPlayerStressTestRunner extends InstrumentationTestRunner {
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(MediaPlayerStressTest.class);
+        /** Video Editor Stress Test cases*/
+        suite.addTestSuite(VideoEditorStressTest.class);
         return suite;
     }
 
