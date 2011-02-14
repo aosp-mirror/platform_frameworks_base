@@ -19,9 +19,11 @@ package android.view.inputmethod;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -32,12 +34,17 @@ import java.util.List;
  * specified subtype of the designated input method directly.
  */
 public final class InputMethodSubtype implements Parcelable {
+    private static final String TAG = InputMethodSubtype.class.getSimpleName();
+    private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
+    private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
+
     private final int mSubtypeNameResId;
     private final int mSubtypeIconResId;
     private final String mSubtypeLocale;
     private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
     private final int mSubtypeHashCode;
+    private HashMap<String, String> mExtraValueHashMapCache;
 
     /**
      * Constructor
@@ -104,6 +111,46 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public String getExtraValue() {
         return mSubtypeExtraValue;
+    }
+
+    private HashMap<String, String> getExtraValueHashMap() {
+        if (mExtraValueHashMapCache == null) {
+            mExtraValueHashMapCache = new HashMap<String, String>();
+            final String[] pairs = mSubtypeExtraValue.split(EXTRA_VALUE_PAIR_SEPARATOR);
+            final int N = pairs.length;
+            for (int i = 0; i < N; ++i) {
+                final String[] pair = pairs[i].split(EXTRA_VALUE_KEY_VALUE_SEPARATOR);
+                if (pair.length == 1) {
+                    mExtraValueHashMapCache.put(pair[0], null);
+                } else if (pair.length > 1) {
+                    if (pair.length > 2) {
+                        Slog.w(TAG, "ExtraValue has two or more '='s");
+                    }
+                    mExtraValueHashMapCache.put(pair[0], pair[1]);
+                }
+            }
+        }
+        return mExtraValueHashMapCache;
+    }
+
+    /**
+     * The string of ExtraValue in subtype should be defined as follows:
+     * example: key0,key1=value1,key2,key3,key4=value4
+     * @param key the key of extra value
+     * @return the subtype contains specified the extra value
+     */
+    public boolean containsExtraValueKey(String key) {
+        return getExtraValueHashMap().containsKey(key);
+    }
+
+    /**
+     * The string of ExtraValue in subtype should be defined as follows:
+     * example: key0,key1=value1,key2,key3,key4=value4
+     * @param key the key of extra value
+     * @return the value of the specified key
+     */
+    public String getExtraValueOf(String key) {
+        return getExtraValueHashMap().get(key);
     }
 
     @Override
