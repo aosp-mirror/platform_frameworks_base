@@ -59,6 +59,10 @@ public final class Calendar {
     public static final String EVENT_BEGIN_TIME = "beginTime";
     public static final String EVENT_END_TIME = "endTime";
 
+    /**
+     * This must not be changed or horrible, unspeakable things could happen.
+     * For instance, the Calendar app might break. Also, the db might not work.
+     */
     public static final String AUTHORITY = "com.android.calendar";
 
     /**
