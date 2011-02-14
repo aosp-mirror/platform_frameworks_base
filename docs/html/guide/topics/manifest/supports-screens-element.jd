@@ -6,7 +6,8 @@ page.title=&lt;supports-screens&gt;
 <dt>syntax:</dt>
 <dd>
 <pre class="stx">
-&lt;supports-screens android:<a href="#small">smallScreens</a>=["true" | "false"] 
+&lt;supports-screens android:<a href="#resizeable">resizeable</a>=["true" | "false"]
+                  android:<a href="#small">smallScreens</a>=["true" | "false"] 
                   android:<a href="#normal">normalScreens</a>=["true" | "false"] 
                   android:<a href="#large">largeScreens</a>=["true" | "false"] 
                   android:<a href="#xlarge">xlargeScreens</a>=["true" | "false"]
@@ -19,17 +20,33 @@ page.title=&lt;supports-screens&gt;
 
 <dt>description:</dt>
 <dd>Lets you specify the screen dimensions the
-application supports.  By default a modern application (using API Level 4 or higher) supports all
-screen sizes and must explicitly disable certain screen sizes here;
-older applications are assumed to support only the "normal"
-screen size.  Note that screen size is a separate axis from
-density. Screen size is determined as the available pixels to an application
-after density scaling has been applied. 
+application supports.  By default, a modern application (using API Level 4 or higher) supports all
+screen sizes; older applications are assumed to support only the "normal" screen size. Screen
+size is determined as the available pixels to an application after density scaling has been
+applied. (Note that screen size is a separate axis from screen density.)
 
-<p>Based on the target device screen density, the Android 
-framework will scale down assets by a factor of 0.75 (low dpi screens) 
-or scale them up by a factor of 1.5 (high dpi screens).
-The screen density is expressed as dots-per-inch (dpi).</p>
+<p>An application "supports" a given screen size if it fills the entire screen and works as
+expected. By default, the system will resize your application to fill the screen, if you have set
+either <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+minSdkVersion}</a> or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+targetSdkVersion}</a> to {@code "4"} or higher. Resizing works well for most applications and
+you don't have to do any extra work to make your application work on larger screens.</p>
+
+<p>In addition to allowing the system to resize your application, you can add additional support
+for different screen sizes by providing <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
+layout resources</a> for different sizes. For instance, you might want to modify the layout
+of an activity when it is on a tablet or similar device that has an <em>xlarge</em> screen.</p>
+
+<p>If your application does not support <em>large</em> or <em>xlarge</em> screens, then you should
+declare that it is not resizeable by setting <a href="#resizeable">{@code android:resizeable}</a> to
+{@code "false"}, so that the system will not resize your application on larger screens.</p>
+
+<p>If your application does not support <em>small</em> screens, then
+there isn't much the system can do to make the application work well on a smaller screen, so
+external services (such as Android Market) should not allow users to install the application on such
+screens.</p>
+
 
 <p>For more information, see 
 <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
@@ -38,16 +55,40 @@ The screen density is expressed as dots-per-inch (dpi).</p>
 <dt>attributes:</dt>
 
 <dd>
-<dl class="attr"><dt><a name="small"></a>{@code android:smallScreens}</dt>
+<dl class="attr">
+  
+  <dt><a name="resizeable"></a>{@code android:resizeable}</dt>
+  <dd>Indicates whether the application is resizeable for different screen sizes. This attribute is
+true, by default, if you have set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+{@code "4"} or higher. Otherwise, it is false by default. If set false, the system will not resize
+your application when run on <em>large</em> or <em>xlarge</em> screens. Instead, the
+application appears in a "postage stamp" that equals the <em>normal</em> screen size that your
+application does support. This is less than an ideal experience for users, because the
+application appears smaller than the available screen, but it might help your application run
+normally if it were designed only for the <em>normal</em> screen size and some behaviors do not work
+when resized.</p>
+  <p>To provide the best experience on all screen sizes, you should allow resizing and, if your
+application does not work well on larger screens, follow the guide to <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> to enable
+additional screen support.</p>
+  </dd>
+  
+  
+  <dt><a name="small"></a>{@code android:smallScreens}</dt>
   <dd>Indicates whether the application supports smaller screen form-factors.
      A small screen is defined as one with a smaller aspect ratio than
      the "normal" (traditional HVGA) screen.  An application that does
      not support small screens <em>will not be available</em> for
-     small screen devices, because there is little the platform can do
-     to make such an application work on a smaller screen. If the application has set the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element's
-{@code android:minSdkVersion} or {@code android:targetSdkVersion} attribute to "4" or higher,
-the default value for this is "true", any value less than "4" results in this set to "false".
+     small screen devices from external services (such as Android Market), because there is little
+the platform can do
+     to make such an application work on a smaller screen. If the application has set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+{@code "4"} or higher,
+the default value for this is {@code "true"}, any value less than {@code "4"} results in this set to
+{@code "false"}.
   </dd>
   
   <dt><a name="normal"></a>{@code android:normalScreens}</dt>
@@ -61,38 +102,44 @@ the default value for this is "true", any value less than "4" results in this se
   <dt><a name="large"></a>{@code android:largeScreens}</dt>
   <dd>Indicates whether the application supports larger screen form-factors.
      A large screen is defined as a screen that is significantly larger
-     than a "normal" phone screen, and thus may require some special care
-     on the application's part to make good use of it. An application that 
-     does not support large screens (declares this "false")&mdash;but does support "normal" or
-"small" screens&mdash;will be placed as a "postage stamp" on 
-     a large screen, so that it retains the dimensions it was originally
-     designed for. If the application has set the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element's
-{@code android:minSdkVersion} or {@code android:targetSdkVersion} attribute to "4" or higher,
-the default value for this is "true", any value less than "4" results in this set to "false".
+     than a "normal" phone screen, and thus might require some special care
+     on the application's part to make good use of it, though it may rely on resizing by the
+system to fill the screen. If the application has set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+{@code "4"} or higher,
+the default value for this is {@code "true"}, any value less than {@code "4"} results in this set to
+{@code "false"}.
   </dd>
-  
+
   <dt><a name="xlarge"></a>{@code android:xlargeScreens}</dt>
   <dd>Indicates whether the application supports extra large screen form-factors.
      An xlarge screen is defined as a screen that is significantly larger
      than a "large" screen, such as a tablet (or something larger) and may require special care
-     on the application's part to make good use of it. An application that 
-     does not support xlarge screens (declares this "false")&mdash;but does support "large",
-"normal", or "small" screens&mdash;will be placed as a "postage stamp" on 
-     an xlarge screen, so that it retains the dimensions it was originally
-     designed for. If the application has set the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element's
-{@code android:minSdkVersion} or {@code android:targetSdkVersion} attribute to "4" or higher,
-the default value for this is "true", any value less than "4" results in this set to "false".
+     on the application's part to make good use of it, though it may rely on resizing by the
+system to fill the screen. If the application has set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+{@code "4"} or higher,
+the default value for this is {@code "true"}, any value less than {@code "4"} results in this set to
+{@code "false"}.
      <p>This attribute was introduced in API Level 9.</p>
   </dd>
   
   <dt><a name="any"></a>{@code android:anyDensity}</dt>
   <dd>Indicates whether the application includes resources to accommodate any screen
      density.  Older applications (before API Level 4) are assumed unable to
-     accomodate all densities and this is "false" by default. Applications using 
-     API Level 4 or higher are assumed able to and this is "true" by default. 
+     accomodate all densities and this is {@code "false"} by default. If the application has set
+either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
+{@code "4"} or higher,
+the default value for this is {@code "true"}. Otherwise, it is {@code "false"}.
      You can explicitly supply your abilities here.
+     <p>Based on the "standard" device screen density (medium dpi), the Android framework will scale
+down application assets by a factor of 0.75 (low dpi screens) or scale them up by a factor of 1.5
+(high dpi screens), when you don't provide alternative resources for a specifc screen density. The
+screen density is expressed as dots-per-inch (dpi).</p>
   </dd>
   
 
