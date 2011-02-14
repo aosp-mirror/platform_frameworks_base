@@ -717,21 +717,23 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:
 or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> attribute's value to {@code "11"}.</p>
 
-<p>However, the following properties allow you to disable split touch events for
-specific view groups, certain activities, or the entire application.</p>
+<p>However, the following properties allow you to disable split touch events across views inside
+specific view groups and across windows.</p>
 
 <ul>
 <li>The {@link android.R.attr#splitMotionEvents android:splitMotionEvents} attribute for view groups
-allows you to disable split motion events for the children in a layout. For example:
+allows you to disable split touch events that occur between child views in a layout. For example:
 <pre>
 &lt;LinearLayout android:splitMotionEvents="false" ... >
     ...
 &lt;/LinearLayout>
 </pre>
+<p>This way, child views in the linear layout cannot split touch events&mdash;only one view can
+receive touch events at a time.</p>
 </li>
 
 <li>The {@link android.R.attr#windowEnableSplitTouch android:windowEnableSplitTouch} style property
-allows you to disable split motion events across windows by applying it to a theme for the activity
+allows you to disable split touch events across windows, by applying it to a theme for the activity
 or entire application. For example:
 <pre>
 &lt;style name="NoSplitMotionEvents" parent="android:Theme.Holo">
@@ -744,7 +746,8 @@ href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity
 href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>,
 only touch events within the current activity window are accepted. For example, by disabling split
 touch events across windows, the system bar cannot receive touch events at the same time as the
-activity.</p>
+activity. This does <em>not</em> affect whether views inside the activity can split touch
+events&mdash;by default, the activity can still split touch events across views.</p>
 
 <p>For more information about creating a theme, read <a
 href="{@docRoot}guide/topics/ui/themes.html">Applying Styles and Themes</a>.</p>
