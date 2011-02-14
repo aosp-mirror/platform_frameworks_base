@@ -279,6 +279,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      *
      * @param whichChild the index of the child view to display
      */
+    @android.view.RemotableViewMethod
     public void setDisplayedChild(int whichChild) {
         setDisplayedChild(whichChild, true);
     }

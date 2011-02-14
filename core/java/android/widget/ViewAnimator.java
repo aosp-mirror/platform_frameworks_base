@@ -96,6 +96,7 @@ public class ViewAnimator extends FrameLayout {
      *
      * @param whichChild the index of the child view to display
      */
+    @android.view.RemotableViewMethod
     public void setDisplayedChild(int whichChild) {
         mWhichChild = whichChild;
         if (whichChild >= getChildCount()) {
@@ -122,6 +123,7 @@ public class ViewAnimator extends FrameLayout {
     /**
      * Manually shows the next child.
      */
+    @android.view.RemotableViewMethod
     public void showNext() {
         setDisplayedChild(mWhichChild + 1);
     }
@@ -129,6 +131,7 @@ public class ViewAnimator extends FrameLayout {
     /**
      * Manually shows the previous child.
      */
+    @android.view.RemotableViewMethod
     public void showPrevious() {
         setDisplayedChild(mWhichChild - 1);
     }
