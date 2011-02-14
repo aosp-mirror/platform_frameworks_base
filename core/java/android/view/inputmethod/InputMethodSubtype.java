@@ -16,10 +16,14 @@
 
 package android.view.inputmethod;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * This class is used to specify meta information of a subtype contained in an input method.
@@ -147,5 +151,36 @@ public final class InputMethodSubtype implements Parcelable {
     private static int hashCodeInternal(int nameResId, int iconResId, String locale,
             String mode, String extraValue) {
         return Arrays.hashCode(new Object[] {nameResId, iconResId, locale, mode, extraValue});
+    }
+
+    /**
+     * Sort the list of InputMethodSubtype
+     * @param context Context will be used for getting localized strings from IME
+     * @param flags Flags for the sort order
+     * @param imi InputMethodInfo of which subtypes are subject to be sorted
+     * @param subtypeList List of InputMethodSubtype which will be sorted
+     * @return Sorted list of subtypes
+     * @hide
+     */
+    public static List<InputMethodSubtype> sort(Context context, int flags, InputMethodInfo imi,
+            List<InputMethodSubtype> subtypeList) {
+        if (imi == null) return subtypeList;
+        final HashSet<InputMethodSubtype> inputSubtypesSet = new HashSet<InputMethodSubtype>(
+                subtypeList);
+        final ArrayList<InputMethodSubtype> sortedList = new ArrayList<InputMethodSubtype>();
+        int N = imi.getSubtypeCount();
+        for (int i = 0; i < N; ++i) {
+            InputMethodSubtype subtype = imi.getSubtypeAt(i);
+            if (inputSubtypesSet.contains(subtype)) {
+                sortedList.add(subtype);
+                inputSubtypesSet.remove(subtype);
+            }
+        }
+        // If subtypes in inputSubtypesSet remain, that means these subtypes are not
+        // contained in imi, so the remaining subtypes will be appended.
+        for (InputMethodSubtype subtype: inputSubtypesSet) {
+            sortedList.add(subtype);
+        }
+        return sortedList;
     }
 }

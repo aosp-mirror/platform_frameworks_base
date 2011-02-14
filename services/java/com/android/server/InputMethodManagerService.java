@@ -596,13 +596,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (imi == null && mCurMethodId != null) {
             imi = mMethodMap.get(mCurMethodId);
         }
-        final List<InputMethodSubtype> enabledSubtypes =
+        List<InputMethodSubtype> enabledSubtypes =
                 mSettings.getEnabledInputMethodSubtypeListLocked(imi);
-        if (!allowsImplicitlySelectedSubtypes || enabledSubtypes.size() > 0) {
-            return enabledSubtypes;
-        } else {
-            return getApplicableSubtypesLocked(mRes, getSubtypes(imi));
+        if (allowsImplicitlySelectedSubtypes && enabledSubtypes.isEmpty()) {
+            enabledSubtypes = getApplicableSubtypesLocked(mRes, getSubtypes(imi));
         }
+        return InputMethodSubtype.sort(mContext, 0, imi, enabledSubtypes);
     }
 
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
