@@ -125,7 +125,12 @@
                 <span class="en">Creating Status Bar Notifications</span>
               </a></li>
             </ul>
-          </li><!-- end of notifying the user -->
+          </li>
+          <li>
+              <a href="<?cs var:toroot ?>guide/topics/ui/drag-drop.html">
+                  Dragging and Dropping
+              </a><span class="new">new!</span>
+          </li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
                 <span class="en">Applying Styles and Themes</span>
               </a></li>
@@ -247,6 +252,12 @@
                 <span class="en">View Animation</span>
               </a></li>
         </ul>
+      </li>
+      <li>
+        <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
+            <span class="en">Copying and Pasting</span>
+        </a>
+        <span class="new">new!</span>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
             <span class="en">Audio and Video</span>
@@ -402,24 +413,24 @@
       <li class="toggle-list">
         <div>
            <a href="<?cs var:toroot ?>guide/developing/devices/index.html">
-        	     <span class="en">Managing Virtual Devices</span>
-         	 </a>
+                <span class="en">Creating and Managing Virtual Devices</span>
+            </a>
         </div>
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/devices/managing-avds.html">
               <span class="en">With AVD Manager</span>
-         	 </a>
+            </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/devices/managing-avds-cmdline.html">
-              <span class="en">From the Command Line</span>
-         	 </a>
+              <span class="en">On the Command Line</span>
+            </a>
           </li>
           <li>
            <a href="<?cs var:toroot ?>guide/developing/devices/emulator.html">
-        	     <span class="en">Using the Android Emulator</span>
-         	 </a>
+                <span class="en">Using the Android Emulator</span>
+            </a>
           </li>
         </ul>
       </li>
@@ -428,7 +439,7 @@
           <span class="en">Using Hardware Devices</span>
         </a>
       </li>
-      
+
       <li class="toggle-list">
         <div>
           <a href="<?cs var:toroot ?>guide/developing/projects/index.html">
@@ -443,7 +454,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/projects/projects-cmdline.html">
-        	    <span class="en">From the Command Line</span>
+                <span class="en">On the Command Line</span>
             </a>
           </li>
         </ul>
@@ -473,12 +484,12 @@
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects.html">
-         	    <span class="en">From Eclipse with ADT</span>
+                <span class="en">In Eclipse with ADT</span>
             </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects-cmdline.html">
-         	    <span class="en">From Other IDEs</span>
+                <span class="en">In Other IDEs</span>
             </a>
           </li>
           <li>
@@ -488,23 +499,23 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-log.html">
-         	    <span class="en">Reading and Writing Logs</span>
+                <span class="en">Reading and Writing Log Messages</span>
             </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-ui.html">
-         	    <span class="en">Debugging and Profiling UIs</span>
-          	</a>
+                <span class="en">Debugging and Profiling UIs</span>
+            </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-tracing.html">
-         	    <span class="en">Profiling with Traceview and dmtracedump</span>
-          	</a>
+                <span class="en">Profiling with Traceview and dmtracedump</span>
+            </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-devtools.html">
-         	    <span class="en">Using the Dev Tools App</span>
-          	</a>
+                <span class="en">Using the Dev Tools App</span>
+            </a>
           </li>
         </ul>
       </li>
