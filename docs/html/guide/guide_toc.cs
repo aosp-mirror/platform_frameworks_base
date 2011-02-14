@@ -65,6 +65,9 @@
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
             <span class="en">Fragments</span>
           </a> <span class="new">new!</span></li>
+          <li><a href="<?cs var:toroot ?>guide/topics/providers/loaders.html">
+            <span class="en">Loaders</span>
+          </a><span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
             <span class="en">Tasks and Back Stack</span>
           </a></li>
@@ -95,8 +98,9 @@
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/ui/index.html">
-               <span class="en">User Interface</span>
-             </a></div>
+            <span class="en">User Interface</span>
+          </a>
+          <span class="new">more!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">
                <span class="en">Declaring Layout</span>
@@ -194,14 +198,6 @@
             </li>
           </ul>
       </li>
-
-      <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
-            <span class="en">Content Providers</span>
-          </a></li>
-      <li><a href="<?cs var:toroot ?>guide/topics/providers/loaders.html">
-            <span class="en">Loaders</span>
-          </a><span class="new">new!</span></li>
-
       <li><a href="<?cs var:toroot ?>guide/topics/security/security.html">
             <span class="en">Security and Permissions</span>
           </a></li>
@@ -242,8 +238,9 @@
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
-               <span class="en">Graphics</span>
-             </a></div>
+            <span class="en">Graphics</span>
+          </a>
+          <span class="new">more!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
                 <span class="en">2D Graphics</span>
@@ -262,15 +259,15 @@
               </a></li>
         </ul>
       </li>
-      <li>
-        <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
-            <span class="en">Copying and Pasting</span>
-        </a>
-        <span class="new">new!</span>
-      </li>
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
             <span class="en">Audio and Video</span>
           </a></li>
+      <li>
+        <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
+            <span class="en">Copy and Paste</span>
+        </a>
+        <span class="new">new!</span>
+      </li>
   <!--<li class="toggle-list">
         <div><a style="color:gray;">Sensors</a></div>
           <ul>
