@@ -45,6 +45,8 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
     private boolean mStarted = false;
     private int mEventType = START_DOCUMENT;
 
+    private boolean mPopped = true; // default to true in case it's not pushed.
+
     /**
      * Builds a {@link BridgeXmlBlockParser}.
      * @param parser The XmlPullParser to get the content from.
@@ -59,6 +61,7 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
 
         if (mContext != null) {
             mContext.pushParser(this);
+            mPopped = false;
         }
     }
 
@@ -80,6 +83,13 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         }
 
         return null;
+    }
+
+    public void ensurePopped() {
+        if (mContext != null && mPopped == false) {
+            mContext.popParser();
+            mPopped = true;
+        }
     }
 
     // ------- XmlResourceParser implementation
@@ -249,9 +259,9 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         }
         int ev = mParser.next();
 
-        if (ev == END_TAG && mParser.getDepth() == 1 && mContext != null) {
+        if (ev == END_TAG && mParser.getDepth() == 1) {
             // done with parser remove it from the context stack.
-            mContext.popParser();
+            ensurePopped();
         }
         mEventType = ev;
         return ev;

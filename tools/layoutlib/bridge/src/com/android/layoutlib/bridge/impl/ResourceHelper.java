@@ -126,8 +126,13 @@ public final class ResourceHelper {
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                     parser.setInput(new FileReader(f));
 
-                    return ColorStateList.createFromXml(context.getResources(),
-                            new BridgeXmlBlockParser(parser, context, resValue.isFramework()));
+                    BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
+                            parser, context, resValue.isFramework());
+                    try {
+                        return ColorStateList.createFromXml(context.getResources(), blockParser);
+                    } finally {
+                        blockParser.ensurePopped();
+                    }
                 } catch (XmlPullParserException e) {
                     Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                             "Failed to configure parser for " + value, e, null /*data*/);
@@ -164,8 +169,6 @@ public final class ResourceHelper {
      * @param context the current context
      */
     public static Drawable getDrawable(ResourceValue value, BridgeContext context) {
-        Drawable d = null;
-
         String stringValue = value.getValue();
         if (RenderResources.REFERENCE_NULL.equals(stringValue)) {
             return null;
@@ -205,9 +208,13 @@ public final class ResourceHelper {
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                     parser.setInput(new FileReader(f));
 
-                    d = Drawable.createFromXml(context.getResources(),
-                            new BridgeXmlBlockParser(parser, context, value.isFramework()));
-                    return d;
+                    BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
+                            parser, context, value.isFramework());
+                    try {
+                        return Drawable.createFromXml(context.getResources(), blockParser);
+                    } finally {
+                        blockParser.ensurePopped();
+                    }
                 } catch (Exception e) {
                     // this is an error and not warning since the file existence is checked before
                     // attempting to parse it.

@@ -76,9 +76,13 @@ abstract class CustomBar extends LinearLayout {
                 "UTF8");
 
         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
-                parser, (BridgeContext) context, false);
+                parser, (BridgeContext) context, false /*platformFile*/);
 
-        inflater.inflate(bridgeParser, this, true);
+        try {
+            inflater.inflate(bridgeParser, this, true);
+        } finally {
+            bridgeParser.ensurePopped();
+        }
     }
 
     private InputStream getIcon(String iconName, Density[] densityInOut, String[] pathOut,
