@@ -294,7 +294,8 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        String value = mResourceData[index].getValue();
+        ResourceValue resValue = mResourceData[index];
+        String value = resValue.getValue();
 
         if (value == null) {
             return null;
@@ -308,11 +309,13 @@ public final class BridgeTypedArray extends TypedArray {
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
                 parser.setInput(new FileReader(f));
 
-                ColorStateList colorStateList = ColorStateList.createFromXml(
-                        mContext.getResources(),
-                        // FIXME: we need to know if this resource is platform or not
-                        new BridgeXmlBlockParser(parser, mContext, false));
-                return colorStateList;
+                BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
+                        parser, mContext, resValue.isFramework());
+                try {
+                    return ColorStateList.createFromXml(mContext.getResources(), blockParser);
+                } finally {
+                    blockParser.ensurePopped();
+                }
             } catch (XmlPullParserException e) {
                 Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                         "Failed to configure parser for " + value, e, null /*data*/);
