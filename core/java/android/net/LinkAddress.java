@@ -19,6 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.UnknownHostException;
@@ -38,12 +39,13 @@ public class LinkAddress implements Parcelable {
      */
     private final int prefixLength;
 
-    public LinkAddress(InetAddress address, InetAddress mask) {
-        this.address = address;
-        this.prefixLength = computeprefixLength(mask);
-    }
-
     public LinkAddress(InetAddress address, int prefixLength) {
+        if (address == null || prefixLength < 0 ||
+                ((address instanceof Inet4Address) && prefixLength > 32) ||
+                (prefixLength > 128)) {
+            throw new IllegalArgumentException("Bad LinkAddress params " + address +
+                    prefixLength);
+        }
         this.address = address;
         this.prefixLength = prefixLength;
     }
@@ -51,18 +53,6 @@ public class LinkAddress implements Parcelable {
     public LinkAddress(InterfaceAddress interfaceAddress) {
         this.address = interfaceAddress.getAddress();
         this.prefixLength = interfaceAddress.getNetworkPrefixLength();
-    }
-
-    private static int computeprefixLength(InetAddress mask) {
-        int count = 0;
-        for (byte b : mask.getAddress()) {
-            for (int i = 0; i < 8; ++i) {
-                if ((b & (1 << i)) != 0) {
-                    ++count;
-                }
-            }
-        }
-        return count;
     }
 
     @Override
