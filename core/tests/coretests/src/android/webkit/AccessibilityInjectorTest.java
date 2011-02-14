@@ -56,6 +56,12 @@ public class AccessibilityInjectorTest
     private static final int META_STATE_ALT_LEFT_ON = KeyEvent.META_ALT_ON
             | KeyEvent.META_ALT_LEFT_ON;
 
+    /** Prefix for the CSS style span appended by WebKit. */
+    private static final String APPLE_SPAN_PREFIX = "<span class=\"Apple-style-span\"";
+
+    /** Suffix for the CSS style span appended by WebKit. */
+    private static final String APPLE_SPAN_SUFFIX = "</span>";
+
     /** The value for not specified selection string since null is a valid value. */
     private static final String SELECTION_STRING_UNKNOWN = "Unknown";
 
@@ -1578,6 +1584,27 @@ public class AccessibilityInjectorTest
     }
 
     /**
+     * Strips the apple span appended by WebKit while generating
+     * the selection markup.
+     *
+     * @param markup The markup.
+     * @return Stripped from apple spans markup.
+     */
+    private static String stripAppleSpanFromMarkup(String markup) {
+        StringBuilder stripped = new StringBuilder(markup);
+        int prefixBegIdx = stripped.indexOf(APPLE_SPAN_PREFIX);
+        while (prefixBegIdx >= 0) {
+            int prefixEndIdx = stripped.indexOf(">", prefixBegIdx) + 1;
+            stripped.replace(prefixBegIdx, prefixEndIdx, "");
+            int suffixBegIdx = stripped.lastIndexOf(APPLE_SPAN_SUFFIX);
+            int suffixEndIdx = suffixBegIdx + APPLE_SPAN_SUFFIX.length();
+            stripped.replace(suffixBegIdx, suffixEndIdx, "");
+            prefixBegIdx = stripped.indexOf(APPLE_SPAN_PREFIX);
+        }
+        return stripped.toString();
+    }
+
+    /**
      * Disables accessibility and the mock accessibility service.
      */
     private void disableAccessibilityAndMockAccessibilityService() {
@@ -1757,7 +1784,11 @@ public class AccessibilityInjectorTest
             }
             if (!event.getText().isEmpty()) {
                 CharSequence text = event.getText().get(0);
-                sReceivedSelectionString = (text != null) ? text.toString() : null;
+                if (text != null) {
+                    sReceivedSelectionString = stripAppleSpanFromMarkup(text.toString());
+                } else {
+                    sReceivedSelectionString = null;
+                }
             }
             synchronized (sTestLock) {
                 sTestLock.notifyAll();
