@@ -392,11 +392,6 @@ public class TabletStatusBar extends StatusBar implements
         // for redirecting errant bar taps to the IME
         mFakeSpaceBar = sb.findViewById(R.id.fake_space_bar);
 
-        // drag and drop pocket
-        ShirtPocket p = (ShirtPocket) sb.findViewById(R.id.shirt_pocket);
-        ShirtPocket.DropZone z = (ShirtPocket.DropZone) sb.findViewById(R.id.drop_target);
-        z.setPocket(p);
-
         // "shadows" of the status bar features, for lights-out mode
         mShadow = sb.findViewById(R.id.bar_shadow);
         mShadow.setOnTouchListener(

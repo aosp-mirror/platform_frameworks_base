@@ -42,14 +42,6 @@
             android:visibility="gone"
             />
         
-        <com.android.systemui.statusbar.tablet.ShirtPocket
-            android:id="@+id/shirt_pocket"
-            android:layout_width="@*android:dimen/status_bar_height"
-            android:layout_height="@*android:dimen/status_bar_height"
-            android:background="#FFFF0000"
-            android:visibility="gone"
-            />
-
         <com.android.systemui.statusbar.tablet.NotificationIconArea
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
