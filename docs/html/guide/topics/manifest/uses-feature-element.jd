@@ -644,33 +644,46 @@ device.</td>
 </tr>
 
 <tr>
-  <td rowspan="4">Touchscreen</td>
+  <td rowspan="5">Touchscreen</td>
+  <td><code>android.hardware.faketouch</code></td>
+  <td>The application uses basic touch interaction events, such as "click down", "click
+up", and drag.</td>
+  <td>When declared, this indicates that the application is compatible with a device that offers an
+emulated touchscreen (or better). A device that offers an emulated touchscreen provides a user input
+system that can emulate a subset of touchscreen capabilities. An example of such an input system is
+a mouse or remote control that drives an on-screen cursor. If your application does not require
+complicated gestures and you want your application available to devices with an emulated
+touchscreen, you should declare this feature.</td>
+</tr>
+<tr>
   <td><code>android.hardware.touchscreen</code></td>
-  <td>The application uses touchscreen capabilities on the device.</td>
+  <td>The application uses touchscreen capabilities, for gestures more interactive
+than basic touches, such as a fling. This is a superset of the faketouch features.</td>
   <td></td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch</code></td>
-  <td>Subfeature. The application uses basic two-point multitouch capabilities on the device
-screen.</td>
+  <td>The application uses basic two-point multitouch capabilities on the device
+screen, such as for pinch gestures, but does not need to track touches independently. This
+is a superset of touchscreen features.</td>
   <td>If declared with the <code>"android:required="true"</code> attribute, this
-subfeature implicitly declares the <code>android.hardware.touchscreen</code>
+implicitly declares the <code>android.hardware.touchscreen</code>
 parent feature. </td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch.distinct</code></td>
   <td>Subfeature. The application uses advanced multipoint multitouch
 capabilities on the device screen, such as for tracking two or more points fully
-independently.</td>
+independently. This is a superset of multitouch features.</td>
   <td rowspan="2">If declared with the <code>"android:required="true"</code> attribute, this
-subfeature implicitly declares the
+implicitly declares the
 <code>android.hardware.touchscreen.multitouch</code> parent feature. </td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch.jazzhand</code></td>
-  <td>Subfeature. The application uses advanced multipoint multitouch
+  <td>The application uses advanced multipoint multitouch
 capabilities on the device screen, for tracking up to five points fully
-independently.</td>
+independently. This is a superset of distinct multitouch features.</td>
 </tr>
 
 <tr>
