@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,9 @@ import android.widget.MediaController;
 import android.widget.VideoView;
 import com.android.mediaframeworktest.MediaNames;
 
+import android.graphics.Bitmap;
+import android.widget.ImageView;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -58,6 +61,8 @@ public class MediaFrameworkTest extends Activity {
     public static AssetFileDescriptor midiafd;
     public static AssetFileDescriptor mp3afd;
     
+    public static Bitmap mDestBitmap;
+    public static ImageView mOverlayView;
     
     public MediaFrameworkTest() {
     }
@@ -69,6 +74,7 @@ public class MediaFrameworkTest extends Activity {
         super.onCreate(icicle);
         setContentView(R.layout.surface_view);
         mSurfaceView = (SurfaceView)findViewById(R.id.surface_view);
+        mOverlayView = (ImageView)findViewById(R.id.overlay_layer);
         ViewGroup.LayoutParams lp = mSurfaceView.getLayoutParams();
         mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         
@@ -77,6 +83,9 @@ public class MediaFrameworkTest extends Activity {
         
         //Get the mp3 fd
         mp3afd = this.getResources().openRawResourceFd(R.raw.testmp3);
+        mOverlayView.setLayoutParams(lp);
+        mDestBitmap = Bitmap.createBitmap((int)640, (int)480, Bitmap.Config.ARGB_8888);
+        mOverlayView.setImageBitmap(mDestBitmap);
     }
     
     public void startPlayback(String filename){
@@ -148,4 +157,9 @@ public class MediaFrameworkTest extends Activity {
       InetAddress address = InetAddress.getByAddress(MediaNames.STREAM_SERVER);
       return address.isReachable(10000);
   }
+
+  public static void testInvalidateOverlay() {
+      mOverlayView.invalidate();
+  }
+
 }

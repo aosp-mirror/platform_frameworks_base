@@ -37,6 +37,7 @@ import com.android.mediaframeworktest.functional.MediaItemThumbnailTest;
 import com.android.mediaframeworktest.functional.MediaPropertiesTest;
 import com.android.mediaframeworktest.functional.VideoEditorAPITest;
 import com.android.mediaframeworktest.functional.VideoEditorExportTest;
+import com.android.mediaframeworktest.functional.VideoEditorPreviewTest;
 import junit.framework.TestSuite;
 
 import android.test.InstrumentationTestRunner;
@@ -79,6 +80,7 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaPropertiesTest.class);
         suite.addTestSuite(VideoEditorAPITest.class);
         suite.addTestSuite(VideoEditorExportTest.class);
+        suite.addTestSuite(VideoEditorPreviewTest.class);
         return suite;
     }
 
