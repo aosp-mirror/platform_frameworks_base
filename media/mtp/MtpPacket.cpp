@@ -153,12 +153,13 @@ void MtpPacket::setParameter(int index, uint32_t value) {
 
 #ifdef MTP_HOST
 int MtpPacket::transfer(struct usb_request* request) {
-    if (usb_request_queue(request)) {
-        LOGE("usb_endpoint_queue failed, errno: %d", errno);
-        return -1;
-    }
-    request = usb_request_wait(request->dev);
-    return (request ? request->actual_length : -1);
+    int result = usb_device_bulk_transfer(request->dev,
+                            request->endpoint,
+                            request->buffer,
+                            request->buffer_length,
+                            0);
+    request->actual_length = result;
+    return result;
 }
 #endif
 
