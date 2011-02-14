@@ -1214,6 +1214,45 @@ static jboolean disconnectPanDeviceNative(JNIEnv *env, jobject object,
     return JNI_FALSE;
 }
 
+static jboolean disconnectPanServerDeviceNative(JNIEnv *env, jobject object,
+                                                jstring path, jstring address,
+                                                jstring iface) {
+    LOGV(__FUNCTION__);
+#ifdef HAVE_BLUETOOTH
+    LOGE("disconnectPanServerDeviceNative");
+    native_data_t *nat = get_native_data(env, object);
+    jobject eventLoop = env->GetObjectField(object, field_mEventLoop);
+    struct event_loop_native_data_t *eventLoopNat =
+            get_EventLoop_native_data(env, eventLoop);
+
+    if (nat && eventLoopNat) {
+        const char *c_address = env->GetStringUTFChars(address, NULL);
+        const char *c_path = env->GetStringUTFChars(path, NULL);
+        const char *c_iface = env->GetStringUTFChars(iface, NULL);
+
+        int len = env->GetStringLength(path) + 1;
+        char *context_path = (char *)calloc(len, sizeof(char));
+        strlcpy(context_path, c_path, len);  // for callback
+
+        bool ret = dbus_func_args_async(env, nat->conn, -1,
+                                        onPanDeviceConnectionResult,
+                                        context_path, eventLoopNat,
+                                        get_adapter_path(env, object),
+                                        DBUS_NETWORKSERVER_IFACE,
+                                        "DisconnectDevice",
+                                        DBUS_TYPE_STRING, &c_address,
+                                        DBUS_TYPE_STRING, &c_iface,
+                                        DBUS_TYPE_INVALID);
+
+        env->ReleaseStringUTFChars(address, c_address);
+        env->ReleaseStringUTFChars(iface, c_iface);
+        env->ReleaseStringUTFChars(path, c_path);
+        return ret ? JNI_TRUE : JNI_FALSE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
 static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"classInitNative", "()V", (void*)classInitNative},
@@ -1274,6 +1313,8 @@ static JNINativeMethod sMethods[] = {
     {"connectPanDeviceNative", "(Ljava/lang/String;Ljava/lang/String;)Z",
               (void *)connectPanDeviceNative},
     {"disconnectPanDeviceNative", "(Ljava/lang/String;)Z", (void *)disconnectPanDeviceNative},
+    {"disconnectPanServerDeviceNative", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z",
+              (void *)disconnectPanServerDeviceNative},
 };
 
 
