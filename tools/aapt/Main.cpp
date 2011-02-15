@@ -160,7 +160,11 @@ void usage(void)
         "       product variants\n"
         "   --utf16\n"
         "       changes default encoding for resources to UTF-16.  Only useful when API\n"
-        "       level is set to 7 or higher where the default encoding is UTF-8.\n");
+        "       level is set to 7 or higher where the default encoding is UTF-8.\n"
+        "   --non-constant-id\n"
+        "       Make the resources ID non constant. This is required to make an R java class\n"
+        "       that does not contain the final value but is used to make reusable compiled\n"
+        "       libraries that need to access resources.\n");
 }
 
 /*
@@ -497,6 +501,8 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setProduct(argv[0]);
+                } else if (strcmp(cp, "-non-constant-id") == 0) {
+                    bundle.setNonConstantId(true);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;
