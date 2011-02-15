@@ -1470,9 +1470,9 @@ public class ScrollView extends FrameLayout {
             final int scrollY = mScrollY;
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth();
+                final int width = getWidth() - mPaddingLeft - mPaddingRight;
 
-                canvas.translate(0, Math.min(0, scrollY));
+                canvas.translate(mPaddingLeft, Math.min(0, scrollY));
                 mEdgeGlowTop.setSize(width, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
                     invalidate();
@@ -1481,10 +1481,11 @@ public class ScrollView extends FrameLayout {
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth();
+                final int width = getWidth() - mPaddingLeft - mPaddingRight;
                 final int height = getHeight();
 
-                canvas.translate(-width, Math.max(getScrollRange(), scrollY) + height);
+                canvas.translate(-width + mPaddingLeft,
+                        Math.max(getScrollRange(), scrollY) + height);
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
