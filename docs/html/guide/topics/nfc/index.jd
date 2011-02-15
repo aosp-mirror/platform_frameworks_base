@@ -31,29 +31,33 @@ page.title=Near Field Communication
     </div>
   </div>
 
-  <p>Near Field Communication (NFC) is a set of short-range wireless technologies, similar to RFID.
-  It typically requires a distance of 4 cm or less and operates at 13.56mhz and at rates ranging
-  from 106 kbit/s to 848 kbit/s. NFC communication always involves an initiator and a target. The
-  initiator actively generates an RF field that can power a passive target. This enables NFC
-  targets to take very simple form factors such as tags, stickers or cards that do not require
-  power. NFC peer-to-peer communication is also possible, where both devices are powered.</p>
-
-  <p>Compared to other wireless technologies such as Bluetooth or WiFi, NFC provides much lower
-  bandwidth and range, but provides low-cost, un-powered targets and do not require discovery or
-  pairing. Users interact with NFC tags with just a tap. Targets can range in complexity. Simple
-  tags just offer read and write capabilities, sometimes with one-time programmable areas to make
-  the card read-only. More complex tags offer math operations, and have cryptographic hardware to
-  authenticate access to a sector. The most sophisticated tags contain operating environments,
-  allowing complex interactions with applets that are running on the tag.</p>
-
-  <p>An Android device with NFC hardware typically acts as an initiator. This mode is also known as
-  NFC reader/writer. The device actively looks for NFC tags and starts activities to handle them in
-  this mode. In Android 2.3.3, devices also have some limited peer-to-peer support.</p>
+  <p>Near Field Communication (NFC) is a set of short-range wireless technologies, typically
+  requiring a distance of 4cm or less. NFC operates at 13.56mhz, and at rates ranging
+  from 106 kbit/s to 848 kbit/s. NFC communication always involves an initiator and a target.
+  The initiator actively generates an RF field that can power a passive target. This
+  enables NFC targets to take very simple form factors such as tags, stickers or cards that do
+  not require power. NFC peer-to-peer communication is also possible, where both devices
+  are powered.
+  <p>
+  Compared to other wireless technologies such as Bluetooth or WiFi, NFC provides much lower
+  bandwidth and range, but enables low-cost, un-powered targets
+  and does not require discovery or pairing. Interactions can be initiated with just a tap.
+  <p>
+  An Android device with NFC hardware will typically act as an initiator when the screen is
+  on. This mode is also known as NFC reader/writer. It will actively look for NFC tags and start
+  activities to handle them. Android 2.3.3 also has some limited P2P support.
+  <p>
+  Tags can range in complexity, simple tags just offer read/write semantics, sometimes
+  with one-time-programmable areas to make the card read-only. More complex tags offer
+  math operations, and have cryptographic hardware to authenticate access to a sector.
+  The most sophisticated tags contain operating environments, allowing
+  complex interactions with code executing on the tag.
 
   <h2 id="api">API Overview</h2>
 
-  <p>The {@link android.nfc} package contain the high-level classes to interact with the local
-  device's NFC adapter, to represent discovered tags, and to use the NDEF data format.</p>
+  <p>The {@link android.nfc} package contains the high-level classes to interact
+  with the local device's NFC adapter, to represent discovered tags, and to use
+  the NDEF data format.
 
   <table>
     <tr>
@@ -65,43 +69,51 @@ page.title=Near Field Communication
     <tr>
       <td>{@link android.nfc.NfcManager}</td>
 
-      <td>A high level manager class that enumerates the NFC adapters on this Android device. Since
-      most Android devices only have one NFC adapter, you can just use the static helper {@link
-      android.nfc.NfcAdapter#getDefaultAdapter()} for most situations.</td>
+
+      <td>A high level manager class that enumerates the NFC adapters on this Android device.
+      Since most Android devices only have one NFC adapter, you can just use the static helper
+      {@link android.nfc.NfcAdapter#getDefaultAdapter(Context)} for most situations.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.NfcAdapter}</td>
 
-      <td>Represents the local NFC adapter and defines the Intents that are used in the tag
-      dispatch system. It provides methods to register for foreground tag dispatching and
-      foreground NDEF pushing. Foreground NDEF push is the only peer-to-peer support that is
-      currently provided in Android.</td>
+      <td>Represents the local NFC adapter. Defines the intent's used to request
+      tag dispatch to your activity, and provides methods to register for foreground
+      tag dispatch and foreground NDEF push. Foreground NDEF push is the only
+      peer-to-peer support that is currently provided in Android.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.NdefMessage} and {@link android.nfc.NdefRecord}</td>
 
-      <td>NDEF is an NFC Forum defined data structure, designed to efficiently store data on NFC
-      tags, such as Text, URLs, and other MIME types. An {@link android.nfc.NdefMessage} acts as a
+      <td>NDEF is an NFC Forum defined data structure, designed to efficiently
+      store data on NFC tags, such as text, URL's, and other MIME types. A
+      {@link android.nfc.NdefMessage} acts as a
       container for the data that you want to transmit or read. One {@link android.nfc.NdefMessage}
-      object contains zero or more {@link android.nfc.NdefRecord}s. Each NDEF Record has a type
-      such as Text, URL, Smart Poster, or any MIME type. The type of the first NDEF Record in the
-      NDEF message is used to dispatch a tag to an Activity.</td>
+      object contains zero or more {@link android.nfc.NdefRecord}s. Each NDEF record
+      has a type such as text, URL, smart poster, or any MIME data. The type of the
+      first NDEF record in the NDEF message is used to dispatch a tag to an activity
+      on Android.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.Tag}</td>
 
-      <td>Represents a passive NFC target. These can come in many form factors such as a tag, card,
-      FOB, or an even more complex device doing card emulation. When a tag is discovered, a {@link
-      android.nfc.Tag} object is created and wrapped inside an Intent. The dispatch system sends
-      the Intent to a compatible Activity <code>startActivity()</code>. You can use the {@link
+      <td>Represents a passive NFC target. These can come in many form factors such as
+      a tag, card, key fob, or even a phone doing card emulation. When a tag is
+      discovered, a {@link android.nfc.Tag} object is created and wrapped inside an
+      Intent. The NFC dispatch system sends the intent to a compatible actvitiy
+      using <code>startActivity()</code>. You can use the {@link
       android.nfc.Tag#getTechList getTechList()} method to determine the technologies supported by
       this tag and create the corresponding {@link android.nfc.tech.TagTechnology} object with one
       of classes provided by {@link android.nfc.tech}.</td>
     </tr>
   </table>
+
+  <p>The {@link android.nfc.tech} package contains classes to query properties
+  and perform I/O operations on a tag. The classes are divided to represent different
+  NFC technologies that can be available on a tag.
 
   <p>The {@link android.nfc.tech} package contains classes to query properties and perform I/O
   operations on a tag. The classes are divided to represent different NFC technologies that can be
@@ -117,7 +129,7 @@ page.title=Near Field Communication
     <tr>
       <td>{@link android.nfc.tech.TagTechnology}</td>
 
-      <td>The interface that all Tag Technology classes must implement.</td>
+      <td>The interface that all tag technology classes must implement.</td>
     </tr>
 
     <tr>
@@ -153,8 +165,8 @@ page.title=Near Field Communication
     <tr>
       <td>{@link android.nfc.tech.Ndef}</td>
 
-      <td>Provides access to NDEF data and operations on NFC Tags that have been formatted as
-      NDEF.</td>
+      <td>Provides access to NDEF data and operations on NFC tags that have been formatted as NDEF.
+      </td>
     </tr>
 
     <tr>
@@ -166,15 +178,15 @@ page.title=Near Field Communication
     <tr>
       <td>{@link android.nfc.tech.MifareClassic}</td>
 
-      <td>Provides access to MIFARE Classic properties and I/O operations. Not all Android devices
-      provide implementations for this class.</td>
+      <td>Provides access to MIFARE Classic properties and I/O operations, if this
+      Android device supports MIFARE.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.tech.MifareUltralight}</td>
 
-      <td>Provides access to MIFARE Ultralight properties and I/O operations. Not all Android
-      devices provide implementations for this class.</td>
+      <td>Provides access to MIFARE Ultralight properties and I/O operations, if this
+      Android device supports MIFARE.</td>
     </tr>
   </table>
 
@@ -191,12 +203,13 @@ page.title=Near Field Communication
     </li>
 
     <li>The minimum SDK version that your application can support. API level 9 only supports
-    limited tag dispatching with {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}, and only
-    gives access to NDEF messages via the {@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES} extra.
-    No other tag properties or I/O operations are accessible. API level 10 adds comprehensive
-    reader/writer support, so you probably want to use this for more functionality.
-      <pre class="pretty-print">
-&lt;uses-sdk android:minSdkVersion="9|10"/&gt;
+    limited tag dispatch via {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED},
+    and only gives access to NDEF messages via the {@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES}
+    extra. No other tag properties or I/O operations are accessible. You probably want
+    to use API level 10 which includes comprehensive reader/writer support.
+
+<pre class="pretty-print">
+&lt;uses-sdk android:minSdkVersion="10"/&gt;
 </pre>
     </li>
 
