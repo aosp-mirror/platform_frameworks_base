@@ -376,14 +376,11 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
 }
 
 void AwesomePlayer::reset() {
-    LOGI("reset");
-
     Mutex::Autolock autoLock(mLock);
     reset_l();
 }
 
 void AwesomePlayer::reset_l() {
-    LOGI("reset_l");
     mDisplayWidth = 0;
     mDisplayHeight = 0;
 
@@ -411,10 +408,6 @@ void AwesomePlayer::reset_l() {
         }
     }
 
-    if (mFlags & PREPARING) {
-        LOGI("waiting until preparation is completed.");
-    }
-
     while (mFlags & PREPARING) {
         mPreparedCondition.wait(mLock);
     }
@@ -437,8 +430,6 @@ void AwesomePlayer::reset_l() {
         mAudioSource->stop();
     }
     mAudioSource.clear();
-
-    LOGI("audio source cleared");
 
     mTimeSource = NULL;
 
@@ -476,8 +467,6 @@ void AwesomePlayer::reset_l() {
         IPCThreadState::self()->flushCommands();
     }
 
-    LOGI("video source cleared");
-
     mDurationUs = -1;
     mFlags = 0;
     mExtractorFlags = 0;
@@ -494,8 +483,6 @@ void AwesomePlayer::reset_l() {
     mFileSource.clear();
 
     mBitrate = -1;
-
-    LOGI("reset_l completed");
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
