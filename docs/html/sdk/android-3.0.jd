@@ -294,8 +294,8 @@ widgets with collections, using widgets such as {@link android.widget.GridView},
 android.widget.ListView}, and {@link android.widget.StackView} that are backed by remote data,
 such as from a content provider.</p>
 
-<p>The {@link android.appwidget.AppWidgetProviderInfo} class (defined with an {@code
-&lt;appwidget-provider&gt; XML file) also supports two new fields: {@link
+<p>The {@link android.appwidget.AppWidgetProviderInfo} class (defined in XML with an {@code
+&lt;appwidget-provider&gt;} element) also supports two new fields: {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} and {@link
 android.appwidget.AppWidgetProviderInfo#previewImage}. The {@link
 android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field lets you specify the view ID of the
