@@ -2234,6 +2234,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@link #startDrag(ClipData, DragShadowBuilder, Object, int)} is called
      * with this flag set, all visible applications will be able to participate
      * in the drag operation and receive the dragged content.
+     *
+     * @hide
      */
     public static final int DRAG_FLAG_GLOBAL = 1;
 

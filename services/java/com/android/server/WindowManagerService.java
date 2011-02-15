@@ -5889,7 +5889,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         outSurface.copyFrom(surface);
                         final IBinder winBinder = window.asBinder();
                         token = new Binder();
-                        mDragState = new DragState(token, surface, flags, winBinder);
+                        mDragState = new DragState(token, surface, /*flags*/ 0, winBinder);
                         mDragState.mSurface = surface;
                         token = mDragState.mToken = new Binder();
 
