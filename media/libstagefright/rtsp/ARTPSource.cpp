@@ -67,7 +67,7 @@ ARTPSource::ARTPSource(
     } else  if (!strncmp(desc.c_str(), "AMR-WB/", 7)) {
         mAssembler = new AAMRAssembler(notify, true /* isWide */, params);
     } else if (!strncmp(desc.c_str(), "MP4V-ES/", 8)
-            || !strncmp(desc.c_str(), "mpeg4-generic/", 14)) {
+            || !strncasecmp(desc.c_str(), "mpeg4-generic/", 14)) {
         mAssembler = new AMPEG4ElementaryAssembler(notify, desc, params);
         mIssueFIRRequests = true;
     } else {

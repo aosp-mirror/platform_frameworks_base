@@ -71,6 +71,11 @@ bool ASessionDescription::parse(const void *data, size_t size) {
             line.setTo(desc, i, eolPos - i);
         }
 
+        if (line.empty()) {
+            i = eolPos + 1;
+            continue;
+        }
+
         if (line.size() < 2 || line.c_str()[1] != '=') {
             return false;
         }

@@ -123,7 +123,7 @@ void ARTPConnection::MakePortPair(
         struct sockaddr_in addr;
         memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
         addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = INADDR_ANY;
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
         addr.sin_port = htons(port);
 
         if (bind(*rtpSocket,
@@ -346,6 +346,8 @@ void ARTPConnection::onPollStreams() {
 }
 
 status_t ARTPConnection::receive(StreamInfo *s, bool receiveRTP) {
+    LOGV("receiving %s", receiveRTP ? "RTP" : "RTCP");
+
     CHECK(!s->mIsInjected);
 
     sp<ABuffer> buffer = new ABuffer(65536);
