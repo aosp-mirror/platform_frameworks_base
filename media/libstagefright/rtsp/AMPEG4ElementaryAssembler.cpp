@@ -104,7 +104,7 @@ AMPEG4ElementaryAssembler::AMPEG4ElementaryAssembler(
       mNextExpectedSeqNoValid(false),
       mNextExpectedSeqNo(0),
       mAccessUnitDamaged(false) {
-    mIsGeneric = desc.startsWith("mpeg4-generic/");
+    mIsGeneric = !strncasecmp(desc.c_str(),"mpeg4-generic/", 14);
 
     if (mIsGeneric) {
         AString value;
