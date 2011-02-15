@@ -101,8 +101,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
 
         if (anchor != null) {
-            mTreeObserver = anchor.getViewTreeObserver();
-            mTreeObserver.addOnGlobalLayoutListener(this);
+            if (mTreeObserver == null) {
+                mTreeObserver = anchor.getViewTreeObserver();
+                mTreeObserver.addOnGlobalLayoutListener(this);
+            }
             mPopup.setAnchorView(anchor);
         } else {
             return false;
@@ -123,10 +125,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public void onDismiss() {
         mPopup = null;
-        if (mTreeObserver != null) {
-            mTreeObserver.removeGlobalOnLayoutListener(MenuPopupHelper.this);
-            mTreeObserver = null;
+        if (mTreeObserver != null && mTreeObserver.isAlive()) {
+            mTreeObserver.removeGlobalOnLayoutListener(this);
         }
+        mTreeObserver = null;
     }
 
     public boolean isShowing() {
@@ -134,6 +136,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (!isShowing()) return;
+
         MenuItem item = null;
         if (mOverflowOnly) {
             item = mMenu.getOverflowItem(position);
@@ -184,13 +188,15 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     @Override
     public void onGlobalLayout() {
         if (!isShowing()) {
-            mTreeObserver.removeGlobalOnLayoutListener(this);
+            if (mTreeObserver.isAlive()) {
+                mTreeObserver.removeGlobalOnLayoutListener(this);
+            }
             mTreeObserver = null;
         } else {
             final View anchor = mAnchorView != null ? mAnchorView.get() : null;
-            if (anchor != null && !anchor.isShown()) {
+            if (anchor == null || !anchor.isShown()) {
                 dismiss();
-            } else {
+            } else if (isShowing()) {
                 // Recompute window size and position
                 mPopup.show();
             }
