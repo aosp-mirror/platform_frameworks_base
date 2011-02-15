@@ -627,7 +627,7 @@ APacketSource::APacketSource(
 
         mFormat->setInt32(kKeyWidth, width);
         mFormat->setInt32(kKeyHeight, height);
-    } else if (!strncmp(desc.c_str(), "mpeg4-generic/", 14)) {
+    } else if (!strncasecmp(desc.c_str(), "mpeg4-generic/", 14)) {
         AString val;
         if (!GetAttribute(params.c_str(), "mode", &val)
                 || (strcasecmp(val.c_str(), "AAC-lbr")
