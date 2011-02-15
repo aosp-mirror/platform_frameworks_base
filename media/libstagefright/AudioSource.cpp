@@ -18,38 +18,54 @@
 #define LOG_TAG "AudioSource"
 #include <utils/Log.h>
 
-#include <media/stagefright/AudioSource.h>
-
 #include <media/AudioRecord.h>
-#include <media/stagefright/MediaBufferGroup.h>
-#include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/AudioSource.h>
+#include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MetaData.h>
+#include <media/stagefright/foundation/ADebug.h>
 #include <cutils/properties.h>
 #include <stdlib.h>
 
 namespace android {
 
+static void AudioRecordCallbackFunction(int event, void *user, void *info) {
+    AudioSource *source = (AudioSource *) user;
+    switch (event) {
+        case AudioRecord::EVENT_MORE_DATA: {
+            source->dataCallbackTimestamp(*((AudioRecord::Buffer *) info), systemTime() / 1000);
+            break;
+        }
+        case AudioRecord::EVENT_OVERRUN: {
+            LOGW("AudioRecord reported overrun!");
+            break;
+        }
+        default:
+            // does nothing
+            break;
+    }
+}
+
 AudioSource::AudioSource(
         int inputSource, uint32_t sampleRate, uint32_t channels)
     : mStarted(false),
-      mCollectStats(false),
+      mSampleRate(sampleRate),
       mPrevSampleTimeUs(0),
-      mTotalLostFrames(0),
-      mPrevLostBytes(0),
-      mGroup(NULL) {
+      mNumFramesReceived(0),
+      mNumClientOwnedBuffers(0) {
 
     LOGV("sampleRate: %d, channels: %d", sampleRate, channels);
     CHECK(channels == 1 || channels == 2);
     uint32_t flags = AudioRecord::RECORD_AGC_ENABLE |
                      AudioRecord::RECORD_NS_ENABLE  |
                      AudioRecord::RECORD_IIR_ENABLE;
-
     mRecord = new AudioRecord(
                 inputSource, sampleRate, AudioSystem::PCM_16_BIT,
                 channels > 1? AudioSystem::CHANNEL_IN_STEREO: AudioSystem::CHANNEL_IN_MONO,
                 4 * kMaxBufferSize / sizeof(int16_t), /* Enable ping-pong buffers */
-                flags);
+                flags,
+                AudioRecordCallbackFunction,
+                this);
 
     mInitCheck = mRecord->initCheck();
 }
@@ -68,18 +84,13 @@ status_t AudioSource::initCheck() const {
 }
 
 status_t AudioSource::start(MetaData *params) {
+    Mutex::Autolock autoLock(mLock);
     if (mStarted) {
         return UNKNOWN_ERROR;
     }
 
     if (mInitCheck != OK) {
         return NO_INIT;
-    }
-
-    char value[PROPERTY_VALUE_MAX];
-    if (property_get("media.stagefright.record-stats", value, NULL)
-        && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
-        mCollectStats = true;
     }
 
     mTrackMaxAmplitude = false;
@@ -92,9 +103,6 @@ status_t AudioSource::start(MetaData *params) {
     }
     status_t err = mRecord->start();
     if (err == OK) {
-        mGroup = new MediaBufferGroup;
-        mGroup->add_buffer(new MediaBuffer(kMaxBufferSize));
-
         mStarted = true;
     } else {
         delete mRecord;
@@ -105,7 +113,25 @@ status_t AudioSource::start(MetaData *params) {
     return err;
 }
 
+void AudioSource::releaseQueuedFrames_l() {
+    LOGV("releaseQueuedFrames_l");
+    List<MediaBuffer *>::iterator it;
+    while (!mBuffersReceived.empty()) {
+        it = mBuffersReceived.begin();
+        (*it)->release();
+        mBuffersReceived.erase(it);
+    }
+}
+
+void AudioSource::waitOutstandingEncodingFrames_l() {
+    LOGV("waitOutstandingEncodingFrames_l: %lld", mNumClientOwnedBuffers);
+    while (mNumClientOwnedBuffers > 0) {
+        mFrameEncodingCompletionCondition.wait(mLock);
+    }
+}
+
 status_t AudioSource::stop() {
+    Mutex::Autolock autoLock(mLock);
     if (!mStarted) {
         return UNKNOWN_ERROR;
     }
@@ -114,29 +140,23 @@ status_t AudioSource::stop() {
         return NO_INIT;
     }
 
-    mRecord->stop();
-
-    delete mGroup;
-    mGroup = NULL;
-
     mStarted = false;
-
-    if (mCollectStats) {
-        LOGI("Total lost audio frames: %lld",
-            mTotalLostFrames + (mPrevLostBytes >> 1));
-    }
+    mRecord->stop();
+    waitOutstandingEncodingFrames_l();
+    releaseQueuedFrames_l();
 
     return OK;
 }
 
 sp<MetaData> AudioSource::getFormat() {
+    Mutex::Autolock autoLock(mLock);
     if (mInitCheck != OK) {
         return 0;
     }
 
     sp<MetaData> meta = new MetaData;
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
-    meta->setInt32(kKeySampleRate, mRecord->getSampleRate());
+    meta->setInt32(kKeySampleRate, mSampleRate);
     meta->setInt32(kKeyChannelCount, mRecord->channelCount());
     meta->setInt32(kKeyMaxInputSize, kMaxBufferSize);
 
@@ -177,121 +197,118 @@ void AudioSource::rampVolume(
 
 status_t AudioSource::read(
         MediaBuffer **out, const ReadOptions *options) {
+    Mutex::Autolock autoLock(mLock);
+    *out = NULL;
 
     if (mInitCheck != OK) {
         return NO_INIT;
     }
 
-    int64_t readTimeUs = systemTime() / 1000;
-    *out = NULL;
-
-    MediaBuffer *buffer;
-    CHECK_EQ(mGroup->acquire_buffer(&buffer), OK);
-
-    int err = 0;
-    if (mStarted) {
-
-        uint32_t numFramesRecorded;
-        mRecord->getPosition(&numFramesRecorded);
-
-
-        if (numFramesRecorded == 0 && mPrevSampleTimeUs == 0) {
-            mInitialReadTimeUs = readTimeUs;
-            // Initial delay
-            if (mStartTimeUs > 0) {
-                mStartTimeUs = readTimeUs - mStartTimeUs;
-            } else {
-                // Assume latency is constant.
-                mStartTimeUs += mRecord->latency() * 1000;
-            }
-            mPrevSampleTimeUs = mStartTimeUs;
-        }
-
-        uint32_t sampleRate = mRecord->getSampleRate();
-
-        // Insert null frames when lost frames are detected.
-        int64_t timestampUs = mPrevSampleTimeUs;
-        uint32_t numLostBytes = mRecord->getInputFramesLost() << 1;
-        numLostBytes += mPrevLostBytes;
-#if 0
-        // Simulate lost frames
-        numLostBytes = ((rand() * 1.0 / RAND_MAX)) * 2 * kMaxBufferSize;
-        numLostBytes &= 0xFFFFFFFE; // Alignment requirement
-
-        // Reduce the chance to lose
-        if (rand() * 1.0 / RAND_MAX >= 0.05) {
-            numLostBytes = 0;
-        }
-#endif
-        if (numLostBytes > 0) {
-            if (numLostBytes > kMaxBufferSize) {
-                mPrevLostBytes = numLostBytes - kMaxBufferSize;
-                numLostBytes = kMaxBufferSize;
-            } else {
-                mPrevLostBytes = 0;
-            }
-
-            CHECK_EQ(numLostBytes & 1, 0);
-            timestampUs += ((1000000LL * (numLostBytes >> 1)) +
-                    (sampleRate >> 1)) / sampleRate;
-
-            if (mCollectStats) {
-                mTotalLostFrames += (numLostBytes >> 1);
-            }
-            memset(buffer->data(), 0, numLostBytes);
-            buffer->set_range(0, numLostBytes);
-            if (numFramesRecorded == 0) {
-                buffer->meta_data()->setInt64(kKeyAnchorTime, mStartTimeUs);
-            }
-            buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs + mPrevSampleTimeUs);
-            buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
-            mPrevSampleTimeUs = timestampUs;
-            *out = buffer;
-            return OK;
-        }
-
-        ssize_t n = mRecord->read(buffer->data(), buffer->size());
-        if (n <= 0) {
-            buffer->release();
-            LOGE("Read from AudioRecord returns %d", n);
-            return UNKNOWN_ERROR;
-        }
-
-        int64_t recordDurationUs = (1000000LL * n >> 1) / sampleRate;
-        timestampUs += recordDurationUs;
-
-        if (mPrevSampleTimeUs - mStartTimeUs < kAutoRampStartUs) {
-            // Mute the initial video recording signal
-            memset((uint8_t *) buffer->data(), 0, n);
-        } else if (mPrevSampleTimeUs - mStartTimeUs < kAutoRampStartUs + kAutoRampDurationUs) {
-            int32_t autoRampDurationFrames =
-                    (kAutoRampDurationUs * sampleRate + 500000LL) / 1000000LL;
-
-            int32_t autoRampStartFrames =
-                    (kAutoRampStartUs * sampleRate + 500000LL) / 1000000LL;
-
-            int32_t nFrames = numFramesRecorded - autoRampStartFrames;
-            rampVolume(nFrames, autoRampDurationFrames, (uint8_t *) buffer->data(), n);
-        }
-        if (mTrackMaxAmplitude) {
-            trackMaxAmplitude((int16_t *) buffer->data(), n >> 1);
-        }
-
-        if (numFramesRecorded == 0) {
-            buffer->meta_data()->setInt64(kKeyAnchorTime, mStartTimeUs);
-        }
-
-        buffer->meta_data()->setInt64(kKeyTime, mStartTimeUs + mPrevSampleTimeUs);
-        buffer->meta_data()->setInt64(kKeyDriftTime, readTimeUs - mInitialReadTimeUs);
-        mPrevSampleTimeUs = timestampUs;
-        LOGV("initial delay: %lld, sample rate: %d, timestamp: %lld",
-                mStartTimeUs, sampleRate, timestampUs);
-
-        buffer->set_range(0, n);
-
-        *out = buffer;
+    while (mStarted && mBuffersReceived.empty()) {
+        mFrameAvailableCondition.wait(mLock);
+    }
+    if (!mStarted) {
         return OK;
     }
+    MediaBuffer *buffer = *mBuffersReceived.begin();
+    mBuffersReceived.erase(mBuffersReceived.begin());
+    ++mNumClientOwnedBuffers;
+    buffer->setObserver(this);
+    buffer->add_ref();
+
+    // Mute/suppress the recording sound
+    int64_t timeUs;
+    CHECK(buffer->meta_data()->findInt64(kKeyTime, &timeUs));
+    int64_t elapsedTimeUs = timeUs - mStartTimeUs;
+    if (elapsedTimeUs < kAutoRampStartUs) {
+        memset((uint8_t *) buffer->data(), 0, buffer->range_length());
+    } else if (elapsedTimeUs < kAutoRampStartUs + kAutoRampDurationUs) {
+        int32_t autoRampDurationFrames =
+                    (kAutoRampDurationUs * mSampleRate + 500000LL) / 1000000LL;
+
+        int32_t autoRampStartFrames =
+                    (kAutoRampStartUs * mSampleRate + 500000LL) / 1000000LL;
+
+        int32_t nFrames = mNumFramesReceived - autoRampStartFrames;
+        rampVolume(nFrames, autoRampDurationFrames,
+                (uint8_t *) buffer->data(), buffer->range_length());
+    }
+
+    // Track the max recording signal amplitude.
+    if (mTrackMaxAmplitude) {
+        trackMaxAmplitude(
+            (int16_t *) buffer->data(), buffer->range_length() >> 1);
+    }
+
+    *out = buffer;
+    return OK;
+}
+
+void AudioSource::signalBufferReturned(MediaBuffer *buffer) {
+    LOGV("signalBufferReturned: %p", buffer->data());
+    Mutex::Autolock autoLock(mLock);
+    --mNumClientOwnedBuffers;
+    buffer->setObserver(0);
+    buffer->release();
+    mFrameEncodingCompletionCondition.signal();
+    return;
+}
+
+status_t AudioSource::dataCallbackTimestamp(
+        const AudioRecord::Buffer& audioBuffer, int64_t timeUs) {
+    LOGV("dataCallbackTimestamp: %lld us", timeUs);
+    Mutex::Autolock autoLock(mLock);
+    if (!mStarted) {
+        LOGW("Spurious callback from AudioRecord. Drop the audio data.");
+        return OK;
+    }
+
+    if (mNumFramesReceived == 0 && mPrevSampleTimeUs == 0) {
+        mInitialReadTimeUs = timeUs;
+        // Initial delay
+        if (mStartTimeUs > 0) {
+            mStartTimeUs = timeUs - mStartTimeUs;
+        } else {
+            // Assume latency is constant.
+            mStartTimeUs += mRecord->latency() * 1000;
+        }
+        mPrevSampleTimeUs = mStartTimeUs;
+    }
+
+    int64_t timestampUs = mPrevSampleTimeUs;
+
+    size_t numLostBytes = mRecord->getInputFramesLost();
+    CHECK_EQ(numLostBytes & 1, 0u);
+    CHECK_EQ(audioBuffer.size & 1, 0u);
+    size_t bufferSize = numLostBytes + audioBuffer.size;
+    MediaBuffer *buffer = new MediaBuffer(bufferSize);
+    if (numLostBytes > 0) {
+        memset(buffer->data(), 0, numLostBytes);
+        memcpy((uint8_t *) buffer->data() + numLostBytes,
+                    audioBuffer.i16, audioBuffer.size);
+    } else {
+        if (audioBuffer.size == 0) {
+            LOGW("Nothing is available from AudioRecord callback buffer");
+            buffer->release();
+            return OK;
+        }
+        memcpy((uint8_t *) buffer->data(),
+                audioBuffer.i16, audioBuffer.size);
+    }
+
+    buffer->set_range(0, bufferSize);
+    timestampUs += ((1000000LL * (bufferSize >> 1)) +
+                    (mSampleRate >> 1)) / mSampleRate;
+
+    if (mNumFramesReceived == 0) {
+        buffer->meta_data()->setInt64(kKeyAnchorTime, mStartTimeUs);
+    }
+    buffer->meta_data()->setInt64(kKeyTime, mPrevSampleTimeUs);
+    buffer->meta_data()->setInt64(kKeyDriftTime, timeUs - mInitialReadTimeUs);
+    mPrevSampleTimeUs = timestampUs;
+    mNumFramesReceived += buffer->range_length() / sizeof(int16_t);
+    mBuffersReceived.push_back(buffer);
+    mFrameAvailableCondition.signal();
 
     return OK;
 }
