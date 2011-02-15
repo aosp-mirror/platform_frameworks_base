@@ -786,92 +786,92 @@ class MediaArtistNativeHelper {
 
     /** Defines video profiles and levels. */
     public final class VideoProfile {
-        /** MPEG4, Simple Profile, Level 0. */
-        public static final int MPEG4_SP_LEVEL_0 = 0;
-
-        /** MPEG4, Simple Profile, Level 0B. */
-        public static final int MPEG4_SP_LEVEL_0B = 1;
-
-        /** MPEG4, Simple Profile, Level 1. */
-        public static final int MPEG4_SP_LEVEL_1 = 2;
-
-        /** MPEG4, Simple Profile, Level 2. */
-        public static final int MPEG4_SP_LEVEL_2 = 3;
-
-        /** MPEG4, Simple Profile, Level 3. */
-        public static final int MPEG4_SP_LEVEL_3 = 4;
-
         /** H263, Profile 0, Level 10. */
-        public static final int H263_PROFILE_0_LEVEL_10 = 5;
+        public static final int H263_PROFILE_0_LEVEL_10 = MediaProperties.H263_PROFILE_0_LEVEL_10;
 
         /** H263, Profile 0, Level 20. */
-        public static final int H263_PROFILE_0_LEVEL_20 = 6;
+        public static final int H263_PROFILE_0_LEVEL_20 = MediaProperties.H263_PROFILE_0_LEVEL_20;
 
         /** H263, Profile 0, Level 30. */
-        public static final int H263_PROFILE_0_LEVEL_30 = 7;
+        public static final int H263_PROFILE_0_LEVEL_30 = MediaProperties.H263_PROFILE_0_LEVEL_30;
 
         /** H263, Profile 0, Level 40. */
-        public static final int H263_PROFILE_0_LEVEL_40 = 8;
+        public static final int H263_PROFILE_0_LEVEL_40 = MediaProperties.H263_PROFILE_0_LEVEL_40;
 
         /** H263, Profile 0, Level 45. */
-        public static final int H263_PROFILE_0_LEVEL_45 = 9;
-
-        /** MPEG4, Simple Profile, Level 4A. */
-        public static final int MPEG4_SP_LEVEL_4A = 10;
+        public static final int H263_PROFILE_0_LEVEL_45 = MediaProperties.H263_PROFILE_0_LEVEL_45;
 
         /** MPEG4, Simple Profile, Level 0. */
-        public static final int MPEG4_SP_LEVEL_5 = 11;
+        public static final int MPEG4_SP_LEVEL_0 = MediaProperties.MPEG4_SP_LEVEL_0;
+
+        /** MPEG4, Simple Profile, Level 0B. */
+        public static final int MPEG4_SP_LEVEL_0B = MediaProperties.MPEG4_SP_LEVEL_0B;
+
+        /** MPEG4, Simple Profile, Level 1. */
+        public static final int MPEG4_SP_LEVEL_1 = MediaProperties.MPEG4_SP_LEVEL_1;
+
+        /** MPEG4, Simple Profile, Level 2. */
+        public static final int MPEG4_SP_LEVEL_2 = MediaProperties.MPEG4_SP_LEVEL_2;
+
+        /** MPEG4, Simple Profile, Level 3. */
+        public static final int MPEG4_SP_LEVEL_3 = MediaProperties.MPEG4_SP_LEVEL_3;
+
+        /** MPEG4, Simple Profile, Level 4A. */
+        public static final int MPEG4_SP_LEVEL_4A = MediaProperties.MPEG4_SP_LEVEL_4A;
+
+        /** MPEG4, Simple Profile, Level 0. */
+        public static final int MPEG4_SP_LEVEL_5 = MediaProperties.MPEG4_SP_LEVEL_5;
 
         /** H264, Profile 0, Level 1. */
-        public static final int H264_PROFILE_0_LEVEL_1 = 12;
+        public static final int H264_PROFILE_0_LEVEL_1 = MediaProperties.H264_PROFILE_0_LEVEL_1;
 
         /** H264, Profile 0, Level 1b. */
-        public static final int H264_PROFILE_0_LEVEL_1b = 13;
+        public static final int H264_PROFILE_0_LEVEL_1b = MediaProperties.H264_PROFILE_0_LEVEL_1B;
 
         /** H264, Profile 0, Level 1.1 */
-        public static final int H264_PROFILE_0_LEVEL_1_1 = 14;
+        public static final int H264_PROFILE_0_LEVEL_1_1 = MediaProperties.H264_PROFILE_0_LEVEL_1_1;
 
         /** H264, Profile 0, Level 1.2 */
-        public static final int H264_PROFILE_0_LEVEL_1_2 = 15;
+        public static final int H264_PROFILE_0_LEVEL_1_2 = MediaProperties.H264_PROFILE_0_LEVEL_1_2;
 
         /** H264, Profile 0, Level 1.3 */
-        public static final int H264_PROFILE_0_LEVEL_1_3 = 16;
+        public static final int H264_PROFILE_0_LEVEL_1_3 = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
 
         /** H264, Profile 0, Level 2. */
-        public static final int H264_PROFILE_0_LEVEL_2 = 17;
+        public static final int H264_PROFILE_0_LEVEL_2 = MediaProperties.H264_PROFILE_0_LEVEL_2;
 
         /** H264, Profile 0, Level 2.1 */
-        public static final int H264_PROFILE_0_LEVEL_2_1 = 18;
+        public static final int H264_PROFILE_0_LEVEL_2_1 = MediaProperties.H264_PROFILE_0_LEVEL_2_1;
 
         /** H264, Profile 0, Level 2.2 */
-        public static final int H264_PROFILE_0_LEVEL_2_2 = 19;
+        public static final int H264_PROFILE_0_LEVEL_2_2 = MediaProperties.H264_PROFILE_0_LEVEL_2_2;
 
         /** H264, Profile 0, Level 3. */
-        public static final int H264_PROFILE_0_LEVEL_3 = 20;
+        public static final int H264_PROFILE_0_LEVEL_3 = MediaProperties.H264_PROFILE_0_LEVEL_3;
 
         /** H264, Profile 0, Level 3.1 */
-        public static final int H264_PROFILE_0_LEVEL_3_1 = 21;
+        public static final int H264_PROFILE_0_LEVEL_3_1 = MediaProperties.H264_PROFILE_0_LEVEL_3_1;
 
         /** H264, Profile 0, Level 3.2 */
-        public static final int H264_PROFILE_0_LEVEL_3_2 = 22;
+        public static final int H264_PROFILE_0_LEVEL_3_2 = MediaProperties.H264_PROFILE_0_LEVEL_3_2;
 
         /** H264, Profile 0, Level 4. */
-        public static final int H264_PROFILE_0_LEVEL_4 = 23;
+        public static final int H264_PROFILE_0_LEVEL_4 = MediaProperties.H264_PROFILE_0_LEVEL_4;
 
         /** H264, Profile 0, Level 4.1 */
-        public static final int H264_PROFILE_0_LEVEL_4_1 = 24;
+        public static final int H264_PROFILE_0_LEVEL_4_1 = MediaProperties.H264_PROFILE_0_LEVEL_4_1;
 
         /** H264, Profile 0, Level 4.2 */
-        public static final int H264_PROFILE_0_LEVEL_4_2 = 25;
+        public static final int H264_PROFILE_0_LEVEL_4_2 = MediaProperties.H264_PROFILE_0_LEVEL_4_2;
 
         /** H264, Profile 0, Level 5. */
-        public static final int H264_PROFILE_0_LEVEL_5 = 26;
+        public static final int H264_PROFILE_0_LEVEL_5 = MediaProperties.H264_PROFILE_0_LEVEL_5;
 
         /** H264, Profile 0, Level 5.1 */
-        public static final int H264_PROFILE_0_LEVEL_5_1 = 27;
+        public static final int H264_PROFILE_0_LEVEL_5_1 = MediaProperties.H264_PROFILE_0_LEVEL_5_1;
 
         /** Profile out of range. */
-        public static final int OUT_OF_RANGE = 255;
+        public static final int OUT_OF_RANGE = MediaProperties.UNSUPPORTED_PROFILE_LEVEL;
     }
 
     /** Defines video frame sizes. */
