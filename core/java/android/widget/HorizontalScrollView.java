@@ -1422,11 +1422,11 @@ public class HorizontalScrollView extends FrameLayout {
             final int scrollX = mScrollX;
             if (!mEdgeGlowLeft.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int height = getHeight();
+                final int height = getHeight() - mPaddingTop - mPaddingBottom;
 
                 canvas.rotate(270);
-                canvas.translate(-height, Math.min(0, scrollX));
-                mEdgeGlowLeft.setSize(getHeight(), getWidth());
+                canvas.translate(-height + mPaddingTop, Math.min(0, scrollX));
+                mEdgeGlowLeft.setSize(height, getWidth());
                 if (mEdgeGlowLeft.draw(canvas)) {
                     invalidate();
                 }
@@ -1435,10 +1435,10 @@ public class HorizontalScrollView extends FrameLayout {
             if (!mEdgeGlowRight.isFinished()) {
                 final int restoreCount = canvas.save();
                 final int width = getWidth();
-                final int height = getHeight();
+                final int height = getHeight() - mPaddingTop - mPaddingBottom;
 
                 canvas.rotate(90);
-                canvas.translate(0,
+                canvas.translate(-mPaddingTop,
                         -(Math.max(getScrollRange(), scrollX) + width));
                 mEdgeGlowRight.setSize(height, width);
                 if (mEdgeGlowRight.draw(canvas)) {
