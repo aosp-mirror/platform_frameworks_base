@@ -50,7 +50,7 @@
     <string name="needPuk2" msgid="4526033371987193070">"Wprowadź kod PUK2, aby odblokować kartę SIM."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Identyfikator rozmówcy przy połączeniach przychodzących"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Identyfikator rozmówcy przy połączeniach wychodzących"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Przekierowania połączeń"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Przekazywanie połączeń"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Połączenia oczekujące"</string>
     <string name="BaMmi" msgid="455193067926770581">"Blokada dzwonienia"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Zmiana hasła"</string>
