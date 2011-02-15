@@ -307,8 +307,15 @@ public class UsimPhoneBookManager extends Handler implements IccConstants {
         fileIds = mPbrFile.mFileIds.get(recNum);
         if (fileIds == null || fileIds.isEmpty()) return;
 
+
+        int extEf = 0;
+        // Only call fileIds.get while EFEXT1_TAG is available
+        if (fileIds.containsKey(USIM_EFEXT1_TAG)) {
+            extEf = fileIds.get(USIM_EFEXT1_TAG);
+        }
+
         mAdnCache.requestLoadAllAdnLike(fileIds.get(USIM_EFADN_TAG),
-            fileIds.get(USIM_EFEXT1_TAG), obtainMessage(EVENT_USIM_ADN_LOAD_DONE));
+            extEf, obtainMessage(EVENT_USIM_ADN_LOAD_DONE));
         try {
             mLock.wait();
         } catch (InterruptedException e) {
