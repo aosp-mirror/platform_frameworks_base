@@ -349,7 +349,7 @@ import java.util.HashMap;
  * section for more information on how the lifecycle of a process is tied
  * to the activities it is hosting.  Note that it is important to save
  * persistent data in {@link #onPause} instead of {@link #onSaveInstanceState}
- * because the later is not part of the lifecycle callbacks, so will not
+ * because the latter is not part of the lifecycle callbacks, so will not
  * be called in every situation as described in its documentation.</p>
  *
  * <p class="note">Be aware that these semantics will change slightly between
