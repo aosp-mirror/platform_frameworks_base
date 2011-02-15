@@ -16,7 +16,7 @@ parent.link=index.html
           <ol>
             <li><a href="#native-api">Native Renderscript APIs</a></li>
 
-            <li><a href="#reflective-api">Reflective layer APIs</a></li>
+            <li><a href="#reflective-api">Reflected layer APIs</a></li>
 
             <li><a href="#graphics-api">Graphics APIs</a></li>
           </ol>
@@ -30,10 +30,18 @@ parent.link=index.html
           </ol>
         </li>
       </ol>
+      <h2>Related Samples</h2>
+      <ol>
+            <li><a href="{@docRoot}resources/samples/Renderscript/Balls/index.html">Balls</a></li>
+            <li><a href="{@docRoot}resources/samples/Renderscript/Fountain/index.html">Fountain</a></li>
+            <li><a href="{@docRoot}resources/samples/Renderscript/HelloCompute/index.html">Hello Compute</a></li>
+            <li><a href="{@docRoot}resources/samples/Renderscript/HelloWorld/index.html">Hello World</a></li>
+            <li><a href="{@docRoot}resources/samples/Renderscript/Samples/index.html">Samples</a></li>
+          </ol>
     </div>
   </div>
 
-  <p>The Renderscript system offers high performance 3D rendering and mathematical computations at
+  <p>The Renderscript system offers high performance 3D rendering and mathematical computation at
   the native level. The Renderscript APIs are intended for developers who are comfortable with
   developing in C (C99 standard) and want to maximize performance in their applications. The
   Renderscript system improves performance by running as native code on the device, but it also
@@ -46,47 +54,46 @@ parent.link=index.html
   intermediate code.</p>
 
   <p>The disadvantage of the Renderscript system is that it adds complexity to the development and
-  debugging processes and is not a substitute for the Android system APIs. It is a portable native
-  language with pointers and explicit resource management. The target use is for performance
-  critical code where the existing Android APIs are not sufficient. If what you are rendering or
-  computing is very simple and does not require much processing power, you should still use the
-  Android APIs for ease of development. Debugging visibility can be limited, because the
+  debugging processes. Debugging visibility can be limited, because the
   Renderscript system can execute on processors other than the main CPU (such as the GPU), so if
-  this occurs, debugging becomes more difficult. Remember the tradeoffs between development and
-  debugging complexity versus performance when deciding to use Renderscript.</p>
+  this occurs, debugging becomes more difficult. The target use is for performance
+  critical code where the traditional framework APIs (such as using {@link android.opengl}) are not sufficient.
+  If what you are rendering or computing is very simple and does not require much processing power, you should still use the
+  traditional framework APIs for ease of development. Remember the tradeoffs between development and
+  debugging complexity versus performance when deciding to use Renderscript. </p>
 
   <p>For an example of Renderscript in action, see the 3D carousel view in the Android 3.0 versions
   of Google Books and YouTube or install the Renderscript sample applications that are shipped with
-  the SDK in <code>&lt;sdk_root&gt;/platforms/android-3.0/samples</code>.</p>
+  the SDK in <code>&lt;sdk_root&gt;/samples/android-11/Renderscript</code>.</p>
 
   <h2 id="overview">Renderscript System Overview</h2>
 
   <p>The Renderscript system adopts a control and slave architecture where the low-level native
   code is controlled by the higher level Android system that runs in the virtual machine (VM). When
-  you use the Renderscript system, there are three layers of APIs that exist:</p>
+  you use the Renderscript system, there are three layers that exist:</p>
 
   <ul>
-    <li>The native Renderscript layer consists of the native Renderscript <code>.rs</code> files
-    that you write to compute mathematical operations, render graphics, or both. This layer does
-    the intensive computation or graphics rendering and returns the result back to the Android VM
-    through the reflected layer.</li>
+    <li>The native Renderscript layer consists of native libraries that are packaged with the SDK.
+    The native Renderscript <code>.rs</code> files compute mathematical operations, render graphics,
+    or both. This layer does the intensive computation or graphics rendering and returns the result
+    back to the Android VM through the reflected layer.</li>
 
-    <li>The reflected layer is a set of generated Android system classes (through reflection) based
-    on the native layer interface that you define. This layer acts as a bridge between the native
+    <li>The reflected layer is a set of generated Android framework classes reflected from
+    the native Renderscript code that you wrote. This layer acts as a bridge between the native
     Renderscript layer and the Android system layer. The Android build tools automatically generate
-    the APIs for this layer during the build process.</li>
+    the classes for this layer during the build process. This layer also includes a set of Android
+    framework APIs that provide the memory and resource allocation classes to support this layer.</li>
 
-    <li>The Android system layer consists of your normal Android APIs along with the Renderscript
+    <li>The Android system layer consists of the traditional framework APIs, which include the Renderscript
     APIs in {@link android.renderscript}. This layer handles things such as the Activity lifecycle
-    management of your application and calls the native Renderscript layer through the reflected
-    layer.</li>
+    management of your application and calls the reflected layer to communicate with the native Renderscript code.</li>
   </ul>
 
   <p>To fully understand how the Renderscript system works, you must understand how the reflected
   layer is generated and how it interacts with the native Renderscript layer and Android system
   layer. The reflected layer provides the entry points into the native code, enabling the Android
-  system code to give high level commands like, "rotate the view" or "filter the bitmap." It
-  delegates all the heavy lifting to the native layer. To accomplish this, you need to create logic
+  system to give high level commands like, "rotate the view" or "filter the bitmap" to the
+  native layer, which does the heavy lifting. To accomplish this, you need to create logic
   to hook together all of these layers so that they can correctly communicate.</p>
 
   <p>At the root of everything is your Renderscript, which is the actual C code that you write and
@@ -94,11 +101,10 @@ parent.link=index.html
   and graphics. A compute Renderscript does not do any graphics rendering while a graphics
   Renderscript does.</p>
 
-  <p>When you create a Renderscript <code>.rs</code> file, an equivalent, reflective layer class,
-  {@link android.renderscript.ScriptC}, is generated by the build tools and exposes the native
-  functions to the Android system. This class is named
-  <code><em>ScriptC_renderscript_filename</em></code>. The following list describes the major
-  components of your native Renderscript code that is reflected:</p>
+  <p>When you create Renderscript <code>.rs</code> files, equivalent, reflected classes
+  are generated by the build tools and expose the native functions and data types and structures
+  to the Android system. The following list describes the major components of your native Renderscript
+  code that is reflected:</p>
 
   <ul>
     <li>The non-static functions in your Renderscript (<code>.rs</code> file) are reflected into
@@ -108,12 +114,12 @@ parent.link=index.html
     <li>Any non-static, global Renderscript variables are reflected into
     <code><em>ScriptC_renderscript_filename</em></code>.
     Accessor methods are generated, so the Android system layer can access the values.
-    The <code>get()</code> method comes with a one-way communication restriction. 
-    The Android system layer always caches the last value that is set and returns that during a call to get.
-    If the native Renderscript code has changed the value, the change does propagate back to the Android system layer
-    for efficiency. If the global variables are initialized in the native Renderscript code, those values are used
-    to initialize the Android system versions. If global variables are marked as <code>const</code>,
-    then a <code>set()</code> method is not generated.
+    The <code>get</code> method comes with a one-way communication restriction. 
+    The Android system layer always caches the last value that is set and returns that during a call to a <code>get<code> method.
+    If the native Renderscript code changes the value, the change does not propagate back to the Android system layer.
+    If the global variables are initialized in the native Renderscript code, those values are used
+    to initialize the corresponding values in the Android system. If global variables are marked as <code>const</code>,
+    then a <code>set</code> method is not generated.
     </li>
 
     <li>Structs are reflected into their own classes, one for each struct, into a class named
@@ -128,15 +134,14 @@ parent.link=index.html
     Renderscripts should not directly set the exported global pointers.</li>
      </ul>
 
-  <p>The Android system also has a corresponding Renderscript context object, {@link
+  <p>The Android framework API also has a corresponding Renderscript context object, {@link
   android.renderscript.RenderScript} (for a compute Renderscript) or {@link
   android.renderscript.RenderScriptGL} (for a graphics Renderscript). This context object allows
   you to bind to the reflected Renderscript class, so that the Renderscript context knows what its
   corresponding native Renderscript is. If you have a graphics Renderscript context, you can also
   specify a variety of Programs (stages in the graphics pipeline) to tweek how your graphics are
   rendered. A graphics Renderscript context also needs a surface to render on, {@link
-  android.renderscript.RSSurfaceView}, which gets passed into its constructor. When all three of
-  the layers are connected, the Renderscript system can compute or render graphics.</p>
+  android.renderscript.RSSurfaceView}, which gets passed into its constructor.</p>
 
   <h2 id="api">API overview</h2>
 
@@ -145,15 +150,15 @@ parent.link=index.html
   because these functions are assumed to be running on a standard CPU. The Renderscript runtime
   chooses the best processor to execute the code, which may not be the CPU, so it cannot guarantee
   support for standard C libraries. What Renderscript does offer is an API that supports intensive
-  computation with an extensive collection of math APIs. Some key features of the Renderscript APIs
-  are:</p>
+  computation with an extensive collection of math APIs. The following sections group the APIs
+  into three distinct categories.</p>
 
 
   <h3 id="native-api">Native Renderscript APIs</h3>
 
   <p>The Renderscript headers are located in the <code>include</code> and
   <code>clang-include</code> directories in the
-  <code>&lt;sdk_root&gt;/platforms/android-3.0/renderscript</code> directory of the Android SDK.
+  <code>&lt;sdk_root&gt;/platforms/android-11/renderscript</code> directory of the Android SDK.
   The headers are automatically included for you, except for the graphics specific header,
   which you can define as follows:</p>
   
@@ -170,16 +175,14 @@ parent.link=index.html
     <li>Graphics rendering functions</li>
     <li>Memory allocation request features</li>
     <li>Data types and structures to support the Renderscript system such as
-    Vector types for defining two-, three-, or four-vectors.</li></li>
-  </ul>
+    Vector types for defining two-, three-, or four-vectors.</li>
   </ul>
 
-  <h3 id="reflective-api">Reflective layer APIs</h3>
+  <h3 id="reflective-api">Reflected layer APIs</h3>
 
-  <p>These classes are not generated by the reflection process, and are actually part of the
-  Android system APIs, but they are mainly used by the reflective layer classes to handle memory
-  allocation and management for your Renderscript. You normally do not need to be call these classes
-  directly.</p> 
+  <p>These classes are mainly used by the reflected classes that are generated from your native Renderscript
+  code. They allocate and manage memory for your Renderscript on the Android system side. 
+  You normally do not need to call these classes directly.</p> 
   
   <p>Because of the constraints of the Renderscript native layer, you cannot do any dynamic
   memory allocation in your Renderscript <code>.rs</code> file.
@@ -195,7 +198,7 @@ parent.link=index.html
   The Android system object, which at this point is just an empty shell, is eventually garbage collected.
   </p>
 
-  <p>The following classes are mainly used by the reflective layer classes:</p>
+  <p>The following classes are mainly used by the reflected layer classes:</p>
 
   <table>
     <tr>
@@ -214,9 +217,9 @@ parent.link=index.html
       <td>
         An {@link android.renderscript.Element} is the most basic element of a memory type. An
         element represents one cell of a memory allocation. An element can have two forms: Basic or
-        Complex. They are typically created from C structures that are used within Renderscript
-        code and cannot contain pointers or nested arrays. The other common source of elements is
-        bitmap formats.
+        Complex. They are typically created from C structures in your Renderscript
+        code during the reflection process. Elements cannot contain pointers or nested arrays. 
+        The other common source of elements is bitmap formats.
 
         <p>A basic element contains a single component of data of any valid Renderscript data type.
         Examples of basic element data types include a single float value, a float4 vector, or a
@@ -253,12 +256,11 @@ parent.link=index.html
       <td>rs_allocation</td>
 
       <td>
-        An {@link android.renderscript.Allocation} provides the memory for applications. An {@link
+        <p>An {@link android.renderscript.Allocation} provides the memory for applications. An {@link
         android.renderscript.Allocation} allocates memory based on a description of the memory that
-        is represented by a {@link android.renderscript.Type}. The {@link
-        android.renderscript.Type} describes an array of {@link android.renderscript.Element}s that
+        is represented by a {@link android.renderscript.Type}. The type describes an array of elements that
         represent the memory to be allocated. Allocations are the primary way data moves into and
-        out of scripts.
+        out of scripts.</p>
 
         <p>Memory is user-synchronized and it's possible for allocations to exist in multiple
         memory spaces concurrently. For example, if you make a call to the graphics card to load a
@@ -270,9 +272,9 @@ parent.link=index.html
 
         <p>Allocation data is uploaded in one of two primary ways: type checked and type unchecked.
         For simple arrays there are <code>copyFrom()</code> functions that take an array from the
-        Android system code and copy it to the native layer memory store. Both type checked and
+        Android system and copy it to the native layer memory store. Both type checked and
         unchecked copies are provided. The unchecked variants allow the Android system to copy over
-        arrays of structures because it not support inherently support structures. For example, if
+        arrays of structures because it does not support structures. For example, if
         there is an allocation that is an array n floats, you can copy the data contained in a
         float[n] array or a byte[n*4] array.</p>
       </td>
@@ -331,7 +333,7 @@ parent.link=index.html
   state is taken from the bind points as set in the {@link android.renderscript.RenderScriptGL}
   bind methods in the control environment (VM environment).</p>
 
-  <p>For example, you can define this at the top of your native Renderscript code:</p>
+  <p>For example, you can define this at the top of your native graphics Renderscript code:</p>
   <pre>
 #pragma stateVertex(parent)
 #pragma stateStore(parent)
@@ -354,9 +356,9 @@ parent.link=index.html
       <td>rs_program_vertex</td>
 
       <td>
-        The Renderscript vertex program, also known as a vertex shader, describes the stage in the
+        <p>The Renderscript vertex program, also known as a vertex shader, describes the stage in the
         graphics pipeline responsible for manipulating geometric data in a user-defined way. The
-        object is constructed by providing Renderscript with the following data:
+        object is constructed by providing Renderscript with the following data:</p>
 
         <ul>
           <li>An Element describing its varying inputs or attributes</li>
@@ -367,7 +369,9 @@ parent.link=index.html
           inputs</li>
         </ul>
 
-        <p>Once the program is created, bind it to the graphics context. It is then used for all
+        <p>Once the program is created, bind it to the {@link android.renderscript.RenderScriptGL} 
+        graphics context by calling 
+        {@link android.renderscript.RenderScriptGL#bindProgramVertex bindProgramVertex()}. It is then used for all
         subsequent draw calls until you bind a new program. If the program has constant inputs, the
         user needs to bind an allocation containing those inputs. The allocation’s type must match
         the one provided during creation. The Renderscript library then does all the necessary
@@ -391,7 +395,7 @@ parent.link=index.html
 
       <td>rs_program_fragment</td>
 
-      <td>The Renderscript fragment program, also known as the fragment shader, is responsible for
+      <td><p>The Renderscript fragment program, also known as the fragment shader, is responsible for
       manipulating pixel data in a user-defined way. It’s constructed from a GLSL shader string
       containing the program body, textures inputs, and a Type object describing the constants used
       by the program. Like the vertex programs, when an allocation with constant input values is
@@ -401,7 +405,7 @@ parent.link=index.html
       rsgAllocationSyncAll so it could send the new values to hardware. Communication between the
       vertex and fragment programs is handled internally in the GLSL code. For example, if the
       fragment program is expecting a varying input called varTex0, the GLSL code inside the
-      program vertex must provide it.
+      program vertex must provide it.</p>
       <p>  To bind shader constructs to the this Program, declare a struct containing the necessary shader constants in your native Renderscript code.
   This struct is generated into a reflected class that you can use as a constant input element
   during the Program's creation. It is an easy way to create an instance of this struct as an allocation.
@@ -416,7 +420,7 @@ parent.link=index.html
       <td>rs_program_store</td>
 
       <td>The Renderscript ProgramStore contains a set of parameters that control how the graphics
-      hardware writes to the framebuffer. It could be used to enable/disable depth writes and
+      hardware writes to the framebuffer. It could be used to enable and disable depth writes and
       testing, setup various blending modes for effects like transparency and define write masks
       for color components.</td>
     </tr>
@@ -493,19 +497,19 @@ parent.link=index.html
 
   <ol>
     <li>Analyze your application's requirements and figure out what you want to develop with
-    Renderscript. To take full advantage of Renderscript, you want to use it when the computation
-    or graphics performance you're getting with the normal Android system APIs is
+    Renderscript. To take full advantage of the Renderscript system, you want to use it when the computation
+    or graphics performance you're getting with the traditional framework APIs is
     insufficient.</li>
 
     <li>Design the interface of your Renderscript code and implement it using the native
     Renderscript APIs that are included in the Android SDK in
-    <code>&lt;sdk_root&gt;/platforms/android-3.0/renderscript</code>.</li>
+    <code>&lt;sdk_root&gt;/platforms/android-11/renderscript</code>.</li>
 
     <li>Create an Android project as you would normally, in Eclipse or with the
     <code>android</code> tool.</li>
 
     <li>Place your Renderscript files in <code>src</code> folder of the Android project so that the
-    build tools can generate the reflective layer classes.</li>
+    build tools can generate the reflected layer classes.</li>
 
     <li>Create your application, calling the Renderscript through the reflected class layer when
     you need to.</li>
@@ -513,16 +517,16 @@ parent.link=index.html
     <li>Build, install, and run your application as you would normally.</li>
   </ol>
 
-  <p>To see how a simple Renderscript application is put together, see <a href="#hello-world">The
-  Hello World Renderscript Graphics Application</a>. The SDK also ships with many Renderscript
-  samples in the<code>&lt;sdk_root&gt;/samples/android-3.0/</code> directory.</p>
+  <p>To see how a simple Renderscript application is put together, see the 
+  <a href="{@docRoot}resources/samples/Renderscript/index.html">Renderscript samples</a>
+  and <a href="#hello-graphics">The Hello Graphics Application</a> section of the documentation.</p>
 
   <h3 id="hello-graphics">The Hello Graphics Application</h3>
 
   <p>This small application demonstrates the structure of a simple Renderscript application. You
   can model your Renderscript application after the basic structure of this application. You can
   find the complete source in the SDK in the
-  <code>&lt;android-sdk&gt;/platforms/android-3.0/samples/HelloWorldRS directory</code>. The
+  <code>&lt;android-sdk&gt;/samples/android-11/HelloWorldRS directory</code>. The
   application uses Renderscript to draw the string, "Hello World!" to the screen and redraws the
   text whenever the user touches the screen at the location of the touch. This application is only
   a demonstration and you should not use the Renderscript system to do something this trivial. The
@@ -544,7 +548,7 @@ parent.link=index.html
     screen.</li>
 
     <li>
-      <p>The <code>&lt;project_root&gt;/gen</code> directory contains the reflective layer classes
+      <p>The <code>&lt;project_root&gt;/gen</code> directory contains the reflected layer classes
       that are generated by the Android build tools. You will notice a
       <code>ScriptC_helloworld</code> class, which is the reflective version of the Renderscript
       and contains the entry points into the <code>helloworld.rs</code> native code. This file does
@@ -552,8 +556,8 @@ parent.link=index.html
     </li>
   </ul>
 
-  <p>Each file has its own distinct use. The following section demonstrates in detail how the
-  sample works:</p>
+  <p>Each file has its own distinct use. The following files comprise the main parts of the sample and
+  demonstrate in detail how the sample works:</p>
 
   <dl>
     <dt><code>helloworld.rs</code></dt>
@@ -628,7 +632,7 @@ int root(int launchID) {
     <dd>This class is generated by the Android build tools and is the reflected version of the
     <code>helloworld.rs</code> Renderscript. It provides a a high level entry point into the
     <code>helloworld.rs</code> native code by defining the corresponding methods that you can call
-    from Android system APIs.</dd>
+    from the traditional framework APIs.</dd>
 
     <dt><code>helloworld.bc</code> bytecode</dt>
 
