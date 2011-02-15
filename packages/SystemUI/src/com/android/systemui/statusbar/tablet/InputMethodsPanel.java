@@ -90,8 +90,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
             if (imi2 == null) return 0;
             if (imi1 == null) return 1;
             if (mPackageManager != null) {
-                CharSequence imiId1 = imi1.loadLabel(mPackageManager);
-                CharSequence imiId2 = imi2.loadLabel(mPackageManager);
+                CharSequence imiId1 = imi1.loadLabel(mPackageManager) + "/" + imi1.getId();
+                CharSequence imiId2 = imi2.loadLabel(mPackageManager) + "/" + imi2.getId();
                 if (imiId1 != null && imiId2 != null) {
                     return imiId1.toString().compareTo(imiId2.toString());
                 }
