@@ -38,6 +38,7 @@
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <netdb.h>
 
 // If no access units are received within 3 secs, assume that the rtp
 // stream has ended and signal end of stream.
@@ -119,9 +120,10 @@ struct MyHandler : public AHandler {
         // want to transmit user/pass in cleartext.
         AString host, path, user, pass;
         unsigned port;
-        if (ARTSPConnection::ParseURL(
-                    mSessionURL.c_str(), &host, &port, &path, &user, &pass)
-                && user.size() > 0) {
+        CHECK(ARTSPConnection::ParseURL(
+                    mSessionURL.c_str(), &host, &port, &path, &user, &pass));
+
+        if (user.size() > 0) {
             mSessionURL.clear();
             mSessionURL.append("rtsp://");
             mSessionURL.append(host);
@@ -131,6 +133,8 @@ struct MyHandler : public AHandler {
 
             LOGI("rewritten session url: '%s'", mSessionURL.c_str());
         }
+
+        mSessionHost = host;
     }
 
     void connect(const sp<AMessage> &doneMsg) {
@@ -247,14 +251,35 @@ struct MyHandler : public AHandler {
     // rtp/rtcp ports to poke a hole into the firewall for future incoming
     // packets. We're going to send an RR/SDES RTCP packet to both of them.
     bool pokeAHole(int rtpSocket, int rtcpSocket, const AString &transport) {
+        struct sockaddr_in addr;
+        memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
+        addr.sin_family = AF_INET;
+
         AString source;
         AString server_port;
         if (!GetAttribute(transport.c_str(),
                           "source",
-                          &source)
-                || !GetAttribute(transport.c_str(),
+                          &source)) {
+            LOGW("Missing 'source' field in Transport response. Using "
+                 "RTSP endpoint address.");
+
+            struct hostent *ent = gethostbyname(mSessionHost.c_str());
+            if (ent == NULL) {
+                LOGE("Failed to look up address of session host '%s'",
+                     mSessionHost.c_str());
+
+                return false;
+            }
+
+            addr.sin_addr.s_addr = *(in_addr_t *)ent->h_addr;
+        } else {
+            addr.sin_addr.s_addr = inet_addr(source.c_str());
+        }
+
+        if (!GetAttribute(transport.c_str(),
                                  "server_port",
                                  &server_port)) {
+            LOGI("Missing 'server_port' field in Transport response.");
             return false;
         }
 
@@ -275,11 +300,6 @@ struct MyHandler : public AHandler {
                  "even one, we'll let it pass for now, but this may break "
                  "in the future.");
         }
-
-        struct sockaddr_in addr;
-        memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
-        addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = inet_addr(source.c_str());
 
         if (addr.sin_addr.s_addr == INADDR_NONE) {
             return true;
@@ -497,22 +517,20 @@ struct MyHandler : public AHandler {
                         if (!track->mUsingInterleavedTCP) {
                             AString transport = response->mHeaders.valueAt(i);
 
-                            if (!pokeAHole(
-                                        track->mRTPSocket,
-                                        track->mRTCPSocket,
-                                        transport)) {
-                                result = UNKNOWN_ERROR;
-                            }
+                            // We are going to continue even if we were
+                            // unable to poke a hole into the firewall...
+                            pokeAHole(
+                                    track->mRTPSocket,
+                                    track->mRTCPSocket,
+                                    transport);
                         }
 
-                        if (result == OK) {
-                            mRTPConn->addStream(
-                                    track->mRTPSocket, track->mRTCPSocket,
-                                    mSessionDesc, index,
-                                    notify, track->mUsingInterleavedTCP);
+                        mRTPConn->addStream(
+                                track->mRTPSocket, track->mRTCPSocket,
+                                mSessionDesc, index,
+                                notify, track->mUsingInterleavedTCP);
 
-                            mSetupTracksSuccessful = true;
-                        }
+                        mSetupTracksSuccessful = true;
                     }
                 }
 
@@ -1059,6 +1077,7 @@ private:
     sp<ASessionDescription> mSessionDesc;
     AString mOriginalSessionURL;  // This one still has user:pass@
     AString mSessionURL;
+    AString mSessionHost;
     AString mBaseURL;
     AString mSessionID;
     bool mSetupTracksSuccessful;
