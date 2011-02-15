@@ -212,6 +212,10 @@ import java.lang.reflect.Array;
         Object ret1 = null;
 
         for (int i = 0; i < spanCount; i++) {
+            if (kind != null && !kind.isInstance(spans[i])) {
+                continue;
+            }
+
             int spanStart = data[i * COLUMNS + START];
             int spanEnd = data[i * COLUMNS + END];
 
@@ -229,10 +233,6 @@ import java.lang.reflect.Array;
                 if (spanEnd == queryStart) {
                     continue;
                 }
-            }
-
-            if (kind != null && !kind.isInstance(spans[i])) {
-                continue;
             }
 
             if (count == 0) {
