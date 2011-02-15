@@ -1175,6 +1175,8 @@ public class WebView extends AbsoluteLayout
 
         mOverscrollDistance = configuration.getScaledOverscrollDistance();
         mOverflingDistance = configuration.getScaledOverflingDistance();
+
+        setScrollBarStyle(super.getScrollBarStyle());
     }
 
     /**
