@@ -394,7 +394,6 @@ public class SearchView extends LinearLayout {
         if (mIconifiedByDefault == iconified) return;
         mIconifiedByDefault = iconified;
         updateViewsVisibility(iconified);
-        setImeVisibility(!iconified);
     }
 
     /**
