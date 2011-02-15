@@ -60,14 +60,14 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/activities.html">
           <span class="en">Activities</span>
-        </a></div>
+        </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
             <span class="en">Fragments</span>
           </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/providers/loaders.html">
             <span class="en">Loaders</span>
-          </a><span class="new">new!</span></li>
+          </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
             <span class="en">Tasks and Back Stack</span>
           </a></li>
@@ -76,11 +76,11 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/services.html">
           <span class="en">Services</span>
-        </a></div>
+        </a> <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/bound-services.html">
             <span class="en">Bound Services</span>
-          </a></li>
+          </a> <span class="new">new!</span></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
@@ -91,7 +91,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/processes-and-threads.html">
             <span class="en">Processes and Threads</span>
-          </a></li>
+          </a> <span class="new">new!</span></li>
     </ul>
 
 
@@ -419,7 +419,7 @@
       <li class="toggle-list">
         <div>
            <a href="<?cs var:toroot ?>guide/developing/devices/index.html">
-                <span class="en">Creating and Managing Virtual Devices</span>
+                <span class="en">Managing Virtual Devices</span>
             </a>
         </div>
         <ul>
@@ -430,7 +430,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/devices/managing-avds-cmdline.html">
-              <span class="en">On the Command Line</span>
+              <span class="en">From the Command Line</span>
             </a>
           </li>
           <li>
@@ -460,7 +460,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/projects/projects-cmdline.html">
-                <span class="en">On the Command Line</span>
+                <span class="en">From the Command Line</span>
             </a>
           </li>
         </ul>
@@ -490,12 +490,12 @@
         <ul>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects.html">
-                <span class="en">In Eclipse with ADT</span>
+                <span class="en">From Eclipse with ADT</span>
             </a>
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-projects-cmdline.html">
-                <span class="en">In Other IDEs</span>
+                <span class="en">From Other IDEs</span>
             </a>
           </li>
           <li>
@@ -505,7 +505,7 @@
           </li>
           <li>
             <a href="<?cs var:toroot ?>guide/developing/debugging/debugging-log.html">
-                <span class="en">Reading and Writing Log Messages</span>
+                <span class="en">Reading and Writing Logs</span>
             </a>
           </li>
           <li>
