@@ -38,6 +38,7 @@
 
 namespace android {
 
+#if 0
 static bool isMtpDevice(uint16_t vendor, uint16_t product) {
     // Sandisk Sansa Fuze
     if (vendor == 0x0781 && product == 0x74c2)
@@ -47,6 +48,7 @@ static bool isMtpDevice(uint16_t vendor, uint16_t product) {
         return true;
     return false;
 }
+#endif
 
 MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
     struct usb_device *device = usb_device_new(deviceName, fd);
@@ -91,7 +93,9 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
                 LOGD("Found MTP device: \"%s\" \"%s\"\n", manufacturerName, productName);
                 free(manufacturerName);
                 free(productName);
-            } else {
+            }
+#if 0
+             else {
                 // look for special cased devices based on vendor/product ID
                 // we are doing this mainly for testing purposes
                 uint16_t vendor = usb_device_get_vendor_id(device);
@@ -119,7 +123,7 @@ MtpDevice* MtpDevice::open(const char* deviceName, int fd) {
                     printf("no MTP string\n");
                 }
             }
-
+#endif
             // if we got here, then we have a likely MTP or PTP device
 
             // interface should be followed by three endpoints
