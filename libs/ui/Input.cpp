@@ -15,6 +15,16 @@
 
 #include <ui/Input.h>
 
+#include <math.h>
+
+#ifdef HAVE_ANDROID_OS
+#include <binder/Parcel.h>
+
+#include "SkPoint.h"
+#include "SkMatrix.h"
+#include "SkScalar.h"
+#endif
+
 namespace android {
 
 static const char* CONFIGURATION_FILE_DIR[] = {
@@ -237,6 +247,41 @@ void KeyEvent::initialize(const KeyEvent& from) {
     mEventTime = from.mEventTime;
 }
 
+
+// --- PointerCoords ---
+
+#ifdef HAVE_ANDROID_OS
+status_t PointerCoords::readFromParcel(Parcel* parcel) {
+    bits = parcel->readInt32();
+
+    uint32_t count = __builtin_popcount(bits);
+    if (count > MAX_AXES) {
+        return BAD_VALUE;
+    }
+
+    for (uint32_t i = 0; i < count; i++) {
+        values[i] = parcel->readInt32();
+    }
+    return OK;
+}
+
+status_t PointerCoords::writeToParcel(Parcel* parcel) const {
+    parcel->writeInt32(bits);
+
+    uint32_t count = __builtin_popcount(bits);
+    for (uint32_t i = 0; i < count; i++) {
+        parcel->writeInt32(values[i]);
+    }
+    return OK;
+}
+#endif
+
+void PointerCoords::tooManyAxes(int axis) {
+    LOGW("Could not set value for axis %d because the PointerCoords structure is full and "
+            "cannot contain more than %d axis values.", axis, int(MAX_AXES));
+}
+
+
 // --- MotionEvent ---
 
 void MotionEvent::initialize(
@@ -272,6 +317,33 @@ void MotionEvent::initialize(
     addSample(eventTime, pointerCoords);
 }
 
+void MotionEvent::copyFrom(const MotionEvent* other, bool keepHistory) {
+    InputEvent::initialize(other->mDeviceId, other->mSource);
+    mAction = other->mAction;
+    mFlags = other->mFlags;
+    mEdgeFlags = other->mEdgeFlags;
+    mMetaState = other->mMetaState;
+    mXOffset = other->mXOffset;
+    mYOffset = other->mYOffset;
+    mXPrecision = other->mXPrecision;
+    mYPrecision = other->mYPrecision;
+    mDownTime = other->mDownTime;
+    mPointerIds = other->mPointerIds;
+
+    if (keepHistory) {
+        mSampleEventTimes = other->mSampleEventTimes;
+        mSamplePointerCoords = other->mSamplePointerCoords;
+    } else {
+        mSampleEventTimes.clear();
+        mSampleEventTimes.push(other->getEventTime());
+        mSamplePointerCoords.clear();
+        size_t pointerCount = other->getPointerCount();
+        size_t historySize = other->getHistorySize();
+        mSamplePointerCoords.appendArray(other->mSamplePointerCoords.array()
+                + (historySize * pointerCount), pointerCount);
+    }
+}
+
 void MotionEvent::addSample(
         int64_t eventTime,
         const PointerCoords* pointerCoords) {
@@ -279,10 +351,223 @@ void MotionEvent::addSample(
     mSamplePointerCoords.appendArray(pointerCoords, getPointerCount());
 }
 
+const PointerCoords* MotionEvent::getRawPointerCoords(size_t pointerIndex) const {
+    return &mSamplePointerCoords[getHistorySize() * getPointerCount() + pointerIndex];
+}
+
+float MotionEvent::getRawAxisValue(int32_t axis, size_t pointerIndex) const {
+    return getRawPointerCoords(pointerIndex)->getAxisValue(axis);
+}
+
+float MotionEvent::getAxisValue(int32_t axis, size_t pointerIndex) const {
+    float value = getRawPointerCoords(pointerIndex)->getAxisValue(axis);
+    switch (axis) {
+    case AINPUT_MOTION_AXIS_X:
+        value += mXOffset;
+        break;
+    case AINPUT_MOTION_AXIS_Y:
+        value += mYOffset;
+        break;
+    }
+    return value;
+}
+
+const PointerCoords* MotionEvent::getHistoricalRawPointerCoords(
+        size_t pointerIndex, size_t historicalIndex) const {
+    return &mSamplePointerCoords[historicalIndex * getPointerCount() + pointerIndex];
+}
+
+float MotionEvent::getHistoricalRawAxisValue(int32_t axis, size_t pointerIndex,
+        size_t historicalIndex) const {
+    return getHistoricalRawPointerCoords(pointerIndex, historicalIndex)->getAxisValue(axis);
+}
+
+float MotionEvent::getHistoricalAxisValue(int32_t axis, size_t pointerIndex,
+        size_t historicalIndex) const {
+    float value = getHistoricalRawPointerCoords(pointerIndex, historicalIndex)->getAxisValue(axis);
+    switch (axis) {
+    case AINPUT_MOTION_AXIS_X:
+        value += mXOffset;
+        break;
+    case AINPUT_MOTION_AXIS_Y:
+        value += mYOffset;
+        break;
+    }
+    return value;
+}
+
 void MotionEvent::offsetLocation(float xOffset, float yOffset) {
     mXOffset += xOffset;
     mYOffset += yOffset;
 }
+
+static inline void scaleAxisValue(PointerCoords& c, int axis, float scaleFactor) {
+    float* value = c.editAxisValue(axis);
+    if (value) {
+        *value *= scaleFactor;
+    }
+}
+
+void MotionEvent::scale(float scaleFactor) {
+    mXOffset *= scaleFactor;
+    mYOffset *= scaleFactor;
+    mXPrecision *= scaleFactor;
+    mYPrecision *= scaleFactor;
+
+    size_t numSamples = mSamplePointerCoords.size();
+    for (size_t i = 0; i < numSamples; i++) {
+        PointerCoords& c = mSamplePointerCoords.editItemAt(i);
+        // No need to scale pressure or size since they are normalized.
+        // No need to scale orientation since it is meaningless to do so.
+        scaleAxisValue(c, AINPUT_MOTION_AXIS_X, scaleFactor);
+        scaleAxisValue(c, AINPUT_MOTION_AXIS_Y, scaleFactor);
+        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOUCH_MAJOR, scaleFactor);
+        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOUCH_MINOR, scaleFactor);
+        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOOL_MAJOR, scaleFactor);
+        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOOL_MINOR, scaleFactor);
+    }
+}
+
+#ifdef HAVE_ANDROID_OS
+static inline float transformAngle(const SkMatrix* matrix, float angleRadians) {
+    // Construct and transform a vector oriented at the specified clockwise angle from vertical.
+    // Coordinate system: down is increasing Y, right is increasing X.
+    SkPoint vector;
+    vector.fX = SkFloatToScalar(sinf(angleRadians));
+    vector.fY = SkFloatToScalar(-cosf(angleRadians));
+    matrix->mapVectors(& vector, 1);
+
+    // Derive the transformed vector's clockwise angle from vertical.
+    float result = atan2f(SkScalarToFloat(vector.fX), SkScalarToFloat(-vector.fY));
+    if (result < - M_PI_2) {
+        result += M_PI;
+    } else if (result > M_PI_2) {
+        result -= M_PI;
+    }
+    return result;
+}
+
+void MotionEvent::transform(const SkMatrix* matrix) {
+    float oldXOffset = mXOffset;
+    float oldYOffset = mYOffset;
+
+    // The tricky part of this implementation is to preserve the value of
+    // rawX and rawY.  So we apply the transformation to the first point
+    // then derive an appropriate new X/Y offset that will preserve rawX and rawY.
+    SkPoint point;
+    float rawX = getRawX(0);
+    float rawY = getRawY(0);
+    matrix->mapXY(SkFloatToScalar(rawX + oldXOffset), SkFloatToScalar(rawY + oldYOffset),
+            & point);
+    float newX = SkScalarToFloat(point.fX);
+    float newY = SkScalarToFloat(point.fY);
+    float newXOffset = newX - rawX;
+    float newYOffset = newY - rawY;
+
+    mXOffset = newXOffset;
+    mYOffset = newYOffset;
+
+    // Apply the transformation to all samples.
+    size_t numSamples = mSamplePointerCoords.size();
+    for (size_t i = 0; i < numSamples; i++) {
+        PointerCoords& c = mSamplePointerCoords.editItemAt(i);
+        float* xPtr = c.editAxisValue(AINPUT_MOTION_AXIS_X);
+        float* yPtr = c.editAxisValue(AINPUT_MOTION_AXIS_Y);
+        if (xPtr && yPtr) {
+            float x = *xPtr + oldXOffset;
+            float y = *yPtr + oldYOffset;
+            matrix->mapXY(SkFloatToScalar(x), SkFloatToScalar(y), & point);
+            *xPtr = SkScalarToFloat(point.fX) - newXOffset;
+            *yPtr = SkScalarToFloat(point.fY) - newYOffset;
+        }
+
+        float* orientationPtr = c.editAxisValue(AINPUT_MOTION_AXIS_ORIENTATION);
+        if (orientationPtr) {
+            *orientationPtr = transformAngle(matrix, *orientationPtr);
+        }
+    }
+}
+
+status_t MotionEvent::readFromParcel(Parcel* parcel) {
+    size_t pointerCount = parcel->readInt32();
+    size_t sampleCount = parcel->readInt32();
+    if (pointerCount == 0 || pointerCount > MAX_POINTERS || sampleCount == 0) {
+        return BAD_VALUE;
+    }
+
+    mDeviceId = parcel->readInt32();
+    mSource = parcel->readInt32();
+    mAction = parcel->readInt32();
+    mFlags = parcel->readInt32();
+    mEdgeFlags = parcel->readInt32();
+    mMetaState = parcel->readInt32();
+    mXOffset = parcel->readFloat();
+    mYOffset = parcel->readFloat();
+    mXPrecision = parcel->readFloat();
+    mYPrecision = parcel->readFloat();
+    mDownTime = parcel->readInt64();
+
+    mPointerIds.clear();
+    mPointerIds.setCapacity(pointerCount);
+    mSampleEventTimes.clear();
+    mSampleEventTimes.setCapacity(sampleCount);
+    mSamplePointerCoords.clear();
+    mSamplePointerCoords.setCapacity(sampleCount * pointerCount);
+
+    for (size_t i = 0; i < pointerCount; i++) {
+        mPointerIds.push(parcel->readInt32());
+    }
+
+    while (sampleCount-- > 0) {
+        mSampleEventTimes.push(parcel->readInt64());
+        for (size_t i = 0; i < pointerCount; i++) {
+            mSamplePointerCoords.push();
+            status_t status = mSamplePointerCoords.editTop().readFromParcel(parcel);
+            if (!status) {
+                return status;
+            }
+        }
+    }
+    return OK;
+}
+
+status_t MotionEvent::writeToParcel(Parcel* parcel) const {
+    size_t pointerCount = mPointerIds.size();
+    size_t sampleCount = mSampleEventTimes.size();
+
+    parcel->writeInt32(pointerCount);
+    parcel->writeInt32(sampleCount);
+
+    parcel->writeInt32(mDeviceId);
+    parcel->writeInt32(mSource);
+    parcel->writeInt32(mAction);
+    parcel->writeInt32(mFlags);
+    parcel->writeInt32(mEdgeFlags);
+    parcel->writeInt32(mMetaState);
+    parcel->writeFloat(mXOffset);
+    parcel->writeFloat(mYOffset);
+    parcel->writeFloat(mXPrecision);
+    parcel->writeFloat(mYPrecision);
+    parcel->writeInt64(mDownTime);
+
+    for (size_t i = 0; i < pointerCount; i++) {
+        parcel->writeInt32(mPointerIds.itemAt(i));
+    }
+
+    const PointerCoords* pc = mSamplePointerCoords.array();
+    for (size_t h = 0; h < sampleCount; h++) {
+        parcel->writeInt64(mSampleEventTimes.itemAt(h));
+        for (size_t i = 0; i < pointerCount; i++) {
+            status_t status = (pc++)->writeToParcel(parcel);
+            if (!status) {
+                return status;
+            }
+        }
+    }
+    return OK;
+}
+#endif
+
 
 // --- InputDeviceInfo ---
 
@@ -307,8 +592,8 @@ void InputDeviceInfo::initialize(int32_t id, const String8& name) {
     mMotionRanges.clear();
 }
 
-const InputDeviceInfo::MotionRange* InputDeviceInfo::getMotionRange(int32_t rangeType) const {
-    ssize_t index = mMotionRanges.indexOfKey(rangeType);
+const InputDeviceInfo::MotionRange* InputDeviceInfo::getMotionRange(int32_t axis) const {
+    ssize_t index = mMotionRanges.indexOfKey(axis);
     return index >= 0 ? & mMotionRanges.valueAt(index) : NULL;
 }
 
@@ -316,14 +601,14 @@ void InputDeviceInfo::addSource(uint32_t source) {
     mSources |= source;
 }
 
-void InputDeviceInfo::addMotionRange(int32_t rangeType, float min, float max,
+void InputDeviceInfo::addMotionRange(int32_t axis, float min, float max,
         float flat, float fuzz) {
     MotionRange range = { min, max, flat, fuzz };
-    addMotionRange(rangeType, range);
+    addMotionRange(axis, range);
 }
 
-void InputDeviceInfo::addMotionRange(int32_t rangeType, const MotionRange& range) {
-    mMotionRanges.add(rangeType, range);
+void InputDeviceInfo::addMotionRange(int32_t axis, const MotionRange& range) {
+    mMotionRanges.add(axis, range);
 }
 
 } // namespace android

@@ -60,7 +60,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libEGL \
 	libpixelflinger \
 	libhardware \
-	libhardware_legacy
+	libhardware_legacy \
+	libskia \
+	libbinder
+
+LOCAL_C_INCLUDES := \
+    external/skia/include/core
 
 LOCAL_MODULE:= libui
 

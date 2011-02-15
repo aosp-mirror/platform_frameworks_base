@@ -363,23 +363,40 @@ enum {
 };
 
 /*
+ * Constants that identify each individual axis of a motion event.
+ */
+enum {
+    AINPUT_MOTION_AXIS_X = 0,
+    AINPUT_MOTION_AXIS_Y = 1,
+    AINPUT_MOTION_AXIS_PRESSURE = 2,
+    AINPUT_MOTION_AXIS_SIZE = 3,
+    AINPUT_MOTION_AXIS_TOUCH_MAJOR = 4,
+    AINPUT_MOTION_AXIS_TOUCH_MINOR = 5,
+    AINPUT_MOTION_AXIS_TOOL_MAJOR = 6,
+    AINPUT_MOTION_AXIS_TOOL_MINOR = 7,
+    AINPUT_MOTION_AXIS_ORIENTATION = 8,
+};
+
+/*
  * Constants used to retrieve information about the range of motion for a particular
  * coordinate of a motion event.
  *
  * Refer to the documentation on android.view.InputDevice for more details about input sources
  * and their correct interpretation.
+ *
+ * DEPRECATION NOTICE: These constants are deprecated.  Use AINPUT_MOTION_AXIS_* constants instead.
  */
 enum {
-    AINPUT_MOTION_RANGE_X = 0,
-    AINPUT_MOTION_RANGE_Y = 1,
-    AINPUT_MOTION_RANGE_PRESSURE = 2,
-    AINPUT_MOTION_RANGE_SIZE = 3,
-    AINPUT_MOTION_RANGE_TOUCH_MAJOR = 4,
-    AINPUT_MOTION_RANGE_TOUCH_MINOR = 5,
-    AINPUT_MOTION_RANGE_TOOL_MAJOR = 6,
-    AINPUT_MOTION_RANGE_TOOL_MINOR = 7,
-    AINPUT_MOTION_RANGE_ORIENTATION = 8,
-};
+    AINPUT_MOTION_RANGE_X = AINPUT_MOTION_AXIS_X,
+    AINPUT_MOTION_RANGE_Y = AINPUT_MOTION_AXIS_Y,
+    AINPUT_MOTION_RANGE_PRESSURE = AINPUT_MOTION_AXIS_PRESSURE,
+    AINPUT_MOTION_RANGE_SIZE = AINPUT_MOTION_AXIS_SIZE,
+    AINPUT_MOTION_RANGE_TOUCH_MAJOR = AINPUT_MOTION_AXIS_TOUCH_MAJOR,
+    AINPUT_MOTION_RANGE_TOUCH_MINOR = AINPUT_MOTION_AXIS_TOUCH_MINOR,
+    AINPUT_MOTION_RANGE_TOOL_MAJOR = AINPUT_MOTION_AXIS_TOOL_MAJOR,
+    AINPUT_MOTION_RANGE_TOOL_MINOR = AINPUT_MOTION_AXIS_TOOL_MINOR,
+    AINPUT_MOTION_RANGE_ORIENTATION = AINPUT_MOTION_AXIS_ORIENTATION,
+} __attribute__ ((deprecated));
 
 
 /*
@@ -526,7 +543,7 @@ float AMotionEvent_getY(const AInputEvent* motion_event, size_t pointer_index);
 
 /* Get the current pressure of this event for the given pointer index.
  * The pressure generally ranges from 0 (no pressure at all) to 1 (normal pressure),
- * however values higher than 1 may be generated depending on the calibration of
+ * although values higher than 1 may be generated depending on the calibration of
  * the input device. */
 float AMotionEvent_getPressure(const AInputEvent* motion_event, size_t pointer_index);
 
@@ -567,6 +584,10 @@ float AMotionEvent_getToolMinor(const AInputEvent* motion_event, size_t pointer_
  * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
  * (finger pointing fully right). */
 float AMotionEvent_getOrientation(const AInputEvent* motion_event, size_t pointer_index);
+
+/* Get the value of the request axis for the given pointer index. */
+float AMotionEvent_getAxisValue(const AInputEvent* motion_event,
+        int32_t axis, size_t pointer_index);
 
 /* Get the number of historical points in this event.  These are movements that
  * have occurred between this event and the previous event.  This only applies
@@ -614,7 +635,7 @@ float AMotionEvent_getHistoricalY(AInputEvent* motion_event, size_t pointer_inde
 /* Get the historical pressure of this event for the given pointer index that
  * occurred between this event and the previous motion event.
  * The pressure generally ranges from 0 (no pressure at all) to 1 (normal pressure),
- * however values higher than 1 may be generated depending on the calibration of
+ * although values higher than 1 may be generated depending on the calibration of
  * the input device. */
 float AMotionEvent_getHistoricalPressure(AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
@@ -668,6 +689,11 @@ float AMotionEvent_getHistoricalToolMinor(const AInputEvent* motion_event, size_
  * (finger pointing fully right). */
 float AMotionEvent_getHistoricalOrientation(const AInputEvent* motion_event, size_t pointer_index,
         size_t history_index);
+
+/* Get the historical value of the request axis for the given pointer index
+ * that occurred between this event and the previous motion event. */
+float AMotionEvent_getHistoricalAxisValue(const AInputEvent* motion_event,
+        int32_t axis, size_t pointer_index, size_t history_index);
 
 
 /*
