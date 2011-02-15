@@ -3013,12 +3013,9 @@ public class ListView extends AbsListView {
         return mItemsCanFocus;
     }
 
-    /**
-     * @hide Pending API council approval.
-     */
     @Override
     public boolean isOpaque() {
-        return (mCachingStarted && mIsCacheColorOpaque && mDividerIsOpaque &&
+        return (mCachingActive && mIsCacheColorOpaque && mDividerIsOpaque &&
                 hasOpaqueScrollbars()) || super.isOpaque();
     }
 
@@ -3071,6 +3068,10 @@ public class ListView extends AbsListView {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        if (mCachingStarted) {
+            mCachingActive = true;
+        }
+
         // Draw the dividers
         final int dividerHeight = mDividerHeight;
         final Drawable overscrollHeader = mOverScrollHeader;
@@ -3164,7 +3165,6 @@ public class ListView extends AbsListView {
                 }
             } else {
                 int top;
-                int listTop = effectivePaddingTop;
 
                 final int scrollY = mScrollY;
 
@@ -3181,7 +3181,7 @@ public class ListView extends AbsListView {
                         View child = getChildAt(i);
                         top = child.getTop();
                         // Don't draw dividers next to items that are not enabled
-                        if (top > listTop) {
+                        if (top > effectivePaddingTop) {
                             if ((areAllItemsSelectable ||
                                     (adapter.isEnabled(first + i) && (i == count - 1 ||
                                             adapter.isEnabled(first + i + 1))))) {
@@ -3218,6 +3218,15 @@ public class ListView extends AbsListView {
 
         // Draw the indicators (these should be drawn above the dividers) and children
         super.dispatchDraw(canvas);
+    }
+
+    @Override
+    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+        boolean more = super.drawChild(canvas, child, drawingTime);
+        if (mCachingActive && child.mCachingFailed) {
+            mCachingActive = false;
+        }
+        return more;
     }
 
     /**
@@ -3558,6 +3567,7 @@ public class ListView extends AbsListView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        //noinspection SimplifiableIfStatement
         if (mItemsCanFocus && ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
             // Don't handle edge touches immediately -- they may actually belong to one of our
             // descendants.

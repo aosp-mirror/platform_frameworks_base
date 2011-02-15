@@ -17,10 +17,6 @@
 package android.view;
 
 import android.animation.LayoutTransition;
-import android.view.animation.AlphaAnimation;
-import com.android.internal.R;
-import com.android.internal.util.Predicate;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -39,10 +35,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+import com.android.internal.R;
+import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
