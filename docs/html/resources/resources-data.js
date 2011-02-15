@@ -569,7 +569,7 @@ var ANDROID_RESOURCES = [
     tags: ['sample', 'new', 'newfeature', 'widgets'],
     path: 'samples/StackWidget/index.html',
     title: {
-      en: 'StackView App Widget'
+      en: 'StackView Widget'
     },
     description: {
       en: 'Demonstrates how to create a simple collection widget containing a StackView.'
@@ -619,7 +619,7 @@ var ANDROID_RESOURCES = [
     tags: ['sample', 'widgets', 'newfeature', 'new'],
     path: 'samples/WeatherListWidget/index.html',
     title: {
-      en: 'Weather List Widget Sample'
+      en: 'Weather List Widget'
     },
     description: {
       en: 'A more complex collection-widget example which uses a ContentProvider as its data source.'
