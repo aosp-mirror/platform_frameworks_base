@@ -361,10 +361,12 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
     /** {@inheritDoc} */
     public void cleanUp() {
+        if (DEBUG) Log.v(TAG, "Cleanup() called on " + this);
         mUpdateMonitor.removeCallback(this);
         mLockPatternUtils = null;
         mUpdateMonitor = null;
         mCallback = null;
+        mLockPatternView.setOnPatternListener(null);
     }
 
     @Override
@@ -406,6 +408,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mCallback.keyguardDone(true);
                 mCallback.reportSuccessfulUnlockAttempt();
             } else {
+                boolean reportFailedAttempt = false;
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
                     mCallback.pokeWakelock(UNLOCK_PATTERN_WAKE_INTERVAL_MS);
                 }
@@ -413,9 +416,10 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 if (pattern.size() >= LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                     mTotalFailedPatternAttempts++;
                     mFailedPatternAttemptsSinceLastTimeout++;
-                    mCallback.reportFailedUnlockAttempt();
+                    reportFailedAttempt = true;
                 }
-                if (mFailedPatternAttemptsSinceLastTimeout >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
+                if (mFailedPatternAttemptsSinceLastTimeout
+                        >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) {
                     long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                     handleAttemptLockout(deadline);
                 } else {
@@ -426,6 +430,12 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     mLockPatternView.postDelayed(
                             mCancelPatternRunnable,
                             PATTERN_CLEAR_TIMEOUT_MS);
+                }
+
+                // Because the following can result in cleanUp() being called on this screen,
+                // member variables reset in cleanUp() shouldn't be accessed after this call.
+                if (reportFailedAttempt) {
+                    mCallback.reportFailedUnlockAttempt();
                 }
             }
         }
