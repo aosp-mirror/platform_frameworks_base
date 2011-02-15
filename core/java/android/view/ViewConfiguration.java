@@ -152,12 +152,12 @@ public class ViewConfiguration {
      * should be at least equal to the size of the screen in ARGB888 format.
      */
     @Deprecated
-    private static final int MAXIMUM_DRAWING_CACHE_SIZE = 320 * 480 * 4; // HVGA screen, ARGB8888
+    private static final int MAXIMUM_DRAWING_CACHE_SIZE = 480 * 800 * 4; // ARGB8888
 
     /**
      * The coefficient of friction applied to flings/scrolls.
      */
-    private static float SCROLL_FRICTION = 0.015f;
+    private static final float SCROLL_FRICTION = 0.015f;
 
     /**
      * Max distance to overscroll for edge effects

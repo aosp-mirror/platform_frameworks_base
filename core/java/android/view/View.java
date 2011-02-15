@@ -2138,6 +2138,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     private int[] mDrawableState = null;
 
+    /**
+     * Set to true when drawing cache is enabled and cannot be created.
+     * 
+     * @hide
+     */
+    public boolean mCachingFailed;
+
     private Bitmap mDrawingCache;
     private Bitmap mUnscaledDrawingCache;
     private DisplayList mDisplayList;
@@ -8355,6 +8362,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @see #setLayerType(int, android.graphics.Paint)
      */
     public void setDrawingCacheEnabled(boolean enabled) {
+        mCachingFailed = false;
         setFlags(enabled ? DRAWING_CACHE_ENABLED : 0, DRAWING_CACHE_ENABLED);
     }
 
@@ -8597,7 +8605,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void buildDrawingCache() {
         buildDrawingCache(false);
     }
-
+    
     /**
      * <p>Forces the drawing cache to be built if the drawing cache is invalid.</p>
      *
@@ -8624,6 +8632,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void buildDrawingCache(boolean autoScale) {
         if ((mPrivateFlags & DRAWING_CACHE_VALID) == 0 || (autoScale ?
                 mDrawingCache == null : mUnscaledDrawingCache == null)) {
+            mCachingFailed = false;
 
             if (ViewDebug.TRACE_HIERARCHY) {
                 ViewDebug.trace(this, ViewDebug.HierarchyTraceType.BUILD_CACHE);
@@ -8649,6 +8658,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     (width * height * (opaque && !use32BitCache ? 2 : 4) >
                             ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize())) {
                 destroyDrawingCache();
+                mCachingFailed = true;
                 return;
             }
 
@@ -8701,6 +8711,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     } else {
                         mUnscaledDrawingCache = null;
                     }
+                    mCachingFailed = true;
                     return;
                 }
 

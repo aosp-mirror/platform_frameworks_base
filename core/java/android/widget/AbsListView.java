@@ -334,6 +334,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * the drawing cache was enabled on the children
      */
     boolean mCachingStarted;
+    boolean mCachingActive;
 
     /**
      * The position of the view that received the down motion event
@@ -4169,7 +4170,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mScrollingCacheEnabled && !mCachingStarted) {
             setChildrenDrawnWithCacheEnabled(true);
             setChildrenDrawingCacheEnabled(true);
-            mCachingStarted = true;
+            mCachingStarted = mCachingActive = true;
         }
     }
 
@@ -4178,7 +4179,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mClearScrollingCache = new Runnable() {
                 public void run() {
                     if (mCachingStarted) {
-                        mCachingStarted = false;
+                        mCachingStarted = mCachingActive = false;
                         setChildrenDrawnWithCacheEnabled(false);
                         if ((mPersistentDrawingCache & PERSISTENT_SCROLLING_CACHE) == 0) {
                             setChildrenDrawingCacheEnabled(false);
