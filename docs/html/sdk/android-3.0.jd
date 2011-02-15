@@ -131,7 +131,10 @@ android.app.FragmentTransaction#commit commit()} and the system applies the frag
 the activity.</p>
 
 <p>For more information about using fragments, read the <a
-href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> documentation.</p>
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> documentation. Several
+samples are also available in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+API Demos</a> application.</p>
 
 
 
@@ -181,7 +184,10 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to {@code "11"}.</p>
 
 <p>For more information about the Action Bar, read the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> documentation.</p>
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> documentation. Several
+samples are also available in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#ActionBar">
+API Demos</a> application.</p>
 
 
 
@@ -221,9 +227,11 @@ before attempting to paste it.</p>
 object) at a time, but one {@link android.content.ClipData} can contain multiple {@link
 android.content.ClipData.Item}s.</p>
 
-<p>For more information, see the {@link android.content.ClipData} class reference. You can also see
-an example implementation of copy and paste in the <a
-href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> sample application.</p>
+<p>For more information, read the <a href="{@docRoot}guide/topics/clipboard/copy-paste.html">Copy
+and Paste</a> documentation. You can also see a simple implementation of copy and paste in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.
+html">API Demos</a> and a more complete implementation in the <a
+href="{@docRoot}resources/samples/NotePad/index.html">Note Pad</a> application.</p>
 
 
 
@@ -265,6 +273,13 @@ getAction()} on the {@link android.view.DragEvent}.</p>
 android.content.ClipData} object, this is not related to the system clipboard. A drag and drop
 operation should never put the dragged data in the system clipboard.</p>
 
+<p>For more information, read the <a href="{@docRoot}guide/topics/ui/drag-drop.html">Dragging and
+Dropping</a> documentation. You can also see an implementation of drag and drop in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/DragAndDropDemo.html">
+API Demos</a> application and the <a
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>
+application.</p>
+
 
 
 <h3>App widgets</h3>
@@ -295,7 +310,10 @@ application called "Widget Preview." To create a preview image, launch this appl
 app widget for your application and set it up how you'd like your preview image to appear, then save
 it and place it in your application's drawable resources.</p>
 
-
+<p>You can see an implementation of the new app widget features in the <a
+href="{@docRoot}resources/samples/StackWidget/index.html">StackView App Widget</a> and <a
+href="{@docRoot}resources/samples/WeatherListWidget/index.html">Weather List Widget</a>
+applications.</p>
 
 
 
@@ -319,7 +337,6 @@ notification can control music playback without starting an activity.</li>
 
 
 
-
 <h3>Content loaders</h3>
 
 <p>New framework APIs facilitate asynchronous loading of data using the {@link
@@ -333,6 +350,13 @@ LoaderCallbacks} interface to receive callbacks when a new loader is requested o
 changed, then call {@link android.app.LoaderManager#initLoader initLoader()} to initialize the
 loader for your activity or fragment.</p>
 
+<p>For more information, read the <a
+href="{@docRoot}guide/topics/providers/loaders.html">Loaders</a> documentation. You can also see
+example code using loaders in the <a
+href="{@docRoot}samples/ApiDemos/src/com/example/android/apis/app/FragmentListCursorLoader.html">
+FragmentListCursorLoader</a> and <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a> samples.</p>
 
 
 
@@ -395,7 +419,10 @@ such as a {@link android.animation.ValueAnimator} or {@link android.animation.Ob
 discussed above.</p>
 
 <p>For more information, see the <a
-href="{@docRoot}guide/topics/graphics/animation.html">Animation</a> developer guide.</p>
+href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a> documentation. You can
+also see several samples using the animation APIs in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API
+Demos</a> application.</p>
 
 
 
@@ -582,7 +609,10 @@ android.view.View#LAYER_TYPE_SOFTWARE} documentation.</p>
 <p>Renderscript is a runtime 3D framework that provides both an API for building 3D scenes as well
 as a special, platform-independent shader language for maximum performance. Using Renderscript, you
 can accelerate graphics operations and data processing. Renderscript is an ideal way to create
-high-performance 3D effects for applications, wallpapers, carousels, and more.</p></li>
+high-performance 3D effects for applications, wallpapers, carousels, and more.</p>
+<p>For more information, see the <a
+href="{@docRoot}guide/topics/graphics/renderscript.html">3D Rendering and Computation with
+Renderscript</a> documentation.</p></li>
 </ul>
 
 
