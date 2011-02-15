@@ -51,6 +51,7 @@ class StatusView {
     private LockPatternUtils mLockPatternUtils;
     private int mHelpMessageId;
     private int mHelpIconId;
+    private KeyguardUpdateMonitor mUpdateMonitor;
 
     private View findViewById(int id) {
         return mView.findViewById(id);
@@ -97,6 +98,7 @@ class StatusView {
         mHasDate = (mDate != null);
         mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
         mLockPatternUtils = lockPatternUtils;
+        mUpdateMonitor = updateMonitor;
 
         refreshTimeAndDateDisplay();
 
@@ -186,7 +188,7 @@ class StatusView {
             // Battery status
             if (mPluggedIn) {
                 // Charging or charged
-                if (mBatteryLevel >= 100) {
+                if (mUpdateMonitor.isDeviceCharged()) {
                     mStatus1.setText(getContext().getString(R.string.lockscreen_charged));
                 } else {
                     mStatus1.setText(getContext().getString(R.string.lockscreen_plugged_in,
