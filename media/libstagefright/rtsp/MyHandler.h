@@ -248,7 +248,7 @@ struct MyHandler : public AHandler {
     // In case we're behind NAT, fire off two UDP packets to the remote
     // rtp/rtcp ports to poke a hole into the firewall for future incoming
     // packets. We're going to send an RR/SDES RTCP packet to both of them.
-    void pokeAHole(int rtpSocket, int rtcpSocket, const AString &transport) {
+    bool pokeAHole(int rtpSocket, int rtcpSocket, const AString &transport) {
         AString source;
         AString server_port;
         if (!GetAttribute(transport.c_str(),
@@ -257,16 +257,25 @@ struct MyHandler : public AHandler {
                 || !GetAttribute(transport.c_str(),
                                  "server_port",
                                  &server_port)) {
-            return;
+            return false;
         }
 
         int rtpPort, rtcpPort;
         if (sscanf(server_port.c_str(), "%d-%d", &rtpPort, &rtcpPort) != 2
                 || rtpPort <= 0 || rtpPort > 65535
                 || rtcpPort <=0 || rtcpPort > 65535
-                || rtcpPort != rtpPort + 1
-                || (rtpPort & 1) != 0) {
-            return;
+                || rtcpPort != rtpPort + 1) {
+            LOGE("Server picked invalid RTP/RTCP port pair %s,"
+                 " RTP port must be even, RTCP port must be one higher.",
+                 server_port.c_str());
+
+            return false;
+        }
+
+        if (rtpPort & 1) {
+            LOGW("Server picked an odd RTP port, it should've picked an "
+                 "even one, we'll let it pass for now, but this may break "
+                 "in the future.");
         }
 
         struct sockaddr_in addr;
@@ -275,7 +284,12 @@ struct MyHandler : public AHandler {
         addr.sin_addr.s_addr = inet_addr(source.c_str());
 
         if (addr.sin_addr.s_addr == INADDR_NONE) {
-            return;
+            return true;
+        }
+
+        if (IN_LOOPBACK(ntohl(addr.sin_addr.s_addr))) {
+            // No firewalls to traverse on the loopback interface.
+            return true;
         }
 
         // Make up an RR/SDES RTCP packet.
@@ -289,16 +303,26 @@ struct MyHandler : public AHandler {
         ssize_t n = sendto(
                 rtpSocket, buf->data(), buf->size(), 0,
                 (const sockaddr *)&addr, sizeof(addr));
-        CHECK_EQ(n, (ssize_t)buf->size());
+
+        if (n < (ssize_t)buf->size()) {
+            LOGE("failed to poke a hole for RTP packets");
+            return false;
+        }
 
         addr.sin_port = htons(rtcpPort);
 
         n = sendto(
                 rtcpSocket, buf->data(), buf->size(), 0,
                 (const sockaddr *)&addr, sizeof(addr));
-        CHECK_EQ(n, (ssize_t)buf->size());
+
+        if (n < (ssize_t)buf->size()) {
+            LOGE("failed to poke a hole for RTCP packets");
+            return false;
+        }
 
         LOGV("successfully poked holes.");
+
+        return true;
     }
 
     virtual void onMessageReceived(const sp<AMessage> &msg) {
@@ -381,6 +405,7 @@ struct MyHandler : public AHandler {
                                 response->mContent->size());
 
                         if (!mSessionDesc->isValid()) {
+                            LOGE("Failed to parse session description.");
                             result = ERROR_MALFORMED;
                         } else {
                             ssize_t i = response->mHeaders.indexOfKey("content-base");
@@ -393,6 +418,25 @@ struct MyHandler : public AHandler {
                                 } else {
                                     mBaseURL = mSessionURL;
                                 }
+                            }
+
+                            if (!mBaseURL.startsWith("rtsp://")) {
+                                // Some misbehaving servers specify a relative
+                                // URL in one of the locations above, combine
+                                // it with the absolute session URL to get
+                                // something usable...
+
+                                LOGW("Server specified a non-absolute base URL"
+                                     ", combining it with the session URL to "
+                                     "get something usable...");
+
+                                AString tmp;
+                                CHECK(MakeURL(
+                                            mSessionURL.c_str(),
+                                            mBaseURL.c_str(),
+                                            &tmp));
+
+                                mBaseURL = tmp;
                             }
 
                             CHECK_GT(mSessionDesc->countTracks(), 1u);
@@ -455,17 +499,22 @@ struct MyHandler : public AHandler {
                         if (!track->mUsingInterleavedTCP) {
                             AString transport = response->mHeaders.valueAt(i);
 
-                            pokeAHole(track->mRTPSocket,
-                                      track->mRTCPSocket,
-                                      transport);
+                            if (!pokeAHole(
+                                        track->mRTPSocket,
+                                        track->mRTCPSocket,
+                                        transport)) {
+                                result = UNKNOWN_ERROR;
+                            }
                         }
 
-                        mRTPConn->addStream(
-                                track->mRTPSocket, track->mRTCPSocket,
-                                mSessionDesc, index,
-                                notify, track->mUsingInterleavedTCP);
+                        if (result == OK) {
+                            mRTPConn->addStream(
+                                    track->mRTPSocket, track->mRTCPSocket,
+                                    mSessionDesc, index,
+                                    notify, track->mUsingInterleavedTCP);
 
-                        mSetupTracksSuccessful = true;
+                            mSetupTracksSuccessful = true;
+                        }
                     }
                 }
 
@@ -853,17 +902,16 @@ struct MyHandler : public AHandler {
             case 'tiou':
             {
                 if (!mReceivedFirstRTCPPacket) {
-                    if (mTryFakeRTCP) {
-                        LOGW("Never received any data, disconnecting.");
-                        (new AMessage('abor', id()))->post();
-                    } else if (mTryTCPInterleaving && mReceivedFirstRTPPacket) {
+                    if (mReceivedFirstRTPPacket && !mTryFakeRTCP) {
                         LOGW("We received RTP packets but no RTCP packets, "
                              "using fake timestamps.");
 
                         mTryFakeRTCP = true;
 
                         mReceivedFirstRTCPPacket = true;
-                    } else {
+
+                        fakeTimestamps();
+                    } else if (!mReceivedFirstRTPPacket && !mTryTCPInterleaving) {
                         LOGW("Never received any data, switching transports.");
 
                         mTryTCPInterleaving = true;
@@ -871,6 +919,9 @@ struct MyHandler : public AHandler {
                         sp<AMessage> msg = new AMessage('abor', id());
                         msg->setInt32("reconnect", true);
                         msg->post();
+                    } else {
+                        LOGW("Never received any data, disconnecting.");
+                        (new AMessage('abor', id()))->post();
                     }
                 }
                 break;
@@ -1156,6 +1207,12 @@ private:
         }
 
         return true;
+    }
+
+    void fakeTimestamps() {
+        for (size_t i = 0; i < mTracks.size(); ++i) {
+            onTimeUpdate(i, 0, 0ll);
+        }
     }
 
     void onTimeUpdate(int32_t trackIndex, uint32_t rtpTime, uint64_t ntpTime) {
