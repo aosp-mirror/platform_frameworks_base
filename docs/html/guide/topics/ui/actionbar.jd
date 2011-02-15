@@ -38,7 +38,15 @@ application</li>
     <li>{@link android.app.ActionBar}</li>
     <li>{@link android.view.Menu}</li>
   </ol>
-
+  
+  <h2>Related samples</h2>
+  <ol>
+    <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#ActionBar">API
+        Demos</a></li>
+    <li><a
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a></li>
+  </ol>
+  
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}guide/topics/ui/menus.html">Creating Menus</a></li>
@@ -363,7 +371,7 @@ the icon and/or title text. However, if there's not enough room in the Action Ba
 in the overflow menu as a normal menu item and you must respond to it from the {@link
 android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} callback method. (For a
 guide to providing search functionality, see the <a
-href="{@docRoot}gudie/topics/search/index.html">Search</a> documentation.)</p>
+href="{@docRoot}guide/topics/search/index.html">Search</a> documentation.)</p>
 
 <p>When the activity first starts, the system populates the Action Bar and overflow menu by calling
 {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()}.
@@ -397,7 +405,7 @@ href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
   <img src="{@docRoot}images/ui/actionbar-tabs.png" alt="" />
   <p class="img-caption"><strong>Figure 6.</strong> Screenshot of tabs in the
 Action Bar, from the <a
-href="{@docRoot}resources/samples/Honeycomb-Gallery/index.html">Honeycomb Gallery</a> sample
+href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> sample
 application.</p>
 </div>
 

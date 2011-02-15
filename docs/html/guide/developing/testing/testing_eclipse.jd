@@ -16,8 +16,8 @@ page.title=Testing from Eclipse with ADT
     basic processes for creating and running applications with ADT, as described in
     <a href="{@docRoot}guide/developing/projects/projects-eclipse.html">Managing Projects from
 Eclipse</a>
-    and <a href="guide/developing/building/building-eclipse.html">Building and Running from
-Eclipse</a>.
+    and <a href="{@docRoot}guide/developing/building/building-eclipse.html">Building and Running
+from Eclipse</a>.
     You may also want to read
     <a href="{@docRoot}guide/topics/testing/testing_android.html">Testing Fundamentals</a>,
     which provides an overview of the Android testing framework.

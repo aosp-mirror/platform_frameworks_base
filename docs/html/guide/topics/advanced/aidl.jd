@@ -14,9 +14,11 @@ do that marshalling is tedious to write, so Android handles it for you with AIDL
 <p class="note"><strong>Note:</strong> Using AIDL is necessary only if you allow clients from
 different applications to access your service for IPC and want to handle multithreading in your
 service. If you do not need to perform IPC across
-different applications, you should create your interface <a href="Binder">implementing a
+different applications, you should create your interface <a
+href="{@docRoot}guide/topics/fundamentals/bound-services.html#Binder">implementing a
 Binder</a> or, if you want to perform IPC, but do not need to handle multithreading, then you
-should implement your interface <a href="#Messenger">using a Messenger</a>.</p>
+should implement your interface <a
+href="{@docRoot}guide/topics/fundamentals/bound-services.html#Messenger">using a Messenger</a>.</p>
 
 <p>Before you begin designing your AIDL interface, be aware that calls on to an AIDL interface are
 direct function calls.  You can not generally make assumptions about the thread in which the call

@@ -46,7 +46,7 @@ To get the samples, download them from the SDK repository using the Android SDK 
 the samples are located in <code>&lt;sdk_root&gt;/samples/android-Honeycomb</code>. The list of links
 below helps you find samples for the features you are interested in:</p>
 <ul>
-  <li><a href="{@docRoot}resources/samples/Honeycomb-Gallery/index.html">Honeycomb Gallery</a> -
+  <li><a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a> -
   A demo application highlighting how to use some of the new APIs in Honeycomb, including fragments, the action bar,
   drag and drop, transition animations, and a stack widget.</li>
   <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">Fragments</a>
