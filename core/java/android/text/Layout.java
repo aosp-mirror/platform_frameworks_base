@@ -600,8 +600,9 @@ public abstract class Layout {
      * are at different run levels (and thus there's a split caret).
      * @param offset the offset
      * @return true if at a level boundary
+     * @hide
      */
-    private boolean isLevelBoundary(int offset) {
+    public boolean isLevelBoundary(int offset) {
         int line = getLineForOffset(offset);
         Directions dirs = getLineDirections(line);
         if (dirs == DIRS_ALL_LEFT_TO_RIGHT || dirs == DIRS_ALL_RIGHT_TO_LEFT) {
@@ -1148,8 +1149,7 @@ public abstract class Layout {
         int bottom = getLineTop(line+1);
 
         float h1 = getPrimaryHorizontal(point) - 0.5f;
-        float h2 = isLevelBoundary(point) ?
-                    getSecondaryHorizontal(point) - 0.5f : h1;
+        float h2 = isLevelBoundary(point) ? getSecondaryHorizontal(point) - 0.5f : h1;
 
         int caps = TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SHIFT_ON) |
                    TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SELECTING);

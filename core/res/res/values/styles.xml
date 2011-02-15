@@ -426,6 +426,7 @@
         <item name="android:textEditNoPasteWindowLayout">?android:attr/textEditNoPasteWindowLayout</item>
         <item name="android:textEditSidePasteWindowLayout">?android:attr/textEditSidePasteWindowLayout</item>
         <item name="android:textEditSideNoPasteWindowLayout">?android:attr/textEditSideNoPasteWindowLayout</item>
+        <item name="android:textCursorDrawable">?android:attr/textCursorDrawable</item>
     </style>
     
     <style name="Widget.TextView.ListSeparator">

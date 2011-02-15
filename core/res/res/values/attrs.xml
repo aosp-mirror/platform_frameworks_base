@@ -778,6 +778,9 @@
     <!-- Color of link text (URLs). -->
     <attr name="textColorLink" format="reference|color" />
 
+    <!-- Reference to a drawable that will be drawn under the insertion cursor. -->
+    <attr name="textCursorDrawable" format="reference" />
+
     <!-- Indicates that the content of a non-editable TextView can be selected.
      Default value is false. EditText content is always selectable. -->
     <attr name="textIsSelectable" format="boolean" />
@@ -2782,6 +2785,9 @@
         <attr name="textEditSidePasteWindowLayout" />
         <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditSideNoPasteWindowLayout" />
+
+        <!-- Reference to a drawable that will be drawn under the insertion cursor. -->
+        <attr name="textCursorDrawable" />
 
         <!-- Indicates that the content of a non-editable text can be selected. -->
         <attr name="textIsSelectable" />
