@@ -89,7 +89,6 @@ public class VideoEditorAPITest extends
      * To Test Creation of Media Video Item.
      */
     // TODO : remove TC_API_001
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItem() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -132,7 +131,6 @@ public class VideoEditorAPITest extends
      * the Begin and End Time.
      */
     // TODO : remove TC_API_002
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemExtractBoundaries() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -202,7 +200,6 @@ public class VideoEditorAPITest extends
      * To test creation of Media Video Item with Set and Get rendering Mode
      */
     // TODO : remove TC_API_003
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemRenderingModes() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -247,7 +244,6 @@ public class VideoEditorAPITest extends
      * To Test the Media Video API : Set Audio Volume, Get Audio Volume and Mute
      */
     // TODO : remove TC_API_005
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemAudioFeatures() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -306,7 +302,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_006
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemGetWaveformData() throws Exception {
 
@@ -349,7 +344,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_007
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemEffect() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -391,7 +385,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_008
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemTransitions() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -439,7 +432,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_009
-    @SuppressWarnings("unused")
     @LargeTest
     public void testMediaVideoItemOverlays() throws Exception {
         final String videoItemFileName = INPUT_FILE_PATH
@@ -1404,8 +1396,6 @@ public class VideoEditorAPITest extends
         final Rect endRect1 = new Rect(10, 10, mediaImageItem.getWidth() / 4,
             mediaImageItem.getHeight() / 4);
 
-        //kbEffectOnMediaItem.setStartRect(startRect1);
-        //kbEffectOnMediaItem.setEndRect(endRect1);
         /* Added newly to take care of removal set APIs */
         kbEffectOnMediaItem = new EffectKenBurns(mediaImageItem, "KBOnM2_changed",
             startRect1, endRect1, 500, 3000);
@@ -1417,7 +1407,6 @@ public class VideoEditorAPITest extends
 
         final Rect zeroRect = new Rect(0, 0, 0, 0);
         try {
-            //kbEffectOnMediaItem.setStartRect(zeroRect);
             kbEffectOnMediaItem = new EffectKenBurns(mediaImageItem, "KBOnM2_zeroStart",
                 zeroRect, endRect, 500, 3000);
 
@@ -1428,7 +1417,6 @@ public class VideoEditorAPITest extends
 
         flagForException = false;
         try {
-            //kbEffectOnMediaItem.setEndRect(zeroRect);
             kbEffectOnMediaItem = new EffectKenBurns(mediaImageItem, "KBOnM2_zeroEnd",
                 startRect, zeroRect, 500, 3000);
         } catch (IllegalArgumentException e) {
@@ -1443,7 +1431,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_037
-    @SuppressWarnings("unused")
     @LargeTest
     public void testTransitionFadeBlack() throws Exception {
 
@@ -1592,7 +1579,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_038
-    @SuppressWarnings("unused")
     @LargeTest
     public void testTransitionCrossFade() throws Exception {
 
@@ -1744,7 +1730,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_039
-    @SuppressWarnings("unused")
     @LargeTest
     public void testTransitionSliding() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
@@ -1935,7 +1920,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_040
-    @SuppressWarnings("unused")
     @LargeTest
     public void testTransitionAlpha() throws Exception {
 
@@ -2115,7 +2099,6 @@ public class VideoEditorAPITest extends
      */
 
     // TODO : remove TC_API_041
-    @SuppressWarnings("unused")
     @LargeTest
     public void testFrameOverlayVideoItem() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
