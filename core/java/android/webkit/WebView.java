@@ -7740,11 +7740,11 @@ public class WebView extends AbsoluteLayout
          *  and allow filtering.
          */
         private class MyArrayListAdapter extends ArrayAdapter<Container> {
-            public MyArrayListAdapter(Context context, Container[] objects, boolean multiple) {
-                super(context,
-                            multiple ? com.android.internal.R.layout.select_dialog_multichoice :
-                            com.android.internal.R.layout.select_dialog_singlechoice,
-                            objects);
+            public MyArrayListAdapter() {
+                super(mContext,
+                        mMultiple ? com.android.internal.R.layout.select_dialog_multichoice :
+                        com.android.internal.R.layout.webview_select_singlechoice,
+                        mContainers);
             }
 
             @Override
@@ -7770,13 +7770,12 @@ public class WebView extends AbsoluteLayout
                     }
 
                     if (Container.OPTGROUP == c.mEnabled) {
-                        // Currently select_dialog_multichoice and
-                        // select_dialog_singlechoice are CheckedTextViews.  If
-                        // that changes, the class cast will no longer be valid.
-                        Assert.assertTrue(
-                                convertView instanceof CheckedTextView);
-                        ((CheckedTextView) convertView).setCheckMarkDrawable(
-                                null);
+                        // Currently select_dialog_multichoice uses CheckedTextViews.
+                        // If that changes, the class cast will no longer be valid.
+                        if (mMultiple) {
+                            Assert.assertTrue(convertView instanceof CheckedTextView);
+                            ((CheckedTextView) convertView).setCheckMarkDrawable(null);
+                        }
                     } else {
                         // c.mEnabled == Container.OPTION_DISABLED
                         // Draw the disabled element in a disabled state.
@@ -7883,6 +7882,7 @@ public class WebView extends AbsoluteLayout
                 mAdapter = a;
             }
 
+            @Override
             public void onChanged() {
                 // The filter may have changed which item is checked.  Find the
                 // item that the ListView thinks is checked.
@@ -7903,15 +7903,12 @@ public class WebView extends AbsoluteLayout
                     }
                 }
             }
-
-            public void onInvalidate() {}
         }
 
         public void run() {
             final ListView listView = (ListView) LayoutInflater.from(mContext)
                     .inflate(com.android.internal.R.layout.select_dialog, null);
-            final MyArrayListAdapter adapter = new
-                    MyArrayListAdapter(mContext, mContainers, mMultiple);
+            final MyArrayListAdapter adapter = new MyArrayListAdapter();
             AlertDialog.Builder b = new AlertDialog.Builder(mContext)
                     .setView(listView).setCancelable(true)
                     .setInverseBackgroundForced(true);
@@ -7949,7 +7946,7 @@ public class WebView extends AbsoluteLayout
                 }
             } else {
                 listView.setOnItemClickListener(new OnItemClickListener() {
-                    public void onItemClick(AdapterView parent, View v,
+                    public void onItemClick(AdapterView<?> parent, View v,
                             int position, long id) {
                         // Rather than sending the message right away, send it
                         // after the page regains focus.
