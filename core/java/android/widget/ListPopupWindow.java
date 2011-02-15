@@ -604,6 +604,7 @@ public class ListPopupWindow {
         removePromptView();
         mPopup.setContentView(null);
         mDropDownList = null;
+        mHandler.removeCallbacks(mResizePopupRunnable);
     }
 
     /**
