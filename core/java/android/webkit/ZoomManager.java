@@ -846,22 +846,29 @@ class ZoomManager {
     public void onNewPicture(WebViewCore.DrawData drawData) {
         final int viewWidth = mWebView.getViewWidth();
         final boolean zoomOverviewWidthChanged = setupZoomOverviewWidth(drawData, viewWidth);
+        final float newZoomOverviewScale = getZoomOverviewScale();
         WebSettings settings = mWebView.getSettings();
         if (zoomOverviewWidthChanged && settings.isNarrowColumnLayout() &&
             settings.getUseFixedViewport() &&
             (mInitialZoomOverview || mInZoomOverview)) {
-            mTextWrapScale = getReadingLevelScale();
+            // Keep mobile site's text wrap scale unchanged.  For mobile sites,
+            // the text wrap scale is the same as zoom overview scale, which is 1.0f.
+            if (exceedsMinScaleIncrement(mTextWrapScale, 1.0f) ||
+                    exceedsMinScaleIncrement(newZoomOverviewScale, 1.0f)) {
+                mTextWrapScale = getReadingLevelScale();
+            } else {
+                mTextWrapScale = newZoomOverviewScale;
+            }
         }
 
-        final float zoomOverviewScale = getZoomOverviewScale();
         if (!mMinZoomScaleFixed) {
-            mMinZoomScale = zoomOverviewScale;
+            mMinZoomScale = newZoomOverviewScale;
         }
         // fit the content width to the current view. Ignore the rounding error case.
         if (!mWebView.drawHistory() && (mInitialZoomOverview || (mInZoomOverview
                 && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1))) {
             mInitialZoomOverview = false;
-            setZoomScale(zoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
+            setZoomScale(newZoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
                 !mWebView.getSettings().getUseFixedViewport());
         }
     }
