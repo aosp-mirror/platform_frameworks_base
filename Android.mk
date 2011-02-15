@@ -429,13 +429,13 @@ web_docs_sample_code_flags := \
 		-samplecode $(sample_dir)/SpinnerTest \
 		            resources/samples/SpinnerTest "SpinnerTest" \
 		-samplecode $(sample_dir)/StackWidget \
-		            resources/samples/StackWidget "StackWidget" \
+		            resources/samples/StackWidget "StackView Widget" \
 		-samplecode $(sample_dir)/TicTacToeLib  \
 		            resources/samples/TicTacToeLib "TicTacToeLib" \
 		-samplecode $(sample_dir)/TicTacToeMain \
 		            resources/samples/TicTacToeMain "TicTacToeMain" \
 		-samplecode $(sample_dir)/WeatherListWidget \
-		            resources/samples/WeatherListWidget "Weather List Widget Sample" \
+		            resources/samples/WeatherListWidget "Weather List Widget" \
 		-samplecode $(sample_dir)/Wiktionary \
 		            resources/samples/Wiktionary "Wiktionary" \
 		-samplecode $(sample_dir)/WiktionarySimple \
