@@ -380,6 +380,58 @@ public class SensorManager
 
     /*-----------------------------------------------------------------------*/
 
+    private class SensorEventPool {
+        private final int mPoolSize;
+        private final SensorEvent mPool[];
+        private int mNumItemsInPool;
+
+        private SensorEvent createSensorEvent() {
+            // maximal size for all legacy events is 3
+            return new SensorEvent(3);
+        }
+
+        SensorEventPool(int poolSize) {
+            mPoolSize = poolSize;
+            mNumItemsInPool = poolSize;
+            mPool = new SensorEvent[poolSize];
+        }
+
+        SensorEvent getFromPool() {
+            SensorEvent t = null;
+            synchronized (this) {
+                if (mNumItemsInPool > 0) {
+                    // remove the "top" item from the pool
+                    final int index = mPoolSize - mNumItemsInPool;
+                    t = mPool[index];
+                    mPool[index] = null;
+                    mNumItemsInPool--;
+                }
+            }
+            if (t == null) {
+                // the pool was empty or this item was removed from the pool for
+                // the first time. In any case, we need to create a new item.
+                t = createSensorEvent();
+            }
+            return t;
+        }
+
+        void returnToPool(SensorEvent t) {
+            synchronized (this) {
+                // is there space left in the pool?
+                if (mNumItemsInPool < mPoolSize) {
+                    // if so, return the item to the pool
+                    mNumItemsInPool++;
+                    final int index = mPoolSize - mNumItemsInPool;
+                    mPool[index] = t;
+                }
+            }
+        }
+    }
+
+    private static SensorEventPool sPool;
+
+    /*-----------------------------------------------------------------------*/
+
     static private class SensorThread {
 
         Thread mThread;
@@ -485,10 +537,9 @@ public class SensorManager
     /*-----------------------------------------------------------------------*/
 
     private class ListenerDelegate {
-        final SensorEventListener mSensorEventListener;
+        private final SensorEventListener mSensorEventListener;
         private final ArrayList<Sensor> mSensorList = new ArrayList<Sensor>();
         private final Handler mHandler;
-        private SensorEvent mValuesPool;
         public SparseBooleanArray mSensors = new SparseBooleanArray();
         public SparseBooleanArray mFirstEvent = new SparseBooleanArray();
         public SparseIntArray mSensorAccuracies = new SparseIntArray();
@@ -527,38 +578,10 @@ public class SensorManager
                     }
 
                     mSensorEventListener.onSensorChanged(t);
-                    returnToPool(t);
+                    sPool.returnToPool(t);
                 }
             };
             addSensor(sensor);
-        }
-
-        protected SensorEvent createSensorEvent() {
-            // maximal size for all legacy events is 3
-            return new SensorEvent(3);
-        }
-
-        protected SensorEvent getFromPool() {
-            SensorEvent t = null;
-            synchronized (this) {
-                // remove the array from the pool
-                t = mValuesPool;
-                mValuesPool = null;
-            }
-            if (t == null) {
-                // the pool was empty, we need a new one
-                t = createSensorEvent();
-            }
-            return t;
-        }
-
-        protected void returnToPool(SensorEvent t) {
-            synchronized (this) {
-                // put back the array into the pool
-                if (mValuesPool == null) {
-                    mValuesPool = t;
-                }
-            }
         }
 
         Object getListener() {
@@ -582,7 +605,7 @@ public class SensorManager
         }
 
         void onSensorChangedLocked(Sensor sensor, float[] values, long[] timestamp, int accuracy) {
-            SensorEvent t = getFromPool();
+            SensorEvent t = sPool.getFromPool();
             final float[] v = t.values;
             v[0] = values[0];
             v[1] = values[1];
@@ -644,6 +667,7 @@ public class SensorManager
                     }
                 } while (i>0);
 
+                sPool = new SensorEventPool( sFullSensorsList.size()*2 );
                 sSensorThread = new SensorThread();
             }
         }
