@@ -258,6 +258,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             // DISCONNECTED for GPRS in any order.  if we receive the CONNECTED first, and then
             // a DISCONNECTED, we want to make sure we set mDataConnectionIsConnected to true
             // since we still have a WiFi connection.
+            final boolean wasConnected = mDataConnectionIsConnected;
             switch (state) {
                 case CONNECTED:
                     mDataConnectionIsConnected = true;
@@ -273,6 +274,12 @@ public class SyncManager implements OnAccountsUpdateListener {
                     // ignore the rest of the states -- leave our boolean alone.
             }
             if (mDataConnectionIsConnected) {
+                if (!wasConnected) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Reconnection detected: clearing all backoffs");
+                    }
+                    mSyncStorageEngine.clearAllBackoffs();
+                }
                 sendCheckAlarmsMessage();
             }
         }

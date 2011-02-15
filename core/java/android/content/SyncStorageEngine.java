@@ -525,6 +525,32 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
+    public void clearAllBackoffs() {
+        boolean changed = false;
+        synchronized (mAuthorities) {
+            for (AccountInfo accountInfo : mAccounts.values()) {
+                for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
+                    if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
+                            || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Log.v(TAG, "clearAllBackoffs:"
+                                    + " authority:" + authorityInfo.authority
+                                    + " account:" + accountInfo.account.name
+                                    + " backoffTime was: " + authorityInfo.backoffTime
+                                    + " backoffDelay was: " + authorityInfo.backoffDelay);
+                        }
+                        authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
+                        authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        if (changed) {
+            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        }
+    }
     public void setDelayUntilTime(Account account, String providerName, long delayUntil) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "setDelayUntil: " + account + ", provider " + providerName
