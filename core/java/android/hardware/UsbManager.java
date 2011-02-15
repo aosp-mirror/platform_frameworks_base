@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -44,11 +45,14 @@ public class UsbManager {
      * Broadcast Action:  A sticky broadcast for USB state change events when in device mode.
      *
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
-     * the USB configuration that is currently set and a bundle containing name/value pairs
-     * with the names of the functions and a value of either {@link #USB_FUNCTION_ENABLED}
-     * or {@link #USB_FUNCTION_DISABLED}.
-     * Possible USB function names include {@link #USB_FUNCTION_MASS_STORAGE},
-     * {@link #USB_FUNCTION_ADB}, {@link #USB_FUNCTION_RNDIS} and {@link #USB_FUNCTION_MTP}.
+     * <ul>
+     * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
+     * <li> {@link #USB_CONFIGURATION} a Bundle containing name/value pairs where the name
+     * is the name of a USB function and the value is either {@link #USB_FUNCTION_ENABLED}
+     * or {@link #USB_FUNCTION_DISABLED}.  The possible function names include
+     * {@link #USB_FUNCTION_MASS_STORAGE}, {@link #USB_FUNCTION_ADB}, {@link #USB_FUNCTION_RNDIS},
+     * {@link #USB_FUNCTION_MTP} and {@link #USB_FUNCTION_ACCESSORY}.
+     * </ul>
      */
     public static final String ACTION_USB_STATE =
             "android.hardware.action.USB_STATE";
@@ -57,6 +61,16 @@ public class UsbManager {
      * Broadcast Action:  A broadcast for USB device attached event.
      *
      * This intent is sent when a USB device is attached to the USB bus when in host mode.
+     * <ul>
+     * <li> {@link #EXTRA_DEVICE_NAME} containing the device's name (String)
+     * <li> {@link #EXTRA_VENDOR_ID} containing the device's vendor ID (Integer)
+     * <li> {@link #EXTRA_PRODUCT_ID} containing the device's product ID (Integer)
+     * <li> {@link #EXTRA_DEVICE_CLASS} } containing the device class (Integer)
+     * <li> {@link #EXTRA_DEVICE_SUBCLASS} containing the device subclass (Integer)
+     * <li> {@link #EXTRA_DEVICE_PROTOCOL} containing the device protocol (Integer)
+     * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.UsbDevice}
+     * for the attached device
+     * </ul>
      */
     public static final String ACTION_USB_DEVICE_ATTACHED =
             "android.hardware.action.USB_DEVICE_ATTACHED";
@@ -65,9 +79,40 @@ public class UsbManager {
      * Broadcast Action:  A broadcast for USB device detached event.
      *
      * This intent is sent when a USB device is detached from the USB bus when in host mode.
+     * <ul>
+     * <li> {@link #EXTRA_DEVICE_NAME} containing the device's name (String)
+     * </ul>
      */
     public static final String ACTION_USB_DEVICE_DETACHED =
             "android.hardware.action.USB_DEVICE_DETACHED";
+
+   /**
+     * Broadcast Action:  A broadcast for USB accessory attached event.
+     *
+     * This intent is sent when a USB accessory is attached.
+     * <ul>
+     * <li> {@link #EXTRA_ACCESSORY_MANUFACTURER} containing the accessory's manufacturer (String)
+     * <li> {@link #EXTRA_ACCESSORY_PRODUCT} containing the accessory's product name (String)
+     * <li> {@link #EXTRA_ACCESSORY_TYPE} containing the accessory's type (String)
+     * <li> {@link #EXTRA_ACCESSORY_VERSION} containing the accessory's version (String)
+     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
+     * for the attached accessory
+     * </ul>
+     */
+    public static final String ACTION_USB_ACCESSORY_ATTACHED =
+            "android.hardware.action.USB_ACCESSORY_ATTACHED";
+
+   /**
+     * Broadcast Action:  A broadcast for USB accessory detached event.
+     *
+     * This intent is sent when a USB accessory is detached.
+     * <ul>
+      * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
+     * for the attached accessory that was detached
+     * </ul>
+     */
+    public static final String ACTION_USB_ACCESSORY_DETACHED =
+            "android.hardware.action.USB_ACCESSORY_DETACHED";
 
     /**
      * Boolean extra indicating whether USB is connected or disconnected.
@@ -106,14 +151,22 @@ public class UsbManager {
     public static final String USB_FUNCTION_MTP = "mtp";
 
     /**
-     * Value indicating that a USB function is enabled.
+     * Name of the Accessory USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     */
+    public static final String USB_FUNCTION_ACCESSORY = "accessory";
+
+    /**
+     * Value indicating that a USB function is enabled.
+     * Used in {@link #USB_CONFIGURATION} extras bundle for the
+     * {@link #ACTION_USB_STATE} broadcast
      */
     public static final String USB_FUNCTION_ENABLED = "enabled";
 
     /**
      * Value indicating that a USB function is disabled.
-     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     * Used in {@link #USB_CONFIGURATION} extras bundle for the
+     * {@link #ACTION_USB_STATE} broadcast
      */
     public static final String USB_FUNCTION_DISABLED = "disabled";
 
@@ -158,7 +211,38 @@ public class UsbManager {
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
      * containing the UsbDevice object for the device.
      */
+
     public static final String EXTRA_DEVICE = "device";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
+     * containing the UsbAccessory object for the accessory.
+     */
+    public static final String EXTRA_ACCESSORY = "accessory";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
+     * containing the accessory's manufacturer name.
+     */
+    public static final String EXTRA_ACCESSORY_MANUFACTURER = "accessory-manufacturer";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
+     * containing the accessory's product name.
+     */
+    public static final String EXTRA_ACCESSORY_PRODUCT = "accessory-product";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
+     * containing the accessory's type.
+     */
+    public static final String EXTRA_ACCESSORY_TYPE = "accessory-type";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
+     * containing the accessory's version.
+     */
+    public static final String EXTRA_ACCESSORY_VERSION = "accessory-version";
 
     private IUsbManager mService;
 
@@ -214,6 +298,41 @@ public class UsbManager {
         }
     }
 
+    /**
+     * Returns a list of currently attached USB accessories.
+     * (in the current implementation there can be at most one)
+     *
+     * @return list of USB accessories, or null if none are attached.
+     */
+    public UsbAccessory[] getAccessoryList() {
+        try {
+            UsbAccessory accessory = mService.getCurrentAccessory();
+            if (accessory == null) {
+                return null;
+            } else {
+                return new UsbAccessory[] { accessory };
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in openAccessory" , e);
+            return null;
+        }
+    }
+
+    /**
+     * Opens a file descriptor for reading and writing data to the USB accessory.
+     *
+     * @param accessory the USB accessory to open
+     * @return file descriptor, or null if the accessor could not be opened.
+     */
+    public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
+        try {
+            return mService.openAccessory();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in openAccessory" , e);
+            return null;
+        }
+    }
+
     private static File getFunctionEnableFile(String function) {
         return new File("/sys/class/usb_composite/" + function + "/enable");
     }
@@ -241,6 +360,22 @@ public class UsbManager {
             boolean enabled = (stream.read() == '1');
             stream.close();
             return enabled;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Enables or disables a USB function.
+     *
+     * @hide
+     */
+    public static boolean setFunctionEnabled(String function, boolean enable) {
+        try {
+            FileOutputStream stream = new FileOutputStream(getFunctionEnableFile(function));
+            stream.write(enable ? '1' : '0');
+            stream.close();
+            return true;
         } catch (IOException e) {
             return false;
         }

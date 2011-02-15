@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,13 @@
 
 #include <stdio.h>
 #include <asm/byteorder.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/usb/f_accessory.h>
+
+#define DRIVER_NAME "/dev/usb_accessory"
 
 namespace android
 {
@@ -164,10 +171,67 @@ static jobject android_server_UsbService_openDevice(JNIEnv *env, jobject thiz, j
         gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
 }
 
+static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strArray, int index)
+{
+    char buffer[256];
+
+    buffer[0] = 0;
+    int length = ioctl(fd, cmd, buffer);
+    LOGD("ioctl returned %d", length);
+    if (buffer[0]) {
+        jstring obj = env->NewStringUTF(buffer);
+        env->SetObjectArrayElement(strArray, index, obj);
+        env->DeleteLocalRef(obj);
+    }
+}
+
+
+static jobjectArray android_server_UsbService_getAccessoryStrings(JNIEnv *env, jobject thiz)
+{
+    int fd = open(DRIVER_NAME, O_RDWR);
+    if (fd < 0) {
+        LOGE("could not open %s", DRIVER_NAME);
+        return NULL;
+    }
+    jclass stringClass = env->FindClass("java/lang/String");
+    jobjectArray strArray = env->NewObjectArray(4, stringClass, NULL);
+    if (!strArray) goto out;
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_MANUFACTURER, strArray, 0);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_MODEL, strArray, 1);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_TYPE, strArray, 2);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_VERSION, strArray, 3);
+
+out:
+    close(fd);
+    return strArray;
+}
+
+static jobject android_server_UsbService_openAccessory(JNIEnv *env, jobject thiz)
+{
+    int fd = open(DRIVER_NAME, O_RDWR);
+    if (fd < 0) {
+        LOGE("could not open %s", DRIVER_NAME);
+        return NULL;
+    }
+    jobject fileDescriptor = env->NewObject(gFileDescriptorOffsets.mClass,
+        gFileDescriptorOffsets.mConstructor);
+    if (fileDescriptor != NULL) {
+        env->SetIntField(fileDescriptor, gFileDescriptorOffsets.mDescriptor, fd);
+    } else {
+        return NULL;
+    }
+    return env->NewObject(gParcelFileDescriptorOffsets.mClass,
+        gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
+}
+
 static JNINativeMethod method_table[] = {
     { "monitorUsbHostBus", "()V", (void*)android_server_UsbService_monitorUsbHostBus },
     { "nativeOpenDevice",  "(Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
                                   (void*)android_server_UsbService_openDevice },
+    { "nativeGetAccessoryStrings", "()[Ljava/lang/String;",
+                                  (void*)android_server_UsbService_getAccessoryStrings },
+    { "nativeOpenAccessory","()Landroid/os/ParcelFileDescriptor;",
+                                  (void*)android_server_UsbService_openAccessory },
 };
 
 int register_android_server_UsbService(JNIEnv *env)

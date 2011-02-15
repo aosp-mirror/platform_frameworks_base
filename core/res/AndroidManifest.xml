@@ -82,9 +82,9 @@
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
 
-    <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
-    <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
     <protected-broadcast android:name="android.hardware.action.USB_STATE" />
+    <protected-broadcast android:name="android.hardware.action.USB_ACCESSORY_ATTACHED" />
+    <protected-broadcast android:name="android.hardware.action.USB_ACCESSORY_ATTACHED" />
     <protected-broadcast android:name="android.hardware.action.USB_DEVICE_ATTACHED" />
     <protected-broadcast android:name="android.hardware.action.USB_DEVICE_DETACHED" />
 
