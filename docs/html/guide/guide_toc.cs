@@ -65,7 +65,7 @@
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
             <span class="en">Fragments</span>
           </a> <span class="new">new!</span></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/providers/loaders.html">
+          <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/loaders.html">
             <span class="en">Loaders</span>
           </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
