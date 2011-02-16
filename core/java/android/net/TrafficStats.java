@@ -69,6 +69,43 @@ public class TrafficStats {
     public static native long getMobileRxBytes();
 
     /**
+     * Get the total number of packets transmitted through the specified interface.
+     *
+     * @return number of packets.  If the statistics are not supported by this interface,
+     * {@link #UNSUPPORTED} will be returned.
+     * @hide
+     */
+    public static native long getTxPackets(String iface);
+
+    /**
+     * Get the total number of packets received through the specified interface.
+     *
+     * @return number of packets.  If the statistics are not supported by this interface,
+     * {@link #UNSUPPORTED} will be returned.
+     * @hide
+     */
+    public static native long getRxPackets(String iface);
+
+    /**
+     * Get the total number of bytes transmitted through the specified interface.
+     *
+     * @return number of bytes.  If the statistics are not supported by this interface,
+     * {@link #UNSUPPORTED} will be returned.
+     * @hide
+     */
+    public static native long getTxBytes(String iface);
+
+    /**
+     * Get the total number of bytes received through the specified interface.
+     *
+     * @return number of bytes.  If the statistics are not supported by this interface,
+     * {@link #UNSUPPORTED} will be returned.
+     * @hide
+     */
+    public static native long getRxBytes(String iface);
+
+
+    /**
      * Get the total number of packets sent through all network interfaces.
      *
      * @return the number of packets.  If the statistics are not supported by this device,

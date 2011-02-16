@@ -435,10 +435,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private final IBatteryStats mBatteryStats;
 
-    public WifiStateMachine(Context context) {
+    public WifiStateMachine(Context context, String wlanInterface) {
         super(TAG);
 
         mContext = context;
+        mInterfaceName = wlanInterface;
 
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI, 0, NETWORKTYPE, "");
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
@@ -449,7 +450,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mWifiMonitor = new WifiMonitor(this);
         mDhcpInfoInternal = new DhcpInfoInternal();
         mWifiInfo = new WifiInfo();
-        mInterfaceName = SystemProperties.get("wifi.interface", "tiwlan0");
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, getHandler());
         mWpsStateMachine = new WpsStateMachine(context, this, getHandler());
         mLinkProperties = new LinkProperties();
