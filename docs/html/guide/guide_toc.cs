@@ -70,7 +70,7 @@
           </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
             <span class="en">Tasks and Back Stack</span>
-          </a></li>
+          </a> <span class="new">new!</span></li>
         </ul>
       </li>
       <li class="toggle-list">
