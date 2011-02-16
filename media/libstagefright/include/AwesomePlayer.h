@@ -43,8 +43,6 @@ struct ARTSPController;
 class DrmManagerClinet;
 class DecryptHandle;
 
-struct LiveSession;
-
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
 
@@ -207,8 +205,6 @@ private:
     sp<ARTSPController> mRTSPController;
     sp<ARTSPController> mConnectingRTSPController;
 
-    sp<LiveSession> mLiveSession;
-
     DrmManagerClient *mDrmManagerClient;
     DecryptHandle *mDecryptHandle;
 
@@ -219,7 +215,6 @@ private:
     status_t setDataSource_l(const sp<DataSource> &dataSource);
     status_t setDataSource_l(const sp<MediaExtractor> &extractor);
     void reset_l();
-    void partial_reset_l();
     status_t seekTo_l(int64_t timeUs);
     status_t pause_l(bool at_eos = false);
     void initRenderer_l();

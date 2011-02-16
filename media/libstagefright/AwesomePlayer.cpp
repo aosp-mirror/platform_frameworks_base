@@ -44,7 +44,6 @@
 
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include "include/LiveSession.h"
 
 #define USE_SURFACE_ALLOC 1
 #define FRAME_DROP_FREQ 7
@@ -232,17 +231,6 @@ status_t AwesomePlayer::setDataSource_l(
     reset_l();
 
     mUri = uri;
-
-    if (!strncmp("http://", uri, 7)) {
-        // Hack to support http live.
-
-        size_t len = strlen(uri);
-        if (!strcasecmp(&uri[len - 5], ".m3u8")
-                || strstr(&uri[7], "m3u8") != NULL) {
-            mUri = "httplive://";
-            mUri.append(&uri[7]);
-        }
-    }
 
     if (headers) {
         mUriHeaders = *headers;
@@ -448,11 +436,6 @@ void AwesomePlayer::reset_l() {
         mRTSPController.clear();
     }
 
-    if (mLiveSession != NULL) {
-        mLiveSession->disconnect();
-        mLiveSession.clear();
-    }
-
     if (mVideoSource != NULL) {
         mVideoSource->stop();
 
@@ -655,35 +638,6 @@ void AwesomePlayer::onBufferingUpdate() {
     postBufferingEvent_l();
 }
 
-void AwesomePlayer::partial_reset_l() {
-    // Only reset the video renderer and shut down the video decoder.
-    // Then instantiate a new video decoder and resume video playback.
-
-    mVideoRenderer.clear();
-
-    if (mVideoBuffer) {
-        mVideoBuffer->release();
-        mVideoBuffer = NULL;
-    }
-
-    {
-        mVideoSource->stop();
-
-        // The following hack is necessary to ensure that the OMX
-        // component is completely released by the time we may try
-        // to instantiate it again.
-        wp<MediaSource> tmp = mVideoSource;
-        mVideoSource.clear();
-        while (tmp.promote() != NULL) {
-            usleep(1000);
-        }
-        IPCThreadState::self()->flushCommands();
-    }
-
-    CHECK_EQ((status_t)OK,
-             initVideoDecoder(OMXCodec::kIgnoreCodecSpecificData));
-}
-
 void AwesomePlayer::onStreamDone() {
     // Posted whenever any stream finishes playing.
 
@@ -693,21 +647,7 @@ void AwesomePlayer::onStreamDone() {
     }
     mStreamDoneEventPending = false;
 
-    if (mStreamDoneStatus == INFO_DISCONTINUITY) {
-        // This special status is returned because an http live stream's
-        // video stream switched to a different bandwidth at this point
-        // and future data may have been encoded using different parameters.
-        // This requires us to shutdown the video decoder and reinstantiate
-        // a fresh one.
-
-        LOGV("INFO_DISCONTINUITY");
-
-        CHECK(mVideoSource != NULL);
-
-        partial_reset_l();
-        postVideoEvent_l();
-        return;
-    } else if (mStreamDoneStatus != ERROR_END_OF_STREAM) {
+    if (mStreamDoneStatus != ERROR_END_OF_STREAM) {
         LOGV("MEDIA_ERROR %d", mStreamDoneStatus);
 
         notifyListener_l(
@@ -1593,29 +1533,6 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             LOGI("Prepare cancelled while waiting for initial cache fill.");
             return UNKNOWN_ERROR;
         }
-    } else if (!strncasecmp(mUri.string(), "httplive://", 11)) {
-        String8 uri("http://");
-        uri.append(mUri.string() + 11);
-
-        if (mLooper == NULL) {
-            mLooper = new ALooper;
-            mLooper->setName("httplive");
-            mLooper->start();
-        }
-
-        mLiveSession = new LiveSession;
-        mLooper->registerHandler(mLiveSession);
-
-        mLiveSession->connect(uri.string());
-        dataSource = mLiveSession->getDataSource();
-
-        sp<MediaExtractor> extractor =
-            MediaExtractor::Create(dataSource, MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
-
-        static_cast<MPEG2TSExtractor *>(extractor.get())
-            ->setLiveSession(mLiveSession);
-
-        return setDataSource_l(extractor);
     } else if (!strncasecmp("rtsp://", mUri.string(), 7)) {
         if (mLooper == NULL) {
             mLooper = new ALooper;

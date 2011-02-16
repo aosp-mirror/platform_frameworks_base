@@ -371,21 +371,6 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
     mBuffer->setRange(0, 0);
 
     switch (type) {
-        case DISCONTINUITY_HTTPLIVE:
-        {
-            mQueue.clear(true);
-
-            if (mStreamType == 0x1b) {
-                // Don't signal discontinuities on audio streams.
-                if (mSource != NULL) {
-                    mSource->queueDiscontinuity(type);
-                } else {
-                    deferDiscontinuity(type);
-                }
-            }
-            break;
-        }
-
         case DISCONTINUITY_SEEK:
         case DISCONTINUITY_FORMATCHANGE:
         {
