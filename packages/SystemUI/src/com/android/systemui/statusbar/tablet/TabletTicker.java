@@ -158,7 +158,9 @@ public class TabletTicker
     private void advance() {
         // Out with the old...
         if (mCurrentView != null) {
-            mWindow.removeView(mCurrentView);
+            if (mWindow != null) {
+                mWindow.removeView(mCurrentView);
+            }
             mCurrentView = null;
             mCurrentKey = null;
             mCurrentNotification = null;
