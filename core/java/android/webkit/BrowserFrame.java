@@ -21,6 +21,8 @@ import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.net.ParseException;
 import android.net.Uri;
@@ -933,7 +935,19 @@ class BrowserFrame extends Handler {
         if (androidResource != null) {
             return new WebResourceResponse(null, null, androidResource);
         }
-        return mCallbackProxy.shouldInterceptRequest(url);
+        WebResourceResponse response = mCallbackProxy.shouldInterceptRequest(url);
+        if (response == null && "browser:incognito".equals(url)) {
+            try {
+                Resources res = mContext.getResources();
+                InputStream ins = res.openRawResource(
+                        com.android.internal.R.raw.incognito_mode_start_page);
+                response = new WebResourceResponse("text/html", "utf8", ins);
+            } catch (NotFoundException ex) {
+                // This shouldn't happen, but try and gracefully handle it jic
+                Log.w(LOGTAG, "Failed opening raw.incognito_mode_start_page", ex);
+            }
+        }
+        return response;
     }
 
     /**
