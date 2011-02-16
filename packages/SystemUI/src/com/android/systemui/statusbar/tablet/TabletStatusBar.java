@@ -268,6 +268,8 @@ public class TabletStatusBar extends StatusBar implements
         lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
         lp.setTitle("RecentsPanel");
         lp.windowAnimations = R.style.Animation_RecentPanel;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);
@@ -510,7 +512,7 @@ public class TabletStatusBar extends StatusBar implements
                         final int peekIndex = m.arg1;
                         if (peekIndex < N) {
                             //Slog.d(TAG, "loading peek: " + peekIndex);
-                            NotificationData.Entry entry = 
+                            NotificationData.Entry entry =
                                 mNotificationDNDMode
                                     ? mNotificationDNDDummyEntry
                                     : mNotificationData.get(N-1-peekIndex);
@@ -556,7 +558,7 @@ public class TabletStatusBar extends StatusBar implements
 
                     final int N = mNotificationData.size();
                     if (mNotificationPeekIndex >= 0 && mNotificationPeekIndex < N) {
-                        NotificationData.Entry entry = 
+                        NotificationData.Entry entry =
                             mNotificationDNDMode
                                 ? mNotificationDNDDummyEntry
                                 : mNotificationData.get(N-1-mNotificationPeekIndex);
@@ -585,6 +587,8 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
                     if (mRecentsPanel != null) {
+                        disable(StatusBarManager.DISABLE_NAVIGATION
+                                | StatusBarManager.DISABLE_BACK);
                         mRecentsPanel.setVisibility(View.VISIBLE);
                         mRecentsPanel.show(true, true);
                     }
@@ -592,6 +596,7 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_CLOSE_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing recents panel");
                     if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
+                        disable(StatusBarManager.DISABLE_NONE);
                         mRecentsPanel.show(false, true);
                     }
                     break;
@@ -701,7 +706,7 @@ public class TabletStatusBar extends StatusBar implements
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
         boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
-                && notification.priority == oldNotification.priority; 
+                && notification.priority == oldNotification.priority;
                 // priority now encompasses isOngoing()
         boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
         if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {

@@ -40,37 +40,43 @@ import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.animation.DecelerateInterpolator;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
 
-public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, OnClickListener {
+public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, OnItemClickListener {
     private static final int GLOW_PADDING = 15;
     private static final String TAG = "RecentAppsPanel";
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
-    private static final int DISPLAY_TASKS_PORTRAIT = 7; // Limited by max binder transaction size
-    private static final int DISPLAY_TASKS_LANDSCAPE = 5; // number of recent tasks to display
-    private static final int MAX_TASKS = DISPLAY_TASKS_PORTRAIT + 1; // allow extra for non-apps
+    private static final int DISPLAY_TASKS = 20;
+    private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
+    private static final int BOTTOM_OFFSET = 28; // TODO: Get from dimens.xml
     private TabletStatusBar mBar;
     private ArrayList<ActivityDescription> mActivityDescriptions;
     private int mIconDpi;
     private View mRecentsScrim;
     private View mRecentsGlowView;
-    private LinearLayout mRecentsContainer;
+    private ListView mRecentsContainer;
     private Bitmap mGlowBitmap;
     private boolean mShowing;
     private Choreographer mChoreo;
     private View mRecentsDismissButton;
+    private ActvityDescriptionAdapter mListAdapter;
+    protected int mLastVisibleItem;
 
     static class ActivityDescription {
         int id;
@@ -97,6 +103,63 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
             packageName = _packageName;
         }
     };
+
+    private static class ViewHolder {
+        private ImageView thumbnailView;
+        private ImageView iconView;
+        private TextView labelView;
+        private TextView descriptionView;
+        private ActivityDescription activityDescription;
+    }
+
+    private class ActvityDescriptionAdapter extends BaseAdapter {
+        private LayoutInflater mInflater;
+
+        public ActvityDescriptionAdapter(Context context) {
+            mInflater = LayoutInflater.from(context);
+        }
+
+        public int getCount() {
+            return mActivityDescriptions != null ? mActivityDescriptions.size() : 0;
+        }
+
+        public Object getItem(int position) {
+            return position; // we only need the index
+        }
+
+        public long getItemId(int position) {
+            return position; // we just need something unique for this position
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.status_bar_recent_item, null);
+                holder = new ViewHolder();
+                holder.thumbnailView = (ImageView) convertView.findViewById(R.id.app_thumbnail);
+                holder.iconView = (ImageView) convertView.findViewById(R.id.app_icon);
+                holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
+                holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            // activityId is reverse since most recent appears at the bottom...
+            final int activityId = mActivityDescriptions.size() - position - 1;
+
+            final ActivityDescription activityDescription = mActivityDescriptions.get(activityId);
+            final Bitmap thumb = activityDescription.thumbnail;
+            holder.thumbnailView.setImageBitmap(compositeBitmap(mGlowBitmap, thumb));
+            holder.iconView.setImageDrawable(activityDescription.icon);
+            holder.labelView.setText(activityDescription.label);
+            holder.descriptionView.setText(activityDescription.description);
+            holder.thumbnailView.setTag(activityDescription);
+            holder.activityDescription = activityDescription;
+
+            return convertView;
+        }
+    }
 
     public boolean isInContentArea(int x, int y) {
         // use mRecentsContainer's exact bounds to determine horizontal position
@@ -267,9 +330,41 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        // Keep track of the last visible item in the list so we can restore it
+        // to the bottom when the orientation changes.
+        int childCount = mRecentsContainer.getChildCount();
+        if (childCount > 0) {
+            mLastVisibleItem = mRecentsContainer.getFirstVisiblePosition() + childCount - 1;
+            View view = mRecentsContainer.getChildAt(childCount - 1);
+            final int distanceFromBottom = mRecentsContainer.getHeight() - view.getTop();
+            //final int distanceFromBottom = view.getHeight() + BOTTOM_OFFSET;
+
+            // This has to happen post-layout, so run it "in the future"
+            post(new Runnable() {
+                public void run() {
+                    mRecentsContainer.setSelectionFromTop(mLastVisibleItem,
+                            mRecentsContainer.getHeight() - distanceFromBottom);
+                }
+            });
+        }
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mRecentsContainer = (LinearLayout) findViewById(R.id.recents_container);
+        LayoutInflater inflater = (LayoutInflater)
+        mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        mRecentsContainer = (ListView) findViewById(R.id.recents_container);
+        View footer = inflater.inflate(R.layout.status_bar_recent_panel_footer,
+                mRecentsContainer, false);
+        mRecentsContainer.setScrollbarFadingEnabled(true);
+        mRecentsContainer.addFooterView(footer);
+        mRecentsContainer.setAdapter(mListAdapter = new ActvityDescriptionAdapter(mContext));
+        mRecentsContainer.setOnItemClickListener(this);
+
         mRecentsGlowView = findViewById(R.id.recents_glow);
         mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView);
@@ -287,20 +382,16 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // we show more in portrait mode, so update UI if orientation changes
-        updateUiElements(newConfig, false);
-    }
-
-    @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + changedView + ", " + visibility + ")");
         if (visibility == View.VISIBLE && changedView == this) {
             refreshApplicationList();
-            mRecentsContainer.setScrollbarFadingEnabled(true);
-            mRecentsContainer.scrollTo(0, 0);
+            post(new Runnable() {
+                public void run() {
+                    mRecentsContainer.setSelection(mActivityDescriptions.size() - 1);
+                }
+            });
         }
     }
 
@@ -402,11 +493,12 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
 
     private void refreshApplicationList() {
         mActivityDescriptions = getRecentTasks();
+        mListAdapter.notifyDataSetInvalidated();
         if (mActivityDescriptions.size() > 0) {
-            updateUiElements(getResources().getConfiguration(), true);
+            mLastVisibleItem = mActivityDescriptions.size() - 1; // scroll to bottom after reloading
+            updateUiElements(getResources().getConfiguration());
         } else {
             // Immediately hide this panel
-            mShowing = false;
             hide(false);
         }
     }
@@ -426,44 +518,29 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
             canvas.drawBitmap(thumbnail,
                     new Rect(0, 0, srcWidth-1, srcHeight-1),
                     new RectF(GLOW_PADDING,
-                            GLOW_PADDING - 4.0f,
-                            outBitmap.getWidth() - GLOW_PADDING + 2.0f,
-                            outBitmap.getHeight() - GLOW_PADDING + 3.0f), paint);
+                            GLOW_PADDING - 7.0f,
+                            outBitmap.getWidth() - GLOW_PADDING + 3.0f,
+                            outBitmap.getHeight() - GLOW_PADDING + 7.0f), paint);
         }
         return outBitmap;
     }
 
-    private void updateUiElements(Configuration config, boolean animate) {
-        mRecentsContainer.removeAllViews();
+    private void updateUiElements(Configuration config) {
+        final int items = mActivityDescriptions.size();
 
-        final int first = 0;
-        final boolean isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT;
-        final int taskCount = isPortrait ? DISPLAY_TASKS_PORTRAIT : DISPLAY_TASKS_LANDSCAPE;
-        final int last = Math.min(mActivityDescriptions.size(), taskCount) - 1;
-        for (int i = last; i >= first; i--) {
-            ActivityDescription activityDescription = mActivityDescriptions.get(i);
-            View view = View.inflate(mContext, R.layout.status_bar_recent_item, null);
-            ImageView appThumbnail = (ImageView) view.findViewById(R.id.app_thumbnail);
-            ImageView appIcon = (ImageView) view.findViewById(R.id.app_icon);
-            TextView appLabel = (TextView) view.findViewById(R.id.app_label);
-            TextView appDesc = (TextView) view.findViewById(R.id.app_description);
-            final Bitmap thumb = activityDescription.thumbnail;
-            appThumbnail.setImageBitmap(compositeBitmap(mGlowBitmap, thumb));
-            appIcon.setImageDrawable(activityDescription.icon);
-            appLabel.setText(activityDescription.label);
-            appDesc.setText(activityDescription.description);
-            appThumbnail.setOnClickListener(this);
-            appThumbnail.setTag(activityDescription);
-            mRecentsContainer.addView(view);
-        }
-
-        int views = mRecentsContainer.getChildCount();
-        mRecentsContainer.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
-        mRecentsGlowView.setVisibility(views > 0 ? View.VISIBLE : View.GONE);
+        mRecentsContainer.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
+        mRecentsGlowView.setVisibility(items > 0 ? View.VISIBLE : View.GONE);
     }
 
-    public void onClick(View v) {
-        ActivityDescription ad = (ActivityDescription)v.getTag();
+    private void hide(boolean animate) {
+        if (!animate) {
+            setVisibility(View.GONE);
+        }
+        mBar.animateCollapse();
+    }
+
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ActivityDescription ad = ((ViewHolder) view.getTag()).activityDescription;
         final ActivityManager am = (ActivityManager)
                 getContext().getSystemService(Context.ACTIVITY_SERVICE);
         if (ad.id >= 0) {
@@ -477,12 +554,5 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
             getContext().startActivity(intent);
         }
         hide(true);
-    }
-
-    private void hide(boolean animate) {
-        setVisibility(View.GONE);
-        if (animate) {
-            mBar.animateCollapse();
-        }
     }
 }

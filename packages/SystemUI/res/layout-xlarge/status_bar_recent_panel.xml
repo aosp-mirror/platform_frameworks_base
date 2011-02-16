@@ -36,36 +36,35 @@
         <LinearLayout android:id="@+id/recents_glow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="-28dip"
+            android:layout_marginBottom="-52dip"
             android:layout_gravity="bottom"
-            android:background="@drawable/recents_blue_glow">
+            android:background="@drawable/recents_blue_glow"
+            android:orientation="horizontal"
+            >
 
-            <LinearLayout android:id="@+id/recents_container"
-                android:layout_width="356dip"
+            <ListView android:id="@+id/recents_container"
+                android:layout_width="@dimen/status_bar_recents_width"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginRight="100dip"
+                android:divider="@null"
+                android:scrollingCache="true"
+                android:stackFromBottom="true"
+                android:fadingEdge="vertical"
+                android:scrollbars="none"
+                android:fadingEdgeLength="30dip"
+                android:listSelector="@drawable/recents_thumbnail_bg_press"
             />
 
         </LinearLayout>
 
     </FrameLayout>
 
-    <!-- The outer FrameLayout is just used as an opaque background for the dismiss icon -->
-    <FrameLayout
+    <View android:id="@+id/recents_dismiss_button"
         android:layout_width="80px"
         android:layout_height="@*android:dimen/status_bar_height"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:background="#ff000000">
-
-        <View android:id="@+id/recents_dismiss_button"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/ic_sysbar_back_ime"
-        />
-
-    </FrameLayout>
+        android:background="@drawable/ic_sysbar_back_ime"
+    />
 
 </com.android.systemui.statusbar.tablet.RecentAppsPanel>
