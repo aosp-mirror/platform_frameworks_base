@@ -237,9 +237,27 @@ public class SyncManager implements OnAccountsUpdateListener {
     private BroadcastReceiver mConnectivityIntentReceiver =
             new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            sendCheckAlarmsMessage();
+            final boolean wasConnected = mDataConnectionIsConnected;
+
+            // don't use the intent to figure out if network is connected, just check
+            // ConnectivityManager directly.
+            mDataConnectionIsConnected = isNetworkConnected();
+            if (mDataConnectionIsConnected) {
+                if (!wasConnected) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Reconnection detected: clearing all backoffs");
+                    }
+                    mSyncStorageEngine.clearAllBackoffs(mSyncQueue);
+                }
+                sendCheckAlarmsMessage();
+            }
         }
     };
+
+    private boolean isNetworkConnected() {
+        NetworkInfo networkInfo = getConnectivityManager().getActiveNetworkInfo();
+        return (networkInfo != null) && networkInfo.isConnected();
+    }
 
     private BroadcastReceiver mShutdownIntentReceiver =
             new BroadcastReceiver() {
@@ -1411,8 +1429,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             // to have the most recent value used.
             try {
                 waitUntilReadyToRun();
-                NetworkInfo networkInfo = getConnectivityManager().getActiveNetworkInfo();
-                mDataConnectionIsConnected = (networkInfo != null) && networkInfo.isConnected();
+                mDataConnectionIsConnected = isNetworkConnected();
                 mSyncManagerWakeLock.acquire();
                 // Always do this first so that we be sure that any periodic syncs that
                 // are ready to run have been converted into pending syncs. This allows the

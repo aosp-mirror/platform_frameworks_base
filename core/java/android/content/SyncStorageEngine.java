@@ -525,7 +525,7 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public void clearAllBackoffs() {
+    public void clearAllBackoffs(SyncQueue syncQueue) {
         boolean changed = false;
         synchronized (mAuthorities) {
             for (AccountInfo accountInfo : mAccounts.values()) {
@@ -541,6 +541,7 @@ public class SyncStorageEngine extends Handler {
                         }
                         authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
                         authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
+                        syncQueue.onBackoffChanged(accountInfo.account, authorityInfo.authority, 0);
                         changed = true;
                     }
                 }
