@@ -1254,9 +1254,7 @@ public class Paint {
      * @param text  The text to measure
      * @param index The offset into text to begin measuring at
      * @param count The number of maximum number of entries to measure. If count
-     *              is negative, then the characters before index are measured
-     *              in reverse order. This allows for measuring the end of
-     *              string.
+     *              is negative, then the characters are measured in reverse order.
      * @param maxWidth The maximum width to accumulate.
      * @param measuredWidth Optional. If not null, returns the actual width
      *                     measured.
