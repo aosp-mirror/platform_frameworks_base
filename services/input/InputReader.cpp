@@ -2641,9 +2641,11 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
                 int32_t c2 = signExtendNybble(in.orientation & 0x0f);
                 if (c1 != 0 || c2 != 0) {
                     orientation = atan2f(c1, c2) * 0.5f;
-                    float minorAxisScale = (16.0f - pythag(c1, c2)) / 16.0f;
-                    toolMinor *= minorAxisScale;
-                    touchMinor *= minorAxisScale;
+                    float scale = 1.0f + pythag(c1, c2) / 16.0f;
+                    touchMajor *= scale;
+                    touchMinor /= scale;
+                    toolMajor *= scale;
+                    toolMinor /= scale;
                 } else {
                     orientation = 0;
                 }
