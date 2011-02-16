@@ -157,7 +157,7 @@ status_t BnSurfaceComposerClient::onTransact(
      const int pid = ipc->getCallingPid();
      const int uid = ipc->getCallingUid();
      const int self_pid = getpid();
-     if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS)) {
+     if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS && uid != 0)) {
          // we're called from a different process, do the real check
          if (!checkCallingPermission(
                  String16("android.permission.ACCESS_SURFACE_FLINGER")))
