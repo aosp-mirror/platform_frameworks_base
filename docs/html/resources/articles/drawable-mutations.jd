@@ -1,4 +1,6 @@
 page.title=Drawable Mutations
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>Android's drawables are extremely useful to easily build applications. A

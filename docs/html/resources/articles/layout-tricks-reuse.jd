@@ -1,4 +1,6 @@
 page.title=Layout Tricks: Creating Reusable UI Components
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>The Android platform offers a wide variety of UI <em>widgets</em>, small

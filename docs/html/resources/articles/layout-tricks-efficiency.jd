@@ -1,4 +1,6 @@
 page.title=Layout Tricks: Creating Efficient Layouts
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>The Android UI toolkit offers several layout managers that are

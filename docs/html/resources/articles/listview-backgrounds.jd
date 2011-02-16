@@ -1,4 +1,6 @@
 page.title=ListView Backgrounds: An Optimization
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>{@link android.widget.ListView} is one of Android's most widely used widgets.

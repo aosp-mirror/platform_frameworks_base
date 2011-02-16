@@ -1,4 +1,6 @@
 page.title=Using Text-to-Speech
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>Starting with Android 1.6 (API Level 4), the Android platform includes a new
