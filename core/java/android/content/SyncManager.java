@@ -241,7 +241,7 @@ public class SyncManager implements OnAccountsUpdateListener {
 
             // don't use the intent to figure out if network is connected, just check
             // ConnectivityManager directly.
-            mDataConnectionIsConnected = isNetworkConnected();
+            mDataConnectionIsConnected = readDataConnectionState();
             if (mDataConnectionIsConnected) {
                 if (!wasConnected) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -254,7 +254,7 @@ public class SyncManager implements OnAccountsUpdateListener {
         }
     };
 
-    private boolean isNetworkConnected() {
+    private boolean readDataConnectionState() {
         NetworkInfo networkInfo = getConnectivityManager().getActiveNetworkInfo();
         return (networkInfo != null) && networkInfo.isConnected();
     }
@@ -1429,7 +1429,7 @@ public class SyncManager implements OnAccountsUpdateListener {
             // to have the most recent value used.
             try {
                 waitUntilReadyToRun();
-                mDataConnectionIsConnected = isNetworkConnected();
+                mDataConnectionIsConnected = readDataConnectionState();
                 mSyncManagerWakeLock.acquire();
                 // Always do this first so that we be sure that any periodic syncs that
                 // are ready to run have been converted into pending syncs. This allows the
