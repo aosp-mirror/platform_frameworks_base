@@ -867,12 +867,15 @@ class ZoomManager {
         if (!mMinZoomScaleFixed) {
             mMinZoomScale = newZoomOverviewScale;
         }
-        // fit the content width to the current view. Ignore the rounding error case.
-        if (!mWebView.drawHistory() && (mInitialZoomOverview || (mInZoomOverview
-                && Math.abs((viewWidth * mInvActualScale) - mZoomOverviewWidth) > 1))) {
+        // fit the content width to the current view for the first new picture
+        // after first layout.
+        boolean scaleHasDiff = exceedsMinScaleIncrement(newZoomOverviewScale, mActualScale);
+        if (!mWebView.drawHistory() && mInitialZoomOverview && scaleHasDiff) {
             mInitialZoomOverview = false;
             setZoomScale(newZoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
                 !mWebView.getSettings().getUseFixedViewport());
+        } else if (scaleHasDiff) {
+            mInZoomOverview = false;
         }
     }
 
