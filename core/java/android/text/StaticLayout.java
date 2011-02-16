@@ -36,8 +36,8 @@ import android.text.style.TabStopSpan;
  * float, float, android.graphics.Paint)
  * Canvas.drawText()} directly.</p>
  */
-public class StaticLayout extends Layout
-{
+public class StaticLayout extends Layout {
+
     public StaticLayout(CharSequence source, TextPaint paint,
                         int width,
                         Alignment align, float spacingmult, float spacingadd,
@@ -114,8 +114,8 @@ public class StaticLayout extends Layout
         mMeasured = MeasuredText.obtain();
     }
 
-    /* package */ void generate(CharSequence source, int bufstart, int bufend,
-                        TextPaint paint, int outerwidth,
+    /* package */ void generate(CharSequence source, int bufStart, int bufEnd,
+                        TextPaint paint, int outerWidth,
                         Alignment align,
                         float spacingmult, float spacingadd,
                         boolean includepad, boolean trackpad,
@@ -126,7 +126,7 @@ public class StaticLayout extends Layout
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
 
         Paint.FontMetricsInt fm = mFontMetricsInt;
-        int[] choosehtv = null;
+        int[] chooseHtv = null;
 
         MeasuredText measured = mMeasured;
 
@@ -137,27 +137,26 @@ public class StaticLayout extends Layout
         int DEFAULT_DIR = DIR_LEFT_TO_RIGHT; // XXX
 
         int paraEnd;
-        for (int paraStart = bufstart; paraStart <= bufend; paraStart = paraEnd) {
-            paraEnd = TextUtils.indexOf(source, '\n', paraStart, bufend);
+        for (int paraStart = bufStart; paraStart <= bufEnd; paraStart = paraEnd) {
+            paraEnd = TextUtils.indexOf(source, CHAR_NEW_LINE, paraStart, bufEnd);
             if (paraEnd < 0)
-                paraEnd = bufend;
+                paraEnd = bufEnd;
             else
                 paraEnd++;
-            int paraLen = paraEnd - paraStart;
 
             int firstWidthLineLimit = mLineCount + 1;
-            int firstwidth = outerwidth;
-            int restwidth = outerwidth;
+            int firstWidth = outerWidth;
+            int restWidth = outerWidth;
 
-            LineHeightSpan[] chooseht = null;
+            LineHeightSpan[] chooseHt = null;
 
             if (spanned != null) {
                 LeadingMarginSpan[] sp = getParagraphSpans(spanned, paraStart, paraEnd,
                         LeadingMarginSpan.class);
                 for (int i = 0; i < sp.length; i++) {
                     LeadingMarginSpan lms = sp[i];
-                    firstwidth -= sp[i].getLeadingMargin(true);
-                    restwidth -= sp[i].getLeadingMargin(false);
+                    firstWidth -= sp[i].getLeadingMargin(true);
+                    restWidth -= sp[i].getLeadingMargin(false);
                     
                     // LeadingMarginSpan2 is odd.  The count affects all
                     // leading margin spans, not just this particular one,
@@ -166,32 +165,31 @@ public class StaticLayout extends Layout
                     if (lms instanceof LeadingMarginSpan2) {
                         LeadingMarginSpan2 lms2 = (LeadingMarginSpan2) lms;
                         int lmsFirstLine = getLineForOffset(spanned.getSpanStart(lms2));
-                        firstWidthLineLimit = lmsFirstLine + 
-                            lms2.getLeadingMarginLineCount();
+                        firstWidthLineLimit = lmsFirstLine + lms2.getLeadingMarginLineCount();
                     }
                 }
 
-                chooseht = getParagraphSpans(spanned, paraStart, paraEnd, LineHeightSpan.class);
+                chooseHt = getParagraphSpans(spanned, paraStart, paraEnd, LineHeightSpan.class);
 
-                if (chooseht.length != 0) {
-                    if (choosehtv == null ||
-                        choosehtv.length < chooseht.length) {
-                        choosehtv = new int[ArrayUtils.idealIntArraySize(
-                                            chooseht.length)];
+                if (chooseHt.length != 0) {
+                    if (chooseHtv == null ||
+                        chooseHtv.length < chooseHt.length) {
+                        chooseHtv = new int[ArrayUtils.idealIntArraySize(
+                                            chooseHt.length)];
                     }
 
-                    for (int i = 0; i < chooseht.length; i++) {
-                        int o = spanned.getSpanStart(chooseht[i]);
+                    for (int i = 0; i < chooseHt.length; i++) {
+                        int o = spanned.getSpanStart(chooseHt[i]);
 
                         if (o < paraStart) {
                             // starts in this layout, before the
                             // current paragraph
 
-                            choosehtv[i] = getLineTop(getLineForOffset(o));
+                            chooseHtv[i] = getLineTop(getLineForOffset(o));
                         } else {
                             // starts in this paragraph
 
-                            choosehtv[i] = v;
+                            chooseHtv[i] = v;
                         }
                     }
                 }
@@ -204,20 +202,18 @@ public class StaticLayout extends Layout
             int dir = measured.mDir;
             boolean easy = measured.mEasy;
 
-            CharSequence sub = source;
-
-            int width = firstwidth;
+            int width = firstWidth;
 
             float w = 0;
             int here = paraStart;
 
             int ok = paraStart;
-            float okwidth = w;
-            int okascent = 0, okdescent = 0, oktop = 0, okbottom = 0;
+            float okWidth = w;
+            int okAscent = 0, okDescent = 0, okTop = 0, okBottom = 0;
 
             int fit = paraStart;
-            float fitwidth = w;
-            int fitascent = 0, fitdescent = 0, fittop = 0, fitbottom = 0;
+            float fitWidth = w;
+            int fitAscent = 0, fitDescent = 0, fitTop = 0, fitBottom = 0;
 
             boolean hasTabOrEmoji = false;
             boolean hasTab = false;
@@ -244,21 +240,18 @@ public class StaticLayout extends Layout
                 }
 
                 nextSpanStart = spanEnd;
-                int startInPara = spanStart - paraStart;
-                int endInPara = spanEnd - paraStart;
 
-                int fmtop = fm.top;
-                int fmbottom = fm.bottom;
-                int fmascent = fm.ascent;
-                int fmdescent = fm.descent;
+                int fmTop = fm.top;
+                int fmBottom = fm.bottom;
+                int fmAscent = fm.ascent;
+                int fmDescent = fm.descent;
 
                 for (int j = spanStart; j < spanEnd; j++) {
                     char c = chs[j - paraStart];
-                    float before = w;
 
-                    if (c == '\n') {
+                    if (c == CHAR_NEW_LINE) {
                         // intentionally left empty
-                    } else if (c == '\t') {
+                    } else if (c == CHAR_TAB) {
                         if (hasTab == false) {
                             hasTab = true;
                             hasTabOrEmoji = true;
@@ -276,7 +269,8 @@ public class StaticLayout extends Layout
                         } else {
                             w = TabStops.nextDefaultStop(w, TAB_INCREMENT);
                         }
-                    } else if (c >= 0xD800 && c <= 0xDFFF && j + 1 < spanEnd) {
+                    } else if (c >= CHAR_FIRST_HIGH_SURROGATE && c <= CHAR_LAST_LOW_SURROGATE
+                            && j + 1 < spanEnd) {
                         int emoji = Character.codePointAt(chs, j - paraStart);
 
                         if (emoji >= MIN_EMOJI && emoji <= MAX_EMOJI) {
@@ -311,17 +305,17 @@ public class StaticLayout extends Layout
                     // Log.e("text", "was " + before + " now " + w + " after " + c + " within " + width);
 
                     if (w <= width) {
-                        fitwidth = w;
+                        fitWidth = w;
                         fit = j + 1;
 
-                        if (fmtop < fittop)
-                            fittop = fmtop;
-                        if (fmascent < fitascent)
-                            fitascent = fmascent;
-                        if (fmdescent > fitdescent)
-                            fitdescent = fmdescent;
-                        if (fmbottom > fitbottom)
-                            fitbottom = fmbottom;
+                        if (fmTop < fitTop)
+                            fitTop = fmTop;
+                        if (fmAscent < fitAscent)
+                            fitAscent = fmAscent;
+                        if (fmDescent > fitDescent)
+                            fitDescent = fmDescent;
+                        if (fmBottom > fitBottom)
+                            fitBottom = fmBottom;
 
                         /*
                          * From the Unicode Line Breaking Algorithm:
@@ -339,25 +333,26 @@ public class StaticLayout extends Layout
                          * after but not before.
                          */
 
-                        if (c == ' ' || c == '\t' ||
-                            ((c == '.'  || c == ',' || c == ':' || c == ';') &&
+                        if (c == CHAR_SPACE || c == CHAR_TAB ||
+                            ((c == CHAR_DOT || c == CHAR_COMMA ||
+                                    c == CHAR_COLON || c == CHAR_SEMICOLON) &&
                              (j - 1 < here || !Character.isDigit(chs[j - 1 - paraStart])) &&
                              (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
-                            ((c == '/' || c == '-') &&
+                            ((c == CHAR_SLASH || c == CHAR_HYPHEN) &&
                              (j + 1 >= spanEnd || !Character.isDigit(chs[j + 1 - paraStart]))) ||
-                            (c >= FIRST_CJK && isIdeographic(c, true) &&
+                            (c >= CHAR_FIRST_CJK && isIdeographic(c, true) &&
                              j + 1 < spanEnd && isIdeographic(chs[j + 1 - paraStart], false))) {
-                            okwidth = w;
+                            okWidth = w;
                             ok = j + 1;
 
-                            if (fittop < oktop)
-                                oktop = fittop;
-                            if (fitascent < okascent)
-                                okascent = fitascent;
-                            if (fitdescent > okdescent)
-                                okdescent = fitdescent;
-                            if (fitbottom > okbottom)
-                                okbottom = fitbottom;
+                            if (fitTop < okTop)
+                                okTop = fitTop;
+                            if (fitAscent < okAscent)
+                                okAscent = fitAscent;
+                            if (fitDescent > okDescent)
+                                okDescent = fitDescent;
+                            if (fitBottom > okBottom)
+                                okBottom = fitBottom;
                         }
                     } else {
                         if (ellipsize != null) {
@@ -365,56 +360,56 @@ public class StaticLayout extends Layout
                             if (ok != here) {
                                 // Log.e("text", "output ok " + here + " to " +ok);
 
-                                while (ok < spanEnd && chs[ok - paraStart] == ' ') {
+                                while (ok < spanEnd && chs[ok - paraStart] == CHAR_SPACE) {
                                     ok++;
                                 }
 
                                 v = out(source,
                                         here, ok,
-                                        okascent, okdescent, oktop, okbottom,
+                                        okAscent, okDescent, okTop, okBottom,
                                         v,
-                                        spacingmult, spacingadd, chooseht,
-                                        choosehtv, fm, hasTabOrEmoji,
+                                        spacingmult, spacingadd, chooseHt,
+                                        chooseHtv, fm, hasTabOrEmoji,
                                         needMultiply, paraStart, chdirs, dir, easy,
-                                        ok == bufend, includepad, trackpad,
+                                        ok == bufEnd, includepad, trackpad,
                                         chs, widths, here - paraStart,
-                                        ellipsize, ellipsizedWidth, okwidth,
+                                        ellipsize, ellipsizedWidth, okWidth,
                                         paint);
 
                                 here = ok;
                             } else {
                                 // Act like it fit even though it didn't.
 
-                                fitwidth = w;
+                                fitWidth = w;
                                 here = fit = j + 1;
 
-                                if (fmtop < fittop)
-                                    fittop = fmtop;
-                                if (fmascent < fitascent)
-                                    fitascent = fmascent;
-                                if (fmdescent > fitdescent)
-                                    fitdescent = fmdescent;
-                                if (fmbottom > fitbottom)
-                                    fitbottom = fmbottom;
+                                if (fmTop < fitTop)
+                                    fitTop = fmTop;
+                                if (fmAscent < fitAscent)
+                                    fitAscent = fmAscent;
+                                if (fmDescent > fitDescent)
+                                    fitDescent = fmDescent;
+                                if (fmBottom > fitBottom)
+                                    fitBottom = fmBottom;
                             }
                         } else {
                             if (ok != here) {
                                 // Log.e("text", "output ok " + here + " to " +ok);
 
-                                while (ok < spanEnd && chs[ok - paraStart] == ' ') {
+                                while (ok < spanEnd && chs[ok - paraStart] == CHAR_SPACE) {
                                     ok++;
                                 }
 
                                 v = out(source,
                                         here, ok,
-                                        okascent, okdescent, oktop, okbottom,
+                                        okAscent, okDescent, okTop, okBottom,
                                         v,
-                                        spacingmult, spacingadd, chooseht,
-                                        choosehtv, fm, hasTabOrEmoji,
+                                        spacingmult, spacingadd, chooseHt,
+                                        chooseHtv, fm, hasTabOrEmoji,
                                         needMultiply, paraStart, chdirs, dir, easy,
-                                        ok == bufend, includepad, trackpad,
+                                        ok == bufEnd, includepad, trackpad,
                                         chs, widths, here - paraStart,
-                                        ellipsize, ellipsizedWidth, okwidth,
+                                        ellipsize, ellipsizedWidth, okWidth,
                                         paint);
 
                                 here = ok;
@@ -422,15 +417,15 @@ public class StaticLayout extends Layout
                                 // Log.e("text", "output fit " + here + " to " +fit);
                                 v = out(source,
                                         here, fit,
-                                        fitascent, fitdescent,
-                                        fittop, fitbottom,
+                                        fitAscent, fitDescent,
+                                        fitTop, fitBottom,
                                         v,
-                                        spacingmult, spacingadd, chooseht,
-                                        choosehtv, fm, hasTabOrEmoji,
+                                        spacingmult, spacingadd, chooseHt,
+                                        chooseHtv, fm, hasTabOrEmoji,
                                         needMultiply, paraStart, chdirs, dir, easy,
-                                        fit == bufend, includepad, trackpad,
+                                        fit == bufEnd, includepad, trackpad,
                                         chs, widths, here - paraStart,
-                                        ellipsize, ellipsizedWidth, fitwidth,
+                                        ellipsize, ellipsizedWidth, fitWidth,
                                         paint);
 
                                 here = fit;
@@ -446,10 +441,10 @@ public class StaticLayout extends Layout
                                         fm.ascent, fm.descent,
                                         fm.top, fm.bottom,
                                         v,
-                                        spacingmult, spacingadd, chooseht,
-                                        choosehtv, fm, hasTabOrEmoji,
+                                        spacingmult, spacingadd, chooseHt,
+                                        chooseHtv, fm, hasTabOrEmoji,
                                         needMultiply, paraStart, chdirs, dir, easy,
-                                        here + 1 == bufend, includepad,
+                                        here + 1 == bufEnd, includepad,
                                         trackpad,
                                         chs, widths, here - paraStart,
                                         ellipsize, ellipsizedWidth,
@@ -470,65 +465,64 @@ public class StaticLayout extends Layout
 
                         ok = fit = here;
                         w = 0;
-                        fitascent = fitdescent = fittop = fitbottom = 0;
-                        okascent = okdescent = oktop = okbottom = 0;
+                        fitAscent = fitDescent = fitTop = fitBottom = 0;
+                        okAscent = okDescent = okTop = okBottom = 0;
 
                         if (--firstWidthLineLimit <= 0) {
-                            width = restwidth;
+                            width = restWidth;
                         }
                     }
                 }
             }
 
             if (paraEnd != here) {
-                if ((fittop | fitbottom | fitdescent | fitascent) == 0) {
+                if ((fitTop | fitBottom | fitDescent | fitAscent) == 0) {
                     paint.getFontMetricsInt(fm);
 
-                    fittop = fm.top;
-                    fitbottom = fm.bottom;
-                    fitascent = fm.ascent;
-                    fitdescent = fm.descent;
+                    fitTop = fm.top;
+                    fitBottom = fm.bottom;
+                    fitAscent = fm.ascent;
+                    fitDescent = fm.descent;
                 }
 
                 // Log.e("text", "output rest " + here + " to " + end);
 
                 v = out(source,
-                        here, paraEnd, fitascent, fitdescent,
-                        fittop, fitbottom,
+                        here, paraEnd, fitAscent, fitDescent,
+                        fitTop, fitBottom,
                         v,
-                        spacingmult, spacingadd, chooseht,
-                        choosehtv, fm, hasTabOrEmoji,
+                        spacingmult, spacingadd, chooseHt,
+                        chooseHtv, fm, hasTabOrEmoji,
                         needMultiply, paraStart, chdirs, dir, easy,
-                        paraEnd == bufend, includepad, trackpad,
+                        paraEnd == bufEnd, includepad, trackpad,
                         chs, widths, here - paraStart,
                         ellipsize, ellipsizedWidth, w, paint);
             }
 
             paraStart = paraEnd;
 
-            if (paraEnd == bufend)
+            if (paraEnd == bufEnd)
                 break;
         }
 
-        if (bufend == bufstart || source.charAt(bufend - 1) == '\n') {
-            // Log.e("text", "output last " + bufend);
+        if (bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE) {
+            // Log.e("text", "output last " + bufEnd);
 
             paint.getFontMetricsInt(fm);
 
             v = out(source,
-                    bufend, bufend, fm.ascent, fm.descent,
+                    bufEnd, bufEnd, fm.ascent, fm.descent,
                     fm.top, fm.bottom,
                     v,
                     spacingmult, spacingadd, null,
                     null, fm, false,
-                    needMultiply, bufend, null, DEFAULT_DIR, true,
+                    needMultiply, bufEnd, null, DEFAULT_DIR, true,
                     true, includepad, trackpad,
-                    null, null, bufstart,
+                    null, null, bufStart,
                     ellipsize, ellipsizedWidth, 0, paint);
         }
     }
 
-    private static final char FIRST_CJK = '\u2E80';
     /**
      * Returns true if the specified character is one of those specified
      * as being Ideographic (class ID) by the Unicode Line Breaking Algorithm
@@ -636,14 +630,14 @@ public class StaticLayout extends Layout
     private int out(CharSequence text, int start, int end,
                       int above, int below, int top, int bottom, int v,
                       float spacingmult, float spacingadd,
-                      LineHeightSpan[] chooseht, int[] choosehtv,
+                      LineHeightSpan[] chooseHt, int[] chooseHtv,
                       Paint.FontMetricsInt fm, boolean hasTabOrEmoji,
                       boolean needMultiply, int pstart, byte[] chdirs,
                       int dir, boolean easy, boolean last,
-                      boolean includepad, boolean trackpad,
-                      char[] chs, float[] widths, int widstart,
-                      TextUtils.TruncateAt ellipsize, float ellipsiswidth,
-                      float textwidth, TextPaint paint) {
+                      boolean includePad, boolean trackPad,
+                      char[] chs, float[] widths, int widthStart,
+                      TextUtils.TruncateAt ellipsize, float ellipsisWidth,
+                      float textWidth, TextPaint paint) {
         int j = mLineCount;
         int off = j * mColumns;
         int want = off + mColumns + TOP;
@@ -662,19 +656,19 @@ public class StaticLayout extends Layout
             mLineDirections = grow2;
         }
 
-        if (chooseht != null) {
+        if (chooseHt != null) {
             fm.ascent = above;
             fm.descent = below;
             fm.top = top;
             fm.bottom = bottom;
 
-            for (int i = 0; i < chooseht.length; i++) {
-                if (chooseht[i] instanceof LineHeightSpan.WithDensity) {
-                    ((LineHeightSpan.WithDensity) chooseht[i]).
-                        chooseHeight(text, start, end, choosehtv[i], v, fm, paint);
+            for (int i = 0; i < chooseHt.length; i++) {
+                if (chooseHt[i] instanceof LineHeightSpan.WithDensity) {
+                    ((LineHeightSpan.WithDensity) chooseHt[i]).
+                        chooseHeight(text, start, end, chooseHtv[i], v, fm, paint);
 
                 } else {
-                    chooseht[i].chooseHeight(text, start, end, choosehtv[i], v, fm);
+                    chooseHt[i].chooseHeight(text, start, end, chooseHtv[i], v, fm);
                 }
             }
 
@@ -685,20 +679,20 @@ public class StaticLayout extends Layout
         }
 
         if (j == 0) {
-            if (trackpad) {
+            if (trackPad) {
                 mTopPadding = top - above;
             }
 
-            if (includepad) {
+            if (includePad) {
                 above = top;
             }
         }
         if (last) {
-            if (trackpad) {
+            if (trackPad) {
                 mBottomPadding = bottom - below;
             }
 
-            if (includepad) {
+            if (includePad) {
                 below = bottom;
             }
         }
@@ -708,9 +702,9 @@ public class StaticLayout extends Layout
         if (needMultiply) {
             double ex = (below - above) * (spacingmult - 1) + spacingadd;
             if (ex >= 0) {
-                extra = (int)(ex + 0.5);
+                extra = (int)(ex + EXTRA_ROUNDING);
             } else {
-                extra = -(int)(-ex + 0.5);
+                extra = -(int)(-ex + EXTRA_ROUNDING);
             }
         } else {
             extra = 0;
@@ -735,45 +729,45 @@ public class StaticLayout extends Layout
         if (easy) {
             mLineDirections[j] = linedirs;
         } else {
-            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, widstart, chs,
-                    widstart, end - start);
+            mLineDirections[j] = AndroidBidi.directions(dir, chdirs, widthStart, chs,
+                    widthStart, end - start);
         }
 
         // If ellipsize is in marquee mode, do not apply ellipsis on the first line
         if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
-            calculateEllipsis(start, end, widths, widstart,
-                    ellipsiswidth, ellipsize, j,
-                    textwidth, paint);
+            calculateEllipsis(start, end, widths, widthStart,
+                    ellipsisWidth, ellipsize, j,
+                    textWidth, paint);
         }
 
         mLineCount++;
         return v;
     }
 
-    private void calculateEllipsis(int linestart, int lineend,
-                                   float[] widths, int widstart,
+    private void calculateEllipsis(int lineStart, int lineEnd,
+                                   float[] widths, int widthStart,
                                    float avail, TextUtils.TruncateAt where,
-                                   int line, float textwidth, TextPaint paint) {
+                                   int line, float textWidth, TextPaint paint) {
 
-        if (textwidth <= avail) {
+        if (textWidth <= avail) {
             // Everything fits!
             mLines[mColumns * line + ELLIPSIS_START] = 0;
             mLines[mColumns * line + ELLIPSIS_COUNT] = 0;
             return;
         }
 
-        float ellipsiswid = paint.measureText("\u2026");
+        float ellipsisWidth = paint.measureText(HORIZONTAL_ELLIPSIS);
         int ellipsisStart, ellipsisCount;
-        int len = lineend - linestart;
+        int len = lineEnd - lineStart;
 
         if (where == TextUtils.TruncateAt.START) {
             float sum = 0;
             int i;
 
             for (i = len; i >= 0; i--) {
-                float w = widths[i - 1 + linestart - widstart];
+                float w = widths[i - 1 + lineStart - widthStart];
 
-                if (w + sum + ellipsiswid > avail) {
+                if (w + sum + ellipsisWidth > avail) {
                     break;
                 }
 
@@ -787,9 +781,9 @@ public class StaticLayout extends Layout
             int i;
 
             for (i = 0; i < len; i++) {
-                float w = widths[i + linestart - widstart];
+                float w = widths[i + lineStart - widthStart];
 
-                if (w + sum + ellipsiswid > avail) {
+                if (w + sum + ellipsisWidth > avail) {
                     break;
                 }
 
@@ -802,9 +796,9 @@ public class StaticLayout extends Layout
             float lsum = 0, rsum = 0;
             int left = 0, right = len;
 
-            float ravail = (avail - ellipsiswid) / 2;
+            float ravail = (avail - ellipsisWidth) / 2;
             for (right = len; right >= 0; right--) {
-                float w = widths[right - 1 + linestart - widstart];
+                float w = widths[right - 1 + lineStart - widthStart];
 
                 if (w + rsum > ravail) {
                     break;
@@ -813,9 +807,9 @@ public class StaticLayout extends Layout
                 rsum += w;
             }
 
-            float lavail = avail - ellipsiswid - rsum;
+            float lavail = avail - ellipsisWidth - rsum;
             for (left = 0; left < right; left++) {
-                float w = widths[left + linestart - widstart];
+                float w = widths[left + lineStart - widthStart];
 
                 if (w + lsum > lavail) {
                     break;
@@ -967,6 +961,24 @@ public class StaticLayout extends Layout
     private static final int TAB_MASK   = 0x20000000;
 
     private static final int TAB_INCREMENT = 20; // same as Layout, but that's private
+
+    private static final char CHAR_FIRST_CJK = '\u2E80';
+
+    private static final char CHAR_NEW_LINE = '\n';
+    private static final char CHAR_TAB = '\t';
+    private static final char CHAR_SPACE = ' ';
+    private static final char CHAR_DOT = '.';
+    private static final char CHAR_COMMA = ',';
+    private static final char CHAR_COLON = ':';
+    private static final char CHAR_SEMICOLON = ';';
+    private static final char CHAR_SLASH = '/';
+    private static final char CHAR_HYPHEN = '-';
+
+    private static final double EXTRA_ROUNDING = 0.5;
+    private static final String HORIZONTAL_ELLIPSIS = "\u2026"; // this is "..."
+
+    private static final int CHAR_FIRST_HIGH_SURROGATE = 0xD800;
+    private static final int CHAR_LAST_LOW_SURROGATE = 0xDFFF;
 
     /*
      * This is reused across calls to generate()
