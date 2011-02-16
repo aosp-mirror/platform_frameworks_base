@@ -174,6 +174,7 @@ public class WebSettings {
     private boolean         mBlockNetworkImage = false;
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
+    private boolean         mShowVisualIndicator = false;
     private PluginState     mPluginState = PluginState.OFF;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
@@ -1188,6 +1189,26 @@ public class WebSettings {
             mJavaScriptEnabled = flag;
             postSync();
         }
+    }
+
+    /**
+     * Tell the WebView to show the visual indicator
+     * @param flag True if the WebView should show the visual indicator
+     * @hide
+     */
+    public synchronized void setShowVisualIndicator(boolean flag) {
+        if (mShowVisualIndicator != flag) {
+            mShowVisualIndicator = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * @return True if the WebView is showing the visual indicator
+     * @hide
+     */
+    public synchronized boolean getShowVisualIndicator() {
+        return mShowVisualIndicator;
     }
 
     /**
