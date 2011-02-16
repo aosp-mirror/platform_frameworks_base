@@ -1068,59 +1068,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetAttributes[checkType] == null) continue;
+                if (mNetAttributes[checkType].isDefault() == false) continue;
                 if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
                         noMobileData) {
                     Slog.e(TAG, "not failing over to mobile type " + checkType +
                             " because Mobile Data Disabled");
                     continue;
                 }
-                if (mNetAttributes[checkType].isDefault()) {
-                    /* TODO - if we have multiple nets we could use
-                     * we may want to put more thought into which we choose
-                     */
-                    if (checkType == mNetworkPreference) {
-                        newType = checkType;
-                        break;
-                    }
-                    if (mNetAttributes[checkType].mPriority > newPriority) {
-                        newType = checkType;
-                        newPriority = mNetAttributes[newType].mPriority;
-                    }
+                NetworkStateTracker tracker = mNetTrackers[checkType];
+                NetworkInfo info = tracker.getNetworkInfo();
+                if (!info.isConnectedOrConnecting() ||
+                        tracker.isTeardownRequested()) {
+                    info.setFailover(true);
+                    tracker.reconnect();
                 }
-            }
+                if (DBG) Slog.d(TAG, "Attempting to switch to " + info.getTypeName());
 
-            if (newType != -1) {
-                newNet = mNetTrackers[newType];
-                /**
-                 * See if the other network is available to fail over to.
-                 * If is not available, we enable it anyway, so that it
-                 * will be able to connect when it does become available,
-                 * but we report a total loss of connectivity rather than
-                 * report that we are attempting to fail over.
-                 */
-                if (newNet.isAvailable()) {
-                    NetworkInfo switchTo = newNet.getNetworkInfo();
-                    switchTo.setFailover(true);
-                    if (!switchTo.isConnectedOrConnecting() ||
-                            newNet.isTeardownRequested()) {
-                        newNet.reconnect();
-                    }
-                    if (DBG) {
-                        if (switchTo.isConnected()) {
-                            Slog.v(TAG, "Switching to already connected " +
-                                    switchTo.getTypeName());
-                        } else {
-                            Slog.v(TAG, "Attempting to switch to " +
-                                    switchTo.getTypeName());
-                        }
-                    }
-                } else {
-                    newNet.reconnect();
-                    newNet = null; // not officially avail..  try anyway, but
-                                   // report no failover
+                // figure out if this is the highest priority network
+                // so we send an appropriate return value
+                if (checkType == mNetworkPreference) {
+                    newType = checkType;
                 }
-            } else {
-                Slog.e(TAG, "Network failover failing.");
+                if (mNetAttributes[checkType].mPriority > newPriority &&
+                        newType != mNetworkPreference) {
+                    newType = checkType;
+                    newPriority = mNetAttributes[checkType].mPriority;
+                }
             }
         }
 
