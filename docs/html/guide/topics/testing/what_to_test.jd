@@ -1,4 +1,6 @@
 page.title=What To Test
+parent.title=Testing
+parent.link=index.html
 @jd:body
 <p>
     As you develop Android applications, knowing what to test is as important as knowing how to
