@@ -198,8 +198,6 @@ public final class CacheManager {
             mBaseDir = new File(context.getCacheDir(), "webviewCacheChromiumStaging");
             if (!mBaseDir.exists()) {
                 mBaseDir.mkdirs();
-            } else {
-                // TODO: Should we clear out old files?
             }
             return;
         }
@@ -605,11 +603,12 @@ public final class CacheManager {
      * @return Whether the removal succeeded.
      */
     static boolean removeAllCacheFiles() {
-        assert !JniUtil.useChromiumHttpStack();
-
         // Note, this is called before init() when the database is
         // created or upgraded.
         if (mBaseDir == null) {
+            // This method should not be called before init() when using the
+            // chrome http stack
+            assert !JniUtil.useChromiumHttpStack();
             // Init() has not been called yet, so just flag that
             // we need to clear the cache when init() is called.
             mClearCacheOnInit = true;
