@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 #include <linux/ioctl.h>
 #endif
 
