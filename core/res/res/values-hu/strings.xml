@@ -1013,11 +1013,9 @@
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Törlés visszavonása."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Most nem."</string>
     <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Kapcsolódva a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózathoz"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Kapcsolat bontva a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózattal"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Bontotta a kapcsolatot a(z) <xliff:g id="PROFILENAME">%s</xliff:g> virtuális magánhálózattal"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Érintse meg az újracsatlakozáshoz."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Fiók kiválasztása"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Növelés"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Csökkentés"</string>
 </resources>

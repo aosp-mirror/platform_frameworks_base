@@ -602,7 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Professionnelle"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Autre"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Saisissez le code PIN"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Appuyez saisir mot passe"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Saisie mot passe"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Saisissez le mot de passe pour procéder au déverrouillage."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Saisissez le code PIN pour procéder au déverrouillage."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Le code PIN est incorrect !"</string>
@@ -1016,8 +1016,6 @@
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> déconnecté"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Appuyez ici pour vous reconnecter à un VPN"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Sélectionner un compte"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Augmenter"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuer"</string>
 </resources>

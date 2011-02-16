@@ -1016,8 +1016,6 @@
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Đã ngắt kết nối VPN <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Chạm để kết nối lại với VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Chọn tài khoản"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Tăng dần"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Giảm dần"</string>
 </resources>
