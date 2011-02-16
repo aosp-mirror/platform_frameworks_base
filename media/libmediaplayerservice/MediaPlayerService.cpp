@@ -732,18 +732,14 @@ player_type getPlayerType(const char* url)
         return TEST_PLAYER;
     }
 
-    char value[PROPERTY_VALUE_MAX];
-    if (!property_get("media.httplive.disable-nuplayer", value, NULL)
-            || (strcasecmp(value, "true") && strcmp(value, "1"))) {
-        if (!strncasecmp("http://", url, 7)) {
-            size_t len = strlen(url);
-            if (len >= 5 && !strcasecmp(".m3u8", &url[len - 5])) {
-                return NU_PLAYER;
-            }
+    if (!strncasecmp("http://", url, 7)) {
+        size_t len = strlen(url);
+        if (len >= 5 && !strcasecmp(".m3u8", &url[len - 5])) {
+            return NU_PLAYER;
+        }
 
-            if (strstr(url,"m3u8")) {
-                return NU_PLAYER;
-            }
+        if (strstr(url,"m3u8")) {
+            return NU_PLAYER;
         }
     }
 

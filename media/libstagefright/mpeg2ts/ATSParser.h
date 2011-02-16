@@ -34,7 +34,6 @@ struct MediaSource;
 struct ATSParser : public RefBase {
     enum DiscontinuityType {
         DISCONTINUITY_NONE,
-        DISCONTINUITY_HTTPLIVE,
         DISCONTINUITY_SEEK,
         DISCONTINUITY_FORMATCHANGE
     };
