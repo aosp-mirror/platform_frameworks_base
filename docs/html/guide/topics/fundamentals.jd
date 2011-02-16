@@ -422,7 +422,7 @@ because the Android system makes the appropriate adjustments to your UI layout a
 resources. However, you should create specialized layouts for certain screen sizes and provide
 specialized images for certain densities, using alternative layout resources, and by declaring in
 your manifest exactly which screen sizes your application supports with the <a
-href="{@docRoot}guide/topics/manifest/supports-screens.html">{@code
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> element.</p>
 <p>For more information, see the <a
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>
@@ -453,7 +453,8 @@ platform version specifies an <a
 href="{@docRoot}guide/appendix/api-levels.html">API Level</a> (for example, Android 1.0 is API Level
 1 and Android 2.3 is API Level 9). If you use any APIs that were added to the platform after
 version 1.0, you should declare the minimum API Level in which those APIs were introduced using the
-<a href="{@docRoot}guide/topics/manifest/uses-sdk.html">{@code &lt;uses-sdk&gt;}</a> element.</dd>
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+element.</dd>
 </dl>
 
 <p>It's important that you declare all such requirements for your application, because, when you

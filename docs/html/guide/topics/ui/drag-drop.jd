@@ -289,14 +289,14 @@ DraggableDot.java</a> in <a href="{@docRoot}resources/samples/ApiDemos/index.htm
 <p>
     To get the action type, a listener calls {@link android.view.DragEvent#getAction()}. There
     are six possible values, defined by constants in the {@link android.view.DragEvent} class. These
-    are listed in <a href="table1">table 1</a>.
+    are listed in <a href="#table1">table 1</a>.
 </p>
 <p>
     The {@link android.view.DragEvent} object also contains the data that your application provided
     to the system in the call to
     {@link android.view.View#startDrag(ClipData,View.DragShadowBuilder,Object,int) startDrag()}.
     Some of the data is valid only for certain action types. The data that is valid for each action
-    type is summarized in <a href="table2">table 2</a>. It is also described in detail with
+    type is summarized in <a href="#table2">table 2</a>. It is also described in detail with
     the event for which it is valid in the section
     <a href="#DesignDragOperation">Designing a Drag and Drop Operation</a>.
 </p>

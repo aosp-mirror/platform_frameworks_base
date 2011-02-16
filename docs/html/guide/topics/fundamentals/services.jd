@@ -121,7 +121,7 @@ a thread in {@link android.app.Activity#onCreate onCreate()}, start running it i
 android.app.Activity#onStart onStart()}, then stop it in {@link android.app.Activity#onStop
 onStop()}. Also consider using {@link android.os.AsyncTask} or {@link android.os.HandlerThread},
 instead of the traditional {@link java.lang.Thread} class. See the <a
-href="{@docRoot}guide/topics/fundamentals/processes-and-threading.html#Threads">Processes and
+href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes and
 Threading</a> document for more information about threads.</p>
   <p>Remember that if you do use a service, it still runs in your application's main thread by
 default, so you should still create a new thread within the service if it performs intensive or
@@ -183,7 +183,7 @@ by the system. If the system kills your service, it restarts it as soon as resou
 available again (though this also depends on the value you return from {@link
 android.app.Service#onStartCommand onStartCommand()}, as discussed later). For more information
 about when the system might destroy a service, see the <a
-href="{@docRoot}guide/topics/fundamentals/processes-and-threading.html">Processes and Threading</a>
+href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes and Threading</a>
 document.</p>
 
 <p>In the following sections, you'll see how you can create each type of service and how to use

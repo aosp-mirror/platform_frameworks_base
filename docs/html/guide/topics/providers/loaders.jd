@@ -29,8 +29,11 @@ page.title=Using Loaders
     
     <h2>Related samples</h2>
    <ol>
-     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentCursorLoader.html"> FragmentCursorLoader</a></li>
-     <li> <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a></li>
+     <li> <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentListCursorLoader.html">FragmentListCursorLoader</a></li>
+     <li> <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+LoaderThrottle</a></li>
    </ol>
   </div>
 </div>
@@ -480,7 +483,7 @@ public static class CursorLoaderListFragment extends ListFragment
 <p>There are a few different samples in <strong>ApiDemos</strong> that
 illustrate how to use loaders:</p>
 <ul>
-  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentCursorLoader.html"> FragmentCursorLoader</a> &#8212; A complete version of the
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentListCursorLoader.html">FragmentListCursorLoader</a> &#8212; A complete version of the
 snippet shown above.</li>
   <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html"> LoaderThrottle</a> &#8212; An example of how to use throttling to
 reduce the number of queries a content provider does then its data changes.</li>

@@ -40,7 +40,7 @@ page.title=Activities
 <h2>See also</h2>
 <ol>
   <li><a href="{@docRoot}resources/tutorials/hello-world.html">Hello World Tutorial</a></li>
-  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack">Tasks and Back
+  <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back
 Stack</a></li>
 </ol>
 
@@ -594,13 +594,14 @@ from the time {@link android.app.Activity#onPause onPause()} returns to the time
 definition in table 1 might still be killed by the system&mdash;but that would happen only in
 extreme circumstances when there is no other recourse. When an activity might be killed is
 discussed more in the <a
-href="{@docRoot}guide/topics/fundamentals/processes-and-threading.html">Processes and
+href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html">Processes and
 Threading</a> document.</p>
 
 
 <h3 id="SavingActivityState">Saving activity state</h3>
 
-<p>The introduction to <a href="Lifecycle">Managing the Activity Lifecycle</a> briefly mentions that
+<p>The introduction to <a href="#Lifecycle">Managing the Activity Lifecycle</a> briefly mentions
+that
 when an activity is paused or stopped, the state of the activity is retained. This is true because
 the {@link android.app.Activity} object is still held in memory when it is paused or
 stopped&mdash;all information about its members and current state is still alive. Thus, any changes
