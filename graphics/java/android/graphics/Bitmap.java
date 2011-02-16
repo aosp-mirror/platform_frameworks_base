@@ -19,7 +19,6 @@ package android.graphics;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
-
 import java.io.OutputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -342,7 +341,7 @@ public final class Bitmap implements Parcelable {
         }
 
         long bufferSize = (long)elements << shift;
-        long pixelSize = (long)getRowBytes() * getHeight();
+        long pixelSize = getByteCount();
 
         if (bufferSize < pixelSize) {
             throw new RuntimeException("Buffer not large enough for pixels");
@@ -378,7 +377,7 @@ public final class Bitmap implements Parcelable {
         }
 
         long bufferBytes = (long)elements << shift;
-        long bitmapBytes = (long)getRowBytes() * getHeight();
+        long bitmapBytes = getByteCount();
 
         if (bufferBytes < bitmapBytes) {
             throw new RuntimeException("Buffer not large enough for pixels");
@@ -819,6 +818,14 @@ public final class Bitmap implements Parcelable {
      */
     public final int getRowBytes() {
         return nativeRowBytes(mNativeBitmap);
+    }
+
+    /**
+     * Returns the number of bytes used to store this bitmap's pixels.
+     */
+    public final int getByteCount() {
+        // int result permits bitmaps up to 46,340 x 46,340
+        return getRowBytes() * getHeight();
     }
 
     /**
