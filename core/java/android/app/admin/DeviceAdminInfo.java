@@ -109,6 +109,7 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>To control this policy, the device admin must have a "set-global-proxy"
      * tag in the "uses-policies" section of its meta-data.
+     * @hide
      */
     public static final int USES_POLICY_SETS_GLOBAL_PROXY = 5;
 
@@ -363,7 +364,7 @@ public final class DeviceAdminInfo implements Parcelable {
      * the given policy control.  The possible policy identifier inputs are:
      * {@link #USES_POLICY_LIMIT_PASSWORD}, {@link #USES_POLICY_WATCH_LOGIN},
      * {@link #USES_POLICY_RESET_PASSWORD}, {@link #USES_POLICY_FORCE_LOCK},
-     * {@link #USES_POLICY_WIPE_DATA}, {@link #USES_POLICY_SETS_GLOBAL_PROXY},
+     * {@link #USES_POLICY_WIPE_DATA},
      * {@link #USES_POLICY_EXPIRE_PASSWORD}, {@link #USES_ENCRYPTED_STORAGE}.
      */
     public boolean usesPolicy(int policyIdent) {
