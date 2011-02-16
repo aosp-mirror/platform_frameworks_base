@@ -18,7 +18,6 @@
 #define ANDROID_REF_BASE_H
 
 #include <cutils/atomic.h>
-#include <utils/TextOutput.h>
 
 #include <stdint.h>
 #include <sys/types.h>
@@ -26,6 +25,10 @@
 
 // ---------------------------------------------------------------------------
 namespace android {
+
+class TextOutput;
+TextOutput& printStrongPointer(TextOutput& to, const void* val);
+TextOutput& printWeakPointer(TextOutput& to, const void* val);
 
 template<typename T> class wp;
 
@@ -427,8 +430,7 @@ sp<T>::sp(T* p, weakref_type* refs)
 template <typename T>
 inline TextOutput& operator<<(TextOutput& to, const sp<T>& val)
 {
-    to << "sp<>(" << val.get() << ")";
-    return to;
+   return printStrongPointer(to, val.get());
 }
 
 // ---------------------------------------------------------------------------
@@ -585,8 +587,7 @@ void wp<T>::clear()
 template <typename T>
 inline TextOutput& operator<<(TextOutput& to, const wp<T>& val)
 {
-    to << "wp<>(" << val.unsafe_get() << ")";
-    return to;
+    return printWeakPointer(to, val.unsafe_get());
 }
 
 }; // namespace android
