@@ -65,11 +65,11 @@ public class MediaPlayerStressTest extends InstrumentationTestCase {
         output.write("File Name: " + filename);
         output.write(" Complete: " + CodecTest.onCompleteSuccess);
         output.write(" Error: " + CodecTest.mPlaybackError);
-        output.write(" Unknown Info: " + CodecTest.mIsMediaInfoUnknown);
-        output.write(" Track Lagging: " +  CodecTest.mIsMediaInfoVideoTrackLagging);
-        output.write(" BadInterleaving: " + CodecTest.mIsMediaInfoBadInterleaving);
-        output.write(" Not Seekable: " + CodecTest.mIsMediaInfoNotSeekable);
-        output.write(" Info Meta data update: " + CodecTest.mIsMediaInfoMetdataUpdate);
+        output.write(" Unknown Info: " + CodecTest.mMediaInfoUnknownCount);
+        output.write(" Track Lagging: " +  CodecTest.mMediaInfoVideoTrackLaggingCount);
+        output.write(" BadInterleaving: " + CodecTest.mMediaInfoBadInterleavingCount);
+        output.write(" Not Seekable: " + CodecTest.mMediaInfoNotSeekableCount);
+        output.write(" Info Meta data update: " + CodecTest.mMediaInfoMetdataUpdateCount);
         output.write("\n");
     }
 
@@ -92,21 +92,11 @@ public class MediaPlayerStressTest extends InstrumentationTestCase {
         else if (CodecTest.mPlaybackError){
             mTotalPlaybackError++;
         }
-        else if (CodecTest.mIsMediaInfoUnknown){
-            mTotalInfoUnknown++;
-        }
-        else if (CodecTest.mIsMediaInfoVideoTrackLagging){
-            mTotalVideoTrackLagging++;
-        }
-        else if (CodecTest.mIsMediaInfoBadInterleaving){
-            mTotalBadInterleaving++;
-        }
-        else if (CodecTest.mIsMediaInfoNotSeekable){
-            mTotalNotSeekable++;
-        }
-        else if (CodecTest.mIsMediaInfoMetdataUpdate){
-            mTotalMetaDataUpdate++;
-        }
+        mTotalInfoUnknown += CodecTest.mMediaInfoUnknownCount;
+        mTotalVideoTrackLagging += CodecTest.mMediaInfoVideoTrackLaggingCount;
+        mTotalBadInterleaving += CodecTest.mMediaInfoBadInterleavingCount;
+        mTotalNotSeekable += CodecTest.mMediaInfoNotSeekableCount;
+        mTotalMetaDataUpdate += CodecTest.mMediaInfoMetdataUpdateCount;
     }
 
     //Test that will start the playback for all the videos

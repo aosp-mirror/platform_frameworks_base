@@ -60,11 +60,11 @@ public class CodecTest {
     private static boolean onPrepareSuccess = false;
     public static boolean onCompleteSuccess = false;
     public static boolean mPlaybackError = false;
-    public static boolean mIsMediaInfoUnknown = false;
-    public static boolean mIsMediaInfoVideoTrackLagging = false;
-    public static boolean mIsMediaInfoBadInterleaving = false;
-    public static boolean mIsMediaInfoNotSeekable = false;
-    public static boolean mIsMediaInfoMetdataUpdate = false;
+    public static int mMediaInfoUnknownCount = 0;
+    public static int mMediaInfoVideoTrackLaggingCount = 0;
+    public static int mMediaInfoBadInterleavingCount = 0;
+    public static int mMediaInfoNotSeekableCount = 0;
+    public static int mMediaInfoMetdataUpdateCount = 0;
 
     public static String printCpuInfo(){      
         String cm = "dumpsys cpuinfo";
@@ -765,19 +765,19 @@ public class CodecTest {
         public boolean onInfo(MediaPlayer mp, int what, int extra) {
             switch (what){
                 case MediaPlayer.MEDIA_INFO_UNKNOWN:
-                    mIsMediaInfoUnknown = true;
+                    mMediaInfoUnknownCount++;
                     break;
                 case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
-                    mIsMediaInfoVideoTrackLagging = true;
+                    mMediaInfoVideoTrackLaggingCount++;
                     break;
                 case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
-                    mIsMediaInfoBadInterleaving = true;
+                    mMediaInfoBadInterleavingCount++;
                     break;
                 case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
-                    mIsMediaInfoNotSeekable = true;
+                    mMediaInfoNotSeekableCount++;
                     break;
                 case MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
-                    mIsMediaInfoMetdataUpdate = true;
+                    mMediaInfoMetdataUpdateCount++;
                     break;
             }
             return true;
@@ -791,11 +791,11 @@ public class CodecTest {
         int nextPosition = 0;
         int waittime = 0;
         onCompleteSuccess = false;
-        mIsMediaInfoUnknown = false;
-        mIsMediaInfoVideoTrackLagging = false;
-        mIsMediaInfoBadInterleaving = false;
-        mIsMediaInfoNotSeekable = false;
-        mIsMediaInfoMetdataUpdate = false;
+        mMediaInfoUnknownCount = 0;
+        mMediaInfoVideoTrackLaggingCount = 0;
+        mMediaInfoBadInterleavingCount = 0;
+        mMediaInfoNotSeekableCount = 0;
+        mMediaInfoMetdataUpdateCount = 0;
         mPlaybackError = false;
         String testResult;
 
