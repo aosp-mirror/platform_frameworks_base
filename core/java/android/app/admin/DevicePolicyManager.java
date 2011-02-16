@@ -1028,6 +1028,7 @@ public class DevicePolicyManager {
      * @param exclusionList a list of domains to be excluded from the global proxy.
      * @return returns null if the proxy was successfully set, or a {@link ComponentName}
      *            of the device admin that sets thew proxy otherwise.
+     * @hide
      */
     public ComponentName setGlobalProxy(ComponentName admin, Proxy proxySpec,
             List<String> exclusionList ) {
@@ -1080,6 +1081,7 @@ public class DevicePolicyManager {
      * Returns the component name setting the global proxy.
      * @return ComponentName object of the device admin that set the global proxy, or
      *            null if no admin has set the proxy.
+     * @hide
      */
     public ComponentName getGlobalProxyAdmin() {
         if (mService != null) {
