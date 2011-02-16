@@ -343,7 +343,7 @@
         android:description="@string/permdesc_bluetooth"
         android:label="@string/permlab_bluetooth" />
 
-    <!-- Allows applications to directly communicate over NFC -->
+    <!-- Allows applications to perform I/O operations over NFC -->
     <permission android:name="android.permission.NFC"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="dangerous"
