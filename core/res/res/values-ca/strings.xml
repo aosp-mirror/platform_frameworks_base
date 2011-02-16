@@ -843,17 +843,17 @@
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"S\'està reproduint a través de Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"So de trucada silenciós seleccionat"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"To de silenci seleccionat"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volum en trucada Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volum de l\'alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum de notificació"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"So de trucada predeterminat"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"So de trucada predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"To predeterminat"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"To predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenci"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sons de trucada"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"So de trucada desconegut"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"To desconegut"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"Xarxa Wi-fi disponible"</item>
     <item quantity="other" msgid="4192424489168397386">"Xarxes Wi-fi disponibles"</item>
@@ -1016,8 +1016,6 @@
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> desconnectada"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Toca per tornar-te a connectar a una VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Selecciona un compte"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementa"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminueix"</string>
 </resources>

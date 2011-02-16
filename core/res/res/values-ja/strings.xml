@@ -1012,12 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"アイテムを削除する"</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"削除を元に戻す"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"今は何もしない"</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPNが接続されました"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPNに接続しました"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPNが切断されました"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"タップしてVPNに再接続してください。"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"アカウントを選択"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"増やす"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"減らす"</string>
 </resources>

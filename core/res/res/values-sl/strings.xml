@@ -1016,8 +1016,6 @@
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Povezava z navideznim zasebnim omrežjem <xliff:g id="PROFILENAME">%s</xliff:g> prekinjena"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Dotaknite se, če želite znova vzpostaviti povezavo z navideznim zasebnim omrežjem."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Izberite račun"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Povečaj"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Zmanjšaj"</string>
 </resources>
