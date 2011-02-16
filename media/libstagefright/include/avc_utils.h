@@ -52,6 +52,10 @@ bool IsIDR(const sp<ABuffer> &accessUnit);
 
 const char *AVCProfileToString(uint8_t profile);
 
+sp<MetaData> MakeAACCodecSpecificData(
+        unsigned profile, unsigned sampling_freq_index,
+        unsigned channel_configuration);
+
 }  // namespace android
 
 #endif  // AVC_UTILS_H_
