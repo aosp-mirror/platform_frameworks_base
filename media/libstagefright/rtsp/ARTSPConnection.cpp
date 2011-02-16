@@ -545,6 +545,10 @@ sp<ABuffer> ARTSPConnection::receiveBinaryData() {
     return buffer;
 }
 
+static bool IsRTSPVersion(const AString &s) {
+    return s == "RTSP/1.0";
+}
+
 bool ARTSPConnection::receiveRTSPReponse() {
     AString statusLine;
 
@@ -584,13 +588,27 @@ bool ARTSPConnection::receiveRTSPReponse() {
         return false;
     }
 
-    AString statusCodeStr(
-            response->mStatusLine, space1 + 1, space2 - space1 - 1);
+    bool isRequest = false;
 
-    if (!ParseSingleUnsignedLong(
-                statusCodeStr.c_str(), &response->mStatusCode)
-            || response->mStatusCode < 100 || response->mStatusCode > 999) {
-        return false;
+    if (!IsRTSPVersion(AString(response->mStatusLine, 0, space1))) {
+        CHECK(IsRTSPVersion(
+                    AString(
+                        response->mStatusLine,
+                        space2 + 1,
+                        response->mStatusLine.size() - space2 - 1)));
+
+        isRequest = true;
+
+        response->mStatusCode = 0;
+    } else {
+        AString statusCodeStr(
+                response->mStatusLine, space1 + 1, space2 - space1 - 1);
+
+        if (!ParseSingleUnsignedLong(
+                    statusCodeStr.c_str(), &response->mStatusCode)
+                || response->mStatusCode < 100 || response->mStatusCode > 999) {
+            return false;
+        }
     }
 
     AString line;
@@ -680,7 +698,63 @@ bool ARTSPConnection::receiveRTSPReponse() {
         }
     }
 
-    return notifyResponseListener(response);
+    return isRequest
+        ? handleServerRequest(response)
+        : notifyResponseListener(response);
+}
+
+bool ARTSPConnection::handleServerRequest(const sp<ARTSPResponse> &request) {
+    // Implementation of server->client requests is optional for all methods
+    // but we do need to respond, even if it's just to say that we don't
+    // support the method.
+
+    ssize_t space1 = request->mStatusLine.find(" ");
+    CHECK_GE(space1, 0);
+
+    AString response;
+    response.append("RTSP/1.0 501 Not Implemented\r\n");
+
+    ssize_t i = request->mHeaders.indexOfKey("cseq");
+
+    if (i >= 0) {
+        AString value = request->mHeaders.valueAt(i);
+
+        unsigned long cseq;
+        if (!ParseSingleUnsignedLong(value.c_str(), &cseq)) {
+            return false;
+        }
+
+        response.append("CSeq: ");
+        response.append(cseq);
+        response.append("\r\n");
+    }
+
+    response.append("\r\n");
+
+    size_t numBytesSent = 0;
+    while (numBytesSent < response.size()) {
+        ssize_t n =
+            send(mSocket, response.c_str() + numBytesSent,
+                 response.size() - numBytesSent, 0);
+
+        if (n == 0) {
+            // Server closed the connection.
+            LOGE("Server unexpectedly closed the connection.");
+
+            return false;
+        } else if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+
+            LOGE("Error sending rtsp response.");
+            return false;
+        }
+
+        numBytesSent += (size_t)n;
+    }
+
+    return true;
 }
 
 // static
