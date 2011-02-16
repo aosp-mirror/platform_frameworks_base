@@ -791,14 +791,19 @@ class ZoomManager {
         // scaleAll(), we need to post a Runnable to ensure requestLayout().
         // Additionally, only update the text wrap scale if the width changed.
         mWebView.post(new PostScale(w != ow &&
-            !mWebView.getSettings().getUseFixedViewport()));
+            !mWebView.getSettings().getUseFixedViewport(), mInZoomOverview));
     }
 
     private class PostScale implements Runnable {
         final boolean mUpdateTextWrap;
+        // Remember the zoom overview state right after rotation since
+        // it could be changed between the time this callback is initiated and
+        // the time it's actually run.
+        final boolean mInZoomOverviewBeforeSizeChange;
 
-        public PostScale(boolean updateTextWrap) {
+        public PostScale(boolean updateTextWrap, boolean inZoomOverview) {
             mUpdateTextWrap = updateTextWrap;
+            mInZoomOverviewBeforeSizeChange = inZoomOverview;
         }
 
         public void run() {
@@ -807,7 +812,7 @@ class ZoomManager {
                 // still want to send the notification over to webkit.
                 // Keep overview mode unchanged when rotating.
                 final float zoomOverviewScale = getZoomOverviewScale();
-                final float newScale = (mInZoomOverview) ?
+                final float newScale = (mInZoomOverviewBeforeSizeChange) ?
                     zoomOverviewScale : Math.max(mActualScale, zoomOverviewScale); 
                 setZoomScale(newScale, mUpdateTextWrap, true);
                 // update the zoom buttons as the scale can be changed
