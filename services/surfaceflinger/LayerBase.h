@@ -337,7 +337,7 @@ protected:
 
 private:
     mutable Mutex mLock;
-    mutable wp<Surface> mClientSurface;
+    mutable bool mHasSurface;
     wp<IBinder> mClientSurfaceBinder;
     const wp<Client> mClientRef;
     // only read

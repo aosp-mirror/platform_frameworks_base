@@ -540,7 +540,9 @@ int32_t LayerBaseClient::sIdentity = 1;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client)
-    : LayerBase(flinger, display), mClientRef(client),
+    : LayerBase(flinger, display),
+      mHasSurface(false),
+      mClientRef(client),
       mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
 }
@@ -557,12 +559,13 @@ sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
 {
     sp<Surface> s;
     Mutex::Autolock _l(mLock);
-    s = mClientSurface.promote();
-    if (s == 0) {
-        s = createSurface();
-        mClientSurface = s;
-        mClientSurfaceBinder = s->asBinder();
-    }
+
+    LOG_ALWAYS_FATAL_IF(mHasSurface,
+            "LayerBaseClient::getSurface() has already been called");
+
+    mHasSurface = true;
+    s = createSurface();
+    mClientSurfaceBinder = s->asBinder();
     return s;
 }
 
