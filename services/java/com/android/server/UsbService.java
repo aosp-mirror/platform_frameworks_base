@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.IUsbManager;
+import android.hardware.UsbAccessory;
 import android.hardware.UsbConstants;
 import android.hardware.UsbDevice;
 import android.hardware.UsbEndpoint;
@@ -78,17 +79,62 @@ class UsbService extends IUsbManager.Stub {
     private int mLastConfiguration = -1;
 
     // lists of enabled and disabled USB functions (for USB device mode)
+    // synchronize on mEnabledFunctions when using either of these lists
     private final ArrayList<String> mEnabledFunctions = new ArrayList<String>();
     private final ArrayList<String> mDisabledFunctions = new ArrayList<String>();
 
+    // contains all connected USB devices (for USB host mode)
     private final HashMap<String,UsbDevice> mDevices = new HashMap<String,UsbDevice>();
 
     // USB busses to exclude from USB host support
     private final String[] mHostBlacklist;
 
     private boolean mSystemReady;
+    private UsbAccessory mCurrentAccessory;
 
     private final Context mContext;
+
+    private final void functionEnabled(String function, boolean enabled) {
+        synchronized (mEnabledFunctions) {
+            if (enabled) {
+                if (!mEnabledFunctions.contains(function)) {
+                    mEnabledFunctions.add(function);
+                }
+                mDisabledFunctions.remove(function);
+            } else {
+                if (!mDisabledFunctions.contains(function)) {
+                    mDisabledFunctions.add(function);
+                }
+                mEnabledFunctions.remove(function);
+            }
+        }
+
+        if (enabled && UsbManager.USB_FUNCTION_ACCESSORY.equals(function)) {
+            String[] strings = nativeGetAccessoryStrings();
+            if (strings != null) {
+                Log.d(TAG, "entering USB accessory mode");
+                mCurrentAccessory = new UsbAccessory(strings);
+                Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+                intent.putExtra(UsbManager.EXTRA_ACCESSORY, mCurrentAccessory);
+                // add strings as separate extras to allow filtering
+                if (strings[0] != null) {
+                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_MANUFACTURER, strings[0]);
+                }
+                if (strings[1] != null) {
+                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_PRODUCT, strings[1]);
+                }
+                if (strings[2] != null) {
+                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_TYPE, strings[2]);
+                }
+                if (strings[3] != null) {
+                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_VERSION, strings[3]);
+                }
+                mContext.sendBroadcast(intent);
+            } else {
+                Log.e(TAG, "nativeGetAccessoryStrings failed");
+            }
+        }
+    }
 
     private final UEventObserver mUEventObserver = new UEventObserver() {
         @Override
@@ -127,17 +173,7 @@ class UsbService extends IUsbManager.Stub {
                         // Note: we do not broadcast a change when a function is enabled or disabled.
                         // We just record the state change for the next broadcast.
                         boolean enabled = "1".equals(enabledStr);
-                        if (enabled) {
-                            if (!mEnabledFunctions.contains(function)) {
-                                mEnabledFunctions.add(function);
-                            }
-                            mDisabledFunctions.remove(function);
-                        } else {
-                            if (!mDisabledFunctions.contains(function)) {
-                                mDisabledFunctions.add(function);
-                            }
-                            mEnabledFunctions.remove(function);
-                        }
+                        functionEnabled(function, enabled);
                     }
                 }
             }
@@ -182,18 +218,20 @@ class UsbService extends IUsbManager.Stub {
             return;
 
         try {
-            File[] files = new File(USB_COMPOSITE_CLASS_PATH).listFiles();
-            for (int i = 0; i < files.length; i++) {
-                File file = new File(files[i], "enable");
-                FileReader reader = new FileReader(file);
-                int len = reader.read(buffer, 0, 1024);
-                reader.close();
-                int value = Integer.valueOf((new String(buffer, 0, len)).trim());
-                String functionName = files[i].getName();
-                if (value == 1) {
-                    mEnabledFunctions.add(functionName);
-                } else {
-                    mDisabledFunctions.add(functionName);
+            synchronized (mEnabledFunctions) {
+                File[] files = new File(USB_COMPOSITE_CLASS_PATH).listFiles();
+                for (int i = 0; i < files.length; i++) {
+                    File file = new File(files[i], "enable");
+                    FileReader reader = new FileReader(file);
+                    int len = reader.read(buffer, 0, 1024);
+                    reader.close();
+                    int value = Integer.valueOf((new String(buffer, 0, len)).trim());
+                    String functionName = files[i].getName();
+                    if (value == 1) {
+                        mEnabledFunctions.add(functionName);
+                    } else {
+                        mDisabledFunctions.add(functionName);
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
@@ -359,19 +397,32 @@ class UsbService extends IUsbManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
         if (mDevices.get(deviceName) == null) {
             // if it is not in mDevices, it either does not exist or is blacklisted
-            throw new IllegalArgumentException("device " + deviceName + " does not exist or is restricted");
+            throw new IllegalArgumentException(
+                    "device " + deviceName + " does not exist or is restricted");
         }
         return nativeOpenDevice(deviceName);
     }
 
+    public UsbAccessory getCurrentAccessory() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
+        return mCurrentAccessory;
+    }
+
+    public ParcelFileDescriptor openAccessory() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_USB, null);
+        return nativeOpenAccessory();
+    }
+
     private final Handler mHandler = new Handler() {
         private void addEnabledFunctions(Intent intent) {
+            synchronized (mEnabledFunctions) {
             // include state of all USB functions in our extras
-            for (int i = 0; i < mEnabledFunctions.size(); i++) {
-                intent.putExtra(mEnabledFunctions.get(i), UsbManager.USB_FUNCTION_ENABLED);
-            }
-            for (int i = 0; i < mDisabledFunctions.size(); i++) {
-                intent.putExtra(mDisabledFunctions.get(i), UsbManager.USB_FUNCTION_DISABLED);
+                for (int i = 0; i < mEnabledFunctions.size(); i++) {
+                    intent.putExtra(mEnabledFunctions.get(i), UsbManager.USB_FUNCTION_ENABLED);
+                }
+                for (int i = 0; i < mDisabledFunctions.size(); i++) {
+                    intent.putExtra(mDisabledFunctions.get(i), UsbManager.USB_FUNCTION_DISABLED);
+                }
             }
         }
 
@@ -381,6 +432,26 @@ class UsbService extends IUsbManager.Stub {
                 case MSG_UPDATE:
                     synchronized (this) {
                         if (mConnected != mLastConnected || mConfiguration != mLastConfiguration) {
+                            if (mConnected == 0 && mCurrentAccessory != null) {
+                                // turn off accessory mode when we are disconnected
+                                if (UsbManager.setFunctionEnabled(
+                                        UsbManager.USB_FUNCTION_ACCESSORY, false)) {
+                                    Log.d(TAG, "exited USB accessory mode");
+
+                                    Intent intent = new Intent(
+                                            UsbManager.ACTION_USB_ACCESSORY_DETACHED);
+                                    intent.putExtra(UsbManager.EXTRA_ACCESSORY, mCurrentAccessory);
+                                    mContext.sendBroadcast(intent);
+                                    mCurrentAccessory = null;
+
+                                    // this will cause an immediate reset of the USB bus,
+                                    // so there is no point in sending the
+                                    // function disabled broadcast.
+                                    return;
+                                } else {
+                                    Log.e(TAG, "could not disable USB_FUNCTION_ACCESSORY");
+                                }
+                            }
 
                             final ContentResolver cr = mContext.getContentResolver();
                             if (Settings.Secure.getInt(cr,
@@ -408,4 +479,6 @@ class UsbService extends IUsbManager.Stub {
 
     private native void monitorUsbHostBus();
     private native ParcelFileDescriptor nativeOpenDevice(String deviceName);
+    private native String[] nativeGetAccessoryStrings();
+    private native ParcelFileDescriptor nativeOpenAccessory();
 }

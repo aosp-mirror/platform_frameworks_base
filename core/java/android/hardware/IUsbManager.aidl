@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.hardware.UsbAccessory;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
@@ -25,4 +26,6 @@ interface IUsbManager
     /* Returns a list of all currently attached USB devices */
     void getDeviceList(out Bundle devices);
     ParcelFileDescriptor openDevice(String deviceName);
+    UsbAccessory getCurrentAccessory();
+    ParcelFileDescriptor openAccessory();
 }
