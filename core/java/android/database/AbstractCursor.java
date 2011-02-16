@@ -133,6 +133,8 @@ public abstract class AbstractCursor implements CrossProcessCursor {
                 result.getChars(0, result.length(), data, 0);
             }
             buffer.sizeCopied = result.length();
+        } else {
+            buffer.sizeCopied = 0;
         }
     }
     
