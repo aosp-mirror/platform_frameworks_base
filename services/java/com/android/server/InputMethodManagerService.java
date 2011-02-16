@@ -1949,7 +1949,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private boolean canAddToLastInputMethod(InputMethodSubtype subtype) {
         if (subtype == null) return true;
-        return subtype.containsExtraValueKey(SUBTYPE_EXTRAVALUE_EXCLUDE_FROM_LAST_IME);
+        return !subtype.containsExtraValueKey(SUBTYPE_EXTRAVALUE_EXCLUDE_FROM_LAST_IME);
     }
 
     private void saveCurrentInputMethodAndSubtypeToHistory() {
