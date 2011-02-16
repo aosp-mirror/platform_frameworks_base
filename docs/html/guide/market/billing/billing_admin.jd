@@ -1,4 +1,6 @@
 page.title=Administering In-app Billing
+parent.title=In-app Billing
+parent.link=index.html
 @jd:body
 
 <style type="text/css">
