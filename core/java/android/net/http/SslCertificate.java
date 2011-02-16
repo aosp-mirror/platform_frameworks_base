@@ -110,7 +110,7 @@ public class SslCertificate {
      * @param issuedBy The entity that issued this certificate
      * @param validNotBefore The not-before date from the certificate validity period in ISO 8601 format
      * @param validNotAfter The not-after date from the certificate validity period in ISO 8601 format
-     * @deprecated Use {@link #SslCertificate(String, String, Date, Date)}
+     * @deprecated Use {@link #SslCertificate(X509Certificate)}
      */
     @Deprecated
     public SslCertificate(
@@ -124,7 +124,9 @@ public class SslCertificate {
      * @param issuedBy The entity that issued this certificate
      * @param validNotBefore The not-before date from the certificate validity period
      * @param validNotAfter The not-after date from the certificate validity period
+     * @deprecated Use {@link #SslCertificate(X509Certificate)}
      */
+    @Deprecated
     public SslCertificate(
             String issuedTo, String issuedBy, Date validNotBefore, Date validNotAfter) {
         mIssuedTo = new DName(issuedTo);
