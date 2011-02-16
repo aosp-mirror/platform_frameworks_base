@@ -602,7 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Trabaho"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Iba pa"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ipasok ang PIN code"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Pindot pasok password"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"I-touch pra mg-passwrd"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Ipasok ang password upang i-unlock"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Ipasok ang PIN upang i-unlock"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Maling PIN code!"</string>
@@ -1012,12 +1012,10 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Tanggalin ang mga item."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"I-undo ang mga pagtanggal."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Walang gawin sa ngayon."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Hindi nakakonekta ang <xliff:g id="PROFILENAME">%s</xliff:g> VPN"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Nakakonekta ang <xliff:g id="PROFILENAME">%s</xliff:g> sa VPN"</string>
     <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Hindi nakakonekta ang <xliff:g id="PROFILENAME">%s</xliff:g> VPN"</string>
     <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Pindutin upang muling kumonekta sa VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Pumili ng account"</string>
-    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
-    <skip />
-    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
-    <skip />
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Taasan"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Babaan"</string>
 </resources>
