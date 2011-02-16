@@ -1,4 +1,6 @@
 page.title=layoutopt
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
 <p><code>layoutopt</code> is a command-line tool that helps you optimize the

@@ -1,4 +1,6 @@
 page.title=Managing AVDs with AVD Manager
+parent.title=Managing Virtual Devices
+parent.link=index.html
 @jd:body
 
   <div id="qv-wrapper">

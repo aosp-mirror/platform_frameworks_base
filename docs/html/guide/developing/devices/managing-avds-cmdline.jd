@@ -1,4 +1,6 @@
 page.title=Managing AVDs from the Command Line
+parent.title=Managing Virtual Devices
+parent.link=index.html
 @jd:body
 
 <div id="qv-wrapper">

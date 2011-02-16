@@ -1,4 +1,6 @@
 page.title=Using the Android Emulator
+parent.title=Managing Virtual Devices
+parent.link=index.html
 @jd:body
 
 <div id="qv-wrapper">

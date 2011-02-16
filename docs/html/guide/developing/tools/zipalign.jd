@@ -1,4 +1,6 @@
 page.title=zipalign
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
 <p>zipalign is an archive alignment tool that provides important

@@ -1,4 +1,6 @@
 page.title=Profiling with Traceview and dmtracedump
+parent.title=Debugging
+parent.link=index.html
 @jd:body
 
  <div id="qv-wrapper">

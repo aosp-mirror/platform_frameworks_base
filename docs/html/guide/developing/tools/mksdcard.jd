@@ -1,4 +1,6 @@
 page.title=mksdcard
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
  <p>The <code>mksdcard</code> tool lets you quickly create a FAT32 disk image that you can load in the

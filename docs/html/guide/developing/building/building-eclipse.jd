@@ -1,4 +1,6 @@
 page.title=Building and Running from Eclipse with ADT
+parent.title=Building and Running
+parent.link=index.html
 @jd:body
 
 <div id="qv-wrapper">
