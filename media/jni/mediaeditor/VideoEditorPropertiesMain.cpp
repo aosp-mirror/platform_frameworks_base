@@ -122,12 +122,26 @@ jobject videoEditProp_getProperties(
             &gotten, pEnv, file, NULL, M4OSA_NULL);
 
     result = M4OSA_fileReadOpen(&context, (M4OSA_Void*)pFile, M4OSA_kFileRead);
+
+    if(M4NO_ERROR != result) {
+        // Free the file path.
+        videoEditOsal_free(pFile);
+        pFile = M4OSA_NULL;
+    }
+
     videoEditJava_checkAndThrowIllegalArgumentException(&gotten, pEnv,
         (M4NO_ERROR != result), "file not found");
-    if(M4NO_ERROR != result)
-        return(properties);
-    result = M4OSA_fileReadClose(context);
-    context = M4OSA_NULL;
+
+    // Close the file and free the file context
+    if (context != NULL) {
+        result = M4OSA_fileReadClose(context);
+        context = M4OSA_NULL;
+    }
+
+    // Return if Error
+    if (M4NO_ERROR != result) {
+        return (properties); // NULL
+    }
 
     // Check if the file path is valid.
     if (gotten)
