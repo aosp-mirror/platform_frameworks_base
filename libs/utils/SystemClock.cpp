@@ -19,7 +19,7 @@
  * System clock functions.
  */
 
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 #include <linux/ioctl.h>
 #include <linux/rtc.h>
 #include <utils/Atomic.h>
@@ -50,7 +50,7 @@ int setCurrentTimeMillis(int64_t millis)
     return -1;
 #else
     struct timeval tv;
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
     struct timespec ts;
     int fd;
     int res;
@@ -66,7 +66,7 @@ int setCurrentTimeMillis(int64_t millis)
 
     LOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
 
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
     fd = open("/dev/alarm", O_RDWR);
     if(fd < 0) {
         LOGW("Unable to open alarm driver: %s\n", strerror(errno));
@@ -106,7 +106,7 @@ int64_t uptimeMillis()
  */
 int64_t elapsedRealtime()
 {
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
     static int s_fd = -1;
 
     if (s_fd == -1) {

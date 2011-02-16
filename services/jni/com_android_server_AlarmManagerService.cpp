@@ -33,7 +33,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 #include <linux/ioctl.h>
 #include <linux/android_alarm.h>
 #endif
@@ -42,7 +42,7 @@ namespace android {
 
 static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv* env, jobject obj, jint fd, jint minswest)
 {
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
     struct timezone tz;
 
     tz.tz_minuteswest = minswest;
@@ -64,7 +64,7 @@ static jint android_server_AlarmManagerService_setKernelTimezone(JNIEnv* env, jo
 
 static jint android_server_AlarmManagerService_init(JNIEnv* env, jobject obj)
 {
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
     return open("/dev/alarm", O_RDWR);
 #else
 	return -1;
@@ -73,14 +73,14 @@ static jint android_server_AlarmManagerService_init(JNIEnv* env, jobject obj)
 
 static void android_server_AlarmManagerService_close(JNIEnv* env, jobject obj, jint fd)
 {
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 	close(fd);
 #endif
 }
 
 static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jint fd, jint type, jlong seconds, jlong nanoseconds)
 {
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
     struct timespec ts;
     ts.tv_sec = seconds;
     ts.tv_nsec = nanoseconds;
@@ -95,7 +95,7 @@ static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jin
 
 static jint android_server_AlarmManagerService_waitForAlarm(JNIEnv* env, jobject obj, jint fd)
 {
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 	int result = 0;
 	
 	do

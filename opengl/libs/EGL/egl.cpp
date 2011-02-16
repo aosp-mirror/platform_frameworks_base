@@ -22,7 +22,7 @@
 
 #include <sys/ioctl.h>
 
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 #include <linux/android_pmem.h>
 #endif
 

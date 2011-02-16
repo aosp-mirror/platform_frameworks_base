@@ -31,7 +31,7 @@
 
 #include <binder/MemoryHeapBase.h>
 
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
 #include <linux/android_pmem.h>
 #endif
 
@@ -108,7 +108,7 @@ status_t MemoryHeapBase::mapfd(int fd, size_t size, uint32_t offset)
 {
     if (size == 0) {
         // try to figure out the size automatically
-#if HAVE_ANDROID_OS
+#ifdef HAVE_ANDROID_OS
         // first try the PMEM ioctl
         pmem_region reg;
         int err = ioctl(fd, PMEM_GET_TOTAL_SIZE, &reg);
