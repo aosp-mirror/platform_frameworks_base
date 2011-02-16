@@ -1,4 +1,6 @@
 page.title=Future-Proofing Your Apps
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>It's important to implement your application so that it will not break as new

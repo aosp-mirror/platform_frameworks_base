@@ -1,4 +1,6 @@
 page.title=Hello, L10N
+parent.title=Tutorials
+parent.link=../../browser.html?tag=tutorial
 @jd:body
 
 <div id="qv-wrapper">

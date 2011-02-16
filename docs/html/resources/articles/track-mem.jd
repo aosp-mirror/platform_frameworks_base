@@ -1,4 +1,6 @@
 page.title=Tracking Memory Allocations
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>Writing efficient mobile applications is not always straightforward. In
