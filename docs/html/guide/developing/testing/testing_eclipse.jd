@@ -1,4 +1,6 @@
 page.title=Testing from Eclipse with ADT
+parent.title=Testing
+parent.link=index.html
 @jd:body
 <div id="qv-wrapper">
     <div id="qv">

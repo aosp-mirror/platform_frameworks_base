@@ -1,4 +1,6 @@
 page.title=UI/Application Exerciser Monkey
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
 <p>The Monkey is a program that runs on your 

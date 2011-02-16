@@ -1,4 +1,6 @@
 page.title=MonkeyDevice
+parent.title=monkeyrunner
+parent.link=index.html
 @jd:body
 <style>
     h4.jd-details-title {background-color: #DEE8F1;}

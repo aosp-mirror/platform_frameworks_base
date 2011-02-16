@@ -1,6 +1,8 @@
 page.title=Android Emulator
+parent.title=Tools
+parent.link=index.html
 @jd:body
-<p>
+
 <p>The Android SDK includes a mobile device emulator &mdash; a virtual mobile device 
 that runs on your computer. The emulator lets you develop and test
 Android applications without using a physical device.</p>
