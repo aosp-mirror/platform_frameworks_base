@@ -653,10 +653,12 @@ The <a href="{@docRoot}guide/developing/tools/monkey.html">UI/Application Exerci
         It guides you through a more complex testing scenario that you develop against a
         more realistic application.
     </li>
+    <!-- sample is not available
     <li>
-        The sample test package <a href="{@docRoot}resources/samples/AlarmServiceTest"}>
+        The sample test package <a href="{@docRoot}resources/samples/AlarmServiceTest/index.html">
         Alarm Service Test</a> is an example of testing a {@link android.app.Service}. It contains
         a set of unit tests for the Alarm Service sample application's {@link android.app.Service}.
     </li>
+    -->
 </ul>
 

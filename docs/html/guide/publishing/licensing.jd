@@ -518,7 +518,7 @@ Android Virtual Devices.</li>
 </ol>
 
 <p>If you are not familiar with AVDs or how to use them, see <a
-href="{@docRoot}guide/developing/devices/index.html">Creating and Managing Virtual Devices</a>.</p>
+href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>.</p>
 
 <h4 id="project-update">Updating your project configuration</h4>
 
@@ -629,7 +629,7 @@ share its code and resources across multiple applications. </p>
 
 <p style="margin-top:.5em;">If you aren't familiar with library projects or how
 to use them, see <a href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">
-Creating and Managing Projects</a>.
+Managing Projects</a>.
 </p>
 </div>
 </div>
@@ -666,8 +666,9 @@ predefined as a library project in its <code>default.properties</code> file, so
 no further configuration is needed. </p>
 
 <p>For more information about how to create an application project or work with
-library projects in Eclipse, see <a href="{@docRoot}guide/developing/projects/projects-eclipse.html">
-Creating and Managing Projects in Eclipse</a></p>.
+library projects in Eclipse, see <a
+href="{@docRoot}guide/developing/projects/projects-eclipse.html">Managing Projects from
+Eclipse with ADT</a></p>.
 
 <h4>Copying the LVL sources to your application</h4>
 
@@ -698,8 +699,8 @@ haven't done that already, do it now before continuing. </p>
 Select the "Android" properties group and click <strong>Add</strong>, then
 choose the LVL library project (com_android_vending_licensing) and click
 <strong>OK</strong>. For more information, see 
-<a href="{@docRoot}developing/projects/projects-eclipse.html#SettingUpLibraryProject">
-Creating and Managing Projects in Eclipse</a></p>.
+<a href="{@docRoot}guide/developing/projects/projects-eclipse.html#SettingUpLibraryProject">
+Managing Projects from Eclipse with ADT</a></p>.
 
 <div style="margin-bottom:2em;">
 
@@ -727,8 +728,8 @@ properties, including the reference to the library project:</p>
 </pre>
 
 <p>For more information about working with library projects, 
-see <a href="{@docRoot}developing/projects/projects-cmdline.html#SettingUpLibraryProject">
-Creating and Managing Projects on the Command Line</a></p>.
+see <a href="{@docRoot}guide/developing/projects/projects-cmdline.html#SettingUpLibraryProject">
+Managing Projects from the Command Line</a></p>.
 
 
 <h2 id="app-integration">Integrating the LVL with Your Application</h2>

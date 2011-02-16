@@ -743,7 +743,8 @@ from the list. It also demonstrates how to provide different configurations of t
 based on the screen configuration.</p>
 
 <p class="note"><strong>Note:</strong> The complete source code for this activity is available in
-<a href="resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
+<a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.html">{@code
 FragmentLayout.java}</a>.</p>
 
 <p>The main activity applies a layout in the usual way, during {@link
