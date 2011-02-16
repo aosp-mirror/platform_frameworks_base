@@ -1,4 +1,6 @@
 page.title=WikiNotes: Linkify your Text!
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <img style="margin-left: 1.5em; margin-bottom:1.5em; float: right;" 

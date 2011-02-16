@@ -1,4 +1,6 @@
 page.title=Layout Tricks: Using ViewStubs
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>Sharing and reusing UI components is very easy with Android, thanks to the <a

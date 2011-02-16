@@ -1,4 +1,6 @@
 page.title=Layout Tricks: Merging Layouts
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>The articles showed you how to use the <code>&lt;include /&gt;</code> tag in XML layouts, to

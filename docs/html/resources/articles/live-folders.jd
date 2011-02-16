@@ -1,4 +1,6 @@
 page.title=Live Folders
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>Live folders, introduced in Android 1.5 (API Level 3), let you display any source of data

@@ -1,4 +1,6 @@
 page.title=Using WebViews
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>A small application called <a title="WebViewDemo"

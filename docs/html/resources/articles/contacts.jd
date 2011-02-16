@@ -1,4 +1,6 @@
 page.title=Using the Contacts API
+parent.title=Articles
+parent.link=../browser.html?tag=article
 @jd:body
 
 <p>Starting from Android 2.0 (API Level 5), the Android platform provides an
