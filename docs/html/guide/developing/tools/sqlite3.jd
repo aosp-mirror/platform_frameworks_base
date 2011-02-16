@@ -1,4 +1,6 @@
 page.title=sqlite3
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
  <p>From a remote shell to your device or from your host machine, you can use the <a href= 

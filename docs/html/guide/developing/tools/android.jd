@@ -1,4 +1,6 @@
 page.title=android
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
 <p>{@code android} is an important development tool that lets you:</p>

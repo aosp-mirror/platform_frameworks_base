@@ -1,4 +1,6 @@
 page.title=Hierarchy Viewer
+parent.title=Tools
+parent.link=index.html
 @jd:body
 
 <p>Hierarchy Viewer allows you to debug and optimize your user 
