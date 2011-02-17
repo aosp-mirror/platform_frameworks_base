@@ -1,4 +1,4 @@
-// Copyright (C) 2009 The Android Open Source Project
+// Copyright (C) 2011 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,17 +22,112 @@ rs_program_vertex gPVBackground;
 rs_program_fragment gPFBackground;
 
 rs_allocation gTGrid;
-rs_mesh gTestMesh;
 
 rs_program_store gPFSBackground;
-
-float gRotate;
 
 rs_font gItalic;
 rs_allocation gTextAlloc;
 
+typedef struct MeshInfo {
+    rs_mesh mMesh;
+    int mNumIndexSets;
+    float3 bBoxMin;
+    float3 bBoxMax;
+} MeshInfo_t;
+
+MeshInfo_t *gMeshes;
+
+static float3 gLookAt;
+
+static float gRotateX;
+static float gRotateY;
+static float gZoom;
+
+static float gLastX;
+static float gLastY;
+
+void onActionDown(float x, float y) {
+    gLastX = x;
+    gLastY = y;
+}
+
+void onActionScale(float scale) {
+
+    gZoom *= 1.0f / scale;
+    gZoom = max(0.1f, min(gZoom, 500.0f));
+}
+
+void onActionMove(float x, float y) {
+    float dx = gLastX - x;
+    float dy = gLastY - y;
+
+    if (fabs(dy) <= 2.0f) {
+        dy = 0.0f;
+    }
+    if (fabs(dx) <= 2.0f) {
+        dx = 0.0f;
+    }
+
+    gRotateY -= dx;
+    if (gRotateY > 360) {
+        gRotateY -= 360;
+    }
+    if (gRotateY < 0) {
+        gRotateY += 360;
+    }
+
+    gRotateX -= dy;
+    gRotateX = min(gRotateX, 80.0f);
+    gRotateX = max(gRotateX, -80.0f);
+
+    gLastX = x;
+    gLastY = y;
+}
+
 void init() {
-    gRotate = 0.0f;
+    gRotateX = 0.0f;
+    gRotateY = 0.0f;
+    gZoom = 50.0f;
+    gLookAt = 0.0f;
+}
+
+void updateMeshInfo() {
+    rs_allocation allMeshes = rsGetAllocation(gMeshes);
+    int size = rsAllocationGetDimX(allMeshes);
+    gLookAt = 0.0f;
+    float minX, minY, minZ, maxX, maxY, maxZ;
+    for (int i = 0; i < size; i++) {
+        MeshInfo_t *info = (MeshInfo_t*)rsGetElementAt(allMeshes, i);
+        rsgMeshComputeBoundingBox(info->mMesh,
+                                  &minX, &minY, &minZ,
+                                  &maxX, &maxY, &maxZ);
+        info->bBoxMin = (minX, minY, minZ);
+        info->bBoxMax = (maxX, maxY, maxZ);
+        gLookAt += (info->bBoxMin + info->bBoxMax)*0.5f;
+    }
+    gLookAt = gLookAt / (float)size;
+}
+
+static void renderAllMeshes() {
+    rs_allocation allMeshes = rsGetAllocation(gMeshes);
+    int size = rsAllocationGetDimX(allMeshes);
+    gLookAt = 0.0f;
+    float minX, minY, minZ, maxX, maxY, maxZ;
+    for (int i = 0; i < size; i++) {
+        MeshInfo_t *info = (MeshInfo_t*)rsGetElementAt(allMeshes, i);
+        rsgDrawMesh(info->mMesh);
+    }
+}
+
+void drawDescription() {
+    uint width = rsgGetWidth();
+    uint height = rsgGetHeight();
+    int left = 0, right = 0, top = 0, bottom = 0;
+
+    rsgBindFont(gItalic);
+
+    rsgMeasureText(gTextAlloc, &left, &right, &top, &bottom);
+    rsgDrawText(gTextAlloc, 2 -left, height - 2 + bottom);
 }
 
 int root(int launchID) {
@@ -43,7 +138,7 @@ int root(int launchID) {
     rsgBindProgramVertex(gPVBackground);
     rs_matrix4x4 proj;
     float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
-    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
+    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 1.0f, 100.0f);
     rsgProgramVertexLoadProjectionMatrix(&proj);
 
     rsgBindProgramFragment(gPFBackground);
@@ -52,20 +147,15 @@ int root(int launchID) {
 
     rs_matrix4x4 matrix;
     rsMatrixLoadIdentity(&matrix);
-    // Position our model on the screen
-    rsMatrixTranslate(&matrix, 0.0f, -0.3f, -10.0f);
-    rsMatrixScale(&matrix, 0.2f, 0.2f, 0.2f);
-    rsMatrixRotate(&matrix, 25.0f, 1.0f, 0.0f, 0.0f);
-    rsMatrixRotate(&matrix, gRotate, 0.0f, 1.0f, 0.0f);
+    // Position our models on the screen
+    rsMatrixTranslate(&matrix, gLookAt.x, gLookAt.y, gLookAt.z - gZoom);
+    rsMatrixRotate(&matrix, gRotateX, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&matrix, gRotateY, 0.0f, 1.0f, 0.0f);
     rsgProgramVertexLoadModelMatrix(&matrix);
 
-    rsgDrawMesh(gTestMesh);
+    renderAllMeshes();
 
-    rsgFontColor(0.3f, 0.3f, 0.3f, 1.0f);
-    rsgDrawText("Renderscript model test", 30, 695);
-
-    rsgBindFont(gItalic);
-    rsgDrawText(gTextAlloc, 30, 730);
+    drawDescription();
 
     return 10;
 }
