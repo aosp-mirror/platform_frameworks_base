@@ -188,23 +188,23 @@ static bool validatePointerCoords(JNIEnv* env, jobject pointerCoordsObj) {
 static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
         float xOffset, float yOffset, PointerCoords* outRawPointerCoords) {
     outRawPointerCoords->clear();
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_X,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_X,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.x) - xOffset);
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_Y,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_Y,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.y) - yOffset);
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_PRESSURE,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_PRESSURE,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.pressure));
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_SIZE,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_SIZE,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.size));
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.touchMajor));
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.touchMinor));
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.toolMajor));
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.toolMinor));
-    outRawPointerCoords->setAxisValue(AINPUT_MOTION_AXIS_ORIENTATION,
+    outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.orientation));
 
     uint32_t bits = env->GetIntField(pointerCoordsObj,
@@ -254,34 +254,34 @@ static jfloatArray obtainPackedAxisValuesArray(JNIEnv* env, uint32_t minSize,
 static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointerCoords,
         float xOffset, float yOffset, jobject outPointerCoordsObj) {
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.x,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_X) + xOffset);
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_X) + xOffset);
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.y,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_Y) + yOffset);
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_Y) + yOffset);
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.pressure,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_PRESSURE));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.size,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_SIZE));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_SIZE));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.touchMajor,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.touchMinor,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.toolMajor,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.toolMinor,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR));
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.orientation,
-            rawPointerCoords->getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION));
+            rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
 
     const uint32_t unpackedAxisBits = 0
-            | (1 << AINPUT_MOTION_AXIS_X)
-            | (1 << AINPUT_MOTION_AXIS_Y)
-            | (1 << AINPUT_MOTION_AXIS_PRESSURE)
-            | (1 << AINPUT_MOTION_AXIS_SIZE)
-            | (1 << AINPUT_MOTION_AXIS_TOUCH_MAJOR)
-            | (1 << AINPUT_MOTION_AXIS_TOUCH_MINOR)
-            | (1 << AINPUT_MOTION_AXIS_TOOL_MAJOR)
-            | (1 << AINPUT_MOTION_AXIS_TOOL_MINOR)
-            | (1 << AINPUT_MOTION_AXIS_ORIENTATION);
+            | (1 << AMOTION_EVENT_AXIS_X)
+            | (1 << AMOTION_EVENT_AXIS_Y)
+            | (1 << AMOTION_EVENT_AXIS_PRESSURE)
+            | (1 << AMOTION_EVENT_AXIS_SIZE)
+            | (1 << AMOTION_EVENT_AXIS_TOUCH_MAJOR)
+            | (1 << AMOTION_EVENT_AXIS_TOUCH_MINOR)
+            | (1 << AMOTION_EVENT_AXIS_TOOL_MAJOR)
+            | (1 << AMOTION_EVENT_AXIS_TOOL_MINOR)
+            | (1 << AMOTION_EVENT_AXIS_ORIENTATION);
 
     uint32_t outBits = 0;
     uint32_t remainingBits = rawPointerCoords->bits & ~unpackedAxisBits;
@@ -610,7 +610,7 @@ static jint android_view_MotionEvent_nativeReadFromParcel(JNIEnv* env, jclass cl
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
 
     status_t status = event->readFromParcel(parcel);
-    if (!status) {
+    if (status) {
         if (!nativePtr) {
             delete event;
         }
@@ -626,7 +626,7 @@ static void android_view_MotionEvent_nativeWriteToParcel(JNIEnv* env, jclass cla
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
 
     status_t status = event->writeToParcel(parcel);
-    if (!status) {
+    if (status) {
         jniThrowRuntimeException(env, "Failed to write MotionEvent parcel.");
     }
 }

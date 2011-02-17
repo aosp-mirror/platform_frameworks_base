@@ -1,6 +1,18 @@
-//
-// Copyright 2010 The Android Open Source Project
-//
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <ui/InputTransport.h>
 #include <utils/Timers.h>
@@ -161,15 +173,15 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
             samplePointerCoords.push();
             PointerCoords& pc = samplePointerCoords.editTop();
             pc.clear();
-            pc.setAxisValue(AINPUT_MOTION_AXIS_X, 100 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_Y, 200 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_PRESSURE, 0.5 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_SIZE, 0.7 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR, 1.5 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR, 1.7 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR, 2.5 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR, 2.7 * i + j);
-            pc.setAxisValue(AINPUT_MOTION_AXIS_ORIENTATION, 3.5 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_X, 100 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_Y, 200 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 0.5 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_SIZE, 0.7 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR, 1.5 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR, 1.7 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, 2.5 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, 2.7 * i + j);
+            pc.setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, 3.5 * i + j);
         }
     }
 
@@ -241,27 +253,27 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
         for (size_t i = 0; i < pointerCount; i++) {
             SCOPED_TRACE(i);
             size_t offset = sampleIndex * pointerCount + i;
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_X),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_X),
                     motionEvent->getHistoricalRawX(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_Y),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_Y),
                     motionEvent->getHistoricalRawY(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_X) + xOffset,
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_X) + xOffset,
                     motionEvent->getHistoricalX(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_Y) + yOffset,
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_Y) + yOffset,
                     motionEvent->getHistoricalY(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_PRESSURE),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
                     motionEvent->getHistoricalPressure(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_SIZE),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
                     motionEvent->getHistoricalSize(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
                     motionEvent->getHistoricalTouchMajor(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
                     motionEvent->getHistoricalTouchMinor(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
                     motionEvent->getHistoricalToolMajor(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
                     motionEvent->getHistoricalToolMinor(i, sampleIndex));
-            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION),
+            EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION),
                     motionEvent->getHistoricalOrientation(i, sampleIndex));
         }
     }
@@ -271,27 +283,27 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
     for (size_t i = 0; i < pointerCount; i++) {
         SCOPED_TRACE(i);
         size_t offset = lastSampleIndex * pointerCount + i;
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_X),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_X),
                 motionEvent->getRawX(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_Y),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_Y),
                 motionEvent->getRawY(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_X) + xOffset,
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_X) + xOffset,
                 motionEvent->getX(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_Y) + yOffset,
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_Y) + yOffset,
                 motionEvent->getY(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_PRESSURE),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
                 motionEvent->getPressure(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_SIZE),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
                 motionEvent->getSize(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
                 motionEvent->getTouchMajor(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
                 motionEvent->getTouchMinor(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
                 motionEvent->getToolMajor(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
                 motionEvent->getToolMinor(i));
-        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION),
+        EXPECT_EQ(samplePointerCoords[offset].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION),
                 motionEvent->getOrientation(i));
     }
 

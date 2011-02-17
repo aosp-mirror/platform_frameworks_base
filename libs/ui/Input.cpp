@@ -362,10 +362,10 @@ float MotionEvent::getRawAxisValue(int32_t axis, size_t pointerIndex) const {
 float MotionEvent::getAxisValue(int32_t axis, size_t pointerIndex) const {
     float value = getRawPointerCoords(pointerIndex)->getAxisValue(axis);
     switch (axis) {
-    case AINPUT_MOTION_AXIS_X:
+    case AMOTION_EVENT_AXIS_X:
         value += mXOffset;
         break;
-    case AINPUT_MOTION_AXIS_Y:
+    case AMOTION_EVENT_AXIS_Y:
         value += mYOffset;
         break;
     }
@@ -386,10 +386,10 @@ float MotionEvent::getHistoricalAxisValue(int32_t axis, size_t pointerIndex,
         size_t historicalIndex) const {
     float value = getHistoricalRawPointerCoords(pointerIndex, historicalIndex)->getAxisValue(axis);
     switch (axis) {
-    case AINPUT_MOTION_AXIS_X:
+    case AMOTION_EVENT_AXIS_X:
         value += mXOffset;
         break;
-    case AINPUT_MOTION_AXIS_Y:
+    case AMOTION_EVENT_AXIS_Y:
         value += mYOffset;
         break;
     }
@@ -419,12 +419,12 @@ void MotionEvent::scale(float scaleFactor) {
         PointerCoords& c = mSamplePointerCoords.editItemAt(i);
         // No need to scale pressure or size since they are normalized.
         // No need to scale orientation since it is meaningless to do so.
-        scaleAxisValue(c, AINPUT_MOTION_AXIS_X, scaleFactor);
-        scaleAxisValue(c, AINPUT_MOTION_AXIS_Y, scaleFactor);
-        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOUCH_MAJOR, scaleFactor);
-        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOUCH_MINOR, scaleFactor);
-        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOOL_MAJOR, scaleFactor);
-        scaleAxisValue(c, AINPUT_MOTION_AXIS_TOOL_MINOR, scaleFactor);
+        scaleAxisValue(c, AMOTION_EVENT_AXIS_X, scaleFactor);
+        scaleAxisValue(c, AMOTION_EVENT_AXIS_Y, scaleFactor);
+        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOUCH_MAJOR, scaleFactor);
+        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOUCH_MINOR, scaleFactor);
+        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOOL_MAJOR, scaleFactor);
+        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOOL_MINOR, scaleFactor);
     }
 }
 
@@ -471,8 +471,8 @@ void MotionEvent::transform(const SkMatrix* matrix) {
     size_t numSamples = mSamplePointerCoords.size();
     for (size_t i = 0; i < numSamples; i++) {
         PointerCoords& c = mSamplePointerCoords.editItemAt(i);
-        float* xPtr = c.editAxisValue(AINPUT_MOTION_AXIS_X);
-        float* yPtr = c.editAxisValue(AINPUT_MOTION_AXIS_Y);
+        float* xPtr = c.editAxisValue(AMOTION_EVENT_AXIS_X);
+        float* yPtr = c.editAxisValue(AMOTION_EVENT_AXIS_Y);
         if (xPtr && yPtr) {
             float x = *xPtr + oldXOffset;
             float y = *yPtr + oldYOffset;
@@ -481,7 +481,7 @@ void MotionEvent::transform(const SkMatrix* matrix) {
             *yPtr = SkScalarToFloat(point.fY) - newYOffset;
         }
 
-        float* orientationPtr = c.editAxisValue(AINPUT_MOTION_AXIS_ORIENTATION);
+        float* orientationPtr = c.editAxisValue(AMOTION_EVENT_AXIS_ORIENTATION);
         if (orientationPtr) {
             *orientationPtr = transformAngle(matrix, *orientationPtr);
         }
@@ -523,7 +523,7 @@ status_t MotionEvent::readFromParcel(Parcel* parcel) {
         for (size_t i = 0; i < pointerCount; i++) {
             mSamplePointerCoords.push();
             status_t status = mSamplePointerCoords.editTop().readFromParcel(parcel);
-            if (!status) {
+            if (status) {
                 return status;
             }
         }
@@ -559,7 +559,7 @@ status_t MotionEvent::writeToParcel(Parcel* parcel) const {
         parcel->writeInt64(mSampleEventTimes.itemAt(h));
         for (size_t i = 0; i < pointerCount; i++) {
             status_t status = (pc++)->writeToParcel(parcel);
-            if (!status) {
+            if (status) {
                 return status;
             }
         }
