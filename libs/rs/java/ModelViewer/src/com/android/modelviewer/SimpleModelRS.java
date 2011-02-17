@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,22 +26,18 @@ import android.util.Log;
 
 public class SimpleModelRS {
 
-    private final int STATE_LAST_FOCUS = 1;
-
-    int mWidth;
-    int mHeight;
-    int mRotation;
-
     public SimpleModelRS() {
     }
 
-    public void init(RenderScriptGL rs, Resources res, int width, int height) {
+    public void init(RenderScriptGL rs, Resources res) {
         mRS = rs;
         mRes = res;
-        mWidth = width;
-        mHeight = height;
-        mRotation = 0;
         initRS();
+    }
+
+    public void surfaceChanged() {
+        mRS.getWidth();
+        mRS.getHeight();
     }
 
     private Resources mRes;
@@ -55,34 +51,23 @@ public class SimpleModelRS {
     private Allocation mGridImage;
     private Allocation mAllocPV;
 
-    private Mesh mMesh;
-
     private Font mItalic;
     private Allocation mTextAlloc;
 
+    private ScriptField_MeshInfo mMeshes;
     private ScriptC_simplemodel mScript;
 
-    int mLastX;
-    int mLastY;
 
-    public void touchEvent(int x, int y) {
-        int dx = mLastX - x;
-        if (Math.abs(dx) > 50 || Math.abs(dx) < 3) {
-            dx = 0;
-        }
+    public void onActionDown(float x, float y) {
+        mScript.invoke_onActionDown(x, y);
+    }
 
-        mRotation -= dx;
-        if (mRotation > 360) {
-            mRotation -= 360;
-        }
-        if (mRotation < 0) {
-            mRotation += 360;
-        }
+    public void onActionScale(float scale) {
+        mScript.invoke_onActionScale(scale);
+    }
 
-        mScript.set_gRotate((float)mRotation);
-
-        mLastX = x;
-        mLastY = y;
+    public void onActionMove(float x, float y) {
+        mScript.invoke_onActionMove(x, y);
     }
 
     private void initPFS() {
@@ -130,10 +115,46 @@ public class SimpleModelRS {
         mScript.set_gTGrid(mGridImage);
     }
 
-    private void initTextAllocation() {
-        String allocString = "Displaying file: R.raw.robot";
+    private void initTextAllocation(String fileName) {
+        String allocString = "Displaying file: " + fileName;
         mTextAlloc = Allocation.createFromString(mRS, allocString, Allocation.USAGE_SCRIPT);
         mScript.set_gTextAlloc(mTextAlloc);
+    }
+
+    private void initMeshes(FileA3D model) {
+        int numEntries = model.getIndexEntryCount();
+        int numMeshes = 0;
+        for (int i = 0; i < numEntries; i ++) {
+            FileA3D.IndexEntry entry = model.getIndexEntry(i);
+            if (entry != null && entry.getEntryType() == FileA3D.EntryType.MESH) {
+                numMeshes ++;
+            }
+        }
+
+        if (numMeshes > 0) {
+            mMeshes = new ScriptField_MeshInfo(mRS, numMeshes);
+
+            for (int i = 0; i < numEntries; i ++) {
+                FileA3D.IndexEntry entry = model.getIndexEntry(i);
+                if (entry != null && entry.getEntryType() == FileA3D.EntryType.MESH) {
+                    Mesh mesh = entry.getMesh();
+                    mMeshes.set_mMesh(i, mesh, false);
+                    mMeshes.set_mNumIndexSets(i, mesh.getPrimitiveCount(), false);
+                }
+            }
+            mMeshes.copyAll();
+        } else {
+            throw new RSRuntimeException("No valid meshes in file");
+        }
+
+        mScript.bind_gMeshes(mMeshes);
+        mScript.invoke_updateMeshInfo();
+    }
+
+    public void loadA3DFile(String path) {
+        FileA3D model = FileA3D.createFromFile(mRS, path);
+        initMeshes(model);
+        initTextAllocation(path);
     }
 
     private void initRS() {
@@ -147,18 +168,12 @@ public class SimpleModelRS {
         loadImage();
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.robot);
-        FileA3D.IndexEntry entry = model.getIndexEntry(0);
-        if (entry == null || entry.getEntryType() != FileA3D.EntryType.MESH) {
-            Log.e("rs", "could not load model");
-        } else {
-            mMesh = (Mesh)entry.getObject();
-            mScript.set_gTestMesh(mMesh);
-        }
+        initMeshes(model);
 
         mItalic = Font.create(mRS, mRes, "serif", Font.Style.ITALIC, 8);
         mScript.set_gItalic(mItalic);
 
-        initTextAllocation();
+        initTextAllocation("R.raw.robot");
 
         mRS.bindRootScript(mScript);
     }

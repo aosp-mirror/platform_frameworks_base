@@ -21,6 +21,7 @@ import android.renderscript.RenderScript;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,9 +32,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuInflater;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
+import android.net.Uri;
 
 import java.lang.Runtime;
 
@@ -65,6 +68,46 @@ public class SimpleModel extends Activity {
         // to take appropriate action when the activity looses focus
         super.onPause();
         mView.pause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.loader_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+        case R.id.load_model:
+            loadModel();
+            return true;
+        case R.id.display_options:
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private static final int FIND_A3D_MODEL = 10;
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == FIND_A3D_MODEL) {
+                Uri selectedImageUri = data.getData();
+                Log.e("Selected Path: ", selectedImageUri.getPath());
+                mView.loadA3DFile(selectedImageUri.getPath());
+            }
+        }
+    }
+
+    public void loadModel() {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_PICK);
+        intent.setClassName("com.android.modelviewer",
+                            "com.android.modelviewer.A3DSelector");
+        startActivityForResult(intent, FIND_A3D_MODEL);
     }
 
 }
