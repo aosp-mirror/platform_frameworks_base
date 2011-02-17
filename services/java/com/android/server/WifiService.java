@@ -42,14 +42,18 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
+import android.net.NetworkInfo.DetailedState;
+import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.Messenger;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -111,6 +115,20 @@ public class WifiService extends IWifiManager.Stub {
 
     private final IBatteryStats mBatteryStats;
 
+    private boolean mEnableTrafficStatsPoll = false;
+    private int mTrafficStatsPollToken = 0;
+    private long mTxPkts;
+    private long mRxPkts;
+    /* Tracks last reported data activity */
+    private int mDataActivity;
+    private String mInterfaceName;
+
+    /**
+     * Interval in milliseconds between polling for traffic
+     * statistics
+     */
+    private static final int POLL_TRAFFIC_STATS_INTERVAL_MSECS = 1000;
+
     /**
      * See {@link Settings.Secure#WIFI_IDLE_MS}. This is the default value if a
      * Settings.Secure value is not present. This timeout value is chosen as
@@ -122,6 +140,9 @@ public class WifiService extends IWifiManager.Stub {
 
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
+
+    private static final int CMD_ENABLE_TRAFFIC_STATS_POLL = 1;
+    private static final int CMD_TRAFFIC_STATS_POLL        = 2;
 
     private boolean mIsReceiverRegistered = false;
 
@@ -180,18 +201,20 @@ public class WifiService extends IWifiManager.Stub {
     /**
      * Asynchronous channel to WifiStateMachine
      */
-    private AsyncChannel mChannel;
+    private AsyncChannel mWifiStateMachineChannel;
 
     /**
-     * TODO: Possibly change WifiService into an AsyncService.
+     * Clients receiving asynchronous messages
      */
-    private class WifiServiceHandler extends Handler {
-        private AsyncChannel mWshChannel;
+    private List<AsyncChannel> mClients = new ArrayList<AsyncChannel>();
 
-        WifiServiceHandler(android.os.Looper looper, Context context) {
+    /**
+     * Handles client connections
+     */
+    private class AsyncServiceHandler extends Handler {
+
+        AsyncServiceHandler(android.os.Looper looper) {
             super(looper);
-            mWshChannel = new AsyncChannel();
-            mWshChannel.connect(context, this, mWifiStateMachine.getHandler());
         }
 
         @Override
@@ -199,11 +222,33 @@ public class WifiService extends IWifiManager.Stub {
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
                     if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        mChannel = mWshChannel;
+                        Slog.d(TAG, "New client listening to asynchronous messages");
+                        mClients.add((AsyncChannel) msg.obj);
                     } else {
-                        Slog.d(TAG, "WifiServicehandler.handleMessage could not connect error=" +
-                                msg.arg1);
-                        mChannel = null;
+                        Slog.e(TAG, "Client connection failure, error=" + msg.arg1);
+                    }
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
+                    AsyncChannel ac = new AsyncChannel();
+                    ac.connect(mContext, this, msg.replyTo);
+                    break;
+                }
+                case CMD_ENABLE_TRAFFIC_STATS_POLL: {
+                    mEnableTrafficStatsPoll = (msg.arg1 == 1);
+                    mTrafficStatsPollToken++;
+                    if (mEnableTrafficStatsPoll) {
+                        notifyOnDataActivity();
+                        sendMessageDelayed(Message.obtain(this, CMD_TRAFFIC_STATS_POLL,
+                                mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
+                    }
+                    break;
+                }
+                case CMD_TRAFFIC_STATS_POLL: {
+                    if (msg.arg1 == mTrafficStatsPollToken) {
+                        notifyOnDataActivity();
+                        sendMessageDelayed(Message.obtain(this, CMD_TRAFFIC_STATS_POLL,
+                                mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
                     break;
                 }
@@ -214,7 +259,40 @@ public class WifiService extends IWifiManager.Stub {
             }
         }
     }
-    WifiServiceHandler mHandler;
+    private AsyncServiceHandler mAsyncServiceHandler;
+
+    /**
+     * Handles interaction with WifiStateMachine
+     */
+    private class WifiStateMachineHandler extends Handler {
+        private AsyncChannel mWsmChannel;
+
+        WifiStateMachineHandler(android.os.Looper looper) {
+            super(looper);
+            mWsmChannel = new AsyncChannel();
+            mWsmChannel.connect(mContext, this, mWifiStateMachine.getHandler());
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED: {
+                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        mWifiStateMachineChannel = mWsmChannel;
+                    } else {
+                        Slog.e(TAG, "WifiStateMachine connection failure, error=" + msg.arg1);
+                        mWifiStateMachineChannel = null;
+                    }
+                    break;
+                }
+                default: {
+                    Slog.d(TAG, "WifiStateMachineHandler.handleMessage ignoring msg=" + msg);
+                    break;
+                }
+            }
+        }
+    }
+    WifiStateMachineHandler mWifiStateMachineHandler;
 
     /**
      * Temporary for computing UIDS that are responsible for starting WIFI.
@@ -224,17 +302,16 @@ public class WifiService extends IWifiManager.Stub {
 
     WifiService(Context context) {
         mContext = context;
-        mWifiStateMachine = new WifiStateMachine(mContext);
+
+        mInterfaceName =  SystemProperties.get("wifi.interface", "wlan0");
+
+        mWifiStateMachine = new WifiStateMachine(mContext, mInterfaceName);
         mWifiStateMachine.enableRssiPolling(true);
         mBatteryStats = BatteryStatsService.getService();
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent idleIntent = new Intent(ACTION_DEVICE_IDLE, null);
         mIdleIntent = PendingIntent.getBroadcast(mContext, IDLE_REQUEST, idleIntent, 0);
-
-        HandlerThread wifiThread = new HandlerThread("WifiService");
-        wifiThread.start();
-        mHandler = new WifiServiceHandler(wifiThread.getLooper(), context);
 
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -271,6 +348,7 @@ public class WifiService extends IWifiManager.Stub {
                             switch(mNetworkInfo.getDetailedState()) {
                                 case CONNECTED:
                                 case DISCONNECTED:
+                                    evaluateTrafficStatsPolling();
                                     resetNotification();
                                     break;
                             }
@@ -280,6 +358,11 @@ public class WifiService extends IWifiManager.Stub {
                         }
                     }
                 }, filter);
+
+        HandlerThread wifiThread = new HandlerThread("WifiService");
+        wifiThread.start();
+        mAsyncServiceHandler = new AsyncServiceHandler(wifiThread.getLooper());
+        mWifiStateMachineHandler = new WifiStateMachineHandler(wifiThread.getLooper());
 
         // Setting is in seconds
         NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(),
@@ -337,10 +420,10 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean pingSupplicant() {
         enforceAccessPermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.syncPingSupplicant(mChannel);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncPingSupplicant(mWifiStateMachineChannel);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return false;
         }
     }
@@ -550,10 +633,10 @@ public class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.syncAddOrUpdateNetwork(mChannel, config);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncAddOrUpdateNetwork(mWifiStateMachineChannel, config);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return -1;
         }
     }
@@ -566,10 +649,10 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean removeNetwork(int netId) {
         enforceChangePermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.syncRemoveNetwork(mChannel, netId);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncRemoveNetwork(mWifiStateMachineChannel, netId);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return false;
         }
     }
@@ -583,10 +666,11 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
         enforceChangePermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.syncEnableNetwork(mChannel, netId, disableOthers);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncEnableNetwork(mWifiStateMachineChannel, netId,
+                    disableOthers);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return false;
         }
     }
@@ -599,10 +683,10 @@ public class WifiService extends IWifiManager.Stub {
      */
     public boolean disableNetwork(int netId) {
         enforceChangePermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.syncDisableNetwork(mChannel, netId);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncDisableNetwork(mWifiStateMachineChannel, netId);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return false;
         }
     }
@@ -639,10 +723,10 @@ public class WifiService extends IWifiManager.Stub {
     public boolean saveConfiguration() {
         boolean result = true;
         enforceChangePermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.syncSaveConfig(mChannel);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncSaveConfig(mWifiStateMachineChannel);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return false;
         }
     }
@@ -776,12 +860,21 @@ public class WifiService extends IWifiManager.Stub {
 
     public WpsResult startWps(WpsConfiguration config) {
         enforceChangePermission();
-        if (mChannel != null) {
-            return mWifiStateMachine.startWps(mChannel, config);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.startWps(mWifiStateMachineChannel, config);
         } else {
-            Slog.e(TAG, "mChannel is not initialized");
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
             return new WpsResult(WpsResult.Status.FAILURE);
         }
+    }
+
+    /**
+     * Get a reference to handler. This is used by a client to establish
+     * an AsyncChannel communication with WifiService
+     */
+    public Messenger getMessenger() {
+        enforceAccessPermission();
+        return new Messenger(mAsyncServiceHandler);
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -805,6 +898,7 @@ public class WifiService extends IWifiManager.Stub {
                 // Once the screen is on, we are not keeping WIFI running
                 // because of any locks so clear that tracking immediately.
                 reportStartWorkSource();
+                evaluateTrafficStatsPolling();
                 mWifiStateMachine.enableRssiPolling(true);
                 mWifiStateMachine.enableAllNetworks();
                 updateWifiState();
@@ -813,6 +907,7 @@ public class WifiService extends IWifiManager.Stub {
                     Slog.d(TAG, "ACTION_SCREEN_OFF");
                 }
                 mScreenOff = true;
+                evaluateTrafficStatsPolling();
                 mWifiStateMachine.enableRssiPolling(false);
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
@@ -1415,6 +1510,48 @@ public class WifiService extends IWifiManager.Stub {
             return (mMulticasters.size() > 0);
         }
     }
+
+    /**
+     * Evaluate if traffic stats polling is needed based on
+     * connection and screen on status
+     */
+    private void evaluateTrafficStatsPolling() {
+        Message msg;
+        if (mNetworkInfo.getDetailedState() == DetailedState.CONNECTED && !mScreenOff) {
+            msg = Message.obtain(mAsyncServiceHandler, CMD_ENABLE_TRAFFIC_STATS_POLL, 1, 0);
+        } else {
+            msg = Message.obtain(mAsyncServiceHandler, CMD_ENABLE_TRAFFIC_STATS_POLL, 0, 0);
+        }
+        msg.sendToTarget();
+    }
+
+    private void notifyOnDataActivity() {
+        long sent, received;
+        long preTxPkts = mTxPkts, preRxPkts = mRxPkts;
+        int dataActivity = WifiManager.DATA_ACTIVITY_NONE;
+
+        mTxPkts = TrafficStats.getTxPackets(mInterfaceName);
+        mRxPkts = TrafficStats.getRxPackets(mInterfaceName);
+
+        if (preTxPkts > 0 || preRxPkts > 0) {
+            sent = mTxPkts - preTxPkts;
+            received = mRxPkts - preRxPkts;
+            if (sent > 0) {
+                dataActivity |= WifiManager.DATA_ACTIVITY_OUT;
+            }
+            if (received > 0) {
+                dataActivity |= WifiManager.DATA_ACTIVITY_IN;
+            }
+
+            if (dataActivity != mDataActivity && !mScreenOff) {
+                mDataActivity = dataActivity;
+                for (AsyncChannel client : mClients) {
+                    client.sendMessage(WifiManager.DATA_ACTIVITY_NOTIFICATION, mDataActivity);
+                }
+            }
+        }
+    }
+
 
     private void checkAndSetNotification() {
         // If we shouldn't place a notification on available networks, then

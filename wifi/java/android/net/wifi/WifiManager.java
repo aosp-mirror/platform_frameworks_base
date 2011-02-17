@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.WorkSource;
+import android.os.Messenger;
 
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class WifiManager {
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
      * enabling, disabling, or unknown. One extra provides this state as an int.
      * Another extra provides the previous state, if available.
-     * 
+     *
      * @see #EXTRA_WIFI_STATE
      * @see #EXTRA_PREVIOUS_WIFI_STATE
      */
@@ -71,7 +72,7 @@ public class WifiManager {
      * The lookup key for an int that indicates whether Wi-Fi is enabled,
      * disabled, enabling, disabling, or unknown.  Retrieve it with
      * {@link android.content.Intent#getIntExtra(String,int)}.
-     * 
+     *
      * @see #WIFI_STATE_DISABLED
      * @see #WIFI_STATE_DISABLING
      * @see #WIFI_STATE_ENABLED
@@ -81,22 +82,22 @@ public class WifiManager {
     public static final String EXTRA_WIFI_STATE = "wifi_state";
     /**
      * The previous Wi-Fi state.
-     * 
+     *
      * @see #EXTRA_WIFI_STATE
      */
     public static final String EXTRA_PREVIOUS_WIFI_STATE = "previous_wifi_state";
-    
+
     /**
      * Wi-Fi is currently being disabled. The state will change to {@link #WIFI_STATE_DISABLED} if
      * it finishes successfully.
-     * 
+     *
      * @see #WIFI_STATE_CHANGED_ACTION
      * @see #getWifiState()
      */
     public static final int WIFI_STATE_DISABLING = 0;
     /**
      * Wi-Fi is disabled.
-     * 
+     *
      * @see #WIFI_STATE_CHANGED_ACTION
      * @see #getWifiState()
      */
@@ -104,14 +105,14 @@ public class WifiManager {
     /**
      * Wi-Fi is currently being enabled. The state will change to {@link #WIFI_STATE_ENABLED} if
      * it finishes successfully.
-     * 
+     *
      * @see #WIFI_STATE_CHANGED_ACTION
      * @see #getWifiState()
      */
     public static final int WIFI_STATE_ENABLING = 2;
     /**
      * Wi-Fi is enabled.
-     * 
+     *
      * @see #WIFI_STATE_CHANGED_ACTION
      * @see #getWifiState()
      */
@@ -119,7 +120,7 @@ public class WifiManager {
     /**
      * Wi-Fi is in an unknown state. This state will occur when an error happens while enabling
      * or disabling.
-     * 
+     *
      * @see #WIFI_STATE_CHANGED_ACTION
      * @see #getWifiState()
      */
@@ -418,6 +419,22 @@ public class WifiManager {
      */
     public static final int WIFI_FREQUENCY_BAND_2GHZ = 2;
 
+    /** List of asyncronous notifications
+     * @hide
+     */
+    public static final int DATA_ACTIVITY_NOTIFICATION = 1;
+
+    //Lowest bit indicates data reception and the second lowest
+    //bit indicates data transmitted
+    /** @hide */
+    public static final int DATA_ACTIVITY_NONE         = 0x00;
+    /** @hide */
+    public static final int DATA_ACTIVITY_IN           = 0x01;
+    /** @hide */
+    public static final int DATA_ACTIVITY_OUT          = 0x02;
+    /** @hide */
+    public static final int DATA_ACTIVITY_INOUT        = 0x03;
+
     IWifiManager mService;
     Handler mHandler;
 
@@ -478,7 +495,7 @@ public class WifiManager {
      * <p/>
      * The new network will be marked DISABLED by default. To enable it,
      * called {@link #enableNetwork}.
-     * 
+     *
      * @param config the set of variables that describe the configuration,
      *            contained in a {@link WifiConfiguration} object.
      * @return the ID of the newly created network description. This is used in
@@ -518,7 +535,7 @@ public class WifiManager {
     /**
      * Internal method for doing the RPC that creates a new network description
      * or updates an existing one.
-     * 
+     *
      * @param config The possibly sparse object containing the variables that
      *         are to set or updated in the network description.
      * @return the ID of the network on success, {@code -1} on failure.
@@ -705,7 +722,7 @@ public class WifiManager {
      * Note: It is possible for this method to change the network IDs of
      * existing networks. You should assume the network IDs can be different
      * after calling this method.
-     * 
+     *
      * @return {@code true} if the operation succeeded
      */
     public boolean saveConfiguration() {
@@ -816,20 +833,20 @@ public class WifiManager {
             return WIFI_STATE_UNKNOWN;
         }
     }
-    
+
     /**
-     * Return whether Wi-Fi is enabled or disabled. 
+     * Return whether Wi-Fi is enabled or disabled.
      * @return {@code true} if Wi-Fi is enabled
      * @see #getWifiState()
      */
     public boolean isWifiEnabled() {
         return getWifiState() == WIFI_STATE_ENABLED;
     }
-    
+
     /**
      * Calculates the level of the signal. This should be used any time a signal
      * is being shown.
-     * 
+     *
      * @param rssi The power of the signal measured in RSSI.
      * @param numLevels The number of levels to consider in the calculated
      *            level.
@@ -847,10 +864,10 @@ public class WifiManager {
             return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
         }
     }
-    
+
     /**
      * Compares two signal strengths.
-     * 
+     *
      * @param rssiA The power of the first signal measured in RSSI.
      * @param rssiB The power of the second signal measured in RSSI.
      * @return Returns <0 if the first signal is weaker than the second signal,
@@ -1115,9 +1132,24 @@ public class WifiManager {
     }
 
     /**
+     * Get a reference to WifiService handler. This is used by a client to establish
+     * an AsyncChannel communication with WifiService
+     *
+     * @return Messenger pointing to the WifiService handler
+     * @hide
+     */
+    public Messenger getMessenger() {
+        try {
+            return mService.getMessenger();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Allows an application to keep the Wi-Fi radio awake.
      * Normally the Wi-Fi radio may turn off when the user has not used the device in a while.
-     * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple 
+     * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple
      * applications may hold WifiLocks, and the radio will only be allowed to turn off when no
      * WifiLocks are held in any application.
      *
@@ -1153,7 +1185,7 @@ public class WifiManager {
          * Locks the Wi-Fi radio on until {@link #release} is called.
          *
          * If this WifiLock is reference-counted, each call to {@code acquire} will increment the
-         * reference count, and the radio will remain locked as long as the reference count is 
+         * reference count, and the radio will remain locked as long as the reference count is
          * above zero.
          *
          * If this WifiLock is not reference-counted, the first call to {@code acquire} will lock

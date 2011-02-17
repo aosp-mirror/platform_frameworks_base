@@ -130,6 +130,33 @@ static jlong getMobileRxBytes(JNIEnv* env, jobject clazz) {
             "/sys/class/net/ppp0/statistics/rx_bytes");
 }
 
+static jlong getData(JNIEnv* env, char *what, jstring interface) {
+    char filename[80];
+    jboolean isCopy;
+
+    const char *interfaceStr = env->GetStringUTFChars(interface, &isCopy);
+    snprintf(filename, sizeof(filename), "/sys/class/net/%s/statistics/%s", interfaceStr, what);
+
+    return readNumber(filename);
+}
+
+static jlong getTxPackets(JNIEnv* env, jobject clazz, jstring interface) {
+    return getData(env, "tx_packets", interface);
+}
+
+static jlong getRxPackets(JNIEnv* env, jobject clazz, jstring interface) {
+    return getData(env, "rx_packets", interface);
+}
+
+static jlong getTxBytes(JNIEnv* env, jobject clazz, jstring interface) {
+    return getData(env, "tx_bytes", interface);
+}
+
+static jlong getRxBytes(JNIEnv* env, jobject clazz, jstring interface) {
+    return getData(env, "rx_bytes", interface);
+}
+
+
 // Total stats are read less often, so we're willing to put up
 // with listing the directory and concatenating filenames.
 
@@ -288,6 +315,10 @@ static JNINativeMethod gMethods[] = {
     {"getMobileRxPackets", "()J", (void*) getMobileRxPackets},
     {"getMobileTxBytes", "()J", (void*) getMobileTxBytes},
     {"getMobileRxBytes", "()J", (void*) getMobileRxBytes},
+    {"getTxPackets", "(Ljava/lang/String;)J", (void*) getTxPackets},
+    {"getRxPackets", "(Ljava/lang/String;)J", (void*) getRxPackets},
+    {"getTxBytes", "(Ljava/lang/String;)J", (void*) getTxBytes},
+    {"getRxBytes", "(Ljava/lang/String;)J", (void*) getRxBytes},
     {"getTotalTxPackets", "()J", (void*) getTotalTxPackets},
     {"getTotalRxPackets", "()J", (void*) getTotalRxPackets},
     {"getTotalTxBytes", "()J", (void*) getTotalTxBytes},

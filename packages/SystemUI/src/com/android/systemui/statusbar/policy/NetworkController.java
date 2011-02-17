@@ -33,6 +33,11 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Telephony;
@@ -50,6 +55,7 @@ import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.server.am.BatteryStatsService;
+import com.android.internal.util.AsyncChannel;
 
 import com.android.systemui.R;
 
@@ -82,6 +88,7 @@ public class NetworkController extends BroadcastReceiver {
 
     // wifi
     final WifiManager mWifiManager;
+    AsyncChannel mWifiChannel;
     boolean mWifiEnabled, mWifiConnected;
     int mWifiLevel;
     String mWifiSsid;
@@ -140,6 +147,14 @@ public class NetworkController extends BroadcastReceiver {
 
         // wifi
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        HandlerThread handlerThread = new HandlerThread("WifiServiceThread");
+        handlerThread.start();
+        Handler handler = new WifiHandler(handlerThread.getLooper());
+        mWifiChannel = new AsyncChannel();
+        Messenger wifiMessenger = mWifiManager.getMessenger();
+        if (wifiMessenger != null) {
+            mWifiChannel.connect(mContext, handler, wifiMessenger);
+        }
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
@@ -583,6 +598,44 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     // ===== Wifi ===================================================================
+
+    class WifiHandler extends Handler {
+
+        WifiHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        mWifiChannel.sendMessage(Message.obtain(this,
+                                AsyncChannel.CMD_CHANNEL_FULL_CONNECTION));
+                    } else {
+                        Slog.e(TAG, "Failed to connect to wifi");
+                    }
+                    break;
+                case WifiManager.DATA_ACTIVITY_NOTIFICATION:
+                    int dataActivity = msg.arg1;
+                    /* TODO: update icons based on data activity */
+                    switch (dataActivity) {
+                        case WifiManager.DATA_ACTIVITY_IN:
+                            break;
+                        case WifiManager.DATA_ACTIVITY_OUT:
+                            break;
+                        case WifiManager.DATA_ACTIVITY_INOUT:
+                            break;
+                        case WifiManager.DATA_ACTIVITY_NONE:
+                            break;
+                    }
+                    break;
+                default:
+                    //Ignore
+                    break;
+            }
+        }
+    }
 
     private void updateWifiState(Intent intent) {
         final String action = intent.getAction();
