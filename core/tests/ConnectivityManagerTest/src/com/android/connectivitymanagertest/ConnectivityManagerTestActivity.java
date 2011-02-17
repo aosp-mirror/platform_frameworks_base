@@ -30,7 +30,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import android.widget.LinearLayout;
@@ -482,6 +484,44 @@ public class ConnectivityManagerTestActivity extends Activity {
         } catch (Exception e) {
             log(e.toString());
         }
+    }
+
+    /**
+     * @param pingServerList a list of servers that can be used for ping test, can be null
+     * @return true if the ping test is successful, false otherwise.
+     */
+    public boolean pingTest(String[] pingServerList) {
+        boolean result = false;
+        String[] hostList = {"www.google.com", "www.yahoo.com",
+                "www.bing.com", "www.facebook.com", "www.ask.com"};
+        if (pingServerList != null) {
+            hostList = pingServerList;
+        }
+        try {
+            // assume the chance that all servers are down is very small
+            for (int i = 0; i < hostList.length; i++ ) {
+                String host = hostList[i];
+                log("Start ping test, ping " + host);
+                Process p = Runtime.getRuntime().exec("ping -c 10 -w 100 " + host);
+                int status = p.waitFor();
+                if (status == 0) {
+                    // if any of the ping test is successful, return true
+                    result = true;
+                    break;
+                } else {
+                    result = false;
+                    log("ping " + host + " failed.");
+                }
+            }
+        } catch (UnknownHostException e) {
+            log("Ping test Fail: Unknown Host");
+        } catch (IOException e) {
+            log("Ping test Fail:  IOException");
+        } catch (InterruptedException e) {
+            log("Ping test Fail: InterruptedException");
+        }
+        log("return");
+        return result;
     }
 
     /**

@@ -107,6 +107,17 @@ public class WifiApStress
             } catch (Exception e) {
                 fail("thread in sleep is interrupted");
             }
+            assertTrue("no uplink data connection after Wi-Fi tethering", mAct.pingTest(null));
+            // Wait for 5 minutes, and verify the data connection again.
+            // bug id: 3400027
+            try {
+                Thread.sleep(5 * 60 * 1000);
+            } catch (Exception e) {
+                fail("thread in sleep is interrupted");
+            }
+            // Verify the uplink data connection
+            assertTrue("no uplink data connection", mAct.pingTest(null));
+            // Disable soft AP
             assertTrue(mAct.mWifiManager.setWifiApEnabled(config, false));
             // Wait for 30 seconds until Wi-Fi tethering is stopped
             try {

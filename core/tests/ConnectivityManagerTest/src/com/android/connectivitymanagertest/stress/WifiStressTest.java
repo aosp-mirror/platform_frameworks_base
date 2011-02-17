@@ -243,6 +243,9 @@ public class WifiStressTest
                 ConnectivityManagerTestActivity.SHORT_TIMEOUT));
         assertTrue(mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
                 ConnectivityManagerTestActivity.LONG_TIMEOUT));
+        // Run ping test to verify the data connection
+        assertTrue("Wi-Fi is connected, but no data connection.", mAct.pingTest(null));
+
         int i;
         for (i = 0; i < mReconnectIterations; i++) {
             // 1. Put device into sleep mode
@@ -271,6 +274,9 @@ public class WifiStressTest
                     mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState());
             assertEquals("Cellular connection is down", State.CONNECTED,
                     mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
+
+            assertTrue("Mobile is connected, but no data connection.", mAct.pingTest(null));
+
             // Turn screen on again
             mAct.turnScreenOn();
             assertTrue("Wait for Wi-Fi enable timeout after wake up",
@@ -279,6 +285,7 @@ public class WifiStressTest
             assertTrue("Wait for Wi-Fi connection timeout after wake up",
                     mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.CONNECTED,
                     ConnectivityManagerTestActivity.LONG_TIMEOUT));
+            assertTrue("Reconnect to Wi-Fi network, but no data connection.", mAct.pingTest(null));
         }
         if (i == mReconnectIterations) {
             writeOutput(String.format("iteration %d out of %d",
