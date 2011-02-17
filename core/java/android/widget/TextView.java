@@ -3873,9 +3873,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void registerForPreDraw() {
         final ViewTreeObserver observer = getViewTreeObserver();
-        if (observer == null) {
-            return;
-        }
 
         if (mPreDrawState == PREDRAW_NOT_REGISTERED) {
             observer.addOnPreDrawListener(this);
@@ -3961,15 +3958,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         final ViewTreeObserver observer = getViewTreeObserver();
-        if (observer != null) {
-            // No need to create the controller.
-            // The get method will add the listener on controller creation.
-            if (mInsertionPointCursorController != null) {
-                observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
-            }
-            if (mSelectionModifierCursorController != null) {
-                observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
-            }
+        // No need to create the controller.
+        // The get method will add the listener on controller creation.
+        if (mInsertionPointCursorController != null) {
+            observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
+        }
+        if (mSelectionModifierCursorController != null) {
+            observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
         }
     }
 
@@ -3978,18 +3973,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         super.onDetachedFromWindow();
 
         final ViewTreeObserver observer = getViewTreeObserver();
-        if (observer != null) {
-            if (mPreDrawState != PREDRAW_NOT_REGISTERED) {
-                observer.removeOnPreDrawListener(this);
-                mPreDrawState = PREDRAW_NOT_REGISTERED;
-            }
-            // No need to create the controller, as getXXController would.
-            if (mInsertionPointCursorController != null) {
-                observer.removeOnTouchModeChangeListener(mInsertionPointCursorController);
-            }
-            if (mSelectionModifierCursorController != null) {
-                observer.removeOnTouchModeChangeListener(mSelectionModifierCursorController);
-            }
+        if (mPreDrawState != PREDRAW_NOT_REGISTERED) {
+            observer.removeOnPreDrawListener(this);
+            mPreDrawState = PREDRAW_NOT_REGISTERED;
+        }
+        // No need to create the controller, as getXXController would.
+        if (mInsertionPointCursorController != null) {
+            observer.removeOnTouchModeChangeListener(mInsertionPointCursorController);
+        }
+        if (mSelectionModifierCursorController != null) {
+            observer.removeOnTouchModeChangeListener(mSelectionModifierCursorController);
         }
 
         if (mError != null) {
@@ -4290,10 +4283,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mPreDrawState == PREDRAW_DONE) {
             final ViewTreeObserver observer = getViewTreeObserver();
-            if (observer != null) {
-                observer.removeOnPreDrawListener(this);
-                mPreDrawState = PREDRAW_NOT_REGISTERED;
-            }
+            observer.removeOnPreDrawListener(this);
+            mPreDrawState = PREDRAW_NOT_REGISTERED;
         }
 
         int color = mCurTextColor;
@@ -5541,8 +5532,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint,
-                                               mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -8655,9 +8645,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private class HandleView extends View {
+    private class HandleView extends View implements ViewTreeObserver.OnScrollChangedListener {
         private Drawable mDrawable;
-        private final PopupWindow mContainer;
+        private final ScrollingPopupWindow mContainer;
         private int mPositionX;
         private int mPositionY;
         private final CursorController mController;
@@ -8726,7 +8716,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public HandleView(CursorController controller, int pos) {
             super(TextView.this.mContext);
             mController = controller;
-            mContainer = new PopupWindow(TextView.this.mContext, null,
+            mContainer = new ScrollingPopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
             mContainer.setClippingEnabled(false);
@@ -8794,24 +8784,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
             mContainer.setContentView(this);
-            final int[] coords = mTempCoords;
-            TextView.this.getLocationInWindow(coords);
-            mContainerPositionX = coords[0] + mPositionX;
-            mContainerPositionY = coords[1] + mPositionY;
-            mContainer.showAtLocation(TextView.this, 0, mContainerPositionX, mContainerPositionY);
+            mContainerPositionX = mPositionX;
+            mContainerPositionY = mPositionY - TextView.this.getHeight();
+            mContainer.showAsDropDown(TextView.this, mContainerPositionX, mContainerPositionY);
 
             // Hide paste view when handle is moved on screen.
-            if (mPastePopupWindow != null) {
-                mPastePopupWindow.hide();
-            }
+            hidePastePopupWindow();
         }
 
         public void hide() {
             mIsDragging = false;
             mContainer.dismiss();
-            if (mPastePopupWindow != null) {
-                mPastePopupWindow.hide();
-            }
+            hidePastePopupWindow();
         }
 
         public boolean isShowing() {
@@ -8834,19 +8818,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int compoundPaddingRight = getCompoundPaddingRight();
 
             final TextView hostView = TextView.this;
-            final int left = 0;
-            final int right = hostView.getWidth();
-            final int top = 0;
-            final int bottom = hostView.getHeight();
 
             if (mTempRect == null) {
                 mTempRect = new Rect();
             }
             final Rect clip = mTempRect;
-            clip.left = left + compoundPaddingLeft;
-            clip.top = top + extendedPaddingTop;
-            clip.right = right - compoundPaddingRight;
-            clip.bottom = bottom - extendedPaddingBottom;
+            clip.left = compoundPaddingLeft;
+            clip.top = extendedPaddingTop;
+            clip.right = hostView.getWidth() - compoundPaddingRight;
+            clip.bottom = hostView.getHeight() - extendedPaddingBottom;
 
             final ViewParent parent = hostView.getParent();
             if (parent == null || !parent.getChildVisibleRect(hostView, clip, null)) {
@@ -8858,7 +8838,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int posX = coords[0] + mPositionX + (int) mHotspotX;
             final int posY = coords[1] + mPositionY + (int) mHotspotY;
 
-            return posX >= clip.left && posX <= clip.right &&
+            // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
+            return posX >= clip.left - 1 && posX <= clip.right + 1 &&
                     posY >= clip.top && posY <= clip.bottom;
         }
 
@@ -8868,23 +8849,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (isPositionVisible()) {
                 int[] coords = null;
                 if (mContainer.isShowing()) {
-                    coords = mTempCoords;
-                    TextView.this.getLocationInWindow(coords);
-                    final int containerPositionX = coords[0] + mPositionX;
-                    final int containerPositionY = coords[1] + mPositionY;
+                    final int containerPositionX = mPositionX;
+                    final int containerPositionY = mPositionY - TextView.this.getHeight();
 
                     if (containerPositionX != mContainerPositionX || 
                         containerPositionY != mContainerPositionY) {
                         mContainerPositionX = containerPositionX;
                         mContainerPositionY = containerPositionY;
 
-                        mContainer.update(mContainerPositionX, mContainerPositionY,
+                        mContainer.update(TextView.this, mContainerPositionX, mContainerPositionY,
                                 mRight - mLeft, mBottom - mTop);
 
                         // Hide paste popup window as soon as a scroll occurs.
-                        if (mPastePopupWindow != null) {
-                            mPastePopupWindow.hide();
-                        }
+                        hidePastePopupWindow();
                     }
                 } else {
                     show();
@@ -8902,9 +8879,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mLastParentY = coords[1];
                     }
                     // Hide paste popup window as soon as the handle is dragged.
-                    if (mPastePopupWindow != null) {
-                        mPastePopupWindow.hide();
-                    }
+                    hidePastePopupWindow();
                 }
             } else {
                 hide();
@@ -9008,10 +8983,60 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mPastePopupWindow.show();
             }
         }
+
+        void hidePastePopupWindow() {
+            if (mPastePopupWindow != null) {
+                mPastePopupWindow.hide();
+            }
+        }
+
+        /**
+         * A popup window, attached to a view, and that listens to scroll events in its anchors'
+         * view hierarchy, so that it is automatically moved on such events.
+         */
+        private class ScrollingPopupWindow extends PopupWindow {
+
+            private int[] mDrawingLocations = new int[2];
+
+            public ScrollingPopupWindow(Context context, AttributeSet attrs, int defStyle) {
+                super(context, attrs, defStyle);
+            }
+
+            @Override
+            public boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
+                    int xoff, int yoff) {
+                anchor.getLocationInWindow(mDrawingLocations);
+                p.x = mDrawingLocations[0] + xoff;
+                p.y = mDrawingLocations[1] + anchor.getHeight() + yoff;
+
+                // Hide paste popup as soon as the view is scrolled.
+                hidePastePopupWindow();
+
+                if (!isPositionVisible()) {
+                    dismiss();
+                    onHandleBecomeInvisible();
+                }
+
+                return false;
+            }
+        }
+
+        public void onScrollChanged() {
+            if (isPositionVisible()) {
+                show();
+                ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+                vto.removeOnScrollChangedListener(this);
+            }
+        }
+
+        public void onHandleBecomeInvisible() {
+            ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+            vto.addOnScrollChangedListener(this);
+        }
     }
 
     private class InsertionPointCursorController implements CursorController {
-        private static final int DELAY_BEFORE_FADE_OUT = 4100;
+        private static final int DELAY_BEFORE_FADE_OUT = 4000;
         private static final int DELAY_BEFORE_PASTE = 2000;
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000;
 
@@ -9027,7 +9052,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void show(int delayBeforePaste) {
             updatePosition();
             hideDelayed();
-            getHandle().show();
             removePastePopupCallback();
             final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
             if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
@@ -9547,9 +9571,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mInsertionPointCursorController = new InsertionPointCursorController();
 
             final ViewTreeObserver observer = getViewTreeObserver();
-            if (observer != null) {
-                observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
-            }
+            observer.addOnTouchModeChangeListener(mInsertionPointCursorController);
         }
 
         return mInsertionPointCursorController;
@@ -9564,9 +9586,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mSelectionModifierCursorController = new SelectionModifierCursorController();
 
             final ViewTreeObserver observer = getViewTreeObserver();
-            if (observer != null) {
-                observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
-            }
+            observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
         }
 
         return mSelectionModifierCursorController;

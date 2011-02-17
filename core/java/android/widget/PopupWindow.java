@@ -378,8 +378,7 @@ public class PopupWindow {
      * <p>Change the popup's content. The content is represented by an instance
      * of {@link android.view.View}.</p>
      *
-     * <p>This method has no effect if called when the popup is showing.  To
-     * apply it while a popup is showing, call </p>
+     * <p>This method has no effect if called when the popup is showing.</p>
      *
      * @param contentView the new content for the popup
      *
@@ -1040,7 +1039,7 @@ public class PopupWindow {
      *
      * @return true if the popup is translated upwards to fit on screen
      */
-    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
+    boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
             int xoff, int yoff) {
 
         anchor.getLocationInWindow(mDrawingLocation);
@@ -1374,6 +1373,7 @@ public class PopupWindow {
      * height can be set to -1 to update location only.  Calling this function
      * also updates the window with the current popup state as
      * described for {@link #update()}.</p>
+     *
      * <p>If the view later scrolls to move <code>anchor</code> to a different
      * location, the popup will be moved correspondingly.</p>
      *
@@ -1395,9 +1395,13 @@ public class PopupWindow {
         }
 
         WeakReference<View> oldAnchor = mAnchor;
-        if (oldAnchor == null || oldAnchor.get() != anchor ||
-                (updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff))) {
+        final boolean needsUpdate = updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff);
+        if (oldAnchor == null || oldAnchor.get() != anchor || (needsUpdate && !mIsDropdown)) {
             registerForScrollChanged(anchor, xoff, yoff);
+        } else if (needsUpdate) {
+            // No need to register again if this is a DropDown, showAsDropDown already did.
+            mAnchorXoff = xoff;
+            mAnchorYoff = yoff;
         }
 
         WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
