@@ -16,8 +16,6 @@
 
 package android.net.wifi;
 
-import android.net.DhcpInfo;
-
 /**
  * Native calls for sending requests to the supplicant daemon, and for
  * receiving asynchronous events. All methods of the form "xxxxCommand()"
