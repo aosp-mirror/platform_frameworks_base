@@ -1056,16 +1056,17 @@ public class PopupWindow {
         anchor.getWindowVisibleDisplayFrame(displayFrame);
         
         final View root = anchor.getRootView();
-        if (mAllowScrollingAnchorParent && (p.y + mPopupHeight > displayFrame.bottom ||
-                p.x + mPopupWidth - root.getWidth() > 0)) {
+        if (p.y + mPopupHeight > displayFrame.bottom || p.x + mPopupWidth - root.getWidth() > 0) {
             // if the drop down disappears at the bottom of the screen. we try to
             // scroll a parent scrollview or move the drop down back up on top of
             // the edit box
-            int scrollX = anchor.getScrollX();
-            int scrollY = anchor.getScrollY();
-            Rect r = new Rect(scrollX, scrollY,  scrollX + mPopupWidth + xoff,
-                    scrollY + mPopupHeight + anchor.getHeight() + yoff);
-            anchor.requestRectangleOnScreen(r, true);
+            if (mAllowScrollingAnchorParent) {
+                int scrollX = anchor.getScrollX();
+                int scrollY = anchor.getScrollY();
+                Rect r = new Rect(scrollX, scrollY,  scrollX + mPopupWidth + xoff,
+                        scrollY + mPopupHeight + anchor.getHeight() + yoff);
+                anchor.requestRectangleOnScreen(r, true);
+            }
 
             // now we re-evaluate the space available, and decide from that
             // whether the pop-up will go above or below the anchor.
