@@ -610,11 +610,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                  * argv7 - Preamble
                  * argv8 - Max SCB
                  */
-                String str = String.format("softap set " + wlanIface + " " + softapIface +
-                                           " %s %s %s", convertQuotedString(wifiConfig.SSID),
-                                           wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ?
-                                           "wpa2-psk" : "open",
-                                           convertQuotedString(wifiConfig.preSharedKey));
+                 String str = String.format("softap set " + wlanIface + " " + softapIface +
+                                       " %s %s %s", convertQuotedString(wifiConfig.SSID),
+                                       getSecurityType(wifiConfig),
+                                       convertQuotedString(wifiConfig.preSharedKey));
                 mConnector.doCommand(str);
             }
             mConnector.doCommand(String.format("softap startap"));
@@ -629,6 +628,17 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
         /* Replace \ with \\, then " with \" and add quotes at end */
         return '"' + s.replaceAll("\\\\","\\\\\\\\").replaceAll("\"","\\\\\"") + '"';
+    }
+
+    private String getSecurityType(WifiConfiguration wifiConfig) {
+        switch (wifiConfig.getAuthType()) {
+            case KeyMgmt.WPA_PSK:
+                return "wpa-psk";
+            case KeyMgmt.WPA2_PSK:
+                return "wpa2-psk";
+            default:
+                return "open";
+        }
     }
 
     public void stopAccessPoint() throws IllegalStateException {
@@ -656,7 +666,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             } else {
                 String str = String.format("softap set " + wlanIface + " " + softapIface
                         + " %s %s %s", convertQuotedString(wifiConfig.SSID),
-                        wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK) ? "wpa2-psk" : "open",
+                        getSecurityType(wifiConfig),
                         convertQuotedString(wifiConfig.preSharedKey));
                 mConnector.doCommand(str);
             }
