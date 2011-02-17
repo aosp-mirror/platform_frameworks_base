@@ -19,7 +19,11 @@ package android.net.wifi;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkUtils;
 
+import java.net.InetAddress;
+import java.net.Inet6Address;
+import java.net.UnknownHostException;
 import java.util.EnumMap;
 
 /**
@@ -61,7 +65,7 @@ public class WifiInfo implements Parcelable {
     public static final String LINK_SPEED_UNITS = "Mbps";
     private int mLinkSpeed;
 
-    private int mIpAddress;
+    private InetAddress mIpAddress;
 
     private String mMacAddress;
 
@@ -72,7 +76,6 @@ public class WifiInfo implements Parcelable {
         mSupplicantState = SupplicantState.UNINITIALIZED;
         mRssi = -9999;
         mLinkSpeed = -1;
-        mIpAddress = 0;
         mHiddenSSID = false;
     }
 
@@ -172,12 +175,13 @@ public class WifiInfo implements Parcelable {
         mSupplicantState = state;
     }
 
-    void setIpAddress(int address) {
+    void setInetAddress(InetAddress address) {
         mIpAddress = address;
     }
 
     public int getIpAddress() {
-        return mIpAddress;
+        if (mIpAddress == null || mIpAddress instanceof Inet6Address) return 0;
+        return NetworkUtils.inetAddressToInt(mIpAddress);
     }
 
     /**
@@ -251,7 +255,12 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mNetworkId);
         dest.writeInt(mRssi);
         dest.writeInt(mLinkSpeed);
-        dest.writeInt(mIpAddress);
+        if (mIpAddress != null) {
+            dest.writeByte((byte)1);
+            dest.writeByteArray(mIpAddress.getAddress());
+        } else {
+            dest.writeByte((byte)0);
+        }
         dest.writeString(getSSID());
         dest.writeString(mBSSID);
         dest.writeString(mMacAddress);
@@ -266,7 +275,11 @@ public class WifiInfo implements Parcelable {
                 info.setNetworkId(in.readInt());
                 info.setRssi(in.readInt());
                 info.setLinkSpeed(in.readInt());
-                info.setIpAddress(in.readInt());
+                if (in.readByte() == 1) {
+                    try {
+                        info.setInetAddress(InetAddress.getByAddress(in.createByteArray()));
+                    } catch (UnknownHostException e) {}
+                }
                 info.setSSID(in.readString());
                 info.mBSSID = in.readString();
                 info.mMacAddress = in.readString();

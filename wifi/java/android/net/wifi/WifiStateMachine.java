@@ -1393,7 +1393,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendNetworkStateChangeBroadcast(mLastBssid);
 
         /* Reset data structures */
-        mWifiInfo.setIpAddress(0);
+        mWifiInfo.setInetAddress(null);
         mWifiInfo.setBSSID(null);
         mWifiInfo.setSSID(null);
         mWifiInfo.setNetworkId(-1);
@@ -2543,7 +2543,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   synchronized (mDhcpInfoInternal) {
                       addr = NetworkUtils.numericToInetAddress(mDhcpInfoInternal.ipAddress);
                   }
-                  mWifiInfo.setIpAddress(NetworkUtils.inetAddressToInt(addr));
+                  mWifiInfo.setInetAddress(addr);
                   configureLinkProperties();
                   if (getNetworkDetailedState() == DetailedState.CONNECTED) {
                       sendLinkConfigurationChangedBroadcast();
@@ -2556,7 +2556,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                   transitionTo(mConnectedState);
                   break;
               case CMD_IP_CONFIG_FAILURE:
-                  mWifiInfo.setIpAddress(0);
+                  mWifiInfo.setInetAddress(null);
 
                   Log.e(TAG, "IP configuration failed");
                   /**
