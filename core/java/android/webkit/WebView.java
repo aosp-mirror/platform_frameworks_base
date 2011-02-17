@@ -5275,7 +5275,6 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        boolean dispatch = true;
         switch (event.getAction()) {
             case KeyEvent.ACTION_DOWN:
                 mKeysPressed.add(Integer.valueOf(event.getKeyCode()));
@@ -5288,7 +5287,7 @@ public class WebView extends AbsoluteLayout
                 if (location == -1) {
                     // We did not receive the key down for this key, so do not
                     // handle the key up.
-                    dispatch = false;
+                    return false;
                 } else {
                     // We did receive the key down.  Handle the key up, and
                     // remove it from our pressed keys.
@@ -5300,17 +5299,12 @@ public class WebView extends AbsoluteLayout
                 // action is added to KeyEvent.
                 break;
         }
-        if (dispatch) {
-            if (inEditingMode()) {
-                // Ensure that the WebTextView gets the event, even if it does
-                // not currently have a bounds.
-                return mWebTextView.dispatchKeyEvent(event);
-            } else {
-                return super.dispatchKeyEvent(event);
-            }
+        if (inEditingMode() && mWebTextView.isFocused()) {
+            // Ensure that the WebTextView gets the event, even if it does
+            // not currently have a bounds.
+            return mWebTextView.dispatchKeyEvent(event);
         } else {
-            // We didn't dispatch, so let something else handle the key
-            return false;
+            return super.dispatchKeyEvent(event);
         }
     }
 
