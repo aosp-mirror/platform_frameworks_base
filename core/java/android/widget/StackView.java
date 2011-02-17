@@ -1207,6 +1207,7 @@ public class StackView extends AdapterViewAnimator {
         void invalidateGlobalRegion(View v, Rect r) {
             // We need to make a new rect here, so as not to modify the one passed
             globalInvalidateRect.set(r);
+            globalInvalidateRect.union(0, 0, getWidth(), getHeight());
             View p = v;
             if (!(v.getParent() != null && v.getParent() instanceof View)) return;
 
@@ -1223,8 +1224,9 @@ public class StackView extends AdapterViewAnimator {
                 firstPass = false;
                 p = (View) p.getParent();
                 parentRect.set(p.getScrollX(), p.getScrollY(),
-                               p.getWidth() + p.getScrollX(), p.getHeight() + p.getScrollY());
-
+                        p.getWidth() + p.getScrollX(), p.getHeight() + p.getScrollY());
+                p.invalidate(globalInvalidateRect.left, globalInvalidateRect.top,
+                        globalInvalidateRect.right, globalInvalidateRect.bottom);
             }
 
             p.invalidate(globalInvalidateRect.left, globalInvalidateRect.top,
