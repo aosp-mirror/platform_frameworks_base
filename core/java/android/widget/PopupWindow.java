@@ -90,6 +90,7 @@ public class PopupWindow {
     private int mSplitTouchEnabled = -1;
     private boolean mLayoutInScreen;
     private boolean mClipToScreen;
+    private boolean mAllowScrollingAnchorParent = true;
 
     private OnTouchListener mTouchInterceptor;
     
@@ -592,6 +593,16 @@ public class PopupWindow {
         mClipToScreen = enabled;
         setClippingEnabled(!enabled);
     }
+
+    /**
+     * Allow PopupWindow to scroll the anchor's parent to provide more room
+     * for the popup. Enabled by default.
+     *
+     * @param enabled True to scroll the anchor's parent when more room is desired by the popup.
+     */
+    void setAllowScrollingAnchorParent(boolean enabled) {
+        mAllowScrollingAnchorParent = enabled;
+    }
     
     /**
      * <p>Indicates whether the popup window supports splitting touches.</p>
@@ -1045,7 +1056,8 @@ public class PopupWindow {
         anchor.getWindowVisibleDisplayFrame(displayFrame);
         
         final View root = anchor.getRootView();
-        if (p.y + mPopupHeight > displayFrame.bottom || p.x + mPopupWidth - root.getWidth() > 0) {
+        if (mAllowScrollingAnchorParent && (p.y + mPopupHeight > displayFrame.bottom ||
+                p.x + mPopupWidth - root.getWidth() > 0)) {
             // if the drop down disappears at the bottom of the screen. we try to
             // scroll a parent scrollview or move the drop down back up on top of
             // the edit box
