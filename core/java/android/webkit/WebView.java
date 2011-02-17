@@ -104,6 +104,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -811,7 +812,7 @@ public class WebView extends AbsoluteLayout
     private OverScrollGlow mOverScrollGlow;
 
     // Used to match key downs and key ups
-    private boolean mGotKeyDown;
+    private Vector<Integer> mKeysPressed;
 
     /* package */ static boolean mLogEvent = true;
 
@@ -1177,6 +1178,9 @@ public class WebView extends AbsoluteLayout
         mOverflingDistance = configuration.getScaledOverflingDistance();
 
         setScrollBarStyle(super.getScrollBarStyle());
+        // Initially use a size of two, since the user is likely to only hold
+        // down two keys at a time (shift + another key)
+        mKeysPressed = new Vector<Integer>(2);
     }
 
     /**
@@ -5126,7 +5130,7 @@ public class WebView extends AbsoluteLayout
                  */
                 mDrawCursorRing = false;
             }
-            mGotKeyDown = false;
+            mKeysPressed.clear();
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
             mTouchMode = TOUCH_DONE_MODE;
             if (mNativeClass != 0) {
@@ -5196,7 +5200,7 @@ public class WebView extends AbsoluteLayout
                 }
                 setFocusControllerActive(false);
             }
-            mGotKeyDown = false;
+            mKeysPressed.clear();
         }
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
@@ -5272,29 +5276,32 @@ public class WebView extends AbsoluteLayout
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean dispatch = true;
-
-        // Textfields, plugins, and contentEditable nodes need to receive the
-        // shift up key even if another key was released while the shift key
-        // was held down.
-        boolean inEditingMode = inEditingMode();
-        if (!inEditingMode && (mNativeClass == 0
-                || !nativePageShouldHandleShiftAndArrows())) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                mGotKeyDown = true;
-            } else {
-                if (!mGotKeyDown && event.getAction() != KeyEvent.ACTION_MULTIPLE) {
-                    /*
-                     * We got a key up for which we were not the recipient of
-                     * the original key down. Don't give it to the view.
-                     */
+        switch (event.getAction()) {
+            case KeyEvent.ACTION_DOWN:
+                mKeysPressed.add(Integer.valueOf(event.getKeyCode()));
+                break;
+            case KeyEvent.ACTION_MULTIPLE:
+                // Always accept the action.
+                break;
+            case KeyEvent.ACTION_UP:
+                int location = mKeysPressed.indexOf(Integer.valueOf(event.getKeyCode()));
+                if (location == -1) {
+                    // We did not receive the key down for this key, so do not
+                    // handle the key up.
                     dispatch = false;
+                } else {
+                    // We did receive the key down.  Handle the key up, and
+                    // remove it from our pressed keys.
+                    mKeysPressed.remove(location);
                 }
-                mGotKeyDown = false;
-            }
+                break;
+            default:
+                // Accept the action.  This should not happen, unless a new
+                // action is added to KeyEvent.
+                break;
         }
-
         if (dispatch) {
-            if (inEditingMode) {
+            if (inEditingMode()) {
                 // Ensure that the WebTextView gets the event, even if it does
                 // not currently have a bounds.
                 return mWebTextView.dispatchKeyEvent(event);
