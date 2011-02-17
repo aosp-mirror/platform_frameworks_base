@@ -442,6 +442,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
+        case GET_TASK_THUMBNAIL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int id = data.readInt();
+            Bitmap bm = getTaskThumbnail(id);
+            reply.writeNoException();
+            if (bm != null) {
+                reply.writeInt(1);
+                bm.writeToParcel(reply, 0);
+            } else {
+                reply.writeInt(0);
+            }
+            return true;
+        }
+        
         case GET_SERVICES_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int maxNum = data.readInt();
@@ -1815,6 +1829,21 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return list;
+    }
+    public Bitmap getTaskThumbnail(int id) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(id);
+        mRemote.transact(GET_TASK_THUMBNAIL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        Bitmap bm = null;
+        if (reply.readInt() != 0) {
+            bm = Bitmap.CREATOR.createFromParcel(reply);
+        }
+        data.recycle();
+        reply.recycle();
+        return bm;
     }
     public List getServices(int maxNum, int flags) throws RemoteException {
         Parcel data = Parcel.obtain();
