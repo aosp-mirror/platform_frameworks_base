@@ -3065,8 +3065,7 @@ class MediaArtistNativeHelper {
      * This function is responsible for stopping the preview
      */
     long stopPreview() {
-        nativeStopPreview();
-        return mPreviewProgress;
+        return nativeStopPreview();
     }
 
     /**
@@ -3999,7 +3998,7 @@ class MediaArtistNativeHelper {
             int framewidth, int frameheight, int surfacewidth, int surfaceheight, long timeMs)
     throws IllegalArgumentException, IllegalStateException, RuntimeException;
 
-    private native void nativeStopPreview();
+    private native int nativeStopPreview();
 
     private native int nativeGenerateAudioGraph(String pcmFilePath, String outGraphPath,
             int frameDuration, int channels, int sampleCount);
