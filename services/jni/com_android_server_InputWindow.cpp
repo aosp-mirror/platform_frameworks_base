@@ -144,10 +144,10 @@ void android_server_InputWindow_toNative(
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputWindow(JNIEnv* env) {
-    FIND_CLASS(gInputWindowClassInfo.clazz, "com/android/server/InputWindow");
+    FIND_CLASS(gInputWindowClassInfo.clazz, "com/android/server/wm/InputWindow");
 
     GET_FIELD_ID(gInputWindowClassInfo.inputWindowHandle, gInputWindowClassInfo.clazz,
-            "inputWindowHandle", "Lcom/android/server/InputWindowHandle;");
+            "inputWindowHandle", "Lcom/android/server/wm/InputWindowHandle;");
 
     GET_FIELD_ID(gInputWindowClassInfo.inputChannel, gInputWindowClassInfo.clazz,
             "inputChannel", "Landroid/view/InputChannel;");

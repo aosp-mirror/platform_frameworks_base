@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.wm;
+
 
 /**
  * Describes input-related application properties for use by the input dispatcher.

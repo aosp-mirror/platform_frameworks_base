@@ -40,7 +40,6 @@ import android.hardware.SensorManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -50,7 +49,6 @@ import android.os.Power;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
@@ -69,14 +67,13 @@ import static android.provider.Settings.System.WINDOW_ANIMATION_SCALE;
 import static android.provider.Settings.System.TRANSITION_ANIMATION_SCALE;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-class PowerManagerService extends IPowerManager.Stub
+public class PowerManagerService extends IPowerManager.Stub
         implements LocalPowerManager, Watchdog.Monitor {
 
     private static final String TAG = "PowerManagerService";
@@ -2689,7 +2686,7 @@ class PowerManagerService extends IPowerManager.Stub
         }
     }
 
-    void setPolicy(WindowManagerPolicy p) {
+    public void setPolicy(WindowManagerPolicy p) {
         synchronized (mLocks) {
             mPolicy = p;
             mLocks.notifyAll();

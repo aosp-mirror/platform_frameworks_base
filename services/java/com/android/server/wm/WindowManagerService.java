@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -42,6 +42,12 @@ import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.WindowManagerPolicyThread;
+import com.android.server.AttributeCache;
+import com.android.server.EventLogTags;
+import com.android.server.PowerManagerService;
+import com.android.server.Watchdog;
+import com.android.server.AttributeCache.Entry;
+import com.android.server.Watchdog.Monitor;
 import com.android.server.am.BatteryStatsService;
 
 import android.Manifest;
@@ -5347,8 +5353,8 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @return True if the server was successfully started, false otherwise.
      *
-     * @see com.android.server.ViewServer
-     * @see com.android.server.ViewServer#VIEW_SERVER_DEFAULT_PORT
+     * @see com.android.server.wm.ViewServer
+     * @see com.android.server.wm.ViewServer#VIEW_SERVER_DEFAULT_PORT
      */
     public boolean startViewServer(int port) {
         if (isSystemSecure()) {
@@ -5394,7 +5400,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @return True if the server stopped, false if it wasn't started or
      *         couldn't be stopped.
      *
-     * @see com.android.server.ViewServer
+     * @see com.android.server.wm.ViewServer
      */
     public boolean stopViewServer() {
         if (isSystemSecure()) {
@@ -5416,7 +5422,7 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * @return True if the server is running, false otherwise.
      *
-     * @see com.android.server.ViewServer
+     * @see com.android.server.wm.ViewServer
      */
     public boolean isViewServerRunning() {
         if (isSystemSecure()) {

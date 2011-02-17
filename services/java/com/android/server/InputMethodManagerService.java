@@ -26,7 +26,7 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
-import com.android.server.StatusBarManagerService;
+import com.android.server.EventLogTags;
 
 import org.xmlpull.v1.XmlPullParserException;
 

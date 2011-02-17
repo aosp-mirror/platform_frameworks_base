@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.wm;
+
 
 import android.util.Slog;
 
@@ -33,7 +34,7 @@ import java.io.OutputStreamWriter;
 /**
  * The ViewServer is local socket server that can be used to communicate with the
  * views of the opened windows. Communication with the views is ensured by the
- * {@link com.android.server.WindowManagerService} and is a cross-process operation.
+ * {@link com.android.server.wm.WindowManagerService} and is a cross-process operation.
  *
  * {@hide}
  */

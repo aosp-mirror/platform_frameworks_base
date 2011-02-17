@@ -24,8 +24,8 @@ import com.android.server.ProcessMap;
 import com.android.server.ProcessStats;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
-import com.android.server.WindowManagerService;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
 

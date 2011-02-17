@@ -70,8 +70,6 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.service.wallpaper.ImageWallpaper;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
-import com.android.server.DevicePolicyManagerService.ActiveAdmin;
-import com.android.server.DevicePolicyManagerService.MyPackageMonitor;
 
 class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperService";

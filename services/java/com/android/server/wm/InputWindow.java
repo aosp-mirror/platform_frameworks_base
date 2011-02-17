@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.wm;
 
 import android.graphics.Region;
 import android.view.InputChannel;

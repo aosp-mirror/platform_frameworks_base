@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.wm;
+
+import android.view.WindowManagerPolicy;
 
 /**
- * Functions as a handle for an application that can receive input.
- * Enables the native input dispatcher to refer indirectly to the window manager's
- * application window token.
+ * Functions as a handle for a window that can receive input.
+ * Enables the native input dispatcher to refer indirectly to the window manager's window state.
  * @hide
  */
-public final class InputApplicationHandle {
-    // Pointer to the native input application handle.
+public final class InputWindowHandle {
+    // Pointer to the native input window handle.
     // This field is lazily initialized via JNI.
     @SuppressWarnings("unused")
     private int ptr;
 
-    // The window manager's application window token.
-    public final WindowManagerService.AppWindowToken appWindowToken;
+    // The input application handle.
+    public final InputApplicationHandle inputApplicationHandle;
+
+    // The window manager's window state.
+    public final WindowManagerPolicy.WindowState windowState;
 
     private native void nativeDispose();
 
-    public InputApplicationHandle(WindowManagerService.AppWindowToken appWindowToken) {
-        this.appWindowToken = appWindowToken;
+    public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
+            WindowManagerPolicy.WindowState windowState) {
+        this.inputApplicationHandle = inputApplicationHandle;
+        this.windowState = windowState;
     }
 
     @Override
