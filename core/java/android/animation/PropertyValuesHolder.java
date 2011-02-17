@@ -578,6 +578,11 @@ public class PropertyValuesHolder implements Cloneable {
         return mAnimatedValue;
     }
 
+    @Override
+    public String toString() {
+        return mPropertyName + ": " + mKeyframeSet.toString();
+    }
+
     /**
      * Utility method to derive a setter/getter method name from a property name, where the
      * prefix is typically "set" or "get" and the first letter of the property name is
