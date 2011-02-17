@@ -92,6 +92,8 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     static final boolean DEBUG = false;
     static final String TAG = "AutoCompleteTextView";
 
+    static final int EXPAND_MAX = 3;
+
     private CharSequence mHintText;
     private TextView mHintView;
     private int mHintResource;
@@ -1057,8 +1059,10 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
         if (!isPopupShowing()) {
             // Make sure the list does not obscure the IME when shown for the first time.
             mPopup.setInputMethodMode(ListPopupWindow.INPUT_METHOD_NEEDED);
+            mPopup.setListItemExpandMax(EXPAND_MAX);
         }
         mPopup.show();
+        mPopup.getListView().setOverScrollMode(View.OVER_SCROLL_ALWAYS);
     }
     
     /**

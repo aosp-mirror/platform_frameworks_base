@@ -65,6 +65,7 @@ public class ListPopupWindow {
 
     private boolean mDropDownAlwaysVisible = false;
     private boolean mForceIgnoreOutsideTouch = false;
+    int mListItemExpandMaximum = Integer.MAX_VALUE;
 
     private View mPromptView;
     private int mPromptPosition = POSITION_PROMPT_ABOVE;
@@ -519,6 +520,7 @@ public class ListPopupWindow {
         int heightSpec = 0;
 
         boolean noInputMethod = isInputMethodNotNeeded();
+        mPopup.setAllowScrollingAnchorParent(!noInputMethod);
 
         if (mPopup.isShowing()) {
             if (mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
@@ -772,6 +774,16 @@ public class ListPopupWindow {
      */
     public ListView getListView() {
         return mDropDownList;
+    }
+
+    /**
+     * The maximum number of list items that can be visible and still have
+     * the list expand when touched.
+     *
+     * @param max Max number of items that can be visible and still allow the list to expand.
+     */
+    void setListItemExpandMax(int max) {
+        mListItemExpandMaximum = max;
     }
 
     /**
@@ -1210,8 +1222,11 @@ public class ListPopupWindow {
 
     private class ResizePopupRunnable implements Runnable {
         public void run() {
-            mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
-            show();
+            if (mDropDownList != null && mDropDownList.getCount() > mDropDownList.getChildCount() &&
+                    mDropDownList.getChildCount() <= mListItemExpandMaximum) {
+                mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+                show();
+            }
         }
     }
 
