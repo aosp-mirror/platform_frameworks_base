@@ -37,18 +37,6 @@ template <typename T> struct trait_trivial_move { enum { value = false }; };
 template <typename T> struct trait_pointer      { enum { value = false }; };    
 template <typename T> struct trait_pointer<T*>  { enum { value = true }; };
 
-// sp<> can be trivially moved
-template <typename T> class sp;
-template <typename T> struct trait_trivial_move< sp<T> >{
-    enum { value = true }; 
-};
-
-// wp<> can be trivially moved
-template <typename T> class wp;
-template <typename T> struct trait_trivial_move< wp<T> >{ 
-    enum { value = true }; 
-};
-
 template <typename TYPE>
 struct traits {
     enum {
@@ -216,7 +204,6 @@ void move_backward_type(TYPE* d, const TYPE* s, size_t n = 1) {
         }
     }
 }
-
 
 // ---------------------------------------------------------------------------
 
