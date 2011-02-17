@@ -730,8 +730,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Get the current password expiration timeout for the given admin or the aggregate
-     * of all admins if admin is null.
+     * Get the password expiration timeout for the given admin. The expiration timeout is the
+     * recurring expiration timeout provided in the call to
+     * {@link #setPasswordExpirationTimeout(ComponentName, long)} for the given admin or the
+     * aggregate of all policy administrators if admin is null.
      *
      * @param admin The name of the admin component to check, or null to aggregate all admins.
      * @return The timeout for the given admin or the minimum of all timeouts
@@ -749,7 +751,9 @@ public class DevicePolicyManager {
 
     /**
      * Get the current password expiration time for the given admin or an aggregate of
-     * all admins if admin is null.
+     * all admins if admin is null. If the password is expired, this will return the time since
+     * the password expired as a negative number.  If admin is null, then a composite of all
+     * expiration timeouts is returned - which will be the minimum of all timeouts.
      *
      * @param admin The name of the admin component to check, or null to aggregate all admins.
      * @return The password expiration time, in ms.

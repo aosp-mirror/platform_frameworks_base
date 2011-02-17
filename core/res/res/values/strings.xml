@@ -1413,10 +1413,10 @@
         to be used while policy is enabled. Only the first device admin
         sets the effective global proxy.</string>
     <!-- Title of policy access to enforce password expiration [CHAR LIMIT=30]-->
-    <string name="policylab_expirePassword">Set password expiration</string>
+    <string name="policylab_expirePassword">Set lock-screen password expiration</string>
     <!-- Description of policy access to enforce password expiration [CHAR LIMIT=110]-->
-    <string name="policydesc_expirePassword">Control how long before lockscreen password needs to be
-    changed</string>
+    <string name="policydesc_expirePassword">Control how frequently the lock-screen password must be
+  changed</string>
     <!-- Title of policy access to require encrypted storage [CHAR LIMIT=30]-->
     <string name="policylab_encryptedStorage">Set storage encryption</string>
     <!-- Description of policy access to require encrypted storage [CHAR LIMIT=110]-->

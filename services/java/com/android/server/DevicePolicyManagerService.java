@@ -79,9 +79,9 @@ import java.util.Set;
  * Implementation of the device policy APIs.
  */
 public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
-    private static final int REQUEST_EXPIRE_PASSWORD = 5571;
+    private static final String TAG = "DevicePolicyManagerService";
 
-    static final String TAG = "DevicePolicyManagerService";
+    private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final long EXPIRATION_GRACE_PERIOD_MS = 5 * 86400 * 1000; // 5 days, in ms
 
