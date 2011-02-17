@@ -67,7 +67,7 @@ public class MediaPlayerStressTest extends InstrumentationTestCase {
         output.write(" Error: " + CodecTest.mPlaybackError);
         output.write(" Unknown Info: " + CodecTest.mMediaInfoUnknownCount);
         output.write(" Track Lagging: " +  CodecTest.mMediaInfoVideoTrackLaggingCount);
-        output.write(" BadInterleaving: " + CodecTest.mMediaInfoBadInterleavingCount);
+        output.write(" Bad Interleaving: " + CodecTest.mMediaInfoBadInterleavingCount);
         output.write(" Not Seekable: " + CodecTest.mMediaInfoNotSeekableCount);
         output.write(" Info Meta data update: " + CodecTest.mMediaInfoMetdataUpdateCount);
         output.write("\n");
@@ -77,9 +77,9 @@ public class MediaPlayerStressTest extends InstrumentationTestCase {
         output.write("Total Result:\n");
         output.write("Total Complete: " + mTotalComplete + "\n");
         output.write("Total Error: " + mTotalPlaybackError + "\n");
-        output.write("Total Unknown Info: " + mTotalInfoUnknown);
+        output.write("Total Unknown Info: " + mTotalInfoUnknown + "\n");
         output.write("Total Track Lagging: " + mTotalVideoTrackLagging + "\n" );
-        output.write("Total BadInterleaving: " + mTotalBadInterleaving + "\n");
+        output.write("Total Bad Interleaving: " + mTotalBadInterleaving + "\n");
         output.write("Total Not Seekable: " + mTotalNotSeekable + "\n");
         output.write("Total Info Meta data update: " + mTotalMetaDataUpdate + "\n");
         output.write("\n");
