@@ -32,7 +32,7 @@ import java.io.File;
  */
 public class WallpaperBackupHelper extends FileBackupHelperBase implements BackupHelper {
     private static final String TAG = "WallpaperBackupHelper";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     // This path must match what the WallpaperManagerService uses
     private static final String WALLPAPER_IMAGE = "/data/data/com.android.settings/files/wallpaper";
@@ -64,6 +64,10 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
         wpm = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
         mDesiredMinWidth = (double) wpm.getDesiredMinimumWidth();
         mDesiredMinHeight = (double) wpm.getDesiredMinimumHeight();
+
+        if (DEBUG) {
+            Slog.d(TAG, "dmW=" + mDesiredMinWidth + " dmH=" + mDesiredMinHeight);
+        }
     }
 
     /**
@@ -94,7 +98,7 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(STAGE_FILE, options);
 
-                    if (DEBUG) Slog.v(TAG, "Restoring wallpaper image w=" + options.outWidth
+                    if (DEBUG) Slog.d(TAG, "Restoring wallpaper image w=" + options.outWidth
                             + " h=" + options.outHeight);
 
                     // how much does the image differ from our preference?
@@ -103,13 +107,13 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
                     if (widthRatio > 0.8 && widthRatio < 1.25
                             && heightRatio > 0.8 && heightRatio < 1.25) {
                         // sufficiently close to our resolution; go ahead and use it
-                        if (DEBUG) Slog.v(TAG, "wallpaper dimension match; using");
+                        if (DEBUG) Slog.d(TAG, "wallpaper dimension match; using");
                         f.renameTo(new File(WALLPAPER_IMAGE));
                         // TODO: spin a service to copy the restored image to sd/usb storage,
                         // since it does not exist anywhere other than the private wallpaper
                         // file.
                     } else {
-                        if (DEBUG) Slog.v(TAG, "dimensions too far off: wr=" + widthRatio
+                        if (DEBUG) Slog.d(TAG, "dimensions too far off: wr=" + widthRatio
                                 + " hr=" + heightRatio);
                         f.delete();
                     }
