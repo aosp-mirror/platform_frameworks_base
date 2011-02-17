@@ -125,7 +125,8 @@ sp<DataSource> DataSource::CreateFromURI(
     sp<DataSource> source;
     if (!strncasecmp("file://", uri, 7)) {
         source = new FileSource(uri + 7);
-    } else if (!strncasecmp("http://", uri, 7)) {
+    } else if (!strncasecmp("http://", uri, 7)
+            || !strncasecmp("https://", uri, 8)) {
         sp<NuHTTPDataSource> httpSource = new NuHTTPDataSource;
         if (httpSource->connect(uri, headers) != OK) {
             return NULL;

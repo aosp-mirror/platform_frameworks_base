@@ -32,7 +32,7 @@ public:
     HTTPStream();
     ~HTTPStream();
 
-    status_t connect(const char *server, int port = 80);
+    status_t connect(const char *server, int port = -1, bool https = false);
     status_t disconnect();
 
     status_t send(const char *data, size_t size);
@@ -70,6 +70,9 @@ private:
     int mSocket;
 
     KeyedVector<AString, AString> mHeaders;
+
+    void *mSSLContext;
+    void *mSSL;
 
     HTTPStream(const HTTPStream &);
     HTTPStream &operator=(const HTTPStream &);

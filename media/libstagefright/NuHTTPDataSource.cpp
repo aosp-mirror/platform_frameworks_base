@@ -24,22 +24,30 @@ static bool ParseSingleUnsignedLong(
 }
 
 static bool ParseURL(
-        const char *url, String8 *host, unsigned *port, String8 *path) {
+        const char *url, String8 *host, unsigned *port,
+        String8 *path, bool *https) {
     host->setTo("");
     *port = 0;
     path->setTo("");
 
-    if (strncasecmp("http://", url, 7)) {
+    size_t hostStart;
+    if (!strncasecmp("http://", url, 7)) {
+        hostStart = 7;
+        *https = false;
+    } else if (!strncasecmp("https://", url, 8)) {
+        hostStart = 8;
+        *https = true;
+    } else {
         return false;
     }
 
-    const char *slashPos = strchr(&url[7], '/');
+    const char *slashPos = strchr(&url[hostStart], '/');
 
     if (slashPos == NULL) {
-        host->setTo(&url[7]);
+        host->setTo(&url[hostStart]);
         path->setTo("/");
     } else {
-        host->setTo(&url[7], slashPos - &url[7]);
+        host->setTo(&url[hostStart], slashPos - &url[hostStart]);
         path->setTo(slashPos);
     }
 
@@ -57,7 +65,7 @@ static bool ParseURL(
         String8 tmp(host->string(), colonOffset);
         *host = tmp;
     } else {
-        *port = 80;
+        *port = (*https) ? 443 : 80;
     }
 
     return true;
@@ -66,6 +74,7 @@ static bool ParseURL(
 NuHTTPDataSource::NuHTTPDataSource()
     : mState(DISCONNECTED),
       mPort(0),
+      mHTTPS(false),
       mOffset(0),
       mContentLength(0),
       mContentLengthValid(false),
@@ -111,11 +120,12 @@ status_t NuHTTPDataSource::connect(
 
     mUri = uri;
 
-    if (!ParseURL(uri, &host, &port, &path)) {
+    bool https;
+    if (!ParseURL(uri, &host, &port, &path, &https)) {
         return ERROR_MALFORMED;
     }
 
-    return connect(host, port, path, headers, offset);
+    return connect(host, port, path, https, headers, offset);
 }
 
 static bool IsRedirectStatusCode(int httpStatus) {
@@ -125,6 +135,7 @@ static bool IsRedirectStatusCode(int httpStatus) {
 
 status_t NuHTTPDataSource::connect(
         const char *host, unsigned port, const char *path,
+        bool https,
         const String8 &headers,
         off64_t offset) {
     LOGI("connect to %s:%u%s @%lld", host, port, path, offset);
@@ -132,7 +143,7 @@ status_t NuHTTPDataSource::connect(
     bool needsToReconnect = true;
 
     if (mState == CONNECTED && host == mHost && port == mPort
-            && offset == mOffset) {
+            && https == mHTTPS && offset == mOffset) {
         if (mContentLengthValid && mOffset == mContentLength) {
             LOGI("Didn't have to reconnect, old one's still good.");
             needsToReconnect = false;
@@ -142,6 +153,7 @@ status_t NuHTTPDataSource::connect(
     mHost = host;
     mPort = port;
     mPath = path;
+    mHTTPS = https;
     mHeaders = headers;
 
     status_t err = OK;
@@ -150,7 +162,7 @@ status_t NuHTTPDataSource::connect(
 
     if (needsToReconnect) {
         mHTTP.disconnect();
-        err = mHTTP.connect(host, port);
+        err = mHTTP.connect(host, port, https);
     }
 
     if (err != OK) {
@@ -353,7 +365,7 @@ ssize_t NuHTTPDataSource::readAt(off64_t offset, void *data, size_t size) {
         String8 host = mHost;
         String8 path = mPath;
         String8 headers = mHeaders;
-        status_t err = connect(host, mPort, path, headers, offset);
+        status_t err = connect(host, mPort, path, mHTTPS, headers, offset);
 
         if (err != OK) {
             return err;

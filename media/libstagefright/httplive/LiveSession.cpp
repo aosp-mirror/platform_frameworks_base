@@ -189,7 +189,8 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
 
     if (!strncasecmp(url, "file://", 7)) {
         source = new FileSource(url + 7);
-    } else if (strncasecmp(url, "http://", 7)) {
+    } else if (strncasecmp(url, "http://", 7)
+            && strncasecmp(url, "https://", 8)) {
         return ERROR_UNSUPPORTED;
     } else {
         {

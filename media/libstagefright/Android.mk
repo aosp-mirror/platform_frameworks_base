@@ -58,7 +58,8 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/frameworks/base/include/media/stagefright/openmax \
         $(TOP)/external/flac/include \
         $(TOP)/external/tremolo \
-        $(TOP)/frameworks/base/media/libstagefright/rtsp
+        $(TOP)/frameworks/base/media/libstagefright/rtsp \
+        $(TOP)/external/openssl/include \
 
 LOCAL_SHARED_LIBRARIES := \
         libbinder         \
@@ -72,7 +73,8 @@ LOCAL_SHARED_LIBRARIES := \
         libstagefright_yuv \
         libcamera_client \
         libdrmframework  \
-        libcrypto
+        libcrypto        \
+        libssl
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \

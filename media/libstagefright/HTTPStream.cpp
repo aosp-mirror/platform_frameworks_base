@@ -34,6 +34,8 @@
 
 #include <media/stagefright/foundation/ADebug.h>
 
+#include <openssl/ssl.h>
+
 namespace android {
 
 // static
@@ -41,11 +43,18 @@ const char *HTTPStream::kStatusKey = ":status:";  // MUST be lowercase.
 
 HTTPStream::HTTPStream()
     : mState(READY),
-      mSocket(-1) {
+      mSocket(-1),
+      mSSLContext(NULL),
+      mSSL(NULL) {
 }
 
 HTTPStream::~HTTPStream() {
     disconnect();
+
+    if (mSSLContext != NULL) {
+        SSL_CTX_free((SSL_CTX *)mSSLContext);
+        mSSLContext = NULL;
+    }
 }
 
 static bool MakeSocketBlocking(int s, bool blocking) {
@@ -198,7 +207,11 @@ static ssize_t MyReceive(int s, void *data, size_t size, int flags) {
     return MySendReceive(s, data, size, flags, false /* sendData */);
 }
 
-status_t HTTPStream::connect(const char *server, int port) {
+status_t HTTPStream::connect(const char *server, int port, bool https) {
+    if (port < 0) {
+        port = https ? 443 : 80;
+    }
+
     Mutex::Autolock autoLock(mLock);
 
     status_t err = OK;
@@ -249,6 +262,47 @@ status_t HTTPStream::connect(const char *server, int port) {
         return res;
     }
 
+    if (https) {
+        CHECK(mSSL == NULL);
+
+        if (mSSLContext == NULL) {
+            SSL_library_init();
+
+            mSSLContext = SSL_CTX_new(TLSv1_client_method());
+
+            if (mSSLContext == NULL) {
+                LOGE("failed to create SSL context");
+                mState = READY;
+                return ERROR_IO;
+            }
+        }
+
+        mSSL = SSL_new((SSL_CTX *)mSSLContext);
+
+        if (mSSL == NULL) {
+            LOGE("failed to create SSL session");
+
+            mState = READY;
+            return ERROR_IO;
+        }
+
+        int res = SSL_set_fd((SSL *)mSSL, mSocket);
+
+        if (res == 1) {
+            res = SSL_connect((SSL *)mSSL);
+        }
+
+        if (res != 1) {
+            SSL_free((SSL *)mSSL);
+            mSSL = NULL;
+
+            LOGE("failed to connect over SSL");
+            mState = READY;
+
+            return ERROR_IO;
+        }
+    }
+
     mState = CONNECTED;
 
     return OK;
@@ -259,6 +313,13 @@ status_t HTTPStream::disconnect() {
 
     if (mState != CONNECTED && mState != CONNECTING) {
         return ERROR_NOT_CONNECTED;
+    }
+
+    if (mSSL != NULL) {
+        SSL_shutdown((SSL *)mSSL);
+
+        SSL_free((SSL *)mSSL);
+        mSSL = NULL;
     }
 
     CHECK(mSocket >= 0);
@@ -276,7 +337,16 @@ status_t HTTPStream::send(const char *data, size_t size) {
     }
 
     while (size > 0) {
-        ssize_t n = MySend(mSocket, data, size, 0);
+        ssize_t n;
+        if (mSSL != NULL) {
+            n = SSL_write((SSL *)mSSL, data, size);
+
+            if (n < 0) {
+                n = -SSL_get_error((SSL *)mSSL, n);
+            }
+        } else {
+            n = MySend(mSocket, data, size, 0);
+        }
 
         if (n < 0) {
             disconnect();
@@ -317,7 +387,17 @@ status_t HTTPStream::receive_line(char *line, size_t size) {
 
     for (;;) {
         char c;
-        ssize_t n = MyReceive(mSocket, &c, 1, 0);
+        ssize_t n;
+        if (mSSL != NULL) {
+            n = SSL_read((SSL *)mSSL, &c, 1);
+
+            if (n < 0) {
+                n = -SSL_get_error((SSL *)mSSL, n);
+            }
+        } else {
+            n = MyReceive(mSocket, &c, 1, 0);
+        }
+
         if (n < 0) {
             disconnect();
 
@@ -437,7 +517,16 @@ status_t HTTPStream::receive_header(int *http_status) {
 ssize_t HTTPStream::receive(void *data, size_t size) {
     size_t total = 0;
     while (total < size) {
-        ssize_t n = MyReceive(mSocket, (char *)data + total, size - total, 0);
+        ssize_t n;
+        if (mSSL != NULL) {
+            n = SSL_read((SSL *)mSSL, (char *)data + total, size - total);
+
+            if (n < 0) {
+                n = -SSL_get_error((SSL *)mSSL, n);
+            }
+        } else {
+            n = MyReceive(mSocket, (char *)data + total, size - total, 0);
+        }
 
         if (n < 0) {
             LOGE("recv failed, errno = %d (%s)", (int)n, strerror(-n));
