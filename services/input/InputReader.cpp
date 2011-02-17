@@ -1285,24 +1285,23 @@ void CursorInputMapper::sync(nsecs_t when) {
             }
         }
 
+        pointerCoords.clear();
+
         if (mPointerController != NULL) {
             mPointerController->move(deltaX, deltaY);
             if (downChanged) {
                 mPointerController->setButtonState(mLocked.down ? POINTER_BUTTON_1 : 0);
             }
-            mPointerController->getPosition(&pointerCoords.x, &pointerCoords.y);
+            float x, y;
+            mPointerController->getPosition(&x, &y);
+            pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_X, x);
+            pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_Y, y);
         } else {
-            pointerCoords.x = deltaX;
-            pointerCoords.y = deltaY;
+            pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_X, deltaX);
+            pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_Y, deltaY);
         }
 
-        pointerCoords.pressure = mLocked.down ? 1.0f : 0.0f;
-        pointerCoords.size = 0;
-        pointerCoords.touchMajor = 0;
-        pointerCoords.touchMinor = 0;
-        pointerCoords.toolMajor = 0;
-        pointerCoords.toolMinor = 0;
-        pointerCoords.orientation = 0;
+        pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_PRESSURE, mLocked.down ? 1.0f : 0.0f);
     } // release lock
 
     int32_t metaState = mContext->getGlobalMetaState();
@@ -2686,15 +2685,16 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
 
             // Write output coords.
             PointerCoords& out = pointerCoords[outIndex];
-            out.x = x;
-            out.y = y;
-            out.pressure = pressure;
-            out.size = size;
-            out.touchMajor = touchMajor;
-            out.touchMinor = touchMinor;
-            out.toolMajor = toolMajor;
-            out.toolMinor = toolMinor;
-            out.orientation = orientation;
+            out.clear();
+            out.setAxisValue(AINPUT_MOTION_AXIS_X, x);
+            out.setAxisValue(AINPUT_MOTION_AXIS_Y, y);
+            out.setAxisValue(AINPUT_MOTION_AXIS_PRESSURE, pressure);
+            out.setAxisValue(AINPUT_MOTION_AXIS_SIZE, size);
+            out.setAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR, touchMajor);
+            out.setAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR, touchMinor);
+            out.setAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR, toolMajor);
+            out.setAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR, toolMinor);
+            out.setAxisValue(AINPUT_MOTION_AXIS_ORIENTATION, orientation);
 
             pointerIds[outIndex] = int32_t(id);
 
@@ -2706,14 +2706,17 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
         // Check edge flags by looking only at the first pointer since the flags are
         // global to the event.
         if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
-            if (pointerCoords[0].x <= 0) {
+            float x = pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_X);
+            float y = pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_Y);
+
+            if (x <= 0) {
                 motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
-            } else if (pointerCoords[0].x >= mLocked.orientedSurfaceWidth) {
+            } else if (x >= mLocked.orientedSurfaceWidth) {
                 motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
             }
-            if (pointerCoords[0].y <= 0) {
+            if (y <= 0) {
                 motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
-            } else if (pointerCoords[0].y >= mLocked.orientedSurfaceHeight) {
+            } else if (y >= mLocked.orientedSurfaceHeight) {
                 motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
             }
         }
@@ -3853,15 +3856,9 @@ void JoystickInputMapper::sync(nsecs_t when) {
 
     if (motionAxisChanged) {
         PointerCoords pointerCoords;
-        pointerCoords.x = mAxes.x.value;
-        pointerCoords.y = mAxes.y.value;
-        pointerCoords.touchMajor = 0;
-        pointerCoords.touchMinor = 0;
-        pointerCoords.toolMajor = 0;
-        pointerCoords.toolMinor = 0;
-        pointerCoords.pressure = 0;
-        pointerCoords.size = 0;
-        pointerCoords.orientation = 0;
+        pointerCoords.clear();
+        pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_X, mAxes.x.value);
+        pointerCoords.setAxisValue(AINPUT_MOTION_AXIS_Y, mAxes.y.value);
 
         int32_t pointerId = 0;
         getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_JOYSTICK, 0,

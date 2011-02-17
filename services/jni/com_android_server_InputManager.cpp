@@ -87,7 +87,6 @@ static struct {
     jfieldID mName;
     jfieldID mSources;
     jfieldID mKeyboardType;
-    jfieldID mMotionRanges;
 } gInputDeviceClassInfo;
 
 static struct {
@@ -1220,9 +1219,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gInputDeviceClassInfo.mKeyboardType, gInputDeviceClassInfo.clazz,
             "mKeyboardType", "I");
-
-    GET_FIELD_ID(gInputDeviceClassInfo.mMotionRanges, gInputDeviceClassInfo.clazz,
-            "mMotionRanges", "[Landroid/view/InputDevice$MotionRange;");
 
     // Configuration
 

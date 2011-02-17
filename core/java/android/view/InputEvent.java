@@ -24,11 +24,6 @@ import android.os.Parcelable;
  */
 public abstract class InputEvent implements Parcelable {
     /** @hide */
-    protected int mDeviceId;
-    /** @hide */
-    protected int mSource;
-    
-    /** @hide */
     protected static final int PARCEL_TOKEN_MOTION_EVENT = 1;
     /** @hide */
     protected static final int PARCEL_TOKEN_KEY_EVENT = 2;
@@ -45,55 +40,37 @@ public abstract class InputEvent implements Parcelable {
      * @return The device id.
      * @see InputDevice#getDevice
      */
-    public final int getDeviceId() {
-        return mDeviceId;
-    }
-    
+    public abstract int getDeviceId();
+
     /**
      * Gets the device that this event came from.
      * 
      * @return The device, or null if unknown.
      */
     public final InputDevice getDevice() {
-        return InputDevice.getDevice(mDeviceId);
+        return InputDevice.getDevice(getDeviceId());
     }
-    
+
     /**
      * Gets the source of the event.
      * 
      * @return The event source or {@link InputDevice#SOURCE_UNKNOWN} if unknown.
      * @see InputDevice#getSourceInfo
      */
-    public final int getSource() {
-        return mSource;
-    }
-    
+    public abstract int getSource();
+
     /**
      * Modifies the source of the event.
-     * @param source The source.
-     * 
+     *
+     * @param source The new source.
      * @hide
      */
-    public final void setSource(int source) {
-        mSource = source;
-    }
-    
+    public abstract void setSource(int source);
+
     public int describeContents() {
         return 0;
     }
-    
-    /** @hide */
-    protected final void readBaseFromParcel(Parcel in) {
-        mDeviceId = in.readInt();
-        mSource = in.readInt();
-    }
-    
-    /** @hide */
-    protected final void writeBaseToParcel(Parcel out) {
-        out.writeInt(mDeviceId);
-        out.writeInt(mSource);
-    }
-    
+
     public static final Parcelable.Creator<InputEvent> CREATOR
             = new Parcelable.Creator<InputEvent>() {
         public InputEvent createFromParcel(Parcel in) {

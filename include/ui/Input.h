@@ -28,6 +28,10 @@
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 
+#ifdef HAVE_ANDROID_OS
+class SkMatrix;
+#endif
+
 /*
  * Additional private constants not defined in ndk/ui/input.h.
  */
@@ -78,6 +82,10 @@ struct AInputDevice {
 
 
 namespace android {
+
+#ifdef HAVE_ANDROID_OS
+class Parcel;
+#endif
 
 /*
  * Flags that flow alongside events in the input dispatch system to help with certain
@@ -162,15 +170,61 @@ struct InputConfiguration {
  * Pointer coordinate data.
  */
 struct PointerCoords {
-    float x;
-    float y;
-    float pressure;
-    float size;
-    float touchMajor;
-    float touchMinor;
-    float toolMajor;
-    float toolMinor;
-    float orientation;
+    static const size_t MAX_AXES = 15; // 15 so that sizeof(PointerCoords) == 16 * 4 == 64
+
+    // Bitfield of axes that are present in this structure.
+    uint32_t bits; // 32bits are enough for now, can raise to 64bit when needed
+
+    // Values of axes that are stored in this structure packed in order by axis id
+    // for each axis that is present in the structure according to 'bits'.
+    float values[MAX_AXES];
+
+    inline void clear() {
+        bits = 0;
+    }
+
+    inline float getAxisValue(int32_t axis) const {
+        uint32_t axisBit = 1 << axis;
+        if (!(bits & axisBit)) {
+            return 0;
+        }
+        uint32_t index = __builtin_popcount(bits & (axisBit - 1));
+        return values[index];
+    }
+
+    inline void setAxisValue(int32_t axis, float value) {
+        uint32_t axisBit = 1 << axis;
+        uint32_t index = __builtin_popcount(bits & (axisBit - 1));
+        if (!(bits & axisBit)) {
+            uint32_t count = __builtin_popcount(bits);
+            if (count >= MAX_AXES) {
+                tooManyAxes(axis);
+                return;
+            }
+            bits |= axisBit;
+            for (uint32_t i = count; i > index; i--) {
+                values[i] = values[i - 1];
+            }
+        }
+        values[index] = value;
+    }
+
+    inline float* editAxisValue(int32_t axis) {
+        uint32_t axisBit = 1 << axis;
+        if (!(bits & axisBit)) {
+            return NULL;
+        }
+        uint32_t index = __builtin_popcount(bits & (axisBit - 1));
+        return &values[index];
+    }
+
+#ifdef HAVE_ANDROID_OS
+    status_t readFromParcel(Parcel* parcel);
+    status_t writeToParcel(Parcel* parcel) const;
+#endif
+
+private:
+    void tooManyAxes(int axis);
 };
 
 /*
@@ -185,12 +239,13 @@ public:
     inline int32_t getDeviceId() const { return mDeviceId; }
 
     inline int32_t getSource() const { return mSource; }
-    
+
+    inline void setSource(int32_t source) { mSource = source; }
+
 protected:
     void initialize(int32_t deviceId, int32_t source);
     void initialize(const InputEvent& from);
 
-private:
     int32_t mDeviceId;
     int32_t mSource;
 };
@@ -241,7 +296,7 @@ public:
             nsecs_t eventTime);
     void initialize(const KeyEvent& from);
 
-private:
+protected:
     int32_t mAction;
     int32_t mFlags;
     int32_t mKeyCode;
@@ -263,11 +318,17 @@ public:
 
     inline int32_t getAction() const { return mAction; }
 
+    inline void setAction(int32_t action) { mAction = action; }
+
     inline int32_t getFlags() const { return mFlags; }
 
     inline int32_t getEdgeFlags() const { return mEdgeFlags; }
 
+    inline void setEdgeFlags(int32_t edgeFlags) { mEdgeFlags = edgeFlags; }
+
     inline int32_t getMetaState() const { return mMetaState; }
+
+    inline void setMetaState(int32_t metaState) { mMetaState = metaState; }
 
     inline float getXOffset() const { return mXOffset; }
 
@@ -285,48 +346,54 @@ public:
 
     inline nsecs_t getEventTime() const { return mSampleEventTimes[getHistorySize()]; }
 
+    const PointerCoords* getRawPointerCoords(size_t pointerIndex) const;
+
+    float getRawAxisValue(int32_t axis, size_t pointerIndex) const;
+
     inline float getRawX(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).x;
+        return getRawAxisValue(AINPUT_MOTION_AXIS_X, pointerIndex);
     }
 
     inline float getRawY(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).y;
+        return getRawAxisValue(AINPUT_MOTION_AXIS_Y, pointerIndex);
     }
 
+    float getAxisValue(int32_t axis, size_t pointerIndex) const;
+
     inline float getX(size_t pointerIndex) const {
-        return getRawX(pointerIndex) + mXOffset;
+        return getAxisValue(AINPUT_MOTION_AXIS_X, pointerIndex);
     }
 
     inline float getY(size_t pointerIndex) const {
-        return getRawY(pointerIndex) + mYOffset;
+        return getAxisValue(AINPUT_MOTION_AXIS_Y, pointerIndex);
     }
 
     inline float getPressure(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).pressure;
+        return getAxisValue(AINPUT_MOTION_AXIS_PRESSURE, pointerIndex);
     }
 
     inline float getSize(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).size;
+        return getAxisValue(AINPUT_MOTION_AXIS_SIZE, pointerIndex);
     }
 
     inline float getTouchMajor(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).touchMajor;
+        return getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR, pointerIndex);
     }
 
     inline float getTouchMinor(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).touchMinor;
+        return getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR, pointerIndex);
     }
 
     inline float getToolMajor(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).toolMajor;
+        return getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR, pointerIndex);
     }
 
     inline float getToolMinor(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).toolMinor;
+        return getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR, pointerIndex);
     }
 
     inline float getOrientation(size_t pointerIndex) const {
-        return getCurrentPointerCoords(pointerIndex).orientation;
+        return getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION, pointerIndex);
     }
 
     inline size_t getHistorySize() const { return mSampleEventTimes.size() - 1; }
@@ -335,48 +402,67 @@ public:
         return mSampleEventTimes[historicalIndex];
     }
 
+    const PointerCoords* getHistoricalRawPointerCoords(
+            size_t pointerIndex, size_t historicalIndex) const;
+
+    float getHistoricalRawAxisValue(int32_t axis, size_t pointerIndex,
+            size_t historicalIndex) const;
+
     inline float getHistoricalRawX(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).x;
+        return getHistoricalRawAxisValue(
+                AINPUT_MOTION_AXIS_X, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalRawY(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).y;
+        return getHistoricalRawAxisValue(
+                AINPUT_MOTION_AXIS_Y, pointerIndex, historicalIndex);
     }
 
+    float getHistoricalAxisValue(int32_t axis, size_t pointerIndex, size_t historicalIndex) const;
+
     inline float getHistoricalX(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalRawX(pointerIndex, historicalIndex) + mXOffset;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_X, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalY(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalRawY(pointerIndex, historicalIndex) + mYOffset;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_Y, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalPressure(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).pressure;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_PRESSURE, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalSize(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).size;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_SIZE, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalTouchMajor(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).touchMajor;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_TOUCH_MAJOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalTouchMinor(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).touchMinor;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_TOUCH_MINOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalToolMajor(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).toolMajor;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_TOOL_MAJOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalToolMinor(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).toolMinor;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_TOOL_MINOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalOrientation(size_t pointerIndex, size_t historicalIndex) const {
-        return getHistoricalPointerCoords(pointerIndex, historicalIndex).orientation;
+        return getHistoricalAxisValue(
+                AINPUT_MOTION_AXIS_ORIENTATION, pointerIndex, historicalIndex);
     }
 
     void initialize(
@@ -396,11 +482,22 @@ public:
             const int32_t* pointerIds,
             const PointerCoords* pointerCoords);
 
+    void copyFrom(const MotionEvent* other, bool keepHistory);
+
     void addSample(
             nsecs_t eventTime,
             const PointerCoords* pointerCoords);
 
     void offsetLocation(float xOffset, float yOffset);
+
+    void scale(float scaleFactor);
+
+#ifdef HAVE_ANDROID_OS
+    void transform(const SkMatrix* matrix);
+
+    status_t readFromParcel(Parcel* parcel);
+    status_t writeToParcel(Parcel* parcel) const;
+#endif
 
     // Low-level accessors.
     inline const int32_t* getPointerIds() const { return mPointerIds.array(); }
@@ -409,7 +506,7 @@ public:
             return mSamplePointerCoords.array();
     }
 
-private:
+protected:
     int32_t mAction;
     int32_t mFlags;
     int32_t mEdgeFlags;
@@ -422,15 +519,6 @@ private:
     Vector<int32_t> mPointerIds;
     Vector<nsecs_t> mSampleEventTimes;
     Vector<PointerCoords> mSamplePointerCoords;
-
-    inline const PointerCoords& getCurrentPointerCoords(size_t pointerIndex) const {
-        return mSamplePointerCoords[getHistorySize() * getPointerCount() + pointerIndex];
-    }
-
-    inline const PointerCoords& getHistoricalPointerCoords(
-            size_t pointerIndex, size_t historicalIndex) const {
-        return mSamplePointerCoords[historicalIndex * getPointerCount() + pointerIndex];
-    }
 };
 
 /*
@@ -486,11 +574,11 @@ public:
     inline const String8 getName() const { return mName; }
     inline uint32_t getSources() const { return mSources; }
 
-    const MotionRange* getMotionRange(int32_t rangeType) const;
+    const MotionRange* getMotionRange(int32_t axis) const;
 
     void addSource(uint32_t source);
-    void addMotionRange(int32_t rangeType, float min, float max, float flat, float fuzz);
-    void addMotionRange(int32_t rangeType, const MotionRange& range);
+    void addMotionRange(int32_t axis, float min, float max, float flat, float fuzz);
+    void addMotionRange(int32_t axis, const MotionRange& range);
 
     inline void setKeyboardType(int32_t keyboardType) { mKeyboardType = keyboardType; }
     inline int32_t getKeyboardType() const { return mKeyboardType; }

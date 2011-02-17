@@ -1180,6 +1180,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     private KeyEvent mNext;
     private boolean mRecycled;
 
+    private int mDeviceId;
+    private int mSource;
     private int mMetaState;
     private int mAction;
     private int mKeyCode;
@@ -1651,6 +1653,23 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return native_hasDefaultAction(mKeyCode);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public final int getDeviceId() {
+        return mDeviceId;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final int getSource() {
+        return mSource;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final void setSource(int source) {
+        mSource = source;
+    }
 
     /**
      * <p>Returns the state of the meta keys.</p>
@@ -2651,8 +2670,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
     
     private KeyEvent(Parcel in) {
-        readBaseFromParcel(in);
-        
+        mDeviceId = in.readInt();
+        mSource = in.readInt();
         mAction = in.readInt();
         mKeyCode = in.readInt();
         mRepeatCount = in.readInt();
@@ -2665,9 +2684,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(PARCEL_TOKEN_KEY_EVENT);
-        
-        writeBaseToParcel(out);
-        
+
+        out.writeInt(mDeviceId);
+        out.writeInt(mSource);
         out.writeInt(mAction);
         out.writeInt(mKeyCode);
         out.writeInt(mRepeatCount);
