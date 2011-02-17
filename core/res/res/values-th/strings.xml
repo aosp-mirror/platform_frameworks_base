@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"โหมดใช้งานบนเครื่องบิน"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"เปิดโหมดใช้งานบนเครื่องบิน"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"โหมดใช้งานบนเครื่องบินปิดทำงานอยู่"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"โหมดปลอดภัย"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ระบบ Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"บริการที่ต้องเสียค่าใช้จ่าย"</string>
@@ -256,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"อนุญาตให้ผู้ถือเชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของวิธีป้อนข้อมูล ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"เชื่อมโยงกับวอลเปเปอร์"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"อนุญาตให้ผู้ถือเชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของวอลเปเปอร์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"เชื่อมโยงกับบริการวิดเจ็ต"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"อนุญาตให้เจ้าของเชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของบริการวิดเจ็ต ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ติดต่อกับผู้ดูแลอุปกรณ์"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"อนุญาตให้ผู้ถือส่งเนื้อหาไปยังโปรแกรมควบคุมอุปกรณ์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"เปลี่ยนการวางแนวหน้าจอ"</string>
@@ -286,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"อนุญาตให้แอปพลิเคชันอ่านและเขียนไปยังรีซอร์สที่เป็นของกลุ่มวินิจฉัย เช่น ไฟล์ใน /dev การทำเช่นนี้อาจส่งผลต่อความเสถียรและความปลอดภัยของระบบ และควรใช้สำหรับการวินิจฉัยเกี่ยวกับฮาร์ดแวร์โดยเฉพาะที่ทำโดยผู้ผลิตหรือผู้ให้บริการเท่านั้น"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"เปิดหรือปิดการใช้งานส่วนประกอบของแอปพลิเคชัน"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"อนุญาตให้แอปพลิเคชันเปลี่ยนว่าจะเปิดการใช้งานคอมโพเนนต์หรือแอปพลิเคชันอื่นหรือไม่ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้เพื่อปิดการใช้งานคุณสมบัติที่สำคัญของแท็บเล็ตได้ ต้องใช้ความระมัดระวังเกี่ยวกับการอนุญาตนี้เพราะอาจทำให้คอมโพเนนต์ของแอปพลิเคชันเข้าสู่สถานะที่ไม่สามารถใช้งานได้ ไม่คงที่ หรือไม่เสถียร"</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"อนุญาตให้แอปพลิเคชันเปลี่ยนว่าจะเปิดใช้งานส่วนประกอบหรือแอปพลิเคชันอื่นหรือไม่ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้เพื่อปิดการใช้งานคุณสมบัติที่สำคัญของโทรศัพท์ได้ การอนุญาตจึงต้องทำอย่างระมัดระวัง เพราะอาจทำให้ส่วนประกอบของแอปพลิเคชันอยู่ในสถานะใช้งานไม่ได้ ทำงานไม่คงที่ หรือไม่เสถียรได้"</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"อนุญาตให้แอปพลิเคชันเปลี่ยนว่าจะเปิดใช้งานส่วนประกอบหรือแอปพลิเคชันอื่นหรือไม่ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้เพื่อปิดการใช้งานคุณสมบัติที่สำคัญของโทรศัพท์ได้ การอนุญาตจึงต้องทำอย่างระมัดระวัง เพราะอาจทำให้ส่วนประกอบของแอปพลิเคชันอยู่ในสถานะใช้งานไม่ได้ ทำงานไม่คงที่ หรือไม่เสถียร"</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"ตั้งค่าแอปพลิเคชันที่เหมาะสม"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"อนุญาตให้แอปพลิเคชันแก้ไขแอปพลิเคชันที่คุณต้องการ วิธีนี้อาจทำให้แอปพลิเคชันที่เป็นอันตรายแอบเปลี่ยนแอปพลิเคชันที่มีการเรียกใช้งาน โดยการปลอมแปลงแอปพลิเคชันที่มีอยู่ของคุณเพื่อเก็บข้อมูลส่วนบุคคลจากคุณ"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"แก้ไขการตั้งค่าระบบสากล"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"อนุญาตให้แอปพลิเคชันควบคุมไฟฉาย"</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"เข้าถึงอุปกรณ์ USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"อนุญาตให้แอปพลิเคชันเข้าถึงอุปกรณ์ USB"</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"ใช้โปรโตคอล MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"อนุญาตการเข้าถึงไดรเวอร์ Kernel MTP เพื่อใช้โปรโตคอล MTP USB"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ทดสอบฮาร์ดแวร์"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"อนุญาตให้แอปพลิเคชันควบคุมอุปกรณ์ต่อพ่วงหลายอย่างเพื่อการทดสอบฮาร์ดแวร์"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"โทรติดต่อหมายเลขโทรศัพท์โดยตรง"</string>
@@ -465,7 +464,7 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"แก้ไข/ลบข้อมูลการ์ด SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"อนุญาตให้แอปพลิเคชันเขียนไปยังที่เก็บข้อมูล USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"อนุญาตให้แอปพลิเคชันเขียนลงบนการ์ด SD"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"แก้ไข/ลบเนื้อหาของที่เก็บข้อมูลสื่อภายใน"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"แก้/ลบเนื้อหาข้อมูลสื่อภายใน"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"อนุญาตให้แอปพลิเคชันแก้ไขเนื้อหาของที่เก็บข้อมูลสื่อภายใน"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"เข้าถึงระบบไฟล์แคช"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"อนุญาตให้แอปพลิเคชันอ่านและเขียนระบบไฟล์แคช"</string>
@@ -487,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะเปิดการใช้งานนโยบาย เฉพาะผู้ดูแลอุปกรณ์คนแรกเท่านั้นที่ตั้งค่าพร็อกซีส่วนกลางที่มีผลบังคับ"</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"ตั้งค่าการหมดอายุของรหัสผ่าน"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"ควบคุมระยะเวลาก่อนที่จะต้องเปลี่ยนรหัสผ่านการล็อกหน้าจอ"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ตั้งค่าการเข้ารหัสที่เก็บข้อมูล"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"กำหนดว่าแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -601,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"ที่ทำงาน"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"อื่นๆ"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"ป้อนรหัส PIN"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"แตะเพื่อใส่รหัสผ่าน"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"ป้อนรหัสผ่านเพื่อปลดล็อก"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"ป้อน PIN เพื่อปลดล็อก"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"รหัส PIN ไม่ถูกต้อง!"</string>
@@ -644,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"รหัสผ่าน"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ลงชื่อเข้าใช้"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"กำลังตรวจสอบ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ปลดล็อก"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"เปิดเสียง"</string>
@@ -900,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"เลือกเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>
     <string name="select_input_method" msgid="6865512749462072765">"เลือกวิธีป้อนข้อมูล"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"กำหนดค่าวิธีการป้อนข้อมูล"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"ตัวเลือก"</u></string>
@@ -998,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"แบ่งปัน"</string>
     <string name="find" msgid="4808270900322985960">"ค้นหา"</string>
     <string name="websearch" msgid="4337157977400211589">"ค้นเว็บ"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"คำขอสถานที่จาก <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"คำขอสถานที่"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"ร้องขอโดย <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"ใช่"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"ไม่"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"เกินจำนวนการลบสูงสุด"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"พบรายการที่ถูกลบ <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> รายการสำหรับ <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> บัญชี <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> คุณต้องการทำอะไร"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"ลบรายการ"</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"เลิกทำการลบ"</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"ไม่ต้องทำอะไรในขณะนี้"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> เชื่อมต่อ VPN แล้ว"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> ตัดการเชื่อมต่อ VPN แล้ว"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"แตะเพื่อเชื่อมต่อกับ VPN อีกครั้ง"</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"เลือกบัญชี"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"การเพิ่ม"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"การลด"</string>
 </resources>

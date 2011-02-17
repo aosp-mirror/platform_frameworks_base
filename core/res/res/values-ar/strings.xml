@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"وضع الطائرة"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"وضع الطائرة قيد التشغيل"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"وضع الطائرة متوقف"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"+100"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"نظام Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"الخدمات التي تكلفك المال"</string>
@@ -256,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لطريقة الإرسال. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"الالتزام بخلفية ما"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للخلفية. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"الالتزام بخدمة أداة"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة الأداة. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"التفاعل مع مشرف الجهاز"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"للسماح للمالك بإرسال الأهداف إلى أحد مشرفي الجهاز. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"تغيير اتجاه الشاشة"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"للسماح للتطبيق بالتحكم في الضوء الوامض."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"الدخول إلى أجهزة USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"للسماح للتطبيق بالدخول إلى أجهزة USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"تنفيذ بروتوكول MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"لإتاحة الدخول إلى برنامج تشغيل kernel MTP لتنفيذ بروتوكول MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"اختبار الأجهزة"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"للسماح للتطبيق بالتحكم في الأجهزة الطرفية المتنوعة بغرض اختبار الأجهزة."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"اتصال مباشر بأرقام الهواتف"</string>
@@ -466,7 +465,7 @@
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"للسماح لتطبيق ما بالكتابة على وحدة تخزين USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"للسماح لتطبيق ما بالكتابة إلى بطاقة SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"تعديل/حذف محتويات وحدة تخزين الوسائط الداخلية"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"للسماح لتطبيق ما بتعديل محتويات وحدة تخزين الوسائط الداخلية."</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"للسماح لأحد التطبيقات بتعديل محتويات وحدة تخزين الوسائط الداخلية."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"الدخول إلى نظام ملفات ذاكرة التخزين المؤقت"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"للسماح لتطبيق ما بقراءة نظام ملفات ذاكرة التخزين المؤقت والكتابة به."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"إجراء/تلقي مكالمات عبر الإنترنت"</string>
@@ -487,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"تعيين الخادم الوكيل العمومي للجهاز لكي يتم استخدامه أثناء تمكين السياسة. يعين مشرف الجهاز الأول فقط الخادم الوكيل العمومي الفعال."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"تعيين انتهاء صلاحية كلمة المرور"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"التحكم في الوقت المستغرق قبل الحاجة إلى تغيير كلمة مرور شاشة التوقف"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تعيين تشفير التخزين"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"طلب تشفير بيانات التطبيق المخزنة"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"الرئيسية"</item>
     <item msgid="869923650527136615">"الجوال"</item>
@@ -601,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"العمل"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"غير ذلك"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"أدخل رقم التعريف الشخصي"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"يمكنك اللمس لإدخال كلمة المرور"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"أدخل كلمة المرور لإلغاء التأمين"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"أدخل رقم التعريف الشخصي (PIN) لإلغاء القفل"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"كود PIN غير صحيح!"</string>
@@ -644,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"كلمة المرور"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"تسجيل الدخول"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"اسم المستخدم غير صحيح أو كلمة المرور غير صحيحة."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"إذا نسيت اسم المستخدم أو كلمة المرور، "\n"فانتقل إلى "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"جارٍ التحقق..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"إلغاء تأمين"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"تشغيل الصوت"</string>
@@ -900,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"اختيار تعطيل تصحيح أخطاء USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"تحديد طريقة الإرسال"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"تهيئة طرق الإدخال"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789 أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"العناصر المرشحة"</u></string>
@@ -998,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"مشاركة"</string>
     <string name="find" msgid="4808270900322985960">"بحث"</string>
     <string name="websearch" msgid="4337157977400211589">"بحث الويب"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"طلب الموقع من <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"طلب الموقع"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"مطلوب من <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"نعم"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"لا"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"تم تجاوز حد الحذف."</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"هناك <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> من العناصر المحذوفة بالنسبة إلى <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، في الحساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. ما الذي تريد فعله؟"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"حذف هذه العناصر"</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"التراجع عن عمليات الحذف"</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"عدم تنفيذ أي شيء الآن"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"تم توصيل الشبكة الظاهرية الخاصة (VPN) لـ <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"تم فصل الشبكة الظاهرية الخاصة (VPN) لـ <xliff:g id="PROFILENAME">%s</xliff:g>"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"يمكنك اللمس لإعادة الاتصال بالشبكة الظاهرية الخاصة (VPN)."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"حدد حسابًا."</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"زيادة"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"تناقص"</string>
 </resources>

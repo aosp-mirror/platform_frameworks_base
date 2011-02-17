@@ -138,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"關機中..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"您的平板電腦將會關機。"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"手機即將關機。"</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"您要關機嗎？"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"最新的"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"最近沒有存取應用程式。"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"平板電腦選項"</string>
@@ -152,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飛航模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"飛航模式為 [開啟]"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"飛航模式為 [關閉]"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要額外費用的服務。"</string>
@@ -225,7 +223,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"防止切換應用程式"</string>
     <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"防止使用者切換到其他應用程式。"</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"監視控制所有應用程式啟動狀態。"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"允許應用程式監視和控制系統啟動活動的方式。惡意應用程式可藉此破壞整個系統。這個權限只有開發人員才需要，一般使用上不需使用這個權限。"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"允許應用程式監視和控制系統啟動活動的方式。惡意程式可能因此癱瘓整個系統。這個權限只有開發人員才需要，一般使用上不需使用這個權限。"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"傳送程式已移除廣播"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"允許應用程式在其他應用程式被移除時發送通知。請注意：惡意程式可能利用此功能，關閉其他執行中的程式。"</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"傳送已接收 SMS 廣播"</string>
@@ -237,9 +235,9 @@
     <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"關閉所有背景程式"</string>
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"允許應用程式控制哪些活動在被移到背景執行時，儘速結束。一般應用程式不需要此功能。"</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"編輯電池狀態"</string>
-    <string name="permdesc_batteryStats" msgid="5847319823772230560">"允許修改電池狀態。一般應用程式不會使用此功能。"</string>
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"允修改收集到的電池用量統計資料。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"控制系統備份與還原"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"允許應用程式控制系統備份與還原機制 (不建議一般應用程式使用)。"</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"允許應用程式控制系統的備份與還原機制。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"允許內部系統使用介面建立視窗。一般應用程式不會使用此功能。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"顯示系統警示"</string>
@@ -257,14 +255,16 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"允許擁有人連結至輸入法的最頂層介面。一般應用程式不需使用此選項。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"連結至桌布"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允許擁有人連結至桌布的最頂層介面，一般應用程式不需使用此選項。"</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"繫結至小工具服務"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"允許應用程式繫結至小工具服務的頂層介面，一般應用程式不需使用此選項。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允許應用程式將調用請求 (intent) 傳送至裝置管理員；一般應用程式不需使用此選項。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"變更螢幕顯示方向"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"允許應用程式隨時變更螢幕顯示方向。一般應用程式不需要此功能。"</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"允許應用程式可隨時變更螢幕旋轉方向。一般應用不應使用這項功能。"</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"傳送 Linux 訊號到應用程式"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"允許應用程式要求將支援的訊號傳送到所有持續的程序。"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"設定應用程式持續執行"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"允許應用程式持續執行，避免系統將它應用到其他程式。"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"允許應用程式部分持續執行，避免系統將它用於其他應用程式。"</string>
     <string name="permlab_deletePackages" msgid="3343439331576348805">"刪除應用程式"</string>
     <string name="permdesc_deletePackages" msgid="3634943677518723314">"允許應用程式刪除 Android 程式。請注意：惡意程式可能利用此功能刪除重要應用程式。"</string>
     <string name="permlab_clearAppUserData" msgid="2192134353540277878">"刪除其他應用程式資料"</string>
@@ -287,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"允許應用程式讀寫 diag 群組的資源；例如：/dev 裡的檔案。這可能會影響系統穩定性與安全性。此功能僅供製造商或技術人員用於硬體規格偵測。"</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"啟用或停用應用程式元件"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"允許應用程式啟用或停用其他應用程式的元件。惡意應用程式可藉此停用重要的平板電腦功能。由於這個權限可能會導致應用程式元件無法使用、造成不一致或不穩定的問題，因此請謹慎斟酌授權。"</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"允許應用程式啟用或停用其他應用程式的元件。惡意應用程式可藉此停用重要的平板電腦功能。由於這個權限可能會導致應用程式元件無法使用、造成不一致或不穩定的問題，因此請謹慎斟酌授權。"</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"允許應用程式啟用或停用其他應用程式的元件。請注意，惡意應用程式可利用此功能，停用重要的手機功能。此外，這個權限可能會導致應用程式元件無法使用、不一致或不穩定，因此請斟酌使用。"</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"設定喜好的應用程式"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"允許應用程式修改您偏好的應用程式。請注意：惡意程式可能藉以秘密竄改執行的程式，或偽造已存在的程式以收集私人資料。"</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"編輯全域系統設定"</string>
@@ -332,7 +332,7 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"允許應用程式編輯全域音訊設定，例如音量與路由。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"允許應用程式存取音訊錄製路徑。"</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"允許應用程式存取錄音檔路徑。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍照和拍攝影片"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"允許應用程式使用相機拍照和錄影，此功能可讓應用程式隨時透過相機收集圖片。"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"永久停用平板電腦"</string>
@@ -347,39 +347,37 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"允許應用程式掛載/卸載抽取式儲存設備的檔案系統。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"將外接式儲存裝置格式化"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"允許應用程式將可移除式儲存裝置格式化。"</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"取得內存空間的資訊"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"允許應用程式取得內存空間的資訊。"</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"建立內存空間"</string>
-    <string name="permdesc_asec_create" msgid="2621346764995731250">"允許應用程式建立內存空間。"</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"銷毀內存空間"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"允許應用程式銷毀內存空間。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"掛接/卸載內存空間"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"允許應用程式掛接/卸載內存空間。"</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"重新命名內存空間"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"允許應用程式重新命名內存空間。"</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"取得內部儲存空間的資訊"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"允許應用程式取得內部儲存空間的資訊。"</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"建立內部儲存空間"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"允許應用程式建立內部儲存空間。"</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"銷毀內部儲存空間"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"允許應用程式銷毀內部儲存空間。"</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"掛接/卸載內部儲存空間"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"允許應用程式掛接/卸載內部儲存空間。"</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"重新命名內部儲存空間"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"允許應用程式重新命名內部儲存空間。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"允許應用程式控制震動。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制閃光燈"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"存取 USB 裝置"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"允許應用程式存取 USB 裝置。"</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"執行 MTP 通訊協定"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"允許存取核心 MTP 驅動程式，以執行 MTP USB 通訊協定。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"測試硬體"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"允許應用程式控制各種週邊設備，以供測試用。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
     <string name="permdesc_callPhone" msgid="3369867353692722456">"允許應用程式自行撥打電話。請注意：惡意程式可能任意撥打電話，造成預期外的支出。但此選項並不允許應用程式撥打緊急電話號碼。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接撥打任何電話號碼"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"允許應用程式自行撥打任何電話號碼，包括緊急電話號碼。請注意：惡意程式可能利用此功能濫用緊急服務，撥打不必要或違法的電話。"</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"允許應用程式自行撥打任何電話號碼，包括緊急電話號碼。請注意：惡意應用程式可能會利用此權限，向緊急服務撥打騷擾甚至非法電話。"</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"直接啟動 CDMA 平板電腦設定程序"</string>
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"直接起始 CDMA 手機設定程序"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"允許應用程式啟動 CDMA 服務 (惡意應用程式可能會在非必要的情況下啟動 CDMA 服務)。"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
-    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"允許啟用/停用無線通訊位置更新通知。一般應用程式不會使用此功能。"</string>
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"允許從廣播中啟用/停用位置資訊更新通知。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"存取登機選項"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"允許讀寫登機服務上傳的資料。一般應用程式不會使用此功能。"</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"允許讀取/寫入由登錄服務所更新的屬性存取權。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"選擇小工具"</string>
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"允許應用程式告知系統哪個應用程式可以使用哪些小工具。開啟此權限後，應用程式會讓其他程式使用個人資料，但一般應用程式不適合使用此功能。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手機狀態"</string>
@@ -466,10 +464,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"修改/刪除 SD 卡的內容"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"允許應用程式寫入 USB 儲存裝置。"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"允許應用程式寫入 SD 卡。"</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"修改/刪除內部媒體儲存裝置內容"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"允許應用程式修改內部媒體儲存裝置內容。"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"存取快取檔案系統"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"撥打/接聽網路電話"</string>
@@ -490,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域 Proxy，只有第一個裝置管理員所設定的全域 Proxy 具有效力。"</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"設定密碼到期日"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"控制螢幕鎖定密碼的使用期限"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"設定儲存裝置加密"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"必須為儲存的應用程式資料加密"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住家電話"</item>
     <item msgid="869923650527136615">"行動電話"</item>
@@ -604,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"公司"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"其他"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"輸入 PIN 碼"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"輕觸即可輸入密碼"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"輸入 PIN 進行解鎖"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"PIN 碼錯誤！"</string>
@@ -647,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密碼"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登入"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"使用者名稱或密碼錯誤。"</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"忘了使用者名稱或密碼？"\n"請前往 "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"檢查中..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解除封鎖"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"開啟音效"</string>
@@ -668,11 +668,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"自動填入功能"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"設定自動填入功能"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"讀取瀏覽器的記錄與書籤"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允許應用程式讀取瀏覽器曾經造訪過的所有網址，以及瀏覽器的所有書籤。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"寫入瀏覽器的記錄與書籤"</string>
@@ -905,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 偵錯模式已啟用"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"選取以停用 USB 偵錯。"</string>
     <string name="select_input_method" msgid="6865512749462072765">"選取輸入方式"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"設定輸入方式"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"待選項目"</u></string>
@@ -986,8 +985,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 個相符項目"</item>
     <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 個相符項目 (共 <xliff:g id="TOTAL">%d</xliff:g> 個相符項目)"</item>
   </plurals>
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
+    <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"正在卸載 USB 儲存裝置..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"正在卸載 SD 卡..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"正在清除 USB 儲存裝置..."</string>
@@ -1004,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"分享"</string>
     <string name="find" msgid="4808270900322985960">"尋找"</string>
     <string name="websearch" msgid="4337157977400211589">"網頁搜尋"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> 的地點要求"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"位置要求"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"要求者：<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"是"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"否"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"已超過刪除上限"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g> 同步化 (<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> 帳戶) 有 <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> 個刪除項目。您想如何處理？"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"刪除這些項目。"</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"復原刪除。"</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"暫不執行。"</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN 已連線"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN 已中斷連線"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"輕觸即可重新連線至 VPN。"</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"選取帳戶"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"增加"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"減少"</string>
 </resources>

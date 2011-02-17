@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2010, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- XL xlarge -->
-    <string name="status_bar_clear_all_button" msgid="4341545325987974494">"Eliminar todos"</string>
-    <!-- XL -->
-    <string name="status_bar_no_notifications_title" msgid="2492933749414725897">"No tienes notificaciones"</string>
-    <!-- XL -->
-    <string name="status_bar_settings_rotation_lock" msgid="9125161825884157545">"Bloquear orient. de pant."</string>
-    <!-- XL -->
-    <string name="recent_tasks_app_label" msgid="5550538721034982973">"Google Apps"</string>
-    <!-- XL xlarge -->
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="4866302415753953027">"Sin conexión a Internet"</string>
-    <!-- XL xlarge -->
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="3832182580451976589">"Wi-Fi conectado"</string>
-
-    <!-- manually translated -->
-    <string name="gps_notification_searching_text">Buscando señal de GPS</string>
-
-    <!-- manually translated -->
-    <string name="gps_notification_found_text">Ubicación establecida por el GPS</string>
+    <string name="status_bar_clear_all_button" msgid="4722520806446512408">"Eliminar todos"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="4684094636492991496">"Sin conexión a Int."</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"WiFi conectado"</string>
+    <!-- no translation found for gps_notification_searching_text (894185519046488403) -->
+    <skip />
+    <!-- no translation found for gps_notification_found_text (5306445324124275852) -->
+    <skip />
 </resources>

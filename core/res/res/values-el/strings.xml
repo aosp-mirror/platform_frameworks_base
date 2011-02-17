@@ -138,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Απενεργοποίηση..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Το tablet σας θα απενεργοποιηθεί."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Το τηλέφωνό σας θα απενεργοποιηθεί."</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Θέλετε να γίνει τερματισμός λειτουργίας;"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Πρόσφατα"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Δεν υπάρχουν πρόσφατες εφαρμογές."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Επιλογές tablet"</string>
@@ -152,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Λειτουργία πτήσης"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Η λειτουργία πτήσης είναι ενεργοποιημένη."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Η λειτουργία πτήσης είναι απενεργοποιημένη"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Ασφαλής λειτουργία"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Σύστημα Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Υπηρεσίες επί πληρωμή"</string>
@@ -257,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας μεθόδου εισόδου. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"δέσμευση σε ταπετσαρία"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας ταπετσαρίας. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"δέσμευση σε υπηρεσία γραφικών στοιχείων"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας γραφικών στοιχείων. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"επικοινωνία με έναν διαχειριστή συσκευής"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Επιτρέπει στον κάτοχο την αποστολή στόχων σε έναν διαχειριστή συσκευής. Δεν θα χρειαστεί ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"αλλαγή προσανατολισμού οθόνης"</string>
@@ -287,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Επιτρέπει σε μια εφαρμογή την ανάγνωση και την εγγραφή σε πόρο που ανήκει στην ομάδα διαγνωστικού (π.χ. αρχεία στον κατάλογο /dev). Αυτό ενδέχεται να επηρεάσει την σταθερότητα και την ασφάλεια του συστήματος. Θα πρέπει να χρησιμοποιείται ΜΟΝΟ για διαγνωστικά υλικού του κατασκευαστή ή του χειριστή."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"ενεργοποίηση ή απενεργοποίηση στοιχείων εφαρμογής"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Επιτρέπει σε μια εφαρμογή την επιλογή ενεργοποίησης ή μη ενός στοιχείου μιας άλλης εφαρμογής. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να απενεργοποιήσουν σημαντικές δυνατότητες του tablet. Η χορήγηση άδειας πρέπει να γίνεται με προσοχή, καθώς είναι πιθανό τα στοιχεία μιας εφαρμογής να καταστούν ασυνεχή, ασταθή ή να είναι αδύνατον να χρησιμοποιηθούν."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Επιτρέπει σε μια εφαρμογή την επιλογή ενεργοποίησης ή μη ενός στοιχείου μιας άλλης εφαρμογής. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να απενεργοποιήσουν σημαντικές δυνατότητες του tablet. Η χορήγηση άδειας πρέπει να γίνεται με προσοχή, καθώς είναι πιθανό τα στοιχεία μιας εφαρμογής να καταστούν ασυνεχή, ασταθή ή να είναι αδύνατον να χρησιμοποιηθούν."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Επιτρέπει σε μια εφαρμογή την επιλογή ενεργοποίησης ή μη ενός στοιχείου μιας άλλης εφαρμογής. Κακόβουλες εφαρμογές μπορούν να το χρησιμοποιήσουν για να απενεργοποιήσουν σημαντικές δυνατότητες του τηλεφώνου. Η χορήγηση αυτής της άδειας πρέπει να γίνεται με προσοχή, καθώς είναι πιθανό τα στοιχεία μιας εφαρμογής να καταστούν ασταθή ή να είναι αδύνατη η χρήση τους."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"ορισμός προτιμώμενων εφαρμογών"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Επιτρέπει σε μια εφαρμογή να τροποποιεί τις εφαρμογές που προτιμάτε. Αυτό ενδέχεται να δώσει τη δυνατότητα σε κακόβουλες εφαρμογές να αλλάξουν χωρίς ειδοποίηση τις εφαρμογές που εκτελούνται, \"ξεγελώντας\" τις υπάρχουσες εφαρμογές ώστε να συλλέξουν ιδιωτικά δεδομένα."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"τροποποίηση καθολικών ρυθμίσεων συστήματος"</string>
@@ -363,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Επιτρέπει στην εφαρμογή τον έλεγχο του φακού."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"πρόσβαση σε συσκευές USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Επιτρέπει στην εφαρμογή την πρόσβαση σε συσκευές USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"εφαρμογή πρωτοκόλλου MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Επιτρέπει την πρόσβαση στο πρόγραμμα οδήγησης kernel MTP για την εφαρμογή του πρωτοκόλλου MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"δοκιμή υλικού"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Επιτρέπει σε μια εφαρμογή τον έλεγχο διαφόρων περιφερειακών για την εκτέλεση δοκιμών υλικού."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"απευθείας κλήση τηλεφωνικών αριθμών"</string>
@@ -466,10 +464,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"τροποποίηση/διαγραφή περιεχομένων κάρτας SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Επ. εγγρ. εφ. σε απ. χώρο USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Επιτρέπει στην εφαρμογή την εγγραφή στην κάρτα SD."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"τροπ./διαγ. περ. απ. εσ. μνήμ."</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Επιτρέπει σε μια εφαρμογή την τροποποίηση περιεχομένων της αποθήκευσης εσωτερικής μνήμης."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"πρόσβαση στο σύστημα αρχείων προσωρινής μνήμης"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Επιτρέπει σε μια εφαρμογή την ανάγνωση και την εγγραφή του συστήματος αρχείων προσωρινής μνήμης."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"πραγματοποίηση/λήψη κλήσεων μέσω Διαδικτύου"</string>
@@ -490,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ορίστε τη χρήση του γενικού διακομιστή μεσολάβησης της συσκευής όταν είναι ενεργοποιημένη η πολιτική. Μόνο ο διαχειριστής της πρώτης συσκευής ορίζει τον ισχύοντα γενικό διακομιστή μεσολάβησης."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Ορισμός λήξης κωδ. πρόσβασης"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Ελέγξτε πόσος χρόνος απομένει προτού πρέπει να αλλάξετε τον κωδικό πρόσβασης κλειδώματος της οθόνης"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ορισμός κρυπτογρ. αποθ. χώρου"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Να απαιτείται η κρυπτογράφηση των αποθηκευμένων δεδομένων εφαρμογής"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Οικία"</item>
     <item msgid="869923650527136615">"Κινητό"</item>
@@ -604,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Εργασία"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Άλλο"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Πληκτρολογήστε τον κωδικό αριθμό PIN"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Αγγίξτε για εισαγ. κωδ."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Εισαγάγετε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Εισαγάγετε το PIN για ξεκλείδωμα"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Εσφαλμένος κωδικός αριθμός PIN!"</string>
@@ -647,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Κωδικός πρόσβασης"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Σύνδεση"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Μη έγκυρο όνομα χρήστη ή κωδικός πρόσβασης."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Ξεχάσετε το όνομα χρήστη ή τον κωδικό πρόσβασής σας;"\n"Επισκεφτείτε τη διεύθυνση "<b>"google.com/accounts/recovery?hl=el-GR"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Έλεγχος..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ξεκλείδωμα"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ενεργοποίηση ήχου"</string>
@@ -668,11 +668,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"Αυτ.συμπ"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Ρύθμ. Αυτ. συμπ."</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ανάγνωση ιστορικού και σελιδοδεικτών προγράμματος περιήγησης"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Επιτρέπει στην εφαρμογή την ανάγνωση όλων των διευθύνσεων URL που το πρόγραμμα περιήγησης έχει επισκεφθεί και όλων των σελιδοδεικτών του προγράμματος περιήγησης."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"εγγραφή ιστορικού και σελιδοδεικτών προγράμματος περιήγησης"</string>
@@ -905,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Επιλογή μεθόδου εισόδου"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"Διαμόρφωση μεθόδων εισαγωγής"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"υποψήφιοι"</u></string>
@@ -986,8 +985,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 αποτέλεσμα"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
+    <string name="action_mode_done" msgid="7217581640461922289">"Ολοκληρώθηκε"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Αποπροσάρτηση αποθηκευτικού χώρου USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Αποπροσάρτηση κάρτας SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Διαγραφή αποθηκευτικού χώρου USB..."</string>
@@ -1004,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"Κοινή χρ."</string>
     <string name="find" msgid="4808270900322985960">"Εύρεση"</string>
     <string name="websearch" msgid="4337157977400211589">"Αναζήτηση ιστού"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Αίτημα τοποθεσίας από <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Αίτημα τοποθεσίας"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Ζητήθηκε από <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Ναι"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Όχι"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Έγινε υπέρβαση του ορίου διαγραφής"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Υπάρχουν <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> διαγραμμένα αντικείμενα για <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, του λογαριασμού <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Τι θέλετε να κάνετε;"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Διαγραφή των αντικειμένων."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Αναίρεση των διαγραφών."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Να μην γίνει καμία ενέργεια τώρα."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Το VPN <xliff:g id="PROFILENAME">%s</xliff:g> συνδέθηκε"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Το VPN <xliff:g id="PROFILENAME">%s</xliff:g> αποσυνδέθηκε"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Αγγίξτε για να επανασυνδεθείτε σε ένα VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Επιλογή λογαριασμού"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Αύξηση"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Μείωση"</string>
 </resources>
