@@ -7,6 +7,7 @@ ifneq ($(TARGET_SIMULATOR),true)
 # Build the unit tests.
 test_src_files := \
     InputChannel_test.cpp \
+    InputEvent_test.cpp \
     InputPublisherAndConsumer_test.cpp
 
 shared_libraries := \
@@ -18,7 +19,8 @@ shared_libraries := \
 	libhardware \
 	libhardware_legacy \
 	libui \
-	libstlport
+	libstlport \
+	libskia
 
 static_libraries := \
 	libgtest \
@@ -28,7 +30,8 @@ c_includes := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
-    external/stlport/stlport
+    external/stlport/stlport \
+    external/skia/include/core
 
 module_tags := eng tests
 

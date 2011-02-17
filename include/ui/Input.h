@@ -170,7 +170,7 @@ struct InputConfiguration {
  * Pointer coordinate data.
  */
 struct PointerCoords {
-    static const size_t MAX_AXES = 15; // 15 so that sizeof(PointerCoords) == 16 * 4 == 64
+    enum { MAX_AXES = 15 }; // 15 so that sizeof(PointerCoords) == 16 * 4 == 64
 
     // Bitfield of axes that are present in this structure.
     uint32_t bits; // 32bits are enough for now, can raise to 64bit when needed
@@ -192,14 +192,14 @@ struct PointerCoords {
         return values[index];
     }
 
-    inline void setAxisValue(int32_t axis, float value) {
+    inline status_t setAxisValue(int32_t axis, float value) {
         uint32_t axisBit = 1 << axis;
         uint32_t index = __builtin_popcount(bits & (axisBit - 1));
         if (!(bits & axisBit)) {
             uint32_t count = __builtin_popcount(bits);
             if (count >= MAX_AXES) {
                 tooManyAxes(axis);
-                return;
+                return NO_MEMORY;
             }
             bits |= axisBit;
             for (uint32_t i = count; i > index; i--) {
@@ -207,6 +207,7 @@ struct PointerCoords {
             }
         }
         values[index] = value;
+        return OK;
     }
 
     inline float* editAxisValue(int32_t axis) {
@@ -351,49 +352,49 @@ public:
     float getRawAxisValue(int32_t axis, size_t pointerIndex) const;
 
     inline float getRawX(size_t pointerIndex) const {
-        return getRawAxisValue(AINPUT_MOTION_AXIS_X, pointerIndex);
+        return getRawAxisValue(AMOTION_EVENT_AXIS_X, pointerIndex);
     }
 
     inline float getRawY(size_t pointerIndex) const {
-        return getRawAxisValue(AINPUT_MOTION_AXIS_Y, pointerIndex);
+        return getRawAxisValue(AMOTION_EVENT_AXIS_Y, pointerIndex);
     }
 
     float getAxisValue(int32_t axis, size_t pointerIndex) const;
 
     inline float getX(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_X, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_X, pointerIndex);
     }
 
     inline float getY(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_Y, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_Y, pointerIndex);
     }
 
     inline float getPressure(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_PRESSURE, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_PRESSURE, pointerIndex);
     }
 
     inline float getSize(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_SIZE, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_SIZE, pointerIndex);
     }
 
     inline float getTouchMajor(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR, pointerIndex);
     }
 
     inline float getTouchMinor(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR, pointerIndex);
     }
 
     inline float getToolMajor(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, pointerIndex);
     }
 
     inline float getToolMinor(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR, pointerIndex);
     }
 
     inline float getOrientation(size_t pointerIndex) const {
-        return getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION, pointerIndex);
+        return getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, pointerIndex);
     }
 
     inline size_t getHistorySize() const { return mSampleEventTimes.size() - 1; }
@@ -410,59 +411,59 @@ public:
 
     inline float getHistoricalRawX(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalRawAxisValue(
-                AINPUT_MOTION_AXIS_X, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_X, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalRawY(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalRawAxisValue(
-                AINPUT_MOTION_AXIS_Y, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_Y, pointerIndex, historicalIndex);
     }
 
     float getHistoricalAxisValue(int32_t axis, size_t pointerIndex, size_t historicalIndex) const;
 
     inline float getHistoricalX(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_X, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_X, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalY(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_Y, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_Y, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalPressure(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_PRESSURE, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_PRESSURE, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalSize(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_SIZE, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_SIZE, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalTouchMajor(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_TOUCH_MAJOR, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_TOUCH_MAJOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalTouchMinor(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_TOUCH_MINOR, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_TOUCH_MINOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalToolMajor(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_TOOL_MAJOR, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_TOOL_MAJOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalToolMinor(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_TOOL_MINOR, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_TOOL_MINOR, pointerIndex, historicalIndex);
     }
 
     inline float getHistoricalOrientation(size_t pointerIndex, size_t historicalIndex) const {
         return getHistoricalAxisValue(
-                AINPUT_MOTION_AXIS_ORIENTATION, pointerIndex, historicalIndex);
+                AMOTION_EVENT_AXIS_ORIENTATION, pointerIndex, historicalIndex);
     }
 
     void initialize(
