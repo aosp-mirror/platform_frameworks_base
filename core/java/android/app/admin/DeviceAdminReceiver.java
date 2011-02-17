@@ -148,7 +148,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Action periodically sent to a device administrator when the device password
-     * is expiring. 
+     * is expiring.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to receive
@@ -266,8 +266,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Called periodically when the password is about to expire or has expired.  It will typically
-     * be called on device boot, once per day before the password expires and at the time when it
-     * expires.
+     * be called at these times: on device boot, once per day before the password expires,
+     * and at the time when the password expires.
      *
      * <p>If the password is not updated by the user, this method will continue to be called
      * once per day until the password is changed or the device admin disables password expiration.
