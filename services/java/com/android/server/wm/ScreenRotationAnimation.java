@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.server;  // TODO: use com.android.server.wm, once things move there
+package com.android.server.wm;  // TODO: use com.android.server.wm, once things move there
+
 
 import android.content.Context;
 import android.graphics.Bitmap;

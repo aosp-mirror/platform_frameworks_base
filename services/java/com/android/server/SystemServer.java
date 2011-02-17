@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.wm.WindowManagerService;
 import com.android.internal.app.ShutdownThread;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;

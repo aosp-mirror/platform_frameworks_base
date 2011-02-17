@@ -116,18 +116,18 @@ static JNINativeMethod gInputWindowHandleMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputWindowHandle(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/InputWindowHandle",
+    int res = jniRegisterNativeMethods(env, "com/android/server/wm/InputWindowHandle",
             gInputWindowHandleMethods, NELEM(gInputWindowHandleMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
-    FIND_CLASS(gInputWindowHandleClassInfo.clazz, "com/android/server/InputWindowHandle");
+    FIND_CLASS(gInputWindowHandleClassInfo.clazz, "com/android/server/wm/InputWindowHandle");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, gInputWindowHandleClassInfo.clazz,
             "ptr", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle,
             gInputWindowHandleClassInfo.clazz,
-            "inputApplicationHandle", "Lcom/android/server/InputApplicationHandle;");
+            "inputApplicationHandle", "Lcom/android/server/wm/InputApplicationHandle;");
 
     return 0;
 }

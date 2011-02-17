@@ -77,11 +77,11 @@ void android_server_InputApplication_toNative(
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputApplication(JNIEnv* env) {
-    FIND_CLASS(gInputApplicationClassInfo.clazz, "com/android/server/InputApplication");
+    FIND_CLASS(gInputApplicationClassInfo.clazz, "com/android/server/wm/InputApplication");
 
     GET_FIELD_ID(gInputApplicationClassInfo.inputApplicationHandle,
             gInputApplicationClassInfo.clazz,
-            "inputApplicationHandle", "Lcom/android/server/InputApplicationHandle;");
+            "inputApplicationHandle", "Lcom/android/server/wm/InputApplicationHandle;");
 
     GET_FIELD_ID(gInputApplicationClassInfo.name, gInputApplicationClassInfo.clazz,
             "name", "Ljava/lang/String;");
