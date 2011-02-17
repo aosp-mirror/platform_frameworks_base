@@ -752,7 +752,9 @@ finish:
 
 status_t IPCThreadState::talkWithDriver(bool doReceive)
 {
-    ALOG_ASSERT(mProcess->mDriverFD >= 0, "Binder driver is not opened");
+    if (mProcess->mDriverFD <= 0) {
+        return -EBADF;
+    }
     
     binder_write_read bwr;
     
@@ -808,6 +810,9 @@ status_t IPCThreadState::talkWithDriver(bool doReceive)
 #else
         err = INVALID_OPERATION;
 #endif
+        if (mProcess->mDriverFD <= 0) {
+            err = -EBADF;
+        }
         IF_LOG_COMMANDS() {
             alog << "Finished read/write, write size = " << mOut.dataSize() << endl;
         }
@@ -1099,7 +1104,9 @@ void IPCThreadState::threadDestructor(void *st)
 	if (self) {
 		self->flushCommands();
 #if defined(HAVE_ANDROID_OS)
-        ioctl(self->mProcess->mDriverFD, BINDER_THREAD_EXIT, 0);
+        if (self->mProcess->mDriverFD > 0) {
+            ioctl(self->mProcess->mDriverFD, BINDER_THREAD_EXIT, 0);
+        }
 #endif
 		delete self;
 	}
