@@ -483,9 +483,9 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
                 && mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY
                 && mInputTargetWaitApplication != NULL) {
             int32_t x = int32_t(motionEntry->firstSample.pointerCoords[0].
-                    getAxisValue(AINPUT_MOTION_AXIS_X));
+                    getAxisValue(AMOTION_EVENT_AXIS_X));
             int32_t y = int32_t(motionEntry->firstSample.pointerCoords[0].
-                    getAxisValue(AINPUT_MOTION_AXIS_Y));
+                    getAxisValue(AMOTION_EVENT_AXIS_Y));
             const InputWindow* touchedWindow = findTouchedWindowAtLocked(x, y);
             if (touchedWindow
                     && touchedWindow->inputWindowHandle != NULL
@@ -890,15 +890,15 @@ void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const M
                 "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
                 i, entry->pointerIds[i],
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_X),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_Y),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_PRESSURE),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_SIZE),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR),
-                sample->pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION));
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
+                sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
     }
 
     // Keep in mind that due to batching, it is possible for the number of samples actually
@@ -1195,9 +1195,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
         int32_t pointerIndex = getMotionEventActionPointerIndex(action);
         int32_t x = int32_t(entry->firstSample.pointerCoords[pointerIndex].
-                getAxisValue(AINPUT_MOTION_AXIS_X));
+                getAxisValue(AMOTION_EVENT_AXIS_X));
         int32_t y = int32_t(entry->firstSample.pointerCoords[pointerIndex].
-                getAxisValue(AINPUT_MOTION_AXIS_Y));
+                getAxisValue(AMOTION_EVENT_AXIS_Y));
         const InputWindow* newTouchedWindow = NULL;
         const InputWindow* topErrorWindow = NULL;
 
@@ -2284,15 +2284,15 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                 "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
                 i, pointerIds[i],
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_X),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_Y),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_PRESSURE),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_SIZE),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR),
-                pointerCoords[i].getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION));
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
+                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
     }
 #endif
     if (! validateMotionEvent(action, pointerCount, pointerIds)) {

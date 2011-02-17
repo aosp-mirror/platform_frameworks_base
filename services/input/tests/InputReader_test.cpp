@@ -1473,15 +1473,15 @@ protected:
             float x, float y, float pressure, float size,
             float touchMajor, float touchMinor, float toolMajor, float toolMinor,
             float orientation) {
-        ASSERT_NEAR(x, coords.getAxisValue(AINPUT_MOTION_AXIS_X), 1);
-        ASSERT_NEAR(y, coords.getAxisValue(AINPUT_MOTION_AXIS_Y), 1);
-        ASSERT_NEAR(pressure, coords.getAxisValue(AINPUT_MOTION_AXIS_PRESSURE), EPSILON);
-        ASSERT_NEAR(size, coords.getAxisValue(AINPUT_MOTION_AXIS_SIZE), EPSILON);
-        ASSERT_NEAR(touchMajor, coords.getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MAJOR), 1);
-        ASSERT_NEAR(touchMinor, coords.getAxisValue(AINPUT_MOTION_AXIS_TOUCH_MINOR), 1);
-        ASSERT_NEAR(toolMajor, coords.getAxisValue(AINPUT_MOTION_AXIS_TOOL_MAJOR), 1);
-        ASSERT_NEAR(toolMinor, coords.getAxisValue(AINPUT_MOTION_AXIS_TOOL_MINOR), 1);
-        ASSERT_NEAR(orientation, coords.getAxisValue(AINPUT_MOTION_AXIS_ORIENTATION), EPSILON);
+        ASSERT_NEAR(x, coords.getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+        ASSERT_NEAR(y, coords.getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
+        ASSERT_NEAR(pressure, coords.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE), EPSILON);
+        ASSERT_NEAR(size, coords.getAxisValue(AMOTION_EVENT_AXIS_SIZE), EPSILON);
+        ASSERT_NEAR(touchMajor, coords.getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR), 1);
+        ASSERT_NEAR(touchMinor, coords.getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR), 1);
+        ASSERT_NEAR(toolMajor, coords.getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR), 1);
+        ASSERT_NEAR(toolMinor, coords.getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR), 1);
+        ASSERT_NEAR(orientation, coords.getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION), EPSILON);
     }
 };
 
@@ -2892,8 +2892,8 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotate
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_X), 1);
-    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_Y), 1);
+    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -2914,8 +2914,8 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_X), 1);
-    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_Y), 1);
+    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -2927,8 +2927,8 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_X), 1);
-    ASSERT_NEAR(DISPLAY_WIDTH - 50, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_Y), 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(DISPLAY_WIDTH - 50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -2940,8 +2940,8 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(DISPLAY_WIDTH - 50, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_X), 1);
-    ASSERT_NEAR(DISPLAY_HEIGHT - 75, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_Y), 1);
+    ASSERT_NEAR(DISPLAY_WIDTH - 50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(DISPLAY_HEIGHT - 75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -2953,8 +2953,8 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(DISPLAY_HEIGHT - 75, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_X), 1);
-    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AINPUT_MOTION_AXIS_Y), 1);
+    ASSERT_NEAR(DISPLAY_HEIGHT - 75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
