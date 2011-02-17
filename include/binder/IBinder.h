@@ -98,7 +98,7 @@ public:
      * Register the @a recipient for a notification if this binder
      * goes away.  If this binder object unexpectedly goes away
      * (typically because its hosting process has been killed),
-     * then DeathRecipient::binderDied() will be called with a referene
+     * then DeathRecipient::binderDied() will be called with a reference
      * to this.
      *
      * The @a cookie is optional -- if non-NULL, it should be a
