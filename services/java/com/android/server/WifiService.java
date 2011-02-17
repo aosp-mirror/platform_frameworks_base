@@ -501,15 +501,12 @@ public class WifiService extends IWifiManager.Stub {
     public synchronized void setWifiApConfiguration(WifiConfiguration wifiConfig) {
         enforceChangePermission();
         final ContentResolver cr = mContext.getContentResolver();
-        boolean isWpa;
         if (wifiConfig == null)
             return;
+        int authType = wifiConfig.getAuthType();
         Settings.Secure.putString(cr, Settings.Secure.WIFI_AP_SSID, wifiConfig.SSID);
-        isWpa = wifiConfig.allowedKeyManagement.get(KeyMgmt.WPA_PSK);
-        Settings.Secure.putInt(cr,
-                               Settings.Secure.WIFI_AP_SECURITY,
-                               isWpa ? KeyMgmt.WPA_PSK : KeyMgmt.NONE);
-        if (isWpa)
+        Settings.Secure.putInt(cr, Settings.Secure.WIFI_AP_SECURITY, authType);
+        if (authType != KeyMgmt.NONE)
             Settings.Secure.putString(cr, Settings.Secure.WIFI_AP_PASSWD, wifiConfig.preSharedKey);
     }
 

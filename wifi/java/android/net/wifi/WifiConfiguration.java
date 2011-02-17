@@ -107,9 +107,16 @@ public class WifiConfiguration implements Parcelable {
          * generated WEP keys. */
         public static final int IEEE8021X = 3;
 
+        /** WPA2 pre-shared key for use with soft access point
+          * (requires {@code preSharedKey} to be specified).
+          * @hide
+          */
+        public static final int WPA2_PSK = 4;
+
         public static final String varName = "key_mgmt";
 
-        public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X" };
+        public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X",
+                "WPA2_PSK" };
     }
 
     /**
@@ -478,6 +485,20 @@ public class WifiConfiguration implements Parcelable {
 
         while ((nextSetBit = set.nextSetBit(nextSetBit + 1)) != -1)
             dest.writeInt(nextSetBit);
+    }
+
+    /** @hide */
+    public int getAuthType() {
+        if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
+            return KeyMgmt.WPA_PSK;
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA2_PSK)) {
+            return KeyMgmt.WPA2_PSK;
+        } else if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
+            return KeyMgmt.WPA_EAP;
+        } else if (allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
+            return KeyMgmt.IEEE8021X;
+        }
+        return KeyMgmt.NONE;
     }
 
     /** Implement the Parcelable interface {@hide} */
