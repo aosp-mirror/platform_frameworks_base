@@ -40,8 +40,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"알림"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"최근 사용한 앱"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"최근에 사용한 애플리케이션이 없습니다."</string>
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"애플리케이션"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"블루투스 테더링됨"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"입력 방법 구성"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"물리적 키보드 사용"</string>
 </resources>

@@ -40,8 +40,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"通知"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"近期任务"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"没有最近使用的应用程序。"</string>
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"应用程序"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"蓝牙已绑定"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"配置输入法"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"使用物理键盘"</string>
 </resources>

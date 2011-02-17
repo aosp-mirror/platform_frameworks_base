@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode pesawat"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode pesawat HIDUP"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode pesawat MATI"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode aman"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistem Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Layanan berbayar"</string>
@@ -256,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi pada suatu metode masukan. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"mengikat ke wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu wallpaper. Tidak diperlukan untuk aplikasi normal."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"mengikat ke layanan widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan widget. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan admin perangkat"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Mengizinkan pemegang mengirimkan tujuan kepada administrator perangkat. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ubah orientasi layar"</string>
@@ -286,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Mengizinkan aplikasi membaca dan menulis ke sumber daya yang dimiliki oleh grup diag; misalnya, berkas dalam /dev. Ini berisiko mempengaruhi kestabilan dan keamanan sistem. Ini sebaiknya HANYA digunakan untuk diagnostik khusus perangkat keras oleh pabrik atau operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktifkan atau nonaktifkan komponen aplikasi"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Izinkan aplikasi mengubah apakah komponen aplikasi lain diaktifkan atau tidak. Aplikasi berbahaya dapat menggunakan ini untuk menonaktifkan kemampuan tablet penting. Hati-hatilah saat menggunakan izin ini, karena komponen aplikasi tidak akan dapat digunakan, tidak konsisten, atau tidak stabil."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Izinkan aplikasi mengubah apakah komponen aplikasi lain diaktifkan atau tidak. Aplikasi berbahaya dapat menggunakan ini untuk menonaktifkan kemampuan ponsel penting. Hati-hatilah saat menggunakan izin ini, karena komponen aplikasi tidak akan dapat digunakan, tidak konsisten, atau tidak stabil."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Izinkan aplikasi untuk mengubah apakah komponen aplikasi lain diaktifkan atau tidak. Aplikasi jahat dapat menggunakan ini untuk menonaktifkan kemampuan ponsel yang penting. Hati-hatilah saat menggunakan izin ini karena berpeluang menyebabkan komponen aplikasi menjadi tidak dapat digunakan, tidak konsisten, atau tidak stabil."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"atur aplikasi yang disukai"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Mengizinkan aplikasi memodifikasi aplikasi yang dipilih. Ini dapat dimanfaatkan aplikasi hasad untuk diam-diam mengubah aplikasi yang sedang berjalan, spoofing aplikasi yang ada untuk mengumpulkan data pribadi dari Anda."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"ubah setelan sistem global"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Mengizinkan aplikasi mengontrol lampu senter."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"akses perangkat USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Mengizinkan aplikasi untuk perangkat USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"implementasikan protokol MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Izinkan akses pada driver MTP kernel untuk mengimplementasikan protokol USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"uji perangkat keras"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Mengizinkan aplikasi mengontrol berbagai perangkat periferal untuk tujuan menguji perangkat keras."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil nomor telepon secara langsung"</string>
@@ -487,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Setel proxy global perangkat yang akandigunakan ketika kebijakan diaktifkan. Hanya admin perangkat pertama yang menyetel procy global yang berlaku."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Setel kedaluwarsa sandi"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Kontrol berapa lama sebelum sandi penguncian layar perlu diubah"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setel enkripsi penyimpanan"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Mengharuskan data aplikasi yang disimpan untuk dienkripsi"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>
     <item msgid="869923650527136615">"Seluler"</item>
@@ -601,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Kerjaan"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Lainnya"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Masukkan kode PIN"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Sentuh untuk memasukkan sandi"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Masukkan sandi untuk membuka"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Masukkan PIN untuk membuka kunci"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Kode PIN salah!"</string>
@@ -644,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Sandi"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Masuk"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nama pengguna atau sandi tidak valid."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Lupa nama pengguna atau sandi Anda?"\n"Kunjungi "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Memeriksa..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Buka kunci"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Suara hidup"</string>
@@ -900,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB terhubung"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Pilih untuk menonaktifkan debugging USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Pilih metode masukan"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"Konfigurasikan metode masukan"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"calon"</u></string>
@@ -998,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"Bagikan"</string>
     <string name="find" msgid="4808270900322985960">"Temukan"</string>
     <string name="websearch" msgid="4337157977400211589">"Penelusuran Web"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Permintaan lokasi dari <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Permintaan lokasi"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Diminta oleh <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Ya"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Tidak"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Penghapusan melebihi batas"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Terdapat <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> item yang dihapus untuk <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, akun <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Apakah yang ingin Anda lakukan?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Hapus item."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Urungkan penghapusan."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Jangan lakukan apa pun untuk saat ini."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN tersambung"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN terputus"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Sentuh untuk terhubung kembali ke VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Pilih akun"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Penambahan"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Pengurangan"</string>
 </resources>

@@ -259,6 +259,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sa fixar vid in fund davos"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permetta al possessur da trametter intenziuns a l\'administratur dal apparat periferic. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"midar l\'orientaziun dal visur"</string>
@@ -498,6 +502,10 @@
     <skip />
     <!-- no translation found for policydesc_expirePassword (7276906351852798814) -->
     <skip />
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Telefonin"</item>
@@ -632,6 +640,8 @@
     <!-- no translation found for sipAddressTypeOther (4408436162950119849) -->
     <skip />
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Endatar il code PIN"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Endatai il pled-clav per debloccar."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Endatar il PIN per debloccar"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Code PIN nuncorrect!"</string>
@@ -677,6 +687,8 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Pled-clav"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"S\'annunziar"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Num d\'utilisader u pled-clav nunvalid."</string>
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Verifitgar..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Debloccar"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Tun activà"</string>
@@ -947,6 +959,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debugging USB connectà"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Tscherner per deactivar il debugging USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Tscherner ina metoda d\'endataziun"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidats"</u></string>
@@ -1082,5 +1096,17 @@
     <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
+    <skip />
+    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
 </resources>

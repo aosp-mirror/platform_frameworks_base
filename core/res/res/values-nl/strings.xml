@@ -138,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Uitschakelen..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Uw tablet wordt uitgeschakeld."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Uw telefoon wordt uitgeschakeld."</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Wilt u afsluiten?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Geen recente toepassingen."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tabletopties"</string>
@@ -152,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Vliegmodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Vliegmodus is AAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Vliegmodus is UIT"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Veilige modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-systeem"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Services waarvoor u moet betalen"</string>
@@ -257,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Hiermee staat u de houder toe zich te verbinden met de hoofdinterface van een invoermethode. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"verbinden met een achtergrond"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Hiermee staat u de houder toe zich te verbinden met de hoofdinterface van een achtergrond. Nooit vereist voor normale toepassingen."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"verbinden met een widgetservice"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Hiermee staat u de houder toe verbinding te maken met de hoofdinterface van een widgetservice. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactie met apparaatbeheer"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Staat de houder toe intenties te verzenden naar een apparaatbeheerder. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"schermstand wijzigen"</string>
@@ -287,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Hiermee kan een toepassing lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"toepassingscomponenten in- of uitschakelen"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Hiermee kan een toepassing bepalen of een component van een andere toepassing is ingeschakeld. Schadelijke toepassingen kunnen hiervan gebruik maken om belangrijke tabletfuncties uit te schakelen. Een machtiging moet zorgvuldig worden overwogen, aangezien toepassingscomponenten onbruikbaar, inconsistent of instabiel kunnen worden."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Hiermee kan een toepassing bepalen of een component van een andere toepassing is ingeschakeld. Schadelijke toepassingen kunnen hiervan gebruik maken om belangrijke tabletfuncties uit te schakelen. Een machtiging moet zorgvuldig worden overwogen, aangezien toepassingscomponenten onbruikbaar, inconsistent of instabiel kunnen worden."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Hiermee kan een toepassing bepalen of een component van een andere toepassing is ingeschakeld. Schadelijke toepassingen kunnen dit gebruiken om belangrijke telefoonfuncties uit te schakelen. Een machtiging moet zorgvuldig worden overwogen, aangezien toepassingscomponenten onbruikbaar, inconsistent of instabiel kunnen worden."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"voorkeurstoepassingen instellen"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Hiermee kan een toepassing uw voorkeurstoepassingen wijzigen. Schadelijke toepassingen kunnen op deze manier de actieve toepassingen zonder uw medeweten wijzigen en uw bestaande toepassingen doorzoeken om privégegevens van u te verzamelen."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"algemene systeeminstellingen wijzigen"</string>
@@ -363,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Hiermee kan de toepassing de zaklamp bedienen."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"toegang krijgen tot USB-apparaten"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Hiermee kan de toepassing toegang krijgen tot USB-apparaten."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP-protocol implementeren"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Staat toegang tot de kernel van de MTP-driver toe voor het implementeren van het MTP-USB-protocol."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardware testen"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Hiermee kan de toepassing verschillende randapparaten beheren om de hardware te testen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
@@ -466,10 +464,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"inhoud op de SD-kaart aanpassen/verwijderen"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Hiermee kan een toepassing schrijven naar de USB-opslag."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Hiermee kan een toepassing schrijven naar de SD-kaart."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"inh. mediaopsl. wijz./verw."</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Hiermee kan een toepassing de inhoud van interne mediaopslag aanpassen."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"het cachebestandssysteem openen"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Staat een toepassing toe het cachebestandssysteem te lezen en te schrijven."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"internetoproepen starten/ontvangen"</string>
@@ -490,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Stel de algemene proxy voor het apparaat in die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eerste apparaatbeheerder stelt de algemene proxy in."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Verval wachtwoord instellen"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Beheren hoe lang het duurt voordat het wachtwoord voor schermvergrendeling moet worden gewijzigd"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Codering voor opslag instellen"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Vereisen dat opgeslagen toepassingsgegevens kunnen worden gecodeerd"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -604,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Werk"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Overig"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN-code invoeren"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Raak aan om wachtwoord op te geven"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Voer het wachtwoord in om te ontgrendelen"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Voer de PIN-code in om te ontgrendelen"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Onjuiste PIN-code!"</string>
@@ -647,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Wachtwoord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Aanmelden"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Gebruikersnaam of wachtwoord ongeldig."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Bent u uw gebruikersnaam of wachtwoord vergeten?"\n"Ga naar "<b>"https://www.google.com/accounts/recovery?hl=nl"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Controleren..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ontgrendelen"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Geluid aan"</string>
@@ -668,11 +668,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"AutoFill"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Aut. aanv. inst."</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"browsergeschiedenis en bladwijzers lezen"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Hiermee kan een toepassing de URL\'s lezen die u via de browser heeft bezocht, evenals alle bladwijzers van de browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"browsergeschiedenis en bladwijzers schrijven"</string>
@@ -905,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Selecteer deze optie om USB-foutopsporing uit te schakelen."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Invoermethode selecteren"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"Invoermethoden configureren"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidaten"</u></string>
@@ -986,8 +985,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 overeenkomst"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> van <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
+    <string name="action_mode_done" msgid="7217581640461922289">"Gereed"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"USB-opslag ontkoppelen..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"SD-kaart ontkoppelen..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USB-opslag wissen..."</string>
@@ -1004,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"Delen"</string>
     <string name="find" msgid="4808270900322985960">"Vinden"</string>
     <string name="websearch" msgid="4337157977400211589">"Online zoeken"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Locatieverzoek van <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Locatieverzoek"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Aangevraagd door <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Nee"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Verwijderingslimiet overschreden"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Er zijn <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> verwijderde items voor <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, account <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Wat wilt u doen?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"De items verwijderen."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Verwijderingen ongedaan maken."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Nu niets doen."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> verbonden via VPN"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN-verbinding met <xliff:g id="PROFILENAME">%s</xliff:g> verbroken"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Raak aan om opnieuw verbinding te maken met een VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Selecteer een account"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Hoger"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Lager"</string>
 </resources>

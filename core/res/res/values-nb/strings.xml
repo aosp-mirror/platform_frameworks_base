@@ -138,8 +138,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutter…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Nettbrettet slås av."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonen vil bli slått av."</string>
-    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
-    <skip />
+    <string name="shutdown_confirm_question" msgid="6656441286856415014">"Vil du slå av?"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nylig"</string>
     <string name="no_recent_tasks" msgid="279702952298056674">"Ingen nylig brukte applikasjoner."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Innstillinger for nettbrett"</string>
@@ -152,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flymodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flymodus er på"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flymodus er av"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"Over 100"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikkermodus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Betaltjenester"</string>
@@ -257,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Lar applikasjonen binde til toppnivågrensesnittet for en inndatametode. Vanlige applikasjoner bør aldri trenge dette."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind til bakgrunnsbilde"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Lar innehaveren binde det øverste nivået av grensesnittet til en bakgrunnsbilder. Skal ikke være nødvendig for vanlige programmer."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind til modultjenste"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Lar innehaveren binde til det øverste nivået av grensesnittet for en modultjeneste. Skal aldri være nødvendig for normale programmer."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommuniser med enhetsadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillater innehaveren å sende hensikter til enhetsadministrator. Bør aldri være nødvendig for normale programmer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"snu skjermen"</string>
@@ -287,7 +287,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Lar applikasjonen lese og skrive enhver ressurs eid av gruppen diag; for eksempel, filer i /dev. Dette kan potensielt påvirke systemets sikkerhet og stabilitet. Dette bør KUN brukes for maskinvarespesifikke diagnoseverktøy laget av operatøren eller produsenten."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivere eller deaktigere applikasjonskomponenter"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Lar programmet endre på hvorvidt en komponent i et annet program er aktivert eller ikke. Skadelige programmer kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få programkomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
-    <!-- outdated translation 4647419365510068321 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Lar programmet endre på hvorvidt en komponent i et annet program er aktivert eller ikke. Skadelige programmer kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få programkomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
+    <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Lar programmet endre på hvorvidt en komponent i et annet program er aktivert eller ikke. Skadelige programmer kan bruke dette til å deaktivere viktige nettbrettfunksjoner. Denne rettigheten må brukes med forsiktighet, ettersom det er mulig å få programkomponenter inn i en ubrukelig, inkonsistent eller ustabil tilstand."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"velge foretrukne applikasjoner"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Lar applikasjonen endre valgene for foretrukne applikasjoner. Dette kan gi ondsinnede applikasjoner tilgang til i det stille å endre hvilke applikasjoner som kjøres, og slik gi seg ut til å være en eksisterende applikasjon og samle private data."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"endre globale systeminnstillinger"</string>
@@ -363,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Lar applikasjonen kontrollere lommelykten."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"tilgang til USB-enheter"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillater programmet å få tilgang til USB-enheter."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"implementer MTP-protokoll"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Tillater tilgang til kjerne-MTP-driver for implementering av MTP USB-protokollen."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"teste maskinvare"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Lar applikasjonen styre diverse enheter med det formål å teste maskinvaren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringe telefonnummer direkte"</string>
@@ -466,10 +464,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"redigere/slette innhold på minnekort"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Prog. skriver til USB-lagr."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Lar applikasjonen skrive til minnekortet."</string>
-    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
-    <skip />
-    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
-    <skip />
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"endre eller slette innhold på interne medier"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Tillater et program til å endre innholdet i interne medier."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"tilgang til bufrede filer"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillater et program å lese og skrive til bufrede filer."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"foreta/motta Internett-anrop"</string>
@@ -490,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angir den globale mellomtjeneren på enheten som skal brukes når regelen er aktivert. Kun den opprinnelige administratoren av enheten kan angi den globale mellomtjeneren."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Angi utløpsdato for passordet"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Velg hvor lenge det skal gå før passordet til låseskjermen må byttes"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Angi lagringskryptering"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Krever at lagrede programdata krypteres"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -604,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbeid"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Annen"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Skriv inn PIN-kode:"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Trykk og oppgi passord"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Skriv inn passord for å låse opp"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Skriv inn personlig kode for å låse opp"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Gal PIN-kode!"</string>
@@ -647,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Passord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Logg på"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ugyldig brukernavn eller passord."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Har du glemt brukernavnet eller passordet?"\n"Gå til"<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Kontrollerer ..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Lås opp"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Lyd på"</string>
@@ -668,11 +668,9 @@
     <string name="autofill_this_form" msgid="1272247532604569872">"Autofyll"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"Konfig. autofyll"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
-    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
-    <skip />
+    <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
-    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
-    <skip />
+    <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lese nettleserens logg og bokmerker"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Lar applikasjonen lese alle adresser nettleseren har besøkt, og alle nettleserens bokmerker."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skrive til nettleserens logg og bokmerker"</string>
@@ -905,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-debugging tilkoblet"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Velg for å deaktivere USB-debugging."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Velg inndatametode"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"Konfigurer inndatametoder"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ"</string>
     <string name="candidates_style" msgid="4333913089637062257">"TAG_FONT"<u>"kandidater"</u>"CLOSE_FONT"</string>
@@ -986,8 +985,7 @@
     <item quantity="one" msgid="8167147081136579439">"1 treff"</item>
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
-    <!-- no translation found for action_mode_done (7217581640461922289) -->
-    <skip />
+    <string name="action_mode_done" msgid="7217581640461922289">"Ferdig"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Kobler fra USB-lagring ..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Kobler fra SD-kort ..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Sletter USB-lagring ..."</string>
@@ -1004,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"Del"</string>
     <string name="find" msgid="4808270900322985960">"Finn"</string>
     <string name="websearch" msgid="4337157977400211589">"Nettsøk"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Posisjonsforespørsel fra <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Posisjonsforespørsel"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Forespurt av <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Nei"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Slettegrense overskredet"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Det finnes <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> slettede elementer for <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, konto <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Hva vil du gjøre?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Slett elementene."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Opphev slettinger."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Ikke gjør noe nå."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> er tilkoblet VPN"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> er frakoblet VPN"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Trykk for å koble til et VPN på nytt."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Velg en konto"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Øke"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Senke"</string>
 </resources>

@@ -40,8 +40,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"התראות"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"אחרונות"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"אין יישומים חדשים."</string>
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"Google Apps"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth קשור"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"הגדר שיטות קלט"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"השתמש במקלדת הפיזית"</string>
 </resources>

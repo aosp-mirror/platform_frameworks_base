@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Lėktuvo režimas"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ĮJUNGTAS lėktuvo režimas"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"lėktuvo režimas IŠJUNGTAS"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Saugos režimas"</string>
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Paslaugos, už kurias mokėjote"</string>
@@ -256,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Leidžia savininkui susisaistyti su įvesties būdo aukščiausio lygio sąsaja. Neturėtų reikėti įprastoms programoms."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"susaistyti su darbalaukio fonu"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Leidžia savininkui susisaistyti su aukščiausio lygio darbalaukio fono sąsaja. Neturėtų reikėti įprastose programose."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"susaistyti su valdiklio paslauga"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Leidžiama savininkui susisaistyti su aukščiausio lygio valdiklio paslaugos sąsaja. Neturėtų reikėti įprastose programose."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"sąveikauti su įrenginio administratoriumi"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Leidžia savininkui siųsti tikslus įrenginio administratoriui. Neturėtų reikėti įprastose programose."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"keisti ekrano padėtį"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Leidžia programai valdyti šviesos signalą."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"pasiekti USB įrenginius"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Leidžiama programai pasiekti USB įrenginius."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"taikyti MTP protokolą"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Leidžiama prieiga prie pagrindinės MTP tvarkyklės taikyti MTP USB protokolą."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"bandyti aparatinę įrangą"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Leidžia programai valdyti įvairius išorinius įrenginius aparatinės įrangos bandymo tikslais."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
@@ -465,7 +464,7 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"keisti / ištrinti SD kortelės turinį"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Leidžiama programai įrašyti į USB atmintinę."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Leidžia programai rašyti į SD kortelę."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"keisti / ištrinti vidinės medijos atmintinės turinį"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"keisti / ištr. vid. med. atm. tur."</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Leidžiama programai keisti vidinės medijos atmintinės turinį."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"pasiekti talpyklos failų sistemą"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Leidžia programai skaityti ir rašyti į talpyklos failų sistemą."</string>
@@ -487,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nustatyti įrenginio bendrąjį tarpinį serverį, kad būtų naudojamas, kol įgalinta politika. Tik pirmasis įrenginio administratorius nustato efektyvų bendrąjį tarpinį serverį."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Nust. slaptaž. galiojimo pab."</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Valdyti, per kiek laiko iki ekrano užrakinimo turi būti pakeistas slaptažodis"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nustatyti atmintinės šifruotę"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Saugomos programos duomenys turi būti šifruoti"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Pagrindinis"</item>
     <item msgid="869923650527136615">"Mobilusis"</item>
@@ -601,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Darbas"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Kita"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Įveskite PIN kodą"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Kad įvest. slaptaž., paliesk."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Įveskite slaptažodį, kad atrakintumėte"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Jei norite atrakinti, įveskite PIN kodą"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Neteisingas PIN kodas!"</string>
@@ -644,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Slaptažodis"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Prisijungti"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neteisingas naudotojo vardas ar slaptažodis."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Pamiršote naudotojo vardą ar slaptažodį?"\n"Apsilankykite šiuo adresu: "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Tikrinama..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Atblokuoti"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Garsas įjungtas"</string>
@@ -900,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Pasirinkite, kas išjungtumėte USB derinimą."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Pasirinkti įvesties būdą"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"Konfigūruoti įvesties metodus"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"kandidatai"</u></string>
@@ -998,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"Bendrinti"</string>
     <string name="find" msgid="4808270900322985960">"Ieškoti"</string>
     <string name="websearch" msgid="4337157977400211589">"Žiniat. paieška"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Vietos užklausa iš <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Vietos užklausa"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Užklausą pateikė <xliff:g id="NAME">%1$s</xliff:g> („<xliff:g id="SERVICE">%2$s</xliff:g>“)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Taip"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"Ne"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"Viršytas ištrynimo apribojimas"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Yra <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> ištrinti (-ų) elementai (-ų), skirti (-ų) <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, „<xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>“ paskyrai. Ką norite daryti?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Ištrinti elementus."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Anuliuoti ištrynimus."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"Kol kas nieko nedaryti."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT prijungtas"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT atjungtas"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Jei norite iš naujo prisijungti prie VPT, palieskite."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Pasirinkti paskyrą"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Padidinti"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Sumažinti"</string>
 </resources>

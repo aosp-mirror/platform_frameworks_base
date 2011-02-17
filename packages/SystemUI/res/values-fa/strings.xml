@@ -40,8 +40,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"اعلان ها"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"اخیر"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"برنامه اخیری موجود نیست."</string>
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"برنامه های کاربردی"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"اتصال اینترنتی با بلوتوث تلفن همراه"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"پیکربندی روش های ورودی"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"از صفحه کلید فیزیکی استفاده کنید"</string>
 </resources>

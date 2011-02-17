@@ -151,8 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode d\'avió"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode d\'avió activat"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode d\'avió desactivat"</string>
-    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
-    <skip />
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"+100"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serveis de pagament"</string>
@@ -256,6 +255,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permet al titular vincular amb la interfície de nivell superior d\'un mètode d\'entrada. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un empaperat"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permet al titular vincular amb la interfície de nivell superior d\'un empaperat. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
+    <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar amb un administrador del dispositiu"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet al titular enviar intencions a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"canviar l\'orientació de la pantalla"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet a l\'aplicació controlar el flaix."</string>
     <string name="permlab_accessUsb" msgid="7362327818655760496">"accedeix a dispositius USB"</string>
     <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permet que l\'aplicació accedeixi als dispositius USB."</string>
-    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
-    <skip />
-    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
-    <skip />
+    <string name="permlab_accessMtp" msgid="4953468676795917042">"implementa el protocol MTP"</string>
+    <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permet l\'accés al programa de control MTP de kernel per implementar el protocol USB d\'MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"provar el maquinari"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permet a l\'aplicació controlar diversos perifèrics per fer proves de maquinari."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"trucar directament a números de telèfon"</string>
@@ -465,8 +464,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificar/suprimir el contingut de les targetes SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Permet que una aplicació gravii a l\'emmagatzematge USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Permet a una aplicació escriure a la targeta SD."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modifica/suprimeix el contingut d\'emmagatzematge de mitjans interns"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet que una aplicació modifiqui el contingut de l\'emmagatzematge de mitjans interns."</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Canvia/esborra emmagatz. intern"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet que una aplicació modifiqui el contingut de l\'emmagatzematge multimèdia intern."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accedir al sistema de fitxers de la memòria cau"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet a una aplicació llegir el sistema de fitxers de la memòria cau i escriure-hi."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"fes/rep trucades per Internet"</string>
@@ -487,6 +486,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Defineix el servidor intermediari global del dispositiu que cal utilitzar mentre la política estigui activada. Només el primer administrador del dispositiu pot definir el servidor intermediari global efectiu."</string>
     <string name="policylab_expirePassword" msgid="2314569545488269564">"Defineix la caducitat de la contrasenya"</string>
     <string name="policydesc_expirePassword" msgid="7276906351852798814">"Controla quant de temps abans de la pantalla de bloqueig cal canviar la contrasenya"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Mòbil"</item>
@@ -601,6 +602,7 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Feina"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Altres"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Introduïu el codi PIN"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Toca per introduir contrasenya"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Introduïu la contrasenya per desbloquejar-lo"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Introdueix el PIN per desbloquejar"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Codi PIN incorrecte."</string>
@@ -644,6 +646,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Contrasenya"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Inicia la sessió"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nom d\'usuari o contrasenya no vàlids."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Has oblidat el teu nom d\'usuari o la contrasenya?"\n"Visita "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"S\'està comprovant..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloqueja"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"So activat"</string>
@@ -840,17 +843,17 @@
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"S\'està reproduint a través de Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"So de trucada silenciós seleccionat"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"To de silenci seleccionat"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volum en trucada Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volum de l\'alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum de notificació"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"So de trucada predeterminat"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"So de trucada predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"To predeterminat"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"To predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenci"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sons de trucada"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"So de trucada desconegut"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"To desconegut"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"Xarxa Wi-fi disponible"</item>
     <item quantity="other" msgid="4192424489168397386">"Xarxes Wi-fi disponibles"</item>
@@ -900,6 +903,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració d\'USB connectada"</string>
     <string name="adb_active_notification_message" msgid="8470296818270110396">"Seleccioneu-ho per desactivar la depuració d\'USB."</string>
     <string name="select_input_method" msgid="6865512749462072765">"Selecció del mètode d\'entrada"</string>
+    <string name="configure_input_methods" msgid="6324843080254191535">"Configura mètodes d\'entrada"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"candidats"</u></string>
@@ -998,24 +1002,20 @@
     <string name="share" msgid="1778686618230011964">"Comparteix"</string>
     <string name="find" msgid="4808270900322985960">"Cerca"</string>
     <string name="websearch" msgid="4337157977400211589">"Cerca al web"</string>
-    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
-    <skip />
-    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
-    <skip />
-    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
-    <skip />
-    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
-    <skip />
-    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
-    <skip />
-    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
-    <skip />
-    <!-- no translation found for sync_really_delete (8933566316059338692) -->
-    <skip />
-    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
-    <skip />
-    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
-    <skip />
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Sol·licitud d\'ubicació de <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Sol·licitud d\'ubicació"</string>
+    <string name="gpsNotifMessage" msgid="1374718023224000702">"Sol·licitat per <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
+    <string name="gpsVerifYes" msgid="2346566072867213563">"Sí"</string>
+    <string name="gpsVerifNo" msgid="1146564937346454865">"No"</string>
+    <string name="sync_too_many_deletes" msgid="5296321850662746890">"S\'ha superat el límit de supressions"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"Hi ha <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> elements suprimits per a <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, compte <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. Què vols fer?"</string>
+    <string name="sync_really_delete" msgid="8933566316059338692">"Suprimeix els elements."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"Desfés les supressions."</string>
+    <string name="sync_do_nothing" msgid="8717589462945226869">"No facis res de moment."</string>
+    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> connectada"</string>
+    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> desconnectada"</string>
+    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Toca per tornar-te a connectar a una VPN."</string>
+    <string name="choose_account_label" msgid="4191313562041125787">"Selecciona un compte"</string>
+    <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementa"</string>
+    <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminueix"</string>
 </resources>

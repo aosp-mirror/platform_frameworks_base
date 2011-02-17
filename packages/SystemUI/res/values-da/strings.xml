@@ -40,8 +40,8 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Meddelelser"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Seneste"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"Der er ingen nye programmer."</string>
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"Programmer"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-tethering anvendt"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Konfigurer inputmetoder"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Brug fysisk tastatur"</string>
 </resources>
