@@ -6061,9 +6061,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (top != mTop) {
             updateMatrix();
             if (mMatrixIsIdentity) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
+                if (mAttachInfo != null) {
                     int minTop;
                     int yLoc;
                     if (top < mTop) {
@@ -6073,8 +6071,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         minTop = mTop;
                         yLoc = 0;
                     }
-                    r.set(0, yLoc, mRight - mLeft, mBottom - minTop);
-                    p.invalidateChild(this, r);
+                    invalidate(0, yLoc, mRight - mLeft, mBottom - minTop);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -6131,17 +6128,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (bottom != mBottom) {
             updateMatrix();
             if (mMatrixIsIdentity) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
+                if (mAttachInfo != null) {
                     int maxBottom;
                     if (bottom < mBottom) {
                         maxBottom = mBottom;
                     } else {
                         maxBottom = bottom;
                     }
-                    r.set(0, 0, mRight - mLeft, maxBottom - mTop);
-                    p.invalidateChild(this, r);
+                    invalidate(0, 0, mRight - mLeft, maxBottom - mTop);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -6189,9 +6183,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (left != mLeft) {
             updateMatrix();
             if (mMatrixIsIdentity) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
+                if (mAttachInfo != null) {
                     int minLeft;
                     int xLoc;
                     if (left < mLeft) {
@@ -6201,8 +6193,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         minLeft = mLeft;
                         xLoc = 0;
                     }
-                    r.set(xLoc, 0, mRight - minLeft, mBottom - mTop);
-                    p.invalidateChild(this, r);
+                    invalidate(xLoc, 0, mRight - minLeft, mBottom - mTop);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
@@ -6250,17 +6241,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (right != mRight) {
             updateMatrix();
             if (mMatrixIsIdentity) {
-                final ViewParent p = mParent;
-                if (p != null && mAttachInfo != null) {
-                    final Rect r = mAttachInfo.mTmpInvalRect;
+                if (mAttachInfo != null) {
                     int maxRight;
                     if (right < mRight) {
                         maxRight = mRight;
                     } else {
                         maxRight = right;
                     }
-                    r.set(0, 0, maxRight - mLeft, mBottom - mTop);
-                    p.invalidateChild(this, r);
+                    invalidate(0, 0, maxRight - mLeft, mBottom - mTop);
                 }
             } else {
                 // Double-invalidation is necessary to capture view's old and new areas
