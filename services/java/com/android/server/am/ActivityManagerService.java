@@ -4969,11 +4969,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             enforceCallingPermission(android.Manifest.permission.GET_TASKS,
                     "getRecentTasks()");
 
-            final boolean canReadFb = (flags&ActivityManager.TASKS_GET_THUMBNAILS) != 0
-                    && checkCallingPermission(
-                            android.Manifest.permission.READ_FRAME_BUFFER)
-                            == PackageManager.PERMISSION_GRANTED;
-            
             IPackageManager pm = AppGlobals.getPackageManager();
             
             ActivityRecord resumed = mMainStack.mResumedActivity;
@@ -4991,17 +4986,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ActivityManager.RecentTaskInfo rti
                             = new ActivityManager.RecentTaskInfo();
                     rti.id = tr.numActivities > 0 ? tr.taskId : -1;
+                    rti.persistentId = tr.taskId;
                     rti.baseIntent = new Intent(
                             tr.intent != null ? tr.intent : tr.affinityIntent);
                     rti.origActivity = tr.origActivity;
-                    
-                    if (canReadFb) {
-                        if (resumed != null && resumed.task == tr) {
-                            rti.thumbnail = resumed.stack.screenshotActivities(resumed);
-                        } else {
-                            rti.thumbnail = tr.lastThumbnail;
-                        }
-                    }
                     rti.description = tr.lastDescription;
                     
                     if ((flags&ActivityManager.RECENT_IGNORE_UNAVAILABLE) != 0) {
@@ -5030,6 +5018,26 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public Bitmap getTaskThumbnail(int id) {
+        synchronized (this) {
+            enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                    "getTaskThumbnail()");
+            ActivityRecord resumed = mMainStack.mResumedActivity;
+            final int N = mRecentTasks.size();
+            for (int i=0; i<N; i++) {
+                TaskRecord tr = mRecentTasks.get(i);
+                if (tr.taskId == id) {
+                    if (resumed != null && resumed.task == tr) {
+                        return resumed.stack.screenshotActivities(resumed);
+                    } else {
+                        return tr.lastThumbnail;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    
     private final int findAffinityTaskTopLocked(int startIndex, String affinity) {
         int j;
         TaskRecord startTask = ((ActivityRecord)mMainStack.mHistory.get(startIndex)).task; 
@@ -5085,6 +5093,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=0; i<N; i++) {
                     TaskRecord tr = mRecentTasks.get(i);
                     if (tr.taskId == task) {
+                        if ((flags&ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+                            mMainStack.mUserLeaving = true;
+                        }
                         if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
                             // Caller wants the home activity moved with it.  To accomplish this,
                             // we'll just move the home task to the top first.
@@ -5097,6 +5108,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
                     ActivityRecord hr = (ActivityRecord)mMainStack.mHistory.get(i);
                     if (hr.task.taskId == task) {
+                        if ((flags&ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+                            mMainStack.mUserLeaving = true;
+                        }
                         if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
                             // Caller wants the home activity moved with it.  To accomplish this,
                             // we'll just move the home task to the top first.

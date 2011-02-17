@@ -374,8 +374,9 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
                 if (title != null && title.length() > 0 && icon != null) {
                     if (DEBUG) Log.v(TAG, "creating activity desc for id=" + id + ", label=" + title);
                     ActivityDescription item = new ActivityDescription(
-                            recentInfo.thumbnail, icon, title,
-                            recentInfo.description, intent, id, index, info.packageName);
+                            am.getTaskThumbnail(recentInfo.persistentId),
+                            icon, title, recentInfo.description, intent, id,
+                            index, info.packageName);
                     activityDescriptions.add(item);
                     ++index;
                 } else {
