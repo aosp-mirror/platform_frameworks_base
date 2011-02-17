@@ -421,56 +421,62 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // now do the layout.
             mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
 
-            mViewRoot.mAttachInfo.mTreeObserver.dispatchOnPreDraw();
+            if (params.isLayoutOnly()) {
+                // delete the canvas and image to reset them on the next full rendering
+                mImage = null;
+                mCanvas = null;
+            } else {
+                mViewRoot.mAttachInfo.mTreeObserver.dispatchOnPreDraw();
 
-            // draw the views
-            // create the BufferedImage into which the layout will be rendered.
-            boolean newImage = false;
-            if (newRenderSize || mCanvas == null) {
-                if (params.getImageFactory() != null) {
-                    mImage = params.getImageFactory().getImage(
-                            mMeasuredScreenWidth,
-                            mMeasuredScreenHeight);
-                } else {
-                    mImage = new BufferedImage(
-                            mMeasuredScreenWidth,
-                            mMeasuredScreenHeight,
-                            BufferedImage.TYPE_INT_ARGB);
-                    newImage = true;
+                // draw the views
+                // create the BufferedImage into which the layout will be rendered.
+                boolean newImage = false;
+                if (newRenderSize || mCanvas == null) {
+                    if (params.getImageFactory() != null) {
+                        mImage = params.getImageFactory().getImage(
+                                mMeasuredScreenWidth,
+                                mMeasuredScreenHeight);
+                    } else {
+                        mImage = new BufferedImage(
+                                mMeasuredScreenWidth,
+                                mMeasuredScreenHeight,
+                                BufferedImage.TYPE_INT_ARGB);
+                        newImage = true;
+                    }
+
+                    if (params.isBgColorOverridden()) {
+                        // since we override the content, it's the same as if it was a new image.
+                        newImage = true;
+                        Graphics2D gc = mImage.createGraphics();
+                        gc.setColor(new Color(params.getOverrideBgColor(), true));
+                        gc.setComposite(AlphaComposite.Src);
+                        gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+                        gc.dispose();
+                    }
+
+                    // create an Android bitmap around the BufferedImage
+                    Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
+                            true /*isMutable*/, params.getDensity());
+
+                    // create a Canvas around the Android bitmap
+                    mCanvas = new Canvas(bitmap);
+                    mCanvas.setDensity(params.getDensity().getDpiValue());
                 }
 
-                if (params.isBgColorOverridden()) {
-                    // since we override the content, it's the same as if it was a new image.
-                    newImage = true;
+                if (freshRender && newImage == false) {
                     Graphics2D gc = mImage.createGraphics();
-                    gc.setColor(new Color(params.getOverrideBgColor(), true));
                     gc.setComposite(AlphaComposite.Src);
-                    gc.fillRect(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
+
+                    gc.setColor(new Color(0x00000000, true));
+                    gc.fillRect(0, 0,
+                            mMeasuredScreenWidth, mMeasuredScreenHeight);
+
+                    // done
                     gc.dispose();
                 }
 
-                // create an Android bitmap around the BufferedImage
-                Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
-                        true /*isMutable*/, params.getDensity());
-
-                // create a Canvas around the Android bitmap
-                mCanvas = new Canvas(bitmap);
-                mCanvas.setDensity(params.getDensity().getDpiValue());
+                mViewRoot.draw(mCanvas);
             }
-
-            if (freshRender && newImage == false) {
-                Graphics2D gc = mImage.createGraphics();
-                gc.setComposite(AlphaComposite.Src);
-
-                gc.setColor(new Color(0x00000000, true));
-                gc.fillRect(0, 0,
-                        mMeasuredScreenWidth, mMeasuredScreenHeight);
-
-                // done
-                gc.dispose();
-            }
-
-            mViewRoot.draw(mCanvas);
 
             mViewInfoList = startVisitingViews(mViewRoot, 0);
 
