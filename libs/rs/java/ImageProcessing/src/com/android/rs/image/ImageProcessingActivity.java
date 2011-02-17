@@ -346,7 +346,7 @@ public class ImageProcessingActivity extends Activity
         mSaturationSeekBar.setProgress(50);
 
         mBenchmarkResult = (TextView) findViewById(R.id.benchmarkText);
-        mBenchmarkResult.setText("Benchmark not yet run");
+        mBenchmarkResult.setText("Result: not run");
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
@@ -430,7 +430,7 @@ public class ImageProcessingActivity extends Activity
 
         //long javaTime = javaFilter();
         //mBenchmarkResult.setText("RS: " + t + " ms  Java: " + javaTime + " ms");
-        mBenchmarkResult.setText("RS: " + t + " ms");
+        mBenchmarkResult.setText("Result: " + t + " ms");
 
         mRadius = oldRadius;
         mScript.set_radius(mRadius);
