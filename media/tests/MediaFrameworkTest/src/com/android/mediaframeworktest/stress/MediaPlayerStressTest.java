@@ -75,13 +75,13 @@ public class MediaPlayerStressTest extends InstrumentationTestCase {
 
     private void writeTestSummary(Writer output) throws Exception{
         output.write("Total Result:\n");
-        output.write(" Complete: " + mTotalComplete);
-        output.write(" Error: " + mTotalPlaybackError);
-        output.write(" Unknown Info: " + mTotalInfoUnknown);
-        output.write(" Track Lagging: " + mTotalVideoTrackLagging );
-        output.write(" BadInterleaving: " + mTotalBadInterleaving);
-        output.write(" Not Seekable: " + mTotalNotSeekable);
-        output.write(" Info Meta data update: " + mTotalMetaDataUpdate);
+        output.write("Total Complete: " + mTotalComplete + "\n");
+        output.write("Total Error: " + mTotalPlaybackError + "\n");
+        output.write("Total Unknown Info: " + mTotalInfoUnknown);
+        output.write("Total Track Lagging: " + mTotalVideoTrackLagging + "\n" );
+        output.write("Total BadInterleaving: " + mTotalBadInterleaving + "\n");
+        output.write("Total Not Seekable: " + mTotalNotSeekable + "\n");
+        output.write("Total Info Meta data update: " + mTotalMetaDataUpdate + "\n");
         output.write("\n");
     }
 

@@ -811,6 +811,7 @@ public class CodecTest {
         try {
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mOnErrorListener);
+            mMediaPlayer.setOnInfoListener(mInfoListener);
             Log.v(TAG, "playMediaSamples: sample file name " + filePath);
             mMediaPlayer.setDataSource(filePath);
             mMediaPlayer.setDisplay(MediaFrameworkTest.mSurfaceView.getHolder());
