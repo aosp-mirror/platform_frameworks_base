@@ -263,6 +263,13 @@ status_t AudioSource::dataCallbackTimestamp(
         return OK;
     }
 
+    // Drop retrieved and previously lost audio data.
+    if (mNumFramesReceived == 0 && timeUs < mStartTimeUs) {
+        mRecord->getInputFramesLost();
+        LOGV("Drop audio data at %lld/%lld us", timeUs, mStartTimeUs);
+        return OK;
+    }
+
     if (mNumFramesReceived == 0 && mPrevSampleTimeUs == 0) {
         mInitialReadTimeUs = timeUs;
         // Initial delay
@@ -277,7 +284,13 @@ status_t AudioSource::dataCallbackTimestamp(
 
     int64_t timestampUs = mPrevSampleTimeUs;
 
-    size_t numLostBytes = mRecord->getInputFramesLost();
+    size_t numLostBytes = 0;
+    if (mNumFramesReceived > 0) {  // Ignore earlier frame lost
+        // getInputFramesLost() returns the number of lost frames.
+        // Convert number of frames lost to number of bytes lost.
+        numLostBytes = mRecord->getInputFramesLost() * mRecord->frameSize();
+    }
+
     CHECK_EQ(numLostBytes & 1, 0u);
     CHECK_EQ(audioBuffer.size & 1, 0u);
     size_t bufferSize = numLostBytes + audioBuffer.size;

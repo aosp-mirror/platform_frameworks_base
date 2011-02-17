@@ -59,12 +59,12 @@ private:
 
         // After the initial mute, we raise the volume linearly
         // over kAutoRampDurationUs.
-        kAutoRampDurationUs = 700000,
+        kAutoRampDurationUs = 300000,
 
         // This is the initial mute duration to suppress
         // the video recording signal tone
-        kAutoRampStartUs = 1000000,
-      };
+        kAutoRampStartUs = 0,
+    };
 
     Mutex mLock;
     Condition mFrameAvailableCondition;
