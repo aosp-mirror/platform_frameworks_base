@@ -57,6 +57,7 @@ private:
     String8 mHost;
     unsigned mPort;
     String8 mPath;
+    bool mHTTPS;
     String8 mHeaders;
     String8 mUri;
 
@@ -83,6 +84,7 @@ private:
 
     status_t connect(
             const char *host, unsigned port, const char *path,
+            bool https,
             const String8 &headers,
             off64_t offset);
 

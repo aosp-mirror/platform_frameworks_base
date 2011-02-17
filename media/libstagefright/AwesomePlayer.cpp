@@ -1481,7 +1481,8 @@ status_t AwesomePlayer::prepareAsync_l() {
 status_t AwesomePlayer::finishSetDataSource_l() {
     sp<DataSource> dataSource;
 
-    if (!strncasecmp("http://", mUri.string(), 7)) {
+    if (!strncasecmp("http://", mUri.string(), 7)
+            || !strncasecmp("https://", mUri.string(), 8)) {
         mConnectingDataSource = new NuHTTPDataSource;
 
         mLock.unlock();
