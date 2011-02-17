@@ -3302,7 +3302,7 @@ public class WebView extends AbsoluteLayout
             }
             mPageThatNeedsToSlideTitleBarOffScreen = null;
         }
-
+        mZoomManager.onPageFinished(url);
         injectAccessibilityForUrl(url);
     }
 

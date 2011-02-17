@@ -875,12 +875,21 @@ class ZoomManager {
         // fit the content width to the current view for the first new picture
         // after first layout.
         boolean scaleHasDiff = exceedsMinScaleIncrement(newZoomOverviewScale, mActualScale);
-        if (!mWebView.drawHistory() && mInitialZoomOverview && scaleHasDiff) {
+        // Make sure the actual scale is no less than zoom overview scale.
+        boolean scaleLessThanOverview =
+                (newZoomOverviewScale - mActualScale) >= MINIMUM_SCALE_INCREMENT;
+        // Make sure mobile sites are correctly handled since mobile site will
+        // change content width after rotating.
+        boolean mobileSiteInOverview = mInZoomOverview &&
+                !exceedsMinScaleIncrement(newZoomOverviewScale, 1.0f);
+        if (!mWebView.drawHistory() &&
+                (mInitialZoomOverview || scaleLessThanOverview || mobileSiteInOverview) &&
+                scaleHasDiff) {
             mInitialZoomOverview = false;
             setZoomScale(newZoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
                 !mWebView.getSettings().getUseFixedViewport());
-        } else if (scaleHasDiff) {
-            mInZoomOverview = false;
+        } else {
+            mInZoomOverview = !scaleHasDiff;
         }
     }
 
@@ -1060,5 +1069,13 @@ class ZoomManager {
 
     public void setHardwareAccelerated() {
         mHardwareAccelerated = true;
+    }
+
+    /**
+     * OnPageFinished called by webview when a page is fully loaded.
+     */
+    /* package*/ void onPageFinished(String url) {
+        // Turn off initial zoom overview flag when a page is fully loaded.
+        mInitialZoomOverview = false;
     }
 }
