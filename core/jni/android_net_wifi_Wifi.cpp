@@ -556,6 +556,18 @@ static jboolean android_net_wifi_setSuspendOptimizationsCommand(JNIEnv* env, job
     return doBooleanCommand(cmdstr, "OK");
 }
 
+static void android_net_wifi_enableBackgroundScan(JNIEnv* env, jobject clazz, jboolean enable)
+{
+    //Note: BGSCAN-START and BGSCAN-STOP are documented in core/res/res/values/config.xml
+    //and will need an update if the names are changed
+    if (enable) {
+        doBooleanCommand("DRIVER BGSCAN-START", "OK");
+    }
+    else {
+        doBooleanCommand("DRIVER BGSCAN-STOP", "OK");
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -623,6 +635,7 @@ static JNINativeMethod gWifiMethods[] = {
         (void*) android_net_wifi_setSuspendOptimizationsCommand},
     { "setCountryCodeCommand", "(Ljava/lang/String;)Z",
         (void*) android_net_wifi_setCountryCodeCommand},
+    { "enableBackgroundScan", "(Z)V", (void*) android_net_wifi_enableBackgroundScan},
 };
 
 int register_android_net_wifi_WifiManager(JNIEnv* env)

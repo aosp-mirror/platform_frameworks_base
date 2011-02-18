@@ -112,9 +112,11 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private String mLastBssid;
     private int mLastNetworkId;
     private boolean mEnableRssiPolling = false;
+    private boolean mEnableBackgroundScan = false;
     private int mRssiPollToken = 0;
     private int mReconnectCount = 0;
     private boolean mIsScanMode = false;
+    private boolean mScanResultIsPending = false;
 
     private boolean mBluetoothConnectionActive = false;
 
@@ -300,6 +302,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_START_WPS                        = 89;
     /* Set the frequency band */
     static final int CMD_SET_FREQUENCY_BAND               = 90;
+    /* Enable background scan for configured networks */
+    static final int CMD_ENABLE_BACKGROUND_SCAN           = 91;
 
     /* Commands from/to the SupplicantStateTracker */
     /* Reset the supplicant state tracker */
@@ -821,6 +825,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     public void enableRssiPolling(boolean enabled) {
        sendMessage(obtainMessage(CMD_ENABLE_RSSI_POLL, enabled ? 1 : 0, 0));
+    }
+
+    public void enableBackgroundScan(boolean enabled) {
+       sendMessage(obtainMessage(CMD_ENABLE_BACKGROUND_SCAN, enabled ? 1 : 0, 0));
     }
 
     public void enableAllNetworks() {
@@ -1538,6 +1546,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_ENABLE_RSSI_POLL:
                     mEnableRssiPolling = (message.arg1 == 1);
                     break;
+                case CMD_ENABLE_BACKGROUND_SCAN:
+                    mEnableBackgroundScan = (message.arg1 == 1);
+                    break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
@@ -1973,6 +1984,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     eventLoggingEnabled = false;
                     setScanResults(WifiNative.scanResultsCommand());
                     sendScanResultsAvailableBroadcast();
+                    mScanResultIsPending = false;
                     break;
                 case CMD_PING_SUPPLICANT:
                     boolean ok = WifiNative.pingCommand();
@@ -2180,6 +2192,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_START_SCAN:
                     eventLoggingEnabled = false;
                     WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
+                    mScanResultIsPending = true;
                     break;
                 case CMD_SET_HIGH_PERF_MODE:
                     setHighPerfModeEnabledNative(message.arg1 == 1);
@@ -2681,8 +2694,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                      * back to CONNECT_MODE.
                      */
                     WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
-                    WifiNative.scanCommand(message.arg1 == SCAN_ACTIVE);
-                    break;
+                    /* Have the parent state handle the rest */
+                    return NOT_HANDLED;
                     /* Ignore connection to same network */
                 case CMD_CONNECT_NETWORK:
                     int netId = message.arg1;
@@ -2771,21 +2784,35 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     class DisconnectedState extends HierarchicalState {
+        private boolean mAlarmEnabled = false;
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
-            /**
-             * In a disconnected state, an infrequent scan that wakes
-             * up the device is needed to ensure a user connects to
-             * an access point on the move
+            /*
+             * We initiate background scanning if it is enabled, otherwise we
+             * initiate an infrequent scan that wakes up the device to ensure
+             * a user connects to an access point on the move
              */
-            long scanMs = Settings.Secure.getLong(mContext.getContentResolver(),
+            if (mEnableBackgroundScan) {
+                /* If a regular scan result is pending, do not initiate background
+                 * scan until the scan results are returned. This is needed because
+                 * initiating a background scan will cancel the regular scan and
+                 * scan results will not be returned until background scanning is
+                 * cleared
+                 */
+                if (!mScanResultIsPending) {
+                    WifiNative.enableBackgroundScan(true);
+                }
+            } else {
+                long scanMs = Settings.Secure.getLong(mContext.getContentResolver(),
                     Settings.Secure.WIFI_SCAN_INTERVAL_MS, DEFAULT_SCAN_INTERVAL_MS);
 
-            mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
                     System.currentTimeMillis() + scanMs, scanMs, mScanIntent);
+                mAlarmEnabled = true;
+            }
         }
         @Override
         public boolean processMessage(Message message) {
@@ -2800,6 +2827,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         transitionTo(mScanModeState);
                     }
                     break;
+                case CMD_ENABLE_BACKGROUND_SCAN:
+                    mEnableBackgroundScan = (message.arg1 == 1);
+                    WifiNative.enableBackgroundScan(mEnableBackgroundScan);
+                    break;
                     /* Ignore network disconnect */
                 case NETWORK_DISCONNECTION_EVENT:
                     break;
@@ -2807,6 +2838,20 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     setNetworkDetailedState(WifiInfo.getDetailedStateOf(stateChangeResult.state));
                     /* DriverStartedState does the rest of the handling */
+                    return NOT_HANDLED;
+                case CMD_START_SCAN:
+                    /* Disable background scan temporarily during a regular scan */
+                    if (mEnableBackgroundScan) {
+                        WifiNative.enableBackgroundScan(false);
+                    }
+                    /* Handled in parent state */
+                    return NOT_HANDLED;
+                case SCAN_RESULTS_EVENT:
+                    /* Re-enable background scan when a pending scan result is received */
+                    if (mEnableBackgroundScan && mScanResultIsPending) {
+                        WifiNative.enableBackgroundScan(true);
+                    }
+                    /* Handled in parent state */
                     return NOT_HANDLED;
                 default:
                     return NOT_HANDLED;
@@ -2817,7 +2862,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
         @Override
         public void exit() {
-            mAlarmManager.cancel(mScanIntent);
+            /* No need for a background scan upon exit from a disconnected state */
+            if (mEnableBackgroundScan) {
+                WifiNative.enableBackgroundScan(false);
+            }
+            if (mAlarmEnabled) {
+                mAlarmManager.cancel(mScanIntent);
+                mAlarmEnabled = false;
+            }
         }
     }
 
