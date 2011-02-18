@@ -679,7 +679,7 @@ public abstract class PhoneBase extends Handler implements Phone {
      *  Set the status of the CDMA subscription mode
      */
     public void setCdmaSubscription(int cdmaSubscriptionType, Message response) {
-        mCM.setCdmaSubscription(cdmaSubscriptionType, response);
+        mCM.setCdmaSubscriptionSource(cdmaSubscriptionType, response);
     }
 
     /**

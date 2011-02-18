@@ -101,7 +101,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         p.mRuimRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
         p.mCM.registerForNVReady(this, EVENT_NV_READY, null);
-        p.mCM.registerForDataStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
+        p.mCM.registerForDataNetworkStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
         p.mCT.registerForVoiceCallEnded (this, EVENT_VOICE_CALL_ENDED, null);
         p.mCT.registerForVoiceCallStarted (this, EVENT_VOICE_CALL_STARTED, null);
         p.mSST.registerForCdmaDataConnectionAttached(this, EVENT_TRY_SETUP_DATA, null);
@@ -125,7 +125,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         mPhone.mCM.unregisterForOffOrNotAvailable(this);
         mCdmaPhone.mRuimRecords.unregisterForRecordsLoaded(this);
         mPhone.mCM.unregisterForNVReady(this);
-        mPhone.mCM.unregisterForDataStateChanged(this);
+        mPhone.mCM.unregisterForDataNetworkStateChanged(this);
         mCdmaPhone.mCT.unregisterForVoiceCallEnded(this);
         mCdmaPhone.mCT.unregisterForVoiceCallStarted(this);
         mCdmaPhone.mSST.unregisterForCdmaDataConnectionAttached(this);

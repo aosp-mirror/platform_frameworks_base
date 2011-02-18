@@ -30,6 +30,7 @@ public class DataCallState {
     public String ifname = "";
     public String [] addresses = new String[0];
     public String [] dnses = new String[0];
+    public String[] gateways = new String[0];
 
     @Override
     public String toString() {
@@ -53,6 +54,12 @@ public class DataCallState {
             sb.append(",");
         }
         if (dnses.length > 0) sb.deleteCharAt(sb.length()-1);
+        sb.append("] gateways=[");
+        for (String addr : gateways) {
+            sb.append(addr);
+            sb.append(",");
+        }
+        if (gateways.length > 0) sb.deleteCharAt(sb.length()-1);
         sb.append("]}");
         return sb.toString();
     }

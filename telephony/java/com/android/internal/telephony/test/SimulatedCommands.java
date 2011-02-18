@@ -825,7 +825,7 @@ public final class SimulatedCommands extends BaseCommands
      * Please note that registration state 4 ("unknown") is treated
      * as "out of service" above
      */
-    public void getRegistrationState (Message result) {
+    public void getVoiceRegistrationState (Message result) {
         String ret[] = new String[14];
 
         ret[0] = "5"; // registered roam
@@ -863,7 +863,7 @@ public final class SimulatedCommands extends BaseCommands
      * Please note that registration state 4 ("unknown") is treated
      * as "out of service" in the Android telephony system
      */
-    public void getGPRSRegistrationState (Message result) {
+    public void getDataRegistrationState (Message result) {
         String ret[] = new String[4];
 
         ret[0] = "5"; // registered roam
@@ -1361,7 +1361,7 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     public void
-    setCdmaSubscription(int cdmaSubscriptionType, Message response) {
+    setCdmaSubscriptionSource(int cdmaSubscriptionType, Message response) {
         Log.w(LOG_TAG, "CDMA not implemented in SimulatedCommands");
         unimplemented(response);
     }
@@ -1466,6 +1466,37 @@ public final class SimulatedCommands extends BaseCommands
     }
 
     public void getGsmBroadcastConfig(Message response) {
+        unimplemented(response);
+    }
+
+    @Override
+    public void supplyIccPinForApp(String pin, String aid, Message response) {
+        unimplemented(response);
+    }
+
+    @Override
+    public void supplyIccPukForApp(String puk, String newPin, String aid, Message response) {
+        unimplemented(response);
+    }
+
+    @Override
+    public void supplyIccPin2ForApp(String pin2, String aid, Message response) {
+        unimplemented(response);
+    }
+
+    @Override
+    public void supplyIccPuk2ForApp(String puk2, String newPin2, String aid, Message response) {
+        unimplemented(response);
+    }
+
+    @Override
+    public void changeIccPinForApp(String oldPin, String newPin, String aidPtr, Message response) {
+        unimplemented(response);
+    }
+
+    @Override
+    public void changeIccPin2ForApp(String oldPin2, String newPin2, String aidPtr,
+            Message response) {
         unimplemented(response);
     }
 }

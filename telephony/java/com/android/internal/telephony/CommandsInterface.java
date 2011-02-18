@@ -216,10 +216,10 @@ public interface CommandsInterface {
 
     void registerForCallStateChanged(Handler h, int what, Object obj);
     void unregisterForCallStateChanged(Handler h);
-    void registerForNetworkStateChanged(Handler h, int what, Object obj);
-    void unregisterForNetworkStateChanged(Handler h);
-    void registerForDataStateChanged(Handler h, int what, Object obj);
-    void unregisterForDataStateChanged(Handler h);
+    void registerForVoiceNetworkStateChanged(Handler h, int what, Object obj);
+    void unregisterForVoiceNetworkStateChanged(Handler h);
+    void registerForDataNetworkStateChanged(Handler h, int what, Object obj);
+    void unregisterForDataNetworkStateChanged(Handler h);
 
     void registerForRadioTechnologyChanged(Handler h, int what, Object obj);
     void unregisterForRadioTechnologyChanged(Handler h);
@@ -549,6 +549,39 @@ public interface CommandsInterface {
      void registerForResendIncallMute(Handler h, int what, Object obj);
      void unregisterForResendIncallMute(Handler h);
 
+     /**
+      * Registers the handler for when Cdma subscription changed events
+      *
+      * @param h Handler for notification message.
+      * @param what User-defined message code.
+      * @param obj User object.
+      *
+      */
+     void registerForCdmaSubscriptionChanged(Handler h, int what, Object obj);
+     void unregisterForCdmaSubscriptionChanged(Handler h);
+
+     /**
+      * Registers the handler for when Cdma prl changed events
+      *
+      * @param h Handler for notification message.
+      * @param what User-defined message code.
+      * @param obj User object.
+      *
+      */
+     void registerForCdmaPrlChanged(Handler h, int what, Object obj);
+     void unregisterForCdmaPrlChanged(Handler h);
+
+     /**
+      * Registers the handler for when Cdma prl changed events
+      *
+      * @param h Handler for notification message.
+      * @param what User-defined message code.
+      * @param obj User object.
+      *
+      */
+     void registerForExitEmergencyCallbackMode(Handler h, int what, Object obj);
+     void unregisterForExitEmergencyCallbackMode(Handler h);
+
     /**
      * Supply the ICC PIN to the ICC card
      *
@@ -564,7 +597,23 @@ public interface CommandsInterface {
     void supplyIccPin(String pin, Message result);
 
     /**
-     * Supply the ICC PUK to the ICC card
+     * Supply the PIN for the app with this AID on the ICC card
+     *
+     *  AID (Application ID), See ETSI 102.221 8.1 and 101.220 4
+     *
+     *  returned message
+     *  retMsg.obj = AsyncResult ar
+     *  ar.exception carries exception on failure
+     *  This exception is CommandException with an error of PASSWORD_INCORRECT
+     *  if the password is incorrect
+     *
+     * ar.exception and ar.result are null on success
+     */
+
+    void supplyIccPinForApp(String pin, String aid, Message result);
+
+    /**
+     * Supply the ICC PUK and newPin to the ICC card
      *
      *  returned message
      *  retMsg.obj = AsyncResult ar
@@ -576,6 +625,22 @@ public interface CommandsInterface {
      */
 
     void supplyIccPuk(String puk, String newPin, Message result);
+
+    /**
+     * Supply the PUK, new pin for the app with this AID on the ICC card
+     *
+     *  AID (Application ID), See ETSI 102.221 8.1 and 101.220 4
+     *
+     *  returned message
+     *  retMsg.obj = AsyncResult ar
+     *  ar.exception carries exception on failure
+     *  This exception is CommandException with an error of PASSWORD_INCORRECT
+     *  if the password is incorrect
+     *
+     * ar.exception and ar.result are null on success
+     */
+
+    void supplyIccPukForApp(String puk, String newPin, String aid, Message result);
 
     /**
      * Supply the ICC PIN2 to the ICC card
@@ -594,6 +659,24 @@ public interface CommandsInterface {
     void supplyIccPin2(String pin2, Message result);
 
     /**
+     * Supply the PIN2 for the app with this AID on the ICC card
+     * Only called following operation where ICC_PIN2 was
+     * returned as a a failure from a previous operation
+     *
+     *  AID (Application ID), See ETSI 102.221 8.1 and 101.220 4
+     *
+     *  returned message
+     *  retMsg.obj = AsyncResult ar
+     *  ar.exception carries exception on failure
+     *  This exception is CommandException with an error of PASSWORD_INCORRECT
+     *  if the password is incorrect
+     *
+     * ar.exception and ar.result are null on success
+     */
+
+    void supplyIccPin2ForApp(String pin2, String aid, Message result);
+
+    /**
      * Supply the SIM PUK2 to the SIM card
      * Only called following operation where SIM_PUK2 was
      * returned as a a failure from a previous operation
@@ -609,8 +692,28 @@ public interface CommandsInterface {
 
     void supplyIccPuk2(String puk2, String newPin2, Message result);
 
+    /**
+     * Supply the PUK2, newPin2 for the app with this AID on the ICC card
+     * Only called following operation where SIM_PUK2 was
+     * returned as a a failure from a previous operation
+     *
+     *  AID (Application ID), See ETSI 102.221 8.1 and 101.220 4
+     *
+     *  returned message
+     *  retMsg.obj = AsyncResult ar
+     *  ar.exception carries exception on failure
+     *  This exception is CommandException with an error of PASSWORD_INCORRECT
+     *  if the password is incorrect
+     *
+     * ar.exception and ar.result are null on success
+     */
+
+    void supplyIccPuk2ForApp(String puk2, String newPin2, String aid, Message result);
+
     void changeIccPin(String oldPin, String newPin, Message result);
+    void changeIccPinForApp(String oldPin, String newPin, String aidPtr, Message result);
     void changeIccPin2(String oldPin2, String newPin2, Message result);
+    void changeIccPin2ForApp(String oldPin2, String newPin2, String aidPtr, Message result);
 
     void changeBarringPassword(String facility, String oldPwd, String newPwd, Message result);
 
@@ -853,7 +956,7 @@ public interface CommandsInterface {
      * Please note that registration state 4 ("unknown") is treated
      * as "out of service" above
      */
-    void getRegistrationState (Message response);
+    void getVoiceRegistrationState (Message response);
 
     /**
      * response.obj.result is an int[3]
@@ -865,7 +968,7 @@ public interface CommandsInterface {
      * Please note that registration state 4 ("unknown") is treated
      * as "out of service" above
      */
-    void getGPRSRegistrationState (Message response);
+    void getDataRegistrationState (Message response);
 
     /**
      * response.obj.result is a String[3]
@@ -1286,7 +1389,7 @@ public interface CommandsInterface {
      * @param cdmaSubscriptionType one of  CDMA_SUBSCRIPTION_*
      * @param response is callback message
      */
-    void setCdmaSubscription(int cdmaSubscriptionType, Message response);
+    void setCdmaSubscriptionSource(int cdmaSubscriptionType, Message response);
 
     /**
      *  Set the TTY mode

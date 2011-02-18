@@ -200,6 +200,7 @@ public class NetworkController extends BroadcastReceiver {
         mLabelViews.add(v);
     }
 
+    @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(WifiManager.RSSI_CHANGED_ACTION)
@@ -315,13 +316,6 @@ public class NetworkController extends BroadcastReceiver {
         return (mSignalStrength != null) && !mSignalStrength.isGsm();
     }
 
-    private boolean isEvdo() {
-        return ((mServiceState != null)
-             && ((mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_0)
-                 || (mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_A)
-                 || (mServiceState.getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EVDO_B)));
-    }
-
     private boolean hasService() {
         if (mServiceState != null) {
             switch (mServiceState.getState()) {
@@ -334,51 +328,6 @@ public class NetworkController extends BroadcastReceiver {
         } else {
             return false;
         }
-    }
-
-    private int getCdmaLevel() {
-        if (mSignalStrength == null) return 0;
-        final int cdmaDbm = mSignalStrength.getCdmaDbm();
-        final int cdmaEcio = mSignalStrength.getCdmaEcio();
-        int levelDbm = 0;
-        int levelEcio = 0;
-
-        if (cdmaDbm >= -75) levelDbm = 4;
-        else if (cdmaDbm >= -85) levelDbm = 3;
-        else if (cdmaDbm >= -95) levelDbm = 2;
-        else if (cdmaDbm >= -100) levelDbm = 1;
-        else levelDbm = 0;
-
-        // Ec/Io are in dB*10
-        if (cdmaEcio >= -90) levelEcio = 4;
-        else if (cdmaEcio >= -110) levelEcio = 3;
-        else if (cdmaEcio >= -130) levelEcio = 2;
-        else if (cdmaEcio >= -150) levelEcio = 1;
-        else levelEcio = 0;
-
-        return (levelDbm < levelEcio) ? levelDbm : levelEcio;
-    }
-
-    private int getEvdoLevel() {
-        if (mSignalStrength == null) return 0;
-        int evdoDbm = mSignalStrength.getEvdoDbm();
-        int evdoSnr = mSignalStrength.getEvdoSnr();
-        int levelEvdoDbm = 0;
-        int levelEvdoSnr = 0;
-
-        if (evdoDbm >= -65) levelEvdoDbm = 4;
-        else if (evdoDbm >= -75) levelEvdoDbm = 3;
-        else if (evdoDbm >= -90) levelEvdoDbm = 2;
-        else if (evdoDbm >= -105) levelEvdoDbm = 1;
-        else levelEvdoDbm = 0;
-
-        if (evdoSnr >= 7) levelEvdoSnr = 4;
-        else if (evdoSnr >= 5) levelEvdoSnr = 3;
-        else if (evdoSnr >= 3) levelEvdoSnr = 2;
-        else if (evdoSnr >= 1) levelEvdoSnr = 1;
-        else levelEvdoSnr = 0;
-
-        return (levelEvdoDbm < levelEvdoSnr) ? levelEvdoDbm : levelEvdoSnr;
     }
 
     private final void updateTelephonySignalStrength() {
@@ -397,44 +346,23 @@ public class NetworkController extends BroadcastReceiver {
             if (mSignalStrength == null) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
                 mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
-            } else if (isCdma()) {
-                // If 3G(EV) and 1x network are available than 3G should be
-                // displayed, displayed RSSI should be from the EV side.
-                // If a voice call is made then RSSI should switch to 1x.
-                int iconLevel;
-                if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
-                    iconLevel = getEvdoLevel();
-                } else {
-                    iconLevel = getCdmaLevel();
-                }
-                int[] iconList;
-                if (isCdmaEri()) {
-                    iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
-                } else {
-                    iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
-                }
-                mPhoneSignalIconId = iconList[iconLevel];
-                mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];
             } else {
-                int asu = mSignalStrength.getGsmSignalStrength();
-
-                // ASU ranges from 0 to 31 - TS 27.007 Sec 8.5
-                // asu = 0 (-113dB or less) is very weak
-                // signal, its better to show 0 bars to the user in such cases.
-                // asu = 99 is a special case, where the signal strength is unknown.
                 int iconLevel;
-                if (asu <= 2 || asu == 99) iconLevel = 0;
-                else if (asu >= 12) iconLevel = 4;
-                else if (asu >= 8)  iconLevel = 3;
-                else if (asu >= 5)  iconLevel = 2;
-                else iconLevel = 1;
-
-                // Though mPhone is a Manager, this call is not an IPC
                 int[] iconList;
-                if (mPhone.isNetworkRoaming()) {
-                    iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
+                iconLevel = mSignalStrength.getLevel();
+                if (isCdma()) {
+                    if (isCdmaEri()) {
+                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
+                    } else {
+                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
+                    }
                 } else {
-                    iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
+                    // Though mPhone is a Manager, this call is not an IPC
+                    if (mPhone.isNetworkRoaming()) {
+                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH_ROAMING[mInetCondition];
+                    } else {
+                        iconList = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[mInetCondition];
+                    }
                 }
                 mPhoneSignalIconId = iconList[iconLevel];
                 mDataSignalIconId = TelephonyIcons.DATA_SIGNAL_STRENGTH[mInetCondition][iconLevel];

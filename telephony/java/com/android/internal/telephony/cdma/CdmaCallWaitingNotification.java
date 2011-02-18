@@ -26,10 +26,12 @@ import com.android.internal.telephony.Connection;
  */
 public class CdmaCallWaitingNotification {
     static final String LOG_TAG = "CDMA";
-    public String number =null;
+    public String number = null;
     public int numberPresentation = 0;
     public String name = null;
     public int namePresentation = 0;
+    public int numberType = 0;
+    public int numberPlan = 0;
     public int isPresent = 0;
     public int signalType = 0;
     public int alertPitch = 0;
@@ -42,6 +44,8 @@ public class CdmaCallWaitingNotification {
             + " numberPresentation: " + numberPresentation
             + " name: " + name
             + " namePresentation: " + namePresentation
+            + " numberType: " + numberType
+            + " numberPlan: " + numberPlan
             + " isPresent: " + isPresent
             + " signalType: " + signalType
             + " alertPitch: " + alertPitch
