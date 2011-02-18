@@ -1,0 +1,397 @@
+page.title=Optimizing Apps for Android 3.0
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+<li><a href="#Setup">Set Up Your SDK with Android 3.0</a></li>
+<li><a href="#SearchableConfiguration">Optimize Your App for Tablets and Similar Devices</a></li>
+<li><a href="#SearchableActivity">Upgrade or Develop a New App for Tablets and Similar
+Devices</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>If you're developing an Android application, Android 3.0 introduces several features that allow
+you to enhance your user's experience on tablets and similar devices. Any application you've already
+published is compatible with devices running Android 3.0, by default, because Android applications
+are forward-compatible. However, there are some simple changes you should make to optimize your
+application for tablet-type devices.</p>
+
+<p>This document shows how you can optimize your existing application for Android 3.0 and
+maintain compatibility with older versions or upgrade your application completely with new APIs.</p>
+
+
+<p><b>To get started:</b></p>
+
+<ol>
+  <li><a href="#Setup">Set up your SDK with Android 3.0</a>.</li>
+  <li>Then choose to either optimize or upgrade:
+    <ol type="a">
+      <li><a href="#Optimize">Optimize Your App for Tablets and Similar Devices</a>.
+        <p>When you have an existing application and want to maintain compatibility with
+older versions of Android.</p>
+      </li>
+      <li><a href="#Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</a>.
+        <p>When you want to upgrade your application to use APIs introduced in Android 3.0 or
+    create a new application targeted to tablets and similar devices.</p></li>
+    </ol>
+  </li>
+</ol>
+
+
+<h2 id="Setup">Set Up Your SDK with Android 3.0</h2>
+
+<p>To start testing and developing your application on Android 3.0, set up your existing Android
+SDK with the new platform:</p>
+
+<p>(If you don't have an existing Android SDK, <a href="{@docRoot}sdk/index.html">download the
+SDK starter package now</a>.)</p>
+
+<ol>
+  <li><a href="{@docRoot}sdk/adding-components.html#launching">Launch the Android SDK and AVD
+Manager</a> and install the following:
+    <ul>
+      <li>SDK Platform Android 3.0</li>
+      <li>Android SDK Tools, revision 10</li>
+      <li>Android SDK Platform-tools, revision 3</li>
+      <li>Documentation for Android SDK, API 11</li>
+      <li>Samples for SDK API 11</li>
+    </ul>
+  </li>
+  <li><a href="{@docRoot}guide/developing/other-ide.html#AVD">Create an AVD</a> for a tablet-type
+device:
+  <p>Set the target to "Android 3.0" and the skin to "WXGA" (the default skin).</p></li>
+</ol>
+
+
+<h3>About emulator performance</h3>
+
+<p>Because the Android emulator must simulate the ARM instruction set on your computer
+and the WXGA screen is significantly larger than a typical virtual device, emulator performance is
+much slower than a real device.</p>
+
+<p>In particular, initializing the emulator can be slow and can take several minutes, depending on
+your hardware. When the emulator is booting, there is limited user feedback, so please be patient
+and wait until you see the home screen (or lock screen) appear. </p>
+
+<p>However, you don't need to boot the emulator each time you rebuild your
+application&mdash;typically you only need to boot at the start of a session and keep it running.
+Also see the tip below for information about using a snapshot to drastically reduce startup time
+after the first initialization. </p>
+
+<p>We're working hard to resolve the performance issues and it will improve in future tools
+releases. For the time being, the emulator is still best way to evaluate your application's
+appearance and functionality on Android 3.0 without a real device.</p>
+
+<p class="note"><strong>Tip:</strong> To improve the startup time for the emulator, enable snapshots
+for the AVD when you create it with the SDK and AVD Manager (there's a checkbox in the AVD creator
+to <strong>Enable</strong> snapshots). Then, start the AVD from the AVD manager and check <b>Launch
+from snapshot</b> and <b>Save to snapshot</b>. This way, when you close the emulator, a snapshot of
+the AVD state is saved and used to quickly relaunch the AVD next time. However, when you choose to
+save a snapshot, the emulator will be slow to close, so you might want to disable <b>Save to
+snapshot</b> after you've acquired an initial snapshot (after you close the AVD for the first
+time).</p>
+
+
+
+<h2 id="Optimize">Optimize Your Application for Tablets and Similar Devices</h2>
+
+<p>If you've already developed an application for an earlier version of Android, there are a few
+things you can do to optimize it for a tablet-style experience on Android 3.0 without changing the
+minimum version required (you don't need to change your manifest's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a>).</p>
+
+<p class="note"><strong>Note:</strong> All Android applications are forward-compatible, so
+there's nothing you <em>have to</em> do&mdash;if your application is a good citizen of the Android
+APIs, your app should work fine on devices running Android 3.0. However, in order to provide users
+a better experience when using your app on an Android 3.0 tablet or similar-size device, you
+should update your application to inherit the new system theme and provide some optimizations for
+larger screens.</p>
+
+<p>Here are a few things you can do to optimize your application for devices running Android
+3.0:</p>
+
+<ol>
+  <li><b>Test your current application on Android 3.0</b>
+    <ol>
+      <li>Build your application as-is and install it on your Android 3.0 AVD (created above during
+<a href="#Setup">setup</a>).</li>
+      <li>Perform your usual tests to be sure everything works and looks as expected.</li>
+    </ol>
+  </li>
+  
+  <li><b>Apply the new "holographic" theme to your application</b>
+    <ol>
+      <li>Open your manifest file and update the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element to
+set <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to {@code "11"}. For example:
+<pre>
+&lt;manifest ... >
+    &lt;uses-sdk android:minSdkVersion="4" 
+              android:targetSdkVersion="11" /&gt;
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+    <p>By targeting the Android 3.0 platform, the system automatically applies the holographic theme
+to each activity when your application runs on an Android 3.0 device. The holographic theme
+provides a new design for widgets, such as buttons and text boxes, and restyles other
+visual elements. This is the standard theme in applications built for Android 3.0, so your
+application will look more at home by enabling the theme.</p>
+    <p>Additionally, the holographic theme enables the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> in your activities when running on an
+Android 3.0 device. The Action Bar replaces the traditional title bar at the top of the activity
+window and provides the user access to the activity's Options Menu.</p>
+      </li>
+      <li>Continue to build your application against the minimum version specified by <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>,
+but install it on the Android 3.0 AVD. Repeat your tests to be sure that your user interface works
+well with the holographic theme.
+        <p class="note"><strong>Note:</strong> If you have applied other themes directly to your
+activities, they will override the inherited holographic theme. To resolve this, you can use
+the <a href="{@docRoot}guide/topics/resources/providing-resources.html#VersionQualifier">system
+version qualifier</a> to provide an alternative theme for Android 3.0 devices that's based on the
+holographic theme. For more information, read how to <a
+href="{@docRoot}guide/topics/ui/themes.html#SelectATheme">select a theme based on platform
+version</a>.</p>
+    </ol>
+  </li>
+
+  <li><b>Supply alternative layout resources for xlarge screens</b>
+    <p>By providing <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
+resources</a> when running on extra large screens (using the <code>xlarge</code> resource
+qualifier), you can improve the user experience of your application on tablet-type devices without
+using new APIs.</p>
+    <p>For example, here are some things to consider when creating a new layout for extra large
+screens:</p>
+    <ul>
+      <li>Landscape layout: The "normal" orientation for tablet-type devices is usually landscape
+(wide), so you should be sure that your activities offer a layout that's optimized for a wide
+viewing area. <p>You can specify landscape resources with the <code>land</code> resource
+qualifier, but if you want alternative resources for an extra large landscape screen, you
+should use both <code>xlarge</code> and <code>land</code> qualifiers. For example, {@code
+res/layout-xlarge-land/}. The order of the qualifier names is important; see <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
+Providing Alternative Resources</a> for more information.</p></li>
+      <li>Button position: Consider whether the position of the most common buttons in your UI are
+easily accessible while holding a tablet with two hands.</li>
+      <li>Font sizes: Be sure your application uses {@code sp} units when setting font
+sizes. This alone should ensure a readable experience on tablet-style devices. In some cases,
+however, you might want to consider larger font sizes for <code>xlarge</code> configurations.</li>
+    </ul>
+    <p>In general, always be sure that your application follows the <a
+href="{@docRoot}guide/practices/screens_support.html#screen-independence">Best Practices
+for Screen Independence</a>.</p>
+  </li>
+</ol>
+
+
+
+
+
+<h2 id="Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</h2>
+
+<p>If you want to develop an application that's fully enhanced for tablet-type devices running
+Android 3.0, then you need to use new APIs in Android 3.0. This section introduces some of
+the new features you should use.</p>
+
+
+<h3>Declare the minimum system version</h3>
+
+<p>The first thing to do when you create a project for Android 3.0 is set your manifest's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+to {@code "11"}. For example:</p>
+
+<pre>
+&lt;manifest ... >
+    &lt;uses-sdk android:minSdkVersion="11" /&gt;
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+   
+<p>By targeting the Android 3.0 platform, the system automatically applies the new holographic theme
+to each of your activities.</p>
+
+<p>Additionally, the holographic theme enables the Action Bar for each activity.</p>
+
+
+<h3>Use the Action Bar</h3>
+
+<p>The Action Bar is a widget for activities that replaces the traditional title bar at the top of
+the screen. By default, the Action Bar includes the application logo on the left side, followed by
+the activity title, and any available items from the Options Menu on the right side.</p>
+
+<p>You can enable items from your activity's Options Menu to appear directly in the Action Bar as
+"action items" by adding {@code showAsAction="ifRoom"} to specific items in your <a
+href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. You can also add
+navigation features to the Action Bar, such as tabs, and use the application icon to navigate to
+your application's "home" activity or "up" the activity hierarchy.</p>
+
+<p>For more information, read <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the
+Action Bar</a>.</p>
+
+
+
+<h3>Divide your activities into fragments</h3>
+
+<p>A fragment represents a behavior or a portion of user interface in an activity. You can combine
+multiple fragments in a single activity to build a multi-pane UI and reuse a fragment in multiple
+activities. You can think of a fragment as a modular section of an activity, which has its own
+lifecycle, receives its own input events, and which you can add or remove while the activity is
+running.</p>
+
+<p>For example, a news application can use one fragment to show a list of articles on the left and
+another fragment to display an article on the right&mdash;both fragments appear in one activity,
+side by side, and each fragment has its own set of lifecycle callback methods and handles its own
+input events. Thus, instead of using one activity to select an article and another activity to
+read the article, the user can select an article and read it all within the same activity.</p>
+
+<p>For more information, read the <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> document.</p>
+
+
+<h3>Use new animation APIs for transitions</h3>
+
+<p>An all new flexible animation framework allows you to animate arbitrary properties of any object
+(View, Drawable, Fragment, Object, or anything else). You can define several animation aspects
+(such as duration, repeat, interpolation, and more) for an object's int, float, and hexadecimal
+color values, by default. That is, when an object has a property field for one of these types, you
+can change its value over time to affect an animation.</p>
+
+<p>The {@link android.view.View} class also provides new APIs that leverage the new animation
+framework, allowing you to easily apply 2D and 3D transformations to views in your activity layout.
+New transformations are made possible with a set of object properties that define the view's layout
+position, orientation, transparency and more.</p>
+
+<p>For more information, read the <a
+href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a> document.</p>
+
+
+<h3>Enable hardware acceleration</h3>
+
+<p>You can now enable the OpenGL renderer for your application by setting {@code
+android:hardwareAccelerated="true"} in your manifest's <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+element or for individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
+&lt;activity&gt;}</a> elements. Hardware acceleration results in smoother animations, smoother
+scrolling, and overall better performance and response to user interaction. When enabled, be sure
+that you thoroughly test your application on a device that supports hardware acceleration.</p>
+
+
+<h3>Enhance your app widgets</h3>
+
+<p>App widgets allow users to access information from your application directly from the Home
+screen and interact with ongoing services (such as preview their email and control music playback).
+Android 3.0 enhances these capabilities by enabling collections, created with widgets such as
+{@link android.widget.ListView}, {@link android.widget.GridView}, and the new {@link
+android.widget.StackView}. These widgets allow you to create more interactive app
+widgets, such as one with a scrolling list, and can automatically update their data through a {@link
+android.widget.RemoteViewsService}.</p>
+
+<p>Additionally, you should create a preview image of your app widget using the Widget Preview
+application (pre-installed in an Android 3.0 AVD) and reference it with the {@link
+android.appwidget.AppWidgetProviderInfo#previewImage android:previewImage} attribute, so that users
+can see what the app widget looks like before adding it to their Home screen.</p>
+
+
+<h3>Add other new features</h3>
+
+<p>Android 3.0 introduces many more APIs that you might find valuable for your
+application, such as drag and drop APIs, new Bluetooth APIs, a system-wide clipboard framework, a
+new graphics engine called Renderscript, and more.</p>
+
+<p>To learn more about the APIs mentioned above and more, see the <a
+href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
+
+
+<h3>Publish your app for extra large screens</h3>
+
+<p>You should also decide whether your application is <em>only</em> for
+tablet-type devices (specifically, <em>xlarge</em> devices) or for all types of screen sizes.</p>
+
+<p>If you want your application to be available to all screen sizes (for example, for all
+phones and tablets), there's nothing you need to do. By default, an application with <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> set to {@code "4"} or higher will resize to fit any screen size.</p>
+
+<p>If your application is <em>only</em> for <em>xlarge</em> screens, include the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> element in your manifest and declare that the application supports
+only <em>xlarge</em> screens, by declaring all other sizes {@code "false"}. For example:</p>
+
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;supports-screens android:smallScreens="false"
+                      android:normalScreens="false"
+                      android:largeScreens="false"
+                      android:xlargeScreens="true" /&gt;
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+
+<p>With this declaration, you indicate that your application does not support any screen size except
+extra large. External services such as Android Market may then use this information to filter your
+application from devices that do not have an extra large screen.</p>
+
+
+
+<h3>Look at some samples</h3>
+
+<p>Many of the new features and APIs that are described in the <a
+href="{@docRoot}sdk/android-3.0.html#api">Android 3.0 Platform Preview</a> also have accompanying
+samples that can help you understand how to use them. To get the samples, download them from the SDK
+repository using the Android SDK Manager. After downloading the samples ("Samples for SDK API 11"), 
+you can find them in <code>&lt;sdk_root&gt;/samples/android-11/</code>. The links below can help you
+find samples for the features you are interested in:</p>
+
+<ul>
+  <li><a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>:
+Demonstrates many new APIs in Android 3.0, including fragments, the action bar, drag and drop, and
+animations.</li>
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/index.html#Fragment">
+Fragments</a>: Various samples that demonstrate fragment layouts, back stack, restoring state, and
+more.</li>
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/ActionBarMechanics.html"
+>Action Bar</a>: Samples that demonstrate various Action Bar features, such as tabs, logos, and
+action items.</li>
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/content/ClipboardSample.
+html">Clipboard</a>: An example of how to use the clipboard for copy and paste operations.</li>
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/DragAndDropDemo.html">
+Drag and Drop</a>: An example of how to perform drag and drop with new View events.</li>
+  <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/List15.html">
+Multi-choice List</a>: An example of how to provide multiple-choice selection for ListView and
+GridView.</li>
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/LoaderThrottle.html">
+Content Loaders</a>: An example using new Loader APIs to asynchronously load data.</li>      
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">
+Property Animation</a>: Several samples using the new animation APIs to animate object
+properties.</li>
+  <li><a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/view/SearchViewActionBar.
+html">Search View Widget</a>: Example using the new search widget in the Action Bar (as an
+"action view").</li>
+  <li><a
+href="{@docRoot}resources/samples/Renderscript/index.html">Renderscript</a>: Contains several
+different applications that demonstrate using renderscript APIs for computations and 3D
+graphics.</li>
+</ul>
+
