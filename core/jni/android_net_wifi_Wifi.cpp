@@ -575,7 +575,6 @@ static jboolean android_net_wifi_setSuspendOptimizationsCommand(JNIEnv* env, job
     return doBooleanCommand(cmdstr, "OK");
 }
 
-
 static jboolean android_net_wifi_doDhcpRequest(JNIEnv* env, jobject clazz, jobject info)
 {
     jint ipaddr, gateway, mask, dns1, dns2, server, lease;
@@ -596,6 +595,18 @@ static jboolean android_net_wifi_doDhcpRequest(JNIEnv* env, jobject clazz, jobje
 static jstring android_net_wifi_getDhcpError(JNIEnv* env, jobject clazz)
 {
     return env->NewStringUTF(::get_dhcp_error_string());
+}
+
+static void android_net_wifi_enableBackgroundScan(JNIEnv* env, jobject clazz, jboolean enable)
+{
+    //Note: BGSCAN-START and BGSCAN-STOP are documented in core/res/res/values/config.xml
+    //and will need an update if the names are changed
+    if (enable) {
+        doBooleanCommand("DRIVER BGSCAN-START", "OK");
+    }
+    else {
+        doBooleanCommand("DRIVER BGSCAN-STOP", "OK");
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -667,6 +678,7 @@ static JNINativeMethod gWifiMethods[] = {
         (void*) android_net_wifi_setCountryCodeCommand},
     { "doDhcpRequest", "(Landroid/net/DhcpInfo;)Z", (void*) android_net_wifi_doDhcpRequest },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_wifi_getDhcpError },
+    { "enableBackgroundScan", "(Z)V", (void*) android_net_wifi_enableBackgroundScan},
 };
 
 int register_android_net_wifi_WifiManager(JNIEnv* env)

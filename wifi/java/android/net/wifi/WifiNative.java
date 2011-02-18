@@ -176,4 +176,6 @@ public class WifiNative {
      * @return the event string sent by the supplicant.
      */
     public native static String waitForEvent();
+
+    public native static void enableBackgroundScan(boolean enable);
 }
