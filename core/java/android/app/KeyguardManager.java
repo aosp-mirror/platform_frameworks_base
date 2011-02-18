@@ -117,6 +117,40 @@ public class KeyguardManager {
     }
 
     /**
+     * isKeyguardLocked
+     *
+     * Return whether the keyguard is currently locked.
+     *
+     * @return true if in keyguard is locked.
+     *
+     * @hide
+     */
+    public boolean isKeyguardLocked() {
+        try {
+            return mWM.isKeyguardSecure();
+        } catch (RemoteException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * isKeyguardSecure
+     *
+     * Return whether the keyguard requires a password to unlock.
+     *
+     * @return true if in keyguard is secure.
+     *
+     * @hide
+     */
+    public boolean isKeyguardSecure() {
+        try {
+            return mWM.isKeyguardSecure();
+        } catch (RemoteException ex) {
+            return false;
+        }
+    }
+
+    /**
      * If keyguard screen is showing or in restricted key input mode (i.e. in
      * keyguard password emergency screen). When in such mode, certain keys,
      * such as the Home key and the right soft keys, don't work.
