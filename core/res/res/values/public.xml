@@ -1642,7 +1642,9 @@
   <!-- Default icon for applications that don't specify an icon. -->
   <public type="mipmap" name="sym_def_app_icon" id="0x010d0000" />
 
-  <!--  Theme attribute used to customize the text insertion cursor -->
-  <!--  Commented out for HC MR1 to prevent an API change -->
-  <!--  <public type="attr" name="textCursorDrawable" id="0x01010362" /> -->
+<!-- ===============================================================
+     Resources added in version 12 of the platform (Honeycomb / 3.1)
+     =============================================================== -->
+  <eat-comment />
+  <public type="attr" name="textCursorDrawable" id="0x01010362" />  
 </resources>
