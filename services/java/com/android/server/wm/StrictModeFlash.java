@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;  // TODO: use com.android.server.wm, once things move there
+package com.android.server.wm;
 
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.DisplayMetrics;

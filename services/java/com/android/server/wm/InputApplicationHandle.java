@@ -30,11 +30,11 @@ public final class InputApplicationHandle {
     private int ptr;
 
     // The window manager's application window token.
-    public final WindowManagerService.AppWindowToken appWindowToken;
+    public final AppWindowToken appWindowToken;
 
     private native void nativeDispose();
 
-    public InputApplicationHandle(WindowManagerService.AppWindowToken appWindowToken) {
+    public InputApplicationHandle(AppWindowToken appWindowToken) {
         this.appWindowToken = appWindowToken;
     }
 
