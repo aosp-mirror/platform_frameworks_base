@@ -301,12 +301,12 @@ status_t Camera::cancelAutoFocus()
 }
 
 // take a picture
-status_t Camera::takePicture()
+status_t Camera::takePicture(int msgType)
 {
-    LOGV("takePicture");
+    LOGV("takePicture: 0x%x", msgType);
     sp <ICamera> c = mCamera;
     if (c == 0) return NO_INIT;
-    return c->takePicture();
+    return c->takePicture(msgType);
 }
 
 // set preview/capture parameters - key/value pairs

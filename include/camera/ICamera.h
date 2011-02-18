@@ -70,7 +70,7 @@ public:
     virtual status_t        startRecording() = 0;
 
     // stop recording mode
-    virtual void            stopRecording() = 0;    
+    virtual void            stopRecording() = 0;
 
     // get recording state
     virtual bool            recordingEnabled() = 0;
@@ -84,8 +84,14 @@ public:
     // cancel auto focus
     virtual status_t        cancelAutoFocus() = 0;
 
-    // take a picture
-    virtual status_t        takePicture() = 0;
+    /*
+     * take a picture.
+     * @param msgType the message type an application selectively turn on/off
+     * on a photo-by-photo basis. The supported message types are:
+     * CAMERA_MSG_SHUTTER, CAMERA_MSG_RAW_IMAGE, CAMERA_MSG_COMPRESSED_IMAGE,
+     * and CAMERA_MSG_POSTVIEW_FRAME. Any other message types will be ignored.
+     */
+    virtual status_t        takePicture(int msgType) = 0;
 
     // set preview/capture parameters - key/value pairs
     virtual status_t        setParameters(const String8& params) = 0;

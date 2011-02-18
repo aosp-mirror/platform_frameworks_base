@@ -223,11 +223,12 @@ public:
     }
 
     // take a picture - returns an IMemory (ref-counted mmap)
-    status_t takePicture()
+    status_t takePicture(int msgType)
     {
-        LOGV("takePicture");
+        LOGV("takePicture: 0x%x", msgType);
         Parcel data, reply;
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
+        data.writeInt32(msgType);
         remote()->transact(TAKE_PICTURE, data, &reply);
         status_t ret = reply.readInt32();
         return ret;
@@ -401,7 +402,8 @@ status_t BnCamera::onTransact(
         case TAKE_PICTURE: {
             LOGV("TAKE_PICTURE");
             CHECK_INTERFACE(ICamera, data, reply);
-            reply->writeInt32(takePicture());
+            int msgType = data.readInt32();
+            reply->writeInt32(takePicture(msgType));
             return NO_ERROR;
         } break;
         case SET_PARAMETERS: {

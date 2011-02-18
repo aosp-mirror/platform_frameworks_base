@@ -508,23 +508,86 @@ public class Camera {
      * finish processing the data in them.
      *
      * <p>The size of the buffer is determined by multiplying the preview
-     * image width, height, and bytes per pixel.  The width and height can be
-     * read from {@link Camera.Parameters#getPreviewSize()}.  Bytes per pixel
+     * image width, height, and bytes per pixel. The width and height can be
+     * read from {@link Camera.Parameters#getPreviewSize()}. Bytes per pixel
      * can be computed from
      * {@link android.graphics.ImageFormat#getBitsPerPixel(int)} / 8,
      * using the image format from {@link Camera.Parameters#getPreviewFormat()}.
      *
      * <p>This method is only necessary when
-     * {@link #setPreviewCallbackWithBuffer(PreviewCallback)} is used.  When
+     * {@link #setPreviewCallbackWithBuffer(PreviewCallback)} is used. When
      * {@link #setPreviewCallback(PreviewCallback)} or
      * {@link #setOneShotPreviewCallback(PreviewCallback)} are used, buffers
-     * are automatically allocated.
+     * are automatically allocated. When a supplied buffer is too small to
+     * hold the preview frame data, preview callback will return null and
+     * the buffer will be removed from the buffer queue.
      *
      * @param callbackBuffer the buffer to add to the queue.
      *     The size should be width * height * bits_per_pixel / 8.
      * @see #setPreviewCallbackWithBuffer(PreviewCallback)
      */
-    public native final void addCallbackBuffer(byte[] callbackBuffer);
+    public final void addCallbackBuffer(byte[] callbackBuffer)
+    {
+        _addCallbackBuffer(callbackBuffer, CAMERA_MSG_PREVIEW_FRAME);
+    }
+
+    /**
+     * Adds a pre-allocated buffer to the raw image callback buffer queue.
+     * Applications can add one or more buffers to the queue. When a raw image
+     * frame arrives and there is still at least one available buffer, the
+     * buffer will be used to hold the raw image data and removed from the
+     * queue. Then raw image callback is invoked with the buffer. If a raw
+     * image frame arrives but there is no buffer left, the frame is
+     * discarded. Applications should add buffers back when they finish
+     * processing the data in them by calling this method again in order
+     * to avoid running out of raw image callback buffers.
+     *
+     * <p>The size of the buffer is determined by multiplying the raw image
+     * width, height, and bytes per pixel. The width and height can be
+     * read from {@link Camera.Parameters#getPictureSize()}. Bytes per pixel
+     * can be computed from
+     * {@link android.graphics.ImageFormat#getBitsPerPixel(int)} / 8,
+     * using the image format from {@link Camera.Parameters#getPreviewFormat()}.
+     *
+     * <p>This method is only necessary when the PictureCallbck for raw image
+     * is used while calling {@link #takePicture(Camera.ShutterCallback,
+     * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}.
+     *
+     * Please note that by calling this method, the mode for application-managed
+     * callback buffers is triggered. If this method has never been called,
+     * null will be returned by the raw image callback since there is
+     * no image callback buffer available. Furthermore, When a supplied buffer
+     * is too small to hold the raw image data, raw image callback will return
+     * null and the buffer will be removed from the buffer queue.
+     *
+     * @param callbackBuffer the buffer to add to the raw image callback buffer
+     *     queue. The size should be width * height * (bits per pixel) / 8. An
+     *     null callbackBuffer will be ignored and won't be added to the queue.
+     *
+     * @see #takePicture(Camera.ShutterCallback,
+     * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}.
+     *
+     * {@hide}
+     */
+    public final void addRawImageCallbackBuffer(byte[] callbackBuffer)
+    {
+        addCallbackBuffer(callbackBuffer, CAMERA_MSG_RAW_IMAGE);
+    }
+
+    private final void addCallbackBuffer(byte[] callbackBuffer, int msgType)
+    {
+        // CAMERA_MSG_VIDEO_FRAME may be allowed in the future.
+        if (msgType != CAMERA_MSG_PREVIEW_FRAME &&
+            msgType != CAMERA_MSG_RAW_IMAGE) {
+            throw new IllegalArgumentException(
+                            "Unsupported message type: " + msgType);
+        }
+
+        _addCallbackBuffer(callbackBuffer, msgType);
+    }
+
+    private native final void _addCallbackBuffer(
+                                byte[] callbackBuffer, int msgType);
 
     private class EventHandler extends Handler
     {
@@ -735,7 +798,7 @@ public class Camera {
             PictureCallback jpeg) {
         takePicture(shutter, raw, null, jpeg);
     }
-    private native final void native_takePicture();
+    private native final void native_takePicture(int msgType);
 
     /**
      * Triggers an asynchronous image capture. The camera service will initiate
@@ -743,7 +806,8 @@ public class Camera {
      * The shutter callback occurs after the image is captured. This can be used
      * to trigger a sound to let the user know that image has been captured. The
      * raw callback occurs when the raw image data is available (NOTE: the data
-     * may be null if the hardware does not have enough memory to make a copy).
+     * will be null if there is no raw image callback buffer available or the
+     * raw image callback buffer is not large enough to hold the raw image).
      * The postview callback occurs when a scaled, fully processed postview
      * image is available (NOTE: not all hardware supports this). The jpeg
      * callback occurs when the compressed image is available. If the
@@ -762,6 +826,8 @@ public class Camera {
      * @param raw       the callback for raw (uncompressed) image data, or null
      * @param postview  callback with postview image data, may be null
      * @param jpeg      the callback for JPEG image data, or null
+     *
+     * @see #addRawImageCallbackBuffer(byte[])
      */
     public final void takePicture(ShutterCallback shutter, PictureCallback raw,
             PictureCallback postview, PictureCallback jpeg) {
@@ -769,7 +835,23 @@ public class Camera {
         mRawImageCallback = raw;
         mPostviewCallback = postview;
         mJpegCallback = jpeg;
-        native_takePicture();
+
+        // If callback is not set, do not send me callbacks.
+        int msgType = 0;
+        if (mShutterCallback != null) {
+            msgType |= CAMERA_MSG_SHUTTER;
+        }
+        if (mRawImageCallback != null) {
+            msgType |= CAMERA_MSG_RAW_IMAGE;
+        }
+        if (mPostviewCallback != null) {
+            msgType |= CAMERA_MSG_POSTVIEW_FRAME;
+        }
+        if (mJpegCallback != null) {
+            msgType |= CAMERA_MSG_COMPRESSED_IMAGE;
+        }
+
+        native_takePicture(msgType);
     }
 
     /**

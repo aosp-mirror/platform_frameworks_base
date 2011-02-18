@@ -66,16 +66,17 @@ namespace android {
 
 // msgType in notifyCallback and dataCallback functions
 enum {
-    CAMERA_MSG_ERROR            = 0x001,
-    CAMERA_MSG_SHUTTER          = 0x002,
-    CAMERA_MSG_FOCUS            = 0x004,
-    CAMERA_MSG_ZOOM             = 0x008,
-    CAMERA_MSG_PREVIEW_FRAME    = 0x010,
-    CAMERA_MSG_VIDEO_FRAME      = 0x020,
-    CAMERA_MSG_POSTVIEW_FRAME   = 0x040,
-    CAMERA_MSG_RAW_IMAGE        = 0x080,
-    CAMERA_MSG_COMPRESSED_IMAGE = 0x100,
-    CAMERA_MSG_ALL_MSGS         = 0x1FF
+    CAMERA_MSG_ERROR            = 0x0001,
+    CAMERA_MSG_SHUTTER          = 0x0002,
+    CAMERA_MSG_FOCUS            = 0x0004,
+    CAMERA_MSG_ZOOM             = 0x0008,
+    CAMERA_MSG_PREVIEW_FRAME    = 0x0010,
+    CAMERA_MSG_VIDEO_FRAME      = 0x0020,
+    CAMERA_MSG_POSTVIEW_FRAME   = 0x0040,
+    CAMERA_MSG_RAW_IMAGE        = 0x0080,
+    CAMERA_MSG_COMPRESSED_IMAGE = 0x0100,
+    CAMERA_MSG_RAW_IMAGE_NOTIFY = 0x0200,
+    CAMERA_MSG_ALL_MSGS         = 0xFFFF
 };
 
 // cmdType in sendCommand functions
@@ -207,7 +208,7 @@ public:
             status_t    cancelAutoFocus();
 
             // take a picture - picture returned from callback
-            status_t    takePicture();
+            status_t    takePicture(int msgType);
 
             // set preview/capture parameters - key/value pairs
             status_t    setParameters(const String8& params);
