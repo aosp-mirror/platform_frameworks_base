@@ -74,7 +74,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         mDatabase.setVersion(CURRENT_DATABASE_VERSION);
     }
 
-    @Suppress
     @SmallTest
     public void testEnableWriteAheadLogging() {
         mDatabase.disableWriteAheadLogging();
@@ -87,7 +86,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         assertEquals(pool, mDatabase.mConnectionPool);
     }
 
-    @Suppress
     @SmallTest
     public void testDisableWriteAheadLogging() {
         mDatabase.execSQL("create table test (i int);");
@@ -104,7 +102,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
         assertFalse(db.isOpen());
     }
 
-    @Suppress
     @SmallTest
     public void testCursorsWithClosedDbConnAfterDisableWriteAheadLogging() {
         mDatabase.disableWriteAheadLogging();
@@ -141,7 +138,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
     /**
      * a transaction should be started before a standalone-update/insert/delete statement
      */
-    @Suppress
     @SmallTest
     public void testStartXactBeforeUpdateSql() throws InterruptedException {
         runTestForStartXactBeforeUpdateSql(INSERT);
@@ -753,7 +749,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
      *
      * @throws InterruptedException
      */
-    @Suppress
     @SmallTest
     public void testTransactionAndWalInterplay1() throws InterruptedException {
         createTableAndClearCache();
@@ -812,7 +807,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
      * instead of mDatabase.beginTransactionNonExclusive(), use execSQL("BEGIN transaction")
      * and instead of mDatabase.endTransaction(), use execSQL("END");
      */
-    @Suppress
     @SmallTest
     public void testTransactionAndWalInterplay2() throws InterruptedException {
         createTableAndClearCache();
@@ -869,7 +863,6 @@ public class SQLiteDatabaseTest extends AndroidTestCase {
      * instead of committing the data, do rollback and make sure the data seen by the query
      * within the transaction is now gone.
      */
-    @Suppress
     @SmallTest
     public void testTransactionAndWalInterplay3() {
         createTableAndClearCache();
