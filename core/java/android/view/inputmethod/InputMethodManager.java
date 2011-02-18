@@ -762,8 +762,7 @@ public final class InputMethodManager {
      * {@link #RESULT_UNCHANGED_HIDDEN}, {@link #RESULT_SHOWN}, or
      * {@link #RESULT_HIDDEN}.
      */
-    public boolean showSoftInput(View view, int flags,
-            ResultReceiver resultReceiver) {
+    public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
         checkFocus();
         synchronized (mH) {
             if (mServedView != view && (mServedView == null
