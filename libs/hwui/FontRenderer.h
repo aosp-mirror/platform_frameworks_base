@@ -138,6 +138,11 @@ public:
         mGammaTable = gammaTable;
     }
 
+    void setAttributeBindingSlots(int positionSlot, int texCoordSlot) {
+        mPositionAttrSlot = positionSlot;
+        mTexcoordAttrSlot = texCoordSlot;
+    }
+
     void setFont(SkPaint* paint, uint32_t fontId, float fontSize);
     bool renderText(SkPaint* paint, const Rect* clip, const char *text, uint32_t startIndex,
             uint32_t len, int numGlyphs, int x, int y, Rect* bounds);
@@ -262,6 +267,9 @@ protected:
     uint32_t mMaxNumberOfQuads;
 
     uint32_t mIndexBufferID;
+
+    int32_t mPositionAttrSlot;
+    int32_t mTexcoordAttrSlot;
 
     const Rect* mClip;
     Rect* mBounds;
