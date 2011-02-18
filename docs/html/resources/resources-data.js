@@ -496,6 +496,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new'],
+    path: 'samples/Renderscript/index.html',
+    title: {
+      en: 'Renderscript'
+    },
+    description: {
+      en: 'A set of samples that demonstrate how to use various features of the Renderscript APIs.'
+    }
+  },
+  {
     tags: ['sample', 'accountsync'],
     path: 'samples/SampleSyncAdapter/index.html',
     title: {
