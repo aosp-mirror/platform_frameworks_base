@@ -35,6 +35,7 @@
 #include "private/android_filesystem_config.h"
 
 #include "MtpServer.h"
+#include "MtpStorage.h"
 
 using namespace android;
 
@@ -56,20 +57,22 @@ class MtpThread : public Thread {
 private:
     MtpDatabase*    mDatabase;
     MtpServer*      mServer;
-    String8         mStoragePath;
-    uint64_t        mReserveSpace;
+    MtpStorage*     mStorage;
     Mutex           mMutex;
     bool            mUsePtp;
     int             mFd;
 
 public:
-    MtpThread(MtpDatabase* database, const char* storagePath, uint64_t reserveSpace)
+    MtpThread(MtpDatabase* database, MtpStorage* storage)
         :   mDatabase(database),
             mServer(NULL),
-            mStoragePath(storagePath),
-            mReserveSpace(reserveSpace),
+            mStorage(storage),
             mFd(-1)
     {
+    }
+
+    virtual ~MtpThread() {
+        delete mStorage;
     }
 
     void setPtpMode(bool usePtp) {
@@ -86,7 +89,7 @@ public:
                     (mUsePtp ? MTP_INTERFACE_MODE_PTP : MTP_INTERFACE_MODE_MTP));
 
             mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
-            mServer->addStorage(mStoragePath, mReserveSpace);
+            mServer->addStorage(mStorage);
 
             mMutex.unlock();
             mServer->run();
@@ -137,7 +140,8 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase,
     const char *storagePathStr = env->GetStringUTFChars(storagePath, NULL);
 
     // create the thread and assign it to the smart pointer
-    sThread = new MtpThread(database, storagePathStr, reserveSpace);
+    MtpStorage* storage = new MtpStorage(MTP_FIRST_STORAGE_ID, storagePathStr, reserveSpace);
+    sThread = new MtpThread(database, storage);
 
     env->ReleaseStringUTFChars(storagePath, storagePathStr);
 #endif
