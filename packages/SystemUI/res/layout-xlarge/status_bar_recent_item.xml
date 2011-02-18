@@ -58,26 +58,33 @@
     />
 
     <TextView android:id="@+id/app_label"
-        android:layout_width="113dip"
+        android:layout_width="97dip"
         android:layout_height="wrap_content"
         android:textSize="18dip"
-        android:fadingEdge="none"
-        android:fadingEdgeLength="0dp"
+        android:fadingEdge="horizontal"
+        android:fadingEdgeLength="10dip"
         android:scrollHorizontally="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="16dip"
         android:layout_marginTop="32dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
     />
 
     <TextView android:id="@+id/app_description"
-        android:layout_width="wrap_content"
+        android:layout_width="97dip"
         android:layout_height="wrap_content"
         android:textSize="18dip"
+        android:fadingEdge="horizontal"
+        android:fadingEdgeLength="10dip"
+        android:scrollHorizontally="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="16dip"
         android:layout_marginTop="61dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
     />
 
 </RelativeLayout>
