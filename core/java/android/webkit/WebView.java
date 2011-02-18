@@ -5508,8 +5508,8 @@ public class WebView extends AbsoluteLayout
                     }
                 }
                 // Trigger the link
-                if (mTouchMode == TOUCH_INIT_MODE
-                        || mTouchMode == TOUCH_DOUBLE_TAP_MODE) {
+                if (!mSelectingText && (mTouchMode == TOUCH_INIT_MODE
+                        || mTouchMode == TOUCH_DOUBLE_TAP_MODE)) {
                     mPrivateHandler.sendEmptyMessageDelayed(
                             SWITCH_TO_SHORTPRESS, TAP_TIMEOUT);
                     mPrivateHandler.sendEmptyMessageDelayed(
