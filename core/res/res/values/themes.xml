@@ -105,7 +105,7 @@
         <item name="listChoiceIndicatorSingle">@android:drawable/btn_radio</item>
         <item name="listChoiceIndicatorMultiple">@android:drawable/btn_check</item>
 
-        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background</item>
 
@@ -358,7 +358,7 @@
         <item name="textColorLinkInverse">@android:color/link_text_dark</item>
         
         <item name="editTextColor">?android:attr/textColorPrimary</item>
-        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selected_background_light</item>
+        <item name="listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>
 
         <item name="activatedBackgroundIndicator">@android:drawable/activated_background_light</item>
         <item name="quickContactBadgeOverlay">@android:drawable/quickcontact_badge_overlay_light</item>
