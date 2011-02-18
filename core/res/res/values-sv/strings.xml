@@ -191,11 +191,11 @@
     <string name="permdesc_writeSms" msgid="6299398896177548095">"Tillåter att program skriver till SMS-meddelanden som lagrats på din telefon eller SIM-kort. Skadliga program kan radera dina meddelanden."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"ta emot WAP"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Tillåter att program tar emot och bearbetar WAP-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem utan att visa dem för dig."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"hämta program som körs"</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillåter att program hämtar information om uppgifter som körs och har körts. Skadliga program kan upptäcka privat information om andra program."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"byt ordning på program som körs"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillåter att ett program flyttar uppgifter till förgrunden eller bakgrunden. Skadliga program kan tvinga sig till förgrunden utan att du kan styra det."</string>
-    <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktivera felsökning av program"</string>
+    <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktivera felsökning av appar"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillåter att ett program aktiverar felsökning för ett annat program. Skadliga program kan använda detta för att avsluta andra program."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"ändra dina gränssnittsinställningar"</string>
     <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillåter att ett program ändrar den aktuella konfigurationen, till exempel språk eller övergripande teckenformat."</string>
@@ -249,11 +249,11 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga program behöver aldrig göra detta."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ändra bildskärmens rikting"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Tillåter att ett program när som helst ändrar skärmens rotering. Behövs inte för vanliga program."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"skicka Linux-signaler till program"</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"skicka Linux-signaler till appar"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Tillåter att programmet begär att den angivna signalen skickas till alla beständiga processer."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"se till att programmet alltid körs"</string>
     <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Tillåter att ett program gör vissa delar beständiga så att systemet inte kan använda det för andra program."</string>
-    <string name="permlab_deletePackages" msgid="3343439331576348805">"ta bort program"</string>
+    <string name="permlab_deletePackages" msgid="3343439331576348805">"ta bort appar"</string>
     <string name="permdesc_deletePackages" msgid="3634943677518723314">"Tillåter att ett program tar bort Android-paket. Skadliga program kan använda detta för att ta bort viktiga program."</string>
     <string name="permlab_clearAppUserData" msgid="2192134353540277878">"ta bort de andra programmens uppgifter"</string>
     <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Tillåter att ett program tar bort användardata."</string>
@@ -263,7 +263,7 @@
     <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Tillåter att ett program hämtar kod, data och cachestorlekar"</string>
     <string name="permlab_installPackages" msgid="335800214119051089">"installera program direkt"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Tillåter att ett program installerar nya eller uppdaterade Android-paket. Skadliga program kan använda detta för att lägga till nya program med godtyckliga och starka behörigheter."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"ta bort cacheinformation för alla program"</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"ta bort cacheinformation för alla appar"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillåter att ett program frigör lagringsutrymme i telefonen genom att ta bort filer i programmets katalog för cachelagring. Åtkomst är mycket begränsad, vanligtvis till systemprocesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flytta programresurser"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Tillåter att ett program flyttar programresurser från interna till externa medier och tvärt om."</string>
@@ -782,7 +782,7 @@
     <item quantity="other" msgid="7915895323644292768">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
   </plurals>
     <string name="select_character" msgid="3365550120617701745">"Infoga tecken"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Okänt program"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Okänd app"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Skickar SMS"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Flera SMS-meddelanden skickas. Tryck på OK om du vill fortsätta eller på Avbryt om du vill avsluta sändningen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>

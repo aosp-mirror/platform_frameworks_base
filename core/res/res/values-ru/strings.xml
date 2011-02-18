@@ -547,7 +547,7 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Экран заблокирован."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Нажмите \"Меню\", чтобы разблокировать экран или вызвать службу экстренной помощи."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Для разблокировки нажмите \"Меню\"."</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Для разблокировки введите графический ключ"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Введите графический ключ"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Экстренный вызов"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вернуться к вызову"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правильно!"</string>
@@ -874,17 +874,17 @@
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхр."</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Спец. возможности"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Фоновый рисунок"</string>
-    <string name="chooser_wallpaper" msgid="7873476199295190279">"Изменить фоновый рисунок"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Сменить обои"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Протокол PPTP"</string>
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Протокол L2TP"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN (на основе предв. общ. ключа)"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN (на основе сертификата)"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN с использованием общего ключа"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN с использованием сертификатов"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выбрать файл"</string>
     <string name="reset" msgid="2448168080964209908">"Сбросить"</string>
     <string name="submit" msgid="1602335572089911941">"Отправить"</string>
     <string name="description_star" msgid="2654319874908576133">"избранное"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Режим громкой связи включен"</string>
-    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Выберите для выхода из режима громкой связи."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Включен режим \"Штурман\""</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Чтобы закрыть приложение, нажмите здесь."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"USB-модем или точка доступа Wi-Fi активны"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"Нажмите для настройки"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Активная передача данных"</string>
