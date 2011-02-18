@@ -1814,42 +1814,7 @@ final class WebViewCore {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
         }
-        int width = w;
-        if (mSettings.getUseWideViewPort()) {
-            if (mViewportWidth == -1) {
-                if (mSettings.getLayoutAlgorithm() ==
-                        WebSettings.LayoutAlgorithm.NORMAL || mSettings.getUseFixedViewport()) {
-                    width = WebView.DEFAULT_VIEWPORT_WIDTH;
-                } else {
-                    /*
-                     * if a page's minimum preferred width is wider than the
-                     * given "w", use it instead to get better layout result. If
-                     * we start a page with MAX_ZOOM_WIDTH, "w" will be always
-                     * wider. If we start a page with screen width, due to the
-                     * delay between {@link #didFirstLayout} and
-                     * {@link #viewSizeChanged},
-                     * {@link #nativeGetContentMinPrefWidth} will return a more
-                     * accurate value than initial 0 to result a better layout.
-                     * In the worse case, the native width will be adjusted when
-                     * next zoom or screen orientation change happens.
-                     */
-                    width = Math.min(WebView.sMaxViewportWidth, Math.max(w,
-                            Math.max(WebView.DEFAULT_VIEWPORT_WIDTH,
-                                    nativeGetContentMinPrefWidth())));
-                }
-            } else if (mViewportWidth > 0) {
-                if (mSettings.getUseFixedViewport()) {
-                    // Use website specified or desired fixed viewport width.
-                    width = mViewportWidth;
-                } else {
-                    width = Math.max(w, mViewportWidth);
-                }
-            } else if (mSettings.getUseFixedViewport()) {
-                width = mWebView.getViewWidth();
-            } else {
-                width = textwrapWidth;
-            }
-        }
+        int width = calculateWindowWidth(w, textwrapWidth);
         int height = h;
         if (width != w) {
             float heightWidthRatio = data.mHeightWidthRatio;
@@ -1872,6 +1837,47 @@ final class WebViewCore {
         }
         mEventHub.sendMessage(Message.obtain(null,
                 EventHub.UPDATE_CACHE_AND_TEXT_ENTRY));
+    }
+
+    // Calculate width to be used in webkit window.
+    private int calculateWindowWidth(int viewWidth, int textwrapWidth) {
+        int width = viewWidth;
+        if (mSettings.getUseWideViewPort()) {
+            if (mViewportWidth == -1) {
+                if (mSettings.getLayoutAlgorithm() ==
+                        WebSettings.LayoutAlgorithm.NORMAL || mSettings.getUseFixedViewport()) {
+                    width = WebView.DEFAULT_VIEWPORT_WIDTH;
+                } else {
+                    /*
+                     * if a page's minimum preferred width is wider than the
+                     * given "w", use it instead to get better layout result. If
+                     * we start a page with MAX_ZOOM_WIDTH, "w" will be always
+                     * wider. If we start a page with screen width, due to the
+                     * delay between {@link #didFirstLayout} and
+                     * {@link #viewSizeChanged},
+                     * {@link #nativeGetContentMinPrefWidth} will return a more
+                     * accurate value than initial 0 to result a better layout.
+                     * In the worse case, the native width will be adjusted when
+                     * next zoom or screen orientation change happens.
+                     */
+                    width = Math.min(WebView.sMaxViewportWidth, Math.max(viewWidth,
+                            Math.max(WebView.DEFAULT_VIEWPORT_WIDTH,
+                                    nativeGetContentMinPrefWidth())));
+                }
+            } else if (mViewportWidth > 0) {
+                if (mSettings.getUseFixedViewport()) {
+                    // Use website specified or desired fixed viewport width.
+                    width = mViewportWidth;
+                } else {
+                    width = Math.max(viewWidth, mViewportWidth);
+                }
+            } else if (mSettings.getUseFixedViewport()) {
+                width = mWebView.getViewWidth();
+            } else {
+                width = textwrapWidth;
+            }
+        }
+        return width;
     }
 
     private void sendUpdateTextEntry() {
@@ -2370,7 +2376,7 @@ final class WebViewCore {
                 // to syncing an incorrect height.
                 data.mHeight = mCurrentViewHeight == 0 ?
                         Math.round(mWebView.getViewHeight() / data.mScale)
-                        : mCurrentViewHeight * data.mWidth / viewportWidth;
+                        : Math.round((float) mCurrentViewHeight * data.mWidth / viewportWidth);
                 data.mTextWrapWidth = Math.round(webViewWidth
                         / mInitialViewState.mTextWrapScale);
                 data.mIgnoreHeight = false;
