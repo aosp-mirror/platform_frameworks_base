@@ -25,7 +25,7 @@ Differences Report &raquo;</a> </li>
 
 <h2>See Also</h2>
 <ol>
-  <li><a href="{@docRoot}sdk/preview/start.html">Getting Started</a></li>
+  <li><a href="{@docRoot}sdk/android-3.0-optimize.html">Optimizing Apps for Android 3.0</a></li>
 </ol>
 
 </div>
@@ -47,6 +47,10 @@ href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
 <p>For a high-level introduction to Android {@sdkPlatformVersion}, see the <a
 href="{@docRoot}sdk/android-{@sdkPlatformVersion}-highlights.html">Platform
 Highlights</a>.</p>
+
+<p>Also see the <a href="{@docRoot}sdk/android-3.0-optimize.html">Optimizing Apps for Android
+3.0</a> document for information about how to optimize your existing applications for Android 3.0
+devices, even if you want to remain compatible with previous versions.</p>
 
 
 
