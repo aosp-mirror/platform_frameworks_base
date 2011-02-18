@@ -141,8 +141,22 @@ public class MediaFile {
 
     private static boolean isWMAEnabled() {
         List<AudioDecoder> decoders = DecoderCapabilities.getAudioDecoders();
-        for (AudioDecoder decoder: decoders) {
+        int count = decoders.size();
+        for (int i = 0; i < count; i++) {
+            AudioDecoder decoder = decoders.get(i);
             if (decoder == AudioDecoder.AUDIO_DECODER_WMA) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isWMVEnabled() {
+        List<VideoDecoder> decoders = DecoderCapabilities.getVideoDecoders();
+        int count = decoders.size();
+        for (int i = 0; i < count; i++) {
+            VideoDecoder decoder = decoders.get(i);
+            if (decoder == VideoDecoder.VIDEO_DECODER_WMV) {
                 return true;
             }
         }
@@ -184,8 +198,10 @@ public class MediaFile {
         addFileType("WEBM", FILE_TYPE_MKV, "video/x-matroska");
         addFileType("TS", FILE_TYPE_MP2TS, "video/mp2ts");
 
-        addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
-        addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
+        if (isWMVEnabled()) {
+            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
+            addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
+        }
 
         addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg", MtpConstants.FORMAT_EXIF_JPEG);
         addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg", MtpConstants.FORMAT_EXIF_JPEG);
