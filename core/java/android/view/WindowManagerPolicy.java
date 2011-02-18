@@ -754,6 +754,24 @@ public interface WindowManagerPolicy {
     void exitKeyguardSecurely(OnKeyguardExitResult callback);
 
     /**
+     * isKeyguardLocked
+     *
+     * Return whether the keyguard is currently locked.
+     *
+     * @return true if in keyguard is locked.
+     */
+    public boolean isKeyguardLocked();
+
+    /**
+     * isKeyguardSecure
+     *
+     * Return whether the keyguard requires a password to unlock.
+     *
+     * @return true if in keyguard is secure.
+     */
+    public boolean isKeyguardSecure();
+
+    /**
      * inKeyguardRestrictedKeyInputMode
      *
      * if keyguard screen is showing or in restricted key input mode (i.e. in
