@@ -6,8 +6,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />    
     <uses-sdk android:minSdkVersion="11" />
     <application android:label="Image Processing">
-        <activity android:name="ImageProcessingActivity"
-                  android:screenOrientation="portrait">
+        <activity android:name="ImageProcessingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
