@@ -28,6 +28,7 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
@@ -67,6 +68,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.Prefs;
 import com.android.systemui.recent.RecentApplicationsActivity;
 
 public class TabletStatusBar extends StatusBar implements
@@ -105,13 +107,16 @@ public class TabletStatusBar extends StatusBar implements
     IWindowManager mWindowManager;
 
     // tracking all current notifications
-    private NotificationData mNotns = new NotificationData();
+    private NotificationData mNotificationData = new NotificationData();
 
     TabletStatusBarView mStatusBarView;
     View mNotificationArea;
     View mNotificationTrigger;
     NotificationIconArea mNotificationIconArea;
     View mNavigationArea;
+
+    boolean mNotificationDNDMode;
+    NotificationData.Entry mNotificationDNDDummyEntry;
 
     ImageView mBackButton;
     View mHomeButton;
@@ -489,24 +494,42 @@ public class TabletStatusBar extends StatusBar implements
             switch (m.what) {
                 case MSG_OPEN_NOTIFICATION_PEEK:
                     if (DEBUG) Slog.d(TAG, "opening notification peek window; arg=" + m.arg1);
+
                     if (m.arg1 >= 0) {
-                        final int N = mNotns.size();
-                        if (mNotificationPeekIndex >= 0 && mNotificationPeekIndex < N) {
-                            NotificationData.Entry entry = mNotns.get(N-1-mNotificationPeekIndex);
-                            entry.icon.setBackgroundColor(0);
-                            mNotificationPeekIndex = -1;
-                            mNotificationPeekKey = null;
+                        final int N = mNotificationData.size();
+
+                        if (!mNotificationDNDMode) {
+                            if (mNotificationPeekIndex >= 0 && mNotificationPeekIndex < N) {
+                                NotificationData.Entry entry = mNotificationData.get(N-1-mNotificationPeekIndex);
+                                entry.icon.setBackgroundColor(0);
+                                mNotificationPeekIndex = -1;
+                                mNotificationPeekKey = null;
+                            }
                         }
 
                         final int peekIndex = m.arg1;
                         if (peekIndex < N) {
                             //Slog.d(TAG, "loading peek: " + peekIndex);
-                            NotificationData.Entry entry = mNotns.get(N-1-peekIndex);
+                            NotificationData.Entry entry = 
+                                mNotificationDNDMode
+                                    ? mNotificationDNDDummyEntry
+                                    : mNotificationData.get(N-1-peekIndex);
                             NotificationData.Entry copy = new NotificationData.Entry(
                                     entry.key,
                                     entry.notification,
                                     entry.icon);
                             inflateViews(copy, mNotificationPeekRow);
+
+                            if (mNotificationDNDMode) {
+                                copy.content.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        SharedPreferences.Editor editor = Prefs.edit(mContext);
+                                        editor.putBoolean(Prefs.DO_NOT_DISTURB_PREF, false);
+                                        editor.apply();
+                                        animateCollapse();
+                                    }
+                                });
+                            }
 
                             entry.icon.setBackgroundColor(0x20FFFFFF);
 
@@ -530,9 +553,13 @@ public class TabletStatusBar extends StatusBar implements
                     if (DEBUG) Slog.d(TAG, "closing notification peek window");
                     mNotificationPeekWindow.setVisibility(View.GONE);
                     mNotificationPeekRow.removeAllViews();
-                    final int N = mNotns.size();
+
+                    final int N = mNotificationData.size();
                     if (mNotificationPeekIndex >= 0 && mNotificationPeekIndex < N) {
-                        NotificationData.Entry entry = mNotns.get(N-1-mNotificationPeekIndex);
+                        NotificationData.Entry entry = 
+                            mNotificationDNDMode
+                                ? mNotificationDNDDummyEntry
+                                : mNotificationData.get(N-1-mNotificationPeekIndex);
                         entry.icon.setBackgroundColor(0);
                     }
 
@@ -643,7 +670,7 @@ public class TabletStatusBar extends StatusBar implements
     public void updateNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ") // TODO");
 
-        final NotificationData.Entry oldEntry = mNotns.findByKey(key);
+        final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
         if (oldEntry == null) {
             Slog.w(TAG, "updateNotification for unknown key: " + key);
             return;
@@ -781,14 +808,15 @@ public class TabletStatusBar extends StatusBar implements
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
-                // synchronize with current shadow state
-                mNotificationIconArea.setVisibility(View.GONE);
                 mTicker.halt();
             } else {
                 Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: no");
-                // synchronize with current shadow state
-                mNotificationIconArea.setVisibility(View.VISIBLE);
             }
+            // refresh icons to show either notifications or the DND message
+            mNotificationDNDMode = Prefs.read(mContext)
+                        .getBoolean(Prefs.DO_NOT_DISTURB_PREF, Prefs.DO_NOT_DISTURB_DEFAULT);
+            Slog.d(TAG, "DND: " + mNotificationDNDMode);
+            reloadAllNotificationIcons();
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
                 mTicker.halt();
@@ -947,7 +975,7 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     private void setAreThereNotifications() {
-        final boolean hasClearable = mNotns.hasClearableItems();
+        final boolean hasClearable = mNotificationData.hasClearableItems();
     }
 
     /**
@@ -1081,7 +1109,7 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     StatusBarNotification removeNotificationViews(IBinder key) {
-        NotificationData.Entry entry = mNotns.remove(key);
+        NotificationData.Entry entry = mNotificationData.remove(key);
         if (entry == null) {
             Slog.w(TAG, "removeNotification for unknown key: " + key);
             return null;
@@ -1192,7 +1220,7 @@ public class TabletStatusBar extends StatusBar implements
         }
 
         // Add the icon.
-        int pos = mNotns.add(entry);
+        int pos = mNotificationData.add(entry);
         if (DEBUG) {
             Slog.d(TAG, "addNotificationViews: added at " + pos);
         }
@@ -1216,7 +1244,31 @@ public class TabletStatusBar extends StatusBar implements
         final LinearLayout.LayoutParams params
             = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
 
-        int N = mNotns.size();
+        // alternate behavior in DND mode
+        if (mNotificationDNDMode && mIconLayout.getChildCount() == 0) {
+            final StatusBarIconView iconView = new StatusBarIconView(mContext, "_dnd");
+            iconView.setImageResource(R.drawable.ic_notification_dnd);
+            iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            iconView.setPadding(mIconHPadding, 0, mIconHPadding, 0);
+
+            final Notification dndNotification = new Notification.Builder(mContext)
+                .setContentTitle(mContext.getText(R.string.notifications_off_title))
+                .setContentText(mContext.getText(R.string.notifications_off_text))
+                .setSmallIcon(R.drawable.ic_notification_dnd)
+                .setOngoing(true)
+                .getNotification();
+
+            mNotificationDNDDummyEntry = new NotificationData.Entry(
+                    null,
+                    new StatusBarNotification("", 0, "", 0, 0, dndNotification),
+                    iconView);
+
+            mIconLayout.addView(iconView, params);
+
+            return;
+        }
+
+        int N = mNotificationData.size();
 
         if (DEBUG) {
             Slog.d(TAG, "refreshing icons: " + N + " notifications, mIconLayout=" + mIconLayout);
@@ -1231,7 +1283,7 @@ public class TabletStatusBar extends StatusBar implements
                         MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE : MAX_NOTIFICATION_ICONS;
         for (int i=0; i< maxNotificationIconsCount; i++) {
             if (i>=N) break;
-            toShow.add(mNotns.get(N-i-1).icon);
+            toShow.add(mNotificationData.get(N-i-1).icon);
         }
 
         ArrayList<View> toRemove = new ArrayList<View>();
@@ -1258,12 +1310,12 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     private void loadNotificationPanel() {
-        int N = mNotns.size();
+        int N = mNotificationData.size();
 
         ArrayList<View> toShow = new ArrayList<View>();
 
         for (int i=0; i<N; i++) {
-            View row = mNotns.get(N-i-1).row;
+            View row = mNotificationData.get(N-i-1).row;
             toShow.add(row);
         }
 
