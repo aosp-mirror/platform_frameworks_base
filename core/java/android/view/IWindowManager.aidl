@@ -100,6 +100,8 @@ interface IWindowManager
     void disableKeyguard(IBinder token, String tag);
     void reenableKeyguard(IBinder token);
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
+    boolean isKeyguardLocked();
+    boolean isKeyguardSecure();
     boolean inKeyguardRestrictedInputMode();
 
     void closeSystemDialogs(String reason);
