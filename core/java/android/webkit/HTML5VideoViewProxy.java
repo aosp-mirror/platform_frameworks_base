@@ -46,6 +46,8 @@ import android.widget.VideoView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -344,7 +346,7 @@ class HTML5VideoViewProxy extends Handler
         private static RequestQueue mRequestQueue;
         private static int mQueueRefCount = 0;
         // The poster URL
-        private String mUrl;
+        private URL mUrl;
         // The proxy we're doing this for.
         private final HTML5VideoViewProxy mProxy;
         // The poster bytes. We only touch this on the network thread.
@@ -359,14 +361,30 @@ class HTML5VideoViewProxy extends Handler
         private Handler mHandler;
 
         public PosterDownloader(String url, HTML5VideoViewProxy proxy) {
-            mUrl = url;
+            try {
+                mUrl = new URL(url);
+            } catch (MalformedURLException e) {
+                mUrl = null;
+            }
             mProxy = proxy;
             mHandler = new Handler();
         }
         // Start the download. Called on WebCore thread.
         public void start() {
             retainQueue();
-            mRequestHandle = mRequestQueue.queueRequest(mUrl, "GET", null, this, null, 0);
+
+            if (mUrl == null) {
+                return;
+            }
+
+            // Only support downloading posters over http/https.
+            // FIXME: Add support for other schemes. WebKit seems able to load
+            // posters over other schemes e.g. file://, but gets the dimensions wrong.
+            String protocol = mUrl.getProtocol();
+            if ("http".equals(protocol) || "https".equals(protocol)) {
+                mRequestHandle = mRequestQueue.queueRequest(mUrl.toString(), "GET", null,
+                        this, null, 0);
+            }
         }
         // Cancel the download if active and release the queue. Called on WebCore thread.
         public void cancelAndReleaseQueue() {
@@ -405,12 +423,16 @@ class HTML5VideoViewProxy extends Handler
                 cleanup();
             } else if (mStatusCode >= 300 && mStatusCode < 400) {
                 // We have a redirect.
-                mUrl = mHeaders.getLocation();
+                try {
+                    mUrl = new URL(mHeaders.getLocation());
+                } catch (MalformedURLException e) {
+                    mUrl = null;
+                }
                 if (mUrl != null) {
                     mHandler.post(new Runnable() {
                        public void run() {
                            if (mRequestHandle != null) {
-                               mRequestHandle.setupRedirect(mUrl, mStatusCode,
+                               mRequestHandle.setupRedirect(mUrl.toString(), mStatusCode,
                                        new HashMap<String, String>());
                            }
                        }
