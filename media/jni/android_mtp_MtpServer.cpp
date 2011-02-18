@@ -60,6 +60,7 @@ private:
     MtpStorage*     mStorage;
     Mutex           mMutex;
     bool            mUsePtp;
+    bool            mLocked;
     int             mFd;
 
 public:
@@ -67,6 +68,8 @@ public:
         :   mDatabase(database),
             mServer(NULL),
             mStorage(storage),
+            mUsePtp(false),
+            mLocked(false),
             mFd(-1)
     {
     }
@@ -81,6 +84,20 @@ public:
         mMutex.unlock();
     }
 
+    void setLocked(bool locked) {
+        mMutex.lock();
+        if (locked != mLocked) {
+            if (mServer) {
+                if (locked)
+                    mServer->removeStorage(mStorage);
+                else
+                    mServer->addStorage(mStorage);
+            }
+            mLocked = locked;
+        }
+        mMutex.unlock();
+    }
+
     virtual bool threadLoop() {
         mMutex.lock();
         mFd = open("/dev/mtp_usb", O_RDWR);
@@ -89,7 +106,8 @@ public:
                     (mUsePtp ? MTP_INTERFACE_MODE_PTP : MTP_INTERFACE_MODE_MTP));
 
             mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
-            mServer->addStorage(mStorage);
+            if (!mLocked)
+                mServer->addStorage(mStorage);
 
             mMutex.unlock();
             mServer->run();
@@ -199,6 +217,16 @@ android_mtp_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
 #endif
 }
 
+static void
+android_mtp_MtpServer_set_locked(JNIEnv *env, jobject thiz, jboolean locked)
+{
+#ifdef HAVE_ANDROID_OS
+    MtpThread *thread = sThread.get();
+    if (thread)
+        thread->setLocked(locked);
+#endif
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -209,6 +237,7 @@ static JNINativeMethod gMethods[] = {
     {"native_send_object_added",    "(I)V", (void *)android_mtp_MtpServer_send_object_added},
     {"native_send_object_removed",  "(I)V", (void *)android_mtp_MtpServer_send_object_removed},
     {"native_set_ptp_mode",         "(Z)V", (void *)android_mtp_MtpServer_set_ptp_mode},
+    {"native_set_locked",           "(Z)V", (void *)android_mtp_MtpServer_set_locked},
 };
 
 static const char* const kClassPathName = "android/mtp/MtpServer";
