@@ -47,8 +47,8 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mRUIMLockedRegistrants = new RegistrantList();
     protected RegistrantList mNVReadyRegistrants = new RegistrantList();
     protected RegistrantList mCallStateRegistrants = new RegistrantList();
-    protected RegistrantList mNetworkStateRegistrants = new RegistrantList();
-    protected RegistrantList mDataConnectionRegistrants = new RegistrantList();
+    protected RegistrantList mVoiceNetworkStateRegistrants = new RegistrantList();
+    protected RegistrantList mDataNetworkStateRegistrants = new RegistrantList();
     protected RegistrantList mRadioTechnologyChangedRegistrants = new RegistrantList();
     protected RegistrantList mIccStatusChangedRegistrants = new RegistrantList();
     protected RegistrantList mVoicePrivacyOnRegistrants = new RegistrantList();
@@ -65,6 +65,9 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mT53AudCntrlInfoRegistrants = new RegistrantList();
     protected RegistrantList mRingbackToneRegistrants = new RegistrantList();
     protected RegistrantList mResendIncallMuteRegistrants = new RegistrantList();
+    protected RegistrantList mCdmaSubscriptionChangedRegistrants = new RegistrantList();
+    protected RegistrantList mCdmaPrlChangedRegistrants = new RegistrantList();
+    protected RegistrantList mExitEmergencyCallbackModeRegistrants = new RegistrantList();
 
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
@@ -293,24 +296,24 @@ public abstract class BaseCommands implements CommandsInterface {
         mCallStateRegistrants.remove(h);
     }
 
-    public void registerForNetworkStateChanged(Handler h, int what, Object obj) {
+    public void registerForVoiceNetworkStateChanged(Handler h, int what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        mNetworkStateRegistrants.add(r);
+        mVoiceNetworkStateRegistrants.add(r);
     }
 
-    public void unregisterForNetworkStateChanged(Handler h) {
-        mNetworkStateRegistrants.remove(h);
+    public void unregisterForVoiceNetworkStateChanged(Handler h) {
+        mVoiceNetworkStateRegistrants.remove(h);
     }
 
-    public void registerForDataStateChanged(Handler h, int what, Object obj) {
+    public void registerForDataNetworkStateChanged(Handler h, int what, Object obj) {
         Registrant r = new Registrant (h, what, obj);
 
-        mDataConnectionRegistrants.add(r);
+        mDataNetworkStateRegistrants.add(r);
     }
 
-    public void unregisterForDataStateChanged(Handler h) {
-        mDataConnectionRegistrants.remove(h);
+    public void unregisterForDataNetworkStateChanged(Handler h) {
+        mDataNetworkStateRegistrants.remove(h);
     }
 
     public void registerForRadioTechnologyChanged(Handler h, int what, Object obj) {
@@ -586,6 +589,39 @@ public abstract class BaseCommands implements CommandsInterface {
 
     public void unregisterForResendIncallMute(Handler h) {
         mResendIncallMuteRegistrants.remove(h);
+    }
+
+    @Override
+    public void registerForCdmaSubscriptionChanged(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mCdmaSubscriptionChangedRegistrants.add(r);
+    }
+
+    @Override
+    public void unregisterForCdmaSubscriptionChanged(Handler h) {
+        mCdmaSubscriptionChangedRegistrants.remove(h);
+    }
+
+    @Override
+    public void registerForCdmaPrlChanged(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mCdmaPrlChangedRegistrants.add(r);
+    }
+
+    @Override
+    public void unregisterForCdmaPrlChanged(Handler h) {
+        mCdmaPrlChangedRegistrants.remove(h);
+    }
+
+    @Override
+    public void registerForExitEmergencyCallbackMode(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mExitEmergencyCallbackModeRegistrants.add(r);
+    }
+
+    @Override
+    public void unregisterForExitEmergencyCallbackMode(Handler h) {
+        mExitEmergencyCallbackModeRegistrants.remove(h);
     }
 
     //***** Protected Methods

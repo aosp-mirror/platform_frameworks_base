@@ -79,6 +79,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     private int gprsState = ServiceState.STATE_OUT_OF_SERVICE;
     private int newGPRSState = ServiceState.STATE_OUT_OF_SERVICE;
+    private int mMaxDataCalls = 1;
+    private int mNewMaxDataCalls = 1;
+    private int mReasonDataDenied = -1;
+    private int mNewReasonDataDenied = -1;
 
     /**
      *  Values correspond to ServiceStateTracker.DATA_ACCESS_ definitions.
@@ -212,7 +216,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         cm.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
         cm.registerForRadioStateChanged(this, EVENT_RADIO_STATE_CHANGED, null);
 
-        cm.registerForNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED, null);
+        cm.registerForVoiceNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED, null);
         cm.setOnNITZTime(this, EVENT_NITZ_TIME, null);
         cm.setOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, null);
         cm.setOnRestrictedStateChanged(this, EVENT_RESTRICTED_STATE_CHANGED, null);
@@ -248,7 +252,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         // Unregister for all events.
         cm.unregisterForAvailable(this);
         cm.unregisterForRadioStateChanged(this);
-        cm.unregisterForNetworkStateChanged(this);
+        cm.unregisterForVoiceNetworkStateChanged(this);
         cm.unregisterForSIMReady(this);
 
         phone.mSIMRecords.unregisterForRecordsLoaded(this);
@@ -491,7 +495,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 ar = (AsyncResult) msg.obj;
 
                 if (ar.exception == null) {
-                    cm.getRegistrationState(obtainMessage(EVENT_GET_LOC_DONE, null));
+                    cm.getVoiceRegistrationState(obtainMessage(EVENT_GET_LOC_DONE, null));
                 }
                 break;
 
@@ -683,6 +687,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     int lac = -1;
                     int cid = -1;
                     int regState = -1;
+                    int reasonRegStateDenied = -1;
                     int psc = -1;
                     if (states.length > 0) {
                         try {
@@ -724,6 +729,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
                     int type = 0;
                     regState = -1;
+                    mNewReasonDataDenied = -1;
+                    mNewMaxDataCalls = 1;
                     if (states.length > 0) {
                         try {
                             regState = Integer.parseInt(states[0]);
@@ -731,6 +738,12 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                             // states[3] (if present) is the current radio technology
                             if (states.length >= 4 && states[3] != null) {
                                 type = Integer.parseInt(states[3]);
+                            }
+                            if ((states.length >= 5 ) && (regState == 3)) {
+                                mNewReasonDataDenied = Integer.parseInt(states[4]);
+                            }
+                            if (states.length >= 6) {
+                                mNewMaxDataCalls = Integer.parseInt(states[5]);
                             }
                         } catch (NumberFormatException ex) {
                             Log.w(LOG_TAG, "error parsing GprsRegistrationState: " + ex);
@@ -785,7 +798,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     }
 
     private void setSignalStrengthDefaultValues() {
-        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1, true);
+        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, true);
     }
 
     /**
@@ -842,12 +855,12 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         EVENT_POLL_STATE_OPERATOR, pollingContext));
 
                 pollingContext[0]++;
-                cm.getGPRSRegistrationState(
+                cm.getDataRegistrationState(
                     obtainMessage(
                         EVENT_POLL_STATE_GPRS, pollingContext));
 
                 pollingContext[0]++;
-                cm.getRegistrationState(
+                cm.getVoiceRegistrationState(
                     obtainMessage(
                         EVENT_POLL_STATE_REGISTRATION, pollingContext));
 
@@ -894,7 +907,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         if (DBG) {
             Log.d(LOG_TAG, "Poll ServiceState done: " +
                 " oldSS=[" + ss + "] newSS=[" + newSS +
-                "] oldGprs=" + gprsState + " newGprs=" + newGPRSState +
+                "] oldGprs=" + gprsState + " newData=" + newGPRSState +
+                " oldMaxDataCalls=" + mMaxDataCalls +
+                " mNewMaxDataCalls=" + mNewMaxDataCalls +
+                " oldReasonDataDenied=" + mReasonDataDenied +
+                " mNewReasonDataDenied=" + mNewReasonDataDenied +
                 " oldType=" + networkTypeToString(networkType) +
                 " newType=" + networkTypeToString(newNetworkType));
         }
@@ -956,6 +973,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         gprsState = newGPRSState;
+        mReasonDataDenied = mNewReasonDataDenied;
+        mMaxDataCalls = mNewMaxDataCalls;
         networkType = newNetworkType;
         // this new state has been applied - forget it until we get a new new state
         newNetworkType = 0;
@@ -1158,6 +1177,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     private void onSignalStrengthResult(AsyncResult ar) {
         SignalStrength oldSignalStrength = mSignalStrength;
         int rssi = 99;
+        int lteSignalStrength = -1;
+        int lteRsrp = -1;
+        int lteRsrq = -1;
+        int lteRssnr = -1;
+        int lteCqi = -1;
 
         if (ar.exception != null) {
             // -1 = unknown
@@ -1169,6 +1193,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             // bug 658816 seems to be a case where the result is 0-length
             if (ints.length != 0) {
                 rssi = ints[0];
+                lteSignalStrength = ints[7];
+                lteRsrp = ints[8];
+                lteRsrq = ints[9];
+                lteRssnr = ints[10];
+                lteCqi = ints[11];
             } else {
                 Log.e(LOG_TAG, "Bogus signal strength response");
                 rssi = 99;
@@ -1176,7 +1205,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         mSignalStrength = new SignalStrength(rssi, -1, -1, -1,
-                -1, -1, -1, true);
+                -1, -1, -1, lteSignalStrength, lteRsrp, lteRsrq, lteRssnr, lteCqi, true);
 
         if (!mSignalStrength.equals(oldSignalStrength)) {
             try { // This takes care of delayed EVENT_POLL_SIGNAL_STRENGTH (scheduled after

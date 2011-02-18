@@ -144,10 +144,10 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     public void getSignalStrength (Message result) {
     }
 
-    public void getRegistrationState (Message result) {
+    public void getVoiceRegistrationState (Message result) {
     }
 
-    public void getGPRSRegistrationState (Message result) {
+    public void getDataRegistrationState (Message result) {
     }
 
     public void getOperator(Message result) {
@@ -339,7 +339,7 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     public void setCdmaRoamingPreference(int cdmaRoamingType, Message response) {
     }
 
-    public void setCdmaSubscription(int cdmaSubscription , Message response) {
+    public void setCdmaSubscriptionSource(int cdmaSubscription , Message response) {
     }
 
     public void queryTTYMode(Message response) {
@@ -361,5 +361,30 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     }
 
     public void exitEmergencyCallbackMode(Message response) {
+    }
+
+    @Override
+    public void supplyIccPinForApp(String pin, String aid, Message response) {
+    }
+
+    @Override
+    public void supplyIccPukForApp(String puk, String newPin, String aid, Message response) {
+    }
+
+    @Override
+    public void supplyIccPin2ForApp(String pin2, String aid, Message response) {
+    }
+
+    @Override
+    public void supplyIccPuk2ForApp(String puk2, String newPin2, String aid, Message response) {
+    }
+
+    @Override
+    public void changeIccPinForApp(String oldPin, String newPin, String aidPtr, Message response) {
+    }
+
+    @Override
+    public void changeIccPin2ForApp(String oldPin2, String newPin2, String aidPtr,
+            Message response) {
     }
 }

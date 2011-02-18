@@ -186,7 +186,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         cm.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
         cm.registerForRadioStateChanged(this, EVENT_RADIO_STATE_CHANGED, null);
 
-        cm.registerForNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED_CDMA, null);
+        cm.registerForVoiceNetworkStateChanged(this, EVENT_NETWORK_STATE_CHANGED_CDMA, null);
         cm.setOnNITZTime(this, EVENT_NITZ_TIME, null);
         cm.setOnSignalStrengthUpdate(this, EVENT_SIGNAL_STRENGTH_UPDATE, null);
 
@@ -215,7 +215,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
         // Unregister for all events.
         cm.unregisterForAvailable(this);
         cm.unregisterForRadioStateChanged(this);
-        cm.unregisterForNetworkStateChanged(this);
+        cm.unregisterForVoiceNetworkStateChanged(this);
         cm.unregisterForRUIMReady(this);
         cm.unregisterForNVReady(this);
         cm.unregisterForCdmaOtaProvision(this);
@@ -517,7 +517,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             ar = (AsyncResult) msg.obj;
 
             if (ar.exception == null) {
-                cm.getRegistrationState(obtainMessage(EVENT_GET_LOC_DONE_CDMA, null));
+                cm.getVoiceRegistrationState(obtainMessage(EVENT_GET_LOC_DONE_CDMA, null));
             }
             break;
 
@@ -897,7 +897,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
     private void setSignalStrengthDefaultValues() {
-        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1, false);
+        mSignalStrength = new SignalStrength(99, -1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1, false);
     }
 
     /**
@@ -955,8 +956,8 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
                     obtainMessage(EVENT_POLL_STATE_OPERATOR_CDMA, pollingContext));
 
             pollingContext[0]++;
-            // RIL_REQUEST_REGISTRATION_STATE is necessary for CDMA
-            cm.getRegistrationState(
+            // RIL_REQUEST_VOICE_REGISTRATION_STATE is necessary for CDMA
+            cm.getVoiceRegistrationState(
                     obtainMessage(EVENT_POLL_STATE_REGISTRATION_CDMA, pollingContext));
 
             break;
@@ -1252,7 +1253,7 @@ final class CdmaServiceStateTracker extends ServiceStateTracker {
             //log(String.format("onSignalStrengthResult cdmaDbm=%d cdmaEcio=%d evdoRssi=%d evdoEcio=%d evdoSnr=%d",
             //        cdmaDbm, cdmaEcio, evdoRssi, evdoEcio, evdoSnr));
             mSignalStrength = new SignalStrength(99, -1, cdmaDbm, cdmaEcio,
-                    evdoRssi, evdoEcio, evdoSnr, false);
+                    evdoRssi, evdoEcio, evdoSnr, -1, -1, -1, -1, -1, false);
         }
 
         try {

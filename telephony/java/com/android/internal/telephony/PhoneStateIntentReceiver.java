@@ -95,25 +95,17 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Returns current signal strength in "asu", ranging from 0-31
-     * or -1 if unknown
+     * Returns current signal strength in as an asu 0..31
      *
-     * For GSM, dBm = -113 + 2*asu
-     * 0 means "-113 dBm or less"
-     * 31 means "-51 dBm or greater"
-     *
-     * @return signal strength in asu, -1 if not yet updated
      * Throws RuntimeException if client has not called notifySignalStrength()
      */
-    public int getSignalStrength() {
+    public int getSignalStrengthLevelAsu() {
         // TODO: use new SignalStrength instead of asu
         if ((mWants & NOTIF_SIGNAL) == 0) {
             throw new RuntimeException
                 ("client must call notifySignalStrength(int)");
         }
-        int gsmSignalStrength = mSignalStrength.getGsmSignalStrength();
-
-        return (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
+        return mSignalStrength.getAsuLevel();
     }
 
     /**
@@ -128,19 +120,7 @@ public final class PhoneStateIntentReceiver extends BroadcastReceiver {
             throw new RuntimeException
                 ("client must call notifySignalStrength(int)");
         }
-
-        int dBm = -1;
-
-        if(!mSignalStrength.isGsm()) {
-            dBm = mSignalStrength.getCdmaDbm();
-        } else {
-            int gsmSignalStrength = mSignalStrength.getGsmSignalStrength();
-            int asu = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
-            if (asu != -1) {
-                dBm = -113 + 2*asu;
-            }
-        }
-        return dBm;
+        return mSignalStrength.getDbm();
     }
 
     public void notifyPhoneCallState(int eventWhat) {

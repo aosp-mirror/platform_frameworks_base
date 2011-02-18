@@ -34,7 +34,7 @@ public class IccCardStatus {
         boolean isCardPresent() {
             return this == CARDSTATE_PRESENT;
         }
-    };
+    }
 
     public enum PinState {
         PINSTATE_UNKNOWN,
@@ -43,12 +43,13 @@ public class IccCardStatus {
         PINSTATE_DISABLED,
         PINSTATE_ENABLED_BLOCKED,
         PINSTATE_ENABLED_PERM_BLOCKED
-    };
+    }
 
     private CardState  mCardState;
     private PinState   mUniversalPinState;
     private int        mGsmUmtsSubscriptionAppIndex;
     private int        mCdmaSubscriptionAppIndex;
+    private int        mImsSubscriptionAppIndex;
     private int        mNumApplications;
 
     private ArrayList<IccCardApplication> mApplications =
@@ -72,6 +73,10 @@ public class IccCardStatus {
         default:
             throw new RuntimeException("Unrecognized RIL_CardState: " + state);
         }
+    }
+
+    public PinState getUniversalPinState() {
+        return mUniversalPinState;
     }
 
     public void setUniversalPinState(int state) {
@@ -115,6 +120,14 @@ public class IccCardStatus {
         mCdmaSubscriptionAppIndex = cdmaSubscriptionAppIndex;
     }
 
+    public int getImsSubscriptionAppIndex() {
+        return mImsSubscriptionAppIndex;
+    }
+
+    public void setImsSubscriptionAppIndex(int imsSubscriptionAppIndex) {
+        mImsSubscriptionAppIndex = imsSubscriptionAppIndex;
+    }
+
     public int getNumApplications() {
         return mNumApplications;
     }
@@ -130,4 +143,5 @@ public class IccCardStatus {
     public IccCardApplication getApplication(int index) {
         return mApplications.get(index);
     }
+
 }
