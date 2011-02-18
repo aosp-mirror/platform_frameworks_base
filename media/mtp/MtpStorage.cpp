@@ -59,7 +59,7 @@ int MtpStorage::getAccessCapability() const {
 uint64_t MtpStorage::getMaxCapacity() {
     if (mMaxCapacity == 0) {
         struct statfs   stat;
-        if (statfs(mFilePath, &stat))
+        if (statfs(getPath(), &stat))
             return -1;
         mMaxCapacity = (uint64_t)stat.f_blocks * (uint64_t)stat.f_bsize;
     }
@@ -68,7 +68,7 @@ uint64_t MtpStorage::getMaxCapacity() {
 
 uint64_t MtpStorage::getFreeSpace() {
     struct statfs   stat;
-    if (statfs(mFilePath, &stat))
+    if (statfs(getPath(), &stat))
         return -1;
     uint64_t freeSpace = (uint64_t)stat.f_bavail * (uint64_t)stat.f_bsize;
     return (freeSpace > mReserveSpace ? freeSpace - mReserveSpace : 0);
