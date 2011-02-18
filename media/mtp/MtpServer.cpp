@@ -84,6 +84,8 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
 static const MtpEventCode kSupportedEventCodes[] = {
     MTP_EVENT_OBJECT_ADDED,
     MTP_EVENT_OBJECT_REMOVED,
+    MTP_EVENT_STORE_ADDED,
+    MTP_EVENT_STORE_REMOVED,
 };
 
 MtpServer::MtpServer(int fd, MtpDatabase* database,
@@ -104,11 +106,23 @@ MtpServer::MtpServer(int fd, MtpDatabase* database,
 MtpServer::~MtpServer() {
 }
 
-void MtpServer::addStorage(const char* filePath, uint64_t reserveSpace) {
-    int index = mStorages.size() + 1;
-    index |= index << 16;   // set high and low part to our index
-    MtpStorage* storage = new MtpStorage(index, filePath, reserveSpace);
-    addStorage(storage);
+void MtpServer::addStorage(MtpStorage* storage) {
+    Mutex::Autolock autoLock(mMutex);
+
+    mStorages.push(storage);
+    sendStoreAdded(storage->getStorageID());
+}
+
+void MtpServer::removeStorage(MtpStorage* storage) {
+    Mutex::Autolock autoLock(mMutex);
+
+    for (int i = 0; i < mStorages.size(); i++) {
+        if (mStorages[i] == storage) {
+            mStorages.removeAt(i);
+            sendStoreRemoved(storage->getStorageID());
+            break;
+        }
+    }
 }
 
 MtpStorage* MtpServer::getStorage(MtpStorageID id) {
@@ -120,6 +134,12 @@ MtpStorage* MtpServer::getStorage(MtpStorageID id) {
             return storage;
     }
     return NULL;
+}
+
+bool MtpServer::hasStorage(MtpStorageID id) {
+    if (id == 0 || id == 0xFFFFFFFF)
+        return mStorages.size() > 0;
+    return (getStorage(id) != NULL);
 }
 
 void MtpServer::run() {
@@ -203,28 +223,38 @@ void MtpServer::run() {
 }
 
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
-    if (mSessionOpen) {
-        LOGV("sendObjectAdded %d\n", handle);
-        mEvent.setEventCode(MTP_EVENT_OBJECT_ADDED);
-        mEvent.setTransactionID(mRequest.getTransactionID());
-        mEvent.setParameter(1, handle);
-        int ret = mEvent.write(mFD);
-        LOGV("mEvent.write returned %d\n", ret);
-    }
+    LOGV("sendObjectAdded %d\n", handle);
+    sendEvent(MTP_EVENT_OBJECT_ADDED, handle);
 }
 
 void MtpServer::sendObjectRemoved(MtpObjectHandle handle) {
+    LOGV("sendObjectRemoved %d\n", handle);
+    sendEvent(MTP_EVENT_OBJECT_REMOVED, handle);
+}
+
+void MtpServer::sendStoreAdded(MtpStorageID id) {
+    LOGV("sendStoreAdded %08X\n", id);
+    sendEvent(MTP_EVENT_STORE_ADDED, id);
+}
+
+void MtpServer::sendStoreRemoved(MtpStorageID id) {
+    LOGV("sendStoreRemoved %08X\n", id);
+    sendEvent(MTP_EVENT_STORE_REMOVED, id);
+}
+
+void MtpServer::sendEvent(MtpEventCode code, uint32_t param1) {
     if (mSessionOpen) {
-        LOGV("sendObjectRemoved %d\n", handle);
-        mEvent.setEventCode(MTP_EVENT_OBJECT_REMOVED);
+        mEvent.setEventCode(code);
         mEvent.setTransactionID(mRequest.getTransactionID());
-        mEvent.setParameter(1, handle);
+        mEvent.setParameter(1, param1);
         int ret = mEvent.write(mFD);
         LOGV("mEvent.write returned %d\n", ret);
     }
 }
 
 bool MtpServer::handleRequest() {
+    Mutex::Autolock autoLock(mMutex);
+
     MtpOperationCode operation = mRequest.getOperationCode();
     MtpResponseCode response;
 
@@ -439,6 +469,9 @@ MtpResponseCode MtpServer::doGetObjectHandles() {
     MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
     MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
                                                             // 0x00000000 for all objects?
+
+    if (!hasStorage(storageID))
+        return MTP_RESPONSE_INVALID_STORAGE_ID;
     if (parent == 0xFFFFFFFF)
         parent = 0;
 
@@ -455,6 +488,8 @@ MtpResponseCode MtpServer::doGetNumObjects() {
     MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
     MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
                                                             // 0x00000000 for all objects?
+    if (!hasStorage(storageID))
+        return MTP_RESPONSE_INVALID_STORAGE_ID;
     if (parent == 0xFFFFFFFF)
         parent = 0;
 
@@ -471,7 +506,9 @@ MtpResponseCode MtpServer::doGetNumObjects() {
 MtpResponseCode MtpServer::doGetObjectReferences() {
     if (!mSessionOpen)
         return MTP_RESPONSE_SESSION_NOT_OPEN;
-    MtpStorageID handle = mRequest.getParameter(1);
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    MtpObjectHandle handle = mRequest.getParameter(1);
 
     // FIXME - check for invalid object handle
     MtpObjectHandleList* handles = mDatabase->getObjectReferences(handle);
@@ -487,7 +524,10 @@ MtpResponseCode MtpServer::doGetObjectReferences() {
 MtpResponseCode MtpServer::doSetObjectReferences() {
     if (!mSessionOpen)
         return MTP_RESPONSE_SESSION_NOT_OPEN;
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpStorageID handle = mRequest.getParameter(1);
+
     MtpObjectHandleList* references = mData.getAUInt32();
     MtpResponseCode result = mDatabase->setObjectReferences(handle, references);
     delete references;
@@ -495,6 +535,8 @@ MtpResponseCode MtpServer::doSetObjectReferences() {
 }
 
 MtpResponseCode MtpServer::doGetObjectPropValue() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
     LOGV("GetObjectPropValue %d %s\n", handle,
@@ -504,6 +546,8 @@ MtpResponseCode MtpServer::doGetObjectPropValue() {
 }
 
 MtpResponseCode MtpServer::doSetObjectPropValue() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectProperty property = mRequest.getParameter(2);
     LOGV("SetObjectPropValue %d %s\n", handle,
@@ -537,6 +581,8 @@ MtpResponseCode MtpServer::doResetDevicePropValue() {
 }
 
 MtpResponseCode MtpServer::doGetObjectPropList() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
 
     MtpObjectHandle handle = mRequest.getParameter(1);
     // use uint32_t so we can support 0xFFFFFFFF
@@ -552,11 +598,15 @@ MtpResponseCode MtpServer::doGetObjectPropList() {
 }
 
 MtpResponseCode MtpServer::doGetObjectInfo() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     return mDatabase->getObjectInfo(handle, mData);
 }
 
 MtpResponseCode MtpServer::doGetObject() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpString pathBuf;
     int64_t fileLength;
@@ -592,6 +642,8 @@ MtpResponseCode MtpServer::doGetObject() {
 }
 
 MtpResponseCode MtpServer::doGetPartialObject() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     uint32_t offset = mRequest.getParameter(2);
     uint32_t length = mRequest.getParameter(3);
@@ -688,6 +740,7 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     if (mSendObjectFileSize > storage->getFreeSpace())
         return MTP_RESPONSE_STORAGE_FULL;
 
+LOGD("path: %s parent: %d storageID: %08X", (const char*)path, parent, storageID);
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,
             format, parent, storageID, mSendObjectFileSize, modifiedTime);
     if (handle == kInvalidObjectHandle) {
@@ -719,6 +772,8 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
 }
 
 MtpResponseCode MtpServer::doSendObject() {
+    if (!hasStorage())
+        return MTP_RESPONSE_GENERAL_ERROR;
     MtpResponseCode result = MTP_RESPONSE_OK;
     mode_t mask;
     int ret;
@@ -835,6 +890,8 @@ static void deletePath(const char* path) {
 }
 
 MtpResponseCode MtpServer::doDeleteObject() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
     MtpObjectFormat format = mRequest.getParameter(2);
     // FIXME - support deleting all objects if handle is 0xFFFFFFFF
