@@ -753,6 +753,9 @@ int Surface::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
         res = dispatch_set_buffers_transform( args );
         break;
+    case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
+        res = dispatch_set_buffers_timestamp( args );
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
@@ -790,6 +793,11 @@ int Surface::dispatch_set_buffers_geometry(va_list args) {
 int Surface::dispatch_set_buffers_transform(va_list args) {
     int transform = va_arg(args, int);
     return setBuffersTransform(transform);
+}
+
+int Surface::dispatch_set_buffers_timestamp(va_list args) {
+    int64_t timestamp = va_arg(args, int64_t);
+    return setBuffersTimestamp(timestamp);
 }
 
 void Surface::setUsage(uint32_t reqUsage)
@@ -907,6 +915,13 @@ int Surface::setBuffersTransform(int transform)
 {
     Mutex::Autolock _l(mSurfaceLock);
     mNextBufferTransform = transform;
+    return NO_ERROR;
+}
+
+int Surface::setBuffersTimestamp(int64_t timestamp)
+{
+    // Surface doesn't really have anything meaningful to do with timestamps
+    // so they'll just be dropped here.
     return NO_ERROR;
 }
 

@@ -76,9 +76,15 @@ static float mtxRot270[16] = {
 static void mtxMul(float out[16], const float a[16], const float b[16]);
 
 SurfaceTexture::SurfaceTexture(GLuint tex) :
-    mBufferCount(MIN_BUFFER_SLOTS), mCurrentTexture(INVALID_BUFFER_SLOT),
-    mCurrentTransform(0), mLastQueued(INVALID_BUFFER_SLOT),
-    mLastQueuedTransform(0), mNextTransform(0), mTexName(tex) {
+    mBufferCount(MIN_BUFFER_SLOTS),
+    mCurrentTexture(INVALID_BUFFER_SLOT),
+    mCurrentTransform(0),
+    mCurrentTimestamp(0),
+    mLastQueued(INVALID_BUFFER_SLOT),
+    mLastQueuedTransform(0),
+    mLastQueuedTimestamp(0),
+    mNextTransform(0),
+    mTexName(tex) {
     LOGV("SurfaceTexture::SurfaceTexture");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
@@ -153,7 +159,7 @@ status_t SurfaceTexture::dequeueBuffer(int *buf) {
     return OK;
 }
 
-status_t SurfaceTexture::queueBuffer(int buf) {
+status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     LOGV("SurfaceTexture::queueBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || mBufferCount <= buf) {
@@ -172,6 +178,7 @@ status_t SurfaceTexture::queueBuffer(int buf) {
     mLastQueued = buf;
     mLastQueuedCrop = mNextCrop;
     mLastQueuedTransform = mNextTransform;
+    mLastQueuedTimestamp = timestamp;
     if (mFrameAvailableListener != 0) {
         mFrameAvailableListener->onFrameAvailable();
     }
@@ -246,12 +253,13 @@ status_t SurfaceTexture::updateTexImage() {
         mCurrentTextureBuf = mSlots[mCurrentTexture].mGraphicBuffer;
         mCurrentCrop = mLastQueuedCrop;
         mCurrentTransform = mLastQueuedTransform;
+        mCurrentTimestamp = mLastQueuedTimestamp;
     }
     return OK;
 }
 
 void SurfaceTexture::getTransformMatrix(float mtx[16]) {
-    LOGV("SurfaceTexture::updateTexImage");
+    LOGV("SurfaceTexture::getTransformMatrix");
     Mutex::Autolock lock(mMutex);
 
     float xform[16];
@@ -340,6 +348,12 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
     // want to expose this to applications, however, so we must add an
     // additional vertical flip to the transform after all the other transforms.
     mtxMul(mtx, mtxFlipV, mtxBeforeFlipV);
+}
+
+nsecs_t SurfaceTexture::getTimestamp() {
+    LOGV("SurfaceTexture::getTimestamp");
+    Mutex::Autolock lock(mMutex);
+    return mCurrentTimestamp;
 }
 
 void SurfaceTexture::setFrameAvailableListener(

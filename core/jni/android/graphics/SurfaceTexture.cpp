@@ -171,6 +171,12 @@ static void SurfaceTexture_getTransformMatrix(JNIEnv* env, jobject thiz,
     env->ReleaseFloatArrayElements(jmtx, mtx, 0);
 }
 
+static jlong SurfaceTexture_getTimestamp(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    return surfaceTexture->getTimestamp();
+}
+
 // ----------------------------------------------------------------------------
 
 const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
@@ -178,9 +184,10 @@ const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTextur
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",          "()V",   (void*)SurfaceTexture_classInit },
     {"nativeInit",               "(ILjava/lang/Object;)V", (void*)SurfaceTexture_init },
-    {"nativeFinalize",            "()V",  (void*)SurfaceTexture_finalize },
+    {"nativeFinalize",           "()V",   (void*)SurfaceTexture_finalize },
     {"nativeUpdateTexImage",     "()V",   (void*)SurfaceTexture_updateTexImage },
     {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
+    {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp }
 };
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)

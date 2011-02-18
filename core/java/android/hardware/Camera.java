@@ -410,8 +410,9 @@ public class Camera {
 
     /**
      * Starts capturing and drawing preview frames to the screen.
-     * Preview will not actually start until a surface is supplied with
-     * {@link #setPreviewDisplay(SurfaceHolder)}.
+     * Preview will not actually start until a surface is supplied
+     * with {@link #setPreviewDisplay(SurfaceHolder)} or
+     * {@link #setPreviewTexture(SurfaceTexture)}.
      *
      * <p>If {@link #setPreviewCallback(Camera.PreviewCallback)},
      * {@link #setOneShotPreviewCallback(Camera.PreviewCallback)}, or
