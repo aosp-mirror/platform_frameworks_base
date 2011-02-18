@@ -80,6 +80,7 @@ class="new">new!</span></li>
         <div><a href="<?cs var:toroot ?>sdk/android-3.0.html">
         <span class="en">Android 3.0 Platform</span></a> <span class="new">new!</span></div>
         <ul>
+          <li><a href="<?cs var:toroot ?>sdk/android-3.0-optimize.html">Optimizing Apps for 3.0</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/android-3.0-highlights.html">Platform Highlights</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/api_diff/11/changes.html">API Differences Report &raquo;</a></li>
         </ul>
@@ -88,8 +89,15 @@ class="new">new!</span></li>
       <div><a href="<?cs var:toroot ?>sdk/android-2.3.3.html">
       <span class="en">Android 2.3.3 Platform</span></a> <span class="new">new!</span></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/android-2.3-highlights.html">Platform Highlights</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/api_diff/10/changes.html">API Differences Report &raquo;</a></li> 
+        </ul>
+      </li>
+      <li class="toggle-list">
+      <div><a href="<?cs var:toroot ?>sdk/android-2.3.html">
+      <span class="en">Android 2.3 Platform</span></a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/android-2.3-highlights.html">Platform Highlights</a></li> 
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/9/changes.html">API Differences Report &raquo;</a></li> 
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>sdk/android-2.2.html">Android 2.2 Platform</a></li>
@@ -99,13 +107,6 @@ class="new">new!</span></li>
       <li class="toggle-list">
         <div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">Older Platforms</a></div>
         <ul>
-          <li class="toggle-list">
-          <div><a href="<?cs var:toroot ?>sdk/android-2.3.html">
-          <span class="en">Android 2.3 Platform</span></a></div>
-            <ul>
-              <li><a href="<?cs var:toroot ?>sdk/api_diff/9/changes.html">API Differences Report &raquo;</a></li> 
-            </ul>
-          </li>
           <li><a href="<?cs var:toroot ?>sdk/android-2.0.1.html">Android 2.0.1 Platform</a></li>
           <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0 Platform</a></li>
           <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Platform</a></li>
