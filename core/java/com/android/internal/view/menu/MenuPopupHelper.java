@@ -36,14 +36,15 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener,
-        ViewTreeObserver.OnGlobalLayoutListener, PopupWindow.OnDismissListener {
+        ViewTreeObserver.OnGlobalLayoutListener, PopupWindow.OnDismissListener,
+        View.OnAttachStateChangeListener {
     private static final String TAG = "MenuPopupHelper";
 
     private Context mContext;
     private ListPopupWindow mPopup;
     private MenuBuilder mMenu;
     private int mPopupMaxWidth;
-    private WeakReference<View> mAnchorView;
+    private View mAnchorView;
     private boolean mOverflowOnly;
     private ViewTreeObserver mTreeObserver;
 
@@ -66,13 +67,11 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         mPopupMaxWidth = metrics.widthPixels / 2;
 
-        if (anchorView != null) {
-            mAnchorView = new WeakReference<View>(anchorView);
-        }
+        mAnchorView = anchorView;
     }
 
     public void setAnchorView(View anchor) {
-        mAnchorView = new WeakReference<View>(anchor);
+        mAnchorView = anchor;
     }
 
     public void show() {
@@ -92,19 +91,19 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mPopup.setAdapter(adapter);
         mPopup.setModal(true);
 
-        View anchor = mAnchorView != null ? mAnchorView.get() : null;
+        View anchor = mAnchorView;
         if (anchor == null && mMenu instanceof SubMenuBuilder) {
             SubMenuBuilder subMenu = (SubMenuBuilder) mMenu;
             final MenuItemImpl itemImpl = (MenuItemImpl) subMenu.getItem();
             anchor = itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null);
-            mAnchorView = new WeakReference<View>(anchor);
+            mAnchorView = anchor;
         }
 
         if (anchor != null) {
-            if (mTreeObserver == null) {
-                mTreeObserver = anchor.getViewTreeObserver();
-                mTreeObserver.addOnGlobalLayoutListener(this);
-            }
+            final boolean addGlobalListener = mTreeObserver == null;
+            mTreeObserver = anchor.getViewTreeObserver(); // Refresh to latest
+            if (addGlobalListener) mTreeObserver.addOnGlobalLayoutListener(this);
+            anchor.addOnAttachStateChangeListener(this);
             mPopup.setAnchorView(anchor);
         } else {
             return false;
@@ -125,10 +124,12 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public void onDismiss() {
         mPopup = null;
-        if (mTreeObserver != null && mTreeObserver.isAlive()) {
+        if (mTreeObserver != null) {
+            if (!mTreeObserver.isAlive()) mTreeObserver = mAnchorView.getViewTreeObserver();
             mTreeObserver.removeGlobalOnLayoutListener(this);
+            mTreeObserver = null;
         }
-        mTreeObserver = null;
+        mAnchorView.removeOnAttachStateChangeListener(this);
     }
 
     public boolean isShowing() {
@@ -187,13 +188,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     @Override
     public void onGlobalLayout() {
-        if (!isShowing()) {
-            if (mTreeObserver.isAlive()) {
-                mTreeObserver.removeGlobalOnLayoutListener(this);
-            }
-            mTreeObserver = null;
-        } else {
-            final View anchor = mAnchorView != null ? mAnchorView.get() : null;
+        if (isShowing()) {
+            final View anchor = mAnchorView;
             if (anchor == null || !anchor.isShown()) {
                 dismiss();
             } else if (isShowing()) {
@@ -201,5 +197,18 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
                 mPopup.show();
             }
         }
+    }
+
+    @Override
+    public void onViewAttachedToWindow(View v) {
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(View v) {
+        if (mTreeObserver != null) {
+            if (!mTreeObserver.isAlive()) mTreeObserver = v.getViewTreeObserver();
+            mTreeObserver.removeGlobalOnLayoutListener(this);
+        }
+        v.removeOnAttachStateChangeListener(this);
     }
 }

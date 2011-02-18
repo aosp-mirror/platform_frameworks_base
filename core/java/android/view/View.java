@@ -74,6 +74,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * <p>
@@ -2099,6 +2100,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private ArrayList<OnLayoutChangeListener> mOnLayoutChangeListeners;
 
     /**
+     * Listeners for attach events.
+     */
+    private CopyOnWriteArrayList<OnAttachStateChangeListener> mOnAttachStateChangeListeners;
+
+    /**
      * Listener used to dispatch click events.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -2993,6 +2999,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return;
         }
         mOnLayoutChangeListeners.remove(listener);
+    }
+
+    /**
+     * Add a listener for attach state changes.
+     *
+     * This listener will be called whenever this view is attached or detached
+     * from a window. Remove the listener using
+     * {@link #removeOnAttachStateChangeListener(OnAttachStateChangeListener)}.
+     *
+     * @param listener Listener to attach
+     * @see #removeOnAttachStateChangeListener(OnAttachStateChangeListener)
+     */
+    public void addOnAttachStateChangeListener(OnAttachStateChangeListener listener) {
+        if (mOnAttachStateChangeListeners == null) {
+            mOnAttachStateChangeListeners = new CopyOnWriteArrayList<OnAttachStateChangeListener>();
+        }
+        mOnAttachStateChangeListeners.add(listener);
+    }
+
+    /**
+     * Remove a listener for attach state changes. The listener will receive no further
+     * notification of window attach/detach events.
+     *
+     * @param listener Listener to remove
+     * @see #addOnAttachStateChangeListener(OnAttachStateChangeListener)
+     */
+    public void removeOnAttachStateChangeListener(OnAttachStateChangeListener listener) {
+        if (mOnAttachStateChangeListeners == null) {
+            return;
+        }
+        mOnAttachStateChangeListeners.remove(listener);
     }
 
     /**
@@ -7953,6 +7990,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         performCollectViewAttributes(visibility);
         onAttachedToWindow();
+
+        final CopyOnWriteArrayList<OnAttachStateChangeListener> listeners =
+                mOnAttachStateChangeListeners;
+        if (listeners != null && listeners.size() > 0) {
+            // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
+            // perform the dispatching. The iterator is a safe guard against listeners that
+            // could mutate the list by calling the various add/remove methods. This prevents
+            // the array from being modified while we iterate it.
+            for (OnAttachStateChangeListener listener : listeners) {
+                listener.onViewAttachedToWindow(this);
+            }
+        }
+
         int vis = info.mWindowVisibility;
         if (vis != GONE) {
             onWindowVisibilityChanged(vis);
@@ -7973,6 +8023,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         onDetachedFromWindow();
+
+        final CopyOnWriteArrayList<OnAttachStateChangeListener> listeners =
+                mOnAttachStateChangeListeners;
+        if (listeners != null && listeners.size() > 0) {
+            // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
+            // perform the dispatching. The iterator is a safe guard against listeners that
+            // could mutate the list by calling the various add/remove methods. This prevents
+            // the array from being modified while we iterate it.
+            for (OnAttachStateChangeListener listener : listeners) {
+                listener.onViewDetachedFromWindow(this);
+            }
+        }
 
         if ((mPrivateFlags & SCROLL_CONTAINER_ADDED) != 0) {
             mAttachInfo.mScrollContainers.remove(this);
@@ -11765,6 +11827,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * @param visibility {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
          */
         public void onSystemUiVisibilityChange(int visibility);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when this view is attached
+     * or detached from its window.
+     */
+    public interface OnAttachStateChangeListener {
+        /**
+         * Called when the view is attached to a window.
+         * @param v The view that was attached
+         */
+        public void onViewAttachedToWindow(View v);
+        /**
+         * Called when the view is detached from a window.
+         * @param v The view that was detached
+         */
+        public void onViewDetachedFromWindow(View v);
     }
 
     private final class UnsetPressedState implements Runnable {
