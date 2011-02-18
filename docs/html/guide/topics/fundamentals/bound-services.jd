@@ -170,7 +170,7 @@ can then extend within your service.</p>
 create a bound service, because it may require multithreading capabilities and
 can result in a more complicated implementation. As such, AIDL is not suitable for most applications
 and this document does not discuss how to use it for your service. If you're certain that you need
-to use AIDL directly, see the <a href="{@docRoot}guide/topics/advanced/aidl.html">AIDL</a>
+to use AIDL directly, see the <a href="{@docRoot}guide/developing/tools/aidl.html">AIDL</a>
 document.</p>
 
 
@@ -341,7 +341,7 @@ service, which must then handle multi-threading.</p>
   <p>For most applications, the service doesn't need to perform multi-threading, so using a {@link
 android.os.Messenger} allows the service to handle one call at a time. If it's important
 that your service be multi-threaded, then you should use <a
-href="{@docRoot}guide/topics/advanced/aidl.html">AIDL</a> to define your interface.</p>
+href="{@docRoot}guide/developing/tools/aidl.html">AIDL</a> to define your interface.</p>
 </div>
 </div>
 

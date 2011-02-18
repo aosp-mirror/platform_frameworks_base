@@ -554,7 +554,6 @@
         <ul>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/android.html">android</a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">aidl</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/dmtracedump.html">dmtracedump</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html" >Draw 9-Patch</a></li>
@@ -754,6 +753,7 @@
       <li><a href="<?cs var:toroot ?>guide/appendix/g-app-intents.html">
             <span class="en">Intents List: Google Apps</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/developing/tools/aidl.html">AIDL</a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/glossary.html">
             <span class="en">Glossary</span>
           </a></li>
