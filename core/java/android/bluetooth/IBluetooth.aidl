@@ -85,7 +85,8 @@ interface IBluetooth
     boolean connectInputDevice(in BluetoothDevice device);
     boolean disconnectInputDevice(in BluetoothDevice device);
     List<BluetoothDevice> getConnectedInputDevices();
-    int getInputDeviceState(in BluetoothDevice device);
+    List<BluetoothDevice> getInputDevicesMatchingConnectionStates(in int[] states);
+    int getInputDeviceConnectionState(in BluetoothDevice device);
     boolean setInputDevicePriority(in BluetoothDevice device, int priority);
     int getInputDevicePriority(in BluetoothDevice device);
 

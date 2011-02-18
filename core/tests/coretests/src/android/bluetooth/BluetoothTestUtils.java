@@ -238,6 +238,9 @@ public class BluetoothTestUtils extends Assert {
                 case BluetoothProfile.HEADSET:
                     mConnectionAction = BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED;
                     break;
+                case BluetoothProfile.INPUT_DEVICE:
+                    mConnectionAction = BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED;
+                    break;
                 default:
                     mConnectionAction = null;
             }
@@ -263,47 +266,6 @@ public class BluetoothTestUtils extends Assert {
                         setFiredFlag(STATE_CONNECTED_FLAG);
                         break;
                     case BluetoothProfile.STATE_DISCONNECTING:
-                        setFiredFlag(STATE_DISCONNECTING_FLAG);
-                        break;
-                }
-            }
-        }
-    }
-
-    private class ConnectInputReceiver extends FlagReceiver {
-        private static final int STATE_DISCONNECTED_FLAG = 1;
-        private static final int STATE_CONNECTING_FLAG = 1 << 1;
-        private static final int STATE_CONNECTED_FLAG = 1 << 2;
-        private static final int STATE_DISCONNECTING_FLAG = 1 << 3;
-
-        private BluetoothDevice mDevice;
-
-        public ConnectInputReceiver(BluetoothDevice device, int expectedFlags) {
-            super(expectedFlags);
-
-            mDevice = device;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!mDevice.equals(intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE))) {
-                return;
-            }
-
-            if (BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED.equals(intent.getAction())) {
-                int state = intent.getIntExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, -1);
-                assertNotSame(-1, state);
-                switch (state) {
-                    case BluetoothInputDevice.STATE_DISCONNECTED:
-                        setFiredFlag(STATE_DISCONNECTED_FLAG);
-                        break;
-                    case BluetoothInputDevice.STATE_CONNECTING:
-                        setFiredFlag(STATE_CONNECTING_FLAG);
-                        break;
-                    case BluetoothInputDevice.STATE_CONNECTED:
-                        setFiredFlag(STATE_CONNECTED_FLAG);
-                        break;
-                    case BluetoothInputDevice.STATE_DISCONNECTING:
                         setFiredFlag(STATE_DISCONNECTING_FLAG);
                         break;
                 }
@@ -366,6 +328,9 @@ public class BluetoothTestUtils extends Assert {
                     case BluetoothProfile.HEADSET:
                         mHeadset = (BluetoothHeadset) proxy;
                         break;
+                    case BluetoothProfile.INPUT_DEVICE:
+                        mInput = (BluetoothInputDevice) proxy;
+                        break;
                 }
             }
         }
@@ -378,6 +343,9 @@ public class BluetoothTestUtils extends Assert {
                         break;
                     case BluetoothProfile.HEADSET:
                         mHeadset = null;
+                        break;
+                    case BluetoothProfile.INPUT_DEVICE:
+                        mInput = null;
                         break;
                 }
             }
@@ -393,6 +361,7 @@ public class BluetoothTestUtils extends Assert {
     private Context mContext;
     private BluetoothA2dp mA2dp;
     private BluetoothHeadset mHeadset;
+    private BluetoothInputDevice mInput;
 
     /**
      * Creates a utility instance for testing Bluetooth.
@@ -1078,142 +1047,6 @@ public class BluetoothTestUtils extends Assert {
     }
 
     /**
-     * Connects the local device with a remote HID device and checks to make sure that the profile
-     * is connected and that the correct actions were broadcast.
-     *
-     * @param adapter The BT adapter.
-     * @param device The remote device.
-     */
-    public void connectInput(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = (ConnectInputReceiver.STATE_CONNECTING_FLAG
-                | ConnectInputReceiver.STATE_CONNECTED_FLAG);
-        long start = -1;
-
-        if (!adapter.isEnabled()) {
-            fail(String.format("connectInput() bluetooth not enabled: device=%s", device));
-        }
-
-        if (!adapter.getBondedDevices().contains(device)) {
-            fail(String.format("connectInput() device not paired: device=%s", device));
-        }
-
-        BluetoothInputDevice inputDevice = new BluetoothInputDevice(mContext);
-        assertNotNull(inputDevice);
-        ConnectInputReceiver receiver = getConnectInputReceiver(device, mask);
-
-        int state = inputDevice.getInputDeviceState(device);
-        switch (state) {
-            case BluetoothInputDevice.STATE_CONNECTED:
-                removeReceiver(receiver);
-                return;
-            case BluetoothInputDevice.STATE_CONNECTING:
-                mask = 0; // Don't check for received intents since we might have missed them.
-                break;
-            case BluetoothInputDevice.STATE_DISCONNECTED:
-            case BluetoothInputDevice.STATE_DISCONNECTING:
-                start = System.currentTimeMillis();
-                assertTrue(inputDevice.connectInputDevice(device));
-                break;
-            default:
-                removeReceiver(receiver);
-                fail(String.format("connectInput() invalid state: device=%s, state=%d", device,
-                        state));
-        }
-
-        long s = System.currentTimeMillis();
-        while (System.currentTimeMillis() - s < CONNECT_DISCONNECT_PROFILE_TIMEOUT) {
-            state = inputDevice.getInputDeviceState(device);
-            if (state == BluetoothInputDevice.STATE_CONNECTED
-                    && (receiver.getFiredFlags() & mask) == mask) {
-                long finish = receiver.getCompletedTime();
-                if (start != -1 && finish != -1) {
-                    writeOutput(String.format("connectInput() completed in %d ms: device=%s",
-                            (finish - start), device));
-                } else {
-                    writeOutput(String.format("connectInput() completed: device=%s", device));
-                }
-                removeReceiver(receiver);
-                return;
-            }
-            sleep(POLL_TIME);
-        }
-
-        int firedFlags = receiver.getFiredFlags();
-        removeReceiver(receiver);
-        fail(String.format("connectInput() timeout: device=%s, state=%d (expected %d), "
-                + "flags=0x%x (expected 0x%s)", device, state, BluetoothInputDevice.STATE_CONNECTED,
-                firedFlags, mask));
-    }
-
-    /**
-     * Disconnects the local device with a remote HID device and checks to make sure that the
-     * profile is connected and that the correct actions were broadcast.
-     *
-     * @param adapter The BT adapter.
-     * @param device The remote device.
-     */
-    public void disconnectInput(BluetoothAdapter adapter, BluetoothDevice device) {
-        int mask = (ConnectInputReceiver.STATE_DISCONNECTING_FLAG
-                | ConnectInputReceiver.STATE_DISCONNECTED_FLAG);
-        long start = -1;
-
-        if (!adapter.isEnabled()) {
-            fail(String.format("disconnectInput() bluetooth not enabled: device=%s", device));
-        }
-
-        if (!adapter.getBondedDevices().contains(device)) {
-            fail(String.format("disconnectInput() device not paired: device=%s", device));
-        }
-
-        BluetoothInputDevice inputDevice = new BluetoothInputDevice(mContext);
-        assertNotNull(inputDevice);
-        ConnectInputReceiver receiver = getConnectInputReceiver(device, mask);
-
-        int state = inputDevice.getInputDeviceState(device);
-        switch (state) {
-            case BluetoothInputDevice.STATE_CONNECTED:
-            case BluetoothInputDevice.STATE_CONNECTING:
-                start = System.currentTimeMillis();
-                assertTrue(inputDevice.disconnectInputDevice(device));
-                break;
-            case BluetoothInputDevice.STATE_DISCONNECTED:
-                removeReceiver(receiver);
-                return;
-            case BluetoothInputDevice.STATE_DISCONNECTING:
-                mask = 0; // Don't check for received intents since we might have missed them.
-                break;
-            default:
-                removeReceiver(receiver);
-                fail(String.format("disconnectInput() invalid state: device=%s, state=%d", device,
-                        state));
-        }
-
-        long s = System.currentTimeMillis();
-        while (System.currentTimeMillis() - s < CONNECT_DISCONNECT_PROFILE_TIMEOUT) {
-            state = inputDevice.getInputDeviceState(device);
-            if (state == BluetoothInputDevice.STATE_DISCONNECTED
-                    && (receiver.getFiredFlags() & mask) == mask) {
-                long finish = receiver.getCompletedTime();
-                if (start != -1 && finish != -1) {
-                    writeOutput(String.format("disconnectInput() completed in %d ms: device=%s",
-                            (finish - start), device));
-                } else {
-                    writeOutput(String.format("disconnectInput() completed: device=%s", device));
-                }
-                removeReceiver(receiver);
-                return;
-            }
-            sleep(POLL_TIME);
-        }
-
-        int firedFlags = receiver.getFiredFlags();
-        removeReceiver(receiver);
-        fail(String.format("disconnectInput() timeout: device=%s, state=%d (expected %d), "
-                + "flags=0x%x (expected 0x%s)", device, state,
-                BluetoothInputDevice.STATE_DISCONNECTED, firedFlags, mask));
-    }
-
-    /**
      * Connects the PANU to a remote NAP and checks to make sure that the PANU is connected and that
      * the correct actions were broadcast.
      *
@@ -1478,17 +1311,10 @@ public class BluetoothTestUtils extends Assert {
             int expectedFlags) {
         String[] actions = {
                 BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED,
-                BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED};
+                BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED,
+                BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED};
         ConnectProfileReceiver receiver = new ConnectProfileReceiver(device, profile,
                 expectedFlags);
-        addReceiver(receiver, actions);
-        return receiver;
-    }
-
-    private ConnectInputReceiver getConnectInputReceiver(BluetoothDevice device,
-            int expectedFlags) {
-        String[] actions = {BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED};
-        ConnectInputReceiver receiver = new ConnectInputReceiver(device, expectedFlags);
         addReceiver(receiver, actions);
         return receiver;
     }
@@ -1511,15 +1337,20 @@ public class BluetoothTestUtils extends Assert {
         long s = System.currentTimeMillis();
         switch (profile) {
             case BluetoothProfile.A2DP:
-                while (mA2dp != null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
+                while (mA2dp == null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
                     sleep(POLL_TIME);
                 }
                 return mA2dp;
             case BluetoothProfile.HEADSET:
-                while (mHeadset != null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
+                while (mHeadset == null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
                     sleep(POLL_TIME);
                 }
                 return mHeadset;
+            case BluetoothProfile.INPUT_DEVICE:
+                while (mInput == null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
+                    sleep(POLL_TIME);
+                }
+                return mInput;
             default:
                 return null;
         }

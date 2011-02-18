@@ -57,6 +57,7 @@ class BluetoothEventLoop {
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
     private BluetoothA2dp mA2dp;
+    private BluetoothInputDevice mInputDevice;
     private final Context mContext;
     // The WakeLock is used for bringing up the LCD during a pairing request
     // from remote device when Android is in Suspend state.
@@ -125,15 +126,24 @@ class BluetoothEventLoop {
 
     /*package*/ void getProfileProxy() {
         mAdapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.A2DP);
+        mAdapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.INPUT_DEVICE);
     }
 
     private BluetoothProfile.ServiceListener mProfileServiceListener =
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            mA2dp = (BluetoothA2dp) proxy;
+            if (profile == BluetoothProfile.A2DP) {
+                mA2dp = (BluetoothA2dp) proxy;
+            } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+                mInputDevice = (BluetoothInputDevice) proxy;
+            }
         }
         public void onServiceDisconnected(int profile) {
-            mA2dp = null;
+            if (profile == BluetoothProfile.A2DP) {
+                mA2dp = null;
+            } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+                mInputDevice = null;
+            }
         }
     };
 
@@ -651,10 +661,9 @@ class BluetoothEventLoop {
             } else {
                 Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
             }
-        } else if (BluetoothUuid.isInputDevice(uuid) && !isOtherInputDeviceConnected(address)) {
-            BluetoothInputDevice inputDevice = new BluetoothInputDevice(mContext);
-            authorized = inputDevice.getInputDevicePriority(device) >
-                         BluetoothInputDevice.PRIORITY_OFF;
+        } else if (mInputDevice != null && BluetoothUuid.isInputDevice(uuid)) {
+            // We can have more than 1 input device connected.
+            authorized = mInputDevice.getPriority(device) > BluetoothInputDevice.PRIORITY_OFF;
              if (authorized) {
                  Log.i(TAG, "Allowing incoming HID connection from " + address);
              } else {
@@ -667,18 +676,6 @@ class BluetoothEventLoop {
         }
         log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
         return authorized;
-    }
-
-    private boolean isOtherInputDeviceConnected(String address) {
-        List<BluetoothDevice> devices =
-            mBluetoothService.lookupInputDevicesMatchingStates(new int[] {
-                                                BluetoothInputDevice.STATE_CONNECTING,
-                                                BluetoothInputDevice.STATE_CONNECTED});
-
-        for (BluetoothDevice device : devices) {
-            if (!device.getAddress().equals(address)) return true;
-        }
-        return false;
     }
 
     private boolean onAgentOutOfBandDataAvailable(String objectPath) {
@@ -758,7 +755,7 @@ class BluetoothEventLoop {
 
             boolean connected = false;
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
-            int state = mBluetoothService.getInputDeviceState(device);
+            int state = mBluetoothService.getInputDeviceConnectionState(device);
             if (state == BluetoothInputDevice.STATE_CONNECTING) {
                 if (result == BluetoothInputDevice.INPUT_CONNECT_FAILED_ALREADY_CONNECTED) {
                     connected = true;

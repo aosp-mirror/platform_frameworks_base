@@ -31,6 +31,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothDeviceProfileState;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfileState;
@@ -83,6 +84,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private int mNativeData;
     private BluetoothEventLoop mEventLoop;
     private BluetoothHeadset mBluetoothHeadset;
+    private BluetoothInputDevice mInputDevice;
     private boolean mIsAirplaneSensitive;
     private boolean mIsAirplaneToggleable;
     private int mBluetoothState;
@@ -2078,6 +2080,8 @@ public class BluetoothService extends IBluetooth.Stub {
 
         mAdapter.getProfileProxy(mContext,
                                  mBluetoothProfileServiceListener, BluetoothProfile.HEADSET);
+        mAdapter.getProfileProxy(mContext,
+                mBluetoothProfileServiceListener, BluetoothProfile.INPUT_DEVICE);
 
         pw.println("\n--Known devices--");
         for (String address : mDeviceProperties.keySet()) {
@@ -2119,8 +2123,17 @@ public class BluetoothService extends IBluetooth.Stub {
             }
         }
 
-        // Rather not do this from here, but no-where else and I need this
-        // dump
+        dumpHeadsetProfile(pw);
+        dumpInputDeviceProfile(pw);
+
+        pw.println("\n--Application Service Records--");
+        for (Integer handle : mServiceRecordToPid.keySet()) {
+            Integer pid = mServiceRecordToPid.get(handle);
+            pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
+        }
+    }
+
+    private void dumpHeadsetProfile(PrintWriter pw) {
         pw.println("\n--Headset Service--");
         if (mBluetoothHeadset != null) {
             List<BluetoothDevice> deviceList = mBluetoothHeadset.getConnectedDevices();
@@ -2158,24 +2171,60 @@ public class BluetoothService extends IBluetooth.Stub {
                     pw.println("SCO audio connected to device:" + device);
                 }
             }
-
-            mAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
         }
+        mAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mBluetoothHeadset);
+    }
 
-        pw.println("\n--Application Service Records--");
-        for (Integer handle : mServiceRecordToPid.keySet()) {
-            Integer pid = mServiceRecordToPid.get(handle);
-            pw.println("\tpid " + pid + " handle " + Integer.toHexString(handle));
+    private void dumpInputDeviceProfile(PrintWriter pw) {
+        pw.println("\n--Bluetooth Service- Input Device Profile");
+        if (mInputDevice != null) {
+            List<BluetoothDevice> deviceList = mInputDevice.getConnectedDevices();
+            if (deviceList.size() == 0) {
+                pw.println("\nNo input devices connected--");
+            } else {
+                pw.println("\nNumber of connected devices:" + deviceList.size());
+                BluetoothDevice device = deviceList.get(0);
+                pw.println("getConnectedDevices[0] = " + device);
+                pw.println("Priority of Connected device = " + mInputDevice.getPriority(device));
+
+                switch (mInputDevice.getConnectionState(device)) {
+                    case BluetoothInputDevice.STATE_CONNECTING:
+                        pw.println("getConnectionState() = STATE_CONNECTING");
+                        break;
+                    case BluetoothInputDevice.STATE_CONNECTED:
+                        pw.println("getConnectionState() = STATE_CONNECTED");
+                        break;
+                    case BluetoothInputDevice.STATE_DISCONNECTING:
+                        pw.println("getConnectionState() = STATE_DISCONNECTING");
+                        break;
+                }
+            }
+            deviceList.clear();
+            deviceList = mInputDevice.getDevicesMatchingConnectionStates(new int[] {
+                     BluetoothProfile.STATE_CONNECTED, BluetoothProfile.STATE_DISCONNECTED});
+            pw.println("--Connected and Disconnected input devices");
+            for (BluetoothDevice device: deviceList) {
+                pw.println(device);
+            }
         }
+        mAdapter.closeProfileProxy(BluetoothProfile.INPUT_DEVICE, mBluetoothHeadset);
     }
 
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
         new BluetoothProfile.ServiceListener() {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            mBluetoothHeadset = (BluetoothHeadset) proxy;
-    }
+            if (profile == BluetoothProfile.HEADSET) {
+                mBluetoothHeadset = (BluetoothHeadset) proxy;
+            } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+                mInputDevice = (BluetoothInputDevice) proxy;
+            }
+        }
         public void onServiceDisconnected(int profile) {
-            mBluetoothHeadset = null;
+            if (profile == BluetoothProfile.HEADSET) {
+                mBluetoothHeadset = null;
+            } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+                mInputDevice = null;
+            }
         }
     };
 
@@ -2311,9 +2360,9 @@ public class BluetoothService extends IBluetooth.Stub {
         return mBluetoothInputProfileHandler.disconnectInputDeviceInternal(device);
     }
 
-    public synchronized int getInputDeviceState(BluetoothDevice device) {
+    public synchronized int getInputDeviceConnectionState(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothInputProfileHandler.getInputDeviceState(device);
+        return mBluetoothInputProfileHandler.getInputDeviceConnectionState(device);
 
     }
 
@@ -2321,6 +2370,13 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         return mBluetoothInputProfileHandler.getConnectedInputDevices();
     }
+
+    public synchronized List<BluetoothDevice> getInputDevicesMatchingConnectionStates(
+            int[] states) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        return mBluetoothInputProfileHandler.getInputDevicesMatchingConnectionStates(states);
+    }
+
 
     public synchronized int getInputDevicePriority(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");

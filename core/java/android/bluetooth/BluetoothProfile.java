@@ -62,6 +62,11 @@ public interface BluetoothProfile {
      * A2DP profile.
      */
     public static final int A2DP = 2;
+    /**
+     * Input Device Profile
+     * @hide
+     */
+    public static final int INPUT_DEVICE = 3;
 
     /**
      * Default priority for devices that we try to auto-connect to and

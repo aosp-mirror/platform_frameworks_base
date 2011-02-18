@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,91 +27,88 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * Public API for controlling the Bluetooth HID (Input Device) Profile
+ * This class provides the public APIs to control the Bluetooth Input
+ * Device Profile.
  *
- * BluetoothInputDevice is a proxy object used to make calls to Bluetooth Service
- * which handles the HID profile.
+ *<p>BluetoothInputDevice is a proxy object for controlling the Bluetooth
+ * Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
+ * the BluetoothInputDevice proxy object.
  *
- * Creating a BluetoothInputDevice object will initiate a binding with the
- * Bluetooth service. Users of this object should call close() when they
- * are finished, so that this proxy object can unbind from the service.
- *
- * Currently the Bluetooth service runs in the system server and this
- * proxy object will be immediately bound to the service on construction.
- *
- *  @hide
+ *<p>Each method is protected with its appropriate permission.
+ *@hide
  */
-public final class BluetoothInputDevice {
+public final class BluetoothInputDevice implements BluetoothProfile {
     private static final String TAG = "BluetoothInputDevice";
     private static final boolean DBG = false;
 
-    /** int extra for ACTION_INPUT_DEVICE_STATE_CHANGED */
-    public static final String EXTRA_INPUT_DEVICE_STATE =
-        "android.bluetooth.inputdevice.extra.INPUT_DEVICE_STATE";
-    /** int extra for ACTION_INPUT_DEVICE_STATE_CHANGED */
-    public static final String EXTRA_PREVIOUS_INPUT_DEVICE_STATE =
-        "android.bluetooth.inputdevice.extra.PREVIOUS_INPUT_DEVICE_STATE";
-
-    /** Indicates the state of an input device has changed.
-     * This intent will always contain EXTRA_INPUT_DEVICE_STATE,
-     * EXTRA_PREVIOUS_INPUT_DEVICE_STATE and BluetoothDevice.EXTRA_DEVICE
-     * extras.
+    /**
+     * Intent used to broadcast the change in connection state of the Input
+     * Device profile.
+     *
+     * <p>This intent will have 3 extras:
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     * </ul>
+     *
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_INPUT_DEVICE_STATE_CHANGED =
-        "android.bluetooth.inputdevice.action.INPUT_DEVICE_STATE_CHANGED";
-
-    public static final int STATE_DISCONNECTED = 0;
-    public static final int STATE_CONNECTING   = 1;
-    public static final int STATE_CONNECTED    = 2;
-    public static final int STATE_DISCONNECTING = 3;
-
-    /**
-     * Auto connection, incoming and outgoing connection are allowed at this
-     * priority level.
-     */
-    public static final int PRIORITY_AUTO_CONNECT = 1000;
-    /**
-     * Incoming and outgoing connection are allowed at this priority level
-     */
-    public static final int PRIORITY_ON = 100;
-    /**
-     * Connections to the device are not allowed at this priority level.
-     */
-    public static final int PRIORITY_OFF = 0;
-    /**
-     * Default priority level when the device is unpaired.
-     */
-    public static final int PRIORITY_UNDEFINED = -1;
+    public static final String ACTION_CONNECTION_STATE_CHANGED =
+        "android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED";
 
     /**
      * Return codes for the connect and disconnect Bluez / Dbus calls.
+     * @hide
      */
     public static final int INPUT_DISCONNECT_FAILED_NOT_CONNECTED = 5000;
 
+    /**
+     * @hide
+     */
     public static final int INPUT_CONNECT_FAILED_ALREADY_CONNECTED = 5001;
 
+    /**
+     * @hide
+     */
     public static final int INPUT_CONNECT_FAILED_ATTEMPT_FAILED = 5002;
 
+    /**
+     * @hide
+     */
     public static final int INPUT_OPERATION_GENERIC_FAILURE = 5003;
 
+    /**
+     * @hide
+     */
     public static final int INPUT_OPERATION_SUCCESS = 5004;
 
-    private final IBluetooth mService;
-    private final Context mContext;
+    private ServiceListener mServiceListener;
+    private BluetoothAdapter mAdapter;
+    private IBluetooth mService;
 
     /**
      * Create a BluetoothInputDevice proxy object for interacting with the local
-     * Bluetooth Service which handle the HID profile.
-     * @param c Context
+     * Bluetooth Service which handles the InputDevice profile
+     *
      */
-    public BluetoothInputDevice(Context c) {
-        mContext = c;
-
+    /*package*/ BluetoothInputDevice(Context mContext, ServiceListener l) {
         IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
+        mServiceListener = l;
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
         if (b != null) {
             mService = IBluetooth.Stub.asInterface(b);
+            if (mServiceListener != null) {
+                mServiceListener.onServiceConnected(BluetoothProfile.INPUT_DEVICE, this);
+            }
         } else {
             Log.w(TAG, "Bluetooth Service not available!");
 
@@ -121,130 +118,151 @@ public final class BluetoothInputDevice {
         }
     }
 
-    /** Initiate a connection to an Input device.
-     *
-     *  This function returns false on error and true if the connection
-     *  attempt is being made.
-     *
-     *  Listen for INPUT_DEVICE_STATE_CHANGED_ACTION to find out when the
-     *  connection is completed.
-     *  @param device Remote BT device.
-     *  @return false on immediate error, true otherwise
-     *  @hide
+    /**
+     * {@inheritDoc}
+     * @hide
      */
-    public boolean connectInputDevice(BluetoothDevice device) {
-        if (DBG) log("connectInputDevice(" + device + ")");
-        try {
-            return mService.connectInputDevice(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+    public boolean connect(BluetoothDevice device) {
+        if (DBG) log("connect(" + device + ")");
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            try {
+                return mService.connectInputDevice(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
-    }
-
-    /** Initiate disconnect from an Input Device.
-     *  This function return false on error and true if the disconnection
-     *  attempt is being made.
-     *
-     *  Listen for INPUT_DEVICE_STATE_CHANGED_ACTION to find out when
-     *  disconnect is completed.
-     *
-     *  @param device Remote BT device.
-     *  @return false on immediate error, true otherwise
-     *  @hide
-     */
-    public boolean disconnectInputDevice(BluetoothDevice device) {
-        if (DBG) log("disconnectInputDevice(" + device + ")");
-        try {
-            return mService.disconnectInputDevice(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
-        }
-    }
-
-    /** Check if a specified InputDevice is connected.
-     *
-     *  @param device Remote BT device.
-     *  @return True if connected , false otherwise and on error.
-     *  @hide
-     */
-    public boolean isInputDeviceConnected(BluetoothDevice device) {
-        if (DBG) log("isInputDeviceConnected(" + device + ")");
-        int state = getInputDeviceState(device);
-        if (state == STATE_CONNECTED) return true;
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return false;
     }
 
-    /** Check if any Input Device is connected.
-     *
-     * @return List of devices, empty List on error.
+    /**
+     * {@inheritDoc}
      * @hide
      */
-    public List<BluetoothDevice> getConnectedInputDevices() {
-        if (DBG) log("getConnectedInputDevices()");
-        try {
-            return mService.getConnectedInputDevices();
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return new ArrayList<BluetoothDevice>();
+    public boolean disconnect(BluetoothDevice device) {
+        if (DBG) log("disconnect(" + device + ")");
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            try {
+                return mService.disconnectInputDevice(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
-    }
-
-    /** Get the state of an Input Device.
-     *
-     *  @param device Remote BT device.
-     *  @return The current state of the Input Device
-     *  @hide
-     */
-    public int getInputDeviceState(BluetoothDevice device) {
-        if (DBG) log("getInputDeviceState(" + device + ")");
-        try {
-            return mService.getInputDeviceState(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return STATE_DISCONNECTED;
-        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
     /**
-     * Set priority of an input device.
-     *
-     * Priority is a non-negative integer. Priority can take the following
-     * values:
-     * {@link PRIORITY_ON}, {@link PRIORITY_OFF}, {@link PRIORITY_AUTO_CONNECT}
-     *
-     * @param device Paired device.
-     * @param priority Integer priority
-     * @return true if priority is set, false on error
+     * {@inheritDoc}
      */
-    public boolean setInputDevicePriority(BluetoothDevice device, int priority) {
-        if (DBG) log("setInputDevicePriority(" + device + ", " + priority + ")");
-        try {
-            return mService.setInputDevicePriority(device, priority);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+    public List<BluetoothDevice> getConnectedDevices() {
+        if (DBG) log("getConnectedDevices()");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.getConnectedInputDevices();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return new ArrayList<BluetoothDevice>();
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return new ArrayList<BluetoothDevice>();
     }
 
     /**
-     * Get the priority associated with an Input Device.
-     *
-     * @param device Input Device
-     * @return non-negative priority, or negative error code on error.
+     * {@inheritDoc}
      */
-    public int getInputDevicePriority(BluetoothDevice device) {
-        if (DBG) log("getInputDevicePriority(" + device + ")");
-        try {
-            return mService.getInputDevicePriority(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return PRIORITY_OFF;
+    public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
+        if (DBG) log("getDevicesMatchingStates()");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.getInputDevicesMatchingConnectionStates(states);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return new ArrayList<BluetoothDevice>();
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return new ArrayList<BluetoothDevice>();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getConnectionState(BluetoothDevice device) {
+        if (DBG) log("getState(" + device + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.getInputDeviceConnectionState(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return BluetoothProfile.STATE_DISCONNECTED;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return BluetoothProfile.STATE_DISCONNECTED;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    public boolean setPriority(BluetoothDevice device, int priority) {
+        if (DBG) log("setPriority(" + device + ", " + priority + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF &&
+                priority != BluetoothProfile.PRIORITY_ON) {
+              return false;
+            }
+            try {
+                return mService.setInputDevicePriority(device, priority);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    public int getPriority(BluetoothDevice device) {
+        if (DBG) log("getPriority(" + device + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.getInputDevicePriority(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return BluetoothProfile.PRIORITY_OFF;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return BluetoothProfile.PRIORITY_OFF;
+    }
+
+    private boolean isEnabled() {
+       if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+       return false;
+    }
+
+    private boolean isValidDevice(BluetoothDevice device) {
+       if (device == null) return false;
+
+       if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
+       return false;
     }
 
     private static void log(String msg) {
-        Log.d(TAG, msg);
+      Log.d(TAG, msg);
     }
 }
