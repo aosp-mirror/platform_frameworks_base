@@ -361,6 +361,7 @@ class ZoomManager {
 
     // returns TRUE if zoom out succeeds and FALSE if no zoom changes.
     private boolean zoom(float zoomMultiplier) {
+        mInitialZoomOverview = false;
         // TODO: alternatively we can disallow this during draw history mode
         mWebView.switchOutDrawHistory();
         // Center zooming to the center of the screen.
@@ -378,6 +379,7 @@ class ZoomManager {
      * @return true if the new scale triggered an animation and false otherwise.
      */
     public boolean startZoomAnimation(float scale, boolean reflowText) {
+        mInitialZoomOverview = false;
         float oldScale = mActualScale;
         mInitialScrollX = mWebView.getScrollX();
         mInitialScrollY = mWebView.getScrollY();
@@ -421,6 +423,7 @@ class ZoomManager {
      * in progress by calling isFixedLengthAnimationInProgress().
      */
     public void animateZoom(Canvas canvas) {
+        mInitialZoomOverview = false;
         if (mZoomScale == 0) {
             Log.w(LOGTAG, "A WebView is attempting to perform a fixed length "
                     + "zoom animation when no zoom is in progress");
@@ -568,6 +571,8 @@ class ZoomManager {
      *   C. If the page is in overmode then change to the default scale.
      */
     public void handleDoubleTap(float lastTouchX, float lastTouchY) {
+        // User takes action, set initial zoom overview to false.
+        mInitialZoomOverview = false;
         WebSettings settings = mWebView.getSettings();
         if (!isDoubleTapEnabled()) {
             return;
@@ -706,6 +711,7 @@ class ZoomManager {
     private class ScaleDetectorListener implements ScaleGestureDetector.OnScaleGestureListener {
 
         public boolean onScaleBegin(ScaleGestureDetector detector) {
+            mInitialZoomOverview = false;
             dismissZoomPicker();
             mWebView.mViewManager.startZoom();
             mWebView.onPinchToZoomAnimationStart();
