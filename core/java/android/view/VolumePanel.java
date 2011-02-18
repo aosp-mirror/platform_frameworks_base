@@ -129,6 +129,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     // List of stream types and their order
     // RING and VOICE_CALL are hidden unless explicitly requested
     private static final int [] STREAM_TYPES = {
+        AudioManager.STREAM_BLUETOOTH_SCO,
         AudioManager.STREAM_RING,
         AudioManager.STREAM_VOICE_CALL,
         AudioManager.STREAM_MUSIC,
@@ -137,6 +138,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     // These icons need to correspond to the ones above.
     private static final int [] STREAM_ICONS_NORMAL = {
+        R.drawable.ic_audio_bt,
         R.drawable.ic_audio_phone,
         R.drawable.ic_audio_phone,
         R.drawable.ic_audio_vol,
@@ -145,6 +147,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     // These icons need to correspond to the ones above.
     private static final int [] STREAM_ICONS_MUTED = {
+        R.drawable.ic_audio_bt,
         R.drawable.ic_audio_phone,
         R.drawable.ic_audio_phone,
         R.drawable.ic_audio_vol_mute,
@@ -277,6 +280,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             final int streamType = STREAM_TYPES[i];
             if (streamType == AudioManager.STREAM_RING
                     || streamType == AudioManager.STREAM_VOICE_CALL
+                    || streamType == AudioManager.STREAM_BLUETOOTH_SCO
                     || streamType == activeStreamType) {
                 continue;
             }
