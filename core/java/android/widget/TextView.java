@@ -4403,12 +4403,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                     (mCurrentAlpha * Color.alpha(cursorcolor)) / 255);
                         }
                         mHighlightPaint.setStyle(Paint.Style.STROKE);
-
-                        if (mCursorCount > 0) {
-                            drawCursor = true;
-                        } else {
-                            highlight = mHighlightPath;
-                        }
+                        highlight = mHighlightPath;
+                        drawCursor = true;
                     }
                 } else {
                     if (mHighlightPathBogus) {
@@ -4491,7 +4487,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
         }
 
-        if (drawCursor) drawCursor(canvas, cursorOffsetVertical);
+        if (drawCursor) {
+            drawCursor(canvas, cursorOffsetVertical);
+            // Rely on the drawable entirely, do not draw the cursor line.
+            // Has to be done after the IMM related code above which relies on the highlight.
+            highlight = null;
+        }
 
         layout.draw(canvas, highlight, mHighlightPaint, cursorOffsetVertical);
 
