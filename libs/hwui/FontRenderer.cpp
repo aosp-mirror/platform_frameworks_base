@@ -316,6 +316,8 @@ FontRenderer::FontRenderer() {
     mTextTexture = NULL;
 
     mIndexBufferID = 0;
+    mPositionAttrSlot = -1;
+    mTexcoordAttrSlot = -1;
 
     mCacheWidth = DEFAULT_TEXT_CACHE_WIDTH;
     mCacheHeight = DEFAULT_TEXT_CACHE_HEIGHT;
@@ -565,13 +567,8 @@ void FontRenderer::issueDrawCommand() {
     float* vtx = mTextMeshPtr;
     float* tex = vtx + 3;
 
-    // position is slot 0
-    uint32_t slot = 0;
-    glVertexAttribPointer(slot, 3, GL_FLOAT, false, 20, vtx);
-
-    // texture0 is slot 1
-    slot = 1;
-    glVertexAttribPointer(slot, 2, GL_FLOAT, false, 20, tex);
+    glVertexAttribPointer(mPositionAttrSlot, 3, GL_FLOAT, false, 20, vtx);
+    glVertexAttribPointer(mTexcoordAttrSlot, 2, GL_FLOAT, false, 20, tex);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferID);
     glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, NULL);
@@ -715,6 +712,11 @@ bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
 
     if (!mCurrentFont) {
         LOGE("No font set");
+        return false;
+    }
+
+    if (mPositionAttrSlot < 0 || mTexcoordAttrSlot < 0) {
+        LOGE("Font renderer unable to draw, attribute slots undefined");
         return false;
     }
 

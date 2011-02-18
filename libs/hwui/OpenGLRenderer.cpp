@@ -1585,8 +1585,12 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 #else
     bool hasActiveLayer = false;
 #endif
-
     mCaches.unbindMeshBuffer();
+
+    // Tell font renderer the locations of position and texture coord
+    // attributes so it can bind its data properly
+    int positionSlot = mCaches.currentProgram->position;
+    fontRenderer.setAttributeBindingSlots(positionSlot, mTexCoordsSlot);
     if (fontRenderer.renderText(paint, clip, text, 0, bytesCount, count, x, y,
             hasActiveLayer ? &bounds : NULL)) {
 #if RENDER_LAYERS_AS_REGIONS
