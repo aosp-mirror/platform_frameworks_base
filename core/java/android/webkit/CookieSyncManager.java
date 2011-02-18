@@ -178,14 +178,16 @@ public final class CookieSyncManager extends WebSyncManager {
             return;
         }
 
-        manager.flushCookieStore();
+        if (JniUtil.useChromiumHttpStack()) {
+            manager.flushCookieStore();
+        } else {
+            ArrayList<Cookie> cookieList = manager.getUpdatedCookiesSince(mLastUpdate);
+            mLastUpdate = System.currentTimeMillis();
+            syncFromRamToFlash(cookieList);
 
-        ArrayList<Cookie> cookieList = manager.getUpdatedCookiesSince(mLastUpdate);
-        mLastUpdate = System.currentTimeMillis();
-        syncFromRamToFlash(cookieList);
-
-        ArrayList<Cookie> lruList = manager.deleteLRUDomain();
-        syncFromRamToFlash(lruList);
+            ArrayList<Cookie> lruList = manager.deleteLRUDomain();
+            syncFromRamToFlash(lruList);
+        }
 
         if (DebugFlags.COOKIE_SYNC_MANAGER) {
             Log.v(LOGTAG, "CookieSyncManager::syncFromRamToFlash DONE");
