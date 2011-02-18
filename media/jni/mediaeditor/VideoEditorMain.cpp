@@ -208,7 +208,7 @@ videoEditor_populateSettings(
                 jobject                 object,
                 jobject                 audioSettingObject);
 
-static void videoEditor_stopPreview(JNIEnv*  pEnv,
+static int videoEditor_stopPreview(JNIEnv*  pEnv,
                               jobject  thiz);
 
 static jobject
@@ -283,8 +283,8 @@ static JNINativeMethod gManualEditMethods[] = {
     {"nativeRenderMediaItemPreviewFrame",
     "(Landroid/view/Surface;Ljava/lang/String;IIIIJ)I",
                         (int *)videoEditor_renderMediaItemPreviewFrame     },
-    {"nativeStopPreview",       "()V",
-                                (void *)videoEditor_stopPreview            },
+    {"nativeStopPreview",       "()I",
+                                (int *)videoEditor_stopPreview    },
     {"stopEncoding",            "()V",
                                 (void *)videoEditor_stopEncoding         },
     {"release",                 "()V",
@@ -482,11 +482,13 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
     pContext->pVM->DetachCurrentThread();
 
 }
-static void videoEditor_stopPreview(JNIEnv*  pEnv,
+static int videoEditor_stopPreview(JNIEnv*  pEnv,
                               jobject  thiz)
 {
     ManualEditContext* pContext = M4OSA_NULL;
     bool needToBeLoaded = true;
+    M4OSA_UInt32 lastProgressTimeMs = 0;
+
     // Get the context.
     pContext =
             (ManualEditContext*)videoEditClasses_getContext(&needToBeLoaded, pEnv, thiz);
@@ -495,12 +497,14 @@ static void videoEditor_stopPreview(JNIEnv*  pEnv,
     videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
                                              (M4OSA_NULL == pContext),
                                              "not initialized");
-    pContext->mPreviewController->stopPreview();
+    lastProgressTimeMs = pContext->mPreviewController->stopPreview();
 
     if (pContext->mOverlayFileName != NULL) {
         M4OSA_free((M4OSA_MemAddr32)pContext->mOverlayFileName);
         pContext->mOverlayFileName = NULL;
     }
+
+    return lastProgressTimeMs;
 }
 
 static void videoEditor_clearSurface(JNIEnv* pEnv,
