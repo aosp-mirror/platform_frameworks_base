@@ -631,7 +631,7 @@
             <span class="zh-TW" style="display:none">準備發佈</span>
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/publishing/publishing.html">
-            <span class="en">Publishing Your Applications</span>
+            <span class="en">Publishing on Android Market</span>
           </a></li>
     </ul>
   </li>
