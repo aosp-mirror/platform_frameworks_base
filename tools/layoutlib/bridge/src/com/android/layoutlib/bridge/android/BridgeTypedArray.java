@@ -188,6 +188,10 @@ public final class BridgeTypedArray extends TypedArray {
 
         String s = mResourceData[index].getValue();
 
+        if (RenderResources.REFERENCE_NULL.equals(s)) {
+            return defValue;
+        }
+
         try {
             return (s == null) ? defValue : XmlUtils.convertValueToInt(s, defValue);
         } catch (NumberFormatException e) {
@@ -301,6 +305,10 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
+        if (RenderResources.REFERENCE_NULL.equals(value)) {
+            return null;
+        }
+
         // let the framework inflate the ColorStateList from the XML file.
         File f = new File(value);
         if (f.isFile()) {
@@ -408,6 +416,10 @@ public final class BridgeTypedArray extends TypedArray {
             return LayoutParams.WRAP_CONTENT;
         }
 
+        if (RenderResources.REFERENCE_NULL.equals(s)) {
+            return defValue;
+        }
+
         if (ResourceHelper.stringToFloat(s, mValue)) {
             return mValue.getDimension(mBridgeResources.mMetrics);
         }
@@ -478,6 +490,10 @@ public final class BridgeTypedArray extends TypedArray {
             return LayoutParams.MATCH_PARENT;
         } else if (s.equals(BridgeConstants.WRAP_CONTENT)) {
             return LayoutParams.WRAP_CONTENT;
+        }
+
+        if (RenderResources.REFERENCE_NULL.equals(s)) {
+            return defValue;
         }
 
         // FIXME huh?
@@ -586,6 +602,10 @@ public final class BridgeTypedArray extends TypedArray {
         if (resValue instanceof StyleResourceValue) {
             // get the id that will represent this style.
             return mContext.getDynamicIdByStyle((StyleResourceValue)resValue);
+        }
+
+        if (RenderResources.REFERENCE_NULL.equals(resValue.getValue())) {
+            return defValue;
         }
 
         // if the attribute was a reference to a resource, and not a declaration of an id (@+id),
@@ -715,6 +735,10 @@ public final class BridgeTypedArray extends TypedArray {
 
         String value = mResourceData[index].getValue();
         if (value != null) {
+            if (RenderResources.REFERENCE_NULL.equals(value)) {
+                return null;
+            }
+
             return new CharSequence[] { value };
         }
 
