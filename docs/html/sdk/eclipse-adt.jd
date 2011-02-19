@@ -1,8 +1,8 @@
 page.title=ADT Plugin for Eclipse
-adt.zip.version=9.0.0
-adt.zip.download=ADT_9.0.0.zip
-adt.zip.bytes=4433536
-adt.zip.checksum=bc2757f2a5a11d131390ce547bae154b
+adt.zip.version=10.0.0
+adt.zip.download=ADT-10.0.0.zip
+adt.zip.bytes=4243777
+adt.zip.checksum=bf88bff62bc45c3b6d062e2beed67765
 
 @jd:body
 
