@@ -345,8 +345,6 @@ public final class BridgeTypedArray extends TypedArray {
             Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null /*data*/);
         }
 
-        assert false;
-
         return null;
     }
 
@@ -429,8 +427,6 @@ public final class BridgeTypedArray extends TypedArray {
                 String.format(
                     "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
                     s, mNames[index]), null /*data*/);
-
-        assert false;
 
         return defValue;
     }
@@ -569,8 +565,6 @@ public final class BridgeTypedArray extends TypedArray {
                     "\"%1$s\" in attribute \"%2$s\" cannont be converted to a fraction.",
                     value, mNames[index]), null /*data*/);
 
-        assert false;
-
         return defValue;
     }
 
@@ -685,8 +679,6 @@ public final class BridgeTypedArray extends TypedArray {
                 String.format(
                     "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]),
                     resValue);
-
-        assert false;
 
         return defValue;
     }
