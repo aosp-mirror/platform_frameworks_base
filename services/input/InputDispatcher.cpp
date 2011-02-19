@@ -115,6 +115,7 @@ static bool isValidMotionAction(int32_t action, size_t pointerCount) {
     case AMOTION_EVENT_ACTION_CANCEL:
     case AMOTION_EVENT_ACTION_MOVE:
     case AMOTION_EVENT_ACTION_OUTSIDE:
+    case AMOTION_EVENT_ACTION_HOVER_MOVE:
         return true;
     case AMOTION_EVENT_ACTION_POINTER_DOWN:
     case AMOTION_EVENT_ACTION_POINTER_UP: {
@@ -318,7 +319,8 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
                 uint32_t source = motionEntry->source;
                 if (! isAppSwitchDue
                         && motionEntry->next == & mInboundQueue.tailSentinel // exactly one event
-                        && motionEntry->action == AMOTION_EVENT_ACTION_MOVE
+                        && (motionEntry->action == AMOTION_EVENT_ACTION_MOVE
+                                || motionEntry->action == AMOTION_EVENT_ACTION_HOVER_MOVE)
                         && deviceId == mThrottleState.lastDeviceId
                         && source == mThrottleState.lastSource) {
                     nsecs_t nextTime = mThrottleState.lastEventTime
@@ -478,7 +480,8 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
         // If the application takes too long to catch up then we drop all events preceding
         // the touch into the other window.
         MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
-        if (motionEntry->action == AMOTION_EVENT_ACTION_DOWN
+        if ((motionEntry->action == AMOTION_EVENT_ACTION_DOWN
+                || motionEntry->action == AMOTION_EVENT_ACTION_HOVER_MOVE)
                 && (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER)
                 && mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY
                 && mInputTargetWaitApplication != NULL) {
@@ -838,12 +841,13 @@ bool InputDispatcher::dispatchMotionLocked(
     bool isPointerEvent = entry->source & AINPUT_SOURCE_CLASS_POINTER;
 
     // Identify targets.
+    bool conflictingPointerActions = false;
     if (! mCurrentInputTargetsValid) {
         int32_t injectionResult;
         if (isPointerEvent) {
             // Pointer event.  (eg. touchscreen)
             injectionResult = findTouchedWindowTargetsLocked(currentTime,
-                    entry, nextWakeupTime);
+                    entry, nextWakeupTime, &conflictingPointerActions);
         } else {
             // Non touch event.  (eg. trackball)
             injectionResult = findFocusedWindowTargetsLocked(currentTime,
@@ -863,6 +867,10 @@ bool InputDispatcher::dispatchMotionLocked(
     }
 
     // Dispatch the motion.
+    if (conflictingPointerActions) {
+        synthesizeCancelationEventsForAllConnectionsLocked(
+                InputState::CANCEL_POINTER_EVENTS, "Conflicting pointer actions.");
+    }
     dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
     return true;
 }
@@ -1123,7 +1131,7 @@ Unresponsive:
 }
 
 int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
-        const MotionEntry* entry, nsecs_t* nextWakeupTime) {
+        const MotionEntry* entry, nsecs_t* nextWakeupTime, bool* outConflictingPointerActions) {
     enum InjectionPermission {
         INJECTION_PERMISSION_UNKNOWN,
         INJECTION_PERMISSION_GRANTED,
@@ -1166,31 +1174,38 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     // Update the touch state as needed based on the properties of the touch event.
     int32_t injectionResult = INPUT_EVENT_INJECTION_PENDING;
     InjectionPermission injectionPermission = INJECTION_PERMISSION_UNKNOWN;
-    bool isSplit, wrongDevice;
-    if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
-        mTempTouchState.reset();
-        mTempTouchState.down = true;
-        mTempTouchState.deviceId = entry->deviceId;
-        mTempTouchState.source = entry->source;
-        isSplit = false;
-        wrongDevice = false;
+
+    bool isSplit = mTouchState.split;
+    bool wrongDevice = mTouchState.down
+            && (mTouchState.deviceId != entry->deviceId
+                    || mTouchState.source != entry->source);
+    if (maskedAction == AMOTION_EVENT_ACTION_DOWN
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+        bool down = maskedAction == AMOTION_EVENT_ACTION_DOWN;
+        if (wrongDevice && !down) {
+            mTempTouchState.copyFrom(mTouchState);
+        } else {
+            mTempTouchState.reset();
+            mTempTouchState.down = down;
+            mTempTouchState.deviceId = entry->deviceId;
+            mTempTouchState.source = entry->source;
+            isSplit = false;
+            wrongDevice = false;
+        }
     } else {
         mTempTouchState.copyFrom(mTouchState);
-        isSplit = mTempTouchState.split;
-        wrongDevice = mTempTouchState.down
-                && (mTempTouchState.deviceId != entry->deviceId
-                        || mTempTouchState.source != entry->source);
-        if (wrongDevice) {
+    }
+    if (wrongDevice) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
-            LOGD("Dropping event because a pointer for a different device is already down.");
+        LOGD("Dropping event because a pointer for a different device is already down.");
 #endif
-            injectionResult = INPUT_EVENT_INJECTION_FAILED;
-            goto Failed;
-        }
+        injectionResult = INPUT_EVENT_INJECTION_FAILED;
+        goto Failed;
     }
 
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-            || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)) {
+            || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
         /* Case 1: New splittable pointer going down. */
 
         int32_t pointerIndex = getMotionEventActionPointerIndex(action);
@@ -1365,7 +1380,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     // If this is the first pointer going down and the touched window has a wallpaper
     // then also add the touched wallpaper windows so they are locked in for the duration
     // of the touch gesture.
-    if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
+    if (maskedAction == AMOTION_EVENT_ACTION_DOWN
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
         const InputWindow* foregroundWindow = mTempTouchState.getFirstForegroundWindow();
         if (foregroundWindow->hasWallpaper) {
             for (size_t i = 0; i < mWindows.size(); i++) {
@@ -1404,12 +1420,14 @@ Failed:
     if (injectionPermission == INJECTION_PERMISSION_GRANTED) {
         if (!wrongDevice) {
             if (maskedAction == AMOTION_EVENT_ACTION_UP
-                    || maskedAction == AMOTION_EVENT_ACTION_CANCEL) {
+                    || maskedAction == AMOTION_EVENT_ACTION_CANCEL
+                    || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
                 // All pointers up or canceled.
                 mTempTouchState.reset();
             } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
                 // First pointer went down.
                 if (mTouchState.down) {
+                    *outConflictingPointerActions = true;
 #if DEBUG_FOCUS
                     LOGD("Pointer down received while already down.");
 #endif
@@ -1750,29 +1768,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
     // Update the connection's input state.
     EventEntry* eventEntry = dispatchEntry->eventEntry;
-    InputState::Consistency consistency = connection->inputState.trackEvent(eventEntry);
-
-#if FILTER_INPUT_EVENTS
-    // Filter out inconsistent sequences of input events.
-    // The input system may drop or inject events in a way that could violate implicit
-    // invariants on input state and potentially cause an application to crash
-    // or think that a key or pointer is stuck down.  Technically we make no guarantees
-    // of consistency but it would be nice to improve on this where possible.
-    // XXX: This code is a proof of concept only.  Not ready for prime time.
-    if (consistency == InputState::TOLERABLE) {
-#if DEBUG_DISPATCH_CYCLE
-        LOGD("channel '%s' ~ Sending an event that is inconsistent with the connection's "
-                "current input state but that is likely to be tolerated by the application.",
-                connection->getInputChannelName());
-#endif
-    } else if (consistency == InputState::BROKEN) {
-        LOGI("channel '%s' ~ Dropping an event that is inconsistent with the connection's "
-                "current input state and that is likely to cause the application to crash.",
-                connection->getInputChannelName());
-        startNextDispatchCycleLocked(currentTime, connection);
-        return;
-    }
-#endif
+    connection->inputState.trackEvent(eventEntry);
 
     // Publish the event.
     status_t status;
@@ -2307,7 +2303,8 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
         AutoMutex _l(mLock);
 
         // Attempt batching and streaming of move events.
-        if (action == AMOTION_EVENT_ACTION_MOVE) {
+        if (action == AMOTION_EVENT_ACTION_MOVE
+                || action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
             // BATCHING CASE
             //
             // Try to append a move sample to the tail of the inbound queue for this device.
@@ -2326,7 +2323,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     continue;
                 }
 
-                if (motionEntry->action != AMOTION_EVENT_ACTION_MOVE
+                if (motionEntry->action != action
                         || motionEntry->source != source
                         || motionEntry->pointerCount != pointerCount
                         || motionEntry->isInjected()) {
@@ -2385,7 +2382,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
 
                     MotionEntry* motionEntry = static_cast<MotionEntry*>(
                             dispatchEntry->eventEntry);
-                    if (motionEntry->action != AMOTION_EVENT_ACTION_MOVE
+                    if (motionEntry->action != action
                             || motionEntry->deviceId != deviceId
                             || motionEntry->source != source
                             || motionEntry->pointerCount != pointerCount
@@ -3529,21 +3526,20 @@ bool InputDispatcher::InputState::isNeutral() const {
     return mKeyMementos.isEmpty() && mMotionMementos.isEmpty();
 }
 
-InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackEvent(
+void InputDispatcher::InputState::trackEvent(
         const EventEntry* entry) {
     switch (entry->type) {
     case EventEntry::TYPE_KEY:
-        return trackKey(static_cast<const KeyEntry*>(entry));
+        trackKey(static_cast<const KeyEntry*>(entry));
+        break;
 
     case EventEntry::TYPE_MOTION:
-        return trackMotion(static_cast<const MotionEntry*>(entry));
-
-    default:
-        return CONSISTENT;
+        trackMotion(static_cast<const MotionEntry*>(entry));
+        break;
     }
 }
 
-InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackKey(
+void InputDispatcher::InputState::trackKey(
         const KeyEntry* entry) {
     int32_t action = entry->action;
     for (size_t i = 0; i < mKeyMementos.size(); i++) {
@@ -3555,19 +3551,20 @@ InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackKey(
             switch (action) {
             case AKEY_EVENT_ACTION_UP:
                 mKeyMementos.removeAt(i);
-                return CONSISTENT;
+                return;
 
             case AKEY_EVENT_ACTION_DOWN:
-                return TOLERABLE;
+                mKeyMementos.removeAt(i);
+                goto Found;
 
             default:
-                return BROKEN;
+                return;
             }
         }
     }
 
-    switch (action) {
-    case AKEY_EVENT_ACTION_DOWN: {
+Found:
+    if (action == AKEY_EVENT_ACTION_DOWN) {
         mKeyMementos.push();
         KeyMemento& memento = mKeyMementos.editTop();
         memento.deviceId = entry->deviceId;
@@ -3576,15 +3573,10 @@ InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackKey(
         memento.scanCode = entry->scanCode;
         memento.flags = entry->flags;
         memento.downTime = entry->downTime;
-        return CONSISTENT;
-    }
-
-    default:
-        return BROKEN;
     }
 }
 
-InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackMotion(
+void InputDispatcher::InputState::trackMotion(
         const MotionEntry* entry) {
     int32_t action = entry->action & AMOTION_EVENT_ACTION_MASK;
     for (size_t i = 0; i < mMotionMementos.size(); i++) {
@@ -3594,40 +3586,28 @@ InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackMotio
             switch (action) {
             case AMOTION_EVENT_ACTION_UP:
             case AMOTION_EVENT_ACTION_CANCEL:
+            case AMOTION_EVENT_ACTION_HOVER_MOVE:
                 mMotionMementos.removeAt(i);
-                return CONSISTENT;
+                return;
 
             case AMOTION_EVENT_ACTION_DOWN:
-                return TOLERABLE;
-
-            case AMOTION_EVENT_ACTION_POINTER_DOWN:
-                if (entry->pointerCount == memento.pointerCount + 1) {
-                    memento.setPointers(entry);
-                    return CONSISTENT;
-                }
-                return BROKEN;
+                mMotionMementos.removeAt(i);
+                goto Found;
 
             case AMOTION_EVENT_ACTION_POINTER_UP:
-                if (entry->pointerCount == memento.pointerCount - 1) {
-                    memento.setPointers(entry);
-                    return CONSISTENT;
-                }
-                return BROKEN;
-
+            case AMOTION_EVENT_ACTION_POINTER_DOWN:
             case AMOTION_EVENT_ACTION_MOVE:
-                if (entry->pointerCount == memento.pointerCount) {
-                    return CONSISTENT;
-                }
-                return BROKEN;
+                memento.setPointers(entry);
+                return;
 
             default:
-                return BROKEN;
+                return;
             }
         }
     }
 
-    switch (action) {
-    case AMOTION_EVENT_ACTION_DOWN: {
+Found:
+    if (action == AMOTION_EVENT_ACTION_DOWN) {
         mMotionMementos.push();
         MotionMemento& memento = mMotionMementos.editTop();
         memento.deviceId = entry->deviceId;
@@ -3636,11 +3616,6 @@ InputDispatcher::InputState::Consistency InputDispatcher::InputState::trackMotio
         memento.yPrecision = entry->yPrecision;
         memento.downTime = entry->downTime;
         memento.setPointers(entry);
-        return CONSISTENT;
-    }
-
-    default:
-        return BROKEN;
     }
 }
 

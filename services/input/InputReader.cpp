@@ -565,15 +565,6 @@ InputDevice::~InputDevice() {
     mMappers.clear();
 }
 
-static void dumpMotionRange(String8& dump, const InputDeviceInfo& deviceInfo,
-        int32_t rangeType, const char* name) {
-    const InputDeviceInfo::MotionRange* range = deviceInfo.getMotionRange(rangeType);
-    if (range) {
-        dump.appendFormat(INDENT3 "%s: min=%0.3f, max=%0.3f, flat=%0.3f, fuzz=%0.3f\n",
-                name, range->min, range->max, range->flat, range->fuzz);
-    }
-}
-
 void InputDevice::dump(String8& dump) {
     InputDeviceInfo deviceInfo;
     getDeviceInfo(& deviceInfo);
@@ -582,17 +573,24 @@ void InputDevice::dump(String8& dump) {
             deviceInfo.getName().string());
     dump.appendFormat(INDENT2 "Sources: 0x%08x\n", deviceInfo.getSources());
     dump.appendFormat(INDENT2 "KeyboardType: %d\n", deviceInfo.getKeyboardType());
-    if (!deviceInfo.getMotionRanges().isEmpty()) {
+
+    const KeyedVector<int32_t, InputDeviceInfo::MotionRange> ranges = deviceInfo.getMotionRanges();
+    if (!ranges.isEmpty()) {
         dump.append(INDENT2 "Motion Ranges:\n");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_X, "X");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_Y, "Y");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_PRESSURE, "Pressure");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_SIZE, "Size");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_TOUCH_MAJOR, "TouchMajor");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_TOUCH_MINOR, "TouchMinor");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_TOOL_MAJOR, "ToolMajor");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_TOOL_MINOR, "ToolMinor");
-        dumpMotionRange(dump, deviceInfo, AMOTION_EVENT_AXIS_ORIENTATION, "Orientation");
+        for (size_t i = 0; i < ranges.size(); i++) {
+            int32_t axis = ranges.keyAt(i);
+            const char* label = getAxisLabel(axis);
+            char name[32];
+            if (label) {
+                strncpy(name, label, sizeof(name));
+                name[sizeof(name) - 1] = '\0';
+            } else {
+                snprintf(name, sizeof(name), "%d", axis);
+            }
+            const InputDeviceInfo::MotionRange& range = ranges.valueAt(i);
+            dump.appendFormat(INDENT3 "%s: min=%0.3f, max=%0.3f, flat=%0.3f, fuzz=%0.3f\n",
+                    name, range.min, range.max, range.flat, range.fuzz);
+        }
     }
 
     size_t numMappers = mMappers.size();
@@ -1123,6 +1121,9 @@ void CursorInputMapper::configure() {
 
     mVWheelScale = 1.0f;
     mHWheelScale = 1.0f;
+
+    mHaveVWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_WHEEL);
+    mHaveHWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_HWHEEL);
 }
 
 void CursorInputMapper::configureParameters() {
@@ -1274,8 +1275,10 @@ void CursorInputMapper::sync(nsecs_t when) {
 
         if (downChanged) {
             motionEventAction = mLocked.down ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
-        } else {
+        } else if (mLocked.down || mPointerController == NULL) {
             motionEventAction = AMOTION_EVENT_ACTION_MOVE;
+        } else {
+            motionEventAction = AMOTION_EVENT_ACTION_HOVER_MOVE;
         }
 
         if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0

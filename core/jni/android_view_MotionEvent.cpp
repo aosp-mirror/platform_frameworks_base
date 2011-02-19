@@ -217,7 +217,7 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
 
             uint32_t index = 0;
             do {
-                uint32_t axis = __builtin_ctz(bits);
+                uint32_t axis = __builtin_ctzll(bits);
                 uint64_t axisBit = 1LL << axis;
                 bits &= ~axisBit;
                 outRawPointerCoords->setAxisValue(axis, values[index++]);
@@ -298,7 +298,7 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
         const float* values = rawPointerCoords->values;
         uint32_t index = 0;
         do {
-            uint32_t axis = __builtin_ctz(remainingBits);
+            uint32_t axis = __builtin_ctzll(remainingBits);
             uint64_t axisBit = 1LL << axis;
             remainingBits &= ~axisBit;
             outBits |= axisBit;

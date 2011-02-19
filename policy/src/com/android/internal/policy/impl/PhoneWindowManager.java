@@ -1490,10 +1490,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             FallbackAction outFallbackAction) {
         // Consult the key character map for specific fallback actions.
         // For example, map NUMPAD_1 to MOVE_HOME when NUMLOCK is not pressed.
-        if (kcm.getFallbackAction(keyCode, metaState, outFallbackAction)) {
-            return true;
-        }
-        return false;
+        return kcm.getFallbackAction(keyCode, metaState, outFallbackAction);
     }
 
     /**

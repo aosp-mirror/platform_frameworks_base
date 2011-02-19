@@ -412,7 +412,8 @@ status_t InputPublisher::publishMotionEvent(
     // Cache essential information about the motion event to ensure that a malicious consumer
     // cannot confuse the publisher by modifying the contents of the shared memory buffer while
     // it is being updated.
-    if (action == AMOTION_EVENT_ACTION_MOVE) {
+    if (action == AMOTION_EVENT_ACTION_MOVE
+            || action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
         mMotionEventPointerCount = pointerCount;
         mMotionEventSampleDataStride = InputMessage::sampleDataStride(pointerCount);
         mMotionEventSampleDataTail = InputMessage::sampleDataPtrIncrement(

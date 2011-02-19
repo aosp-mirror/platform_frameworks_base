@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.MotionEvent.PointerCoords;
 
 import java.util.ArrayList;
 
@@ -43,7 +44,7 @@ public class PointerLocationView extends View {
         private boolean mCurDown;
         
         // Most recent coordinates.
-        private MotionEvent.PointerCoords mCoords = new MotionEvent.PointerCoords();
+        private PointerCoords mCoords = new PointerCoords();
         
         // Most recent velocity.
         private float mXVelocity;
@@ -86,6 +87,7 @@ public class PointerLocationView extends View {
     private int mMaxNumPointers;
     private int mActivePointerId;
     private final ArrayList<PointerState> mPointers = new ArrayList<PointerState>();
+    private final PointerCoords mHoverCoords = new PointerCoords();
     
     private final VelocityTracker mVelocity;
     
@@ -386,9 +388,11 @@ public class PointerLocationView extends View {
             }
             
             final int NI = event.getPointerCount();
-            
+
+            final boolean hover = (action == MotionEvent.ACTION_HOVER_MOVE);
             mCurDown = action != MotionEvent.ACTION_UP
-                    && action != MotionEvent.ACTION_CANCEL;
+                    && action != MotionEvent.ACTION_CANCEL
+                    && !hover;
             mCurNumPointers = mCurDown ? NI : 0;
             if (mMaxNumPointers < mCurNumPointers) {
                 mMaxNumPointers = mCurNumPointers;
@@ -399,22 +403,27 @@ public class PointerLocationView extends View {
             
             for (int i=0; i<NI; i++) {
                 final int id = event.getPointerId(i);
-                final PointerState ps = mPointers.get(id);
+                final PointerState ps = hover ? null : mPointers.get(id);
+                final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
                 final int N = event.getHistorySize();
                 for (int j=0; j<N; j++) {
-                    event.getHistoricalPointerCoords(i, j, ps.mCoords);
+                    event.getHistoricalPointerCoords(i, j, coords);
                     if (mPrintCoords) {
-                        logPointerCoords(ps.mCoords, id);
+                        logPointerCoords(coords, id);
                     }
-                    ps.addTrace(event.getHistoricalX(i, j), event.getHistoricalY(i, j));
+                    if (ps != null) {
+                        ps.addTrace(event.getHistoricalX(i, j), event.getHistoricalY(i, j));
+                    }
                 }
-                event.getPointerCoords(i, ps.mCoords);
+                event.getPointerCoords(i, coords);
                 if (mPrintCoords) {
-                    logPointerCoords(ps.mCoords, id);
+                    logPointerCoords(coords, id);
                 }
-                ps.addTrace(ps.mCoords.x, ps.mCoords.y);
-                ps.mXVelocity = mVelocity.getXVelocity(id);
-                ps.mYVelocity = mVelocity.getYVelocity(id);
+                if (ps != null) {
+                    ps.addTrace(coords.x, coords.y);
+                    ps.mXVelocity = mVelocity.getXVelocity(id);
+                    ps.mYVelocity = mVelocity.getYVelocity(id);
+                }
             }
             
             if (action == MotionEvent.ACTION_UP

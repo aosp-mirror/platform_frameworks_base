@@ -593,19 +593,6 @@ private:
      * synthesized when events are dropped. */
     class InputState {
     public:
-        // Specifies whether a given event will violate input state consistency.
-        enum Consistency {
-            // The event is consistent with the current input state.
-            CONSISTENT,
-            // The event is inconsistent with the current input state but applications
-            // will tolerate it.  eg. Down followed by another down.
-            TOLERABLE,
-            // The event is inconsistent with the current input state and will probably
-            // cause applications to crash.  eg. Up without prior down, move with
-            // unexpected number of pointers.
-            BROKEN
-        };
-
         // Specifies the sources to cancel.
         enum CancelationOptions {
             CANCEL_ALL_EVENTS = 0,
@@ -621,16 +608,13 @@ private:
         bool isNeutral() const;
 
         // Records tracking information for an event that has just been published.
-        // Returns whether the event is consistent with the current input state.
-        Consistency trackEvent(const EventEntry* entry);
+        void trackEvent(const EventEntry* entry);
 
         // Records tracking information for a key event that has just been published.
-        // Returns whether the event is consistent with the current input state.
-        Consistency trackKey(const KeyEntry* entry);
+        void trackKey(const KeyEntry* entry);
 
         // Records tracking information for a motion event that has just been published.
-        // Returns whether the event is consistent with the current input state.
-        Consistency trackMotion(const MotionEntry* entry);
+        void trackMotion(const MotionEntry* entry);
 
         // Synthesizes cancelation events for the current state and resets the tracked state.
         void synthesizeCancelationEvents(nsecs_t currentTime, Allocator* allocator,
@@ -911,7 +895,7 @@ private:
     int32_t findFocusedWindowTargetsLocked(nsecs_t currentTime, const EventEntry* entry,
             nsecs_t* nextWakeupTime);
     int32_t findTouchedWindowTargetsLocked(nsecs_t currentTime, const MotionEntry* entry,
-            nsecs_t* nextWakeupTime);
+            nsecs_t* nextWakeupTime, bool* outConflictingPointerActions);
 
     void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
             BitSet32 pointerIds);

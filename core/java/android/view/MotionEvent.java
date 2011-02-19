@@ -157,7 +157,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * {@link #ACTION_POINTER_ID_MASK} indicate which pointer changed.
      */
     public static final int ACTION_POINTER_UP       = 6;
-    
+
+    /**
+     * Constant for {@link #getAction}: A change happened but the pointer
+     * is not down (unlike {@link #ACTION_MOVE}).  The motion contains the most
+     * recent point, as well as any intermediate points since the last
+     * hover move event.
+     */
+    public static final int ACTION_HOVER_MOVE       = 7;
+
     /**
      * Bits in the action code that represent a pointer index, used with
      * {@link #ACTION_POINTER_DOWN} and {@link #ACTION_POINTER_UP}.  Shifting
@@ -269,9 +277,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <li>For a touch screen, reports the absolute X screen position of the center of
      * the touch contact area.  The units are display pixels.
      * <li>For a touch pad, reports the absolute X surface position of the center of the touch
-     * contact area.  The units are device-specific because the touch pad is not necessarily
-     * associated with a display.  Use {@link InputDevice#getMotionRange(int)} to query
-     * the effective range of values.
+     * contact area.  The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+     * to query the effective range of values.
      * <li>For a mouse, reports the absolute X screen position of the mouse pointer.
      * The units are display pixels.
      * <li>For a trackball, reports the relative horizontal displacement of the trackball.
@@ -317,7 +324,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Constant used to identify the Pressure axis of a motion event.
      * <p>
      * <ul>
-     * <li>For a touch screen or touch pad, reports the approximate pressure applied to the device
+     * <li>For a touch screen or touch pad, reports the approximate pressure applied to the surface
      * by a finger or other tool.  The value is normalized to a range from
      * 0 (no pressure at all) to 1 (normal pressure), although values higher than 1
      * may be generated depending on the calibration of the input device.
@@ -342,7 +349,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <li>For a touch screen or touch pad, reports the approximate size of the contact area in
      * relation to the maximum detectable size for the device.  The value is normalized
      * to a range from 0 (smallest detectable size) to 1 (largest detectable size),
-     * although it is not a linear scale.  This value is of very limited use.
+     * although it is not a linear scale.  This value is of limited use.
      * To obtain calibrated size information, use
      * {@link #AXIS_TOUCH_MAJOR} or {@link #AXIS_TOOL_MAJOR}.
      * </ul>
@@ -475,7 +482,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Constant used to identify the Vertical Scroll axis of a motion event.
      * <p>
      * <ul>
-     * <li>For a mouse, reports the relative movement of vertical scroll wheel.
+     * <li>For a mouse, reports the relative movement of the vertical scroll wheel.
      * The value is normalized to a range from -1.0 (up) to 1.0 (down).
      * </ul>
      * </p><p>
@@ -493,7 +500,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Constant used to identify the Horizontal Scroll axis of a motion event.
      * <p>
      * <ul>
-     * <li>For a mouse, reports the relative movement of horizontal scroll wheel.
+     * <li>For a mouse, reports the relative movement of the horizontal scroll wheel.
      * The value is normalized to a range from -1.0 (left) to 1.0 (right).
      * </ul>
      * </p><p>
@@ -969,9 +976,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param eventTime The the time (in ms) when this specific event was generated.  This 
      * must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param action The kind of action being performed -- one of either
-     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
-     * {@link #ACTION_CANCEL}.
+     * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointers The number of points that will be in this event.
      * @param pointerIds An array of <em>pointers</em> values providing
      * an identifier for each pointer.
@@ -1010,9 +1015,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param eventTime  The the time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param action The kind of action being performed -- one of either
-     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
-     * {@link #ACTION_CANCEL}.
+     * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param x The X coordinate of this event.
      * @param y The Y coordinate of this event.
      * @param pressure The current pressure of this event.  The pressure generally
@@ -1062,9 +1065,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param eventTime  The the time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param action The kind of action being performed -- one of either
-     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
-     * {@link #ACTION_CANCEL}.
+     * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param pointers The number of pointers that are active in this event.
      * @param x The X coordinate of this event.
      * @param y The Y coordinate of this event.
@@ -1106,9 +1107,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
      * @param eventTime  The the time (in ms) when this specific event was generated.  This
      * must be obtained from {@link SystemClock#uptimeMillis()}.
-     * @param action The kind of action being performed -- one of either
-     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
-     * {@link #ACTION_CANCEL}.
+     * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
      * @param x The X coordinate of this event.
      * @param y The Y coordinate of this event.
      * @param metaState The state of any meta / modifier keys that were in effect when
@@ -1203,23 +1202,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Return the kind of action being performed -- one of either
-     * {@link #ACTION_DOWN}, {@link #ACTION_MOVE}, {@link #ACTION_UP}, or
-     * {@link #ACTION_CANCEL}.  Consider using {@link #getActionMasked}
-     * and {@link #getActionIndex} to retrieve the separate masked action
-     * and pointer index.
+     * Return the kind of action being performed.
+     * Consider using {@link #getActionMasked} and {@link #getActionIndex} to retrieve
+     * the separate masked action and pointer index.
+     * @return The action, such as {@link #ACTION_DOWN} or
+     * the combination of {@link #ACTION_POINTER_DOWN} with a shifted pointer index.
      */
     public final int getAction() {
         return nativeGetAction(mNativePtr);
     }
 
     /**
-     * Return the masked action being performed, without pointer index
-     * information.  May be any of the actions: {@link #ACTION_DOWN},
-     * {@link #ACTION_MOVE}, {@link #ACTION_UP}, {@link #ACTION_CANCEL},
-     * {@link #ACTION_POINTER_DOWN}, or {@link #ACTION_POINTER_UP}.
-     * Use {@link #getActionIndex} to return the index associated with
-     * pointer actions.
+     * Return the masked action being performed, without pointer index information.
+     * Use {@link #getActionIndex} to return the index associated with pointer actions.
+     * @return The action, such as {@link #ACTION_DOWN} or {@link #ACTION_POINTER_DOWN}.
      */
     public final int getActionMasked() {
         return nativeGetAction(mNativePtr) & ACTION_MASK;
@@ -1228,10 +1224,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     /**
      * For {@link #ACTION_POINTER_DOWN} or {@link #ACTION_POINTER_UP}
      * as returned by {@link #getActionMasked}, this returns the associated
-     * pointer index.  The index may be used with {@link #getPointerId(int)},
+     * pointer index.
+     * The index may be used with {@link #getPointerId(int)},
      * {@link #getX(int)}, {@link #getY(int)}, {@link #getPressure(int)},
      * and {@link #getSize(int)} to get information about the pointer that has
      * gone down or up.
+     * @return The index associated with the action.
      */
     public final int getActionIndex() {
         return (nativeGetAction(mNativePtr) & ACTION_POINTER_INDEX_MASK)
@@ -2096,7 +2094,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * current location, position and size is updated to the new values.
      * The current values in the event are added to a list of historical values.
      *
-     * Only applies to {@link #ACTION_MOVE} events.
+     * Only applies to {@link #ACTION_MOVE} or {@link #ACTION_HOVER_MOVE} events.
      *
      * @param eventTime The time stamp (in ms) for this data.
      * @param x The new X position.
@@ -2123,7 +2121,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * current location, position and size is updated to the new values.
      * The current values in the event are added to a list of historical values.
      *
-     * Only applies to {@link #ACTION_MOVE} events.
+     * Only applies to {@link #ACTION_MOVE} or {@link #ACTION_HOVER_MOVE} events.
      *
      * @param eventTime The time stamp (in ms) for this data.
      * @param pointerCoords The new pointer coordinates.
@@ -2178,6 +2176,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 return "ACTION_CANCEL";
             case ACTION_MOVE:
                 return "ACTION_MOVE";
+            case ACTION_HOVER_MOVE:
+                return "ACTION_HOVER_MOVE";
         }
         int index = (action & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
         switch (action & ACTION_MASK) {
@@ -2203,8 +2203,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Gets an axis by its symbolic name such as "KEYCODE_A" or an
-     * equivalent numeric constant such as "1001".
+     * Gets an axis by its symbolic name such as "AXIS_X" or an
+     * equivalent numeric constant such as "42".
      *
      * @param symbolicName The symbolic name of the axis.
      * @return The axis or -1 if not found.

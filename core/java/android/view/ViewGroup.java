@@ -1166,7 +1166,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int actionMasked = action & MotionEvent.ACTION_MASK;
 
         // Handle an initial down.
-        if (actionMasked == MotionEvent.ACTION_DOWN) {
+        if (actionMasked == MotionEvent.ACTION_DOWN
+                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
             // Throw away all previous state when starting a new touch gesture.
             // The framework may have dropped the up or cancel event for the previous gesture
             // due to an app switch, ANR, or some other state change.
@@ -1176,7 +1177,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // Check for interception.
         final boolean intercepted;
-        if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) {
+        if (actionMasked == MotionEvent.ACTION_DOWN
+                || actionMasked == MotionEvent.ACTION_HOVER_MOVE
+                || mFirstTouchTarget != null) {
             final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
             if (!disallowIntercept) {
                 intercepted = onInterceptTouchEvent(ev);
@@ -1198,7 +1201,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean alreadyDispatchedToNewTouchTarget = false;
         if (!canceled && !intercepted) {
             if (actionMasked == MotionEvent.ACTION_DOWN
-                    || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)) {
+                    || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
+                    || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
                 final int actionIndex = ev.getActionIndex(); // always 0 for down
                 final int idBitsToAssign = split ? 1 << ev.getPointerId(actionIndex)
                         : TouchTarget.ALL_POINTER_IDS;
@@ -1299,7 +1303,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         // Update list of touch targets for pointer up or cancel, if needed.
-        if (canceled || actionMasked == MotionEvent.ACTION_UP) {
+        if (canceled
+                || actionMasked == MotionEvent.ACTION_UP
+                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
             resetTouchState();
         } else if (split && actionMasked == MotionEvent.ACTION_POINTER_UP) {
             final int actionIndex = ev.getActionIndex();
@@ -1542,6 +1548,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int newAction;
             if (cancel) {
                 newAction = MotionEvent.ACTION_CANCEL;
+            } else if (oldAction == MotionEvent.ACTION_HOVER_MOVE) {
+                newAction = MotionEvent.ACTION_HOVER_MOVE;
             } else {
                 final int oldMaskedAction = oldAction & MotionEvent.ACTION_MASK;
                 if (oldMaskedAction == MotionEvent.ACTION_POINTER_DOWN

@@ -167,6 +167,8 @@ public:
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const = 0;
 
+    virtual bool hasRelativeAxis(int32_t deviceId, int axis) const = 0;
+
     virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const = 0;
 
@@ -224,6 +226,8 @@ public:
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const;
 
+    virtual bool hasRelativeAxis(int32_t deviceId, int axis) const;
+
     virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const;
 
@@ -272,6 +276,7 @@ private:
 
         uint32_t classes;
         uint8_t* keyBitmask;
+        uint8_t* relBitmask;
         String8 configurationFile;
         PropertyMap* configuration;
         VirtualKeyMap* virtualKeyMap;

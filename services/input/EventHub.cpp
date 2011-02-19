@@ -101,12 +101,14 @@ EventHub::Device::Device(int fd, int32_t id, const String8& path,
         const InputDeviceIdentifier& identifier) :
         next(NULL),
         fd(fd), id(id), path(path), identifier(identifier),
-        classes(0), keyBitmask(NULL), configuration(NULL), virtualKeyMap(NULL) {
+        classes(0), keyBitmask(NULL), relBitmask(NULL),
+        configuration(NULL), virtualKeyMap(NULL) {
 }
 
 EventHub::Device::~Device() {
     close();
     delete[] keyBitmask;
+    delete[] relBitmask;
     delete configuration;
     delete virtualKeyMap;
 }
@@ -187,6 +189,18 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
         outAxisInfo->fuzz = info.fuzz;
     }
     return OK;
+}
+
+bool EventHub::hasRelativeAxis(int32_t deviceId, int axis) const {
+    if (axis >= 0 && axis <= REL_MAX) {
+        AutoMutex _l(mLock);
+
+        Device* device = getDeviceLocked(deviceId);
+        if (device && device->relBitmask) {
+            return test_bit(axis, device->relBitmask);
+        }
+    }
+    return false;
 }
 
 int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t scanCode) const {
@@ -772,6 +786,24 @@ int EventHub::openDevice(const char *devicePath) {
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
     ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask);
 
+    device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
+    if (device->keyBitmask != NULL) {
+        memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
+    } else {
+        delete device;
+        LOGE("out of memory allocating key bitmask");
+        return -1;
+    }
+
+    device->relBitmask = new uint8_t[sizeof(rel_bitmask)];
+    if (device->relBitmask != NULL) {
+        memcpy(device->relBitmask, rel_bitmask, sizeof(rel_bitmask));
+    } else {
+        delete device;
+        LOGE("out of memory allocating rel bitmask");
+        return -1;
+    }
+
     // See if this is a keyboard.  Ignore everything in the button range except for
     // joystick and gamepad buttons which are handled like keyboards for the most part.
     bool haveKeyboardKeys = containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
@@ -781,14 +813,6 @@ int EventHub::openDevice(const char *devicePath) {
                 sizeof_bit_array(BTN_DIGI));
     if (haveKeyboardKeys || haveGamepadButtons) {
         device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
-        device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
-        if (device->keyBitmask != NULL) {
-            memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
-        } else {
-            delete device;
-            LOGE("out of memory allocating key bitmask");
-            return -1;
-        }
     }
 
     // See if this is a cursor device such as a trackball or mouse.

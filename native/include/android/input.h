@@ -281,7 +281,13 @@ enum {
     /* A non-primary pointer has gone up.
      * The bits in AMOTION_EVENT_ACTION_POINTER_INDEX_MASK indicate which pointer changed.
      */
-    AMOTION_EVENT_ACTION_POINTER_UP = 6
+    AMOTION_EVENT_ACTION_POINTER_UP = 6,
+
+    /* A change happened but the pointer is not down (unlike AMOTION_EVENT_ACTION_MOVE).
+     * The motion contains the most recent point, as well as any intermediate points since
+     * the last hover move event.
+     */
+    AMOTION_EVENT_ACTION_HOVER_MOVE = 7,
 };
 
 /*

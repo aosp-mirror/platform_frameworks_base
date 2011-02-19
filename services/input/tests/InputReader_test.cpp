@@ -561,6 +561,10 @@ private:
         return -1;
     }
 
+    virtual bool hasRelativeAxis(int32_t deviceId, int axis) const {
+        return false;
+    }
+
     virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const {
         Device* device = getDevice(deviceId);
