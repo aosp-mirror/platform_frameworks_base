@@ -250,4 +250,47 @@ static const KeycodeLabel FLAGS[] = {
     { NULL, 0 }
 };
 
+static const KeycodeLabel AXES[] = {
+    { "X", 0 },
+    { "Y", 1 },
+    { "PRESSURE", 2 },
+    { "SIZE", 3 },
+    { "TOUCH_MAJOR", 4 },
+    { "TOUCH_MINOR", 5 },
+    { "TOOL_MAJOR", 6 },
+    { "TOOL_MINOR", 7 },
+    { "ORIENTATION", 8 },
+    { "VSCROLL", 9 },
+    { "HSCROLL", 10 },
+    { "Z", 11 },
+    { "RX", 12 },
+    { "RY", 13 },
+    { "RZ", 14 },
+    { "HAT_X", 15 },
+    { "HAT_Y", 16 },
+    { "LTRIGGER", 17 },
+    { "RTRIGGER", 18 },
+    { "GENERIC_1", 32 },
+    { "GENERIC_2", 33 },
+    { "GENERIC_3", 34 },
+    { "GENERIC_4", 35 },
+    { "GENERIC_5", 36 },
+    { "GENERIC_6", 37 },
+    { "GENERIC_7", 38 },
+    { "GENERIC_8", 39 },
+    { "GENERIC_9", 40 },
+    { "GENERIC_10", 41 },
+    { "GENERIC_11", 42 },
+    { "GENERIC_12", 43 },
+    { "GENERIC_13", 44 },
+    { "GENERIC_14", 45 },
+    { "GENERIC_15", 46 },
+    { "GENERIC_16", 47 },
+
+    // NOTE: If you add a new axis here you must also add it to several other files.
+    //       Refer to frameworks/base/core/java/android/view/MotionEvent.java for the full list.
+
+    { NULL, -1 }
+};
+
 #endif // _UI_KEYCODE_LABELS_H

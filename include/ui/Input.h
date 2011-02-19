@@ -170,10 +170,10 @@ struct InputConfiguration {
  * Pointer coordinate data.
  */
 struct PointerCoords {
-    enum { MAX_AXES = 15 }; // 15 so that sizeof(PointerCoords) == 16 * 4 == 64
+    enum { MAX_AXES = 14 }; // 14 so that sizeof(PointerCoords) == 64
 
     // Bitfield of axes that are present in this structure.
-    uint32_t bits; // 32bits are enough for now, can raise to 64bit when needed
+    uint64_t bits;
 
     // Values of axes that are stored in this structure packed in order by axis id
     // for each axis that is present in the structure according to 'bits'.
@@ -183,41 +183,9 @@ struct PointerCoords {
         bits = 0;
     }
 
-    inline float getAxisValue(int32_t axis) const {
-        uint32_t axisBit = 1 << axis;
-        if (!(bits & axisBit)) {
-            return 0;
-        }
-        uint32_t index = __builtin_popcount(bits & (axisBit - 1));
-        return values[index];
-    }
-
-    inline status_t setAxisValue(int32_t axis, float value) {
-        uint32_t axisBit = 1 << axis;
-        uint32_t index = __builtin_popcount(bits & (axisBit - 1));
-        if (!(bits & axisBit)) {
-            uint32_t count = __builtin_popcount(bits);
-            if (count >= MAX_AXES) {
-                tooManyAxes(axis);
-                return NO_MEMORY;
-            }
-            bits |= axisBit;
-            for (uint32_t i = count; i > index; i--) {
-                values[i] = values[i - 1];
-            }
-        }
-        values[index] = value;
-        return OK;
-    }
-
-    inline float* editAxisValue(int32_t axis) {
-        uint32_t axisBit = 1 << axis;
-        if (!(bits & axisBit)) {
-            return NULL;
-        }
-        uint32_t index = __builtin_popcount(bits & (axisBit - 1));
-        return &values[index];
-    }
+    float getAxisValue(int32_t axis) const;
+    status_t setAxisValue(int32_t axis, float value);
+    float* editAxisValue(int32_t axis);
 
 #ifdef HAVE_ANDROID_OS
     status_t readFromParcel(Parcel* parcel);

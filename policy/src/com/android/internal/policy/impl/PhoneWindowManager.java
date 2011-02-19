@@ -117,6 +117,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
+import android.view.KeyCharacterMap.FallbackAction;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.media.IAudioService;
@@ -1453,7 +1454,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             // Check for fallback actions.
-            if (kcm.getFallbackAction(keyCode, metaState, mFallbackAction)) {
+            if (getFallbackAction(kcm, keyCode, metaState, mFallbackAction)) {
                 if (DEBUG_FALLBACK) {
                     Slog.d(TAG, "Fallback: keyCode=" + mFallbackAction.keyCode
                             + " metaState=" + Integer.toHexString(mFallbackAction.metaState));
@@ -1483,6 +1484,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Slog.d(TAG, "No fallback.");
         }
         return null;
+    }
+
+    private boolean getFallbackAction(KeyCharacterMap kcm, int keyCode, int metaState,
+            FallbackAction outFallbackAction) {
+        // Consult the key character map for specific fallback actions.
+        // For example, map NUMPAD_1 to MOVE_HOME when NUMLOCK is not pressed.
+        if (kcm.getFallbackAction(keyCode, metaState, outFallbackAction)) {
+            return true;
+        }
+        return false;
     }
 
     /**

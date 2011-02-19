@@ -2496,7 +2496,6 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         // Deliver the event to the view.
         if (mView.dispatchGenericMotionEvent(event)) {
-            ensureTouchMode(false);
             if (isJoystick) {
                 updateJoystickDirection(event, false);
             }
@@ -2525,8 +2524,16 @@ public final class ViewRoot extends Handler implements ViewParent,
         final int metaState = event.getMetaState();
         final int deviceId = event.getDeviceId();
         final int source = event.getSource();
-        final int xDirection = joystickAxisValueToDirection(event.getX());
-        final int yDirection = joystickAxisValueToDirection(event.getY());
+
+        int xDirection = joystickAxisValueToDirection(event.getAxisValue(MotionEvent.AXIS_HAT_X));
+        if (xDirection == 0) {
+            xDirection = joystickAxisValueToDirection(event.getX());
+        }
+
+        int yDirection = joystickAxisValueToDirection(event.getAxisValue(MotionEvent.AXIS_HAT_Y));
+        if (yDirection == 0) {
+            yDirection = joystickAxisValueToDirection(event.getY());
+        }
 
         if (xDirection != mLastJoystickXDirection) {
             if (mLastJoystickXKeyCode != 0) {

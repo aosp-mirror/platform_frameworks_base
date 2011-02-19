@@ -322,6 +322,7 @@ enum {
 
 /*
  * Constants that identify each individual axis of a motion event.
+ * Refer to the documentation on the MotionEvent class for descriptions of each axis.
  */
 enum {
     AMOTION_EVENT_AXIS_X = 0,
@@ -333,6 +334,35 @@ enum {
     AMOTION_EVENT_AXIS_TOOL_MAJOR = 6,
     AMOTION_EVENT_AXIS_TOOL_MINOR = 7,
     AMOTION_EVENT_AXIS_ORIENTATION = 8,
+    AMOTION_EVENT_AXIS_VSCROLL = 9,
+    AMOTION_EVENT_AXIS_HSCROLL = 10,
+    AMOTION_EVENT_AXIS_Z = 11,
+    AMOTION_EVENT_AXIS_RX = 12,
+    AMOTION_EVENT_AXIS_RY = 13,
+    AMOTION_EVENT_AXIS_RZ = 14,
+    AMOTION_EVENT_AXIS_HAT_X = 15,
+    AMOTION_EVENT_AXIS_HAT_Y = 16,
+    AMOTION_EVENT_AXIS_LTRIGGER = 17,
+    AMOTION_EVENT_AXIS_RTRIGGER = 18,
+    AMOTION_EVENT_AXIS_GENERIC_1 = 32,
+    AMOTION_EVENT_AXIS_GENERIC_2 = 33,
+    AMOTION_EVENT_AXIS_GENERIC_3 = 34,
+    AMOTION_EVENT_AXIS_GENERIC_4 = 35,
+    AMOTION_EVENT_AXIS_GENERIC_5 = 36,
+    AMOTION_EVENT_AXIS_GENERIC_6 = 37,
+    AMOTION_EVENT_AXIS_GENERIC_7 = 38,
+    AMOTION_EVENT_AXIS_GENERIC_8 = 39,
+    AMOTION_EVENT_AXIS_GENERIC_9 = 40,
+    AMOTION_EVENT_AXIS_GENERIC_10 = 41,
+    AMOTION_EVENT_AXIS_GENERIC_11 = 42,
+    AMOTION_EVENT_AXIS_GENERIC_12 = 43,
+    AMOTION_EVENT_AXIS_GENERIC_13 = 44,
+    AMOTION_EVENT_AXIS_GENERIC_14 = 45,
+    AMOTION_EVENT_AXIS_GENERIC_15 = 46,
+    AMOTION_EVENT_AXIS_GENERIC_16 = 47,
+
+    // NOTE: If you add a new axis here you must also add it to several other files.
+    //       Refer to frameworks/base/core/java/android/view/MotionEvent.java for the full list.
 };
 
 /*

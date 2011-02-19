@@ -17,3 +17,21 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(LOCAL_PATH)/common.mk
+
+# Validate all key maps.
+include $(CLEAR_VARS)
+
+validatekeymaps := $(HOST_OUT_EXECUTABLES)/validatekeymaps$(HOST_EXECUTABLE_SUFFIX)
+files := \
+    $(foreach file,$(keylayouts),frameworks/base/data/keyboards/$(file)) \
+    $(foreach file,$(keycharmaps),frameworks/base/data/keyboards/$(file)) \
+    $(foreach file,$(keyconfigs),frameworks/base/data/keyboards/$(file))
+
+LOCAL_MODULE := validate_framework_keymaps
+LOCAL_MODULE_TAGS := optional
+LOCAL_REQUIRED_MODULES := validatekeymaps
+
+validate_framework_keymaps: $(files)
+	$(hide) $(validatekeymaps) $(files)
+
+include $(BUILD_PHONY_PACKAGE)

@@ -127,9 +127,7 @@ EventHub::EventHub(void) :
         mOpened(false), mNeedToSendFinishedDeviceScan(false),
         mInputBufferIndex(0), mInputBufferCount(0), mInputFdIndex(0) {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
-#ifdef EV_SW
     memset(mSwitches, 0, sizeof(mSwitches));
-#endif
 }
 
 EventHub::~EventHub(void) {
@@ -229,7 +227,7 @@ int32_t EventHub::getKeyCodeStateLocked(Device* device, int32_t keyCode) const {
     }
 
     Vector<int32_t> scanCodes;
-    device->keyMap.keyLayoutMap->findScanCodes(keyCode, &scanCodes);
+    device->keyMap.keyLayoutMap->findScanCodesForKey(keyCode, &scanCodes);
 
     uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
     memset(key_bitmask, 0, sizeof(key_bitmask));
@@ -253,7 +251,6 @@ int32_t EventHub::getKeyCodeStateLocked(Device* device, int32_t keyCode) const {
 }
 
 int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
-#ifdef EV_SW
     if (sw >= 0 && sw <= SW_MAX) {
         AutoMutex _l(mLock);
 
@@ -262,7 +259,6 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
             return getSwitchStateLocked(device, sw);
         }
     }
-#endif
     return AKEY_STATE_UNKNOWN;
 }
 
@@ -297,7 +293,8 @@ bool EventHub::markSupportedKeyCodesLocked(Device* device, size_t numCodes,
     for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
         scanCodes.clear();
 
-        status_t err = device->keyMap.keyLayoutMap->findScanCodes(keyCodes[codeIndex], &scanCodes);
+        status_t err = device->keyMap.keyLayoutMap->findScanCodesForKey(
+                keyCodes[codeIndex], &scanCodes);
         if (! err) {
             // check the possible scan codes identified by the layout map against the
             // map of codes actually emitted by the driver
@@ -312,14 +309,14 @@ bool EventHub::markSupportedKeyCodesLocked(Device* device, size_t numCodes,
     return true;
 }
 
-status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
+status_t EventHub::mapKey(int32_t deviceId, int scancode,
         int32_t* outKeycode, uint32_t* outFlags) const
 {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
     
     if (device && device->keyMap.haveKeyLayout()) {
-        status_t err = device->keyMap.keyLayoutMap->map(scancode, outKeycode, outFlags);
+        status_t err = device->keyMap.keyLayoutMap->mapKey(scancode, outKeycode, outFlags);
         if (err == NO_ERROR) {
             return NO_ERROR;
         }
@@ -329,7 +326,7 @@ status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
         device = getDeviceLocked(mBuiltInKeyboardId);
         
         if (device && device->keyMap.haveKeyLayout()) {
-            status_t err = device->keyMap.keyLayoutMap->map(scancode, outKeycode, outFlags);
+            status_t err = device->keyMap.keyLayoutMap->mapKey(scancode, outKeycode, outFlags);
             if (err == NO_ERROR) {
                 return NO_ERROR;
             }
@@ -338,6 +335,34 @@ status_t EventHub::scancodeToKeycode(int32_t deviceId, int scancode,
     
     *outKeycode = 0;
     *outFlags = 0;
+    return NAME_NOT_FOUND;
+}
+
+status_t EventHub::mapAxis(int32_t deviceId, int scancode,
+        int32_t* outAxis) const
+{
+    AutoMutex _l(mLock);
+    Device* device = getDeviceLocked(deviceId);
+
+    if (device && device->keyMap.haveKeyLayout()) {
+        status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxis);
+        if (err == NO_ERROR) {
+            return NO_ERROR;
+        }
+    }
+
+    if (mBuiltInKeyboardId != -1) {
+        device = getDeviceLocked(mBuiltInKeyboardId);
+
+        if (device && device->keyMap.haveKeyLayout()) {
+            status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxis);
+            if (err == NO_ERROR) {
+                return NO_ERROR;
+            }
+        }
+    }
+
+    *outAxis = -1;
     return NAME_NOT_FOUND;
 }
 
@@ -488,7 +513,7 @@ bool EventHub::getEvent(RawEvent* outEvent) {
                 if (iev.type == EV_KEY) {
                     outEvent->keyCode = AKEYCODE_UNKNOWN;
                     if (device->keyMap.haveKeyLayout()) {
-                        status_t err = device->keyMap.keyLayoutMap->map(iev.code,
+                        status_t err = device->keyMap.keyLayoutMap->mapKey(iev.code,
                                 &outEvent->keyCode, &outEvent->flags);
                         LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
                                 iev.code, outEvent->keyCode, outEvent->flags, err);
@@ -731,86 +756,79 @@ int EventHub::openDevice(const char *devicePath) {
     loadConfiguration(device);
 
     // Figure out the kinds of events the device reports.
-    
     uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
     memset(key_bitmask, 0, sizeof(key_bitmask));
+    ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask);
 
-    LOGV("Getting keys...");
-    if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask) >= 0) {
-        //LOGI("MAP\n");
-        //for (int i = 0; i < sizeof(key_bitmask); i++) {
-        //    LOGI("%d: 0x%02x\n", i, key_bitmask[i]);
-        //}
+    uint8_t abs_bitmask[sizeof_bit_array(ABS_MAX + 1)];
+    memset(abs_bitmask, 0, sizeof(abs_bitmask));
+    ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask);
 
-        // See if this is a keyboard.  Ignore everything in the button range except for
-        // joystick and gamepad buttons which are also considered keyboards.
-        if (containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
-                || containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_JOYSTICK),
-                        sizeof_bit_array(BTN_DIGI))
-                || containsNonZeroByte(key_bitmask, sizeof_bit_array(KEY_OK),
-                        sizeof_bit_array(KEY_MAX + 1))) {
-            device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
+    uint8_t rel_bitmask[sizeof_bit_array(REL_MAX + 1)];
+    memset(rel_bitmask, 0, sizeof(rel_bitmask));
+    ioctl(fd, EVIOCGBIT(EV_REL, sizeof(rel_bitmask)), rel_bitmask);
 
-            device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
-            if (device->keyBitmask != NULL) {
-                memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
-            } else {
-                delete device;
-                LOGE("out of memory allocating key bitmask");
-                return -1;
-            }
+    uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
+    memset(sw_bitmask, 0, sizeof(sw_bitmask));
+    ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask);
+
+    // See if this is a keyboard.  Ignore everything in the button range except for
+    // joystick and gamepad buttons which are handled like keyboards for the most part.
+    bool haveKeyboardKeys = containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
+            || containsNonZeroByte(key_bitmask, sizeof_bit_array(KEY_OK),
+                    sizeof_bit_array(KEY_MAX + 1));
+    bool haveGamepadButtons =containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_JOYSTICK),
+                sizeof_bit_array(BTN_DIGI));
+    if (haveKeyboardKeys || haveGamepadButtons) {
+        device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
+        device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
+        if (device->keyBitmask != NULL) {
+            memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
+        } else {
+            delete device;
+            LOGE("out of memory allocating key bitmask");
+            return -1;
         }
     }
-    
+
     // See if this is a cursor device such as a trackball or mouse.
-    if (test_bit(BTN_MOUSE, key_bitmask)) {
-        uint8_t rel_bitmask[sizeof_bit_array(REL_MAX + 1)];
-        memset(rel_bitmask, 0, sizeof(rel_bitmask));
-        LOGV("Getting relative controllers...");
-        if (ioctl(fd, EVIOCGBIT(EV_REL, sizeof(rel_bitmask)), rel_bitmask) >= 0) {
-            if (test_bit(REL_X, rel_bitmask) && test_bit(REL_Y, rel_bitmask)) {
-                device->classes |= INPUT_DEVICE_CLASS_CURSOR;
-            }
-        }
+    if (test_bit(BTN_MOUSE, key_bitmask)
+            && test_bit(REL_X, rel_bitmask)
+            && test_bit(REL_Y, rel_bitmask)) {
+        device->classes |= INPUT_DEVICE_CLASS_CURSOR;
     }
 
     // See if this is a touch pad.
-    uint8_t abs_bitmask[sizeof_bit_array(ABS_MAX + 1)];
-    memset(abs_bitmask, 0, sizeof(abs_bitmask));
-    LOGV("Getting absolute controllers...");
-    if (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask) >= 0) {
-        // Is this a new modern multi-touch driver?
-        if (test_bit(ABS_MT_POSITION_X, abs_bitmask)
-                && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
+    // Is this a new modern multi-touch driver?
+    if (test_bit(ABS_MT_POSITION_X, abs_bitmask)
+            && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
+        // Some joysticks such as the PS3 controller report axes that conflict
+        // with the ABS_MT range.  Try to confirm that the device really is
+        // a touch screen.
+        if (test_bit(BTN_TOUCH, key_bitmask) || !haveGamepadButtons) {
             device->classes |= INPUT_DEVICE_CLASS_TOUCH | INPUT_DEVICE_CLASS_TOUCH_MT;
-
-        // Is this an old style single-touch driver?
-        } else if (test_bit(BTN_TOUCH, key_bitmask)
-                && test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
-            device->classes |= INPUT_DEVICE_CLASS_TOUCH;
         }
+    // Is this an old style single-touch driver?
+    } else if (test_bit(BTN_TOUCH, key_bitmask)
+            && test_bit(ABS_X, abs_bitmask)
+            && test_bit(ABS_Y, abs_bitmask)) {
+        device->classes |= INPUT_DEVICE_CLASS_TOUCH;
     }
 
-#ifdef EV_SW
     // figure out the switches this device reports
-    uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
-    memset(sw_bitmask, 0, sizeof(sw_bitmask));
-    bool hasSwitches = false;
-    if (ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask) >= 0) {
-        for (int i=0; i<EV_SW; i++) {
-            //LOGI("Device %d sw %d: has=%d", device->id, i, test_bit(i, sw_bitmask));
-            if (test_bit(i, sw_bitmask)) {
-                hasSwitches = true;
-                if (mSwitches[i] == 0) {
-                    mSwitches[i] = device->id;
-                }
+    bool haveSwitches = false;
+    for (int i=0; i<EV_SW; i++) {
+        //LOGI("Device %d sw %d: has=%d", device->id, i, test_bit(i, sw_bitmask));
+        if (test_bit(i, sw_bitmask)) {
+            haveSwitches = true;
+            if (mSwitches[i] == 0) {
+                mSwitches[i] = device->id;
             }
         }
     }
-    if (hasSwitches) {
+    if (haveSwitches) {
         device->classes |= INPUT_DEVICE_CLASS_SWITCH;
     }
-#endif
 
     if ((device->classes & INPUT_DEVICE_CLASS_TOUCH)) {
         // Load the virtual keys for the touch screen, if any.
@@ -862,12 +880,10 @@ int EventHub::openDevice(const char *devicePath) {
 
     // See if this device is a joystick.
     // Ignore touchscreens because they use the same absolute axes for other purposes.
+    // Assumes that joysticks always have buttons and the keymap has been loaded.
     if (device->classes & INPUT_DEVICE_CLASS_GAMEPAD
             && !(device->classes & INPUT_DEVICE_CLASS_TOUCH)) {
-        if (test_bit(ABS_X, abs_bitmask)
-                || test_bit(ABS_Y, abs_bitmask)
-                || test_bit(ABS_HAT0X, abs_bitmask)
-                || test_bit(ABS_HAT0Y, abs_bitmask)) {
+        if (containsNonZeroByte(abs_bitmask, 0, sizeof_bit_array(ABS_MAX + 1))) {
             device->classes |= INPUT_DEVICE_CLASS_JOYSTICK;
         }
     }
@@ -950,7 +966,7 @@ bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {
     }
     
     Vector<int32_t> scanCodes;
-    device->keyMap.keyLayoutMap->findScanCodes(keycode, &scanCodes);
+    device->keyMap.keyLayoutMap->findScanCodesForKey(keycode, &scanCodes);
     const size_t N = scanCodes.size();
     for (size_t i=0; i<N && i<=KEY_MAX; i++) {
         int32_t sc = scanCodes.itemAt(i);
@@ -972,13 +988,11 @@ int EventHub::closeDevice(const char *devicePath) {
                  device->path.string(), device->identifier.name.string(), device->id,
                  device->fd, device->classes);
 
-#ifdef EV_SW
             for (int j=0; j<EV_SW; j++) {
                 if (mSwitches[j] == device->id) {
                     mSwitches[j] = 0;
                 }
             }
-#endif
 
             if (device->id == mBuiltInKeyboardId) {
                 LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",

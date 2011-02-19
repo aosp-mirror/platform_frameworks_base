@@ -481,7 +481,9 @@ private:
         enum {
             FIELD_BTN_MOUSE = 1,
             FIELD_REL_X = 2,
-            FIELD_REL_Y = 4
+            FIELD_REL_Y = 4,
+            FIELD_REL_WHEEL = 8,
+            FIELD_REL_HWHEEL = 16,
         };
 
         uint32_t fields;
@@ -489,6 +491,8 @@ private:
         bool btnMouse;
         int32_t relX;
         int32_t relY;
+        int32_t relWheel;
+        int32_t relHWheel;
 
         inline void clear() {
             fields = 0;
@@ -500,6 +504,12 @@ private:
     float mYScale;
     float mXPrecision;
     float mYPrecision;
+
+    bool mHaveVWheel;
+    bool mHaveHWheel;
+    float mVWheelScale;
+    float mHWheelScale;
+
     sp<PointerControllerInterface> mPointerController;
 
     struct LockedState {
@@ -985,123 +995,53 @@ public:
     virtual void process(const RawEvent* rawEvent);
 
 private:
-    struct RawAxes {
-        RawAbsoluteAxisInfo x;
-        RawAbsoluteAxisInfo y;
-        RawAbsoluteAxisInfo hat0X;
-        RawAbsoluteAxisInfo hat0Y;
-    } mRawAxes;
+    struct Axis {
+        RawAbsoluteAxisInfo rawAxisInfo;
 
-    struct NormalizedAxis {
-        bool valid;
+        int32_t axis;  // axis id
+        bool explicitlyMapped; // true if the axis was explicitly assigned an axis id
 
-        static const float min = -1.0f;
-        static const float max = -1.0f;
+        float scale;   // scale factor from raw to normalized values
+        float offset;  // offset to add after scaling for normalization
 
-        float scale;      // scale factor
-        float center;     // center offset after scaling
-        float precision;  // precision
-        float flat;       // size of flat region
-        float fuzz;       // error tolerance
+        float min;     // normalized inclusive minimum
+        float max;     // normalized inclusive maximum
+        float flat;    // normalized flat region size
+        float fuzz;    // normalized error tolerance
 
-        float value;      // most recent value
+        float oldValue; // previous value
+        float newValue; // most recent value
 
-        NormalizedAxis() : valid(false), scale(0), center(0), precision(0),
-                flat(0), fuzz(0), value(0) {
-        }
+        float filter;  // filter out small variations of this size
 
-        void configure(const RawAbsoluteAxisInfo& rawAxis) {
-            if (rawAxis.valid && rawAxis.getRange() != 0) {
-                valid = true;
-                scale = 2.0f / rawAxis.getRange();
-                precision = rawAxis.getRange();
-                flat = rawAxis.flat * scale;
-                fuzz = rawAxis.fuzz * scale;
-                center = float(rawAxis.minValue + rawAxis.maxValue) / rawAxis.getRange();
-            }
-        }
-
-        void resetState() {
-            value = 0;
-        }
-
-        bool updateValue(int32_t rawValue) {
-            float newValue = rawValue * scale - center;
-            if (value == newValue) {
-                return false;
-            }
-            value = newValue;
-            return true;
+        void initialize(const RawAbsoluteAxisInfo& rawAxisInfo,
+                int32_t axis, bool explicitlyMapped, float scale, float offset,
+                float min, float max, float flat, float fuzz) {
+            this->rawAxisInfo = rawAxisInfo;
+            this->axis = axis;
+            this->explicitlyMapped = explicitlyMapped;
+            this->scale = scale;
+            this->offset = offset;
+            this->min = min;
+            this->max = max;
+            this->flat = flat;
+            this->fuzz = fuzz;
+            this->filter = 0;
+            this->oldValue = 0;
+            this->newValue = 0;
         }
     };
 
-    struct DirectionalAxis : NormalizedAxis {
-        int32_t direction; // most recent direction vector: value is one of -1, 0, 1.
+    // Axes indexed by raw ABS_* axis index.
+    KeyedVector<int32_t, Axis> mAxes;
 
-        int32_t lastKeyCode;  // most recent key code produced
+    void sync(nsecs_t when, bool force);
 
-        DirectionalAxis() : lastKeyCode(0) {
-        }
+    bool haveAxis(int32_t axis);
+    void pruneAxes(bool ignoreExplicitlyMappedAxes);
+    bool haveAxesChangedSignificantly();
 
-        void resetState() {
-            NormalizedAxis::resetState();
-            direction = 0;
-            lastKeyCode = 0;
-        }
-
-        bool updateValueAndDirection(int32_t rawValue) {
-            if (!updateValue(rawValue)) {
-                return false;
-            }
-            if (value > flat) {
-                direction = 1;
-            } else if (value < -flat) {
-                direction = -1;
-            } else {
-                direction = 0;
-            }
-            return true;
-        }
-    };
-
-    struct Axes {
-        NormalizedAxis x;
-        NormalizedAxis y;
-        DirectionalAxis hat0X;
-        DirectionalAxis hat0Y;
-    } mAxes;
-
-    struct Accumulator {
-        enum {
-            FIELD_ABS_X = 1,
-            FIELD_ABS_Y = 2,
-            FIELD_ABS_HAT0X = 4,
-            FIELD_ABS_HAT0Y = 8,
-
-            FIELD_ALL = FIELD_ABS_X | FIELD_ABS_Y | FIELD_ABS_HAT0X | FIELD_ABS_HAT0Y,
-        };
-
-        uint32_t fields;
-
-        int32_t absX;
-        int32_t absY;
-        int32_t absHat0X;
-        int32_t absHat0Y;
-
-        inline void clear() {
-            fields = 0;
-        }
-    } mAccumulator;
-
-    void initialize();
-
-    void sync(nsecs_t when);
-
-    void notifyDirectionalAxis(DirectionalAxis& axis,
-            nsecs_t when, int32_t metaState, int32_t lowKeyCode, int32_t highKeyCode);
-
-    static void dumpNormalizedAxis(String8& dump,
-            const NormalizedAxis& axis, const char* name);
+    static bool isCenteredAxis(int32_t axis);
 };
 
 } // namespace android

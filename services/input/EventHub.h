@@ -167,8 +167,11 @@ public:
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const = 0;
 
-    virtual status_t scancodeToKeycode(int32_t deviceId, int scancode,
+    virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const = 0;
+
+    virtual status_t mapAxis(int32_t deviceId, int scancode,
+            int32_t* outAxis) const = 0;
 
     // exclude a particular device from opening
     // this can be used to ignore input devices for sensors
@@ -221,8 +224,11 @@ public:
     virtual status_t getAbsoluteAxisInfo(int32_t deviceId, int axis,
             RawAbsoluteAxisInfo* outAxisInfo) const;
 
-    virtual status_t scancodeToKeycode(int32_t deviceId, int scancode,
+    virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const;
+
+    virtual status_t mapAxis(int32_t deviceId, int scancode,
+            int32_t* outAxis) const;
 
     virtual void addExcludedDevice(const char* deviceName);
 
@@ -314,9 +320,7 @@ private:
     List<String8> mExcludedDevices;
 
     // device ids that report particular switches.
-#ifdef EV_SW
     int32_t mSwitches[SW_MAX + 1];
-#endif
 
     static const int INPUT_BUFFER_SIZE = 64;
     struct input_event mInputBufferData[INPUT_BUFFER_SIZE];

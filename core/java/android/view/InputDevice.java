@@ -44,6 +44,7 @@ public final class InputDevice implements Parcelable {
     private int mKeyboardType;
 
     private final SparseArray<MotionRange> mMotionRanges = new SparseArray<MotionRange>();
+    private int[] mMotionAxes;
 
     /**
      * A mask for input source classes.
@@ -359,12 +360,31 @@ public final class InputDevice implements Parcelable {
      *
      * @see MotionEvent#AXIS_X
      * @see MotionEvent#AXIS_Y
+     * @see #getSupportedAxes()
      */
     public MotionRange getMotionRange(int axis) {
         return mMotionRanges.get(axis);
     }
 
-    // Called by native code.
+    /**
+     * Gets the axis ids of all motion axes supported by this device.
+     * @return The axis ids of all motion axes supported by this device.
+     *
+     * @see #getMotionRange(int)
+     */
+    public int[] getMotionAxes() {
+        synchronized (this) {
+            if (mMotionAxes == null) {
+                final int count = mMotionRanges.size();
+                mMotionAxes = new int[count];
+                for (int i = 0; i < count; i++) {
+                    mMotionAxes[i] = mMotionRanges.keyAt(i);
+                }
+            }
+            return mMotionAxes;
+        }
+    }
+
     private void addMotionRange(int axis, float min, float max, float flat, float fuzz) {
         mMotionRanges.append(axis, new MotionRange(min, max, flat, fuzz));
     }
@@ -388,33 +408,35 @@ public final class InputDevice implements Parcelable {
         }
 
         /**
-         * Gets the minimum value for the axis.
-         * @return The (inclusive) minimum value.
+         * Gets the inclusive minimum value for the axis.
+         * @return The inclusive minimum value.
          */
         public float getMin() {
             return mMin;
         }
 
         /**
-         * Gets the maximum value for the axis.
-         * @return The (inclusive) maximum value.
+         * Gets the inclusive maximum value for the axis.
+         * @return The inclusive maximum value.
          */
         public float getMax() {
             return mMax;
         }
 
         /**
-         * Gets the range of the axis (difference between maximum and minimum plus one).
+         * Gets the range of the axis (difference between maximum and minimum).
          * @return The range of values.
          */
         public float getRange() {
-            return mMax - mMin + 1;
+            return mMax - mMin;
         }
 
         /**
          * Gets the extent of the center flat position with respect to this axis.
+         * <p>
          * For example, a flat value of 8 means that the center position is between -8 and +8.
          * This value is mainly useful for calibrating self-centering devices.
+         * </p>
          * @return The extent of the center flat position.
          */
         public float getFlat() {
@@ -423,8 +445,10 @@ public final class InputDevice implements Parcelable {
 
         /**
          * Gets the error tolerance for input device measurements with respect to this axis.
+         * <p>
          * For example, a value of 2 indicates that the measured value may be up to +/- 2 units
          * away from the actual value due to noise and device sensitivity limitations.
+         * </p>
          * @return The error tolerance.
          */
         public float getFuzz() {

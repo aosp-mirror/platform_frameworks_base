@@ -217,7 +217,7 @@ status_t getKeyCharacterMapFile(int32_t deviceId, String8& outKeyCharacterMapFil
     return NAME_NOT_FOUND;
 }
 
-static int lookupLabel(const char* literal, const KeycodeLabel *list) {
+static int lookupValueByLabel(const char* literal, const KeycodeLabel *list) {
     while (list->literal) {
         if (strcmp(literal, list->literal) == 0) {
             return list->value;
@@ -227,12 +227,30 @@ static int lookupLabel(const char* literal, const KeycodeLabel *list) {
     return list->value;
 }
 
+static const char* lookupLabelByValue(int value, const KeycodeLabel *list) {
+    while (list->literal) {
+        if (list->value == value) {
+            return list->literal;
+        }
+        list++;
+    }
+    return NULL;
+}
+
 int32_t getKeyCodeByLabel(const char* label) {
-    return int32_t(lookupLabel(label, KEYCODES));
+    return int32_t(lookupValueByLabel(label, KEYCODES));
 }
 
 uint32_t getKeyFlagByLabel(const char* label) {
-    return uint32_t(lookupLabel(label, FLAGS));
+    return uint32_t(lookupValueByLabel(label, FLAGS));
+}
+
+int32_t getAxisByLabel(const char* label) {
+    return int32_t(lookupValueByLabel(label, AXES));
+}
+
+const char* getAxisLabel(int32_t axisId) {
+    return lookupLabelByValue(axisId, AXES);
 }
 
 static int32_t setEphemeralMetaState(int32_t mask, bool down, int32_t oldMetaState) {

@@ -111,6 +111,18 @@ extern int32_t getKeyCodeByLabel(const char* label);
 extern uint32_t getKeyFlagByLabel(const char* label);
 
 /**
+ * Gets a axis by its short form label, eg. "X".
+ * Returns -1 if unknown.
+ */
+extern int32_t getAxisByLabel(const char* label);
+
+/**
+ * Gets a axis label by its id.
+ * Returns NULL if unknown.
+ */
+extern const char* getAxisLabel(int32_t axisId);
+
+/**
  * Updates a meta state field when a key is pressed or released.
  */
 extern int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState);

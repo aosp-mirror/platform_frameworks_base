@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.KeyData;
@@ -582,213 +583,214 @@ public class KeyEvent extends InputEvent implements Parcelable {
     //  those new codes.  This is intended to maintain a consistent
     //  set of key code definitions across all Android devices.
 
-    // Symbolic names of all keys indexed by keycode.
-    // There should be exactly LAST_KEYCODE + 1 entries in this table.
-    private static final String[] KEYCODE_SYMBOLIC_NAMES = new String[] {
-        "KEYCODE_UNKNOWN",
-        "KEYCODE_SOFT_LEFT",
-        "KEYCODE_SOFT_RIGHT",
-        "KEYCODE_HOME",
-        "KEYCODE_BACK",
-        "KEYCODE_CALL",
-        "KEYCODE_ENDCALL",
-        "KEYCODE_0",
-        "KEYCODE_1",
-        "KEYCODE_2",
-        "KEYCODE_3",
-        "KEYCODE_4",
-        "KEYCODE_5",
-        "KEYCODE_6",
-        "KEYCODE_7",
-        "KEYCODE_8",
-        "KEYCODE_9",
-        "KEYCODE_STAR",
-        "KEYCODE_POUND",
-        "KEYCODE_DPAD_UP",
-        "KEYCODE_DPAD_DOWN",
-        "KEYCODE_DPAD_LEFT",
-        "KEYCODE_DPAD_RIGHT",
-        "KEYCODE_DPAD_CENTER",
-        "KEYCODE_VOLUME_UP",
-        "KEYCODE_VOLUME_DOWN",
-        "KEYCODE_POWER",
-        "KEYCODE_CAMERA",
-        "KEYCODE_CLEAR",
-        "KEYCODE_A",
-        "KEYCODE_B",
-        "KEYCODE_C",
-        "KEYCODE_D",
-        "KEYCODE_E",
-        "KEYCODE_F",
-        "KEYCODE_G",
-        "KEYCODE_H",
-        "KEYCODE_I",
-        "KEYCODE_J",
-        "KEYCODE_K",
-        "KEYCODE_L",
-        "KEYCODE_M",
-        "KEYCODE_N",
-        "KEYCODE_O",
-        "KEYCODE_P",
-        "KEYCODE_Q",
-        "KEYCODE_R",
-        "KEYCODE_S",
-        "KEYCODE_T",
-        "KEYCODE_U",
-        "KEYCODE_V",
-        "KEYCODE_W",
-        "KEYCODE_X",
-        "KEYCODE_Y",
-        "KEYCODE_Z",
-        "KEYCODE_COMMA",
-        "KEYCODE_PERIOD",
-        "KEYCODE_ALT_LEFT",
-        "KEYCODE_ALT_RIGHT",
-        "KEYCODE_SHIFT_LEFT",
-        "KEYCODE_SHIFT_RIGHT",
-        "KEYCODE_TAB",
-        "KEYCODE_SPACE",
-        "KEYCODE_SYM",
-        "KEYCODE_EXPLORER",
-        "KEYCODE_ENVELOPE",
-        "KEYCODE_ENTER",
-        "KEYCODE_DEL",
-        "KEYCODE_GRAVE",
-        "KEYCODE_MINUS",
-        "KEYCODE_EQUALS",
-        "KEYCODE_LEFT_BRACKET",
-        "KEYCODE_RIGHT_BRACKET",
-        "KEYCODE_BACKSLASH",
-        "KEYCODE_SEMICOLON",
-        "KEYCODE_APOSTROPHE",
-        "KEYCODE_SLASH",
-        "KEYCODE_AT",
-        "KEYCODE_NUM",
-        "KEYCODE_HEADSETHOOK",
-        "KEYCODE_FOCUS",
-        "KEYCODE_PLUS",
-        "KEYCODE_MENU",
-        "KEYCODE_NOTIFICATION",
-        "KEYCODE_SEARCH",
-        "KEYCODE_MEDIA_PLAY_PAUSE",
-        "KEYCODE_MEDIA_STOP",
-        "KEYCODE_MEDIA_NEXT",
-        "KEYCODE_MEDIA_PREVIOUS",
-        "KEYCODE_MEDIA_REWIND",
-        "KEYCODE_MEDIA_FAST_FORWARD",
-        "KEYCODE_MUTE",
-        "KEYCODE_PAGE_UP",
-        "KEYCODE_PAGE_DOWN",
-        "KEYCODE_PICTSYMBOLS",
-        "KEYCODE_SWITCH_CHARSET",
-        "KEYCODE_BUTTON_A",
-        "KEYCODE_BUTTON_B",
-        "KEYCODE_BUTTON_C",
-        "KEYCODE_BUTTON_X",
-        "KEYCODE_BUTTON_Y",
-        "KEYCODE_BUTTON_Z",
-        "KEYCODE_BUTTON_L1",
-        "KEYCODE_BUTTON_R1",
-        "KEYCODE_BUTTON_L2",
-        "KEYCODE_BUTTON_R2",
-        "KEYCODE_BUTTON_THUMBL",
-        "KEYCODE_BUTTON_THUMBR",
-        "KEYCODE_BUTTON_START",
-        "KEYCODE_BUTTON_SELECT",
-        "KEYCODE_BUTTON_MODE",
-        "KEYCODE_ESCAPE",
-        "KEYCODE_FORWARD_DEL",
-        "KEYCODE_CTRL_LEFT",
-        "KEYCODE_CTRL_RIGHT",
-        "KEYCODE_CAPS_LOCK",
-        "KEYCODE_SCROLL_LOCK",
-        "KEYCODE_META_LEFT",
-        "KEYCODE_META_RIGHT",
-        "KEYCODE_FUNCTION",
-        "KEYCODE_SYSRQ",
-        "KEYCODE_BREAK",
-        "KEYCODE_MOVE_HOME",
-        "KEYCODE_MOVE_END",
-        "KEYCODE_INSERT",
-        "KEYCODE_FORWARD",
-        "KEYCODE_MEDIA_PLAY",
-        "KEYCODE_MEDIA_PAUSE",
-        "KEYCODE_MEDIA_CLOSE",
-        "KEYCODE_MEDIA_EJECT",
-        "KEYCODE_MEDIA_RECORD",
-        "KEYCODE_F1",
-        "KEYCODE_F2",
-        "KEYCODE_F3",
-        "KEYCODE_F4",
-        "KEYCODE_F5",
-        "KEYCODE_F6",
-        "KEYCODE_F7",
-        "KEYCODE_F8",
-        "KEYCODE_F9",
-        "KEYCODE_F10",
-        "KEYCODE_F11",
-        "KEYCODE_F12",
-        "KEYCODE_NUM_LOCK",
-        "KEYCODE_NUMPAD_0",
-        "KEYCODE_NUMPAD_1",
-        "KEYCODE_NUMPAD_2",
-        "KEYCODE_NUMPAD_3",
-        "KEYCODE_NUMPAD_4",
-        "KEYCODE_NUMPAD_5",
-        "KEYCODE_NUMPAD_6",
-        "KEYCODE_NUMPAD_7",
-        "KEYCODE_NUMPAD_8",
-        "KEYCODE_NUMPAD_9",
-        "KEYCODE_NUMPAD_DIVIDE",
-        "KEYCODE_NUMPAD_MULTIPLY",
-        "KEYCODE_MUMPAD_SUBTRACT",
-        "KEYCODE_NUMPAD_ADD",
-        "KEYCODE_NUMPAD_DOT",
-        "KEYCODE_NUMPAD_COMMA",
-        "KEYCODE_NUMPAD_ENTER",
-        "KEYCODE_NUMPAD_EQUALS",
-        "KEYCODE_NUMPAD_LEFT_PAREN",
-        "KEYCODE_NUMPAD_RIGHT_PAREN",
-        "KEYCODE_VOLUME_MUTE",
-        "KEYCODE_INFO",
-        "KEYCODE_CHANNEL_UP",
-        "KEYCODE_CHANNEL_DOWN",
-        "KEYCODE_ZOOM_IN",
-        "KEYCODE_ZOOM_OUT",
-        "KEYCODE_TV",
-        "KEYCODE_WINDOW",
-        "KEYCODE_GUIDE",
-        "KEYCODE_DVR",
-        "KEYCODE_BOOKMARK",
-        "KEYCODE_CAPTIONS",
-        "KEYCODE_SETTINGS",
-        "KEYCODE_TV_POWER",
-        "KEYCODE_TV_INPUT",
-        "KEYCODE_STB_INPUT",
-        "KEYCODE_STB_POWER",
-        "KEYCODE_AVR_POWER",
-        "KEYCODE_AVR_INPUT",
-        "KEYCODE_PROG_RED",
-        "KEYCODE_PROG_GREEN",
-        "KEYCODE_PROG_YELLOW",
-        "KEYCODE_PROG_BLUE",
-        "KEYCODE_APP_SWITCH",
-        "KEYCODE_BUTTON_1",
-        "KEYCODE_BUTTON_2",
-        "KEYCODE_BUTTON_3",
-        "KEYCODE_BUTTON_4",
-        "KEYCODE_BUTTON_5",
-        "KEYCODE_BUTTON_6",
-        "KEYCODE_BUTTON_7",
-        "KEYCODE_BUTTON_8",
-        "KEYCODE_BUTTON_9",
-        "KEYCODE_BUTTON_10",
-        "KEYCODE_BUTTON_11",
-        "KEYCODE_BUTTON_12",
-        "KEYCODE_BUTTON_13",
-        "KEYCODE_BUTTON_14",
-        "KEYCODE_BUTTON_15",
-        "KEYCODE_BUTTON_16",
+    // Symbolic names of all key codes.
+    private static final SparseArray<String> KEYCODE_SYMBOLIC_NAMES = new SparseArray<String>();
+    private static void populateKeycodeSymbolicNames() {
+        SparseArray<String> names = KEYCODE_SYMBOLIC_NAMES;
+        names.append(KEYCODE_UNKNOWN, "KEYCODE_UNKNOWN");
+        names.append(KEYCODE_SOFT_LEFT, "KEYCODE_SOFT_LEFT");
+        names.append(KEYCODE_SOFT_RIGHT, "KEYCODE_SOFT_RIGHT");
+        names.append(KEYCODE_HOME, "KEYCODE_HOME");
+        names.append(KEYCODE_BACK, "KEYCODE_BACK");
+        names.append(KEYCODE_CALL, "KEYCODE_CALL");
+        names.append(KEYCODE_ENDCALL, "KEYCODE_ENDCALL");
+        names.append(KEYCODE_0, "KEYCODE_0");
+        names.append(KEYCODE_1, "KEYCODE_1");
+        names.append(KEYCODE_2, "KEYCODE_2");
+        names.append(KEYCODE_3, "KEYCODE_3");
+        names.append(KEYCODE_4, "KEYCODE_4");
+        names.append(KEYCODE_5, "KEYCODE_5");
+        names.append(KEYCODE_6, "KEYCODE_6");
+        names.append(KEYCODE_7, "KEYCODE_7");
+        names.append(KEYCODE_8, "KEYCODE_8");
+        names.append(KEYCODE_9, "KEYCODE_9");
+        names.append(KEYCODE_STAR, "KEYCODE_STAR");
+        names.append(KEYCODE_POUND, "KEYCODE_POUND");
+        names.append(KEYCODE_DPAD_UP, "KEYCODE_DPAD_UP");
+        names.append(KEYCODE_DPAD_DOWN, "KEYCODE_DPAD_DOWN");
+        names.append(KEYCODE_DPAD_LEFT, "KEYCODE_DPAD_LEFT");
+        names.append(KEYCODE_DPAD_RIGHT, "KEYCODE_DPAD_RIGHT");
+        names.append(KEYCODE_DPAD_CENTER, "KEYCODE_DPAD_CENTER");
+        names.append(KEYCODE_VOLUME_UP, "KEYCODE_VOLUME_UP");
+        names.append(KEYCODE_VOLUME_DOWN, "KEYCODE_VOLUME_DOWN");
+        names.append(KEYCODE_POWER, "KEYCODE_POWER");
+        names.append(KEYCODE_CAMERA, "KEYCODE_CAMERA");
+        names.append(KEYCODE_CLEAR, "KEYCODE_CLEAR");
+        names.append(KEYCODE_A, "KEYCODE_A");
+        names.append(KEYCODE_B, "KEYCODE_B");
+        names.append(KEYCODE_C, "KEYCODE_C");
+        names.append(KEYCODE_D, "KEYCODE_D");
+        names.append(KEYCODE_E, "KEYCODE_E");
+        names.append(KEYCODE_F, "KEYCODE_F");
+        names.append(KEYCODE_G, "KEYCODE_G");
+        names.append(KEYCODE_H, "KEYCODE_H");
+        names.append(KEYCODE_I, "KEYCODE_I");
+        names.append(KEYCODE_J, "KEYCODE_J");
+        names.append(KEYCODE_K, "KEYCODE_K");
+        names.append(KEYCODE_L, "KEYCODE_L");
+        names.append(KEYCODE_M, "KEYCODE_M");
+        names.append(KEYCODE_N, "KEYCODE_N");
+        names.append(KEYCODE_O, "KEYCODE_O");
+        names.append(KEYCODE_P, "KEYCODE_P");
+        names.append(KEYCODE_Q, "KEYCODE_Q");
+        names.append(KEYCODE_R, "KEYCODE_R");
+        names.append(KEYCODE_S, "KEYCODE_S");
+        names.append(KEYCODE_T, "KEYCODE_T");
+        names.append(KEYCODE_U, "KEYCODE_U");
+        names.append(KEYCODE_V, "KEYCODE_V");
+        names.append(KEYCODE_W, "KEYCODE_W");
+        names.append(KEYCODE_X, "KEYCODE_X");
+        names.append(KEYCODE_Y, "KEYCODE_Y");
+        names.append(KEYCODE_Z, "KEYCODE_Z");
+        names.append(KEYCODE_COMMA, "KEYCODE_COMMA");
+        names.append(KEYCODE_PERIOD, "KEYCODE_PERIOD");
+        names.append(KEYCODE_ALT_LEFT, "KEYCODE_ALT_LEFT");
+        names.append(KEYCODE_ALT_RIGHT, "KEYCODE_ALT_RIGHT");
+        names.append(KEYCODE_SHIFT_LEFT, "KEYCODE_SHIFT_LEFT");
+        names.append(KEYCODE_SHIFT_RIGHT, "KEYCODE_SHIFT_RIGHT");
+        names.append(KEYCODE_TAB, "KEYCODE_TAB");
+        names.append(KEYCODE_SPACE, "KEYCODE_SPACE");
+        names.append(KEYCODE_SYM, "KEYCODE_SYM");
+        names.append(KEYCODE_EXPLORER, "KEYCODE_EXPLORER");
+        names.append(KEYCODE_ENVELOPE, "KEYCODE_ENVELOPE");
+        names.append(KEYCODE_ENTER, "KEYCODE_ENTER");
+        names.append(KEYCODE_DEL, "KEYCODE_DEL");
+        names.append(KEYCODE_GRAVE, "KEYCODE_GRAVE");
+        names.append(KEYCODE_MINUS, "KEYCODE_MINUS");
+        names.append(KEYCODE_EQUALS, "KEYCODE_EQUALS");
+        names.append(KEYCODE_LEFT_BRACKET, "KEYCODE_LEFT_BRACKET");
+        names.append(KEYCODE_RIGHT_BRACKET, "KEYCODE_RIGHT_BRACKET");
+        names.append(KEYCODE_BACKSLASH, "KEYCODE_BACKSLASH");
+        names.append(KEYCODE_SEMICOLON, "KEYCODE_SEMICOLON");
+        names.append(KEYCODE_APOSTROPHE, "KEYCODE_APOSTROPHE");
+        names.append(KEYCODE_SLASH, "KEYCODE_SLASH");
+        names.append(KEYCODE_AT, "KEYCODE_AT");
+        names.append(KEYCODE_NUM, "KEYCODE_NUM");
+        names.append(KEYCODE_HEADSETHOOK, "KEYCODE_HEADSETHOOK");
+        names.append(KEYCODE_FOCUS, "KEYCODE_FOCUS");
+        names.append(KEYCODE_PLUS, "KEYCODE_PLUS");
+        names.append(KEYCODE_MENU, "KEYCODE_MENU");
+        names.append(KEYCODE_NOTIFICATION, "KEYCODE_NOTIFICATION");
+        names.append(KEYCODE_SEARCH, "KEYCODE_SEARCH");
+        names.append(KEYCODE_MEDIA_PLAY_PAUSE, "KEYCODE_MEDIA_PLAY_PAUSE");
+        names.append(KEYCODE_MEDIA_STOP, "KEYCODE_MEDIA_STOP");
+        names.append(KEYCODE_MEDIA_NEXT, "KEYCODE_MEDIA_NEXT");
+        names.append(KEYCODE_MEDIA_PREVIOUS, "KEYCODE_MEDIA_PREVIOUS");
+        names.append(KEYCODE_MEDIA_REWIND, "KEYCODE_MEDIA_REWIND");
+        names.append(KEYCODE_MEDIA_FAST_FORWARD, "KEYCODE_MEDIA_FAST_FORWARD");
+        names.append(KEYCODE_MUTE, "KEYCODE_MUTE");
+        names.append(KEYCODE_PAGE_UP, "KEYCODE_PAGE_UP");
+        names.append(KEYCODE_PAGE_DOWN, "KEYCODE_PAGE_DOWN");
+        names.append(KEYCODE_PICTSYMBOLS, "KEYCODE_PICTSYMBOLS");
+        names.append(KEYCODE_SWITCH_CHARSET, "KEYCODE_SWITCH_CHARSET");
+        names.append(KEYCODE_BUTTON_A, "KEYCODE_BUTTON_A");
+        names.append(KEYCODE_BUTTON_B, "KEYCODE_BUTTON_B");
+        names.append(KEYCODE_BUTTON_C, "KEYCODE_BUTTON_C");
+        names.append(KEYCODE_BUTTON_X, "KEYCODE_BUTTON_X");
+        names.append(KEYCODE_BUTTON_Y, "KEYCODE_BUTTON_Y");
+        names.append(KEYCODE_BUTTON_Z, "KEYCODE_BUTTON_Z");
+        names.append(KEYCODE_BUTTON_L1, "KEYCODE_BUTTON_L1");
+        names.append(KEYCODE_BUTTON_R1, "KEYCODE_BUTTON_R1");
+        names.append(KEYCODE_BUTTON_L2, "KEYCODE_BUTTON_L2");
+        names.append(KEYCODE_BUTTON_R2, "KEYCODE_BUTTON_R2");
+        names.append(KEYCODE_BUTTON_THUMBL, "KEYCODE_BUTTON_THUMBL");
+        names.append(KEYCODE_BUTTON_THUMBR, "KEYCODE_BUTTON_THUMBR");
+        names.append(KEYCODE_BUTTON_START, "KEYCODE_BUTTON_START");
+        names.append(KEYCODE_BUTTON_SELECT, "KEYCODE_BUTTON_SELECT");
+        names.append(KEYCODE_BUTTON_MODE, "KEYCODE_BUTTON_MODE");
+        names.append(KEYCODE_ESCAPE, "KEYCODE_ESCAPE");
+        names.append(KEYCODE_FORWARD_DEL, "KEYCODE_FORWARD_DEL");
+        names.append(KEYCODE_CTRL_LEFT, "KEYCODE_CTRL_LEFT");
+        names.append(KEYCODE_CTRL_RIGHT, "KEYCODE_CTRL_RIGHT");
+        names.append(KEYCODE_CAPS_LOCK, "KEYCODE_CAPS_LOCK");
+        names.append(KEYCODE_SCROLL_LOCK, "KEYCODE_SCROLL_LOCK");
+        names.append(KEYCODE_META_LEFT, "KEYCODE_META_LEFT");
+        names.append(KEYCODE_META_RIGHT, "KEYCODE_META_RIGHT");
+        names.append(KEYCODE_FUNCTION, "KEYCODE_FUNCTION");
+        names.append(KEYCODE_SYSRQ, "KEYCODE_SYSRQ");
+        names.append(KEYCODE_BREAK, "KEYCODE_BREAK");
+        names.append(KEYCODE_MOVE_HOME, "KEYCODE_MOVE_HOME");
+        names.append(KEYCODE_MOVE_END, "KEYCODE_MOVE_END");
+        names.append(KEYCODE_INSERT, "KEYCODE_INSERT");
+        names.append(KEYCODE_FORWARD, "KEYCODE_FORWARD");
+        names.append(KEYCODE_MEDIA_PLAY, "KEYCODE_MEDIA_PLAY");
+        names.append(KEYCODE_MEDIA_PAUSE, "KEYCODE_MEDIA_PAUSE");
+        names.append(KEYCODE_MEDIA_CLOSE, "KEYCODE_MEDIA_CLOSE");
+        names.append(KEYCODE_MEDIA_EJECT, "KEYCODE_MEDIA_EJECT");
+        names.append(KEYCODE_MEDIA_RECORD, "KEYCODE_MEDIA_RECORD");
+        names.append(KEYCODE_F1, "KEYCODE_F1");
+        names.append(KEYCODE_F2, "KEYCODE_F2");
+        names.append(KEYCODE_F3, "KEYCODE_F3");
+        names.append(KEYCODE_F4, "KEYCODE_F4");
+        names.append(KEYCODE_F5, "KEYCODE_F5");
+        names.append(KEYCODE_F6, "KEYCODE_F6");
+        names.append(KEYCODE_F7, "KEYCODE_F7");
+        names.append(KEYCODE_F8, "KEYCODE_F8");
+        names.append(KEYCODE_F9, "KEYCODE_F9");
+        names.append(KEYCODE_F10, "KEYCODE_F10");
+        names.append(KEYCODE_F11, "KEYCODE_F11");
+        names.append(KEYCODE_F12, "KEYCODE_F12");
+        names.append(KEYCODE_NUM_LOCK, "KEYCODE_NUM_LOCK");
+        names.append(KEYCODE_NUMPAD_0, "KEYCODE_NUMPAD_0");
+        names.append(KEYCODE_NUMPAD_1, "KEYCODE_NUMPAD_1");
+        names.append(KEYCODE_NUMPAD_2, "KEYCODE_NUMPAD_2");
+        names.append(KEYCODE_NUMPAD_3, "KEYCODE_NUMPAD_3");
+        names.append(KEYCODE_NUMPAD_4, "KEYCODE_NUMPAD_4");
+        names.append(KEYCODE_NUMPAD_5, "KEYCODE_NUMPAD_5");
+        names.append(KEYCODE_NUMPAD_6, "KEYCODE_NUMPAD_6");
+        names.append(KEYCODE_NUMPAD_7, "KEYCODE_NUMPAD_7");
+        names.append(KEYCODE_NUMPAD_8, "KEYCODE_NUMPAD_8");
+        names.append(KEYCODE_NUMPAD_9, "KEYCODE_NUMPAD_9");
+        names.append(KEYCODE_NUMPAD_DIVIDE, "KEYCODE_NUMPAD_DIVIDE");
+        names.append(KEYCODE_NUMPAD_MULTIPLY, "KEYCODE_NUMPAD_MULTIPLY");
+        names.append(KEYCODE_NUMPAD_SUBTRACT, "KEYCODE_NUMPAD_SUBTRACT");
+        names.append(KEYCODE_NUMPAD_ADD, "KEYCODE_NUMPAD_ADD");
+        names.append(KEYCODE_NUMPAD_DOT, "KEYCODE_NUMPAD_DOT");
+        names.append(KEYCODE_NUMPAD_COMMA, "KEYCODE_NUMPAD_COMMA");
+        names.append(KEYCODE_NUMPAD_ENTER, "KEYCODE_NUMPAD_ENTER");
+        names.append(KEYCODE_NUMPAD_EQUALS, "KEYCODE_NUMPAD_EQUALS");
+        names.append(KEYCODE_NUMPAD_LEFT_PAREN, "KEYCODE_NUMPAD_LEFT_PAREN");
+        names.append(KEYCODE_NUMPAD_RIGHT_PAREN, "KEYCODE_NUMPAD_RIGHT_PAREN");
+        names.append(KEYCODE_VOLUME_MUTE, "KEYCODE_VOLUME_MUTE");
+        names.append(KEYCODE_INFO, "KEYCODE_INFO");
+        names.append(KEYCODE_CHANNEL_UP, "KEYCODE_CHANNEL_UP");
+        names.append(KEYCODE_CHANNEL_DOWN, "KEYCODE_CHANNEL_DOWN");
+        names.append(KEYCODE_ZOOM_IN, "KEYCODE_ZOOM_IN");
+        names.append(KEYCODE_ZOOM_OUT, "KEYCODE_ZOOM_OUT");
+        names.append(KEYCODE_TV, "KEYCODE_TV");
+        names.append(KEYCODE_WINDOW, "KEYCODE_WINDOW");
+        names.append(KEYCODE_GUIDE, "KEYCODE_GUIDE");
+        names.append(KEYCODE_DVR, "KEYCODE_DVR");
+        names.append(KEYCODE_BOOKMARK, "KEYCODE_BOOKMARK");
+        names.append(KEYCODE_CAPTIONS, "KEYCODE_CAPTIONS");
+        names.append(KEYCODE_SETTINGS, "KEYCODE_SETTINGS");
+        names.append(KEYCODE_TV_POWER, "KEYCODE_TV_POWER");
+        names.append(KEYCODE_TV_INPUT, "KEYCODE_TV_INPUT");
+        names.append(KEYCODE_STB_INPUT, "KEYCODE_STB_INPUT");
+        names.append(KEYCODE_STB_POWER, "KEYCODE_STB_POWER");
+        names.append(KEYCODE_AVR_POWER, "KEYCODE_AVR_POWER");
+        names.append(KEYCODE_AVR_INPUT, "KEYCODE_AVR_INPUT");
+        names.append(KEYCODE_PROG_RED, "KEYCODE_PROG_RED");
+        names.append(KEYCODE_PROG_GREEN, "KEYCODE_PROG_GREEN");
+        names.append(KEYCODE_PROG_YELLOW, "KEYCODE_PROG_YELLOW");
+        names.append(KEYCODE_PROG_BLUE, "KEYCODE_PROG_BLUE");
+        names.append(KEYCODE_APP_SWITCH, "KEYCODE_APP_SWITCH");
+        names.append(KEYCODE_BUTTON_1, "KEYCODE_BUTTON_1");
+        names.append(KEYCODE_BUTTON_2, "KEYCODE_BUTTON_2");
+        names.append(KEYCODE_BUTTON_3, "KEYCODE_BUTTON_3");
+        names.append(KEYCODE_BUTTON_4, "KEYCODE_BUTTON_4");
+        names.append(KEYCODE_BUTTON_5, "KEYCODE_BUTTON_5");
+        names.append(KEYCODE_BUTTON_6, "KEYCODE_BUTTON_6");
+        names.append(KEYCODE_BUTTON_7, "KEYCODE_BUTTON_7");
+        names.append(KEYCODE_BUTTON_8, "KEYCODE_BUTTON_8");
+        names.append(KEYCODE_BUTTON_9, "KEYCODE_BUTTON_9");
+        names.append(KEYCODE_BUTTON_10, "KEYCODE_BUTTON_10");
+        names.append(KEYCODE_BUTTON_11, "KEYCODE_BUTTON_11");
+        names.append(KEYCODE_BUTTON_12, "KEYCODE_BUTTON_12");
+        names.append(KEYCODE_BUTTON_13, "KEYCODE_BUTTON_13");
+        names.append(KEYCODE_BUTTON_14, "KEYCODE_BUTTON_14");
+        names.append(KEYCODE_BUTTON_15, "KEYCODE_BUTTON_15");
+        names.append(KEYCODE_BUTTON_16, "KEYCODE_BUTTON_16");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
@@ -1250,14 +1252,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     static {
-        if (META_SYMBOLIC_NAMES.length != 32) {
-            throw new IllegalStateException(
-                    "META_SYMBOLIC_NAMES array should contain exactly 32 entries.");
-        }
-        if (KEYCODE_SYMBOLIC_NAMES.length != LAST_KEYCODE + 1) {
-            throw new IllegalStateException(
-                    "KEYCODE_SYMBOLIC_NAMES array is out of sync with the keycode constants.");
-        }
+        populateKeycodeSymbolicNames();
     }
 
     private KeyEvent() {
@@ -1651,6 +1646,49 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** @hide */
     public final boolean hasDefaultAction() {
         return native_hasDefaultAction(mKeyCode);
+    }
+
+    /**
+     * Returns true if the specified keycode is a gamepad button.
+     * @return True if the keycode is a gamepad button, such as {@link #KEYCODE_BUTTON_A}.
+     */
+    public static final boolean isGamepadButton(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BUTTON_A:
+            case KeyEvent.KEYCODE_BUTTON_B:
+            case KeyEvent.KEYCODE_BUTTON_C:
+            case KeyEvent.KEYCODE_BUTTON_X:
+            case KeyEvent.KEYCODE_BUTTON_Y:
+            case KeyEvent.KEYCODE_BUTTON_Z:
+            case KeyEvent.KEYCODE_BUTTON_L1:
+            case KeyEvent.KEYCODE_BUTTON_R1:
+            case KeyEvent.KEYCODE_BUTTON_L2:
+            case KeyEvent.KEYCODE_BUTTON_R2:
+            case KeyEvent.KEYCODE_BUTTON_THUMBL:
+            case KeyEvent.KEYCODE_BUTTON_THUMBR:
+            case KeyEvent.KEYCODE_BUTTON_START:
+            case KeyEvent.KEYCODE_BUTTON_SELECT:
+            case KeyEvent.KEYCODE_BUTTON_MODE:
+            case KeyEvent.KEYCODE_BUTTON_1:
+            case KeyEvent.KEYCODE_BUTTON_2:
+            case KeyEvent.KEYCODE_BUTTON_3:
+            case KeyEvent.KEYCODE_BUTTON_4:
+            case KeyEvent.KEYCODE_BUTTON_5:
+            case KeyEvent.KEYCODE_BUTTON_6:
+            case KeyEvent.KEYCODE_BUTTON_7:
+            case KeyEvent.KEYCODE_BUTTON_8:
+            case KeyEvent.KEYCODE_BUTTON_9:
+            case KeyEvent.KEYCODE_BUTTON_10:
+            case KeyEvent.KEYCODE_BUTTON_11:
+            case KeyEvent.KEYCODE_BUTTON_12:
+            case KeyEvent.KEYCODE_BUTTON_13:
+            case KeyEvent.KEYCODE_BUTTON_14:
+            case KeyEvent.KEYCODE_BUTTON_15:
+            case KeyEvent.KEYCODE_BUTTON_16:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /** {@inheritDoc} */
@@ -2554,7 +2592,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     /**
      * Returns a string that represents the symbolic name of the specified action
-     * such as "ACTION_DOWN", or "35" (if unknown).
+     * such as "ACTION_DOWN", or an equivalent numeric constant such as "35" if unknown.
      *
      * @param action The action.
      * @return The symbolic name of the specified action.
@@ -2575,52 +2613,51 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     /**
      * Returns a string that represents the symbolic name of the specified keycode
-     * such as "KEYCODE_A", "KEYCODE_DPAD_UP", or "1001" (if unknown).
+     * such as "KEYCODE_A", "KEYCODE_DPAD_UP", or an equivalent numeric constant
+     * such as "1001" if unknown.
      *
      * @param keyCode The key code.
      * @return The symbolic name of the specified keycode.
      *
      * @see KeyCharacterMap#getDisplayLabel
-     * @hide
      */
     public static String keyCodeToString(int keyCode) {
-        if (keyCode >= 0 && keyCode < KEYCODE_SYMBOLIC_NAMES.length) {
-            return KEYCODE_SYMBOLIC_NAMES[keyCode];
-        }
-        return Integer.toString(keyCode);
+        String symbolicName = KEYCODE_SYMBOLIC_NAMES.get(keyCode);
+        return symbolicName != null ? symbolicName : Integer.toString(keyCode);
     }
 
     /**
-     * Gets a keycode by its symbolic name such as "KEYCODE_A" or "1001" (if unknown).
+     * Gets a keycode by its symbolic name such as "KEYCODE_A" or an equivalent
+     * numeric constant such as "1001".
      *
      * @param symbolicName The symbolic name of the keycode.
-     * @return The keycode or -1 if not found.
+     * @return The keycode or {@link #KEYCODE_UNKNOWN} if not found.
      * @see #keycodeToString
-     * @hide
      */
     public static int keyCodeFromString(String symbolicName) {
         if (symbolicName == null) {
             throw new IllegalArgumentException("symbolicName must not be null");
         }
 
-        final int count = KEYCODE_SYMBOLIC_NAMES.length;
+        final int count = KEYCODE_SYMBOLIC_NAMES.size();
         for (int i = 0; i < count; i++) {
-            if (symbolicName.equals(KEYCODE_SYMBOLIC_NAMES[i])) {
+            if (symbolicName.equals(KEYCODE_SYMBOLIC_NAMES.valueAt(i))) {
                 return i;
             }
         }
 
         try {
-            return Integer.parseInt(symbolicName,10);
+            return Integer.parseInt(symbolicName, 10);
         } catch (NumberFormatException ex) {
-            return -1;
+            return KEYCODE_UNKNOWN;
         }
     }
 
     /**
      * Returns a string that represents the symbolic name of the specified combined meta
      * key modifier state flags such as "0", "META_SHIFT_ON",
-     * "META_ALT_ON|META_SHIFT_ON" or "0x10000000" (if unknown).
+     * "META_ALT_ON|META_SHIFT_ON" or an equivalent numeric constant such as "0x10000000"
+     * if unknown.
      *
      * @param metaState The meta state.
      * @return The symbolic name of the specified combined meta state flags.

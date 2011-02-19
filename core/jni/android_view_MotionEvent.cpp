@@ -207,8 +207,7 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
     outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION,
             env->GetFloatField(pointerCoordsObj, gPointerCoordsClassInfo.orientation));
 
-    uint32_t bits = env->GetIntField(pointerCoordsObj,
-            gPointerCoordsClassInfo.mPackedAxisBits);
+    uint64_t bits = env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits);
     if (bits) {
         jfloatArray valuesArray = jfloatArray(env->GetObjectField(pointerCoordsObj,
                 gPointerCoordsClassInfo.mPackedAxisValues));
@@ -219,7 +218,7 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
             uint32_t index = 0;
             do {
                 uint32_t axis = __builtin_ctz(bits);
-                uint32_t axisBit = 1 << axis;
+                uint64_t axisBit = 1LL << axis;
                 bits &= ~axisBit;
                 outRawPointerCoords->setAxisValue(axis, values[index++]);
             } while (bits);
@@ -272,21 +271,21 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
     env->SetFloatField(outPointerCoordsObj, gPointerCoordsClassInfo.orientation,
             rawPointerCoords->getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
 
-    const uint32_t unpackedAxisBits = 0
-            | (1 << AMOTION_EVENT_AXIS_X)
-            | (1 << AMOTION_EVENT_AXIS_Y)
-            | (1 << AMOTION_EVENT_AXIS_PRESSURE)
-            | (1 << AMOTION_EVENT_AXIS_SIZE)
-            | (1 << AMOTION_EVENT_AXIS_TOUCH_MAJOR)
-            | (1 << AMOTION_EVENT_AXIS_TOUCH_MINOR)
-            | (1 << AMOTION_EVENT_AXIS_TOOL_MAJOR)
-            | (1 << AMOTION_EVENT_AXIS_TOOL_MINOR)
-            | (1 << AMOTION_EVENT_AXIS_ORIENTATION);
+    const uint64_t unpackedAxisBits = 0
+            | (1LL << AMOTION_EVENT_AXIS_X)
+            | (1LL << AMOTION_EVENT_AXIS_Y)
+            | (1LL << AMOTION_EVENT_AXIS_PRESSURE)
+            | (1LL << AMOTION_EVENT_AXIS_SIZE)
+            | (1LL << AMOTION_EVENT_AXIS_TOUCH_MAJOR)
+            | (1LL << AMOTION_EVENT_AXIS_TOUCH_MINOR)
+            | (1LL << AMOTION_EVENT_AXIS_TOOL_MAJOR)
+            | (1LL << AMOTION_EVENT_AXIS_TOOL_MINOR)
+            | (1LL << AMOTION_EVENT_AXIS_ORIENTATION);
 
-    uint32_t outBits = 0;
-    uint32_t remainingBits = rawPointerCoords->bits & ~unpackedAxisBits;
+    uint64_t outBits = 0;
+    uint64_t remainingBits = rawPointerCoords->bits & ~unpackedAxisBits;
     if (remainingBits) {
-        uint32_t packedAxesCount = __builtin_popcount(remainingBits);
+        uint32_t packedAxesCount = __builtin_popcountll(remainingBits);
         jfloatArray outValuesArray = obtainPackedAxisValuesArray(env, packedAxesCount,
                 outPointerCoordsObj);
         if (!outValuesArray) {
@@ -300,7 +299,7 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
         uint32_t index = 0;
         do {
             uint32_t axis = __builtin_ctz(remainingBits);
-            uint32_t axisBit = 1 << axis;
+            uint64_t axisBit = 1LL << axis;
             remainingBits &= ~axisBit;
             outBits |= axisBit;
             outValues[index++] = rawPointerCoords->getAxisValue(axis);
@@ -309,7 +308,7 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
         env->ReleasePrimitiveArrayCritical(outValuesArray, outValues, 0);
         env->DeleteLocalRef(outValuesArray);
     }
-    env->SetIntField(outPointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits, outBits);
+    env->SetLongField(outPointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits, outBits);
 }
 
 
@@ -758,7 +757,7 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     FIND_CLASS(gPointerCoordsClassInfo.clazz, "android/view/MotionEvent$PointerCoords");
 
     GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisBits, gPointerCoordsClassInfo.clazz,
-            "mPackedAxisBits", "I");
+            "mPackedAxisBits", "J");
     GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisValues, gPointerCoordsClassInfo.clazz,
             "mPackedAxisValues", "[F");
     GET_FIELD_ID(gPointerCoordsClassInfo.x, gPointerCoordsClassInfo.clazz,

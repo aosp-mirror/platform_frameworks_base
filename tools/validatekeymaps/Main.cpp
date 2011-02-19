@@ -17,6 +17,7 @@
 #include <ui/KeyCharacterMap.h>
 #include <ui/KeyLayoutMap.h>
 #include <ui/VirtualKeyMap.h>
+#include <utils/PropertyMap.h>
 #include <utils/String8.h>
 
 #include <stdio.h>
@@ -32,6 +33,7 @@ enum FileType {
     FILETYPE_KEYLAYOUT,
     FILETYPE_KEYCHARACTERMAP,
     FILETYPE_VIRTUALKEYDEFINITION,
+    FILETYPE_INPUTDEVICECONFIGURATION,
 };
 
 
@@ -39,9 +41,9 @@ static void usage() {
     fprintf(stderr, "Keymap Validation Tool\n\n");
     fprintf(stderr, "Usage:\n");
     fprintf(stderr,
-        " %s [*.kl] [*.kcm] [virtualkeys.*] [...]\n"
-        "   Validates the specified key layouts, key character maps \n"
-        "   or virtual key definitions.\n\n",
+        " %s [*.kl] [*.kcm] [*.idc] [virtualkeys.*] [...]\n"
+        "   Validates the specified key layouts, key character maps, \n"
+        "   input device configurations, or virtual key definitions.\n\n",
         gProgName);
 }
 
@@ -53,6 +55,9 @@ static FileType getFileType(const char* filename) {
         }
         if (strcmp(extension, ".kcm") == 0) {
             return FILETYPE_KEYCHARACTERMAP;
+        }
+        if (strcmp(extension, ".idc") == 0) {
+            return FILETYPE_INPUTDEVICECONFIGURATION;
         }
     }
 
@@ -87,6 +92,16 @@ static bool validateFile(const char* filename) {
         status_t status = KeyCharacterMap::load(String8(filename), &map);
         if (status) {
             fprintf(stderr, "Error %d parsing key character map file.\n\n", status);
+            return false;
+        }
+        break;
+    }
+
+    case FILETYPE_INPUTDEVICECONFIGURATION: {
+        PropertyMap* map;
+        status_t status = PropertyMap::load(String8(filename), &map);
+        if (status) {
+            fprintf(stderr, "Error %d parsing input device configuration file.\n\n", status);
             return false;
         }
         break;

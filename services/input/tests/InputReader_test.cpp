@@ -561,7 +561,7 @@ private:
         return -1;
     }
 
-    virtual status_t scancodeToKeycode(int32_t deviceId, int scancode,
+    virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const {
         Device* device = getDevice(deviceId);
         if (device) {
@@ -576,6 +576,11 @@ private:
                 return OK;
             }
         }
+        return NAME_NOT_FOUND;
+    }
+
+    virtual status_t mapAxis(int32_t deviceId, int scancode,
+            int32_t* outAxis) const {
         return NAME_NOT_FOUND;
     }
 

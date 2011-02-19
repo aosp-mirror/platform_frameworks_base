@@ -250,11 +250,59 @@ void KeyEvent::initialize(const KeyEvent& from) {
 
 // --- PointerCoords ---
 
+float PointerCoords::getAxisValue(int32_t axis) const {
+    if (axis < 0 || axis > 63) {
+        return 0;
+    }
+
+    uint64_t axisBit = 1LL << axis;
+    if (!(bits & axisBit)) {
+        return 0;
+    }
+    uint32_t index = __builtin_popcountll(bits & (axisBit - 1LL));
+    return values[index];
+}
+
+status_t PointerCoords::setAxisValue(int32_t axis, float value) {
+    if (axis < 0 || axis > 63) {
+        return NAME_NOT_FOUND;
+    }
+
+    uint64_t axisBit = 1LL << axis;
+    uint32_t index = __builtin_popcountll(bits & (axisBit - 1LL));
+    if (!(bits & axisBit)) {
+        uint32_t count = __builtin_popcountll(bits);
+        if (count >= MAX_AXES) {
+            tooManyAxes(axis);
+            return NO_MEMORY;
+        }
+        bits |= axisBit;
+        for (uint32_t i = count; i > index; i--) {
+            values[i] = values[i - 1];
+        }
+    }
+    values[index] = value;
+    return OK;
+}
+
+float* PointerCoords::editAxisValue(int32_t axis) {
+    if (axis < 0 || axis > 63) {
+        return NULL;
+    }
+
+    uint64_t axisBit = 1LL << axis;
+    if (!(bits & axisBit)) {
+        return NULL;
+    }
+    uint32_t index = __builtin_popcountll(bits & (axisBit - 1LL));
+    return &values[index];
+}
+
 #ifdef HAVE_ANDROID_OS
 status_t PointerCoords::readFromParcel(Parcel* parcel) {
-    bits = parcel->readInt32();
+    bits = parcel->readInt64();
 
-    uint32_t count = __builtin_popcount(bits);
+    uint32_t count = __builtin_popcountll(bits);
     if (count > MAX_AXES) {
         return BAD_VALUE;
     }
@@ -266,9 +314,9 @@ status_t PointerCoords::readFromParcel(Parcel* parcel) {
 }
 
 status_t PointerCoords::writeToParcel(Parcel* parcel) const {
-    parcel->writeInt32(bits);
+    parcel->writeInt64(bits);
 
-    uint32_t count = __builtin_popcount(bits);
+    uint32_t count = __builtin_popcountll(bits);
     for (uint32_t i = 0; i < count; i++) {
         parcel->writeInt32(values[i]);
     }

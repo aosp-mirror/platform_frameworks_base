@@ -20,6 +20,7 @@ import android.graphics.Matrix;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.SparseArray;
 
 /**
  * Object used to report movement (mouse, pen, finger, trackball) events.  This
@@ -263,10 +264,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the X axis of a motion event.
-     *
-     * The interpretation of the X axis varies by input source.
-     * It may represent the X position of the center of the touch contact area,
-     * a relative horizontal displacement of a trackball or joystick, or something else.
+     * <p>
+     * <ul>
+     * <li>For a touch screen, reports the absolute X screen position of the center of
+     * the touch contact area.  The units are display pixels.
+     * <li>For a touch pad, reports the absolute X surface position of the center of the touch
+     * contact area.  The units are device-specific because the touch pad is not necessarily
+     * associated with a display.  Use {@link InputDevice#getMotionRange(int)} to query
+     * the effective range of values.
+     * <li>For a mouse, reports the absolute X screen position of the mouse pointer.
+     * The units are display pixels.
+     * <li>For a trackball, reports the relative horizontal displacement of the trackball.
+     * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+     * <li>For a joystick, reports the absolute X position of the joystick.
+     * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+     * </ul>
+     * </p>
      *
      * @see #getX(int)
      * @see #getHistoricalX(int, int)
@@ -277,10 +290,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the Y axis of a motion event.
-     * 
-     * The interpretation of the Y axis varies by input source.
-     * It may represent the Y position of the center of the touch contact area,
-     * a relative vertical displacement of a trackball or joystick, or something else.
+     * <p>
+     * <ul>
+     * <li>For a touch screen, reports the absolute Y screen position of the center of
+     * the touch contact area.  The units are display pixels.
+     * <li>For a touch pad, reports the absolute Y surface position of the center of the touch
+     * contact area.  The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+     * to query the effective range of values.
+     * <li>For a mouse, reports the absolute Y screen position of the mouse pointer.
+     * The units are display pixels.
+     * <li>For a trackball, reports the relative vertical displacement of the trackball.
+     * The value is normalized to a range from -1.0 (up) to 1.0 (down).
+     * <li>For a joystick, reports the absolute Y position of the joystick.
+     * The value is normalized to a range from -1.0 (up or far) to 1.0 (down or near).
+     * </ul>
+     * </p>
      *
      * @see #getY(int)
      * @see #getHistoricalY(int, int)
@@ -291,12 +315,18 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the Pressure axis of a motion event.
-     *
-     * The pressure axis specifies a normalized value that describes the approximate
-     * pressure applied to the device by a finger or other tool.
-     * The pressure generally ranges from 0 (no pressure at all) to 1 (normal pressure),
-     * although values higher than 1 may be generated depending on the calibration of
-     * the input device.
+     * <p>
+     * <ul>
+     * <li>For a touch screen or touch pad, reports the approximate pressure applied to the device
+     * by a finger or other tool.  The value is normalized to a range from
+     * 0 (no pressure at all) to 1 (normal pressure), although values higher than 1
+     * may be generated depending on the calibration of the input device.
+     * <li>For a trackball, the value is set to 1 if the trackball button is pressed
+     * or 0 otherwise.
+     * <li>For a mouse, the value is set to 1 if the primary mouse button is pressed
+     * or 0 otherwise.
+     * </ul>
+     * </p>
      *
      * @see #getPressure(int)
      * @see #getHistoricalPressure(int, int)
@@ -307,17 +337,16 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the Size axis of a motion event.
-     *
-     * The size axis specifies a normalized value that describes the approximate size
-     * of the pointer touch area in relation to the maximum detectable size for the device.
-     * It represents some approximation of the area of the screen being
-     * pressed; the actual value in pixels corresponding to the
-     * touch is normalized with the device specific range of values
-     * and scaled to a value between 0 and 1. The value of size can be used to
-     * determine fat touch events.
-     *
-     * To obtain calibrated size information in terms of pixels, use
-     * {@link #AXIS_TOUCH_MAJOR} or {@link #AXIS_TOOL_MAJOR} instead.
+     * <p>
+     * <ul>
+     * <li>For a touch screen or touch pad, reports the approximate size of the contact area in
+     * relation to the maximum detectable size for the device.  The value is normalized
+     * to a range from 0 (smallest detectable size) to 1 (largest detectable size),
+     * although it is not a linear scale.  This value is of very limited use.
+     * To obtain calibrated size information, use
+     * {@link #AXIS_TOUCH_MAJOR} or {@link #AXIS_TOOL_MAJOR}.
+     * </ul>
+     * </p>
      *
      * @see #getSize(int)
      * @see #getHistoricalSize(int, int)
@@ -328,11 +357,17 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the TouchMajor axis of a motion event.
-     *
-     * The touch major axis specifies the length of the major axis of an ellipse that
-     * describes the touch area at the point of contact.
-     * If the device is a touch screen, the length is reported in pixels, otherwise it is
-     * reported in device-specific units.
+     * <p>
+     * <ul>
+     * <li>For a touch screen, reports the length of the major axis of an ellipse that
+     * represents the touch area at the point of contact.
+     * The units are display pixels.
+     * <li>For a touch pad, reports the length of the major axis of an ellipse that
+     * represents the touch area at the point of contact.
+     * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+     * to query the effective range of values.
+     * </ul>
+     * </p>
      *
      * @see #getTouchMajor(int)
      * @see #getHistoricalTouchMajor(int, int)
@@ -343,11 +378,19 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the TouchMinor axis of a motion event.
-     *
-     * The touch major axis specifies the length of the minor axis of an ellipse that
-     * describes the touch area at the point of contact.
-     * If the device is a touch screen, the length is reported in pixels, otherwise it is
-     * reported in device-specific units.
+     * <p>
+     * <ul>
+     * <li>For a touch screen, reports the length of the minor axis of an ellipse that
+     * represents the touch area at the point of contact.
+     * The units are display pixels.
+     * <li>For a touch pad, reports the length of the minor axis of an ellipse that
+     * represents the touch area at the point of contact.
+     * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+     * to query the effective range of values.
+     * </ul>
+     * </p><p>
+     * When the touch is circular, the major and minor axis lengths will be equal to one another.
+     * </p>
      *
      * @see #getTouchMinor(int)
      * @see #getHistoricalTouchMinor(int, int)
@@ -358,13 +401,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the ToolMajor axis of a motion event.
-     *
-     * The tool major axis specifies the length of the major axis of an ellipse that
-     * describes the size of the approaching tool.
-     * The tool area represents the estimated size of the finger or pen that is
-     * touching the device independent of its actual touch area at the point of contact.
-     * If the device is a touch screen, the length is reported in pixels, otherwise it is
-     * reported in device-specific units.
+     * <p>
+     * <ul>
+     * <li>For a touch screen, reports the length of the major axis of an ellipse that
+     * represents the size of the approaching finger or tool used to make contact.
+     * <li>For a touch pad, reports the length of the major axis of an ellipse that
+     * represents the size of the approaching finger or tool used to make contact.
+     * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+     * to query the effective range of values.
+     * </ul>
+     * </p><p>
+     * When the touch is circular, the major and minor axis lengths will be equal to one another.
+     * </p><p>
+     * The tool size may be larger than the touch size since the tool may not be fully
+     * in contact with the touch sensor.
+     * </p>
      *
      * @see #getToolMajor(int)
      * @see #getHistoricalToolMajor(int, int)
@@ -375,13 +426,21 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the ToolMinor axis of a motion event.
-     *
-     * The tool minor axis specifies the length of the major axis of an ellipse that
-     * describes the size of the approaching tool.
-     * The tool area represents the estimated size of the finger or pen that is
-     * touching the device independent of its actual touch area at the point of contact.
-     * If the device is a touch screen, the length is reported in pixels, otherwise it is
-     * reported in device-specific units.
+     * <p>
+     * <ul>
+     * <li>For a touch screen, reports the length of the minor axis of an ellipse that
+     * represents the size of the approaching finger or tool used to make contact.
+     * <li>For a touch pad, reports the length of the minor axis of an ellipse that
+     * represents the size of the approaching finger or tool used to make contact.
+     * The units are device-dependent; use {@link InputDevice#getMotionRange(int)}
+     * to query the effective range of values.
+     * </ul>
+     * </p><p>
+     * When the touch is circular, the major and minor axis lengths will be equal to one another.
+     * </p><p>
+     * The tool size may be larger than the touch size since the tool may not be fully
+     * in contact with the touch sensor.
+     * </p>
      *
      * @see #getToolMinor(int)
      * @see #getHistoricalToolMinor(int, int)
@@ -392,15 +451,18 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Constant used to identify the Orientation axis of a motion event.
-     *
-     * The orientation axis specifies the orientation of the touch area and tool area in
-     * radians clockwise from vertical relative to the vertical plane of the device.
-     * An angle of 0 degrees indicates that the major axis of contact is oriented
+     * <p>
+     * <ul>
+     * <li>For a touch screen or touch pad, reports the orientation of the finger
+     * or tool in radians relative to the vertical plane of the device.
+     * An angle of 0 radians indicates that the major axis of contact is oriented
      * upwards, is perfectly circular or is of unknown orientation.  A positive angle
      * indicates that the major axis of contact is oriented to the right.  A negative angle
      * indicates that the major axis of contact is oriented to the left.
      * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
      * (finger pointing fully right).
+     * </ul>
+     * </p>
      *
      * @see #getOrientation(int)
      * @see #getHistoricalOrientation(int, int)
@@ -408,6 +470,399 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see InputDevice#getMotionRange
      */
     public static final int AXIS_ORIENTATION = 8;
+
+    /**
+     * Constant used to identify the Vertical Scroll axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a mouse, reports the relative movement of vertical scroll wheel.
+     * The value is normalized to a range from -1.0 (up) to 1.0 (down).
+     * </ul>
+     * </p><p>
+     * This axis should be used to scroll views vertically.
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_VSCROLL = 9;
+
+    /**
+     * Constant used to identify the Horizontal Scroll axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a mouse, reports the relative movement of horizontal scroll wheel.
+     * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+     * </ul>
+     * </p><p>
+     * This axis should be used to scroll views horizontally.
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_HSCROLL = 10;
+
+    /**
+     * Constant used to identify the Z axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute Z position of the joystick.
+     * The value is normalized to a range from -1.0 (high) to 1.0 (low).
+     * <em>On game pads with two analog joysticks, this axis is often reinterpreted
+     * to report the absolute X position of the second joystick instead.</em>
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_Z = 11;
+
+    /**
+     * Constant used to identify the X Rotation axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute rotation angle about the X axis.
+     * The value is normalized to a range from -1.0 (counter-clockwise) to 1.0 (clockwise).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RX = 12;
+
+    /**
+     * Constant used to identify the Y Rotation axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute rotation angle about the Y axis.
+     * The value is normalized to a range from -1.0 (counter-clockwise) to 1.0 (clockwise).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RY = 13;
+
+    /**
+     * Constant used to identify the Z Rotation axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute rotation angle about the Z axis.
+     * The value is normalized to a range from -1.0 (counter-clockwise) to 1.0 (clockwise).
+     * <em>On game pads with two analog joysticks, this axis is often reinterpreted
+     * to report the absolute Y position of the second joystick instead.</em>
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RZ = 14;
+
+    /**
+     * Constant used to identify the Hat X axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute X position of the directional hat control.
+     * The value is normalized to a range from -1.0 (left) to 1.0 (right).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_HAT_X = 15;
+
+    /**
+     * Constant used to identify the Hat Y axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute Y position of the directional hat control.
+     * The value is normalized to a range from -1.0 (up) to 1.0 (down).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_HAT_Y = 16;
+
+    /**
+     * Constant used to identify the Left Trigger axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the left trigger control.
+     * The value is normalized to a range from 0.0 (released) to 1.0 (fully pressed).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_LTRIGGER = 17;
+
+    /**
+     * Constant used to identify the Right Trigger axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the right trigger control.
+     * The value is normalized to a range from 0.0 (released) to 1.0 (fully pressed).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RTRIGGER = 18;
+
+    /**
+     * Constant used to identify the Generic 1 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_1 = 32;
+
+    /**
+     * Constant used to identify the Generic 2 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_2 = 33;
+
+    /**
+     * Constant used to identify the Generic 3 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_3 = 34;
+
+    /**
+     * Constant used to identify the Generic 4 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_4 = 35;
+
+    /**
+     * Constant used to identify the Generic 5 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_5 = 36;
+
+    /**
+     * Constant used to identify the Generic 6 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_6 = 37;
+
+    /**
+     * Constant used to identify the Generic 7 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_7 = 38;
+
+    /**
+     * Constant used to identify the Generic 8 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_8 = 39;
+
+    /**
+     * Constant used to identify the Generic 9 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_9 = 40;
+
+    /**
+     * Constant used to identify the Generic 10 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_10 = 41;
+
+    /**
+     * Constant used to identify the Generic 11 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_11 = 42;
+
+    /**
+     * Constant used to identify the Generic 12 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_12 = 43;
+
+    /**
+     * Constant used to identify the Generic 13 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_13 = 44;
+
+    /**
+     * Constant used to identify the Generic 14 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_14 = 45;
+
+    /**
+     * Constant used to identify the Generic 15 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_15 = 46;
+
+    /**
+     * Constant used to identify the Generic 16 axis of a motion event.
+     * The interpretation of a generic axis is device-specific.
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GENERIC_16 = 47;
+
+    // NOTE: If you add a new axis here you must also add it to:
+    //  native/include/android/input.h
+    //  frameworks/base/include/ui/KeycodeLabels.h
+
+    // Symbolic names of all axes.
+    private static final SparseArray<String> AXIS_SYMBOLIC_NAMES = new SparseArray<String>();
+    private static void populateAxisSymbolicNames() {
+        SparseArray<String> names = AXIS_SYMBOLIC_NAMES;
+        names.append(AXIS_X, "AXIS_X");
+        names.append(AXIS_Y, "AXIS_Y");
+        names.append(AXIS_PRESSURE, "AXIS_PRESSURE");
+        names.append(AXIS_SIZE, "AXIS_SIZE");
+        names.append(AXIS_TOUCH_MAJOR, "AXIS_TOUCH_MAJOR");
+        names.append(AXIS_TOUCH_MINOR, "AXIS_TOUCH_MINOR");
+        names.append(AXIS_TOOL_MAJOR, "AXIS_TOOL_MAJOR");
+        names.append(AXIS_TOOL_MINOR, "AXIS_TOOL_MINOR");
+        names.append(AXIS_ORIENTATION, "AXIS_ORIENTATION");
+        names.append(AXIS_VSCROLL, "AXIS_VSCROLL");
+        names.append(AXIS_HSCROLL, "AXIS_HSCROLL");
+        names.append(AXIS_Z, "AXIS_Z");
+        names.append(AXIS_RX, "AXIS_RX");
+        names.append(AXIS_RY, "AXIS_RY");
+        names.append(AXIS_RZ, "AXIS_RZ");
+        names.append(AXIS_HAT_X, "AXIS_HAT_X");
+        names.append(AXIS_HAT_Y, "AXIS_HAT_Y");
+        names.append(AXIS_LTRIGGER, "AXIS_LTRIGGER");
+        names.append(AXIS_RTRIGGER, "AXIS_RTRIGGER");
+        names.append(AXIS_GENERIC_1, "AXIS_GENERIC_1");
+        names.append(AXIS_GENERIC_2, "AXIS_GENERIC_2");
+        names.append(AXIS_GENERIC_3, "AXIS_GENERIC_3");
+        names.append(AXIS_GENERIC_4, "AXIS_GENERIC_4");
+        names.append(AXIS_GENERIC_5, "AXIS_GENERIC_5");
+        names.append(AXIS_GENERIC_6, "AXIS_GENERIC_6");
+        names.append(AXIS_GENERIC_7, "AXIS_GENERIC_7");
+        names.append(AXIS_GENERIC_8, "AXIS_GENERIC_8");
+        names.append(AXIS_GENERIC_9, "AXIS_GENERIC_9");
+        names.append(AXIS_GENERIC_10, "AXIS_GENERIC_10");
+        names.append(AXIS_GENERIC_11, "AXIS_GENERIC_11");
+        names.append(AXIS_GENERIC_12, "AXIS_GENERIC_12");
+        names.append(AXIS_GENERIC_13, "AXIS_GENERIC_13");
+        names.append(AXIS_GENERIC_14, "AXIS_GENERIC_14");
+        names.append(AXIS_GENERIC_15, "AXIS_GENERIC_15");
+        names.append(AXIS_GENERIC_16, "AXIS_GENERIC_16");
+    }
+
+    static {
+        populateAxisSymbolicNames();
+    }
 
     // Private value for history pos that obtains the current sample.
     private static final int HISTORY_CURRENT = -0x80000000;
@@ -1081,7 +1536,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * Returns the orientation of the touch area and tool area in radians clockwise from vertical
      * for the given pointer <em>index</em> (use {@link #getPointerId(int)} to find the pointer
      * identifier for this index).
-     * An angle of 0 degrees indicates that the major axis of contact is oriented
+     * An angle of 0 radians indicates that the major axis of contact is oriented
      * upwards, is perfectly circular or is of unknown orientation.  A positive angle
      * indicates that the major axis of contact is oriented to the right.  A negative angle
      * indicates that the major axis of contact is oriented to the left.
@@ -1737,34 +2192,40 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
     /**
      * Returns a string that represents the symbolic name of the specified axis
-     * such as "AXIS_X" or an equivalent numeric constants such as "42" if unknown.
+     * such as "AXIS_X" or an equivalent numeric constant such as "42" if unknown.
      *
      * @param axis The axis
      * @return The symbolic name of the specified axis.
-     * @hide
      */
     public static String axisToString(int axis) {
-        switch (axis) {
-            case AXIS_X:
-                return "AXIS_X";
-            case AXIS_Y:
-                return "AXIS_Y";
-            case AXIS_PRESSURE:
-                return "AXIS_PRESSURE";
-            case AXIS_SIZE:
-                return "AXIS_SIZE";
-            case AXIS_TOUCH_MAJOR:
-                return "AXIS_TOUCH_MAJOR";
-            case AXIS_TOUCH_MINOR:
-                return "AXIS_TOUCH_MINOR";
-            case AXIS_TOOL_MAJOR:
-                return "AXIS_TOOL_MAJOR";
-            case AXIS_TOOL_MINOR:
-                return "AXIS_TOOL_MINOR";
-            case AXIS_ORIENTATION:
-                return "AXIS_ORIENTATION";
-            default:
-                return Integer.toString(axis);
+        String symbolicName = AXIS_SYMBOLIC_NAMES.get(axis);
+        return symbolicName != null ? symbolicName : Integer.toString(axis);
+    }
+
+    /**
+     * Gets an axis by its symbolic name such as "KEYCODE_A" or an
+     * equivalent numeric constant such as "1001".
+     *
+     * @param symbolicName The symbolic name of the axis.
+     * @return The axis or -1 if not found.
+     * @see #keycodeToString
+     */
+    public static int axisFromString(String symbolicName) {
+        if (symbolicName == null) {
+            throw new IllegalArgumentException("symbolicName must not be null");
+        }
+
+        final int count = AXIS_SYMBOLIC_NAMES.size();
+        for (int i = 0; i < count; i++) {
+            if (symbolicName.equals(AXIS_SYMBOLIC_NAMES.valueAt(i))) {
+                return i;
+            }
+        }
+
+        try {
+            return Integer.parseInt(symbolicName, 10);
+        } catch (NumberFormatException ex) {
+            return -1;
         }
     }
 
@@ -1803,7 +2264,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final class PointerCoords {
         private static final int INITIAL_PACKED_AXIS_VALUES = 8;
-        private int mPackedAxisBits; // 32bits are enough for now, can raise to 64bit when needed
+        private long mPackedAxisBits;
         private float[] mPackedAxisValues;
 
         /**
@@ -1823,20 +2284,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         }
 
         /**
-         * The X coordinate of the pointer movement.
-         * The interpretation of the X axis varies by input source.
-         * It may represent the X position of the center of the touch contact area,
-         * a relative horizontal displacement of a trackball or joystick, or something else.
+         * The X component of the pointer movement.
          *
          * @see MotionEvent#AXIS_X
          */
         public float x;
         
         /**
-         * The Y coordinate of the pointer movement.
-         * The interpretation of the Y axis varies by input source.
-         * It may represent the Y position of the center of the touch contact area,
-         * a relative vertical displacement of a trackball or joystick, or something else.
+         * The Y component of the pointer movement.
          *
          * @see MotionEvent#AXIS_Y
          */
@@ -1912,7 +2367,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         
         /**
          * The orientation of the touch area and tool area in radians clockwise from vertical.
-         * An angle of 0 degrees indicates that the major axis of contact is oriented
+         * An angle of 0 radians indicates that the major axis of contact is oriented
          * upwards, is perfectly circular or is of unknown orientation.  A positive angle
          * indicates that the major axis of contact is oriented to the right.  A negative angle
          * indicates that the major axis of contact is oriented to the left.
@@ -1947,11 +2402,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
          * @param other The pointer coords object to copy.
          */
         public void copyFrom(PointerCoords other) {
-            final int bits = other.mPackedAxisBits;
+            final long bits = other.mPackedAxisBits;
             mPackedAxisBits = bits;
             if (bits != 0) {
                 final float[] otherValues = other.mPackedAxisValues;
-                final int count = Integer.bitCount(bits);
+                final int count = Long.bitCount(bits);
                 float[] values = mPackedAxisValues;
                 if (values == null || count > values.length) {
                     values = new float[otherValues.length];
@@ -2001,12 +2456,15 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 case AXIS_ORIENTATION:
                     return orientation;
                 default: {
-                    final int bits = mPackedAxisBits;
-                    final int axisBit = 1 << axis;
+                    if (axis < 0 || axis > 63) {
+                        throw new IllegalArgumentException("Axis out of range.");
+                    }
+                    final long bits = mPackedAxisBits;
+                    final long axisBit = 1L << axis;
                     if ((bits & axisBit) == 0) {
                         return 0;
                     }
-                    final int index = Integer.bitCount(bits & (axisBit - 1));
+                    final int index = Long.bitCount(bits & (axisBit - 1L));
                     return mPackedAxisValues[index];
                 }
             }
@@ -2051,16 +2509,19 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     orientation = value;
                     break;
                 default: {
-                    final int bits = mPackedAxisBits;
-                    final int axisBit = 1 << axis;
-                    final int index = Integer.bitCount(bits & (axisBit - 1));
+                    if (axis < 0 || axis > 63) {
+                        throw new IllegalArgumentException("Axis out of range.");
+                    }
+                    final long bits = mPackedAxisBits;
+                    final long axisBit = 1L << axis;
+                    final int index = Long.bitCount(bits & (axisBit - 1L));
                     float[] values = mPackedAxisValues;
                     if ((bits & axisBit) == 0) {
                         if (values == null) {
                             values = new float[INITIAL_PACKED_AXIS_VALUES];
                             mPackedAxisValues = values;
                         } else {
-                            final int count = Integer.bitCount(bits);
+                            final int count = Long.bitCount(bits);
                             if (count < values.length) {
                                 if (index != count) {
                                     System.arraycopy(values, index, values, index + 1,

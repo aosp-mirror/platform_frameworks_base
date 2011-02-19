@@ -327,7 +327,10 @@ public class PointerLocationView extends View {
                 .append(" ToolMajor=").append(coords.toolMajor, 3)
                 .append(" ToolMinor=").append(coords.toolMinor, 3)
                 .append(" Orientation=").append((float)(coords.orientation * 180 / Math.PI), 1)
-                .append("deg").toString());
+                .append("deg")
+                .append(" VScroll=").append(coords.getAxisValue(MotionEvent.AXIS_VSCROLL), 1)
+                .append(" HScroll=").append(coords.getAxisValue(MotionEvent.AXIS_HSCROLL), 1)
+                .toString());
     }
 
     public void addTouchEvent(MotionEvent event) {

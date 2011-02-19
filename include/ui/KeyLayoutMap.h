@@ -25,7 +25,7 @@
 namespace android {
 
 /**
- * Describes a mapping from keyboard scan codes to Android key codes.
+ * Describes a mapping from keyboard scan codes and joystick axes to Android key codes and axes.
  */
 class KeyLayoutMap {
 public:
@@ -33,8 +33,10 @@ public:
 
     static status_t load(const String8& filename, KeyLayoutMap** outMap);
 
-    status_t map(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const;
-    status_t findScanCodes(int32_t keyCode, Vector<int32_t>* outScanCodes) const;
+    status_t mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const;
+    status_t findScanCodesForKey(int32_t keyCode, Vector<int32_t>* outScanCodes) const;
+
+    status_t mapAxis(int32_t scanCode, int32_t* axis) const;
 
 private:
     struct Key {
@@ -42,7 +44,8 @@ private:
         uint32_t flags;
     };
 
-    KeyedVector<int32_t,Key> mKeys;
+    KeyedVector<int32_t, Key> mKeys;
+    KeyedVector<int32_t, int32_t> mAxes;
 
     KeyLayoutMap();
 
@@ -57,6 +60,7 @@ private:
 
     private:
         status_t parseKey();
+        status_t parseAxis();
     };
 };
 

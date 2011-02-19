@@ -261,7 +261,6 @@ key 233   HEADSETHOOK
 # key 239 "KEY_KBDILLUMUP"
 # key 240 "KEY_UNKNOWN"
 
-
 key 288   BUTTON_1
 key 289   BUTTON_2
 key 290   BUTTON_3
@@ -400,3 +399,16 @@ key 484   B                 FUNCTION
 # key 502 KEY_BRL_DOT6
 # key 503 KEY_BRL_DOT7
 # key 504 KEY_BRL_DOT8
+
+
+# Joystick and game controller axes.
+# Axes that are not mapped will be assigned generic axis numbers by the input subsystem.
+axis 0x00 X
+axis 0x01 Y
+axis 0x02 Z
+axis 0x03 RX
+axis 0x04 RY
+axis 0x05 RZ
+axis 0x10 HAT_X
+axis 0x11 HAT_Y
+ 

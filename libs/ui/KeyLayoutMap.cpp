@@ -82,11 +82,11 @@ status_t KeyLayoutMap::load(const String8& filename, KeyLayoutMap** outMap) {
     return status;
 }
 
-status_t KeyLayoutMap::map(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const {
+status_t KeyLayoutMap::mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const {
     ssize_t index = mKeys.indexOfKey(scanCode);
     if (index < 0) {
 #if DEBUG_MAPPING
-        LOGD("map: scanCode=%d ~ Failed.", scanCode);
+        LOGD("mapKey: scanCode=%d ~ Failed.", scanCode);
 #endif
         *keyCode = AKEYCODE_UNKNOWN;
         *flags = 0;
@@ -98,12 +98,12 @@ status_t KeyLayoutMap::map(int32_t scanCode, int32_t* keyCode, uint32_t* flags) 
     *flags = k.flags;
 
 #if DEBUG_MAPPING
-    LOGD("map: scanCode=%d ~ Result keyCode=%d, flags=0x%08x.", scanCode, *keyCode, *flags);
+    LOGD("mapKey: scanCode=%d ~ Result keyCode=%d, flags=0x%08x.", scanCode, *keyCode, *flags);
 #endif
     return NO_ERROR;
 }
 
-status_t KeyLayoutMap::findScanCodes(int32_t keyCode, Vector<int32_t>* outScanCodes) const {
+status_t KeyLayoutMap::findScanCodesForKey(int32_t keyCode, Vector<int32_t>* outScanCodes) const {
     const size_t N = mKeys.size();
     for (size_t i=0; i<N; i++) {
         if (mKeys.valueAt(i).keyCode == keyCode) {
@@ -112,6 +112,25 @@ status_t KeyLayoutMap::findScanCodes(int32_t keyCode, Vector<int32_t>* outScanCo
     }
     return NO_ERROR;
 }
+
+status_t KeyLayoutMap::mapAxis(int32_t scanCode, int32_t* axis) const {
+    ssize_t index = mAxes.indexOfKey(scanCode);
+    if (index < 0) {
+#if DEBUG_MAPPING
+        LOGD("mapAxis: scanCode=%d ~ Failed.", scanCode);
+#endif
+        *axis = -1;
+        return NAME_NOT_FOUND;
+    }
+
+    *axis = mAxes.valueAt(index);
+
+#if DEBUG_MAPPING
+    LOGD("mapAxis: scanCode=%d ~ Result axis=%d.", scanCode, *axis);
+#endif
+    return NO_ERROR;
+}
+
 
 // --- KeyLayoutMap::Parser ---
 
@@ -136,6 +155,10 @@ status_t KeyLayoutMap::Parser::parse() {
             if (keywordToken == "key") {
                 mTokenizer->skipDelimiters(WHITESPACE);
                 status_t status = parseKey();
+                if (status) return status;
+            } else if (keywordToken == "axis") {
+                mTokenizer->skipDelimiters(WHITESPACE);
+                status_t status = parseAxis();
                 if (status) return status;
             } else {
                 LOGE("%s: Expected keyword, got '%s'.", mTokenizer->getLocation().string(),
@@ -162,12 +185,12 @@ status_t KeyLayoutMap::Parser::parseKey() {
     char* end;
     int32_t scanCode = int32_t(strtol(scanCodeToken.string(), &end, 0));
     if (*end) {
-        LOGE("%s: Expected scan code number, got '%s'.", mTokenizer->getLocation().string(),
+        LOGE("%s: Expected key scan code number, got '%s'.", mTokenizer->getLocation().string(),
                 scanCodeToken.string());
         return BAD_VALUE;
     }
     if (mMap->mKeys.indexOfKey(scanCode) >= 0) {
-        LOGE("%s: Duplicate entry for scan code '%s'.", mTokenizer->getLocation().string(),
+        LOGE("%s: Duplicate entry for key scan code '%s'.", mTokenizer->getLocation().string(),
                 scanCodeToken.string());
         return BAD_VALUE;
     }
@@ -189,12 +212,12 @@ status_t KeyLayoutMap::Parser::parseKey() {
         String8 flagToken = mTokenizer->nextToken(WHITESPACE);
         uint32_t flag = getKeyFlagByLabel(flagToken.string());
         if (!flag) {
-            LOGE("%s: Expected flag label, got '%s'.", mTokenizer->getLocation().string(),
+            LOGE("%s: Expected key flag label, got '%s'.", mTokenizer->getLocation().string(),
                     flagToken.string());
             return BAD_VALUE;
         }
         if (flags & flag) {
-            LOGE("%s: Duplicate flag '%s'.", mTokenizer->getLocation().string(),
+            LOGE("%s: Duplicate key flag '%s'.", mTokenizer->getLocation().string(),
                     flagToken.string());
             return BAD_VALUE;
         }
@@ -208,6 +231,37 @@ status_t KeyLayoutMap::Parser::parseKey() {
     key.keyCode = keyCode;
     key.flags = flags;
     mMap->mKeys.add(scanCode, key);
+    return NO_ERROR;
+}
+
+status_t KeyLayoutMap::Parser::parseAxis() {
+    String8 scanCodeToken = mTokenizer->nextToken(WHITESPACE);
+    char* end;
+    int32_t scanCode = int32_t(strtol(scanCodeToken.string(), &end, 0));
+    if (*end) {
+        LOGE("%s: Expected axis scan code number, got '%s'.", mTokenizer->getLocation().string(),
+                scanCodeToken.string());
+        return BAD_VALUE;
+    }
+    if (mMap->mAxes.indexOfKey(scanCode) >= 0) {
+        LOGE("%s: Duplicate entry for axis scan code '%s'.", mTokenizer->getLocation().string(),
+                scanCodeToken.string());
+        return BAD_VALUE;
+    }
+
+    mTokenizer->skipDelimiters(WHITESPACE);
+    String8 axisToken = mTokenizer->nextToken(WHITESPACE);
+    int32_t axis = getAxisByLabel(axisToken.string());
+    if (axis < 0) {
+        LOGE("%s: Expected axis label, got '%s'.", mTokenizer->getLocation().string(),
+                axisToken.string());
+        return BAD_VALUE;
+    }
+
+#if DEBUG_PARSER
+    LOGD("Parsed axis: scanCode=%d, axis=%d.", scanCode, axis);
+#endif
+    mMap->mAxes.add(scanCode, axis);
     return NO_ERROR;
 }
 
