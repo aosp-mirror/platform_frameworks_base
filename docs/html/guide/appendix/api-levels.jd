@@ -83,6 +83,7 @@ Android platform.</p>
 
 <table>
   <tr><th>Platform Version</th><th>API Level</th></tr>
+  <tr><td>Android 3.0</td><td>11</td></tr>
   <tr><td>Android 2.3.3</td><td>10</td></tr>
   <tr><td>Android 2.3</td><td>9</td></tr>
   <tr><td>Android 2.2</td><td>8</td></tr>
