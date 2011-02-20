@@ -37,7 +37,9 @@ enum {
     DECODE_FD,
     CREATE_MEDIA_RECORDER,
     CREATE_METADATA_RETRIEVER,
-    GET_OMX
+    GET_OMX,
+    ADD_BATTERY_DATA,
+    PULL_BATTERY_DATA
 };
 
 class BpMediaPlayerService: public BpInterface<IMediaPlayerService>
@@ -156,6 +158,19 @@ public:
         remote()->transact(GET_OMX, data, &reply);
         return interface_cast<IOMX>(reply.readStrongBinder());
     }
+
+    virtual void addBatteryData(uint32_t params) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        data.writeInt32(params);
+        remote()->transact(ADD_BATTERY_DATA, data, &reply);
+    }
+
+    virtual status_t pullBatteryData(Parcel* reply) {
+        Parcel data;
+        data.writeInterfaceToken(IMediaPlayerService::getInterfaceDescriptor());
+        return remote()->transact(PULL_BATTERY_DATA, data, reply);
+    }
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayerService, "android.media.IMediaPlayerService");
@@ -268,6 +283,17 @@ status_t BnMediaPlayerService::onTransact(
             CHECK_INTERFACE(IMediaPlayerService, data, reply);
             sp<IOMX> omx = getOMX();
             reply->writeStrongBinder(omx->asBinder());
+            return NO_ERROR;
+        } break;
+        case ADD_BATTERY_DATA: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            uint32_t params = data.readInt32();
+            addBatteryData(params);
+            return NO_ERROR;
+        } break;
+        case PULL_BATTERY_DATA: {
+            CHECK_INTERFACE(IMediaPlayerService, data, reply);
+            pullBatteryData(reply);
             return NO_ERROR;
         } break;
         default:

@@ -54,6 +54,22 @@ public:
     virtual sp<IMemory>         decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
     virtual sp<IOMX>            getOMX() = 0;
+
+    // codecs usage tracking for the battery app
+    enum BatteryDataBits {
+        // tracking audio codec
+        kBatteryDataTrackAudio          = 1,
+        // tracking video codec
+        kBatteryDataTrackVideo          = 2,
+        // codec is started, otherwise codec is paused
+        kBatteryDataCodecStarted        = 4,
+        // tracking decoder (for media player),
+        // otherwise tracking encoder (for media recorder)
+        kBatteryDataTrackDecoder        = 8,
+    };
+
+    virtual void addBatteryData(uint32_t params) = 0;
+    virtual status_t pullBatteryData(Parcel* reply) = 0;
 };
 
 // ----------------------------------------------------------------------------

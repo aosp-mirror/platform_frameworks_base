@@ -204,7 +204,31 @@ public:
 
             void                removeClient(wp<Client> client);
 
+    // For battery usage tracking purpose
+    struct BatteryUsageInfo {
+        // how many streams are being played by one UID
+        int     refCount;
+        // a temp variable to store the duration(ms) of audio codecs
+        // when we start a audio codec, we minus the system time from audioLastTime
+        // when we pause it, we add the system time back to the audioLastTime
+        // so after the pause, audioLastTime = pause time - start time
+        // if multiple audio streams are played (or recorded), then audioLastTime
+        // = the total playing time of all the streams
+        int32_t audioLastTime;
+        // when all the audio streams are being paused, we assign audioLastTime to
+        // this variable, so this value could be provided to the battery app
+        // in the next pullBatteryData call
+        int32_t audioTotalTime;
 
+        int32_t videoLastTime;
+        int32_t videoTotalTime;
+    };
+    KeyedVector<int, BatteryUsageInfo>    mBatteryData;
+
+    // Collect info of the codec usage from media player and media recorder
+    virtual void                addBatteryData(uint32_t params);
+    // API for the Battery app to pull the data of codecs usage
+    virtual status_t            pullBatteryData(Parcel* reply);
 private:
 
     class Client : public BnMediaPlayer {

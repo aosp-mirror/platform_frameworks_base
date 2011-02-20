@@ -1228,6 +1228,14 @@ public class MediaPlayer
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();
 
+    /**
+     * @param reply Parcel with audio/video duration info for battery
+                    tracking usage
+     * @return The status code.
+     * {@hide}
+     */
+    public native static int native_pullBatteryData(Parcel reply);
+
     @Override
     protected void finalize() { native_finalize(); }
 
