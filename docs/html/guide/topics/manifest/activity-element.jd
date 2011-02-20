@@ -14,6 +14,7 @@ page.title=&lt;activity&gt;
           android:<a href="#exclude">excludeFromRecents</a>=["true" | "false"]
           android:<a href="#exported">exported</a>=["true" | "false"]
           android:<a href="#finish">finishOnTaskLaunch</a>=["true" | "false"]
+          android:<a href="#hwaccel">hardwareAccelerated</a>=["true" | "false"]
           android:<a href="#icon">icon</a>="<i>drawable resource</i>"
           android:<a href="#label">label</a>="<i>string resource</i>"
           android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" |
@@ -285,6 +286,24 @@ If this attribute and
 are both "{@code true}", this attribute trumps the other.  The affinity of the 
 activity is ignored.  The activity is not re-parented, but destroyed.
 </p>
+
+<dt><a name="hwaccel"></a>{@code android:hardwareAccelerated}</dt>
+<dd>Whether or not hardware-accelerated rendering should be enabled for this
+Activity &mdash; "{@code true}" if it should be enabled, and "{@code false}" if
+not. The default value is "{@code false}".
+
+<p>Starting from Android 3.0, a hardware-accelerated OpenGL renderer is
+available to applications, to improve performance for many common 2D graphics
+operations. When the hardware-accelerated renderer is enabled, most operations
+in Canvas, Paint, Xfermode, ColorFilter, Shader, and Camera are accelerated.
+This results in smoother animations, smoother scrolling, and improved
+responsiveness overall, even for applications that do not explicitly make use
+the framework's OpenGL libraries. </p>
+
+<p>Note that not all of the OpenGL 2D operations are accelerated. If you enable
+the hardware-accelerated renderer, test your application to ensure that it can
+make use of the renderer without errors.</p>
+</dd>
 
 <dt><a name="icon"></a>{@code android:icon}</dt>
 <dd>An icon representing the activity. The icon is displayed to users when 
