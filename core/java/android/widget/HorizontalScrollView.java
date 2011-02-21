@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.FocusFinder;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -62,6 +63,7 @@ public class HorizontalScrollView extends FrameLayout {
 
     private static final float MAX_SCROLL_FACTOR = ScrollView.MAX_SCROLL_FACTOR;
 
+    private static final String TAG = "HorizontalScrollView";
 
     private long mLastScroll;
 
@@ -456,6 +458,12 @@ public class HorizontalScrollView extends FrameLayout {
                 }
 
                 final int pointerIndex = ev.findPointerIndex(activePointerId);
+                if (pointerIndex == -1) {
+                    Log.e(TAG, "Invalid pointerId=" + activePointerId
+                            + " in onInterceptTouchEvent");
+                    break;
+                }
+
                 final int x = (int) ev.getX(pointerIndex);
                 final int xDiff = (int) Math.abs(x - mLastMotionX);
                 if (xDiff > mTouchSlop) {
@@ -557,6 +565,11 @@ public class HorizontalScrollView extends FrameLayout {
             }
             case MotionEvent.ACTION_MOVE:
                 final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (activePointerIndex == -1) {
+                    Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent");
+                    break;
+                }
+
                 final int x = (int) ev.getX(activePointerIndex);
                 int deltaX = mLastMotionX - x;
                 if (!mIsBeingDragged && Math.abs(deltaX) > mTouchSlop) {
