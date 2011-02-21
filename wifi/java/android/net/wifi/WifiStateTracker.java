@@ -45,7 +45,6 @@ public class WifiStateTracker implements NetworkStateTracker {
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
-    private AtomicInteger mDefaultGatewayAddr = new AtomicInteger(0);
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
     private LinkProperties mLinkProperties;
@@ -136,40 +135,6 @@ public class WifiStateTracker implements NetworkStateTracker {
     }
 
     /**
-     * Tells the underlying networking system that the caller wants to
-     * begin using the named feature. The interpretation of {@code feature}
-     * is completely up to each networking implementation.
-     * @param feature the name of the feature to be used
-     * @param callingPid the process ID of the process that is issuing this request
-     * @param callingUid the user ID of the process that is issuing this request
-     * @return an integer value representing the outcome of the request.
-     * The interpretation of this value is specific to each networking
-     * implementation+feature combination, except that the value {@code -1}
-     * always indicates failure.
-     * TODO: needs to go away
-     */
-    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    /**
-     * Tells the underlying networking system that the caller is finished
-     * using the named feature. The interpretation of {@code feature}
-     * is completely up to each networking implementation.
-     * @param feature the name of the feature that is no longer needed.
-     * @param callingPid the process ID of the process that is issuing this request
-     * @param callingUid the user ID of the process that is issuing this request
-     * @return an integer value representing the outcome of the request.
-     * The interpretation of this value is specific to each networking
-     * implementation+feature combination, except that the value {@code -1}
-     * always indicates failure.
-     * TODO: needs to go away
-     */
-    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    /**
      * @param enabled
      */
     public void setDataEnable(boolean enabled) {
@@ -212,13 +177,6 @@ public class WifiStateTracker implements NetworkStateTracker {
      */
     public LinkCapabilities getLinkCapabilities() {
         return new LinkCapabilities(mLinkCapabilities);
-    }
-
-    /**
-     * Fetch default gateway address for the network
-     */
-    public int getDefaultGatewayAddr() {
-        return mDefaultGatewayAddr.get();
     }
 
     /**
