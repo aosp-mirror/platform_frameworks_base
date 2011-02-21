@@ -21,8 +21,6 @@ import java.util.HashMap;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
-import android.util.Pair;
 
 import com.android.internal.widget.IRemoteViewsFactory;
 
@@ -40,9 +38,9 @@ public abstract class RemoteViewsService extends Service {
     // reclaimed), the references to the factories that are created need to be stored and used when
     // the service is restarted (in response to user input for example).  When the process is
     // destroyed, so is this static cache of RemoteViewsFactories.
-    private static final HashMap<Intent.FilterComparison, RemoteViewsFactory> mRemoteViewFactories =
+    private static final HashMap<Intent.FilterComparison, RemoteViewsFactory> sRemoteViewFactories =
             new HashMap<Intent.FilterComparison, RemoteViewsFactory>();
-    private final Object mLock = new Object();
+    private static final Object sLock = new Object();
 
     /**
      * An interface for an adapter between a remote collection view (ListView, GridView, etc) and
@@ -162,6 +160,16 @@ public abstract class RemoteViewsService extends Service {
         public synchronized boolean hasStableIds() {
             return mFactory.hasStableIds();
         }
+        public void onDestroy(Intent intent) {
+            synchronized (sLock) {
+                Intent.FilterComparison fc = new Intent.FilterComparison(intent);
+                if (RemoteViewsService.sRemoteViewFactories.containsKey(fc)) {
+                    RemoteViewsFactory factory = RemoteViewsService.sRemoteViewFactories.get(fc);
+                    factory.onDestroy();
+                    RemoteViewsService.sRemoteViewFactories.remove(fc);
+                }
+            }
+        }
 
         private RemoteViewsFactory mFactory;
         private boolean mIsCreated;
@@ -169,17 +177,17 @@ public abstract class RemoteViewsService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        synchronized (mLock) {
+        synchronized (sLock) {
             Intent.FilterComparison fc = new Intent.FilterComparison(intent);
             RemoteViewsFactory factory = null;
             boolean isCreated = false;
-            if (!mRemoteViewFactories.containsKey(fc)) {
+            if (!sRemoteViewFactories.containsKey(fc)) {
                 factory = onGetViewFactory(intent);
-                mRemoteViewFactories.put(fc, factory);
+                sRemoteViewFactories.put(fc, factory);
                 factory.onCreate();
                 isCreated = false;
             } else {
-                factory = mRemoteViewFactories.get(fc);
+                factory = sRemoteViewFactories.get(fc);
                 isCreated = true;
             }
             return new RemoteViewsFactoryAdapter(factory, isCreated);

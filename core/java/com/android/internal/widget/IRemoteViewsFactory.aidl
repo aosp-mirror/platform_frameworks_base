@@ -16,11 +16,13 @@
 
 package com.android.internal.widget;
 
+import android.content.Intent;
 import android.widget.RemoteViews;
 
 /** {@hide} */
 interface IRemoteViewsFactory {
     void onDataSetChanged();
+    void onDestroy(in Intent intent);
     int getCount();
     RemoteViews getViewAt(int position);
     RemoteViews getLoadingView();

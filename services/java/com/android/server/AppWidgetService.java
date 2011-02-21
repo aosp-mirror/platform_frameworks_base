@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +56,6 @@ import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -69,11 +67,13 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.RemoteViews;
+import android.widget.RemoteViewsService;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
+import com.android.internal.widget.IRemoteViewsFactory;
 
 class AppWidgetService extends IAppWidgetService.Stub
 {
@@ -153,9 +153,12 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
-    // Manages connections to RemoteViewsServices
+    // Manages active connections to RemoteViewsServices
     private final HashMap<Pair<Integer, FilterComparison>, ServiceConnection>
         mBoundRemoteViewsServices = new HashMap<Pair<Integer,FilterComparison>,ServiceConnection>();
+    // Manages persistent references to RemoteViewsServices from different App Widgets
+    private final HashMap<FilterComparison, HashSet<Integer>>
+        mRemoteViewsServicesAppWidgets = new HashMap<FilterComparison, HashSet<Integer>>();
 
     Context mContext;
     Locale mLocale;
@@ -429,6 +432,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
+    // Binds to a specific RemoteViewsService
     public void bindRemoteViewsService(int appWidgetId, Intent intent, IBinder connection) {
         synchronized (mAppWidgetIds) {
             AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
@@ -452,8 +456,8 @@ class AppWidgetService extends IAppWidgetService.Stub
             // that first.  (This does not allow multiple connections to the same service under
             // the same key)
             ServiceConnectionProxy conn = null;
-            Pair<Integer, FilterComparison> key = Pair.create(appWidgetId,
-                    new FilterComparison(intent));
+            FilterComparison fc = new FilterComparison(intent);
+            Pair<Integer, FilterComparison> key = Pair.create(appWidgetId, fc);
             if (mBoundRemoteViewsServices.containsKey(key)) {
                 conn = (ServiceConnectionProxy) mBoundRemoteViewsServices.get(key);
                 conn.disconnect();
@@ -471,9 +475,15 @@ class AppWidgetService extends IAppWidgetService.Stub
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+
+            // Add it to the mapping of RemoteViewsService to appWidgetIds so that we can determine
+            // when we can call back to the RemoteViewsService later to destroy associated
+            // factories.
+             WidgetRemoteViewsServiceBinding(appWidgetId, fc);
         }
     }
 
+    // Unbinds from a specific RemoteViewsService
     public void unbindRemoteViewsService(int appWidgetId, Intent intent) {
         synchronized (mAppWidgetIds) {
             // Unbind from the RemoteViewsService (which will trigger a callback to the bound
@@ -500,6 +510,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         }
     }
 
+    // Unbinds from a RemoteViewsService when we delete an app widget
     private void unbindAppWidgetRemoteViewsServicesLocked(AppWidgetId id) {
         int appWidgetId = id.appWidgetId;
         // Unbind all connections to Services bound to this AppWidgetId
@@ -513,6 +524,71 @@ class AppWidgetService extends IAppWidgetService.Stub
                 conn.disconnect();
                 mContext.unbindService(conn);
                 it.remove();
+            }
+        }
+
+        // Check if we need to destroy any services (if no other app widgets are
+        // referencing the same service)
+        decrementAppWidgetServiceRefCount(appWidgetId);
+    }
+
+    // Destroys the cached factory on the RemoteViewsService's side related to the specified intent
+    private void destroyRemoteViewsService(final Intent intent) {
+        final ServiceConnection conn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                final IRemoteViewsFactory cb =
+                    IRemoteViewsFactory.Stub.asInterface(service);
+                try {
+                    cb.onDestroy(intent);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                mContext.unbindService(this);
+            }
+            @Override
+            public void onServiceDisconnected(android.content.ComponentName name) {
+                // Do nothing
+            }
+        };
+
+        // Bind to the service and remove the static intent->factory mapping in the
+        // RemoteViewsService.
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    // Adds to the ref-count for a given RemoteViewsService intent
+    private void incrementAppWidgetServiceRefCount(int appWidgetId, FilterComparison fc) {
+        HashSet<Integer> appWidgetIds = null;
+        if (mRemoteViewsServicesAppWidgets.containsKey(fc)) {
+            appWidgetIds = mRemoteViewsServicesAppWidgets.get(fc);
+        } else {
+            appWidgetIds = new HashSet<Integer>();
+            mRemoteViewsServicesAppWidgets.put(fc, appWidgetIds);
+        }
+        appWidgetIds.add(appWidgetId);
+    }
+
+    // Subtracts from the ref-count for a given RemoteViewsService intent, prompting a delete if
+    // the ref-count reaches zero.
+    private void decrementAppWidgetServiceRefCount(int appWidgetId) {
+        Iterator<FilterComparison> it =
+            mRemoteViewsServicesAppWidgets.keySet().iterator();
+        while (it.hasNext()) {
+            final FilterComparison key = it.next();
+            final HashSet<Integer> ids = mRemoteViewsServicesAppWidgets.get(key);
+            if (ids.remove(appWidgetId)) {
+                // If we have removed the last app widget referencing this service, then we
+                // should destroy it and remove it from this set
+                if (ids.isEmpty()) {
+                    destroyRemoteViewsService(key.getIntent());
+                    it.remove();
+                }
             }
         }
     }
