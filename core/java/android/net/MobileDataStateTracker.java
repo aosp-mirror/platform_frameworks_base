@@ -59,7 +59,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private ITelephony mPhoneService;
 
     private String mApnType;
-    private static String[] sDnsPropNames;
     private NetworkInfo mNetworkInfo;
     private boolean mTeardownRequested = false;
     private Handler mTarget;
@@ -67,7 +66,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private LinkProperties mLinkProperties;
     private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
-    private int mDefaultGatewayAddr = 0;
     private boolean mDefaultRouteSet = false;
 
     // DEFAULT and HIPRI are the same connection.  If we're one of these we need to check if
@@ -94,18 +92,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
 
         mPhoneService = null;
-
-        sDnsPropNames = new String[] {
-                "net.rmnet0.dns1",
-                "net.rmnet0.dns2",
-                "net.eth0.dns1",
-                "net.eth0.dns2",
-                "net.eth0.dns3",
-                "net.eth0.dns4",
-                "net.gprs.dns1",
-                "net.gprs.dns2",
-                "net.ppp0.dns1",
-                "net.ppp0.dns2"};
     }
 
     /**
@@ -166,15 +152,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
     }
 
-    /**
-     * Return the IP addresses of the DNS servers available for the mobile data
-     * network interface.
-     * @return a list of DNS addresses, with no holes.
-     */
-    public String[] getDnsPropNames() {
-        return sDnsPropNames;
-    }
-
     public boolean isPrivateDnsRouteSet() {
         return mPrivateDnsRouteSet;
     }
@@ -185,10 +162,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
     public NetworkInfo getNetworkInfo() {
         return mNetworkInfo;
-    }
-
-    public int getDefaultGatewayAddr() {
-        return mDefaultGatewayAddr;
     }
 
     public boolean isDefaultRouteSet() {
@@ -279,7 +252,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             //if (DBG) log("clearing mInterfaceName for "+ mApnType +
                             //        " as it DISCONNECTED");
                             //mInterfaceName = null;
-                            //mDefaultGatewayAddr = 0;
                             break;
                         case CONNECTING:
                             setDetailedState(DetailedState.CONNECTING, reason, apnName);
@@ -504,47 +476,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
         log("Could not set radio power to " + (turnOn ? "on" : "off"));
         return false;
-    }
-
-    /**
-     * Tells the phone sub-system that the caller wants to
-     * begin using the named feature. The only supported features at
-     * this time are {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
-     * to specify that it wants to send and/or receive MMS data, and
-     * {@code Phone.FEATURE_ENABLE_SUPL}, which is used for Assisted GPS.
-     * @param feature the name of the feature to be used
-     * @param callingPid the process ID of the process that is issuing this request
-     * @param callingUid the user ID of the process that is issuing this request
-     * @return an integer value representing the outcome of the request.
-     * The interpretation of this value is feature-specific.
-     * specific, except that the value {@code -1}
-     * always indicates failure. For {@code Phone.FEATURE_ENABLE_MMS},
-     * the other possible return values are
-     * <ul>
-     * <li>{@code Phone.APN_ALREADY_ACTIVE}</li>
-     * <li>{@code Phone.APN_REQUEST_STARTED}</li>
-     * <li>{@code Phone.APN_TYPE_NOT_AVAILABLE}</li>
-     * <li>{@code Phone.APN_REQUEST_FAILED}</li>
-     * </ul>
-     */
-    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    /**
-     * Tells the phone sub-system that the caller is finished
-     * using the named feature. The only supported feature at
-     * this time is {@code Phone.FEATURE_ENABLE_MMS}, which allows an application
-     * to specify that it wants to send and/or receive MMS data.
-     * @param feature the name of the feature that is no longer needed
-     * @param callingPid the process ID of the process that is issuing this request
-     * @param callingUid the user ID of the process that is issuing this request
-     * @return an integer value representing the outcome of the request.
-     * The interpretation of this value is feature-specific, except that
-     * the value {@code -1} always indicates failure.
-     */
-    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
     }
 
     /**

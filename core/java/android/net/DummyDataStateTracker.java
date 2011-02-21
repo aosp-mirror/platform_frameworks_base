@@ -70,15 +70,6 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         mContext = context;
     }
 
-    /**
-     * Return the IP addresses of the DNS servers available for the mobile data
-     * network interface.
-     * @return a list of DNS addresses, with no holes.
-     */
-    public String[] getDnsPropNames() {
-        return new String[0];
-    }
-
     public boolean isPrivateDnsRouteSet() {
         return mPrivateDnsRouteSet;
     }
@@ -89,10 +80,6 @@ public class DummyDataStateTracker implements NetworkStateTracker {
 
     public NetworkInfo getNetworkInfo() {
         return mNetworkInfo;
-    }
-
-    public int getDefaultGatewayAddr() {
-        return 0;
     }
 
     public boolean isDefaultRouteSet() {
@@ -179,14 +166,6 @@ public class DummyDataStateTracker implements NetworkStateTracker {
      */
     public boolean setRadio(boolean turnOn) {
         return true;
-    }
-
-    public int startUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
-    }
-
-    public int stopUsingNetworkFeature(String feature, int callingPid, int callingUid) {
-        return -1;
     }
 
     public void setDataEnable(boolean enabled) {
