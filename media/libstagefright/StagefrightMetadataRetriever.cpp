@@ -272,6 +272,12 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
         return NULL;
     }
 
+    int32_t drm = 0;
+    if (mExtractor->getMetaData()->findInt32(kKeyIsDRM, &drm) && drm != 0) {
+        LOGE("frame grab not allowed.");
+        return NULL;
+    }
+
     size_t n = mExtractor->countTracks();
     size_t i;
     for (i = 0; i < n; ++i) {

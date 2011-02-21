@@ -67,6 +67,7 @@ sp<MediaExtractor> MediaExtractor::Create(
              mime, confidence);
     }
 
+    bool isDrm = false;
     // DRM MIME type syntax is "drm+type+original" where
     // type is "es_based" or "container_based" and
     // original is the content's cleartext MIME type
@@ -78,39 +79,45 @@ sp<MediaExtractor> MediaExtractor::Create(
         }
         ++originalMime;
         if (!strncmp(mime, "drm+es_based+", 13)) {
+            // DRMExtractor sets container metadata kKeyIsDRM to 1
             return new DRMExtractor(source, originalMime);
         } else if (!strncmp(mime, "drm+container_based+", 20)) {
             mime = originalMime;
+            isDrm = true;
         } else {
             return NULL;
         }
     }
 
+    MediaExtractor *ret = NULL;
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
             || !strcasecmp(mime, "audio/mp4")) {
-        return new MPEG4Extractor(source);
+        ret = new MPEG4Extractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
-        return new MP3Extractor(source, meta);
+        ret = new MP3Extractor(source, meta);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
             || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
-        return new AMRExtractor(source);
+        ret = new AMRExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)) {
-        return new FLACExtractor(source);
+        ret = new FLACExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WAV)) {
-        return new WAVExtractor(source);
+        ret = new WAVExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
-        return new OggExtractor(source);
+        ret = new OggExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
-        return new MatroskaExtractor(source);
+        ret = new MatroskaExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
-        return new MPEG2TSExtractor(source);
+        ret = new MPEG2TSExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
-        return new WVMExtractor(source);
+        ret = new WVMExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
-        return new AACExtractor(source);
+        ret = new AACExtractor(source);
+    }
+    if (ret != NULL && isDrm) {
+        ret->getMetaData()->setInt32(kKeyIsDRM, 1);
     }
 
-    return NULL;
+    return ret;
 }
 
 }  // namespace android
