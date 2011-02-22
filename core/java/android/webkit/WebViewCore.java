@@ -2369,15 +2369,42 @@ final class WebViewCore {
                 // mViewScale as 0 means it is in zoom overview mode. So we don't
                 // know the exact scale. If mRestoredScale is non-zero, use it;
                 // otherwise just use mTextWrapScale as the initial scale.
-                data.mScale = mInitialViewState.mViewScale == 0
-                        ? (mRestoredScale > 0 ? mRestoredScale
-                                : mInitialViewState.mTextWrapScale)
-                        : mInitialViewState.mViewScale;
+                float tentativeScale = mInitialViewState.mViewScale;
+                if (tentativeScale == 0) {
+                    // The following tries to figure out more correct view scale
+                    // and text wrap scale to be sent to webkit, by using some
+                    // knowledge from web settings and zoom manager.
+
+                    // Calculated window width will be used to guess the scale
+                    // in zoom overview mode.
+                    tentativeScale = mInitialViewState.mTextWrapScale;
+                    int tentativeViewWidth = Math.round(webViewWidth / tentativeScale);
+                    int windowWidth = calculateWindowWidth(tentativeViewWidth,
+                            tentativeViewWidth);
+                    // In viewport setup time, since no content width is known, we assume
+                    // the windowWidth will be the content width, to get a more likely
+                    // zoom overview scale.
+                    data.mScale = (float) webViewWidth / windowWidth;
+                    if (!mSettings.getLoadWithOverviewMode()) {
+                        // If user choose non-overview mode.
+                        data.mScale = Math.max(data.mScale, tentativeScale);
+                    }
+                    if (mSettings.isNarrowColumnLayout() &&
+                            mSettings.getUseFixedViewport()) {
+                        // In case of automatic text reflow in fixed view port mode.
+                        mInitialViewState.mTextWrapScale =
+                                ZoomManager.computeReadingLevelScale(data.mScale);
+                    }
+                } else {
+                    // Scale is given such as when page is restored, use it.
+                    data.mScale = tentativeScale;
+                }
                 if (DebugFlags.WEB_VIEW_CORE) {
                     Log.v(LOGTAG, "setupViewport"
                              + " mRestoredScale=" + mRestoredScale
                              + " mViewScale=" + mInitialViewState.mViewScale
                              + " mTextWrapScale=" + mInitialViewState.mTextWrapScale
+                             + " data.mScale= " + data.mScale
                              );
                 }
                 data.mWidth = Math.round(webViewWidth / data.mScale);
@@ -2396,8 +2423,9 @@ final class WebViewCore {
                 // send VIEW_SIZE_CHANGED to the front of the queue so that we
                 // can avoid pushing the wrong picture to the WebView side.
                 mEventHub.removeMessages(EventHub.VIEW_SIZE_CHANGED);
-                mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
-                        EventHub.VIEW_SIZE_CHANGED, data));
+                // Let webkit know the scale and inner width/height immediately
+                // in viewport setup time to avoid wrong information.
+                viewSizeChanged(data);
             }
         }
     }
