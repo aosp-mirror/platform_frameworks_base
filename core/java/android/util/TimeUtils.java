@@ -191,7 +191,7 @@ public class TimeUtils {
             int pos = 0;
             fieldLen -= 1;
             while (pos < fieldLen) {
-                formatStr[pos] = ' ';
+                formatStr[pos++] = ' ';
             }
             formatStr[pos] = '0';
             return pos+1;
