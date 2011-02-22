@@ -3997,7 +3997,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (mBlink != null) {
-            mBlink.cancel();
+            mBlink.removeCallbacks(mBlink);
         }
 
         if (mInsertionPointCursorController != null) {
@@ -5421,18 +5421,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         invalidate();
         int curs = getSelectionStart();
 
-        if (curs >= 0 || (mGravity & Gravity.VERTICAL_GRAVITY_MASK) ==
-                             Gravity.BOTTOM) {
+        if (curs >= 0 || (mGravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.BOTTOM) {
             registerForPreDraw();
         }
 
         if (curs >= 0) {
             mHighlightPathBogus = true;
-
-            if (isFocused()) {
-                mShowCursor = SystemClock.uptimeMillis();
-                makeBlink();
-            }
+            makeBlink();
         }
 
         checkForResize();
@@ -6589,13 +6584,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setCursorVisible(boolean visible) {
-        mCursorVisible = visible;
-        invalidate();
+        if (mCursorVisible != visible) {
+            mCursorVisible = visible;
+            invalidate();
 
-        makeBlink();
+            makeBlink();
 
-        // InsertionPointCursorController depends on mCursorVisible
-        prepareCursorControllers();
+            // InsertionPointCursorController depends on mCursorVisible
+            prepareCursorControllers();
+        }
     }
 
     private boolean isCursorVisible() {
@@ -6934,11 +6931,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (oldStart >= 0 || newStart >= 0) {
                 invalidateCursor(Selection.getSelectionStart(buf), oldStart, newStart);
                 registerForPreDraw();
-
-                if (isFocused()) {
-                    mShowCursor = SystemClock.uptimeMillis();
-                    makeBlink();
-                }
+                makeBlink();
             }
         }
 
@@ -7087,22 +7080,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + " what=" + what + ": " + buf);
             TextView.this.spanChange(buf, what, s, -1, e, -1);
         }
-    }
-
-    private void makeBlink() {
-        if (!isCursorVisible()) {
-            if (mBlink != null) {
-                mBlink.removeCallbacks(mBlink);
-            }
-
-            return;
-        }
-
-        if (mBlink == null)
-            mBlink = new Blink(this);
-
-        mBlink.removeCallbacks(mBlink);
-        mBlink.postAtTime(mBlink, mShowCursor + BLINK);
     }
 
     /**
@@ -7271,11 +7248,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (hasWindowFocus) {
             if (mBlink != null) {
                 mBlink.uncancel();
-
-                if (isFocused()) {
-                    mShowCursor = SystemClock.uptimeMillis();
-                    makeBlink();
-                }
+                makeBlink();
             }
         } else {
             if (mBlink != null) {
@@ -7512,17 +7485,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             TextView tv = mView.get();
 
-            if (tv != null && tv.isFocused()) {
-                int st = tv.getSelectionStart();
-                int en = tv.getSelectionEnd();
-
-                if (st == en && st >= 0 && en >= 0) {
-                    if (tv.mLayout != null) {
-                        tv.invalidateCursorPath();
-                    }
-
-                    postAtTime(this, SystemClock.uptimeMillis() + BLINK);
+            if (tv != null && tv.shouldBlink()) {
+                if (tv.mLayout != null) {
+                    tv.invalidateCursorPath();
                 }
+
+                postAtTime(this, SystemClock.uptimeMillis() + BLINK);
             }
         }
 
@@ -7535,6 +7503,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         void uncancel() {
             mCancelled = false;
+        }
+    }
+
+    /**
+     * @return True when the TextView isFocused and has a valid zero-length selection (cursor).
+     */
+    private boolean shouldBlink() {
+        if (!isFocused()) return false;
+
+        final int start = getSelectionStart();
+        if (start < 0) return false;
+
+        final int end = getSelectionEnd();
+        if (end < 0) return false;
+
+        return start == end;
+    }
+
+    private void makeBlink() {
+        if (isCursorVisible()) {
+            if (shouldBlink()) {
+                mShowCursor = SystemClock.uptimeMillis();
+                if (mBlink == null) mBlink = new Blink(this);
+                mBlink.removeCallbacks(mBlink);
+                mBlink.postAtTime(mBlink, mShowCursor + BLINK);
+            }
+        } else {
+            if (mBlink != null) mBlink.removeCallbacks(mBlink);
         }
     }
 
