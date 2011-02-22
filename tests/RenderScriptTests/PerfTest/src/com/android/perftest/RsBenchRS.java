@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.samples;
+package com.android.perftest;
 
 import java.io.Writer;
 
@@ -84,9 +84,6 @@ public class RsBenchRS {
     private ScriptField_VertexShaderConstants3_s mVSConstPixel;
     private ScriptField_FragentShaderConstants3_s mFSConstPixel;
 
-    private ProgramVertex mProgVertexCube;
-    private ProgramFragment mProgFragmentCube;
-
     private ProgramRaster mCullBack;
     private ProgramRaster mCullFront;
     private ProgramRaster mCullNone;
@@ -95,7 +92,6 @@ public class RsBenchRS {
     private Allocation mTexOpaque;
     private Allocation mTexTransparent;
     private Allocation mTexChecker;
-    private Allocation mTexCube;
 
     private Mesh m10by10Mesh;
     private Mesh m100by100Mesh;
@@ -247,19 +243,6 @@ public class RsBenchRS {
         // Bind the source of constant data
         mProgFragmentCustom.bindConstants(mFSConst.getAllocation(), 0);
 
-        // Cubemap test shaders
-        pvbCustom = new ProgramVertex.Builder(mRS);
-        pvbCustom.setShader(mRes, R.raw.shadercubev);
-        pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
-        pvbCustom.addConstant(mVSConst.getAllocation().getType());
-        mProgVertexCube = pvbCustom.create();
-        mProgVertexCube.bindConstants(mVSConst.getAllocation(), 0);
-
-        pfbCustom = new ProgramFragment.Builder(mRS);
-        pfbCustom.setShader(mRes, R.raw.shadercubef);
-        pfbCustom.addTexture(Program.TextureType.TEXTURE_CUBE);
-        mProgFragmentCube = pfbCustom.create();
-
         pvbCustom = new ProgramVertex.Builder(mRS);
         pvbCustom.setShader(mRes, R.raw.shader2v);
         pvbCustom.addInput(ScriptField_VertexShaderInputs_s.createElement(mRS));
@@ -290,8 +273,6 @@ public class RsBenchRS {
 
         mScript.set_gProgVertexCustom(mProgVertexCustom);
         mScript.set_gProgFragmentCustom(mProgFragmentCustom);
-        mScript.set_gProgVertexCube(mProgVertexCube);
-        mScript.set_gProgFragmentCube(mProgFragmentCube);
         mScript.set_gProgVertexPixelLight(mProgVertexPixelLight);
         mScript.set_gProgVertexPixelLightMove(mProgVertexPixelLightMove);
         mScript.set_gProgFragmentPixelLight(mProgFragmentPixelLight);
@@ -316,14 +297,11 @@ public class RsBenchRS {
         mTexOpaque = loadTextureRGB(R.drawable.data);
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
         mTexChecker = loadTextureRGB(R.drawable.checker);
-        Bitmap b = BitmapFactory.decodeResource(mRes, R.drawable.cubemap_test);
-        mTexCube = Allocation.createCubemapFromBitmap(mRS, b);
 
         mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);
         mScript.set_gTexTransparent(mTexTransparent);
         mScript.set_gTexChecker(mTexChecker);
-        mScript.set_gTexCube(mTexCube);
     }
 
     private void initFonts() {

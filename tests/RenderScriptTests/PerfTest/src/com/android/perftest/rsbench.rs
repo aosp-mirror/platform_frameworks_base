@@ -14,7 +14,7 @@
 
 #pragma version(1)
 
-#pragma rs java_package_name(com.android.samples)
+#pragma rs java_package_name(com.android.perftest)
 
 #include "rs_graphics.rsh"
 #include "shader_def.rsh"
@@ -34,7 +34,6 @@ rs_allocation gTexOpaque;
 rs_allocation gTexTorus;
 rs_allocation gTexTransparent;
 rs_allocation gTexChecker;
-rs_allocation gTexCube;
 
 rs_mesh g10by10Mesh;
 rs_mesh g100by100Mesh;
@@ -75,8 +74,6 @@ rs_program_fragment gProgFragmentCustom;
 rs_program_vertex gProgVertexPixelLight;
 rs_program_vertex gProgVertexPixelLightMove;
 rs_program_fragment gProgFragmentPixelLight;
-rs_program_vertex gProgVertexCube;
-rs_program_fragment gProgFragmentCube;
 rs_program_fragment gProgFragmentMultitex;
 
 float gDt = 0;
