@@ -61,7 +61,7 @@ static Properties sink_properties[] = {
  * Return false if dbus is down, or another serious error (out of memory)
 */
 static bool initNative(JNIEnv* env, jobject object) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
@@ -88,7 +88,7 @@ static bool initNative(JNIEnv* env, jobject object) {
 
 static void cleanupNative(JNIEnv* env, jobject object) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         dbus_connection_close(nat->conn);
         env->DeleteGlobalRef(nat->me);
@@ -101,7 +101,7 @@ static void cleanupNative(JNIEnv* env, jobject object) {
 static jobjectArray getSinkPropertiesNative(JNIEnv *env, jobject object,
                                             jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         DBusMessage *msg, *reply;
         DBusError err;
@@ -132,7 +132,7 @@ static jobjectArray getSinkPropertiesNative(JNIEnv *env, jobject object,
 
 static jboolean connectSinkNative(JNIEnv *env, jobject object, jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
         int len = env->GetStringLength(path) + 1;
@@ -153,7 +153,7 @@ static jboolean connectSinkNative(JNIEnv *env, jobject object, jstring path) {
 static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
                                      jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
 
@@ -171,7 +171,7 @@ static jboolean disconnectSinkNative(JNIEnv *env, jobject object,
 static jboolean suspendSinkNative(JNIEnv *env, jobject object,
                                      jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
         bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
@@ -187,7 +187,7 @@ static jboolean suspendSinkNative(JNIEnv *env, jobject object,
 static jboolean resumeSinkNative(JNIEnv *env, jobject object,
                                      jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
         bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
@@ -203,7 +203,7 @@ static jboolean resumeSinkNative(JNIEnv *env, jobject object,
 static jboolean avrcpVolumeUpNative(JNIEnv *env, jobject object,
                                      jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
         bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
@@ -219,7 +219,7 @@ static jboolean avrcpVolumeUpNative(JNIEnv *env, jobject object,
 static jboolean avrcpVolumeDownNative(JNIEnv *env, jobject object,
                                      jstring path) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat) {
         const char *c_path = env->GetStringUTFChars(path, NULL);
         bool ret = dbus_func_args_async(env, nat->conn, -1, NULL, NULL, nat,
@@ -278,7 +278,7 @@ DBusHandlerResult a2dp_event_filter(DBusMessage *msg, JNIEnv *env) {
 }
 
 void onConnectSinkResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;
