@@ -54,6 +54,12 @@ public class MtpServer {
         native_set_ptp_mode(usePtp);
     }
 
+    // Used to disable MTP by removing all storage units.
+    // This is done to disable access to file transfer when the device is locked.
+    public void setLocked(boolean locked) {
+        native_set_locked(locked);
+    }
+
     private native final void native_setup(MtpDatabase database, String storagePath,
             long reserveSpace);
     private native final void native_start();
@@ -61,4 +67,5 @@ public class MtpServer {
     private native final void native_send_object_added(int handle);
     private native final void native_send_object_removed(int handle);
     private native final void native_set_ptp_mode(boolean usePtp);
+    private native final void native_set_locked(boolean locked);
 }
