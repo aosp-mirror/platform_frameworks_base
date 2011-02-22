@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.samples;
+package com.android.perftest;
 
 import java.io.Writer;
 import java.util.ArrayList;

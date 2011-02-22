@@ -157,5 +157,5 @@ int root(int launchID) {
 
     drawDescription();
 
-    return 10;
+    return 0;
 }

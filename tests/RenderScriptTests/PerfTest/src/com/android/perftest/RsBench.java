@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.samples;
+package com.android.perftest;
 
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;
