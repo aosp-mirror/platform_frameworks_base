@@ -95,7 +95,7 @@ public class VideoEditorPreviewTest extends
     private boolean previewStop;
 
     /* Minimum waiting time for Semaphore to wait for release */
-    private final long minWaitingTime = 1000;
+    private final long minWaitingTime = 3000;
 
     // Declares the annotation for Preview Test Cases
     public @interface Preview {
@@ -473,8 +473,8 @@ public class VideoEditorPreviewTest extends
         mVideoEditorHelper.checkProgressCBValues(progressValues);
         final SurfaceHolder surfaceHolder =
             MediaFrameworkTest.mSurfaceView.getHolder();
-
-        long waitingTime = minWaitingTime + 10000;
+        /* As transition takes more time buffer of 10 sec is added */
+        long waitingTime = minWaitingTime + 10000 + 10000;
 
         blockTillPreviewCompletes.acquire();
         try {
@@ -691,31 +691,34 @@ public class VideoEditorPreviewTest extends
 
         long waitingTime = minWaitingTime + mVideoEditor.getDuration();
 
+
         blockTillPreviewCompletes.acquire();
+                    final String fileName = mVideoEditor.getPath() + "\test.3gp";
+                    final int height = MediaProperties.HEIGHT_480;
+                    final int bitrate = MediaProperties.BITRATE_512K;
+
+            try {
+                mVideoEditor.export(fileName, height, bitrate,
+                    new ExportProgressListener() {
+                        public void onProgress(VideoEditor ve,
+                            String outFileName,int progress) {
+
+                        }
+                    });
+            } catch (IOException e) {
+                assertTrue("UnExpected Error in Export" +
+                    e.toString(), false);
+            }
 
         final SurfaceHolder surfaceHolder =
             MediaFrameworkTest.mSurfaceView.getHolder();
         try {
+
             mVideoEditor.startPreview(surfaceHolder, 5000, -1, false, 1,
                 new PreviewProgressListener() {
-                    final String fileName = mVideoEditor.getPath() + "\test.3gp";
-                    final int height = MediaProperties.HEIGHT_360;
-                    final int bitrate = MediaProperties.BITRATE_512K;
+
                     public void onProgress(VideoEditor videoEditor, long timeMs,
                         OverlayData overlayData) {
-                            if (timeMs >= 10000)
-                            try {
-                                videoEditor.export(fileName, height, bitrate,
-                                    new ExportProgressListener() {
-                                        public void onProgress(VideoEditor ve,
-                                            String outFileName,int progress) {
-
-                                        }
-                                    });
-                            } catch (IOException e) {
-                                assertTrue("UnExpected Error in Export" +
-                                    e.toString(), false);
-                        }
                     }
                 public void onStart(VideoEditor videoEditor) {
                     setPreviewStart();
@@ -725,10 +728,10 @@ public class VideoEditorPreviewTest extends
                     blockTillPreviewCompletes.release();
                 }
             });
+
         } catch (Exception e) {
             blockTillPreviewCompletes.release();
         }
-
         blockTillPreviewCompletes.tryAcquire(waitingTime, TimeUnit.MILLISECONDS);
         mVideoEditor.stopPreview();
         assertTrue("Preview Failed to start", previewStart);
@@ -837,31 +840,7 @@ public class VideoEditorPreviewTest extends
             mVideoEditor.renderPreviewFrame(surfaceHolder, 7000,
             overlayData1));
 
-        long waitingTime = minWaitingTime + (mVideoEditor.getDuration() - 5000);
-
-        blockTillPreviewCompletes.acquire();
-        try {
-            mVideoEditor.startPreview(surfaceHolder, 5000, -1, false, 1,
-                new PreviewProgressListener() {
-                    public void onProgress(VideoEditor videoEditor, long timeMs,
-                        OverlayData overlayData) {
-                    }
-                    public void onStart(VideoEditor videoEditor) {
-                        setPreviewStart();
-                    }
-                    public void onStop(VideoEditor videoEditor) {
-                        setPreviewStop();
-                        blockTillPreviewCompletes.release();
-                    }
-            });
-        } catch (Exception e) {
-            blockTillPreviewCompletes.release();
-        }
-        blockTillPreviewCompletes.tryAcquire(waitingTime, TimeUnit.MILLISECONDS);
-        mVideoEditor.stopPreview();
-        assertTrue("Preview Failed to start", previewStart);
-        assertTrue("Preview Failed to stop", previewStop);
-        blockTillPreviewCompletes.release();
+        validatePreviewProgress(5000, -1, false, mVideoEditor.getDuration());
     }
 
     /**
@@ -1142,20 +1121,19 @@ public class VideoEditorPreviewTest extends
         duration = mVideoEditor.getDuration();
         /* RenderPreviewFrame returns -1 to indicate last frame */
         try {
-        assertEquals("Render preview Frame at item duration", -1,
-            mVideoEditor.renderPreviewFrame(surfaceHolder, duration,
-            overlayData1));
-        } catch ( Exception e) {
-            assertTrue (" Render Preview Frame without generate", false);
-        }
-        duration = mVideoEditor.getDuration() + 1000;
-        try {
             mVideoEditor.renderPreviewFrame(surfaceHolder, duration,
             overlayData1);
         } catch ( IllegalStateException e) {
             flagForException = true;
         }
+        assertTrue (" Render Preview Frame without generate", flagForException);
+        duration = mVideoEditor.getDuration() + 1000;
+        try {
+            mVideoEditor.renderPreviewFrame(surfaceHolder, duration,
+            overlayData1);
+        } catch ( IllegalArgumentException e) {
+            flagForException = true;
+        }
         assertTrue (" Preview time greater than duration", flagForException);
     }
-
 }
