@@ -2553,6 +2553,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int getCurrentLandscapeRotation(int lastRotation) {
+        // if the user has locked rotation, we ignore the sensor 
+        if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
+            if (isLandscapeOrSeascape(mUserRotation)) {
+                return mUserRotation;
+            } else {
+                // it seems odd to obey the sensor at all if rotation lock is enabled
+                return mLandscapeRotation;
+            }
+        }
+
         int sensorRotation = mOrientationListener.getCurrentRotation(lastRotation);
         if (isLandscapeOrSeascape(sensorRotation)) {
             return sensorRotation;
@@ -2570,6 +2580,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private int getCurrentPortraitRotation(int lastRotation) {
+        // if the user has locked rotation, we ignore the sensor 
+        if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
+            if (isAnyPortrait(mUserRotation)) {
+                return mUserRotation;
+            } else {
+                // it seems odd to obey the sensor at all if rotation lock is enabled
+                return mPortraitRotation;
+            }
+        }
+
         int sensorRotation = mOrientationListener.getCurrentRotation(lastRotation);
         if (isAnyPortrait(sensorRotation)) {
             return sensorRotation;
