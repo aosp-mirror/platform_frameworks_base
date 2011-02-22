@@ -5028,15 +5028,13 @@ public class WebView extends AbsoluteLayout
         super.onAttachedToWindow();
         if (hasWindowFocus()) setActive(true);
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null) {
-            if (mGlobalLayoutListener == null) {
-                mGlobalLayoutListener = new InnerGlobalLayoutListener();
-                treeObserver.addOnGlobalLayoutListener(mGlobalLayoutListener);
-            }
-            if (mScrollChangedListener == null) {
-                mScrollChangedListener = new InnerScrollChangedListener();
-                treeObserver.addOnScrollChangedListener(mScrollChangedListener);
-            }
+        if (mGlobalLayoutListener == null) {
+            mGlobalLayoutListener = new InnerGlobalLayoutListener();
+            treeObserver.addOnGlobalLayoutListener(mGlobalLayoutListener);
+        }
+        if (mScrollChangedListener == null) {
+            mScrollChangedListener = new InnerScrollChangedListener();
+            treeObserver.addOnScrollChangedListener(mScrollChangedListener);
         }
 
         addAccessibilityApisToJavaScript();
@@ -5049,15 +5047,13 @@ public class WebView extends AbsoluteLayout
         if (hasWindowFocus()) setActive(false);
 
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null) {
-            if (mGlobalLayoutListener != null) {
-                treeObserver.removeGlobalOnLayoutListener(mGlobalLayoutListener);
-                mGlobalLayoutListener = null;
-            }
-            if (mScrollChangedListener != null) {
-                treeObserver.removeOnScrollChangedListener(mScrollChangedListener);
-                mScrollChangedListener = null;
-            }
+        if (mGlobalLayoutListener != null) {
+            treeObserver.removeGlobalOnLayoutListener(mGlobalLayoutListener);
+            mGlobalLayoutListener = null;
+        }
+        if (mScrollChangedListener != null) {
+            treeObserver.removeOnScrollChangedListener(mScrollChangedListener);
+            mScrollChangedListener = null;
         }
 
         removeAccessibilityApisFromJavaScript();
@@ -5091,8 +5087,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * @deprecated WebView should not have implemented
-     * ViewTreeObserver.OnGlobalFocusChangeListener.  This method
-     * does nothing now.
+     * ViewTreeObserver.OnGlobalFocusChangeListener. This method does nothing now.
      */
     @Deprecated
     public void onGlobalFocusChanged(View oldFocus, View newFocus) {
@@ -7725,6 +7720,7 @@ public class WebView extends AbsoluteLayout
             int     mEnabled;
             int     mId;
 
+            @Override
             public String toString() {
                 return mString;
             }
@@ -7878,6 +7874,7 @@ public class WebView extends AbsoluteLayout
                 mAdapter = a;
             }
 
+            @Override
             public void onChanged() {
                 // The filter may have changed which item is checked.  Find the
                 // item that the ListView thinks is checked.
@@ -8193,6 +8190,7 @@ public class WebView extends AbsoluteLayout
      * zero to make the view transparent.
      * @param color   the ARGB color described by Color.java
      */
+    @Override
     public void setBackgroundColor(int color) {
         mBackgroundColor = color;
         mWebViewCore.sendMessage(EventHub.SET_BACKGROUND_COLOR, color);
