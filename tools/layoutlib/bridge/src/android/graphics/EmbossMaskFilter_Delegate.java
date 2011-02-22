@@ -58,7 +58,7 @@ public class EmbossMaskFilter_Delegate extends MaskFilter_Delegate {
     /*package*/ static int nativeConstructor(float[] direction, float ambient,
             float specular, float blurRadius) {
         EmbossMaskFilter_Delegate newDelegate = new EmbossMaskFilter_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

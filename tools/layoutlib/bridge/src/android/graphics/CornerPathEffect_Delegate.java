@@ -64,7 +64,7 @@ public class CornerPathEffect_Delegate extends PathEffect_Delegate {
     @LayoutlibDelegate
     /*package*/ static int nativeCreate(float radius) {
         CornerPathEffect_Delegate newDelegate = new CornerPathEffect_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

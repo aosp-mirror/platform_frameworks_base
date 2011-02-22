@@ -61,7 +61,7 @@ public abstract class Xfermode_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance) {
-        sManager.removeDelegate(native_instance);
+        sManager.removeJavaReferenceFor(native_instance);
     }
 
     // ---- Private delegate/helper methods ----

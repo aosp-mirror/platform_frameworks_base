@@ -67,7 +67,7 @@ public class ComposeShader_Delegate extends Shader_Delegate {
             int native_mode) {
         // FIXME not supported yet.
         ComposeShader_Delegate newDelegate = new ComposeShader_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -75,7 +75,7 @@ public class ComposeShader_Delegate extends Shader_Delegate {
             int porterDuffMode) {
         // FIXME not supported yet.
         ComposeShader_Delegate newDelegate = new ComposeShader_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate

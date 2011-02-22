@@ -57,7 +57,7 @@ public abstract class MaskFilter_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_filter) {
-        sManager.removeDelegate(native_filter);
+        sManager.removeJavaReferenceFor(native_filter);
     }
 
     // ---- Private delegate/helper methods ----

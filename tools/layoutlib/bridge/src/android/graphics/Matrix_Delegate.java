@@ -189,7 +189,7 @@ public final class Matrix_Delegate {
             }
         }
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -765,7 +765,7 @@ public final class Matrix_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance) {
-        sManager.removeDelegate(native_instance);
+        sManager.removeJavaReferenceFor(native_instance);
     }
 
     // ---- Private helper methods ----

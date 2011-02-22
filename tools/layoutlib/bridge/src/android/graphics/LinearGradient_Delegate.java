@@ -59,7 +59,7 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
             int colors[], float positions[], int tileMode) {
         LinearGradient_Delegate newDelegate = new LinearGradient_Delegate(x0, y0, x1, y1,
                 colors, positions, Shader_Delegate.getTileMode(tileMode));
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate

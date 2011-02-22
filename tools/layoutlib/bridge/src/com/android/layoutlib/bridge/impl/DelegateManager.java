@@ -16,7 +16,13 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import com.android.layoutlib.bridge.util.SparseWeakArray;
+
 import android.util.SparseArray;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manages native delegates.
@@ -44,13 +50,32 @@ import android.util.SparseArray;
  * will do is call {@link #getDelegate(int)} to get the Java object matching the int.
  *
  * Typical native init methods are returning a new int back to the Java class, so
- * {@link #addDelegate(Object)} does the same.
+ * {@link #addNewDelegate(Object)} does the same.
+ *
+ * The JNI references are counted, so we do the same through a {@link WeakReference}. Because
+ * the Java object needs to count as a reference (even though it only holds an int), we use the
+ * following mechanism:
+ *
+ * - {@link #addNewDelegate(Object)} and {@link #removeJavaReferenceFor(int)} adds and removes
+ *   the delegate to/from a list. This list hold the reference and prevents the GC from reclaiming
+ *   the delegate.
+ *
+ * - {@link #addNewDelegate(Object)} also adds the delegate to a {@link SparseArray} that holds a
+ *   {@link WeakReference} to the delegate. This allows the delegate to be deleted automatically
+ *   when nothing references it. This means that any class that holds a delegate (except for the
+ *   Java main class) must not use the int but the Delegate class instead. The integers must
+ *   only be used in the API between the main Java class and the Delegate.
  *
  * @param <T> the delegate class to manage
  */
 public final class DelegateManager<T> {
-
-    private final SparseArray<T> mDelegates = new SparseArray<T>();
+    private final SparseWeakArray<T> mDelegates = new SparseWeakArray<T>();
+    /** list used to store delegates when their main object holds a reference to them.
+     * This is to ensure that the WeakReference in the SparseWeakArray doesn't get GC'ed
+     * @see #addNewDelegate(Object)
+     * @see #removeJavaReferenceFor(int)
+     */
+    private final List<T> mJavaReferences = new ArrayList<T>();
     private int mDelegateCounter = 0;
 
     /**
@@ -77,17 +102,20 @@ public final class DelegateManager<T> {
      * @param newDelegate the delegate to add
      * @return a unique native int to identify the delegate
      */
-    public int addDelegate(T newDelegate) {
+    public int addNewDelegate(T newDelegate) {
         int native_object = ++mDelegateCounter;
         mDelegates.put(native_object, newDelegate);
+        assert !mJavaReferences.contains(newDelegate);
+        mJavaReferences.add(newDelegate);
         return native_object;
     }
 
     /**
-     * Removes the delegate matching the given native int.
-     * @param native_object the native int.
+     * Removes the main reference on the given delegate.
+     * @param native_object the native integer representing the delegate.
      */
-    public void removeDelegate(int native_object) {
-        mDelegates.remove(native_object);
+    public void removeJavaReferenceFor(int native_object) {
+        T delegate = getDelegate(native_object);
+        mJavaReferences.remove(delegate);
     }
 }

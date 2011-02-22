@@ -76,7 +76,7 @@ public class BitmapShader_Delegate extends Shader_Delegate {
                 bitmap.getImage(),
                 Shader_Delegate.getTileMode(shaderTileModeX),
                 Shader_Delegate.getTileMode(shaderTileModeY));
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate

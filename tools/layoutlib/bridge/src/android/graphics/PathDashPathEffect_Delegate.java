@@ -65,7 +65,7 @@ public class PathDashPathEffect_Delegate extends PathEffect_Delegate {
     /*package*/ static int nativeCreate(int native_path, float advance, float phase,
             int native_style) {
         PathDashPathEffect_Delegate newDelegate = new PathDashPathEffect_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

@@ -45,7 +45,7 @@ public abstract class Shader_Delegate {
     // ---- delegate helper data ----
 
     // ---- delegate data ----
-    private int mLocalMatrix = 0;
+    private Matrix_Delegate mLocalMatrix = null;
 
     // ---- Public Helper methods ----
 
@@ -77,7 +77,7 @@ public abstract class Shader_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_shader, int native_skiaShader) {
-        sManager.removeDelegate(native_shader);
+        sManager.removeJavaReferenceFor(native_shader);
     }
 
     @LayoutlibDelegate
@@ -89,15 +89,14 @@ public abstract class Shader_Delegate {
             return;
         }
 
-        shaderDelegate.mLocalMatrix = matrix_instance;
+        shaderDelegate.mLocalMatrix = Matrix_Delegate.getDelegate(matrix_instance);
     }
 
     // ---- Private delegate/helper methods ----
 
     protected java.awt.geom.AffineTransform getLocalMatrix() {
-        Matrix_Delegate localMatrixDelegate = Matrix_Delegate.getDelegate(mLocalMatrix);
-        if (localMatrixDelegate != null) {
-            return localMatrixDelegate.getAffineTransform();
+        if (mLocalMatrix != null) {
+            return mLocalMatrix.getAffineTransform();
         }
 
         return new java.awt.geom.AffineTransform();

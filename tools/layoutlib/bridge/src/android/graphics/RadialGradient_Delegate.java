@@ -58,7 +58,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
             int colors[], float positions[], int tileMode) {
         RadialGradient_Delegate newDelegate = new RadialGradient_Delegate(x, y, radius,
                 colors, positions, Shader_Delegate.getTileMode(tileMode));
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate

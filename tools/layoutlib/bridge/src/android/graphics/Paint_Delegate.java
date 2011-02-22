@@ -75,19 +75,19 @@ public class Paint_Delegate {
     private int mCap;
     private int mJoin;
     private int mTextAlign;
-    private int mTypeface;
+    private Typeface_Delegate mTypeface;
     private float mStrokeWidth;
     private float mStrokeMiter;
     private float mTextSize;
     private float mTextScaleX;
     private float mTextSkewX;
 
-    private int mXfermode;
-    private int mColorFilter;
-    private int mShader;
-    private int mPathEffect;
-    private int mMaskFilter;
-    private int mRasterizer;
+    private Xfermode_Delegate mXfermode;
+    private ColorFilter_Delegate mColorFilter;
+    private Shader_Delegate mShader;
+    private PathEffect_Delegate mPathEffect;
+    private MaskFilter_Delegate mMaskFilter;
+    private Rasterizer_Delegate mRasterizer;
 
 
     // ---- Public Helper methods ----
@@ -172,17 +172,16 @@ public class Paint_Delegate {
     }
 
     public Stroke getJavaStroke() {
-        PathEffect_Delegate effectDelegate = PathEffect_Delegate.getDelegate(mPathEffect);
-        if (effectDelegate != null) {
-            if (effectDelegate.isSupported()) {
-                Stroke stroke = effectDelegate.getStroke(this);
+        if (mPathEffect != null) {
+            if (mPathEffect.isSupported()) {
+                Stroke stroke = mPathEffect.getStroke(this);
                 assert stroke != null;
                 if (stroke != null) {
                     return stroke;
                 }
             } else {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_PATHEFFECT,
-                        effectDelegate.getSupportMessage(),
+                        mPathEffect.getSupportMessage(),
                         null, null /*data*/);
             }
         }
@@ -201,7 +200,7 @@ public class Paint_Delegate {
      * @return the delegate or null.
      */
     public Xfermode_Delegate getXfermode() {
-        return  Xfermode_Delegate.getDelegate(mXfermode);
+        return mXfermode;
     }
 
     /**
@@ -210,7 +209,7 @@ public class Paint_Delegate {
      * @return the delegate or null.
      */
     public ColorFilter_Delegate getColorFilter() {
-        return ColorFilter_Delegate.getDelegate(mColorFilter);
+        return mColorFilter;
     }
 
     /**
@@ -219,7 +218,7 @@ public class Paint_Delegate {
      * @return the delegate or null.
      */
     public Shader_Delegate getShader() {
-        return Shader_Delegate.getDelegate(mShader);
+        return mShader;
     }
 
     /**
@@ -228,7 +227,7 @@ public class Paint_Delegate {
      * @return the delegate or null.
      */
     public MaskFilter_Delegate getMaskFilter() {
-        return MaskFilter_Delegate.getDelegate(mMaskFilter);
+        return mMaskFilter;
     }
 
     /**
@@ -237,7 +236,7 @@ public class Paint_Delegate {
      * @return the delegate or null.
      */
     public Rasterizer_Delegate getRasterizer() {
-        return Rasterizer_Delegate.getDelegate(mRasterizer);
+        return mRasterizer;
     }
 
     // ---- native methods ----
@@ -585,7 +584,7 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int native_init() {
         Paint_Delegate newDelegate = new Paint_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -597,7 +596,7 @@ public class Paint_Delegate {
         }
 
         Paint_Delegate newDelegate = new Paint_Delegate(delegate);
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -728,7 +727,9 @@ public class Paint_Delegate {
             return shader;
         }
 
-        return delegate.mShader = shader;
+        delegate.mShader = Shader_Delegate.getDelegate(shader);
+
+        return shader;
     }
 
     @LayoutlibDelegate
@@ -739,13 +740,12 @@ public class Paint_Delegate {
             return filter;
         }
 
-        delegate.mColorFilter = filter;
+        delegate.mColorFilter = ColorFilter_Delegate.getDelegate(filter);;
 
         // since none of those are supported, display a fidelity warning right away
-        ColorFilter_Delegate filterDelegate = delegate.getColorFilter();
-        if (filterDelegate != null && filterDelegate.isSupported() == false) {
+        if (delegate.mColorFilter != null && delegate.mColorFilter.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_COLORFILTER,
-                    filterDelegate.getSupportMessage(), null, null /*data*/);
+                    delegate.mColorFilter.getSupportMessage(), null, null /*data*/);
         }
 
         return filter;
@@ -759,7 +759,9 @@ public class Paint_Delegate {
             return xfermode;
         }
 
-        return delegate.mXfermode = xfermode;
+        delegate.mXfermode = Xfermode_Delegate.getDelegate(xfermode);
+
+        return xfermode;
     }
 
     @LayoutlibDelegate
@@ -770,7 +772,9 @@ public class Paint_Delegate {
             return effect;
         }
 
-        return delegate.mPathEffect = effect;
+        delegate.mPathEffect = PathEffect_Delegate.getDelegate(effect);
+
+        return effect;
     }
 
     @LayoutlibDelegate
@@ -781,13 +785,12 @@ public class Paint_Delegate {
             return maskfilter;
         }
 
-        delegate.mMaskFilter = maskfilter;
+        delegate.mMaskFilter = MaskFilter_Delegate.getDelegate(maskfilter);
 
         // since none of those are supported, display a fidelity warning right away
-        MaskFilter_Delegate filterDelegate = delegate.getMaskFilter();
-        if (filterDelegate != null && filterDelegate.isSupported() == false) {
+        if (delegate.mMaskFilter != null && delegate.mMaskFilter.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_MASKFILTER,
-                    filterDelegate.getSupportMessage(), null, null /*data*/);
+                    delegate.mMaskFilter.getSupportMessage(), null, null /*data*/);
         }
 
         return maskfilter;
@@ -801,9 +804,9 @@ public class Paint_Delegate {
             return 0;
         }
 
-        delegate.mTypeface = typeface;
+        delegate.mTypeface = Typeface_Delegate.getDelegate(typeface);
         delegate.updateFontObject();
-        return delegate.mTypeface;
+        return typeface;
     }
 
     @LayoutlibDelegate
@@ -814,13 +817,12 @@ public class Paint_Delegate {
             return rasterizer;
         }
 
-        delegate.mRasterizer = rasterizer;
+        delegate.mRasterizer = Rasterizer_Delegate.getDelegate(rasterizer);
 
         // since none of those are supported, display a fidelity warning right away
-        Rasterizer_Delegate rasterizerDelegate = delegate.getRasterizer();
-        if (rasterizerDelegate != null && rasterizerDelegate.isSupported() == false) {
+        if (delegate.mRasterizer != null && delegate.mRasterizer.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_RASTERIZER,
-                    rasterizerDelegate.getSupportMessage(), null, null /*data*/);
+                    delegate.mRasterizer.getSupportMessage(), null, null /*data*/);
         }
 
         return rasterizer;
@@ -986,7 +988,7 @@ public class Paint_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void finalizer(int nativePaint) {
-        sManager.removeDelegate(nativePaint);
+        sManager.removeJavaReferenceFor(nativePaint);
     }
 
     // ---- Private delegate/helper methods ----
@@ -1028,18 +1030,18 @@ public class Paint_Delegate {
         mCap = Paint.Cap.BUTT.nativeInt;
         mJoin = Paint.Join.MITER.nativeInt;
         mTextAlign = 0;
-        mTypeface = Typeface.sDefaults[0].native_instance;
+        mTypeface = Typeface_Delegate.getDelegate(Typeface.sDefaults[0].native_instance);
         mStrokeWidth = 1.f;
         mStrokeMiter = 4.f;
         mTextSize = 20.f;
         mTextScaleX = 1.f;
         mTextSkewX = 0.f;
-        mXfermode = 0;
-        mColorFilter = 0;
-        mShader = 0;
-        mPathEffect = 0;
-        mMaskFilter = 0;
-        mRasterizer = 0;
+        mXfermode = null;
+        mColorFilter = null;
+        mShader = null;
+        mPathEffect = null;
+        mMaskFilter = null;
+        mRasterizer = null;
         updateFontObject();
     }
 
@@ -1048,9 +1050,9 @@ public class Paint_Delegate {
      */
     @SuppressWarnings("deprecation")
     private void updateFontObject() {
-        if (mTypeface != 0) {
+        if (mTypeface != null) {
             // Get the fonts from the TypeFace object.
-            List<Font> fonts = Typeface_Delegate.getFonts(mTypeface);
+            List<Font> fonts = mTypeface.getFonts();
 
             // create new font objects as well as FontMetrics, based on the current text size
             // and skew info.

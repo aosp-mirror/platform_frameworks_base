@@ -266,12 +266,12 @@ public class Region_Delegate {
     @LayoutlibDelegate
     /*package*/ static int nativeConstructor() {
         Region_Delegate newDelegate = new Region_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_region) {
-        sManager.removeDelegate(native_region);
+        sManager.removeJavaReferenceFor(native_region);
     }
 
     @LayoutlibDelegate

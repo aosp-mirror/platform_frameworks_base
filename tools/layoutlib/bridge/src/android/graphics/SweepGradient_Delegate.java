@@ -54,7 +54,7 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
     @LayoutlibDelegate
     /*package*/ static int nativeCreate1(float x, float y, int colors[], float positions[]) {
         SweepGradient_Delegate newDelegate = new SweepGradient_Delegate(x, y, colors, positions);
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate

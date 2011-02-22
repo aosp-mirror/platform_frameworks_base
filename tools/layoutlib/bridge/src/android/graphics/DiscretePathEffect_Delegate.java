@@ -64,7 +64,7 @@ public class DiscretePathEffect_Delegate extends PathEffect_Delegate {
     @LayoutlibDelegate
     /*package*/ static int nativeCreate(float length, float deviation) {
         DiscretePathEffect_Delegate newDelegate = new DiscretePathEffect_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

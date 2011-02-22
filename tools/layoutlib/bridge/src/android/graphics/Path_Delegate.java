@@ -90,7 +90,7 @@ public final class Path_Delegate {
         // create the delegate
         Path_Delegate newDelegate = new Path_Delegate();
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -104,7 +104,7 @@ public final class Path_Delegate {
             newDelegate.set(pathDelegate);
         }
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -440,7 +440,7 @@ public final class Path_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void finalizer(int nPath) {
-        sManager.removeDelegate(nPath);
+        sManager.removeJavaReferenceFor(nPath);
     }
 
 

@@ -74,6 +74,10 @@ public final class Typeface_Delegate {
         sPostInitDelegate.clear();
     }
 
+    public static Typeface_Delegate getDelegate(int nativeTypeface) {
+        return sManager.getDelegate(nativeTypeface);
+    }
+
     public static List<Font> getFonts(Typeface typeface) {
         return getFonts(typeface.native_instance);
     }
@@ -84,7 +88,11 @@ public final class Typeface_Delegate {
             return null;
         }
 
-        return delegate.mFonts;
+        return delegate.getFonts();
+    }
+
+    public List<Font> getFonts() {
+        return mFonts;
     }
 
     // ---- native methods ----
@@ -105,7 +113,7 @@ public final class Typeface_Delegate {
             sPostInitDelegate.add(newDelegate);
         }
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -125,7 +133,7 @@ public final class Typeface_Delegate {
             sPostInitDelegate.add(newDelegate);
         }
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -144,7 +152,7 @@ public final class Typeface_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeUnref(int native_instance) {
-        sManager.removeDelegate(native_instance);
+        sManager.removeJavaReferenceFor(native_instance);
     }
 
     @LayoutlibDelegate

@@ -245,12 +245,12 @@ public final class Bitmap_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int nativeBitmap) {
-        sManager.removeDelegate(nativeBitmap);
+        sManager.removeJavaReferenceFor(nativeBitmap);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeRecycle(int nativeBitmap) {
-        sManager.removeDelegate(nativeBitmap);
+        sManager.removeJavaReferenceFor(nativeBitmap);
     }
 
     @LayoutlibDelegate
@@ -522,7 +522,7 @@ public final class Bitmap_Delegate {
 
     private static Bitmap createBitmap(Bitmap_Delegate delegate, boolean isMutable, int density) {
         // get its native_int
-        int nativeInt = sManager.addDelegate(delegate);
+        int nativeInt = sManager.addNewDelegate(delegate);
 
         // and create/return a new Bitmap with it
         return new Bitmap(nativeInt, null /* buffer */, isMutable, null /*ninePatchChunk*/, density);

@@ -57,7 +57,7 @@ public class LayerRasterizer_Delegate extends Rasterizer_Delegate {
     @LayoutlibDelegate
     /*package*/ static int nativeConstructor() {
         LayerRasterizer_Delegate newDelegate = new LayerRasterizer_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate

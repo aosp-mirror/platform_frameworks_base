@@ -61,7 +61,7 @@ public abstract class PathEffect_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_patheffect) {
-        sManager.removeDelegate(native_patheffect);
+        sManager.removeJavaReferenceFor(native_patheffect);
     }
 
     // ---- Private delegate/helper methods ----

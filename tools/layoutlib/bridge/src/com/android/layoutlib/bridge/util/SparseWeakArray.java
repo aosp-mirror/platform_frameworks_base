@@ -16,15 +16,33 @@
 
 package com.android.layoutlib.bridge.util;
 
+
 import com.android.internal.util.ArrayUtils;
 
+import android.util.SparseArray;
+
+import java.lang.ref.WeakReference;
+
 /**
+ * This is a custom {@link SparseArray} that uses {@link WeakReference} around the objects added
+ * to it. When the array is compacted, not only deleted indices but also empty references
+ * are removed, making the array efficient at removing references that were reclaimed.
+ *
+ * The code is taken from {@link SparseArray} directly and adapted to use weak references.
+ *
+ * Because our usage means that we never actually call {@link #remove(int)} or {@link #delete(int)},
+ * we must manually check if there are reclaimed references to trigger an internal compact step
+ * (which is normally only triggered when an item is manually removed).
+ *
  * SparseArrays map integers to Objects.  Unlike a normal array of Objects,
  * there can be gaps in the indices.  It is intended to be more efficient
  * than using a HashMap to map Integers to Objects.
  */
+@SuppressWarnings("unchecked")
 public class SparseWeakArray<E> {
-    private static final Object DELETED = new Object();
+
+    private static final Object DELETED_REF = new Object();
+    private static final WeakReference<?> DELETED = new WeakReference(DELETED_REF);
     private boolean mGarbage = false;
 
     /**
@@ -43,7 +61,7 @@ public class SparseWeakArray<E> {
         initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
 
         mKeys = new int[initialCapacity];
-        mValues = new Object[initialCapacity];
+        mValues = new WeakReference[initialCapacity];
         mSize = 0;
     }
 
@@ -62,10 +80,10 @@ public class SparseWeakArray<E> {
     public E get(int key, E valueIfKeyNotFound) {
         int i = binarySearch(mKeys, 0, mSize, key);
 
-        if (i < 0 || mValues[i] == DELETED) {
+        if (i < 0 || mValues[i] == DELETED || mValues[i].get() == null) {
             return valueIfKeyNotFound;
         } else {
-            return (E) mValues[i];
+            return (E) mValues[i].get();
         }
     }
 
@@ -106,12 +124,14 @@ public class SparseWeakArray<E> {
         int n = mSize;
         int o = 0;
         int[] keys = mKeys;
-        Object[] values = mValues;
+        WeakReference<?>[] values = mValues;
 
         for (int i = 0; i < n; i++) {
-            Object val = values[i];
+            WeakReference<?> val = values[i];
 
-            if (val != DELETED) {
+            // Don't keep any non DELETED values, but only the one that still have a valid
+            // reference.
+            if (val != DELETED && val.get() != null) {
                 if (i != o) {
                     keys[o] = keys[i];
                     values[o] = val;
@@ -136,17 +156,17 @@ public class SparseWeakArray<E> {
         int i = binarySearch(mKeys, 0, mSize, key);
 
         if (i >= 0) {
-            mValues[i] = value;
+            mValues[i] = new WeakReference(value);
         } else {
             i = ~i;
 
-            if (i < mSize && mValues[i] == DELETED) {
+            if (i < mSize && (mValues[i] == DELETED || mValues[i].get() == null)) {
                 mKeys[i] = key;
-                mValues[i] = value;
+                mValues[i] = new WeakReference(value);
                 return;
             }
 
-            if (mGarbage && mSize >= mKeys.length) {
+            if (mSize >= mKeys.length && (mGarbage || hasReclaimedRefs())) {
                 gc();
 
                 // Search again because indices may have changed.
@@ -157,7 +177,7 @@ public class SparseWeakArray<E> {
                 int n = ArrayUtils.idealIntArraySize(mSize + 1);
 
                 int[] nkeys = new int[n];
-                Object[] nvalues = new Object[n];
+                WeakReference<?>[] nvalues = new WeakReference[n];
 
                 // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
                 System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
@@ -174,7 +194,7 @@ public class SparseWeakArray<E> {
             }
 
             mKeys[i] = key;
-            mValues[i] = value;
+            mValues[i] = new WeakReference(value);
             mSize++;
         }
     }
@@ -214,7 +234,7 @@ public class SparseWeakArray<E> {
             gc();
         }
 
-        return (E) mValues[index];
+        return (E) mValues[index].get();
     }
 
     /**
@@ -227,7 +247,7 @@ public class SparseWeakArray<E> {
             gc();
         }
 
-        mValues[index] = value;
+        mValues[index] = new WeakReference(value);
     }
 
     /**
@@ -257,7 +277,7 @@ public class SparseWeakArray<E> {
         }
 
         for (int i = 0; i < mSize; i++)
-            if (mValues[i] == value)
+            if (mValues[i].get() == value)
                 return i;
 
         return -1;
@@ -268,7 +288,7 @@ public class SparseWeakArray<E> {
      */
     public void clear() {
         int n = mSize;
-        Object[] values = mValues;
+        WeakReference<?>[] values = mValues;
 
         for (int i = 0; i < n; i++) {
             values[i] = null;
@@ -288,7 +308,7 @@ public class SparseWeakArray<E> {
             return;
         }
 
-        if (mGarbage && mSize >= mKeys.length) {
+        if (mSize >= mKeys.length && (mGarbage || hasReclaimedRefs())) {
             gc();
         }
 
@@ -297,7 +317,7 @@ public class SparseWeakArray<E> {
             int n = ArrayUtils.idealIntArraySize(pos + 1);
 
             int[] nkeys = new int[n];
-            Object[] nvalues = new Object[n];
+            WeakReference<?>[] nvalues = new WeakReference[n];
 
             // Log.e("SparseArray", "grow " + mKeys.length + " to " + n);
             System.arraycopy(mKeys, 0, nkeys, 0, mKeys.length);
@@ -308,8 +328,18 @@ public class SparseWeakArray<E> {
         }
 
         mKeys[pos] = key;
-        mValues[pos] = value;
+        mValues[pos] = new WeakReference(value);
         mSize = pos + 1;
+    }
+
+    private boolean hasReclaimedRefs() {
+        for (int i = 0 ; i < mSize ; i++) {
+            if (mValues[i].get() == null) { // DELETED.get() never returns null.
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int binarySearch(int[] a, int start, int len, int key) {
@@ -333,6 +363,6 @@ public class SparseWeakArray<E> {
     }
 
     private int[] mKeys;
-    private Object[] mValues;
+    private WeakReference<?>[] mValues;
     private int mSize;
 }

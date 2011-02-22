@@ -57,7 +57,7 @@ public abstract class DrawFilter_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int nativeDrawFilter) {
-        sManager.removeDelegate(nativeDrawFilter);
+        sManager.removeJavaReferenceFor(nativeDrawFilter);
     }
 
     // ---- Private delegate/helper methods ----

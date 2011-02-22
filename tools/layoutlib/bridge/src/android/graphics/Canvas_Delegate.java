@@ -64,7 +64,7 @@ public final class Canvas_Delegate {
     private Bitmap_Delegate mBitmap;
     private GcSnapshot mSnapshot;
 
-    private int mDrawFilter = 0;
+    private DrawFilter_Delegate mDrawFilter = null;
 
     // ---- Public Helper methods ----
 
@@ -95,7 +95,7 @@ public final class Canvas_Delegate {
      * @return the delegate or null.
      */
     public DrawFilter_Delegate getDrawFilter() {
-        return DrawFilter_Delegate.getDelegate(mDrawFilter);
+        return mDrawFilter;
     }
 
     // ---- native methods ----
@@ -313,12 +313,12 @@ public final class Canvas_Delegate {
             // create a new Canvas_Delegate with the given bitmap and return its new native int.
             Canvas_Delegate newDelegate = new Canvas_Delegate(bitmapDelegate);
 
-            return sManager.addDelegate(newDelegate);
+            return sManager.addNewDelegate(newDelegate);
         } else {
             // create a new Canvas_Delegate and return its new native int.
             Canvas_Delegate newDelegate = new Canvas_Delegate();
 
-            return sManager.addDelegate(newDelegate);
+            return sManager.addNewDelegate(newDelegate);
         }
     }
 
@@ -510,26 +510,18 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeSetDrawFilter(int nativeCanvas,
-                                                   int nativeFilter) {
+    /*package*/ static void nativeSetDrawFilter(int nativeCanvas, int nativeFilter) {
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
         if (canvasDelegate == null) {
             return;
         }
 
-        canvasDelegate.mDrawFilter = nativeFilter;
+        canvasDelegate.mDrawFilter = DrawFilter_Delegate.getDelegate(nativeFilter);
 
-        // get the delegate only because we don't support them at all for the moment, so
-        // we can display the message now.
-
-        DrawFilter_Delegate filterDelegate = DrawFilter_Delegate.getDelegate(nativeFilter);
-        if (canvasDelegate == null) {
-            return;
-        }
-
-        if (filterDelegate.isSupported() == false) {
+        if (canvasDelegate.mDrawFilter != null &&
+                canvasDelegate.mDrawFilter.isSupported() == false) {
             Bridge.getLog().fidelityWarning(LayoutLog.TAG_DRAWFILTER,
-                    filterDelegate.getSupportMessage(), null, null /*data*/);
+                    canvasDelegate.mDrawFilter.getSupportMessage(), null, null /*data*/);
         }
     }
 
@@ -1139,7 +1131,7 @@ public final class Canvas_Delegate {
         canvasDelegate.dispose();
 
         // remove it from the manager.
-        sManager.removeDelegate(nativeCanvas);
+        sManager.removeJavaReferenceFor(nativeCanvas);
     }
 
     // ---- Private delegate/helper methods ----

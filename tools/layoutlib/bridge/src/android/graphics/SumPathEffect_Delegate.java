@@ -64,7 +64,7 @@ public class SumPathEffect_Delegate extends PathEffect_Delegate {
     @LayoutlibDelegate
     /*package*/ static int nativeCreate(int first, int second) {
         SumPathEffect_Delegate newDelegate = new SumPathEffect_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----
