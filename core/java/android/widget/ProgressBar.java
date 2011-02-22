@@ -701,8 +701,8 @@ public class ProgressBar extends View {
 
             if (mProgress > max) {
                 mProgress = max;
-                refreshProgress(R.id.progress, mProgress, false);
             }
+            refreshProgress(R.id.progress, mProgress, false);
         }
     }
     
