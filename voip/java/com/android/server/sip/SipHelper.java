@@ -284,6 +284,13 @@ class SipHelper {
                     mHeaderFactory.createContentTypeHeader(
                             "application", "sdp"));
 
+            // Adding rport argument in the request could fix some SIP servers
+            // in resolving the initiator's NAT port mapping for relaying the
+            // response message from the other end.
+
+            ViaHeader viaHeader = (ViaHeader) request.getHeader(ViaHeader.NAME);
+            if (viaHeader != null) viaHeader.setRPort();
+
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
             if (DEBUG) Log.d(TAG, "send RE-INVITE: " + request);
