@@ -1,4 +1,6 @@
 page.title=&lt;category&gt;
+parent.title=The AndroidManifest.xml File
+parent.link=manifest-intro.html
 @jd:body
 
 <dl class="xml">
