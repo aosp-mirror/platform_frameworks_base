@@ -46,7 +46,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
@@ -7243,7 +7242,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // does not happen in that case (using the arrows on a bluetooth keyboard).
         if (focused && isTextEditable()) {
             final InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) imm.showSoftInput(this, 0, null);
+            if (imm != null) imm.showSoftInput(this, 0);
         }
     }
 
@@ -7327,33 +7326,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    class CommitSelectionReceiver extends ResultReceiver {
-        private final int mPrevStart, mPrevEnd;
-
-        public CommitSelectionReceiver(int prevStart, int prevEnd) {
-            super(getHandler());
-            mPrevStart = prevStart;
-            mPrevEnd = prevEnd;
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            // If this tap was actually used to show the IMM, leave cursor or selection unchanged
-            // by restoring its previous position.
-            if (resultCode == InputMethodManager.RESULT_SHOWN) {
-                final int len = mText.length();
-                int start = Math.min(len, mPrevStart);
-                int end = Math.min(len, mPrevEnd);
-                Selection.setSelection((Spannable)mText, start, end);
-
-                boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
-                if (hasSelection() && !selectAllGotFocus) {
-                    startSelectionActionMode();
-                }
-            }
-        }
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
@@ -7394,10 +7366,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && mText instanceof Spannable && mLayout != null) {
             boolean handled = false;
 
-            // Save previous selection, in case this event is used to show the IME.
-            int oldSelStart = getSelectionStart();
-            int oldSelEnd = getSelectionEnd();
-
             final int oldScrollX = mScrollX;
             final int oldScrollY = mScrollY;
 
@@ -7429,22 +7397,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (touchIsFinished) {
-                    CommitSelectionReceiver csr = null;
-                    if (getSelectionStart() != oldSelStart || getSelectionEnd() != oldSelEnd ||
-                            didTouchFocusSelect()) {
-                        csr = new CommitSelectionReceiver(oldSelStart, oldSelEnd);
-                    }
-
                     // Show the IME, except when selecting in read-only text.
                     if (!mTextIsSelectable) {
                         final InputMethodManager imm = InputMethodManager.peekInstance();
-                        handled |= imm != null && imm.showSoftInput(this, 0, csr) && (csr != null);
+                        handled |= imm != null && imm.showSoftInput(this, 0);
                     }
 
-                    stopSelectionActionMode();
-                    boolean selectAllGotFocus = mSelectAllOnFocus && mTouchFocusSelected;
-                    if (hasInsertionController() && !selectAllGotFocus && mText.length() > 0) {
-                        getInsertionController().show();
+
+                    boolean selectAllGotFocus = mSelectAllOnFocus && didTouchFocusSelect();
+                    if (!selectAllGotFocus && hasSelection()) {
+                        startSelectionActionMode();
+                    } else {
+                        stopSelectionActionMode();
+                        if (hasInsertionController() && !selectAllGotFocus && mText.length() > 0) {
+                            getInsertionController().show();
+                        }
                     }
                 }
             }
