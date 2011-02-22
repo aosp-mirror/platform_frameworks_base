@@ -42,6 +42,7 @@ import com.android.internal.R;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -115,6 +116,7 @@ class CallbackProxy extends Handler {
     private static final int HISTORY_INDEX_CHANGED               = 136;
     private static final int AUTH_CREDENTIALS                    = 137;
     private static final int SET_INSTALLABLE_WEBAPP              = 138;
+    private static final int NOTIFY_SEARCHBOX_LISTENERS          = 139;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -781,6 +783,12 @@ class CallbackProxy extends Handler {
                     mWebChromeClient.setInstallableWebApp();
                 }
                 break;
+            case NOTIFY_SEARCHBOX_LISTENERS:
+                SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
+
+                @SuppressWarnings("unchecked")
+                List<String> suggestions = (List<String>) msg.obj;
+                searchBox.handleSuggestions(msg.getData().getString("query"), suggestions);
         }
     }
 
@@ -1556,5 +1564,13 @@ class CallbackProxy extends Handler {
         // another Activity when the alert should be displayed?
         // See bug 3166409
         return mContext instanceof Activity;
+    }
+
+    void onSearchboxSuggestionsReceived(String query, List<String> suggestions) {
+        Message msg = obtainMessage(NOTIFY_SEARCHBOX_LISTENERS);
+        msg.obj = suggestions;
+        msg.getData().putString("query", query);
+
+        sendMessage(msg);
     }
 }

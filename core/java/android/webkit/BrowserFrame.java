@@ -46,7 +46,6 @@ import java.lang.ref.WeakReference;
 import java.net.URLEncoder;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
@@ -88,6 +87,9 @@ class BrowserFrame extends Handler {
 
     // Key store handler when Chromium HTTP stack is used.
     private KeyStoreHandler mKeyStoreHandler = null;
+
+    // Implementation of the searchbox API.
+    private final SearchBoxImpl mSearchBox;
 
     // message ids
     // a message posted when a frame loading is completed
@@ -225,12 +227,18 @@ class BrowserFrame extends Handler {
         sConfigCallback.addHandler(this);
 
         mJSInterfaceMap = javascriptInterfaces;
+        if (mJSInterfaceMap == null) {
+            mJSInterfaceMap = new HashMap<String, Object>();
+        }
 
         mSettings = settings;
         mContext = context;
         mCallbackProxy = proxy;
         mDatabase = WebViewDatabase.getInstance(appContext);
         mWebViewCore = w;
+
+        mSearchBox = new SearchBoxImpl(mWebViewCore, mCallbackProxy);
+        mJSInterfaceMap.put(SearchBoxImpl.JS_INTERFACE_NAME, mSearchBox);
 
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
@@ -587,17 +595,17 @@ class BrowserFrame extends Handler {
      * We should re-attach any attached js interfaces.
      */
     private void windowObjectCleared(int nativeFramePointer) {
-        if (mJSInterfaceMap != null) {
-            Iterator iter = mJSInterfaceMap.keySet().iterator();
-            while (iter.hasNext())  {
-                String interfaceName = (String) iter.next();
-                Object object = mJSInterfaceMap.get(interfaceName);
-                if (object != null) {
-                    nativeAddJavascriptInterface(nativeFramePointer,
-                            mJSInterfaceMap.get(interfaceName), interfaceName);
-                }
+        Iterator<String> iter = mJSInterfaceMap.keySet().iterator();
+        while (iter.hasNext())  {
+            String interfaceName = iter.next();
+            Object object = mJSInterfaceMap.get(interfaceName);
+            if (object != null) {
+                nativeAddJavascriptInterface(nativeFramePointer,
+                        mJSInterfaceMap.get(interfaceName), interfaceName);
             }
         }
+
+        stringByEvaluatingJavaScriptFromString(SearchBoxImpl.JS_BRIDGE);
     }
 
     /**
@@ -620,16 +628,11 @@ class BrowserFrame extends Handler {
     public void addJavascriptInterface(Object obj, String interfaceName) {
         assert obj != null;
         removeJavascriptInterface(interfaceName);
-        if (mJSInterfaceMap == null) {
-            mJSInterfaceMap = new HashMap<String, Object>();
-        }
+
         mJSInterfaceMap.put(interfaceName, obj);
     }
 
     public void removeJavascriptInterface(String interfaceName) {
-        if (mJSInterfaceMap == null) {
-            return;
-        }
         if (mJSInterfaceMap.containsKey(interfaceName)) {
             mJSInterfaceMap.remove(interfaceName);
         }
@@ -1232,6 +1235,11 @@ class BrowserFrame extends Handler {
             Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");
             return;
         }
+    }
+
+
+    /*package*/ SearchBox getSearchBox() {
+        return mSearchBox;
     }
 
     //==========================================================================
