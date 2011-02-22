@@ -160,6 +160,11 @@ public class ValueAnimator extends Animator {
     private int mCurrentIteration = 0;
 
     /**
+     * Tracks current elapsed/eased fraction, for querying in getAnimatedFraction().
+     */
+    private float mCurrentFraction = 0f;
+
+    /**
      * Tracks whether a startDelay'd animation has begun playing through the startDelay.
      */
     private boolean mStartedDelay = false;
@@ -1111,6 +1116,16 @@ public class ValueAnimator extends Animator {
     }
 
     /**
+     * Returns the current animation fraction, which is the elapsed/interpolated fraction used in
+     * the most recent frame update on the animation.
+     *
+     * @return Elapsed/interpolated fraction of the animation.
+     */
+    public float getAnimatedFraction() {
+        return mCurrentFraction;
+    }
+
+    /**
      * This method is called with the elapsed fraction of the animation during every
      * animation frame. This function turns the elapsed fraction into an interpolated fraction
      * and then into an animated value (from the evaluator. The function is called mostly during
@@ -1124,6 +1139,7 @@ public class ValueAnimator extends Animator {
      */
     void animateValue(float fraction) {
         fraction = mInterpolator.getInterpolation(fraction);
+        mCurrentFraction = fraction;
         int numValues = mValues.length;
         for (int i = 0; i < numValues; ++i) {
             mValues[i].calculateValue(fraction);

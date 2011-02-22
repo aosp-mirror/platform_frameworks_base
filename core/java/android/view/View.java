@@ -1866,7 +1866,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * transform matrix, based on whether the rotation or scaleX/Y properties
      * have changed since the matrix was last calculated.
      */
-    private boolean mMatrixDirty = false;
+    boolean mMatrixDirty = false;
 
     /**
      * An internal variable that tracks whether we need to recalculate the
@@ -1914,66 +1914,66 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * The degrees rotation around the vertical axis through the pivot point.
      */
     @ViewDebug.ExportedProperty
-    private float mRotationY = 0f;
+    float mRotationY = 0f;
 
     /**
      * The degrees rotation around the horizontal axis through the pivot point.
      */
     @ViewDebug.ExportedProperty
-    private float mRotationX = 0f;
+    float mRotationX = 0f;
 
     /**
      * The degrees rotation around the pivot point.
      */
     @ViewDebug.ExportedProperty
-    private float mRotation = 0f;
+    float mRotation = 0f;
 
     /**
      * The amount of translation of the object away from its left property (post-layout).
      */
     @ViewDebug.ExportedProperty
-    private float mTranslationX = 0f;
+    float mTranslationX = 0f;
 
     /**
      * The amount of translation of the object away from its top property (post-layout).
      */
     @ViewDebug.ExportedProperty
-    private float mTranslationY = 0f;
+    float mTranslationY = 0f;
 
     /**
      * The amount of scale in the x direction around the pivot point. A
      * value of 1 means no scaling is applied.
      */
     @ViewDebug.ExportedProperty
-    private float mScaleX = 1f;
+    float mScaleX = 1f;
 
     /**
      * The amount of scale in the y direction around the pivot point. A
      * value of 1 means no scaling is applied.
      */
     @ViewDebug.ExportedProperty
-    private float mScaleY = 1f;
+    float mScaleY = 1f;
 
     /**
      * The amount of scale in the x direction around the pivot point. A
      * value of 1 means no scaling is applied.
      */
     @ViewDebug.ExportedProperty
-    private float mPivotX = 0f;
+    float mPivotX = 0f;
 
     /**
      * The amount of scale in the y direction around the pivot point. A
      * value of 1 means no scaling is applied.
      */
     @ViewDebug.ExportedProperty
-    private float mPivotY = 0f;
+    float mPivotY = 0f;
 
     /**
      * The opacity of the View. This is a value from 0 to 1, where 0 means
      * completely transparent and 1 means completely opaque.
      */
     @ViewDebug.ExportedProperty
-    private float mAlpha = 1f;
+    float mAlpha = 1f;
 
     /**
      * The distance in pixels from the left edge of this view's parent
@@ -2235,6 +2235,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Cache the touch slop from the context that created the view.
      */
     private int mTouchSlop;
+
+    /**
+     * Object that handles automatic animation of view properties.
+     */
+    private ViewPropertyAnimator mAnimator = null;
 
     /**
      * Cache drag/drop state
@@ -6154,6 +6159,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags &= ~ALPHA_SET;
             invalidate(false);
         }
+    }
+
+    /**
+     * Faster version of setAlpha() which performs the same steps except there are
+     * no calls to invalidate(). The caller of this function should perform proper invalidation
+     * on the parent and this object. The return value indicates whether the subclass handles
+     * alpha (the return value for onSetAlpha()).
+     *
+     * @param alpha The new value for the alpha property
+     * @return true if the View subclass handles alpha (the return value for onSetAlpha())
+     */
+    boolean setAlphaNoInvalidation(float alpha) {
+        mAlpha = alpha;
+        boolean subclassHandlesAlpha = onSetAlpha((int) (alpha * 255));
+        if (subclassHandlesAlpha) {
+            mPrivateFlags |= ALPHA_SET;
+        } else {
+            mPrivateFlags &= ~ALPHA_SET;
+        }
+        return subclassHandlesAlpha;
     }
 
     /**
@@ -11782,6 +11807,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /** @hide */
     public void hackTurnOffWindowResizeAnim(boolean off) {
         mAttachInfo.mTurnOffWindowResizeAnim = off;
+    }
+
+    /**
+     * This method returns a ViewPropertyAnimator object, which can be used to animate
+     * specific properties on this View.
+     *
+     * @return ViewPropertyAnimator The ViewPropertyAnimator associated with this View.
+     */
+    public ViewPropertyAnimator animate() {
+        if (mAnimator == null) {
+            mAnimator = new ViewPropertyAnimator(this);
+        }
+        return mAnimator;
     }
 
     /**
