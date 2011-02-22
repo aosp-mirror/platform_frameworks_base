@@ -32,7 +32,7 @@ class SkRasterizerGlue {
 public:
 
     static void finalizer(JNIEnv* env, jobject clazz, SkRasterizer* obj) {
-        obj->safeUnref();
+        SkSafeUnref(obj);
     }
  
 };

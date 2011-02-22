@@ -33,7 +33,7 @@ using namespace uirenderer;
 class SkColorFilterGlue {
 public:
     static void finalizer(JNIEnv* env, jobject clazz, SkColorFilter* obj, SkiaColorFilter* f) {
-        obj->safeUnref();
+        SkSafeUnref(obj);
         // f == NULL when not !USE_OPENGL_RENDERER, so no need to delete outside the ifdef
 #ifdef USE_OPENGL_RENDERER
         if (android::uirenderer::Caches::hasInstance()) {
