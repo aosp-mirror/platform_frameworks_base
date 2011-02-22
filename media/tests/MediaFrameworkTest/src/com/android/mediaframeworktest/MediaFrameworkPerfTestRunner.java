@@ -17,7 +17,8 @@
 package com.android.mediaframeworktest;
 
 import com.android.mediaframeworktest.performance.MediaPlayerPerformance;
-
+/*Video Editor performance Test cases*/
+import com.android.mediaframeworktest.performance.VideoEditorPerformance;
 import junit.framework.TestSuite;
 
 import android.test.InstrumentationTestRunner;
@@ -26,7 +27,7 @@ import android.test.InstrumentationTestSuite;
 
 /**
  * Instrumentation Test Runner for all MediaPlayer tests.
- * 
+ *
  * Running all tests:
  *
  * adb shell am instrument \
@@ -40,6 +41,8 @@ public class MediaFrameworkPerfTestRunner extends InstrumentationTestRunner {
   public TestSuite getAllTests() {
       TestSuite suite = new InstrumentationTestSuite(this);
       suite.addTestSuite(MediaPlayerPerformance.class);
+      /*Video Editor performance Test cases*/
+      suite.addTestSuite(VideoEditorPerformance.class);
       return suite;
   }
 
