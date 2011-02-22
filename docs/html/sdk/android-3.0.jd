@@ -1,4 +1,4 @@
-page.title=Android 3.0 Platform Preview
+page.title=Android 3.0 Platform
 sdk.platform.version=3.0
 sdk.platform.apiLevel=11
 @jd:body
@@ -25,7 +25,7 @@ Differences Report &raquo;</a> </li>
 
 <h2>See Also</h2>
 <ol>
-  <li><a href="{@docRoot}sdk/android-3.0-optimize.html">Optimizing Apps for Android 3.0</a></li>
+  <li><a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0</a></li>
 </ol>
 
 </div>
@@ -48,10 +48,12 @@ href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
 href="{@docRoot}sdk/android-{@sdkPlatformVersion}-highlights.html">Platform
 Highlights</a>.</p>
 
-<p>Also see the <a href="{@docRoot}sdk/android-3.0-optimize.html">Optimizing Apps for Android
-3.0</a> document for information about how to optimize your existing applications for Android 3.0
-devices, even if you want to remain compatible with previous versions.</p>
-
+<p class="note"><strong>Note:</strong>
+If you've already published an Android application, please test and optimize your application on
+Android 3.0 as soon as possible. You should do so to be sure your application provides the best
+experience possible on the latest Android-powered devices. For information about what you can do,
+read <a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android
+3.0</a>.</p>
 
 
 <h2 id="relnotes">Revisions</h2>
