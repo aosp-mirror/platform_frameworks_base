@@ -1,16 +1,16 @@
 ndk=true
 
-ndk.win_download=android-ndk-r6-windows.zip
-ndk.win_bytes=64147764
-ndk.win_checksum=771b56328b7fc7751aa8040fb9dd09f0
+ndk.win_download=android-ndk-r5b-windows.zip
+ndk.win_bytes=61299831
+ndk.win_checksum=87745ada305ab639399161ab4faf684c
 
-ndk.mac_download=android-ndk-r6-darwin-x86.tar.bz2
-ndk.mac_bytes=50244722
-ndk.mac_checksum=d107f6d63478b73e09ed2eecd4c62bd3
+ndk.mac_download=android-ndk-r5b-darwin-x86.tar.bz2
+ndk.mac_bytes=50210863
+ndk.mac_checksum=019a14622a377b3727ec789af6707037
 
-ndk.linux_download=android-ndk-r6-linux-x86.tar.bz2
-ndk.linux_bytes=44088689
-ndk.linux_checksum=c83c3ab5a5e5a3b3fe7b907735ce77d4
+ndk.linux_download=android-ndk-r5b-linux-x86.tar.bz2
+ndk.linux_bytes=44138539
+ndk.linux_checksum=4c0045ddc2bfd657be9d5177d0e0b7e7
 
 page.title=Android NDK
 @jd:body
@@ -60,55 +60,6 @@ padding: .25em 1em;
 </style>
 
 <div class="toggleable open">
-    <a href="#"
-         onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-opened.png"
-         class="toggle-img"
-         height="9px"
-         width="9px" /> Android NDK, Revision 6</a> <em>(February 2011)</em>
-
-    <div class="toggleme">
-      <p>This release of the NDK introduces the following header files:</p>
-        <ul>
-          <li><p><code>&lt;android/asset_manager.h&gt;</code>: Allows access to assets
-          using 64-bit file offsets and sizes. This is useful for very large assets that exceed
-          2GB, as required by some games. The following APIs are provided:<p>
-              <ul>
-                <li><code>AAsset_getLength64</code></li>
-                <li><code>AAsset_getRemainingLength64</code></li>
-                <li><code>AAsset_openFileDescriptor64</code></li>
-                <li><code>AAsset_seek64</code></li>
-              </ul>
-          </li>
-          
-          <li><code>&lt;android/input.h&gt;</code>: Provides the following AMETA_XXX constants 
-          that are related to the new input framework in Honeycomb:
-<pre>              
-AMETA_FUNCTION_ON = 0x08,
-AMETA_CTRL_ON = 0x1000,
-AMETA_CTRL_LEFT_ON = 0x2000,
-AMETA_CTRL_RIGHT_ON = 0x4000,
-AMETA_META_ON = 0x10000,
-AMETA_META_LEFT_ON = 0x20000,
-AMETA_META_RIGHT_ON = 0x40000,
-AMETA_CAPS_LOCK_ON = 0x100000,
-AMETA_NUM_LOCK_ON = 0x200000,
-AMETA_SCROLL_LOCK_ON = 0x400000,
-</pre>
-          </li>
-          
-          <li><code>&lt;android/keycodes&gt;</code>: Provides <code>AKEYCODE_XXX</code>
-          constants that are related to the new input framework in Honeycomb.
-          </li>
-          
-          <li><code>&lt;android/native_activity.h&gt;</code>: Adds a new field to the
-          system-allocated <code>ANativeActivity</code> structure named <code>obbPath</code> that
-          contains the path of your application's OBB files, if any.
-          </li>
-  </ul>
-  </div>
-  </div>
-
-<div class="toggleable closed">
     <a href="#"
          onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
          class="toggle-img"
