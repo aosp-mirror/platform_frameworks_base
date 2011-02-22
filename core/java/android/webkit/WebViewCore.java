@@ -778,6 +778,8 @@ final class WebViewCore {
         int mNode;
         int mX;
         int mY;
+        int mNativeLayer;
+        Rect mNativeLayerRect = new Rect();
     }
 
     static class TouchHighlightData {
@@ -821,6 +823,8 @@ final class WebViewCore {
         int mMetaState;
         boolean mReprocess;
         MotionEvent mMotionEvent;
+        int mNativeLayer;
+        Rect mNativeLayerRect = new Rect();
     }
 
     static class GeolocationPermissionsData {
@@ -1304,6 +1308,10 @@ final class WebViewCore {
 
                         case TOUCH_UP:
                             TouchUpData touchUpData = (TouchUpData) msg.obj;
+                            if (touchUpData.mNativeLayer != 0) {
+                                nativeScrollLayer(touchUpData.mNativeLayer,
+                                        touchUpData.mNativeLayerRect);
+                            }
                             nativeTouchUp(touchUpData.mMoveGeneration,
                                     touchUpData.mFrame, touchUpData.mNode,
                                     touchUpData.mX, touchUpData.mY);
@@ -1317,6 +1325,10 @@ final class WebViewCore {
                             for (int c = 0; c < count; c++) {
                                 xArray[c] = ted.mPoints[c].x;
                                 yArray[c] = ted.mPoints[c].y;
+                            }
+                            if (ted.mNativeLayer != 0) {
+                                nativeScrollLayer(ted.mNativeLayer,
+                                        ted.mNativeLayerRect);
                             }
                             Message.obtain(
                                     mWebView.mPrivateHandler,
@@ -2702,4 +2714,5 @@ final class WebViewCore {
             int slop);
 
    private native void nativeAutoFillForm(int queryId);
+   private native void nativeScrollLayer(int layer, Rect rect);
 }

@@ -5531,6 +5531,8 @@ public class WebView extends AbsoluteLayout
                         ted.mPoints[0] = new Point(contentX, contentY);
                         ted.mMetaState = ev.getMetaState();
                         ted.mReprocess = mDeferTouchProcess;
+                        ted.mNativeLayer = nativeScrollableLayer(
+                                contentX, contentY, ted.mNativeLayerRect, null);
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (mDeferTouchProcess) {
                             // still needs to set them for compute deltaX/Y
@@ -5575,6 +5577,8 @@ public class WebView extends AbsoluteLayout
                     ted.mPoints[0] = new Point(contentX, contentY);
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
+                    ted.mNativeLayer = mScrollingLayer;
+                    ted.mNativeLayerRect.set(mScrollingLayerRect);
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     mLastSentTouchTime = eventTime;
                     if (mDeferTouchProcess) {
@@ -5754,6 +5758,8 @@ public class WebView extends AbsoluteLayout
                     ted.mPoints[0] = new Point(contentX, contentY);
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
+                    ted.mNativeLayer = mScrollingLayer;
+                    ted.mNativeLayerRect.set(mScrollingLayerRect);
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
@@ -5773,6 +5779,9 @@ public class WebView extends AbsoluteLayout
                             ted.mPoints[0] = new Point(contentX, contentY);
                             ted.mMetaState = ev.getMetaState();
                             ted.mReprocess = mDeferTouchProcess;
+                            ted.mNativeLayer = nativeScrollableLayer(
+                                    contentX, contentY,
+                                    ted.mNativeLayerRect, null);
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mPreventDefault != PREVENT_DEFAULT_YES){
                             mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
@@ -6004,6 +6013,8 @@ public class WebView extends AbsoluteLayout
             ted.mPoints = new Point[1];
             ted.mPoints[0] = new Point(x, y);
             ted.mAction = MotionEvent.ACTION_CANCEL;
+            ted.mNativeLayer = nativeScrollableLayer(
+                    x, y, ted.mNativeLayerRect, null);
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mPreventDefault = PREVENT_DEFAULT_IGNORE;
         }
@@ -7161,6 +7172,9 @@ public class WebView extends AbsoluteLayout
                         // simplicity for now, we don't set it.
                         ted.mMetaState = 0;
                         ted.mReprocess = mDeferTouchProcess;
+                        ted.mNativeLayer = nativeScrollableLayer(
+                                ted.mPoints[0].x, ted.mPoints[0].y,
+                                ted.mNativeLayerRect, null);
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
@@ -8033,6 +8047,8 @@ public class WebView extends AbsoluteLayout
         touchUpData.mNode = node;
         touchUpData.mX = x;
         touchUpData.mY = y;
+        touchUpData.mNativeLayer = nativeScrollableLayer(
+                x, y, touchUpData.mNativeLayerRect, null);
         mWebViewCore.sendMessage(EventHub.TOUCH_UP, touchUpData);
     }
 
