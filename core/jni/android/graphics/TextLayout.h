@@ -22,6 +22,18 @@
 
 namespace android {
 
+#define UNICODE_NOT_A_CHAR              0xffff
+#define UNICODE_ZWSP                    0x200b
+#define UNICODE_FIRST_LOW_SURROGATE     0xdc00
+#define UNICODE_FIRST_HIGH_SURROGATE    0xd800
+#define UNICODE_FIRST_PRIVATE_USE       0xe000
+#define UNICODE_FIRST_RTL_CHAR          0x0590
+
+/*
+ * Temporary buffer size
+ */
+#define CHAR_BUFFER_SIZE 80
+
 class TextLayout {
 public:
 
