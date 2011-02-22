@@ -2438,6 +2438,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mKeyguardMediator.isShowingAndNotHidden();
     }
 
+
+    /** {@inheritDoc} */
+    public boolean isKeyguardLocked() {
+        return keyguardOn();
+    }
+
+    /** {@inheritDoc} */
+    public boolean isKeyguardSecure() {
+        return mKeyguardMediator.isSecure();
+    }
+
     /** {@inheritDoc} */
     public boolean inKeyguardRestrictedKeyInputMode() {
         return mKeyguardMediator.isInputRestricted();
