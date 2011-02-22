@@ -1,4 +1,6 @@
 page.title=&lt;uses-configuration&gt;
+parent.title=The AndroidManifest.xml File
+parent.link=manifest-intro.html
 @jd:body
 
 <!-- ##api level 3##  see comment below -->
