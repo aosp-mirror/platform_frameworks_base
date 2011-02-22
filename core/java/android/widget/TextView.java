@@ -8678,7 +8678,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Touch-up filter: number of previous positions remembered
         private static final int HISTORY_SIZE = 5;
-        private static final int TOUCH_UP_FILTER_DELAY = 150;
+        private static final int TOUCH_UP_FILTER_DELAY_AFTER = 150;
+        private static final int TOUCH_UP_FILTER_DELAY_BEFORE = 350;
         private final long[] mPreviousOffsetsTimes = new long[HISTORY_SIZE];
         private final int[] mPreviousOffsets = new int[HISTORY_SIZE];
         private int mPreviousOffsetIndex = 0;
@@ -8705,15 +8706,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void filterOnTouchUp() {
             final long now = SystemClock.uptimeMillis();
             int i = 0;
-            int index = 0;
+            int index = mPreviousOffsetIndex;
             final int iMax = Math.min(mNumberPreviousOffsets, HISTORY_SIZE);
-            while (i < iMax) {
-                index = (mPreviousOffsetIndex - i + HISTORY_SIZE) % HISTORY_SIZE;
-                if ((now - mPreviousOffsetsTimes[index]) >= TOUCH_UP_FILTER_DELAY) break;
+            while (i < iMax && (now - mPreviousOffsetsTimes[index]) < TOUCH_UP_FILTER_DELAY_AFTER) {
                 i++;
+                index = (mPreviousOffsetIndex - i + HISTORY_SIZE) % HISTORY_SIZE;
             }
 
-            mController.updateOffset(this, mPreviousOffsets[index]);
+            if (i > 0 && i < iMax &&
+                    (now - mPreviousOffsetsTimes[index]) > TOUCH_UP_FILTER_DELAY_BEFORE) {
+                mController.updateOffset(this, mPreviousOffsets[index]);
+            }
         }
 
         public static final int LEFT = 0;
@@ -8735,40 +8738,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void setOrientation(int pos) {
             int handleWidth;
             switch (pos) {
-            case LEFT: {
-                if (mSelectHandleLeft == null) {
-                    mSelectHandleLeft = mContext.getResources().getDrawable(
-                            mTextSelectHandleLeftRes);
+                case LEFT: {
+                    if (mSelectHandleLeft == null) {
+                        mSelectHandleLeft = mContext.getResources().getDrawable(
+                                mTextSelectHandleLeftRes);
+                    }
+                    mDrawable = mSelectHandleLeft;
+                    handleWidth = mDrawable.getIntrinsicWidth();
+                    mHotspotX = handleWidth * 3.0f / 4.0f;
+                    break;
                 }
-                mDrawable = mSelectHandleLeft;
-                handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = handleWidth * 3.0f / 4.0f;
-                break;
-            }
 
-            case RIGHT: {
-                if (mSelectHandleRight == null) {
-                    mSelectHandleRight = mContext.getResources().getDrawable(
-                            mTextSelectHandleRightRes);
+                case RIGHT: {
+                    if (mSelectHandleRight == null) {
+                        mSelectHandleRight = mContext.getResources().getDrawable(
+                                mTextSelectHandleRightRes);
+                    }
+                    mDrawable = mSelectHandleRight;
+                    handleWidth = mDrawable.getIntrinsicWidth();
+                    mHotspotX = handleWidth / 4.0f;
+                    break;
                 }
-                mDrawable = mSelectHandleRight;
-                handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = handleWidth / 4.0f;
-                break;
-            }
 
-            case CENTER:
-            default: {
-                if (mSelectHandleCenter == null) {
-                    mSelectHandleCenter = mContext.getResources().getDrawable(
-                            mTextSelectHandleRes);
+                case CENTER:
+                default: {
+                    if (mSelectHandleCenter == null) {
+                        mSelectHandleCenter = mContext.getResources().getDrawable(
+                                mTextSelectHandleRes);
+                    }
+                    mDrawable = mSelectHandleCenter;
+                    handleWidth = mDrawable.getIntrinsicWidth();
+                    mHotspotX = handleWidth / 2.0f;
+                    mIsInsertionHandle = true;
+                    break;
                 }
-                mDrawable = mSelectHandleCenter;
-                handleWidth = mDrawable.getIntrinsicWidth();
-                mHotspotX = handleWidth / 2.0f;
-                mIsInsertionHandle = true;
-                break;
-            }
             }
 
             final int handleHeight = mDrawable.getIntrinsicHeight();
@@ -8948,11 +8951,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (mIsInsertionHandle) {
                         long delay = SystemClock.uptimeMillis() - mTouchTimer;
                         if (delay < ViewConfiguration.getTapTimeout()) {
-                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                                // Tapping on the handle dismisses the displayed paste view,
-                                mPastePopupWindow.hide();
-                            } else {
-                                ((InsertionPointCursorController) mController).show(0);
+                            final float deltaX = mDownPositionX - ev.getRawX();
+                            final float deltaY = mDownPositionY - ev.getRawY();
+                            final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                            if (distanceSquared < mSquaredTouchSlopDistance) {
+                                if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                                    // Tapping on the handle dismisses the displayed paste view,
+                                    mPastePopupWindow.hide();
+                                } else {
+                                    ((InsertionPointCursorController) mController).show(0);
+                                }
                             }
                         }
                     }
