@@ -446,7 +446,6 @@ public class IccUtils {
         int colorNumber = data[valueIndex++] & 0xFF;
         int clutOffset = ((data[valueIndex++] & 0xFF) << 8)
                 | (data[valueIndex++] & 0xFF);
-        length = length - 6;
 
         int[] colorIndexArray = getCLUT(data, clutOffset, colorNumber);
         if (true == transparency) {
