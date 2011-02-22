@@ -22,6 +22,8 @@
 
 #define MTP_STANDARD_VERSION            100
 
+#define MTP_FIRST_STORAGE_ID            0x00010001
+
 // Container Types
 #define MTP_CONTAINER_TYPE_UNDEFINED    0
 #define MTP_CONTAINER_TYPE_COMMAND      1

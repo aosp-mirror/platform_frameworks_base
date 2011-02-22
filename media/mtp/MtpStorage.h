@@ -17,6 +17,7 @@
 #ifndef _MTP_STORAGE_H
 #define _MTP_STORAGE_H
 
+#include "MtpTypes.h"
 #include "mtp.h"
 
 namespace android {
@@ -27,7 +28,7 @@ class MtpStorage {
 
 private:
     MtpStorageID            mStorageID;
-    const char*             mFilePath;
+    MtpString               mFilePath;
     uint64_t                mMaxCapacity;
     // amount of free space to leave unallocated
     uint64_t                mReserveSpace;
@@ -44,7 +45,7 @@ public:
     uint64_t                getMaxCapacity();
     uint64_t                getFreeSpace();
     const char*             getDescription() const;
-    inline const char*      getPath() const { return mFilePath; }
+    inline const char*      getPath() const { return (const char *)mFilePath; }
 };
 
 }; // namespace android
