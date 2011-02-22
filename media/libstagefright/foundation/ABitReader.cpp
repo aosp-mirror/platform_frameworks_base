@@ -90,9 +90,7 @@ size_t ABitReader::numBitsLeft() const {
 }
 
 const uint8_t *ABitReader::data() const {
-    CHECK_EQ(mNumBitsLeft % 8, 0u);
-
-    return mData - mNumBitsLeft / 8;
+    return mData - (mNumBitsLeft + 7) / 8;
 }
 
 }  // namespace android

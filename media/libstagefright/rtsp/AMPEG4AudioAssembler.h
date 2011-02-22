@@ -46,6 +46,7 @@ private:
     bool mMuxConfigPresent;
     unsigned mNumSubFrames;
     unsigned mFrameLengthType;
+    ssize_t mFixedFrameLength;
     bool mOtherDataPresent;
     unsigned mOtherDataLenBits;
 
