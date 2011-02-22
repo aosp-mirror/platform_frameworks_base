@@ -6640,7 +6640,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * view specifying how it should be arranged. There are many subclasses of
      * ViewGroup.LayoutParams, and these correspond to the different subclasses
      * of ViewGroup that are responsible for arranging their children.
-     * @return The LayoutParams associated with this view
+     *
+     * This method may return null if this View is not attached to a parent
+     * ViewGroup or {@link #setLayoutParams(android.view.ViewGroup.LayoutParams)}
+     * was not invoked successfully. When a View is attached to a parent
+     * ViewGroup, this method must not return null.
+     *
+     * @return The LayoutParams associated with this view, or null if no
+     *         parameters have been set yet
      */
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "layout_")
     public ViewGroup.LayoutParams getLayoutParams() {
@@ -6654,11 +6661,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * correspond to the different subclasses of ViewGroup that are responsible
      * for arranging their children.
      *
-     * @param params the layout parameters for this view
+     * @param params The layout parameters for this view, cannot be null
      */
     public void setLayoutParams(ViewGroup.LayoutParams params) {
         if (params == null) {
-            throw new NullPointerException("params == null");
+            throw new NullPointerException("Layout parameters cannot be null");
         }
         mLayoutParams = params;
         requestLayout();
