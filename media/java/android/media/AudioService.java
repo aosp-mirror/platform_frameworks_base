@@ -1218,7 +1218,7 @@ public class AudioService extends IAudioService.Stub {
         if (!checkAudioSettingsPermission("startBluetoothSco()")) {
             return;
         }
-        ScoClient client = getScoClient(cb);
+        ScoClient client = getScoClient(cb, true);
         client.incCount();
     }
 
@@ -1227,8 +1227,10 @@ public class AudioService extends IAudioService.Stub {
         if (!checkAudioSettingsPermission("stopBluetoothSco()")) {
             return;
         }
-        ScoClient client = getScoClient(cb);
-        client.decCount();
+        ScoClient client = getScoClient(cb, false);
+        if (client != null) {
+            client.decCount();
+        }
     }
 
     private class ScoClient implements IBinder.DeathRecipient {
@@ -1355,27 +1357,38 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    public ScoClient getScoClient(IBinder cb) {
+    private ScoClient getScoClient(IBinder cb, boolean create) {
         synchronized(mScoClients) {
-            ScoClient client;
+            ScoClient client = null;
             int size = mScoClients.size();
             for (int i = 0; i < size; i++) {
                 client = mScoClients.get(i);
                 if (client.getBinder() == cb)
                     return client;
             }
-            client = new ScoClient(cb);
-            mScoClients.add(client);
+            if (create) {
+                client = new ScoClient(cb);
+                mScoClients.add(client);
+            }
             return client;
         }
     }
 
     public void clearAllScoClients(IBinder exceptBinder, boolean stopSco) {
         synchronized(mScoClients) {
+            ScoClient savedClient = null;
             int size = mScoClients.size();
             for (int i = 0; i < size; i++) {
-                if (mScoClients.get(i).getBinder() != exceptBinder)
-                    mScoClients.get(i).clearCount(stopSco);
+                ScoClient cl = mScoClients.get(i);
+                if (cl.getBinder() != exceptBinder) {
+                    cl.clearCount(stopSco);
+                } else {
+                    savedClient = cl;
+                }
+            }
+            mScoClients.clear();
+            if (savedClient != null) {
+                mScoClients.add(savedClient);
             }
         }
     }
@@ -2320,6 +2333,7 @@ public class AudioService extends IAudioService.Stub {
                     case BluetoothHeadset.STATE_AUDIO_DISCONNECTED:
                         audioState = AudioManager.SCO_AUDIO_STATE_DISCONNECTED;
                         mScoAudioState = SCO_STATE_INACTIVE;
+                        clearAllScoClients(null, false);
                         break;
                     case BluetoothHeadset.STATE_AUDIO_CONNECTING:
                         if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL) {
