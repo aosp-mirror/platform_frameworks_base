@@ -168,7 +168,7 @@ page.title=Android Supported Media Formats
 
 
 <tr>
-<td rowspan="3">Video</td>
+<td rowspan="4">Video</td>
 <td>H.263</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
@@ -190,6 +190,14 @@ page.title=Android Supported Media Formats
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>&nbsp;</td>
 <td>3GPP (.3gp)</td>
+</tr>
+
+<tr>
+<td>VP8</td>
+<td>&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 2.3.3+)</small></td>
+<td>&nbsp;</td>
+<td><a href="http://www.webmproject.org/">WebM</a> (.webm)</td>
 </tr>
 
 </tbody></table>
