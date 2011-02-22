@@ -43,7 +43,7 @@ import android.widget.ListView;
  * <p>
  * Optionally, your custom view can contain another view object of any type to
  * display when the list view is empty. This "empty list" notifier must have an
- * id "android:empty". Note that when an empty view is present, the list view
+ * id "android:id/empty". Note that when an empty view is present, the list view
  * will be hidden when there is no data to display.
  * <p>
  * The following code demonstrates an (ugly) custom screen layout. It has a list
@@ -59,14 +59,14 @@ import android.widget.ListView;
  *         android:paddingLeft=&quot;8dp&quot;
  *         android:paddingRight=&quot;8dp&quot;&gt;
  *
- *     &lt;ListView android:id=&quot;@id/android:list&quot;
+ *     &lt;ListView android:id=&quot;@android:id/list&quot;
  *               android:layout_width=&quot;match_parent&quot;
  *               android:layout_height=&quot;match_parent&quot;
  *               android:background=&quot;#00FF00&quot;
  *               android:layout_weight=&quot;1&quot;
  *               android:drawSelectorOnTop=&quot;false&quot;/&gt;
  *
- *     &lt;TextView android:id=&quot;@id/android:empty&quot;
+ *     &lt;TextView android:id=&quot;@android:id/empty&quot;
  *               android:layout_width=&quot;match_parent&quot;
  *               android:layout_height=&quot;match_parent&quot;
  *               android:background=&quot;#FF0000&quot;
