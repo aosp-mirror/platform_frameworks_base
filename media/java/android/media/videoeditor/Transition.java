@@ -173,6 +173,7 @@ public abstract class Transition {
 
         mDurationMs = durationMs;
         invalidate();
+        mNativeHelper.setGeneratePreview(true);
     }
 
     /**
