@@ -136,17 +136,17 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                     newState == BluetoothProfile.STATE_DISCONNECTED) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
-            } else if (action.equals(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED)) {
-                int newState = intent.getIntExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, 0);
+            } else if (action.equals(BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);
                 int oldState =
-                    intent.getIntExtra(BluetoothInputDevice.EXTRA_PREVIOUS_INPUT_DEVICE_STATE, 0);
+                    intent.getIntExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, 0);
 
-                if (oldState == BluetoothInputDevice.STATE_CONNECTED &&
-                    newState == BluetoothInputDevice.STATE_DISCONNECTED) {
+                if (oldState == BluetoothProfile.STATE_CONNECTED &&
+                    newState == BluetoothProfile.STATE_DISCONNECTED) {
                     sendMessage(DISCONNECT_HID_INCOMING);
                 }
-                if (newState == BluetoothInputDevice.STATE_CONNECTED ||
-                    newState == BluetoothInputDevice.STATE_DISCONNECTED) {
+                if (newState == BluetoothProfile.STATE_CONNECTED ||
+                    newState == BluetoothProfile.STATE_DISCONNECTED) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
             } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
@@ -194,7 +194,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
-        filter.addAction(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
+        filter.addAction(BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
 
         mContext.registerReceiver(mBroadcastReceiver, filter);
@@ -286,7 +286,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
                         sendMessage(DISCONNECT_A2DP_OUTGOING);
                         deferMessage(message);
                         break;
-                    } else if (mService.getInputDeviceState(mDevice) !=
+                    } else if (mService.getInputDeviceConnectionState(mDevice) !=
                             BluetoothInputDevice.STATE_DISCONNECTED) {
                         sendMessage(DISCONNECT_HID_OUTGOING);
                         deferMessage(message);

@@ -250,8 +250,8 @@ public class BluetoothStressTest extends InstrumentationTestCase {
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("connectInput iteration " + (i + 1) + " of " + iterations);
-            mTestUtils.connectInput(adapter, device);
-            mTestUtils.disconnectInput(adapter, device);
+            mTestUtils.connectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE);
+            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE);
         }
 
         mTestUtils.unpair(adapter, device);

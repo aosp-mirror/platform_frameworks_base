@@ -64,7 +64,7 @@ final class BluetoothInputProfileHandler {
                                             BluetoothDeviceProfileState state) {
         String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (objectPath == null ||
-            getInputDeviceState(device) != BluetoothInputDevice.STATE_DISCONNECTED ||
+            getInputDeviceConnectionState(device) != BluetoothInputDevice.STATE_DISCONNECTED ||
             getInputDevicePriority(device) == BluetoothInputDevice.PRIORITY_OFF) {
             return false;
         }
@@ -92,7 +92,7 @@ final class BluetoothInputProfileHandler {
                                                BluetoothDeviceProfileState state) {
         String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (objectPath == null ||
-                getInputDeviceState(device) == BluetoothInputDevice.STATE_DISCONNECTED) {
+                getInputDeviceConnectionState(device) == BluetoothInputDevice.STATE_DISCONNECTED) {
             return false;
         }
         if (state != null) {
@@ -115,7 +115,7 @@ final class BluetoothInputProfileHandler {
         return true;
     }
 
-    synchronized int getInputDeviceState(BluetoothDevice device) {
+    synchronized int getInputDeviceConnectionState(BluetoothDevice device) {
         if (mInputDevices.get(device) == null) {
             return BluetoothInputDevice.STATE_DISCONNECTED;
         }
@@ -125,6 +125,11 @@ final class BluetoothInputProfileHandler {
     synchronized List<BluetoothDevice> getConnectedInputDevices() {
         List<BluetoothDevice> devices = lookupInputDevicesMatchingStates(
             new int[] {BluetoothInputDevice.STATE_CONNECTED});
+        return devices;
+    }
+
+    synchronized List<BluetoothDevice> getInputDevicesMatchingConnectionStates(int[] states) {
+        List<BluetoothDevice> devices = lookupInputDevicesMatchingStates(states);
         return devices;
     }
 
@@ -147,7 +152,7 @@ final class BluetoothInputProfileHandler {
         List<BluetoothDevice> inputDevices = new ArrayList<BluetoothDevice>();
 
         for (BluetoothDevice device: mInputDevices.keySet()) {
-            int inputDeviceState = getInputDeviceState(device);
+            int inputDeviceState = getInputDeviceConnectionState(device);
             for (int state : states) {
                 if (state == inputDeviceState) {
                     inputDevices.add(device);
@@ -178,10 +183,10 @@ final class BluetoothInputProfileHandler {
             setInputDevicePriority(device, BluetoothInputDevice.PRIORITY_AUTO_CONNECT);
         }
 
-        Intent intent = new Intent(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
+        Intent intent = new Intent(BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
-        intent.putExtra(BluetoothInputDevice.EXTRA_PREVIOUS_INPUT_DEVICE_STATE, prevState);
-        intent.putExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, state);
+        intent.putExtra(BluetoothInputDevice.EXTRA_PREVIOUS_STATE, prevState);
+        intent.putExtra(BluetoothInputDevice.EXTRA_STATE, state);
         mContext.sendBroadcast(intent, BluetoothService.BLUETOOTH_PERM);
 
         debugLog("InputDevice state : device: " + device + " State:" + prevState + "->" + state);

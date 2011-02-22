@@ -72,10 +72,10 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
                     newState == BluetoothProfile.STATE_DISCONNECTED)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
-            } else if (action.equals(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED)) {
-                int newState = intent.getIntExtra(BluetoothInputDevice.EXTRA_INPUT_DEVICE_STATE, 0);
-                if (mProfile == HID && (newState == BluetoothInputDevice.STATE_CONNECTED ||
-                    newState == BluetoothInputDevice.STATE_DISCONNECTED)) {
+            } else if (action.equals(BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED)) {
+                int newState = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, 0);
+                if (mProfile == HID && (newState == BluetoothProfile.STATE_CONNECTED ||
+                    newState == BluetoothProfile.STATE_DISCONNECTED)) {
                     sendMessage(TRANSITION_TO_STABLE);
                 }
             } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
@@ -96,7 +96,7 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
-        filter.addAction(BluetoothInputDevice.ACTION_INPUT_DEVICE_STATE_CHANGED);
+        filter.addAction(BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         context.registerReceiver(mBroadcastReceiver, filter);
     }

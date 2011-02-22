@@ -1049,6 +1049,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.A2DP) {
             BluetoothA2dp a2dp = new BluetoothA2dp(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+            BluetoothInputDevice iDev = new BluetoothInputDevice(context, listener);
+            return true;
         } else {
             return false;
         }
