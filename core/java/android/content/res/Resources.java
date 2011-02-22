@@ -115,7 +115,7 @@ public class Resources {
     private CompatibilityInfo mCompatibilityInfo;
     private Display mDefaultDisplay;
 
-    private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>() {
+    private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>(0) {
         @Override
         public void put(long k, Object o) {
             throw new UnsupportedOperationException();
