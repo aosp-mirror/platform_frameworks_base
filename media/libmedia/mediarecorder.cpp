@@ -298,6 +298,17 @@ status_t MediaRecorder::setOutputFile(int fd, int64_t offset, int64_t length)
         return INVALID_OPERATION;
     }
 
+    // It appears that if an invalid file descriptor is passed through
+    // binder calls, the server-side of the inter-process function call
+    // is skipped. As a result, the check at the server-side to catch
+    // the invalid file descritpor never gets invoked. This is to workaround
+    // this issue by checking the file descriptor first before passing
+    // it through binder call.
+    if (fd < 0) {
+        LOGE("Invalid file descriptor: %d", fd);
+        return BAD_VALUE;
+    }
+
     status_t ret = mMediaRecorder->setOutputFile(fd, offset, length);
     if (OK != ret) {
         LOGV("setOutputFile failed: %d", ret);
