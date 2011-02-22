@@ -2256,18 +2256,29 @@
         <attr name="unselectedAlpha" format="float" />
     </declare-styleable>
     <declare-styleable name="GridView">
+        <!-- Defines the default horizontal spacing between columns. -->
         <attr name="horizontalSpacing" format="dimension" />
+        <!-- Defines the default vertical spacing between rows. -->
         <attr name="verticalSpacing" format="dimension" />
+        <!-- Defines how columns should stretch to fill the available empty space, if any. -->
         <attr name="stretchMode">
+            <!-- Stretching is disabled. -->
             <enum name="none" value="0"/>
+            <!-- The spacing between each column is stretched. -->
             <enum name="spacingWidth" value="1" />
+            <!-- Each column is stretched equally. -->
             <enum name="columnWidth" value="2" />
+            <!-- The spacing between each column is uniformly stretched.. -->
             <enum name="spacingWidthUniform" value="3" />
         </attr>
+        <!-- Specifies the fixed width for each column. -->
         <attr name="columnWidth" format="dimension" />
+        <!-- Defines how many columns to show. -->
         <attr name="numColumns" format="integer" min="0">
+            <!-- Display as many columns as possible to fill the available space. -->
             <enum name="auto_fit" value="-1" />
         </attr>
+        <!-- Specifies the gravity within each cell. -->
         <attr name="gravity" />
     </declare-styleable>
     <declare-styleable name="ImageSwitcher">
