@@ -620,7 +620,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         ev.mEdgeFlags = o.mEdgeFlags;
         ev.mDownTimeNano = o.mDownTimeNano;
         ev.mAction = o.mAction;
-        o.mFlags = o.mFlags;
+        ev.mFlags = o.mFlags;
         ev.mMetaState = o.mMetaState;
         ev.mXOffset = o.mXOffset;
         ev.mYOffset = o.mYOffset;
