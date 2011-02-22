@@ -1280,6 +1280,7 @@ public class Camera {
         private static final String PIXEL_FORMAT_YUV422SP = "yuv422sp";
         private static final String PIXEL_FORMAT_YUV420SP = "yuv420sp";
         private static final String PIXEL_FORMAT_YUV422I = "yuv422i-yuyv";
+        private static final String PIXEL_FORMAT_YUV420P = "yuv420p";
         private static final String PIXEL_FORMAT_RGB565 = "rgb565";
         private static final String PIXEL_FORMAT_JPEG = "jpeg";
 
@@ -1800,6 +1801,7 @@ public class Camera {
             case ImageFormat.NV16:      return PIXEL_FORMAT_YUV422SP;
             case ImageFormat.NV21:      return PIXEL_FORMAT_YUV420SP;
             case ImageFormat.YUY2:      return PIXEL_FORMAT_YUV422I;
+            case ImageFormat.YV12:      return PIXEL_FORMAT_YUV420P;
             case ImageFormat.RGB_565:   return PIXEL_FORMAT_RGB565;
             case ImageFormat.JPEG:      return PIXEL_FORMAT_JPEG;
             default:                    return null;
@@ -1818,6 +1820,9 @@ public class Camera {
 
             if (format.equals(PIXEL_FORMAT_YUV422I))
                 return ImageFormat.YUY2;
+
+            if (format.equals(PIXEL_FORMAT_YUV420P))
+                return ImageFormat.YV12;
 
             if (format.equals(PIXEL_FORMAT_RGB565))
                 return ImageFormat.RGB_565;
