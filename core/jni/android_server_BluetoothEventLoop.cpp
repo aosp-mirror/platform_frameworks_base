@@ -88,7 +88,7 @@ native_data_t *get_EventLoop_native_data(JNIEnv *env, jobject object) {
 
 #endif
 static void classInitNative(JNIEnv* env, jclass clazz) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
 #ifdef HAVE_BLUETOOTH
     method_onPropertyChanged = env->GetMethodID(clazz, "onPropertyChanged",
@@ -147,7 +147,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
 }
 
 static void initializeNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat = (native_data_t *)calloc(1, sizeof(native_data_t));
     if (NULL == nat) {
@@ -175,7 +175,7 @@ static void initializeNativeDataNative(JNIEnv* env, jobject object) {
 }
 
 static void cleanupNativeDataNative(JNIEnv* env, jobject object) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     native_data_t *nat =
             (native_data_t *)env->GetIntField(object, field_mNativeData);
@@ -216,7 +216,7 @@ static short dbus_flags_to_unix_events(unsigned int flags) {
 }
 
 static jboolean setUpEventLoop(native_data_t *nat) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     if (nat != NULL && nat->conn != NULL) {
         dbus_threads_init_default();
@@ -395,7 +395,7 @@ static int register_agent(native_data_t *nat,
 }
 
 static void tearDownEventLoop(native_data_t *nat) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     if (nat != NULL && nat->conn != NULL) {
 
         DBusMessage *msg, *reply;
@@ -1229,7 +1229,7 @@ success:
 #ifdef HAVE_BLUETOOTH
 
 void onCreatePairedDeviceResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *address = (const char *)user;
@@ -1298,7 +1298,7 @@ done:
 }
 
 void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *address= (const char *)user;
@@ -1328,7 +1328,7 @@ void onCreateDeviceResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;
@@ -1354,7 +1354,7 @@ void onDiscoverServicesResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onGetDeviceServiceChannelResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     const char *address = (const char *) user;
     native_data_t *nat = (native_data_t *) n;
@@ -1387,7 +1387,7 @@ done:
 }
 
 void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;
@@ -1426,7 +1426,7 @@ void onInputDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
 }
 
 void onPanDeviceConnectionResult(DBusMessage *msg, void *user, void *n) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     native_data_t *nat = (native_data_t *)n;
     const char *path = (const char *)user;

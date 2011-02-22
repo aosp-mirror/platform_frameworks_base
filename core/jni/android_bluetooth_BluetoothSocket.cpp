@@ -66,7 +66,7 @@ static struct asocket *get_socketData(JNIEnv *env, jobject obj) {
 
 static void initSocketFromFdNative(JNIEnv *env, jobject obj, jint fd) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     struct asocket *s = asocket_init(fd);
 
@@ -85,7 +85,7 @@ static void initSocketFromFdNative(JNIEnv *env, jobject obj, jint fd) {
 
 static void initSocketNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     int fd;
     int lm = 0;
@@ -161,7 +161,7 @@ static void initSocketNative(JNIEnv *env, jobject obj) {
 
 static void connectNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     int ret;
     jint type;
@@ -240,7 +240,7 @@ static void connectNative(JNIEnv *env, jobject obj) {
 /* Returns errno instead of throwing, so java can check errno */
 static int bindListenNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     jint type;
     socklen_t addr_sz;
@@ -307,7 +307,7 @@ static int bindListenNative(JNIEnv *env, jobject obj) {
 
 static jobject acceptNative(JNIEnv *env, jobject obj, int timeout) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     int fd;
     jint type;
@@ -380,7 +380,7 @@ static jobject acceptNative(JNIEnv *env, jobject obj, int timeout) {
 
 static jint availableNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     int available;
     struct asocket *s = get_socketData(env, obj);
@@ -403,7 +403,7 @@ static jint availableNative(JNIEnv *env, jobject obj) {
 static jint readNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
         jint length) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     int ret;
     jbyte *b;
@@ -446,7 +446,7 @@ static jint readNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
 static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
         jint length) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 
     int ret;
     jbyte *b;
@@ -488,7 +488,7 @@ static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
 
 static void abortNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
@@ -504,7 +504,7 @@ static void abortNative(JNIEnv *env, jobject obj) {
 
 static void destroyNative(JNIEnv *env, jobject obj) {
 #ifdef HAVE_BLUETOOTH
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
     struct asocket *s = get_socketData(env, obj);
     int fd = s->fd;
 
