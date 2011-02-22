@@ -1065,10 +1065,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                         }
                     }
                     mSurfaceHolder.mSurfaceLock.lock();
-                    // Make surface invalid.
-                    //mSurfaceHolder.mSurface.copyFrom(mSurface);
-                    mSurfaceHolder.mSurface = new Surface();
-                    mSurfaceHolder.mSurfaceLock.unlock();
+                    try {
+                        mSurfaceHolder.mSurface = new Surface();
+                    } finally {
+                        mSurfaceHolder.mSurfaceLock.unlock();
+                    }
                 }
             }
             
