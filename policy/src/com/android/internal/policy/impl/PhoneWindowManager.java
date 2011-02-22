@@ -2463,6 +2463,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled) {
 
+        if (false) {
+            Slog.v(TAG, "rotationForOrientationLw(orient="
+                        + orientation + ", last=" + lastRotation
+                        + "); user=" + mUserRotation + " "
+                        + ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED)
+                            ? "USER_ROTATION_LOCKED" : "")
+                        );
+        }
+
         if (mPortraitRotation < 0) {
             // Initialize the rotation angles for each orientation once.
             Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
@@ -2581,15 +2590,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // User rotation: to be used when all else fails in assigning an orientation to the device
     public void setUserRotationMode(int mode, int rot) {
         ContentResolver res = mContext.getContentResolver();
-        mUserRotationMode = mode;
+
+        // mUserRotationMode and mUserRotation will be assigned by the content observer
         if (mode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
-            mUserRotation = rot;
-            Settings.System.putInt(res,
-                    Settings.System.ACCELEROMETER_ROTATION,
-                    0);
             Settings.System.putInt(res,
                     Settings.System.USER_ROTATION,
                     rot);
+            Settings.System.putInt(res,
+                    Settings.System.ACCELEROMETER_ROTATION,
+                    0);
         } else {
             Settings.System.putInt(res,
                     Settings.System.ACCELEROMETER_ROTATION,
@@ -2907,7 +2916,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mDeskDockRotation="); pw.println(mDeskDockRotation);
         pw.print(prefix); pw.print("mUserRotationMode="); pw.print(mUserRotationMode);
                 pw.print(" mUserRotation="); pw.print(mUserRotation);
-                pw.print("mAllowAllRotations="); pw.println(mAllowAllRotations);
+                pw.print(" mAllowAllRotations="); pw.println(mAllowAllRotations);
         pw.print(prefix); pw.print("mAccelerometerDefault="); pw.print(mAccelerometerDefault);
                 pw.print(" mCurrentAppOrientation="); pw.println(mCurrentAppOrientation);
         pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");

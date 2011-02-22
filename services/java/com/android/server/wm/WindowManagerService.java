@@ -4822,9 +4822,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void freezeRotation() {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
-                "setRotation()")) {
+                "freezeRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
         }
+
+        if (DEBUG_ORIENTATION) Slog.v(TAG, "freezeRotation: mRotation=" + mRotation);
 
         mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED, mRotation);
         setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
@@ -4832,11 +4834,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void thawRotation() {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
-                "setRotation()")) {
+                "thawRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
         }
 
-        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 0);
+        if (DEBUG_ORIENTATION) Slog.v(TAG, "thawRotation: mRotation=" + mRotation);
+
+        mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE, 777); // rot not used
         setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false, 0);
     }
 
