@@ -138,6 +138,12 @@ public class SearchManager
     public final static String EXTRA_SELECT_QUERY = "select_query";
 
     /**
+     * Boolean extra data key for {@link Intent#ACTION_WEB_SEARCH} intents.  If {@code true},
+     * this search should open a new browser window, rather than using an existing one.
+     */
+    public final static String EXTRA_NEW_SEARCH = "new_search";
+
+    /**
      * Boolean extra data key for a suggestion provider to return in {@link Cursor#getExtras} to
      * indicate that the search is not complete yet. This can be used by the search UI
      * to indicate that a search is in progress. The suggestion provider can return partial results

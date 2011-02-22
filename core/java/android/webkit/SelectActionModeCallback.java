@@ -83,6 +83,7 @@ class SelectActionModeCallback implements ActionMode.Callback {
             case com.android.internal.R.id.websearch:
                 mode.finish();
                 Intent i = new Intent(Intent.ACTION_WEB_SEARCH);
+                i.putExtra(SearchManager.EXTRA_NEW_SEARCH, true);
                 i.putExtra(SearchManager.QUERY, mWebView.getSelection());
                 mWebView.getContext().startActivity(i);
                 break;
