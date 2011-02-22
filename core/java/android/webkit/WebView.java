@@ -6643,8 +6643,9 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
-        Rect rect = new Rect(contentX - mNavSlop, contentY - mNavSlop,
-                contentX + mNavSlop, contentY + mNavSlop);
+        int slop = viewToContentDimension(mNavSlop);
+        Rect rect = new Rect(contentX - slop, contentY - slop,
+                contentX + slop, contentY + slop);
         nativeSelectBestAt(rect);
         mInitialHitTestResult = hitTestResult(null);
     }
@@ -6718,7 +6719,8 @@ public class WebView extends AbsoluteLayout
         }
         int x = viewToContentX((int) event.getX() + mWebTextView.getLeft());
         int y = viewToContentY((int) event.getY() + mWebTextView.getTop());
-        nativeMotionUp(x, y, mNavSlop);
+        int slop = viewToContentDimension(mNavSlop);
+        nativeMotionUp(x, y, slop);
     }
 
     /**
@@ -6741,6 +6743,7 @@ public class WebView extends AbsoluteLayout
         // mLastTouchX and mLastTouchY are the point in the current viewport
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
+        int slop = viewToContentDimension(mNavSlop);
         if (getSettings().supportTouchOnly()) {
             removeTouchHighlight(false);
             WebViewCore.TouchUpData touchUpData = new WebViewCore.TouchUpData();
@@ -6748,7 +6751,7 @@ public class WebView extends AbsoluteLayout
             // it used when processing GET_TOUCH_HIGHLIGHT_RECTS
             touchUpData.mMoveGeneration = 0;
             mWebViewCore.sendMessage(EventHub.TOUCH_UP, touchUpData);
-        } else if (nativePointInNavCache(contentX, contentY, mNavSlop)) {
+        } else if (nativePointInNavCache(contentX, contentY, slop)) {
             WebViewCore.MotionUpData motionUpData = new WebViewCore
                     .MotionUpData();
             motionUpData.mFrame = nativeCacheHitFramePointer();
@@ -6764,7 +6767,8 @@ public class WebView extends AbsoluteLayout
     }
 
     private void doMotionUp(int contentX, int contentY) {
-        if (nativeMotionUp(contentX, contentY, mNavSlop) && mLogEvent) {
+        int slop = viewToContentDimension(mNavSlop);
+        if (nativeMotionUp(contentX, contentY, slop) && mLogEvent) {
             EventLog.writeEvent(EventLogTags.BROWSER_SNAP_CENTER);
         }
         if (nativeHasCursorNode() && !nativeCursorIsTextInput()) {
@@ -6777,7 +6781,8 @@ public class WebView extends AbsoluteLayout
      * plugin. Otherwise a NULL rectangle is returned.
      */
     Rect getPluginBounds(int x, int y) {
-        if (nativePointInNavCache(x, y, mNavSlop) && nativeCacheHitIsPlugin()) {
+        int slop = viewToContentDimension(mNavSlop);
+        if (nativePointInNavCache(x, y, slop) && nativeCacheHitIsPlugin()) {
             return nativeCacheHitNodeBounds();
         } else {
             return null;
