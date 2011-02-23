@@ -60,7 +60,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/activities.html">
           <span class="en">Activities</span>
-        </a> <span class="new">new!</span></div>
+        </a> <span class="new-child">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
             <span class="en">Fragments</span>
@@ -99,7 +99,7 @@
         <div><a href="<?cs var:toroot ?>guide/topics/ui/index.html">
             <span class="en">User Interface</span>
           </a>
-          <span class="new">new!</span></div>
+          <span class="new-child">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">
                <span class="en">Declaring Layout</span>
@@ -238,7 +238,7 @@
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
             <span class="en">Graphics</span>
           </a>
-          <span class="new">new!</span></div>
+          <span class="new-child">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
                 <span class="en">2D Graphics</span>
