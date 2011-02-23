@@ -624,6 +624,8 @@ public class GradientDrawable extends Drawable {
         
         int shapeType = a.getInt(
                 com.android.internal.R.styleable.GradientDrawable_shape, RECTANGLE);
+        boolean dither = a.getBoolean(
+                com.android.internal.R.styleable.GradientDrawable_dither, false);
         
         if (shapeType == RING) {
             st.mInnerRadius = a.getDimensionPixelSize(
@@ -645,10 +647,11 @@ public class GradientDrawable extends Drawable {
         a.recycle();
         
         setShape(shapeType);
-        
+        setDither(dither);
+
         int type;
 
-        final int innerDepth = parser.getDepth()+1;
+        final int innerDepth = parser.getDepth() + 1;
         int depth;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                && ((depth=parser.getDepth()) >= innerDepth
