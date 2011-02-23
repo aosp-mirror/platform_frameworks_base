@@ -115,7 +115,7 @@ parent.link=index.html
     <code><em>ScriptC_renderscript_filename</em></code>.
     Accessor methods are generated, so the Android system layer can access the values.
     The <code>get</code> method comes with a one-way communication restriction. 
-    The Android system layer always caches the last value that is set and returns that during a call to a <code>get<code> method.
+    The Android system layer always caches the last value that is set and returns that during a call to a <code>get</code> method.
     If the native Renderscript code changes the value, the change does not propagate back to the Android system layer.
     If the global variables are initialized in the native Renderscript code, those values are used
     to initialize the corresponding values in the Android system. If global variables are marked as <code>const</code>,
@@ -373,11 +373,11 @@ parent.link=index.html
         graphics context by calling 
         {@link android.renderscript.RenderScriptGL#bindProgramVertex bindProgramVertex()}. It is then used for all
         subsequent draw calls until you bind a new program. If the program has constant inputs, the
-        user needs to bind an allocation containing those inputs. The allocation’s type must match
+        user needs to bind an allocation containing those inputs. The allocation's type must match
         the one provided during creation. The Renderscript library then does all the necessary
         plumbing to send those constants to the graphics hardware. Varying inputs to the shader,
         such as position, normal, and texture coordinates are matched by name between the input
-        Element and the Mesh object being drawn. The signatures don’t have to be exact or in any
+        Element and the Mesh object being drawn. The signatures don't have to be exact or in any
         strict order. As long as the input name in the shader matches a channel name and size
         available on the mesh, the run-time would take care of connecting the two. Unlike OpenGL,
         there is no need to link the vertex and fragment programs.</p>
@@ -396,7 +396,7 @@ parent.link=index.html
       <td>rs_program_fragment</td>
 
       <td><p>The Renderscript fragment program, also known as the fragment shader, is responsible for
-      manipulating pixel data in a user-defined way. It’s constructed from a GLSL shader string
+      manipulating pixel data in a user-defined way. It's constructed from a GLSL shader string
       containing the program body, textures inputs, and a Type object describing the constants used
       by the program. Like the vertex programs, when an allocation with constant input values is
       bound to the shader, its values are sent to the graphics program automatically. Note that the
@@ -445,7 +445,7 @@ parent.link=index.html
       mip-maps are used and the amount of anisotropy required. There may be situations where
       hardware limitations prevent the exact behavior from being matched. In these cases, the
       runtime attempts to provide the closest possible approximation. For example, the user
-      requested 16x anisotropy, but only 8x was set because it’s the best available on the
+      requested 16x anisotropy, but only 8x was set because it's the best available on the
       hardware.</td>
     </tr>
 
