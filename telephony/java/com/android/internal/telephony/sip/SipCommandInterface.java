@@ -251,12 +251,24 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     public void getBasebandVersion (Message response) {
     }
 
-    public void queryFacilityLock (String facility, String password,
+    @Override
+    public void queryFacilityLock(String facility, String password,
             int serviceClass, Message response) {
     }
 
-    public void setFacilityLock (String facility, boolean lockState,
+    @Override
+    public void queryFacilityLockForApp(String facility, String password,
+            int serviceClass, String appId, Message response) {
+    }
+
+    @Override
+    public void setFacilityLock(String facility, boolean lockState,
             String password, int serviceClass, Message response) {
+    }
+
+    @Override
+    public void setFacilityLockForApp(String facility, boolean lockState,
+            String password, int serviceClass, String appId, Message response) {
     }
 
     public void sendUSSD (String ussdString, Message response) {

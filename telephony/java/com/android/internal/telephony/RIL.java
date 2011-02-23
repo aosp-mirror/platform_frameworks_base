@@ -1643,30 +1643,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
+    @Override
     public void
-    queryFacilityLock (String facility, String password, int serviceClass,
+    queryFacilityLock(String facility, String password, int serviceClass,
                             Message response) {
-        RILRequest rr = RILRequest.obtain(RIL_REQUEST_QUERY_FACILITY_LOCK, response);
-
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
-
-        // count strings
-        rr.mp.writeInt(3);
-
-        rr.mp.writeString(facility);
-        rr.mp.writeString(password);
-
-        rr.mp.writeString(Integer.toString(serviceClass));
-
-        send(rr);
+        queryFacilityLockForApp(facility, password, serviceClass, null, response);
     }
 
+    @Override
     public void
-    setFacilityLock (String facility, boolean lockState, String password,
-                        int serviceClass, Message response) {
-        String lockString;
-         RILRequest rr
-                = RILRequest.obtain(RIL_REQUEST_SET_FACILITY_LOCK, response);
+    queryFacilityLockForApp(String facility, String password, int serviceClass, String appId,
+                            Message response) {
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_QUERY_FACILITY_LOCK, response);
 
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
@@ -1674,10 +1662,40 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(4);
 
         rr.mp.writeString(facility);
+        rr.mp.writeString(password);
+
+        rr.mp.writeString(Integer.toString(serviceClass));
+        rr.mp.writeString(appId);
+
+        send(rr);
+    }
+
+    @Override
+    public void
+    setFacilityLock (String facility, boolean lockState, String password,
+                        int serviceClass, Message response) {
+        setFacilityLockForApp(facility, lockState, password, serviceClass, null, response);
+    }
+
+    @Override
+    public void
+    setFacilityLockForApp(String facility, boolean lockState, String password,
+                        int serviceClass, String appId, Message response) {
+        String lockString;
+         RILRequest rr
+                = RILRequest.obtain(RIL_REQUEST_SET_FACILITY_LOCK, response);
+
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+
+        // count strings
+        rr.mp.writeInt(5);
+
+        rr.mp.writeString(facility);
         lockString = (lockState)?"1":"0";
         rr.mp.writeString(lockString);
         rr.mp.writeString(password);
         rr.mp.writeString(Integer.toString(serviceClass));
+        rr.mp.writeString(appId);
 
         send(rr);
 
