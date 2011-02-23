@@ -20,6 +20,7 @@
 
 #include "APacketSource.h"
 
+#include "ARawAudioAssembler.h"
 #include "ASessionDescription.h"
 
 #include "avc_utils.h"
@@ -661,6 +662,8 @@ APacketSource::APacketSource(
         mFormat->setData(
                 kKeyESDS, 0,
                 codecSpecificData->data(), codecSpecificData->size());
+    } else if (ARawAudioAssembler::Supports(desc.c_str())) {
+        ARawAudioAssembler::MakeFormat(desc.c_str(), mFormat);
     } else {
         mInitCheck = ERROR_UNSUPPORTED;
     }
