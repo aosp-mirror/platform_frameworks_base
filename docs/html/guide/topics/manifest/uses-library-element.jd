@@ -46,7 +46,7 @@ parent.link=manifest-intro.html
         <dd>
             Android Market filters applications based on the libraries installed on the
             user's device. For more information about filtering, see the topic
-            <a href="{@docRoot}/guide/appendix/market-filters.html">Market Filters</a>.
+            <a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a>.
         </dd>
     </dl>
     <p>

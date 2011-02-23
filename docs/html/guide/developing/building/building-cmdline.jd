@@ -72,7 +72,7 @@ ant debug
       <p>This creates your debug <code>.apk</code> file inside the project <code>bin/</code> directory, named
       <code>&lt;your_project_name&gt;-debug.apk</code>. The file is already signed with
       the debug key and has been aligned with
-      <a href="{@docRoot}/guide/developing/tools/zipalign.html"><code>zipalign</code></a>.
+      <a href="{@docRoot}guide/developing/tools/zipalign.html"><code>zipalign</code></a>.
       </p>
     </li>
   </ol>
