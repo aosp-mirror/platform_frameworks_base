@@ -868,8 +868,8 @@ dimensions.</p>
 <h3>JSON utilities</h3>
 
 <p>New classes, {@link android.util.JsonReader} and {@link android.util.JsonWriter}, help you
-read and write JSON streams. The new APIs compliment the {@link org.json} classes which manipulate a
-document in memory.</p>
+read and write JSON streams. The new APIs complement the {@link org.json} classes, which manipulate
+a document in memory.</p>
 
 <p>You can create an instance of {@link android.util.JsonReader} by calling
 its constructor method and passing the {@link java.io.InputStreamReader} that feeds the JSON string.
