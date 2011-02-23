@@ -32,7 +32,43 @@ public class L10nUtils {
         com.android.internal.R.string.autofill_address_name_separator,      // IDS_AUTOFILL_DIALOG_ADDRESS_NAME_SEPARATOR
         com.android.internal.R.string.autofill_address_summary_name_format, // IDS_AUTOFILL_DIALOG_ADDRESS_SUMMARY_NAME_FORMAT
         com.android.internal.R.string.autofill_address_summary_separator,   // IDS_AUTOFILL_DIALOG_ADDRESS_SUMMARY_SEPARATOR
-        com.android.internal.R.string.autofill_address_summary_format       // IDS_AUTOFILL_DIALOG_ADDRESS_SUMMARY_FORMAT
+        com.android.internal.R.string.autofill_address_summary_format,      // IDS_AUTOFILL_DIALOG_ADDRESS_SUMMARY_FORMAT
+        com.android.internal.R.string.autofill_attention_ignored_re,        // IDS_AUTOFILL_ATTENTION_IGNORED_RE
+        com.android.internal.R.string.autofill_region_ignored_re,           // IDS_AUTOFILL_REGION_IGNORED_RE
+        com.android.internal.R.string.autofill_company_re,                  // IDS_AUTOFILL_COMPANY_RE
+        com.android.internal.R.string.autofill_address_line_1_re,           // IDS_AUTOFILL_ADDRESS_LINE_1_RE
+        com.android.internal.R.string.autofill_address_line_1_label_re,     // IDS_AUTOFILL_ADDRESS_LINE_1_LABEL_RE
+        com.android.internal.R.string.autofill_address_line_2_re,           // IDS_AUTOFILL_ADDRESS_LINE_2_RE
+        com.android.internal.R.string.autofill_address_line_3_re,           // IDS_AUTOFILL_ADDRESS_LINE_3_RE
+        com.android.internal.R.string.autofill_country_re,                  // IDS_AUTOFILL_COUNTRY_RE
+        com.android.internal.R.string.autofill_zip_code_re,                 // IDS_AUTOFILL_ZIP_CODE_RE
+        com.android.internal.R.string.autofill_zip_4_re,                    // IDS_AUTOFILL_ZIP_4_RE
+        com.android.internal.R.string.autofill_city_re,                     // IDS_AUTOFILL_CITY_RE
+        com.android.internal.R.string.autofill_state_re,                    // IDS_AUTOFILL_STATE_RE
+        com.android.internal.R.string.autofill_address_type_same_as_re,     // IDS_AUTOFILL_SAME_AS_RE
+        com.android.internal.R.string.autofill_address_type_use_my_re,      // IDS_AUTOFILL_USE_MY_RE
+        com.android.internal.R.string.autofill_billing_designator_re,       // IDS_AUTOFILL_BILLING_DESIGNATOR_RE
+        com.android.internal.R.string.autofill_shipping_designator_re,      // IDS_AUTOFILL_SHIPPING_DESIGNATOR_RE
+        com.android.internal.R.string.autofill_email_re,                    // IDS_AUTOFILL_EMAIL_RE
+        com.android.internal.R.string.autofill_username_re,                 // IDS_AUTOFILL_USERNAME_RE
+        com.android.internal.R.string.autofill_name_re,                     // IDS_AUTOFILL_NAME_RE
+        com.android.internal.R.string.autofill_name_specific_re,            // IDS_AUTOFILL_NAME_SPECIFIC_RE
+        com.android.internal.R.string.autofill_first_name_re,               // IDS_AUTOFILL_FIRST_NAME_RE
+        com.android.internal.R.string.autofill_middle_initial_re,           // IDS_AUTOFILL_MIDDLE_INITIAL_RE
+        com.android.internal.R.string.autofill_middle_name_re,              // IDS_AUTOFILL_MIDDLE_NAME_RE
+        com.android.internal.R.string.autofill_last_name_re,                // IDS_AUTOFILL_LAST_NAME_RE
+        com.android.internal.R.string.autofill_phone_re,                    // IDS_AUTOFILL_PHONE_RE
+        com.android.internal.R.string.autofill_area_code_re,                // IDS_AUTOFILL_AREA_CODE_RE
+        com.android.internal.R.string.autofill_phone_prefix_re,             // IDS_AUTOFILL_PHONE_PREFIX_RE
+        com.android.internal.R.string.autofill_phone_suffix_re,             // IDS_AUTOFILL_PHONE_SUFFIX_RE
+        com.android.internal.R.string.autofill_phone_extension_re,          // IDS_AUTOFILL_PHONE_EXTENSION_RE
+        com.android.internal.R.string.autofill_name_on_card_re,             // IDS_AUTOFILL_NAME_ON_CARD_RE
+        com.android.internal.R.string.autofill_name_on_card_contextual_re,  // IDS_AUTOFILL_NAME_ON_CARD_CONTEXTUAL_RE
+        com.android.internal.R.string.autofill_card_cvc_re,                 // IDS_AUTOFILL_CARD_CVC_RE
+        com.android.internal.R.string.autofill_card_number_re,              // IDS_AUTOFILL_CARD_NUMBER_RE
+        com.android.internal.R.string.autofill_expiration_month_re,         // IDS_AUTOFILL_EXPIRATION_MONTH_RE
+        com.android.internal.R.string.autofill_expiration_date_re,          // IDS_AUTOFILL_EXPIRATION_DATE_RE
+        com.android.internal.R.string.autofill_card_ignored_re              // IDS_AUTOFILL_CARD_IGNORED_RE
     };
 
     private static List<String> mStrings;
