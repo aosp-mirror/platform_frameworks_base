@@ -19,6 +19,7 @@
 #define AVC_UTILS_H_
 
 #include <media/stagefright/foundation/ABuffer.h>
+#include <utils/Errors.h>
 
 namespace android {
 

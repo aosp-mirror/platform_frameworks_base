@@ -18,6 +18,7 @@
 
 #define OGG_EXTRACTOR_H_
 
+#include <utils/Errors.h>
 #include <media/stagefright/MediaExtractor.h>
 
 namespace android {

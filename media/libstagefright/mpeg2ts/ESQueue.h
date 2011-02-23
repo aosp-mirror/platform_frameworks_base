@@ -19,6 +19,7 @@
 #define ES_QUEUE_H_
 
 #include <media/stagefright/foundation/ABase.h>
+#include <utils/Errors.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
 

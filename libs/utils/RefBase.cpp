@@ -23,6 +23,7 @@
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
+#include <utils/TextOutput.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -530,5 +531,20 @@ bool RefBase::onIncStrongAttempted(uint32_t flags, const void* id)
 void RefBase::onLastWeakRef(const void* /*id*/)
 {
 }
-        
+
+// ---------------------------------------------------------------------------
+
+TextOutput& printStrongPointer(TextOutput& to, const void* val)
+{
+    to << "sp<>(" << val << ")";
+    return to;
+}
+
+TextOutput& printWeakPointer(TextOutput& to, const void* val)
+{
+    to << "wp<>(" << val << ")";
+    return to;
+}
+
+
 }; // namespace android
