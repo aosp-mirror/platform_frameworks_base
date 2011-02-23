@@ -139,8 +139,6 @@ public class Browser {
     public static final int SEARCHES_PROJECTION_SEARCH_INDEX = 1;
     public static final int SEARCHES_PROJECTION_DATE_INDEX = 2;
 
-    private static final String SEARCHES_WHERE_CLAUSE = "search = ?";
-
     /* Set a cap on the count of history items in the history/bookmark
        table, to prevent db and layout operations from dragging to a
        crawl.  Revisit this cap when/if db/layout performance
@@ -165,6 +163,13 @@ public class Browser {
         i.putExtra("url", url);
         c.startActivity(i);
     }
+
+    /**
+     * Passed along with an Intent to a browser, specifying that a new tab
+     * be created.  Overrides EXTRA_APPLICATION_ID; if both are set, a new tab
+     * will be used, rather than using the same one.
+     */
+    public static final String EXTRA_CREATE_NEW_TAB = "create_new_tab";
 
     /**
      * Stores a Bitmap extra in an {@link Intent} representing the screenshot of
