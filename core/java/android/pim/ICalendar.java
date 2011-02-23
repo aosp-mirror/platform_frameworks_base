@@ -578,6 +578,23 @@ public class ICalendar {
                             + text);
                 }
                 parameter.name = text.substring(startIndex + 1, equalIndex);
+            } else if (c == '"') {
+                if (parameter == null) {
+                    throw new FormatException("Expected parameter before '\"' in " + text);
+                }
+                if (equalIndex == -1) {
+                    throw new FormatException("Expected '=' within parameter in " + text);
+                }
+                if (state.index > equalIndex + 1) {
+                    throw new FormatException("Parameter value cannot contain a '\"' in " + text);
+                }
+                final int endQuote = text.indexOf('"', state.index + 1);
+                if (endQuote < 0) {
+                    throw new FormatException("Expected closing '\"' in " + text);
+                }
+                parameter.value = text.substring(state.index + 1, endQuote);
+                state.index = endQuote + 1;
+                return parameter;
             }
             ++state.index;
         }
