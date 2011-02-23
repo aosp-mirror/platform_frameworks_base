@@ -814,7 +814,7 @@ EGLBoolean eglTerminate(EGLDisplay dpy)
     dp->refs--;
     dp->numTotalConfigs = 0;
     delete [] dp->configs;
-    clearTLS();
+
     return res;
 }
 
@@ -1150,6 +1150,27 @@ EGLBoolean eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
     return result;
 }
 
+static void loseCurrent(egl_context_t * cur_c)
+{
+    if (cur_c) {
+        egl_surface_t * cur_r = get_surface(cur_c->read);
+        egl_surface_t * cur_d = get_surface(cur_c->draw);
+
+        // by construction, these are either 0 or valid (possibly terminated)
+        // it should be impossible for these to be invalid
+        ContextRef _cur_c(cur_c);
+        SurfaceRef _cur_r(cur_r);
+        SurfaceRef _cur_d(cur_d);
+
+        cur_c->read = NULL;
+        cur_c->draw = NULL;
+
+        _cur_c.release();
+        _cur_r.release();
+        _cur_d.release();
+    }
+}
+
 EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
                             EGLSurface read, EGLContext ctx)
 {
@@ -1178,13 +1199,9 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
 
     // these are the current objects structs
     egl_context_t * cur_c = get_context(getContext());
-    egl_surface_t * cur_r = NULL;
-    egl_surface_t * cur_d = NULL;
     
     if (ctx != EGL_NO_CONTEXT) {
         c = get_context(ctx);
-        cur_r = get_surface(c->read);
-        cur_d = get_surface(c->draw);
         impl_ctx = c->context;
     } else {
         // no context given, use the implementation of the current context
@@ -1230,30 +1247,21 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
     }
 
     if (result == EGL_TRUE) {
-        // by construction, these are either 0 or valid (possibly terminated)
-        // it should be impossible for these to be invalid
-        ContextRef _cur_c(cur_c);
-        SurfaceRef _cur_r(cur_r);
-        SurfaceRef _cur_d(cur_d);
 
-        // cur_c has to be valid here (but could be terminated)
+        loseCurrent(cur_c);
+
         if (ctx != EGL_NO_CONTEXT) {
             setGlThreadSpecific(c->cnx->hooks[c->version]);
             setContext(ctx);
             _c.acquire();
+            _r.acquire();
+            _d.acquire();
+            c->read = read;
+            c->draw = draw;
         } else {
             setGlThreadSpecific(&gHooksNoContext);
             setContext(EGL_NO_CONTEXT);
         }
-        _cur_c.release();
-
-        _r.acquire();
-        _cur_r.release();
-        if (c) c->read = read;
-
-        _d.acquire();
-        _cur_d.release();
-        if (c) c->draw = draw;
     }
     return result;
 }
@@ -1637,6 +1645,9 @@ EGLenum eglQueryAPI(void)
 
 EGLBoolean eglReleaseThread(void)
 {
+    // If there is context bound to the thread, release it
+    loseCurrent(get_context(getContext()));
+
     for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
         egl_connection_t* const cnx = &gEGLImpl[i];
         if (cnx->dso) {
