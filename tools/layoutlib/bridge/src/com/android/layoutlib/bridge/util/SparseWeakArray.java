@@ -119,8 +119,6 @@ public class SparseWeakArray<E> {
     }
 
     private void gc() {
-        // Log.e("SparseArray", "gc start with " + mSize);
-
         int n = mSize;
         int o = 0;
         int[] keys = mKeys;
@@ -144,7 +142,17 @@ public class SparseWeakArray<E> {
         mGarbage = false;
         mSize = o;
 
-        // Log.e("SparseArray", "gc end with " + mSize);
+        int newSize = ArrayUtils.idealIntArraySize(mSize);
+        if (newSize < mKeys.length) {
+            int[] nkeys = new int[newSize];
+            WeakReference<?>[] nvalues = new WeakReference[newSize];
+
+            System.arraycopy(mKeys, 0, nkeys, 0, newSize);
+            System.arraycopy(mValues, 0, nvalues, 0, newSize);
+
+            mKeys = nkeys;
+            mValues = nvalues;
+        }
     }
 
     /**
