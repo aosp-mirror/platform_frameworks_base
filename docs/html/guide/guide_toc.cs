@@ -69,18 +69,17 @@
             <span class="en">Loaders</span>
           </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
-            <span class="en">Tasks and Back Stack</span>
-          </a> <span class="new">new!</span></li>
+            <span class="en">Tasks and Back Stack</span></a></li>
         </ul>
       </li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/services.html">
           <span class="en">Services</span>
-        </a> <span class="new">new!</span></div>
+        </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/bound-services.html">
             <span class="en">Bound Services</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/providers/content-providers.html">
@@ -91,7 +90,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/processes-and-threads.html">
             <span class="en">Processes and Threads</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
     </ul>
 
 
@@ -100,7 +99,7 @@
         <div><a href="<?cs var:toroot ?>guide/topics/ui/index.html">
             <span class="en">User Interface</span>
           </a>
-          <span class="new">more!</span></div>
+          <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">
                <span class="en">Declaring Layout</span>
@@ -130,10 +129,9 @@
               </a></li>
             </ul>
           </li>
-          <li>
-              <a href="<?cs var:toroot ?>guide/topics/ui/drag-drop.html">
-                  Dragging and Dropping
-              </a><span class="new">new!</span>
+          <li><a href="<?cs var:toroot ?>guide/topics/ui/drag-drop.html">
+                <span class="en">Dragging and Dropping</span>
+              </a> <span class="new">new!</span>
           </li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
                 <span class="en">Applying Styles and Themes</span>
@@ -240,7 +238,7 @@
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
             <span class="en">Graphics</span>
           </a>
-          <span class="new">more!</span></div>
+          <span class="new">new!</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
                 <span class="en">2D Graphics</span>
@@ -250,10 +248,10 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript.html">
                 <span class="en">3D with Renderscript</span>
-              </a><span class="new">new!</span></li>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
                 <span class="en">Property Animation</span>
-              </a><span class="new">new!</span></li>
+              </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/view-animation.html">
                 <span class="en">View Animation</span>
               </a></li>
@@ -653,6 +651,9 @@
       <li><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
             <span class="en">Supporting Multiple Screens</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>guide/practices/optimizing-for-3.0.html">
+            <span class="en">Optimizing Apps for Android 3.0</span>
+          </a> <span class="new">new!</span></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>

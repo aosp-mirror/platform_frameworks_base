@@ -80,7 +80,6 @@ class="new">new!</span></li>
         <div><a href="<?cs var:toroot ?>sdk/android-3.0.html">
         <span class="en">Android 3.0 Platform</span></a> <span class="new">new!</span></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/android-3.0-optimize.html">Optimizing Apps for 3.0</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/android-3.0-highlights.html">Platform Highlights</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/api_diff/11/changes.html">API Differences Report &raquo;</a></li>
         </ul>
