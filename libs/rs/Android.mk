@@ -152,9 +152,4 @@ LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
-# include the java examples
-include $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk,\
-    java \
-    ))
-
 endif #simulator
