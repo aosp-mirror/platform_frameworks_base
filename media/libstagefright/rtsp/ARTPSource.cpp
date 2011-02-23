@@ -25,6 +25,7 @@
 #include "AH263Assembler.h"
 #include "AMPEG4AudioAssembler.h"
 #include "AMPEG4ElementaryAssembler.h"
+#include "ARawAudioAssembler.h"
 #include "ASessionDescription.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -70,6 +71,8 @@ ARTPSource::ARTPSource(
             || !strncasecmp(desc.c_str(), "mpeg4-generic/", 14)) {
         mAssembler = new AMPEG4ElementaryAssembler(notify, desc, params);
         mIssueFIRRequests = true;
+    } else if (ARawAudioAssembler::Supports(desc.c_str())) {
+        mAssembler = new ARawAudioAssembler(notify, desc.c_str(), params);
     } else {
         TRESPASS();
     }
