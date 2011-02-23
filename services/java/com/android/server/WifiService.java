@@ -96,6 +96,9 @@ public class WifiService extends IWifiManager.Stub {
     private boolean mDeviceIdle;
     private int mPluggedType;
 
+    /* Chipset supports background scan */
+    private final boolean mBackgroundScanSupported;
+
     // true if the user enabled Wifi while in airplane mode
     private AtomicBoolean mAirplaneModeOverwridden = new AtomicBoolean(false);
 
@@ -369,6 +372,9 @@ public class WifiService extends IWifiManager.Stub {
                 Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY, 900) * 1000l;
         mNotificationEnabledSettingObserver = new NotificationEnabledSettingObserver(new Handler());
         mNotificationEnabledSettingObserver.register();
+
+        mBackgroundScanSupported = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wifi_background_scan_support);
     }
 
     /**
@@ -900,6 +906,9 @@ public class WifiService extends IWifiManager.Stub {
                 reportStartWorkSource();
                 evaluateTrafficStatsPolling();
                 mWifiStateMachine.enableRssiPolling(true);
+                if (mBackgroundScanSupported) {
+                    mWifiStateMachine.enableBackgroundScan(false);
+                }
                 mWifiStateMachine.enableAllNetworks();
                 updateWifiState();
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
@@ -909,6 +918,9 @@ public class WifiService extends IWifiManager.Stub {
                 mScreenOff = true;
                 evaluateTrafficStatsPolling();
                 mWifiStateMachine.enableRssiPolling(false);
+                if (mBackgroundScanSupported) {
+                    mWifiStateMachine.enableBackgroundScan(true);
+                }
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off
                  * AND the "stay on while plugged in" setting doesn't match the
