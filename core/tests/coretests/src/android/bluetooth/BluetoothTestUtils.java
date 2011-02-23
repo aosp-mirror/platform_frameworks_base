@@ -16,6 +16,8 @@
 
 package android.bluetooth;
 
+import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -296,8 +298,8 @@ public class BluetoothTestUtils extends Assert {
                 return;
             }
 
-            if (BluetoothPan.ACTION_PAN_STATE_CHANGED.equals(intent.getAction())) {
-                int state = intent.getIntExtra(BluetoothPan.EXTRA_PAN_STATE, -1);
+            if (BluetoothPan.ACTION_CONNECTION_STATE_CHANGED.equals(intent.getAction())) {
+                int state = intent.getIntExtra(BluetoothPan.EXTRA_STATE, -1);
                 assertNotSame(-1, state);
                 switch (state) {
                     case BluetoothPan.STATE_DISCONNECTED:
@@ -331,6 +333,9 @@ public class BluetoothTestUtils extends Assert {
                     case BluetoothProfile.INPUT_DEVICE:
                         mInput = (BluetoothInputDevice) proxy;
                         break;
+                    case BluetoothProfile.PAN:
+                        mPan = (BluetoothPan) proxy;
+                        break;
                 }
             }
         }
@@ -347,6 +352,9 @@ public class BluetoothTestUtils extends Assert {
                     case BluetoothProfile.INPUT_DEVICE:
                         mInput = null;
                         break;
+                    case BluetoothProfile.PAN:
+                        mPan = null;
+                        break;
                 }
             }
         }
@@ -362,6 +370,7 @@ public class BluetoothTestUtils extends Assert {
     private BluetoothA2dp mA2dp;
     private BluetoothHeadset mHeadset;
     private BluetoothInputDevice mInput;
+    private BluetoothPan mPan;
 
     /**
      * Creates a utility instance for testing Bluetooth.
@@ -706,13 +715,13 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      */
     public void enablePan(BluetoothAdapter adapter) {
-        BluetoothPan pan = new BluetoothPan(mContext);
-        assertNotNull(pan);
+        if (mPan == null) mPan = (BluetoothPan) connectProxy(adapter, BluetoothProfile.PAN);
+        assertNotNull(mPan);
 
         long start = System.currentTimeMillis();
-        pan.setBluetoothTethering(true);
+        mPan.setBluetoothTethering(true);
         long stop = System.currentTimeMillis();
-        assertTrue(pan.isTetheringOn());
+        assertTrue(mPan.isTetheringOn());
 
         writeOutput(String.format("enablePan() completed in %d ms", (stop - start)));
     }
@@ -724,13 +733,13 @@ public class BluetoothTestUtils extends Assert {
      * @param adapter The BT adapter.
      */
     public void disablePan(BluetoothAdapter adapter) {
-        BluetoothPan pan = new BluetoothPan(mContext);
-        assertNotNull(pan);
+        if (mPan == null) mPan = (BluetoothPan) connectProxy(adapter, BluetoothProfile.PAN);
+        assertNotNull(mPan);
 
         long start = System.currentTimeMillis();
-        pan.setBluetoothTethering(false);
+        mPan.setBluetoothTethering(false);
         long stop = System.currentTimeMillis();
-        assertFalse(pan.isTetheringOn());
+        assertFalse(mPan.isTetheringOn());
 
         writeOutput(String.format("disablePan() completed in %d ms", (stop - start)));
     }
@@ -1102,11 +1111,11 @@ public class BluetoothTestUtils extends Assert {
             fail(String.format("%s device not paired: device=%s", methodName, device));
         }
 
-        BluetoothPan pan = new BluetoothPan(mContext);
-        assertNotNull(pan);
+        if (mPan == null) mPan = (BluetoothPan) connectProxy(adapter, BluetoothProfile.PAN);
+        assertNotNull(mPan);
         ConnectPanReceiver receiver = getConnectPanReceiver(device, role, mask);
 
-        int state = pan.getPanDeviceState(device);
+        int state = mPan.getConnectionState(device);
         switch (state) {
             case BluetoothPan.STATE_CONNECTED:
                 removeReceiver(receiver);
@@ -1119,7 +1128,7 @@ public class BluetoothTestUtils extends Assert {
                 start = System.currentTimeMillis();
                 if (role == BluetoothPan.LOCAL_PANU_ROLE) {
                     Log.i("BT", "connect to pan");
-                    assertTrue(pan.connect(device));
+                    assertTrue(mPan.connect(device));
                 }
                 break;
             default:
@@ -1130,7 +1139,7 @@ public class BluetoothTestUtils extends Assert {
 
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < CONNECT_DISCONNECT_PROFILE_TIMEOUT) {
-            state = pan.getPanDeviceState(device);
+            state = mPan.getConnectionState(device);
             if (state == BluetoothPan.STATE_CONNECTED
                     && (receiver.getFiredFlags() & mask) == mask) {
                 long finish = receiver.getCompletedTime();
@@ -1209,23 +1218,23 @@ public class BluetoothTestUtils extends Assert {
             fail(String.format("%s device not paired: device=%s", methodName, device));
         }
 
-        BluetoothPan pan = new BluetoothPan(mContext);
-        assertNotNull(pan);
+        if (mPan == null) mPan = (BluetoothPan) connectProxy(adapter, BluetoothProfile.PAN);
+        assertNotNull(mPan);
         ConnectPanReceiver receiver = getConnectPanReceiver(device, role, mask);
 
-        int state = pan.getPanDeviceState(device);
+        int state = mPan.getConnectionState(device);
         switch (state) {
-            case BluetoothInputDevice.STATE_CONNECTED:
-            case BluetoothInputDevice.STATE_CONNECTING:
+            case BluetoothPan.STATE_CONNECTED:
+            case BluetoothPan.STATE_CONNECTING:
                 start = System.currentTimeMillis();
                 if (role == BluetoothPan.LOCAL_PANU_ROLE) {
-                    assertTrue(pan.disconnect(device));
+                    assertTrue(mPan.disconnect(device));
                 }
                 break;
-            case BluetoothInputDevice.STATE_DISCONNECTED:
+            case BluetoothPan.STATE_DISCONNECTED:
                 removeReceiver(receiver);
                 return;
-            case BluetoothInputDevice.STATE_DISCONNECTING:
+            case BluetoothPan.STATE_DISCONNECTING:
                 mask = 0; // Don't check for received intents since we might have missed them.
                 break;
             default:
@@ -1236,7 +1245,7 @@ public class BluetoothTestUtils extends Assert {
 
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < CONNECT_DISCONNECT_PROFILE_TIMEOUT) {
-            state = pan.getPanDeviceState(device);
+            state = mPan.getConnectionState(device);
             if (state == BluetoothInputDevice.STATE_DISCONNECTED
                     && (receiver.getFiredFlags() & mask) == mask) {
                 long finish = receiver.getCompletedTime();
@@ -1321,7 +1330,7 @@ public class BluetoothTestUtils extends Assert {
 
     private ConnectPanReceiver getConnectPanReceiver(BluetoothDevice device, int role,
             int expectedFlags) {
-        String[] actions = {BluetoothPan.ACTION_PAN_STATE_CHANGED};
+        String[] actions = {BluetoothPan.ACTION_CONNECTION_STATE_CHANGED};
         ConnectPanReceiver receiver = new ConnectPanReceiver(device, role, expectedFlags);
         addReceiver(receiver, actions);
         return receiver;
@@ -1351,6 +1360,11 @@ public class BluetoothTestUtils extends Assert {
                     sleep(POLL_TIME);
                 }
                 return mInput;
+            case BluetoothProfile.PAN:
+                while (mPan == null && System.currentTimeMillis() - s < CONNECT_PROXY_TIMEOUT) {
+                    sleep(POLL_TIME);
+                }
+                return mPan;
             default:
                 return null;
         }

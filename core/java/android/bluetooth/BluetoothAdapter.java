@@ -1052,6 +1052,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.INPUT_DEVICE) {
             BluetoothInputDevice iDev = new BluetoothInputDevice(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.PAN) {
+            BluetoothPan pan = new BluetoothPan(context, listener);
+            return true;
         } else {
             return false;
         }

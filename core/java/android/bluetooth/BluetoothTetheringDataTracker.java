@@ -96,8 +96,21 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
     public void startMonitoring(Context context, Handler target) {
         mContext = context;
         mCsHandler = target;
-        mBluetoothPan = new BluetoothPan(mContext);
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null) {
+            adapter.getProfileProxy(mContext, mProfileServiceListener, BluetoothProfile.PAN);
+        }
     }
+
+    private BluetoothProfile.ServiceListener mProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            mBluetoothPan = (BluetoothPan) proxy;
+        }
+        public void onServiceDisconnected(int profile) {
+            mBluetoothPan = null;
+        }
+    };
 
     /**
      * Disable connectivity to a network
@@ -105,8 +118,10 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
      */
     public boolean teardown() {
         mTeardownRequested.set(true);
-        for (BluetoothDevice device: mBluetoothPan.getConnectedDevices()) {
-            mBluetoothPan.disconnect(device);
+        if (mBluetoothPan != null) {
+            for (BluetoothDevice device: mBluetoothPan.getConnectedDevices()) {
+                mBluetoothPan.disconnect(device);
+            }
         }
         return true;
     }

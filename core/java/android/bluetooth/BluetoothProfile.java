@@ -58,15 +58,23 @@ public interface BluetoothProfile {
      * Headset and Handsfree profile
      */
     public static final int HEADSET = 1;
+
     /**
      * A2DP profile.
      */
     public static final int A2DP = 2;
+
     /**
      * Input Device Profile
      * @hide
      */
     public static final int INPUT_DEVICE = 3;
+
+    /**
+     * PAN Profile
+     * @hide
+     */
+    public static final int PAN = 4;
 
     /**
      * Default priority for devices that we try to auto-connect to and

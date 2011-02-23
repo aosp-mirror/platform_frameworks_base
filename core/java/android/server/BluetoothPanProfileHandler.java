@@ -58,6 +58,9 @@ final class BluetoothPanProfileHandler {
     private Context mContext;
     private BluetoothService mBluetoothService;
 
+    static final String NAP_ROLE = "nap";
+    static final String NAP_BRIDGE = "pan1";
+
     private BluetoothPanProfileHandler(Context context, BluetoothService service) {
         mContext = context;
         mPanDevices = new HashMap<BluetoothDevice, BluetoothPanDevice>();
@@ -114,7 +117,7 @@ final class BluetoothPanProfileHandler {
         }
     }
 
-    synchronized int getPanDeviceState(BluetoothDevice device) {
+    synchronized int getPanDeviceConnectionState(BluetoothDevice device) {
         BluetoothPanDevice panDevice = mPanDevices.get(device);
         if (panDevice == null) {
             return BluetoothPan.STATE_DISCONNECTED;
@@ -125,13 +128,13 @@ final class BluetoothPanProfileHandler {
     synchronized boolean connectPanDevice(BluetoothDevice device) {
         String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (DBG) Log.d(TAG, "connect PAN(" + objectPath + ")");
-        if (getPanDeviceState(device) != BluetoothPan.STATE_DISCONNECTED) {
+        if (getPanDeviceConnectionState(device) != BluetoothPan.STATE_DISCONNECTED) {
             errorLog(device + " already connected to PAN");
         }
 
         int connectedCount = 0;
         for (BluetoothDevice panDevice: mPanDevices.keySet()) {
-            if (getPanDeviceState(panDevice) == BluetoothPan.STATE_CONNECTED) {
+            if (getPanDeviceConnectionState(panDevice) == BluetoothPan.STATE_CONNECTED) {
                 connectedCount ++;
             }
         }
@@ -187,8 +190,23 @@ final class BluetoothPanProfileHandler {
         List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
 
         for (BluetoothDevice device: mPanDevices.keySet()) {
-            if (getPanDeviceState(device) == BluetoothPan.STATE_CONNECTED) {
+            if (getPanDeviceConnectionState(device) == BluetoothPan.STATE_CONNECTED) {
                 devices.add(device);
+            }
+        }
+        return devices;
+    }
+
+    synchronized List<BluetoothDevice> getPanDevicesMatchingConnectionStates(int[] states) {
+        List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
+
+        for (BluetoothDevice device: mPanDevices.keySet()) {
+            int panDeviceState = getPanDeviceConnectionState(device);
+            for (int state : states) {
+                if (state == panDeviceState) {
+                    devices.add(device);
+                    break;
+                }
             }
         }
         return devices;
@@ -198,7 +216,7 @@ final class BluetoothPanProfileHandler {
         String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         debugLog("disconnect PAN(" + objectPath + ")");
 
-        int state = getPanDeviceState(device);
+        int state = getPanDeviceConnectionState(device);
         if (state != BluetoothPan.STATE_CONNECTED) {
             debugLog(device + " already disconnected from PAN");
             return false;
@@ -274,14 +292,10 @@ final class BluetoothPanProfileHandler {
             panDevice.mLocalRole = role;
         }
 
-        if (state == BluetoothPan.STATE_DISCONNECTED) {
-            mPanDevices.remove(device);
-        }
-
-        Intent intent = new Intent(BluetoothPan.ACTION_PAN_STATE_CHANGED);
+        Intent intent = new Intent(BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
-        intent.putExtra(BluetoothPan.EXTRA_PREVIOUS_PAN_STATE, prevState);
-        intent.putExtra(BluetoothPan.EXTRA_PAN_STATE, state);
+        intent.putExtra(BluetoothPan.EXTRA_PREVIOUS_STATE, prevState);
+        intent.putExtra(BluetoothPan.EXTRA_STATE, state);
         intent.putExtra(BluetoothPan.EXTRA_LOCAL_ROLE, role);
         mContext.sendBroadcast(intent, BluetoothService.BLUETOOTH_PERM);
 

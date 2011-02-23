@@ -785,7 +785,7 @@ class BluetoothEventLoop {
 
             boolean connected = false;
             BluetoothDevice device = mAdapter.getRemoteDevice(address);
-            int state = mBluetoothService.getPanDeviceState(device);
+            int state = mBluetoothService.getPanDeviceConnectionState(device);
             if (state == BluetoothPan.STATE_CONNECTING) {
                 if (result == BluetoothPan.PAN_CONNECT_FAILED_ALREADY_CONNECTED) {
                     connected = true;
