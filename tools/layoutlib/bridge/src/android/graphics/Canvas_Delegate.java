@@ -948,7 +948,7 @@ public final class Canvas_Delegate {
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
             public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                // WARNING: the logic in this method is similar to Paint.measureText.
+                // WARNING: the logic in this method is similar to Paint_Delegate.measureText.
                 // Any change to this method should be reflected in Paint.measureText
                 // Paint.TextAlign indicates how the text is positioned relative to X.
                 // LEFT is the default and there's nothing to do.

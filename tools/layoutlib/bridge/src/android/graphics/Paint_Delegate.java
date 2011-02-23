@@ -32,6 +32,7 @@ import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -541,9 +542,6 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float native_measureText(Paint thisPaint, char[] text, int index,
             int count) {
-        // WARNING: the logic in this method is similar to Canvas.drawText.
-        // Any change to this method should be reflected in Canvas.drawText
-
         // get the delegate
         Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
         if (delegate == null) {
@@ -566,19 +564,51 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int native_breakText(Paint thisPaint, char[] text, int index, int count,
             float maxWidth, float[] measuredWidth) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.native_breakText is not supported.", null, null /*data*/);
-        return 0;
+
+        // get the delegate
+        Paint_Delegate delegate = sManager.getDelegate(thisPaint.mNativePaint);
+        if (delegate == null) {
+            return 0;
+        }
+
+        int inc = count > 0 ? 1 : -1;
+
+        int measureIndex = 0;
+        float measureAcc = 0;
+        for (int i = index; i != index + count; i += inc, measureIndex++) {
+            int start, end;
+            if (i < index) {
+                start = i;
+                end = index;
+            } else {
+                start = index;
+                end = i;
+            }
+
+            // measure from start to end
+            float res = delegate.measureText(text, start, end - start + 1);
+
+            if (measuredWidth != null) {
+                measuredWidth[measureIndex] = res;
+            }
+
+            measureAcc += res;
+            if (res > maxWidth) {
+                // we should not return this char index, but since it's 0-based
+                // and we need to return a count, we simply return measureIndex;
+                return measureIndex;
+            }
+
+        }
+
+        return measureIndex;
     }
 
     @LayoutlibDelegate
     /*package*/ static int native_breakText(Paint thisPaint, String text, boolean measureForwards,
             float maxWidth, float[] measuredWidth) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.native_breakText is not supported.", null, null /*data*/);
-        return 0;
+        return native_breakText(thisPaint, text.toCharArray(), 0, text.length(), maxWidth,
+                measuredWidth);
     }
 
     @LayoutlibDelegate
@@ -864,19 +894,49 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, char[] text, int index,
             int count, float[] widths) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.getTextWidths is not supported.", null, null /*data*/);
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(native_object);
+        if (delegate == null) {
+            return 0;
+        }
+
+        if (delegate.mFonts.size() > 0) {
+            // FIXME: handle multi-char characters (see measureText)
+            float totalAdvance = 0;
+            for (int i = 0; i < count; i++) {
+                char c = text[i + index];
+                boolean found = false;
+                for (FontInfo info : delegate.mFonts) {
+                    if (info.mFont.canDisplay(c)) {
+                        float adv = info.mMetrics.charWidth(c);
+                        totalAdvance += adv;
+                        if (widths != null) {
+                            widths[i] = adv;
+                        }
+
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found == false) {
+                    // no advance for this char.
+                    if (widths != null) {
+                        widths[i] = 0.f;
+                    }
+                }
+            }
+
+            return (int) totalAdvance;
+        }
+
         return 0;
     }
 
     @LayoutlibDelegate
     /*package*/ static int native_getTextWidths(int native_object, String text, int start,
             int end, float[] widths) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.getTextWidths is not supported.", null, null /*data*/);
-        return 0;
+        return native_getTextWidths(native_object, text.toCharArray(), start, end - start, widths);
     }
 
     @LayoutlibDelegate
@@ -973,17 +1033,28 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static void nativeGetStringBounds(int nativePaint, String text, int start,
             int end, Rect bounds) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.getStringBounds is not supported.", null, null /*data*/);
+        nativeGetCharArrayBounds(nativePaint, text.toCharArray(), start, end - start, bounds);
     }
 
     @LayoutlibDelegate
     /*package*/ static void nativeGetCharArrayBounds(int nativePaint, char[] text, int index,
             int count, Rect bounds) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Paint.getCharArrayBounds is not supported.", null, null /*data*/);
+
+        // get the delegate from the native int.
+        Paint_Delegate delegate = sManager.getDelegate(nativePaint);
+        if (delegate == null) {
+            return;
+        }
+
+        // FIXME should test if the main font can display all those characters.
+        // See MeasureText
+        if (delegate.mFonts.size() > 0) {
+            FontInfo mainInfo = delegate.mFonts.get(0);
+
+            Rectangle2D rect = mainInfo.mFont.getStringBounds(text, index, index + count,
+                    delegate.mFontContext);
+            bounds.set(0, 0, (int) rect.getWidth(), (int) rect.getHeight());
+        }
     }
 
     @LayoutlibDelegate
@@ -1075,6 +1146,10 @@ public class Paint_Delegate {
     }
 
     /*package*/ float measureText(char[] text, int index, int count) {
+
+        // WARNING: the logic in this method is similar to Canvas_Delegate.native_drawText
+        // Any change to this method should be reflected there as well
+
         if (mFonts.size() > 0) {
             FontInfo mainFont = mFonts.get(0);
             int i = index;
@@ -1122,6 +1197,8 @@ public class Paint_Delegate {
                     i += size;
                 }
             }
+
+            return total;
         }
 
         return 0;
