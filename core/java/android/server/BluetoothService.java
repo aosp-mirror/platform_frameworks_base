@@ -1351,7 +1351,7 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /*package*/ synchronized boolean setBondState(String address, int state, int reason) {
-        mBondState.setBondState(address.toUpperCase(), state);
+        mBondState.setBondState(address.toUpperCase(), state, reason);
         return true;
     }
 
