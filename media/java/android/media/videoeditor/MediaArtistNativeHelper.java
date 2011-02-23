@@ -3807,7 +3807,6 @@ class MediaArtistNativeHelper {
         } catch (Throwable e) {
             // Allocating to new size with Fixed count
             try {
-                System.gc();
                 rgb888 = new int[thumbnailSize * MAX_THUMBNAIL_PERMITTED];
                 bitmaps = new Bitmap[MAX_THUMBNAIL_PERMITTED];
                 thumbnailCount = MAX_THUMBNAIL_PERMITTED;
