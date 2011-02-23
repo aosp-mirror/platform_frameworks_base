@@ -331,35 +331,31 @@ public final class SimulatedCommands extends BaseCommands
         mSsnNotifyOn = enable;
     }
 
-    /**
-     * (AsyncResult)response.obj).result will be an Integer representing
-     * the sum of enabled service classes (sum of SERVICE_CLASS_*)
-     *
-     * @param facility one of CB_FACILTY_*
-     * @param pin password or "" if not required
-     * @param serviceClass is a sum of SERVICE_CLASS_*
-     */
-
-    public void queryFacilityLock (String facility, String pin,
+    @Override
+    public void queryFacilityLock(String facility, String pin,
                                    int serviceClass, Message result) {
-        if (facility != null &&
-                facility.equals(CommandsInterface.CB_FACILITY_BA_SIM)) {
+        queryFacilityLockForApp(facility, pin, serviceClass, null, result);
+    }
+
+    @Override
+    public void queryFacilityLockForApp(String facility, String pin, int serviceClass,
+            String appId, Message result) {
+        if (facility != null && facility.equals(CommandsInterface.CB_FACILITY_BA_SIM)) {
             if (result != null) {
                 int[] r = new int[1];
                 r[0] = (mSimLockEnabled ? 1 : 0);
-                Log.i(LOG_TAG, "[SimCmd] queryFacilityLock: SIM is " +
-                        (r[0] == 0 ? "unlocked" : "locked"));
+                Log.i(LOG_TAG, "[SimCmd] queryFacilityLock: SIM is "
+                        + (r[0] == 0 ? "unlocked" : "locked"));
                 AsyncResult.forMessage(result, r, null);
                 result.sendToTarget();
             }
             return;
-        } else if (facility != null &&
-                facility.equals(CommandsInterface.CB_FACILITY_BA_FD)) {
+        } else if (facility != null && facility.equals(CommandsInterface.CB_FACILITY_BA_FD)) {
             if (result != null) {
                 int[] r = new int[1];
                 r[0] = (mSimFdnEnabled ? 1 : 0);
-                Log.i(LOG_TAG, "[SimCmd] queryFacilityLock: FDN is " +
-                        (r[0] == 0 ? "disabled" : "enabled"));
+                Log.i(LOG_TAG, "[SimCmd] queryFacilityLock: FDN is "
+                        + (r[0] == 0 ? "disabled" : "enabled"));
                 AsyncResult.forMessage(result, r, null);
                 result.sendToTarget();
             }
@@ -369,14 +365,15 @@ public final class SimulatedCommands extends BaseCommands
         unimplemented(result);
     }
 
-    /**
-     * @param facility one of CB_FACILTY_*
-     * @param lockEnabled true if SIM lock is enabled
-     * @param pin the SIM pin or "" if not required
-     * @param serviceClass is a sum of SERVICE_CLASS_*
-     */
-    public void setFacilityLock (String facility, boolean lockEnabled,
-                                 String pin, int serviceClass,
+    @Override
+    public void setFacilityLock(String facility, boolean lockEnabled, String pin, int serviceClass,
+            Message result) {
+        setFacilityLockForApp(facility, lockEnabled, pin, serviceClass, null, result);
+    }
+
+    @Override
+    public void setFacilityLockForApp(String facility, boolean lockEnabled,
+                                 String pin, int serviceClass, String appId,
                                  Message result) {
         if (facility != null &&
                 facility.equals(CommandsInterface.CB_FACILITY_BA_SIM)) {

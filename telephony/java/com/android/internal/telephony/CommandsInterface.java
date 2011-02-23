@@ -1178,6 +1178,21 @@ public interface CommandsInterface {
         Message response);
 
     /**
+     * (AsyncResult)response.obj).result will be an Integer representing
+     * the sum of enabled service classes (sum of SERVICE_CLASS_*) for the
+     * application with appId.
+     *
+     * @param facility one of CB_FACILTY_*
+     * @param password password or "" if not required
+     * @param serviceClass is a sum of SERVICE_CLASS_*
+     * @param appId is application Id or null if none
+     * @param response is callback message
+     */
+
+    void queryFacilityLockForApp(String facility, String password, int serviceClass, String appId,
+        Message response);
+
+    /**
      * @param facility one of CB_FACILTY_*
      * @param lockState true means lock, false means unlock
      * @param password password or "" if not required
@@ -1187,6 +1202,18 @@ public interface CommandsInterface {
     void setFacilityLock (String facility, boolean lockState, String password,
         int serviceClass, Message response);
 
+    /**
+     * Set the facility lock for the app with this AID on the ICC card.
+     *
+     * @param facility one of CB_FACILTY_*
+     * @param lockState true means lock, false means unlock
+     * @param password password or "" if not required
+     * @param serviceClass is a sum of SERVICE_CLASS_*
+     * @param appId is application Id or null if none
+     * @param response is callback message
+     */
+    void setFacilityLockForApp(String facility, boolean lockState, String password,
+        int serviceClass, String appId, Message response);
 
     void sendUSSD (String ussdString, Message response);
 
