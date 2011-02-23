@@ -23,6 +23,7 @@ import com.android.internal.util.HierarchicalStateMachine;
 import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
+import android.net.NetworkUtils;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.os.SystemProperties;
@@ -415,11 +416,13 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                             } else {
                                 addrPrefixLen = 0;
                             }
-                            if (!InetAddress.isNumeric(addr)) {
+                            InetAddress ia;
+                            try {
+                                ia = NetworkUtils.numericToInetAddress(addr);
+                            } catch (IllegalArgumentException e) {
                                 EventLogTags.writeBadIpAddress(addr);
                                 throw new UnknownHostException("Non-numeric ip addr=" + addr);
                             }
-                            InetAddress ia = InetAddress.getByName(addr);
                             if (addrPrefixLen == 0) {
                                 // Assume point to point
                                 addrPrefixLen = (ia instanceof Inet4Address) ? 32 : 128;
@@ -434,11 +437,13 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     }
                     if (response.dnses != null && response.dnses.length > 0) {
                         for (String addr : response.dnses) {
-                            if (!InetAddress.isNumeric(addr)) {
+                            InetAddress ia;
+                            try {
+                                ia = NetworkUtils.numericToInetAddress(addr);
+                            } catch (IllegalArgumentException e) {
                                 EventLogTags.writePdpBadDnsAddress("dns=" + addr); 
                                 throw new UnknownHostException("Non-numeric dns addr=" + addr);
                             }
-                            InetAddress ia = InetAddress.getByName(addr);
                             linkProperties.addDns(ia);
                         }
                         result = SetupResult.SUCCESS;
@@ -448,12 +453,14 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                         dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
                         if (isDnsOk(dnsServers)) {
                             for (String dnsAddr : dnsServers) {
-                                if (!InetAddress.isNumeric(dnsAddr)) {
+                                InetAddress ia;
+                                try {
+                                    ia = NetworkUtils.numericToInetAddress(dnsAddr);
+                                } catch (IllegalArgumentException e) {
                                     EventLogTags.writePdpBadDnsAddress("dnsAddr=" + dnsAddr);
                                     throw new UnknownHostException("Non-numeric dns addr="
                                                 + dnsAddr);
                                 }
-                                InetAddress ia = InetAddress.getByName(dnsAddr);
                                 linkProperties.addDns(ia);
                             }
                             result = SetupResult.SUCCESS;
@@ -476,11 +483,13 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                         }
                     }
                     for (String addr : response.gateways) {
-                        if (!InetAddress.isNumeric(addr)) {
+                        InetAddress ia;
+                        try {
+                            ia = NetworkUtils.numericToInetAddress(addr);
+                        } catch (IllegalArgumentException e) {
                             EventLogTags.writePdpBadDnsAddress("gateway=" + addr);
                             throw new UnknownHostException("Non-numeric gateway addr=" + addr);
                         }
-                        InetAddress ia = InetAddress.getByName(addr);
                         linkProperties.addGateway(ia);
                     }
                     result = SetupResult.SUCCESS;

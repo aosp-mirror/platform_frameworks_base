@@ -270,9 +270,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             InetAddress addr = null;
             int prefixLength = 0;
             try {
-                addr = InetAddress.getByName(st.nextToken(" "));
-            } catch (UnknownHostException uhe) {
-                Slog.e(TAG, "Failed to parse ipaddr", uhe);
+                addr = NetworkUtils.numericToInetAddress(st.nextToken(" "));
+            } catch (IllegalArgumentException iae) {
+                Slog.e(TAG, "Failed to parse ipaddr", iae);
             }
 
             try {
@@ -451,7 +451,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         try {
             String cmd = "tether dns set";
             for (String s : dns) {
-                cmd += " " + InetAddress.getByName(s).getHostAddress();
+                cmd += " " + NetworkUtils.numericToInetAddress(s).getHostAddress();
             }
             try {
                 mConnector.doCommand(cmd);
@@ -459,7 +459,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 throw new IllegalStateException(
                         "Unable to communicate to native daemon for setting tether dns");
             }
-        } catch (UnknownHostException e) {
+        } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Error resolving dns name", e);
         }
     }
@@ -519,11 +519,11 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
             mConnector.doCommand(String.format("pppd attach %s %s %s %s %s", tty,
-                    InetAddress.getByName(localAddr).getHostAddress(),
-                    InetAddress.getByName(remoteAddr).getHostAddress(),
-                    InetAddress.getByName(dns1Addr).getHostAddress(),
-                    InetAddress.getByName(dns2Addr).getHostAddress()));
-        } catch (UnknownHostException e) {
+                    NetworkUtils.numericToInetAddress(localAddr).getHostAddress(),
+                    NetworkUtils.numericToInetAddress(remoteAddr).getHostAddress(),
+                    NetworkUtils.numericToInetAddress(dns1Addr).getHostAddress(),
+                    NetworkUtils.numericToInetAddress(dns2Addr).getHostAddress()));
+        } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Error resolving addr", e);
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException("Error communicating to native daemon to attach pppd", e);
