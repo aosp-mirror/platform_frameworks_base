@@ -811,11 +811,12 @@ public class GradientDrawable extends Drawable {
                         com.android.internal.R.styleable.DrawableCorners_bottomRightRadius, radius);
                 if (topLeftRadius != radius || topRightRadius != radius ||
                         bottomLeftRadius != radius || bottomRightRadius != radius) {
+                    // The corner radii are specified in clockwise order (see Path.addRoundRect())
                     setCornerRadii(new float[] {
                             topLeftRadius, topLeftRadius,
                             topRightRadius, topRightRadius,
-                            bottomLeftRadius, bottomLeftRadius,
-                            bottomRightRadius, bottomRightRadius
+                            bottomRightRadius, bottomRightRadius,
+                            bottomLeftRadius, bottomLeftRadius
                     });
                 }
                 a.recycle();

@@ -240,7 +240,7 @@ public class BitmapFactory {
         /**
          * The resulting height of the bitmap, set independent of the state of
          * inJustDecodeBounds. However, if there is an error trying to decode,
-         * outHeight will be set to -1.
+         * outHeight will be set to -1. 
          */
         public int outHeight;
 
