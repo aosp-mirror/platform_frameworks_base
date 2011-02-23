@@ -150,12 +150,12 @@ int32_t AInputQueue::hasEvents() {
     pfd[0].events = POLLIN;
     pfd[0].revents = 0;
     pfd[1].fd = mDispatchKeyRead;
-    pfd[0].events = POLLIN;
-    pfd[0].revents = 0;
+    pfd[1].events = POLLIN;
+    pfd[1].revents = 0;
     
     int nfd = poll(pfd, 2, 0);
     if (nfd <= 0) return 0;
-    return (pfd[0].revents == POLLIN || pfd[1].revents == POLLIN) ? 1 : -1;
+    return ((pfd[0].revents & POLLIN) || (pfd[1].revents & POLLIN)) ? 1 : -1;
 }
 
 int32_t AInputQueue::getEvent(AInputEvent** outEvent) {
