@@ -862,8 +862,9 @@ public final class ContactsContract {
     }
 
     /**
-     * Types of data used to produce the display name for a contact. Listed in the order
-     * of increasing priority.
+     * Types of data used to produce the display name for a contact. In the order
+     * of increasing priority: {@link #EMAIL}, {@link #PHONE},
+     * {@link #ORGANIZATION}, {@link #NICKNAME}, {@link #STRUCTURED_NAME}.
      */
     public interface DisplayNameSources {
         public static final int UNDEFINED = 0;
