@@ -27,187 +27,261 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * @hide
+ * This class provides the APIs to control the Bluetooth Pan
+ * Profile.
+ *
+ *<p>BluetoothPan is a proxy object for controlling the Bluetooth
+ * Service via IPC. Use {@link BluetoothAdapter#getProfileProxy} to get
+ * the BluetoothPan proxy object.
+ *
+ *<p>Each method is protected with its appropriate permission.
+ *@hide
  */
-public final class BluetoothPan {
+public final class BluetoothPan implements BluetoothProfile {
     private static final String TAG = "BluetoothPan";
     private static final boolean DBG = false;
 
-    //TODO: This needs to inherit from BluetoothProfile like other profiles.
+    /**
+     * Intent used to broadcast the change in connection state of the Pan
+     * profile.
+     *
+     * <p>This intent will have 4 extras:
+     * <ul>
+     *   <li> {@link #EXTRA_STATE} - The current state of the profile. </li>
+     *   <li> {@link #EXTRA_PREVIOUS_STATE}- The previous state of the profile.</li>
+     *   <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. </li>
+     *   <li> {@link #EXTRA_LOCAL_ROLE} - Which local role the remote device is
+     *   bound to. </li>
+     * </ul>
+     *
+     * <p>{@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} can be any of
+     * {@link #STATE_DISCONNECTED}, {@link #STATE_CONNECTING},
+     * {@link #STATE_CONNECTED}, {@link #STATE_DISCONNECTING}.
+     *
+     * <p> {@link #EXTRA_LOCAL_ROLE} can be one of {@link #LOCAL_NAP_ROLE} or
+     * {@link #LOCAL_PANU_ROLE}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_STATE_CHANGED =
+        "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
 
-    /** int extra for ACTION_PAN_STATE_CHANGED */
-    public static final String EXTRA_PAN_STATE = "android.bluetooth.pan.extra.STATE";
-
-    /** int extra for ACTION_PAN_STATE_CHANGED */
-    public static final String EXTRA_PREVIOUS_PAN_STATE =
-        "android.bluetooth.pan.extra.PREVIOUS_STATE";
-
-    /** int extra for ACTION_PAN_STATE_CHANGED */
+    /**
+     * Extra for {@link #ACTION_CONNECTION_STATE_CHANGED} intent
+     * The local role of the PAN profile that the remote device is bound to.
+     * It can be one of {@link #LOCAL_NAP_ROLE} or {@link #LOCAL_PANU_ROLE}.
+     */
     public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
 
+    /**
+     * The local device is acting as a Network Access Point.
+     */
     public static final int LOCAL_NAP_ROLE = 1;
+
+    /**
+     * The local device is acting as a PAN User.
+     */
     public static final int LOCAL_PANU_ROLE = 2;
 
     /**
-     * Indicates the state of an PAN device has changed.
-     * This intent will always contain EXTRA_DEVICE_STATE,
-     * EXTRA_PREVIOUS_DEVICE_STATE, BluetoothDevice.EXTRA_DEVICE
-     * and EXTRA_LOCAL_ROLE.
-     * extras.
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PAN_STATE_CHANGED =
-      "android.bluetooth.pan.action.STATE_CHANGED";
-
-    public static final String NAP_ROLE = "nap";
-    public static final String NAP_BRIDGE = "pan1";
-
-    public static final int MAX_CONNECTIONS = 7;
-
-    public static final int STATE_DISCONNECTED = 0;
-    public static final int STATE_CONNECTING   = 1;
-    public static final int STATE_CONNECTED    = 2;
-    public static final int STATE_DISCONNECTING = 3;
-
-    /**
      * Return codes for the connect and disconnect Bluez / Dbus calls.
+     * @hide
      */
     public static final int PAN_DISCONNECT_FAILED_NOT_CONNECTED = 1000;
 
+    /**
+     * @hide
+     */
     public static final int PAN_CONNECT_FAILED_ALREADY_CONNECTED = 1001;
 
+    /**
+     * @hide
+     */
     public static final int PAN_CONNECT_FAILED_ATTEMPT_FAILED = 1002;
 
+    /**
+     * @hide
+     */
     public static final int PAN_OPERATION_GENERIC_FAILURE = 1003;
 
+    /**
+     * @hide
+     */
     public static final int PAN_OPERATION_SUCCESS = 1004;
 
-    private final IBluetooth mService;
-    private final Context mContext;
+    private ServiceListener mServiceListener;
+    private BluetoothAdapter mAdapter;
+    private IBluetooth mService;
 
     /**
      * Create a BluetoothPan proxy object for interacting with the local
-     * Bluetooth Pan service.
-     * @param c Context
+     * Bluetooth Service which handles the Pan profile
+     *
      */
-    public BluetoothPan(Context c) {
-        mContext = c;
-
+    /*package*/ BluetoothPan(Context mContext, ServiceListener l) {
         IBinder b = ServiceManager.getService(BluetoothAdapter.BLUETOOTH_SERVICE);
+        mServiceListener = l;
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
         if (b != null) {
             mService = IBluetooth.Stub.asInterface(b);
+            if (mServiceListener != null) {
+                mServiceListener.onServiceConnected(BluetoothProfile.PAN, this);
+            }
         } else {
             Log.w(TAG, "Bluetooth Service not available!");
 
             // Instead of throwing an exception which prevents people from going
-            // into Wireless settings in the emulator. Let it crash later
-            // when it is actually used.
+            // into Wireless settings in the emulator. Let it crash later when it is actually used.
             mService = null;
         }
     }
 
     /**
-     * Initiate a PAN connection.
-     *
-     * This function returns false on error and true if the connection
-     * attempt is being made.
-     *
-     * Listen for {@link #ACTION_PAN_STATE_CHANGED} to find out when the
-     * connection is completed.
-     *
-     * @param device Remote BT device.
-     * @return false on immediate error, true otherwise
+     * {@inheritDoc}
      * @hide
      */
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        try {
-            return mService.connectPanDevice(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            try {
+                return mService.connectPanDevice(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
     /**
-     * Initiate disconnect from PAN.
-     *
-     * This function return false on error and true if the disconnection
-     * attempt is being made.
-     *
-     * Listen for {@link #ACTION_PAN_STATE_CHANGED} to find out when
-     * disconnect is completed.
-     *
-     * @param device Remote BT device.
-     * @return false on immediate error, true otherwise
+     * {@inheritDoc}
      * @hide
      */
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        try {
-            return mService.disconnectPanDevice(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return false;
+        if (mService != null && isEnabled() &&
+            isValidDevice(device)) {
+            try {
+                return mService.disconnectPanDevice(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return false;
+            }
         }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
     /**
-     * Get the state of a PAN Device.
-     *
-     * This function returns an int representing the state of the PAN connection
-     *
-     *  @param device Remote BT device.
-     *  @return The current state of the PAN Device
-     *  @hide
-     */
-    public int getPanDeviceState(BluetoothDevice device) {
-        if (DBG) log("getPanDeviceState(" + device + ")");
-        try {
-            return mService.getPanDeviceState(device);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-            return STATE_DISCONNECTED;
-        }
-    }
-
-    /**
-     * Returns a set of all the connected PAN Devices
-     *
-     * Does not include devices that are currently connecting or disconnecting
-     *
-     *  @return List of PAN devices or empty on Error
-     * @hide
+     * {@inheritDoc}
      */
     public List<BluetoothDevice> getConnectedDevices() {
-       if (DBG) log("getConnectedDevices");
-       try {
-           return mService.getConnectedPanDevices();
-       } catch (RemoteException e) {
-           Log.e(TAG, "", e);
-           return new ArrayList<BluetoothDevice>();
-       }
+        if (DBG) log("getConnectedDevices()");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.getConnectedPanDevices();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return new ArrayList<BluetoothDevice>();
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return new ArrayList<BluetoothDevice>();
     }
 
-    private static void log(String msg) {
-        Log.d(TAG, msg);
+    /**
+     * {@inheritDoc}
+     */
+    public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
+        if (DBG) log("getDevicesMatchingStates()");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.getPanDevicesMatchingConnectionStates(states);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return new ArrayList<BluetoothDevice>();
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return new ArrayList<BluetoothDevice>();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getConnectionState(BluetoothDevice device) {
+        if (DBG) log("getState(" + device + ")");
+        if (mService != null && isEnabled()
+            && isValidDevice(device)) {
+            try {
+                return mService.getPanDeviceConnectionState(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+                return BluetoothProfile.STATE_DISCONNECTED;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return BluetoothProfile.STATE_DISCONNECTED;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    public boolean setPriority(BluetoothDevice device, int priority) {
+        // Priorities are not supported for PAN devices - since we don't
+        // auto connect.
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    public int getPriority(BluetoothDevice device) {
+        if (DBG) log("getPriority(" + device + ")");
+        // Priorities are not supported for PAN devices - since we don't
+        // auto connect.
+        return BluetoothProfile.PRIORITY_ON;
     }
 
     public void setBluetoothTethering(boolean value) {
+        if (DBG) log("setBluetoothTethering(" + value + ")");
         try {
             mService.setBluetoothTethering(value);
         } catch (RemoteException e) {
-            Log.e(TAG, "", e);
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
         }
     }
 
     public boolean isTetheringOn() {
+        if (DBG) log("isTetheringOn()");
         try {
             return mService.isTetheringOn();
         } catch (RemoteException e) {
-            Log.e(TAG, "", e);
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return false;
         }
+    }
+
+    private boolean isEnabled() {
+       if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+       return false;
+    }
+
+    private boolean isValidDevice(BluetoothDevice device) {
+       if (device == null) return false;
+
+       if (BluetoothAdapter.checkBluetoothAddress(device.getAddress())) return true;
+       return false;
+    }
+
+    private static void log(String msg) {
+      Log.d(TAG, msg);
     }
 }

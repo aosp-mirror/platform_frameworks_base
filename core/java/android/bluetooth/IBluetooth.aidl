@@ -92,8 +92,9 @@ interface IBluetooth
 
     boolean isTetheringOn();
     void setBluetoothTethering(boolean value);
-    int getPanDeviceState(in BluetoothDevice device);
+    int getPanDeviceConnectionState(in BluetoothDevice device);
     List<BluetoothDevice> getConnectedPanDevices();
+    List<BluetoothDevice> getPanDevicesMatchingConnectionStates(in int[] states);
     boolean connectPanDevice(in BluetoothDevice device);
     boolean disconnectPanDevice(in BluetoothDevice device);
 
