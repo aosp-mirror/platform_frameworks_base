@@ -197,7 +197,6 @@ public class MediaImageItem extends MediaItem {
             fl.close();
         }
         imageBitmap.recycle();
-        System.gc();
     }
 
     /*
