@@ -332,6 +332,14 @@
         android:description="@string/permdesc_accessWifiState"
         android:label="@string/permlab_accessWifiState" />
 
+    <!-- Allows applications to access information about WiMAX networks
+         @hide -->
+    <permission android:name="android.permission.ACCESS_WIMAX_STATE"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:protectionLevel="normal"
+        android:description="@string/permdesc_accessWimaxState"
+        android:label="@string/permlab_accessWimaxState" />
+
     <!-- Allows applications to connect to paired bluetooth devices -->
     <permission android:name="android.permission.BLUETOOTH"
         android:permissionGroup="android.permission-group.NETWORK"
@@ -841,6 +849,14 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_changeWifiState"
         android:label="@string/permlab_changeWifiState" />
+
+    <!-- Allows applications to change WiMAX connectivity state
+         @hide -->
+    <permission android:name="android.permission.CHANGE_WIMAX_STATE"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="dangerous"
+        android:description="@string/permdesc_changeWimaxState"
+        android:label="@string/permlab_changeWimaxState" />
 
     <!-- Allows applications to enter Wi-Fi Multicast mode -->
     <permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"
