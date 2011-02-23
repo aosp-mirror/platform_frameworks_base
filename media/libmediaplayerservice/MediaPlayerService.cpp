@@ -23,6 +23,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <dirent.h>
 #include <unistd.h>
 
@@ -50,6 +51,8 @@
 #include <media/MediaMetadataRetrieverInterface.h>
 #include <media/Metadata.h>
 #include <media/AudioTrack.h>
+
+#include <private/android_filesystem_config.h>
 
 #include "MediaRecorderClient.h"
 #include "MediaPlayerService.h"
@@ -1762,4 +1765,93 @@ int MediaPlayerService::AudioCache::getSessionId()
     return 0;
 }
 
+void MediaPlayerService::addBatteryData(uint32_t params)
+{
+    Mutex::Autolock lock(mLock);
+    int uid = IPCThreadState::self()->getCallingUid();
+    if (uid == AID_MEDIA) {
+        return;
+    }
+    int index = mBatteryData.indexOfKey(uid);
+    int32_t time = systemTime() / 1000000L;
+
+    if (index < 0) { // create a new entry for this UID
+        BatteryUsageInfo info;
+        info.audioTotalTime = 0;
+        info.videoTotalTime = 0;
+        info.audioLastTime = 0;
+        info.videoLastTime = 0;
+        info.refCount = 0;
+
+        mBatteryData.add(uid, info);
+    }
+
+    BatteryUsageInfo &info = mBatteryData.editValueFor(uid);
+
+    if (params & kBatteryDataCodecStarted) {
+        if (params & kBatteryDataTrackAudio) {
+            info.audioLastTime -= time;
+            info.refCount ++;
+        }
+        if (params & kBatteryDataTrackVideo) {
+            info.videoLastTime -= time;
+            info.refCount ++;
+        }
+    } else {
+        if (info.refCount == 0) {
+            LOGW("Battery track warning: refCount is already 0");
+            return;
+        } else if (info.refCount < 0) {
+            LOGE("Battery track error: refCount < 0");
+            mBatteryData.removeItem(uid);
+            return;
+        }
+
+        if (params & kBatteryDataTrackAudio) {
+            info.audioLastTime += time;
+            info.refCount --;
+        }
+        if (params & kBatteryDataTrackVideo) {
+            info.videoLastTime += time;
+            info.refCount --;
+        }
+
+        // no stream is being played by this UID
+        if (info.refCount == 0) {
+            info.audioTotalTime += info.audioLastTime;
+            info.audioLastTime = 0;
+            info.videoTotalTime += info.videoLastTime;
+            info.videoLastTime = 0;
+        }
+    }
+}
+
+status_t MediaPlayerService::pullBatteryData(Parcel* reply) {
+    Mutex::Autolock lock(mLock);
+    BatteryUsageInfo info;
+    int size = mBatteryData.size();
+
+    reply->writeInt32(size);
+    int i = 0;
+
+    while (i < size) {
+        info = mBatteryData.valueAt(i);
+
+        reply->writeInt32(mBatteryData.keyAt(i)); //UID
+        reply->writeInt32(info.audioTotalTime);
+        reply->writeInt32(info.videoTotalTime);
+
+        info.audioTotalTime = 0;
+        info.videoTotalTime = 0;
+
+        // remove the UID entry where no stream is being played
+        if (info.refCount <= 0) {
+            mBatteryData.removeItemsAt(i);
+            size --;
+            i --;
+        }
+        i++;
+    }
+    return NO_ERROR;
+}
 } // namespace android

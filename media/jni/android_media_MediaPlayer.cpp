@@ -36,6 +36,8 @@
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
 #include <surfaceflinger/Surface.h>
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
 
 // ----------------------------------------------------------------------------
 
@@ -723,6 +725,21 @@ static void android_media_MediaPlayer_attachAuxEffect(JNIEnv *env,  jobject thiz
     process_media_player_call( env, thiz, mp->attachAuxEffect(effectId), NULL, NULL );
 }
 
+static jint
+android_media_MediaPlayer_pullBatteryData(JNIEnv *env, jobject thiz, jobject java_reply)
+{
+    sp<IBinder> binder = defaultServiceManager()->getService(String16("media.player"));
+    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
+    if (service.get() == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException", "cannot get MediaPlayerService");
+        return UNKNOWN_ERROR;
+    }
+
+    Parcel *reply = parcelForJavaObject(env, java_reply);
+
+    return service->pullBatteryData(reply);
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -758,6 +775,7 @@ static JNINativeMethod gMethods[] = {
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer_set_audio_session_id},
     {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
+    {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

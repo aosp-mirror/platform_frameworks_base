@@ -28,6 +28,8 @@
 #include "include/MPEG2TSExtractor.h"
 
 #include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+#include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/hexdump.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/AudioPlayer.h>
@@ -155,8 +157,17 @@ private:
             const AwesomeNativeWindowRenderer &);
 };
 
-////////////////////////////////////////////////////////////////////////////////
+// To collect the decoder usage
+void addBatteryData(uint32_t params) {
+    sp<IBinder> binder =
+        defaultServiceManager()->getService(String16("media.player"));
+    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
+    CHECK(service.get() != NULL);
 
+    service->addBatteryData(params);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 AwesomePlayer::AwesomePlayer()
     : mQueueStarted(false),
       mTimeSource(NULL),
@@ -377,6 +388,17 @@ void AwesomePlayer::reset_l() {
                     Playback::STOP, 0);
             mDecryptHandle = NULL;
             mDrmManagerClient = NULL;
+    }
+
+    if (mFlags & PLAYING) {
+        uint32_t params = IMediaPlayerService::kBatteryDataTrackDecoder;
+        if ((mAudioSource != NULL) && (mAudioSource != mAudioTrack)) {
+            params |= IMediaPlayerService::kBatteryDataTrackAudio;
+        }
+        if (mVideoSource != NULL) {
+            params |= IMediaPlayerService::kBatteryDataTrackVideo;
+        }
+        addBatteryData(params);
     }
 
     if (mFlags & PREPARING) {
@@ -779,6 +801,16 @@ status_t AwesomePlayer::play_l() {
         seekTo_l(0);
     }
 
+    uint32_t params = IMediaPlayerService::kBatteryDataCodecStarted
+        | IMediaPlayerService::kBatteryDataTrackDecoder;
+    if ((mAudioSource != NULL) && (mAudioSource != mAudioTrack)) {
+        params |= IMediaPlayerService::kBatteryDataTrackAudio;
+    }
+    if (mVideoSource != NULL) {
+        params |= IMediaPlayerService::kBatteryDataTrackVideo;
+    }
+    addBatteryData(params);
+
     return OK;
 }
 
@@ -932,6 +964,16 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
         mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
                 Playback::PAUSE, 0);
     }
+
+    uint32_t params = IMediaPlayerService::kBatteryDataTrackDecoder;
+    if ((mAudioSource != NULL) && (mAudioSource != mAudioTrack)) {
+        params |= IMediaPlayerService::kBatteryDataTrackAudio;
+    }
+    if (mVideoSource != NULL) {
+        params |= IMediaPlayerService::kBatteryDataTrackVideo;
+    }
+
+    addBatteryData(params);
 
     return OK;
 }
