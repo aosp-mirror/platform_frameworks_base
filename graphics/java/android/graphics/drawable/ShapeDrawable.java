@@ -286,7 +286,7 @@ public class ShapeDrawable extends Drawable {
     protected boolean inflateTag(String name, Resources r, XmlPullParser parser,
             AttributeSet attrs) {
 
-        if (name.equals("padding")) {
+        if ("padding".equals(name)) {
             TypedArray a = r.obtainAttributes(attrs,
                     com.android.internal.R.styleable.ShapeDrawablePadding);
             setPadding(
@@ -315,7 +315,10 @@ public class ShapeDrawable extends Drawable {
         int color = mShapeState.mPaint.getColor();
         color = a.getColor(com.android.internal.R.styleable.ShapeDrawable_color, color);
         mShapeState.mPaint.setColor(color);
-            
+
+        boolean dither = a.getBoolean(com.android.internal.R.styleable.ShapeDrawable_dither, false);
+        mShapeState.mPaint.setDither(dither);
+
         setIntrinsicWidth((int)
                 a.getDimension(com.android.internal.R.styleable.ShapeDrawable_width, 0f));
         setIntrinsicHeight((int)

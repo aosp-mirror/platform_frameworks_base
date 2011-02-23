@@ -3176,7 +3176,10 @@
         <attr name="visible" format="boolean" />
     </declare-styleable>
 
+    <!-- Drawable used to render several states. Each state is represented by
+         a child drawable. -->
     <declare-styleable name="StateListDrawable">
+        <!-- Indicates whether the drawable should be initially visible. -->
         <attr name="visible" />
         <!-- If true, allows the drawable's padding to change based on the
              current state that is selected.  If false, the padding will
@@ -3200,6 +3203,7 @@
         <attr name="exitFadeDuration" format="integer" />
     </declare-styleable>
 
+    <!-- Drawable used to render several animated frames. -->
     <declare-styleable name="AnimationDrawable">
         <attr name="visible" />
         <attr name="variablePadding" />
@@ -3209,6 +3213,7 @@
         <attr name="oneshot" format="boolean" />
     </declare-styleable>
 
+    <!-- Represents a single frame inside an AnimationDrawable. -->
     <declare-styleable name="AnimationDrawableItem">
         <!-- Amount of time (in milliseconds) to display this frame. -->
         <attr name="duration" format="integer" />
@@ -3217,12 +3222,21 @@
         <attr name="drawable" format="reference" />
     </declare-styleable>
 
+    <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->
     <declare-styleable name="GradientDrawable">
+        <!-- Indicates whether the drawable should intially be visible. -->
         <attr name="visible" />
+        <!-- Enables or disables dithering. -->
+        <attr name="dither" />
+        <!-- Indicates what shape to fill with a gradient. -->
         <attr name="shape">
+            <!-- Rectangle shape, with optional rounder corners. -->
             <enum name="rectangle" value="0" />
+            <!-- Oval shape. -->
             <enum name="oval" value="1" />
+            <!-- Line shape. -->
             <enum name="line" value="2" />
+            <!-- Ring shape. -->
             <enum name="ring" value="3" />
         </attr>
         <!-- Inner radius of the ring expressed as a ratio of the ring's width. For instance,
@@ -3237,71 +3251,123 @@
         <attr name="innerRadius" format="dimension" />
         <!-- Thickness of the ring. When defined, thicknessRatio is ignored. -->
         <attr name="thickness" format="dimension" />
+        <!-- Indicates whether the drawable's level affects the way the gradient is drawn. -->
         <attr name="useLevel" />
     </declare-styleable>
 
+    <!-- Used to specify the size of the shape for GradientDrawable. -->
     <declare-styleable name="GradientDrawableSize">
+        <!-- Width of the gradient shape. -->
         <attr name="width" />
+        <!-- Height of the gradient shape. -->
         <attr name="height" />
     </declare-styleable>
 
+    <!-- Used to describe the gradient used to fill the shape of a GradientDrawable. -->
     <declare-styleable name="GradientDrawableGradient">
+        <!-- Start color of the gradient. -->
         <attr name="startColor" format="color" />
-        <!-- Optional center color. For linear gradients, use centerX or centerY to place the center color. -->
+        <!-- Optional center color. For linear gradients, use centerX or centerY
+             to place the center color. -->
         <attr name="centerColor" format="color" />
+        <!-- End color of the gradient. -->
         <attr name="endColor" format="color" />
         <attr name="useLevel" format="boolean" />
+        <!-- Angle of the gradient. -->
         <attr name="angle" format="float" />
+        <!-- Type of gradient. The default type is linear. -->
         <attr name="type">
+            <!-- Linear gradient. -->
             <enum name="linear" value="0" />
+            <!-- Radial, or circular, gradient. -->
             <enum name="radial" value="1" />
+            <!-- Sweep, or angled or diamond, gradient. -->
             <enum name="sweep"  value="2" />
         </attr>
+        <!-- X coordinate of the origin of the gradient within the shape. -->
         <attr name="centerX" format="float|fraction" />
+        <!-- Y coordinate of the origin of the gradient within the shape. -->
         <attr name="centerY" format="float|fraction" />
+        <!-- Radius of the gradient, used only with radial gradient. -->
         <attr name="gradientRadius" format="float|fraction" />
     </declare-styleable>
 
+    <!-- Used to fill the shape of GradientDrawable with a solid color. -->
     <declare-styleable name="GradientDrawableSolid">
+        <!-- Solid color for the gradient shape. -->
         <attr name="color" format="color" />
     </declare-styleable>
 
+    <!-- Used to describe the optional stroke of a GradientDrawable. -->
     <declare-styleable name="GradientDrawableStroke">
+        <!-- Width of the gradient shape's stroke. -->
         <attr name="width" />
+        <!-- Color of the gradient shape's stroke. -->
         <attr name="color" />
+        <!-- Length of a dash in the stroke. -->
         <attr name="dashWidth" format="dimension" />
+        <!-- Gap between dashes in the stroke. -->
         <attr name="dashGap" format="dimension" />
     </declare-styleable>
 
+    <!-- Describes the corners for the rectangle shape of a GradientDrawable.
+         This can be used to render rounded corners. -->
     <declare-styleable name="DrawableCorners">
+        <!-- Defines the radius of the four corners. -->
         <attr name="radius" format="dimension" />
+        <!-- Radius of the top left corner. -->
         <attr name="topLeftRadius" format="dimension" />
+        <!-- Radius of the top right corner. -->
         <attr name="topRightRadius" format="dimension" />
+        <!-- Radius of the bottom left corner. -->
         <attr name="bottomLeftRadius" format="dimension" />
+        <!-- Radius of the bottom right corner. -->
         <attr name="bottomRightRadius" format="dimension" />
     </declare-styleable>
 
+    <!-- Used to specify the optional padding of a GradientDrawable. -->
     <declare-styleable name="GradientDrawablePadding">
+        <!-- Amount of left padding inside the gradient shape. -->
         <attr name="left" format="dimension" />
+        <!-- Amount of top padding inside the gradient shape. -->
         <attr name="top" format="dimension" />
+        <!-- Amount of right padding inside the gradient shape. -->
         <attr name="right" format="dimension" />
+        <!-- Amount of bottom padding inside the gradient shape. -->
         <attr name="bottom" format="dimension" />
     </declare-styleable>
 
+    <!-- Drawable used to render several drawables stacked on top of each other.
+         Each child drawable can be controlled individually. -->
     <declare-styleable name="LayerDrawable">
+        <!-- Indicates the opacity of the layer. This can be useful to allow the
+              system to enable drawing optimizations. The default value is
+              translucent. -->
         <attr name="opacity">
+            <!-- Indicates that the layer is opaque and contains no transparent
+                 nor translucent pixels. -->
             <enum name="opaque" value="-1" />
+            <!-- The layer is completely transparent (no pixel will be drawn.) -->
             <enum name="transparent" value="-2" />
+            <!-- The layer has translucent pixels. -->
             <enum name="translucent" value="-3" />
         </attr>
     </declare-styleable>
 
+    <!-- Describes an item (or child) of a LayerDrawable. -->
     <declare-styleable name="LayerDrawableItem">
+        <!-- Left coordinate of the layer. -->
         <attr name="left" />
+        <!-- Top coordinate of the layer. -->
         <attr name="top" />
+        <!-- Right coordinate of the layer. -->
         <attr name="right" />
+        <!-- Bottom coordinate of the layer. -->
         <attr name="bottom" />
+        <!-- Drawable used to render the layer. -->
         <attr name="drawable" />
+        <!-- Identifier of the layer. This can be used to retrieve the layer
+             from a drawbable container. -->
         <attr name="id" />
     </declare-styleable>
 
@@ -3317,6 +3383,7 @@
         <attr name="drawable" />
     </declare-styleable>
 
+    <!-- Drawable used to rotate another drawable. -->
     <declare-styleable name="RotateDrawable">
         <attr name="visible" />
         <attr name="fromDegrees" format="float" />
@@ -3475,6 +3542,8 @@
         <attr name="width" />
         <!-- Defines the height of the shape. -->
         <attr name="height" />
+        <!-- Enables or disables dithering. -->
+        <attr name="dither" />
     </declare-styleable>
 
     <!-- ========================== -->
