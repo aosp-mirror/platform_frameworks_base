@@ -48,15 +48,14 @@ public class MtpClient {
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String deviceName = intent.getStringExtra(UsbManager.EXTRA_DEVICE_NAME);
+            UsbDevice usbDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+            String deviceName = usbDevice.getDeviceName();
 
             synchronized (mDeviceList) {
                 MtpDevice mtpDevice = getDeviceLocked(deviceName);
 
                 if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {
                     if (mtpDevice == null) {
-                        UsbDevice usbDevice =
-                                (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                         mtpDevice = openDevice(usbDevice);
                     }
                     if (mtpDevice != null) {

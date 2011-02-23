@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.UsbDevice;
 import android.hardware.UsbManager;
 import android.util.Log;
 
@@ -41,7 +42,8 @@ public class DeviceDisconnectedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String deviceName = intent.getStringExtra(UsbManager.EXTRA_DEVICE_NAME);
+        UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+        String deviceName = device.getDeviceName();
         Log.d(TAG, "ACTION_USB_DEVICE_DETACHED " + deviceName);
 
         // close our activity if the device it is displaying is disconnected
