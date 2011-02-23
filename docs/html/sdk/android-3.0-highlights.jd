@@ -46,7 +46,9 @@ page.title=Android 3.0 Platform Highlights
 <p>Welcome to Android 3.0!</p>
 
 <p>The Android 3.0 platform introduces many new and exciting features for users and developers. 
-This document provides a glimpse of some of the new features and technologies, as delivered in the Android 3.0 Preview SDK. For more information about the SDK or how to download it, please see the <a href="{@docRoot}sdk/preview/index.html">Preview SDK</a> document.</p>
+This document provides a glimpse of some of the new features and technologies, as delivered in
+Android 3.0. For a more detailed look at new developer APIs, see the <a
+href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 <ul>
   <li><a href="#UserFeatures">New User Features</a></li>
@@ -259,7 +261,8 @@ allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></emb
 </object>
 </div>
 
-<p>For more information about the new developer APIs, see the Android 3.0 Platform notes in the SDK Preview documentation, available by download through the Android SDK Manager.</p>
+<p>For more information about the new developer APIs, see the <a
+href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 <p>For a video overview of platform features, see the Android 3.0 Sneak Peek. </p>
 
