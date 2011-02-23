@@ -727,17 +727,30 @@ status_t CameraService::Client::cancelAutoFocus() {
 }
 
 // take a picture - image is returned in callback
-status_t CameraService::Client::takePicture() {
-    LOG1("takePicture (pid %d)", getCallingPid());
+status_t CameraService::Client::takePicture(int msgType) {
+    LOG1("takePicture (pid %d): 0x%x", getCallingPid(), msgType);
 
     Mutex::Autolock lock(mLock);
     status_t result = checkPidAndHardware();
     if (result != NO_ERROR) return result;
 
-    enableMsgType(CAMERA_MSG_SHUTTER |
-                  CAMERA_MSG_POSTVIEW_FRAME |
-                  CAMERA_MSG_RAW_IMAGE |
-                  CAMERA_MSG_COMPRESSED_IMAGE);
+    if ((msgType & CAMERA_MSG_RAW_IMAGE) &&
+        (msgType & CAMERA_MSG_RAW_IMAGE_NOTIFY)) {
+        LOGE("CAMERA_MSG_RAW_IMAGE and CAMERA_MSG_RAW_IMAGE_NOTIFY"
+                " cannot be both enabled");
+        return BAD_VALUE;
+    }
+
+    // We only accept picture related message types
+    // and ignore other types of messages for takePicture().
+    int picMsgType = msgType
+                        & (CAMERA_MSG_SHUTTER |
+                           CAMERA_MSG_POSTVIEW_FRAME |
+                           CAMERA_MSG_RAW_IMAGE |
+                           CAMERA_MSG_RAW_IMAGE_NOTIFY |
+                           CAMERA_MSG_COMPRESSED_IMAGE);
+
+    enableMsgType(picMsgType);
 
     return mHardware->takePicture();
 }

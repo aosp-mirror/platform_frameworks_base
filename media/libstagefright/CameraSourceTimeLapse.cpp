@@ -277,7 +277,7 @@ void CameraSourceTimeLapse::threadTimeLapseEntry() {
         // this thread as read() will make a copy of this last frame and keep
         // returning it in the quick stop mode.
         Mutex::Autolock autoLock(mQuickStopLock);
-        CHECK_EQ(OK, mCamera->takePicture());
+        CHECK_EQ(OK, mCamera->takePicture(CAMERA_MSG_RAW_IMAGE));
         if (mQuickStop) {
             LOGV("threadTimeLapseEntry: Exiting due to mQuickStop = true");
             return;
