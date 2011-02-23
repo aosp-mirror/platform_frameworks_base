@@ -668,7 +668,7 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     public void updateNotification(IBinder key, StatusBarNotification notification) {
-        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ") // TODO");
+        if (DEBUG) Slog.d(TAG, "updateNotification(" + key + " -> " + notification + ")");
 
         final NotificationData.Entry oldEntry = mNotificationData.findByKey(key);
         if (oldEntry == null) {
@@ -685,7 +685,8 @@ public class TabletStatusBar extends StatusBar implements
             Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " expanded=" + oldEntry.expanded
-                    + " contentView=" + oldContentView);
+                    + " contentView=" + oldContentView
+                    + " rowParent=" + oldEntry.row.getParent());
             Slog.d(TAG, "new notification: when=" + notification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " contentView=" + contentView);
@@ -806,16 +807,17 @@ public class TabletStatusBar extends StatusBar implements
             }
         }
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-            if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
-                mTicker.halt();
-            } else {
-                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: no");
-            }
-            // refresh icons to show either notifications or the DND message
             mNotificationDNDMode = Prefs.read(mContext)
                         .getBoolean(Prefs.DO_NOT_DISTURB_PREF, Prefs.DO_NOT_DISTURB_DEFAULT);
-            Slog.d(TAG, "DND: " + mNotificationDNDMode);
+
+            if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: yes" + (mNotificationDNDMode?" (DND)":""));
+                mTicker.halt();
+            } else {
+                Slog.i(TAG, "DISABLE_NOTIFICATION_ICONS: no" + (mNotificationDNDMode?" (DND)":""));
+            }
+
+            // refresh icons to show either notifications or the DND message
             reloadAllNotificationIcons();
         } else if ((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) {
@@ -1241,29 +1243,34 @@ public class TabletStatusBar extends StatusBar implements
 
         if (mIconLayout == null) return;
 
+        // first, populate the main notification panel
+        loadNotificationPanel();
+
         final LinearLayout.LayoutParams params
             = new LinearLayout.LayoutParams(mIconSize + 2*mIconHPadding, mNaturalBarHeight);
 
         // alternate behavior in DND mode
-        if (mNotificationDNDMode && mIconLayout.getChildCount() == 0) {
-            final StatusBarIconView iconView = new StatusBarIconView(mContext, "_dnd");
-            iconView.setImageResource(R.drawable.ic_notification_dnd);
-            iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            iconView.setPadding(mIconHPadding, 0, mIconHPadding, 0);
+        if (mNotificationDNDMode) {
+            if (mIconLayout.getChildCount() == 0) {
+                final StatusBarIconView iconView = new StatusBarIconView(mContext, "_dnd");
+                iconView.setImageResource(R.drawable.ic_notification_dnd);
+                iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                iconView.setPadding(mIconHPadding, 0, mIconHPadding, 0);
 
-            final Notification dndNotification = new Notification.Builder(mContext)
-                .setContentTitle(mContext.getText(R.string.notifications_off_title))
-                .setContentText(mContext.getText(R.string.notifications_off_text))
-                .setSmallIcon(R.drawable.ic_notification_dnd)
-                .setOngoing(true)
-                .getNotification();
+                final Notification dndNotification = new Notification.Builder(mContext)
+                    .setContentTitle(mContext.getText(R.string.notifications_off_title))
+                    .setContentText(mContext.getText(R.string.notifications_off_text))
+                    .setSmallIcon(R.drawable.ic_notification_dnd)
+                    .setOngoing(true)
+                    .getNotification();
 
-            mNotificationDNDDummyEntry = new NotificationData.Entry(
-                    null,
-                    new StatusBarNotification("", 0, "", 0, 0, dndNotification),
-                    iconView);
+                mNotificationDNDDummyEntry = new NotificationData.Entry(
+                        null,
+                        new StatusBarNotification("", 0, "", 0, 0, dndNotification),
+                        iconView);
 
-            mIconLayout.addView(iconView, params);
+                mIconLayout.addView(iconView, params);
+            }
 
             return;
         }
@@ -1305,8 +1312,6 @@ public class TabletStatusBar extends StatusBar implements
                 mIconLayout.addView(v, i, params);
             }
         }
-
-        loadNotificationPanel();
     }
 
     private void loadNotificationPanel() {
