@@ -24,7 +24,11 @@ page.title=IRC and Twitter
 </tr>
 </table>
 
-<p>If you haven't used IRC before, check <a href="http://en.wikipedia.org/wiki/List_of_IRC_clients">http://en.wikipedia.org/wiki/List_of_IRC_clients &raquo;</a> for a helpful list of IRC clients. Alternatively, you could also use this <a href="http://java.freenode.net/index.php?channel=android-dev">web interface &raquo;</a>, which does not require any installation, to join discussions on the Android IRC channels.  </p>
+<p>If you haven't used IRC before, check <a
+href="http://en.wikipedia.org/wiki/List_of_IRC_clients">http://en.wikipedia.org/wiki/
+List_of_IRC_clients &raquo;</a> for a helpful list of IRC clients. Alternatively, you could also use
+this <a href="http://webchat.freenode.net/?channels=android-dev">web interface &raquo;</a>, which
+does not require any installation, to join discussions on the Android IRC channels.  </p>
 
 <p>Here are some tips for using IRC:</h4>
 
