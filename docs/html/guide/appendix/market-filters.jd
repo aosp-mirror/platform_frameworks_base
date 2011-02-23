@@ -24,6 +24,8 @@ manifest file to the configurations defined by the device, as well as other fact
 <li><a
 href="{@docRoot}guide/practices/compatibility.html">Android Compatibility</a></li>
 <li><code><a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></code></li>
+<li><code><a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a></code></li>
 <li><code><a
 href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></code></li>
@@ -393,6 +395,13 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 &lt;supports-screens&gt;}</a> manifest element (described above in <a href="#table1">table
 1</a>) to enable screen compatibility mode for screen configurations you have not accounted for
 with alternative resources.</p>
+    </td>
+  </tr>
+  <tr>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td>
+      <p>Android Market filters the application unless one or more of the GL texture compression formats supported by the application are also supported by the device. </p>
     </td>
   </tr>
 </table>
