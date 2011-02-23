@@ -93,7 +93,7 @@ public class TabletStatusBar extends StatusBar implements
     public static final int MSG_CLOSE_INPUT_METHODS_PANEL = 1041;
     public static final int MSG_STOP_TICKER = 2000;
 
-    // Fitts' Law assistance for LatinIME; TODO: replace with a more general approach
+    // Fitts' Law assistance for LatinIME; see policy.EventHole
     private static final boolean FAKE_SPACE_BAR = true;
 
     // The height of the bar, as definied by the build.  It may be taller if we're plugged
@@ -159,7 +159,6 @@ public class TabletStatusBar extends StatusBar implements
     // for disabling the status bar
     int mDisabled = 0;
 
-    boolean mNotificationsOn = true;
     private RecentAppsPanel mRecentsPanel;
     private InputMethodsPanel mInputMethodsPanel;
 
@@ -767,7 +766,7 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     public void removeNotification(IBinder key) {
-        if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ") // TODO");
+        if (DEBUG) Slog.d(TAG, "removeNotification(" + key + ")");
         removeNotificationViews(key);
         mTicker.remove(key);
         setAreThereNotifications();
@@ -1015,16 +1014,11 @@ public class TabletStatusBar extends StatusBar implements
     public void onClickNotificationTrigger() {
         if (DEBUG) Slog.d(TAG, "clicked notification icons; disabled=" + mDisabled);
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            if (!mNotificationsOn) {
-                mNotificationsOn = true;
-                mIconLayout.setVisibility(View.VISIBLE); // TODO: animation
-            } else {
-                int msg = !mNotificationPanel.isShowing()
-                    ? MSG_OPEN_NOTIFICATION_PANEL
-                    : MSG_CLOSE_NOTIFICATION_PANEL;
-                mHandler.removeMessages(msg);
-                mHandler.sendEmptyMessage(msg);
-            }
+            int msg = !mNotificationPanel.isShowing()
+                ? MSG_OPEN_NOTIFICATION_PANEL
+                : MSG_CLOSE_NOTIFICATION_PANEL;
+            mHandler.removeMessages(msg);
+            mHandler.sendEmptyMessage(msg);
         }
     }
 
@@ -1434,155 +1428,6 @@ public class TabletStatusBar extends StatusBar implements
 
         return true;
     }
-
-/*
-    public class ShadowController {
-        boolean mShowShadows;
-        Map<View, View> mShadowsForElements = new IdentityHashMap<View, View>(7);
-        Map<View, View> mElementsForShadows = new IdentityHashMap<View, View>(7);
-        LayoutTransition mElementTransition, mShadowTransition;
-
-        View mTouchTarget;
-
-        ShadowController(boolean showShadows) {
-            mShowShadows = showShadows;
-            mTouchTarget = null;
-
-            mElementTransition = new LayoutTransition();
-//            AnimatorSet s = new AnimatorSet();
-//            s.play(ObjectAnimator.ofInt(null, "top", 48, 0))
-//                .with(ObjectAnimator.ofFloat(null, "scaleY", 0.5f, 1f))
-//                .with(ObjectAnimator.ofFloat(null, "alpha", 0.5f, 1f))
-//                ;
-            mElementTransition.setAnimator(LayoutTransition.APPEARING, //s);
-                   ObjectAnimator.ofInt(null, "top", 48, 0));
-            mElementTransition.setDuration(LayoutTransition.APPEARING, 100);
-            mElementTransition.setStartDelay(LayoutTransition.APPEARING, 0);
-
-//            s = new AnimatorSet();
-//            s.play(ObjectAnimator.ofInt(null, "top", 0, 48))
-//                .with(ObjectAnimator.ofFloat(null, "scaleY", 1f, 0.5f))
-//                .with(ObjectAnimator.ofFloat(null, "alpha", 1f, 0.5f))
-//                ;
-            mElementTransition.setAnimator(LayoutTransition.DISAPPEARING, //s);
-                    ObjectAnimator.ofInt(null, "top", 0, 48));
-            mElementTransition.setDuration(LayoutTransition.DISAPPEARING, 400);
-
-            mShadowTransition = new LayoutTransition();
-            mShadowTransition.setAnimator(LayoutTransition.APPEARING,
-                    ObjectAnimator.ofFloat(null, "alpha", 0f, 1f));
-            mShadowTransition.setDuration(LayoutTransition.APPEARING, 200);
-            mShadowTransition.setStartDelay(LayoutTransition.APPEARING, 100);
-            mShadowTransition.setAnimator(LayoutTransition.DISAPPEARING,
-                    ObjectAnimator.ofFloat(null, "alpha", 1f, 0f));
-            mShadowTransition.setDuration(LayoutTransition.DISAPPEARING, 100);
-
-            ViewGroup bar = (ViewGroup) TabletStatusBar.this.mBarContents;
-            bar.setLayoutTransition(mElementTransition);
-            ViewGroup nav = (ViewGroup) TabletStatusBar.this.mNavigationArea;
-            nav.setLayoutTransition(mElementTransition);
-            ViewGroup shadowGroup = (ViewGroup) bar.findViewById(R.id.shadows);
-            shadowGroup.setLayoutTransition(mShadowTransition);
-        }
-
-        public void add(View element, View shadow) {
-            shadow.setOnTouchListener(makeTouchListener());
-            mShadowsForElements.put(element, shadow);
-            mElementsForShadows.put(shadow, element);
-        }
-
-        public boolean getShadowState() {
-            return mShowShadows;
-        }
-
-        public View.OnTouchListener makeTouchListener() {
-            return new View.OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent ev) {
-                    final int action = ev.getAction();
-
-                    if (DEBUG) Slog.d(TAG, "ShadowController: v=" + v + ", ev=" + ev);
-
-                    // currently redirecting events?
-                    if (mTouchTarget == null) {
-                        mTouchTarget = mElementsForShadows.get(v);
-                    }
-
-                    if (mTouchTarget != null && mTouchTarget.getVisibility() != View.GONE) {
-                        boolean last = false;
-                        switch (action) {
-                            case MotionEvent.ACTION_CANCEL:
-                            case MotionEvent.ACTION_UP:
-                                mHandler.removeMessages(MSG_RESTORE_SHADOWS);
-                                if (mShowShadows) {
-                                    mHandler.sendEmptyMessageDelayed(MSG_RESTORE_SHADOWS,
-                                            v == mNotificationShadow ? 5000 : 500);
-                                }
-                                last = true;
-                                break;
-                            case MotionEvent.ACTION_DOWN:
-                                mHandler.removeMessages(MSG_RESTORE_SHADOWS);
-                                setElementShadow(mTouchTarget, false);
-                                break;
-                        }
-                        mTouchTarget.dispatchTouchEvent(ev);
-                        if (last) mTouchTarget = null;
-                        return true;
-                    }
-
-                    return false;
-                }
-            };
-        }
-
-        public void refresh() {
-            for (View element : mShadowsForElements.keySet()) {
-                setElementShadow(element, mShowShadows);
-            }
-        }
-
-        public void showAllShadows() {
-            mShowShadows = true;
-            refresh();
-        }
-
-        public void hideAllShadows() {
-            mShowShadows = false;
-            refresh();
-        }
-
-        // Use View.INVISIBLE for things hidden due to shadowing, and View.GONE for things that are
-        // disabled (and should not be shadowed or re-shown)
-        public void setElementShadow(View button, boolean shade) {
-            View shadow = mShadowsForElements.get(button);
-            if (shadow != null) {
-                if (button.getVisibility() != View.GONE) {
-                    shadow.setVisibility(shade ? View.VISIBLE : View.INVISIBLE);
-                    button.setVisibility(shade ? View.INVISIBLE : View.VISIBLE);
-                }
-            }
-        }
-
-        // Hide both element and shadow, using default layout animations.
-        public void hideElement(View button) {
-            Slog.d(TAG, "hiding: " + button);
-            View shadow = mShadowsForElements.get(button);
-            if (shadow != null) {
-                shadow.setVisibility(View.GONE);
-            }
-            button.setVisibility(View.GONE);
-        }
-
-        // Honoring the current shadow state.
-        public void showElement(View button) {
-            Slog.d(TAG, "showing: " + button);
-            View shadow = mShadowsForElements.get(button);
-            if (shadow != null) {
-                shadow.setVisibility(mShowShadows ? View.VISIBLE : View.INVISIBLE);
-            }
-            button.setVisibility(mShowShadows ? View.INVISIBLE : View.VISIBLE);
-        }
-    }
-    */
 
     public class TouchOutsideListener implements View.OnTouchListener {
         private int mMsg;
