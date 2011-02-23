@@ -30,11 +30,17 @@ import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import com.android.internal.app.IUsageStats;
+import com.android.internal.os.PkgUsageStats;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interact with the overall activities running in the system.
@@ -1232,5 +1238,30 @@ public class ActivityManager {
      */
     public static boolean isRunningInTestHarness() {
         return SystemProperties.getBoolean("ro.test_harness", false);
+    }
+
+    /**
+     * Returns the launch count of each installed package.
+     *
+     * @hide
+     */
+    public Map<String, Integer> getAllPackageLaunchCounts() {
+        try {
+            IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
+                    ServiceManager.getService("usagestats"));
+            if (usageStatsService == null) {
+                return new HashMap<String, Integer>();
+            }
+
+            Map<String, Integer> launchCounts = new HashMap<String, Integer>();
+            for (PkgUsageStats pkgUsageStats : usageStatsService.getAllPkgUsageStats()) {
+                launchCounts.put(pkgUsageStats.packageName, pkgUsageStats.launchCount);
+            }
+
+            return launchCounts;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not query launch counts", e);
+            return new HashMap<String, Integer>();
+        }
     }
 }

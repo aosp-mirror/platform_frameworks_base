@@ -1196,7 +1196,7 @@
     <permission android:name="android.permission.PACKAGE_USAGE_STATS"
         android:label="@string/permlab_pkgUsageStats"
         android:description="@string/permdesc_pkgUsageStats"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to collect battery statistics -->
     <permission android:name="android.permission.BATTERY_STATS"
