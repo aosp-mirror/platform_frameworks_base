@@ -20,6 +20,10 @@
 
 #include "StagefrightRecorder.h"
 
+#include <binder/IPCThreadState.h>
+#include <binder/IServiceManager.h>
+
+#include <media/IMediaPlayerService.h>
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/CameraSource.h>
@@ -46,9 +50,23 @@
 
 namespace android {
 
+// To collect the encoder usage for the battery app
+static void addBatteryData(uint32_t params) {
+    sp<IBinder> binder =
+        defaultServiceManager()->getService(String16("media.player"));
+    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
+    CHECK(service.get() != NULL);
+
+    service->addBatteryData(params);
+}
+
+
 StagefrightRecorder::StagefrightRecorder()
     : mWriter(NULL), mWriterAux(NULL),
-      mOutputFd(-1), mOutputFdAux(-1) {
+      mOutputFd(-1), mOutputFdAux(-1),
+      mAudioSource(AUDIO_SOURCE_LIST_END),
+      mVideoSource(VIDEO_SOURCE_LIST_END),
+      mStarted(false) {
 
     LOGV("Constructor");
     reset();
@@ -745,30 +763,54 @@ status_t StagefrightRecorder::start() {
         return UNKNOWN_ERROR;
     }
 
+    status_t status = OK;
+
     switch (mOutputFormat) {
         case OUTPUT_FORMAT_DEFAULT:
         case OUTPUT_FORMAT_THREE_GPP:
         case OUTPUT_FORMAT_MPEG_4:
-            return startMPEG4Recording();
+            status = startMPEG4Recording();
+            break;
 
         case OUTPUT_FORMAT_AMR_NB:
         case OUTPUT_FORMAT_AMR_WB:
-            return startAMRRecording();
+            status = startAMRRecording();
+            break;
 
         case OUTPUT_FORMAT_AAC_ADIF:
         case OUTPUT_FORMAT_AAC_ADTS:
-            return startAACRecording();
+            status = startAACRecording();
+            break;
 
         case OUTPUT_FORMAT_RTP_AVP:
-            return startRTPRecording();
+            status = startRTPRecording();
+            break;
 
         case OUTPUT_FORMAT_MPEG2TS:
-            return startMPEG2TSRecording();
+            status = startMPEG2TSRecording();
+            break;
 
         default:
             LOGE("Unsupported output file format: %d", mOutputFormat);
-            return UNKNOWN_ERROR;
+            status = UNKNOWN_ERROR;
+            break;
     }
+
+    if ((status == OK) && (!mStarted)) {
+        mStarted = true;
+
+        uint32_t params = IMediaPlayerService::kBatteryDataCodecStarted;
+        if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+            params |= IMediaPlayerService::kBatteryDataTrackAudio;
+        }
+        if (mVideoSource != VIDEO_SOURCE_LIST_END) {
+            params |= IMediaPlayerService::kBatteryDataTrackVideo;
+        }
+
+        addBatteryData(params);
+    }
+
+    return status;
 }
 
 sp<MediaSource> StagefrightRecorder::createAudioSource() {
@@ -1458,6 +1500,21 @@ status_t StagefrightRecorder::pause() {
         mWriterAux->pause();
     }
 
+    if (mStarted) {
+        mStarted = false;
+
+        uint32_t params = 0;
+        if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+            params |= IMediaPlayerService::kBatteryDataTrackAudio;
+        }
+        if (mVideoSource != VIDEO_SOURCE_LIST_END) {
+            params |= IMediaPlayerService::kBatteryDataTrackVideo;
+        }
+
+        addBatteryData(params);
+    }
+
+
     return OK;
 }
 
@@ -1493,6 +1550,21 @@ status_t StagefrightRecorder::stop() {
             mOutputFdAux = -1;
         }
     }
+
+    if (mStarted) {
+        mStarted = false;
+
+        uint32_t params = 0;
+        if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+            params |= IMediaPlayerService::kBatteryDataTrackAudio;
+        }
+        if (mVideoSource != VIDEO_SOURCE_LIST_END) {
+            params |= IMediaPlayerService::kBatteryDataTrackVideo;
+        }
+
+        addBatteryData(params);
+    }
+
 
     return err;
 }

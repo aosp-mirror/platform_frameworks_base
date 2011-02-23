@@ -107,6 +107,8 @@ private:
     bool mIsMetaDataStoredInVideoBuffers;
     MediaProfiles *mEncoderProfiles;
 
+    bool mStarted;
+
     status_t setupMPEG4Recording(
         bool useSplitCameraSource,
         int outputFd,
