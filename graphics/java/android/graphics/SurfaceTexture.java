@@ -44,7 +44,13 @@ import android.os.Message;
  * be done by transforming (1, 1, 0, 1).
  *
  * <p>The texture object uses the GL_TEXTURE_EXTERNAL_OES texture target, which is defined by the
- * OES_EGL_image_external OpenGL ES extension.  This limits how the texture may be used.
+ * {@link http://www.khronos.org/registry/gles/extensions/OES/OES_EGL_image_external.txt
+ * GL_OES_EGL_image_external} OpenGL ES extension.  This limits how the texture may be used.  Each
+ * time the texture is bound it must be bound to the GL_TEXTURE_EXTERNAL_OES target rather than the
+ * GL_TEXTURE_2D target.  Additionally, any OpenGL ES 2.0 shader that samples from the texture must
+ * declare its use of this extension using, for example, an "#extension GL_OES_EGL_image_external :
+ * require" directive.  Such shaders must also access the texture using the samplerExternalOES GLSL
+ * sampler type.
  *
  * <p>SurfaceTexture objects may be created on any thread.  {@link #updateTexImage} may only be
  * called on the thread with the OpenGL ES context that contains the texture object.  The
