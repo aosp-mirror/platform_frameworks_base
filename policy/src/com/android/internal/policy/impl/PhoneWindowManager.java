@@ -1448,7 +1448,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
                 if (shortcutIntent != null) {
                     shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(shortcutIntent);
+                    try {
+                        mContext.startActivity(shortcutIntent);
+                    } catch (ActivityNotFoundException ex) {
+                        Slog.w(TAG, "Dropping shortcut key combination because "
+                                + "the activity to which it is registered was not found: "
+                                + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
+                    }
                     return null;
                 }
             }

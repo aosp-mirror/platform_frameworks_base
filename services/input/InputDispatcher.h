@@ -682,6 +682,7 @@ private:
 
         nsecs_t lastEventTime; // the time when the event was originally captured
         nsecs_t lastDispatchTime; // the time when the last event was dispatched
+        int32_t originalKeyCodeForFallback; // original keycode for fallback in progress, -1 if none
 
         explicit Connection(const sp<InputChannel>& inputChannel,
                 const sp<InputWindowHandle>& inputWindowHandle);

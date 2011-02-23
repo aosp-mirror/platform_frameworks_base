@@ -3211,14 +3211,52 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                     // be used as modifiers) but it will ensure that fallback keys do not
                     // get stuck.  This takes care of the case where the application does not handle
                     // the original DOWN so we generate a fallback DOWN but it does handle
-                    // the original UP in which case we would not generate the fallback UP.
+                    // the original UP in which case we want to send a fallback CANCEL.
                     synthesizeCancelationEventsForConnectionLocked(connection,
                             InputState::CANCEL_FALLBACK_EVENTS,
-                            "application handled a non-fallback event, canceling all fallback events");
+                            "application handled a non-fallback event, "
+                            "canceling all fallback events");
+                    connection->originalKeyCodeForFallback = -1;
                 } else {
-                    // If the application did not handle a non-fallback key, then ask
-                    // the policy what to do with it.  We might generate a fallback key
-                    // event here.
+                    // If the application did not handle a non-fallback key, first check
+                    // that we are in a good state to handle the fallback key.  Then ask
+                    // the policy what to do with it.
+                    if (connection->originalKeyCodeForFallback < 0) {
+                        if (keyEntry->action != AKEY_EVENT_ACTION_DOWN
+                                || keyEntry->repeatCount != 0) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                            LOGD("Unhandled key event: Skipping fallback since this "
+                                    "is not an initial down.  "
+                                    "keyCode=%d, action=%d, repeatCount=%d",
+                                    keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount);
+#endif
+                            goto SkipFallback;
+                        }
+
+                        // Start handling the fallback key on DOWN.
+                        connection->originalKeyCodeForFallback = keyEntry->keyCode;
+                    } else {
+                        if (keyEntry->keyCode != connection->originalKeyCodeForFallback) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                            LOGD("Unhandled key event: Skipping fallback since there is "
+                                    "already a different fallback in progress.  "
+                                    "keyCode=%d, originalKeyCodeForFallback=%d",
+                                    keyEntry->keyCode, connection->originalKeyCodeForFallback);
+#endif
+                            goto SkipFallback;
+                        }
+
+                        // Finish handling the fallback key on UP.
+                        if (keyEntry->action == AKEY_EVENT_ACTION_UP) {
+                            connection->originalKeyCodeForFallback = -1;
+                        }
+                    }
+
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                    LOGD("Unhandled key event: Asking policy to perform fallback action.  "
+                            "keyCode=%d, action=%d, repeatCount=%d",
+                            keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount);
+#endif
                     KeyEvent event;
                     initializeKeyEvent(&event, keyEntry);
 
@@ -3248,6 +3286,12 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                         keyEntry->downTime = event.getDownTime();
                         keyEntry->syntheticRepeat = false;
 
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                        LOGD("Unhandled key event: Dispatching fallback key.  "
+                                "fallbackKeyCode=%d, fallbackMetaState=%08x",
+                                keyEntry->keyCode, keyEntry->metaState);
+#endif
+
                         dispatchEntry->inProgress = false;
                         startDispatchCycleLocked(now(), connection);
                         return;
@@ -3257,6 +3301,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
         }
     }
 
+SkipFallback:
     startNextDispatchCycleLocked(now(), connection);
 }
 
@@ -3715,7 +3760,8 @@ InputDispatcher::Connection::Connection(const sp<InputChannel>& inputChannel,
         const sp<InputWindowHandle>& inputWindowHandle) :
         status(STATUS_NORMAL), inputChannel(inputChannel), inputWindowHandle(inputWindowHandle),
         inputPublisher(inputChannel),
-        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX) {
+        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX),
+        originalKeyCodeForFallback(-1) {
 }
 
 InputDispatcher::Connection::~Connection() {
