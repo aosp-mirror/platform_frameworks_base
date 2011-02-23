@@ -90,6 +90,10 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/STATIC_LIBRARIES/libstagefright_aacdec_intermediates)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/STATIC_LIBRARIES/libstagefright_mp3dec_intermediates)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/build.prop)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/ImageProcessing_intermediates/)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/ModelViewer_intermediates/)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/PerfTest_intermediates/)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/RSTest_intermediates/)
 
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
