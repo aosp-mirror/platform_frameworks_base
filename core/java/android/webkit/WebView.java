@@ -2272,6 +2272,17 @@ public class WebView extends AbsoluteLayout
         }
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
+        if (nativeHasCursorNode()) {
+            Rect cursorBounds = nativeGetCursorRingBounds();
+            if (!cursorBounds.contains(contentX, contentY)) {
+                int slop = viewToContentDimension(mNavSlop);
+                cursorBounds.inset(-slop, -slop);
+                if (cursorBounds.contains(contentX, contentY)) {
+                    contentX = (int) cursorBounds.centerX();
+                    contentY = (int) cursorBounds.centerY();
+                }
+            }
+        }
         mWebViewCore.sendMessage(EventHub.REQUEST_CURSOR_HREF,
                 contentX, contentY, hrefMsg);
     }
