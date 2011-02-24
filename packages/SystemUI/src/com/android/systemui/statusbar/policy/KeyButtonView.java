@@ -42,13 +42,12 @@ public class KeyButtonView extends ImageView {
 
     IWindowManager mWindowManager;
     long mDownTime;
-    boolean mSending, mLongPressed;
+    boolean mSending;
     int mCode;
     int mRepeat;
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-                mLongPressed = true;
                 mRepeat++;
                 sendEvent(KeyEvent.ACTION_DOWN,
                         KeyEvent.FLAG_FROM_SYSTEM
@@ -91,7 +90,6 @@ public class KeyButtonView extends ImageView {
                 mDownTime = SystemClock.uptimeMillis();
                 mRepeat = 0;
                 mSending = true;
-                mLongPressed = false;
                 sendEvent(KeyEvent.ACTION_DOWN,
                         KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY, mDownTime);
                 setPressed(true);
@@ -107,7 +105,7 @@ public class KeyButtonView extends ImageView {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
-                if (mSending && !mLongPressed) {
+                if (mSending) {
                     mSending = false;
                     sendEvent(KeyEvent.ACTION_UP,
                             KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
@@ -117,7 +115,7 @@ public class KeyButtonView extends ImageView {
                 break;
             case MotionEvent.ACTION_UP:
                 setPressed(false);
-                if (mSending && !mLongPressed) {
+                if (mSending) {
                     mSending = false;
                     sendEvent(KeyEvent.ACTION_UP,
                             KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
