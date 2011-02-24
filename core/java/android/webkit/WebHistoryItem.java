@@ -90,7 +90,9 @@ public class WebHistoryItem implements Cloneable {
      * another item, the identifiers will be the same even if they are not the
      * same object.
      * @return The id for this item.
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public int getId() {
         return mId;
     }

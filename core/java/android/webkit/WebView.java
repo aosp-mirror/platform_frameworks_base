@@ -851,13 +851,17 @@ public class WebView extends AbsoluteLayout
     private PictureListener mPictureListener;
     /**
      * Interface to listen for new pictures as they change.
+     * @deprecated This interface is now obsolete.
      */
+    @Deprecated
     public interface PictureListener {
         /**
          * Notify the listener that the picture has changed.
          * @param view The WebView that owns the picture.
          * @param picture The new picture.
+         * @deprecated This method is now obsolete.
          */
+        @Deprecated
         public void onNewPicture(WebView view, Picture picture);
     }
 
@@ -1500,7 +1504,9 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Enables platform notifications of data state and proxy changes.
+     * @deprecated Obsolete - platform notifications are always enabled.
      */
+    @Deprecated
     public static void enablePlatformNotifications() {
         Network.enablePlatformNotifications();
     }
@@ -1508,7 +1514,9 @@ public class WebView extends AbsoluteLayout
     /**
      * If platform notifications are enabled, this should be called
      * from the Activity's onPause() or onStop().
+     * @deprecated Obsolete - platform notifications are always enabled.
      */
+    @Deprecated
     public static void disablePlatformNotifications() {
         Network.disablePlatformNotifications();
     }
@@ -1611,7 +1619,9 @@ public class WebView extends AbsoluteLayout
      * @param dest The file to store the serialized picture data. Will be
      *             overwritten with this WebView's picture data.
      * @return True if the picture was successfully saved.
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public boolean savePicture(Bundle b, final File dest) {
         if (dest == null || b == null) {
             return false;
@@ -1672,7 +1682,9 @@ public class WebView extends AbsoluteLayout
      * @param b A Bundle containing the saved display data.
      * @param src The file where the picture data was stored.
      * @return True if the picture was successfully restored.
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public boolean restorePicture(Bundle b, File src) {
         if (src == null || b == null) {
             return false;
@@ -3609,7 +3621,9 @@ public class WebView extends AbsoluteLayout
      * Set the Picture listener. This is an interface used to receive
      * notifications of a new Picture.
      * @param listener An implementation of WebView.PictureListener.
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public void setPictureListener(PictureListener listener) {
         mPictureListener = listener;
     }
@@ -4965,7 +4979,9 @@ public class WebView extends AbsoluteLayout
     /**
      * Use this method to put the WebView into text selection mode.
      * Do not rely on this functionality; it will be deprecated in the future.
+     * @deprecated This method is now obsolete.
      */
+    @Deprecated
     public void emulateShiftHeld() {
         setUpSelect(false, 0, 0);
     }
@@ -8236,6 +8252,10 @@ public class WebView extends AbsoluteLayout
         mWebViewCore.sendMessage(EventHub.SET_BACKGROUND_COLOR, color);
     }
 
+    /**
+     * @deprecated This method is now obsolete.
+     */
+    @Deprecated
     public void debugDump() {
         nativeDebugDump();
         mWebViewCore.sendMessage(EventHub.DUMP_NAVTREE);
