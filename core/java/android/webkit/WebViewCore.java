@@ -558,7 +558,7 @@ final class WebViewCore {
     private native String nativeRetrieveHref(int x, int y);
     private native String nativeRetrieveAnchorText(int x, int y);
     private native String nativeRetrieveImageSource(int x, int y);
-
+    private native void nativeStopPaintingCaret();
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
 
@@ -1381,6 +1381,9 @@ final class WebViewCore {
                             nativeMoveMouseIfLatest(cData.mMoveGeneration,
                                     cData.mFrame,
                                     cData.mX, cData.mY);
+                            if (msg.arg1 == 1) {
+                                nativeStopPaintingCaret();
+                            }
                             break;
 
                         case REQUEST_CURSOR_HREF: {
