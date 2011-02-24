@@ -21,7 +21,28 @@ import java.util.ArrayList;
 import java.util.Set;
 
 
-
+/**
+ * Entry point for the layoutlib_create tool.
+ * <p/>
+ * The tool does not currently rely on any external configuration file.
+ * Instead the configuration is mostly done via the {@link CreateInfo} class.
+ * <p/>
+ * For a complete description of the tool and its implementation, please refer to
+ * the "README.txt" file at the root of this project.
+ * <p/>
+ * For a quick test, invoke this as follows:
+ * <pre>
+ * $ make layoutlib
+ * </pre>
+ * which does:
+ * <pre>
+ * $ make layoutlib_create &lt;bunch of framework jars&gt;
+ * $ out/host/linux-x86/framework/bin/layoutlib_create \
+ *        out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar \
+ *        out/target/common/obj/JAVA_LIBRARIES/core_intermediates/classes.jar \
+ *        out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar
+ * </pre>
+ */
 public class Main {
 
     public static void main(String[] args) {
@@ -42,15 +63,13 @@ public class Main {
         }
 
         try {
-            AsmGenerator agen = new AsmGenerator(log, osDestJar[0],
-                    CreateInfo.INJECTED_CLASSES,
-                    CreateInfo.OVERRIDDEN_METHODS,
-                    CreateInfo.RENAMED_CLASSES,
-                    CreateInfo.REMOVED_METHODS
-            );
+            AsmGenerator agen = new AsmGenerator(log, osDestJar[0], new CreateInfo());
 
             AsmAnalyzer aa = new AsmAnalyzer(log, osJarPath, agen,
-                    new String[] { "android.view.View" },   // derived from
+                    new String[] {                          // derived from
+                        "android.view.View",
+                        "android.app.Fragment"
+                    },
                     new String[] {                          // include classes
                         "android.*", // for android.R
                         "android.util.*",
