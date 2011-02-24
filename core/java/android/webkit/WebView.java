@@ -1339,7 +1339,7 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    /*
+    /**
      * returns the height of the titlebarview (if any). Does not care about
      * scrolling
      * @hide
