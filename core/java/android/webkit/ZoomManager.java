@@ -282,11 +282,13 @@ class ZoomManager {
     }
 
     public final float getReadingLevelScale() {
-        // The reading scale is at least 0.5f apart from the overview scale.
+        return computeScaleWithLimits(computeReadingLevelScale(getZoomOverviewScale()));
+    }
+
+    /* package */ final static float computeReadingLevelScale(float scale) {
+        // The reading scale is at least 0.5f apart from the input scale.
         final float MIN_SCALE_DIFF = 0.5f;
-        return computeScaleWithLimits(
-                   Math.max(getZoomOverviewScale() + MIN_SCALE_DIFF,
-                            DEFAULT_READING_LEVEL_SCALE));
+        return Math.max(scale + MIN_SCALE_DIFF, DEFAULT_READING_LEVEL_SCALE);
     }
 
     public final float getInvDefaultScale() {
