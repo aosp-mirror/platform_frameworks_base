@@ -629,7 +629,7 @@ class ZoomManager {
     }
 
     /* package */ float getZoomOverviewScale() {
-        return mWebView.getViewWidth() * mInvZoomOverviewWidth;
+        return computeScaleWithLimits(mWebView.getViewWidth() * mInvZoomOverviewWidth);
     }
 
     public boolean isInZoomOverview() {
@@ -722,7 +722,8 @@ class ZoomManager {
 
         public boolean onScale(ScaleGestureDetector detector) {
             // Prevent scaling beyond overview scale.
-            float scale = Math.max(detector.getScaleFactor() * mActualScale,
+            float scale = Math.max(
+                    computeScaleWithLimits(detector.getScaleFactor() * mActualScale),
                     getZoomOverviewScale());
             if (mPinchToZoomAnimating || willScaleTriggerZoom(scale)) {
                 mPinchToZoomAnimating = true;
@@ -732,6 +733,7 @@ class ZoomManager {
                 } else {
                     scale = Math.max(scale, mActualScale * 0.8f);
                 }
+                scale = computeScaleWithLimits(scale);
                 // if the scale change is too small, regard it as jitter and skip it.
                 if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_WITHOUT_JITTER) {
                     return false;
