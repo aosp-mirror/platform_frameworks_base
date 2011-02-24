@@ -205,7 +205,7 @@ import java.util.ArrayList;
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
-    
+
     private static final int PRIORITY = 100;
     private int mCurrentAlpha = 255;
 
@@ -7181,16 +7181,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Don't leave us in the middle of a batch edit.
             onEndBatchEdit();
 
-            hideInsertionPointCursorController();
             if (this instanceof ExtractEditText) {
                 // terminateTextSelectionMode removes selection, which we want to keep when
                 // ExtractEditText goes out of focus.
                 final int selStart = getSelectionStart();
                 final int selEnd = getSelectionEnd();
-                terminateSelectionActionMode();
+                hideControllers();
                 Selection.setSelection((Spannable) mText, selStart, selEnd);
             } else {
-                terminateSelectionActionMode();
+                hideControllers();
             }
 
             // No need to create the controller
@@ -8310,21 +8309,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return selectionStarted;
     }
 
-    /**
-     * Same as {@link #stopSelectionActionMode()}, except that there is no cursor controller
-     * fade out animation. Needed since the drawable and their alpha values are shared by all
-     * TextViews. Switching from one TextView to another would fade the cursor controllers in the
-     * new one otherwise.
-     */
-    private void terminateSelectionActionMode() {
-        stopSelectionActionMode();
-
-        // No need to create the controller, nothing to cancel in that case.
-        if (mSelectionModifierCursorController != null) {
-            mSelectionModifierCursorController.cancelFadeOutAnimation();
-        }
-    }
-
     private void stopSelectionActionMode() {
         if (mSelectionActionMode != null) {
             // This will hide the mSelectionModifierCursorController
@@ -8658,7 +8642,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mTouchToWindowOffsetX;
         private float mTouchToWindowOffsetY;
         private float mHotspotX;
-        private int mHeight;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
         // Where the touch position should be on the handle to ensure a maximum cursor visibility
@@ -8771,9 +8754,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             final int handleHeight = mDrawable.getIntrinsicHeight();
 
-            mTouchOffsetY = -handleHeight * 0.3f;
+            mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
-            mHeight = handleHeight;
             invalidate();
         }
 
@@ -8801,6 +8783,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mIsDragging = false;
             mContainer.dismiss();
             hidePastePopupWindow();
+            ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+            vto.removeOnScrollChangedListener(this);
         }
 
         public boolean isShowing() {
@@ -9224,10 +9208,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public boolean isShowing() {
             return mIsShowing;
-        }
-
-        public void cancelFadeOutAnimation() {
-            hide();
         }
 
         public void updatePosition(HandleView handle, int x, int y) {
