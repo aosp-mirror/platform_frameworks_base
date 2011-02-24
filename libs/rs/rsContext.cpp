@@ -270,19 +270,23 @@ void Context::deinitEGL() {
 
 Context::PushState::PushState(Context *con) {
     mRsc = con;
-    mFragment.set(con->getProgramFragment());
-    mVertex.set(con->getProgramVertex());
-    mStore.set(con->getProgramStore());
-    mRaster.set(con->getProgramRaster());
-    mFont.set(con->getFont());
+    if (con->mIsGraphicsContext) {
+        mFragment.set(con->getProgramFragment());
+        mVertex.set(con->getProgramVertex());
+        mStore.set(con->getProgramStore());
+        mRaster.set(con->getProgramRaster());
+        mFont.set(con->getFont());
+    }
 }
 
 Context::PushState::~PushState() {
-    mRsc->setProgramFragment(mFragment.get());
-    mRsc->setProgramVertex(mVertex.get());
-    mRsc->setProgramStore(mStore.get());
-    mRsc->setProgramRaster(mRaster.get());
-    mRsc->setFont(mFont.get());
+    if (mRsc->mIsGraphicsContext) {
+        mRsc->setProgramFragment(mFragment.get());
+        mRsc->setProgramVertex(mVertex.get());
+        mRsc->setProgramStore(mStore.get());
+        mRsc->setProgramRaster(mRaster.get());
+        mRsc->setFont(mFont.get());
+    }
 }
 
 
