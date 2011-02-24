@@ -484,8 +484,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dati di fabbrica"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Imposta il proxy globale del dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale effettivo è impostabile solo dal primo amministratore del dispositivo."</string>
-    <string name="policylab_expirePassword" msgid="2314569545488269564">"Imposta scadenza password"</string>
-    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Stabilisci la scadenza della password di blocco dello schermo"</string>
+    <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Imposta scadenza password"</string>
+    <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Stabilisci la scadenza della password di blocco dello schermo"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Imposta crittografia archivio"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Richiede la crittografia dei dati applicazione memorizzati"</string>
   <string-array name="phoneTypes">
@@ -957,7 +957,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Autorizzazione richiesta"\n"per l\'account <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metodo inserimento"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinc"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesso facilitato"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilità"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Sfondo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambia sfondo"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocollo di tunneling Point-to-Point"</string>

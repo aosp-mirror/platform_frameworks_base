@@ -484,8 +484,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Tyhjennä puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Aseta laitteen yleinen välityspalvelin"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Aseta laitteen yleinen välityspalvelin käyttöön, kun käytäntö on käytössä. Vain ensimmäinen laitteen järjestelmänhallitsija voi asettaa käytettävän yleisen välityspalvelimen."</string>
-    <string name="policylab_expirePassword" msgid="2314569545488269564">"Aseta salasanan umpeutuminen"</string>
-    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Valitse, kuinka pian ruudunlukituksen poiston salasana tulee vaihtaa"</string>
+    <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Aseta salasanan umpeutuminen"</string>
+    <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Valitse, kuinka pian ruudunlukituksen poiston salasana tulee vaihtaa"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Aseta tallennustilan salaus"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Pakota tallennettujen sovellustietojen salaus"</string>
   <string-array name="phoneTypes">
