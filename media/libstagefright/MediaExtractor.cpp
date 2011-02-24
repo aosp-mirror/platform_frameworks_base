@@ -67,12 +67,19 @@ sp<MediaExtractor> MediaExtractor::Create(
              mime, confidence);
     }
 
-    if (!strncmp(mime, "drm", 3)) {
-        const char *originalMime = strrchr(mime, '+') + 1;
-
-        if (!strncmp(mime, "drm+es_based", 12)) {
+    // DRM MIME type syntax is "drm+type+original" where
+    // type is "es_based" or "container_based" and
+    // original is the content's cleartext MIME type
+    if (!strncmp(mime, "drm+", 4)) {
+        const char *originalMime = strchr(mime+4, '+');
+        if (originalMime == NULL) {
+            // second + not found
+            return NULL;
+        }
+        ++originalMime;
+        if (!strncmp(mime, "drm+es_based+", 13)) {
             return new DRMExtractor(source, originalMime);
-        } else if (!strncmp(mime, "drm+container_based", 19)) {
+        } else if (!strncmp(mime, "drm+container_based+", 20)) {
             mime = originalMime;
         } else {
             return NULL;
