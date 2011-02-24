@@ -87,6 +87,18 @@ struct UseAndroidNativeBufferParams {
     const sp<android_native_buffer_t>& nativeBuffer;
 };
 
+// A pointer to this struct is passed to OMX_GetParameter when the extension
+// index for the 'OMX.google.android.index.getAndroidNativeBufferUsage'
+// extension is given.  The usage bits returned from this query will be used to
+// allocate the Gralloc buffers that get passed to the useAndroidNativeBuffer
+// command.
+struct GetAndroidNativeBufferUsageParams {
+    OMX_U32 nSize;              // IN
+    OMX_VERSIONTYPE nVersion;   // IN
+    OMX_U32 nPortIndex;         // IN
+    OMX_U32 nUsage;             // OUT
+};
+
 }  // namespace android
 
 extern android::OMXPluginBase *createOMXPlugin();
