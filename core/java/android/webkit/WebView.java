@@ -8022,18 +8022,17 @@ public class WebView extends AbsoluteLayout
     /*
      * Send a mouse move event to the webcore thread.
      *
-     * @param removeFocus Pass true if the "mouse" cursor is now over a node
-     *                    which wants key events, but it is not the focus. This
-     *                    will make the visual appear as though nothing is in
-     *                    focus.  Remove the WebTextView, if present, and stop
-     *                    drawing the blinking caret.
+     * @param removeFocus Pass true to remove the WebTextView, if present.
+     * @param stopPaintingCaret Stop drawing the blinking caret if true.
      * called by JNI
      */
-    private void sendMoveMouseIfLatest(boolean removeFocus) {
+    @SuppressWarnings("unused")
+    private void sendMoveMouseIfLatest(boolean removeFocus, boolean stopPaintingCaret) {
         if (removeFocus) {
             clearTextEntry();
         }
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE_IF_LATEST,
+                stopPaintingCaret ? 1 : 0, 0,
                 cursorData());
     }
 
