@@ -484,8 +484,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Telefon ohne Warnung löschen"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Den globalen Proxy des Geräts festlegen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den globalen Proxy des Geräts zur Verwendung während der Aktivierung der Richtlinie festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
-    <string name="policylab_expirePassword" msgid="2314569545488269564">"Ablauf des Passworts festlegen"</string>
-    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Zeitraum bis zur Änderung des Passworts für die Bildschirmsperre festlegen"</string>
+    <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf des Passworts festlegen"</string>
+    <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Zeitraum bis zur Änderung des Passworts für die Bildschirmsperre festlegen"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Speicherverschlüsselung"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Anforderung, dass gespeicherte Anwendungsdaten verschlüsselt werden"</string>
   <string-array name="phoneTypes">

@@ -484,8 +484,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Dzēš tālruņa datus bez brīdinājuma, veicot rūpnīcas datu atiestatīšanu"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Iestatīt ierīces globālo starpniekserveri"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Iestatiet izmantojamo ierīces globālo starpniekserveri, kad ir iespējota politika. Spēkā esošo globālo starpniekserveri iestata tikai pirmās ierīces administrators."</string>
-    <string name="policylab_expirePassword" msgid="2314569545488269564">"Paroles termiņa izb. iest."</string>
-    <string name="policydesc_expirePassword" msgid="7276906351852798814">"Kontrolē ekrāna bloķēšanas paroles maiņas intervālu"</string>
+    <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Paroles termiņa izb. iest."</string>
+    <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kontrolē ekrāna bloķēšanas paroles maiņas intervālu"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Skatīt atmiņas šifrējumu"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Pieprasīt, lai saglabātie lietojumprogrammas dati tiktu šifrēti"</string>
   <string-array name="phoneTypes">
