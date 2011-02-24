@@ -62,12 +62,6 @@ public class UsbManager {
      *
      * This intent is sent when a USB device is attached to the USB bus when in host mode.
      * <ul>
-     * <li> {@link #EXTRA_DEVICE_NAME} containing the device's name (String)
-     * <li> {@link #EXTRA_VENDOR_ID} containing the device's vendor ID (Integer)
-     * <li> {@link #EXTRA_PRODUCT_ID} containing the device's product ID (Integer)
-     * <li> {@link #EXTRA_DEVICE_CLASS} } containing the device class (Integer)
-     * <li> {@link #EXTRA_DEVICE_SUBCLASS} containing the device subclass (Integer)
-     * <li> {@link #EXTRA_DEVICE_PROTOCOL} containing the device protocol (Integer)
      * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.UsbDevice}
      * for the attached device
      * </ul>
@@ -80,7 +74,8 @@ public class UsbManager {
      *
      * This intent is sent when a USB device is detached from the USB bus when in host mode.
      * <ul>
-     * <li> {@link #EXTRA_DEVICE_NAME} containing the device's name (String)
+     * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.UsbDevice}
+     * for the detached device
      * </ul>
      */
     public static final String ACTION_USB_DEVICE_DETACHED =
@@ -91,10 +86,6 @@ public class UsbManager {
      *
      * This intent is sent when a USB accessory is attached.
      * <ul>
-     * <li> {@link #EXTRA_ACCESSORY_MANUFACTURER} containing the accessory's manufacturer (String)
-     * <li> {@link #EXTRA_ACCESSORY_PRODUCT} containing the accessory's product name (String)
-     * <li> {@link #EXTRA_ACCESSORY_TYPE} containing the accessory's type (String)
-     * <li> {@link #EXTRA_ACCESSORY_VERSION} containing the accessory's version (String)
      * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
      * for the attached accessory
      * </ul>
@@ -172,43 +163,7 @@ public class UsbManager {
 
     /**
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} and
-     * {@link #ACTION_USB_DEVICE_DETACHED} broadcasts
-     * containing the device's ID (String).
-     */
-    public static final String EXTRA_DEVICE_NAME = "device_name";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
-     * containing the device's vendor ID (int).
-     */
-    public static final String EXTRA_VENDOR_ID = "vendor_id";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
-     * containing the device's product ID (int).
-     */
-    public static final String EXTRA_PRODUCT_ID = "product_id";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
-     * containing the device's class (int).
-     */
-    public static final String EXTRA_DEVICE_CLASS = "device_class";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
-     * containing the device's class (int).
-     */
-    public static final String EXTRA_DEVICE_SUBCLASS = "device_subclass";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
-     * containing the device's class (int).
-     */
-    public static final String EXTRA_DEVICE_PROTOCOL = "device_protocol";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} broadcast
+     * {@link #ACTION_USB_DEVICE_DETACHED} broadcasts.
      * containing the UsbDevice object for the device.
      */
 
@@ -219,30 +174,6 @@ public class UsbManager {
      * containing the UsbAccessory object for the accessory.
      */
     public static final String EXTRA_ACCESSORY = "accessory";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
-     * containing the accessory's manufacturer name.
-     */
-    public static final String EXTRA_ACCESSORY_MANUFACTURER = "accessory-manufacturer";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
-     * containing the accessory's product name.
-     */
-    public static final String EXTRA_ACCESSORY_PRODUCT = "accessory-product";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
-     * containing the accessory's type.
-     */
-    public static final String EXTRA_ACCESSORY_TYPE = "accessory-type";
-
-    /**
-     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
-     * containing the accessory's version.
-     */
-    public static final String EXTRA_ACCESSORY_VERSION = "accessory-version";
 
     private IUsbManager mService;
 

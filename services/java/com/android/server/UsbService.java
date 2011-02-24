@@ -143,19 +143,6 @@ class UsbService extends IUsbManager.Stub {
                 mCurrentAccessory = new UsbAccessory(strings);
                 Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
                 intent.putExtra(UsbManager.EXTRA_ACCESSORY, mCurrentAccessory);
-                // add strings as separate extras to allow filtering
-                if (strings[0] != null) {
-                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_MANUFACTURER, strings[0]);
-                }
-                if (strings[1] != null) {
-                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_PRODUCT, strings[1]);
-                }
-                if (strings[2] != null) {
-                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_TYPE, strings[2]);
-                }
-                if (strings[3] != null) {
-                    intent.putExtra(UsbManager.EXTRA_ACCESSORY_VERSION, strings[3]);
-                }
                 mContext.sendBroadcast(intent);
             } else {
                 Log.e(TAG, "nativeGetAccessoryStrings failed");
@@ -360,12 +347,6 @@ class UsbService extends IUsbManager.Stub {
             mDevices.put(deviceName, device);
 
             Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-            intent.putExtra(UsbManager.EXTRA_DEVICE_NAME, deviceName);
-            intent.putExtra(UsbManager.EXTRA_VENDOR_ID, vendorID);
-            intent.putExtra(UsbManager.EXTRA_PRODUCT_ID, productID);
-            intent.putExtra(UsbManager.EXTRA_DEVICE_CLASS, deviceClass);
-            intent.putExtra(UsbManager.EXTRA_DEVICE_SUBCLASS, deviceSubclass);
-            intent.putExtra(UsbManager.EXTRA_DEVICE_PROTOCOL, deviceProtocol);
             intent.putExtra(UsbManager.EXTRA_DEVICE, device);
             Log.d(TAG, "usbDeviceAdded, sending " + intent);
             mContext.sendBroadcast(intent);
@@ -378,7 +359,7 @@ class UsbService extends IUsbManager.Stub {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
                 Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
-                intent.putExtra(UsbManager.EXTRA_DEVICE_NAME, deviceName);
+                intent.putExtra(UsbManager.EXTRA_DEVICE, device);
                 Log.d(TAG, "usbDeviceRemoved, sending " + intent);
                 mContext.sendBroadcast(intent);
             }
