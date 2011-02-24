@@ -5748,9 +5748,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 }
                 mCamera.save();
                 mMatrix.preScale(mScaleX, mScaleY, mPivotX, mPivotY);
-                mCamera.rotateX(mRotationX);
-                mCamera.rotateY(mRotationY);
-                mCamera.rotateZ(-mRotation);
+                mCamera.rotate(mRotationX, mRotationY, -mRotation);
                 mCamera.getMatrix(matrix3D);
                 matrix3D.preTranslate(-mPivotX, -mPivotY);
                 matrix3D.postTranslate(mPivotX + mTranslationX, mPivotY + mTranslationY);

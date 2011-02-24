@@ -397,6 +397,16 @@
         </activity>
 
         <activity
+                android:name="Animated3dActivity"
+                android:label="_Animated 3d"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="SimplePathsActivity"
                 android:label="_SimplePaths">
             <intent-filter>
