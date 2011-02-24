@@ -928,6 +928,7 @@ public class VideoEditorImpl implements VideoEditor {
             String name;
             MediaItem currentMediaItem = null;
             Overlay currentOverlay = null;
+            boolean regenerateProjectThumbnail = false;
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     case XmlPullParser.START_TAG: {
@@ -948,6 +949,11 @@ public class VideoEditorImpl implements VideoEditor {
                             } catch (Exception ex) {
                                 Log.w(TAG, "Cannot load media item: " + mediaItemId, ex);
                                 currentMediaItem = null;
+
+                                // First media item is invalid, mark for project thumbnail removal
+                                if (mMediaItems.size() == 0) {
+                                    regenerateProjectThumbnail = true;
+                                }
                                 // Ignore the media item
                                 ignoredMediaItems.add(mediaItemId);
                             }
@@ -1043,6 +1049,11 @@ public class VideoEditorImpl implements VideoEditor {
                 eventType = parser.next();
             }
             computeTimelineDuration();
+            // Regenerate project thumbnail
+            if (regenerateProjectThumbnail) {
+                generateProjectThumbnail();
+                regenerateProjectThumbnail = false;
+            }
         } finally {
             if (fis != null) {
                 fis.close();
