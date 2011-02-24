@@ -8655,9 +8655,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private float mTouchToWindowOffsetX;
         private float mTouchToWindowOffsetY;
         private float mHotspotX;
-        private float mHotspotY;
         private int mHeight;
+        // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
+        // Where the touch position should be on the handle to ensure a maximum cursor visibility
+        private float mIdealVerticalOffset;
         private int mLastParentX;
         private int mLastParentY;
         private float mDownPositionX, mDownPositionY;
@@ -8767,7 +8769,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int handleHeight = mDrawable.getIntrinsicHeight();
 
             mTouchOffsetY = -handleHeight * 0.3f;
-            mHotspotY = 0;
+            mIdealVerticalOffset = 0.7f * handleHeight;
             mHeight = handleHeight;
             invalidate();
         }
@@ -8836,7 +8838,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int[] coords = mTempCoords;
             hostView.getLocationInWindow(coords);
             final int posX = coords[0] + mPositionX + (int) mHotspotX;
-            final int posY = coords[1] + mPositionY + (int) mHotspotY;
+            final int posY = coords[1] + mPositionY;
 
             // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
             return posX >= clip.left - 1 && posX <= clip.right + 1 &&
@@ -8901,6 +8903,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mDownPositionY = ev.getRawY();
                     mTouchToWindowOffsetX = mDownPositionX - mPositionX;
                     mTouchToWindowOffsetY = mDownPositionY - mPositionY;
+
                     final int[] coords = mTempCoords;
                     TextView.this.getLocationInWindow(coords);
                     mLastParentX = coords[0];
@@ -8915,8 +8918,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case MotionEvent.ACTION_MOVE: {
                     final float rawX = ev.getRawX();
                     final float rawY = ev.getRawY();
+
+                    // Vertical hysteresis: vertical down movement tends to snap to ideal offset
+                    final float previousVerticalOffset = mTouchToWindowOffsetY - mLastParentY;
+                    final float currentVerticalOffset = rawY - mPositionY - mLastParentY;
+                    float newVerticalOffset;
+                    if (previousVerticalOffset < mIdealVerticalOffset) {
+                        newVerticalOffset = Math.min(currentVerticalOffset, mIdealVerticalOffset);
+                        newVerticalOffset = Math.max(newVerticalOffset, previousVerticalOffset);
+                    } else {
+                        newVerticalOffset = Math.max(currentVerticalOffset, mIdealVerticalOffset);
+                        newVerticalOffset = Math.min(newVerticalOffset, previousVerticalOffset);
+                    }
+                    mTouchToWindowOffsetY = newVerticalOffset + mLastParentY;
+
                     final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
-                    final float newPosY = rawY - mTouchToWindowOffsetY + mHotspotY + mTouchOffsetY;
+                    final float newPosY = rawY - mTouchToWindowOffsetY + mTouchOffsetY;
 
                     mController.updatePosition(this, Math.round(newPosX), Math.round(newPosY));
                     break;
@@ -8954,18 +8971,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mIsDragging;
         }
 
-        void positionAtCursor(final int offset, boolean bottom) {
+        void positionAtCursor(final int offset) {
             addPositionToTouchUpFilter(offset);
             final int width = mDrawable.getIntrinsicWidth();
             final int height = mDrawable.getIntrinsicHeight();
             final int line = mLayout.getLineForOffset(offset);
-            final int lineTop = mLayout.getLineTop(line);
             final int lineBottom = mLayout.getLineBottom(line);
 
             final Rect bounds = sCursorControllerTempRect;
             bounds.left = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX) +
                     TextView.this.mScrollX;
-            bounds.top = (bottom ? lineBottom : lineTop - mHeight) + TextView.this.mScrollY;
+            bounds.top = lineBottom + TextView.this.mScrollY;
 
             bounds.right = bounds.left + width;
             bounds.bottom = bounds.top + height;
@@ -9107,10 +9123,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void updatePosition(HandleView handle, int x, int y) {
             final int previousOffset = getSelectionStart();
-            int offset = getHysteresisOffset(x, y, previousOffset);
+            final int newOffset = getOffset(x, y);
 
-            if (offset != previousOffset) {
-                updateOffset(handle, offset);
+            if (newOffset != previousOffset) {
+                updateOffset(handle, newOffset);
                 removePastePopupCallback();
             }
             hideDelayed();
@@ -9131,7 +9147,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return;
             }
 
-            getHandle().positionAtCursor(offset, true);
+            getHandle().positionAtCursor(offset);
         }
 
         public int getCurrentOffset(HandleView handle) {
@@ -9215,8 +9231,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int selectionStart = getSelectionStart();
             int selectionEnd = getSelectionEnd();
 
-            final int previousOffset = handle == mStartHandle ? selectionStart : selectionEnd;
-            int offset = getHysteresisOffset(x, y, previousOffset);
+            int offset = getOffset(x, y);
 
             // Handle the case where start and end are swapped, making sure start <= end
             if (handle == mStartHandle) {
@@ -9275,8 +9290,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             // The handles have been created since the controller isShowing().
-            mStartHandle.positionAtCursor(selectionStart, true);
-            mEndHandle.positionAtCursor(selectionEnd, true);
+            mStartHandle.positionAtCursor(selectionStart);
+            mEndHandle.positionAtCursor(selectionEnd);
         }
 
         public int getCurrentOffset(HandleView handle) {
@@ -9404,26 +9419,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int line = getLineAtCoordinate(y);
         final int offset = getOffsetAtCoordinate(line, x);
         return offset;
-    }
-
-    int getHysteresisOffset(int x, int y, int previousOffset) {
-        final Layout layout = getLayout();
-        if (layout == null) return -1;
-
-        int line = getLineAtCoordinate(y);
-        final int previousLine = layout.getLineForOffset(previousOffset);
-        final int previousLineTop = layout.getLineTop(previousLine);
-        final int previousLineBottom = layout.getLineBottom(previousLine);
-        final int hysteresisThreshold = (previousLineBottom - previousLineTop) / 8;
-
-        // If new line is just before or after previous line and y position is less than
-        // hysteresisThreshold away from previous line, keep cursor on previous line.
-        if (((line == previousLine + 1) && ((y - previousLineBottom) < hysteresisThreshold)) ||
-            ((line == previousLine - 1) && ((previousLineTop - y)    < hysteresisThreshold))) {
-            line = previousLine;
-        }
-
-        return getOffsetAtCoordinate(line, x);
     }
 
     private int convertToLocalHorizontalCoordinate(int x) {
