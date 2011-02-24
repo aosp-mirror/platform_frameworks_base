@@ -608,6 +608,7 @@ public class NumberPicker extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 mLastMotionEventY = mLastDownEventY = event.getY();
                 removeAllCallbacks();
+                hideInputControls();
                 mBeginEditOnUpEvent = false;
                 mAdjustScrollerOnUpEvent = true;
                 if (mDrawSelectorWheel) {
@@ -620,7 +621,6 @@ public class NumberPicker extends LinearLayout {
                     }
                     mBeginEditOnUpEvent = scrollersFinished;
                     mAdjustScrollerOnUpEvent = true;
-                    hideInputControls();
                     return true;
                 }
                 if (isEventInViewHitRect(event, mInputText)
@@ -630,7 +630,6 @@ public class NumberPicker extends LinearLayout {
                                 && isEventInViewHitRect(event, mDecrementButton))) {
                     mAdjustScrollerOnUpEvent = false;
                     setDrawSelectorWheel(true);
-                    hideInputControls();
                     return true;
                 }
                 break;
@@ -641,7 +640,6 @@ public class NumberPicker extends LinearLayout {
                     mBeginEditOnUpEvent = false;
                     onScrollStateChange(OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                     setDrawSelectorWheel(true);
-                    hideInputControls();
                     return true;
                 }
                 break;
@@ -1265,7 +1263,6 @@ public class NumberPicker extends LinearLayout {
             }
         }
 
-        postAdjustScrollerCommand(flingScroller.getDuration());
         invalidate();
     }
 
