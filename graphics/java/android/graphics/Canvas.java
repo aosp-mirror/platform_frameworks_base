@@ -74,6 +74,8 @@ public class Canvas {
      */
     public static final int DIRECTION_RTL = 1;
     
+    // This field is used to finalize the native Canvas properly
+    @SuppressWarnings({"UnusedDeclaration"})
     private final CanvasFinalizer mFinalizer;
 
     private static class CanvasFinalizer {
@@ -480,6 +482,7 @@ public class Canvas {
      * 
      * @hide
      */
+    @SuppressWarnings({"UnusedDeclaration"})
     public int getNativeMatrix() {
         return 0;
     }
@@ -945,10 +948,19 @@ public class Canvas {
     }
 
     /**
-     * Draw the specified arc, which will be scaled to fit inside the
-     * specified oval. If the sweep angle is >= 360, then the oval is drawn
+     * <p>Draw the specified arc, which will be scaled to fit inside the
+     * specified oval.</p>
+     * 
+     * <p>If the start angle is negative or >= 360, the start angle is treated
+     * as start angle modulo 360.</p>
+     * 
+     * <p>If the sweep angle is >= 360, then the oval is drawn
      * completely. Note that this differs slightly from SkPath::arcTo, which
-     * treats the sweep angle mod 360.
+     * treats the sweep angle modulo 360. If the sweep angle is negative,
+     * the sweep angle is treated as sweep angle modulo 360</p>
+     * 
+     * <p>The arc is drawn clockwise. An angle of 0 degrees correspond to the
+     * geometric angle of 0 degrees (3 o'clock on a watch.)</p>
      *
      * @param oval       The bounds of oval used to define the shape and size
      *                   of the arc
