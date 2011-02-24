@@ -217,7 +217,7 @@ static bool Resync(
 
             *inout_pos += len;
 
-            LOGV("skipped ID3 tag, new starting offset is %ld (0x%08lx)",
+            LOGV("skipped ID3 tag, new starting offset is %lld (0x%016llx)",
                  *inout_pos, *inout_pos);
         }
 
@@ -241,7 +241,7 @@ static bool Resync(
     do {
         if (pos >= *inout_pos + kMaxBytesChecked) {
             // Don't scan forever.
-            LOGV("giving up at offset %ld", pos);
+            LOGV("giving up at offset %lld", pos);
             break;
         }
 
@@ -251,7 +251,15 @@ static bool Resync(
             } else {
                 memcpy(buf, tmp, remainingBytes);
                 bytesToRead = kMaxReadBytes - remainingBytes;
-                totalBytesRead = source->readAt(pos, buf + remainingBytes, bytesToRead);
+
+                /*
+                 * The next read position should start from the end of
+                 * the last buffer, and thus should include the remaining
+                 * bytes in the buffer.
+                 */
+                totalBytesRead = source->readAt(pos + remainingBytes,
+                                                buf + remainingBytes,
+                                                bytesToRead);
                 if (totalBytesRead <= 0) {
                     break;
                 }
@@ -283,7 +291,7 @@ static bool Resync(
             continue;
         }
 
-        LOGV("found possible 1st frame at %ld (header = 0x%08x)", pos, header);
+        LOGV("found possible 1st frame at %lld (header = 0x%08x)", pos, header);
 
         // We found what looks like a valid frame,
         // now find its successors.
@@ -314,7 +322,7 @@ static bool Resync(
                 break;
             }
 
-            LOGV("found subsequent frame #%d at %ld", j + 2, test_pos);
+            LOGV("found subsequent frame #%d at %lld", j + 2, test_pos);
 
             test_pos += test_frame_size;
         }
