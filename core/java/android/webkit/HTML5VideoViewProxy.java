@@ -77,6 +77,7 @@ class HTML5VideoViewProxy extends Handler
     private static final int PAUSED            = 203;
 
     private static final String COOKIE = "Cookie";
+    private static final String HIDE_URL_LOGS = "x-hide-urls-from-log";
 
     // Timer thread -> UI thread
     private static final int TIMEUPDATE = 300;
@@ -184,10 +185,12 @@ class HTML5VideoViewProxy extends Handler
             mVideoView.setMediaController(new MediaController(proxy.getContext()));
 
             String cookieValue = CookieManager.getInstance().getCookie(url);
-            Map<String, String> headers = null;
+            Map<String, String> headers = new HashMap<String, String>();
             if (cookieValue != null) {
-                headers = new HashMap<String, String>();
                 headers.put(COOKIE, cookieValue);
+            }
+            if (mCurrentProxy.getWebView().isPrivateBrowsingEnabled()) {
+                headers.put(HIDE_URL_LOGS, "true");
             }
 
             mVideoView.setVideoURI(Uri.parse(url), headers);
