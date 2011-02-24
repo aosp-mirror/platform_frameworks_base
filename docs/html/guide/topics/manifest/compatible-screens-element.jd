@@ -101,6 +101,38 @@ href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple 
     </dd>
   </dl>
 </dd>
+
+<dt>example</dt>
+<dd>
+<p>If your application is compatible with only small and normal screens, regardless
+of screen density, then you must specify eight different {@code &lt;screen&gt;} elements,
+because each screen size has four different density configurations. You must declare each one of
+these; any combination of size and density that you do <em>not</em> specify is considered a screen
+configuration with which your application is <em>not</em> compatible. Here's what the manifest
+entry looks like if your application is compatible with only small and normal screens:</p>
+
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;compatible-screens>
+        &lt;!-- all small size screens -->
+        &lt;screen android:screenSize="small" android:screenDensity="ldpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="mdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="hdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="xhdpi" />
+        &lt;!-- all normal size screens -->
+        &lt;screen android:screenSize="normal" android:screenDensity="ldpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="mdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="hdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="xhdpi" />
+    &lt;/compatible-screens>
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+</dd>
+
 <dt>introduced in:</dt>
 <dd>API Level 9</dd>
 <dt>see also:</dt>
