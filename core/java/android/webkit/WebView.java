@@ -5414,12 +5414,20 @@ public class WebView extends AbsoluteLayout
 
             // If WebKit already showed no interests in this sequence of events,
             // WebView handles them directly.
-            if (mPreventDefault == PREVENT_DEFAULT_NO && action == MotionEvent.ACTION_MOVE) {
+            if (mPreventDefault == PREVENT_DEFAULT_NO) {
                 handleMultiTouchInWebView(ev);
             } else {
                 passMultiTouchToWebKit(ev);
             }
             return true;
+        } else {
+            final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+            if (detector != null) {
+                // ScaleGestureDetector needs a consistent event stream to operate properly.
+                // It won't take any action with fewer than two pointers, but it needs to
+                // update internal bookkeeping state.
+                detector.onTouchEvent(ev);
+            }
         }
 
         // Skip ACTION_MOVE for single touch if it's still handling multi-touch.
@@ -5958,23 +5966,6 @@ public class WebView extends AbsoluteLayout
 
         float x = ev.getX();
         float y = ev.getY();
-
-        if (!detector.isInProgress() &&
-            ev.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN) {
-            // Insert a fake pointer down event in order to start
-            // the zoom scale detector.
-            MotionEvent temp = MotionEvent.obtain(ev);
-            // Clear the original event and set it to
-            // ACTION_POINTER_DOWN.
-            try {
-                temp.setAction(temp.getAction() &
-                ~MotionEvent.ACTION_MASK |
-                MotionEvent.ACTION_POINTER_DOWN);
-                detector.onTouchEvent(temp);
-            } finally {
-                temp.recycle();
-            }
-        }
 
         detector.onTouchEvent(ev);
 
