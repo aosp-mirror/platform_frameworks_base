@@ -447,6 +447,13 @@ static jobject Bitmap_extractAlpha(JNIEnv* env, jobject clazz,
     JavaPixelAllocator allocator(env);
 
     src->extractAlpha(dst, paint, &allocator, &offset);
+    // If Skia can't allocate pixels for destination bitmap, it resets
+    // it, that is set its pixels buffer to NULL, and zero width and height.
+    if (dst->getPixels() == NULL && src->getPixels() != NULL) {
+        delete dst;
+        doThrowOOME(env, "failed to allocate pixels for alpha");
+        return NULL;
+    }
     if (offsetXY != 0 && env->GetArrayLength(offsetXY) >= 2) {
         int* array = env->GetIntArrayElements(offsetXY, NULL);
         array[0] = offset.fX;
@@ -651,4 +658,3 @@ int register_android_graphics_Bitmap(JNIEnv* env)
     return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
                                 gBitmapMethods, SK_ARRAY_COUNT(gBitmapMethods));
 }
-
