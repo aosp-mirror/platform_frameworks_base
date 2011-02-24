@@ -41,9 +41,14 @@ namespace android {
 
 const int64_t LiveSession::kMaxPlaylistAgeUs = 15000000ll;
 
-LiveSession::LiveSession()
-    : mDataSource(new LiveDataSource),
-      mHTTPDataSource(new NuHTTPDataSource),
+LiveSession::LiveSession(uint32_t flags)
+    : mFlags(flags),
+      mDataSource(new LiveDataSource),
+      mHTTPDataSource(
+              new NuHTTPDataSource(
+                  (mFlags & kFlagIncognito)
+                    ? NuHTTPDataSource::kFlagIncognito
+                    : 0)),
       mPrevBandwidthIndex(-1),
       mLastPlaylistFetchTimeUs(-1),
       mSeqNumber(-1),
@@ -139,7 +144,11 @@ void LiveSession::onConnect(const sp<AMessage> &msg) {
     AString url;
     CHECK(msg->findString("url", &url));
 
-    LOGI("onConnect '%s'", url.c_str());
+    if (!(mFlags & kFlagIncognito)) {
+        LOGI("onConnect '%s'", url.c_str());
+    } else {
+        LOGI("onConnect <URL suppressed>");
+    }
 
     mMasterURL = url;
 

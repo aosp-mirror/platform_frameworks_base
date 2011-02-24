@@ -71,7 +71,17 @@ void NuPlayer::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
 
-    msg->setObject("source", new HTTPLiveSource(url));
+    uint32_t flags = 0;
+
+    if (headers) {
+        ssize_t index = headers->indexOfKey(String8("x-hide-urls-from-log"));
+
+        if (index >= 0) {
+            flags |= HTTPLiveSource::kFlagIncognito;
+        }
+    }
+
+    msg->setObject("source", new HTTPLiveSource(url, flags));
     msg->post();
 }
 

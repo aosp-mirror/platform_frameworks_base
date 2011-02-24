@@ -29,7 +29,11 @@ struct M3UParser;
 struct NuHTTPDataSource;
 
 struct LiveSession : public AHandler {
-    LiveSession();
+    enum Flags {
+        // Don't log any URLs.
+        kFlagIncognito = 1,
+    };
+    LiveSession(uint32_t flags = 0);
 
     sp<DataSource> getDataSource();
 
@@ -66,6 +70,8 @@ private:
         AString mURI;
         unsigned long mBandwidth;
     };
+
+    uint32_t mFlags;
 
     sp<LiveDataSource> mDataSource;
 
