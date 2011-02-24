@@ -440,10 +440,17 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
     }
 
     // Set up the native window.
-    // XXX TODO: Get the gralloc usage flags from the OMX plugin!
+    OMX_U32 usage = 0;
+    err = mOMX->getGraphicBufferUsage(mNode, kPortIndexOutput, &usage);
+    if (err != 0) {
+        LOGW("querying usage flags from OMX IL component failed: %d", err);
+        // XXX: Currently this error is logged, but not fatal.
+        usage = 0;
+    }
+
     err = native_window_set_usage(
             mNativeWindow.get(),
-            GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
+            usage | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
 
     if (err != 0) {
         LOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
@@ -2286,4 +2293,3 @@ void ACodec::FlushingState::changeStateIfWeOwnAllBuffers() {
 }
 
 }  // namespace android
-
