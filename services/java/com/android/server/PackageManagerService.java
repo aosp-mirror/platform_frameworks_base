@@ -146,6 +146,12 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_UPGRADE = false;
     private static final boolean DEBUG_INSTALL = false;
     private static final boolean DEBUG_STOPPED = false;
+    private static final boolean DEBUG_REMOVE = false;
+    private static final boolean DEBUG_SHOW_INFO = false;
+    private static final boolean DEBUG_PACKAGE_INFO = false;
+    private static final boolean DEBUG_INTENT_MATCHING = false;
+    private static final boolean DEBUG_PACKAGE_SCANNING = false;
+    private static final boolean DEBUG_APP_DIR_OBSERVER = false;
 
     private static final boolean MULTIPLE_APPLICATION_UIDS = true;
     private static final int RADIO_UID = Process.PHONE_UID;
@@ -154,8 +160,6 @@ class PackageManagerService extends IPackageManager.Stub {
     private static final int FIRST_APPLICATION_UID =
         Process.FIRST_APPLICATION_UID;
     private static final int MAX_APPLICATION_UIDS = 1000;
-
-    private static final boolean SHOW_INFO = false;
 
     private static final boolean GET_CERTIFICATES = true;
 
@@ -370,6 +374,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
+
     final private DefaultContainerConnection mDefContainerConn =
             new DefaultContainerConnection();
     class DefaultContainerConnection implements ServiceConnection {
@@ -1355,9 +1360,8 @@ class PackageManagerService extends IPackageManager.Stub {
     public PackageInfo getPackageInfo(String packageName, int flags) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
-            if (Config.LOGV) Log.v(
-                TAG, "getPackageInfo " + packageName
-                + ": " + p);
+            if (DEBUG_PACKAGE_INFO)
+                Log.v(TAG, "getPackageInfo " + packageName + ": " + p);
             if (p != null) {
                 return generatePackageInfo(p, flags);
             }
@@ -1408,9 +1412,8 @@ class PackageManagerService extends IPackageManager.Stub {
     public int[] getPackageGids(String packageName) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
-            if (Config.LOGV) Log.v(
-                TAG, "getPackageGids" + packageName
-                + ": " + p);
+            if (DEBUG_PACKAGE_INFO)
+                Log.v(TAG, "getPackageGids" + packageName + ": " + p);
             if (p != null) {
                 final PackageSetting ps = (PackageSetting)p.mExtras;
                 final SharedUserSetting suid = ps.sharedUser;
@@ -1522,7 +1525,7 @@ class PackageManagerService extends IPackageManager.Stub {
     public ApplicationInfo getApplicationInfo(String packageName, int flags) {
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
-            if (Config.LOGV) Log.v(
+            if (DEBUG_PACKAGE_INFO) Log.v(
                     TAG, "getApplicationInfo " + packageName
                     + ": " + p);
             if (p != null) {
@@ -1597,7 +1600,7 @@ class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
-            if (Config.LOGV) Log.v(TAG, "getActivityInfo " + component + ": " + a);
+            if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLP(a.info, flags)) {
                 return PackageParser.generateActivityInfo(a, flags);
             }
@@ -1611,7 +1614,7 @@ class PackageManagerService extends IPackageManager.Stub {
     public ActivityInfo getReceiverInfo(ComponentName component, int flags) {
         synchronized (mPackages) {
             PackageParser.Activity a = mReceivers.mActivities.get(component);
-            if (Config.LOGV) Log.v(
+            if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getReceiverInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLP(a.info, flags)) {
                 return PackageParser.generateActivityInfo(a, flags);
@@ -1623,7 +1626,7 @@ class PackageManagerService extends IPackageManager.Stub {
     public ServiceInfo getServiceInfo(ComponentName component, int flags) {
         synchronized (mPackages) {
             PackageParser.Service s = mServices.mServices.get(component);
-            if (Config.LOGV) Log.v(
+            if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getServiceInfo " + component + ": " + s);
             if (s != null && mSettings.isEnabledLP(s.info, flags)) {
                 return PackageParser.generateServiceInfo(s, flags);
@@ -1635,7 +1638,7 @@ class PackageManagerService extends IPackageManager.Stub {
     public ProviderInfo getProviderInfo(ComponentName component, int flags) {
         synchronized (mPackages) {
             PackageParser.Provider p = mProvidersByComponent.get(component);
-            if (Config.LOGV) Log.v(
+            if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getProviderInfo " + component + ": " + p);
             if (p != null && mSettings.isEnabledLP(p.info, flags)) {
                 return PackageParser.generateProviderInfo(p, flags);
@@ -2113,7 +2116,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         List<ResolveInfo> results = queryIntentActivities(
             intent, resolvedType, flags|PackageManager.GET_RESOLVED_FILTER);
-        if (Config.LOGV) Log.v(TAG, "Query " + intent + ": " + results);
+        if (DEBUG_INTENT_MATCHING) Log.v(TAG, "Query " + intent + ": " + results);
 
         int specificsPos = 0;
         int N;
@@ -2133,7 +2136,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
 
-                if (Config.LOGV) Log.v(TAG, "Specific #" + i + ": " + sintent);
+                if (DEBUG_INTENT_MATCHING) Log.v(TAG, "Specific #" + i + ": " + sintent);
                 String action = sintent.getAction();
                 if (resultsAction != null && resultsAction.equals(action)) {
                     // If this action was explicitly requested, then don't
@@ -2166,7 +2169,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
                 // Look for any generic query activities that are duplicates
                 // of this specific one, and remove them from the results.
-                if (Config.LOGV) Log.v(TAG, "Specific #" + i + ": " + ai);
+                if (DEBUG_INTENT_MATCHING) Log.v(TAG, "Specific #" + i + ": " + ai);
                 N = results.size();
                 int j;
                 for (j=specificsPos; j<N; j++) {
@@ -2176,7 +2179,7 @@ class PackageManagerService extends IPackageManager.Stub {
                                     comp.getPackageName()))
                         || (action != null && sri.filter.matchAction(action))) {
                         results.remove(j);
-                        if (Config.LOGV) Log.v(
+                        if (DEBUG_INTENT_MATCHING) Log.v(
                             TAG, "Removing duplicate item from " + j
                             + " due to specific " + specificsPos);
                         if (ri == null) {
@@ -2224,7 +2227,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     final ResolveInfo rij = results.get(j);
                     if (rij.filter != null && rij.filter.hasAction(action)) {
                         results.remove(j);
-                        if (Config.LOGV) Log.v(
+                        if (DEBUG_INTENT_MATCHING) Log.v(
                             TAG, "Removing duplicate item from " + j
                             + " due to action " + action + " at " + i);
                         j--;
@@ -2263,7 +2266,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if (Config.LOGV) Log.v(TAG, "Result: " + results);
+        if (DEBUG_INTENT_MATCHING) Log.v(TAG, "Result: " + results);
         return results;
     }
 
@@ -2869,7 +2872,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if ((parseFlags&PackageParser.PARSE_CHATTY) != 0 && Config.LOGD) Log.d(
+        if (DEBUG_PACKAGE_SCANNING && (parseFlags&PackageParser.PARSE_CHATTY) != 0) Log.d(
                 TAG, "Scanning package " + pkg.packageName);
         if (mPackages.containsKey(pkg.packageName)
                 || mSharedLibraries.containsKey(pkg.packageName)) {
@@ -2942,18 +2945,9 @@ class PackageManagerService extends IPackageManager.Stub {
                     mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                     return null;
                 }
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0 && Config.LOGD) {
+                if (DEBUG_PACKAGE_SCANNING && (parseFlags & PackageParser.PARSE_CHATTY) != 0) {
                     Log.d(TAG, "Shared UserID " + pkg.mSharedUserId + " (uid="
                             + suid.userId + "): packages=" + suid.packages);
-                }
-            }
-
-            if (false) {
-                if (pkg.mOriginalPackages != null) {
-                    Log.w(TAG, "WAITING FOR DEBUGGER");
-                    Debug.waitForDebugger();
-                    Log.i(TAG, "Package " + pkg.packageName + " from original packages"
-                            + pkg.mOriginalPackages);
                 }
             }
             
@@ -3205,7 +3199,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 pkg.applicationInfo.dataDir = dataPath.getPath();
             } else {
-                if ((parseFlags&PackageParser.PARSE_CHATTY) != 0 && Config.LOGV)
+                if (DEBUG_PACKAGE_SCANNING && (parseFlags & PackageParser.PARSE_CHATTY) != 0)
                     Log.v(TAG, "Want this data dir: " + dataPath);
                 //invoke installer to do the actual installation
                 if (mInstaller != null) {
@@ -3386,7 +3380,8 @@ class PackageManagerService extends IPackageManager.Stub {
                             } else {
                                 p.info.authority = p.info.authority + ";" + names[j];
                             }
-                            if ((parseFlags&PackageParser.PARSE_CHATTY) != 0 && Config.LOGD)
+                            if (DEBUG_PACKAGE_SCANNING
+                                    && (parseFlags & PackageParser.PARSE_CHATTY) != 0)
                                 Log.d(TAG, "Registered content provider: " + names[j] +
                                         ", className = " + p.info.name +
                                         ", isSyncable = " + p.info.isSyncable);
@@ -3410,7 +3405,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Providers: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Providers: " + r);
             }
 
             N = pkg.services.size();
@@ -3430,7 +3425,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Services: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Services: " + r);
             }
 
             N = pkg.receivers.size();
@@ -3450,7 +3445,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Receivers: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Receivers: " + r);
             }
 
             N = pkg.activities.size();
@@ -3470,7 +3465,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Activities: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Activities: " + r);
             }
 
             N = pkg.permissionGroups.size();
@@ -3504,7 +3499,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Permission Groups: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Permission Groups: " + r);
             }
 
             N = pkg.permissions.size();
@@ -3569,7 +3564,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Permissions: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Permissions: " + r);
             }
 
             N = pkg.instrumentation.size();
@@ -3592,7 +3587,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Instrumentation: " + r);
+                if (DEBUG_PACKAGE_SCANNING) Log.d(TAG, "  Instrumentation: " + r);
             }
 
             if (pkg.protectedBroadcasts != null) {
@@ -3635,8 +3630,8 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     void removePackageLI(PackageParser.Package pkg, boolean chatty) {
-        if (chatty && Config.LOGD) Log.d(
-            TAG, "Removing package " + pkg.applicationInfo.packageName );
+        if (DEBUG_INSTALL && chatty)
+            Log.d(TAG, "Removing package " + pkg.applicationInfo.packageName);
 
         synchronized (mPackages) {
             clearPackagePreferredActivitiesLP(pkg.packageName);
@@ -3665,7 +3660,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 for (int j = 0; j < names.length; j++) {
                     if (mProviders.get(names[j]) == p) {
                         mProviders.remove(names[j]);
-                        if (chatty && Config.LOGD) Log.d(
+                        if (DEBUG_REMOVE && chatty) Log.d(
                             TAG, "Unregistered content provider: " + names[j] +
                             ", className = " + p.info.name +
                             ", isSyncable = " + p.info.isSyncable);
@@ -3681,7 +3676,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Providers: " + r);
+                if (DEBUG_REMOVE) Log.d(TAG, "  Providers: " + r);
             }
 
             N = pkg.services.size();
@@ -3699,7 +3694,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Services: " + r);
+                if (DEBUG_REMOVE) Log.d(TAG, "  Services: " + r);
             }
 
             N = pkg.receivers.size();
@@ -3717,7 +3712,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Receivers: " + r);
+                if (DEBUG_REMOVE) Log.d(TAG, "  Receivers: " + r);
             }
 
             N = pkg.activities.size();
@@ -3735,7 +3730,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Activities: " + r);
+                if (DEBUG_REMOVE) Log.d(TAG, "  Activities: " + r);
             }
 
             N = pkg.permissions.size();
@@ -3761,7 +3756,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Permissions: " + r);
+                if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
             }
 
             N = pkg.instrumentation.size();
@@ -3779,7 +3774,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
             }
             if (r != null) {
-                if (Config.LOGD) Log.d(TAG, "  Instrumentation: " + r);
+                if (DEBUG_REMOVE) Log.d(TAG, "  Instrumentation: " + r);
             }
         }
     }
@@ -4065,10 +4060,12 @@ class PackageManagerService extends IPackageManager.Stub {
         public final void addActivity(PackageParser.Activity a, String type) {
             final boolean systemApp = isSystemApp(a.info.applicationInfo);
             mActivities.put(a.getComponentName(), a);
-            if (SHOW_INFO || Config.LOGV) Log.v(
+            if (DEBUG_SHOW_INFO)
+                Log.v(
                 TAG, "  " + type + " " +
                 (a.info.nonLocalizedLabel != null ? a.info.nonLocalizedLabel : a.info.name) + ":");
-            if (SHOW_INFO || Config.LOGV) Log.v(TAG, "    Class=" + a.info.name);
+            if (DEBUG_SHOW_INFO)
+                Log.v(TAG, "    Class=" + a.info.name);
             int NI = a.intents.size();
             for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
@@ -4077,7 +4074,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     Log.w(TAG, "Package " + a.info.applicationInfo.packageName + " has activity "
                             + a.className + " with priority > 0, forcing to 0");
                 }
-                if (SHOW_INFO || Config.LOGV) {
+                if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
@@ -4090,14 +4087,16 @@ class PackageManagerService extends IPackageManager.Stub {
 
         public final void removeActivity(PackageParser.Activity a, String type) {
             mActivities.remove(a.getComponentName());
-            if (SHOW_INFO || Config.LOGV) Log.v(
-                TAG, "  " + type + " " +
-                (a.info.nonLocalizedLabel != null ? a.info.nonLocalizedLabel : a.info.name) + ":");
-            if (SHOW_INFO || Config.LOGV) Log.v(TAG, "    Class=" + a.info.name);
-            int NI = a.intents.size();
+            if (DEBUG_SHOW_INFO) {
+                Log.v(TAG, "  " + type + " "
+                        + (a.info.nonLocalizedLabel != null ? a.info.nonLocalizedLabel
+                                : a.info.name) + ":");
+                Log.v(TAG, "    Class=" + a.info.name);
+            }
+            final int NI = a.intents.size();
             for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
-                if (SHOW_INFO || Config.LOGV) {
+                if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
@@ -4235,16 +4234,17 @@ class PackageManagerService extends IPackageManager.Stub {
 
         public final void addService(PackageParser.Service s) {
             mServices.put(s.getComponentName(), s);
-            if (SHOW_INFO || Config.LOGV) Log.v(
-                TAG, "  " + (s.info.nonLocalizedLabel != null
+            if (DEBUG_SHOW_INFO) {
+                Log.v(TAG, "  "
+                        + (s.info.nonLocalizedLabel != null
                         ? s.info.nonLocalizedLabel : s.info.name) + ":");
-            if (SHOW_INFO || Config.LOGV) Log.v(
-                    TAG, "    Class=" + s.info.name);
-            int NI = s.intents.size();
+                Log.v(TAG, "    Class=" + s.info.name);
+            }
+            final int NI = s.intents.size();
             int j;
             for (j=0; j<NI; j++) {
                 PackageParser.ServiceIntentInfo intent = s.intents.get(j);
-                if (SHOW_INFO || Config.LOGV) {
+                if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
@@ -4257,16 +4257,16 @@ class PackageManagerService extends IPackageManager.Stub {
 
         public final void removeService(PackageParser.Service s) {
             mServices.remove(s.getComponentName());
-            if (SHOW_INFO || Config.LOGV) Log.v(
-                TAG, "  " + (s.info.nonLocalizedLabel != null
+            if (DEBUG_SHOW_INFO) {
+                Log.v(TAG, "  " + (s.info.nonLocalizedLabel != null
                         ? s.info.nonLocalizedLabel : s.info.name) + ":");
-            if (SHOW_INFO || Config.LOGV) Log.v(
-                    TAG, "    Class=" + s.info.name);
-            int NI = s.intents.size();
+                Log.v(TAG, "    Class=" + s.info.name);
+            }
+            final int NI = s.intents.size();
             int j;
             for (j=0; j<NI; j++) {
                 PackageParser.ServiceIntentInfo intent = s.intents.get(j);
-                if (SHOW_INFO || Config.LOGV) {
+                if (DEBUG_SHOW_INFO) {
                     Log.v(TAG, "    IntentFilter:");
                     intent.dump(new LogPrinter(Log.VERBOSE, TAG), "      ");
                 }
@@ -4493,13 +4493,12 @@ class PackageManagerService extends IPackageManager.Stub {
                     fullPathStr = fullPath.getPath();
                 }
 
-                if (Config.LOGV) Log.v(
-                    TAG, "File " + fullPathStr + " changed: "
-                    + Integer.toHexString(event));
+                if (DEBUG_APP_DIR_OBSERVER)
+                    Log.v(TAG, "File " + fullPathStr + " changed: " + Integer.toHexString(event));
 
                 if (!isPackageFilename(path)) {
-                    if (Config.LOGV) Log.v(
-                        TAG, "Ignoring change of non-package file: " + fullPathStr);
+                    if (DEBUG_APP_DIR_OBSERVER)
+                        Log.v(TAG, "Ignoring change of non-package file: " + fullPathStr);
                     return;
                 }
 
@@ -9951,7 +9950,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 return true;
             }
             final PackageSetting packageSettings = mPackages.get(componentInfo.packageName);
-            if (Config.LOGV) {
+            if (DEBUG_SETTINGS) {
                 Log.v(TAG, "isEnabledLock - packageName = " + componentInfo.packageName
                            + " componentName = " + componentInfo.name);
                 Log.v(TAG, "enabledComponents: "
@@ -9960,11 +9959,6 @@ class PackageManagerService extends IPackageManager.Stub {
                            + Arrays.toString(packageSettings.disabledComponents.toArray()));
             }
             if (packageSettings == null) {
-                if (false) {
-                    Log.w(TAG, "WAITING FOR DEBUGGER");
-                    Debug.waitForDebugger();
-                    Log.i(TAG, "We will crash!");
-                }
                 return false;
             }
             if (packageSettings.enabled == COMPONENT_ENABLED_STATE_DISABLED
