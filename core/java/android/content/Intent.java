@@ -1312,6 +1312,17 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REPLACED = "android.intent.action.PACKAGE_REPLACED";
     /**
+     * Broadcast Action: A new version of your application has been installed
+     * over an existing one.  This is only sent to the application that was
+     * replaced.  It does not contain any additional data; to receive it, just
+     * use an intent filter for this action.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MY_PACKAGE_REPLACED = "android.intent.action.MY_PACKAGE_REPLACED";
+    /**
      * Broadcast Action: An existing application package has been removed from
      * the device.  The data contains the name of the package.  The package
      * that is being installed does <em>not</em> receive this Intent.
@@ -1401,6 +1412,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
+
+    /**
+     * Broadcast Action: Sent to the installer package of an application
+     * when that application is first launched (that is the first time it
+     * is moved out of the stopped state).  The data contains the name of the package.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_FIRST_LAUNCH = "android.intent.action.PACKAGE_FIRST_LAUNCH";
 
     /**
      * Broadcast Action: Resources for a set of packages (which were
@@ -2442,6 +2464,20 @@ public class Intent implements Parcelable, Cloneable {
      * been found to create the final resolved list.
      */
     public static final int FLAG_DEBUG_LOG_RESOLUTION = 0x00000008;
+    /**
+     * If set, this intent will not match any components in packages that
+     * are currently stopped.  If this is not set, then the default behavior
+     * is to include such applications in the result.
+     */
+    public static final int FLAG_EXCLUDE_STOPPED_PACKAGES = 0x00000010;
+    /**
+     * If set, this intent will always match any components in packages that
+     * are currently stopped.  This is the default behavior when
+     * {@link #FLAG_EXCLUDE_STOPPED_PACKAGES} is not set.  If both of these
+     * flags are set, this one wins (it allows overriding of exclude for
+     * places where the framework may automatically set the exclude flag).
+     */
+    public static final int FLAG_INCLUDE_STOPPED_PACKAGES = 0x00000020;
 
     /**
      * If set, the new activity is not kept in the history stack.  As soon as
@@ -3913,6 +3949,12 @@ public class Intent implements Parcelable, Cloneable {
      */
     public int getFlags() {
         return mFlags;
+    }
+
+    /** @hide */
+    public boolean isExcludingStopped() {
+        return (mFlags&(FLAG_EXCLUDE_STOPPED_PACKAGES|FLAG_INCLUDE_STOPPED_PACKAGES))
+                == FLAG_EXCLUDE_STOPPED_PACKAGES;
     }
 
     /**

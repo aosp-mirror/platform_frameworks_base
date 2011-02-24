@@ -187,6 +187,7 @@ final class BluetoothInputProfileHandler {
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
         intent.putExtra(BluetoothInputDevice.EXTRA_PREVIOUS_STATE, prevState);
         intent.putExtra(BluetoothInputDevice.EXTRA_STATE, state);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mContext.sendBroadcast(intent, BluetoothService.BLUETOOTH_PERM);
 
         debugLog("InputDevice state : device: " + device + " State:" + prevState + "->" + state);

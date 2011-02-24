@@ -278,6 +278,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_LARGE_HEAP = 1<<20;
 
     /**
+     * Value for {@link #flags}: true if this application's package is in
+     * the stopped state.
+     */
+    public static final int FLAG_STOPPED = 1<<21;
+
+    /**
      * Value for {@link #flags}: Set to true if the application has been
      * installed using the forward lock option.
      *
