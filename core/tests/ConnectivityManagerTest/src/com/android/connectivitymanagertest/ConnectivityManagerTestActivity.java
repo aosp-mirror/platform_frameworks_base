@@ -21,30 +21,34 @@ import android.content.Context;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.State;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IPowerManager;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.LinearLayout;
+
+import com.android.internal.util.AsyncChannel;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import android.widget.LinearLayout;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.State;
 
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration.KeyMgmt;
 
 /**
  * An activity registered with connectivity manager broadcast
@@ -180,6 +184,24 @@ public class ConnectivityManagerTestActivity extends Activity {
         }
     }
 
+    private class WifiServiceHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        //AsyncChannel in msg.obj
+                    } else {
+                        log("Failed to establish AsyncChannel connection");
+                    }
+                    break;
+                default:
+                    //Ignore
+                    break;
+            }
+        }
+    }
+
     public ConnectivityManagerTestActivity() {
         mState = State.UNKNOWN;
         scanResultAvailable = false;
@@ -216,6 +238,8 @@ public class ConnectivityManagerTestActivity extends Activity {
         mCM = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)getSystemService(Context.WIFI_SERVICE);
+        mWifiManager.asyncConnect(this, new WifiServiceHandler());
+
         initializeNetworkStates();
 
         if (mWifiManager.isWifiEnabled()) {
