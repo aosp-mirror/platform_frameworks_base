@@ -3079,7 +3079,7 @@ class PackageManagerService extends IPackageManager.Stub {
             // package isn't already installed, since we don't want to break
             // things that are installed.
             if ((scanMode&SCAN_NEW_INSTALL) != 0) {
-                int N = pkg.providers.size();
+                final int N = pkg.providers.size();
                 int i;
                 for (i=0; i<N; i++) {
                     PackageParser.Provider p = pkg.providers.get(i);
@@ -4043,7 +4043,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             mFlags = flags;
             final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
-            int N = packageActivities.size();
+            final int N = packageActivities.size();
             ArrayList<ArrayList<PackageParser.ActivityIntentInfo>> listCut =
                 new ArrayList<ArrayList<PackageParser.ActivityIntentInfo>>(N);
 
@@ -4066,7 +4066,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 (a.info.nonLocalizedLabel != null ? a.info.nonLocalizedLabel : a.info.name) + ":");
             if (DEBUG_SHOW_INFO)
                 Log.v(TAG, "    Class=" + a.info.name);
-            int NI = a.intents.size();
+            final int NI = a.intents.size();
             for (int j=0; j<NI; j++) {
                 PackageParser.ActivityIntentInfo intent = a.intents.get(j);
                 if (!systemApp && intent.getPriority() > 0 && "activity".equals(type)) {
@@ -4218,7 +4218,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             mFlags = flags;
             final boolean defaultOnly = (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0;
-            int N = packageServices.size();
+            final int N = packageServices.size();
             ArrayList<ArrayList<PackageParser.ServiceIntentInfo>> listCut =
                 new ArrayList<ArrayList<PackageParser.ServiceIntentInfo>>(N);
 
@@ -8624,7 +8624,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         public Object getUserIdLP(int uid) {
             if (uid >= FIRST_APPLICATION_UID) {
-                int N = mUserIds.size();
+                final int N = mUserIds.size();
                 final int index = uid - FIRST_APPLICATION_UID;
                 return index < N ? mUserIds.get(index) : null;
             } else {
@@ -8645,7 +8645,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         private void removeUserIdLP(int uid) {
             if (uid >= FIRST_APPLICATION_UID) {
-                int N = mUserIds.size();
+                final int N = mUserIds.size();
                 final int index = uid - FIRST_APPLICATION_UID;
                 if (index < N) mUserIds.set(index, null);
             } else {
@@ -8655,7 +8655,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
         private void replaceUserIdLP(int uid, Object obj) {
             if (uid >= FIRST_APPLICATION_UID) {
-                int N = mUserIds.size();
+                final int N = mUserIds.size();
                 final int index = uid - FIRST_APPLICATION_UID;
                 if (index < N) mUserIds.set(index, obj);
             } else {
@@ -9323,7 +9323,7 @@ class PackageManagerService extends IPackageManager.Stub {
 
             }
 
-            int N = mPendingPackages.size();
+            final int N = mPendingPackages.size();
             for (int i=0; i<N; i++) {
                 final PendingPackage pp = mPendingPackages.get(i);
                 Object idObj = getUserIdLP(pp.sharedId);
