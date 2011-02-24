@@ -5781,10 +5781,67 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * <p>Sets the distance along the Z axis (orthogonal to the X/Y plane on which
+     * views are drawn) from the camera to this view. The camera's distance
+     * affects 3D transformations, for instance rotations around the X and Y
+     * axis. If the rotationX or rotationY properties are changed and this view is
+     * large (more than half the size of the screen), it is recommended to always 
+     * use a camera distance that's greater than the height (X axis rotation) or
+     * the width (Y axis rotation) of this view.</p>
+     * 
+     * <p>The distance of the camera from the view plane can have an affect on the
+     * perspective distortion of the view when it is rotated around the x or y axis.
+     * For example, a large distance will result in a large viewing angle, and there
+     * will not be much perspective distortion of the view as it rotates. A short
+     * distance may cause much more perspective distortion upon rotation, and can 
+     * also result in some drawing artifacts if the rotated view ends up partially
+     * behind the camera (which is why the recommendation is to use a distance at
+     * least as far as the size of the view, if the view is to be rotated.)</p>
+     * 
+     * <p>The distance is expressed in "depth pixels." The default distance depends
+     * on the screen density. For instance, on a medium density display, the
+     * default distance is 1280. On a high density display, the default distance
+     * is 1920.</p>
+     * 
+     * <p>If you want to specify a distance that leads to visually consistent
+     * results across various densities, use the following formula:</p>
+     * <pre>
+     * float scale = context.getResources().getDisplayMetrics().density;
+     * view.setCameraDistance(distance * scale);
+     * </pre>
+     * 
+     * <p>The density scale factor of a high density display is 1.5,
+     * and 1920 = 1280 * 1.5.</p>
+     * 
+     * @param distance The distance in "depth pixels", if negative the opposite
+     *        value is used
+     * 
+     * @see #setRotationX(float) 
+     * @see #setRotationY(float) 
+     */
+    public void setCameraDistance(float distance) {
+        invalidateParentCaches();
+        invalidate(false);
+
+        final float dpi = mResources.getDisplayMetrics().densityDpi;
+        if (mCamera == null) {
+            mCamera = new Camera();
+            matrix3D = new Matrix();
+        }
+
+        mCamera.setLocation(0.0f, 0.0f, -Math.abs(distance) / dpi);
+        mMatrixDirty = true;
+
+        invalidate(false);
+    }
+
+    /**
      * The degrees that the view is rotated around the pivot point.
      *
+     * @see #setRotation(float) 
      * @see #getPivotX()
      * @see #getPivotY()
+     * 
      * @return The degrees of rotation.
      */
     public float getRotation() {
@@ -5796,8 +5853,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * result in clockwise rotation.
      *
      * @param rotation The degrees of rotation.
+     * 
+     * @see #getRotation() 
      * @see #getPivotX()
      * @see #getPivotY()
+     * @see #setRotationX(float) 
+     * @see #setRotationY(float) 
      *
      * @attr ref android.R.styleable#View_rotation
      */
@@ -5818,6 +5879,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @see #getPivotX()
      * @see #getPivotY()
+     * @see #setRotationY(float) 
+     * 
      * @return The degrees of Y rotation.
      */
     public float getRotationY() {
@@ -5828,10 +5891,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Sets the degrees that the view is rotated around the vertical axis through the pivot point.
      * Increasing values result in counter-clockwise rotation from the viewpoint of looking
      * down the y axis.
+     * 
+     * When rotating large views, it is recommended to adjust the camera distance
+     * accordingly. Refer to {@link #setCameraDistance(float)} for more information.
      *
      * @param rotationY The degrees of Y rotation.
+     * 
+     * @see #getRotationY() 
      * @see #getPivotX()
      * @see #getPivotY()
+     * @see #setRotation(float)
+     * @see #setRotationX(float) 
+     * @see #setCameraDistance(float) 
      *
      * @attr ref android.R.styleable#View_rotationY
      */
@@ -5852,6 +5923,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @see #getPivotX()
      * @see #getPivotY()
+     * @see #setRotationX(float) 
+     * 
      * @return The degrees of X rotation.
      */
     public float getRotationX() {
@@ -5862,10 +5935,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Sets the degrees that the view is rotated around the horizontal axis through the pivot point.
      * Increasing values result in clockwise rotation from the viewpoint of looking down the
      * x axis.
+     * 
+     * When rotating large views, it is recommended to adjust the camera distance
+     * accordingly. Refer to {@link #setCameraDistance(float)} for more information.
      *
      * @param rotationX The degrees of X rotation.
+     * 
+     * @see #getRotationX() 
      * @see #getPivotX()
      * @see #getPivotY()
+     * @see #setRotation(float)
+     * @see #setRotationY(float) 
+     * @see #setCameraDistance(float) 
      *
      * @attr ref android.R.styleable#View_rotationX
      */
