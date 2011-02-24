@@ -38,7 +38,7 @@ public abstract class Rasterizer_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Rasterizer_Delegate> sManager =
-            new DelegateManager<Rasterizer_Delegate>();
+            new DelegateManager<Rasterizer_Delegate>(Rasterizer_Delegate.class);
 
     // ---- delegate helper data ----
 

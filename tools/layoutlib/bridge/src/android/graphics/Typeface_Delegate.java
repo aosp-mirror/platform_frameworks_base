@@ -46,7 +46,7 @@ public final class Typeface_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Typeface_Delegate> sManager =
-            new DelegateManager<Typeface_Delegate>();
+            new DelegateManager<Typeface_Delegate>(Typeface_Delegate.class);
 
     // ---- delegate helper data ----
     private static final String DEFAULT_FAMILY = "sans-serif";

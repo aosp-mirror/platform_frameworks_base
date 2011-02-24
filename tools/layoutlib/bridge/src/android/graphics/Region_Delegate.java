@@ -48,7 +48,7 @@ public class Region_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Region_Delegate> sManager =
-            new DelegateManager<Region_Delegate>();
+            new DelegateManager<Region_Delegate>(Region_Delegate.class);
 
     // ---- delegate helper data ----
 

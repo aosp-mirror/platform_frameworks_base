@@ -54,7 +54,7 @@ public final class Bitmap_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Bitmap_Delegate> sManager =
-            new DelegateManager<Bitmap_Delegate>();
+            new DelegateManager<Bitmap_Delegate>(Bitmap_Delegate.class);
 
     // ---- delegate helper data ----
 

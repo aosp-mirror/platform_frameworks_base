@@ -46,7 +46,7 @@ public final class Matrix_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Matrix_Delegate> sManager =
-            new DelegateManager<Matrix_Delegate>();
+            new DelegateManager<Matrix_Delegate>(Matrix_Delegate.class);
 
     // ---- delegate data ----
     private float mValues[] = new float[MATRIX_SIZE];

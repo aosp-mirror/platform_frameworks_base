@@ -50,7 +50,7 @@ public final class Path_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Path_Delegate> sManager =
-            new DelegateManager<Path_Delegate>();
+            new DelegateManager<Path_Delegate>(Path_Delegate.class);
 
     // ---- delegate data ----
     private FillType mFillType = FillType.WINDING;

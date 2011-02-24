@@ -40,7 +40,7 @@ public abstract class Shader_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Shader_Delegate> sManager =
-            new DelegateManager<Shader_Delegate>();
+            new DelegateManager<Shader_Delegate>(Shader_Delegate.class);
 
     // ---- delegate helper data ----
 

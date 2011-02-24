@@ -54,7 +54,7 @@ public final class Canvas_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Canvas_Delegate> sManager =
-            new DelegateManager<Canvas_Delegate>();
+            new DelegateManager<Canvas_Delegate>(Canvas_Delegate.class);
 
     // ---- delegate helper data ----
 
