@@ -1166,13 +1166,20 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
 
         case FOURCC('d', '2', '6', '3'):
         {
-            // d263 contains fixed 7 bytes:
-            // vendor - 4 bytes
-            // version - 1 byte
-            // level - 1 byte
-            // profile - 1 byte
-            char buffer[7];
-            if (chunk_data_size != (off64_t) sizeof(buffer)) {
+            /*
+             * d263 contains a fixed 7 bytes part:
+             *   vendor - 4 bytes
+             *   version - 1 byte
+             *   level - 1 byte
+             *   profile - 1 byte
+             * optionally, "d263" box itself may contain a 16-byte
+             * bit rate box (bitr)
+             *   average bit rate - 4 bytes
+             *   max bit rate - 4 bytes
+             */
+            char buffer[23];
+            if (chunk_data_size != 7 &&
+                chunk_data_size != 23) {
                 LOGE("Incorrect D263 box size %lld", chunk_data_size);
                 return ERROR_MALFORMED;
             }
