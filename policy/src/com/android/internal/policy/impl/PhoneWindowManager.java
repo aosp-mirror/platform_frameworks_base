@@ -601,19 +601,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     Runnable mHomeLongPress = new Runnable() {
         public void run() {
-            /*
-             * Eat the longpress so it won't dismiss the recent apps dialog when
-             * the user lets go of the home key
-             */
-            mHomePressed = false;
-            showRecentAppsDialog();
+            handleLongPressOnHome();
         }
     };
 
-    /**
-     * Create (if necessary) and launch the recent apps dialog
-     */
-    void showRecentAppsDialog() {
+    private void handleLongPressOnHome() {
         // We can't initialize this in init() since the configuration hasn't been loaded yet.
         if (mLongPressOnHomeBehavior < 0) {
             mLongPressOnHomeBehavior
@@ -627,14 +619,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
             performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
             sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
+
+            // Eat the longpress so it won't dismiss the recent apps dialog when
+            // the user lets go of the home key
+            mHomePressed = false;
         }
-        
+
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
-            // Fallback to dialog if we fail to launch the above.
-            if (mRecentAppsDialog == null) {
-                mRecentAppsDialog = new RecentApplicationsDialog(mContext);
-            }
-            mRecentAppsDialog.show();
+            showRecentAppsDialog();
         } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_ACTIVITY) {
             try {
                 Intent intent = new Intent();
@@ -648,6 +640,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Log.e(TAG, "Failed to launch RecentAppsIntent", e);
             }
         }
+    }
+
+    /**
+     * Create (if necessary) and launch the recent apps dialog
+     */
+    void showRecentAppsDialog() {
+        if (mRecentAppsDialog == null) {
+            mRecentAppsDialog = new RecentApplicationsDialog(mContext);
+        }
+        mRecentAppsDialog.show();
     }
     
     /** {@inheritDoc} */

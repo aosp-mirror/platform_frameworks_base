@@ -143,7 +143,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * this is 0, there is no key held down.
      */
     private int mPanelChordingKey;
-    private boolean mPanelMayLongPress;
 
     private ImageView mLeftIconView;
 
@@ -658,22 +657,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (event.getRepeatCount() == 0) {
             // The panel key was pushed, so set the chording key
             mPanelChordingKey = keyCode;
-            mPanelMayLongPress = false;
 
             PanelFeatureState st = getPanelState(featureId, true);
             if (!st.isOpen) {
-                if (getContext().getResources().getConfiguration().keyboard
-                        == Configuration.KEYBOARD_NOKEYS) {
-                    mPanelMayLongPress = true;
-                }
                 return preparePanel(st, event);
             }
-        } else if (mPanelMayLongPress && mPanelChordingKey == keyCode
-                && (event.getFlags()&KeyEvent.FLAG_LONG_PRESS) != 0) {
-            // We have had a long press while in a state where this
-            // should be executed...  do it!
-            mPanelChordingKey = 0;
-            mPanelMayLongPress = false;
         }
 
         return false;
@@ -688,7 +676,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // The panel key was released, so clear the chording key
         if (mPanelChordingKey != 0) {
             mPanelChordingKey = 0;
-            mPanelMayLongPress = false;
 
             if (event.isCanceled()) {
                 return;
@@ -2139,8 +2126,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public void onWindowFocusChanged(boolean hasWindowFocus) {
             super.onWindowFocusChanged(hasWindowFocus);
-
-            mPanelMayLongPress = false;
 
             // If the user is chording a menu shortcut, release the chord since
             // this window lost focus
