@@ -1,5 +1,4 @@
-#
-# Copyright (C) 2008 The Android Open Source Project
+# Copyright (C) 2011 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,27 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 LOCAL_PATH := $(call my-dir)
+
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under,src)
-LOCAL_JAVA_RESOURCE_DIRS := resources
+# Only compile source java files in this lib.
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
+LOCAL_MODULE := layoutlib-tests
+LOCAL_MODULE_TAGS := optional
 
-LOCAL_JAVA_LIBRARIES := \
-	kxml2-2.3.0 \
-	layoutlib_api-prebuilt \
-	tools-common-prebuilt
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-	temp_layoutlib \
-	ninepatch-prebuilt
-
-LOCAL_MODULE := layoutlib
+LOCAL_JAVA_LIBRARIES := layoutlib kxml2-2.3.0 junit
 
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 # Build all sub-directories
 include $(call all-makefiles-under,$(LOCAL_PATH))
-
