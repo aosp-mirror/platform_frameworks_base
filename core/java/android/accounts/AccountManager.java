@@ -188,6 +188,24 @@ public class AccountManager {
     public static final String KEY_ERROR_CODE = "errorCode";
     public static final String KEY_ERROR_MESSAGE = "errorMessage";
     public static final String KEY_USERDATA = "userdata";
+    /**
+     * Authenticators using 'customTokens' option will also get the UID of the
+     * caller
+     * @hide
+     */
+    public static final String KEY_CALLER_UID = "callerUid";
+
+    /**
+     * @hide 
+     */
+    public static final String KEY_CALLER_PID = "callerPid";
+
+    /**
+     * Boolean, if set and 'customTokens' the authenticator is responsible for
+     * notifications.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_ON_FAILURE = "notifyOnAuthFailure";
 
     public static final String ACTION_AUTHENTICATOR_INTENT =
             "android.accounts.AccountAuthenticator";
