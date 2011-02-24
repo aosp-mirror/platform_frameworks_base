@@ -40,7 +40,7 @@ public abstract class PathEffect_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<PathEffect_Delegate> sManager =
-            new DelegateManager<PathEffect_Delegate>();
+            new DelegateManager<PathEffect_Delegate>(PathEffect_Delegate.class);
 
     // ---- delegate helper data ----
 

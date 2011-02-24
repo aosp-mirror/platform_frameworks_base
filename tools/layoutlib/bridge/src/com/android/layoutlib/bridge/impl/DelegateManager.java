@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.impl;
 
+import com.android.layoutlib.bridge.util.Debug;
 import com.android.layoutlib.bridge.util.SparseWeakArray;
 
 import android.util.SparseArray;
@@ -69,6 +70,7 @@ import java.util.List;
  * @param <T> the delegate class to manage
  */
 public final class DelegateManager<T> {
+    private final Class<T> mClass;
     private final SparseWeakArray<T> mDelegates = new SparseWeakArray<T>();
     /** list used to store delegates when their main object holds a reference to them.
      * This is to ensure that the WeakReference in the SparseWeakArray doesn't get GC'ed
@@ -77,6 +79,10 @@ public final class DelegateManager<T> {
      */
     private final List<T> mJavaReferences = new ArrayList<T>();
     private int mDelegateCounter = 0;
+
+    public DelegateManager(Class<T> theClass) {
+        mClass = theClass;
+    }
 
     /**
      * Returns the delegate from the given native int.
@@ -91,6 +97,14 @@ public final class DelegateManager<T> {
     public T getDelegate(int native_object) {
         if (native_object > 0) {
             T delegate =  mDelegates.get(native_object);
+
+            if (Debug.DEBUG) {
+                if (delegate == null) {
+                    System.out.println("Unknown " + mClass.getSimpleName() + " with int " +
+                            native_object);
+                }
+            }
+
             assert delegate != null;
             return delegate;
         }
@@ -107,6 +121,11 @@ public final class DelegateManager<T> {
         mDelegates.put(native_object, newDelegate);
         assert !mJavaReferences.contains(newDelegate);
         mJavaReferences.add(newDelegate);
+
+        if (Debug.DEBUG) {
+            System.out.println("New " + mClass.getSimpleName() + " with int " + native_object);
+        }
+
         return native_object;
     }
 
@@ -116,6 +135,12 @@ public final class DelegateManager<T> {
      */
     public void removeJavaReferenceFor(int native_object) {
         T delegate = getDelegate(native_object);
+
+        if (Debug.DEBUG) {
+            System.out.println("Removing main Java ref on " + mClass.getSimpleName() +
+                    " with int " + native_object);
+        }
+
         mJavaReferences.remove(delegate);
     }
 }

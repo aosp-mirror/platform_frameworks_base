@@ -62,7 +62,7 @@ public class Paint_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Paint_Delegate> sManager =
-            new DelegateManager<Paint_Delegate>();
+            new DelegateManager<Paint_Delegate>(Paint_Delegate.class);
 
     // ---- delegate helper data ----
     private List<FontInfo> mFonts;

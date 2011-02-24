@@ -38,7 +38,7 @@ public abstract class DrawFilter_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<DrawFilter_Delegate> sManager =
-            new DelegateManager<DrawFilter_Delegate>();
+            new DelegateManager<DrawFilter_Delegate>(DrawFilter_Delegate.class);
 
     // ---- delegate helper data ----
 

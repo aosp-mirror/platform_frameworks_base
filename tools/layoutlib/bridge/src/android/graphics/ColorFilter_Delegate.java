@@ -38,7 +38,7 @@ public abstract class ColorFilter_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<ColorFilter_Delegate> sManager =
-            new DelegateManager<ColorFilter_Delegate>();
+            new DelegateManager<ColorFilter_Delegate>(ColorFilter_Delegate.class);
 
     // ---- delegate helper data ----
 

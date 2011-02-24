@@ -38,7 +38,7 @@ public abstract class MaskFilter_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<MaskFilter_Delegate> sManager =
-            new DelegateManager<MaskFilter_Delegate>();
+            new DelegateManager<MaskFilter_Delegate>(MaskFilter_Delegate.class);
 
     // ---- delegate helper data ----
 

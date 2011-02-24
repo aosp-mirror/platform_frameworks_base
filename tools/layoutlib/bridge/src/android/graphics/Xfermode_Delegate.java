@@ -40,7 +40,7 @@ public abstract class Xfermode_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Xfermode_Delegate> sManager =
-            new DelegateManager<Xfermode_Delegate>();
+            new DelegateManager<Xfermode_Delegate>(Xfermode_Delegate.class);
 
     // ---- delegate helper data ----
 
