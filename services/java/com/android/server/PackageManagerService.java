@@ -4581,13 +4581,8 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
-    public void setInstallerPackageName(String targetPackage,
-            String installerPackageName) {
-        PackageSetting pkgSetting;
+    public void setInstallerPackageName(String targetPackage, String installerPackageName) {
         final int uid = Binder.getCallingUid();
-        final int permission = mContext.checkCallingPermission(
-                android.Manifest.permission.INSTALL_PACKAGES);
-        final boolean allowedByPermission = (permission == PackageManager.PERMISSION_GRANTED);
         synchronized (mPackages) {
             PackageSetting targetPackageSetting = mSettings.mPackages.get(targetPackage);
             if (targetPackageSetting == null) {
