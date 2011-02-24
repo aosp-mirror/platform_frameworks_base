@@ -1342,8 +1342,9 @@ public class WebView extends AbsoluteLayout
     /*
      * returns the height of the titlebarview (if any). Does not care about
      * scrolling
+     * @hide
      */
-    int getTitleHeight() {
+    protected int getTitleHeight() {
         return mTitleBar != null ? mTitleBar.getHeight() : 0;
     }
 
@@ -3710,7 +3711,7 @@ public class WebView extends AbsoluteLayout
             } else if (mTitleGravity == Gravity.TOP) {
                 newTop = mScrollY;
             }
-            mTitleBar.setBottom(newTop + getTitleHeight());
+            mTitleBar.setBottom(newTop + mTitleBar.getHeight());
             mTitleBar.setTop(newTop);
         }
         return super.drawChild(canvas, child, drawingTime);
@@ -3790,7 +3791,7 @@ public class WebView extends AbsoluteLayout
             drawOverScrollBackground(canvas);
         }
         if (mTitleBar != null) {
-            canvas.translate(0, (int) mTitleBar.getHeight());
+            canvas.translate(0, getTitleHeight());
         }
         drawContent(canvas);
         canvas.restoreToCount(saveCount);
