@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.android;
 
-import android.content.ClipData;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -26,7 +25,6 @@ import android.os.RemoteException;
 import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InputChannel;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.WindowManager.LayoutParams;
@@ -54,10 +52,6 @@ public final class BridgeWindowSession implements IWindowSession {
         // pass for now.
     }
 
-    public void finishKey(IWindow arg0) throws RemoteException {
-        // pass for now.
-    }
-
     public boolean getInTouchMode() throws RemoteException {
         // pass for now.
         return false;
@@ -66,16 +60,6 @@ public final class BridgeWindowSession implements IWindowSession {
     public boolean performHapticFeedback(IWindow window, int effectId, boolean always) {
         // pass for now.
         return false;
-    }
-
-    public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
-        // pass for now.
-        return null;
-    }
-
-    public MotionEvent getPendingTrackballMove(IWindow arg0) throws RemoteException {
-        // pass for now.
-        return null;
     }
 
     public int relayout(IWindow arg0, LayoutParams arg1, int arg2, int arg3, int arg4,
@@ -101,38 +85,6 @@ public final class BridgeWindowSession implements IWindowSession {
         // pass for now.
     }
 
-    public void setInsets(IWindow window, int touchable, Rect contentInsets,
-            Rect visibleInsets, Region touchableRegion) {
-        // pass for now.
-    }
-
-    public IBinder prepareDrag(IWindow window, int flags,
-            int thumbnailWidth, int thumbnailHeight, Surface outSurface)
-            throws RemoteException {
-        // pass for now
-        return null;
-    }
-
-    public boolean performDrag(IWindow window, IBinder dragToken,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY,
-            ClipData data)
-            throws RemoteException {
-        // pass for now
-        return false;
-    }
-
-    public void reportDropResult(IWindow window, boolean consumed) throws RemoteException {
-        // pass for now
-    }
-
-    public void dragRecipientEntered(IWindow window) throws RemoteException {
-        // pass for now
-    }
-
-    public void dragRecipientExited(IWindow window) throws RemoteException {
-        // pass for now
-    }
-
     public void setWallpaperPosition(IBinder window, float x, float y,
         float xStep, float yStep) {
         // pass for now.
@@ -152,18 +104,13 @@ public final class BridgeWindowSession implements IWindowSession {
         // pass for now.
     }
 
-    public void closeSystemDialogs(String reason) {
-        // pass for now.
-    }
-
     public IBinder asBinder() {
         // pass for now.
         return null;
     }
 
-    public IBinder prepareDrag(IWindow arg0, boolean arg1, int arg2, int arg3, Surface arg4)
-            throws RemoteException {
+    public void setInsets(IWindow arg0, int arg1, Rect arg2, Rect arg3) throws RemoteException {
         // TODO Auto-generated method stub
-        return null;
+
     }
 }

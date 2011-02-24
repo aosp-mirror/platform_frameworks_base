@@ -87,7 +87,6 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
             info.mHasWindowFocus = true;
             info.mWindowVisibility = View.VISIBLE;
             info.mInTouchMode = false; // this is so that we can display selections.
-            info.mHardwareAccelerated = false;
             content.dispatchAttachedToWindow(info, 0);
 
 

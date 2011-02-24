@@ -166,12 +166,6 @@ public class GcSnapshot {
             return mOriginalCopy;
         }
 
-        void change() {
-            if (mBitmap != null) {
-                mBitmap.change();
-            }
-        }
-
         /**
          * Sets the clip for the graphics2D object associated with the layer.
          * This should be used over the normal Graphics2D setClip method.
@@ -611,7 +605,6 @@ public class GcSnapshot {
 
         try {
             drawable.draw(configuredGraphics2D, paint);
-            layer.change();
         } finally {
             // dispose Graphics2D object
             configuredGraphics2D.dispose();

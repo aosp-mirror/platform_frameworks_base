@@ -28,7 +28,6 @@ import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -45,7 +44,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
@@ -126,9 +124,6 @@ public final class BridgeContext extends Activity {
         mProjectCallback = projectCallback;
 
         mRenderResources = renderResources;
-
-        mFragments.mCurState = Fragment.CREATED;
-        mFragments.mActivity = this;
 
         mApplicationInfo = new ApplicationInfo();
         mApplicationInfo.targetSdkVersion = targetSdkVersion;
@@ -993,13 +988,6 @@ public final class BridgeContext extends Activity {
     }
 
     @Override
-    public SQLiteDatabase openOrCreateDatabase(String arg0, int arg1,
-            CursorFactory arg2, DatabaseErrorHandler arg3) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Drawable peekWallpaper() {
         // TODO Auto-generated method stub
         return null;
@@ -1134,12 +1122,6 @@ public final class BridgeContext extends Activity {
     @Override
     public Context getApplicationContext() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void startActivities(Intent[] arg0) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

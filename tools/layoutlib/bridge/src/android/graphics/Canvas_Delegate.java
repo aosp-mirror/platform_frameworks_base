@@ -270,6 +270,13 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static void drawText(Canvas thisCanvas,
+            String text, float x, float y, Paint paint) {
+        native_drawText(thisCanvas.mNativeCanvas, text, 0, text.length(), x, y,
+                paint.mNativePaint);
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void drawPoints(Canvas thisCanvas, float[] pts, int offset, int count,
             Paint paint) {
         // FIXME
@@ -323,6 +330,12 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static int initGL() {
+        // not supported.
+        return 0;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void native_setBitmap(int nativeCanvas, int bitmap) {
         // get the delegate from the native int.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
@@ -337,6 +350,11 @@ public final class Canvas_Delegate {
         }
 
         canvasDelegate.setBitmap(bitmapDelegate);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void nativeSetViewport(int nCanvas, int w, int h) {
+        // only useful in GL which is not supported, so no need to do anything.
     }
 
     @LayoutlibDelegate
@@ -944,7 +962,7 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawText(int nativeCanvas,
             final char[] text, final int index, final int count,
-            final float startX, final float startY, int flags, int paint) {
+            final float startX, final float startY, int paint) {
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
             public void draw(Graphics2D graphics, Paint_Delegate paint) {
@@ -1044,30 +1062,12 @@ public final class Canvas_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
-                                               float y, int flags, int paint) {
+                                               float y, int paint) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
-        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawTextRun(int nativeCanvas, String text,
-            int start, int end, int contextStart, int contextEnd,
-            float x, float y, int flags, int paint) {
-        int count = end - start;
-        char[] buffer = TemporaryBuffer.obtain(count);
-        TextUtils.getChars(text, start, end, buffer, 0);
-
-        native_drawText(nativeCanvas, buffer, start, end, x, y, flags, paint);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawTextRun(int nativeCanvas, char[] text,
-            int start, int count, int contextStart, int contextCount,
-            float x, float y, int flags, int paint) {
-        native_drawText(nativeCanvas, text, start, count, x, y, flags, paint);
+        native_drawText(nativeCanvas, buffer, 0, count, x, y, paint);
     }
 
     @LayoutlibDelegate
@@ -1094,7 +1094,7 @@ public final class Canvas_Delegate {
                                                      char[] text, int index,
                                                      int count, int path,
                                                      float hOffset,
-                                                     float vOffset, int bidiFlags,
+                                                     float vOffset,
                                                      int paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
@@ -1106,7 +1106,7 @@ public final class Canvas_Delegate {
                                                      String text, int path,
                                                      float hOffset,
                                                      float vOffset,
-                                                     int flags, int paint) {
+                                                     int paint) {
         // FIXME
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Canvas.drawTextOnPath is not supported.", null, null /*data*/);

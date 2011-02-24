@@ -126,19 +126,8 @@ public class BridgeRenderSession extends RenderSession {
     @Override
     public Result animate(Object targetObject, String animationName,
             boolean isFrameworkAnimation, IAnimationListener listener) {
-        try {
-            Bridge.prepareThread();
-            mLastResult = mSession.acquire(RenderParams.DEFAULT_TIMEOUT);
-            if (mLastResult.isSuccess()) {
-                mLastResult = mSession.animate(targetObject, animationName, isFrameworkAnimation,
-                        listener);
-            }
-        } finally {
-            mSession.release();
-            Bridge.cleanupThread();
-        }
-
-        return mLastResult;
+        // Animation is only supported in API 11+
+        return super.animate(targetObject, animationName, isFrameworkAnimation, listener);
     }
 
     @Override
