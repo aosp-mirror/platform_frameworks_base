@@ -55,17 +55,25 @@ public:
     virtual sp<IMemory>         decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat) = 0;
     virtual sp<IOMX>            getOMX() = 0;
 
-    // codecs usage tracking for the battery app
+    // codecs and audio devices usage tracking for the battery app
     enum BatteryDataBits {
         // tracking audio codec
-        kBatteryDataTrackAudio          = 1,
+        kBatteryDataTrackAudio          = 0x1,
         // tracking video codec
-        kBatteryDataTrackVideo          = 2,
+        kBatteryDataTrackVideo          = 0x2,
         // codec is started, otherwise codec is paused
-        kBatteryDataCodecStarted        = 4,
+        kBatteryDataCodecStarted        = 0x4,
         // tracking decoder (for media player),
         // otherwise tracking encoder (for media recorder)
-        kBatteryDataTrackDecoder        = 8,
+        kBatteryDataTrackDecoder        = 0x8,
+        // start to play an audio on an audio device
+        kBatteryDataAudioFlingerStart   = 0x10,
+        // stop/pause the audio playback
+        kBatteryDataAudioFlingerStop    = 0x20,
+        // audio is rounted to speaker
+        kBatteryDataSpeakerOn           = 0x40,
+        // audio is rounted to devices other than speaker
+        kBatteryDataOtherAudioDeviceOn  = 0x80,
     };
 
     virtual void addBatteryData(uint32_t params) = 0;
