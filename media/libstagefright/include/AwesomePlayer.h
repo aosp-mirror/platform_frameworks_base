@@ -124,6 +124,8 @@ private:
 
         AUDIO_RUNNING       = 8192,
         AUDIOPLAYER_STARTED = 16384,
+
+        INCOGNITO           = 32768,
     };
 
     mutable Mutex mLock;

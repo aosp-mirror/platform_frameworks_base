@@ -33,7 +33,6 @@ status_t StagefrightPlayer::initCheck() {
 
 status_t StagefrightPlayer::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
-    LOGI("setDataSource('%s')", url);
     return mPlayer->setDataSource(url, headers);
 }
 

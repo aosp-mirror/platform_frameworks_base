@@ -27,7 +27,11 @@ struct ATSParser;
 struct LiveSession;
 
 struct NuPlayer::HTTPLiveSource : public NuPlayer::Source {
-    HTTPLiveSource(const char *url);
+    enum Flags {
+        // Don't log any URLs.
+        kFlagIncognito = 1,
+    };
+    HTTPLiveSource(const char *url, uint32_t flags = 0);
 
     virtual void start();
 
@@ -46,6 +50,7 @@ protected:
 
 private:
     AString mURL;
+    uint32_t mFlags;
     bool mEOS;
     off64_t mOffset;
     sp<ALooper> mLiveLooper;

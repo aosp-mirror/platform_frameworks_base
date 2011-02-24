@@ -12,7 +12,11 @@
 namespace android {
 
 struct NuHTTPDataSource : public DataSource {
-    NuHTTPDataSource();
+    enum Flags {
+        // Don't log any URLs.
+        kFlagIncognito = 1
+    };
+    NuHTTPDataSource(uint32_t flags = 0);
 
     status_t connect(
             const char *uri,
@@ -51,6 +55,8 @@ private:
     };
 
     Mutex mLock;
+
+    uint32_t mFlags;
 
     State mState;
 

@@ -33,8 +33,9 @@
 
 namespace android {
 
-NuPlayer::HTTPLiveSource::HTTPLiveSource(const char *url)
+NuPlayer::HTTPLiveSource::HTTPLiveSource(const char *url, uint32_t flags)
     : mURL(url),
+      mFlags(flags),
       mEOS(false),
       mOffset(0) {
 }
@@ -49,7 +50,9 @@ void NuPlayer::HTTPLiveSource::start() {
     mLiveLooper->setName("http live");
     mLiveLooper->start();
 
-    mLiveSession = new LiveSession;
+    mLiveSession = new LiveSession(
+            (mFlags & kFlagIncognito) ? LiveSession::kFlagIncognito : 0);
+
     mLiveLooper->registerHandler(mLiveSession);
 
     mLiveSession->connect(mURL.c_str());

@@ -247,6 +247,22 @@ status_t AwesomePlayer::setDataSource_l(
 
     if (headers) {
         mUriHeaders = *headers;
+
+        ssize_t index = mUriHeaders.indexOfKey(String8("x-hide-urls-from-log"));
+        if (index >= 0) {
+            // Browser is in "incognito" mode, suppress logging URLs.
+
+            // This isn't something that should be passed to the server.
+            mUriHeaders.removeItemsAt(index);
+
+            mFlags |= INCOGNITO;
+        }
+    }
+
+    if (!(mFlags & INCOGNITO)) {
+        LOGI("setDataSource_l('%s')", mUri.string());
+    } else {
+        LOGI("setDataSource_l(URL suppressed)");
     }
 
     // The actual work will be done during preparation in the call to
@@ -1538,7 +1554,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
     if (!strncasecmp("http://", mUri.string(), 7)
             || !strncasecmp("https://", mUri.string(), 8)) {
-        mConnectingDataSource = new NuHTTPDataSource;
+        mConnectingDataSource = new NuHTTPDataSource(
+                (mFlags & INCOGNITO) ? NuHTTPDataSource::kFlagIncognito : 0);
 
         mLock.unlock();
         status_t err = mConnectingDataSource->connect(mUri, &mUriHeaders);

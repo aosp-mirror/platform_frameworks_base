@@ -71,8 +71,9 @@ static bool ParseURL(
     return true;
 }
 
-NuHTTPDataSource::NuHTTPDataSource()
-    : mState(DISCONNECTED),
+NuHTTPDataSource::NuHTTPDataSource(uint32_t flags)
+    : mFlags(flags),
+      mState(DISCONNECTED),
       mPort(0),
       mHTTPS(false),
       mOffset(0),
@@ -138,7 +139,11 @@ status_t NuHTTPDataSource::connect(
         bool https,
         const String8 &headers,
         off64_t offset) {
-    LOGI("connect to %s:%u%s @%lld", host, port, path, offset);
+    if (!(mFlags & kFlagIncognito)) {
+        LOGI("connect to %s:%u%s @%lld", host, port, path, offset);
+    } else {
+        LOGI("connect to <URL suppressed> @%lld", offset);
+    }
 
     bool needsToReconnect = true;
 
