@@ -68,7 +68,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS' 
 
     // Current on-disk Parcel version
-    private static final int VERSION = 52;
+    private static final int VERSION = 53;
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -235,6 +235,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mDischargeCurrentLevel;
     int mLowDischargeAmountSinceCharge;
     int mHighDischargeAmountSinceCharge;
+    int mDischargeScreenOnUnplugLevel;
+    int mDischargeScreenOffUnplugLevel;
+    int mDischargeAmountScreenOn;
+    int mDischargeAmountScreenOnSinceCharge;
+    int mDischargeAmountScreenOff;
+    int mDischargeAmountScreenOffSinceCharge;
 
     long mLastWriteTime = 0; // Milliseconds
 
@@ -1567,6 +1573,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             // Fake a wake lock, so we consider the device waked as long
             // as the screen is on.
             noteStartWakeLocked(-1, -1, "dummy", WAKE_TYPE_PARTIAL);
+            
+            // Update discharge amounts.
+            if (mOnBatteryInternal) {
+                updateDischargeScreenLevels(false, true);
+            }
         }
     }
     
@@ -1583,6 +1594,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
 
             noteStopWakeLocked(-1, -1, "dummy", WAKE_TYPE_PARTIAL);
+            
+            // Update discharge amounts.
+            if (mOnBatteryInternal) {
+                updateDischargeScreenLevels(true, false);
+            }
         }
     }
     
@@ -3899,8 +3915,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeStartLevel = 0;
         mDischargeUnplugLevel = 0;
         mDischargeCurrentLevel = 0;
-        mLowDischargeAmountSinceCharge = 0;
-        mHighDischargeAmountSinceCharge = 0;
+        initDischarge();
     }
 
     public BatteryStatsImpl(Parcel p) {
@@ -3970,6 +3985,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         mUnpluggedBatteryUptime = getBatteryUptimeLocked(mUptimeStart);
         mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(mRealtimeStart);
     }
+
+    void initDischarge() {
+        mLowDischargeAmountSinceCharge = 0;
+        mHighDischargeAmountSinceCharge = 0;
+        mDischargeAmountScreenOn = 0;
+        mDischargeAmountScreenOnSinceCharge = 0;
+        mDischargeAmountScreenOff = 0;
+        mDischargeAmountScreenOffSinceCharge = 0;
+    }
     
     public void resetAllStatsLocked() {
         mStartCount = 0;
@@ -4007,10 +4031,32 @@ public final class BatteryStatsImpl extends BatteryStats {
             mKernelWakelockStats.clear();
         }
         
-        mLowDischargeAmountSinceCharge = 0;
-        mHighDischargeAmountSinceCharge = 0;
+        initDischarge();
 
         clearHistoryLocked();
+    }
+
+    void updateDischargeScreenLevels(boolean oldScreenOn, boolean newScreenOn) {
+        if (oldScreenOn) {
+            int diff = mDischargeScreenOnUnplugLevel - mDischargeCurrentLevel;
+            if (diff > 0) {
+                mDischargeAmountScreenOn += diff;
+                mDischargeAmountScreenOnSinceCharge += diff;
+            }
+        } else {
+            int diff = mDischargeScreenOffUnplugLevel - mDischargeCurrentLevel;
+            if (diff > 0) {
+                mDischargeAmountScreenOff += diff;
+                mDischargeAmountScreenOffSinceCharge += diff;
+            }
+        }
+        if (newScreenOn) {
+            mDischargeScreenOnUnplugLevel = mDischargeCurrentLevel;
+            mDischargeScreenOffUnplugLevel = 0;
+        } else {
+            mDischargeScreenOnUnplugLevel = 0;
+            mDischargeScreenOffUnplugLevel = mDischargeCurrentLevel;
+        }
     }
     
     void setOnBattery(boolean onBattery, int oldStatus, int level) {
@@ -4047,6 +4093,15 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUnpluggedBatteryUptime = getBatteryUptimeLocked(uptime);
                 mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(realtime);
                 mDischargeCurrentLevel = mDischargeUnplugLevel = level;
+                if (mScreenOn) {
+                    mDischargeScreenOnUnplugLevel = level;
+                    mDischargeScreenOffUnplugLevel = 0;
+                } else {
+                    mDischargeScreenOnUnplugLevel = 0;
+                    mDischargeScreenOffUnplugLevel = level;
+                }
+                mDischargeAmountScreenOn = 0;
+                mDischargeAmountScreenOff = 0;
                 doUnplugLocked(mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
             } else {
                 updateKernelWakelocksLocked();
@@ -4062,6 +4117,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
                     mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
                 }
+                updateDischargeScreenLevels(mScreenOn, mScreenOn);
                 doPlugLocked(getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
             }
             if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
@@ -4346,6 +4402,50 @@ public final class BatteryStatsImpl extends BatteryStats {
             int val = mHighDischargeAmountSinceCharge;
             if (mOnBattery && mDischargeCurrentLevel < mDischargeUnplugLevel) {
                 val += mDischargeUnplugLevel-mDischargeCurrentLevel;
+            }
+            return val;
+        }
+    }
+    
+    public int getDischargeAmountScreenOn() {
+        synchronized(this) {
+            int val = mDischargeAmountScreenOn;
+            if (mOnBattery && mScreenOn
+                    && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
+                val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
+            }
+            return val;
+        }
+    }
+
+    public int getDischargeAmountScreenOnSinceCharge() {
+        synchronized(this) {
+            int val = mDischargeAmountScreenOnSinceCharge;
+            if (mOnBattery && mScreenOn
+                    && mDischargeCurrentLevel < mDischargeScreenOnUnplugLevel) {
+                val += mDischargeScreenOnUnplugLevel-mDischargeCurrentLevel;
+            }
+            return val;
+        }
+    }
+
+    public int getDischargeAmountScreenOff() {
+        synchronized(this) {
+            int val = mDischargeAmountScreenOff;
+            if (mOnBattery && !mScreenOn
+                    && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
+                val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
+            }
+            return val;
+        }
+    }
+
+    public int getDischargeAmountScreenOffSinceCharge() {
+        synchronized(this) {
+            int val = mDischargeAmountScreenOffSinceCharge;
+            if (mOnBattery && !mScreenOn
+                    && mDischargeCurrentLevel < mDischargeScreenOffUnplugLevel) {
+                val += mDischargeScreenOffUnplugLevel-mDischargeCurrentLevel;
             }
             return val;
         }
@@ -4656,7 +4756,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeCurrentLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
-        
+        mDischargeAmountScreenOnSinceCharge = in.readInt();
+        mDischargeAmountScreenOffSinceCharge = in.readInt();
+
         mStartCount++;
         
         mScreenOn = false;
@@ -4851,6 +4953,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(getLowDischargeAmountSinceCharge());
         out.writeInt(getHighDischargeAmountSinceCharge());
+        out.writeInt(getDischargeAmountScreenOnSinceCharge());
+        out.writeInt(getDischargeAmountScreenOffSinceCharge());
         
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -5090,6 +5194,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeCurrentLevel = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
+        mDischargeAmountScreenOn = in.readInt();
+        mDischargeAmountScreenOnSinceCharge = in.readInt();
+        mDischargeAmountScreenOff = in.readInt();
+        mDischargeAmountScreenOffSinceCharge = in.readInt();
         mLastWriteTime = in.readLong();
 
         mMobileDataRx[STATS_LAST] = in.readLong();
@@ -5191,6 +5299,10 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(mLowDischargeAmountSinceCharge);
         out.writeInt(mHighDischargeAmountSinceCharge);
+        out.writeInt(mDischargeAmountScreenOn);
+        out.writeInt(mDischargeAmountScreenOnSinceCharge);
+        out.writeInt(mDischargeAmountScreenOff);
+        out.writeInt(mDischargeAmountScreenOffSinceCharge);
         out.writeLong(mLastWriteTime);
 
         out.writeLong(getMobileTcpBytesReceived(STATS_SINCE_UNPLUGGED));

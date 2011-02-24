@@ -132,6 +132,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String NETWORK_DATA = "nt";
     private static final String USER_ACTIVITY_DATA = "ua";
     private static final String BATTERY_DATA = "bt";
+    private static final String BATTERY_DISCHARGE_DATA = "dc";
     private static final String BATTERY_LEVEL_DATA = "lv";
     private static final String WIFI_LOCK_DATA = "wfl";
     private static final String MISC_DATA = "m";
@@ -801,6 +802,30 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getHighDischargeAmountSinceCharge();
 
     /**
+     * Get the amount the battery has discharged while the screen was on,
+     * since the last time power was unplugged.
+     */
+    public abstract int getDischargeAmountScreenOn();
+
+    /**
+     * Get the amount the battery has discharged while the screen was on,
+     * since the last time the device was charged.
+     */
+    public abstract int getDischargeAmountScreenOnSinceCharge();
+
+    /**
+     * Get the amount the battery has discharged while the screen was off,
+     * since the last time power was unplugged.
+     */
+    public abstract int getDischargeAmountScreenOff();
+
+    /**
+     * Get the amount the battery has discharged while the screen was off,
+     * since the last time the device was charged.
+     */
+    public abstract int getDischargeAmountScreenOffSinceCharge();
+
+    /**
      * Returns the total, last, or current battery uptime in microseconds.
      *
      * @param curTime the elapsed realtime in microseconds.
@@ -1093,6 +1118,17 @@ public abstract class BatteryStats implements Parcelable {
         if (which == STATS_SINCE_UNPLUGGED) {
             dumpLine(pw, 0 /* uid */, category, BATTERY_LEVEL_DATA, getDischargeStartLevel(), 
                     getDischargeCurrentLevel());
+        }
+        
+        if (which == STATS_SINCE_UNPLUGGED) {
+            dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
+                    getDischargeStartLevel()-getDischargeCurrentLevel(),
+                    getDischargeStartLevel()-getDischargeCurrentLevel(),
+                    getDischargeAmountScreenOn(), getDischargeAmountScreenOff());
+        } else {
+            dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
+                    getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
+                    getDischargeAmountScreenOn(), getDischargeAmountScreenOff());
         }
         
         if (reqUid < 0) {
@@ -1451,6 +1487,10 @@ public abstract class BatteryStats implements Parcelable {
                 pw.print(prefix); pw.print("    Last discharge cycle end level: "); 
                         pw.println(getDischargeCurrentLevel());
             }
+            pw.print(prefix); pw.print("    Amount discharged while screen on: ");
+                    pw.println(getDischargeAmountScreenOn());
+            pw.print(prefix); pw.print("    Amount discharged while screen off: ");
+                    pw.println(getDischargeAmountScreenOff());
             pw.println(" ");
         } else {
             pw.print(prefix); pw.println("  Device battery use since last full charge");
@@ -1458,6 +1498,10 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println(getLowDischargeAmountSinceCharge());
             pw.print(prefix); pw.print("    Amount discharged (upper bound): ");
                     pw.println(getHighDischargeAmountSinceCharge());
+            pw.print(prefix); pw.print("    Amount discharged while screen on: ");
+                    pw.println(getDischargeAmountScreenOnSinceCharge());
+            pw.print(prefix); pw.print("    Amount discharged while screen off: ");
+                    pw.println(getDischargeAmountScreenOffSinceCharge());
             pw.println(" ");
         }
         
