@@ -11,14 +11,10 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                  <img src="{@docRoot}images/home/market-intl.png" alt="Android
-Market" width="104" height="120" style="padding:10px 60px 5px" />
-                                  <div id="announcement" style="width:295px">
-<p>We're pleased to announce that paid apps are available in more locations of the world! Developers
-from 20 more locations can now sell paid apps on Android Market. Users in more locations will also
-soon be able to purchase apps.</p><p><a
-href="http://android-developers.blogspot.com/2010/09/more-countries-more-sellers-more-buyers.html">
-Learn more &raquo;</a></p>
+                                  <img src="{@docRoot}assets/images/home/GDC2011.png" alt="Android at GDC 2011" width="203px" style="padding-left:22px;padding-bottom:28px;padding-top:22px;"/>
+                                  <div id="announcement" style="width:275px">
+    <p>Android will be at the <a href="http://www.gdconf.com/">2011 Game Developers Conference</a> in San Francisco, from March 1st to 4th. We're looking forward to seeing you there!</p>
+    <p><a href="http://android-developers.blogspot.com/2011/02/heading-for-gdc.html">Learn more &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
