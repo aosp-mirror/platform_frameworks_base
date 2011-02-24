@@ -4394,7 +4394,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         }
                         mHighlightPaint.setStyle(Paint.Style.STROKE);
                         highlight = mHighlightPath;
-                        drawCursor = true;
+                        drawCursor = mCursorCount > 0;
                     }
                 } else {
                     if (mHighlightPathBogus) {
@@ -4503,7 +4503,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void updateCursorsPositions() {
-        if (mCursorDrawableRes == 0) return;
+        if (mCursorDrawableRes == 0) {
+            mCursorCount = 0;
+            return; 
+        }
 
         final int offset = getSelectionStart();
         final int line = mLayout.getLineForOffset(offset);
