@@ -37,6 +37,7 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
 #include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
@@ -76,8 +77,16 @@ void NuPlayer::setDataSource(
 }
 
 void NuPlayer::setVideoSurface(const sp<Surface> &surface) {
-    sp<AMessage> msg = new AMessage(kWhatSetVideoSurface, id());
-    msg->setObject("surface", surface);
+    sp<AMessage> msg = new AMessage(kWhatSetVideoNativeWindow, id());
+    msg->setObject("native-window", new NativeWindowWrapper(surface));
+    msg->post();
+}
+
+void NuPlayer::setVideoSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
+    sp<AMessage> msg = new AMessage(kWhatSetVideoNativeWindow, id());
+    sp<SurfaceTextureClient> surfaceTextureClient(surfaceTexture != NULL ?
+                new SurfaceTextureClient(surfaceTexture) : NULL);
+    msg->setObject("native-window", new NativeWindowWrapper(surfaceTextureClient));
     msg->post();
 }
 
@@ -144,14 +153,14 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
-        case kWhatSetVideoSurface:
+        case kWhatSetVideoNativeWindow:
         {
-            LOGV("kWhatSetVideoSurface");
+            LOGV("kWhatSetVideoNativeWindow");
 
             sp<RefBase> obj;
-            CHECK(msg->findObject("surface", &obj));
+            CHECK(msg->findObject("native-window", &obj));
 
-            mSurface = static_cast<Surface *>(obj.get());
+            mNativeWindow = static_cast<NativeWindowWrapper *>(obj.get());
             break;
         }
 
@@ -529,7 +538,8 @@ status_t NuPlayer::instantiateDecoder(bool audio, sp<Decoder> *decoder) {
         new AMessage(audio ? kWhatAudioNotify : kWhatVideoNotify,
                      id());
 
-    *decoder = new Decoder(notify, audio ? NULL : mSurface);
+    *decoder = audio ? new Decoder(notify) :
+                       new Decoder(notify, mNativeWindow);
     looper()->registerHandler(*decoder);
 
     (*decoder)->configure(meta);

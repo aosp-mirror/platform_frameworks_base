@@ -935,6 +935,15 @@ status_t MediaPlayerService::Client::setVideoSurface(const sp<Surface>& surface)
     return p->setVideoSurface(surface);
 }
 
+status_t MediaPlayerService::Client::setVideoSurfaceTexture(
+        const sp<ISurfaceTexture>& surfaceTexture)
+{
+    LOGV("[%d] setVideoSurfaceTexture(%p)", mConnId, surfaceTexture.get());
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    return p->setVideoSurfaceTexture(surfaceTexture);
+}
+
 status_t MediaPlayerService::Client::invoke(const Parcel& request,
                                             Parcel *reply)
 {

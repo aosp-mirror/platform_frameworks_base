@@ -43,6 +43,8 @@
 #include <media/stagefright/OMXCodec.h>
 
 #include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
 
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -83,8 +85,8 @@ private:
 
 struct AwesomeLocalRenderer : public AwesomeRenderer {
     AwesomeLocalRenderer(
-            const sp<Surface> &surface, const sp<MetaData> &meta)
-        : mTarget(new SoftwareRenderer(surface, meta)) {
+            const sp<ANativeWindow> &nativeWindow, const sp<MetaData> &meta)
+        : mTarget(new SoftwareRenderer(nativeWindow, meta)) {
     }
 
     virtual void render(MediaBuffer *buffer) {
@@ -889,7 +891,7 @@ void AwesomePlayer::notifyVideoSize_l() {
 }
 
 void AwesomePlayer::initRenderer_l() {
-    if (mSurface == NULL) {
+    if (mNativeWindow == NULL) {
         return;
     }
 
@@ -920,13 +922,13 @@ void AwesomePlayer::initRenderer_l() {
         // directly to ANativeBuffers, so we must use a renderer that
         // just pushes those buffers to the ANativeWindow.
         mVideoRenderer =
-            new AwesomeNativeWindowRenderer(mSurface, rotationDegrees);
+            new AwesomeNativeWindowRenderer(mNativeWindow, rotationDegrees);
     } else {
         // Other decoders are instantiated locally and as a consequence
         // allocate their buffers in local address space.  This renderer
         // then performs a color conversion and copy to get the data
         // into the ANativeBuffer.
-        mVideoRenderer = new AwesomeLocalRenderer(mSurface, meta);
+        mVideoRenderer = new AwesomeLocalRenderer(mNativeWindow, meta);
     }
 }
 
@@ -986,6 +988,17 @@ void AwesomePlayer::setSurface(const sp<Surface> &surface) {
     Mutex::Autolock autoLock(mLock);
 
     mSurface = surface;
+    mNativeWindow = surface;
+}
+
+void AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
+    Mutex::Autolock autoLock(mLock);
+
+    mSurface.clear();
+    if (surfaceTexture != NULL) {
+        mNativeWindow = new SurfaceTextureClient(surfaceTexture);
+    }
+
 }
 
 void AwesomePlayer::setAudioSink(
@@ -1164,7 +1177,7 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
             mVideoTrack,
-            NULL, flags, USE_SURFACE_ALLOC ? mSurface : NULL);
+            NULL, flags, USE_SURFACE_ALLOC ? mNativeWindow : NULL);
 
     if (mVideoSource != NULL) {
         int64_t durationUs;

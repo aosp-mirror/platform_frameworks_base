@@ -24,11 +24,12 @@ import android.os.Message;
 /**
  * Captures frames from an image stream as an OpenGL ES texture.
  *
- * <p>The image stream may come from either camera preview.  A SurfaceTexture may be used in place
- * of a SurfaceHolder when specifying the output destination of a {@link android.hardware.Camera}
+ * <p>The image stream may come from either camera preview or video decode.  A SurfaceTexture
+ * may be used in place of a SurfaceHolder when specifying the output destination of a
+ * {@link android.hardware.Camera} or {@link android.media.MediaPlayer}
  * object.  Doing so will cause all the frames from the image stream to be sent to the
  * SurfaceTexture object rather than to the device's display.  When {@link #updateTexImage} is
- * called, the contents of the texture object specified when the SurfaceTexture was created is
+ * called, the contents of the texture object specified when the SurfaceTexture was created are
  * updated to contain the most recent image from the image stream.  This may cause some frames of
  * the stream to be skipped.
  *
@@ -129,6 +130,8 @@ public class SurfaceTexture {
      *     16 elements.
      */
     public void getTransformMatrix(float[] mtx) {
+        // Note we intentionally don't check mtx for null, so this will result in a
+        // NullPointerException. But it's safe because it happens before the call to native.
         if (mtx.length != 16) {
             throw new IllegalArgumentException();
         }

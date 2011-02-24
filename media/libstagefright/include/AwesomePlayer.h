@@ -36,6 +36,7 @@ struct MediaBuffer;
 struct MediaExtractor;
 struct MediaSource;
 struct NuCachedSource2;
+struct ISurfaceTexture;
 
 struct ALooper;
 struct ARTSPController;
@@ -80,6 +81,7 @@ struct AwesomePlayer {
     bool isPlaying() const;
 
     void setSurface(const sp<Surface> &surface);
+    void setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture);
     void setAudioSink(const sp<MediaPlayerBase::AudioSink> &audioSink);
     status_t setLooping(bool shouldLoop);
 
@@ -133,6 +135,7 @@ private:
     wp<MediaPlayerBase> mListener;
 
     sp<Surface> mSurface;
+    sp<ANativeWindow> mNativeWindow;
     sp<MediaPlayerBase::AudioSink> mAudioSink;
 
     SystemTimeSource mSystemTimeSource;

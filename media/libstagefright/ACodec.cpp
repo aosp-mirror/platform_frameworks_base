@@ -11,9 +11,11 @@
 #include <media/stagefright/foundation/AMessage.h>
 
 #include <media/stagefright/MediaDefs.h>
+#include <media/stagefright/NativeWindowWrapper.h>
 #include <media/stagefright/OMXClient.h>
 
 #include <surfaceflinger/Surface.h>
+#include <gui/SurfaceTextureClient.h>
 
 #include <OMX_Component.h>
 
@@ -1633,8 +1635,11 @@ void ACodec::UninitializedState::onSetup(
     mCodec->configureCodec(mime.c_str(), msg);
 
     sp<RefBase> obj;
-    if (msg->findObject("surface", &obj)) {
-        mCodec->mNativeWindow = static_cast<Surface *>(obj.get());
+    if (msg->findObject("native-window", &obj)) {
+        sp<NativeWindowWrapper> nativeWindow(
+                static_cast<NativeWindowWrapper *>(obj.get()));
+        CHECK(nativeWindow != NULL);
+        mCodec->mNativeWindow = nativeWindow->getNativeWindow();
     }
 
     CHECK_EQ((status_t)OK, mCodec->initNativeWindow());

@@ -31,13 +31,15 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/Utils.h>
 #include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
 NuPlayer::Decoder::Decoder(
-        const sp<AMessage> &notify, const sp<Surface> &surface)
+        const sp<AMessage> &notify,
+        const sp<NativeWindowWrapper> &nativeWindow)
     : mNotify(notify),
-      mSurface(surface) {
+      mNativeWindow(nativeWindow) {
 }
 
 NuPlayer::Decoder::~Decoder() {
@@ -55,8 +57,8 @@ void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
 
     sp<AMessage> format = makeFormat(meta);
 
-    if (mSurface != NULL) {
-        format->setObject("surface", mSurface);
+    if (mNativeWindow != NULL) {
+        format->setObject("native-window", mNativeWindow);
     }
 
     if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {

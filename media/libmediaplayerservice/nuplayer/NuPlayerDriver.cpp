@@ -86,6 +86,13 @@ status_t NuPlayerDriver::setVideoSurface(const sp<Surface> &surface) {
     return OK;
 }
 
+status_t NuPlayerDriver::setVideoSurfaceTexture(
+        const sp<ISurfaceTexture> &surfaceTexture) {
+    mPlayer->setVideoSurfaceTexture(surfaceTexture);
+
+    return OK;
+}
+
 status_t NuPlayerDriver::prepare() {
     return OK;
 }

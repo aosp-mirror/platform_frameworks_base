@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.graphics.Bitmap;
+import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 
 import java.io.FileDescriptor;
@@ -379,6 +380,11 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
+ * <tr><td>setTexture </p></td>
+ *     <td>any </p></td>
+ *     <td>{} </p></td>
+ *     <td>This method can be called in any state and calling it does not change
+ *         the object state. </p></td></tr>
  * <tr><td>setLooping </p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *         PlaybackCompleted}</p></td>
@@ -503,6 +509,7 @@ public class MediaPlayer
     private int mListenerContext; // accessed by native methods
     private Surface mSurface; // accessed by native methods
     private SurfaceHolder  mSurfaceHolder;
+    private SurfaceTexture mSurfaceTexture; // accessed by native methods
     private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
@@ -533,9 +540,10 @@ public class MediaPlayer
     }
 
     /*
-     * Update the MediaPlayer ISurface. Call after updating mSurface.
+     * Update the MediaPlayer ISurface and ISurfaceTexture.
+     * Call after updating mSurface and/or mSurfaceTexture.
      */
-    private native void _setVideoSurface();
+    private native void _setVideoSurfaceOrSurfaceTexture();
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -577,11 +585,20 @@ public class MediaPlayer
     }
 
     /**
-     * Sets the SurfaceHolder to use for displaying the video portion of the media.
-     * This call is optional. Not calling it when playing back a video will
+     * Sets the {@link SurfaceHolder} to use for displaying the video
+     * portion of the media.  A surface must be set if a display is
+     * needed.  Not calling this method when playing back a video will
      * result in only the audio track being played.
      *
      * @param sh the SurfaceHolder to use for video display
+     */
+    /*
+     * This portion of comment has a non-Javadoc prefix so as not to refer to a
+     * hidden method. When unhidden, merge it with the previous javadoc comment.
+     *
+     * Either a surface or surface texture must be set if a display or video sink
+     * is needed.  Not calling this method or {@link #setTexture(SurfaceTexture)}
+     * when playing back a video will result in only the audio track being played.
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
@@ -590,7 +607,29 @@ public class MediaPlayer
         } else {
             mSurface = null;
         }
-        _setVideoSurface();
+        mSurfaceTexture = null;
+        _setVideoSurfaceOrSurfaceTexture();
+        updateSurfaceScreenOn();
+    }
+
+    /**
+     * Sets the {@link SurfaceTexture} to be used as the sink for the
+     * video portion of the media. Either a surface or surface texture
+     * must be set if a video sink is needed.  The same surface texture
+     * can be re-set without harm. Setting a surface texture will un-set
+     * any surface that was set via {@link #setDisplay(SurfaceHolder)}.
+     * Not calling this method or {@link #setDisplay(SurfaceHolder)}
+     * when playing back a video will result in only the audio track
+     * being played. Note that if a SurfaceTexture is used, the value
+     * set via setScreenOnWhilePlaying has no effect.
+     *
+     * @hide
+     */
+    public void setTexture(SurfaceTexture st) {
+        mSurfaceHolder = null;
+        mSurface = null;
+        mSurfaceTexture = st;
+        _setVideoSurfaceOrSurfaceTexture();
         updateSurfaceScreenOn();
     }
 
@@ -644,6 +683,8 @@ public class MediaPlayer
 
         return null;
     }
+
+    // Note no convenience method to create a MediaPlayer with SurfaceTexture sink.
 
     /**
      * Convenience method to create a MediaPlayer for a given resource id.

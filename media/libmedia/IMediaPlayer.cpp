@@ -23,6 +23,7 @@
 #include <media/IMediaPlayer.h>
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
@@ -45,7 +46,8 @@ enum {
     SET_METADATA_FILTER,
     GET_METADATA,
     SET_AUX_EFFECT_SEND_LEVEL,
-    ATTACH_AUX_EFFECT
+    ATTACH_AUX_EFFECT,
+    SET_VIDEO_SURFACETEXTURE,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -64,12 +66,24 @@ public:
         remote()->transact(DISCONNECT, data, &reply);
     }
 
+    // pass the buffered Surface to the media player service
     status_t setVideoSurface(const sp<Surface>& surface)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
         Surface::writeToParcel(surface, &data);
         remote()->transact(SET_VIDEO_SURFACE, data, &reply);
+        return reply.readInt32();
+    }
+
+    // pass the buffered ISurfaceTexture to the media player service
+    status_t setVideoSurfaceTexture(const sp<ISurfaceTexture>& surfaceTexture)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        sp<IBinder> b(surfaceTexture->asBinder());
+        data.writeStrongBinder(b);
+        remote()->transact(SET_VIDEO_SURFACETEXTURE, data, &reply);
         return reply.readInt32();
     }
 
@@ -220,6 +234,7 @@ public:
         remote()->transact(ATTACH_AUX_EFFECT, data, &reply);
         return reply.readInt32();
     }
+
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -239,6 +254,13 @@ status_t BnMediaPlayer::onTransact(
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             sp<Surface> surface = Surface::readFromParcel(data);
             reply->writeInt32(setVideoSurface(surface));
+            return NO_ERROR;
+        } break;
+        case SET_VIDEO_SURFACETEXTURE: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            sp<ISurfaceTexture> surfaceTexture =
+                    interface_cast<ISurfaceTexture>(data.readStrongBinder());
+            reply->writeInt32(setVideoSurfaceTexture(surfaceTexture));
             return NO_ERROR;
         } break;
         case PREPARE_ASYNC: {

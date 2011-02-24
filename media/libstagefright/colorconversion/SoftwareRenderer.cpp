@@ -26,14 +26,15 @@
 #include <surfaceflinger/Surface.h>
 #include <ui/android_native_buffer.h>
 #include <ui/GraphicBufferMapper.h>
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
 SoftwareRenderer::SoftwareRenderer(
-        const sp<Surface> &surface, const sp<MetaData> &meta)
+        const sp<ANativeWindow> &nativeWindow, const sp<MetaData> &meta)
     : mConverter(NULL),
       mYUVMode(None),
-      mSurface(surface) {
+      mNativeWindow(nativeWindow) {
     int32_t tmp;
     CHECK(meta->findInt32(kKeyColorFormat, &tmp));
     mColorFormat = (OMX_COLOR_FORMATTYPE)tmp;
@@ -65,22 +66,22 @@ SoftwareRenderer::SoftwareRenderer(
             break;
     }
 
-    CHECK(mSurface.get() != NULL);
+    CHECK(mNativeWindow != NULL);
     CHECK(mWidth > 0);
     CHECK(mHeight > 0);
     CHECK(mConverter == NULL || mConverter->isValid());
 
     CHECK_EQ(0,
             native_window_set_usage(
-            mSurface.get(),
+            mNativeWindow.get(),
             GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN
             | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP));
 
-    CHECK_EQ(0, native_window_set_buffer_count(mSurface.get(), 2));
+    CHECK_EQ(0, native_window_set_buffer_count(mNativeWindow.get(), 2));
 
     // Width must be multiple of 32???
     CHECK_EQ(0, native_window_set_buffers_geometry(
-                mSurface.get(),
+                mNativeWindow.get(),
                 mCropRight - mCropLeft + 1,
                 mCropBottom - mCropTop + 1,
                 halFormat));
@@ -96,7 +97,7 @@ SoftwareRenderer::SoftwareRenderer(
 
     if (transform) {
         CHECK_EQ(0, native_window_set_buffers_transform(
-                    mSurface.get(), transform));
+                    mNativeWindow.get(), transform));
     }
 }
 
@@ -109,12 +110,12 @@ void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
     android_native_buffer_t *buf;
     int err;
-    if ((err = mSurface->dequeueBuffer(mSurface.get(), &buf)) != 0) {
+    if ((err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf)) != 0) {
         LOGW("Surface::dequeueBuffer returned error %d", err);
         return;
     }
 
-    CHECK_EQ(0, mSurface->lockBuffer(mSurface.get(), buf));
+    CHECK_EQ(0, mNativeWindow->lockBuffer(mNativeWindow.get(), buf));
 
     GraphicBufferMapper &mapper = GraphicBufferMapper::get();
 
@@ -140,7 +141,7 @@ void SoftwareRenderer::render(
 
     CHECK_EQ(0, mapper.unlock(buf->handle));
 
-    if ((err = mSurface->queueBuffer(mSurface.get(), buf)) != 0) {
+    if ((err = mNativeWindow->queueBuffer(mNativeWindow.get(), buf)) != 0) {
         LOGW("Surface::queueBuffer returned error %d", err);
     }
     buf = NULL;

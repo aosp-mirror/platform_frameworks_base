@@ -34,6 +34,7 @@ namespace android {
 class Parcel;
 class ISurface;
 class Surface;
+class ISurfaceTexture;
 
 template<typename T> class SortedVector;
 
@@ -112,7 +113,13 @@ public:
         return INVALID_OPERATION;
     }
 
+    // pass the buffered Surface to the media player service
     virtual status_t    setVideoSurface(const sp<Surface>& surface) = 0;
+
+    // pass the buffered ISurfaceTexture to the media player service
+    virtual status_t    setVideoSurfaceTexture(
+                                const sp<ISurfaceTexture>& surfaceTexture) = 0;
+
     virtual status_t    prepare() = 0;
     virtual status_t    prepareAsync() = 0;
     virtual status_t    start() = 0;
@@ -177,7 +184,7 @@ protected:
     sp<AudioSink>       mAudioSink;
 };
 
-// Implement this class for media players that output directo to hardware
+// Implement this class for media players that output audio directly to hardware
 class MediaPlayerHWInterface : public MediaPlayerBase
 {
 public:
