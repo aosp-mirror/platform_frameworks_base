@@ -244,6 +244,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     Object     mLastNITZTimeInfo;
 
+    private static final String WIFI_ONLY_CARRIER = "wifi-only";
+
     //***** Events
 
     static final int EVENT_SEND                 = 1;
@@ -654,14 +656,22 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         Looper looper = mSenderThread.getLooper();
         mSender = new RILSender(looper);
 
-        mReceiver = new RILReceiver();
-        mReceiverThread = new Thread(mReceiver, "RILReceiver");
-        mReceiverThread.start();
+        // TODO: Provide a common API for determining if a
+        // device is wifi-only. bug: 3480713
+        String carrier = SystemProperties.get("ro.carrier");
+        if (WIFI_ONLY_CARRIER.equals(carrier)) {
+            riljLog("Not starting RILReceiver: wifi-only");
+        } else {
+            riljLog("Starting RILReceiver");
+            mReceiver = new RILReceiver();
+            mReceiverThread = new Thread(mReceiver, "RILReceiver");
+            mReceiverThread.start();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        context.registerReceiver(mIntentReceiver, filter);
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_SCREEN_ON);
+            filter.addAction(Intent.ACTION_SCREEN_OFF);
+            context.registerReceiver(mIntentReceiver, filter);
+        }
     }
 
     //***** CommandsInterface implementation
