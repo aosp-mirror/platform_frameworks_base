@@ -22,7 +22,6 @@
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPath.h>
-#include <SkPictureFlat.h>
 #include <SkRefCnt.h>
 #include <SkTDArray.h>
 #include <SkTSearch.h>

@@ -451,7 +451,7 @@ class ScreenshotPixelRef : public SkPixelRef {
 public:
     ScreenshotPixelRef(SkColorTable* ctable) {
         fCTable = ctable;
-        ctable->safeRef();
+        SkSafeRef(ctable);
         setImmutable();
     }
     virtual ~ScreenshotPixelRef() {

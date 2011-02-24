@@ -53,7 +53,7 @@ static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArra
 
 static void Shader_destructor(JNIEnv* env, jobject o, SkShader* shader, SkiaShader* skiaShader)
 {
-    shader->safeUnref();
+    SkSafeUnref(shader);
     // skiaShader == NULL when not !USE_OPENGL_RENDERER, so no need to delete it outside the ifdef
 #ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::Caches::hasInstance()) {

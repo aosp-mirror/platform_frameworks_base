@@ -571,7 +571,7 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     pathPaint.setMaskFilter(NULL);
     pathPaint.setShader(NULL);
     SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
-    pathPaint.setXfermode(mode)->safeUnref();
+    SkSafeUnref(pathPaint.setXfermode(mode));
 
     SkCanvas canvas(bitmap);
     canvas.translate(-bounds.fLeft + offset, -bounds.fTop + offset);

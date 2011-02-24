@@ -378,12 +378,12 @@ static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) {
 
     jbyteArray buffer = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
     if (NULL == buffer) {
-        ctable->safeUnref();
+        SkSafeUnref(ctable);
         delete bitmap;
         return NULL;
     }
 
-    ctable->safeUnref();
+    SkSafeUnref(ctable);
 
     size_t size = bitmap->getSize();
     bitmap->lockPixels();
