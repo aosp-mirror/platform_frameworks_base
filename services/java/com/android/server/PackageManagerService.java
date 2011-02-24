@@ -70,7 +70,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
@@ -87,7 +86,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.security.SystemKeyStore;
-import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -1984,11 +1982,9 @@ class PackageManagerService extends IPackageManager.Stub {
                 // then let the user decide between them.
                 ResolveInfo r0 = query.get(0);
                 ResolveInfo r1 = query.get(1);
-                if (false) {
-                    System.out.println(r0.activityInfo.name +
-                                       "=" + r0.priority + " vs " +
-                                       r1.activityInfo.name +
-                                       "=" + r1.priority);
+                if (DEBUG_INTENT_MATCHING) {
+                    Log.d(TAG, r0.activityInfo.name + "=" + r0.priority + " vs "
+                            + r1.activityInfo.name + "=" + r1.priority);
                 }
                 // If the first activity has a higher priority, or a different
                 // default, then it is always desireable to pick it.
@@ -2519,7 +2515,7 @@ class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        if (false) {
+        if (DEBUG_PACKAGE_SCANNING) {
             Log.d(TAG, "Scanning app dir " + dir);
         }
 
@@ -2872,8 +2868,11 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        if (DEBUG_PACKAGE_SCANNING && (parseFlags&PackageParser.PARSE_CHATTY) != 0) Log.d(
-                TAG, "Scanning package " + pkg.packageName);
+        if (DEBUG_PACKAGE_SCANNING) {
+            if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                Log.d(TAG, "Scanning package " + pkg.packageName);
+        }
+
         if (mPackages.containsKey(pkg.packageName)
                 || mSharedLibraries.containsKey(pkg.packageName)) {
             Slog.w(TAG, "Application package " + pkg.packageName
@@ -2945,9 +2944,10 @@ class PackageManagerService extends IPackageManager.Stub {
                     mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                     return null;
                 }
-                if (DEBUG_PACKAGE_SCANNING && (parseFlags & PackageParser.PARSE_CHATTY) != 0) {
-                    Log.d(TAG, "Shared UserID " + pkg.mSharedUserId + " (uid="
-                            + suid.userId + "): packages=" + suid.packages);
+                if (DEBUG_PACKAGE_SCANNING) {
+                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                        Log.d(TAG, "Shared UserID " + pkg.mSharedUserId + " (uid=" + suid.userId
+                                + "): packages=" + suid.packages);
                 }
             }
             
@@ -3199,8 +3199,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 pkg.applicationInfo.dataDir = dataPath.getPath();
             } else {
-                if (DEBUG_PACKAGE_SCANNING && (parseFlags & PackageParser.PARSE_CHATTY) != 0)
-                    Log.v(TAG, "Want this data dir: " + dataPath);
+                if (DEBUG_PACKAGE_SCANNING) {
+                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                        Log.v(TAG, "Want this data dir: " + dataPath);
+                }
                 //invoke installer to do the actual installation
                 if (mInstaller != null) {
                     int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
@@ -3380,11 +3382,12 @@ class PackageManagerService extends IPackageManager.Stub {
                             } else {
                                 p.info.authority = p.info.authority + ";" + names[j];
                             }
-                            if (DEBUG_PACKAGE_SCANNING
-                                    && (parseFlags & PackageParser.PARSE_CHATTY) != 0)
-                                Log.d(TAG, "Registered content provider: " + names[j] +
-                                        ", className = " + p.info.name +
-                                        ", isSyncable = " + p.info.isSyncable);
+                            if (DEBUG_PACKAGE_SCANNING) {
+                                if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                                    Log.d(TAG, "Registered content provider: " + names[j]
+                                            + ", className = " + p.info.name + ", isSyncable = "
+                                            + p.info.isSyncable);
+                            }
                         } else {
                             PackageParser.Provider other = mProviders.get(names[j]);
                             Slog.w(TAG, "Skipping provider name " + names[j] +
@@ -3630,8 +3633,10 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     void removePackageLI(PackageParser.Package pkg, boolean chatty) {
-        if (DEBUG_INSTALL && chatty)
-            Log.d(TAG, "Removing package " + pkg.applicationInfo.packageName);
+        if (DEBUG_INSTALL) {
+            if (chatty)
+                Log.d(TAG, "Removing package " + pkg.applicationInfo.packageName);
+        }
 
         synchronized (mPackages) {
             clearPackagePreferredActivitiesLP(pkg.packageName);
@@ -3660,10 +3665,12 @@ class PackageManagerService extends IPackageManager.Stub {
                 for (int j = 0; j < names.length; j++) {
                     if (mProviders.get(names[j]) == p) {
                         mProviders.remove(names[j]);
-                        if (DEBUG_REMOVE && chatty) Log.d(
-                            TAG, "Unregistered content provider: " + names[j] +
-                            ", className = " + p.info.name +
-                            ", isSyncable = " + p.info.isSyncable);
+                        if (DEBUG_REMOVE) {
+                            if (chatty)
+                                Log.d(TAG, "Unregistered content provider: " + names[j]
+                                        + ", className = " + p.info.name + ", isSyncable = "
+                                        + p.info.isSyncable);
+                        }
                     }
                 }
                 if (chatty) {
@@ -3898,10 +3905,9 @@ class PackageManagerService extends IPackageManager.Stub {
         for (int i=0; i<N; i++) {
             String name = pkg.requestedPermissions.get(i);
             BasePermission bp = mSettings.mPermissions.get(name);
-            if (false) {
+            if (DEBUG_INSTALL) {
                 if (gp != ps) {
-                    Log.i(TAG, "Package " + pkg.packageName + " checking " + name
-                            + ": " + bp);
+                    Log.i(TAG, "Package " + pkg.packageName + " checking " + name + ": " + bp);
                 }
             }
             if (bp != null && bp.packageSetting != null) {
@@ -3947,7 +3953,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     allowed = false;
                 }
-                if (false) {
+                if (DEBUG_INSTALL) {
                     if (gp != ps) {
                         Log.i(TAG, "Package " + pkg.packageName + " granting " + perm);
                     }
@@ -6100,9 +6106,8 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         if (retCode != 0) {
-            Slog.e(TAG, "Couldn't set new package file permissions for " +
-                    newPackage.mPath
-                       + ". The return code was: " + retCode);
+            Slog.e(TAG, "Couldn't set new package file permissions for " + newPackage.mPath
+                    + ". The return code was: " + retCode);
             // TODO Define new internal error
             return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
         }
@@ -7020,8 +7025,9 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private void sendPackageChangedBroadcast(String packageName,
             boolean killFlag, ArrayList<String> componentNames, int packageUid) {
-        if (false) Log.v(TAG, "Sending package changed: package=" + packageName
-                + " components=" + componentNames);
+        if (DEBUG_INSTALL)
+            Log.v(TAG, "Sending package changed: package=" + packageName + " components="
+                    + componentNames);
         Bundle extras = new Bundle(4);
         extras.putString(Intent.EXTRA_CHANGED_COMPONENT_NAME, componentNames.get(0));
         String nameList[] = new String[componentNames.size()];
@@ -8632,17 +8638,6 @@ class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        private Set<String> findPackagesWithFlag(int flag) {
-            Set<String> ret = new HashSet<String>();
-            for (PackageSetting ps : mPackages.values()) {
-                // Has to match atleast all the flag bits set on flag
-                if ((ps.pkgFlags & flag) == flag) {
-                    ret.add(ps.name);
-                }
-            }
-            return ret;
-        }
-
         private void removeUserIdLP(int uid) {
             if (uid >= FIRST_APPLICATION_UID) {
                 final int N = mUserIds.size();
@@ -9188,10 +9183,6 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 serializer.endTag(null, "item");
             }
-        }
-
-        String getReadMessagesLP() {
-            return mReadMessages.toString();
         }
 
         ArrayList<PackageSetting> getListOfIncompleteInstallPackages() {
@@ -10285,7 +10276,6 @@ class PackageManagerService extends IPackageManager.Stub {
        ArrayList<SdInstallArgs> failedList = new ArrayList<SdInstallArgs>();
        final Set<SdInstallArgs> keys = processCids.keySet();
        for (SdInstallArgs args : keys) {
-           String cid = args.cid;
            String pkgName = args.getPackageName();
            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to unload pkg : " + pkgName);
            // Delete package internally
