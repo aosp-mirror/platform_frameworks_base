@@ -873,7 +873,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Defineix"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminat"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No cal cap permís"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Oculta"</b></string>
+    <string name="perms_hide" msgid="7283915391320676226"><b>"Oamaga"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra\'ls tots"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Emmagatzematge massiu USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB connectat"</string>
