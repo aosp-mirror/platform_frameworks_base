@@ -168,7 +168,13 @@ private:
     int64_t mTimeSourceDeltaUs;
     int64_t mVideoTimeUs;
 
-    bool mSeeking;
+    enum SeekType {
+        NO_SEEK,
+        SEEK,
+        SEEK_VIDEO_ONLY
+    };
+    SeekType mSeeking;
+
     bool mSeekNotificationSent;
     int64_t mSeekTimeUs;
 

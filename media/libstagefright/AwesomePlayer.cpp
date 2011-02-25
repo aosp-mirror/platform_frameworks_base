@@ -50,7 +50,7 @@
 #include <media/stagefright/foundation/AMessage.h>
 
 #define USE_SURFACE_ALLOC 1
-#define FRAME_DROP_FREQ 7
+#define FRAME_DROP_FREQ 0
 
 namespace android {
 
@@ -496,7 +496,7 @@ void AwesomePlayer::reset_l() {
     mTimeSourceDeltaUs = 0;
     mVideoTimeUs = 0;
 
-    mSeeking = false;
+    mSeeking = NO_SEEK;
     mSeekNotificationSent = false;
     mSeekTimeUs = 0;
 
@@ -1052,7 +1052,7 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
     if (mRTSPController != NULL) {
         *positionUs = mRTSPController->getNormalPlayTimeUs();
     }
-    else if (mSeeking) {
+    else if (mSeeking != NO_SEEK) {
         *positionUs = mSeekTimeUs;
     } else if (mVideoSource != NULL) {
         Mutex::Autolock autoLock(mMiscStateLock);
@@ -1096,7 +1096,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
         play_l();
     }
 
-    mSeeking = true;
+    mSeeking = SEEK;
     mSeekNotificationSent = false;
     mSeekTimeUs = timeUs;
     mFlags &= ~(AT_EOS | AUDIO_AT_EOS | VIDEO_AT_EOS);
@@ -1120,7 +1120,7 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
 }
 
 void AwesomePlayer::seekAudioIfNecessary_l() {
-    if (mSeeking && mVideoSource == NULL && mAudioPlayer != NULL) {
+    if (mSeeking != NO_SEEK && mVideoSource == NULL && mAudioPlayer != NULL) {
         mAudioPlayer->seekTo(mSeekTimeUs);
 
         mWatchForAudioSeekComplete = true;
@@ -1216,7 +1216,12 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
 }
 
 void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
-    if (!mSeeking || (mFlags & SEEK_PREVIEW)) {
+    if (mSeeking == SEEK_VIDEO_ONLY) {
+        mSeeking = NO_SEEK;
+        return;
+    }
+
+    if (mSeeking == NO_SEEK || (mFlags & SEEK_PREVIEW)) {
         return;
     }
 
@@ -1235,7 +1240,7 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
     }
 
     mFlags |= FIRST_FRAME;
-    mSeeking = false;
+    mSeeking = NO_SEEK;
     mSeekNotificationSent = false;
 
     if (mDecryptHandle != NULL) {
@@ -1255,13 +1260,13 @@ void AwesomePlayer::onVideoEvent() {
     }
     mVideoEventPending = false;
 
-    if (mSeeking) {
+    if (mSeeking != NO_SEEK) {
         if (mVideoBuffer) {
             mVideoBuffer->release();
             mVideoBuffer = NULL;
         }
 
-        if (mCachedSource != NULL && mAudioSource != NULL
+        if (mSeeking == SEEK && mCachedSource != NULL && mAudioSource != NULL
                 && !(mFlags & SEEK_PREVIEW)) {
             // We're going to seek the video source first, followed by
             // the audio source.
@@ -1282,11 +1287,14 @@ void AwesomePlayer::onVideoEvent() {
 
     if (!mVideoBuffer) {
         MediaSource::ReadOptions options;
-        if (mSeeking) {
+        if (mSeeking != NO_SEEK) {
             LOGV("seeking to %lld us (%.2f secs)", mSeekTimeUs, mSeekTimeUs / 1E6);
 
             options.setSeekTo(
-                    mSeekTimeUs, MediaSource::ReadOptions::SEEK_CLOSEST_SYNC);
+                    mSeekTimeUs,
+                    mSeeking == SEEK_VIDEO_ONLY
+                        ? MediaSource::ReadOptions::SEEK_NEXT_SYNC
+                        : MediaSource::ReadOptions::SEEK_CLOSEST_SYNC);
         }
         for (;;) {
             status_t err = mVideoSource->read(&mVideoBuffer, &options);
@@ -1310,7 +1318,7 @@ void AwesomePlayer::onVideoEvent() {
                 // So video playback is complete, but we may still have
                 // a seek request pending that needs to be applied
                 // to the audio track.
-                if (mSeeking) {
+                if (mSeeking != NO_SEEK) {
                     LOGV("video stream ended while seeking!");
                 }
                 finishSeekIfNecessary(-1);
@@ -1336,12 +1344,19 @@ void AwesomePlayer::onVideoEvent() {
     int64_t timeUs;
     CHECK(mVideoBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
 
+    if (mSeeking == SEEK_VIDEO_ONLY) {
+        if (mSeekTimeUs > timeUs) {
+            LOGI("XXX mSeekTimeUs = %lld us, timeUs = %lld us",
+                 mSeekTimeUs, timeUs);
+        }
+    }
+
     {
         Mutex::Autolock autoLock(mMiscStateLock);
         mVideoTimeUs = timeUs;
     }
 
-    bool wasSeeking = mSeeking;
+    SeekType wasSeeking = mSeeking;
     finishSeekIfNecessary(timeUs);
 
     if (mAudioPlayer != NULL && !(mFlags & (AUDIO_RUNNING | SEEK_PREVIEW))) {
@@ -1366,12 +1381,40 @@ void AwesomePlayer::onVideoEvent() {
         mTimeSourceDeltaUs = realTimeUs - mediaTimeUs;
     }
 
-    if (!wasSeeking) {
+    if (wasSeeking == SEEK_VIDEO_ONLY) {
+        int64_t nowUs = ts->getRealTimeUs() - mTimeSourceDeltaUs;
+
+        int64_t latenessUs = nowUs - timeUs;
+
+        if (latenessUs > 0) {
+            LOGI("after SEEK_VIDEO_ONLY we're late by %.2f secs", latenessUs / 1E6);
+        }
+    }
+
+    if (wasSeeking == NO_SEEK) {
         // Let's display the first frame after seeking right away.
 
         int64_t nowUs = ts->getRealTimeUs() - mTimeSourceDeltaUs;
 
         int64_t latenessUs = nowUs - timeUs;
+
+        if (latenessUs > 500000ll
+                && mRTSPController == NULL
+                && mAudioPlayer != NULL
+                && mAudioPlayer->getMediaTimeMapping(
+                    &realTimeUs, &mediaTimeUs)) {
+            LOGI("we're much too late (%.2f secs), video skipping ahead",
+                 latenessUs / 1E6);
+
+            mVideoBuffer->release();
+            mVideoBuffer = NULL;
+
+            mSeeking = SEEK_VIDEO_ONLY;
+            mSeekTimeUs = mediaTimeUs;
+
+            postVideoEvent_l();
+            return;
+        }
 
         if (latenessUs > 40000) {
             // We're more than 40ms late.
@@ -1410,7 +1453,7 @@ void AwesomePlayer::onVideoEvent() {
     mVideoBuffer->release();
     mVideoBuffer = NULL;
 
-    if (wasSeeking && (mFlags & SEEK_PREVIEW)) {
+    if (wasSeeking != NO_SEEK && (mFlags & SEEK_PREVIEW)) {
         mFlags &= ~SEEK_PREVIEW;
         return;
     }
@@ -1479,7 +1522,7 @@ void AwesomePlayer::onCheckAudioStatus() {
             mSeekNotificationSent = true;
         }
 
-        mSeeking = false;
+        mSeeking = NO_SEEK;
     }
 
     status_t finalStatus;
