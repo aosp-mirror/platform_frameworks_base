@@ -978,13 +978,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleSetBackgroundData(boolean enabled) {
-        if (enabled != getBackgroundDataSetting()) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.BACKGROUND_DATA, enabled ? 1 : 0);
-            Intent broadcast = new Intent(
-                    ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
-            mContext.sendBroadcast(broadcast);
-        }
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.BACKGROUND_DATA, enabled ? 1 : 0);
+        Intent broadcast = new Intent(
+                ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
+        mContext.sendBroadcast(broadcast);
     }
 
     /**
