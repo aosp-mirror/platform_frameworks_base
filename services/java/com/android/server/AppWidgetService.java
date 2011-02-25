@@ -479,7 +479,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             // Add it to the mapping of RemoteViewsService to appWidgetIds so that we can determine
             // when we can call back to the RemoteViewsService later to destroy associated
             // factories.
-             WidgetRemoteViewsServiceBinding(appWidgetId, fc);
+            incrementAppWidgetServiceRefCount(appWidgetId, fc);
         }
     }
 
