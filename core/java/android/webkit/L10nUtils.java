@@ -18,8 +18,9 @@ package android.webkit;
 
 import android.content.Context;
 
-import java.util.List;
-import java.util.Vector;
+import java.lang.ref.SoftReference;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * @hide
@@ -71,20 +72,32 @@ public class L10nUtils {
         com.android.internal.R.string.autofill_card_ignored_re              // IDS_AUTOFILL_CARD_IGNORED_RE
     };
 
-    private static List<String> mStrings;
+    private static Context mApplicationContext;
+    private static Map<Integer, SoftReference<String> > mStrings;
 
-    public static void loadStrings(Context context) {
-        if (mStrings != null) {
-            return;
+    public static void setApplicationContext(Context applicationContext) {
+        mApplicationContext = applicationContext.getApplicationContext();
+    }
+
+    private static String loadString(int id) {
+        if (mStrings == null) {
+            mStrings = new HashMap<Integer, SoftReference<String> >(mIdsArray.length);
         }
 
-        mStrings = new Vector<String>(mIdsArray.length);
-        for (int i = 0; i < mIdsArray.length; i++) {
-            mStrings.add(context.getResources().getString(mIdsArray[i]));
-        }
+        String localisedString = mApplicationContext.getResources().getString(mIdsArray[id]);
+        mStrings.put(id, new SoftReference<String>(localisedString));
+        return localisedString;
     }
 
     public static String getLocalisedString(int id) {
-        return mStrings.get(id);
+        if (mStrings == null) {
+            // This is the first time we need a localised string.
+            // loadString will create the Map.
+            return loadString(id);
+        }
+
+        SoftReference<String> ref = mStrings.get(id);
+        boolean needToLoad = ref == null || ref.get() == null;
+        return needToLoad ? loadString(id) : ref.get();
     }
 }

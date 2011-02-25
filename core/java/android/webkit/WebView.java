@@ -987,7 +987,7 @@ public class WebView extends AbsoluteLayout
 
         mCallbackProxy = new CallbackProxy(context, this);
         mViewManager = new ViewManager(this);
-        L10nUtils.loadStrings(context);
+        L10nUtils.setApplicationContext(context.getApplicationContext());
         mWebViewCore = new WebViewCore(context, this, mCallbackProxy, javaScriptInterfaces);
         mDatabase = WebViewDatabase.getInstance(context);
         mScroller = new OverScroller(context, null, 0, 0, false); //TODO Use OverScroller's flywheel
