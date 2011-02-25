@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
@@ -39,12 +40,12 @@ public abstract class Shader_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Shader_Delegate> sManager =
-            new DelegateManager<Shader_Delegate>();
+            new DelegateManager<Shader_Delegate>(Shader_Delegate.class);
 
     // ---- delegate helper data ----
 
     // ---- delegate data ----
-    private int mLocalMatrix = 0;
+    private Matrix_Delegate mLocalMatrix = null;
 
     // ---- Public Helper methods ----
 
@@ -74,36 +75,12 @@ public abstract class Shader_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_shader, int native_skiaShader) {
-        sManager.removeDelegate(native_shader);
+        sManager.removeJavaReferenceFor(native_shader);
     }
 
-    /*package*/ static boolean nativeGetLocalMatrix(int native_shader, int matrix_instance) {
-        // get the delegate from the native int.
-        Shader_Delegate shaderDelegate = sManager.getDelegate(native_shader);
-        if (shaderDelegate == null) {
-            return false;
-        }
-
-        // can be null if shader has no matrix (int is 0)
-        Matrix_Delegate localMatrixDelegate = Matrix_Delegate.getDelegate(
-                shaderDelegate.mLocalMatrix);
-
-        // can be null if the int is 0.
-        Matrix_Delegate destMatrixDelegate = Matrix_Delegate.getDelegate(matrix_instance);
-        if (destMatrixDelegate != null) {
-            if (localMatrixDelegate != null) {
-                destMatrixDelegate.set(localMatrixDelegate);
-            } else {
-                // since there's no local matrix, it's considered to be the identity, reset
-                // the destination matrix
-                destMatrixDelegate.reset();
-            }
-        }
-
-        return localMatrixDelegate == null || localMatrixDelegate.isIdentity();
-    }
-
+    @LayoutlibDelegate
     /*package*/ static void nativeSetLocalMatrix(int native_shader, int native_skiaShader,
             int matrix_instance) {
         // get the delegate from the native int.
@@ -112,15 +89,14 @@ public abstract class Shader_Delegate {
             return;
         }
 
-        shaderDelegate.mLocalMatrix = matrix_instance;
+        shaderDelegate.mLocalMatrix = Matrix_Delegate.getDelegate(matrix_instance);
     }
 
     // ---- Private delegate/helper methods ----
 
     protected java.awt.geom.AffineTransform getLocalMatrix() {
-        Matrix_Delegate localMatrixDelegate = Matrix_Delegate.getDelegate(mLocalMatrix);
-        if (localMatrixDelegate != null) {
-            return localMatrixDelegate.getAffineTransform();
+        if (mLocalMatrix != null) {
+            return mLocalMatrix.getAffineTransform();
         }
 
         return new java.awt.geom.AffineTransform();

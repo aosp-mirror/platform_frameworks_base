@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.MaskFilter
@@ -37,7 +38,7 @@ public abstract class MaskFilter_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<MaskFilter_Delegate> sManager =
-            new DelegateManager<MaskFilter_Delegate>();
+            new DelegateManager<MaskFilter_Delegate>(MaskFilter_Delegate.class);
 
     // ---- delegate helper data ----
 
@@ -54,8 +55,9 @@ public abstract class MaskFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_filter) {
-        sManager.removeDelegate(native_filter);
+        sManager.removeJavaReferenceFor(native_filter);
     }
 
     // ---- Private delegate/helper methods ----

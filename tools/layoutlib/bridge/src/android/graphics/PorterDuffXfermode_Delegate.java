@@ -19,6 +19,7 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -125,9 +126,10 @@ public class PorterDuffXfermode_Delegate extends Xfermode_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreateXfermode(int mode) {
         PorterDuffXfermode_Delegate newDelegate = new PorterDuffXfermode_Delegate(mode);
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

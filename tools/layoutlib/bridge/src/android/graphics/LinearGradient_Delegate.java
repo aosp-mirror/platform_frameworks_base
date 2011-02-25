@@ -19,6 +19,7 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
@@ -52,13 +53,16 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate1(LinearGradient thisGradient,
             float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode) {
         LinearGradient_Delegate newDelegate = new LinearGradient_Delegate(x0, y0, x1, y1,
                 colors, positions, Shader_Delegate.getTileMode(tileMode));
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
+
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate2(LinearGradient thisGradient,
             float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode) {
@@ -66,12 +70,16 @@ public final class LinearGradient_Delegate extends Gradient_Delegate {
                 x0, y0, x1, y1, new int[] { color0, color1}, null /*positions*/,
                 tileMode);
     }
+
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate1(LinearGradient thisGradient,
             int native_shader, float x0, float y0, float x1, float y1,
             int colors[], float positions[], int tileMode) {
         // nothing to be done here.
         return 0;
     }
+
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate2(LinearGradient thisGradient,
             int native_shader, float x0, float y0, float x1, float y1,
             int color0, int color1, int tileMode) {

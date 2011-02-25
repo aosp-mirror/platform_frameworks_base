@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.PorterDuffColorFilter
@@ -53,11 +54,13 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int native_CreatePorterDuffFilter(int srcColor, int porterDuffMode) {
         PorterDuffColorFilter_Delegate newDelegate = new PorterDuffColorFilter_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nCreatePorterDuffFilter(int nativeFilter, int srcColor,
             int porterDuffMode) {
         // pass

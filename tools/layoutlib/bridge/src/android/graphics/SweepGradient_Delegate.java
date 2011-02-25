@@ -19,6 +19,7 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.SweepGradient
@@ -50,21 +51,25 @@ public class SweepGradient_Delegate extends Gradient_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate1(float x, float y, int colors[], float positions[]) {
         SweepGradient_Delegate newDelegate = new SweepGradient_Delegate(x, y, colors, positions);
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate2(float x, float y, int color0, int color1) {
         return nativeCreate1(x, y, new int[] { color0, color1 }, null /*positions*/);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate1(int native_shader, float cx, float cy,
             int[] colors, float[] positions) {
         // nothing to be done here.
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate2(int native_shader, float cx, float cy,
             int color0, int color1) {
         // nothing to be done here.

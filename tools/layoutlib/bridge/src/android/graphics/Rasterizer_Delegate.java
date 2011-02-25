@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.Rasterizer
@@ -37,7 +38,7 @@ public abstract class Rasterizer_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Rasterizer_Delegate> sManager =
-            new DelegateManager<Rasterizer_Delegate>();
+            new DelegateManager<Rasterizer_Delegate>(Rasterizer_Delegate.class);
 
     // ---- delegate helper data ----
 
@@ -54,8 +55,9 @@ public abstract class Rasterizer_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance) {
-        sManager.removeDelegate(native_instance);
+        sManager.removeJavaReferenceFor(native_instance);
     }
 
     // ---- Private delegate/helper methods ----

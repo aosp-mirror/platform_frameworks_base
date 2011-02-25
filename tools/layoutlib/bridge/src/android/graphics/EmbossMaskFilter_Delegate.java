@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.EmbossMaskFilter
@@ -53,10 +54,11 @@ public class EmbossMaskFilter_Delegate extends MaskFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeConstructor(float[] direction, float ambient,
             float specular, float blurRadius) {
         EmbossMaskFilter_Delegate newDelegate = new EmbossMaskFilter_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

@@ -17,6 +17,7 @@
 package android.app;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ public class Fragment_Delegate {
      * Like {@link #instantiate(Context, String, Bundle)} but with a null
      * argument Bundle.
      */
+    @LayoutlibDelegate
     /*package*/ static Fragment instantiate(Context context, String fname) {
         return instantiate(context, fname, null);
     }
@@ -66,6 +68,7 @@ public class Fragment_Delegate {
      * the given fragment class.  This is a runtime exception; it is not
      * normally expected to happen.
      */
+    @LayoutlibDelegate
     /*package*/ static Fragment instantiate(Context context, String fname, Bundle args) {
         try {
             if (sProjectCallback != null) {

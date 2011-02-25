@@ -19,6 +19,7 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
@@ -63,6 +64,7 @@ public class BitmapShader_Delegate extends Shader_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate(int native_bitmap, int shaderTileModeX,
             int shaderTileModeY) {
         Bitmap_Delegate bitmap = Bitmap_Delegate.getDelegate(native_bitmap);
@@ -74,9 +76,10 @@ public class BitmapShader_Delegate extends Shader_Delegate {
                 bitmap.getImage(),
                 Shader_Delegate.getTileMode(shaderTileModeX),
                 Shader_Delegate.getTileMode(shaderTileModeY));
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativePostCreate(int native_shader, int native_bitmap,
             int shaderTileModeX, int shaderTileModeY) {
         // pass, not needed.

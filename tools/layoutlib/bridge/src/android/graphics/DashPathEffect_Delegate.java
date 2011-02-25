@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.BasicStroke;
 import java.awt.Stroke;
@@ -71,9 +72,10 @@ public final class DashPathEffect_Delegate extends PathEffect_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreate(float intervals[], float phase) {
         DashPathEffect_Delegate newDelegate = new DashPathEffect_Delegate(intervals, phase);
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

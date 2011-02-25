@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.layoutlib.bridge.util;
 
-import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+public class Debug {
 
-/**
- * Delegate used to provide new implementation of a select few methods of {@link View}
- *
- * Through the layoutlib_create tool, the original  methods of View have been replaced
- * by calls to methods of the same name in this delegate class.
- *
- */
-public class View_Delegate {
+    public final static boolean DEBUG = false;
 
-    @LayoutlibDelegate
-    /*package*/ static boolean isInEditMode(View thisView) {
-        return true;
-    }
 }

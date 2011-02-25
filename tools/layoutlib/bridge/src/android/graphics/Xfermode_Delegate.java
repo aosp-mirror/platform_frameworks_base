@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.Composite;
 
@@ -39,7 +40,7 @@ public abstract class Xfermode_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Xfermode_Delegate> sManager =
-            new DelegateManager<Xfermode_Delegate>();
+            new DelegateManager<Xfermode_Delegate>(Xfermode_Delegate.class);
 
     // ---- delegate helper data ----
 
@@ -58,8 +59,9 @@ public abstract class Xfermode_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void finalizer(int native_instance) {
-        sManager.removeDelegate(native_instance);
+        sManager.removeJavaReferenceFor(native_instance);
     }
 
     // ---- Private delegate/helper methods ----

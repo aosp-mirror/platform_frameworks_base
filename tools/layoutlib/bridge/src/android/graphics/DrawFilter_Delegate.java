@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.DrawFilter
@@ -37,7 +38,7 @@ public abstract class DrawFilter_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<DrawFilter_Delegate> sManager =
-            new DelegateManager<DrawFilter_Delegate>();
+            new DelegateManager<DrawFilter_Delegate>(DrawFilter_Delegate.class);
 
     // ---- delegate helper data ----
 
@@ -54,8 +55,9 @@ public abstract class DrawFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int nativeDrawFilter) {
-        sManager.removeDelegate(nativeDrawFilter);
+        sManager.removeJavaReferenceFor(nativeDrawFilter);
     }
 
     // ---- Private delegate/helper methods ----

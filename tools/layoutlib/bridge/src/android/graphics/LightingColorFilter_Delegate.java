@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.LightingColorFilter
@@ -53,11 +54,13 @@ public class LightingColorFilter_Delegate extends ColorFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int native_CreateLightingFilter(int mul, int add) {
         LightingColorFilter_Delegate newDelegate = new LightingColorFilter_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nCreateLightingFilter(int nativeFilter, int mul, int add) {
         // pass
         return 0;

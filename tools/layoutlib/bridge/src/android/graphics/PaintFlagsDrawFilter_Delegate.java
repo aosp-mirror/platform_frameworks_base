@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.PaintFlagsDrawFilter
@@ -53,9 +54,10 @@ public class PaintFlagsDrawFilter_Delegate extends DrawFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeConstructor(int clearBits, int setBits) {
         PaintFlagsDrawFilter_Delegate newDelegate = new PaintFlagsDrawFilter_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
     // ---- Private delegate/helper methods ----

@@ -19,6 +19,7 @@ package android.graphics;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.os.Parcel;
 
@@ -47,7 +48,7 @@ public class Region_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<Region_Delegate> sManager =
-            new DelegateManager<Region_Delegate>();
+            new DelegateManager<Region_Delegate>(Region_Delegate.class);
 
     // ---- delegate helper data ----
 
@@ -136,6 +137,7 @@ public class Region_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static boolean isEmpty(Region thisRegion) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -145,6 +147,7 @@ public class Region_Delegate {
         return regionDelegate.mArea.isEmpty();
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean isRect(Region thisRegion) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -154,6 +157,7 @@ public class Region_Delegate {
         return regionDelegate.mArea.isRectangular();
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean isComplex(Region thisRegion) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -163,6 +167,7 @@ public class Region_Delegate {
         return regionDelegate.mArea.isSingular() == false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean contains(Region thisRegion, int x, int y) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -172,6 +177,7 @@ public class Region_Delegate {
         return regionDelegate.mArea.contains(x, y);
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean quickContains(Region thisRegion,
             int left, int top, int right, int bottom) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
@@ -183,6 +189,7 @@ public class Region_Delegate {
                 regionDelegate.mArea.contains(left, top, right - left, bottom - top);
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean quickReject(Region thisRegion,
             int left, int top, int right, int bottom) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
@@ -194,6 +201,7 @@ public class Region_Delegate {
                 regionDelegate.mArea.intersects(left, top, right - left, bottom - top) == false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean quickReject(Region thisRegion, Region rgn) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -211,6 +219,7 @@ public class Region_Delegate {
 
     }
 
+    @LayoutlibDelegate
     /*package*/ static void translate(Region thisRegion, int dx, int dy, Region dst) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -232,6 +241,7 @@ public class Region_Delegate {
         }
     }
 
+    @LayoutlibDelegate
     /*package*/ static void scale(Region thisRegion, float scale, Region dst) {
         Region_Delegate regionDelegate = sManager.getDelegate(thisRegion.mNativeRegion);
         if (regionDelegate == null) {
@@ -253,15 +263,18 @@ public class Region_Delegate {
         }
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativeConstructor() {
         Region_Delegate newDelegate = new Region_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_region) {
-        sManager.removeDelegate(native_region);
+        sManager.removeJavaReferenceFor(native_region);
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeSetRegion(int native_dst, int native_src) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
@@ -279,6 +292,7 @@ public class Region_Delegate {
         return true;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeSetRect(int native_dst,
             int left, int top, int right, int bottom) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
@@ -290,6 +304,7 @@ public class Region_Delegate {
         return dstRegion.mArea.getBounds().isEmpty() == false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeSetPath(int native_dst, int native_path, int native_clip) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
         if (dstRegion == null) {
@@ -311,6 +326,7 @@ public class Region_Delegate {
         return dstRegion.mArea.getBounds().isEmpty() == false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeGetBounds(int native_region, Rect rect) {
         Region_Delegate region = sManager.getDelegate(native_region);
         if (region == null) {
@@ -330,6 +346,7 @@ public class Region_Delegate {
         return true;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeGetBoundaryPath(int native_region, int native_path) {
         Region_Delegate region = sManager.getDelegate(native_region);
         if (region == null) {
@@ -350,6 +367,7 @@ public class Region_Delegate {
         return true;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeOp(int native_dst,
             int left, int top, int right, int bottom, int op) {
         Region_Delegate region = sManager.getDelegate(native_dst);
@@ -368,6 +386,7 @@ public class Region_Delegate {
         return region.mArea.getBounds().isEmpty() == false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeOp(int native_dst, Rect rect, int native_region, int op) {
         Region_Delegate region = sManager.getDelegate(native_dst);
         if (region == null) {
@@ -385,6 +404,7 @@ public class Region_Delegate {
         return region.mArea.getBounds().isEmpty() == false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeOp(int native_dst,
             int native_region1, int native_region2, int op) {
         Region_Delegate dstRegion = sManager.getDelegate(native_dst);
@@ -413,6 +433,7 @@ public class Region_Delegate {
 
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativeCreateFromParcel(Parcel p) {
         // This is only called by Region.CREATOR (Parcelable.Creator<Region>), which is only
         // used during aidl call so really this should not be called.
@@ -422,6 +443,7 @@ public class Region_Delegate {
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeWriteToParcel(int native_region,
                                                       Parcel p) {
         // This is only called when sending a region through aidl, so really this should not
@@ -432,6 +454,7 @@ public class Region_Delegate {
         return false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static boolean nativeEquals(int native_r1, int native_r2) {
         Region_Delegate region1 = sManager.getDelegate(native_r1);
         if (region1 == null) {
@@ -446,6 +469,7 @@ public class Region_Delegate {
         return region1.mArea.equals(region2.mArea);
     }
 
+    @LayoutlibDelegate
     /*package*/ static String nativeToString(int native_region) {
         Region_Delegate region = sManager.getDelegate(native_region);
         if (region == null) {

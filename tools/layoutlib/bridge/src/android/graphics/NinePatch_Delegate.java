@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.ninepatch.NinePatchChunk;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.drawable.NinePatchDrawable;
 
@@ -137,6 +138,7 @@ public final class NinePatch_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static boolean isNinePatchChunk(byte[] chunk) {
         NinePatchChunk chunkObject = getChunk(chunk);
         if (chunkObject != null) {
@@ -146,12 +148,14 @@ public final class NinePatch_Delegate {
         return false;
     }
 
+    @LayoutlibDelegate
     /*package*/ static void validateNinePatchChunk(int bitmap, byte[] chunk) {
         // the default JNI implementation only checks that the byte[] has the same
         // size as the C struct it represent. Since we cannot do the same check (serialization
         // will return different size depending on content), we do nothing.
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDraw(int canvas_instance, RectF loc, int bitmap_instance,
             byte[] c, int paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
@@ -160,6 +164,7 @@ public final class NinePatch_Delegate {
                 destDensity, srcDensity);
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDraw(int canvas_instance, Rect loc, int bitmap_instance,
             byte[] c, int paint_instance_or_null, int destDensity, int srcDensity) {
         draw(canvas_instance,
@@ -168,54 +173,53 @@ public final class NinePatch_Delegate {
                 destDensity, srcDensity);
     }
 
-   private static void draw(int canvas_instance,
-           final int left, final int top, final int right, final int bottom,
-           int bitmap_instance, byte[] c, int paint_instance_or_null,
-           final int destDensity, final int srcDensity) {
-       // get the delegate from the native int.
-       final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
-       if (bitmap_delegate == null) {
-           return;
-       }
-
-       if (c == null) {
-           // not a 9-patch?
-           BufferedImage image = bitmap_delegate.getImage();
-           Canvas_Delegate.native_drawBitmap(canvas_instance, bitmap_instance,
-                   new Rect(0, 0, image.getWidth(), image.getHeight()),
-                   new Rect(left, top, right, bottom),
-                   paint_instance_or_null, destDensity, srcDensity);
-           return;
-       }
-
-       final NinePatchChunk chunkObject = getChunk(c);
-       assert chunkObject != null;
-       if (chunkObject == null) {
-           return;
-       }
-
-       Canvas_Delegate canvas_delegate = Canvas_Delegate.getDelegate(canvas_instance);
-       if (canvas_delegate == null) {
-           return;
-       }
-
-       // this one can be null
-       Paint_Delegate paint_delegate = Paint_Delegate.getDelegate(paint_instance_or_null);
-
-       canvas_delegate.getSnapshot().draw(new GcSnapshot.Drawable() {
-               public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                   chunkObject.draw(bitmap_delegate.getImage(), graphics,
-                           left, top, right - left, bottom - top, destDensity, srcDensity);
-               }
-           }, paint_delegate, true /*compositeOnly*/, false /*forceSrcMode*/);
-
-    }
-
+    @LayoutlibDelegate
     /*package*/ static int nativeGetTransparentRegion(int bitmap, byte[] chunk, Rect location) {
         return 0;
     }
 
     // ---- Private Helper methods ----
 
+    private static void draw(int canvas_instance,
+            final int left, final int top, final int right, final int bottom,
+            int bitmap_instance, byte[] c, int paint_instance_or_null,
+            final int destDensity, final int srcDensity) {
+        // get the delegate from the native int.
+        final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
+        if (bitmap_delegate == null) {
+            return;
+        }
 
+        if (c == null) {
+            // not a 9-patch?
+            BufferedImage image = bitmap_delegate.getImage();
+            Canvas_Delegate.native_drawBitmap(canvas_instance, bitmap_instance,
+                    new Rect(0, 0, image.getWidth(), image.getHeight()),
+                    new Rect(left, top, right, bottom),
+                    paint_instance_or_null, destDensity, srcDensity);
+            return;
+        }
+
+        final NinePatchChunk chunkObject = getChunk(c);
+        assert chunkObject != null;
+        if (chunkObject == null) {
+            return;
+        }
+
+        Canvas_Delegate canvas_delegate = Canvas_Delegate.getDelegate(canvas_instance);
+        if (canvas_delegate == null) {
+            return;
+        }
+
+        // this one can be null
+        Paint_Delegate paint_delegate = Paint_Delegate.getDelegate(paint_instance_or_null);
+
+        canvas_delegate.getSnapshot().draw(new GcSnapshot.Drawable() {
+                public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                    chunkObject.draw(bitmap_delegate.getImage(), graphics,
+                            left, top, right - left, bottom - top, destDensity, srcDensity);
+                }
+            }, paint_delegate, true /*compositeOnly*/, false /*forceSrcMode*/);
+
+     }
 }

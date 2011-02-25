@@ -188,6 +188,10 @@ public final class BridgeTypedArray extends TypedArray {
 
         String s = mResourceData[index].getValue();
 
+        if (RenderResources.REFERENCE_NULL.equals(s)) {
+            return defValue;
+        }
+
         try {
             return (s == null) ? defValue : XmlUtils.convertValueToInt(s, defValue);
         } catch (NumberFormatException e) {
@@ -301,6 +305,10 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
+        if (RenderResources.REFERENCE_NULL.equals(value)) {
+            return null;
+        }
+
         // let the framework inflate the ColorStateList from the XML file.
         File f = new File(value);
         if (f.isFile()) {
@@ -336,8 +344,6 @@ public final class BridgeTypedArray extends TypedArray {
         } catch (NumberFormatException e) {
             Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e, null /*data*/);
         }
-
-        assert false;
 
         return null;
     }
@@ -408,6 +414,10 @@ public final class BridgeTypedArray extends TypedArray {
             return LayoutParams.WRAP_CONTENT;
         }
 
+        if (RenderResources.REFERENCE_NULL.equals(s)) {
+            return defValue;
+        }
+
         if (ResourceHelper.stringToFloat(s, mValue)) {
             return mValue.getDimension(mBridgeResources.mMetrics);
         }
@@ -417,8 +427,6 @@ public final class BridgeTypedArray extends TypedArray {
                 String.format(
                     "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
                     s, mNames[index]), null /*data*/);
-
-        assert false;
 
         return defValue;
     }
@@ -480,6 +488,10 @@ public final class BridgeTypedArray extends TypedArray {
             return LayoutParams.WRAP_CONTENT;
         }
 
+        if (RenderResources.REFERENCE_NULL.equals(s)) {
+            return defValue;
+        }
+
         // FIXME huh?
 
         float f = getDimension(index, defValue);
@@ -488,8 +500,11 @@ public final class BridgeTypedArray extends TypedArray {
         if (f == 0) return 0;
         if (f > 0) return 1;
 
-        throw new UnsupportedOperationException("Can't convert to dimension: " +
-                Integer.toString(index));
+        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
+                "Can't convert to dimension: " + Integer.toString(index),
+                null, null /*data*/);
+
+        return defValue;
     }
 
     /**
@@ -550,8 +565,6 @@ public final class BridgeTypedArray extends TypedArray {
                     "\"%1$s\" in attribute \"%2$s\" cannont be converted to a fraction.",
                     value, mNames[index]), null /*data*/);
 
-        assert false;
-
         return defValue;
     }
 
@@ -583,6 +596,10 @@ public final class BridgeTypedArray extends TypedArray {
         if (resValue instanceof StyleResourceValue) {
             // get the id that will represent this style.
             return mContext.getDynamicIdByStyle((StyleResourceValue)resValue);
+        }
+
+        if (RenderResources.REFERENCE_NULL.equals(resValue.getValue())) {
+            return defValue;
         }
 
         // if the attribute was a reference to a resource, and not a declaration of an id (@+id),
@@ -663,8 +680,6 @@ public final class BridgeTypedArray extends TypedArray {
                     "Unable to resolve id \"%1$s\" for attribute \"%2$s\"", value, mNames[index]),
                     resValue);
 
-        assert false;
-
         return defValue;
     }
 
@@ -712,6 +727,10 @@ public final class BridgeTypedArray extends TypedArray {
 
         String value = mResourceData[index].getValue();
         if (value != null) {
+            if (RenderResources.REFERENCE_NULL.equals(value)) {
+                return null;
+            }
+
             return new CharSequence[] { value };
         }
 

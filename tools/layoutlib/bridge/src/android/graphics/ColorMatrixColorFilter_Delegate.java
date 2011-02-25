@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.ColorMatrixColorFilter
@@ -53,11 +54,13 @@ public class ColorMatrixColorFilter_Delegate extends ColorFilter_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeColorMatrixFilter(float[] array) {
         ColorMatrixColorFilter_Delegate newDelegate = new ColorMatrixColorFilter_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nColorMatrixFilter(int nativeFilter, float[] array) {
         // pass
         return 0;

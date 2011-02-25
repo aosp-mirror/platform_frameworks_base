@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import java.awt.Stroke;
 
@@ -39,7 +40,7 @@ public abstract class PathEffect_Delegate {
 
     // ---- delegate manager ----
     protected static final DelegateManager<PathEffect_Delegate> sManager =
-            new DelegateManager<PathEffect_Delegate>();
+            new DelegateManager<PathEffect_Delegate>(PathEffect_Delegate.class);
 
     // ---- delegate helper data ----
 
@@ -58,8 +59,9 @@ public abstract class PathEffect_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static void nativeDestructor(int native_patheffect) {
-        sManager.removeDelegate(native_patheffect);
+        sManager.removeJavaReferenceFor(native_patheffect);
     }
 
     // ---- Private delegate/helper methods ----

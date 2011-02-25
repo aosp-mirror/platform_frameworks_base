@@ -17,6 +17,7 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.impl.DelegateManager;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 /**
  * Delegate implementing the native methods of android.graphics.LayerRasterizer
@@ -53,11 +54,13 @@ public class LayerRasterizer_Delegate extends Rasterizer_Delegate {
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static int nativeConstructor() {
         LayerRasterizer_Delegate newDelegate = new LayerRasterizer_Delegate();
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeAddLayer(int native_layer, int native_paint, float dx, float dy) {
 
     }

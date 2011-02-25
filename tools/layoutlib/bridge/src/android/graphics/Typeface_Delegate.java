@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
+import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.res.AssetManager;
 
@@ -45,7 +46,7 @@ public final class Typeface_Delegate {
 
     // ---- delegate manager ----
     private static final DelegateManager<Typeface_Delegate> sManager =
-            new DelegateManager<Typeface_Delegate>();
+            new DelegateManager<Typeface_Delegate>(Typeface_Delegate.class);
 
     // ---- delegate helper data ----
     private static final String DEFAULT_FAMILY = "sans-serif";
@@ -73,6 +74,10 @@ public final class Typeface_Delegate {
         sPostInitDelegate.clear();
     }
 
+    public static Typeface_Delegate getDelegate(int nativeTypeface) {
+        return sManager.getDelegate(nativeTypeface);
+    }
+
     public static List<Font> getFonts(Typeface typeface) {
         return getFonts(typeface.native_instance);
     }
@@ -83,11 +88,16 @@ public final class Typeface_Delegate {
             return null;
         }
 
-        return delegate.mFonts;
+        return delegate.getFonts();
+    }
+
+    public List<Font> getFonts() {
+        return mFonts;
     }
 
     // ---- native methods ----
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreate(String familyName, int style) {
         if (familyName == null) {
             familyName = DEFAULT_FAMILY;
@@ -103,9 +113,10 @@ public final class Typeface_Delegate {
             sPostInitDelegate.add(newDelegate);
         }
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreateFromTypeface(int native_instance, int style) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
@@ -122,25 +133,29 @@ public final class Typeface_Delegate {
             sPostInitDelegate.add(newDelegate);
         }
 
-        return sManager.addDelegate(newDelegate);
+        return sManager.addNewDelegate(newDelegate);
     }
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreateFromAsset(AssetManager mgr, String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromAsset() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static synchronized int nativeCreateFromFile(String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
                 "Typeface.createFromFile() is not supported.", null /*throwable*/, null /*data*/);
         return 0;
     }
 
+    @LayoutlibDelegate
     /*package*/ static void nativeUnref(int native_instance) {
-        sManager.removeDelegate(native_instance);
+        sManager.removeJavaReferenceFor(native_instance);
     }
 
+    @LayoutlibDelegate
     /*package*/ static int nativeGetStyle(int native_instance) {
         Typeface_Delegate delegate = sManager.getDelegate(native_instance);
         if (delegate == null) {
@@ -150,6 +165,7 @@ public final class Typeface_Delegate {
         return delegate.mStyle;
     }
 
+    @LayoutlibDelegate
     /*package*/ static void setGammaForText(float blackGamma, float whiteGamma) {
         // This is for device testing only: pass
     }
