@@ -754,7 +754,6 @@ public class SipAudioCall {
     }
 
     private void grabWifiHighPerfLock() {
-        /* not available in master yet
         if (mWifiHighPerfLock == null) {
             Log.v(TAG, "acquire wifi high perf lock");
             mWifiHighPerfLock = ((WifiManager)
@@ -762,7 +761,6 @@ public class SipAudioCall {
                     .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
             mWifiHighPerfLock.acquire();
         }
-        */
     }
 
     private void releaseWifiHighPerfLock() {
