@@ -1694,7 +1694,9 @@ public class Camera {
         }
 
         /**
-         * Gets the supported preview formats.
+         * Gets the supported preview formats. {@link android.graphics.ImageFormat#NV21}
+         * is always supported. {@link android.graphics.ImageFormat#YV12}
+         * is always supported since API level 12.
          *
          * @return a list of supported preview formats. This method will always
          *         return a list with at least one element.
