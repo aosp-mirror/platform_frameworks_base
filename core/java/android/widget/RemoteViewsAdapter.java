@@ -20,7 +20,6 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -33,8 +32,8 @@ import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 
 import com.android.internal.widget.IRemoteViewsAdapterConnection;
 import com.android.internal.widget.IRemoteViewsFactory;
