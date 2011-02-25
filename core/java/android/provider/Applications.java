@@ -18,7 +18,6 @@ package android.provider;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -27,11 +26,9 @@ import java.util.List;
 /**
  * The Applications provider gives information about installed applications.
  *
- * @hide Only used by ApplicationsProvider and Launchers so far.
+ * @hide Only used by ApplicationsProvider so far.
  */
 public class Applications {
-
-    private static final String TAG = "ApplicationsProvider";
 
     /**
      * The content authority for this provider.
@@ -68,26 +65,6 @@ public class Applications {
             ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + APPLICATION_SUB_TYPE;
 
     /**
-     * The path that should be used when an application is launched. The aim is
-     * to help ApplicationsProvider keep track of which applications the user
-     * uses the most, and improve app ranking based on this.
-     */
-    public static final String INCREASE_LAUNCH_COUNT_PATH = "increase_launch_count";
-
-    public static final Uri INCREASE_LAUNCH_COUNT_URI = CONTENT_URI.buildUpon()
-            .appendPath(INCREASE_LAUNCH_COUNT_PATH).build();
-
-    /**
-     * The package name parameter for the "increase launch count" call.
-     */
-    public static final String INCREASE_LAUNCH_COUNT_PACKAGE = "packageName";
-
-    /**
-     * The classname parameter for the "increase launch count" call.
-     */
-    public static final String INCREASE_LAUNCH_COUNT_CLASS = "className";
-
-    /**
      * no public constructor since this is a utility class
      */
     private Applications() {}
@@ -99,20 +76,6 @@ public class Applications {
     public static Cursor search(ContentResolver resolver, String query) {
         Uri searchUri = CONTENT_URI.buildUpon().appendPath(SEARCH_PATH).appendPath(query).build();
         return resolver.query(searchUri, null, null, null, null);
-    }
-
-    /**
-     * Increases the launch count of an application. Launch counts are used
-     * by the ApplicationsProvider to improve ranking.
-     */
-    public static void increaseLaunchCount(
-            final ContentResolver resolver, final ComponentName componentName) {
-
-        ContentValues parameters = new ContentValues();
-        parameters.put(INCREASE_LAUNCH_COUNT_PACKAGE, componentName.getPackageName());
-        parameters.put(INCREASE_LAUNCH_COUNT_CLASS, componentName.getClassName());
-
-        resolver.insert(INCREASE_LAUNCH_COUNT_URI, parameters);
     }
 
     /**
