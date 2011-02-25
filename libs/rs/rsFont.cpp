@@ -20,6 +20,9 @@
 #include "rsFont.h"
 #include "rsProgramFragment.h"
 #include <cutils/properties.h>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include FT_BITMAP_H
 
 #include <GLES/gl.h>
@@ -208,7 +211,7 @@ void Font::renderUTF(const char *text, uint32_t len, int32_t x, int32_t y,
             }
         }
 
-        penX += (cachedGlyph->mAdvance.x >> 6);
+        penX += (cachedGlyph->mAdvanceX >> 6);
 
         // If we were given a specific number of glyphs, decrement
         if (numGlyphs > 0) {
@@ -238,7 +241,8 @@ void Font::updateGlyphCache(CachedGlyphInfo *glyph) {
         return;
     }
 
-    glyph->mAdvance = mFace->glyph->advance;
+    glyph->mAdvanceX = mFace->glyph->advance.x;
+    glyph->mAdvanceY = mFace->glyph->advance.y;
     glyph->mBitmapLeft = mFace->glyph->bitmap_left;
     glyph->mBitmapTop = mFace->glyph->bitmap_top;
 
@@ -801,6 +805,22 @@ void FontState::deinit(Context *rsc) {
         FT_Done_FreeType( mLibrary );
         mLibrary = NULL;
     }
+}
+
+bool FontState::CacheTextureLine::fitBitmap(FT_Bitmap_ *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
+    if ((uint32_t)bitmap->rows > mMaxHeight) {
+        return false;
+    }
+
+    if (mCurrentCol + (uint32_t)bitmap->width < mMaxWidth) {
+        *retOriginX = mCurrentCol;
+        *retOriginY = mCurrentRow;
+        mCurrentCol += bitmap->width;
+        mDirty = true;
+       return true;
+    }
+
+    return false;
 }
 
 namespace android {

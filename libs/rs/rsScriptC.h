@@ -21,7 +21,7 @@
 
 #include "RenderScriptEnv.h"
 
-#include <bcc/bcc.h>
+struct BCCOpaqueScript;
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -50,7 +50,7 @@ public:
 
     Program_t mProgram;
 
-    BCCScriptRef mBccScript;
+    BCCOpaqueScript *mBccScript;
 
     const Allocation *ptrToAllocation(const void *) const;
 

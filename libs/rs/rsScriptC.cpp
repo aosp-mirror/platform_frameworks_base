@@ -26,6 +26,8 @@ extern "C" {
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <bcc/bcc.h>
+
 using namespace android;
 using namespace android::renderscript;
 
