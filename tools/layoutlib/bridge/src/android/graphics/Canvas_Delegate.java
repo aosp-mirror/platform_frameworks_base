@@ -1043,8 +1043,7 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_drawText(int nativeCanvas, String text,
-                                               int start, int end, float x,
-                                               float y, int flags, int paint) {
+            int start, int end, float x, float y, int flags, int paint) {
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
@@ -1060,7 +1059,7 @@ public final class Canvas_Delegate {
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
-        native_drawText(nativeCanvas, buffer, start, end, x, y, flags, paint);
+        native_drawText(nativeCanvas, buffer, 0, count, x, y, flags, paint);
     }
 
     @LayoutlibDelegate
