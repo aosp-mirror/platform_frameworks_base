@@ -741,6 +741,10 @@ public class PhoneProxy extends Handler implements Phone {
          return mActivePhone.getCdmaEriIconMode();
     }
 
+    public Phone getActivePhone() {
+         return mActivePhone;
+    }
+
     public void sendBurstDtmf(String dtmfString, int on, int off, Message onComplete){
         mActivePhone.sendBurstDtmf(dtmfString, on, off, onComplete);
     }

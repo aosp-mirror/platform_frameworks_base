@@ -582,7 +582,7 @@ public abstract class SMSDispatcher extends Handler {
      *         {@link Activity#RESULT_OK} if the message has been broadcast
      *         to applications
      */
-    protected abstract int dispatchMessage(SmsMessageBase sms);
+    public abstract int dispatchMessage(SmsMessageBase sms);
 
 
     /**
@@ -916,7 +916,7 @@ public abstract class SMSDispatcher extends Handler {
      * @param response
      *            Callback message is empty on completion
      */
-    protected abstract void activateCellBroadcastSms(int activate, Message response);
+    public abstract void activateCellBroadcastSms(int activate, Message response);
 
     /**
      * Query the current configuration of cell broadcast SMS.
@@ -925,7 +925,7 @@ public abstract class SMSDispatcher extends Handler {
      *            Callback message contains the configuration from the modem on completion
      *            @see #setCellBroadcastConfig
      */
-    protected abstract void getCellBroadcastSmsConfig(Message response);
+    public abstract void getCellBroadcastSmsConfig(Message response);
 
     /**
      * Configure cell broadcast SMS.
@@ -937,7 +937,7 @@ public abstract class SMSDispatcher extends Handler {
      * @param response
      *            Callback message is empty on completion
      */
-    protected abstract void setCellBroadcastConfig(int[] configValuesArray, Message response);
+    public abstract void setCellBroadcastConfig(int[] configValuesArray, Message response);
 
     /**
      * Send an acknowledge message.
@@ -1004,6 +1004,27 @@ public abstract class SMSDispatcher extends Handler {
     protected SmsTracker SmsTrackerFactory(HashMap<String, Object> data, PendingIntent sentIntent,
             PendingIntent deliveryIntent) {
         return new SmsTracker(data, sentIntent, deliveryIntent);
+    }
+
+    public void initSipStack(boolean isObg) {
+        // This function should be overridden by the classes that support
+        // switching modes such as the CdmaSMSDispatcher.
+        // Not implemented in GsmSMSDispatcher.
+        Log.e(TAG, "Error! This function should never be executed.");
+    }
+
+    public void switchToCdma() {
+        // This function should be overridden by the classes that support
+        // switching modes such as the CdmaSMSDispatcher.
+        // Not implemented in GsmSMSDispatcher.
+        Log.e(TAG, "Error! This function should never be executed.");
+    }
+
+    public void switchToGsm() {
+        // This function should be overridden by the classes that support
+        // switching modes such as the CdmaSMSDispatcher.
+        // Not implemented in GsmSMSDispatcher.
+        Log.e(TAG, "Error! This function should never be executed.");
     }
 
     private DialogInterface.OnClickListener mListener =

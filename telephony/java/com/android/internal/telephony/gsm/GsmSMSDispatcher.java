@@ -99,7 +99,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     @Override
-    protected int dispatchMessage(SmsMessageBase smsb) {
+    public int dispatchMessage(SmsMessageBase smsb) {
 
         // If sms is null, means there was a parsing error.
         if (smsb == null) {
@@ -383,7 +383,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     @Override
-    protected void activateCellBroadcastSms(int activate, Message response) {
+    public void activateCellBroadcastSms(int activate, Message response) {
         // Unless CBS is implemented for GSM, this point should be unreachable.
         Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
         response.recycle();
@@ -391,7 +391,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     @Override
-    protected void getCellBroadcastSmsConfig(Message response){
+    public void getCellBroadcastSmsConfig(Message response){
         // Unless CBS is implemented for GSM, this point should be unreachable.
         Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
         response.recycle();
@@ -399,7 +399,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     @Override
-    protected  void setCellBroadcastConfig(int[] configValuesArray, Message response) {
+    public  void setCellBroadcastConfig(int[] configValuesArray, Message response) {
         // Unless CBS is implemented for GSM, this point should be unreachable.
         Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
         response.recycle();

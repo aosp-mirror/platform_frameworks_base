@@ -124,5 +124,18 @@ class TelephonyIcons {
               R.drawable.stat_sys_data_fully_inandout_1x }
             };
 
+    // LTE and eHRPD
+    static final int[][] DATA_4G = {
+            { R.drawable.stat_sys_data_connected_4g,
+              R.drawable.stat_sys_data_in_4g,
+              R.drawable.stat_sys_data_out_4g,
+              R.drawable.stat_sys_data_inandout_4g },
+            { R.drawable.stat_sys_data_fully_connected_4g,
+              R.drawable.stat_sys_data_fully_in_4g,
+              R.drawable.stat_sys_data_fully_out_4g,
+              R.drawable.stat_sys_data_fully_inandout_4g }
+        };
+
+
 }
 
