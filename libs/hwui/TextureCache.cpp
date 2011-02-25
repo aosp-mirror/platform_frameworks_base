@@ -209,13 +209,10 @@ void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool rege
         // decoding happened
         texture->blend = !bitmap->isOpaque();
         break;
+    case SkBitmap::kARGB_4444_Config:
     case SkBitmap::kIndex8_Config:
         uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
-        texture->blend = false;
-        break;
-    case SkBitmap::kARGB_4444_Config:
-        uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
-        texture->blend = true;
+        texture->blend = !bitmap->isOpaque();
         break;
     default:
         LOGW("Unsupported bitmap config: %d", bitmap->getConfig());
@@ -235,6 +232,7 @@ void TextureCache::uploadLoFiTexture(bool resize, SkBitmap* bitmap,
     rgbaBitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);
     rgbaBitmap.allocPixels();
     rgbaBitmap.eraseColor(0);
+    rgbaBitmap.setIsOpaque(bitmap->isOpaque());
 
     SkCanvas canvas(rgbaBitmap);
     canvas.drawBitmap(*bitmap, 0.0f, 0.0f, NULL);
