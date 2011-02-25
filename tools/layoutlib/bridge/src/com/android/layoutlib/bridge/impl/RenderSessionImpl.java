@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_ANIM_NOT_FOUND;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_INFLATION;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_NOT_INFLATED;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
@@ -43,9 +42,7 @@ import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeWindow;
 import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.bars.FakeActionBar;
 import com.android.layoutlib.bridge.bars.PhoneSystemBar;
-import com.android.layoutlib.bridge.bars.TabletSystemBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenSize;
@@ -53,11 +50,6 @@ import com.android.util.Pair;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.LayoutTransition;
-import android.animation.LayoutTransition.TransitionListener;
-import android.app.Fragment_Delegate;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
@@ -72,7 +64,6 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.QuickContactBadge;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TabHost.TabSpec;
@@ -112,9 +103,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private boolean mWindowIsFloating;
 
     private int mStatusBarSize;
-    private int mSystemBarSize;
     private int mTitleBarSize;
-    private int mActionBarSize;
 
 
     // information being returned through the API
@@ -174,13 +163,11 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         findBackground(resources);
         findStatusBar(resources, metrics);
-        findActionBar(resources, metrics);
-        findSystemBar(resources, metrics);
+        findTitleBar(resources, metrics);
 
         // build the inflater and parser.
         mInflater = new BridgeInflater(context, params.getProjectCallback());
         context.setBridgeInflater(mInflater);
-        mInflater.setFactory2(context);
 
         mBlockParser = new BridgeXmlBlockParser(
                 params.getLayoutDescription(), context, false /* platformResourceFlag */);
@@ -214,17 +201,15 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                  * we're creating the following layout
                  *
                    +-------------------------------------------------+
-                   | System bar (only in phone UI)                   |
+                   | System bar                                      |
                    +-------------------------------------------------+
                    | (Layout with background drawable)               |
                    | +---------------------------------------------+ |
-                   | | Title/Action bar (optional)                 | |
+                   | | Title (optional)                            | |
                    | +---------------------------------------------+ |
                    | | Content, vertical extending                 | |
                    | |                                             | |
                    | +---------------------------------------------+ |
-                   +-------------------------------------------------+
-                   | System bar (only in tablet UI)                  |
                    +-------------------------------------------------+
 
                  */
@@ -257,20 +242,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 topLayout.addView(backgroundLayout);
 
 
-                // if the theme says no title/action bar, then the size will be 0
-                if (mActionBarSize > 0) {
-                    try {
-                        FakeActionBar actionBar = new FakeActionBar(context,
-                                params.getDensity(),
-                                params.getAppLabel(), params.getAppIcon());
-                        actionBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mActionBarSize));
-                        backgroundLayout.addView(actionBar);
-                    } catch (XmlPullParserException e) {
-
-                    }
-                } else if (mTitleBarSize > 0) {
+                // if the theme says no title, then the size will be 0
+                if (mTitleBarSize > 0) {
                     try {
                         TitleBar titleBar = new TitleBar(context,
                                 params.getDensity(), params.getAppLabel());
@@ -283,7 +256,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     }
                 }
 
-
                 // content frame
                 mContentRoot = new FrameLayout(context);
                 layoutParams = new LinearLayout.LayoutParams(
@@ -291,30 +263,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 layoutParams.weight = 1;
                 mContentRoot.setLayoutParams(layoutParams);
                 backgroundLayout.addView(mContentRoot);
-
-                if (mSystemBarSize > 0) {
-                    // system bar
-                    try {
-                        TabletSystemBar systemBar = new TabletSystemBar(context,
-                                params.getDensity());
-                        systemBar.setLayoutParams(
-                                new LinearLayout.LayoutParams(
-                                        LayoutParams.MATCH_PARENT, mSystemBarSize));
-                        topLayout.addView(systemBar);
-                    } catch (XmlPullParserException e) {
-
-                    }
-                }
             }
 
 
-            // Sets the project callback (custom view loader) to the fragment delegate so that
-            // it can instantiate the custom Fragment.
-            Fragment_Delegate.setProjectCallback(params.getProjectCallback());
-
             View view = mInflater.inflate(mBlockParser, mContentRoot);
-
-            Fragment_Delegate.setProjectCallback(null);
 
             // set the AttachInfo on the root view.
             AttachInfo info = new AttachInfo(new BridgeWindowSession(), new BridgeWindow(),
@@ -322,7 +274,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             info.mHasWindowFocus = true;
             info.mWindowVisibility = View.VISIBLE;
             info.mInTouchMode = false; // this is so that we can display selections.
-            info.mHardwareAccelerated = false;
             mViewRoot.dispatchAttachedToWindow(info, 0);
 
             // post-inflate process. For now this supports TabHost/TabWidget
@@ -494,64 +445,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     }
 
     /**
-     * Animate an object
-     * <p>
-     * {@link #acquire(long)} must have been called before this.
-     *
-     * @throws IllegalStateException if the current context is different than the one owned by
-     *      the scene, or if {@link #acquire(long)} was not called.
-     *
-     * @see RenderSession#animate(Object, String, boolean, IAnimationListener)
-     */
-    public Result animate(Object targetObject, String animationName,
-            boolean isFrameworkAnimation, IAnimationListener listener) {
-        checkLock();
-
-        BridgeContext context = getContext();
-
-        // find the animation file.
-        ResourceValue animationResource = null;
-        int animationId = 0;
-        if (isFrameworkAnimation) {
-            animationResource = context.getRenderResources().getFrameworkResource(
-                    ResourceType.ANIMATOR, animationName);
-            if (animationResource != null) {
-                animationId = Bridge.getResourceId(ResourceType.ANIMATOR, animationName);
-            }
-        } else {
-            animationResource = context.getRenderResources().getProjectResource(
-                    ResourceType.ANIMATOR, animationName);
-            if (animationResource != null) {
-                animationId = context.getProjectCallback().getResourceId(
-                        ResourceType.ANIMATOR, animationName);
-            }
-        }
-
-        if (animationResource != null) {
-            try {
-                Animator anim = AnimatorInflater.loadAnimator(context, animationId);
-                if (anim != null) {
-                    anim.setTarget(targetObject);
-
-                    new PlayAnimationThread(anim, this, animationName, listener).start();
-
-                    return SUCCESS.createResult();
-                }
-            } catch (Exception e) {
-                // get the real cause of the exception.
-                Throwable t = e;
-                while (t.getCause() != null) {
-                    t = t.getCause();
-                }
-
-                return ERROR_UNKNOWN.createResult(t.getMessage(), t);
-            }
-        }
-
-        return ERROR_ANIM_NOT_FOUND.createResult();
-    }
-
-    /**
      * Insert a new child into an existing parent.
      * <p>
      * {@link #acquire(long)} must have been called before this.
@@ -562,7 +455,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @see RenderSession#insertChild(Object, ILayoutPullParser, int, IAnimationListener)
      */
     public Result insertChild(final ViewGroup parentView, ILayoutPullParser childXml,
-            final int index, IAnimationListener listener) {
+            final int index, final IAnimationListener listener) {
         checkLock();
 
         BridgeContext context = getContext();
@@ -580,17 +473,33 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         invalidateRenderingSize();
 
         if (listener != null) {
-            new AnimationThread(this, "insertChild", listener) {
-
+            // there is no support for animating views in this API level, so we fake the animation
+            // through a no animation thread.
+            new Thread("not animated insertChild") {
                 @Override
-                public Result preAnimation() {
-                    parentView.setLayoutTransition(new LayoutTransition());
-                    return addView(parentView, child, index);
-                }
+                public void run() {
+                    Result result = addView(parentView, child, index);
+                    if (result.isSuccess() == false) {
+                        listener.done(result);
+                    }
 
-                @Override
-                public void postAnimation() {
-                    parentView.setLayoutTransition(null);
+                    // ready to do the work, acquire the scene.
+                    result = acquire(250);
+                    if (result.isSuccess() == false) {
+                        listener.done(result);
+                        return;
+                    }
+
+                    try {
+                        result = render(false /*freshRender*/);
+                        if (result.isSuccess()) {
+                            listener.onNewFrame(RenderSessionImpl.this.getSession());
+                        }
+                    } finally {
+                        release();
+                    }
+
+                    listener.done(result);
                 }
             }.start();
 
@@ -662,72 +571,36 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         if (listener != null) {
             final LayoutParams params = layoutParams;
 
-            // there is no support for animating views across layouts, so in case the new and old
-            // parent views are different we fake the animation through a no animation thread.
-            if (previousParent != newParentView) {
-                new Thread("not animated moveChild") {
-                    @Override
-                    public void run() {
-                        Result result = moveView(previousParent, newParentView, childView, index,
-                                params);
-                        if (result.isSuccess() == false) {
-                            listener.done(result);
-                        }
-
-                        // ready to do the work, acquire the scene.
-                        result = acquire(250);
-                        if (result.isSuccess() == false) {
-                            listener.done(result);
-                            return;
-                        }
-
-                        try {
-                            result = render(false /*freshRender*/);
-                            if (result.isSuccess()) {
-                                listener.onNewFrame(RenderSessionImpl.this.getSession());
-                            }
-                        } finally {
-                            release();
-                        }
-
+            // there is no support for animating views in this API level, so we fake the animation
+            // through a no animation thread.
+            new Thread("not animated moveChild") {
+                @Override
+                public void run() {
+                    Result result = moveView(previousParent, newParentView, childView, index,
+                            params);
+                    if (result.isSuccess() == false) {
                         listener.done(result);
                     }
-                }.start();
-            } else {
-                new AnimationThread(this, "moveChild", listener) {
 
-                    @Override
-                    public Result preAnimation() {
-                        // set up the transition for the parent.
-                        LayoutTransition transition = new LayoutTransition();
-                        previousParent.setLayoutTransition(transition);
-
-                        // tweak the animation durations and start delays (to match the duration of
-                        // animation playing just before).
-                        // Note: Cannot user Animation.setDuration() directly. Have to set it
-                        // on the LayoutTransition.
-                        transition.setDuration(LayoutTransition.DISAPPEARING, 100);
-                        // CHANGE_DISAPPEARING plays after DISAPPEARING
-                        transition.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 100);
-
-                        transition.setDuration(LayoutTransition.CHANGE_DISAPPEARING, 100);
-
-                        transition.setDuration(LayoutTransition.CHANGE_APPEARING, 100);
-                        // CHANGE_APPEARING plays after CHANGE_APPEARING
-                        transition.setStartDelay(LayoutTransition.APPEARING, 100);
-
-                        transition.setDuration(LayoutTransition.APPEARING, 100);
-
-                        return moveView(previousParent, newParentView, childView, index, params);
+                    // ready to do the work, acquire the scene.
+                    result = acquire(250);
+                    if (result.isSuccess() == false) {
+                        listener.done(result);
+                        return;
                     }
 
-                    @Override
-                    public void postAnimation() {
-                        previousParent.setLayoutTransition(null);
-                        newParentView.setLayoutTransition(null);
+                    try {
+                        result = render(false /*freshRender*/);
+                        if (result.isSuccess()) {
+                            listener.onNewFrame(RenderSessionImpl.this.getSession());
+                        }
+                    } finally {
+                        release();
                     }
-                }.start();
-            }
+
+                    listener.done(result);
+                }
+            }.start();
 
             // always return success since the real status will come through the listener.
             return SUCCESS.createResult(layoutParams);
@@ -763,66 +636,17 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private Result moveView(ViewGroup previousParent, final ViewGroup newParent,
             final View movedView, final int index, final LayoutParams params) {
         try {
-            // check if there is a transition on the previousParent.
-            LayoutTransition previousTransition = previousParent.getLayoutTransition();
-            if (previousTransition != null) {
-                // in this case there is an animation. This means we have to wait for the child's
-                // parent reference to be null'ed out so that we can add it to the new parent.
-                // It is technically removed right before the DISAPPEARING animation is done (if
-                // the animation of this type is not null, otherwise it's after which is impossible
-                // to handle).
-                // Because there is no move animation, if the new parent is the same as the old
-                // parent, we need to wait until the CHANGE_DISAPPEARING animation is done before
-                // adding the child or the child will appear in its new location before the
-                // other children have made room for it.
+            // standard code with no animation. pretty simple.
+            previousParent.removeView(movedView);
 
-                // add a listener to the transition to be notified of the actual removal.
-                previousTransition.addTransitionListener(new TransitionListener() {
-                    private int mChangeDisappearingCount = 0;
-
-                    public void startTransition(LayoutTransition transition, ViewGroup container,
-                            View view, int transitionType) {
-                        if (transitionType == LayoutTransition.CHANGE_DISAPPEARING) {
-                            mChangeDisappearingCount++;
-                        }
-                    }
-
-                    public void endTransition(LayoutTransition transition, ViewGroup container,
-                            View view, int transitionType) {
-                        if (transitionType == LayoutTransition.CHANGE_DISAPPEARING) {
-                            mChangeDisappearingCount--;
-                        }
-
-                        if (transitionType == LayoutTransition.CHANGE_DISAPPEARING &&
-                                mChangeDisappearingCount == 0) {
-                            // add it to the parentView in the correct location
-                            if (params != null) {
-                                newParent.addView(movedView, index, params);
-                            } else {
-                                newParent.addView(movedView, index);
-                            }
-                        }
-                    }
-                });
-
-                // remove the view from the current parent.
-                previousParent.removeView(movedView);
-
-                // and return since adding the view to the new parent is done in the listener.
-                return SUCCESS.createResult();
+            // add it to the parentView in the correct location
+            if (params != null) {
+                newParent.addView(movedView, index, params);
             } else {
-                // standard code with no animation. pretty simple.
-                previousParent.removeView(movedView);
-
-                // add it to the parentView in the correct location
-                if (params != null) {
-                    newParent.addView(movedView, index, params);
-                } else {
-                    newParent.addView(movedView, index);
-                }
-
-                return SUCCESS.createResult();
+                newParent.addView(movedView, index);
             }
+
+            return SUCCESS.createResult();
         } catch (UnsupportedOperationException e) {
             // looks like this is a view class that doesn't support children manipulation!
             return ERROR_VIEWGROUP_NO_CHILDREN.createResult();
@@ -839,7 +663,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      *
      * @see RenderSession#removeChild(Object, IAnimationListener)
      */
-    public Result removeChild(final View childView, IAnimationListener listener) {
+    public Result removeChild(final View childView, final IAnimationListener listener) {
         checkLock();
 
         invalidateRenderingSize();
@@ -847,17 +671,33 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         final ViewGroup parent = (ViewGroup) childView.getParent();
 
         if (listener != null) {
-            new AnimationThread(this, "moveChild", listener) {
-
+            // there is no support for animating views in this API level, so we fake the animation
+            // through a no animation thread.
+            new Thread("not animated moveChild") {
                 @Override
-                public Result preAnimation() {
-                    parent.setLayoutTransition(new LayoutTransition());
-                    return removeView(parent, childView);
-                }
+                public void run() {
+                    Result result = removeView(parent, childView);
+                    if (result.isSuccess() == false) {
+                        listener.done(result);
+                    }
 
-                @Override
-                public void postAnimation() {
-                    parent.setLayoutTransition(null);
+                    // ready to do the work, acquire the scene.
+                    result = acquire(250);
+                    if (result.isSuccess() == false) {
+                        listener.done(result);
+                        return;
+                    }
+
+                    try {
+                        result = render(false /*freshRender*/);
+                        if (result.isSuccess()) {
+                            listener.onNewFrame(RenderSessionImpl.this.getSession());
+                        }
+                    } finally {
+                        release();
+                    }
+
+                    listener.done(result);
                 }
             }.start();
 
@@ -902,96 +742,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
     }
 
-    private boolean isTabletUi() {
-        return getParams().getConfigScreenSize() == ScreenSize.XLARGE;
-    }
-
     private void findStatusBar(RenderResources resources, DisplayMetrics metrics) {
-        if (isTabletUi() == false) {
-            boolean windowFullscreen = getBooleanThemeValue(resources,
-                    "windowFullscreen", false /*defaultValue*/);
+        boolean windowFullscreen = getBooleanThemeValue(resources,
+                "windowFullscreen", false /*defaultValue*/);
 
-            if (windowFullscreen == false && mWindowIsFloating == false) {
-                // default value
-                mStatusBarSize = DEFAULT_STATUS_BAR_HEIGHT;
-
-                // get the real value
-                ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
-                        "status_bar_height");
-
-                if (value != null) {
-                    TypedValue typedValue = ResourceHelper.getValue(value.getValue());
-                    if (typedValue != null) {
-                        // compute the pixel value based on the display metrics
-                        mStatusBarSize = (int)typedValue.getDimension(metrics);
-                    }
-                }
-            }
-        }
-    }
-
-    private void findActionBar(RenderResources resources, DisplayMetrics metrics) {
-        if (mWindowIsFloating) {
-            return;
-        }
-
-        boolean windowActionBar = getBooleanThemeValue(resources,
-                "windowActionBar", true /*defaultValue*/);
-
-        // if there's a value and it's false (default is true)
-        if (windowActionBar) {
-
-            // default size of the window title bar
-            mActionBarSize = DEFAULT_TITLE_BAR_HEIGHT;
-
-            // get value from the theme.
-            ResourceValue value = resources.findItemInTheme("actionBarSize");
-
-            // resolve it
-            value = resources.resolveResValue(value);
-
-            if (value != null) {
-                // get the numerical value, if available
-                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
-                if (typedValue != null) {
-                    // compute the pixel value based on the display metrics
-                    mActionBarSize = (int)typedValue.getDimension(metrics);
-                }
-            }
-        } else {
-            // action bar overrides title bar so only look for this one if action bar is hidden
-            boolean windowNoTitle = getBooleanThemeValue(resources,
-                    "windowNoTitle", false /*defaultValue*/);
-
-            if (windowNoTitle == false) {
-
-                // default size of the window title bar
-                mTitleBarSize = DEFAULT_TITLE_BAR_HEIGHT;
-
-                // get value from the theme.
-                ResourceValue value = resources.findItemInTheme("windowTitleSize");
-
-                // resolve it
-                value = resources.resolveResValue(value);
-
-                if (value != null) {
-                    // get the numerical value, if available
-                    TypedValue typedValue = ResourceHelper.getValue(value.getValue());
-                    if (typedValue != null) {
-                        // compute the pixel value based on the display metrics
-                        mTitleBarSize = (int)typedValue.getDimension(metrics);
-                    }
-                }
-            }
-
-        }
-    }
-
-    private void findSystemBar(RenderResources resources, DisplayMetrics metrics) {
-        if (isTabletUi() && mWindowIsFloating == false) {
-
+        if (windowFullscreen == false && mWindowIsFloating == false) {
             // default value
-            mSystemBarSize = 48; // ??
+            mStatusBarSize = DEFAULT_STATUS_BAR_HEIGHT;
 
             // get the real value
             ResourceValue value = resources.getFrameworkResource(ResourceType.DIMEN,
@@ -1001,7 +758,37 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 TypedValue typedValue = ResourceHelper.getValue(value.getValue());
                 if (typedValue != null) {
                     // compute the pixel value based on the display metrics
-                    mSystemBarSize = (int)typedValue.getDimension(metrics);
+                    mStatusBarSize = (int)typedValue.getDimension(metrics);
+                }
+            }
+        }
+    }
+
+    private void findTitleBar(RenderResources resources, DisplayMetrics metrics) {
+        if (mWindowIsFloating) {
+            return;
+        }
+
+        boolean windowNoTitle = getBooleanThemeValue(resources,
+                "windowNoTitle", false /*defaultValue*/);
+
+        if (windowNoTitle == false) {
+
+            // default size of the window title bar
+            mTitleBarSize = DEFAULT_TITLE_BAR_HEIGHT;
+
+            // get value from the theme.
+            ResourceValue value = resources.findItemInTheme("windowTitleSize");
+
+            // resolve it
+            value = resources.resolveResValue(value);
+
+            if (value != null) {
+                // get the numerical value, if available
+                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                if (typedValue != null) {
+                    // compute the pixel value based on the display metrics
+                    mTitleBarSize = (int)typedValue.getDimension(metrics);
                 }
             }
         }
@@ -1036,9 +823,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             throws PostInflateException {
         if (view instanceof TabHost) {
             setupTabHost((TabHost)view, projectCallback);
-        } else if (view instanceof QuickContactBadge) {
-            QuickContactBadge badge = (QuickContactBadge) view;
-            badge.setImageToDefault();
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup)view;
             final int count = group.getChildCount();

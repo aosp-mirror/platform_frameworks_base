@@ -76,13 +76,38 @@ public abstract class Shader_Delegate {
     // ---- native methods ----
 
     @LayoutlibDelegate
-    /*package*/ static void nativeDestructor(int native_shader, int native_skiaShader) {
+    /*package*/ static void nativeDestructor(int native_shader) {
         sManager.removeJavaReferenceFor(native_shader);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void nativeSetLocalMatrix(int native_shader, int native_skiaShader,
-            int matrix_instance) {
+    /*package*/ static boolean nativeGetLocalMatrix(int native_shader, int matrix_instance) {
+        // get the delegate from the native int.
+        Shader_Delegate shaderDelegate = sManager.getDelegate(native_shader);
+        if (shaderDelegate == null) {
+            return false;
+        }
+
+        // get the (optional) out matrix.
+        Matrix_Delegate outMatrixDelegate = Matrix_Delegate.getDelegate(matrix_instance);
+
+        if (shaderDelegate.mLocalMatrix == null || shaderDelegate.mLocalMatrix.isIdentity()) {
+            if (outMatrixDelegate != null) {
+                outMatrixDelegate.reset();
+            }
+            return false;
+        }
+
+        if (outMatrixDelegate != null) {
+            outMatrixDelegate.set(shaderDelegate.mLocalMatrix);
+        }
+
+        return true;
+    }
+
+
+    @LayoutlibDelegate
+    /*package*/ static void nativeSetLocalMatrix(int native_shader, int matrix_instance) {
         // get the delegate from the native int.
         Shader_Delegate shaderDelegate = sManager.getDelegate(native_shader);
         if (shaderDelegate == null) {
