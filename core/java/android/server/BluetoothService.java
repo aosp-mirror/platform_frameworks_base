@@ -1077,6 +1077,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public synchronized boolean removeBondInternal(String address) {
+        // Unset the trusted device state and then unpair
+        setTrust(address, false);
         return removeDeviceNative(getObjectPathFromAddress(address));
     }
 
