@@ -143,9 +143,35 @@ public class ViewPropertyAnimator {
     private static class PropertyBundle {
         int mPropertyMask;
         ArrayList<NameValuesHolder> mNameValuesHolder;
+
         PropertyBundle(int propertyMask, ArrayList<NameValuesHolder> nameValuesHolder) {
             mPropertyMask = propertyMask;
             mNameValuesHolder = nameValuesHolder;
+        }
+
+        /**
+         * Removes the given property from being animated as a part of this
+         * PropertyBundle. If the property was a part of this bundle, it returns
+         * true to indicate that it was, in fact, canceled. This is an indication
+         * to the caller that a cancellation actually occurred.
+         *
+         * @param propertyConstant The property whose cancellation is requested.
+         * @return true if the given property is a part of this bundle and if it
+         * has therefore been canceled.
+         */
+        boolean cancel(int propertyConstant) {
+            if ((mPropertyMask & propertyConstant) != 0 && mNameValuesHolder != null) {
+                int count = mNameValuesHolder.size();
+                for (int i = 0; i < count; ++i) {
+                    NameValuesHolder nameValuesHolder = mNameValuesHolder.get(i);
+                    if (nameValuesHolder.mNameConstant == propertyConstant) {
+                        mNameValuesHolder.remove(i);
+                        mPropertyMask &= ~propertyConstant;
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
@@ -508,24 +534,6 @@ public class ViewPropertyAnimator {
             NameValuesHolder nameValuesHolder = nameValueList.get(i);
             propertyMask |= nameValuesHolder.mNameConstant;
         }
-        // First, cancel any running animation on the same property set
-        if (mAnimatorMap.size() > 0) {
-            Animator animatorToCancel = null;
-            Set<Animator> animatorSet = mAnimatorMap.keySet();
-            for (Animator runningAnim : animatorSet) {
-                PropertyBundle bundle = mAnimatorMap.get(runningAnim);
-                if (bundle.mPropertyMask == propertyMask) {
-                    // There can be only one such duplicate, because that animation would
-                    // have caused previous ones to cancel prior to starting. So break when we
-                    // find one.
-                    animatorToCancel = runningAnim;
-                    break;
-                }
-            }
-            if (animatorToCancel != null) {
-                animatorToCancel.cancel();
-            }
-        }
         mAnimatorMap.put(animator, new PropertyBundle(propertyMask, nameValueList));
         animator.addUpdateListener(mAnimatorEventListener);
         animator.addListener(mAnimatorEventListener);
@@ -578,6 +586,29 @@ public class ViewPropertyAnimator {
      * @param byValue The amount by which the property will change
      */
     private void animatePropertyBy(int constantName, float fromValue, float byValue) {
+        // First, cancel any existing animations on this property
+        if (mAnimatorMap.size() > 0) {
+            Animator animatorToCancel = null;
+            Set<Animator> animatorSet = mAnimatorMap.keySet();
+            for (Animator runningAnim : animatorSet) {
+                PropertyBundle bundle = mAnimatorMap.get(runningAnim);
+                if (bundle.cancel(constantName)) {
+                    // property was canceled - cancel the animation if it's now empty
+                    // Note that it's safe to break out here because every new animation
+                    // on a property will cancel a previous animation on that property, so
+                    // there can only ever be one such animation running.
+                    if (bundle.mPropertyMask == NONE) {
+                        // the animation is not longer changing animthing - cancel it
+                        animatorToCancel = runningAnim;
+                        break;
+                    }
+                }
+            }
+            if (animatorToCancel != null) {
+                animatorToCancel.cancel();
+            }
+        }
+
         float startValue = getValue(constantName);
         NameValuesHolder nameValuePair = new NameValuesHolder(constantName, startValue, byValue);
         mPendingAnimations.add(nameValuePair);
