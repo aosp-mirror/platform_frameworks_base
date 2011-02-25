@@ -22,15 +22,15 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <utils/StrongPointer.h>
 
 // ---------------------------------------------------------------------------
 namespace android {
 
 class TextOutput;
-TextOutput& printStrongPointer(TextOutput& to, const void* val);
 TextOutput& printWeakPointer(TextOutput& to, const void* val);
-
-template<typename T> class wp;
 
 // ---------------------------------------------------------------------------
 
@@ -50,15 +50,15 @@ inline bool operator _op_ (const U* o) const {                  \
     return m_ptr _op_ o;                                        \
 }
 
-#define COMPARE(_op_)                                           \
-COMPARE_WEAK(_op_)                                              \
-inline bool operator _op_ (const wp<T>& o) const {              \
-    return m_ptr _op_ o.m_ptr;                                  \
-}                                                               \
-template<typename U>                                            \
-inline bool operator _op_ (const wp<U>& o) const {              \
-    return m_ptr _op_ o.m_ptr;                                  \
-}
+// ---------------------------------------------------------------------------
+
+class ReferenceMover;
+class ReferenceConverterBase {
+public:
+    virtual size_t getReferenceTypeSize() const = 0;
+    virtual void* getReferenceBase(void const*) const = 0;
+    inline virtual ~ReferenceConverterBase() { }
+};
 
 // ---------------------------------------------------------------------------
 
@@ -115,6 +115,8 @@ public:
         getWeakRefs()->trackMe(enable, retain); 
     }
 
+    typedef RefBase basetype;
+
 protected:
                             RefBase();
     virtual                 ~RefBase();
@@ -136,6 +138,11 @@ protected:
     virtual void            onLastStrongRef(const void* id);
     virtual bool            onIncStrongAttempted(uint32_t flags, const void* id);
     virtual void            onLastWeakRef(const void* id);
+
+private:
+    friend class ReferenceMover;
+    static void moveReferences(void* d, void const* s, size_t n,
+            const ReferenceConverterBase& caster);
 
 private:
     friend class weakref_type;
@@ -166,73 +173,20 @@ public:
     inline int32_t getStrongCount() const {
         return mCount;
     }
-    
+
+    typedef LightRefBase<T> basetype;
+
 protected:
     inline ~LightRefBase() { }
-    
+
+private:
+    friend class ReferenceMover;
+    inline static void moveReferences(void* d, void const* s, size_t n,
+            const ReferenceConverterBase& caster) { }
+
 private:
     mutable volatile int32_t mCount;
 };
-
-// ---------------------------------------------------------------------------
-
-template <typename T>
-class sp
-{
-public:
-    typedef typename RefBase::weakref_type weakref_type;
-    
-    inline sp() : m_ptr(0) { }
-
-    sp(T* other);
-    sp(const sp<T>& other);
-    template<typename U> sp(U* other);
-    template<typename U> sp(const sp<U>& other);
-
-    ~sp();
-    
-    // Assignment
-
-    sp& operator = (T* other);
-    sp& operator = (const sp<T>& other);
-    
-    template<typename U> sp& operator = (const sp<U>& other);
-    template<typename U> sp& operator = (U* other);
-    
-    //! Special optimization for use by ProcessState (and nobody else).
-    void force_set(T* other);
-    
-    // Reset
-    
-    void clear();
-    
-    // Accessors
-
-    inline  T&      operator* () const  { return *m_ptr; }
-    inline  T*      operator-> () const { return m_ptr;  }
-    inline  T*      get() const         { return m_ptr; }
-
-    // Operators
-        
-    COMPARE(==)
-    COMPARE(!=)
-    COMPARE(>)
-    COMPARE(<)
-    COMPARE(<=)
-    COMPARE(>=)
-
-private:    
-    template<typename Y> friend class sp;
-    template<typename Y> friend class wp;
-
-    // Optimization for wp::promote().
-    sp(T* p, weakref_type* refs);
-    
-    T*              m_ptr;
-};
-
-template <typename T>
-TextOutput& operator<<(TextOutput& to, const sp<T>& val);
 
 // ---------------------------------------------------------------------------
 
@@ -329,111 +283,10 @@ private:
 template <typename T>
 TextOutput& operator<<(TextOutput& to, const wp<T>& val);
 
-#undef COMPARE
 #undef COMPARE_WEAK
 
 // ---------------------------------------------------------------------------
 // No user serviceable parts below here.
-
-template<typename T>
-sp<T>::sp(T* other)
-    : m_ptr(other)
-{
-    if (other) other->incStrong(this);
-}
-
-template<typename T>
-sp<T>::sp(const sp<T>& other)
-    : m_ptr(other.m_ptr)
-{
-    if (m_ptr) m_ptr->incStrong(this);
-}
-
-template<typename T> template<typename U>
-sp<T>::sp(U* other) : m_ptr(other)
-{
-    if (other) other->incStrong(this);
-}
-
-template<typename T> template<typename U>
-sp<T>::sp(const sp<U>& other)
-    : m_ptr(other.m_ptr)
-{
-    if (m_ptr) m_ptr->incStrong(this);
-}
-
-template<typename T>
-sp<T>::~sp()
-{
-    if (m_ptr) m_ptr->decStrong(this);
-}
-
-template<typename T>
-sp<T>& sp<T>::operator = (const sp<T>& other) {
-    T* otherPtr(other.m_ptr);
-    if (otherPtr) otherPtr->incStrong(this);
-    if (m_ptr) m_ptr->decStrong(this);
-    m_ptr = otherPtr;
-    return *this;
-}
-
-template<typename T>
-sp<T>& sp<T>::operator = (T* other)
-{
-    if (other) other->incStrong(this);
-    if (m_ptr) m_ptr->decStrong(this);
-    m_ptr = other;
-    return *this;
-}
-
-template<typename T> template<typename U>
-sp<T>& sp<T>::operator = (const sp<U>& other)
-{
-    U* otherPtr(other.m_ptr);
-    if (otherPtr) otherPtr->incStrong(this);
-    if (m_ptr) m_ptr->decStrong(this);
-    m_ptr = otherPtr;
-    return *this;
-}
-
-template<typename T> template<typename U>
-sp<T>& sp<T>::operator = (U* other)
-{
-    if (other) other->incStrong(this);
-    if (m_ptr) m_ptr->decStrong(this);
-    m_ptr = other;
-    return *this;
-}
-
-template<typename T>    
-void sp<T>::force_set(T* other)
-{
-    other->forceIncStrong(this);
-    m_ptr = other;
-}
-
-template<typename T>
-void sp<T>::clear()
-{
-    if (m_ptr) {
-        m_ptr->decStrong(this);
-        m_ptr = 0;
-    }
-}
-
-template<typename T>
-sp<T>::sp(T* p, weakref_type* refs)
-    : m_ptr((p && refs->attemptIncStrong(this)) ? p : 0)
-{
-}
-
-template <typename T>
-inline TextOutput& operator<<(TextOutput& to, const sp<T>& val)
-{
-   return printStrongPointer(to, val.get());
-}
-
-// ---------------------------------------------------------------------------
 
 template<typename T>
 wp<T>::wp(T* other)
@@ -572,7 +425,8 @@ void wp<T>::set_object_and_refs(T* other, weakref_type* refs)
 template<typename T>
 sp<T> wp<T>::promote() const
 {
-    return sp<T>(m_ptr, m_refs);
+    T* p = (m_ptr && m_refs->attemptIncStrong(this)) ? m_ptr : 0;
+    return sp<T>(p, true);
 }
 
 template<typename T>
@@ -589,6 +443,77 @@ inline TextOutput& operator<<(TextOutput& to, const wp<T>& val)
 {
     return printWeakPointer(to, val.unsafe_get());
 }
+
+// ---------------------------------------------------------------------------
+
+// this class just serves as a namespace so TYPE::moveReferences can stay
+// private.
+
+class ReferenceMover {
+    // StrongReferenceCast and WeakReferenceCast do the impedance matching
+    // between the generic (void*) implementation in Refbase and the strongly typed
+    // template specializations below.
+
+    template <typename TYPE>
+    struct StrongReferenceCast : public ReferenceConverterBase {
+        virtual size_t getReferenceTypeSize() const { return sizeof( sp<TYPE> ); }
+        virtual void* getReferenceBase(void const* p) const {
+            sp<TYPE> const* sptr(reinterpret_cast<sp<TYPE> const*>(p));
+            return static_cast<typename TYPE::basetype *>(sptr->get());
+        }
+    };
+
+    template <typename TYPE>
+    struct WeakReferenceCast : public ReferenceConverterBase {
+        virtual size_t getReferenceTypeSize() const { return sizeof( wp<TYPE> ); }
+        virtual void* getReferenceBase(void const* p) const {
+            wp<TYPE> const* sptr(reinterpret_cast<wp<TYPE> const*>(p));
+            return static_cast<typename TYPE::basetype *>(sptr->unsafe_get());
+        }
+    };
+
+public:
+    template<typename TYPE> static inline
+    void move_references(sp<TYPE>* d, sp<TYPE> const* s, size_t n) {
+        memmove(d, s, n*sizeof(sp<TYPE>));
+        StrongReferenceCast<TYPE> caster;
+        TYPE::moveReferences(d, s, n, caster);
+    }
+    template<typename TYPE> static inline
+    void move_references(wp<TYPE>* d, wp<TYPE> const* s, size_t n) {
+        memmove(d, s, n*sizeof(wp<TYPE>));
+        WeakReferenceCast<TYPE> caster;
+        TYPE::moveReferences(d, s, n, caster);
+    }
+};
+
+// specialization for moving sp<> and wp<> types.
+// these are used by the [Sorted|Keyed]Vector<> implementations
+// sp<> and wp<> need to be handled specially, because they do not
+// have trivial copy operation in the general case (see RefBase.cpp
+// when DEBUG ops are enabled), but can be implemented very
+// efficiently in most cases.
+
+template<typename TYPE> inline
+void move_forward_type(sp<TYPE>* d, sp<TYPE> const* s, size_t n) {
+    ReferenceMover::move_references(d, s, n);
+}
+
+template<typename TYPE> inline
+void move_backward_type(sp<TYPE>* d, sp<TYPE> const* s, size_t n) {
+    ReferenceMover::move_references(d, s, n);
+}
+
+template<typename TYPE> inline
+void move_forward_type(wp<TYPE>* d, wp<TYPE> const* s, size_t n) {
+    ReferenceMover::move_references(d, s, n);
+}
+
+template<typename TYPE> inline
+void move_backward_type(wp<TYPE>* d, wp<TYPE> const* s, size_t n) {
+    ReferenceMover::move_references(d, s, n);
+}
+
 
 }; // namespace android
 
