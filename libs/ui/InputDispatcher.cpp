@@ -37,7 +37,9 @@
 // Log debug messages about the app switch latency optimization.
 #define DEBUG_APP_SWITCH 0
 
+#include <android/input.h>
 #include <cutils/log.h>
+#include <ui/Input.h>
 #include <ui/InputDispatcher.h>
 #include <ui/PowerManager.h>
 
@@ -2090,6 +2092,26 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, int32_t sou
 #endif
     if (! validateKeyEvent(action)) {
         return;
+    }
+
+    /* According to http://source.android.com/porting/keymaps_keyboard_input.html
+     * Key definitions: Key definitions follow the syntax key SCANCODE KEYCODE [FLAGS...],
+     * where SCANCODE is a number, KEYCODE is defined in your specific keylayout file
+     * (android.keylayout.xxx), and potential FLAGS are defined as follows:
+     *     SHIFT: While pressed, the shift key modifier is set
+     *     ALT: While pressed, the alt key modifier is set
+     *     CAPS: While pressed, the caps lock key modifier is set
+     *     Since KeyEvent.java doesn't check if Cap lock is ON and we don't have a
+     *     modifer state for cap lock, we will not support it.
+     */
+    if (policyFlags & POLICY_FLAG_ALT) {
+        metaState |= AMETA_ALT_ON | AMETA_ALT_LEFT_ON;
+    }
+    if (policyFlags & POLICY_FLAG_ALT_GR) {
+        metaState |= AMETA_ALT_ON | AMETA_ALT_RIGHT_ON;
+    }
+    if (policyFlags & POLICY_FLAG_SHIFT) {
+        metaState |= AMETA_SHIFT_ON | AMETA_SHIFT_LEFT_ON;
     }
 
     policyFlags |= POLICY_FLAG_TRUSTED;
