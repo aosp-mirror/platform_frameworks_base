@@ -25,6 +25,24 @@ import android.content.ComponentName;
  * correspond to the fields in the <code>&lt;appwidget-provider&gt;</code> xml tag.
  */
 public class AppWidgetProviderInfo implements Parcelable {
+
+    /**
+     * Widget is not resizable.
+     */
+    public static final int RESIZE_NONE             = 0;
+    /**
+     * Widget is resizable in the horizontal axis only.
+     */
+    public static final int RESIZE_HORIZONTAL       = 1;
+    /**
+     * Widget is resizable in the vertical axis only.
+     */
+    public static final int RESIZE_VERTICAL         = 2;
+    /**
+     * Widget is resizable in both the horizontal and vertical axes.
+     */
+    public static final int RESIZE_BOTH = RESIZE_HORIZONTAL | RESIZE_VERTICAL;
+
     /**
      * Identity of this AppWidget component.  This component should be a {@link
      * android.content.BroadcastReceiver}, and it will be sent the AppWidget intents
@@ -124,6 +142,13 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
 	public int previewImage;
 
+    /**
+     * The rules by which a widget can be resized. See {@link #RESIZE_NONE},
+     * {@link #RESIZE_NONE}, {@link #RESIZE_HORIZONTAL},
+     * {@link #RESIZE_VERTICAL}, {@link #RESIZE_BOTH}.
+     */
+    public int resizableMode;
+
     public AppWidgetProviderInfo() {
     }
 
@@ -145,6 +170,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.icon = in.readInt();
         this.previewImage = in.readInt();
         this.autoAdvanceViewId = in.readInt();
+        this.resizableMode = in.readInt();
     }
 
     public void writeToParcel(android.os.Parcel out, int flags) {
@@ -168,6 +194,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.icon);
         out.writeInt(this.previewImage);
         out.writeInt(this.autoAdvanceViewId);
+        out.writeInt(this.resizableMode);
     }
 
     public int describeContents() {

@@ -973,15 +973,15 @@ class AppWidgetService extends IAppWidgetService.Stub
                         + "AppWidget provider '" + component + '\'');
                 return null;
             }
-        
+
             AttributeSet attrs = Xml.asAttributeSet(parser);
-            
+
             int type;
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                     && type != XmlPullParser.START_TAG) {
                 // drain whitespace, comments, etc.
             }
-            
+
             String nodeName = parser.getName();
             if (!"appwidget-provider".equals(nodeName)) {
                 Slog.w(TAG, "Meta-data does not start with appwidget-provider tag for"
@@ -1001,10 +1001,10 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             Resources res = mPackageManager.getResourcesForApplication(
                     activityInfo.applicationInfo);
-            
+
             TypedArray sa = res.obtainAttributes(attrs,
                     com.android.internal.R.styleable.AppWidgetProviderInfo);
-            
+
             // These dimensions has to be resolved in the application's context.
             // We simply send back the raw complex data, which will be
             // converted to dp in {@link AppWidgetManager#getAppWidgetInfo}.
@@ -1013,7 +1013,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             info.minWidth = value != null ? value.data : 0; 
             value = sa.peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight);
             info.minHeight = value != null ? value.data : 0;
-                    
+
             info.updatePeriodMillis = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);
             info.initialLayout = sa.getResourceId(
@@ -1029,6 +1029,9 @@ class AppWidgetService extends IAppWidgetService.Stub
             		com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
             info.autoAdvanceViewId = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId, -1);
+            info.resizableMode = sa.getInt(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
+                    AppWidgetProviderInfo.RESIZE_NONE);
 
             sa.recycle();
         } catch (Exception e) {

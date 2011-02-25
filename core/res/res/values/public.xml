@@ -1646,5 +1646,6 @@
      Resources added in version 12 of the platform (Honeycomb / 3.1)
      =============================================================== -->
   <eat-comment />
-  <public type="attr" name="textCursorDrawable" id="0x01010362" />  
+  <public type="attr" name="textCursorDrawable" id="0x01010362" />
+  <public type="attr" name="resizeMode" />
 </resources>

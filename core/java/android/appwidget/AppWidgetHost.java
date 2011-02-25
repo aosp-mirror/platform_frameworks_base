@@ -16,6 +16,9 @@
 
 package android.appwidget;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -23,10 +26,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.widget.RemoteViews;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
@@ -43,6 +45,7 @@ public class AppWidgetHost {
 
     final static Object sServiceLock = new Object();
     static IAppWidgetService sService;
+    private DisplayMetrics mDisplayMetrics;
 
     Context mContext;
     String mPackageName;
@@ -103,6 +106,7 @@ public class AppWidgetHost {
         mContext = context;
         mHostId = hostId;
         mHandler = new UpdateHandler(context.getMainLooper());
+        mDisplayMetrics = context.getResources().getDisplayMetrics();
         synchronized (sServiceLock) {
             if (sService == null) {
                 IBinder b = ServiceManager.getService(Context.APPWIDGET_SERVICE);
@@ -243,12 +247,21 @@ public class AppWidgetHost {
             AppWidgetProviderInfo appWidget) {
         return new AppWidgetHostView(context);
     }
-    
+
     /**
      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
      */
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
         AppWidgetHostView v;
+
+        // Convert complex to dp -- we are getting the AppWidgetProviderInfo from the
+        // AppWidgetService, which doesn't have our context, hence we need to do the 
+        // conversion here.
+        appWidget.minWidth =
+            TypedValue.complexToDimensionPixelSize(appWidget.minWidth, mDisplayMetrics);
+        appWidget.minHeight =
+            TypedValue.complexToDimensionPixelSize(appWidget.minHeight, mDisplayMetrics);
+
         synchronized (mViews) {
             v = mViews.get(appWidgetId);
         }
