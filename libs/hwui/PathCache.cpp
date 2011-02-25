@@ -44,7 +44,9 @@ void PathCache::remove(SkPath* path) {
 
     mCache.setOnEntryRemovedListener(NULL);
     for (size_t i = 0; i < pathsToRemove.size(); i++) {
-        mCache.removeAt(pathsToRemove.itemAt(i));
+        // This will work because pathsToRemove is sorted
+        // and because the cache is a sorted keyed vector
+        mCache.removeAt(pathsToRemove.itemAt(i) - i);
     }
     mCache.setOnEntryRemovedListener(this);
 }
