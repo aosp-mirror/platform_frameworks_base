@@ -119,6 +119,9 @@ private:
         // sufficient data to begin playback and finish the preparation phase
         // for good.
         PREPARING_CONNECTED = 2048,
+
+        AUDIO_RUNNING       = 8192,
+        AUDIOPLAYER_STARTED = 16384,
     };
 
     mutable Mutex mLock;
@@ -160,7 +163,13 @@ private:
     int64_t mTimeSourceDeltaUs;
     int64_t mVideoTimeUs;
 
-    bool mSeeking;
+    enum SeekType {
+        NO_SEEK,
+        SEEK,
+        SEEK_VIDEO_ONLY
+    };
+    SeekType mSeeking;
+
     bool mSeekNotificationSent;
     int64_t mSeekTimeUs;
 
@@ -255,6 +264,8 @@ private:
 
     void finishSeekIfNecessary(int64_t videoTimeUs);
     void ensureCacheIsFetching_l();
+
+    status_t startAudioPlayer_l();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
