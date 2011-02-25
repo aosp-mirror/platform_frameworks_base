@@ -16,25 +16,25 @@
 
 package android.widget;
 
-import android.view.ViewDebug;
 import com.android.internal.R;
 
-import android.util.AttributeSet;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.view.View;
-import android.view.VelocityTracker;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.KeyEvent;
-import android.view.FocusFinder;
-import android.view.MotionEvent;
-import android.view.ViewParent;
-import android.view.animation.AnimationUtils;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.view.FocusFinder;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewDebug;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.animation.AnimationUtils;
 
 import java.util.List;
 
@@ -74,13 +74,6 @@ public class HorizontalScrollView extends FrameLayout {
     private OverScroller mScroller;
     private EdgeGlow mEdgeGlowLeft;
     private EdgeGlow mEdgeGlowRight;
-
-    /**
-     * Flag to indicate that we are moving focus ourselves. This is so the
-     * code that watches for focus changes initiated outside this ScrollView
-     * knows that it does not have to do anything.
-     */
-    private boolean mScrollViewMovedFocus;
 
     /**
      * Position of the last motion event.
@@ -885,10 +878,7 @@ public class HorizontalScrollView extends FrameLayout {
             doScrollX(delta);
         }
 
-        if (newFocused != findFocus() && newFocused.requestFocus(direction)) {
-            mScrollViewMovedFocus = true;
-            mScrollViewMovedFocus = false;
-        }
+        if (newFocused != findFocus()) newFocused.requestFocus(direction);
 
         return handled;
     }
@@ -1239,13 +1229,11 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (!mScrollViewMovedFocus) {
-            if (!mIsLayoutDirty) {
-                scrollToChild(focused);
-            } else {
-                // The child may not be laid out yet, we can't compute the scroll yet
-                mChildToScrollTo = focused;
-            }
+        if (!mIsLayoutDirty) {
+            scrollToChild(focused);
+        } else {
+            // The child may not be laid out yet, we can't compute the scroll yet
+            mChildToScrollTo = focused;
         }
         super.requestChildFocus(child, focused);
     }
@@ -1363,17 +1351,16 @@ public class HorizontalScrollView extends FrameLayout {
 
             final boolean movingRight = velocityX > 0;
 
+            View currentFocused = findFocus();
             View newFocused = findFocusableViewInMyBounds(movingRight,
-                    mScroller.getFinalX(), findFocus());
+                    mScroller.getFinalX(), currentFocused);
 
             if (newFocused == null) {
                 newFocused = this;
             }
 
-            if (newFocused != findFocus()
-                    && newFocused.requestFocus(movingRight ? View.FOCUS_RIGHT : View.FOCUS_LEFT)) {
-                mScrollViewMovedFocus = true;
-                mScrollViewMovedFocus = false;
+            if (newFocused != currentFocused) {
+                newFocused.requestFocus(movingRight ? View.FOCUS_RIGHT : View.FOCUS_LEFT);
             }
 
             invalidate();
@@ -1385,6 +1372,7 @@ public class HorizontalScrollView extends FrameLayout {
      *
      * <p>This version also clamps the scrolling to the bounds of our child.
      */
+    @Override
     public void scrollTo(int x, int y) {
         // we rely on the fact the View.scrollBy calls scrollTo.
         if (getChildCount() > 0) {
