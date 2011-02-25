@@ -42,6 +42,9 @@ import android.util.Log;
 import android.util.Xml;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.os.Debug;
+import android.os.SystemProperties;
+import android.os.Environment;
 
 /**
  * The VideoEditor implementation {@hide}
@@ -134,6 +137,7 @@ public class VideoEditorImpl implements VideoEditor {
      */
     private MediaArtistNativeHelper mMANativeHelper;
     private boolean mPreviewInProgress = false;
+    private final boolean mMallocDebug;
 
     /**
      * Constructor
@@ -142,6 +146,18 @@ public class VideoEditorImpl implements VideoEditor {
      *        related to the project
      */
     public VideoEditorImpl(String projectPath) throws IOException {
+        String s;
+        s = SystemProperties.get("libc.debug.malloc");
+        if (s.equals("1")) {
+            mMallocDebug = true;
+            try {
+                dumpHeap("HeapAtStart");
+            } catch (Exception ex) {
+                Log.e(TAG, "dumpHeap returned error in constructor");
+            }
+        } else {
+            mMallocDebug = false;
+        }
         mLock = new Semaphore(1, true);
         mMANativeHelper = new MediaArtistNativeHelper(projectPath, mLock, this);
         mProjectPath = projectPath;
@@ -707,6 +723,13 @@ public class VideoEditorImpl implements VideoEditor {
         } finally {
             if (semAcquireDone) {
                 unlock();
+            }
+        }
+        if (mMallocDebug) {
+            try {
+                dumpHeap("HeapAtEnd");
+            } catch (Exception ex) {
+                Log.e(TAG, "dumpHeap returned error in release");
             }
         }
     }
@@ -1884,5 +1907,33 @@ public class VideoEditorImpl implements VideoEditor {
             Log.d(TAG, "unlock: releasing semaphore");
         }
         mLock.release();
+    }
+
+    /**
+     * Dumps the heap memory usage information to file
+     */
+    private static void dumpHeap (String filename) throws Exception {
+        /* Cleanup as much as possible before dump
+         */
+        System.gc();
+        System.runFinalization();
+        Thread.sleep(1000);
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            String extDir =
+             Environment.getExternalStorageDirectory().toString();
+
+            /* If dump file already exists, then delete it first
+            */
+            if ((new File(extDir + "/" + filename + ".dump")).exists()) {
+                (new File(extDir + "/" + filename + ".dump")).delete();
+            }
+            /* Dump native heap
+            */
+            FileOutputStream ost =
+             new FileOutputStream(extDir + "/" + filename + ".dump");
+            Debug.dumpNativeHeap(ost.getFD());
+            ost.close();
+        }
     }
 }
