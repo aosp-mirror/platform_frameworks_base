@@ -42,6 +42,8 @@ import java.util.regex.Pattern;
  * event-log-tags file defines the payload contents for each type code.
  */
 public class EventLog {
+    /** @hide */ public EventLog() {}
+
     private static final String TAG = "EventLog";
 
     private static final String TAGS_FILE = "/system/etc/event-log-tags";

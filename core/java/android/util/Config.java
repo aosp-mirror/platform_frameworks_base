@@ -21,8 +21,9 @@ package android.util;
  * on release vs. debug build.
  * {@more}
  */
-public final class Config
-{
+public final class Config {
+    /** @hide */ public Config() {}
+
     /**
      * If this is a debug build, this field will be true.
      */

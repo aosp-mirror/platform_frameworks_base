@@ -20,9 +20,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * <p>Various utilities for debugging and logging.</p> 
+ * <p>Various utilities for debugging and logging.</p>
  */
 public class DebugUtils {
+    /** @hide */ public DebugUtils() {}
+
     /**
      * <p>Filters objects against the <code>ANDROID_OBJECT_FILTER</code>
      * environment variable. This environment variable can filter objects
