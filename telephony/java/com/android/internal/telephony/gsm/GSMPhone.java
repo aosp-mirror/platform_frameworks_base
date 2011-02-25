@@ -33,6 +33,7 @@ import android.telephony.CellLocation;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import com.android.internal.telephony.CallTracker;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -72,6 +73,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.UUSInfo;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 import com.android.internal.telephony.IccVmNotSupportedException;
+import com.android.internal.telephony.ServiceStateTracker;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -100,9 +102,6 @@ public class GSMPhone extends PhoneBase {
     // Instance Variables
     GsmCallTracker mCT;
     GsmServiceStateTracker mSST;
-    GsmSMSDispatcher mSMS;
-    SIMRecords mSIMRecords;
-    SimCard mSimCard;
     CatService mStkService;
     ArrayList <GsmMmiCode> mPendingMMIs = new ArrayList<GsmMmiCode>();
     SimPhoneBookInterfaceManager mSimPhoneBookIntManager;
@@ -283,6 +282,14 @@ public class GSMPhone extends PhoneBase {
         return mSIMRecords.getVoiceCallForwardingFlag();
     }
 
+    public CallTracker getCallTracker() {
+        return mCT;
+    }
+
+    public ServiceStateTracker getServiceStateTracker() {
+        return mSST;
+    }
+
     public List<? extends MmiCode>
     getPendingMmiCodes() {
         return mPendingMMIs;
@@ -314,7 +321,7 @@ public class GSMPhone extends PhoneBase {
                 case CONNECTED:
                 case DISCONNECTING:
                     if ( mCT.state != Phone.State.IDLE
-                            && !mSST.isConcurrentVoiceAndData()) {
+                            && !mSST.isConcurrentVoiceAndDataAllowed()) {
                         ret = DataState.SUSPENDED;
                     } else {
                         ret = DataState.CONNECTED;
@@ -404,7 +411,7 @@ public class GSMPhone extends PhoneBase {
         mNotifier.notifySignalStrength(this);
     }
 
-    /*package*/ void
+    public void
     notifyDataConnectionFailed(String reason, String apnType) {
         mNotifier.notifyDataConnectionFailed(this, reason, apnType);
     }

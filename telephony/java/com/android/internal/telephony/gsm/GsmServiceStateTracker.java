@@ -278,7 +278,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param what what code of message when delivered
      * @param obj placed in Message.obj
      */
-    void registerForGprsAttached(Handler h, int what, Object obj) {
+    @Override
+    public void registerForDataConnectionAttached(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
         gprsAttachedRegistrants.add(r);
 
@@ -287,7 +288,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    void unregisterForGprsAttached(Handler h) {
+    @Override
+    public void unregisterForDataConnectionAttached(Handler h) {
         gprsAttachedRegistrants.remove(h);
     }
 
@@ -329,7 +331,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param what what code of message when delivered
      * @param obj placed in Message.obj
      */
-    void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
+    public void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
         Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedEnabled ");
         Registrant r = new Registrant(h, what, obj);
         psRestrictEnabledRegistrants.add(r);
@@ -339,7 +341,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    void unregisterForPsRestrictedEnabled(Handler h) {
+    public void unregisterForPsRestrictedEnabled(Handler h) {
         psRestrictEnabledRegistrants.remove(h);
     }
 
@@ -349,7 +351,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param what what code of message when delivered
      * @param obj placed in Message.obj
      */
-    void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
+    public void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
         Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedDisabled ");
         Registrant r = new Registrant(h, what, obj);
         psRestrictDisabledRegistrants.add(r);
@@ -359,7 +361,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    void unregisterForPsRestrictedDisabled(Handler h) {
+    public void unregisterForPsRestrictedDisabled(Handler h) {
         psRestrictDisabledRegistrants.remove(h);
     }
 
@@ -567,33 +569,21 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             && cm.getRadioState() == CommandsInterface.RadioState.RADIO_OFF) {
             cm.setRadioPower(true, null);
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
-            DataConnectionTracker dcTracker = phone.mDataConnection;
-            if (! dcTracker.isDataConnectionAsDesired()) {
-                EventLog.writeEvent(EventLogTags.DATA_NETWORK_STATUS_ON_RADIO_OFF,
-                        dcTracker.getStateInString(), dcTracker.getAnyDataEnabled() ? 1 : 0);
-            }
             // If it's on and available and we want it off gracefully
             powerOffRadioSafely();
         } // Otherwise, we're in the desired state
     }
 
     @Override
-    protected void powerOffRadioSafely() {
-        // clean data connection
+    public void powerOffRadioSafely() {
+        // Cleanup all connections
         DataConnectionTracker dcTracker = phone.mDataConnection;
-        Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_CONNECTION);
-        msg.arg1 = 1; // tearDown is true
-        msg.obj = GSMPhone.REASON_RADIO_TURNED_OFF;
+        Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_ALL_CONNECTIONS);
         dcTracker.sendMessage(msg);
 
         // poll data state up to 15 times, with a 100ms delay
         // totaling 1.5 sec. Normal data disable action will finish in 100ms.
         for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
-            if (dcTracker.getState() != DataConnectionTracker.State.CONNECTED
-                    && dcTracker.getState() != DataConnectionTracker.State.DISCONNECTING) {
-                Log.d(LOG_TAG, "Data shutdown complete.");
-                break;
-            }
             SystemClock.sleep(DATA_STATE_POLL_SLEEP_MS);
         }
 
@@ -1073,7 +1063,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasNetworkTypeChanged) {
-            phone.notifyDataConnection();
+            phone.notifyDataConnection(Phone.REASON_NW_TYPE_CHANGED, Phone.APN_TYPE_ALL);
         }
 
         if (hasRoamingOn) {
@@ -1401,11 +1391,15 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         return gprsState;
     }
 
+    public int getCurrentDataConnectionState() {
+        return gprsState;
+    }
+
     /**
      * @return true if phone is camping on a technology (eg UMTS)
      * that could support voice and data simultaneously.
      */
-    boolean isConcurrentVoiceAndData() {
+    public boolean isConcurrentVoiceAndDataAllowed() {
         return (networkType >= DATA_ACCESS_UMTS);
     }
 

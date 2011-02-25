@@ -21,8 +21,10 @@ import android.net.LocalServerSocket;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.os.SystemProperties;
 
 import com.android.internal.telephony.cdma.CDMAPhone;
+import com.android.internal.telephony.cdma.CDMALTEPhone;
 import com.android.internal.telephony.gsm.GSMPhone;
 import com.android.internal.telephony.sip.SipPhone;
 import com.android.internal.telephony.sip.SipPhoneFactory;
@@ -34,6 +36,9 @@ public class PhoneFactory {
     static final String LOG_TAG = "PHONE";
     static final int SOCKET_OPEN_RETRY_MILLIS = 2 * 1000;
     static final int SOCKET_OPEN_MAX_RETRY = 3;
+    static final boolean LTE_AVAILABLE_ON_CDMA =
+        SystemProperties.getBoolean("ro.mot.lte_on_cdma", false);
+
     //***** Class Variables
 
     static private Phone sProxyPhone = null;
@@ -115,9 +120,15 @@ public class PhoneFactory {
                     sProxyPhone = new PhoneProxy(new GSMPhone(context,
                             sCommandsInterface, sPhoneNotifier));
                 } else if (phoneType == Phone.PHONE_TYPE_CDMA) {
-                    Log.i(LOG_TAG, "Creating CDMAPhone");
-                    sProxyPhone = new PhoneProxy(new CDMAPhone(context,
-                            sCommandsInterface, sPhoneNotifier));
+                    if (LTE_AVAILABLE_ON_CDMA == false ) {
+                        Log.i(LOG_TAG, "Creating CDMAPhone");
+                        sProxyPhone = new PhoneProxy(new CDMAPhone(context,
+                                sCommandsInterface, sPhoneNotifier));
+                    } else {
+                        Log.i(LOG_TAG, "Creating CDMALTEPhone");
+                        sProxyPhone = new PhoneProxy(new CDMALTEPhone(context,
+                                sCommandsInterface, sPhoneNotifier));
+                    }
                 }
 
                 sMadeDefaults = true;
@@ -147,6 +158,13 @@ public class PhoneFactory {
 
         case RILConstants.NETWORK_MODE_GLOBAL:
             return Phone.PHONE_TYPE_CDMA;
+
+        case RILConstants.NETWORK_MODE_LTE_ONLY:
+            if (SystemProperties.getBoolean("ro.mot.lte_on_cdma", false)) {
+                return Phone.PHONE_TYPE_CDMA;
+            } else {
+                return Phone.PHONE_TYPE_GSM;
+            }
         default:
             return Phone.PHONE_TYPE_GSM;
         }
@@ -166,8 +184,13 @@ public class PhoneFactory {
 
     public static Phone getCdmaPhone() {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
-            Phone phone = new CDMAPhone(sContext, sCommandsInterface, sPhoneNotifier);
-            return phone;
+            if (LTE_AVAILABLE_ON_CDMA == false) {
+                Phone phone = new CDMAPhone(sContext, sCommandsInterface, sPhoneNotifier);
+                return phone;
+            } else {
+                Phone phone = new CDMALTEPhone(sContext, sCommandsInterface, sPhoneNotifier);
+                return phone;
+            }
         }
     }
 

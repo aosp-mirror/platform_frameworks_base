@@ -119,6 +119,10 @@ public abstract class CallTracker extends Handler {
 
     //***** Overridden from Handler
     public abstract void handleMessage (Message msg);
+    public abstract void registerForVoiceCallStarted(Handler h, int what, Object obj);
+    public abstract void unregisterForVoiceCallStarted(Handler h);
+    public abstract void registerForVoiceCallEnded(Handler h, int what, Object obj);
+    public abstract void unregisterForVoiceCallEnded(Handler h);
 
     protected abstract void log(String msg);
 
