@@ -208,7 +208,10 @@ LOG_WINDOW("Getting blob for %d,%d from %p", row, column, window);
     uint8_t type = field.type;
     if (type == FIELD_TYPE_BLOB || type == FIELD_TYPE_STRING) {
         jbyteArray byteArray = env->NewByteArray(field.data.buffer.size);
-        LOG_ASSERT(byteArray, "Native could not create new byte[]");
+        if (!byteArray) {
+            throw_sqlite3_exception(env, "Native could not create new byte[]");
+            return NULL;
+        }
         env->SetByteArrayRegion(byteArray, 0, field.data.buffer.size,
             (const jbyte*)window->offsetToPtr(field.data.buffer.offset));
         return byteArray;
