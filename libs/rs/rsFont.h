@@ -23,8 +23,9 @@
 #include <utils/Vector.h>
 #include <utils/KeyedVector.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+struct FT_LibraryRec_;
+struct FT_FaceRec_;
+struct FT_Bitmap_;
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -105,11 +106,12 @@ protected:
         float mBitmapMaxU;
         float mBitmapMaxV;
         // Minimize how much we call freetype
-        FT_UInt mGlyphIndex;
-        FT_Vector mAdvance;
+        int32_t mGlyphIndex;
+        int32_t mAdvanceX;
+        int32_t mAdvanceY;
         // Values below contain a glyph's origin in the bitmap
-        FT_Int mBitmapLeft;
-        FT_Int mBitmapTop;
+        int32_t mBitmapLeft;
+        int32_t mBitmapTop;
     };
 
     String8 mFontName;
@@ -120,7 +122,7 @@ protected:
     bool init(const char *name, float fontSize, uint32_t dpi, const void *data = NULL, uint32_t dataLen = 0);
 
     virtual void preDestroy() const;
-    FT_Face mFace;
+    FT_FaceRec_ *mFace;
     bool mInitialized;
     bool mHasKerning;
 
@@ -173,21 +175,7 @@ protected:
               mCurrentCol(currentCol), mDirty(false)  {
         }
 
-        bool fitBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
-            if ((uint32_t)bitmap->rows > mMaxHeight) {
-                return false;
-            }
-
-            if (mCurrentCol + (uint32_t)bitmap->width < mMaxWidth) {
-                *retOriginX = mCurrentCol;
-                *retOriginY = mCurrentRow;
-                mCurrentCol += bitmap->width;
-                mDirty = true;
-               return true;
-            }
-
-            return false;
-        }
+        bool fitBitmap(FT_Bitmap_ *bitmap, uint32_t *retOriginX, uint32_t *retOriginY);
     };
 
     Vector<CacheTextureLine*> mCacheLines;
@@ -211,8 +199,8 @@ protected:
     float mWhiteThreshold;
 
     // Free type library, we only need one copy
-    FT_Library mLibrary;
-    FT_Library getLib();
+    FT_LibraryRec_ *mLibrary;
+    FT_LibraryRec_ *getLib();
     Vector<Font*> mActiveFonts;
 
     // Render state for the font
@@ -229,7 +217,7 @@ protected:
         return (uint8_t*)mTextTexture->getPtr();
     }
 
-    bool cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY);
+    bool cacheBitmap(FT_Bitmap_ *bitmap, uint32_t *retOriginX, uint32_t *retOriginY);
     const Type* getCacheTextureType() {
         return mTextTexture->getType();
     }
