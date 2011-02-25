@@ -4549,6 +4549,13 @@
         <!-- The view id of the AppWidget subview which should be auto-advanced.
              by the widget's host. -->
         <attr name="autoAdvanceViewId" format="reference" />
+        <!-- Optional parameter which indicates if and how this widget can be 
+             resized. -->
+        <attr name="resizeMode" format="integer">
+            <flag name="none" value="0x0" />
+            <flag name="horizontal" value="0x1" />
+            <flag name="vertical" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!-- =============================== -->
