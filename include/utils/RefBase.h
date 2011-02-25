@@ -425,8 +425,11 @@ void wp<T>::set_object_and_refs(T* other, weakref_type* refs)
 template<typename T>
 sp<T> wp<T>::promote() const
 {
-    T* p = (m_ptr && m_refs->attemptIncStrong(this)) ? m_ptr : 0;
-    return sp<T>(p, true);
+    sp<T> result;
+    if (m_ptr && m_refs->attemptIncStrong(&result)) {
+        result.set_pointer(m_ptr);
+    }
+    return result;
 }
 
 template<typename T>

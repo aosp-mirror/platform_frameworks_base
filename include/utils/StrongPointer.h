@@ -104,11 +104,8 @@ public:
 private:    
     template<typename Y> friend class sp;
     template<typename Y> friend class wp;
-
-    // Optimization for wp::promote().
-    sp(T* p, bool);
-
-    T*              m_ptr;
+    void set_pointer(T* ptr);
+    T* m_ptr;
 };
 
 #undef COMPARE
@@ -206,10 +203,9 @@ void sp<T>::clear()
 }
 
 template<typename T>
-sp<T>::sp(T* p, bool)
-: m_ptr(p)
-  {
-  }
+void sp<T>::set_pointer(T* ptr) {
+    m_ptr = ptr;
+}
 
 template <typename T>
 inline TextOutput& operator<<(TextOutput& to, const sp<T>& val)
