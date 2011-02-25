@@ -14,17 +14,17 @@ page.title=Near Field Communication
           <a href="#dispatch">The Tag Dispatch System</a>
 
           <ol>
-            <li><a href="#foreground-dispatch">Using the foreground dispatch system</a></li>
-
             <li><a href="#intent-dispatch">Using the intent dispatch system</a></li>
+            
+            <li><a href="#foreground-dispatch">Using the foreground dispatch system</a></li>
           </ol>
         </li>
 
-        <li><a href="#ndef">NDEF messages</a></li>
+        <li><a href="#ndef">NDEF Messages</a></li>
 
-        <li><a href="#read">Reading an NFC tag</a></li>
+        <li><a href="#read">Reading an NFC Tag</a></li>
 
-        <li><a href="#write">Writing to an NFC tag</a></li>
+        <li><a href="#write">Writing to an NFC Tag</a></li>
 
         <li><a href="#p2p">Peer to Peer Data Exchange</a></li>
       </ol>
@@ -32,32 +32,29 @@ page.title=Near Field Communication
   </div>
 
   <p>Near Field Communication (NFC) is a set of short-range wireless technologies, typically
-  requiring a distance of 4cm or less. NFC operates at 13.56mhz, and at rates ranging
-  from 106 kbit/s to 848 kbit/s. NFC communication always involves an initiator and a target.
-  The initiator actively generates an RF field that can power a passive target. This
-  enables NFC targets to take very simple form factors such as tags, stickers or cards that do
-  not require power. NFC peer-to-peer communication is also possible, where both devices
-  are powered.
-  <p>
-  Compared to other wireless technologies such as Bluetooth or WiFi, NFC provides much lower
-  bandwidth and range, but enables low-cost, un-powered targets
-  and does not require discovery or pairing. Interactions can be initiated with just a tap.
-  <p>
-  An Android device with NFC hardware will typically act as an initiator when the screen is
-  on. This mode is also known as NFC reader/writer. It will actively look for NFC tags and start
-  activities to handle them. Android 2.3.3 also has some limited P2P support.
-  <p>
-  Tags can range in complexity, simple tags just offer read/write semantics, sometimes
-  with one-time-programmable areas to make the card read-only. More complex tags offer
-  math operations, and have cryptographic hardware to authenticate access to a sector.
-  The most sophisticated tags contain operating environments, allowing
-  complex interactions with code executing on the tag.
+  requiring a distance of 4cm or less. NFC operates at 13.56mhz, and at rates ranging from 106
+  kbit/s to 848 kbit/s. NFC communication always involves an initiator and a target. The initiator
+  actively generates an RF field that can power a passive target. This enables NFC targets to take
+  very simple form factors such as tags, stickers or cards that do not require power. NFC
+  peer-to-peer communication is also possible, where both devices are powered.</p>
+
+  <p>Compared to other wireless technologies such as Bluetooth or WiFi, NFC provides much lower
+  bandwidth and range, but enables low-cost, un-powered targets and does not require discovery or
+  pairing. Interactions can be initiated with just a tap.</p>
+
+  <p>An Android device with NFC hardware will typically act as an initiator when the screen is on.
+  This mode is also known as NFC reader/writer. It will actively look for NFC tags and start
+  activities to handle them. Android 2.3.3 also has some limited P2P support.</p>
+
+  <p>Tags can range in complexity, simple tags just offer read/write semantics, sometimes with
+  one-time-programmable areas to make the card read-only. More complex tags offer math operations,
+  and have cryptographic hardware to authenticate access to a sector. The most sophisticated tags
+  contain operating environments, allowing complex interactions with code executing on the tag.</p>
 
   <h2 id="api">API Overview</h2>
 
-  <p>The {@link android.nfc} package contains the high-level classes to interact
-  with the local device's NFC adapter, to represent discovered tags, and to use
-  the NDEF data format.
+  <p>The {@link android.nfc} package contains the high-level classes to interact with the local
+  device's NFC adapter, to represent discovered tags, and to use the NDEF data format.</p>
 
   <table>
     <tr>
@@ -69,51 +66,43 @@ page.title=Near Field Communication
     <tr>
       <td>{@link android.nfc.NfcManager}</td>
 
-
-      <td>A high level manager class that enumerates the NFC adapters on this Android device.
-      Since most Android devices only have one NFC adapter, you can just use the static helper
-      {@link android.nfc.NfcAdapter#getDefaultAdapter(Context)} for most situations.</td>
+      <td>A high level manager class that enumerates the NFC adapters on this Android device. Since
+      most Android devices only have one NFC adapter, you can just use the static helper {@link
+      android.nfc.NfcAdapter#getDefaultAdapter(Context)} for most situations.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.NfcAdapter}</td>
 
-      <td>Represents the local NFC adapter. Defines the intent's used to request
-      tag dispatch to your activity, and provides methods to register for foreground
-      tag dispatch and foreground NDEF push. Foreground NDEF push is the only
-      peer-to-peer support that is currently provided in Android.</td>
+      <td>Represents the local NFC adapter. Defines the intent's used to request tag dispatch to
+      your activity, and provides methods to register for foreground tag dispatch and foreground
+      NDEF push. Foreground NDEF push is the only peer-to-peer support that is currently provided
+      in Android.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.NdefMessage} and {@link android.nfc.NdefRecord}</td>
 
-      <td>NDEF is an NFC Forum defined data structure, designed to efficiently
-      store data on NFC tags, such as text, URL's, and other MIME types. A
-      {@link android.nfc.NdefMessage} acts as a
+      <td>NDEF is an NFC Forum defined data structure, designed to efficiently store data on NFC
+      tags, such as text, URL's, and other MIME types. A {@link android.nfc.NdefMessage} acts as a
       container for the data that you want to transmit or read. One {@link android.nfc.NdefMessage}
-      object contains zero or more {@link android.nfc.NdefRecord}s. Each NDEF record
-      has a type such as text, URL, smart poster, or any MIME data. The type of the
-      first NDEF record in the NDEF message is used to dispatch a tag to an activity
-      on Android.</td>
+      object contains zero or more {@link android.nfc.NdefRecord}s. Each NDEF record has a type
+      such as text, URL, smart poster, or any MIME data. The type of the first NDEF record in the
+      NDEF message is used to dispatch a tag to an activity on Android.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.Tag}</td>
 
-      <td>Represents a passive NFC target. These can come in many form factors such as
-      a tag, card, key fob, or even a phone doing card emulation. When a tag is
-      discovered, a {@link android.nfc.Tag} object is created and wrapped inside an
-      Intent. The NFC dispatch system sends the intent to a compatible actvitiy
-      using <code>startActivity()</code>. You can use the {@link
-      android.nfc.Tag#getTechList getTechList()} method to determine the technologies supported by
-      this tag and create the corresponding {@link android.nfc.tech.TagTechnology} object with one
-      of classes provided by {@link android.nfc.tech}.</td>
+      <td>Represents a passive NFC target. These can come in many form factors such as a tag, card,
+      key fob, or even a phone doing card emulation. When a tag is discovered, a {@link
+      android.nfc.Tag} object is created and wrapped inside an Intent. The NFC dispatch system
+      sends the intent to a compatible activity using <code>startActivity()</code>. You can use the
+      {@link android.nfc.Tag#getTechList getTechList()} method to determine the technologies
+      supported by this tag and create the corresponding {@link android.nfc.tech.TagTechnology}
+      object with one of classes provided by {@link android.nfc.tech}.</td>
     </tr>
   </table>
-
-  <p>The {@link android.nfc.tech} package contains classes to query properties
-  and perform I/O operations on a tag. The classes are divided to represent different
-  NFC technologies that can be available on a tag.
 
   <p>The {@link android.nfc.tech} package contains classes to query properties and perform I/O
   operations on a tag. The classes are divided to represent different NFC technologies that can be
@@ -165,28 +154,28 @@ page.title=Near Field Communication
     <tr>
       <td>{@link android.nfc.tech.Ndef}</td>
 
-      <td>Provides access to NDEF data and operations on NFC tags that have been formatted as NDEF.
-      </td>
+      <td>Provides access to NDEF data and operations on NFC tags that have been formatted as
+      NDEF.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.tech.NdefFormatable}</td>
 
-      <td>Provides a format operations for tags that may be NDEF formatable.</td>
+      <td>Provides a format operations for tags that may be NDEF formattable.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.tech.MifareClassic}</td>
 
-      <td>Provides access to MIFARE Classic properties and I/O operations, if this
-      Android device supports MIFARE.</td>
+      <td>Provides access to MIFARE Classic properties and I/O operations, if this Android device
+      supports MIFARE.</td>
     </tr>
 
     <tr>
       <td>{@link android.nfc.tech.MifareUltralight}</td>
 
-      <td>Provides access to MIFARE Ultralight properties and I/O operations, if this
-      Android device supports MIFARE.</td>
+      <td>Provides access to MIFARE Ultralight properties and I/O operations, if this Android
+      device supports MIFARE.</td>
     </tr>
   </table>
 
@@ -203,12 +192,11 @@ page.title=Near Field Communication
     </li>
 
     <li>The minimum SDK version that your application can support. API level 9 only supports
-    limited tag dispatch via {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED},
-    and only gives access to NDEF messages via the {@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES}
-    extra. No other tag properties or I/O operations are accessible. You probably want
-    to use API level 10 which includes comprehensive reader/writer support.
-
-<pre class="pretty-print">
+    limited tag dispatch via {@link android.nfc.NfcAdapter#ACTION_TAG_DISCOVERED}, and only gives
+    access to NDEF messages via the {@link android.nfc.NfcAdapter#EXTRA_NDEF_MESSAGES} extra. No
+    other tag properties or I/O operations are accessible. You probably want to use API level 10
+    which includes comprehensive reader/writer support.
+      <pre class="pretty-print">
 &lt;uses-sdk android:minSdkVersion="10"/&gt;
 </pre>
     </li>
@@ -252,7 +240,7 @@ page.title=Near Field Communication
   <h2 id="dispatch">The Tag Dispatch System</h2>
 
   <p>When an Android device scans an NFC tag, the desired behavior is to have the most appropriate
-  Activity handle the intent without asking the user what appplication to use. Because devices scan
+  Activity handle the intent without asking the user what application to use. Because devices scan
   NFC tags at a very short range, it is likely that making users manually select an Activity forces
   them to move the device away from the tag and break the connection. You should develop your
   Activity to only handle the NFC tags that your Activity cares about to prevent the Activity
@@ -314,12 +302,18 @@ page.title=Near Field Communication
 
   <p>If your Activity declares the <code>android.nfc.action.TECH_DISCOVERED</code> intent in your
   <code>AndroidManifest.xml</code> file, you must create an XML resource file that specifies the
-  technologies that your Activity supports. The following sample defines all of the technologies.
-  Specifiying multiple technologies within the same list tells the system
-  to filter tags that support all of the technologies. The example below never filters a tag
-  because no tag supports all of the technologies at once.
-  You can remove the ones that you do not need. Save this file (you can name it anything you wish)
-  in the <code>&lt;project-root&gt;/res/xml</code> folder.</p>
+  technologies that your Activity supports within a <code>tech-list</code> set. Your Activity is
+  considered a match if a <code>tech-list</code> set is a subset of the technologies that are
+  supported by the tag, which you can obtain by calling {@link android.nfc.Tag#getTechList
+  getTechList()}.</p>
+
+  <p>For example, if the tag that is scanned supports MifareClassic, NdefFormatable, and NfcA, your
+  <code>tech-list</code> set must specify all three, two, or one of the technologies (and nothing
+  else) in order for your Activity to be matched.</p>
+
+  <p>The following sample defines all of the technologies. You can remove the ones that you do not
+  need. Save this file (you can name it anything you wish) in the
+  <code>&lt;project-root&gt;/res/xml</code> folder.</p>
   <pre>
 &lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
     &lt;tech-list&gt;
@@ -336,12 +330,13 @@ page.title=Near Field Communication
 &lt;/resources&gt;
 </pre>
 
-You can also specify multiple filter lists. In this case, a tag must match all of the
-technologies within one of the lists. The following example filters for
-cards that support the NfcA and Ndef technology or support the
-NfcB and Ndef technology.
-
-<pre>
+  <p>You can also specify multiple <code>tech-list</code> sets. Each of the <code>tech-list</code>
+  sets is considered independently, and your Activity is considered a match if any single
+  <code>tech-list</code> set is a subset of the technologies that are returned by {@link
+  android.nfc.Tag#getTechList getTechList()}. This provides <code>AND</code> and <code>OR</code>
+  semantics for matching technologies. The following example matches tags that can support the
+  NfcA and Ndef technologies or can support the NfcB and Ndef technologies:</p>
+  <pre>
 &lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
     &lt;tech-list&gt;
         &lt;tech&gt;android.nfc.tech.NfcA&lt;/tech&gt;        
@@ -358,14 +353,19 @@ NfcB and Ndef technology.
 </pre>
 
   <p>In your <code>AndroidManifest.xml</code> file, specify the resource file that you just created
-  in the <code>&lt;meta-data&gt;</code> element inside the <code>&lt;intent-filter&gt;</code>
+  in the <code>&lt;meta-data&gt;</code> element inside the <code>&lt;activity&gt;</code>
   element like in the following example:</p>
   <pre>
+&lt;activity&gt;
+...
 &lt;intent-filter&gt;
     &lt;action android:name="android.nfc.action.TECH_DISCOVERED"/&gt;
-    &lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
-        android:resource="@xml/nfc_tech_filter.xml" /&gt;
 &lt;/intent-filter&gt;
+
+&lt;meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+    android:resource="@xml/nfc_tech_filter" /&gt;
+...
+&lt;/activity&gt;
 </pre>
 
   <h3 id="foreground-dispatch">Using the foreground dispatch system</h3>
@@ -391,9 +391,9 @@ PendingIntent pendingIntent = PendingIntent.getActivity(
         dispatch system checks the specified intent filters with the intent that is received when
         the device scans a tag. If they match, then your application handles the intent. If it does
         not match, the foreground dispatch system falls back to the intent dispatch system.
-        Specifying a <code>null</code> array of intent filters and for the technology filters,
-        you receive a <code>TAG_DISCOVERED</code> intent for all tags discovered. Note that the
-        snippet below handles all MIME types. You should only handle the ones that you need.
+        Specifying a <code>null</code> array of intent filters and for the technology filters, you
+        receive a <code>TAG_DISCOVERED</code> intent for all tags discovered. Note that the snippet
+        below handles all MIME types. You should only handle the ones that you need.
           <pre>
     IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
         try {
@@ -424,7 +424,7 @@ PendingIntent pendingIntent = PendingIntent.getActivity(
     <li>Override the following Activity lifecycle callbacks and add logic to enable and disable the
     foreground dispatch when the Activity loses ({@link android.app.Activity#onPause onPause()})
     and regains ({@link android.app.Activity#onResume onResume()}) focus. {@link
-    android.nfc.NfcAdapter#enableForegroundDispatch} must best called from the main thread and only
+    android.nfc.NfcAdapter#enableForegroundDispatch} must be called from the main thread and only
     when the activity is in the foreground (calling in {@link android.app.Activity#onResume
     onResume()} guarantees this). You also need to implement the {@link
     android.app.Activity#onNewIntent onNewIntent} callback to process the data from the scanned NFC
@@ -452,7 +452,7 @@ public void onNewIntent(Intent intent) {
   "{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/nfc/ForegroundDispatch.html">ForegroundDispatch</a>
   sample from API Demos for the complete sample.</p>
 
-  <h2 id="ndef">Working with Data on NFC tags</h2>
+  <h2 id="ndef">Working with Data on NFC Tags</h2>
 
   <p>Data on NFC tags are encoded in raw bytes, so you must convert the bytes to something human
   readable if you are presenting the data to the user. When writing to NFC tags, you must write
@@ -462,7 +462,7 @@ public void onNewIntent(Intent intent) {
   Android NFC devices if you are writing to tags. However, many tag technologies use their own
   standard for storing data and are supported by Android as well, but you have to implement your
   own protocol stack to read and write to these tags. You can find a full list of the supported
-  technologies in {@link android.nfc.tech} and an overview of the technolgies in the {@link
+  technologies in {@link android.nfc.tech} and an overview of the technologies in the {@link
   android.nfc.tech.TagTechnology} interface. This section is a brief overview of how to work with
   NDEF messages in the context of the Android system. It is not meant to be a complete discussion
   of the NDEF specification, but highlights the main things that you need to be aware of when
@@ -477,8 +477,8 @@ public void onNewIntent(Intent intent) {
   {@link android.nfc.NdefMessage}. The size constraint of the NFC tag determines how big your
   {@link android.nfc.NdefMessage} can be.</p>
 
-  <p>Tags that support the {@link android.nfc.tech.Ndef} and {@link android.nfc.tech.NdefFormatable}
-  technologies return and accept {@link android.nfc.NdefMessage}
+  <p>Tags that support the {@link android.nfc.tech.Ndef} and {@link
+  android.nfc.tech.NdefFormatable} technologies return and accept {@link android.nfc.NdefMessage}
   objects as parameters for read and write operations. You need to create your own logic to read
   and write bytes for other tag technologies in {@link android.nfc.tech}.</p>
 
@@ -488,7 +488,7 @@ public void onNewIntent(Intent intent) {
   "{@docRoot}resources/samples/NFCDemo/src/com/example/android/nfc/simulator/MockNdefMessages.html">
   plain text and SmartPoster NDEF messages.</a></p>
 
-  <h2 id="read">Reading an NFC tag</h2>
+  <h2 id="read">Reading an NFC Tag</h2>
 
   <p>When a device comes in proximity to an NFC tag, the appropriate intent is started on the
   device, notifying interested applications that a NFC tag was scanned. By previously declaring the
@@ -532,7 +532,7 @@ NdefMessage[] getNdefMessages(Intent intent) {
   <code>com.example.android.nfc.record</code> of the NFCDemo sample show you how to parse some
   common types of NDEF messages such as plain text or a SmartPoster.</p>
 
-  <h2 id="write">Writing to an NFC tag</h2>
+  <h2 id="write">Writing to an NFC Tag</h2>
 
   <p>Writing to an NFC tag involves constructing your NDEF message in bytes and using the
   appropriate tag technology for the tag that you are writing to. The following code sample shows
@@ -558,7 +558,7 @@ catch (Exception e){
 }
 </pre>
 
-  <h2 id="p2p">Peer-to-peer data exchange</h2>
+  <h2 id="p2p">Peer-to-Peer Data Exchange</h2>
 
   <p>Support for simple peer-to-peer data exchange is supported by the foreground push feature,
   which is enabled with the {@link android.nfc.NfcAdapter#enableForegroundNdefPush} method. To use
@@ -572,7 +572,6 @@ catch (Exception e){
 
     <li>The NFC device that is receiving the pushed data (the scanned device) must support the
     <code>com.android.npp</code> NDEF push protocol, which is optional for Android devices.</li>
-</li>
   </ul>
 
   <p class="note">If your Activity enables the foreground push feature and is in the foreground,
