@@ -1982,9 +1982,8 @@ void OpenGLRenderer::getAlphaAndMode(SkPaint* paint, int* alpha, SkXfermode::Mod
 }
 
 SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
-    /* In the future we should look at unifying the Porter-Duff modes and
-     * SkXferModes so that we can use SkXfermode::IsMode(xfer, &mode).
-     */
+    // In the future we should look at unifying the Porter-Duff modes and
+    // SkXferModes so that we can use SkXfermode::IsMode(xfer, &mode).
     if (mode == NULL) {
         return SkXfermode::kSrcOver_Mode;
     }
