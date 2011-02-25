@@ -165,9 +165,9 @@ public class Browser {
     }
 
     /**
-     * Passed along with an Intent to a browser, specifying that a new tab
-     * be created.  Overrides EXTRA_APPLICATION_ID; if both are set, a new tab
-     * will be used, rather than using the same one.
+     * Boolean extra passed along with an Intent to a browser, specifying that
+     * a new tab be created.  Overrides EXTRA_APPLICATION_ID; if both are set,
+     * a new tab will be used, rather than using the same one.
      */
     public static final String EXTRA_CREATE_NEW_TAB = "create_new_tab";
 
