@@ -318,10 +318,56 @@ public class PointerLocationView extends View {
         }
     }
     
-    private void logPointerCoords(MotionEvent.PointerCoords coords, int id) {
+    private void logPointerCoords(int action, int index, MotionEvent.PointerCoords coords, int id) {
+        final String prefix;
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                prefix = "DOWN";
+                break;
+            case MotionEvent.ACTION_UP:
+                prefix = "UP";
+                break;
+            case MotionEvent.ACTION_MOVE:
+                prefix = "MOVE";
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                prefix = "CANCEL";
+                break;
+            case MotionEvent.ACTION_OUTSIDE:
+                prefix = "OUTSIDE";
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (index == ((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT)) {
+                    prefix = "DOWN";
+                } else {
+                    prefix = "MOVE";
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                if (index == ((action & MotionEvent.ACTION_POINTER_INDEX_MASK)
+                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT)) {
+                    prefix = "UP";
+                } else {
+                    prefix = "MOVE";
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_MOVE:
+                prefix = "HOVER MOVE";
+                break;
+            case MotionEvent.ACTION_SCROLL:
+                prefix = "SCROLL";
+                break;
+            default:
+                prefix = Integer.toString(action);
+                break;
+        }
+
         Log.i(TAG, mText.clear()
                 .append("Pointer ").append(id + 1)
-                .append(": (").append(coords.x, 3).append(", ").append(coords.y, 3)
+                .append(": ")
+                .append(prefix)
+                .append(" (").append(coords.x, 3).append(", ").append(coords.y, 3)
                 .append(") Pressure=").append(coords.pressure, 3)
                 .append(" Size=").append(coords.size, 3)
                 .append(" TouchMajor=").append(coords.touchMajor, 3)
@@ -335,7 +381,7 @@ public class PointerLocationView extends View {
                 .toString());
     }
 
-    public void addTouchEvent(MotionEvent event) {
+    public void addPointerEvent(MotionEvent event) {
         synchronized (mPointers) {
             int action = event.getAction();
             
@@ -363,10 +409,16 @@ public class PointerLocationView extends View {
                         ps.mCurDown = false;
                     }
                     mCurDown = true;
+                    mCurNumPointers = 0;
                     mMaxNumPointers = 0;
                     mVelocity.clear();
                 }
-                
+
+                mCurNumPointers += 1;
+                if (mMaxNumPointers < mCurNumPointers) {
+                    mMaxNumPointers = mCurNumPointers;
+                }
+
                 final int id = event.getPointerId(index);
                 while (NP <= id) {
                     PointerState ps = new PointerState();
@@ -375,49 +427,41 @@ public class PointerLocationView extends View {
                 }
                 
                 if (mActivePointerId < 0 ||
-                        ! mPointers.get(mActivePointerId).mCurDown) {
+                        !mPointers.get(mActivePointerId).mCurDown) {
                     mActivePointerId = id;
                 }
                 
                 final PointerState ps = mPointers.get(id);
                 ps.mCurDown = true;
-                if (mPrintCoords) {
-                    Log.i(TAG, mText.clear().append("Pointer ")
-                            .append(id + 1).append(": DOWN").toString());
-                }
             }
-            
-            final int NI = event.getPointerCount();
 
-            final boolean hover = (action == MotionEvent.ACTION_HOVER_MOVE);
-            mCurDown = action != MotionEvent.ACTION_UP
-                    && action != MotionEvent.ACTION_CANCEL
-                    && !hover;
-            mCurNumPointers = mCurDown ? NI : 0;
-            if (mMaxNumPointers < mCurNumPointers) {
-                mMaxNumPointers = mCurNumPointers;
-            }
+            final int NI = event.getPointerCount();
 
             mVelocity.addMovement(event);
             mVelocity.computeCurrentVelocity(1);
-            
-            for (int i=0; i<NI; i++) {
-                final int id = event.getPointerId(i);
-                final PointerState ps = hover ? null : mPointers.get(id);
-                final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
-                final int N = event.getHistorySize();
-                for (int j=0; j<N; j++) {
-                    event.getHistoricalPointerCoords(i, j, coords);
+
+            final int N = event.getHistorySize();
+            for (int historyPos = 0; historyPos < N; historyPos++) {
+                for (int i = 0; i < NI; i++) {
+                    final int id = event.getPointerId(i);
+                    final PointerState ps = mCurDown ? mPointers.get(id) : null;
+                    final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
+                    event.getHistoricalPointerCoords(i, historyPos, coords);
                     if (mPrintCoords) {
-                        logPointerCoords(coords, id);
+                        logPointerCoords(action, i, coords, id);
                     }
                     if (ps != null) {
-                        ps.addTrace(event.getHistoricalX(i, j), event.getHistoricalY(i, j));
+                        ps.addTrace(coords.x, coords.y);
                     }
                 }
+            }
+            for (int i = 0; i < NI; i++) {
+                final int id = event.getPointerId(i);
+                final PointerState ps = mCurDown ? mPointers.get(id) : null;
+                final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
                 event.getPointerCoords(i, coords);
                 if (mPrintCoords) {
-                    logPointerCoords(coords, id);
+                    logPointerCoords(action, i, coords, id);
                 }
                 if (ps != null) {
                     ps.addTrace(coords.x, coords.y);
@@ -425,7 +469,7 @@ public class PointerLocationView extends View {
                     ps.mYVelocity = mVelocity.getYVelocity(id);
                 }
             }
-            
+
             if (action == MotionEvent.ACTION_UP
                     || action == MotionEvent.ACTION_CANCEL
                     || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP) {
@@ -435,15 +479,13 @@ public class PointerLocationView extends View {
                 final int id = event.getPointerId(index);
                 final PointerState ps = mPointers.get(id);
                 ps.mCurDown = false;
-                if (mPrintCoords) {
-                    Log.i(TAG, mText.clear().append("Pointer ")
-                            .append(id + 1).append(": UP").toString());
-                }
                 
                 if (action == MotionEvent.ACTION_UP
                         || action == MotionEvent.ACTION_CANCEL) {
                     mCurDown = false;
+                    mCurNumPointers = 0;
                 } else {
+                    mCurNumPointers -= 1;
                     if (mActivePointerId == id) {
                         mActivePointerId = event.getPointerId(index == 0 ? 1 : 0);
                     }
@@ -462,8 +504,17 @@ public class PointerLocationView extends View {
     
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        addTouchEvent(event);
+        addPointerEvent(event);
         return true;
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            addPointerEvent(event);
+            return true;
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     @Override

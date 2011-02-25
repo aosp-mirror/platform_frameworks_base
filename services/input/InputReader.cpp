@@ -1197,7 +1197,14 @@ void CursorInputMapper::process(const RawEvent* rawEvent) {
     switch (rawEvent->type) {
     case EV_KEY:
         switch (rawEvent->scanCode) {
-        case BTN_MOUSE:
+        case BTN_LEFT:
+        case BTN_RIGHT:
+        case BTN_MIDDLE:
+        case BTN_SIDE:
+        case BTN_EXTRA:
+        case BTN_FORWARD:
+        case BTN_BACK:
+        case BTN_TASK:
             mAccumulator.fields |= Accumulator::FIELD_BTN_MOUSE;
             mAccumulator.btnMouse = rawEvent->value != 0;
             // Sync now since BTN_MOUSE is not necessarily followed by SYN_REPORT and
@@ -1247,6 +1254,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     int motionEventAction;
     PointerCoords pointerCoords;
     nsecs_t downTime;
+    float vscroll, hscroll;
     { // acquire lock
         AutoMutex _l(mLock);
 
@@ -1331,10 +1339,14 @@ void CursorInputMapper::sync(nsecs_t when) {
         pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, mLocked.down ? 1.0f : 0.0f);
 
         if (mHaveVWheel && (fields & Accumulator::FIELD_REL_WHEEL)) {
-            pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_VSCROLL, mAccumulator.relWheel);
+            vscroll = mAccumulator.relWheel;
+        } else {
+            vscroll = 0;
         }
         if (mHaveHWheel && (fields & Accumulator::FIELD_REL_HWHEEL)) {
-            pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_HSCROLL, mAccumulator.relHWheel);
+            hscroll = mAccumulator.relHWheel;
+        } else {
+            hscroll = 0;
         }
     } // release lock
 
@@ -1345,6 +1357,15 @@ void CursorInputMapper::sync(nsecs_t when) {
             1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
 
     mAccumulator.clear();
+
+    if (vscroll != 0 || hscroll != 0) {
+        pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_VSCROLL, vscroll);
+        pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_HSCROLL, hscroll);
+
+        getDispatcher()->notifyMotion(when, getDeviceId(), mSources, 0,
+                AMOTION_EVENT_ACTION_SCROLL, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
+                1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
+    }
 }
 
 int32_t CursorInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {

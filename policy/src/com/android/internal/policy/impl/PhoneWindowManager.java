@@ -284,7 +284,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                     synchronized (mLock) {
                         if (mPointerLocationView != null) {
-                            mPointerLocationView.addTouchEvent(event);
+                            mPointerLocationView.addPointerEvent(event);
                             handled = true;
                         }
                     }

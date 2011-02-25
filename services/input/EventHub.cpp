@@ -508,6 +508,7 @@ bool EventHub::getEvent(RawEvent* outEvent) {
         }
 
         // Grab the next input event.
+        bool deviceWasRemoved = false;
         for (;;) {
             // Consume buffered input events, if any.
             if (mInputBufferIndex < mInputBufferCount) {
@@ -558,6 +559,10 @@ bool EventHub::getEvent(RawEvent* outEvent) {
                 int32_t readSize = read(pfd.fd, mInputBufferData,
                         sizeof(struct input_event) * INPUT_BUFFER_SIZE);
                 if (readSize < 0) {
+                    if (errno == ENODEV) {
+                        deviceWasRemoved = true;
+                        break;
+                    }
                     if (errno != EAGAIN && errno != EINTR) {
                         LOGW("could not get event (errno=%d)", errno);
                     }
@@ -570,6 +575,13 @@ bool EventHub::getEvent(RawEvent* outEvent) {
             }
         }
 
+        // Handle the case where a device has been removed but INotify has not yet noticed.
+        if (deviceWasRemoved) {
+            AutoMutex _l(mLock);
+            closeDeviceAtIndexLocked(mInputFdIndex);
+            continue; // report added or removed devices immediately
+        }
+
 #if HAVE_INOTIFY
         // readNotify() will modify mFDs and mFDCount, so this must be done after
         // processing all other events.
@@ -579,8 +591,6 @@ bool EventHub::getEvent(RawEvent* outEvent) {
             continue; // report added or removed devices immediately
         }
 #endif
-
-        mInputFdIndex = 0;
 
         // Poll for events.  Mind the wake lock dance!
         // We hold a wake lock at all times except during poll().  This works due to some
@@ -602,6 +612,9 @@ bool EventHub::getEvent(RawEvent* outEvent) {
                 usleep(100000);
             }
         }
+
+        // Prepare to process all of the FDs we just polled.
+        mInputFdIndex = 0;
     }
 }
 
@@ -1008,35 +1021,40 @@ int EventHub::closeDevice(const char *devicePath) {
     for (size_t i = FIRST_ACTUAL_DEVICE_INDEX; i < mDevices.size(); i++) {
         Device* device = mDevices[i];
         if (device->path == devicePath) {
-            LOGI("Removed device: path=%s name=%s id=%d fd=%d classes=0x%x\n",
-                 device->path.string(), device->identifier.name.string(), device->id,
-                 device->fd, device->classes);
-
-            for (int j=0; j<EV_SW; j++) {
-                if (mSwitches[j] == device->id) {
-                    mSwitches[j] = 0;
-                }
-            }
-
-            if (device->id == mBuiltInKeyboardId) {
-                LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
-                        device->path.string(), mBuiltInKeyboardId);
-                mBuiltInKeyboardId = -1;
-                clearKeyboardProperties(device, true);
-            }
-            clearKeyboardProperties(device, false);
-
-            mFds.removeAt(i);
-            mDevices.removeAt(i);
-            device->close();
-
-            device->next = mClosingDevices;
-            mClosingDevices = device;
-            return 0;
+            return closeDeviceAtIndexLocked(i);
         }
     }
-    LOGE("remove device: %s not found\n", devicePath);
+    LOGV("Remove device: %s not found, device may already have been removed.", devicePath);
     return -1;
+}
+
+int EventHub::closeDeviceAtIndexLocked(int index) {
+    Device* device = mDevices[index];
+    LOGI("Removed device: path=%s name=%s id=%d fd=%d classes=0x%x\n",
+         device->path.string(), device->identifier.name.string(), device->id,
+         device->fd, device->classes);
+
+    for (int j=0; j<EV_SW; j++) {
+        if (mSwitches[j] == device->id) {
+            mSwitches[j] = 0;
+        }
+    }
+
+    if (device->id == mBuiltInKeyboardId) {
+        LOGW("built-in keyboard device %s (id=%d) is closing! the apps will not like this",
+                device->path.string(), mBuiltInKeyboardId);
+        mBuiltInKeyboardId = -1;
+        clearKeyboardProperties(device, true);
+    }
+    clearKeyboardProperties(device, false);
+
+    mFds.removeAt(index);
+    mDevices.removeAt(index);
+    device->close();
+
+    device->next = mClosingDevices;
+    mClosingDevices = device;
+    return 0;
 }
 
 int EventHub::readNotify(int nfd) {

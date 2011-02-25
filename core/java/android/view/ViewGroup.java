@@ -1145,6 +1145,53 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            // Send the event to the child under the pointer.
+            final int childrenCount = mChildrenCount;
+            if (childrenCount != 0) {
+                final View[] children = mChildren;
+                final float x = event.getX();
+                final float y = event.getY();
+
+                for (int i = childrenCount - 1; i >= 0; i--) {
+                    final View child = children[i];
+                    if ((child.mViewFlags & VISIBILITY_MASK) != VISIBLE
+                            && child.getAnimation() == null) {
+                        // Skip invisible child unless it is animating.
+                        continue;
+                    }
+
+                    if (!isTransformedTouchPointInView(x, y, child, null)) {
+                        // Scroll point is out of child's bounds.
+                        continue;
+                    }
+
+                    final float offsetX = mScrollX - child.mLeft;
+                    final float offsetY = mScrollY - child.mTop;
+                    final boolean handled;
+                    if (!child.hasIdentityMatrix()) {
+                        MotionEvent transformedEvent = MotionEvent.obtain(event);
+                        transformedEvent.offsetLocation(offsetX, offsetY);
+                        transformedEvent.transform(child.getInverseMatrix());
+                        handled = child.dispatchGenericMotionEvent(transformedEvent);
+                        transformedEvent.recycle();
+                    } else {
+                        event.offsetLocation(offsetX, offsetY);
+                        handled = child.dispatchGenericMotionEvent(event);
+                        event.offsetLocation(-offsetX, -offsetY);
+                    }
+
+                    if (handled) {
+                        return true;
+                    }
+                }
+            }
+
+            // No child handled the event.  Send it to this view group.
+            return super.dispatchGenericMotionEvent(event);
+        }
+
+        // Send the event to the focused child or to this view group if it has focus.
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
             return super.dispatchGenericMotionEvent(event);
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
@@ -1178,7 +1225,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Check for interception.
         final boolean intercepted;
         if (actionMasked == MotionEvent.ACTION_DOWN
-                || actionMasked == MotionEvent.ACTION_HOVER_MOVE
                 || mFirstTouchTarget != null) {
             final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
             if (!disallowIntercept) {
@@ -1188,6 +1234,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 intercepted = false;
             }
         } else {
+            // There are no touch targets and this action is not an initial down
+            // so this view group continues to intercept touches.
             intercepted = true;
         }
 
@@ -1548,8 +1596,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final int newAction;
             if (cancel) {
                 newAction = MotionEvent.ACTION_CANCEL;
-            } else if (oldAction == MotionEvent.ACTION_HOVER_MOVE) {
-                newAction = MotionEvent.ACTION_HOVER_MOVE;
             } else {
                 final int oldMaskedAction = oldAction & MotionEvent.ACTION_MASK;
                 if (oldMaskedAction == MotionEvent.ACTION_POINTER_DOWN
