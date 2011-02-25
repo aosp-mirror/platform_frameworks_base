@@ -82,7 +82,6 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     public static final int TRANSITION_TO_STABLE = 102;
     public static final int CONNECT_OTHER_PROFILES = 103;
 
-    private static final int AUTO_CONNECT_DELAY = 6000; // 6 secs
     private static final int CONNECT_OTHER_PROFILES_DELAY = 4000; // 4 secs
 
     private BondedDevice mBondedDevice = new BondedDevice();

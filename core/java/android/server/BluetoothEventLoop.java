@@ -34,14 +34,9 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 
 /**
- * TODO: Move this to
- * java/services/com/android/server/BluetoothEventLoop.java
- * and make the constructor package private again.
- *
  * @hide
  */
 class BluetoothEventLoop {
@@ -114,7 +109,7 @@ class BluetoothEventLoop {
             BluetoothService bluetoothService) {
         mBluetoothService = bluetoothService;
         mContext = context;
-        mPasskeyAgentRequestData = new HashMap();
+        mPasskeyAgentRequestData = new HashMap<String, Integer>();
         mAdapter = adapter;
         //WakeLock instantiation in BluetoothEventLoop class
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -180,10 +175,12 @@ class BluetoothEventLoop {
     }
 
     private void addDevice(String address, String[] properties) {
-        mBluetoothService.addRemoteDeviceProperties(address, properties);
-        String rssi = mBluetoothService.getRemoteDeviceProperty(address, "RSSI");
-        String classValue = mBluetoothService.getRemoteDeviceProperty(address, "Class");
-        String name = mBluetoothService.getRemoteDeviceProperty(address, "Name");
+        BluetoothDeviceProperties deviceProperties =
+                mBluetoothService.getDeviceProperties();
+        deviceProperties.addProperties(address, properties);
+        String rssi = deviceProperties.getProperty(address, "RSSI");
+        String classValue = deviceProperties.getProperty(address, "Class");
+        String name = deviceProperties.getProperty(address, "Name");
         short rssiValue;
         // For incoming connections, we don't get the RSSI value. Use a default of MIN_VALUE.
         // If we accept the pairing, we will automatically show it at the top of the list.
@@ -206,6 +203,14 @@ class BluetoothEventLoop {
         }
     }
 
+    /**
+     * Called by native code on a DeviceFound signal from org.bluez.Adapter.
+     *
+     * @param address the MAC address of the new device
+     * @param properties an array of property keys and value strings
+     *
+     * @see BluetoothDeviceProperties#addProperties(String, String[])
+     */
     private void onDeviceFound(String address, String[] properties) {
         if (properties == null) {
             Log.e(TAG, "ERROR: Remote device properties are null");
@@ -214,12 +219,24 @@ class BluetoothEventLoop {
         addDevice(address, properties);
     }
 
+    /**
+     * Called by native code on a DeviceDisappeared signal from
+     * org.bluez.Adapter.
+     *
+     * @param address the MAC address of the disappeared device
+     */
     private void onDeviceDisappeared(String address) {
         Intent intent = new Intent(BluetoothDevice.ACTION_DISAPPEARED);
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
 
+    /**
+     * Called by native code on a DisconnectRequested signal from
+     * org.bluez.Device.
+     *
+     * @param deviceObjectPath the object path for the disconnecting device
+     */
     private void onDeviceDisconnectRequested(String deviceObjectPath) {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
         if (address == null) {
@@ -231,11 +248,23 @@ class BluetoothEventLoop {
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
     }
 
+    /**
+     * Called by native code for the async response to a CreatePairedDevice
+     * method call to org.bluez.Adapter.
+     *
+     * @param address the MAC address of the device to pair
+     * @param result success or error result for the pairing operation
+     */
     private void onCreatePairedDeviceResult(String address, int result) {
         address = address.toUpperCase();
         mBluetoothService.onCreatePairedDeviceResult(address, result);
     }
 
+    /**
+     * Called by native code on a DeviceCreated signal from org.bluez.Adapter.
+     *
+     * @param deviceObjectPath the object path for the created device
+     */
     private void onDeviceCreated(String deviceObjectPath) {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
         if (!mBluetoothService.isRemoteDeviceInCache(address)) {
@@ -248,6 +277,11 @@ class BluetoothEventLoop {
         return;
     }
 
+    /**
+     * Called by native code on a DeviceRemoved signal from org.bluez.Adapter.
+     *
+     * @param deviceObjectPath the object path for the removed device
+     */
     private void onDeviceRemoved(String deviceObjectPath) {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
         if (address != null) {
@@ -257,31 +291,43 @@ class BluetoothEventLoop {
         }
     }
 
+    /**
+     * Called by native code on a PropertyChanged signal from
+     * org.bluez.Adapter. This method is also called from Java at
+     * {@link BluetoothService.EnableThread#run()} to set the "Pairable"
+     * property when Bluetooth is enabled.
+     *
+     * @param propValues a string array containing the key and one or more
+     *  values.
+     */
     /*package*/ void onPropertyChanged(String[] propValues) {
-        if (mBluetoothService.isAdapterPropertiesEmpty()) {
+        BluetoothAdapterProperties adapterProperties =
+                mBluetoothService.getAdapterProperties();
+
+        if (adapterProperties.isEmpty()) {
             // We have got a property change before
             // we filled up our cache.
-            mBluetoothService.getAllProperties();
+            adapterProperties.getAllProperties();
         }
         log("Property Changed: " + propValues[0] + " : " + propValues[1]);
         String name = propValues[0];
         if (name.equals("Name")) {
-            mBluetoothService.setProperty(name, propValues[1]);
+            adapterProperties.setProperty(name, propValues[1]);
             Intent intent = new Intent(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED);
             intent.putExtra(BluetoothAdapter.EXTRA_LOCAL_NAME, propValues[1]);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         } else if (name.equals("Pairable") || name.equals("Discoverable")) {
             String pairable = name.equals("Pairable") ? propValues[1] :
-                mBluetoothService.getPropertyInternal("Pairable");
+                adapterProperties.getProperty("Pairable");
             String discoverable = name.equals("Discoverable") ? propValues[1] :
-                mBluetoothService.getPropertyInternal("Discoverable");
+                adapterProperties.getProperty("Discoverable");
 
             // This shouldn't happen, unless Adapter Properties are null.
             if (pairable == null || discoverable == null)
                 return;
 
-            mBluetoothService.setProperty(name, propValues[1]);
+            adapterProperties.setProperty(name, propValues[1]);
             int mode = BluetoothService.bluezStringToScanMode(
                     pairable.equals("true"),
                     discoverable.equals("true"));
@@ -293,7 +339,7 @@ class BluetoothEventLoop {
             }
         } else if (name.equals("Discovering")) {
             Intent intent;
-            mBluetoothService.setProperty(name, propValues[1]);
+            adapterProperties.setProperty(name, propValues[1]);
             if (propValues[1].equals("true")) {
                 mBluetoothService.setIsDiscovering(true);
                 intent = new Intent(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
@@ -315,7 +361,7 @@ class BluetoothEventLoop {
                 }
                 value = str.toString();
             }
-            mBluetoothService.setProperty(name, value);
+            adapterProperties.setProperty(name, value);
             if (name.equals("UUIDs")) {
                 mBluetoothService.updateBluetoothState(value);
             }
@@ -325,10 +371,18 @@ class BluetoothEventLoop {
             if (propValues[1].equals("true"))
                 onRestartRequired();
         } else if (name.equals("DiscoverableTimeout")) {
-            mBluetoothService.setProperty(name, propValues[1]);
+            adapterProperties.setProperty(name, propValues[1]);
         }
     }
 
+    /**
+     * Called by native code on a PropertyChanged signal from
+     * org.bluez.Device.
+     *
+     * @param deviceObjectPath the object path for the changed device
+     * @param propValues a string array containing the key and one or more
+     *  values.
+     */
     private void onDevicePropertyChanged(String deviceObjectPath, String[] propValues) {
         String name = propValues[0];
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
@@ -399,18 +453,26 @@ class BluetoothEventLoop {
             }
         } else if (name.equals("Trusted")) {
             if (DBG)
-                log("set trust state succeded, value is  " + propValues[1]);
+                log("set trust state succeeded, value is: " + propValues[1]);
             mBluetoothService.setRemoteDeviceProperty(address, name, propValues[1]);
         }
     }
 
+    /**
+     * Called by native code on a PropertyChanged signal from
+     * org.bluez.Input.
+     *
+     * @param path the object path for the changed input device
+     * @param propValues a string array containing the key and one or more
+     *  values.
+     */
     private void onInputDevicePropertyChanged(String path, String[] propValues) {
         String address = mBluetoothService.getAddressFromObjectPath(path);
         if (address == null) {
-            Log.e(TAG, "onInputDevicePropertyChanged: Address of the remote device in null");
+            Log.e(TAG, "onInputDevicePropertyChanged: Address of the remote device is null");
             return;
         }
-        log(" Input Device : Name of Property is:" + propValues[0]);
+        log("Input Device : Name of Property is: " + propValues[0]);
         boolean state = false;
         if (propValues[1].equals("true")) {
             state = true;
@@ -418,6 +480,14 @@ class BluetoothEventLoop {
         mBluetoothService.handleInputDevicePropertyChange(address, state);
     }
 
+    /**
+     * Called by native code on a PropertyChanged signal from
+     * org.bluez.Network.
+     *
+     * @param deviceObjectPath the object path for the changed PAN device
+     * @param propValues a string array containing the key and one or more
+     *  values.
+     */
     private void onPanDevicePropertyChanged(String deviceObjectPath, String[] propValues) {
         String name = propValues[0];
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
@@ -471,6 +541,13 @@ class BluetoothEventLoop {
         return address;
     }
 
+    /**
+     * Called by native code on a RequestPairingConsent method call to
+     * org.bluez.Agent.
+     *
+     * @param objectPath the path of the device to request pairing consent for
+     * @param nativeData a native pointer to the original D-Bus message
+     */
     private void onRequestPairingConsent(String objectPath, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
@@ -494,11 +571,19 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                         BluetoothDevice.PAIRING_VARIANT_CONSENT);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        // Release wakelock to allow the LCD to go off after the PIN popup notification.
         mWakeLock.release();
         return;
     }
 
+    /**
+     * Called by native code on a RequestConfirmation method call to
+     * org.bluez.Agent.
+     *
+     * @param objectPath the path of the device to confirm the passkey for
+     * @param passkey an integer containing the 6-digit passkey to confirm
+     * @param nativeData a native pointer to the original D-Bus message
+     */
     private void onRequestPasskeyConfirmation(String objectPath, int passkey, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
@@ -510,11 +595,18 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                 BluetoothDevice.PAIRING_VARIANT_PASSKEY_CONFIRMATION);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        // Release wakelock to allow the LCD to go off after the PIN popup notification.
         mWakeLock.release();
         return;
     }
 
+    /**
+     * Called by native code on a RequestPasskey method call to
+     * org.bluez.Agent.
+     *
+     * @param objectPath the path of the device requesting a passkey
+     * @param nativeData a native pointer to the original D-Bus message
+     */
     private void onRequestPasskey(String objectPath, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
@@ -525,11 +617,18 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                 BluetoothDevice.PAIRING_VARIANT_PASSKEY);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        // Release wakelock to allow the LCD to go off after the PIN popup notification.
         mWakeLock.release();
         return;
     }
 
+    /**
+     * Called by native code on a RequestPinCode method call to
+     * org.bluez.Agent.
+     *
+     * @param objectPath the path of the device requesting a PIN code
+     * @param nativeData a native pointer to the original D-Bus message
+     */
     private void onRequestPinCode(String objectPath, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
@@ -583,11 +682,19 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mAdapter.getRemoteDevice(address));
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT, BluetoothDevice.PAIRING_VARIANT_PIN);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-        // Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        // Release wakelock to allow the LCD to go off after the PIN popup notification.
         mWakeLock.release();
         return;
     }
 
+    /**
+     * Called by native code on a DisplayPasskey method call to
+     * org.bluez.Agent.
+     *
+     * @param objectPath the path of the device to display the passkey for
+     * @param passkey an integer containing the 6-digit passkey
+     * @param nativeData a native pointer to the original D-Bus message
+     */
     private void onDisplayPasskey(String objectPath, int passkey, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
@@ -600,7 +707,7 @@ class BluetoothEventLoop {
         intent.putExtra(BluetoothDevice.EXTRA_PAIRING_VARIANT,
                         BluetoothDevice.PAIRING_VARIANT_DISPLAY_PASSKEY);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
-        //Release wakelock to allow the LCD to go off after the PIN popup notifcation.
+        //Release wakelock to allow the LCD to go off after the PIN popup notification.
         mWakeLock.release();
     }
 
@@ -617,7 +724,14 @@ class BluetoothEventLoop {
         mWakeLock.release();
     }
 
-    private void onRequestOobData(String objectPath , int nativeData) {
+    /**
+     * Called by native code on a RequestOobData method call to
+     * org.bluez.Agent.
+     *
+     * @param objectPath the path of the device requesting OOB data
+     * @param nativeData a native pointer to the original D-Bus message
+     */
+    private void onRequestOobData(String objectPath, int nativeData) {
         String address = checkPairingRequestAndGetAddress(objectPath, nativeData);
         if (address == null) return;
 
@@ -628,6 +742,13 @@ class BluetoothEventLoop {
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
     }
 
+    /**
+     * Called by native code on an Authorize method call to org.bluez.Agent.
+     *
+     * @param objectPath the path of the device requesting to be authorized
+     * @param deviceUuid the UUID of the requesting device
+     * @return true if the authorization is allowed; false if not allowed
+     */
     private boolean onAgentAuthorize(String objectPath, String deviceUuid) {
         if (!mBluetoothService.isEnabled()) return false;
 
@@ -704,6 +825,9 @@ class BluetoothEventLoop {
         return false;
     }
 
+    /**
+     * Called by native code on a Cancel method call to org.bluez.Agent.
+     */
     private void onAgentCancel() {
         Intent intent = new Intent(BluetoothDevice.ACTION_PAIRING_CANCEL);
         mContext.sendBroadcast(intent, BLUETOOTH_ADMIN_PERM);
@@ -714,6 +838,13 @@ class BluetoothEventLoop {
         return;
     }
 
+    /**
+     * Called by native code for the async response to a DiscoverServices
+     * method call to org.bluez.Adapter.
+     *
+     * @param deviceObjectPath the path for the specified device
+     * @param result true for success; false on error
+     */
     private void onDiscoverServicesResult(String deviceObjectPath, boolean result) {
         String address = mBluetoothService.getAddressFromObjectPath(deviceObjectPath);
         if (address == null) return;
@@ -726,6 +857,14 @@ class BluetoothEventLoop {
         mBluetoothService.makeServiceChannelCallbacks(address);
     }
 
+    /**
+     * Called by native code for the async response to a CreateDevice
+     * method call to org.bluez.Adapter.
+     *
+     * @param address the MAC address of the device to create
+     * @param result {@link #CREATE_DEVICE_SUCCESS},
+     *  {@link #CREATE_DEVICE_ALREADY_EXISTS} or {@link #CREATE_DEVICE_FAILED}}
+     */
     private void onCreateDeviceResult(String address, int result) {
         if (DBG) log("Result of onCreateDeviceResult:" + result);
 
@@ -736,7 +875,7 @@ class BluetoothEventLoop {
                 mBluetoothService.discoverServicesNative(path, "");
                 break;
             }
-            Log.w(TAG, "Device exists, but we dont have the bluez path, failing");
+            Log.w(TAG, "Device exists, but we don't have the bluez path, failing");
             // fall-through
         case CREATE_DEVICE_FAILED:
             mBluetoothService.sendUuidIntent(address);
@@ -747,6 +886,13 @@ class BluetoothEventLoop {
         }
     }
 
+    /**
+     * Called by native code for the async response to a Connect
+     * method call to org.bluez.Input.
+     *
+     * @param path the path of the specified input device
+     * @param result Result code of the operation.
+     */
     private void onInputDeviceConnectionResult(String path, int result) {
         // Success case gets handled by Property Change signal
         if (result != BluetoothInputDevice.INPUT_OPERATION_SUCCESS) {
@@ -776,6 +922,13 @@ class BluetoothEventLoop {
         }
     }
 
+    /**
+     * Called by native code for the async response to a Connect
+     * method call to org.bluez.Network.
+     *
+     * @param path the path of the specified PAN device
+     * @param result Result code of the operation.
+     */
     private void onPanDeviceConnectionResult(String path, int result) {
         log ("onPanDeviceConnectionResult " + path + " " + result);
         // Success case gets handled by Property Change signal
@@ -810,12 +963,26 @@ class BluetoothEventLoop {
         }
     }
 
+    /**
+     * Called by native code on a DeviceDisconnected signal from
+     * org.bluez.NetworkServer.
+     *
+     * @param address the MAC address of the disconnected device
+     */
     private void onNetworkDeviceDisconnected(String address) {
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         mBluetoothService.handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED,
                                                       BluetoothPan.LOCAL_NAP_ROLE);
     }
 
+    /**
+     * Called by native code on a DeviceConnected signal from
+     * org.bluez.NetworkServer.
+     *
+     * @param address the MAC address of the connected device
+     * @param iface interface of remote network
+     * @param destUuid unused UUID parameter
+     */
     private void onNetworkDeviceConnected(String address, String iface, int destUuid) {
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         mBluetoothService.handlePanDeviceStateChange(device, iface, BluetoothPan.STATE_CONNECTED,
