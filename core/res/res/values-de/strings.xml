@@ -484,8 +484,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Telefon ohne Warnung löschen"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Den globalen Proxy des Geräts festlegen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den globalen Proxy des Geräts zur Verwendung während der Aktivierung der Richtlinie festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
-    <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf des Passworts festlegen"</string>
-    <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Zeitraum bis zur Änderung des Passworts für die Bildschirmsperre festlegen"</string>
+    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf des Passworts festlegen"</string>
+    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Zeitraum bis zur Änderung des Passworts für die Bildschirmsperre festlegen"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Speicherverschlüsselung"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Anforderung, dass gespeicherte Anwendungsdaten verschlüsselt werden"</string>
   <string-array name="phoneTypes">
@@ -659,7 +659,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"Werkstest fehlgeschlagen"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Die Aktion FACTORY_TEST wird nur für unter \"/system/app\" gespeicherte Pakete unterstützt."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Es wurden kein Paket mit der Aktion FACTORY_TEST gefunden."</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"Neu booten"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Neustart"</string>
     <string name="js_dialog_title" msgid="8143918455087008109">"Die Seite auf \'<xliff:g id="TITLE">%s</xliff:g>\' sagt:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"Von dieser Seite navigieren?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Wählen Sie \"OK\", um fortzufahren, oder wählen Sie \"Abbrechen\", um auf der aktuellen Seite zu bleiben."</string>
@@ -683,7 +683,7 @@
     <string name="save_password_message" msgid="767344687139195790">"Möchten Sie, dass der Browser dieses Passwort speichert?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nicht jetzt"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Speichern"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"Niemals"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"Nie"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"Sie sind zum Öffnen dieser Seite nicht berechtigt."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text in Zwischenablage kopiert."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mehr"</string>

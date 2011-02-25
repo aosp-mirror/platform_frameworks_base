@@ -484,8 +484,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Tilbakestill telefonens data uten advarsel ved å utføre tilbakestilling til fabrikkstandard"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Angi enhetens globale mellomtjener"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angir den globale mellomtjeneren på enheten som skal brukes når regelen er aktivert. Kun den opprinnelige administratoren av enheten kan angi den globale mellomtjeneren."</string>
-    <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Angi utløpsdato for passordet"</string>
-    <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Velg hvor lenge det skal gå før passordet til låseskjermen må byttes"</string>
+    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Angi utløpsdato for passordet"</string>
+    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Velg hvor lenge det skal gå før passordet til låseskjermen må byttes"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Angi lagringskryptering"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Krever at lagrede programdata krypteres"</string>
   <string-array name="phoneTypes">
