@@ -597,7 +597,7 @@ public class VideoEditorStressTest
             if (i % 4 == 0) {
                 final Bitmap[] thumbNails =
                     mediaVideoItem.getThumbnailList(mediaVideoItem.getWidth()*3,
-                        mediaVideoItem.getHeight()*2, i, 5000, 2);
+                        mediaVideoItem.getHeight()/2, i, 5000, 2);
                 // Recycle this Bitmap array
                 for (int i1 = 0; i1 < thumbNails.length; i1++) {
                     thumbNails[i1].recycle();

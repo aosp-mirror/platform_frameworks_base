@@ -217,21 +217,21 @@ public class VideoEditorPerformance extends
             videoItemStartTime, videoItemEndTime);
 
         timeTaken = calculateTimeTaken (startTime, NUM_OF_ITERATIONS);
-        loggingInfo[0] = "Time taken to Create Media Video Item\t" +
+        loggingInfo[0] = "Time taken to Create Media Video Item :" +
             timeTaken;
 
         /** Time Take for Addition of Media Video Item */
         startTime = SystemClock.uptimeMillis();
         addVideoItems(mediaVideoItem);
         timeTaken = calculateTimeTaken (startTime, NUM_OF_ITERATIONS);
-        loggingInfo[1] = "\n\tTime taken to Add  Media Video Item\t"
+        loggingInfo[1] = "\n\tTime taken to Add  Media Video Item :"
             + timeTaken;
 
         /** Time Take for Removal of Media Video Item */
         startTime = SystemClock.uptimeMillis();
         removeVideoItems(mediaVideoItem);
         timeTaken = calculateTimeTaken (startTime, NUM_OF_ITERATIONS);
-        loggingInfo[2] = "\n\tTime taken to remove  Media Video Item\t"
+        loggingInfo[2] = "\n\tTime taken to remove  Media Video Item :"
             + timeTaken;
 
         writeTimingInfo("testPerformanceAddRemoveVideoItem (in mSec)", loggingInfo);
@@ -257,19 +257,19 @@ public class VideoEditorPerformance extends
         createImageItems(mediaImageItem, imageItemFileName, renderingMode,
             imageItemDuration);
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[0] = "Time taken to Create  Media Image Item\t" +
+        loggingInfo[0] = "Time taken to Create  Media Image Item :" +
             timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
         addImageItems(mediaImageItem);
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[1] = "\n\tTime taken to add  Media Image Item\t" +
+        loggingInfo[1] = "\n\tTime taken to add  Media Image Item :" +
             timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
         removeImageItems(mediaImageItem);
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[2] = "\n\tTime taken to remove  Media Image Item\t"
+        loggingInfo[2] = "\n\tTime taken to remove  Media Image Item :"
             + timeTaken;
 
         writeTimingInfo("testPerformanceAddRemoveImageItem (in mSec)",
@@ -333,7 +333,7 @@ public class VideoEditorPerformance extends
                 transitionBehavior);
         }
         timeTaken = calculateTimeTaken(beginTime, (NUM_OF_ITERATIONS * 10));
-        loggingInfo[0] = "Time taken to Create CrossFade Transition\t" +
+        loggingInfo[0] = "Time taken to Create CrossFade Transition :" +
             timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
@@ -341,7 +341,7 @@ public class VideoEditorPerformance extends
             mVideoEditor.addTransition(tranCrossfade[i]);
         }
         timeTaken = calculateTimeTaken(beginTime, (NUM_OF_ITERATIONS * 10));
-        loggingInfo[1] = "\n\tTime taken to add CrossFade Transition\t" +
+        loggingInfo[1] = "\n\tTime taken to add CrossFade Transition :" +
             timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
@@ -350,7 +350,7 @@ public class VideoEditorPerformance extends
                 .removeTransition(tranCrossfade[i].getId()));
         }
         timeTaken = calculateTimeTaken(beginTime, (NUM_OF_ITERATIONS * 10));
-        loggingInfo[2] = "\n\tTime taken to remove CrossFade Transition\t" +
+        loggingInfo[2] = "\n\tTime taken to remove CrossFade Transition :" +
             timeTaken;
 
         writeTimingInfo("testPerformanceAddRemoveTransition (in mSec)", loggingInfo);
@@ -529,8 +529,8 @@ public class VideoEditorPerformance extends
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
 
         timeTaken = calculateTimeTaken(beginTime, 1);
-        loggingInfo[0] = "Time taken to do ONE export of storyboard duration\t"
-            + mVideoEditor.getDuration() + "   is   :\t" + timeTaken;
+        loggingInfo[0] = "Time taken to do ONE export of storyboard duration "
+            + mVideoEditor.getDuration() + " is :" + timeTaken;
 
         writeTimingInfo("testPerformanceExport (in mSec)", loggingInfo);
         mVideoEditorHelper.deleteProject(new File(mVideoEditor.getPath()));
@@ -564,7 +564,7 @@ public class VideoEditorPerformance extends
                 mediaVideoItem.getHeight() / 2, i);
         }
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[0] = "Duration taken to get Video Thumbnails\t" +
+        loggingInfo[0] = "Duration taken to get Video Thumbnails :" +
             timeTaken;
 
         writeTimingInfo("testPerformanceThumbnailVideoItem (in mSec)", loggingInfo);
@@ -611,7 +611,7 @@ public class VideoEditorPerformance extends
             mediaVideoItem.addOverlay(overlayFrame[i]);
         }
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[0] = "Time taken to add & create Overlay\t" + timeTaken;
+        loggingInfo[0] = "Time taken to add & create Overlay :" + timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
         for (int i = 0; i < NUM_OF_ITERATIONS; i++) {
@@ -619,7 +619,7 @@ public class VideoEditorPerformance extends
                 mediaVideoItem.removeOverlay((overlayFrame[i].getId())));
         }
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[1] = "\n\tTime taken to remove  Overlay\t" +
+        loggingInfo[1] = "\n\tTime taken to remove  Overlay :" +
             timeTaken;
 
         writeTimingInfo("testPerformanceOverlayVideoItem (in mSec)", loggingInfo);
@@ -676,7 +676,7 @@ public class VideoEditorPerformance extends
             }
         }
         timeTaken = calculateTimeTaken(beginTime, (NUM_OF_ITERATIONS*10));
-        loggingInfo[0] = "Time taken to get Media Properties\t"
+        loggingInfo[0] = "Time taken to get Media Properties :"
             + timeTaken;
         writeTimingInfo("testPerformanceVideoItemProperties:", loggingInfo);
     }
@@ -727,7 +727,7 @@ public class VideoEditorPerformance extends
         final long durationToAddObjects = averageTime;
         final float timeTaken = (float)durationToAddObjects *
             1.0f/(float)NUM_OF_ITERATIONS;
-        loggingInfo[0] = "Time taken to Generate Preview with transition\t"
+        loggingInfo[0] = "Time taken to Generate Preview with transition :"
             + timeTaken;
         writeTimingInfo("testPerformanceGeneratePreviewWithTransitions:",
             loggingInfo);
@@ -782,7 +782,7 @@ public class VideoEditorPerformance extends
         final long durationToAddObjects = (averageTime);
         final float timeTaken = (float)durationToAddObjects *
             1.0f/(float)NUM_OF_ITERATIONS;
-        loggingInfo[0] = "Time taken to Generate KenBurn Effect \t"
+        loggingInfo[0] = "Time taken to Generate KenBurn Effect :"
             + timeTaken;
         writeTimingInfo("testPerformanceWithKenBurn", loggingInfo);
     }
@@ -850,7 +850,7 @@ public class VideoEditorPerformance extends
         final float timeTaken = (float)durationToAddObjects *
             1.0f/(float)NUM_OF_ITERATIONS;
         loggingInfo[0] =
-            "Time taken to testPerformanceEffectOverlappingTransition\t"
+            "Time taken to testPerformanceEffectOverlappingTransition :"
             + timeTaken;
         writeTimingInfo("testPerformanceEffectOverlappingTransition:",
             loggingInfo);
@@ -920,7 +920,7 @@ public class VideoEditorPerformance extends
         final long durationToAddObjects = (averageTime);
         final float timeTaken = (float)durationToAddObjects *
             1.0f/(float)NUM_OF_ITERATIONS;
-        loggingInfo[0] = "Time taken to TransitionWithEffectOverlapping\t"
+        loggingInfo[0] = "Time taken to TransitionWithEffectOverlapping :"
             + timeTaken;
         writeTimingInfo("testPerformanceTransitionWithEffectOverlapping",
             loggingInfo);
@@ -952,7 +952,7 @@ public class VideoEditorPerformance extends
         }
         final float timeTaken = (float)durationToAddObjects *
             1.0f/(float)NUM_OF_ITERATIONS;
-        loggingInfo[0] = "Time taken for Thumbnail generation \t"
+        loggingInfo[0] = "Time taken for Thumbnail generation :"
             + timeTaken;
         writeTimingInfo("testThumbnailH264NonIFrame", loggingInfo);
     }
@@ -984,7 +984,7 @@ public class VideoEditorPerformance extends
         }
         final float timeTaken = (float)durationToAddObjects *
             1.0f/(float)NUM_OF_ITERATIONS;
-        loggingInfo[0] = "Time taken Thumbnail generation \t"
+        loggingInfo[0] = "Time taken Thumbnail generation :"
             + timeTaken;
         writeTimingInfo("testThumbnailH264AnIFrame", loggingInfo);
     }
@@ -1024,7 +1024,7 @@ public class VideoEditorPerformance extends
             }
         });
         timeTaken = calculateTimeTaken(beginTime, 1);
-        loggingInfo[0] = "Time taken for 1st Audio Track (AACLC)\t"
+        loggingInfo[0] = "Time taken for 1st Audio Track (AACLC) :"
             + timeTaken;
 
         final AudioTrack audioTrack2 = new AudioTrack(mVideoEditor,
@@ -1037,7 +1037,7 @@ public class VideoEditorPerformance extends
             }
         });
         timeTaken = calculateTimeTaken(beginTime, 1);
-        loggingInfo[1] = "\n\tTime taken for 2nd Audio Track(AMRNB)\t"
+        loggingInfo[1] = "\n\tTime taken for 2nd Audio Track(AMRNB) :"
             + timeTaken;
 
         writeTimingInfo("testPerformanceWithAudioTrack", loggingInfo);
@@ -1065,19 +1065,19 @@ public class VideoEditorPerformance extends
         createImageItems(mediaImageItem, imageItemFileName, renderingMode,
             imageItemDuration);
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[0] = "Time taken to Create  Media Image Item (640x480)\t"
+        loggingInfo[0] = "Time taken to Create  Media Image Item (640x480) :"
             + timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
         addImageItems(mediaImageItem);
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[1] = "\n\tTime taken to add  Media Image Item (640x480)\t"
+        loggingInfo[1] = "\n\tTime taken to add  Media Image Item (640x480) :"
             + timeTaken;
 
         beginTime = SystemClock.uptimeMillis();
         removeImageItems(mediaImageItem);
         timeTaken = calculateTimeTaken(beginTime, NUM_OF_ITERATIONS);
-        loggingInfo[2] = "\n\tTime taken to remove  Media Image Item (640x480)\t"
+        loggingInfo[2] = "\n\tTime taken to remove  Media Image Item (640x480) :"
             + timeTaken;
         writeTimingInfo("testPerformanceAddRemoveImageItem640x480 (in mSec)", loggingInfo);
     }
