@@ -33,8 +33,9 @@ public class ClassHasNativeVisitorTest {
     @Test
     public void testHasNative() throws IOException {
         MockClassHasNativeVisitor cv = new MockClassHasNativeVisitor();
-        ClassReader cr = new ClassReader(
-                "com.android.tools.layoutlib.create.ClassHasNativeVisitorTest$ClassWithNative");
+        String className =
+                this.getClass().getCanonicalName() + "$" + ClassWithNative.class.getSimpleName();
+        ClassReader cr = new ClassReader(className);
 
         cr.accept(cv, 0 /* flags */);
         assertArrayEquals(new String[] { "native_method" }, cv.getMethodsFound());
@@ -44,13 +45,16 @@ public class ClassHasNativeVisitorTest {
     @Test
     public void testHasNoNative() throws IOException {
         MockClassHasNativeVisitor cv = new MockClassHasNativeVisitor();
-        ClassReader cr = new ClassReader(
-                "com.android.tools.layoutlib.create.ClassHasNativeVisitorTest$ClassWithoutNative");
+        String className =
+            this.getClass().getCanonicalName() + "$" + ClassWithoutNative.class.getSimpleName();
+        ClassReader cr = new ClassReader(className);
 
         cr.accept(cv, 0 /* flags */);
         assertArrayEquals(new String[0], cv.getMethodsFound());
         assertFalse(cv.hasNativeMethods());
     }
+
+    //-------
 
     /**
      * Overrides {@link ClassHasNativeVisitor} to collec the name of the native methods found.
