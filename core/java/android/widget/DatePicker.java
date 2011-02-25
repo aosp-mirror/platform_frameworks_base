@@ -366,9 +366,20 @@ public class DatePicker extends FrameLayout {
      * Gets whether the {@link CalendarView} is shown.
      *
      * @return True if the calendar view is shown.
+     * @see #getCalendarView()
      */
     public boolean getCalendarViewShown() {
         return mCalendarView.isShown();
+    }
+
+    /**
+     * Gets the {@link CalendarView}.
+     *
+     * @return The calendar view.
+     * @see #getCalendarViewShown()
+     */
+    public CalendarView getCalendarView () {
+        return mCalendarView;
     }
 
     /**
