@@ -530,7 +530,7 @@ void NuHTTPDataSource::addBandwidthMeasurement_l(
     }
 }
 
-DecryptHandle* NuHTTPDataSource::DrmInitialization() {
+sp<DecryptHandle> NuHTTPDataSource::DrmInitialization() {
     if (mDrmManagerClient == NULL) {
         mDrmManagerClient = new DrmManagerClient();
     }
@@ -554,8 +554,8 @@ DecryptHandle* NuHTTPDataSource::DrmInitialization() {
     return mDecryptHandle;
 }
 
-void NuHTTPDataSource::getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {
-    *handle = mDecryptHandle;
+void NuHTTPDataSource::getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client) {
+    handle = mDecryptHandle;
 
     *client = mDrmManagerClient;
 }

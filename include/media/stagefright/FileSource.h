@@ -38,9 +38,9 @@ public:
 
     virtual status_t getSize(off64_t *size);
 
-    virtual DecryptHandle* DrmInitialization();
+    virtual sp<DecryptHandle> DrmInitialization();
 
-    virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
+    virtual void getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client);
 
 protected:
     virtual ~FileSource();
@@ -52,7 +52,7 @@ private:
     Mutex mLock;
 
     /*for DRM*/
-    DecryptHandle *mDecryptHandle;
+    sp<DecryptHandle> mDecryptHandle;
     DrmManagerClient *mDrmManagerClient;
     int64_t mDrmBufOffset;
     int64_t mDrmBufSize;

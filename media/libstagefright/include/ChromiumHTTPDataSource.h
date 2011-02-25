@@ -45,9 +45,9 @@ struct ChromiumHTTPDataSource : public HTTPBase {
 
     virtual bool estimateBandwidth(int32_t *bandwidth_bps);
 
-    virtual DecryptHandle *DrmInitialization();
+    virtual sp<DecryptHandle> DrmInitialization();
 
-    virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
+    virtual void getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client);
 
     virtual String8 getUri();
 
@@ -95,7 +95,7 @@ private:
     int64_t mTotalTransferTimeUs;
     size_t mTotalTransferBytes;
 
-    DecryptHandle *mDecryptHandle;
+    sp<DecryptHandle> mDecryptHandle;
     DrmManagerClient *mDrmManagerClient;
 
     void disconnect_l();

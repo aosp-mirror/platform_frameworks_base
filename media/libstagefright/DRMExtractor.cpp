@@ -41,7 +41,7 @@ namespace android {
 class DRMSource : public MediaSource {
 public:
     DRMSource(const sp<MediaSource> &mediaSource,
-            DecryptHandle *decryptHandle,
+            const sp<DecryptHandle> &decryptHandle,
             DrmManagerClient *managerClient,
             int32_t trackId, DrmBuffer *ipmpBox);
 
@@ -56,7 +56,7 @@ protected:
 
 private:
     sp<MediaSource> mOriginalMediaSource;
-    DecryptHandle* mDecryptHandle;
+    sp<DecryptHandle> mDecryptHandle;
     DrmManagerClient* mDrmManagerClient;
     size_t mTrackId;
     mutable Mutex mDRMLock;
@@ -70,7 +70,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 DRMSource::DRMSource(const sp<MediaSource> &mediaSource,
-        DecryptHandle *decryptHandle,
+        const sp<DecryptHandle> &decryptHandle,
         DrmManagerClient *managerClient,
         int32_t trackId, DrmBuffer *ipmpBox)
     : mOriginalMediaSource(mediaSource),
@@ -245,7 +245,7 @@ DRMExtractor::DRMExtractor(const sp<DataSource> &source, const char* mime)
     mOriginalExtractor->setDrmFlag(true);
     mOriginalExtractor->getMetaData()->setInt32(kKeyIsDRM, 1);
 
-    source->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
+    source->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
 }
 
 DRMExtractor::~DRMExtractor() {
@@ -281,7 +281,7 @@ sp<MetaData> DRMExtractor::getMetaData() {
 bool SniffDRM(
     const sp<DataSource> &source, String8 *mimeType, float *confidence,
         sp<AMessage> *) {
-    DecryptHandle *decryptHandle = source->DrmInitialization();
+    sp<DecryptHandle> decryptHandle = source->DrmInitialization();
 
     if (decryptHandle != NULL) {
         if (decryptHandle->decryptApiType == DecryptApiType::CONTAINER_BASED) {

@@ -45,7 +45,7 @@ private:
     sp<DataSource> mDataSource;
 
     sp<MediaExtractor> mOriginalExtractor;
-    DecryptHandle* mDecryptHandle;
+    sp<DecryptHandle> mDecryptHandle;
     DrmManagerClient* mDrmManagerClient;
 
     DRMExtractor(const DRMExtractor &);

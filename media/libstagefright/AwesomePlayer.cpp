@@ -303,7 +303,7 @@ status_t AwesomePlayer::setDataSource_l(
         return UNKNOWN_ERROR;
     }
 
-    dataSource->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
+    dataSource->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
     if (mDecryptHandle != NULL) {
         CHECK(mDrmManagerClient);
         if (RightsStatus::RIGHTS_VALID != mDecryptHandle->status) {
@@ -1689,7 +1689,8 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         return UNKNOWN_ERROR;
     }
 
-    dataSource->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
+    dataSource->getDrmInfo(mDecryptHandle, &mDrmManagerClient);
+
     if (mDecryptHandle != NULL) {
         CHECK(mDrmManagerClient);
         if (RightsStatus::RIGHTS_VALID == mDecryptHandle->status) {

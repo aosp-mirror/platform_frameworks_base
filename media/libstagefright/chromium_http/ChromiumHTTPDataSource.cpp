@@ -273,7 +273,7 @@ bool ChromiumHTTPDataSource::estimateBandwidth(int32_t *bandwidth_bps) {
     return true;
 }
 
-DecryptHandle *ChromiumHTTPDataSource::DrmInitialization() {
+sp<DecryptHandle> ChromiumHTTPDataSource::DrmInitialization() {
     Mutex::Autolock autoLock(mLock);
 
     if (mDrmManagerClient == NULL) {
@@ -301,10 +301,10 @@ DecryptHandle *ChromiumHTTPDataSource::DrmInitialization() {
 }
 
 void ChromiumHTTPDataSource::getDrmInfo(
-        DecryptHandle **handle, DrmManagerClient **client) {
+        sp<DecryptHandle> &handle, DrmManagerClient **client) {
     Mutex::Autolock autoLock(mLock);
 
-    *handle = mDecryptHandle;
+    handle = mDecryptHandle;
     *client = mDrmManagerClient;
 }
 
