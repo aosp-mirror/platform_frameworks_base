@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import android.view.ViewDebug;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -33,6 +32,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.AnimationUtils;
@@ -69,13 +69,6 @@ public class ScrollView extends FrameLayout {
     private OverScroller mScroller;
     private EdgeGlow mEdgeGlowTop;
     private EdgeGlow mEdgeGlowBottom;
-
-    /**
-     * Flag to indicate that we are moving focus ourselves. This is so the
-     * code that watches for focus changes initiated outside this ScrollView
-     * knows that it does not have to do anything.
-     */
-    private boolean mScrollViewMovedFocus;
 
     /**
      * Position of the last motion event.
@@ -671,15 +664,13 @@ public class ScrollView extends FrameLayout {
      * the parameter top.
      * </p>
      *
-     * @param topFocus           look for a candidate is the one at the top of the bounds
-     *                           if topFocus is true, or at the bottom of the bounds if topFocus is
-     *                           false
+     * @param topFocus           look for a candidate at the top of the bounds if topFocus is true,
+     *                           or at the bottom of the bounds if topFocus is false
      * @param top                the top offset of the bounds in which a focusable must be
      *                           found (the fading edge is assumed to start at this position)
      * @param preferredFocusable the View that has highest priority and will be
      *                           returned if it is within my bounds (null is valid)
-     * @return the next focusable component in the bounds or null if none can be
-     *         found
+     * @return the next focusable component in the bounds or null if none can be found
      */
     private View findFocusableViewInMyBounds(final boolean topFocus,
             final int top, View preferredFocusable) {
@@ -856,11 +847,10 @@ public class ScrollView extends FrameLayout {
      * <p>Scrolls the view to make the area defined by <code>top</code> and
      * <code>bottom</code> visible. This method attempts to give the focus
      * to a component visible in this area. If no component can be focused in
-     * the new visible area, the focus is reclaimed by this scrollview.</p>
+     * the new visible area, the focus is reclaimed by this ScrollView.</p>
      *
      * @param direction the scroll direction: {@link android.view.View#FOCUS_UP}
-     *                  to go upward
-     *                  {@link android.view.View#FOCUS_DOWN} to downward
+     *                  to go upward, {@link android.view.View#FOCUS_DOWN} to downward
      * @param top       the top offset of the new area to be made visible
      * @param bottom    the bottom offset of the new area to be made visible
      * @return true if the key event is consumed by this method, false otherwise
@@ -885,10 +875,7 @@ public class ScrollView extends FrameLayout {
             doScrollY(delta);
         }
 
-        if (newFocused != findFocus() && newFocused.requestFocus(direction)) {
-            mScrollViewMovedFocus = true;
-            mScrollViewMovedFocus = false;
-        }
+        if (newFocused != findFocus()) newFocused.requestFocus(direction);
 
         return handled;
     }
@@ -1249,13 +1236,11 @@ public class ScrollView extends FrameLayout {
 
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (!mScrollViewMovedFocus) {
-            if (!mIsLayoutDirty) {
-                scrollToChild(focused);
-            } else {
-                // The child may not be laid out yet, we can't compute the scroll yet
-                mChildToScrollTo = focused;
-            }
+        if (!mIsLayoutDirty) {
+            scrollToChild(focused);
+        } else {
+            // The child may not be laid out yet, we can't compute the scroll yet
+            mChildToScrollTo = focused;
         }
         super.requestChildFocus(child, focused);
     }
@@ -1388,16 +1373,15 @@ public class ScrollView extends FrameLayout {
 
             final boolean movingDown = velocityY > 0;
 
+            View currentFocused = findFocus();
             View newFocused =
-                    findFocusableViewInMyBounds(movingDown, mScroller.getFinalY(), findFocus());
+                    findFocusableViewInMyBounds(movingDown, mScroller.getFinalY(), currentFocused);
             if (newFocused == null) {
                 newFocused = this;
             }
 
-            if (newFocused != findFocus()
-                    && newFocused.requestFocus(movingDown ? View.FOCUS_DOWN : View.FOCUS_UP)) {
-                mScrollViewMovedFocus = true;
-                mScrollViewMovedFocus = false;
+            if (newFocused != currentFocused) {
+                    newFocused.requestFocus(movingDown ? View.FOCUS_DOWN : View.FOCUS_UP);
             }
 
             if (mFlingStrictSpan == null) {

@@ -58,6 +58,7 @@ import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -1771,12 +1772,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public static final int STATUS_BAR_DISABLE_CLOCK = 0x00800000;
 
-
     /**
      * @hide
      */
     public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = STATUS_BAR_HIDDEN;
-    
 
     /**
      * Controls the over-scroll mode for this view.
@@ -3185,8 +3184,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * gives it focus no matter what.  It should only be called internally by framework
      * code that knows what it is doing, namely {@link #requestFocus(int, Rect)}.
      *
-     * @param direction values are View.FOCUS_UP, View.FOCUS_DOWN,
-     *        View.FOCUS_LEFT or View.FOCUS_RIGHT. This is the direction which
+     * @param direction values are {@link View#FOCUS_UP}, {@link View#FOCUS_DOWN},
+     *        {@link View#FOCUS_LEFT} or {@link View#FOCUS_RIGHT}. This is the direction which
      *        focus moved when requestFocus() is called. It may not always
      *        apply, in which case use the default View.FOCUS_DOWN.
      * @param previouslyFocusedRect The rectangle of the view that had focus
@@ -4337,9 +4336,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Call this to try to give focus to a specific view or to one of its
      * descendants.
      *
-     * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns false),
-     * or if it is focusable and it is not focusable in touch mode ({@link #isFocusableInTouchMode})
-     * while the device is in touch mode.
+     * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns
+     * false), or if it is focusable and it is not focusable in touch mode
+     * ({@link #isFocusableInTouchMode}) while the device is in touch mode.
      *
      * See also {@link #focusSearch}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
@@ -4358,9 +4357,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Call this to try to give focus to a specific view or to one of its
      * descendants and give it a hint about what direction focus is heading.
      *
-     * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns false),
-     * or if it is focusable and it is not focusable in touch mode ({@link #isFocusableInTouchMode})
-     * while the device is in touch mode.
+     * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns
+     * false), or if it is focusable and it is not focusable in touch mode
+     * ({@link #isFocusableInTouchMode}) while the device is in touch mode.
      *
      * See also {@link #focusSearch}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
@@ -4382,14 +4381,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * about where focus is coming from, and therefore, where to show selection, or
      * forward focus change internally.
      *
-     * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns false),
-     * or if it is focusable and it is not focusable in touch mode ({@link #isFocusableInTouchMode})
-     * while the device is in touch mode.
+     * A view will not actually take focus if it is not focusable ({@link #isFocusable} returns
+     * false), or if it is focusable and it is not focusable in touch mode
+     * ({@link #isFocusableInTouchMode}) while the device is in touch mode.
      *
      * A View will not take focus if it is not visible.
      *
-     * A View will not take focus if one of its parents has {@link android.view.ViewGroup#getDescendantFocusability()}
-     * equal to {@link ViewGroup#FOCUS_BLOCK_DESCENDANTS}.
+     * A View will not take focus if one of its parents has
+     * {@link android.view.ViewGroup#getDescendantFocusability()} equal to
+     * {@link ViewGroup#FOCUS_BLOCK_DESCENDANTS}.
      *
      * See also {@link #focusSearch}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
@@ -6559,7 +6559,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mTranslationY = y - mTop;
         mMatrixDirty = true;
     }
-    
+
     /**
      * @hide
      */
@@ -6582,7 +6582,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void setFastAlpha(float alpha) {
         mAlpha = alpha;
     }
-    
+
     /**
      * @hide
      */
@@ -6590,7 +6590,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         mRotationY = y;
         mMatrixDirty = true;
     }
-    
+
     /**
      * Hit rectangle in parent's coordinates
      *
@@ -8768,7 +8768,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void buildDrawingCache() {
         buildDrawingCache(false);
     }
-    
+
     /**
      * <p>Forces the drawing cache to be built if the drawing cache is invalid.</p>
      *
