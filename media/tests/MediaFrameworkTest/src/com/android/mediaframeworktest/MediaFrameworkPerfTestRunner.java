@@ -21,9 +21,10 @@ import com.android.mediaframeworktest.performance.MediaPlayerPerformance;
 import com.android.mediaframeworktest.performance.VideoEditorPerformance;
 import junit.framework.TestSuite;
 
+import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-
+import android.util.Log;
 
 /**
  * Instrumentation Test Runner for all MediaPlayer tests.
@@ -36,19 +37,30 @@ import android.test.InstrumentationTestSuite;
 
 public class MediaFrameworkPerfTestRunner extends InstrumentationTestRunner {
 
+    public static boolean mGetNativeHeapDump = false;
 
-  @Override
-  public TestSuite getAllTests() {
-      TestSuite suite = new InstrumentationTestSuite(this);
-      suite.addTestSuite(MediaPlayerPerformance.class);
-      /*Video Editor performance Test cases*/
-      suite.addTestSuite(VideoEditorPerformance.class);
-      return suite;
-  }
 
-  @Override
-  public ClassLoader getLoader() {
-      return MediaFrameworkTestRunner.class.getClassLoader();
-  }
+    @Override
+    public TestSuite getAllTests() {
+        TestSuite suite = new InstrumentationTestSuite(this);
+        suite.addTestSuite(MediaPlayerPerformance.class);
+        /* Video Editor performance Test cases */
+        suite.addTestSuite(VideoEditorPerformance.class);
+        return suite;
+    }
+
+    @Override
+    public ClassLoader getLoader() {
+        return MediaFrameworkTestRunner.class.getClassLoader();
+    }
+
+    @Override
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        String get_heap_dump = (String) icicle.get("get_heap_dump");
+        if (get_heap_dump != null) {
+            mGetNativeHeapDump = true;
+        }
+    }
 }
 
