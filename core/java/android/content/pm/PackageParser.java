@@ -2817,6 +2817,9 @@ public class PackageParser {
         // User set enabled state.
         public int mSetEnabled = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 
+        // Whether the package has been stopped.
+        public boolean mSetStopped = false;
+
         // Additional data supplied by callers.
         public Object mExtras;
 
@@ -3071,6 +3074,11 @@ public class PackageParser {
             if (!sCompatibilityModeEnabled) {
                 p.applicationInfo.disableCompatibilityMode();
             }
+            if (p.mSetStopped) {
+                p.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
+            } else {
+                p.applicationInfo.flags &= ~ApplicationInfo.FLAG_STOPPED;
+            }
             return p.applicationInfo;
         }
 
@@ -3084,6 +3092,11 @@ public class PackageParser {
         }
         if (!sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
+        }
+        if (p.mSetStopped) {
+            p.applicationInfo.flags |= ApplicationInfo.FLAG_STOPPED;
+        } else {
+            p.applicationInfo.flags &= ~ApplicationInfo.FLAG_STOPPED;
         }
         if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;

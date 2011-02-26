@@ -3145,6 +3145,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 forceStopPackageLocked(packageName, pkgUid);
+                try {
+                    pm.setPackageStoppedState(packageName, true);
+                } catch (RemoteException e) {
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -5544,20 +5548,31 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // started.
                 if (i >= N) {
                     final long origId = Binder.clearCallingIdentity();
-                    ProcessRecord proc = startProcessLocked(cpi.processName,
-                            cpr.appInfo, false, 0, "content provider",
-                            new ComponentName(cpi.applicationInfo.packageName,
-                                    cpi.name), false);
-                    if (proc == null) {
-                        Slog.w(TAG, "Unable to launch app "
-                                + cpi.applicationInfo.packageName + "/"
-                                + cpi.applicationInfo.uid + " for provider "
-                                + name + ": process is bad");
-                        return null;
+
+                    try {
+                        // Content provider is now in use, its package can't be stopped.
+                        try {
+                            AppGlobals.getPackageManager().setPackageStoppedState(
+                                    cpr.appInfo.packageName, false);
+                        } catch (RemoteException e) {
+                        }
+
+                        ProcessRecord proc = startProcessLocked(cpi.processName,
+                                cpr.appInfo, false, 0, "content provider",
+                                new ComponentName(cpi.applicationInfo.packageName,
+                                        cpi.name), false);
+                        if (proc == null) {
+                            Slog.w(TAG, "Unable to launch app "
+                                    + cpi.applicationInfo.packageName + "/"
+                                    + cpi.applicationInfo.uid + " for provider "
+                                    + name + ": process is bad");
+                            return null;
+                        }
+                        cpr.launchingApp = proc;
+                        mLaunchingProviders.add(cpr);
+                    } finally {
+                        Binder.restoreCallingIdentity(origId);
                     }
-                    cpr.launchingApp = proc;
-                    mLaunchingProviders.add(cpr);
-                    Binder.restoreCallingIdentity(origId);
                 }
 
                 // Make sure the provider is published (the same provider class
@@ -5812,6 +5827,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             app = newProcessRecordLocked(null, info, null);
             mProcessNames.put(info.processName, info.uid, app);
             updateLruProcessLocked(app, true, true);
+        }
+
+        // This package really, really can not be stopped.
+        try {
+            AppGlobals.getPackageManager().setPackageStoppedState(
+                    info.packageName, false);
+        } catch (RemoteException e) {
         }
 
         if ((info.flags&(ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT))
@@ -9354,6 +9376,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         // restarting state.
         mRestartingServices.remove(r);
         
+        // Service is now being launched, its package can't be stopped.
+        try {
+            AppGlobals.getPackageManager().setPackageStoppedState(
+                    r.packageName, false);
+        } catch (RemoteException e) {
+        }
+
         final String appName = r.processName;
         ProcessRecord app = getProcessRecordLocked(appName, r.appInfo.uid);
         if (app != null && app.thread != null) {
@@ -10248,6 +10277,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ss = stats.getServiceStatsLocked(app.uid, app.packageName, app.name);
             }
 
+            // Backup agent is now in use, its package can't be stopped.
+            try {
+                AppGlobals.getPackageManager().setPackageStoppedState(
+                        app.packageName, false);
+            } catch (RemoteException e) {
+            }
+
             BackupRecord r = new BackupRecord(ss, app, backupMode);
             ComponentName hostingName = new ComponentName(app.packageName, app.backupAgentName);
             // startProcessLocked() returns existing proc's record if it's already running
@@ -10534,6 +10570,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             Bundle map, String requiredPermission,
             boolean ordered, boolean sticky, int callingPid, int callingUid) {
         intent = new Intent(intent);
+
+        // By default broadcasts do not go to stopped apps.
+        intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
 
         if (DEBUG_BROADCAST_LIGHT) Slog.v(
             TAG, (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
@@ -11565,6 +11604,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     info.activityInfo.applicationInfo.packageName,
                     info.activityInfo.name);
             r.curReceiver = info.activityInfo;
+
+            // Broadcast is being executed, its package can't be stopped.
+            try {
+                AppGlobals.getPackageManager().setPackageStoppedState(
+                        r.curComponent.getPackageName(), false);
+            } catch (RemoteException e) {
+            }
 
             // Is this receiver's application already running?
             ProcessRecord app = getProcessRecordLocked(targetProcess,
