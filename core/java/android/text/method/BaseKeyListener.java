@@ -33,23 +33,6 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         implements KeyListener {
     /* package */ static final Object OLD_SEL_START = new NoCopySpan.Concrete();
 
-    private static final int MODIFIER_NONE = 0;
-    private static final int MODIFIER_ALT = 1;
-    private static final int MODIFIER_INVALID = 2;
-
-    private static int getModifier(Editable content, KeyEvent event) {
-        if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-            return MODIFIER_ALT;
-        }
-        if (!event.hasNoModifiers()) {
-            return MODIFIER_INVALID;
-        }
-        if (getMetaState(content, META_ALT_ON) == 1) {
-            return MODIFIER_ALT;
-        }
-        return MODIFIER_NONE;
-    }
-
     /**
      * Performs the action that happens when you press the {@link KeyEvent#KEYCODE_DEL} key in
      * a {@link TextView}.  If there is a selection, deletes the selection; otherwise,
@@ -59,27 +42,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
      * @return true if anything was deleted; false otherwise.
      */
     public boolean backspace(View view, Editable content, int keyCode, KeyEvent event) {
-        int modifier = getModifier(content, event);
-        if (modifier == MODIFIER_INVALID) {
-            return false;
-        }
-
-        if (deleteSelection(view, content)) {
-            return true;
-        }
-
-        if (modifier == MODIFIER_ALT && deleteLine(view, content)) {
-            return true;
-        }
-
-        final int start = Selection.getSelectionEnd(content);
-        final int end = TextUtils.getOffsetBefore(content, start);
-        if (start != end) {
-            content.delete(Math.min(start, end), Math.max(start, end));
-            return true;
-        }
-
-        return false;
+        return backspaceOrForwardDelete(view, content, keyCode, event, false);
     }
 
     /**
@@ -91,26 +54,42 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
      * @return true if anything was deleted; false otherwise.
      */
     public boolean forwardDelete(View view, Editable content, int keyCode, KeyEvent event) {
-        int modifier = getModifier(content, event);
-        if (modifier == MODIFIER_INVALID) {
+        return backspaceOrForwardDelete(view, content, keyCode, event, true);
+    }
+
+    private boolean backspaceOrForwardDelete(View view, Editable content, int keyCode,
+            KeyEvent event, boolean isForwardDelete) {
+        // Ensure the key event does not have modifiers except ALT or SHIFT.
+        if (!KeyEvent.metaStateHasNoModifiers(event.getMetaState()
+                & ~(KeyEvent.META_SHIFT_MASK | KeyEvent.META_ALT_MASK))) {
             return false;
         }
 
+        // If there is a current selection, delete it.
         if (deleteSelection(view, content)) {
             return true;
         }
 
-        if (modifier == MODIFIER_ALT && deleteLine(view, content)) {
-            return true;
+        // Alt+Backspace or Alt+ForwardDelete deletes the current line, if possible.
+        if (event.isAltPressed() || getMetaState(content, META_ALT_ON) == 1) {
+            if (deleteLine(view, content)) {
+                return true;
+            }
         }
 
+        // Delete a character.
         final int start = Selection.getSelectionEnd(content);
-        final int end = TextUtils.getOffsetAfter(content, start);
+        final int end;
+        if (isForwardDelete || event.isShiftPressed()
+                || getMetaState(content, META_SHIFT_ON) == 1) {
+            end = TextUtils.getOffsetAfter(content, start);
+        } else {
+            end = TextUtils.getOffsetBefore(content, start);
+        }
         if (start != end) {
             content.delete(Math.min(start, end), Math.max(start, end));
             return true;
         }
-
         return false;
     }
 
