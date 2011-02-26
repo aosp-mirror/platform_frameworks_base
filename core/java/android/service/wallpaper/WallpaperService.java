@@ -460,16 +460,17 @@ public abstract class WallpaperService extends Service {
         }
         
         private void dispatchPointer(MotionEvent event) {
-            synchronized (mLock) {
-                if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    mPendingMove = event;
-                } else {
-                    mPendingMove = null;
+            if (event.isTouchEvent()) {
+                synchronized (mLock) {
+                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        mPendingMove = event;
+                    } else {
+                        mPendingMove = null;
+                    }
                 }
+                Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT, event);
+                mCaller.sendMessage(msg);
             }
-
-            Message msg = mCaller.obtainMessageO(MSG_TOUCH_EVENT, event);
-            mCaller.sendMessage(msg);
         }
 
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {

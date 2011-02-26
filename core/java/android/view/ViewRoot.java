@@ -2247,7 +2247,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     private void deliverPointerEvent(MotionEvent event, boolean sendDone) {
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishPointerEvent(event, sendDone, false);
+            finishMotionEvent(event, sendDone, false);
             return;
         }
 
@@ -2270,7 +2270,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             event.offsetLocation(0, mCurScrollY);
         }
         if (MEASURE_LATENCY) {
-            lt.sample("A Dispatching TouchEvents", System.nanoTime() - event.getEventTimeNano());
+            lt.sample("A Dispatching PointerEvents", System.nanoTime() - event.getEventTimeNano());
         }
 
         // Remember the touch position for possible drag-initiation.
@@ -2278,12 +2278,12 @@ public final class ViewRoot extends Handler implements ViewParent,
         mLastTouchPoint.y = event.getRawY();
 
         // Dispatch touch to view hierarchy.
-        boolean handled = mView.dispatchTouchEvent(event);
+        boolean handled = mView.dispatchPointerEvent(event);
         if (MEASURE_LATENCY) {
-            lt.sample("B Dispatched TouchEvents ", System.nanoTime() - event.getEventTimeNano());
+            lt.sample("B Dispatched PointerEvents ", System.nanoTime() - event.getEventTimeNano());
         }
         if (handled) {
-            finishPointerEvent(event, sendDone, true);
+            finishMotionEvent(event, sendDone, true);
             return;
         }
 
@@ -2325,23 +2325,27 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (nearest != null) {
                 event.offsetLocation(deltas[0], deltas[1]);
                 event.setEdgeFlags(0);
-                if (mView.dispatchTouchEvent(event)) {
-                    finishPointerEvent(event, sendDone, true);
+                if (mView.dispatchPointerEvent(event)) {
+                    finishMotionEvent(event, sendDone, true);
                     return;
                 }
             }
         }
 
         // Pointer event was unhandled.
-        finishPointerEvent(event, sendDone, false);
+        finishMotionEvent(event, sendDone, false);
     }
 
-    private void finishPointerEvent(MotionEvent event, boolean sendDone, boolean handled) {
+    private void finishMotionEvent(MotionEvent event, boolean sendDone, boolean handled) {
         event.recycle();
         if (sendDone) {
             finishInputEvent(handled);
         }
-        if (LOCAL_LOGV || WATCH_POINTER) Log.i(TAG, "Done dispatching!");
+        if (LOCAL_LOGV || WATCH_POINTER) {
+            if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                Log.i(TAG, "Done dispatching!");
+            }
+        }
     }
 
     private void deliverTrackballEvent(MotionEvent event, boolean sendDone) {
@@ -2349,7 +2353,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
-            finishTrackballEvent(event, sendDone, false);
+            finishMotionEvent(event, sendDone, false);
             return;
         }
 
@@ -2361,7 +2365,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             // touch mode here.
             ensureTouchMode(false);
 
-            finishTrackballEvent(event, sendDone, true);
+            finishMotionEvent(event, sendDone, true);
             mLastTrackballTime = Integer.MIN_VALUE;
             return;
         }
@@ -2471,14 +2475,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         // Unfortunately we can't tell whether the application consumed the keys, so
         // we always consider the trackball event handled.
-        finishTrackballEvent(event, sendDone, true);
-    }
-
-    private void finishTrackballEvent(MotionEvent event, boolean sendDone, boolean handled) {
-        event.recycle();
-        if (sendDone) {
-            finishInputEvent(handled);
-        }
+        finishMotionEvent(event, sendDone, true);
     }
 
     private void deliverGenericMotionEvent(MotionEvent event, boolean sendDone) {
@@ -2490,7 +2487,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (isJoystick) {
                 updateJoystickDirection(event, false);
             }
-            finishGenericMotionEvent(event, sendDone, false);
+            finishMotionEvent(event, sendDone, false);
             return;
         }
 
@@ -2499,23 +2496,16 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (isJoystick) {
                 updateJoystickDirection(event, false);
             }
-            finishGenericMotionEvent(event, sendDone, true);
+            finishMotionEvent(event, sendDone, true);
             return;
         }
 
         if (isJoystick) {
             // Translate the joystick event into DPAD keys and try to deliver those.
             updateJoystickDirection(event, true);
-            finishGenericMotionEvent(event, sendDone, true);
+            finishMotionEvent(event, sendDone, true);
         } else {
-            finishGenericMotionEvent(event, sendDone, false);
-        }
-    }
-
-    private void finishGenericMotionEvent(MotionEvent event, boolean sendDone, boolean handled) {
-        event.recycle();
-        if (sendDone) {
-            finishInputEvent(handled);
+            finishMotionEvent(event, sendDone, false);
         }
     }
 

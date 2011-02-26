@@ -57,6 +57,7 @@ import android.util.Poolable;
 import android.util.PoolableManager;
 import android.util.Pools;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
@@ -2128,6 +2129,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     private OnTouchListener mOnTouchListener;
 
+    private OnGenericMotionListener mOnGenericMotionListener;
+
     private OnDragListener mOnDragListener;
 
     private OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener;
@@ -2255,6 +2258,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @hide
      */
     public static final int DRAG_FLAG_GLOBAL = 1;
+
+    /**
+     * Vertical scroll factor cached by {@link #getVerticalScrollFactor}.
+     */
+    private float mVerticalScrollFactor;
 
     /**
      * Position of the vertical scroll bar.
@@ -3164,6 +3172,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public void setOnTouchListener(OnTouchListener l) {
         mOnTouchListener = l;
+    }
+
+    /**
+     * Register a callback to be invoked when a generic motion event is sent to this view.
+     * @param l the generic motion listener to attach to this view
+     */
+    public void setOnGenericMotionListener(OnGenericMotionListener l) {
+        mOnGenericMotionListener = l;
     }
 
     /**
@@ -4624,13 +4640,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Pass a generic motion event down to the focused view.
+     * Dispatch a generic motion event.
+     * <p>
+     * Generic motion events with source class {@link InputDevice#SOURCE_CLASS_POINTER}
+     * are delivered to the view under the pointer.  All other generic motion events are
+     * delivered to the focused view.
+     * </p>
      *
      * @param event The motion event to be dispatched.
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (mOnGenericMotionListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
+                && mOnGenericMotionListener.onGenericMotion(this, event)) {
+            return true;
+        }
+
         return onGenericMotionEvent(event);
+    }
+
+    /**
+     * Dispatch a pointer event.
+     * <p>
+     * Dispatches touch related pointer events to {@link #onTouchEvent} and all
+     * other events to {@link #onGenericMotionEvent}.  This separation of concerns
+     * reinforces the invariant that {@link #onTouchEvent} is really about touches
+     * and should not be expected to handle other pointing device features.
+     * </p>
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     * @hide
+     */
+    public final boolean dispatchPointerEvent(MotionEvent event) {
+        if (event.isTouchEvent()) {
+            return dispatchTouchEvent(event);
+        } else {
+            return dispatchGenericMotionEvent(event);
+        }
     }
 
     /**
@@ -5142,20 +5189,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Implement this method to handle generic motion events.
      * <p>
-     * Generic motion events are dispatched to the focused view to describe
-     * the motions of input devices such as joysticks.  The
+     * Generic motion events describe joystick movements, mouse hovers, track pad
+     * touches, scroll wheel movements and other input events.  The
      * {@link MotionEvent#getSource() source} of the motion event specifies
      * the class of input that was received.  Implementations of this method
      * must examine the bits in the source before processing the event.
      * The following code example shows how this is done.
+     * </p><p>
+     * Generic motion events with source class {@link InputDevice#SOURCE_CLASS_POINTER}
+     * are delivered to the view under the pointer.  All other generic motion events are
+     * delivered to the focused view.
      * </p>
      * <code>
      * public boolean onGenericMotionEvent(MotionEvent event) {
      *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-     *         float x = event.getX();
-     *         float y = event.getY();
-     *         // process the joystick motion
-     *         return true;
+     *         if (event.getAction() == MotionEvent.ACTION_MOVE) {
+     *             // process the joystick movement...
+     *             return true;
+     *         }
+     *     }
+     *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_POINTER) != 0) {
+     *         switch (event.getAction()) {
+     *             case MotionEvent.ACTION_HOVER_MOVE:
+     *                 // process the mouse hover movement...
+     *                 return true;
+     *             case MotionEvent.ACTION_SCROLL:
+     *                 // process the scroll wheel movement...
+     *                 return true;
+     *         }
      *     }
      *     return super.onGenericMotionEvent(event);
      * }
@@ -11653,6 +11714,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Gets a scale factor that determines the distance the view should scroll
+     * vertically in response to {@link MotionEvent#ACTION_SCROLL}.
+     * @return The vertical scroll scale factor.
+     * @hide
+     */
+    protected float getVerticalScrollFactor() {
+        if (mVerticalScrollFactor == 0) {
+            TypedValue outValue = new TypedValue();
+            if (!mContext.getTheme().resolveAttribute(
+                    com.android.internal.R.attr.listPreferredItemHeight, outValue, true)) {
+                throw new IllegalStateException(
+                        "Expected theme to define listPreferredItemHeight.");
+            }
+            mVerticalScrollFactor = outValue.getDimension(
+                    mContext.getResources().getDisplayMetrics());
+        }
+        return mVerticalScrollFactor;
+    }
+
+    /**
+     * Gets a scale factor that determines the distance the view should scroll
+     * horizontally in response to {@link MotionEvent#ACTION_SCROLL}.
+     * @return The horizontal scroll scale factor.
+     * @hide
+     */
+    protected float getHorizontalScrollFactor() {
+        // TODO: Should use something else.
+        return getVerticalScrollFactor();
+    }
+
+    /**
      * A MeasureSpec encapsulates the layout requirements passed from parent to child.
      * Each MeasureSpec represents a requirement for either the width or the height.
      * A MeasureSpec is comprised of a size and a mode. There are three possible
@@ -11857,6 +11949,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          * @return True if the listener has consumed the event, false otherwise.
          */
         boolean onTouch(View v, MotionEvent event);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a generic motion event is
+     * dispatched to this view. The callback will be invoked before the generic motion
+     * event is given to the view.
+     */
+    public interface OnGenericMotionListener {
+        /**
+         * Called when a generic motion event is dispatched to a view. This allows listeners to
+         * get a chance to respond before the target view.
+         *
+         * @param v The view the generic motion event has been dispatched to.
+         * @param event The MotionEvent object containing full information about
+         *        the event.
+         * @return True if the listener has consumed the event, false otherwise.
+         */
+        boolean onGenericMotion(View v, MotionEvent event);
     }
 
     /**

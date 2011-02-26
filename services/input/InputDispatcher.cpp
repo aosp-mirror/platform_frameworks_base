@@ -116,6 +116,7 @@ static bool isValidMotionAction(int32_t action, size_t pointerCount) {
     case AMOTION_EVENT_ACTION_MOVE:
     case AMOTION_EVENT_ACTION_OUTSIDE:
     case AMOTION_EVENT_ACTION_HOVER_MOVE:
+    case AMOTION_EVENT_ACTION_SCROLL:
         return true;
     case AMOTION_EVENT_ACTION_POINTER_DOWN:
     case AMOTION_EVENT_ACTION_POINTER_UP: {
@@ -480,8 +481,7 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
         // If the application takes too long to catch up then we drop all events preceding
         // the touch into the other window.
         MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
-        if ((motionEntry->action == AMOTION_EVENT_ACTION_DOWN
-                || motionEntry->action == AMOTION_EVENT_ACTION_HOVER_MOVE)
+        if (motionEntry->action == AMOTION_EVENT_ACTION_DOWN
                 && (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER)
                 && mInputTargetWaitCause == INPUT_TARGET_WAIT_CAUSE_APPLICATION_NOT_READY
                 && mInputTargetWaitApplication != NULL) {
@@ -1180,7 +1180,8 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             && (mTouchState.deviceId != entry->deviceId
                     || mTouchState.source != entry->source);
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
+            || maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
         bool down = maskedAction == AMOTION_EVENT_ACTION_DOWN;
         if (wrongDevice && !down) {
             mTempTouchState.copyFrom(mTouchState);
@@ -1205,8 +1206,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
     if (maskedAction == AMOTION_EVENT_ACTION_DOWN
             || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)
-            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
-        /* Case 1: New splittable pointer going down. */
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
+            || maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
+        /* Case 1: New splittable pointer going down, or need target for hover or scroll. */
 
         int32_t pointerIndex = getMotionEventActionPointerIndex(action);
         int32_t x = int32_t(entry->firstSample.pointerCoords[pointerIndex].
@@ -1380,8 +1382,10 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     // If this is the first pointer going down and the touched window has a wallpaper
     // then also add the touched wallpaper windows so they are locked in for the duration
     // of the touch gesture.
-    if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+    // We do not collect wallpapers during HOVER_MOVE or SCROLL because the wallpaper
+    // engine only supports touch events.  We would need to add a mechanism similar
+    // to View.onGenericMotionEvent to enable wallpapers to handle these events.
+    if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
         const InputWindow* foregroundWindow = mTempTouchState.getFirstForegroundWindow();
         if (foregroundWindow->hasWallpaper) {
             for (size_t i = 0; i < mWindows.size(); i++) {
@@ -1423,7 +1427,7 @@ Failed:
                     || maskedAction == AMOTION_EVENT_ACTION_CANCEL
                     || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
                 // All pointers up or canceled.
-                mTempTouchState.reset();
+                mTouchState.reset();
             } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
                 // First pointer went down.
                 if (mTouchState.down) {
@@ -1432,6 +1436,7 @@ Failed:
                     LOGD("Pointer down received while already down.");
 #endif
                 }
+                mTouchState.copyFrom(mTempTouchState);
             } else if (maskedAction == AMOTION_EVENT_ACTION_POINTER_UP) {
                 // One pointer went up.
                 if (isSplit) {
@@ -1450,10 +1455,13 @@ Failed:
                         i += 1;
                     }
                 }
+                mTouchState.copyFrom(mTempTouchState);
+            } else if (maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
+                // Discard temporary touch state since it was only valid for this action.
+            } else {
+                // Save changes to touch state as-is for all other actions.
+                mTouchState.copyFrom(mTempTouchState);
             }
-
-            // Save changes to touch state.
-            mTouchState.copyFrom(mTempTouchState);
         }
     } else {
 #if DEBUG_FOCUS

@@ -62,6 +62,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.HardwareCanvas;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -6145,6 +6146,33 @@ public class WebView extends AbsoluteLayout
         mHeldMotionless = MOTIONLESS_TRUE;
         mTouchMode = TOUCH_DONE_MODE;
         nativeHideCursor();
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_SCROLL: {
+                    final float vscroll;
+                    final float hscroll;
+                    if ((event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0) {
+                        vscroll = 0;
+                        hscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    } else {
+                        vscroll = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                        hscroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+                    }
+                    if (hscroll != 0 || vscroll != 0) {
+                        final int vdelta = (int) (vscroll * getVerticalScrollFactor());
+                        final int hdelta = (int) (hscroll * getHorizontalScrollFactor());
+                        if (pinScrollBy(hdelta, vdelta, true, 0)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     private long mTrackballFirstTime = 0;

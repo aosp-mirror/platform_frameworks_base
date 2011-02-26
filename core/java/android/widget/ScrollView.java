@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
+import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -628,6 +629,35 @@ public class ScrollView extends FrameLayout {
                 mVelocityTracker.clear();
             }
         }
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_SCROLL: {
+                    if (!mIsBeingDragged) {
+                        final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                        if (vscroll != 0) {
+                            final int delta = (int) (vscroll * getVerticalScrollFactor());
+                            final int range = getScrollRange();
+                            int oldScrollY = mScrollY;
+                            int newScrollY = oldScrollY - delta;
+                            if (newScrollY < 0) {
+                                newScrollY = 0;
+                            } else if (newScrollY > range) {
+                                newScrollY = range;
+                            }
+                            if (newScrollY != oldScrollY) {
+                                super.scrollTo(mScrollX, newScrollY);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return super.onGenericMotionEvent(event);
     }
 
     @Override

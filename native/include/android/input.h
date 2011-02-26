@@ -288,6 +288,15 @@ enum {
      * the last hover move event.
      */
     AMOTION_EVENT_ACTION_HOVER_MOVE = 7,
+
+    /* The motion event contains relative vertical and/or horizontal scroll offsets.
+     * Use getAxisValue to retrieve the information from AMOTION_EVENT_AXIS_VSCROLL
+     * and AMOTION_EVENT_AXIS_HSCROLL.
+     * The pointer may or may not be down when this event is dispatched.
+     * This action is always delivered to the winder under the pointer, which
+     * may not be the window currently touched.
+     */
+    AMOTION_EVENT_ACTION_SCROLL = 8,
 };
 
 /*

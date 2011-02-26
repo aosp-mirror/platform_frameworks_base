@@ -261,6 +261,7 @@ private:
 
     int openDevice(const char *devicePath);
     int closeDevice(const char *devicePath);
+    int closeDeviceAtIndexLocked(int index);
     int scanDir(const char *dirname);
     int readNotify(int nfd);
 

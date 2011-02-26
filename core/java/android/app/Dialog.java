@@ -627,24 +627,21 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Called when a generic motion event was not handled by any of the
      * views inside of the dialog.
      * <p>
-     * Generic motion events are dispatched to the focused view to describe
-     * the motions of input devices such as joysticks.  The
+     * Generic motion events describe joystick movements, mouse hovers, track pad
+     * touches, scroll wheel movements and other input events.  The
      * {@link MotionEvent#getSource() source} of the motion event specifies
      * the class of input that was received.  Implementations of this method
      * must examine the bits in the source before processing the event.
      * The following code example shows how this is done.
+     * </p><p>
+     * Generic motion events with source class
+     * {@link android.view.InputDevice#SOURCE_CLASS_POINTER}
+     * are delivered to the view under the pointer.  All other generic motion events are
+     * delivered to the focused view.
+     * </p><p>
+     * See {@link View#onGenericMotionEvent(MotionEvent)} for an example of how to
+     * handle this event.
      * </p>
-     * <code>
-     * public boolean onGenericMotionEvent(MotionEvent event) {
-     *     if ((event.getSource() &amp; InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-     *         float x = event.getX();
-     *         float y = event.getY();
-     *         // process the joystick motion
-     *         return true;
-     *     }
-     *     return super.onGenericMotionEvent(event);
-     * }
-     * </code>
      *
      * @param event The generic motion event being processed.
      *

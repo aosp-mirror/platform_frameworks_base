@@ -40,6 +40,12 @@ import android.util.SparseArray;
  * by a motion event with {@link #ACTION_UP} or when gesture is canceled
  * with {@link #ACTION_CANCEL}.
  * </p><p>
+ * Some pointing devices such as mice may support vertical and/or horizontal scrolling.
+ * A scroll event is reported as a generic motion event with {@link #ACTION_SCROLL} that
+ * includes the relative scroll offset in the {@link #AXIS_VSCROLL} and
+ * {@link #AXIS_HSCROLL} axes.  See {@link #getAxisValue(int)} for information
+ * about retrieving these additional axes.
+ * </p><p>
  * On trackball devices with source class {@link InputDevice#SOURCE_CLASS_TRACKBALL},
  * the pointer coordinates specify relative movements as X/Y deltas.
  * A trackball gesture consists of a sequence of movements described by motion
@@ -51,6 +57,8 @@ import android.util.SparseArray;
  * The joystick axis values are normalized to a range of -1.0 to 1.0 where 0.0 corresponds
  * to the center position.  More information about the set of available axes and the
  * range of motion can be obtained using {@link InputDevice#getMotionRange}.
+ * Some common joystick axes are {@link #AXIS_X}, {@link #AXIS_Y},
+ * {@link #AXIS_HAT_X}, {@link #AXIS_HAT_Y}, {@link #AXIS_Z} and {@link #AXIS_RZ}.
  * </p><p>
  * Motion events always report movements for all pointers at once.  The number
  * of pointers only ever changes by one as individual pointers go up and down,
@@ -163,8 +171,28 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * is not down (unlike {@link #ACTION_MOVE}).  The motion contains the most
      * recent point, as well as any intermediate points since the last
      * hover move event.
+     * <p>
+     * This action is not a touch event so it is delivered to
+     * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+     * {@link View#onTouchEvent(MotionEvent)}.
+     * </p>
      */
     public static final int ACTION_HOVER_MOVE       = 7;
+
+    /**
+     * Constant for {@link #getAction}: The motion event contains relative
+     * vertical and/or horizontal scroll offsets.  Use {@link #getAxisValue(int)}
+     * to retrieve the information from {@link #AXIS_VSCROLL} and {@link #AXIS_HSCROLL}.
+     * The pointer may or may not be down when this event is dispatched.
+     * This action is always delivered to the winder under the pointer, which
+     * may not be the window currently touched.
+     * <p>
+     * This action is not a touch event so it is delivered to
+     * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+     * {@link View#onTouchEvent(MotionEvent)}.
+     * </p>
+     */
+    public static final int ACTION_SCROLL           = 8;
 
     /**
      * Bits in the action code that represent a pointer index, used with
@@ -483,7 +511,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <p>
      * <ul>
      * <li>For a mouse, reports the relative movement of the vertical scroll wheel.
-     * The value is normalized to a range from -1.0 (up) to 1.0 (down).
+     * The value is normalized to a range from -1.0 (down) to 1.0 (up).
      * </ul>
      * </p><p>
      * This axis should be used to scroll views vertically.
@@ -1234,6 +1262,32 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public final int getActionIndex() {
         return (nativeGetAction(mNativePtr) & ACTION_POINTER_INDEX_MASK)
                 >> ACTION_POINTER_INDEX_SHIFT;
+    }
+
+    /**
+     * Returns true if this motion event is a touch event.
+     * <p>
+     * Specifically excludes pointer events with action {@link #ACTION_HOVER_MOVE}
+     * or {@link #ACTION_SCROLL} because they are not actually touch events
+     * (the pointer is not down).
+     * </p>
+     * @return True if this motion event is a touch event.
+     * @hide
+     */
+    public final boolean isTouchEvent() {
+        if ((getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            switch (getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_POINTER_DOWN:
+                case MotionEvent.ACTION_POINTER_UP:
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_OUTSIDE:
+                    return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2174,10 +2228,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 return "ACTION_UP";
             case ACTION_CANCEL:
                 return "ACTION_CANCEL";
+            case ACTION_OUTSIDE:
+                return "ACTION_OUTSIDE";
             case ACTION_MOVE:
                 return "ACTION_MOVE";
             case ACTION_HOVER_MOVE:
                 return "ACTION_HOVER_MOVE";
+            case ACTION_SCROLL:
+                return "ACTION_SCROLL";
         }
         int index = (action & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
         switch (action & ACTION_MASK) {
