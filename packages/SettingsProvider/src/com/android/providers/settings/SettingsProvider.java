@@ -748,8 +748,10 @@ public class SettingsProvider extends ContentProvider {
         }
 
         @Override
-        protected synchronized void entryEvicted(String key, Bundle value) {
-            mCacheFullyMatchesDisk = false;
+        protected void entryRemoved(boolean evicted, String key, Bundle oldValue, Bundle newValue) {
+            if (evicted) {
+                mCacheFullyMatchesDisk = false;
+            }
         }
 
         /**
