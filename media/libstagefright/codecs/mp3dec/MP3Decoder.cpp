@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "MP3Decoder"
+
 #include "MP3Decoder.h"
 
 #include "include/pvmp3decoder_api.h"
@@ -175,7 +178,12 @@ status_t MP3Decoder::read(
             != NO_DECODING_ERROR) {
         LOGV("mp3 decoder returned error %d", decoderErr);
 
-        if (decoderErr != NO_ENOUGH_MAIN_DATA_ERROR) {
+        if (decoderErr != NO_ENOUGH_MAIN_DATA_ERROR ||
+                mConfig->outputFrameSize == 0) {
+
+            if (mConfig->outputFrameSize == 0) {
+                LOGE("Output frame size is 0");
+            }
             buffer->release();
             buffer = NULL;
 
