@@ -139,8 +139,7 @@ public class LruCache<K, V> {
      * Caches {@code value} for {@code key}. The value is moved to the head of
      * the queue.
      *
-     * @return the previous value mapped by {@code key}. Although that entry is
-     *     no longer cached, it has not been passed to {@link #entryEvicted}.
+     * @return the previous value mapped by {@code key}.
      */
     public final V put(K key, V value) {
         if (key == null || value == null) {
@@ -195,15 +194,14 @@ public class LruCache<K, V> {
                 evictionCount++;
             }
 
-            entryEvicted(key, value);
+            entryRemoved(true, key, value, null);
         }
     }
 
     /**
      * Removes the entry for {@code key} if it exists.
      *
-     * @return the previous value mapped by {@code key}. Although that entry is
-     *     no longer cached, it has not been passed to {@link #entryEvicted}.
+     * @return the previous value mapped by {@code key}.
      */
     public final V remove(K key) {
         if (key == null) {
@@ -223,16 +221,6 @@ public class LruCache<K, V> {
         }
 
         return previous;
-    }
-
-    /**
-     * Calls {@link #entryRemoved}.
-     *
-     * @deprecated replaced by entryRemoved
-     */
-    @Deprecated
-    protected void entryEvicted(K key, V value) {
-        entryRemoved(true, key, value, null);
     }
 
     /**
@@ -291,7 +279,7 @@ public class LruCache<K, V> {
     }
 
     /**
-     * Clear the cache, calling {@link #entryEvicted} on each removed entry.
+     * Clear the cache, calling {@link #entryRemoved} on each removed entry.
      */
     public final void evictAll() {
         trimToSize(-1); // -1 will evict 0-sized elements
