@@ -7389,6 +7389,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return superResult;
     }
 
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (mMovement != null && mText instanceof Spannable && mLayout != null) {
+            try {
+                if (mMovement.onGenericMotionEvent(this, (Spannable) mText, event)) {
+                    return true;
+                }
+            } catch (AbstractMethodError ex) {
+                // onGenericMotionEvent was added to the MovementMethod interface in API 12.
+                // Ignore its absence in case third party applications implemented the
+                // interface directly.
+            }
+        }
+        return super.onGenericMotionEvent(event);
+    }
+
     private void prepareCursorControllers() {
         boolean windowSupportsHandles = false;
 

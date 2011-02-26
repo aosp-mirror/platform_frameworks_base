@@ -47,6 +47,7 @@ public interface MovementMethod {
     public void onTakeFocus(TextView widget, Spannable text, int direction);
     public boolean onTrackballEvent(TextView widget, Spannable text, MotionEvent event);
     public boolean onTouchEvent(TextView widget, Spannable text, MotionEvent event);
+    public boolean onGenericMotionEvent(TextView widget, Spannable text, MotionEvent event);
 
     /**
      * Returns true if this movement method allows arbitrary selection
