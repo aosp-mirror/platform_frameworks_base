@@ -133,7 +133,7 @@ sp<T>::sp(const sp<T>& other)
 template<typename T> template<typename U>
 sp<T>::sp(U* other) : m_ptr(other)
 {
-    if (other) other->incStrong(this);
+    if (other) ((T*)other)->incStrong(this);
 }
 
 template<typename T> template<typename U>
@@ -170,7 +170,7 @@ sp<T>& sp<T>::operator = (T* other)
 template<typename T> template<typename U>
 sp<T>& sp<T>::operator = (const sp<U>& other)
 {
-    U* otherPtr(other.m_ptr);
+    T* otherPtr(other.m_ptr);
     if (otherPtr) otherPtr->incStrong(this);
     if (m_ptr) m_ptr->decStrong(this);
     m_ptr = otherPtr;
@@ -180,7 +180,7 @@ sp<T>& sp<T>::operator = (const sp<U>& other)
 template<typename T> template<typename U>
 sp<T>& sp<T>::operator = (U* other)
 {
-    if (other) other->incStrong(this);
+    if (other) ((T*)other)->incStrong(this);
     if (m_ptr) m_ptr->decStrong(this);
     m_ptr = other;
     return *this;

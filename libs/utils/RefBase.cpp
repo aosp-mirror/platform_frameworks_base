@@ -99,20 +99,38 @@ public:
 #if DEBUG_REFS_FATAL_SANITY_CHECKS
             LOG_ALWAYS_FATAL("Strong references remain!");
 #else
-            LOGE("Strong references remain!");
+            LOGE("Strong references remain:");
 #endif
+            ref_entry* refs = mStrongRefs;
+            while (refs) {
+                char inc = refs->ref >= 0 ? '+' : '-';
+                LOGD("\t%c ID %p (ref %d):", inc, refs->id, refs->ref);
+#if DEBUG_REFS_CALLSTACK_ENABLED
+                refs->stack.dump();
+#endif;
+                refs = refs->next;
+            }
         }
 
         if (!mRetain && mWeakRefs != NULL) {
             dumpStack = true;
 #if DEBUG_REFS_FATAL_SANITY_CHECKS
-            LOG_ALWAYS_FATAL("Weak references remain!");
+            LOG_ALWAYS_FATAL("Weak references remain:");
 #else
             LOGE("Weak references remain!");
 #endif
+            ref_entry* refs = mWeakRefs;
+            while (refs) {
+                char inc = refs->ref >= 0 ? '+' : '-';
+                LOGD("\t%c ID %p (ref %d):", inc, refs->id, refs->ref);
+#if DEBUG_REFS_CALLSTACK_ENABLED
+                refs->stack.dump();
+#endif;
+                refs = refs->next;
+            }
         }
-
         if (dumpStack) {
+            LOGE("above errors at:");
             CallStack stack;
             stack.update();
             stack.dump();
@@ -228,7 +246,8 @@ private:
         if (mTrackEnabled) {
             AutoMutex _l(mMutex);
             
-            ref_entry* ref = *refs;
+            ref_entry* const head = *refs;
+            ref_entry* ref = head;
             while (ref != NULL) {
                 if (ref->id == id) {
                     *refs = ref->next;
@@ -248,6 +267,13 @@ private:
             LOGE("RefBase: removing id %p on RefBase %p"
                     "(weakref_type %p) that doesn't exist!",
                     id, mBase, this);
+
+            ref = head;
+            while (ref) {
+                char inc = ref->ref >= 0 ? '+' : '-';
+                LOGD("\t%c ID %p (ref %d):", inc, ref->id, ref->ref);
+                ref = ref->next;
+            }
 
             CallStack stack;
             stack.update();
