@@ -22,8 +22,9 @@
 #include "MtpResponsePacket.h"
 #include "MtpEventPacket.h"
 #include "mtp.h"
-
 #include "MtpUtils.h"
+
+#include <utils/threads.h>
 
 namespace android {
 
@@ -62,20 +63,29 @@ private:
     MtpString           mSendObjectFilePath;
     size_t              mSendObjectFileSize;
 
+    Mutex               mMutex;
+
 public:
                         MtpServer(int fd, MtpDatabase* database,
                                     int fileGroup, int filePerm, int directoryPerm);
     virtual             ~MtpServer();
 
-    void                addStorage(const char* filePath, uint64_t reserveSpace);
-    inline void         addStorage(MtpStorage* storage) { mStorages.push(storage); }
-    MtpStorage*         getStorage(MtpStorageID id);
+    void                addStorage(MtpStorage* storage);
+    void                removeStorage(MtpStorage* storage);
+
     void                run();
 
     void                sendObjectAdded(MtpObjectHandle handle);
     void                sendObjectRemoved(MtpObjectHandle handle);
 
 private:
+    MtpStorage*         getStorage(MtpStorageID id);
+    inline bool         hasStorage() { return mStorages.size() > 0; }
+    bool                hasStorage(MtpStorageID id);
+    void                sendStoreAdded(MtpStorageID id);
+    void                sendStoreRemoved(MtpStorageID id);
+    void                sendEvent(MtpEventCode code, uint32_t param1);
+
     bool                handleRequest();
 
     MtpResponseCode     doGetDeviceInfo();
