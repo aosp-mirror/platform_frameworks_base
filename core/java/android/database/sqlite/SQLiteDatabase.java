@@ -2218,9 +2218,10 @@ public class SQLiteDatabase extends SQLiteClosable {
             }
             mCompiledQueries = new LruCache<String, SQLiteCompiledSql>(cacheSize) {
                 @Override
-                protected void entryEvicted(String key, SQLiteCompiledSql value) {
+                protected void entryRemoved(boolean evicted, String key, SQLiteCompiledSql oldValue,
+                        SQLiteCompiledSql newValue) {
                     verifyLockOwner();
-                    value.releaseIfNotInUse();
+                    oldValue.releaseIfNotInUse();
                 }
             };
             if (oldCompiledQueries != null) {
