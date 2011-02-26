@@ -26,8 +26,7 @@ import java.util.Map;
  * become eligible for garbage collection.
  *
  * <p>If your cached values hold resources that need to be explicitly released,
- * override {@link #entryEvicted}. This method is only invoked when values are
- * evicted. Values replaced by calls to {@link #put} must be released manually.
+ * override {@link #entryRemoved}.
  *
  * <p>If a cache miss should be computed on demand for the corresponding keys,
  * override {@link #create}. This simplifies the calling code, allowing it to
@@ -88,29 +87,52 @@ public class LruCache<K, V> {
      * head of the queue. This returns null if a value is not cached and cannot
      * be created.
      */
-    public synchronized final V get(K key) {
+    public final V get(K key) {
         if (key == null) {
             throw new NullPointerException("key == null");
         }
 
-        V result = map.get(key);
-        if (result != null) {
-            hitCount++;
-            return result;
+        V mapValue;
+        synchronized (this) {
+            mapValue = map.get(key);
+            if (mapValue != null) {
+                hitCount++;
+                return mapValue;
+            }
+            missCount++;
         }
 
-        missCount++;
+        /*
+         * Attempt to create a value. This may take a long time, and the map
+         * may be different when create() returns. If a conflicting value was
+         * added to the map while create() was working, we leave that value in
+         * the map and release the created value.
+         */
 
-        // TODO: release the lock while calling this potentially slow user code
-        result = create(key);
+        V createdValue = create(key);
+        if (createdValue == null) {
+            return null;
+        }
 
-        if (result != null) {
+        synchronized (this) {
             createCount++;
-            size += safeSizeOf(key, result);
-            map.put(key, result);
-            trimToSize(maxSize);
+            mapValue = map.put(key, createdValue);
+
+            if (mapValue != null) {
+                // There was a conflict so undo that last put
+                map.put(key, mapValue);
+            } else {
+                size += safeSizeOf(key, createdValue);
+            }
         }
-        return result;
+
+        if (mapValue != null) {
+            entryRemoved(false, key, createdValue, mapValue);
+            return mapValue;
+        } else {
+            trimToSize(maxSize);
+            return createdValue;
+        }
     }
 
     /**
@@ -120,41 +142,60 @@ public class LruCache<K, V> {
      * @return the previous value mapped by {@code key}. Although that entry is
      *     no longer cached, it has not been passed to {@link #entryEvicted}.
      */
-    public synchronized final V put(K key, V value) {
+    public final V put(K key, V value) {
         if (key == null || value == null) {
             throw new NullPointerException("key == null || value == null");
         }
 
-        putCount++;
-        size += safeSizeOf(key, value);
-        V previous = map.put(key, value);
-        if (previous != null) {
-            size -= safeSizeOf(key, previous);
+        V previous;
+        synchronized (this) {
+            putCount++;
+            size += safeSizeOf(key, value);
+            previous = map.put(key, value);
+            if (previous != null) {
+                size -= safeSizeOf(key, previous);
+            }
         }
+
+        if (previous != null) {
+            entryRemoved(false, key, previous, value);
+        }
+
         trimToSize(maxSize);
         return previous;
     }
 
+    /**
+     * @param maxSize the maximum size of the cache before returning. May be -1
+     *     to evict even 0-sized elements.
+     */
     private void trimToSize(int maxSize) {
-        while (size > maxSize) {
-            Map.Entry<K, V> toEvict = map.eldest(); // equal to map.entrySet().iterator().next();
-            if (toEvict == null) {
-                break; // map is empty; if size is not 0 then throw an error below
+        while (true) {
+            K key;
+            V value;
+            synchronized (this) {
+                if (size < 0 || (map.isEmpty() && size != 0)) {
+                    throw new IllegalStateException(getClass().getName()
+                            + ".sizeOf() is reporting inconsistent results!");
+                }
+
+                if (size <= maxSize) {
+                    break;
+                }
+
+                Map.Entry<K, V> toEvict = map.eldest();
+                if (toEvict == null) {
+                    break;
+                }
+
+                key = toEvict.getKey();
+                value = toEvict.getValue();
+                map.remove(key);
+                size -= safeSizeOf(key, value);
+                evictionCount++;
             }
 
-            K key = toEvict.getKey();
-            V value = toEvict.getValue();
-            map.remove(key);
-            size -= safeSizeOf(key, value);
-            evictionCount++;
-
-            // TODO: release the lock while calling this potentially slow user code
             entryEvicted(key, value);
-        }
-
-        if (size < 0 || (map.isEmpty() && size != 0)) {
-            throw new IllegalStateException(getClass().getName()
-                    + ".sizeOf() is reporting inconsistent results!");
         }
     }
 
@@ -164,28 +205,67 @@ public class LruCache<K, V> {
      * @return the previous value mapped by {@code key}. Although that entry is
      *     no longer cached, it has not been passed to {@link #entryEvicted}.
      */
-    public synchronized final V remove(K key) {
+    public final V remove(K key) {
         if (key == null) {
             throw new NullPointerException("key == null");
         }
 
-        V previous = map.remove(key);
-        if (previous != null) {
-            size -= safeSizeOf(key, previous);
+        V previous;
+        synchronized (this) {
+            previous = map.remove(key);
+            if (previous != null) {
+                size -= safeSizeOf(key, previous);
+            }
         }
+
+        if (previous != null) {
+            entryRemoved(false, key, previous, null);
+        }
+
         return previous;
     }
 
     /**
-     * Called for entries that have reached the tail of the least recently used
-     * queue and are be removed. The default implementation does nothing.
+     * Calls {@link #entryRemoved}.
+     *
+     * @deprecated replaced by entryRemoved
      */
-    protected void entryEvicted(K key, V value) {}
+    @Deprecated
+    protected void entryEvicted(K key, V value) {
+        entryRemoved(true, key, value, null);
+    }
+
+    /**
+     * Called for entries that have been evicted or removed. This method is
+     * invoked when a value is evicted to make space, removed by a call to
+     * {@link #remove}, or replaced by a call to {@link #put}. The default
+     * implementation does nothing.
+     *
+     * <p>The method is called without synchronization: other threads may
+     * access the cache while this method is executing.
+     *
+     * @param evicted true if the entry is being removed to make space, false
+     *     if the removal was caused by a {@link #put} or {@link #remove}.
+     * @param newValue the new value for {@code key}, if it exists. If non-null,
+     *     this removal was caused by a {@link #put}. Otherwise it was caused by
+     *     an eviction or a {@link #remove}.
+     */
+    protected void entryRemoved(boolean evicted, K key, V oldValue, V newValue) {}
 
     /**
      * Called after a cache miss to compute a value for the corresponding key.
      * Returns the computed value or null if no value can be computed. The
      * default implementation returns null.
+     *
+     * <p>The method is called without synchronization: other threads may
+     * access the cache while this method is executing.
+     *
+     * <p>If a value for {@code key} exists in the cache when this method
+     * returns, the created value will be released with {@link #entryRemoved}
+     * and discarded. This can occur when multiple threads request the same key
+     * at the same time (causing multiple values to be created), or when one
+     * thread calls {@link #put} while another is creating a value for the same
+     * key.
      */
     protected V create(K key) {
         return null;
@@ -213,7 +293,7 @@ public class LruCache<K, V> {
     /**
      * Clear the cache, calling {@link #entryEvicted} on each removed entry.
      */
-    public synchronized final void evictAll() {
+    public final void evictAll() {
         trimToSize(-1); // -1 will evict 0-sized elements
     }
 

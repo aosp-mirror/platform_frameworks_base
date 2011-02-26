@@ -18,6 +18,7 @@ package android.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import junit.framework.TestCase;
@@ -166,22 +167,16 @@ public final class LruCacheTest extends TestCase {
     }
 
     public void testEntryEvictedWhenFull() {
-        List<String> expectedEvictionLog = new ArrayList<String>();
-        final List<String> evictionLog = new ArrayList<String>();
-        LruCache<String, String> cache = new LruCache<String, String>(3) {
-            @Override protected void entryEvicted(String key, String value) {
-                evictionLog.add(key + "=" + value);
-            }
-        };
+        List<String> log = new ArrayList<String>();
+        LruCache<String, String> cache = newRemovalLogCache(log);
 
         cache.put("a", "A");
         cache.put("b", "B");
         cache.put("c", "C");
-        assertEquals(expectedEvictionLog, evictionLog);
+        assertEquals(Collections.<String>emptyList(), log);
 
         cache.put("d", "D");
-        expectedEvictionLog.add("a=A");
-        assertEquals(expectedEvictionLog, evictionLog);
+        assertEquals(Arrays.asList("a=A"), log);
     }
 
     /**
@@ -309,19 +304,14 @@ public final class LruCacheTest extends TestCase {
     }
 
     public void testEvictAll() {
-        final List<String> evictionLog = new ArrayList<String>();
-        LruCache<String, String> cache = new LruCache<String, String>(10) {
-            @Override protected void entryEvicted(String key, String value) {
-                evictionLog.add(key + "=" + value);
-            }
-        };
-
+        List<String> log = new ArrayList<String>();
+        LruCache<String, String> cache = newRemovalLogCache(log);
         cache.put("a", "A");
         cache.put("b", "B");
         cache.put("c", "C");
         cache.evictAll();
         assertEquals(0, cache.size());
-        assertEquals(Arrays.asList("a=A", "b=B", "c=C"), evictionLog);
+        assertEquals(Arrays.asList("a=A", "b=B", "c=C"), log);
     }
 
     public void testEvictAllEvictsSizeZeroElements() {
@@ -335,16 +325,6 @@ public final class LruCacheTest extends TestCase {
         cache.put("b", "B");
         cache.evictAll();
         assertSnapshot(cache);
-    }
-
-    public void testRemoveDoesNotCallEntryEvicted() {
-        LruCache<String, String> cache = new LruCache<String, String>(10) {
-            @Override protected void entryEvicted(String key, String value) {
-                fail();
-            }
-        };
-        cache.put("a", "A");
-        assertEquals("A", cache.remove("a"));
     }
 
     public void testRemoveWithCustomSizes() {
@@ -376,10 +356,115 @@ public final class LruCacheTest extends TestCase {
         }
     }
 
+    public void testRemoveCallsEntryRemoved() {
+        List<String> log = new ArrayList<String>();
+        LruCache<String, String> cache = newRemovalLogCache(log);
+        cache.put("a", "A");
+        cache.remove("a");
+        assertEquals(Arrays.asList("a=A>null"), log);
+    }
+
+    public void testPutCallsEntryRemoved() {
+        List<String> log = new ArrayList<String>();
+        LruCache<String, String> cache = newRemovalLogCache(log);
+        cache.put("a", "A");
+        cache.put("a", "A2");
+        assertEquals(Arrays.asList("a=A>A2"), log);
+    }
+
+    public void testEntryRemovedIsCalledWithoutSynchronization() {
+        LruCache<String, String> cache = new LruCache<String, String>(3) {
+            @Override protected void entryRemoved(
+                    boolean evicted, String key, String oldValue, String newValue) {
+                assertFalse(Thread.holdsLock(this));
+            }
+        };
+
+        cache.put("a", "A");
+        cache.put("a", "A2"); // replaced
+        cache.put("b", "B");
+        cache.put("c", "C");
+        cache.put("d", "D");  // single eviction
+        cache.remove("a");    // removed
+        cache.evictAll();     // multiple eviction
+    }
+
+    public void testCreateIsCalledWithoutSynchronization() {
+        LruCache<String, String> cache = new LruCache<String, String>(3) {
+            @Override protected String create(String key) {
+                assertFalse(Thread.holdsLock(this));
+                return null;
+            }
+        };
+
+        cache.get("a");
+    }
+
+    /**
+     * Test what happens when a value is added to the map while create is
+     * working. The map value should be returned by get(), and the created value
+     * should be released with entryRemoved().
+     */
+    public void testCreateWithConcurrentPut() {
+        final List<String> log = new ArrayList<String>();
+        LruCache<String, String> cache = new LruCache<String, String>(3) {
+            @Override protected String create(String key) {
+                put(key, "B");
+                return "A";
+            }
+            @Override protected void entryRemoved(
+                    boolean evicted, String key, String oldValue, String newValue) {
+                log.add(key + "=" + oldValue + ">" + newValue);
+            }
+        };
+
+        assertEquals("B", cache.get("a"));
+        assertEquals(Arrays.asList("a=A>B"), log);
+    }
+
+    /**
+     * Test what happens when two creates happen concurrently. The result from
+     * the first create to return is returned by both gets. The other created
+     * values should be released with entryRemove().
+     */
+    public void testCreateWithConcurrentCreate() {
+        final List<String> log = new ArrayList<String>();
+        LruCache<String, Integer> cache = new LruCache<String, Integer>(3) {
+            int callCount = 0;
+            @Override protected Integer create(String key) {
+                if (callCount++ == 0) {
+                    assertEquals(2, get(key).intValue());
+                    return 1;
+                } else {
+                    return 2;
+                }
+            }
+            @Override protected void entryRemoved(
+                    boolean evicted, String key, Integer oldValue, Integer newValue) {
+                log.add(key + "=" + oldValue + ">" + newValue);
+            }
+        };
+
+        assertEquals(2, cache.get("a").intValue());
+        assertEquals(Arrays.asList("a=1>2"), log);
+    }
+
     private LruCache<String, String> newCreatingCache() {
         return new LruCache<String, String>(3) {
             @Override protected String create(String key) {
                 return (key.length() > 1) ? ("created-" + key) : null;
+            }
+        };
+    }
+
+    private LruCache<String, String> newRemovalLogCache(final List<String> log) {
+        return new LruCache<String, String>(3) {
+            @Override protected void entryRemoved(
+                    boolean evicted, String key, String oldValue, String newValue) {
+                String message = evicted
+                        ? (key + "=" + oldValue)
+                        : (key + "=" + oldValue + ">" + newValue);
+                log.add(message);
             }
         };
     }
