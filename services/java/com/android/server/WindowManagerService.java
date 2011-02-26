@@ -4745,6 +4745,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.inKeyguardRestrictedKeyInputMode();
     }
 
+    public boolean isKeyguardLocked() {
+        return mPolicy.isKeyguardLocked();
+    }
+
+    public boolean isKeyguardSecure() {
+        return mPolicy.isKeyguardSecure();
+    }
+
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
             for (int i=mWindows.size()-1; i>=0; i--) {
