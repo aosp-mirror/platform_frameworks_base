@@ -127,7 +127,7 @@ public class KeyguardManager {
      */
     public boolean isKeyguardLocked() {
         try {
-            return mWM.isKeyguardSecure();
+            return mWM.isKeyguardLocked();
         } catch (RemoteException ex) {
             return false;
         }
