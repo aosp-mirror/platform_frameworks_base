@@ -108,13 +108,15 @@ public class UsbService extends IUsbManager.Stub {
     private final Context mContext;
     private final Object mLock = new Object();
     private final UsbDeviceSettingsManager mDeviceManager;
+    private final boolean mHasUsbHost;
+    private final boolean mHasUsbAccessory;
 
     /*
      * Handles USB function enable/disable events (device mode)
      */
     private final void functionEnabledLocked(String function, boolean enabled) {
         boolean enteringAccessoryMode =
-            (enabled && UsbManager.USB_FUNCTION_ACCESSORY.equals(function));
+            (mHasUsbAccessory && enabled && UsbManager.USB_FUNCTION_ACCESSORY.equals(function));
 
         if (enteringAccessoryMode) {
             // keep a list of functions to reenable after exiting accessory mode
@@ -207,6 +209,9 @@ public class UsbService extends IUsbManager.Stub {
     public UsbService(Context context) {
         mContext = context;
         mDeviceManager = new UsbDeviceSettingsManager(context);
+        PackageManager pm = mContext.getPackageManager();
+        mHasUsbHost = pm.hasSystemFeature(PackageManager.FEATURE_USB_HOST);
+        mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
 
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
@@ -378,8 +383,7 @@ public class UsbService extends IUsbManager.Stub {
 
     public void systemReady() {
         synchronized (mLock) {
-            if (mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_hasUsbHostSupport)) {
+            if (mHasUsbHost) {
                 // start monitoring for connected USB devices
                 initHostSupport();
             }

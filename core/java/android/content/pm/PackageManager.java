@@ -785,6 +785,21 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports connecting to USB devices
+     * as the USB host.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_USB_HOST = "android.hardware.usb.host";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports connecting to USB accessories.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The SIP API is enabled on the device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
