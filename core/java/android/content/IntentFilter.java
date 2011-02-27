@@ -1094,7 +1094,7 @@ public class IntentFilter implements Parcelable {
      */
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag) {
-        if (!matchAction(action)) {
+        if (action != null && !matchAction(action)) {
             if (Config.LOGV) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;
