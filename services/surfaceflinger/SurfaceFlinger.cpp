@@ -2470,7 +2470,7 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
             }
             break;
         }
-        if (++name > 31)
+        if (++name >= SharedBufferStack::NUM_LAYERS_MAX)
             name = NO_MEMORY;
     } while(name >= 0);
 
