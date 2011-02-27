@@ -2,7 +2,6 @@
     package="com.android.camerabrowser">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_USB" />
 
     <application android:label="@string/app_label"
             android:name="com.android.camerabrowser.CameraBrowserApplication">
@@ -12,20 +11,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
         </activity>
 
         <activity android:name="StorageBrowser" />
         <activity android:name="ObjectBrowser" />
         <activity android:name="ObjectViewer" />
-
-<!--
-        <receiver android:name="UsbReceiver">
-            <intent-filter>
-                <action android:name="android.hardware.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-        </receiver>
--->
     </application>
-
-
 </manifest>
