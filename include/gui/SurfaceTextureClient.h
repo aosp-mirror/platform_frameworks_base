@@ -40,40 +40,41 @@ private:
     SurfaceTextureClient(const SurfaceTextureClient& rhs);
 
     // ANativeWindow hooks
-    static int setSwapInterval(ANativeWindow* window, int interval);
-    static int dequeueBuffer(ANativeWindow* window, android_native_buffer_t** buffer);
     static int cancelBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
+    static int dequeueBuffer(ANativeWindow* window, android_native_buffer_t** buffer);
     static int lockBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
-    static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
-    static int query(ANativeWindow* window, int what, int* value);
     static int perform(ANativeWindow* window, int operation, ...);
+    static int query(ANativeWindow* window, int what, int* value);
+    static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
+    static int setSwapInterval(ANativeWindow* window, int interval);
 
-    int setSwapInterval(int interval);
+    int cancelBuffer(android_native_buffer_t* buffer);
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);
-    int queueBuffer(android_native_buffer_t* buffer);
-    int cancelBuffer(android_native_buffer_t* buffer);
-    int query(int what, int* value);
     int perform(int operation, va_list args);
+    int query(int what, int* value);
+    int queueBuffer(android_native_buffer_t* buffer);
+    int setSwapInterval(int interval);
 
-    int dispatchSetUsage(va_list args);
     int dispatchConnect(va_list args);
     int dispatchDisconnect(va_list args);
-    int dispatchSetCrop(va_list args);
     int dispatchSetBufferCount(va_list args);
     int dispatchSetBuffersGeometry(va_list args);
     int dispatchSetBuffersTransform(va_list args);
+    int dispatchSetCrop(va_list args);
+    int dispatchSetUsage(va_list args);
 
     int connect(int api);
     int disconnect(int api);
-    int setUsage(uint32_t reqUsage);
-    int setCrop(Rect const* rect);
     int setBufferCount(int bufferCount);
     int setBuffersGeometry(int w, int h, int format);
     int setBuffersTransform(int transform);
+    int setCrop(Rect const* rect);
+    int setUsage(uint32_t reqUsage);
 
     void freeAllBuffers();
 
+    enum { MIN_UNDEQUEUED_BUFFERS = SurfaceTexture::MIN_UNDEQUEUED_BUFFERS };
     enum { MIN_BUFFER_SLOTS = SurfaceTexture::MIN_BUFFER_SLOTS };
     enum { NUM_BUFFER_SLOTS = SurfaceTexture::NUM_BUFFER_SLOTS };
     enum { DEFAULT_FORMAT = PIXEL_FORMAT_RGBA_8888 };

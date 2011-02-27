@@ -75,6 +75,26 @@ enum {
     NATIVE_WINDOW_WIDTH     = 0,
     NATIVE_WINDOW_HEIGHT,
     NATIVE_WINDOW_FORMAT,
+
+    /* The minimum number of buffers that must remain un-dequeued after a buffer
+     * has been queued.  This value applies only if set_buffer_count was used to
+     * override the number of buffers and if a buffer has since been queued.
+     * Users of the set_buffer_count ANativeWindow method should query this
+     * value before calling set_buffer_count.  If it is necessary to have N
+     * buffers simultaneously dequeued as part of the steady-state operation,
+     * and this query returns M then N+M buffers should be requested via
+     * native_window_set_buffer_count.
+     *
+     * Note that this value does NOT apply until a single buffer has been
+     * queued.  In particular this means that it is possible to:
+     *
+     * 1. Query M = min undequeued buffers
+     * 2. Set the buffer count to N + M
+     * 3. Dequeue all N + M buffers
+     * 4. Cancel M buffers
+     * 5. Queue, dequeue, queue, dequeue, ad infinitum
+     */
+    NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
 };
 
 /* valid operations for the (*perform)() hook */

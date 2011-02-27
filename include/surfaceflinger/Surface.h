@@ -242,6 +242,10 @@ private:
     status_t validate(bool inCancelBuffer = false) const;
     sp<ISurface> getISurface() const;
 
+    // When the buffer pool is a fixed size we want to make sure SurfaceFlinger
+    // won't stall clients, so we require an extra buffer.
+    enum { MIN_UNDEQUEUED_BUFFERS = 2 };
+
     inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
     inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
 
