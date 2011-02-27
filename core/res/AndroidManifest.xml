@@ -466,12 +466,13 @@
         android:label="@string/permlab_flashlight"
         android:description="@string/permdesc_flashlight" />
 
-    <!-- Allows an application to access USB devices -->
-    <permission android:name="android.permission.ACCESS_USB"
+    <!-- Allows an application to manage preferences and permissions for USB devices
+         @hide -->
+    <permission android:name="android.permission.MANAGE_USB"
         android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
-        android:protectionLevel="normal"
-        android:label="@string/permlab_accessUsb"
-        android:description="@string/permdesc_accessUsb" />
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_manageUsb"
+        android:description="@string/permdesc_manageUsb" />
 
     <!-- Allows an application to access the MTP USB kernel driver.
          For use only by the device side MTP implementation.
@@ -1372,9 +1373,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
                 android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name="com.android.server.usb.UsbResolverActivity"
+            android:theme="@style/Theme.Holo.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
         </activity>
 
         <service android:name="com.android.server.LoadAverageService"

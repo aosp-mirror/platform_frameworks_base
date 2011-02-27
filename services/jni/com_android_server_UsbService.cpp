@@ -177,7 +177,6 @@ static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strA
 
     buffer[0] = 0;
     int length = ioctl(fd, cmd, buffer);
-    LOGD("ioctl returned %d", length);
     if (buffer[0]) {
         jstring obj = env->NewStringUTF(buffer);
         env->SetObjectArrayElement(strArray, index, obj);
@@ -236,9 +235,9 @@ static JNINativeMethod method_table[] = {
 
 int register_android_server_UsbService(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("com/android/server/UsbService");
+    jclass clazz = env->FindClass("com/android/server/usb/UsbService");
     if (clazz == NULL) {
-        LOGE("Can't find com/android/server/UsbService");
+        LOGE("Can't find com/android/server/usb/UsbService");
         return -1;
     }
     method_usbDeviceAdded = env->GetMethodID(clazz, "usbDeviceAdded", "(Ljava/lang/String;IIIII[I[I)V");
@@ -267,7 +266,7 @@ int register_android_server_UsbService(JNIEnv *env)
     LOG_FATAL_IF(gParcelFileDescriptorOffsets.mConstructor == NULL,
                  "Unable to find constructor for android.os.ParcelFileDescriptor");
 
-    return jniRegisterNativeMethods(env, "com/android/server/UsbService",
+    return jniRegisterNativeMethods(env, "com/android/server/usb/UsbService",
             method_table, NELEM(method_table));
 }
 

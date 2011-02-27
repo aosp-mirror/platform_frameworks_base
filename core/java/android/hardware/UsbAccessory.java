@@ -95,6 +95,23 @@ public final class UsbAccessory implements Parcelable {
         return mVersion;
     }
 
+    private static boolean compare(String s1, String s2) {
+        if (s1 == null) return (s2 == null);
+        return s1.equals(s2);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof UsbAccessory) {
+            UsbAccessory accessory = (UsbAccessory)obj;
+            return (compare(mManufacturer, accessory.getManufacturer()) &&
+                    compare(mModel, accessory.getModel()) &&
+                    compare(mType, accessory.getType()) &&
+                    compare(mVersion, accessory.getVersion()));
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "UsbAccessory[mManufacturer=" + mManufacturer +
