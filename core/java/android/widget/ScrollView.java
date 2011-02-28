@@ -607,8 +607,16 @@ public class ScrollView extends FrameLayout {
                     endDrag();
                 }
                 break;
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                final int index = ev.getActionIndex();
+                final float y = ev.getY(index);
+                mLastMotionY = y;
+                mActivePointerId = ev.getPointerId(index);
+                break;
+            }
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
+                mLastMotionY = ev.getY(ev.findPointerIndex(mActivePointerId));
                 break;
         }
         return true;
