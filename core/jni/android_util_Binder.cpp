@@ -1250,15 +1250,13 @@ static void android_os_Parcel_writeNative(JNIEnv* env, jobject clazz,
     if (parcel == NULL) {
         return;
     }
-    void *dest;
 
     const status_t err = parcel->writeInt32(length);
     if (err != NO_ERROR) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
     }
 
-    dest = parcel->writeInplace(length);
-
+    void* dest = parcel->writeInplace(length);
     if (dest == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return;
@@ -1266,7 +1264,7 @@ static void android_os_Parcel_writeNative(JNIEnv* env, jobject clazz,
 
     jbyte* ar = (jbyte*)env->GetPrimitiveArrayCritical((jarray)data, 0);
     if (ar) {
-        memcpy(dest, ar, length);
+        memcpy(dest, ar + offset, length);
         env->ReleasePrimitiveArrayCritical((jarray)data, ar, 0);
     }
 }

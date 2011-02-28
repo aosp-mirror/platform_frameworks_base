@@ -31,6 +31,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -356,7 +357,7 @@ public final class Parcel {
     public final native void enforceInterface(String interfaceName);
 
     /**
-     * Write a byte array into the parcel at the current {#link #dataPosition},
+     * Write a byte array into the parcel at the current {@link #dataPosition},
      * growing {@link #dataCapacity} if needed.
      * @param b Bytes to place into the parcel.
      */
@@ -365,7 +366,7 @@ public final class Parcel {
     }
 
     /**
-     * Write an byte array into the parcel at the current {#link #dataPosition},
+     * Write an byte array into the parcel at the current {@link #dataPosition},
      * growing {@link #dataCapacity} if needed.
      * @param b Bytes to place into the parcel.
      * @param offset Index of first byte to be written.
@@ -376,9 +377,7 @@ public final class Parcel {
             writeInt(-1);
             return;
         }
-        if (b.length < offset + len || len < 0 || offset < 0) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        Arrays.checkOffsetAndCount(b.length, offset, len);
         writeNative(b, offset, len);
     }
 
