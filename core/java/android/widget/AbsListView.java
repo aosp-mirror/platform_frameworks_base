@@ -3529,6 +3529,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 post(this);
             } else {
                 mTouchMode = TOUCH_MODE_REST;
+                reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
             }
         }
 
