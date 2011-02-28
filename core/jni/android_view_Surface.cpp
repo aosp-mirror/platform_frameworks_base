@@ -177,7 +177,7 @@ static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
 
 sp<ANativeWindow> android_Surface_getNativeWindow(
         JNIEnv* env, jobject clazz) {
-    return getSurface(env, clazz).get();
+    return getSurface(env, clazz);
 }
 
 static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
