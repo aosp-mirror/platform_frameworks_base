@@ -1707,12 +1707,19 @@ videoEditor_populateSettings(
 
                 if (aFramingCtx->FramingYuv != M4OSA_NULL )
                 {
-                    if (aFramingCtx->FramingYuv->pac_data != M4OSA_NULL) {
-                        M4OSA_free((M4OSA_MemAddr32)aFramingCtx->FramingYuv->pac_data);
-                        aFramingCtx->FramingYuv->pac_data = M4OSA_NULL;
+                    if (aFramingCtx->FramingYuv[0].pac_data != M4OSA_NULL) {
+                        M4OSA_free((M4OSA_MemAddr32)aFramingCtx->FramingYuv[0].pac_data);
+                        aFramingCtx->FramingYuv[0].pac_data = M4OSA_NULL;
                     }
-                }
-                if (aFramingCtx->FramingYuv != M4OSA_NULL) {
+                    if (aFramingCtx->FramingYuv[1].pac_data != M4OSA_NULL) {
+                        M4OSA_free((M4OSA_MemAddr32)aFramingCtx->FramingYuv[1].pac_data);
+                        aFramingCtx->FramingYuv[1].pac_data = M4OSA_NULL;
+                    }
+                    if (aFramingCtx->FramingYuv[2].pac_data != M4OSA_NULL) {
+                        M4OSA_free((M4OSA_MemAddr32)aFramingCtx->FramingYuv[2].pac_data);
+                        aFramingCtx->FramingYuv[2].pac_data = M4OSA_NULL;
+                    }
+
                     M4OSA_free((M4OSA_MemAddr32)aFramingCtx->FramingYuv);
                     aFramingCtx->FramingYuv = M4OSA_NULL;
                 }
