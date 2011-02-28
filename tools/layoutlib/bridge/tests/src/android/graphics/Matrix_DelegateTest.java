@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge;
-
-import android.graphics.Matrix;
-import android.text.TextPaint;
+package android.graphics;
 
 import junit.framework.TestCase;
 
 /**
  *
  */
-public class AndroidGraphicsTests extends TestCase {
+public class Matrix_DelegateTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
@@ -36,14 +33,17 @@ public class AndroidGraphicsTests extends TestCase {
         super.tearDown();
     }
 
-    public void testMatrix() {
+    public void testIdentity() {
         Matrix m1 = new Matrix();
 
         assertTrue(m1.isIdentity());
 
         m1.setValues(new float[] { 1,0,0, 0,1,0, 0,0,1 });
         assertTrue(m1.isIdentity());
+    }
 
+    public void testCopyConstructor() {
+        Matrix m1 = new Matrix();
         Matrix m2 = new Matrix(m1);
 
         float[] v1 = new float[9];
@@ -54,10 +54,5 @@ public class AndroidGraphicsTests extends TestCase {
         for (int i = 0 ; i < 9; i++) {
             assertEquals(v1[i], v2[i]);
         }
-    }
-
-    public void textTextPaint() {
-        TextPaint p = new TextPaint();
-        assertNotNull(p);
     }
 }
