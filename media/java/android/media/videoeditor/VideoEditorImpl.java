@@ -373,6 +373,8 @@ public class VideoEditorImpl implements VideoEditor {
         switch (height) {
             case MediaProperties.HEIGHT_144:
                 break;
+            case MediaProperties.HEIGHT_288:
+                break;
             case MediaProperties.HEIGHT_360:
                 break;
             case MediaProperties.HEIGHT_480:

@@ -3556,7 +3556,7 @@ class MediaArtistNativeHelper {
             case MediaProperties.ASPECT_RATIO_4_3:
                 if (height == MediaProperties.HEIGHT_480)
                     retValue = VideoFrameSize.VGA;
-                if (height == MediaProperties.HEIGHT_720)
+                else if (height == MediaProperties.HEIGHT_720)
                     retValue = VideoFrameSize.S720p;
                 break;
             case MediaProperties.ASPECT_RATIO_5_3:
@@ -3566,6 +3566,8 @@ class MediaArtistNativeHelper {
             case MediaProperties.ASPECT_RATIO_11_9:
                 if (height == MediaProperties.HEIGHT_144)
                     retValue = VideoFrameSize.QCIF;
+                else if (height == MediaProperties.HEIGHT_288)
+                    retValue = VideoFrameSize.CIF;
                 break;
         }
         if (retValue == VideoFrameSize.SIZE_UNDEFINED) {
