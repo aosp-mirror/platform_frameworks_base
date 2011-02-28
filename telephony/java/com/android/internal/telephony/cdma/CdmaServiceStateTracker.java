@@ -232,57 +232,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         if (DBG) log("CdmaServiceStateTracker finalized");
     }
 
-    void registerForNetworkAttach(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-        networkAttachedRegistrants.add(r);
-
-        if (ss.getState() == ServiceState.STATE_IN_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    void unregisterForNetworkAttach(Handler h) {
-        networkAttachedRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition into Data attached.
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    void registerForCdmaDataConnectionAttached(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-        cdmaDataConnectionAttachedRegistrants.add(r);
-
-        if (cdmaDataConnectionState == ServiceState.STATE_IN_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    void unregisterForCdmaDataConnectionAttached(Handler h) {
-        cdmaDataConnectionAttachedRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition into Data detached.
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    void registerForCdmaDataConnectionDetached(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-        cdmaDataConnectionDetachedRegistrants.add(r);
-
-        if (cdmaDataConnectionState != ServiceState.STATE_IN_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    void unregisterForCdmaDataConnectionDetached(Handler h) {
-        cdmaDataConnectionDetachedRegistrants.remove(h);
-    }
-
     /**
      * Registration point for subscription info ready
      * @param h handler to notify
@@ -1094,7 +1043,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRegistered) {
-            networkAttachedRegistrants.notifyRegistrants();
+            mNetworkAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasChanged) {
@@ -1161,11 +1110,11 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRoamingOn) {
-            roamingOnRegistrants.notifyRegistrants();
+            mRoamingOnRegistrants.notifyRegistrants();
         }
 
         if (hasRoamingOff) {
-            roamingOffRegistrants.notifyRegistrants();
+            mRoamingOffRegistrants.notifyRegistrants();
         }
 
         if (hasLocationChanged) {
