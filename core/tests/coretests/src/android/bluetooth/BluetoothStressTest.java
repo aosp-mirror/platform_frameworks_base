@@ -316,4 +316,34 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         mTestUtils.disablePan(adapter);
         mTestUtils.disable(adapter);
     }
+
+    /**
+     * Stress test for verifying that AudioManager can open and close SCO connections.
+     * <p>
+     * In this test, a HSP connection is opened with an external headset and the SCO connection is
+     * repeatibly opened and closed.
+     */
+    public void testStartStopSco() {
+        int iterations = BluetoothTestRunner.sStartStopScoIterations;
+        if (iterations == 0) {
+            return;
+        }
+
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sHeadsetAddress);
+        mTestUtils.enable(adapter);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
+                BluetoothTestRunner.sPairPin);
+        mTestUtils.connectProfile(adapter, device, BluetoothProfile.HEADSET);
+
+        for (int i = 0; i < iterations; i++) {
+            mTestUtils.writeOutput("startStopSco iteration " + (i + 1) + " of " + iterations);
+            mTestUtils.startSco(adapter, device);
+            mTestUtils.stopSco(adapter, device);
+        }
+
+        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.disable(adapter);
+    }
 }
