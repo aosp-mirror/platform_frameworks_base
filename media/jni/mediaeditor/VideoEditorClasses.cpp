@@ -896,8 +896,9 @@ videoEditClasses_getAlphaMagicSettings(
                 jobject                             object,
                 M4xVSS_AlphaMagicSettings**         ppSettings)
 {
-    VideoEditJava_AlphaMagicFieldIds   fieldIds  = {NULL, NULL, NULL, NULL, NULL};
+    VideoEditJava_AlphaMagicFieldIds fieldIds;
     M4xVSS_AlphaMagicSettings* pSettings = M4OSA_NULL;
+    memset(&fieldIds, 0, sizeof(VideoEditJava_AlphaMagicFieldIds));
 
     // Check if the previous action succeeded.
     if (*pResult)
@@ -1036,11 +1037,10 @@ videoEditClasses_getBackgroundMusicSettings(
                 jobject                             object,
                 M4xVSS_BGMSettings**                ppSettings)
 {
-    VideoEditJava_BackgroundMusicFieldIds fieldIds  = {NULL, NULL, NULL, NULL,
-                                                       NULL, NULL,NULL,NULL,NULL,NULL};
+    VideoEditJava_BackgroundMusicFieldIds fieldIds;
     M4xVSS_BGMSettings*           pSettings = M4OSA_NULL;
     bool                          converted = true;
-
+    memset(&fieldIds, 0, sizeof(VideoEditJava_BackgroundMusicFieldIds));
     // Check if the previous action succeeded.
     if (*pResult)
     {
@@ -1324,12 +1324,12 @@ videoEditClasses_getClipSettings(
                 jobject                             object,
                 M4VSS3GPP_ClipSettings**            ppSettings)
 {
-    VideoEditJava_ClipSettingsFieldIds fieldIds  = {NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                             NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+    VideoEditJava_ClipSettingsFieldIds fieldIds;
     M4VSS3GPP_ClipSettings*    pSettings = M4OSA_NULL;
     M4OSA_ERR                  result    = M4NO_ERROR;
     bool                       converted = true;
-
+    memset(&fieldIds, 0, sizeof(VideoEditJava_ClipSettingsFieldIds));
     // Check if the previous action succeeded.
     if (*pResult)
     {
@@ -1500,10 +1500,10 @@ videoEditClasses_createClipSettings(
                 M4VSS3GPP_ClipSettings*             pSettings,
                 jobject*                            pObject)
 {
-    VideoEditJava_ClipSettingsFieldIds fieldIds = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                           NULL, NULL, NULL, NULL, NULL, NULL};
+    VideoEditJava_ClipSettingsFieldIds fieldIds;
     jclass                     clazz    = NULL;
     jobject                    object   = NULL;
+    memset(&fieldIds, 0, sizeof(VideoEditJava_ClipSettingsFieldIds));
 
     // Check if the previous action succeeded.
     if (*pResult)
@@ -1600,11 +1600,10 @@ videoEditPropClass_createProperties(
                 VideoEditPropClass_Properties*      pProperties,
                 jobject*                            pObject)
 {
-    VideoEditJava_PropertiesFieldIds fieldIds = {NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                                     NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    VideoEditJava_PropertiesFieldIds fieldIds;
     jclass                   clazz    = NULL;
     jobject                  object   = NULL;
-
+    memset(&fieldIds, 0, sizeof(VideoEditJava_PropertiesFieldIds));
     // Check if the previous action succeeded.
     if (*pResult)
     {
@@ -1783,9 +1782,7 @@ videoEditClasses_getEditSettings(
                 M4VSS3GPP_EditSettings**            ppSettings,
                 bool                                flag)
 {
-    VideoEditJava_EditSettingsFieldIds fieldIds            ={NULL, NULL, NULL, NULL, NULL, NULL,
-                                                            NULL, NULL, NULL, NULL, NULL, NULL,
-                                                            NULL, NULL,NULL};
+    VideoEditJava_EditSettingsFieldIds fieldIds;
     jobjectArray               clipSettingsArray           = NULL;
     jsize                      clipSettingsArraySize       = 0;
     jobject                    clipSettings                = NULL;
@@ -1799,7 +1796,7 @@ videoEditClasses_getEditSettings(
     int                        audioChannels               = 0;
     M4VSS3GPP_EditSettings*    pSettings                   = M4OSA_NULL;
     bool                       converted                   = true;
-
+    memset(&fieldIds, 0, sizeof(VideoEditJava_EditSettingsFieldIds));
     // Check if the previous action succeeded.
     if (*pResult)
     {
@@ -2304,10 +2301,10 @@ videoEditClasses_getEffectSettings(
                 jobject                             object,
                 M4VSS3GPP_EffectSettings*           pSettings)
 {
-    VideoEditJava_EffectSettingsFieldIds fieldIds  = {NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-                                  NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+    VideoEditJava_EffectSettingsFieldIds fieldIds;
     bool                         converted = true;
+    memset(&fieldIds, 0, sizeof(VideoEditJava_EffectSettingsFieldIds));
 
     // Check if the previous action succeeded.
     if (*pResult)
@@ -2736,11 +2733,13 @@ videoEditClasses_getTransitionSettings(
                 jobject                             object,
                 M4VSS3GPP_TransitionSettings**      ppSettings)
 {
-    VideoEditJava_TransitionSettingsFieldIds fieldIds      = {NULL, NULL, NULL, NULL, NULL, NULL};
+
+    VideoEditJava_TransitionSettingsFieldIds fieldIds;
     jobject                          alphaSettings = NULL;
     jobject                          slideSettings = NULL;
     M4VSS3GPP_TransitionSettings*    pSettings     = M4OSA_NULL;
     bool                             converted     = true;
+    memset(&fieldIds, 0, sizeof(VideoEditJava_TransitionSettingsFieldIds));
 
     // Check if the previous action succeeded.
     if (*pResult)
@@ -3025,10 +3024,11 @@ videoEditClasses_createVersion(
                 M4_VersionInfo*                     pVersionInfo,
                 jobject*                            pObject)
 {
-    VideoEditJava_VersionFieldIds fieldIds = {NULL, NULL, NULL};
+
+    VideoEditJava_VersionFieldIds fieldIds;
     jclass                clazz    = NULL;
     jobject               object   = NULL;
-
+    memset(&fieldIds, 0, sizeof(VideoEditJava_VersionFieldIds));
     // Check if the previous action succeeded.
     if (*pResult)
     {

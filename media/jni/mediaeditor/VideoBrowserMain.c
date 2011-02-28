@@ -206,8 +206,8 @@ M4OSA_ERR videoBrowserCreate(
                 pContext->m_pReaderCtx, &mediaFamily, &pStreamHandler);
 
         /*in case we found a bifs stream or something else...*/
-        if ((err == M4ERR_READER_UNKNOWN_STREAM_TYPE) ||
-            (err == M4WAR_TOO_MUCH_STREAMS))
+        if ((err == (M4OSA_UInt32)M4ERR_READER_UNKNOWN_STREAM_TYPE) ||
+            (err == (M4OSA_UInt32)M4WAR_TOO_MUCH_STREAMS))
         {
             err = M4NO_ERROR;
             continue;
@@ -251,7 +251,7 @@ M4OSA_ERR videoBrowserCreate(
                             &decoderType, &pContext->m_pDecoder);
 #else
                         err = VideoEditorVideoDecoder_getInterface_MPEG4(
-                            &decoderType, &pContext->m_pDecoder);
+                            &decoderType, (void **)&pContext->m_pDecoder);
 #endif
                     CHECK_ERR(videoBrowserCreate, err) ;
 
@@ -277,7 +277,7 @@ M4OSA_ERR videoBrowserCreate(
                             &decoderType, &pContext->m_pDecoder);
 #else
                         err = VideoEditorVideoDecoder_getInterface_H264(
-                            &decoderType, &pContext->m_pDecoder);
+                            &decoderType, (void **)&pContext->m_pDecoder);
 #endif
                    CHECK_ERR(videoBrowserCreate, err) ;
 
