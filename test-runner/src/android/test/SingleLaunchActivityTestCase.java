@@ -75,7 +75,7 @@ public abstract class SingleLaunchActivityTestCase<T extends Activity>
     protected void tearDown() throws Exception {
         // If it is the last test case, call finish on the activity.
         sTestCaseCounter --;
-        if (sTestCaseCounter == 1) {
+        if (sTestCaseCounter == 0) {
             sActivity.finish();
         }        
         super.tearDown();
