@@ -1040,7 +1040,7 @@ int Surface::getBufferIndex(const sp<GraphicBuffer>& buffer) const
         // e.g. if GraphicBuffer is used to wrap an android_native_buffer_t that
         // was dequeued from an ANativeWindow.
         for (size_t i = 0; i < mBuffers.size(); i++) {
-            if (buffer->handle == mBuffers[i]->handle) {
+            if (mBuffers[i] != 0 && buffer->handle == mBuffers[i]->handle) {
                 idx = mBuffers[i]->getIndex();
                 break;
             }
