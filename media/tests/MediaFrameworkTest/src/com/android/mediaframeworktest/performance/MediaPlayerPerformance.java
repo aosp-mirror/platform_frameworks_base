@@ -17,7 +17,9 @@
 package com.android.mediaframeworktest.performance;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.MediaFrameworkPerfTestRunner;
 import com.android.mediaframeworktest.MediaNames;
+import com.android.mediaframeworktest.MediaTestUtil;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Camera;
@@ -27,7 +29,7 @@ import android.media.MediaRecorder;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.test.ActivityInstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
@@ -52,7 +54,7 @@ import android.hardware.Camera.PreviewCallback;
  * Junit / Instrumentation - performance measurement for media player and 
  * recorder
  */
-public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<MediaFrameworkTest> {
+public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
 
     private String TAG = "MediaPlayerPerformance";
 
@@ -87,6 +89,15 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase<Medi
 
     protected void setUp() throws Exception {
         super.setUp();
+        getActivity();
+        if (MediaFrameworkPerfTestRunner.mGetNativeHeapDump)
+            MediaTestUtil.getNativeHeapDump(this.getName() + "_before");
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        if (MediaFrameworkPerfTestRunner.mGetNativeHeapDump)
+            MediaTestUtil.getNativeHeapDump(this.getName() + "_after");
     }
 
     public void createDB() {
