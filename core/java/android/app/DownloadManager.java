@@ -907,8 +907,8 @@ public class DownloadManager {
 
     /**
      * Cancel downloads and remove them from the download manager.  Each download will be stopped if
-     * it was running, and it will no longer be accessible through the download manager.  If a file
-     * was already downloaded to external storage, it will be deleted.
+     * it was running, and it will no longer be accessible through the download manager.
+     * If there is a downloaded file, partial or complete, it is deleted.
      *
      * @param ids the IDs of the downloads to remove
      * @return the number of downloads actually removed
