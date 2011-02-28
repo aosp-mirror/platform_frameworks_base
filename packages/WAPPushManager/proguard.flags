@@ -1,0 +1,18 @@
+
+#apply method is dynamically referenced by the reflection class.
+-keep class android.app.ContextImpl$SharedPreferencesImpl$EditorImpl {
+    void apply();
+}
+-keep class android.content.SharedPreferences$Editor {
+    void apply();
+}
+
+#WapPushManager is referenced only by AndroidManifest.xml
+-keep class com.android.smspush.WapPushManager {
+#CTS module method
+    public boolean isDataExist(java.lang.String, java.lang.String,
+            java.lang.String, java.lang.String);
+    public boolean verifyData(java.lang.String, java.lang.String,
+            java.lang.String, java.lang.String, int, boolean, boolean);
+}
+
