@@ -55,6 +55,11 @@
 
 #include <fcntl.h>
 
+#include <gui/SurfaceTextureClient.h>
+
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+
 using namespace android;
 
 static long gNumRepetitions;
@@ -65,6 +70,10 @@ static bool gPlaybackAudio;
 static bool gWriteMP4;
 static bool gDisplayHistogram;
 static String8 gWriteMP4Filename;
+
+static sp<ANativeWindow> gSurface;
+
+#define USE_SURFACE_COMPOSER 0
 
 static int64_t getNowUs() {
     struct timeval tv;
@@ -138,7 +147,8 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
         rawSource = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source,
             NULL /* matchComponentName */,
-            gPreferSoftwareCodec ? OMXCodec::kPreferSoftwareCodecs : 0);
+            gPreferSoftwareCodec ? OMXCodec::kPreferSoftwareCodecs : 0,
+            gSurface);
 
         if (rawSource == NULL) {
             fprintf(stderr, "Failed to instantiate decoder for '%s'.\n", mime);
@@ -540,6 +550,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -k seek test\n");
     fprintf(stderr, "       -x display a histogram of decoding times/fps "
                     "(video only)\n");
+    fprintf(stderr, "       -S allocate buffers from a surface\n");
 }
 
 int main(int argc, char **argv) {
@@ -550,6 +561,7 @@ int main(int argc, char **argv) {
     bool dumpProfiles = false;
     bool extractThumbnail = false;
     bool seekTest = false;
+    bool useSurfaceAlloc = false;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
     gReproduceBug = -1;
@@ -563,7 +575,7 @@ int main(int argc, char **argv) {
     sp<LiveSession> liveSession;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptsow:kx")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsow:kxS")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -639,6 +651,12 @@ int main(int argc, char **argv) {
             case 'x':
             {
                 gDisplayHistogram = true;
+                break;
+            }
+
+            case 'S':
+            {
+                useSurfaceAlloc = true;
                 break;
             }
 
@@ -778,6 +796,39 @@ int main(int argc, char **argv) {
              it != list.end(); ++it) {
             printf("%s\n", (*it).mName.string());
         }
+    }
+
+    sp<SurfaceComposerClient> composerClient;
+    sp<SurfaceControl> control;
+
+    if (useSurfaceAlloc && !audioOnly) {
+#if USE_SURFACE_COMPOSER
+        composerClient = new SurfaceComposerClient;
+        CHECK_EQ(composerClient->initCheck(), (status_t)OK);
+
+        control = composerClient->createSurface(
+                getpid(),
+                String8("A Surface"),
+                0,
+                1280,
+                800,
+                PIXEL_FORMAT_RGB_565,
+                0);
+
+        CHECK(control != NULL);
+        CHECK(control->isValid());
+
+        CHECK_EQ(composerClient->openTransaction(), (status_t)OK);
+        CHECK_EQ(control->setLayer(30000), (status_t)OK);
+        CHECK_EQ(control->show(), (status_t)OK);
+        CHECK_EQ(composerClient->closeTransaction(), (status_t)OK);
+
+        gSurface = control->getSurface();
+        CHECK(gSurface != NULL);
+#else
+        sp<SurfaceTexture> texture = new SurfaceTexture(0 /* tex */);
+        gSurface = new SurfaceTextureClient(texture);
+#endif
     }
 
     DataSource::RegisterDefaultSniffers();
@@ -955,6 +1006,14 @@ int main(int argc, char **argv) {
 
             sleep(3);
         }
+    }
+
+    if (useSurfaceAlloc && !audioOnly) {
+        gSurface.clear();
+
+#if USE_SURFACE_COMPOSER
+        composerClient->dispose();
+#endif
     }
 
     client.disconnect();
