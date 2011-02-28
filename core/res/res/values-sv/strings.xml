@@ -823,7 +823,7 @@
     <string name="anr_activity_process" msgid="5420826626009561014">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
     <string name="anr_application_process" msgid="4185842666452210193">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
     <string name="anr_process" msgid="1246866008169975783">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarar inte."</string>
-    <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
+    <string name="force_close" msgid="3653416315450806396">"Tvinga stängning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Programmet omdirigerades"</string>
