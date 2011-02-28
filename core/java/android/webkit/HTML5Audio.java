@@ -173,7 +173,8 @@ class HTML5Audio extends Handler
             mState = INITIALIZED;
             mMediaPlayer.prepareAsync();
         } catch (IOException e) {
-            Log.e(LOGTAG, "couldn't load the resource: " + url + " exc: " + e);
+            String debugUrl = url.length() > 128 ? url.substring(0, 128) + "..." : url;
+            Log.e(LOGTAG, "couldn't load the resource: "+ debugUrl +" exc: " + e);
             resetMediaPlayer();
         }
     }
