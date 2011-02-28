@@ -17,11 +17,15 @@
 
 package android.hardware;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 /**
  * Class for accessing USB state information.
  * @hide
  */
-public class Usb {
+public class UsbManager {
    /**
      * Broadcast Action:  A broadcast for USB connected events.
      *
@@ -96,4 +100,30 @@ public class Usb {
      * Used in extras for the {@link #ACTION_USB_CONNECTED} broadcast
      */
     public static final String USB_FUNCTION_DISABLED = "disabled";
+
+    private static File getFunctionEnableFile(String function) {
+        return new File("/sys/class/usb_composite/" + function + "/enable");
+    }
+
+    /**
+     * Returns true if the specified USB function is supported by the kernel.
+     * Note that a USB function maybe supported but disabled.
+     */
+    public static boolean isFunctionSupported(String function) {
+        return getFunctionEnableFile(function).exists();
+    }
+
+    /**
+     * Returns true if the specified USB function is currently enabled.
+     */
+    public static boolean isFunctionEnabled(String function) {
+        try {
+            FileInputStream stream = new FileInputStream(getFunctionEnableFile(function));
+            boolean enabled = (stream.read() == '1');
+            stream.close();
+            return enabled;
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }
