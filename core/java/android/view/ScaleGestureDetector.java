@@ -245,6 +245,7 @@ public class ScaleGestureDetector {
                     final float bottomSlop = mBottomSlopEdge;
                     int index0 = event.findPointerIndex(mActiveId0);
                     int index1 = event.findPointerIndex(mActiveId1);
+
                     float x0 = getRawX(event, index0);
                     float y0 = getRawY(event, index0);
                     float x1 = getRawX(event, index1);
@@ -353,14 +354,24 @@ public class ScaleGestureDetector {
                         if (actionId == mActiveId0) {
                             final int newIndex = findNewActiveIndex(event, mActiveId1, actionIndex);
                             if (newIndex >= 0) {
+                                mListener.onScaleEnd(this);
                                 mActiveId0 = event.getPointerId(newIndex);
+                                mActive0MostRecent = true;
+                                mPrevEvent = MotionEvent.obtain(event);
+                                setContext(event);
+                                mGestureInProgress = mListener.onScaleBegin(this);
                             } else {
                                 gestureEnded = true;
                             }
                         } else if (actionId == mActiveId1) {
                             final int newIndex = findNewActiveIndex(event, mActiveId0, actionIndex);
                             if (newIndex >= 0) {
+                                mListener.onScaleEnd(this);
                                 mActiveId1 = event.getPointerId(newIndex);
+                                mActive0MostRecent = false;
+                                mPrevEvent = MotionEvent.obtain(event);
+                                setContext(event);
+                                mGestureInProgress = mListener.onScaleBegin(this);
                             } else {
                                 gestureEnded = true;
                             }
@@ -449,6 +460,7 @@ public class ScaleGestureDetector {
      * MotionEvent has no getRawX(int) method; simulate it pending future API approval.
      */
     private static float getRawX(MotionEvent event, int pointerIndex) {
+        if (pointerIndex < 0) return Float.MIN_VALUE;
         if (pointerIndex == 0) return event.getRawX();
         float offset = event.getRawX() - event.getX();
         return event.getX(pointerIndex) + offset;
@@ -458,6 +470,7 @@ public class ScaleGestureDetector {
      * MotionEvent has no getRawY(int) method; simulate it pending future API approval.
      */
     private static float getRawY(MotionEvent event, int pointerIndex) {
+        if (pointerIndex < 0) return Float.MIN_VALUE;
         if (pointerIndex == 0) return event.getRawY();
         float offset = event.getRawY() - event.getY();
         return event.getY(pointerIndex) + offset;
