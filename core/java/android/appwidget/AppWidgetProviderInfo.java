@@ -130,6 +130,9 @@ public class AppWidgetProviderInfo implements Parcelable {
 
     /**
      * The view id of the AppWidget subview which should be auto-advanced by the widget's host.
+     *
+     * <p>This field corresponds to the <code>android:autoAdvanceViewId</code> attribute in
+     * the AppWidget meta-data file.
      */
     public int autoAdvanceViewId;
 
@@ -146,8 +149,11 @@ public class AppWidgetProviderInfo implements Parcelable {
      * The rules by which a widget can be resized. See {@link #RESIZE_NONE},
      * {@link #RESIZE_NONE}, {@link #RESIZE_HORIZONTAL},
      * {@link #RESIZE_VERTICAL}, {@link #RESIZE_BOTH}.
+     *
+     * <p>This field corresponds to the <code>android:resizeMode</code> attribute in
+     * the AppWidget meta-data file.
      */
-    public int resizableMode;
+    public int resizeMode;
 
     public AppWidgetProviderInfo() {
     }
@@ -170,7 +176,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.icon = in.readInt();
         this.previewImage = in.readInt();
         this.autoAdvanceViewId = in.readInt();
-        this.resizableMode = in.readInt();
+        this.resizeMode = in.readInt();
     }
 
     public void writeToParcel(android.os.Parcel out, int flags) {
@@ -194,7 +200,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.icon);
         out.writeInt(this.previewImage);
         out.writeInt(this.autoAdvanceViewId);
-        out.writeInt(this.resizableMode);
+        out.writeInt(this.resizeMode);
     }
 
     public int describeContents() {

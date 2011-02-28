@@ -1029,7 +1029,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             		com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
             info.autoAdvanceViewId = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_autoAdvanceViewId, -1);
-            info.resizableMode = sa.getInt(
+            info.resizeMode = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_resizeMode,
                     AppWidgetProviderInfo.RESIZE_NONE);
 
