@@ -417,8 +417,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/NotePad "Note Pad" \
 		-samplecode $(sample_dir)/SampleSyncAdapter \
 		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
-		-samplecode frameworks/base/libs/rs/java \
-		            resources/samples/Renderscript "Renderscript" \
+		-samplecode $(sample_dir)/RenderScript \
+		            resources/samples/RenderScript "RenderScript" \
 		-samplecode $(sample_dir)/SearchableDictionary \
 		            resources/samples/SearchableDictionary "Searchable Dictionary v2" \
 		-samplecode $(sample_dir)/SipDemo \
