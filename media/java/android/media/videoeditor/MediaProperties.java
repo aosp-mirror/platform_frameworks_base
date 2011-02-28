@@ -29,6 +29,7 @@ public class MediaProperties {
      *  Supported heights
      */
     public static final int HEIGHT_144 = 144;
+    public static final int HEIGHT_288 = 288;
     public static final int HEIGHT_360 = 360;
     public static final int HEIGHT_480 = 480;
     public static final int HEIGHT_720 = 720;
@@ -82,7 +83,8 @@ public class MediaProperties {
     @SuppressWarnings({"unchecked"})
     private static final Pair<Integer, Integer>[] ASPECT_RATIO_11_9_RESOLUTIONS =
         new Pair[] {
-        new Pair<Integer, Integer>(176, HEIGHT_144)
+        new Pair<Integer, Integer>(176, HEIGHT_144),
+        new Pair<Integer, Integer>(352, HEIGHT_288)
     };
 
     @SuppressWarnings({"unchecked"})
