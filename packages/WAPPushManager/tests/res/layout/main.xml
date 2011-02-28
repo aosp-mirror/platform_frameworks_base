@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2010 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<AbsoluteLayout
+android:id="@+id/widget133"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+xmlns:android="http://schemas.android.com/apk/res/android"
+>
+<EditText
+android:id="@+id/app_id"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="10"
+android:textSize="18sp"
+android:layout_x="0px"
+android:layout_y="26px"
+>
+</EditText>
+<EditText
+android:id="@+id/cont"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="20"
+android:textSize="18sp"
+android:layout_x="47px"
+android:layout_y="26px"
+>
+</EditText>
+<EditText
+android:id="@+id/pkg"
+android:layout_width="125px"
+android:layout_height="wrap_content"
+android:text="pkg"
+android:textSize="18sp"
+android:layout_x="0px"
+android:layout_y="81px"
+>
+</EditText>
+<EditText
+android:id="@+id/cls"
+android:layout_width="173px"
+android:layout_height="wrap_content"
+android:text="cls"
+android:textSize="18sp"
+android:layout_x="147px"
+android:layout_y="81px"
+>
+</EditText>
+<Button
+android:id="@+id/addpkg"
+android:layout_width="182px"
+android:layout_height="wrap_content"
+android:text="add/update package"
+android:layout_x="15px"
+android:layout_y="225px"
+>
+</Button>
+<TextView
+android:id="@+id/widget52"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="input app_id, cont_type, pkg, cls"
+android:textSize="18sp"
+android:layout_x="0px"
+android:layout_y="0px"
+>
+</TextView>
+<Button
+android:id="@+id/procmsg"
+android:layout_width="109px"
+android:layout_height="wrap_content"
+android:text="process msg"
+android:layout_x="197px"
+android:layout_y="361px"
+>
+</Button>
+<RadioGroup
+android:id="@+id/widget137"
+android:layout_width="83px"
+android:layout_height="80px"
+android:orientation="vertical"
+android:layout_x="19px"
+android:layout_y="137px"
+>
+<RadioButton
+android:id="@+id/act"
+android:layout_width="182px"
+android:layout_height="wrap_content"
+android:text="act"
+android:checked="true"
+>
+</RadioButton>
+<RadioButton
+android:id="@+id/svc"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="svc"
+>
+</RadioButton>
+</RadioGroup>
+<Button
+android:id="@+id/delpkg"
+android:layout_width="174px"
+android:layout_height="wrap_content"
+android:text="delete pkg"
+android:layout_x="14px"
+android:layout_y="283px"
+>
+</Button>
+<EditText
+android:id="@+id/pdu"
+android:layout_width="186px"
+android:layout_height="83px"
+android:text="0006080302030aaf02905c030d6a0085070373616d706c6540646f636f6d6f2e6e652e6a700005c3072009102012345601"
+android:textSize="18sp"
+android:layout_x="10px"
+android:layout_y="341px"
+>
+</EditText>
+<CheckBox
+android:id="@+id/ftr"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="ftr_proc"
+android:layout_x="143px"
+android:layout_y="181px"
+>
+</CheckBox>
+<CheckBox
+android:id="@+id/sig"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="nd_sig"
+android:checked="true"
+android:layout_x="142px"
+android:layout_y="140px"
+>
+</CheckBox>
+</AbsoluteLayout>

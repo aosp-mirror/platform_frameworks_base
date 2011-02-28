@@ -1723,7 +1723,8 @@ static status_t writeLayoutClasses(
 
 static status_t writeSymbolClass(
     FILE* fp, const sp<AaptAssets>& assets, bool includePrivate,
-    const sp<AaptSymbols>& symbols, const String8& className, int indent)
+    const sp<AaptSymbols>& symbols, const String8& className, int indent,
+    bool nonConstantId)
 {
     fprintf(fp, "%spublic %sfinal class %s {\n",
             getIndentSpace(indent),
@@ -1732,6 +1733,10 @@ static status_t writeSymbolClass(
 
     size_t i;
     status_t err = NO_ERROR;
+
+    const char * id_format = nonConstantId ?
+            "%spublic static int %s=0x%08x;\n" :
+            "%spublic static final int %s=0x%08x;\n";
 
     size_t N = symbols->getSymbols().size();
     for (i=0; i<N; i++) {
@@ -1785,7 +1790,7 @@ static status_t writeSymbolClass(
         if (deprecated) {
             fprintf(fp, "%s@Deprecated\n", getIndentSpace(indent));
         }
-        fprintf(fp, "%spublic static final int %s=0x%08x;\n",
+        fprintf(fp, id_format,
                 getIndentSpace(indent),
                 String8(name).string(), (int)sym.int32Val);
     }
@@ -1836,7 +1841,7 @@ static status_t writeSymbolClass(
         if (nclassName == "styleable") {
             styleableSymbols = nsymbols;
         } else {
-            err = writeSymbolClass(fp, assets, includePrivate, nsymbols, nclassName, indent);
+            err = writeSymbolClass(fp, assets, includePrivate, nsymbols, nclassName, indent, nonConstantId);
         }
         if (err != NO_ERROR) {
             return err;
@@ -1907,7 +1912,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         "\n"
         "package %s;\n\n", package.string());
 
-        status_t err = writeSymbolClass(fp, assets, includePrivate, symbols, className, 0);
+        status_t err = writeSymbolClass(fp, assets, includePrivate, symbols, className, 0, bundle->getNonConstantId());
         if (err != NO_ERROR) {
             return err;
         }

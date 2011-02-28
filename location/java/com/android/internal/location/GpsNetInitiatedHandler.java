@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.telephony.GsmAlphabet;
 
 /**
  * A GPS Network-initiated Handler class used by LocationManager.
@@ -288,58 +289,32 @@ public class GpsNetInitiatedHandler {
      */
     static String decodeGSMPackedString(byte[] input)
     {
-        final char CHAR_CR = 0x0D;
-        int nStridx = 0;
-        int nPckidx = 0;
-        int num_bytes = input.length;
-        int cPrev = 0;
-        int cCurr = 0;
-        byte nShift;
-        byte nextChar;
-        byte[] stringBuf = new byte[input.length * 2];
-        String result = "";
+        final char PADDING_CHAR = 0x00;
+        int lengthBytes = input.length;
+        int lengthSeptets = (lengthBytes * 8) / 7;
+        String decoded;
 
-        while(nPckidx < num_bytes)
-        {
-            nShift = (byte) (nStridx & 0x07);
-            cCurr = input[nPckidx++];
-            if (cCurr < 0) cCurr += 256;
-
-            /* A 7-bit character can be split at the most between two bytes of packed
-             ** data.
-             */
-            nextChar = (byte) (( (cCurr << nShift) | (cPrev >> (8-nShift)) ) & 0x7F);
-            stringBuf[nStridx++] = nextChar;
-
-            /* Special case where the whole of the next 7-bit character fits inside
-             ** the current byte of packed data.
-             */
-            if(nShift == 6)
-            {
-                /* If the next 7-bit character is a CR (0x0D) and it is the last
-                 ** character, then it indicates a padding character. Drop it.
-                 */
-                if (nPckidx == num_bytes || (cCurr >> 1) == CHAR_CR)
-                {
-                    break;
+        /* Special case where the last 7 bits in the last byte could hold a valid
+         * 7-bit character or a padding character. Drop the last 7-bit character
+         * if it is a padding character.
+         */
+        if (lengthBytes % 7 == 0) {
+            if (lengthBytes > 0) {
+                if ((input[lengthBytes - 1] >> 1) == PADDING_CHAR) {
+                    lengthSeptets = lengthSeptets - 1;
                 }
-
-                nextChar = (byte) (cCurr >> 1);
-                stringBuf[nStridx++] = nextChar;
             }
-
-            cPrev = cCurr;
         }
 
-        try {
-            result = new String(stringBuf, 0, nStridx, "US-ASCII");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            Log.e(TAG, e.getMessage());
+        decoded = GsmAlphabet.gsm7BitPackedToString(input, 0, lengthSeptets);
+
+        // Return "" if decoding of GSM packed string fails
+        if (null == decoded) {
+            Log.e(TAG, "Decoding of GSM packed string failed");
+            decoded = "";
         }
 
-        return result;
+        return decoded;
     }
 
     static String decodeUTF8String(byte[] input)

@@ -37,6 +37,7 @@ public class WspTypeDecoder {
     private final static HashMap<Integer, String> WELL_KNOWN_PARAMETERS =
             new HashMap<Integer, String>();
 
+    public static final int PARAMETER_ID_X_WAP_APPLICATION_ID = 0x2f;
     private static final int Q_VALUE = 0x00;
 
     static {
@@ -600,6 +601,70 @@ public class WspTypeDecoder {
             return true;
         }
         return decodeTextString(startIndex);
+    }
+
+    /**
+     * Seek for the "X-Wap-Application-Id" field for WSP pdu
+     *
+     * @param startIndex The starting position of seek pointer
+     * @param endIndex Valid seek area end point
+     *
+     * @return false when error(not a X-Wap-Application-Id) occur
+     *         return value can be retrieved by getValue32()
+     */
+    public boolean seekXWapApplicationId(int startIndex, int endIndex) {
+        int index = startIndex;
+
+        try {
+            for (index = startIndex; index <= endIndex; ) {
+                /**
+                 * 8.4.1.1  Field name
+                 * Field name is integer or text.
+                 */
+                if (decodeIntegerValue(index)) {
+                    int fieldValue = (int) getValue32();
+
+                    if (fieldValue == PARAMETER_ID_X_WAP_APPLICATION_ID) {
+                        unsigned32bit = index + 1;
+                        return true;
+                    }
+                } else {
+                    if (!decodeTextString(index)) return false;
+                }
+                index += getDecodedDataLength();
+                if (index > endIndex) return false;
+
+                /**
+                 * 8.4.1.2 Field values
+                 * Value Interpretation of First Octet
+                 * 0 - 30 This octet is followed by the indicated number (0 - 30)
+                        of data octets
+                 * 31 This octet is followed by a uintvar, which indicates the number
+                 *      of data octets after it
+                 * 32 - 127 The value is a text string, terminated by a zero octet
+                        (NUL character)
+                 * 128 - 255 It is an encoded 7-bit value; this header has no more data
+                 */
+                byte val = wspData[index];
+                if (0 <= val && val <= WAP_PDU_SHORT_LENGTH_MAX) {
+                    index += wspData[index] + 1;
+                } else if (val == WAP_PDU_LENGTH_QUOTE) {
+                    if (index + 1 >= endIndex) return false;
+                    index++;
+                    if (!decodeUintvarInteger(index)) return false;
+                    index += getDecodedDataLength();
+                } else if (WAP_PDU_LENGTH_QUOTE < val && val <= 127) {
+                    if (!decodeTextString(index)) return false;
+                    index += getDecodedDataLength();
+                } else {
+                    index++;
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //seek application ID failed. WSP header might be corrupted
+            return false;
+        }
+        return false;
     }
 
     /**

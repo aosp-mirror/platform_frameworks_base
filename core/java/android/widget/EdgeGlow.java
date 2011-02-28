@@ -339,6 +339,7 @@ public class EdgeGlow {
                     mEdgeScaleY = mEdgeScaleYStart +
                         (mEdgeScaleYFinish - mEdgeScaleYStart) *
                             interp * factor;
+                    mState = STATE_RECEDE;
                     break;
                 case STATE_RECEDE:
                     mState = STATE_IDLE;
