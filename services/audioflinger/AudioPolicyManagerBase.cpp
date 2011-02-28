@@ -1889,7 +1889,15 @@ void AudioPolicyManagerBase::initializeVolumeCurves() {
         mStreams[i].mVolDbAtt[StreamDescriptor::VOLMAX] = 0.0f;
     }
 
-    // TODO add modifications for music to have finer steps below knee1 and above knee2
+    // Modification for music: more attenuation for lower volumes, finer steps at high volumes
+    mStreams[AudioSystem::MUSIC].mVolIndex[StreamDescriptor::VOLMIN] = 1;
+    mStreams[AudioSystem::MUSIC].mVolDbAtt[StreamDescriptor::VOLMIN] = -58.0f;
+    mStreams[AudioSystem::MUSIC].mVolIndex[StreamDescriptor::VOLKNEE1] = 20;
+    mStreams[AudioSystem::MUSIC].mVolDbAtt[StreamDescriptor::VOLKNEE1] = -40.0f;
+    mStreams[AudioSystem::MUSIC].mVolIndex[StreamDescriptor::VOLKNEE2] = 60;
+    mStreams[AudioSystem::MUSIC].mVolDbAtt[StreamDescriptor::VOLKNEE2] = -17.0f;
+    mStreams[AudioSystem::MUSIC].mVolIndex[StreamDescriptor::VOLMAX] = 100;
+    mStreams[AudioSystem::MUSIC].mVolDbAtt[StreamDescriptor::VOLMAX] = 0.0f;
 }
 
 float AudioPolicyManagerBase::computeVolume(int stream, int index, audio_io_handle_t output, uint32_t device)
