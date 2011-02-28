@@ -552,9 +552,38 @@ public abstract class PackageManager {
     public static final int DONT_DELETE_DATA = 0x00000001;
 
     /**
+     * Return code for when package deletion succeeds. This is passed to the
+     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
+     * succeeded in deleting the package.
+     * 
+     * @hide
+     */
+    public static final int DELETE_SUCCEEDED = 1;
+
+    /**
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
+     * failed to delete the package for an unspecified reason.
+     * 
+     * @hide
+     */
+    public static final int DELETE_FAILED_INTERNAL_ERROR = -1;
+
+    /**
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
+     * failed to delete the package because it is the active DevicePolicy
+     * manager.
+     * 
+     * @hide
+     */
+    public static final int DELETE_FAILED_DEVICE_POLICY_MANAGER = -2;
+
+    /**
      * Return code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * when the package has been successfully moved by the system.
+     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)} when the
+     * package has been successfully moved by the system.
+     * 
      * @hide
      */
     public static final int MOVE_SUCCEEDED = 1;

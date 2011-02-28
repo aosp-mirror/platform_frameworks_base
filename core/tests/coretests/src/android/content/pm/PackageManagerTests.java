@@ -769,9 +769,9 @@ public class PackageManagerTests extends AndroidTestCase {
             return doneFlag;
         }
 
-        public void packageDeleted(boolean succeeded) throws RemoteException {
+        public void packageDeleted(String packageName, int returnCode) throws RemoteException {
             synchronized(this) {
-                this.succeeded = succeeded;
+                this.succeeded = returnCode == PackageManager.DELETE_SUCCEEDED;
                 doneFlag = true;
                 notifyAll();
             }
