@@ -134,14 +134,17 @@ class UsbService {
         mContext = context;
         init();  // set initial status
 
-        mUEventObserver.startObserving(USB_CONNECTED_MATCH);
-        mUEventObserver.startObserving(USB_CONFIGURATION_MATCH);
-        mUEventObserver.startObserving(USB_FUNCTIONS_MATCH);
+        if (mConfiguration >= 0) {
+            mUEventObserver.startObserving(USB_CONNECTED_MATCH);
+            mUEventObserver.startObserving(USB_CONFIGURATION_MATCH);
+            mUEventObserver.startObserving(USB_FUNCTIONS_MATCH);
+        }
     }
 
     private final void init() {
         char[] buffer = new char[1024];
 
+        mConfiguration = -1;
         try {
             FileReader file = new FileReader(USB_CONNECTED_PATH);
             int len = file.read(buffer, 0, 1024);
@@ -153,10 +156,12 @@ class UsbService {
             file.close();
             mConfiguration = Integer.valueOf((new String(buffer, 0, len)).trim());
         } catch (FileNotFoundException e) {
-            Slog.w(TAG, "This kernel does not have USB configuration switch support");
+            Slog.i(TAG, "This kernel does not have USB configuration switch support");
         } catch (Exception e) {
             Slog.e(TAG, "" , e);
         }
+        if (mConfiguration < 0)
+            return;
 
         try {
             File[] files = new File(USB_COMPOSITE_CLASS_PATH).listFiles();
