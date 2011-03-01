@@ -2447,21 +2447,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 }
                 cache = child.getDrawingCache(true);
             } else {
-                if (layerType == LAYER_TYPE_SOFTWARE) {
-                    child.buildDrawingCache(true);
-                    cache = child.getDrawingCache(true);
-                } else if (layerType == LAYER_TYPE_NONE) {
-                    // Delay getting the display list until animation-driven alpha values are
-                    // set up and possibly passed on to the view
-                    hasDisplayList = child.canHaveDisplayList();
+                switch (layerType) {
+                    case LAYER_TYPE_SOFTWARE:
+                        child.buildDrawingCache(true);
+                        cache = child.getDrawingCache(true);
+                        break;
+                    case LAYER_TYPE_NONE:
+                        // Delay getting the display list until animation-driven alpha values are
+                        // set up and possibly passed on to the view
+                        hasDisplayList = child.canHaveDisplayList();
+                        break;
                 }
             }
         }
 
         final boolean hasNoCache = cache == null || hasDisplayList;
+        final boolean offsetForScroll = cache == null && !hasDisplayList &&
+                layerType != LAYER_TYPE_HARDWARE;
 
         final int restoreTo = canvas.save();
-        if (cache == null && !hasDisplayList) {
+        if (offsetForScroll) {
             canvas.translate(cl - sx, ct - sy);
         } else {
             canvas.translate(cl, ct);
@@ -2477,7 +2482,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 int transX = 0;
                 int transY = 0;
 
-                if (cache == null && !hasDisplayList) {
+                if (offsetForScroll) {
                     transX = -sx;
                     transY = -sy;
                 }
@@ -2532,7 +2537,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if ((flags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
-            if (cache == null && !hasDisplayList) {
+            if (offsetForScroll) {
                 canvas.clipRect(sx, sy, sx + (cr - cl), sy + (cb - ct));
             } else {
                 if (!scalingRequired || cache == null) {
