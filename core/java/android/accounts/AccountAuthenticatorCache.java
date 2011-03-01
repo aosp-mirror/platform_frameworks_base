@@ -18,17 +18,22 @@ package android.accounts;
 
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
+import android.content.pm.ResolveInfo;
 import android.content.pm.XmlSerializerAndParser;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.text.TextUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * A cache of services that export the {@link IAccountAuthenticator} interface. This cache
@@ -63,11 +68,40 @@ import java.io.IOException;
                     com.android.internal.R.styleable.AccountAuthenticator_smallIcon, 0);
             final int prefId = sa.getResourceId(
                     com.android.internal.R.styleable.AccountAuthenticator_accountPreferences, 0);
+            
+            boolean customTokens = false;
+            try {
+                // In HC this will be an attribute in authenticator.xml, this is a workaround
+                // using meta-data to avoid changes to the API. 
+                // If meta-data is absent the old behavior is preserved. 
+                // Authenticator will know if AccountManager supports customTokens or not.
+                PackageManager pm = mContext.getPackageManager();
+                List<ResolveInfo> resolveInfos = pm.queryIntentServices(
+                        new Intent(AccountManager.ACTION_AUTHENTICATOR_INTENT),
+                        PackageManager.GET_META_DATA);
+                for (ResolveInfo resolveInfo: resolveInfos) {
+                    android.content.pm.ServiceInfo si = resolveInfo.serviceInfo;
+                    if (!packageName.equals(si.packageName)) {
+                        continue;
+                    }
+                    Object ctString = si.metaData.get(AccountManager.ACTION_AUTHENTICATOR_INTENT 
+                            + ".customTokens");
+                    if (ctString != null) {
+                        customTokens = true;
+                    }
+                }
+            } catch (Throwable t) {
+                // Protected against invalid data in meta or unexpected 
+                // conditions - the authenticator will not have the new 
+                // features. 
+                Log.e(TAG, "Error getting customTokens metadata " + t);
+            }
+            
             if (TextUtils.isEmpty(accountType)) {
                 return null;
             }
-            return new AuthenticatorDescription(accountType, packageName, labelId, iconId, 
-                    smallIconId, prefId);
+            return new AuthenticatorDescription(accountType, packageName, labelId, iconId,
+                    smallIconId, prefId, customTokens);
         } finally {
             sa.recycle();
         }
