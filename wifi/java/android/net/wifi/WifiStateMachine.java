@@ -59,6 +59,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -805,22 +806,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
     }
 
-    public WpsResult startWps(AsyncChannel channel, WpsConfiguration config) {
-        WpsResult result;
-        switch (config.setup) {
-            case PIN_FROM_DEVICE:
-            case PBC:
-            case PIN_FROM_ACCESS_POINT:
-                //TODO: will go away with AsyncChannel use from settings
-                Message resultMsg = channel.sendMessageSynchronously(CMD_START_WPS, config);
-                result = (WpsResult) resultMsg.obj;
-                resultMsg.recycle();
-                break;
-            default:
-                result = new WpsResult(Status.FAILURE);
-                break;
-        }
-        return result;
+    public void startWps(Messenger replyTo, WpsConfiguration config) {
+        Message msg = obtainMessage(CMD_START_WPS, config);
+        msg.replyTo = replyTo;
+        sendMessage(msg);
     }
 
     public void enableRssiPolling(boolean enabled) {
@@ -1588,7 +1577,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_START_WPS:
                     /* Return failure when the state machine cannot handle WPS initiation*/
-                    mReplyChannel.replyToMessage(message, message.what,
+                    mReplyChannel.replyToMessage(message, WifiManager.CMD_WPS_COMPLETED,
                                 new WpsResult(Status.FAILURE));
                     break;
                 default:

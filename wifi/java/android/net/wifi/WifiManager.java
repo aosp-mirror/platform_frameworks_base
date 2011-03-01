@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.net.DhcpInfo;
 import android.os.Binder;
 import android.os.IBinder;
@@ -25,6 +26,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.os.Messenger;
+
+import com.android.internal.util.AsyncChannel;
 
 import java.util.List;
 
@@ -446,6 +449,9 @@ public class WifiManager {
 
     /* Number of currently active WifiLocks and MulticastLocks */
     private int mActiveLockCount;
+
+    /* For communication with WifiService */
+    private AsyncChannel mAsyncChannel = new AsyncChannel();
 
     /**
      * Create a new WifiManager instance.
@@ -1032,6 +1038,37 @@ public class WifiManager {
     }
 
     /* TODO: deprecate synchronous API and open up the following API */
+
+    /* Commands to WifiService */
+    /** @hide */
+    public static final int CMD_CONNECT_NETWORK             = 1;
+    /** @hide */
+    public static final int CMD_FORGET_NETWORK              = 2;
+    /** @hide */
+    public static final int CMD_SAVE_NETWORK                = 3;
+    /** @hide */
+    public static final int CMD_START_WPS                   = 4;
+
+    /* Events from WifiService */
+    /** @hide */
+    public static final int CMD_WPS_COMPLETED               = 11;
+
+    /* For system use only */
+    /** @hide */
+    public static final int CMD_ENABLE_TRAFFIC_STATS_POLL   = 21;
+    /** @hide */
+    public static final int CMD_TRAFFIC_STATS_POLL          = 22;
+
+    /**
+     * Initiate an asynchronous channel connection setup
+     * @param srcContext is the context of the source
+     * @param srcHandler is the handler on which the source receives messages
+     * @hide
+     */
+     public void asyncConnect(Context srcContext, Handler srcHandler) {
+        mAsyncChannel.connect(srcContext, srcHandler, getMessenger());
+     }
+
     /**
      * Connect to a network with the given configuration. The network also
      * gets added to the supplicant configuration.
@@ -1048,9 +1085,7 @@ public class WifiManager {
         if (config == null) {
             return;
         }
-        try {
-            mService.connectNetworkWithConfig(config);
-        } catch (RemoteException e) { }
+        mAsyncChannel.sendMessage(CMD_CONNECT_NETWORK, config);
     }
 
     /**
@@ -1067,9 +1102,7 @@ public class WifiManager {
         if (networkId < 0) {
             return;
         }
-        try {
-            mService.connectNetworkWithId(networkId);
-        } catch (RemoteException e) { }
+        mAsyncChannel.sendMessage(CMD_CONNECT_NETWORK, networkId);
     }
 
     /**
@@ -1091,9 +1124,8 @@ public class WifiManager {
         if (config == null) {
             return;
         }
-        try {
-            mService.saveNetwork(config);
-        } catch (RemoteException e) { }
+
+        mAsyncChannel.sendMessage(CMD_SAVE_NETWORK, config);
     }
 
     /**
@@ -1110,25 +1142,22 @@ public class WifiManager {
         if (netId < 0) {
             return;
         }
-        try {
-            mService.forgetNetwork(netId);
-        } catch (RemoteException e) { }
+
+        mAsyncChannel.sendMessage(CMD_FORGET_NETWORK, netId);
     }
 
     /**
      * Start Wi-fi Protected Setup
      *
      * @param config WPS configuration
-     * @return WpsResult containing pin and status
      * @hide
-     * TODO: with use of AsyncChannel, return value should go away
      */
-    public WpsResult startWps(WpsConfiguration config) {
-        try {
-            return mService.startWps(config);
-        } catch (RemoteException e) {
-            return new WpsResult(WpsResult.Status.FAILURE);
+    public void startWps(WpsConfiguration config) {
+        if (config == null) {
+            return;
         }
+
+        mAsyncChannel.sendMessage(CMD_START_WPS, config);
     }
 
     /**

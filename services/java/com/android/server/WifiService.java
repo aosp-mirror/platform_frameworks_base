@@ -144,9 +144,6 @@ public class WifiService extends IWifiManager.Stub {
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
 
-    private static final int CMD_ENABLE_TRAFFIC_STATS_POLL = 1;
-    private static final int CMD_TRAFFIC_STATS_POLL        = 2;
-
     private boolean mIsReceiverRegistered = false;
 
 
@@ -237,22 +234,43 @@ public class WifiService extends IWifiManager.Stub {
                     ac.connect(mContext, this, msg.replyTo);
                     break;
                 }
-                case CMD_ENABLE_TRAFFIC_STATS_POLL: {
+                case WifiManager.CMD_ENABLE_TRAFFIC_STATS_POLL: {
                     mEnableTrafficStatsPoll = (msg.arg1 == 1);
                     mTrafficStatsPollToken++;
                     if (mEnableTrafficStatsPoll) {
                         notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, CMD_TRAFFIC_STATS_POLL,
+                        sendMessageDelayed(Message.obtain(this, WifiManager.CMD_TRAFFIC_STATS_POLL,
                                 mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
                     break;
                 }
-                case CMD_TRAFFIC_STATS_POLL: {
+                case WifiManager.CMD_TRAFFIC_STATS_POLL: {
                     if (msg.arg1 == mTrafficStatsPollToken) {
                         notifyOnDataActivity();
-                        sendMessageDelayed(Message.obtain(this, CMD_TRAFFIC_STATS_POLL,
+                        sendMessageDelayed(Message.obtain(this, WifiManager.CMD_TRAFFIC_STATS_POLL,
                                 mTrafficStatsPollToken, 0), POLL_TRAFFIC_STATS_INTERVAL_MSECS);
                     }
+                    break;
+                }
+                case WifiManager.CMD_CONNECT_NETWORK: {
+                    if (msg.obj != null) {
+                        mWifiStateMachine.connectNetwork((WifiConfiguration)msg.obj);
+                    } else {
+                        mWifiStateMachine.connectNetwork(msg.arg1);
+                    }
+                    break;
+                }
+                case WifiManager.CMD_SAVE_NETWORK: {
+                    mWifiStateMachine.saveNetwork((WifiConfiguration)msg.obj);
+                    break;
+                }
+                case WifiManager.CMD_FORGET_NETWORK: {
+                    mWifiStateMachine.forgetNetwork(msg.arg1);
+                    break;
+                }
+                case WifiManager.CMD_START_WPS: {
+                    //replyTo has the original source
+                    mWifiStateMachine.startWps(msg.replyTo, (WpsConfiguration)msg.obj);
                     break;
                 }
                 default: {
@@ -844,42 +862,19 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.clearBlacklist();
     }
 
-    public void connectNetworkWithId(int networkId) {
-        enforceChangePermission();
-        mWifiStateMachine.connectNetwork(networkId);
-    }
 
-    public void connectNetworkWithConfig(WifiConfiguration config) {
-        enforceChangePermission();
-        mWifiStateMachine.connectNetwork(config);
-    }
-
-    public void saveNetwork(WifiConfiguration config) {
-        enforceChangePermission();
-        mWifiStateMachine.saveNetwork(config);
-    }
-
-    public void forgetNetwork(int netId) {
-        enforceChangePermission();
-        mWifiStateMachine.forgetNetwork(netId);
-    }
-
-    public WpsResult startWps(WpsConfiguration config) {
-        enforceChangePermission();
-        if (mWifiStateMachineChannel != null) {
-            return mWifiStateMachine.startWps(mWifiStateMachineChannel, config);
-        } else {
-            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
-            return new WpsResult(WpsResult.Status.FAILURE);
-        }
-    }
 
     /**
      * Get a reference to handler. This is used by a client to establish
      * an AsyncChannel communication with WifiService
      */
     public Messenger getMessenger() {
+        /* Enforce the highest permissions
+           TODO: when we consider exposing the asynchronous API, think about
+                 how to provide both access and change permissions seperately
+         */
         enforceAccessPermission();
+        enforceChangePermission();
         return new Messenger(mAsyncServiceHandler);
     }
 
@@ -1530,9 +1525,11 @@ public class WifiService extends IWifiManager.Stub {
     private void evaluateTrafficStatsPolling() {
         Message msg;
         if (mNetworkInfo.getDetailedState() == DetailedState.CONNECTED && !mScreenOff) {
-            msg = Message.obtain(mAsyncServiceHandler, CMD_ENABLE_TRAFFIC_STATS_POLL, 1, 0);
+            msg = Message.obtain(mAsyncServiceHandler,
+                    WifiManager.CMD_ENABLE_TRAFFIC_STATS_POLL, 1, 0);
         } else {
-            msg = Message.obtain(mAsyncServiceHandler, CMD_ENABLE_TRAFFIC_STATS_POLL, 0, 0);
+            msg = Message.obtain(mAsyncServiceHandler,
+                    WifiManager.CMD_ENABLE_TRAFFIC_STATS_POLL, 0, 0);
         }
         msg.sendToTarget();
     }

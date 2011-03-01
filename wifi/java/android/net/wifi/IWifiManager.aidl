@@ -103,16 +103,6 @@ interface IWifiManager
 
     void clearBlacklist();
 
-    void connectNetworkWithConfig(in WifiConfiguration wifiConfig);
-
-    void connectNetworkWithId(int networkId);
-
-    void saveNetwork(in WifiConfiguration wifiConfig);
-
-    void forgetNetwork(int networkId);
-
-    WpsResult startWps(in WpsConfiguration config);
-
     Messenger getMessenger();
 }
 

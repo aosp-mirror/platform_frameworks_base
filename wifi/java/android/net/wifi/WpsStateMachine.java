@@ -110,7 +110,7 @@ class WpsStateMachine extends HierarchicalStateMachine {
                             Log.e(TAG, "Invalid setup for WPS");
                             break;
                     }
-                    mReplyChannel.replyToMessage(message, message.what, result);
+                    mReplyChannel.replyToMessage(message, WifiManager.CMD_WPS_COMPLETED, result);
                     if (result.status == Status.SUCCESS) {
                         transitionTo(mActiveState);
                     } else {
@@ -172,7 +172,7 @@ class WpsStateMachine extends HierarchicalStateMachine {
                     break;
                 case WifiStateMachine.CMD_START_WPS:
                     /* Ignore request and send an in progress message */
-                    mReplyChannel.replyToMessage(message, message.what,
+                    mReplyChannel.replyToMessage(message, WifiManager.CMD_WPS_COMPLETED,
                                 new WpsResult(Status.IN_PROGRESS));
                     break;
                 default:

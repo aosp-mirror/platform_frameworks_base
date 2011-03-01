@@ -34,11 +34,14 @@ import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
-
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
+
+import com.android.internal.util.AsyncChannel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -75,6 +78,7 @@ public class WifiConnectionTest
         enabledNetworks = getEnabledNetworks(mWifiManager.getConfiguredNetworks());
 
         mAct = getActivity();
+        mWifiManager.asyncConnect(mAct, new WifiServiceHandler());
         networks = mAct.loadNetworkConfigurations();
         if (DEBUG) {
             printNetworkConfigurations();
@@ -87,6 +91,24 @@ public class WifiConnectionTest
         WifiInfo mConnection = mAct.mWifiManager.getConnectionInfo();
         assertNotNull(mConnection);
         assertTrue("wpa_supplicant is not started ", mAct.mWifiManager.pingSupplicant());
+    }
+
+    private class WifiServiceHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        //AsyncChannel in msg.obj
+                    } else {
+                        log("Failed to establish AsyncChannel connection");
+                    }
+                    break;
+                default:
+                    //Ignore
+                    break;
+            }
+        }
     }
 
     private void printNetworkConfigurations() {
