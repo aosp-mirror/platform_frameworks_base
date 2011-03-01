@@ -453,7 +453,11 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
 
         case MSG_TYPE_OVERLAY_CLEAR:
             isSendProgress = false;
-            pContext->mOverlayFileName = NULL;
+            if (pContext->mOverlayFileName != NULL) {
+                M4OSA_free((M4OSA_MemAddr32)pContext->mOverlayFileName);
+                pContext->mOverlayFileName = NULL;
+            }
+
             LOGV("MSG_TYPE_OVERLAY_CLEAR");
             //argc is not used
             pContext->mIsUpdateOverlay = true;
@@ -1760,6 +1764,17 @@ videoEditor_populateSettings(
             VIDEOEDIT_LOG_EDIT_SETTINGS(pContext->pEditSettings);
         }
     }
+    /* free previous allocations , if any */
+    if (pContext->mAudioSettings != M4OSA_NULL) {
+        if (pContext->mAudioSettings->pFile != NULL) {
+            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pFile);
+            pContext->mAudioSettings->pFile = M4OSA_NULL;
+        }
+        if (pContext->mAudioSettings->pPCMFilePath != NULL) {
+            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pPCMFilePath);
+            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
+        }
+    }
 
     if (audioSettingObject != M4OSA_NULL) {
         jclass audioSettingClazz = pEnv->FindClass(AUDIO_SETTINGS_CLASS_NAME);
@@ -1822,16 +1837,6 @@ videoEditor_populateSettings(
         pContext->mAudioSettings->fileType
             = pEnv->GetIntField(audioSettingObject,fid);
         M4OSA_TRACE1_1("fileType = %d",pContext->mAudioSettings->fileType);
-
-        /* free previous allocations , if any */
-        if (pContext->mAudioSettings->pFile != NULL) {
-            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pFile);
-            pContext->mAudioSettings->pFile = M4OSA_NULL;
-        }
-        if (pContext->mAudioSettings->pPCMFilePath != NULL) {
-            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pPCMFilePath);
-            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
-        }
 
         fid = pEnv->GetFieldID(audioSettingClazz,"pFile","Ljava/lang/String;");
         strPath = (jstring)pEnv->GetObjectField(audioSettingObject,fid);
@@ -3044,18 +3049,18 @@ videoEditor_release(
             pContext->mPreviewController = M4OSA_NULL;
         }
 
-        if (pContext->mAudioSettings->pFile != NULL) {
-            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pFile);
-            pContext->mAudioSettings->pFile = M4OSA_NULL;
-        }
-        if (pContext->mAudioSettings->pPCMFilePath != NULL) {
-            M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pPCMFilePath);
-            pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
-        }
-
-        // Free the context.
+        // Free the mAudioSettings context.
         if(pContext->mAudioSettings != M4OSA_NULL)
         {
+            if (pContext->mAudioSettings->pFile != NULL) {
+                M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pFile);
+                pContext->mAudioSettings->pFile = M4OSA_NULL;
+            }
+            if (pContext->mAudioSettings->pPCMFilePath != NULL) {
+                M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings->pPCMFilePath);
+                pContext->mAudioSettings->pPCMFilePath = M4OSA_NULL;
+            }
+
             M4OSA_free((M4OSA_MemAddr32)pContext->mAudioSettings);
             pContext->mAudioSettings = M4OSA_NULL;
         }
