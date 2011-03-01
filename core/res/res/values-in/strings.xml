@@ -130,7 +130,7 @@
     <string name="me" msgid="6545696007631404292">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opsi tablet"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opsi telepon"</string>
-    <string name="silent_mode" msgid="7167703389802618663">"Mode senyap"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Modus senyap"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Hidupkan nirkabel"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Matikan nirkabel"</string>
     <string name="screen_lock" msgid="799094655496098153">"Kunci layar"</string>
@@ -683,7 +683,7 @@
     <string name="save_password_message" msgid="767344687139195790">"Apakah Anda ingin peramban menyimpan sandi ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Tidak sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"Tidak pernah"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"Anda tidak memiliki izin untuk membuka laman ini."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke clipboard."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
