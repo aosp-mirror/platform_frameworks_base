@@ -24,6 +24,7 @@
 namespace android {
 
 enum camcorder_quality {
+    CAMCORDER_QUALITY_LIST_START = 0,
     CAMCORDER_QUALITY_LOW  = 0,
     CAMCORDER_QUALITY_HIGH = 1,
     CAMCORDER_QUALITY_QCIF = 2,
@@ -31,14 +32,17 @@ enum camcorder_quality {
     CAMCORDER_QUALITY_480P = 4,
     CAMCORDER_QUALITY_720P = 5,
     CAMCORDER_QUALITY_1080P = 6,
+    CAMCORDER_QUALITY_LIST_END = 6,
 
+    CAMCORDER_QUALITY_TIME_LAPSE_LIST_START = 1000,
     CAMCORDER_QUALITY_TIME_LAPSE_LOW  = 1000,
     CAMCORDER_QUALITY_TIME_LAPSE_HIGH = 1001,
     CAMCORDER_QUALITY_TIME_LAPSE_QCIF = 1002,
     CAMCORDER_QUALITY_TIME_LAPSE_CIF = 1003,
     CAMCORDER_QUALITY_TIME_LAPSE_480P = 1004,
     CAMCORDER_QUALITY_TIME_LAPSE_720P = 1005,
-    CAMCORDER_QUALITY_TIME_LAPSE_1080P = 1006
+    CAMCORDER_QUALITY_TIME_LAPSE_1080P = 1006,
+    CAMCORDER_QUALITY_TIME_LAPSE_LIST_END = 1006,
 };
 
 enum video_decoder {
@@ -147,6 +151,11 @@ public:
     Vector<int> getImageEncodingQualityLevels(int cameraId) const;
 
 private:
+    enum {
+        // Camcorder profiles (high/low) and timelapse profiles (high/low)
+        kNumRequiredProfiles = 4,
+    };
+
     MediaProfiles& operator=(const MediaProfiles&);  // Don't call me
     MediaProfiles(const MediaProfiles&);             // Don't call me
     MediaProfiles() {}                               // Dummy default constructor
@@ -159,6 +168,14 @@ private:
               mFrameWidth(frameWidth),
               mFrameHeight(frameHeight),
               mFrameRate(frameRate) {}
+
+        VideoCodec(const VideoCodec& copy) {
+            mCodec = copy.mCodec;
+            mBitRate = copy.mBitRate;
+            mFrameWidth = copy.mFrameWidth;
+            mFrameHeight = copy.mFrameHeight;
+            mFrameRate = copy.mFrameRate;
+        }
 
         ~VideoCodec() {}
 
@@ -176,6 +193,13 @@ private:
               mSampleRate(sampleRate),
               mChannels(channels) {}
 
+        AudioCodec(const AudioCodec& copy) {
+            mCodec = copy.mCodec;
+            mBitRate = copy.mBitRate;
+            mSampleRate = copy.mSampleRate;
+            mChannels = copy.mChannels;
+        }
+
         ~AudioCodec() {}
 
         audio_encoder mCodec;
@@ -192,6 +216,15 @@ private:
               mDuration(0),
               mVideoCodec(0),
               mAudioCodec(0) {}
+
+        CamcorderProfile(const CamcorderProfile& copy) {
+            mCameraId = copy.mCameraId;
+            mFileFormat = copy.mFileFormat;
+            mQuality = copy.mQuality;
+            mDuration = copy.mDuration;
+            mVideoCodec = new VideoCodec(*copy.mVideoCodec);
+            mAudioCodec = new AudioCodec(*copy.mAudioCodec);
+        }
 
         ~CamcorderProfile() {
             delete mVideoCodec;
@@ -272,6 +305,8 @@ private:
     };
 
     int getCamcorderProfileIndex(int cameraId, camcorder_quality quality) const;
+    void initRequiredProfileRefs(const Vector<int>& cameraIds);
+    int getRequiredProfileRefIndex(int cameraId);
 
     // Debug
     static void logVideoCodec(const VideoCodec& codec);
@@ -291,7 +326,10 @@ private:
     static VideoDecoderCap* createVideoDecoderCap(const char **atts);
     static VideoEncoderCap* createVideoEncoderCap(const char **atts);
     static AudioEncoderCap* createAudioEncoderCap(const char **atts);
-    static CamcorderProfile* createCamcorderProfile(int cameraId, const char **atts);
+
+    static CamcorderProfile* createCamcorderProfile(
+                int cameraId, const char **atts, Vector<int>& cameraIds);
+
     static int getCameraId(const char **atts);
 
     ImageEncodingQualityLevels* findImageEncodingQualityLevels(int cameraId) const;
@@ -335,6 +373,21 @@ private:
 
     static int findTagForName(const NameToTagMap *map, size_t nMappings, const char *name);
 
+    /**
+     * Check on existing profiles with the following criteria:
+     * 1. Low quality profile must have the lowest video
+     *    resolution product (width x height)
+     * 2. High quality profile must have the highest video
+     *    resolution product (width x height)
+     *
+     * and add required low/high quality camcorder/timelapse
+     * profiles if they are not found. This allows to remove
+     * duplicate profile definitions in the media_profiles.xml
+     * file.
+     */
+    void checkAndAddRequiredProfilesIfNecessary();
+
+
     // Mappings from name (for instance, codec name) to enum value
     static const NameToTagMap sVideoEncoderNameMap[];
     static const NameToTagMap sAudioEncoderNameMap[];
@@ -355,6 +408,20 @@ private:
     Vector<VideoDecoderCap*>  mVideoDecoders;
     Vector<output_format>     mEncoderOutputFileFormats;
     Vector<ImageEncodingQualityLevels *>  mImageEncodingQualityLevels;
+
+    typedef struct {
+        bool mHasRefProfile;      // Refers to an existing profile
+        int  mRefProfileIndex;    // Reference profile index
+        int  mResolutionProduct;  // width x height
+    } RequiredProfileRefInfo;     // Required low and high profiles
+
+    typedef struct {
+        RequiredProfileRefInfo mRefs[kNumRequiredProfiles];
+        int mCameraId;
+    } RequiredProfiles;
+
+    RequiredProfiles *mRequiredProfileRefs;
+    Vector<int>              mCameraIds;
 };
 
 }; // namespace android
