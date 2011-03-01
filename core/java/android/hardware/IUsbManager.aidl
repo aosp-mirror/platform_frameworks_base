@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.hardware.UsbAccessory;
+import android.hardware.UsbDevice;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
@@ -25,7 +26,39 @@ interface IUsbManager
 {
     /* Returns a list of all currently attached USB devices */
     void getDeviceList(out Bundle devices);
+
+    /* Returns a file descriptor for communicating with the USB device.
+     * The native fd can be passed to usb_device_new() in libusbhost.
+     */
     ParcelFileDescriptor openDevice(String deviceName);
+
+    /* Returns the currently attached USB accessory */
     UsbAccessory getCurrentAccessory();
-    ParcelFileDescriptor openAccessory();
+
+    /* Returns a file descriptor for communicating with the USB accessory.
+     * This file descriptor can be used with standard Java file operations.
+     */
+    ParcelFileDescriptor openAccessory(in UsbAccessory accessory);
+
+    /* Sets the default package for a USB device
+     * (or clears it if the package name is null)
+     */
+    oneway void setDevicePackage(in UsbDevice device, String packageName);
+
+    /* Sets the default package for a USB device
+     * (or clears it if the package name is null)
+     */
+    void setAccessoryPackage(in UsbAccessory accessory, String packageName);
+
+    /* Grants permission for the given UID to access the device */
+    void grantDevicePermission(in UsbDevice device, int uid);
+
+    /* Grants permission for the given UID to access the accessory */
+    void grantAccessoryPermission(in UsbAccessory accessory, int uid);
+
+    /* Returns true if the USB manager has default preferences or permissions for the package */
+    boolean hasDefaults(String packageName, int uid);
+
+    /* Clears default preferences and permissions for the package */
+    oneway void clearDefaults(String packageName, int uid);
 }

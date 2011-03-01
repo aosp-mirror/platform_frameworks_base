@@ -98,7 +98,7 @@ public class UsbManager {
      *
      * This intent is sent when a USB accessory is detached.
      * <ul>
-      * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
+     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
      * for the attached accessory that was detached
      * </ul>
      */
@@ -163,14 +163,15 @@ public class UsbManager {
 
     /**
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} and
-     * {@link #ACTION_USB_DEVICE_DETACHED} broadcasts.
+     * {@link #ACTION_USB_DEVICE_DETACHED} broadcasts
      * containing the UsbDevice object for the device.
      */
 
     public static final String EXTRA_DEVICE = "device";
 
     /**
-     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} broadcast
+     * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} and
+     * {@link #ACTION_USB_ACCESSORY_DETACHED} broadcasts
      * containing the UsbAccessory object for the accessory.
      */
     public static final String EXTRA_ACCESSORY = "accessory";
@@ -244,7 +245,7 @@ public class UsbManager {
                 return new UsbAccessory[] { accessory };
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in openAccessory" , e);
+            Log.e(TAG, "RemoteException in getAccessoryList" , e);
             return null;
         }
     }
@@ -257,7 +258,7 @@ public class UsbManager {
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         try {
-            return mService.openAccessory();
+            return mService.openAccessory(accessory);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openAccessory" , e);
             return null;
