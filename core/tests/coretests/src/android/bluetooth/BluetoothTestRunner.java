@@ -39,6 +39,7 @@ import android.util.Log;
  *     [-e connect_headset_iterations <iterations>] \
  *     [-e connect_input_iterations <iterations>] \
  *     [-e connect_pan_iterations <iterations>] \
+ *     [-e start_stop_sco_iterations <iterations>] \
  *     [-e pair_address <address>] \
  *     [-e headset_address <address>] \
  *     [-e a2dp_address <address>] \
@@ -62,6 +63,7 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
     public static int sConnectA2dpIterations = 100;
     public static int sConnectInputIterations = 100;
     public static int sConnectPanIterations = 100;
+    public static int sStartStopScoIterations = 100;
 
     public static String sPairAddress = "";
     public static String sHeadsetAddress = "";
@@ -167,6 +169,14 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
             }
         }
 
+        val = arguments.getString("start_stop_sco_iterations");
+        if (val != null) {
+            try {
+                sStartStopScoIterations = Integer.parseInt(val);
+            } catch (NumberFormatException e) {
+                // Invalid argument, fall back to default value
+            }
+        }
         val = arguments.getString("pair_address");
         if (val != null) {
             sPairAddress = val;
@@ -214,6 +224,7 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
         Log.i(TAG, String.format("connect_headset_iterations=%d", sConnectHeadsetIterations));
         Log.i(TAG, String.format("connect_input_iterations=%d", sConnectInputIterations));
         Log.i(TAG, String.format("connect_pan_iterations=%d", sConnectPanIterations));
+        Log.i(TAG, String.format("start_stop_sco_iterations=%d", sStartStopScoIterations));
         Log.i(TAG, String.format("pair_address=%s", sPairAddress));
         Log.i(TAG, String.format("a2dp_address=%s", sA2dpAddress));
         Log.i(TAG, String.format("headset_address=%s", sHeadsetAddress));

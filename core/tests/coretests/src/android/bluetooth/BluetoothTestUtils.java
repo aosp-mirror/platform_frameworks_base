@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.os.Environment;
 import android.util.Log;
 
@@ -65,6 +66,11 @@ public class BluetoothTestUtils extends Assert {
      * Timeout to connect a profile proxy in ms.
      */
     private static final int CONNECT_PROXY_TIMEOUT = 5000;
+
+    /**
+     * Timeout to start or stop a SCO channel in ms.
+     */
+    private static final int START_STOP_SCO_TIMEOUT = 10000;
 
     /**
      * Time between polls in ms.
@@ -313,6 +319,32 @@ public class BluetoothTestUtils extends Assert {
                         break;
                     case BluetoothPan.STATE_DISCONNECTING:
                         setFiredFlag(STATE_DISCONNECTING_FLAG);
+                        break;
+                }
+            }
+        }
+    }
+
+    private class StartStopScoReceiver extends FlagReceiver {
+        private static final int STATE_CONNECTED_FLAG = 1;
+        private static final int STATE_DISCONNECTED_FLAG = 1 << 1;
+
+        public StartStopScoReceiver(int expectedFlags) {
+            super(expectedFlags);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED.equals(intent.getAction())) {
+                int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
+                        AudioManager.SCO_AUDIO_STATE_ERROR);
+                assertNotSame(AudioManager.SCO_AUDIO_STATE_ERROR, state);
+                switch(state) {
+                    case AudioManager.SCO_AUDIO_STATE_CONNECTED:
+                        setFiredFlag(STATE_CONNECTED_FLAG);
+                        break;
+                    case AudioManager.SCO_AUDIO_STATE_DISCONNECTED:
+                        setFiredFlag(STATE_DISCONNECTED_FLAG);
                         break;
                 }
             }
@@ -1269,6 +1301,103 @@ public class BluetoothTestUtils extends Assert {
     }
 
     /**
+     * Opens a SCO channel using {@link android.media.AudioManager#startBluetoothSco()} and checks
+     * to make sure that the channel is opened and that the correct actions were broadcast.
+     *
+     * @param adapter The BT adapter.
+     * @param device The remote device.
+     */
+    public void startSco(BluetoothAdapter adapter, BluetoothDevice device) {
+        startStopSco(adapter, device, true);
+    }
+
+    /**
+     * Closes a SCO channel using {@link android.media.AudioManager#stopBluetoothSco()} and checks
+     *  to make sure that the channel is closed and that the correct actions were broadcast.
+     *
+     * @param adapter The BT adapter.
+     * @param device The remote device.
+     */
+    public void stopSco(BluetoothAdapter adapter, BluetoothDevice device) {
+        startStopSco(adapter, device, false);
+    }
+    /**
+     * Helper method for {@link #startSco(BluetoothAdapter, BluetoothDevice)} and
+     * {@link #stopSco(BluetoothAdapter, BluetoothDevice)}.
+     *
+     * @param adapter The BT adapter.
+     * @param device The remote device.
+     * @param isStart Whether the SCO channel should be opened.
+     */
+    private void startStopSco(BluetoothAdapter adapter, BluetoothDevice device, boolean isStart) {
+        long start = -1;
+        int mask;
+        String methodName;
+
+        if (isStart) {
+            methodName = "startSco()";
+            mask = StartStopScoReceiver.STATE_CONNECTED_FLAG;
+        } else {
+            methodName = "stopSco()";
+            mask = StartStopScoReceiver.STATE_DISCONNECTED_FLAG;
+        }
+
+        if (!adapter.isEnabled()) {
+            fail(String.format("%s bluetooth not enabled: device=%s, start=%b", methodName, device,
+                    isStart));
+        }
+
+        if (!adapter.getBondedDevices().contains(device)) {
+            fail(String.format("%s device not paired: device=%s, start=%b", methodName, device,
+                    isStart));
+        }
+
+        AudioManager manager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        assertNotNull(manager);
+
+        if (!manager.isBluetoothScoAvailableOffCall()) {
+            fail(String.format("%s device does not support SCO: device=%s, start=%b", methodName,
+                    device, isStart));
+        }
+
+        boolean isScoOn = manager.isBluetoothScoOn();
+        if (isStart == isScoOn) {
+            return;
+        }
+
+        StartStopScoReceiver receiver = getStartStopScoReceiver(mask);
+        start = System.currentTimeMillis();
+        if (isStart) {
+            manager.startBluetoothSco();
+        } else {
+            manager.stopBluetoothSco();
+        }
+
+        long s = System.currentTimeMillis();
+        while (System.currentTimeMillis() - s < START_STOP_SCO_TIMEOUT) {
+            isScoOn = manager.isBluetoothScoOn();
+            if ((isStart == isScoOn) &&
+                    (receiver.getFiredFlags() & mask) == mask) {
+                long finish = receiver.getCompletedTime();
+                if (start != -1 && finish != -1) {
+                    writeOutput(String.format("%s completed in %d ms", methodName,
+                            (finish - start)));
+                } else {
+                    writeOutput(String.format("%s completed", methodName));
+                }
+                removeReceiver(receiver);
+                return;
+            }
+            sleep(POLL_TIME);
+        }
+
+        int firedFlags = receiver.getFiredFlags();
+        removeReceiver(receiver);
+        fail(String.format("%s timeout: start=%b (expected %b), flags=0x%x (expected 0x%x)",
+                methodName, isScoOn, isStart, firedFlags, mask));
+    }
+
+    /**
      * Writes a string to the logcat and a file if a file has been specified in the constructor.
      *
      * @param s The string to be written.
@@ -1332,6 +1461,13 @@ public class BluetoothTestUtils extends Assert {
             int expectedFlags) {
         String[] actions = {BluetoothPan.ACTION_CONNECTION_STATE_CHANGED};
         ConnectPanReceiver receiver = new ConnectPanReceiver(device, role, expectedFlags);
+        addReceiver(receiver, actions);
+        return receiver;
+    }
+
+    private StartStopScoReceiver getStartStopScoReceiver(int expectedFlags) {
+        String[] actions = {AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED};
+        StartStopScoReceiver receiver = new StartStopScoReceiver(expectedFlags);
         addReceiver(receiver, actions);
         return receiver;
     }
