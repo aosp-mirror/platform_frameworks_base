@@ -363,7 +363,11 @@ public class DialogFragment extends Fragment
             case STYLE_NO_TITLE:
                 mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
-        return (LayoutInflater)mDialog.getContext().getSystemService(
+        if (mDialog != null) {
+            return (LayoutInflater)mDialog.getContext().getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+        }
+        return (LayoutInflater)mActivity.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
     }
     
