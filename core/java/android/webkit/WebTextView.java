@@ -947,6 +947,8 @@ import junit.framework.Assert;
         @Override
         public void setBounds(int left, int top, int right, int bottom) {
             super.setBounds(left, top, right, bottom);
+            bottom--;
+            right -= 2;
             // Top line
             mLines[0] = left;
             mLines[1] = top + 1;
