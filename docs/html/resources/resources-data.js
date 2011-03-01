@@ -497,12 +497,12 @@ var ANDROID_RESOURCES = [
   },
   {
     tags: ['sample', 'new', 'newfeature', 'performance', 'gamedev', 'gl'],
-    path: 'samples/Renderscript/index.html',
+    path: 'samples/RenderScript/index.html',
     title: {
-      en: 'Renderscript'
+      en: 'RenderScript'
     },
     description: {
-      en: 'A set of samples that demonstrate how to use various features of the Renderscript APIs.'
+      en: 'A set of samples that demonstrate how to use various features of the RenderScript APIs.'
     }
   },
   {
