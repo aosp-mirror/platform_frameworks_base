@@ -126,6 +126,17 @@ static jlong android_os_ParcelFileDescriptor_seekTo(JNIEnv* env,
     return lseek(fd, pos, SEEK_SET);
 }
 
+static jlong android_os_ParcelFileDescriptor_getFdNative(JNIEnv* env, jobject clazz)
+{
+    jint fd = getFd(env, clazz);
+    if (fd < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "bad file descriptor");
+        return -1;
+    }
+
+    return fd;
+}
+
 static const JNINativeMethod gParcelFileDescriptorMethods[] = {
     {"getFileDescriptorFromSocket", "(Ljava/net/Socket;)Ljava/io/FileDescriptor;",
         (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromSocket},
@@ -134,7 +145,9 @@ static const JNINativeMethod gParcelFileDescriptorMethods[] = {
     {"getStatSize", "()J",
         (void*)android_os_ParcelFileDescriptor_getStatSize},
     {"seekTo", "(J)J",
-        (void*)android_os_ParcelFileDescriptor_seekTo}
+        (void*)android_os_ParcelFileDescriptor_seekTo},
+    {"getFdNative", "()I",
+        (void*)android_os_ParcelFileDescriptor_getFdNative}
 };
 
 const char* const kParcelFileDescriptorPathName = "android/os/ParcelFileDescriptor";

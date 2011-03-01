@@ -197,6 +197,40 @@ public class ParcelFileDescriptor implements Parcelable {
     public native long seekTo(long pos);
     
     /**
+     * Return the native fd int for this ParcelFileDescriptor.  The
+     * ParcelFileDescriptor still owns the fd, and it still must be closed
+     * through this API.
+     */
+    public int getFd() {
+        if (mClosed) {
+            throw new IllegalStateException("Already closed");
+        }
+        return getFdNative();
+    }
+    
+    private native int getFdNative();
+    
+    /**
+     * Return the native fd int for this ParcelFileDescriptor and detach it
+     * from the object here.  You are now responsible for closing the fd in
+     * native code.
+     */
+    public int detachFd() {
+        if (mClosed) {
+            throw new IllegalStateException("Already closed");
+        }
+        if (mParcelDescriptor != null) {
+            int fd = mParcelDescriptor.detachFd();
+            mClosed = true;
+            return fd;
+        }
+        int fd = getFd();
+        mClosed = true;
+        Parcel.clearFileDescriptor(mFileDescriptor);
+        return fd;
+    }
+    
+    /**
      * Close the ParcelFileDescriptor. This implementation closes the underlying
      * OS resources allocated to represent this stream.
      * 
