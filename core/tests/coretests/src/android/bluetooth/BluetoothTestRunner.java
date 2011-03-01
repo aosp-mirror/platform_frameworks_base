@@ -65,14 +65,9 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
     public static int sConnectPanIterations = 100;
     public static int sStartStopScoIterations = 100;
 
-    public static String sPairAddress = "";
-    public static String sHeadsetAddress = "";
-    public static String sA2dpAddress = "";
-    public static String sInputAddress = "";
-    public static String sPanAddress = "";
-
-    public static byte[] sPairPin = {'1', '2', '3', '4'};
-    public static int sPairPasskey = 123456;
+    public static String sDeviceAddress = "";
+    public static byte[] sDevicePairPin = {'1', '2', '3', '4'};
+    public static int sDevicePairPasskey = 123456;
 
     @Override
     public TestSuite getAllTests() {
@@ -177,40 +172,24 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
                 // Invalid argument, fall back to default value
             }
         }
-        val = arguments.getString("pair_address");
+
+        val = arguments.getString("device_address");
         if (val != null) {
-            sPairAddress = val;
+            sDeviceAddress = val;
         }
 
-        val = arguments.getString("headset_address");
+        val = arguments.getString("device_pair_pin");
         if (val != null) {
-            sHeadsetAddress = val;
+            byte[] pin = BluetoothDevice.convertPinToBytes(val);
+            if (pin != null) {
+                sDevicePairPin = pin;
+            }
         }
 
-        val = arguments.getString("a2dp_address");
-        if (val != null) {
-            sA2dpAddress = val;
-        }
-
-        val = arguments.getString("input_address");
-        if (val != null) {
-            sInputAddress = val;
-        }
-
-        val = arguments.getString("pan_address");
-        if (val != null) {
-            sPanAddress = val;
-        }
-
-        val = arguments.getString("pair_pin");
-        if (val != null) {
-            sPairPin = BluetoothDevice.convertPinToBytes(val);
-        }
-
-        val = arguments.getString("pair_passkey");
+        val = arguments.getString("device_pair_passkey");
         if (val != null) {
             try {
-                sPairPasskey = Integer.parseInt(val);
+                sDevicePairPasskey = Integer.parseInt(val);
             } catch (NumberFormatException e) {
                 // Invalid argument, fall back to default value
             }
@@ -225,13 +204,9 @@ public class BluetoothTestRunner extends InstrumentationTestRunner {
         Log.i(TAG, String.format("connect_input_iterations=%d", sConnectInputIterations));
         Log.i(TAG, String.format("connect_pan_iterations=%d", sConnectPanIterations));
         Log.i(TAG, String.format("start_stop_sco_iterations=%d", sStartStopScoIterations));
-        Log.i(TAG, String.format("pair_address=%s", sPairAddress));
-        Log.i(TAG, String.format("a2dp_address=%s", sA2dpAddress));
-        Log.i(TAG, String.format("headset_address=%s", sHeadsetAddress));
-        Log.i(TAG, String.format("input_address=%s", sInputAddress));
-        Log.i(TAG, String.format("pan_address=%s", sPanAddress));
-        Log.i(TAG, String.format("pair_pin=%s", new String(sPairPin)));
-        Log.i(TAG, String.format("pair_passkey=%d", sPairPasskey));
+        Log.i(TAG, String.format("device_address=%s", sDeviceAddress));
+        Log.i(TAG, String.format("device_pair_pin=%s", new String(sDevicePairPin)));
+        Log.i(TAG, String.format("device_pair_passkey=%d", sDevicePairPasskey));
 
         // Call onCreate last since we want to set the static variables first.
         super.onCreate(arguments);
