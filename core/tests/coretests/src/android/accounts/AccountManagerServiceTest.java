@@ -96,7 +96,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         assertEquals(a21, accounts[1]);
         assertEquals(a31, accounts[2]);
 
-        mAms.removeAccount(a21);
+        mAms.removeAccountInternal(a21);
 
         accounts = mAms.getAccounts("type1" );
         Arrays.sort(accounts, new AccountSorter());
