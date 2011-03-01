@@ -2785,11 +2785,30 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     class DisconnectedState extends HierarchicalState {
         private boolean mAlarmEnabled = false;
+        private long mScanIntervalMs;
+
+        private void setScanAlarm(boolean enabled) {
+            if (enabled == mAlarmEnabled) return;
+            if (enabled) {
+                mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + mScanIntervalMs,
+                        mScanIntervalMs,
+                        mScanIntent);
+
+                mAlarmEnabled = true;
+            } else {
+                mAlarmManager.cancel(mScanIntent);
+                mAlarmEnabled = false;
+            }
+        }
+
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
 
+            mScanIntervalMs = Settings.Secure.getLong(mContext.getContentResolver(),
+                    Settings.Secure.WIFI_SCAN_INTERVAL_MS, DEFAULT_SCAN_INTERVAL_MS);
             /*
              * We initiate background scanning if it is enabled, otherwise we
              * initiate an infrequent scan that wakes up the device to ensure
@@ -2806,12 +2825,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     WifiNative.enableBackgroundScan(true);
                 }
             } else {
-                long scanMs = Settings.Secure.getLong(mContext.getContentResolver(),
-                    Settings.Secure.WIFI_SCAN_INTERVAL_MS, DEFAULT_SCAN_INTERVAL_MS);
-
-                mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + scanMs, scanMs, mScanIntent);
-                mAlarmEnabled = true;
+                setScanAlarm(true);
             }
         }
         @Override
@@ -2829,7 +2843,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_ENABLE_BACKGROUND_SCAN:
                     mEnableBackgroundScan = (message.arg1 == 1);
-                    WifiNative.enableBackgroundScan(mEnableBackgroundScan);
+                    if (mEnableBackgroundScan) {
+                        WifiNative.enableBackgroundScan(true);
+                        setScanAlarm(false);
+                    } else {
+                        WifiNative.enableBackgroundScan(false);
+                        setScanAlarm(true);
+                    }
                     break;
                     /* Ignore network disconnect */
                 case NETWORK_DISCONNECTION_EVENT:
@@ -2866,10 +2886,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (mEnableBackgroundScan) {
                 WifiNative.enableBackgroundScan(false);
             }
-            if (mAlarmEnabled) {
-                mAlarmManager.cancel(mScanIntent);
-                mAlarmEnabled = false;
-            }
+            setScanAlarm(false);
         }
     }
 
