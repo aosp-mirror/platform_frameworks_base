@@ -209,7 +209,42 @@ public class AccountManagerService
 
         sThis.set(this);
 
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addDataScheme("package");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context1, Intent intent) {
+                purgeOldGrants();
+            }
+        }, intentFilter);
+        purgeOldGrants();
+
         validateAccountsAndPopulateCache();
+    }
+
+    private void purgeOldGrants() {
+        synchronized (mCacheLock) {
+            final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+            final Cursor cursor = db.query(TABLE_GRANTS,
+                    new String[]{GRANTS_GRANTEE_UID},
+                    null, null, GRANTS_GRANTEE_UID, null, null);
+            try {
+                while (cursor.moveToNext()) {
+                    final int uid = cursor.getInt(0);
+                    final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
+                    if (packageExists) {
+                        continue;
+                    }
+                    Log.d(TAG, "deleting grants for UID " + uid
+                            + " because its package is no longer installed");
+                    db.delete(TABLE_GRANTS, GRANTS_GRANTEE_UID + "=?",
+                            new String[]{Integer.toString(uid)});
+                }
+            } finally {
+                cursor.close();
+            }
+        }
     }
 
     private void validateAccountsAndPopulateCache() {
