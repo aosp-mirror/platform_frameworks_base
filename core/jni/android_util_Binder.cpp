@@ -1520,6 +1520,14 @@ static void android_os_Parcel_closeFileDescriptor(JNIEnv* env, jobject clazz, jo
     }
 }
 
+static void android_os_Parcel_clearFileDescriptor(JNIEnv* env, jobject clazz, jobject object)
+{
+    int fd = env->GetIntField(object, gFileDescriptorOffsets.mDescriptor);
+    if (fd >= 0) {
+        env->SetIntField(object, gFileDescriptorOffsets.mDescriptor, -1);
+    }
+}
+
 static void android_os_Parcel_freeBuffer(JNIEnv* env, jobject clazz)
 {
     int32_t own = env->GetIntField(clazz, gParcelOffsets.mOwnObject);
@@ -1719,6 +1727,7 @@ static const JNINativeMethod gParcelMethods[] = {
     {"internalReadFileDescriptor",  "()Ljava/io/FileDescriptor;", (void*)android_os_Parcel_readFileDescriptor},
     {"openFileDescriptor",  "(Ljava/lang/String;I)Ljava/io/FileDescriptor;", (void*)android_os_Parcel_openFileDescriptor},
     {"closeFileDescriptor", "(Ljava/io/FileDescriptor;)V", (void*)android_os_Parcel_closeFileDescriptor},
+    {"clearFileDescriptor", "(Ljava/io/FileDescriptor;)V", (void*)android_os_Parcel_clearFileDescriptor},
     {"freeBuffer",          "()V", (void*)android_os_Parcel_freeBuffer},
     {"init",                "(I)V", (void*)android_os_Parcel_init},
     {"destroy",             "()V", (void*)android_os_Parcel_destroy},

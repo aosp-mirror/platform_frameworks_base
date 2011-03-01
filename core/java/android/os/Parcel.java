@@ -1385,6 +1385,7 @@ public final class Parcel {
             int mode) throws FileNotFoundException;
     /*package*/ static native void closeFileDescriptor(FileDescriptor desc)
             throws IOException;
+    /*package*/ static native void clearFileDescriptor(FileDescriptor desc);
 
     /**
      * Read a byte value from the parcel at the current dataPosition().
