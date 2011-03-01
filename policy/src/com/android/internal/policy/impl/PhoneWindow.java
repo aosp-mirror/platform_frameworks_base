@@ -1601,6 +1601,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private ActionMode mActionMode;
         private ActionBarContextView mActionModeView;
         private PopupWindow mActionModePopup;
+        private Runnable mShowActionModePopup;
 
         public DecorView(Context context, int featureId) {
             super(context);
@@ -1976,6 +1977,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         final int height = TypedValue.complexToDimensionPixelSize(heightValue.data,
                                 mContext.getResources().getDisplayMetrics());
                         mActionModePopup.setHeight(height);
+                        mShowActionModePopup = new Runnable() {
+                            public void run() {
+                                mActionModePopup.showAtLocation(PhoneWindow.DecorView.this,
+                                        Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
+                            }
+                        };
                     } else {
                         ViewStub stub = (ViewStub) findViewById(
                                 com.android.internal.R.id.action_mode_bar_stub);
@@ -1994,8 +2001,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionModeView.setVisibility(View.VISIBLE);
                         mActionMode = mode;
                         if (mActionModePopup != null) {
-                            mActionModePopup.showAtLocation(this,
-                                    Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
+                            post(mShowActionModePopup);
                         }
                     } else {
                         mActionMode = null;
@@ -2183,6 +2189,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 mActionButtonPopup = null;
             }
+
+            if (mActionModePopup != null) {
+                removeCallbacks(mShowActionModePopup);
+                if (mActionModePopup.isShowing()) {
+                    mActionModePopup.dismiss();
+                }
+                mActionModePopup = null;
+            }
         }
 
         @Override
@@ -2246,6 +2260,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             public void onDestroyActionMode(ActionMode mode) {
                 mWrapped.onDestroyActionMode(mode);
                 if (mActionModePopup != null) {
+                    removeCallbacks(mShowActionModePopup);
                     mActionModePopup.dismiss();
                 } else if (mActionModeView != null) {
                     mActionModeView.setVisibility(GONE);
