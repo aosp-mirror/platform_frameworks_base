@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -58,6 +60,7 @@ public class NetworkTimeUpdateService {
 
     private static final int EVENT_AUTO_TIME_CHANGED = 1;
     private static final int EVENT_POLL_NETWORK_TIME = 2;
+    private static final int EVENT_WIFI_CONNECTED = 3;
 
     /** Normal polling frequency */
     private static final long POLLING_INTERVAL_MS = 24L * 60 * 60 * 1000; // 24 hrs
@@ -113,6 +116,7 @@ public class NetworkTimeUpdateService {
 
         registerForTelephonyIntents();
         registerForAlarms();
+        registerForConnectivityIntents();
 
         mThread = new HandlerThread(TAG);
         mThread.start();
@@ -160,6 +164,12 @@ public class NetworkTimeUpdateService {
                     mHandler.obtainMessage(EVENT_POLL_NETWORK_TIME).sendToTarget();
                 }
             }, new IntentFilter(ACTION_POLL));
+    }
+
+    private void registerForConnectivityIntents() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        mContext.registerReceiver(mConnectivityReceiver, intentFilter);
     }
 
     private void onPollNetworkTime(int event) {
@@ -253,6 +263,27 @@ public class NetworkTimeUpdateService {
         }
     };
 
+    /** Receiver for ConnectivityManager events */
+    private BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
+                // There is connectivity
+                NetworkInfo netInfo = (NetworkInfo)intent.getParcelableExtra(
+                        ConnectivityManager.EXTRA_NETWORK_INFO);
+                if (netInfo != null) {
+                    // Verify that it's a WIFI connection
+                    if (netInfo.getState() == NetworkInfo.State.CONNECTED &&
+                            netInfo.getType() == ConnectivityManager.TYPE_WIFI ) {
+                        mHandler.obtainMessage(EVENT_WIFI_CONNECTED).sendToTarget();
+                    }
+                }
+            }
+        }
+    };
+
     /** Handler to do the network accesses on */
     private class MyHandler extends Handler {
 
@@ -265,6 +296,7 @@ public class NetworkTimeUpdateService {
             switch (msg.what) {
                 case EVENT_AUTO_TIME_CHANGED:
                 case EVENT_POLL_NETWORK_TIME:
+                case EVENT_WIFI_CONNECTED:
                     onPollNetworkTime(msg.what);
                     break;
             }
