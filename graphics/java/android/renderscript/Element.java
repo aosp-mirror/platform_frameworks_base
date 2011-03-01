@@ -21,7 +21,7 @@ import android.util.Log;
 
 /**
  * <p>The most basic data type. An element represents one cell of a memory allocation.
- * Element is the basic data type of Renderscript. An element can be of two forms: Basic elements or Complex forms. 
+ * Element is the basic data type of Renderscript. An element can be of two forms: Basic elements or Complex forms.
  * Examples of basic elements are:</p>
  * <ul>
  *  <li>Single float value</li>
@@ -29,7 +29,7 @@ import android.util.Log;
  *  <li>single RGB-565 color</li>
  *  <li>single unsigned int 16</li>
  * </ul>
- * <p>Complex elements contain a list of sub-elements and names that 
+ * <p>Complex elements contain a list of sub-elements and names that
  * represents a structure of data. The fields can be accessed by name
  * from a script or shader. The memory layout is defined and ordered. Data
  * alignment is determinied by the most basic primitive type. i.e. a float4
@@ -403,7 +403,7 @@ public class Element extends BaseObj {
         if(rs.mElement_MATRIX_3X3 == null) {
             rs.mElement_MATRIX_3X3 = createUser(rs, DataType.MATRIX_3X3);
         }
-        return rs.mElement_MATRIX_4X4;
+        return rs.mElement_MATRIX_3X3;
     }
 
     public static Element MATRIX_2X2(RenderScript rs) {
