@@ -454,45 +454,33 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     public void setDevicePackage(UsbDevice device, String packageName) {
-        synchronized (mLock) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-            mDeviceManager.setDevicePackage(device, packageName);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.setDevicePackage(device, packageName);
     }
 
     public void setAccessoryPackage(UsbAccessory accessory, String packageName) {
-        synchronized (mLock) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-            mDeviceManager.setAccessoryPackage(accessory, packageName);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.setAccessoryPackage(accessory, packageName);
     }
 
     public void grantDevicePermission(UsbDevice device, int uid) {
-        synchronized (mLock) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-            mDeviceManager.grantDevicePermission(device, uid);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.grantDevicePermission(device, uid);
     }
 
     public void grantAccessoryPermission(UsbAccessory accessory, int uid) {
-        synchronized (mLock) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-            mDeviceManager.grantAccessoryPermission(accessory, uid);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.grantAccessoryPermission(accessory, uid);
     }
 
     public boolean hasDefaults(String packageName, int uid) {
-        synchronized (mLock) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-            return mDeviceManager.hasDefaults(packageName, uid);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        return mDeviceManager.hasDefaults(packageName, uid);
     }
 
     public void clearDefaults(String packageName, int uid) {
-        synchronized (mLock) {
-            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-            mDeviceManager.clearDefaults(packageName, uid);
-        }
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        mDeviceManager.clearDefaults(packageName, uid);
     }
 
     /*

@@ -64,17 +64,19 @@ class UsbDeviceSettingsManager {
     private final Context mContext;
 
     // maps UID to user approved USB devices
-    final SparseArray<ArrayList<DeviceFilter>> mDevicePermissionMap =
+    private final SparseArray<ArrayList<DeviceFilter>> mDevicePermissionMap =
             new SparseArray<ArrayList<DeviceFilter>>();
     // maps UID to user approved USB accessories
-    final SparseArray<ArrayList<AccessoryFilter>> mAccessoryPermissionMap =
+    private final SparseArray<ArrayList<AccessoryFilter>> mAccessoryPermissionMap =
             new SparseArray<ArrayList<AccessoryFilter>>();
     // Maps DeviceFilter to user preferred application package
-    final HashMap<DeviceFilter, String> mDevicePreferenceMap =
+    private final HashMap<DeviceFilter, String> mDevicePreferenceMap =
             new HashMap<DeviceFilter, String>();
     // Maps DeviceFilter to user preferred application package
-    final HashMap<AccessoryFilter, String> mAccessoryPreferenceMap =
+    private final HashMap<AccessoryFilter, String> mAccessoryPreferenceMap =
             new HashMap<AccessoryFilter, String>();
+
+    private final Object mLock = new Object();
 
     // This class is used to describe a USB device.
     // When used in HashMaps all values must be specified,
@@ -343,16 +345,20 @@ class UsbDeviceSettingsManager {
 
     private class MyPackageMonitor extends PackageMonitor {
         public void onPackageRemoved(String packageName, int uid) {
-            // clear all activity preferences for the package
-            if (clearPackageDefaults(packageName)) {
-                writeSettings();
+            synchronized (mLock) {
+                // clear all activity preferences for the package
+                if (clearPackageDefaultsLocked(packageName)) {
+                    writeSettingsLocked();
+                }
             }
         }
 
         public void onUidRemoved(int uid) {
-            // clear all permissions for the UID
-            if (clearUidDefaults(uid)) {
-                writeSettings();
+            synchronized (mLock) {
+                // clear all permissions for the UID
+                if (clearUidDefaultsLocked(uid)) {
+                    writeSettingsLocked();
+                }
             }
         }
     }
@@ -360,7 +366,9 @@ class UsbDeviceSettingsManager {
 
     public UsbDeviceSettingsManager(Context context) {
         mContext = context;
-        readSettings();
+        synchronized (mLock) {
+            readSettingsLocked();
+        }
         mPackageMonitor.register(context, true);
     }
 
@@ -423,7 +431,7 @@ class UsbDeviceSettingsManager {
         XmlUtils.nextElement(parser);
     }
 
-    private void readSettings() {
+    private void readSettingsLocked() {
         FileInputStream stream = null;
         try {
             stream = new FileInputStream(sSettingsFile);
@@ -458,7 +466,7 @@ class UsbDeviceSettingsManager {
         }
     }
 
-    private void writeSettings() {
+    private void writeSettingsLocked() {
         FileOutputStream fos = null;
         try {
             FileOutputStream fstr = new FileOutputStream(sSettingsFile);
@@ -524,7 +532,7 @@ class UsbDeviceSettingsManager {
 
     // Checks to see if a package matches a device or accessory.
     // Only one of device and accessory should be non-null.
-    private boolean packageMatches(ResolveInfo info, String metaDataName,
+    private boolean packageMatchesLocked(ResolveInfo info, String metaDataName,
             UsbDevice device, UsbAccessory accessory) {
         ActivityInfo ai = info.activityInfo;
         PackageManager pm = mContext.getPackageManager();
@@ -562,7 +570,7 @@ class UsbDeviceSettingsManager {
         return false;
     }
 
-    private final ArrayList<ResolveInfo> getDeviceMatches(UsbDevice device, Intent intent) {
+    private final ArrayList<ResolveInfo> getDeviceMatchesLocked(UsbDevice device, Intent intent) {
         ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent,
@@ -570,14 +578,15 @@ class UsbDeviceSettingsManager {
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
             ResolveInfo resolveInfo = resolveInfos.get(i);
-            if (packageMatches(resolveInfo, intent.getAction(), device, null)) {
+            if (packageMatchesLocked(resolveInfo, intent.getAction(), device, null)) {
                 matches.add(resolveInfo);
             }
         }
         return matches;
     }
 
-    private final ArrayList<ResolveInfo> getAccessoryMatches(UsbAccessory accessory, Intent intent) {
+    private final ArrayList<ResolveInfo> getAccessoryMatchesLocked(
+            UsbAccessory accessory, Intent intent) {
         ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent,
@@ -585,7 +594,7 @@ class UsbDeviceSettingsManager {
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
             ResolveInfo resolveInfo = resolveInfos.get(i);
-            if (packageMatches(resolveInfo, intent.getAction(), null, accessory)) {
+            if (packageMatchesLocked(resolveInfo, intent.getAction(), null, accessory)) {
                 matches.add(resolveInfo);
             }
         }
@@ -597,10 +606,15 @@ class UsbDeviceSettingsManager {
         deviceIntent.putExtra(UsbManager.EXTRA_DEVICE, device);
         deviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        ArrayList<ResolveInfo> matches = getDeviceMatches(device, deviceIntent);
-        // Launch our default activity directly, if we have one.
-        // Otherwise we will start the UsbResolverActivity to allow the user to choose.
-        String defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
+        ArrayList<ResolveInfo> matches;
+        String defaultPackage;
+        synchronized (mLock) {
+            matches = getDeviceMatchesLocked(device, deviceIntent);
+            // Launch our default activity directly, if we have one.
+            // Otherwise we will start the UsbResolverActivity to allow the user to choose.
+            defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
+        }
+
         if (defaultPackage != null) {
             int count = matches.size();
             for (int i = 0; i < count; i++) {
@@ -623,8 +637,7 @@ class UsbDeviceSettingsManager {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         intent.putExtra(Intent.EXTRA_INTENT, deviceIntent);
-        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS,
-                matches);
+        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS, matches);
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -644,10 +657,15 @@ class UsbDeviceSettingsManager {
         accessoryIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
         accessoryIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        ArrayList<ResolveInfo> matches = getAccessoryMatches(accessory, accessoryIntent);
-        // Launch our default activity directly, if we have one.
-        // Otherwise we will start the UsbResolverActivity to allow the user to choose.
-        String defaultPackage = mAccessoryPreferenceMap.get(new AccessoryFilter(accessory));
+        ArrayList<ResolveInfo> matches;
+        String defaultPackage;
+        synchronized (mLock) {
+            matches = getAccessoryMatchesLocked(accessory, accessoryIntent);
+            // Launch our default activity directly, if we have one.
+            // Otherwise we will start the UsbResolverActivity to allow the user to choose.
+            defaultPackage = mAccessoryPreferenceMap.get(new AccessoryFilter(accessory));
+        }
+
         if (defaultPackage != null) {
             int count = matches.size();
             for (int i = 0; i < count; i++) {
@@ -670,8 +688,7 @@ class UsbDeviceSettingsManager {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         intent.putExtra(Intent.EXTRA_INTENT, accessoryIntent);
-        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS,
-                matches);
+        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS, matches);
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
@@ -688,14 +705,16 @@ class UsbDeviceSettingsManager {
 
     public void checkPermission(UsbDevice device) {
         if (device == null) return;
-        ArrayList<DeviceFilter> filterList = mDevicePermissionMap.get(Binder.getCallingUid());
-        if (filterList != null) {
-            int count = filterList.size();
-            for (int i = 0; i < count; i++) {
-                DeviceFilter filter = filterList.get(i);
-                if (filter.equals(device)) {
-                    // permission allowed
-                    return;
+        synchronized (mLock) {
+            ArrayList<DeviceFilter> filterList = mDevicePermissionMap.get(Binder.getCallingUid());
+            if (filterList != null) {
+                int count = filterList.size();
+                for (int i = 0; i < count; i++) {
+                    DeviceFilter filter = filterList.get(i);
+                    if (filter.equals(device)) {
+                        // permission allowed
+                        return;
+                    }
                 }
             }
         }
@@ -704,14 +723,16 @@ class UsbDeviceSettingsManager {
 
     public void checkPermission(UsbAccessory accessory) {
         if (accessory == null) return;
-        ArrayList<AccessoryFilter> filterList = mAccessoryPermissionMap.get(Binder.getCallingUid());
-        if (filterList != null) {
-            int count = filterList.size();
-            for (int i = 0; i < count; i++) {
-                AccessoryFilter filter = filterList.get(i);
-                if (filter.equals(accessory)) {
-                    // permission allowed
-                    return;
+        synchronized (mLock) {
+            ArrayList<AccessoryFilter> filterList = mAccessoryPermissionMap.get(Binder.getCallingUid());
+            if (filterList != null) {
+                int count = filterList.size();
+                for (int i = 0; i < count; i++) {
+                    AccessoryFilter filter = filterList.get(i);
+                    if (filter.equals(accessory)) {
+                        // permission allowed
+                        return;
+                    }
                 }
             }
         }
@@ -720,73 +741,85 @@ class UsbDeviceSettingsManager {
 
     public void setDevicePackage(UsbDevice device, String packageName) {
         DeviceFilter filter = new DeviceFilter(device);
-        if (packageName == null) {
-            mDevicePreferenceMap.remove(filter);
-        } else {
-            mDevicePreferenceMap.put(filter, packageName);
+        synchronized (mLock) {
+            if (packageName == null) {
+                mDevicePreferenceMap.remove(filter);
+            } else {
+                mDevicePreferenceMap.put(filter, packageName);
+            }
+           // FIXME - only if changed
+            writeSettingsLocked();
         }
-       // FIXME - only if changed
-        writeSettings();
     }
 
     public void setAccessoryPackage(UsbAccessory accessory, String packageName) {
         AccessoryFilter filter = new AccessoryFilter(accessory);
-        if (packageName == null) {
-            mAccessoryPreferenceMap.remove(filter);
-        } else {
-            mAccessoryPreferenceMap.put(filter, packageName);
+        synchronized (mLock) {
+            if (packageName == null) {
+                mAccessoryPreferenceMap.remove(filter);
+            } else {
+                mAccessoryPreferenceMap.put(filter, packageName);
+            }
+            // FIXME - only if changed
+            writeSettingsLocked();
         }
-        // FIXME - only if changed
-        writeSettings();
     }
 
     public void grantDevicePermission(UsbDevice device, int uid) {
-        ArrayList<DeviceFilter> filterList = mDevicePermissionMap.get(uid);
-        if (filterList == null) {
-            filterList = new ArrayList<DeviceFilter>();
-            mDevicePermissionMap.put(uid, filterList);
-        } else {
-            int count = filterList.size();
-            for (int i = 0; i < count; i++) {
-                if (filterList.get(i).equals(device)) return;
+        synchronized (mLock) {
+            ArrayList<DeviceFilter> filterList = mDevicePermissionMap.get(uid);
+            if (filterList == null) {
+                filterList = new ArrayList<DeviceFilter>();
+                mDevicePermissionMap.put(uid, filterList);
+            } else {
+                int count = filterList.size();
+                for (int i = 0; i < count; i++) {
+                    if (filterList.get(i).equals(device)) return;
+                }
             }
+            filterList.add(new DeviceFilter(device));
+            writeSettingsLocked();
         }
-        filterList.add(new DeviceFilter(device));
-        writeSettings();
     }
 
     public void grantAccessoryPermission(UsbAccessory accessory, int uid) {
-        ArrayList<AccessoryFilter> filterList = mAccessoryPermissionMap.get(uid);
-        if (filterList == null) {
-            filterList = new ArrayList<AccessoryFilter>();
-            mAccessoryPermissionMap.put(uid, filterList);
-        } else {
-            int count = filterList.size();
-            for (int i = 0; i < count; i++) {
-                if (filterList.get(i).equals(accessory)) return;
+        synchronized (mLock) {
+            ArrayList<AccessoryFilter> filterList = mAccessoryPermissionMap.get(uid);
+            if (filterList == null) {
+                filterList = new ArrayList<AccessoryFilter>();
+                mAccessoryPermissionMap.put(uid, filterList);
+            } else {
+                int count = filterList.size();
+                for (int i = 0; i < count; i++) {
+                    if (filterList.get(i).equals(accessory)) return;
+                }
             }
+            filterList.add(new AccessoryFilter(accessory));
+            writeSettingsLocked();
         }
-        filterList.add(new AccessoryFilter(accessory));
-        writeSettings();
     }
 
     public boolean hasDefaults(String packageName, int uid) {
-        if (mDevicePermissionMap.get(uid) != null) return true;
-        if (mAccessoryPermissionMap.get(uid) != null) return true;
-        if (mDevicePreferenceMap.values().contains(packageName)) return true;
-        if (mAccessoryPreferenceMap.values().contains(packageName)) return true;
-        return false;
-    }
-
-    public void clearDefaults(String packageName, int uid) {
-        boolean packageCleared = clearPackageDefaults(packageName);
-        boolean uidCleared = clearUidDefaults(uid);
-        if (packageCleared || uidCleared) {
-            writeSettings();
+        synchronized (mLock) {
+            if (mDevicePermissionMap.get(uid) != null) return true;
+            if (mAccessoryPermissionMap.get(uid) != null) return true;
+            if (mDevicePreferenceMap.values().contains(packageName)) return true;
+            if (mAccessoryPreferenceMap.values().contains(packageName)) return true;
+            return false;
         }
     }
 
-    private boolean clearUidDefaults(int uid) {
+    public void clearDefaults(String packageName, int uid) {
+        synchronized (mLock) {
+            boolean packageCleared = clearPackageDefaultsLocked(packageName);
+            boolean uidCleared = clearUidDefaultsLocked(uid);
+            if (packageCleared || uidCleared) {
+                writeSettingsLocked();
+            }
+        }
+    }
+
+    private boolean clearUidDefaultsLocked(int uid) {
         boolean cleared = false;
         int index = mDevicePermissionMap.indexOfKey(uid);
         if (index >= 0) {
@@ -801,61 +834,65 @@ class UsbDeviceSettingsManager {
         return cleared;
     }
 
-    private boolean clearPackageDefaults(String packageName) {
+    private boolean clearPackageDefaultsLocked(String packageName) {
         boolean cleared = false;
-        if (mDevicePreferenceMap.containsValue(packageName)) {
-            // make a copy of the key set to avoid ConcurrentModificationException
-            Object[] keys = mDevicePreferenceMap.keySet().toArray();
-            for (int i = 0; i < keys.length; i++) {
-                Object key = keys[i];
-                if (packageName.equals(mDevicePreferenceMap.get(key))) {
-                    mDevicePreferenceMap.remove(key);
-                    cleared = true;
+        synchronized (mLock) {
+            if (mDevicePreferenceMap.containsValue(packageName)) {
+                // make a copy of the key set to avoid ConcurrentModificationException
+                Object[] keys = mDevicePreferenceMap.keySet().toArray();
+                for (int i = 0; i < keys.length; i++) {
+                    Object key = keys[i];
+                    if (packageName.equals(mDevicePreferenceMap.get(key))) {
+                        mDevicePreferenceMap.remove(key);
+                        cleared = true;
+                    }
                 }
             }
-        }
-        if (mAccessoryPreferenceMap.containsValue(packageName)) {
-            // make a copy of the key set to avoid ConcurrentModificationException
-            Object[] keys = mAccessoryPreferenceMap.keySet().toArray();
-            for (int i = 0; i < keys.length; i++) {
-                Object key = keys[i];
-                if (packageName.equals(mAccessoryPreferenceMap.get(key))) {
-                    mAccessoryPreferenceMap.remove(key);
-                    cleared = true;
+            if (mAccessoryPreferenceMap.containsValue(packageName)) {
+                // make a copy of the key set to avoid ConcurrentModificationException
+                Object[] keys = mAccessoryPreferenceMap.keySet().toArray();
+                for (int i = 0; i < keys.length; i++) {
+                    Object key = keys[i];
+                    if (packageName.equals(mAccessoryPreferenceMap.get(key))) {
+                        mAccessoryPreferenceMap.remove(key);
+                        cleared = true;
+                    }
                 }
             }
+            return cleared;
         }
-        return cleared;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw) {
-        pw.println("  Device permissions:");
-        int count = mDevicePermissionMap.size();
-        for (int i = 0; i < count; i++) {
-            int uid = mDevicePermissionMap.keyAt(i);
-            pw.println("    " + "uid " + uid + ":");
-            ArrayList<DeviceFilter> filters = mDevicePermissionMap.valueAt(i);
-            for (DeviceFilter filter : filters) {
-                pw.println("      " + filter);
+        synchronized (mLock) {
+            pw.println("  Device permissions:");
+            int count = mDevicePermissionMap.size();
+            for (int i = 0; i < count; i++) {
+                int uid = mDevicePermissionMap.keyAt(i);
+                pw.println("    " + "uid " + uid + ":");
+                ArrayList<DeviceFilter> filters = mDevicePermissionMap.valueAt(i);
+                for (DeviceFilter filter : filters) {
+                    pw.println("      " + filter);
+                }
             }
-        }
-        pw.println("  Accessory permissions:");
-        count = mAccessoryPermissionMap.size();
-        for (int i = 0; i < count; i++) {
-            int uid = mAccessoryPermissionMap.keyAt(i);
-            pw.println("    " + "uid " + uid + ":");
-            ArrayList<AccessoryFilter> filters = mAccessoryPermissionMap.valueAt(i);
-            for (AccessoryFilter filter : filters) {
-                pw.println("      " + filter);
+            pw.println("  Accessory permissions:");
+            count = mAccessoryPermissionMap.size();
+            for (int i = 0; i < count; i++) {
+                int uid = mAccessoryPermissionMap.keyAt(i);
+                pw.println("    " + "uid " + uid + ":");
+                ArrayList<AccessoryFilter> filters = mAccessoryPermissionMap.valueAt(i);
+                for (AccessoryFilter filter : filters) {
+                    pw.println("      " + filter);
+                }
             }
-        }
-        pw.println("  Device preferences:");
-        for (DeviceFilter filter : mDevicePreferenceMap.keySet()) {
-            pw.println("    " + filter + ": " + mDevicePreferenceMap.get(filter));
-        }
-        pw.println("  Accessory preferences:");
-        for (AccessoryFilter filter : mAccessoryPreferenceMap.keySet()) {
-            pw.println("    " + filter + ": " + mAccessoryPreferenceMap.get(filter));
+            pw.println("  Device preferences:");
+            for (DeviceFilter filter : mDevicePreferenceMap.keySet()) {
+                pw.println("    " + filter + ": " + mDevicePreferenceMap.get(filter));
+            }
+            pw.println("  Accessory preferences:");
+            for (AccessoryFilter filter : mAccessoryPreferenceMap.keySet()) {
+                pw.println("    " + filter + ": " + mAccessoryPreferenceMap.get(filter));
+            }
         }
     }
 }
