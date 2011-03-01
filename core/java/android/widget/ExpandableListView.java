@@ -299,6 +299,9 @@ public class ExpandableListView extends ListView {
                     indicatorRect.right = mIndicatorRight;
                 }
                 
+                indicatorRect.left += mPaddingLeft;
+                indicatorRect.right += mPaddingLeft;
+
                 lastItemType = pos.position.type; 
             }
 
