@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,11 @@ import java.util.Set;
  * more convenient syntax to animate a specific property, then ViewPropertyAnimator might be
  * more well-suited to the task.
  *
- * <p>This class could provide better performance for several simultaneous animations, because
- * it will optimize invalidatesionto take place only once for several properties instead of each
- * aniamted property independently causing its own invalidation. Also, the syntax of using this
+ * <p>This class may provide better performance for several simultaneous animations, because
+ * it will optimize invalidate calls to take place only once for several properties instead of each
+ * animated property independently causing its own invalidation. Also, the syntax of using this
  * class could be easier to use because the caller need only tell the View object which
- * property to animate, and the value to animate either to or by, and this calss handles the
+ * property to animate, and the value to animate either to or by, and this class handles the
  * details of configuring the underlying Animator class and starting it.</p>
  *
  * <p>This class is not constructed by the caller, but rather by the View whose properties
@@ -103,7 +103,7 @@ public class ViewPropertyAnimator {
 
     /**
      * Constants used to associate a property being requested and the mechanism used to set
-     * the property (this calss calls directly into View to set the properties in question).
+     * the property (this class calls directly into View to set the properties in question).
      */
     private static final int NONE           = 0x0000;
     private static final int TRANSLATION_X  = 0x0001;
@@ -260,7 +260,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>x</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setX(float)
@@ -273,7 +273,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>x</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setX(float)
@@ -286,7 +286,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>y</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setY(float)
@@ -299,7 +299,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>y</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setY(float)
@@ -312,7 +312,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>rotation</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setRotation(float)
@@ -325,7 +325,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>rotation</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setRotation(float)
@@ -338,7 +338,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>rotationX</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setRotationX(float)
@@ -351,7 +351,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>rotationX</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setRotationX(float)
@@ -364,7 +364,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>rotationY</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setRotationY(float)
@@ -377,7 +377,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>rotationY</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setRotationY(float)
@@ -390,7 +390,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>translationX</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setTranslationX(float)
@@ -403,7 +403,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>translationX</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setTranslationX(float)
@@ -416,7 +416,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>translationY</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setTranslationY(float)
@@ -429,7 +429,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>translationY</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setTranslationY(float)
@@ -442,7 +442,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>scaleX</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setScaleX(float)
@@ -455,7 +455,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>scaleX</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setScaleX(float)
@@ -468,7 +468,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>scaleY</code> property to be animated to the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setScaleY(float)
@@ -481,7 +481,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>scaleY</code> property to be animated by the
-     * specifed value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setScaleY(float)
@@ -494,7 +494,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>alpha</code> property to be animated to the
-     * specified value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The value to be animated to.
      * @see View#setAlpha(float)
@@ -507,7 +507,7 @@ public class ViewPropertyAnimator {
 
     /**
      * This method will cause the View's <code>alpha</code> property to be animated by the
-     * specified value.
+     * specified value. Animations already running on the property will be canceled.
      *
      * @param value The amount to be animated by, as an offset from the current value.
      * @see View#setAlpha(float)
@@ -548,7 +548,7 @@ public class ViewPropertyAnimator {
 
     /**
      * Utility function, called by the various x(), y(), etc. methods. This stores the
-     * constnat name for the property along with the from/delta values that will be used to
+     * constant name for the property along with the from/delta values that will be used to
      * calculate and set the property during the animation. This structure is added to the
      * pending animations, awaiting the eventual start() of the underlying animator. A
      * Runnable is posted to start the animation, and any pending such Runnable is canceled
@@ -578,14 +578,14 @@ public class ViewPropertyAnimator {
     }
 
     /**
-     * Utility function, called by animatePropert() and animatePropertyBy(), which handles the
+     * Utility function, called by animateProperty() and animatePropertyBy(), which handles the
      * details of adding a pending animation and posting the request to start the animation.
      *
      * @param constantName The specifier for the property being animated
-     * @param fromValue The starting value of the property
+     * @param startValue The starting value of the property
      * @param byValue The amount by which the property will change
      */
-    private void animatePropertyBy(int constantName, float fromValue, float byValue) {
+    private void animatePropertyBy(int constantName, float startValue, float byValue) {
         // First, cancel any existing animations on this property
         if (mAnimatorMap.size() > 0) {
             Animator animatorToCancel = null;
@@ -598,7 +598,7 @@ public class ViewPropertyAnimator {
                     // on a property will cancel a previous animation on that property, so
                     // there can only ever be one such animation running.
                     if (bundle.mPropertyMask == NONE) {
-                        // the animation is not longer changing animthing - cancel it
+                        // the animation is not longer changing anything - cancel it
                         animatorToCancel = runningAnim;
                         break;
                     }
@@ -609,7 +609,6 @@ public class ViewPropertyAnimator {
             }
         }
 
-        float startValue = getValue(constantName);
         NameValuesHolder nameValuePair = new NameValuesHolder(constantName, startValue, byValue);
         mPendingAnimations.add(nameValuePair);
         mView.getHandler().removeCallbacks(mAnimationStarter);
