@@ -213,6 +213,17 @@ bool OpenGLRenderer::callDrawGLFunction(Functor *functor) {
     if (mDirtyClip) {
         setScissorFromClip();
     }
+
+#if RENDER_LAYERS_AS_REGIONS
+    // Since we don't know what the functor will draw, let's dirty
+    // tne entire clip region
+    if (hasLayer()) {
+        Rect clip(*mSnapshot->clipRect);
+        clip.snapToPixelBoundaries();
+        dirtyLayerUnchecked(clip, getRegion());
+    }
+#endif
+
     status_t result = (*functor)();
     resume();
     return (result == 0) ? false : true;
