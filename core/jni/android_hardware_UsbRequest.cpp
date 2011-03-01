@@ -187,7 +187,7 @@ android_hardware_UsbRequest_cancel(JNIEnv *env, jobject thiz)
 }
 
 static JNINativeMethod method_table[] = {
-    {"native_init",             "(Landroid/hardware/UsbDevice;IIII)Z",
+    {"native_init",             "(Landroid/hardware/usb/UsbDevice;IIII)Z",
                                             (void *)android_hardware_UsbRequest_init},
     {"native_close",            "()V",      (void *)android_hardware_UsbRequest_close},
     {"native_queue_array",      "([BIZ)Z",  (void *)android_hardware_UsbRequest_queue_array},
@@ -200,9 +200,9 @@ static JNINativeMethod method_table[] = {
 
 int register_android_hardware_UsbRequest(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("android/hardware/UsbRequest");
+    jclass clazz = env->FindClass("android/hardware/usb/UsbRequest");
     if (clazz == NULL) {
-        LOGE("Can't find android/hardware/UsbRequest");
+        LOGE("Can't find android/hardware/usb/UsbRequest");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
@@ -211,7 +211,7 @@ int register_android_hardware_UsbRequest(JNIEnv *env)
         return -1;
     }
 
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/UsbRequest",
+    return AndroidRuntime::registerNativeMethods(env, "android/hardware/usb/UsbRequest",
             method_table, NELEM(method_table));
 }
 

@@ -26,7 +26,7 @@ public final class UsbAccessory {
     private final String mType;
     private final String mVersion;
 
-    /* package */ UsbAccessory(android.hardware.UsbAccessory accessory) {
+    /* package */ UsbAccessory(android.hardware.usb.UsbAccessory accessory) {
         mManufacturer = accessory.getManufacturer();
         mModel = accessory.getModel();
         mType = accessory.getType();

@@ -1664,11 +1664,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.hardware.UsbManager} for access to USB devices (as a USB host)
+     * android.hardware.usb.UsbManager} for access to USB devices (as a USB host)
      * and for controlling this device's behavior as a USB device.
      *
      * @see #getSystemService
-     * @see android.harware.UsbManager
+     * @see android.harware.usb.UsbManager
      */
     public static final String USB_SERVICE = "usb";
 

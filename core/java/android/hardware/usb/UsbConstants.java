@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
 /**
  * Contains constants for the USB protocol.

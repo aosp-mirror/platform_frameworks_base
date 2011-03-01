@@ -237,7 +237,7 @@ static JNINativeMethod method_table[] = {
                                         (void *)android_hardware_UsbDevice_control_request},
     {"native_bulk_request",     "(I[BII)I",
                                         (void *)android_hardware_UsbDevice_bulk_request},
-    {"native_request_wait",             "()Landroid/hardware/UsbRequest;",
+    {"native_request_wait",             "()Landroid/hardware/usb/UsbRequest;",
                                         (void *)android_hardware_UsbDevice_request_wait},
     { "native_get_serial",      "()Ljava/lang/String;",
                                         (void*)android_hardware_UsbDevice_get_serial },
@@ -251,9 +251,9 @@ static JNINativeMethod method_table[] = {
 
 int register_android_hardware_UsbDevice(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("android/hardware/UsbDevice");
+    jclass clazz = env->FindClass("android/hardware/usb/UsbDevice");
     if (clazz == NULL) {
-        LOGE("Can't find android/hardware/UsbDevice");
+        LOGE("Can't find android/hardware/usb/UsbDevice");
         return -1;
     }
     field_context = env->GetFieldID(clazz, "mNativeContext", "I");
@@ -262,7 +262,7 @@ int register_android_hardware_UsbDevice(JNIEnv *env)
         return -1;
     }
 
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/UsbDevice",
+    return AndroidRuntime::registerNativeMethods(env, "android/hardware/usb/UsbDevice",
             method_table, NELEM(method_table));
 }
 

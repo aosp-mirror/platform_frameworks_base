@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
-import android.hardware.UsbAccessory;
-import android.hardware.UsbDevice;
+import android.hardware.usb.UsbAccessory;
+import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
