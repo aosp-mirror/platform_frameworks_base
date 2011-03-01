@@ -2522,8 +2522,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                             layerFlags |= Canvas.CLIP_TO_LAYER_SAVE_FLAG;
                         }
                         if (layerType == LAYER_TYPE_NONE) {
-                            canvas.saveLayerAlpha(sx, sy, sx + cr - cl, sy + cb - ct,
-                                    multipliedAlpha, layerFlags);
+                            final int scrollX = hasDisplayList ? 0 : sx;
+                            final int scrollY = hasDisplayList ? 0 : sy;
+                            canvas.saveLayerAlpha(scrollX, scrollY, scrollX + cr - cl,
+                                    scrollY + cb - ct, multipliedAlpha, layerFlags);
                         }
                     } else {
                         // Alpha is handled by the child directly, clobber the layer's alpha
@@ -2561,7 +2563,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     ((HardwareCanvas) canvas).drawHardwareLayer(layer, 0, 0, child.mLayerPaint);
                     layerRendered = true;
                 } else {
-                    canvas.saveLayer(sx, sy, sx + cr - cl, sy + cb - ct, child.mLayerPaint,
+                    final int scrollX = hasDisplayList ? 0 : sx;
+                    final int scrollY = hasDisplayList ? 0 : sy;                    
+                    canvas.saveLayer(scrollX, scrollY,
+                            scrollX + cr - cl, scrollY + cb - ct, child.mLayerPaint,
                             Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
                 }
             }
