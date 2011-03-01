@@ -68,6 +68,14 @@ public abstract class InputEvent implements Parcelable {
     public abstract void setSource(int source);
 
     /**
+     * Copies the event.
+     *
+     * @return A deep copy of the event.
+     * @hide
+     */
+    public abstract InputEvent copy();
+
+    /**
      * Recycles the event.
      * This method should only be used by the system since applications do not
      * expect {@link KeyEvent} objects to be recycled, although {@link MotionEvent}
@@ -75,6 +83,28 @@ public abstract class InputEvent implements Parcelable {
      * @hide
      */
     public abstract void recycle();
+
+    /**
+     * Gets a private flag that indicates when the system has detected that this input event
+     * may be inconsistent with respect to the sequence of previously delivered input events,
+     * such as when a key up event is sent but the key was not down or when a pointer
+     * move event is sent but the pointer is not down.
+     *
+     * @return True if this event is tainted.
+     * @hide
+     */
+    public abstract boolean isTainted();
+
+    /**
+     * Sets a private flag that indicates when the system has detected that this input event
+     * may be inconsistent with respect to the sequence of previously delivered input events,
+     * such as when a key up event is sent but the key was not down or when a pointer
+     * move event is sent but the pointer is not down.
+     *
+     * @param tainted True if this event is tainted.
+     * @hide
+     */
+    public abstract void setTainted(boolean tainted);
 
     public int describeContents() {
         return 0;

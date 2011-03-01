@@ -1126,6 +1126,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onKeyEvent(event, 1);
+        }
+
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
             return super.dispatchKeyEvent(event);
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
@@ -1152,6 +1156,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchTrackballEvent(MotionEvent event) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTrackballEvent(event, 1);
+        }
+
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
             return super.dispatchTrackballEvent(event);
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
@@ -1332,6 +1340,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTouchEvent(ev, 1);
+        }
+
         if (!onFilterTouchEventForSecurity(ev)) {
             return false;
         }

@@ -430,6 +430,12 @@ static jint android_view_MotionEvent_nativeGetFlags(JNIEnv* env, jclass clazz,
     return event->getFlags();
 }
 
+static void android_view_MotionEvent_nativeSetFlags(JNIEnv* env, jclass clazz,
+        jint nativePtr, jint flags) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setFlags(flags);
+}
+
 static jint android_view_MotionEvent_nativeGetEdgeFlags(JNIEnv* env, jclass clazz,
         jint nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -656,6 +662,9 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetFlags",
             "(I)I",
             (void*)android_view_MotionEvent_nativeGetFlags },
+    { "nativeSetFlags",
+            "(II)V",
+            (void*)android_view_MotionEvent_nativeSetFlags },
     { "nativeGetEdgeFlags",
             "(I)I",
             (void*)android_view_MotionEvent_nativeGetEdgeFlags },

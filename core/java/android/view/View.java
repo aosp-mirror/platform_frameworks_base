@@ -2384,6 +2384,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     Rect mLocalDirtyRect;
 
     /**
+     * Consistency verifier for debugging purposes.
+     * @hide
+     */
+    protected final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
+            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
+                    new InputEventConsistencyVerifier(this, 0) : null;
+
+    /**
      * Simple constructor to use when creating a view from code.
      *
      * @param context The Context the view is running in, through which it can
@@ -4590,13 +4598,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled, false otherwise.
      */
     public boolean dispatchKeyEvent(KeyEvent event) {
-        // If any attached key listener a first crack at the event.
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onKeyEvent(event, 0);
+        }
 
         //noinspection SimplifiableIfStatement,deprecation
         if (android.util.Config.LOGV) {
             captureViewInfo("captureViewKeyEvent", this);
         }
 
+        // Give any attached key listener a first crack at the event.
         //noinspection SimplifiableIfStatement
         if (mOnKeyListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnKeyListener.onKey(this, event.getKeyCode(), event)) {
@@ -4625,6 +4636,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTouchEvent(event, 0);
+        }
+
         if (!onFilterTouchEventForSecurity(event)) {
             return false;
         }
@@ -4662,6 +4677,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchTrackballEvent(MotionEvent event) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
+        }
+
         //Log.i("view", "view=" + this + ", " + event.toString());
         return onTrackballEvent(event);
     }
@@ -4679,6 +4698,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
+        }
+
         final int source = event.getSource();
         if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             final int action = event.getAction();

@@ -250,6 +250,13 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private final int mDensity;
 
+    /**
+     * Consistency verifier for debugging purposes.
+     */
+    protected final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
+            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
+                    new InputEventConsistencyVerifier(this, 0) : null;
+
     public static IWindowSession getWindowSession(Looper mainLooper) {
         synchronized (mStaticInit) {
             if (!mInitialized) {
@@ -2316,6 +2323,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverPointerEvent(MotionEvent event, boolean sendDone) {
+        if (mInputEventConsistencyVerifier != null) {
+            if (event.isTouchEvent()) {
+                mInputEventConsistencyVerifier.onTouchEvent(event, 0);
+            } else {
+                mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
+            }
+        }
+
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
             finishMotionEvent(event, sendDone, false);
@@ -2421,6 +2436,10 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private void deliverTrackballEvent(MotionEvent event, boolean sendDone) {
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
+        }
 
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
@@ -2550,6 +2569,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverGenericMotionEvent(MotionEvent event, boolean sendDone) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
+        }
+
         final int source = event.getSource();
         final boolean isJoystick = (source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0;
 
@@ -2785,6 +2808,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onKeyEvent(event, 0);
+        }
+
         // If there is no view, then the event will not be handled.
         if (mView == null || !mAdded) {
             finishKeyEvent(event, sendDone, false);

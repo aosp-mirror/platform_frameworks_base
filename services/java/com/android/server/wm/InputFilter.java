@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.InputEvent;
+import android.view.InputEventConsistencyVerifier;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
@@ -100,6 +101,16 @@ public abstract class InputFilter {
     private final H mH;
     private Host mHost;
 
+    // Consistency verifiers for debugging purposes.
+    private final InputEventConsistencyVerifier mInboundInputEventConsistencyVerifier =
+            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
+                    new InputEventConsistencyVerifier(this,
+                            InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT) : null;
+    private final InputEventConsistencyVerifier mOutboundInputEventConsistencyVerifier =
+            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
+                    new InputEventConsistencyVerifier(this,
+                            InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT) : null;
+
     /**
      * Creates the input filter.
      *
@@ -152,6 +163,9 @@ public abstract class InputFilter {
             throw new IllegalStateException("Cannot send input event because the input filter " +
                     "is not installed.");
         }
+        if (mOutboundInputEventConsistencyVerifier != null) {
+            mOutboundInputEventConsistencyVerifier.onInputEvent(event, 0);
+        }
         mHost.sendInputEvent(event, policyFlags);
     }
 
@@ -201,6 +215,12 @@ public abstract class InputFilter {
             switch (msg.what) {
                 case MSG_INSTALL:
                     mHost = (Host)msg.obj;
+                    if (mInboundInputEventConsistencyVerifier != null) {
+                        mInboundInputEventConsistencyVerifier.reset();
+                    }
+                    if (mOutboundInputEventConsistencyVerifier != null) {
+                        mOutboundInputEventConsistencyVerifier.reset();
+                    }
                     onInstalled();
                     break;
 
@@ -215,6 +235,9 @@ public abstract class InputFilter {
                 case MSG_INPUT_EVENT: {
                     final InputEvent event = (InputEvent)msg.obj;
                     try {
+                        if (mInboundInputEventConsistencyVerifier != null) {
+                            mInboundInputEventConsistencyVerifier.onInputEvent(event, 0);
+                        }
                         onInputEvent(event, msg.arg1);
                     } finally {
                         event.recycle();
