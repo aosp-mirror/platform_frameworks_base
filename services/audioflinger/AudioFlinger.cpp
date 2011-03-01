@@ -1629,6 +1629,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                     track->mState = TrackBase::ACTIVE;
                     param = AudioMixer::RAMP_VOLUME;
                 }
+                mAudioMixer->setParameter(AudioMixer::RESAMPLE, AudioMixer::RESET, NULL);
             } else if (cblk->server != 0) {
                 // If the track is stopped before the first frame was mixed,
                 // do not apply ramp
@@ -3855,9 +3856,12 @@ status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrac
             mActiveTrack.clear();
             return status;
         }
-        mActiveTrack->mState = TrackBase::RESUMING;
         mRsmpInIndex = mFrameCount;
         mBytesRead = 0;
+        if (mResampler != NULL) {
+            mResampler->reset();
+        }
+        mActiveTrack->mState = TrackBase::RESUMING;
         // signal thread to start
         LOGV("Signal record thread");
         mWaitWorkCV.signal();

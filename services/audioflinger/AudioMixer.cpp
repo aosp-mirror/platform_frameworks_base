@@ -220,6 +220,12 @@ status_t AudioMixer::setParameter(int target, int name, void *value)
                 return NO_ERROR;
             }
         }
+        if (name == RESET) {
+            track_t& track = mState.tracks[ mActiveTrack ];
+            track.resetResampler();
+            invalidateState(1<<mActiveTrack);
+            return NO_ERROR;
+        }
         break;
     case RAMP_VOLUME:
     case VOLUME:
@@ -287,6 +293,13 @@ bool AudioMixer::track_t::setResampler(uint32_t value, uint32_t devSampleRate)
 bool AudioMixer::track_t::doesResample() const
 {
     return resampler != 0;
+}
+
+void AudioMixer::track_t::resetResampler()
+{
+    if (resampler != 0) {
+        resampler->reset();
+    }
 }
 
 inline

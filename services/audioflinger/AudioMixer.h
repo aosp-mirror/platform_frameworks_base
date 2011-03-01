@@ -67,6 +67,7 @@ public:
         AUX_BUFFER      = 0x4003,
         // for TARGET RESAMPLE
         SAMPLE_RATE     = 0x4100,
+        RESET           = 0x4101,
         // for TARGET VOLUME (8 channels max)
         VOLUME0         = 0x4200,
         VOLUME1         = 0x4201,
@@ -163,6 +164,7 @@ private:
 
         bool        setResampler(uint32_t sampleRate, uint32_t devSampleRate);
         bool        doesResample() const;
+        void        resetResampler();
         void        adjustVolumeRamp(bool aux);
     };
 

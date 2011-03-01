@@ -148,6 +148,12 @@ void AudioResampler::setVolume(int16_t left, int16_t right) {
     mVolume[1] = right;
 }
 
+void AudioResampler::reset() {
+    mInputIndex = 0;
+    mPhaseFraction = 0;
+    mBuffer.frameCount = 0;
+}
+
 // ----------------------------------------------------------------------------
 
 void AudioResamplerOrder1::resample(int32_t* out, size_t outFrameCount,
