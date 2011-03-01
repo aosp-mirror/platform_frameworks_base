@@ -155,6 +155,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     int mViewVisibility;
     boolean mAppVisible = true;
 
+    // Set to true if the owner of this window is in the stopped state,
+    // so the window should no longer be active.
+    boolean mStopped = false;
+    
     SurfaceHolder.Callback2 mSurfaceHolderCallback;
     BaseSurfaceHolder mSurfaceHolder;
     boolean mIsCreating;
@@ -618,6 +622,15 @@ public final class ViewRoot extends Handler implements ViewParent,
         scheduleTraversals();
     }
 
+    void setStopped(boolean stopped) {
+        if (mStopped != stopped) {
+            mStopped = stopped;
+            if (!stopped) {
+                scheduleTraversals();
+            }
+        }
+    }
+    
     public ViewParent getParent() {
         return null;
     }
@@ -760,7 +773,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         boolean insetsChanged = false;
 
-        if (mLayoutRequested) {
+        if (mLayoutRequested && !mStopped) {
             // Execute enqueued actions on every layout in case a view that was detached
             // enqueued an action after being detached
             getRunQueue().executeActions(attachInfo.mHandler);
@@ -1143,54 +1156,56 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
             }
 
-            boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
-                    (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0);
-            if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
-                    || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
-                childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
-                childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
-
-                if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
-                        + mWidth + " measuredWidth=" + host.getMeasuredWidth()
-                        + " mHeight=" + mHeight
-                        + " measuredHeight=" + host.getMeasuredHeight()
-                        + " coveredInsetsChanged=" + contentInsetsChanged);
-
-                 // Ask host how big it wants to be
-                host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-
-                // Implementation of weights from WindowManager.LayoutParams
-                // We just grow the dimensions as needed and re-measure if
-                // needs be
-                int width = host.getMeasuredWidth();
-                int height = host.getMeasuredHeight();
-                boolean measureAgain = false;
-
-                if (lp.horizontalWeight > 0.0f) {
-                    width += (int) ((mWidth - width) * lp.horizontalWeight);
-                    childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width,
-                            MeasureSpec.EXACTLY);
-                    measureAgain = true;
-                }
-                if (lp.verticalWeight > 0.0f) {
-                    height += (int) ((mHeight - height) * lp.verticalWeight);
-                    childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height,
-                            MeasureSpec.EXACTLY);
-                    measureAgain = true;
-                }
-
-                if (measureAgain) {
-                    if (DEBUG_LAYOUT) Log.v(TAG,
-                            "And hey let's measure once more: width=" + width
-                            + " height=" + height);
+            if (!mStopped) {
+                boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
+                        (relayoutResult&WindowManagerImpl.RELAYOUT_IN_TOUCH_MODE) != 0);
+                if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
+                        || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
+                    childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
+                    childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
+    
+                    if (DEBUG_LAYOUT) Log.v(TAG, "Ooops, something changed!  mWidth="
+                            + mWidth + " measuredWidth=" + host.getMeasuredWidth()
+                            + " mHeight=" + mHeight
+                            + " measuredHeight=" + host.getMeasuredHeight()
+                            + " coveredInsetsChanged=" + contentInsetsChanged);
+    
+                     // Ask host how big it wants to be
                     host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    
+                    // Implementation of weights from WindowManager.LayoutParams
+                    // We just grow the dimensions as needed and re-measure if
+                    // needs be
+                    int width = host.getMeasuredWidth();
+                    int height = host.getMeasuredHeight();
+                    boolean measureAgain = false;
+    
+                    if (lp.horizontalWeight > 0.0f) {
+                        width += (int) ((mWidth - width) * lp.horizontalWeight);
+                        childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width,
+                                MeasureSpec.EXACTLY);
+                        measureAgain = true;
+                    }
+                    if (lp.verticalWeight > 0.0f) {
+                        height += (int) ((mHeight - height) * lp.verticalWeight);
+                        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height,
+                                MeasureSpec.EXACTLY);
+                        measureAgain = true;
+                    }
+    
+                    if (measureAgain) {
+                        if (DEBUG_LAYOUT) Log.v(TAG,
+                                "And hey let's measure once more: width=" + width
+                                + " height=" + height);
+                        host.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+                    }
+    
+                    mLayoutRequested = true;
                 }
-
-                mLayoutRequested = true;
             }
         }
 
-        final boolean didLayout = mLayoutRequested;
+        final boolean didLayout = mLayoutRequested && !mStopped;
         boolean triggerGlobalLayoutListener = didLayout
                 || attachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {

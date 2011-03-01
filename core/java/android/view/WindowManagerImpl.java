@@ -302,6 +302,20 @@ public class WindowManagerImpl implements WindowManager {
         }
     }
     
+    public void setStoppedState(IBinder token, boolean stopped) {
+        synchronized (this) {
+            if (mViews == null)
+                return;
+            int count = mViews.length;
+            for (int i=0; i<count; i++) {
+                if (token == null || mParams[i].token == token) {
+                    ViewRoot root = mRoots[i];
+                    root.setStopped(stopped);
+                }
+            }
+        }
+    }
+    
     public WindowManager.LayoutParams getRootViewLayoutParameter(View view) {
         ViewParent vp = view.getParent();
         while (vp != null && !(vp instanceof ViewRoot)) {
