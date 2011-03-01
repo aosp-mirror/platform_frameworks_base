@@ -21,7 +21,7 @@
 
 #include <SkPaint.h>
 
-#include <utils/String8.h>
+#include <utils/String16.h>
 
 #include "utils/Compare.h"
 #include "utils/GenerationCache.h"
@@ -37,16 +37,11 @@ struct ShadowText {
 
     ShadowText(SkPaint* paint, uint32_t radius, uint32_t len, const char* srcText):
             radius(radius), len(len) {
-        // The source text we receive is in UTF-16, convert to UTF-8
-        str.setTo((const char16_t*) srcText, len >> 1);
+        // TODO: Propagate this through the API, we should not cast here
+        text = (const char16_t*) srcText;
 
         textSize = paint->getTextSize();
         typeface = paint->getTypeface();
-    }
-
-    ShadowText(const ShadowText& shadow):
-            radius(shadow.radius), len(shadow.len), textSize(shadow.textSize),
-            typeface(shadow.typeface), str(shadow.str) {
     }
 
     ~ShadowText() {
@@ -56,16 +51,21 @@ struct ShadowText {
     uint32_t len;
     float textSize;
     SkTypeface* typeface;
-    String8 str;
+    const char16_t* text;
+    String16 str;
+
+    void copyTextLocally() {
+        str.setTo((const char16_t*) text, len >> 1);
+        text = str.string();
+    }
 
     // TODO: Should take into account fake bold and text skew
     bool operator<(const ShadowText& rhs) const {
         LTE_INT(len) {
             LTE_INT(radius) {
                 LTE_FLOAT(textSize) {
-                    if (typeface < rhs.typeface) return true;
-                    else if (typeface == rhs.typeface) {
-                        return str.compare(rhs.str) < 0;
+                    LTE_INT(typeface) {
+                        return strncmp16(text, rhs.text, len >> 1) < 0;
                     }
                 }
             }

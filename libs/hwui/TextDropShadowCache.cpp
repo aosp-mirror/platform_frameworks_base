@@ -147,6 +147,9 @@ ShadowTexture* TextDropShadowCache::get(SkPaint* paint, const char* text, uint32
             if (mDebugEnabled) {
                 LOGD("Shadow texture created, size = %d", texture->bitmapSize);
             }
+
+            entry.copyTextLocally();
+
             mSize += size;
             mCache.put(entry, texture);
         } else {
