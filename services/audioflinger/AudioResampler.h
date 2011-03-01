@@ -53,6 +53,8 @@ public:
     virtual void resample(int32_t* out, size_t outFrameCount,
             AudioBufferProvider* provider) = 0;
 
+    virtual void reset();
+
 protected:
     // number of bits for phase fraction - 30 bits allows nearly 2x downsampling
     static const int kNumPhaseBits = 30;
