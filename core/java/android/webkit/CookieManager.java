@@ -293,6 +293,10 @@ public final class CookieManager {
      * @param value The value for set-cookie: in http response header
      */
     public void setCookie(String url, String value) {
+        if (JniUtil.useChromiumHttpStack()) {
+            setCookie(url, value, false);
+        }
+
         WebAddress uri;
         try {
             uri = new WebAddress(url);
@@ -301,11 +305,33 @@ public final class CookieManager {
             return;
         }
 
-        if (JniUtil.useChromiumHttpStack()) {
-            nativeSetCookie(uri.toString(), value);
-        } else {
-            setCookie(uri, value);
+        setCookie(uri, value);
+    }
+
+    /**
+     * Set cookie for a given url. The old cookie with same host/path/name will
+     * be removed. The new cookie will be added if it is not expired or it does
+     * not have expiration which implies it is session cookie.
+     * @param url The url which cookie is set for
+     * @param value The value for set-cookie: in http response header
+     * @param privateBrowsing cookie jar to use
+     * @hide hiding private browsing
+     */
+    public void setCookie(String url, String value, boolean privateBrowsing) {
+        if (!JniUtil.useChromiumHttpStack()) {
+            setCookie(url, value);
+            return;
         }
+
+        WebAddress uri;
+        try {
+            uri = new WebAddress(url);
+        } catch (ParseException ex) {
+            Log.e(LOGTAG, "Bad address: " + url);
+            return;
+        }
+
+        nativeSetCookie(uri.toString(), value, privateBrowsing);
     }
 
     /**
@@ -424,6 +450,10 @@ public final class CookieManager {
      * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
      */
     public String getCookie(String url) {
+        if (JniUtil.useChromiumHttpStack()) {
+            return getCookie(url, false);
+        }
+
         WebAddress uri;
         try {
             uri = new WebAddress(url);
@@ -432,11 +462,32 @@ public final class CookieManager {
             return null;
         }
 
-        if (JniUtil.useChromiumHttpStack()) {
-            return nativeGetCookie(uri.toString());
-        } else {
-            return getCookie(uri);
+        return getCookie(uri);
+    }
+
+    /**
+     * Get cookie(s) for a given url so that it can be set to "cookie:" in http
+     * request header.
+     * @param url The url needs cookie
+     * @param privateBrowsing cookie jar to use
+     * @return The cookies in the format of NAME=VALUE [; NAME=VALUE]
+     * @hide Private mode is not very well exposed for now
+     */
+    public String getCookie(String url, boolean privateBrowsing) {
+        if (!JniUtil.useChromiumHttpStack()) {
+            // Just redirect to regular get cookie for android stack
+            return getCookie(url);
         }
+
+        WebAddress uri;
+        try {
+            uri = new WebAddress(url);
+        } catch (ParseException ex) {
+            Log.e(LOGTAG, "Bad address: " + url);
+            return null;
+        }
+
+        return nativeGetCookie(uri.toString(), privateBrowsing);
     }
 
     /**
@@ -605,10 +656,23 @@ public final class CookieManager {
      */
     public synchronized boolean hasCookies() {
         if (JniUtil.useChromiumHttpStack()) {
-            return nativeHasCookies();
+            return hasCookies(false);
         }
 
         return CookieSyncManager.getInstance().hasCookies();
+    }
+
+    /**
+     *  Return true if there are stored cookies.
+     *  @param privateBrowsing cookie jar to use
+     *  @hide Hiding private mode
+     */
+    public synchronized boolean hasCookies(boolean privateBrowsing) {
+        if (!JniUtil.useChromiumHttpStack()) {
+            return hasCookies();
+        }
+
+        return nativeHasCookies(privateBrowsing);
     }
 
     /**
@@ -1132,13 +1196,13 @@ public final class CookieManager {
 
     // Native functions
     private static native boolean nativeAcceptCookie();
-    private static native String nativeGetCookie(String url);
-    private static native boolean nativeHasCookies();
+    private static native String nativeGetCookie(String url, boolean privateBrowsing);
+    private static native boolean nativeHasCookies(boolean privateBrowsing);
     private static native void nativeRemoveAllCookie();
     private static native void nativeRemoveExpiredCookie();
     private static native void nativeRemoveSessionCookie();
     private static native void nativeSetAcceptCookie(boolean accept);
-    private static native void nativeSetCookie(String url, String value);
+    private static native void nativeSetCookie(String url, String value, boolean privateBrowsing);
     private static native void nativeFlushCookieStore();
     private static native boolean nativeAcceptFileSchemeCookies();
     private static native void nativeSetAcceptFileSchemeCookies(boolean accept);
