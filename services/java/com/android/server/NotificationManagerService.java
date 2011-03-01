@@ -37,7 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.UsbManager;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;

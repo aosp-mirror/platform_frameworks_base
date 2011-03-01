@@ -16,8 +16,8 @@
 
 package android.mtp;
 
-import android.hardware.UsbDevice;
-import android.hardware.UsbManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -37,7 +37,7 @@ public final class MtpDevice {
     /**
      * MtpClient constructor
      *
-     * @param device the {@link android.hardware.UsbDevice} for the MTP or PTP device
+     * @param device the {@link android.hardware.usb.UsbDevice} for the MTP or PTP device
      */
     public MtpDevice(UsbDevice device) {
         mDevice = device;
@@ -46,7 +46,7 @@ public final class MtpDevice {
     /**
      * Opens the MTP or PTP device and return an {@link android.mtp.MtpDevice} for it.
      *
-     * @param manager reference to {@link android.hardware.UsbManager}
+     * @param manager reference to {@link android.hardware.usb.UsbManager}
      * @return true if the device was successfully opened.
      */
     public boolean open(UsbManager manager) {

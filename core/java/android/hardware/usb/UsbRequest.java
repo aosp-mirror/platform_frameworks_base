@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
 import android.util.Log;
 
@@ -23,9 +23,9 @@ import java.nio.ByteBuffer;
 /**
  * A class representing USB request packet.
  * This can be used for both reading and writing data to or from a
- * {@link android.hardware.UsbDevice}.
+ * {@link android.hardware.usb.UsbDevice}.
  * UsbRequests are sent asynchronously via {@link #queue} and the results
- * are read by {@link android.hardware.UsbDevice#requestWait}.
+ * are read by {@link android.hardware.usb.UsbDevice#requestWait}.
  */
 public class UsbRequest {
 
@@ -94,7 +94,7 @@ public class UsbRequest {
      * This can be used in conjunction with {@link #setClientData}
      * to associate another object with this request, which can be useful for
      * maintaining state between calls to {@link #queue} and
-     * {@link android.hardware.UsbDevice#requestWait}
+     * {@link android.hardware.usb.UsbDevice#requestWait}
      *
      * @return the client data for the request
      */
@@ -107,7 +107,7 @@ public class UsbRequest {
      * This can be used in conjunction with {@link #getClientData}
      * to associate another object with this request, which can be useful for
      * maintaining state between calls to {@link #queue} and
-     * {@link android.hardware.UsbDevice#requestWait}
+     * {@link android.hardware.usb.UsbDevice#requestWait}
      *
      * @param data the client data for the request
      */
@@ -121,7 +121,7 @@ public class UsbRequest {
      * For IN endpoints, the endpoint will attempt to read the given number of bytes
      * into the specified buffer.
      * If the queueing operation is successful, we return true and the result will be
-     * returned via {@link android.hardware.UsbDevice#requestWait}
+     * returned via {@link android.hardware.usb.UsbDevice#requestWait}
      *
      * @param buffer the buffer containing the bytes to write, or location to store
      * the results of a read

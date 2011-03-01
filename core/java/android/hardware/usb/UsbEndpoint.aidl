@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
-parcelable UsbInterface;
+parcelable UsbEndpoint;

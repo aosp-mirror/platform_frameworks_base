@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 /**
  * A class representing a USB accessory.
  */
-public final class UsbAccessory implements Parcelable {
+public class UsbAccessory implements Parcelable {
 
     private static final String TAG = "UsbAccessory";
 
-    private String mManufacturer;
-    private String mModel;
-    private String mType;
-    private String mVersion;
-
-    private UsbAccessory() {
-    }
+    private final String mManufacturer;
+    private final String mModel;
+    private final String mType;
+    private final String mVersion;
 
     /**
      * UsbAccessory should only be instantiated by UsbService implementation

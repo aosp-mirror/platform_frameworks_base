@@ -15,7 +15,7 @@
  */
 
 
-package android.hardware;
+package android.hardware.usb;
 
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -55,55 +55,55 @@ public class UsbManager {
      * </ul>
      */
     public static final String ACTION_USB_STATE =
-            "android.hardware.action.USB_STATE";
+            "android.hardware.usb.action.USB_STATE";
 
    /**
      * Broadcast Action:  A broadcast for USB device attached event.
      *
      * This intent is sent when a USB device is attached to the USB bus when in host mode.
      * <ul>
-     * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.UsbDevice}
+     * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.usb.UsbDevice}
      * for the attached device
      * </ul>
      */
     public static final String ACTION_USB_DEVICE_ATTACHED =
-            "android.hardware.action.USB_DEVICE_ATTACHED";
+            "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 
    /**
      * Broadcast Action:  A broadcast for USB device detached event.
      *
      * This intent is sent when a USB device is detached from the USB bus when in host mode.
      * <ul>
-     * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.UsbDevice}
+     * <li> {@link #EXTRA_DEVICE} containing the {@link android.hardware.usb.UsbDevice}
      * for the detached device
      * </ul>
      */
     public static final String ACTION_USB_DEVICE_DETACHED =
-            "android.hardware.action.USB_DEVICE_DETACHED";
+            "android.hardware.usb.action.USB_DEVICE_DETACHED";
 
    /**
      * Broadcast Action:  A broadcast for USB accessory attached event.
      *
      * This intent is sent when a USB accessory is attached.
      * <ul>
-     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
+     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.usb.UsbAccessory}
      * for the attached accessory
      * </ul>
      */
     public static final String ACTION_USB_ACCESSORY_ATTACHED =
-            "android.hardware.action.USB_ACCESSORY_ATTACHED";
+            "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
 
    /**
      * Broadcast Action:  A broadcast for USB accessory detached event.
      *
      * This intent is sent when a USB accessory is detached.
      * <ul>
-     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.UsbAccessory}
+     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.usb.UsbAccessory}
      * for the attached accessory that was detached
      * </ul>
      */
     public static final String ACTION_USB_ACCESSORY_DETACHED =
-            "android.hardware.action.USB_ACCESSORY_DETACHED";
+            "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
 
     /**
      * Boolean extra indicating whether USB is connected or disconnected.
@@ -210,7 +210,7 @@ public class UsbManager {
 
     /**
      * Opens the device so it can be used to send and receive
-     * data using {@link android.hardware.UsbRequest}.
+     * data using {@link android.hardware.usb.UsbRequest}.
      *
      * @param device the device to open
      * @return true if we successfully opened the device

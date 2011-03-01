@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class representing an endpoint on a {@link android.hardware.UsbInterface}.
+ * A class representing an endpoint on a {@link android.hardware.usb.UsbInterface}.
  */
 public final class UsbEndpoint implements Parcelable {
 
@@ -65,9 +65,9 @@ public final class UsbEndpoint implements Parcelable {
 
     /**
      * Returns the endpoint's direction.
-     * Returns {@link android.hardware.UsbConstants#USB_DIR_OUT}
+     * Returns {@link android.hardware.usb.UsbConstants#USB_DIR_OUT}
      * if the direction is host to device, and
-     * {@link android.hardware.UsbConstants#USB_DIR_IN} if the
+     * {@link android.hardware.usb.UsbConstants#USB_DIR_IN} if the
      * direction is device to host.
      *
      * @return the endpoint's direction
@@ -89,10 +89,10 @@ public final class UsbEndpoint implements Parcelable {
      * Returns the endpoint's type.
      * Possible results are:
      * <ul>
-     * <li>{@link android.hardware.UsbConstants#USB_ENDPOINT_XFER_CONTROL} (endpoint zero)
-     * <li>{@link android.hardware.UsbConstants#USB_ENDPOINT_XFER_ISOC} (isochronous endpoint)
-     * <li>{@link android.hardware.UsbConstants#USB_ENDPOINT_XFER_BULK} (bulk endpoint)
-     * <li>{@link android.hardware.UsbConstants#USB_ENDPOINT_XFER_INT} (interrupt endpoint)
+     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_CONTROL} (endpoint zero)
+     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_ISOC} (isochronous endpoint)
+     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_BULK} (bulk endpoint)
+     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_INT} (interrupt endpoint)
      * </ul>
      *
      * @return the endpoint's type
@@ -120,7 +120,7 @@ public final class UsbEndpoint implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.hardware.UsbInterface} this endpoint belongs to.
+     * Returns the {@link android.hardware.usb.UsbInterface} this endpoint belongs to.
      *
      * @return the endpoint's interface
      */
@@ -129,7 +129,7 @@ public final class UsbEndpoint implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.hardware.UsbDevice} this endpoint belongs to.
+     * Returns the {@link android.hardware.usb.UsbDevice} this endpoint belongs to.
      *
      * @return the endpoint's device
      */

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
 import android.os.Bundle;
 import android.os.Parcel;
@@ -106,7 +106,7 @@ public final class UsbDevice implements Parcelable {
     /**
      * Returns the devices's class field.
      * Some useful constants for USB device classes can be found in
-     * {@link android.hardware.UsbConstants}
+     * {@link android.hardware.usb.UsbConstants}
      *
      * @return the devices's class
      */
@@ -133,7 +133,7 @@ public final class UsbDevice implements Parcelable {
     }
 
     /**
-     * Returns the number of {@link android.hardware.UsbInterface}s this device contains.
+     * Returns the number of {@link android.hardware.usb.UsbInterface}s this device contains.
      *
      * @return the number of interfaces
      */
@@ -142,7 +142,7 @@ public final class UsbDevice implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.hardware.UsbInterface} at the given index.
+     * Returns the {@link android.hardware.usb.UsbInterface} at the given index.
      *
      * @return the interface
      */
@@ -171,9 +171,9 @@ public final class UsbDevice implements Parcelable {
     }
 
     /**
-     * Claims exclusive access to a {@link android.hardware.UsbInterface}.
+     * Claims exclusive access to a {@link android.hardware.usb.UsbInterface}.
      * This must be done before sending or receiving data on any
-     * {@link android.hardware.UsbEndpoint}s belonging to the interface
+     * {@link android.hardware.usb.UsbEndpoint}s belonging to the interface
      * @param intf the interface to claim
      * @param force true to disconnect kernel driver if necessary
      * @return true if the interface was successfully claimed
@@ -183,7 +183,7 @@ public final class UsbDevice implements Parcelable {
     }
 
     /**
-     * Releases exclusive access to a {@link android.hardware.UsbInterface}.
+     * Releases exclusive access to a {@link android.hardware.usb.UsbInterface}.
      *
      * @return true if the interface was successfully released
      */
@@ -231,11 +231,12 @@ public final class UsbDevice implements Parcelable {
     }
 
     /**
-     * Waits for the result of a {@link android.hardware.UsbRequest#queue} operation
-     * Note that this may return requests queued on multiple {@link android.hardware.UsbEndpoint}s.
-     * When multiple endpoints are in use, {@link android.hardware.UsbRequest#getEndpoint} and
-     * {@link android.hardware.UsbRequest#getClientData} can be useful in determining how to process
-     * the result of this function.
+     * Waits for the result of a {@link android.hardware.usb.UsbRequest#queue} operation
+     * Note that this may return requests queued on multiple 
+     * {@link android.hardware.usb.UsbEndpoint}s.
+     * When multiple endpoints are in use, {@link android.hardware.usb.UsbRequest#getEndpoint} and
+     * {@link android.hardware.usb.UsbRequest#getClientData} can be useful in determining
+     * how to process the result of this function.
      *
      * @return a completed USB request, or null if an error occurred
      */

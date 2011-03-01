@@ -19,7 +19,7 @@ package com.google.android.usb;
 
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.IUsbManager;
+import android.hardware.usb.IUsbManager;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -43,7 +43,7 @@ public class UsbManager {
      * {@link com.google.android.usb.UsbAccessory} for the attached accessory.
      */
     public static final String ACTION_USB_ACCESSORY_ATTACHED =
-            "android.hardware.action.USB_ACCESSORY_ATTACHED";
+            "android.hardware.usb.action.USB_ACCESSORY_ATTACHED";
 
    /**
      * Broadcast Action:  A broadcast for USB accessory detached event.
@@ -53,7 +53,7 @@ public class UsbManager {
      * {@link com.google.android.usb.UsbAccessory} for the attached accessory that was detached.
      */
     public static final String ACTION_USB_ACCESSORY_DETACHED =
-            "android.hardware.action.USB_ACCESSORY_DETACHED";
+            "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
 
     private final IUsbManager mService;
 
@@ -79,8 +79,8 @@ public class UsbManager {
      * @return UsbAccessory for the broadcast.
      */
     public static UsbAccessory getAccessory(Intent intent) {
-        android.hardware.UsbAccessory accessory =
-            intent.getParcelableExtra(android.hardware.UsbManager.EXTRA_ACCESSORY);
+        android.hardware.usb.UsbAccessory accessory =
+            intent.getParcelableExtra(android.hardware.usb.UsbManager.EXTRA_ACCESSORY);
         if (accessory == null) {
             return null;
         } else {
@@ -96,7 +96,7 @@ public class UsbManager {
      */
     public UsbAccessory[] getAccessoryList() {
         try {
-            android.hardware.UsbAccessory accessory = mService.getCurrentAccessory();
+            android.hardware.usb.UsbAccessory accessory = mService.getCurrentAccessory();
             if (accessory == null) {
                 return null;
             } else {
@@ -116,7 +116,7 @@ public class UsbManager {
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         try {
-            return mService.openAccessory(new android.hardware.UsbAccessory(
+            return mService.openAccessory(new android.hardware.usb.UsbAccessory(
                     accessory.getManufacturer(),accessory.getModel(),
                     accessory.getType(), accessory.getVersion()));
         } catch (RemoteException e) {

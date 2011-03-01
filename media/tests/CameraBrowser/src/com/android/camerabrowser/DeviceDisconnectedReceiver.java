@@ -21,8 +21,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.UsbDevice;
-import android.hardware.UsbManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.util.Log;
 
 public class DeviceDisconnectedReceiver extends BroadcastReceiver {

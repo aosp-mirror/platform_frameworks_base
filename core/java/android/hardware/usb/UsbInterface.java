@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.hardware;
+package android.hardware.usb;
 
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class representing an interface on a {@link android.hardware.UsbDevice}.
+ * A class representing an interface on a {@link android.hardware.usb.UsbDevice}.
  */
-public final class UsbInterface implements Parcelable {
+public class UsbInterface implements Parcelable {
 
     private int mId;
     private int mClass;
@@ -60,7 +60,7 @@ public final class UsbInterface implements Parcelable {
     /**
      * Returns the interface's class field.
      * Some useful constants for USB classes can be found in
-     * {@link android.hardware.UsbConstants}
+     * {@link android.hardware.usb.UsbConstants}
      *
      * @return the interface's class
      */
@@ -87,7 +87,7 @@ public final class UsbInterface implements Parcelable {
     }
 
     /**
-     * Returns the number of {@link android.hardware.UsbEndpoint}s this interface contains.
+     * Returns the number of {@link android.hardware.usb.UsbEndpoint}s this interface contains.
      *
      * @return the number of endpoints
      */
@@ -96,7 +96,7 @@ public final class UsbInterface implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.hardware.UsbEndpoint} at the given index.
+     * Returns the {@link android.hardware.usb.UsbEndpoint} at the given index.
      *
      * @return the endpoint
      */
@@ -105,7 +105,7 @@ public final class UsbInterface implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.hardware.UsbDevice} this interface belongs to.
+     * Returns the {@link android.hardware.usb.UsbDevice} this interface belongs to.
      *
      * @return the interface's device
      */

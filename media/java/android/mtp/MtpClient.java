@@ -20,10 +20,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.UsbConstants;
-import android.hardware.UsbDevice;
-import android.hardware.UsbInterface;
-import android.hardware.UsbManager;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -95,7 +95,7 @@ public class MtpClient {
     }
 
     /**
-     * Tests to see if a {@link android.hardware.UsbDevice}
+     * Tests to see if a {@link android.hardware.usb.UsbDevice}
      * supports the PTP protocol (typically used by digital cameras)
      *
      * @param device the device to test
@@ -140,7 +140,7 @@ public class MtpClient {
     }
 
     /**
-     * Opens the {@link android.hardware.UsbDevice} for an MTP or PTP
+     * Opens the {@link android.hardware.usb.UsbDevice} for an MTP or PTP
      * device and return an {@link android.mtp.MtpDevice} for it.
      *
      * @param device the device to open
