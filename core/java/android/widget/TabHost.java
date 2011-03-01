@@ -183,18 +183,14 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null) {
-            treeObserver.addOnTouchModeChangeListener(this);
-        }
+        treeObserver.addOnTouchModeChangeListener(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null) {
-            treeObserver.removeOnTouchModeChangeListener(this);
-        }
+        treeObserver.removeOnTouchModeChangeListener(this);
     }
 
     /**

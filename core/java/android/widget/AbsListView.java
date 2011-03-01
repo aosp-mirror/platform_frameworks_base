@@ -2268,11 +2268,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.onAttachedToWindow();
 
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null) {
-            treeObserver.addOnTouchModeChangeListener(this);
-            if (mTextFilterEnabled && mPopup != null && !mGlobalLayoutListenerAddedFilter) {
-                treeObserver.addOnGlobalLayoutListener(this);
-            }
+        treeObserver.addOnTouchModeChangeListener(this);
+        if (mTextFilterEnabled && mPopup != null && !mGlobalLayoutListenerAddedFilter) {
+            treeObserver.addOnGlobalLayoutListener(this);
         }
 
         if (mAdapter != null && mDataSetObserver == null) {
@@ -2297,12 +2295,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mRecycler.clear();
 
         final ViewTreeObserver treeObserver = getViewTreeObserver();
-        if (treeObserver != null) {
-            treeObserver.removeOnTouchModeChangeListener(this);
-            if (mTextFilterEnabled && mPopup != null) {
-                treeObserver.removeGlobalOnLayoutListener(this);
-                mGlobalLayoutListenerAddedFilter = false;
-            }
+        treeObserver.removeOnTouchModeChangeListener(this);
+        if (mTextFilterEnabled && mPopup != null) {
+            treeObserver.removeGlobalOnLayoutListener(this);
+            mGlobalLayoutListenerAddedFilter = false;
         }
 
         if (mAdapter != null) {
