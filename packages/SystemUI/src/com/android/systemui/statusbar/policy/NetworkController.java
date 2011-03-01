@@ -39,6 +39,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.telephony.PhoneStateListener;
@@ -92,7 +93,7 @@ public class NetworkController extends BroadcastReceiver {
     boolean mWifiEnabled, mWifiConnected;
     int mWifiLevel;
     String mWifiSsid;
-    int mWifiIconId;
+    int mWifiIconId = 0;
 
     // bluetooth
     private boolean mBluetoothTethered = false;
@@ -129,6 +130,9 @@ public class NetworkController extends BroadcastReceiver {
      */
     public NetworkController(Context context) {
         mContext = context;
+
+        // set up the default wifi icon, used when no radios have ever appeared
+        updateWifiIcons();
 
         // telephony
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -272,6 +276,10 @@ public class NetworkController extends BroadcastReceiver {
             }
             mDataState = state;
             mDataNetType = networkType;
+            if (state < 0) {
+                // device without a data connection
+                mSignalStrength = null;
+            }
             updateDataNetType();
             updateDataIcon();
             refreshViews();
@@ -328,6 +336,11 @@ public class NetworkController extends BroadcastReceiver {
         } else {
             return false;
         }
+    }
+
+    private boolean hasMobileDataFeature() {
+        // XXX: HAX: replace when a more reliable method is available
+        return (! "wifi-only".equals(SystemProperties.get("ro.carrier")));
     }
 
     private final void updateTelephonySignalStrength() {
@@ -708,11 +721,13 @@ public class NetworkController extends BroadcastReceiver {
             dataTypeIconId = 0;
         } else {
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-            combinedSignalIconId = mDataSignalIconId;
+            // On devices without mobile radios, we want to show the wifi icon
+            combinedSignalIconId =
+                hasMobileDataFeature() ? mDataSignalIconId : mWifiIconId;
             dataTypeIconId = 0;
         }
 
-        if (false) {
+        if (DEBUG) {
             Slog.d(TAG, "refreshViews combinedSignalIconId=0x"
                     + Integer.toHexString(combinedSignalIconId)
                     + "/" + getResourceName(combinedSignalIconId)
