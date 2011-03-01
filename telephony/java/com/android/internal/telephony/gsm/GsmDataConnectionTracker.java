@@ -799,8 +799,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             do {
                 String[] types = parseTypes(
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.TYPE)));
-                int enabled =
-                    cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.ENABLED));
                 ApnSetting apn = new ApnSetting(
                         cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers._ID)),
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NUMERIC)),
@@ -817,11 +815,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         types,
                         cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROTOCOL)),
                         cursor.getString(cursor.getColumnIndexOrThrow(
-                                Telephony.Carriers.ROAMING_PROTOCOL)),
-                        (enabled == 0 ? false : true),
-                        cursor.getInt(cursor.getColumnIndexOrThrow(
-                                Telephony.Carriers.INACTIVE_TIMER)),
-                        cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.CLASS)));
+                                Telephony.Carriers.ROAMING_PROTOCOL)));
                 result.add(apn);
             } while (cursor.moveToNext());
         }
@@ -865,13 +859,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         apn = apnContext.getNextApn();
         if (apn == null) {
             if (DBG) log("setupData: return for no apn found!");
-            return false;
-        }
-
-        if (((mPhone.getServiceState().getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_EHRPD)
-            || (mPhone.getServiceState().getRadioTechnology() == ServiceState.RADIO_TECHNOLOGY_LTE))
-            && (!apn.enabled)) {
-            if (DBG) log("setupData: apn is desabled by carrier!");
             return false;
         }
 
