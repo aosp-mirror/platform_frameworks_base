@@ -459,16 +459,12 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         return err;
     }
 
-    // XXX TODO: Do something so the ANativeWindow knows that we'll need to get
-    // the same set of buffers.
-
     LOGV("[%s] Allocating %lu buffers from a native window of size %lu on "
          "output port",
          mComponentName.c_str(), def.nBufferCountActual, def.nBufferSize);
 
     // Dequeue buffers and send them to OMX
-    OMX_U32 i;
-    for (i = 0; i < def.nBufferCountActual; i++) {
+    for (OMX_U32 i = 0; i < def.nBufferCountActual; i++) {
         android_native_buffer_t *buf;
         err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
         if (err != 0) {
@@ -477,23 +473,26 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         }
 
         sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf, false));
-        IOMX::buffer_id bufferId;
-        err = mOMX->useGraphicBuffer(mNode, kPortIndexOutput, graphicBuffer,
-                &bufferId);
-        if (err != 0) {
-            break;
-        }
-
-        LOGV("[%s] Registered graphic buffer with ID %p (pointer = %p)",
-             mComponentName.c_str(),
-             bufferId, graphicBuffer.get());
-
         BufferInfo info;
-        info.mBufferID = bufferId;
         info.mStatus = BufferInfo::OWNED_BY_US;
         info.mData = new ABuffer(0);
         info.mGraphicBuffer = graphicBuffer;
         mBuffers[kPortIndexOutput].push(info);
+
+        IOMX::buffer_id bufferId;
+        err = mOMX->useGraphicBuffer(mNode, kPortIndexOutput, graphicBuffer,
+                &bufferId);
+        if (err != 0) {
+            LOGE("registering GraphicBuffer %lu with OMX IL component failed: "
+                 "%d", i, err);
+            break;
+        }
+
+        mBuffers[kPortIndexOutput].editItemAt(i).mBufferID = bufferId;
+
+        LOGV("[%s] Registered graphic buffer with ID %p (pointer = %p)",
+             mComponentName.c_str(),
+             bufferId, graphicBuffer.get());
     }
 
     OMX_U32 cancelStart;
@@ -503,7 +502,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         // If an error occurred while dequeuing we need to cancel any buffers
         // that were dequeued.
         cancelStart = 0;
-        cancelEnd = i;
+        cancelEnd = mBuffers[kPortIndexOutput].size();
     } else {
         // Return the last two buffers to the native window.
         // XXX TODO: The number of buffers the native window owns should
@@ -2286,4 +2285,3 @@ void ACodec::FlushingState::changeStateIfWeOwnAllBuffers() {
 }
 
 }  // namespace android
-
