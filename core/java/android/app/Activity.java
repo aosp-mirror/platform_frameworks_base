@@ -2417,6 +2417,7 @@ public class Activity extends ContextThemeWrapper
      */
     public boolean onMenuOpened(int featureId, Menu menu) {
         if (featureId == Window.FEATURE_ACTION_BAR) {
+            initActionBar();
             if (mActionBar != null) {
                 mActionBar.dispatchMenuVisibilityChanged(true);
             } else {
