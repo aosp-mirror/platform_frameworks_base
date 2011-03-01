@@ -105,6 +105,7 @@ static struct binderproxy_offsets_t
     // Object state.
     jfieldID mObject;
     jfieldID mSelf;
+    jfieldID mOrgue;
 
 } gBinderProxyOffsets;
 
@@ -374,12 +375,12 @@ public:
 class JavaDeathRecipient : public IBinder::DeathRecipient
 {
 public:
-    JavaDeathRecipient(JNIEnv* env, jobject object, sp<DeathRecipientList>& list)
+    JavaDeathRecipient(JNIEnv* env, jobject object, const sp<DeathRecipientList>& list)
         : mVM(jnienv_to_javavm(env)), mObject(env->NewGlobalRef(object)), mList(list)
     {
         // These objects manage their own lifetimes so are responsible for final bookkeeping.
         // The list holds a strong reference to this object.
-        mList->add(this);
+        list->add(this);
 
         android_atomic_inc(&gNumDeathRefs);
         incRefsCreated(env);
@@ -404,7 +405,10 @@ public:
 
     void clearReference()
     {
-        mList->remove(this);
+        sp<DeathRecipientList> list = mList.promote();
+        if (list != NULL) {
+            list->remove(this);
+        }
     }
 
     bool matches(jobject obj) {
@@ -424,7 +428,7 @@ protected:
 private:
     JavaVM* const   mVM;
     jobject const   mObject;
-    sp<DeathRecipientList> mList;
+    wp<DeathRecipientList> mList;
 };
 
 // ----------------------------------------------------------------------------
@@ -436,7 +440,7 @@ DeathRecipientList::~DeathRecipientList() {
     // to the list are holding references on the list object.  Only when they are torn
     // down can the list header be destroyed.
     if (mList.size() > 0) {
-        LOGE("Retiring binder %p with extant death recipients\n", this);
+        LOGE("Retiring DRL %p with extant death recipients\n", this);
     }
 }
 
@@ -469,9 +473,6 @@ sp<JavaDeathRecipient> DeathRecipientList::find(jobject recipient) {
     }
     return NULL;
 }
-
-static KeyedVector<IBinder*, sp<DeathRecipientList> > gDeathRecipientsByIBinder;
-static Mutex gDeathRecipientMapLock;
 
 // ----------------------------------------------------------------------------
 
@@ -517,7 +518,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 
     object = env->NewObject(gBinderProxyOffsets.mClass, gBinderProxyOffsets.mConstructor);
     if (object != NULL) {
-        LOGV("objectForBinder %p: created new %p!\n", val.get(), object);
+        LOGV("objectForBinder %p: created new proxy %p !\n", val.get(), object);
         // The proxy holds a reference to the native object.
         env->SetIntField(object, gBinderProxyOffsets.mObject, (int)val.get());
         val->incStrong(object);
@@ -528,6 +529,11 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
                 env->GetObjectField(object, gBinderProxyOffsets.mSelf));
         val->attachObject(&gBinderProxyOffsets, refObject,
                 jnienv_to_javavm(env), proxy_cleanup);
+
+        // Also remember the death recipients registered on this proxy
+        sp<DeathRecipientList> drl = new DeathRecipientList;
+        drl->incStrong((void*)javaObjectForIBinder);
+        env->SetIntField(object, gBinderProxyOffsets.mOrgue, reinterpret_cast<jint>(drl.get()));
 
         // Note that a new object reference has been created.
         android_atomic_inc(&gNumProxyRefs);
@@ -1027,24 +1033,9 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
     LOGV("linkToDeath: binder=%p recipient=%p\n", target, recipient);
 
     if (!target->localBinder()) {
-        sp<JavaDeathRecipient> jdr;
-
-        {
-            sp<DeathRecipientList> list;
-            AutoMutex _maplocker(gDeathRecipientMapLock);
-
-            ssize_t listIndex = gDeathRecipientsByIBinder.indexOfKey(target);
-            if (listIndex < 0) {
-                // Set up the death notice bookkeeping for this binder lazily
-                list = new DeathRecipientList;
-                gDeathRecipientsByIBinder.add(target, list);
-            } else {
-                list = gDeathRecipientsByIBinder.valueAt(listIndex);
-            }
-
-            jdr = new JavaDeathRecipient(env, recipient, list);
-        }
-
+        DeathRecipientList* list = (DeathRecipientList*)
+                env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
+        sp<JavaDeathRecipient> jdr = new JavaDeathRecipient(env, recipient, list);
         status_t err = target->linkToDeath(jdr, NULL, flags);
         if (err != NO_ERROR) {
             // Failure adding the death recipient, so clear its reference
@@ -1075,20 +1066,11 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 
     if (!target->localBinder()) {
         status_t err = NAME_NOT_FOUND;
-        sp<JavaDeathRecipient> origJDR;
-        {
-            AutoMutex _maplocker(gDeathRecipientMapLock);
-            ssize_t listIndex = gDeathRecipientsByIBinder.indexOfKey(target);
-            if (listIndex >= 0) {
-                sp<DeathRecipientList> list = gDeathRecipientsByIBinder.valueAt(listIndex);
-                origJDR = list->find(recipient);
-            } else {
-                // If there is no DeathRecipientList for this binder, it means the binder
-                // is dead and in the process of being cleaned up.
-                err = DEAD_OBJECT;
-            }
-        }
-        // If we found the matching recipient, proceed to unlink using that
+
+        // If we find the matching recipient, proceed to unlink using that
+        DeathRecipientList* list = (DeathRecipientList*)
+                env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
+        sp<JavaDeathRecipient> origJDR = list->find(recipient);
         if (origJDR != NULL) {
             wp<IBinder::DeathRecipient> dr;
             err = target->unlinkToDeath(origJDR, NULL, flags, &dr);
@@ -1115,20 +1097,17 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
 {
     IBinder* b = (IBinder*)
-        env->GetIntField(obj, gBinderProxyOffsets.mObject);
-    LOGV("Destroying BinderProxy %p: binder=%p\n", obj, b);
-    env->SetIntField(obj, gBinderProxyOffsets.mObject, 0);
-    b->decStrong(obj);
-    IPCThreadState::self()->flushCommands();
+            env->GetIntField(obj, gBinderProxyOffsets.mObject);
+    DeathRecipientList* drl = (DeathRecipientList*)
+            env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
 
-    // tear down the death recipient bookkeeping
-    {
-        AutoMutex _maplocker(gDeathRecipientMapLock);
-        ssize_t listIndex = gDeathRecipientsByIBinder.indexOfKey(b);
-        if (listIndex >= 0) {
-            gDeathRecipientsByIBinder.removeItemsAt((size_t)listIndex);
-        }
-    }
+    LOGV("Destroying BinderProxy %p: binder=%p drl=%p\n", obj, b, drl);
+    env->SetIntField(obj, gBinderProxyOffsets.mObject, 0);
+    env->SetIntField(obj, gBinderProxyOffsets.mOrgue, 0);
+    drl->decStrong((void*)javaObjectForIBinder);
+    b->decStrong(obj);
+
+    IPCThreadState::self()->flushCommands();
 }
 
 // ----------------------------------------------------------------------------
@@ -1178,6 +1157,9 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     gBinderProxyOffsets.mSelf
         = env->GetFieldID(clazz, "mSelf", "Ljava/lang/ref/WeakReference;");
     assert(gBinderProxyOffsets.mSelf);
+    gBinderProxyOffsets.mOrgue
+        = env->GetFieldID(clazz, "mOrgue", "I");
+    assert(gBinderProxyOffsets.mOrgue);
 
     return AndroidRuntime::registerNativeMethods(
         env, kBinderProxyPathName,
