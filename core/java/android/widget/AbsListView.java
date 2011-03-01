@@ -3241,6 +3241,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mLastY = y;
             break;
         }
+
+        case MotionEvent.ACTION_POINTER_DOWN: {
+            // New pointers take over dragging duties
+            final int index = ev.getActionIndex();
+            final int id = ev.getPointerId(index);
+            final int x = (int) ev.getX(index);
+            final int y = (int) ev.getY(index);
+            mMotionCorrection = 0;
+            mActivePointerId = id;
+            mMotionX = x;
+            mMotionY = y;
+            final int motionPosition = pointToPosition(x, y);
+            if (motionPosition >= 0) {
+                // Remember where the motion event started
+                v = getChildAt(motionPosition - mFirstPosition);
+                mMotionViewOriginalTop = v.getTop();
+                mMotionPosition = motionPosition;
+            }
+            mLastY = y;
+            break;
+        }
         }
 
         return true;
@@ -3412,9 +3433,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mMotionY = (int) ev.getY(newPointerIndex);
             mMotionCorrection = 0;
             mActivePointerId = ev.getPointerId(newPointerIndex);
-            if (mVelocityTracker != null) {
-                mVelocityTracker.clear();
-            }
         }
     }
 

@@ -475,8 +475,16 @@ public class HorizontalScrollView extends FrameLayout {
                     invalidate();
                 }
                 break;
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                final int index = ev.getActionIndex();
+                final float x = ev.getX(index);
+                mLastMotionX = x;
+                mActivePointerId = ev.getPointerId(index);
+                break;
+            }
             case MotionEvent.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
+                mLastMotionX = ev.getX(ev.findPointerIndex(mActivePointerId));
                 break;
         }
 
