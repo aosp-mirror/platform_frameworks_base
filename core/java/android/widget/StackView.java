@@ -33,6 +33,7 @@ import android.graphics.Region;
 import android.graphics.TableMaskFilter;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -114,6 +115,8 @@ public class StackView extends AdapterViewAnimator {
 
     private static final int MIN_TIME_BETWEEN_INTERACTION_AND_AUTOADVANCE = 5000;
 
+    private static long MIN_TIME_BETWEEN_SCROLLS = 100;
+
     /**
      * These variables are all related to the current state of touch interaction
      * with the stack
@@ -137,6 +140,7 @@ public class StackView extends AdapterViewAnimator {
     private StackSlider mStackSlider;
     private boolean mFirstLayoutHappened = false;
     private long mLastInteractionTime = 0;
+    private long mLastScrollTime;
     private int mStackMode;
     private int mFramePadding;
     private final Rect stackInvalidateRect = new Rect();
@@ -562,6 +566,38 @@ public class StackView extends AdapterViewAnimator {
             mPerspectiveShiftY = mNewPerspectiveShiftY;
             mPerspectiveShiftX = mNewPerspectiveShiftX;
             updateChildTransforms();
+        }
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_SCROLL: {
+                    final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    if (vscroll < 0) {
+                        pacedScroll(false);
+                        return true;
+                    } else if (vscroll > 0) {
+                        pacedScroll(true);
+                        return true;
+                    }
+                }
+            }
+        }
+        return super.onGenericMotionEvent(event);
+    }
+
+    // This ensures that the frequency of stack flips caused by scrolls is capped
+    private void pacedScroll(boolean up) {
+        long timeSinceLastScroll = System.currentTimeMillis() - mLastScrollTime;
+        if (timeSinceLastScroll > MIN_TIME_BETWEEN_SCROLLS) {
+            if (up) {
+                showPrevious();
+            } else {
+                showNext();
+            }
+            mLastScrollTime = System.currentTimeMillis();
         }
     }
 
