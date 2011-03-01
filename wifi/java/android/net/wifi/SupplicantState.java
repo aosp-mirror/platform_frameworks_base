@@ -152,6 +152,26 @@ public enum SupplicantState implements Parcelable {
         return state != UNINITIALIZED && state != INVALID;
     }
 
+    static boolean isConnecting(SupplicantState state) {
+        switch(state) {
+            case ASSOCIATING:
+            case ASSOCIATED:
+            case FOUR_WAY_HANDSHAKE:
+            case GROUP_HANDSHAKE:
+            case COMPLETED:
+                return true;
+            case DISCONNECTED:
+            case INACTIVE:
+            case SCANNING:
+            case DORMANT:
+            case UNINITIALIZED:
+            case INVALID:
+                return false;
+            default:
+                throw new IllegalArgumentException("Unknown supplicant state");
+        }
+    }
+
     /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;

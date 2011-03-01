@@ -344,6 +344,9 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     private static final long DEFAULT_SCAN_INTERVAL_MS = 60 * 1000; /* 1 minute */
 
+    private static final int MIN_RSSI = -200;
+    private static final int MAX_RSSI = 256;
+
     /* Default parent state */
     private HierarchicalState mDefaultState = new DefaultState();
     /* Temporary initial state */
@@ -1238,7 +1241,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     private void fetchRssiAndLinkSpeedNative() {
         int newRssi = WifiNative.getRssiCommand();
-        if (newRssi != -1 && -200 < newRssi && newRssi < 256) { // screen out invalid values
+        if (newRssi != -1 && MIN_RSSI < newRssi && newRssi < MAX_RSSI) { // screen out invalid values
             /* some implementations avoid negative values by adding 256
              * so we need to adjust for that here.
              */
@@ -1263,7 +1266,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             }
             mLastSignalLevel = newSignalLevel;
         } else {
-            mWifiInfo.setRssi(-200);
+            mWifiInfo.setRssi(MIN_RSSI);
         }
         int newLinkSpeed = WifiNative.getLinkSpeedCommand();
         if (newLinkSpeed != -1) {
@@ -1385,15 +1388,17 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         /* Disable interface */
         NetworkUtils.disableInterface(mInterfaceName);
 
-        /* send event to CM & network change broadcast */
-        setNetworkDetailedState(DetailedState.DISCONNECTED);
-        sendNetworkStateChangeBroadcast(mLastBssid);
-
         /* Reset data structures */
         mWifiInfo.setInetAddress(null);
         mWifiInfo.setBSSID(null);
         mWifiInfo.setSSID(null);
         mWifiInfo.setNetworkId(-1);
+        mWifiInfo.setRssi(MIN_RSSI);
+        mWifiInfo.setLinkSpeed(-1);
+
+        /* send event to CM & network change broadcast */
+        setNetworkDetailedState(DetailedState.DISCONNECTED);
+        sendNetworkStateChangeBroadcast(mLastBssid);
 
         /* Clear network properties */
         mLinkProperties.clear();
@@ -2362,7 +2367,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     // 50023 supplicant_state_changed (custom|1|5)
                     EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, state.ordinal());
                     mWifiInfo.setSupplicantState(state);
-                    mWifiInfo.setNetworkId(stateChangeResult.networkId);
+                    // Network id is only valid when we start connecting
+                    if (SupplicantState.isConnecting(state)) {
+                        mWifiInfo.setNetworkId(stateChangeResult.networkId);
+                    }
                     if (state == SupplicantState.ASSOCIATING) {
                         /* BSSID is valid only in ASSOCIATING state */
                         mWifiInfo.setBSSID(stateChangeResult.BSSID);
@@ -2739,6 +2747,15 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             }
             return HANDLED;
+        }
+        @Override
+        public void exit() {
+            /* If a scan result is pending in connected state, the supplicant
+             * is in SCAN_ONLY_MODE. Restore CONNECT_MODE on exit
+             */
+            if (mScanResultIsPending) {
+                WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
+            }
         }
     }
 
