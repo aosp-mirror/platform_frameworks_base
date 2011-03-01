@@ -3270,7 +3270,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         if (vscroll != 0) {
                             final int delta = (int) (vscroll * getVerticalScrollFactor());
-                            if (trackMotionScroll(delta, delta)) {
+                            if (!trackMotionScroll(delta, delta)) {
                                 return true;
                             }
                         }
