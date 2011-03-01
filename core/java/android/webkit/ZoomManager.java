@@ -704,9 +704,10 @@ class ZoomManager {
      *         false otherwise.
      */
     public boolean isPreventingWebkitUpdates() {
-        // currently only animating a multi-touch zoom prevents updates, but
-        // others can add their own conditions to this method if necessary.
-        return mPinchToZoomAnimating;
+        // currently only animating a multi-touch zoom and fixed length
+        // animations prevent updates, but others can add their own conditions
+        // to this method if necessary.
+        return isZoomAnimating();
     }
 
     public ScaleGestureDetector getMultiTouchGestureDetector() {
