@@ -21,6 +21,8 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.io.File;
 
@@ -64,6 +66,13 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
         wpm = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
         mDesiredMinWidth = (double) wpm.getDesiredMinimumWidth();
         mDesiredMinHeight = (double) wpm.getDesiredMinimumHeight();
+
+        if (mDesiredMinWidth <= 0 || mDesiredMinHeight <= 0) {
+            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            Display d = wm.getDefaultDisplay();
+            mDesiredMinWidth = d.getWidth();
+            mDesiredMinHeight = d.getHeight();
+        }
 
         if (DEBUG) {
             Slog.d(TAG, "dmW=" + mDesiredMinWidth + " dmH=" + mDesiredMinHeight);
