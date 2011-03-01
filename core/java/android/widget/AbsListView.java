@@ -1251,6 +1251,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (mOnScrollListener != null) {
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
         }
+        onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
     }
 
     /**
@@ -2789,8 +2790,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (!mDataChanged) {
                     if ((mTouchMode != TOUCH_MODE_FLING) && (motionPosition >= 0)
                             && (getAdapter().isEnabled(motionPosition))) {
-                        // User clicked on an actual view (and was not stopping a fling). It might be a
-                        // click or a scroll. Assume it is a click until proven otherwise
+                        // User clicked on an actual view (and was not stopping a fling).
+                        // It might be a click or a scroll. Assume it is a click until
+                        // proven otherwise
                         mTouchMode = TOUCH_MODE_DOWN;
                         // FIXME Debounce
                         if (mPendingCheckForTap == null) {
@@ -2799,9 +2801,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     } else {
                         if (ev.getEdgeFlags() != 0 && motionPosition < 0) {
-                            // If we couldn't find a view to click on, but the down event was touching
-                            // the edge, we will bail out and try again. This allows the edge correcting
-                            // code in ViewRoot to try to find a nearby view to select
+                            // If we couldn't find a view to click on, but the down event
+                            // was touching the edge, we will bail out and try again.
+                            // This allows the edge correcting code in ViewRoot to try to
+                            // find a nearby view to select
                             return false;
                         }
 
@@ -3264,18 +3267,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
-    protected void onOverScrolled(int scrollX, int scrollY,
-            boolean clampedX, boolean clampedY) {
-        mScrollY = scrollY;
-        invalidateParentIfNeeded();
+    protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+        if (mScrollY != scrollY) {
+            onScrollChanged(mScrollX, scrollY, mScrollX, mScrollY);
+            mScrollY = scrollY;
+            invalidateParentIfNeeded();
 
-        if (clampedY) {
-            // Velocity is broken by hitting the limit; don't start a fling off of this.
-            if (mVelocityTracker != null) {
-                mVelocityTracker.clear();
+            if (clampedY) {
+                // Velocity is broken by hitting the limit; don't start a fling off of this.
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.clear();
+                }
             }
+            awakenScrollBars();
         }
-        awakenScrollBars();
     }
 
     @Override
@@ -4293,17 +4298,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mLastPositionDistanceGuess += incrementalDeltaY;
         }
 
-        if (firstPosition == 0 && firstTop >= listPadding.top && incrementalDeltaY >= 0) {
-            // Don't need to move views down if the top of the first position
-            // is already visible
-            return incrementalDeltaY != 0;
-        }
+        final boolean cannotScrollDown = (firstPosition == 0 &&
+                firstTop >= listPadding.top && incrementalDeltaY >= 0);
+        final boolean cannotScrollUp = (firstPosition + childCount == mItemCount &&
+                lastBottom <= getHeight() - listPadding.bottom && incrementalDeltaY <= 0);
 
-        if (firstPosition + childCount == mItemCount &&
-                lastBottom <= getHeight() - listPadding.bottom &&
-                incrementalDeltaY <= 0) {
-            // Don't need to move views up if the bottom of the last position
-            // is already visible
+        if (cannotScrollDown || cannotScrollUp) {
             return incrementalDeltaY != 0;
         }
 
