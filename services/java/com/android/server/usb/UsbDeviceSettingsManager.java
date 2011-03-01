@@ -741,27 +741,37 @@ class UsbDeviceSettingsManager {
 
     public void setDevicePackage(UsbDevice device, String packageName) {
         DeviceFilter filter = new DeviceFilter(device);
+        boolean changed = false;
         synchronized (mLock) {
             if (packageName == null) {
-                mDevicePreferenceMap.remove(filter);
+                changed = (mDevicePreferenceMap.remove(filter) != null);
             } else {
-                mDevicePreferenceMap.put(filter, packageName);
+                changed = !packageName.equals(mDevicePreferenceMap.get(filter));
+                if (changed) {
+                    mDevicePreferenceMap.put(filter, packageName);
+                }
             }
-           // FIXME - only if changed
-            writeSettingsLocked();
+            if (changed) {
+                writeSettingsLocked();
+            }
         }
     }
 
     public void setAccessoryPackage(UsbAccessory accessory, String packageName) {
         AccessoryFilter filter = new AccessoryFilter(accessory);
+        boolean changed = false;
         synchronized (mLock) {
             if (packageName == null) {
-                mAccessoryPreferenceMap.remove(filter);
+                changed = (mAccessoryPreferenceMap.remove(filter) != null);
             } else {
-                mAccessoryPreferenceMap.put(filter, packageName);
+                changed = !packageName.equals(mAccessoryPreferenceMap.get(filter));
+                if (changed) {
+                    mAccessoryPreferenceMap.put(filter, packageName);
+                }
             }
-            // FIXME - only if changed
-            writeSettingsLocked();
+            if (changed) {
+                writeSettingsLocked();
+            }
         }
     }
 
