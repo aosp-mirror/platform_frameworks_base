@@ -66,6 +66,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManagerImpl;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -4401,6 +4402,9 @@ public class Activity extends ContextThemeWrapper
         if (mStopped) {
             mStopped = false;
             mCalled = false;
+            if (mToken != null && mParent == null) {
+                WindowManagerImpl.getDefault().setStoppedState(mToken, false);
+            }
             mInstrumentation.callActivityOnRestart(this);
             if (!mCalled) {
                 throw new SuperNotCalledException(
@@ -4477,6 +4481,10 @@ public class Activity extends ContextThemeWrapper
                 mWindow.closeAllPanels();
             }
 
+            if (mToken != null && mParent == null) {
+                WindowManagerImpl.getDefault().setStoppedState(mToken, true);
+            }
+            
             mFragments.dispatchStop();
             
             mCalled = false;
