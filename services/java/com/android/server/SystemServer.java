@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.usb.UsbService;
 import com.android.internal.app.ShutdownThread;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.SamplingProfilerIntegration;
@@ -397,9 +398,10 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "USB Observer");
+                Slog.i(TAG, "USB Service");
                 // Listen for USB changes
                 usb = new UsbService(context);
+                ServiceManager.addService(Context.USB_SERVICE, usb);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting UsbService", e);
             }

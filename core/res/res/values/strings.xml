@@ -927,9 +927,9 @@
         the flashlight.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessUsb">access USB devices</string>
+    <string name="permlab_manageUsb">manage preferences and permissions for USB devices</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessUsb">Allows the application to access USB devices.</string>
+    <string name="permdesc_manageUsb">Allows the application to manage preferences and permissions for USB devices.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_hardware_test">test hardware</string>
@@ -1926,6 +1926,8 @@
     <string name="clearDefaultHintMsg">Clear default in Home Settings &gt; Applications &gt; Manage applications.</string>
     <!-- Default title for the activity chooser, when one is not given. Android allows multiple activities to perform an action.  for example, there may be many ringtone pickers installed.  A dialog is shown to the user allowing him to pick which activity should be used.  This is the title. -->
     <string name="chooseActivity">Select an action</string>
+    <!-- title for the USB activity chooser. -->
+    <string name="chooseUsbActivity">Select an application for the USB device</string>
     <!-- Text to display when there are no activities found to display in the
          activity chooser. See the "Select an action" title. -->
     <string name="noApplications">No applications can perform this action.</string>

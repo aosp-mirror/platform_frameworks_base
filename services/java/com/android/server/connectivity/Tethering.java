@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.hardware.UsbManager;
+import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.IConnectivityManager;
