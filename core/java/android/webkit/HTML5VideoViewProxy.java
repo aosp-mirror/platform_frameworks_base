@@ -184,12 +184,13 @@ class HTML5VideoViewProxy extends Handler
             mVideoView.setWillNotDraw(false);
             mVideoView.setMediaController(new MediaController(proxy.getContext()));
 
-            String cookieValue = CookieManager.getInstance().getCookie(url);
+            boolean isPrivate = mCurrentProxy.getWebView().isPrivateBrowsingEnabled();
+            String cookieValue = CookieManager.getInstance().getCookie(url, isPrivate);
             Map<String, String> headers = new HashMap<String, String>();
             if (cookieValue != null) {
                 headers.put(COOKIE, cookieValue);
             }
-            if (mCurrentProxy.getWebView().isPrivateBrowsingEnabled()) {
+            if (isPrivate) {
                 headers.put(HIDE_URL_LOGS, "true");
             }
 
