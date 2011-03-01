@@ -172,6 +172,11 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
     @Override
     void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
+        if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED) {
+            super.measureHorizontal(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+
         // First, measure with no constraint
         final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         mImposedTabsHeight = -1;
@@ -208,9 +213,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
 
         // Measure again, this time with imposed tab widths and respecting initial spec request
-        if (mImposedTabsHeight >= 0 || unspecifiedWidth != widthMeasureSpec) {
-            super.measureHorizontal(widthMeasureSpec, heightMeasureSpec);
-        }
+        super.measureHorizontal(widthMeasureSpec, heightMeasureSpec);
     }
 
     /**
