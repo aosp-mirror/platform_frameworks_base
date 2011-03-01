@@ -25,12 +25,14 @@ import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.ViewConfiguration;
 import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
@@ -45,6 +47,8 @@ public class KeyButtonView extends ImageView {
     boolean mSending;
     int mCode;
     int mRepeat;
+    int mTouchSlop;
+
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
@@ -53,6 +57,9 @@ public class KeyButtonView extends ImageView {
                         KeyEvent.FLAG_FROM_SYSTEM
                         | KeyEvent.FLAG_VIRTUAL_HARD_KEY
                         | KeyEvent.FLAG_LONG_PRESS);
+
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                //playSoundEffect(SoundEffectConstants.CLICK);
             }
         }
     };
@@ -78,6 +85,7 @@ public class KeyButtonView extends ImageView {
                 ServiceManager.getService(Context.WINDOW_SERVICE));
 
         setClickable(true);
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
@@ -100,7 +108,10 @@ public class KeyButtonView extends ImageView {
                 if (mSending) {
                     x = (int)ev.getX();
                     y = (int)ev.getY();
-                    setPressed(x >= 0 && x < getWidth() && y >= 0 &&  y < getHeight());
+                    setPressed(x >= -mTouchSlop
+                            && x < getWidth() + mTouchSlop
+                            && y >= -mTouchSlop
+                            && y < getHeight() + mTouchSlop);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -114,12 +125,18 @@ public class KeyButtonView extends ImageView {
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                final boolean doIt = isPressed();
                 setPressed(false);
                 if (mSending) {
                     mSending = false;
-                    sendEvent(KeyEvent.ACTION_UP,
-                            KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
                     removeCallbacks(mCheckLongPress);
+                    if (doIt) {
+                        sendEvent(KeyEvent.ACTION_UP,
+                                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
+
+                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                    }
                 }
                 break;
         }
