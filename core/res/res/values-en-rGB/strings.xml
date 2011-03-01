@@ -879,7 +879,7 @@
     <string name="usb_storage_title" msgid="5901459041398751495">"USB connected"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android‘s USB storage."</string>
     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"You have connected to your computer via USB. Touch the button below if you want to copy files between your computer and your Android‘s SD card."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Turn off USB storage"</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Turn on USB storage"</string>
     <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"There is a problem with using your USB storage for USB mass storage."</string>
     <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"There is a problem with using your SD card for USB mass storage."</string>
     <string name="usb_storage_notification_title" msgid="8175892554757216525">"USB connected"</string>
