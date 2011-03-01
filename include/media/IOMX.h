@@ -85,6 +85,9 @@ public:
     virtual status_t enableGraphicBuffers(
             node_id node, OMX_U32 port_index, OMX_BOOL enable) = 0;
 
+    virtual status_t getGraphicBufferUsage(
+            node_id node, OMX_U32 port_index, OMX_U32* usage) = 0;
+
     virtual status_t useBuffer(
             node_id node, OMX_U32 port_index, const sp<IMemory> &params,
             buffer_id *buffer) = 0;

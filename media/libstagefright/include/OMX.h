@@ -62,6 +62,9 @@ public:
     virtual status_t enableGraphicBuffers(
             node_id node, OMX_U32 port_index, OMX_BOOL enable);
 
+    virtual status_t getGraphicBufferUsage(
+            node_id node, OMX_U32 port_index, OMX_U32* usage);
+
     virtual status_t storeMetaDataInBuffers(
             node_id node, OMX_U32 port_index, OMX_BOOL enable);
 

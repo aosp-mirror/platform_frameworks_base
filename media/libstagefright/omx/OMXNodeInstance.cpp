@@ -302,6 +302,45 @@ status_t OMXNodeInstance::enableGraphicBuffers(
     return OK;
 }
 
+status_t OMXNodeInstance::getGraphicBufferUsage(
+        OMX_U32 portIndex, OMX_U32* usage) {
+    Mutex::Autolock autoLock(mLock);
+
+    OMX_INDEXTYPE index;
+    OMX_ERRORTYPE err = OMX_GetExtensionIndex(
+            mHandle,
+            const_cast<OMX_STRING>(
+                    "OMX.google.android.index.getAndroidNativeBufferUsage"),
+            &index);
+
+    if (err != OMX_ErrorNone) {
+        LOGE("OMX_GetExtensionIndex failed");
+
+        return StatusFromOMXError(err);
+    }
+
+    OMX_VERSIONTYPE ver;
+    ver.s.nVersionMajor = 1;
+    ver.s.nVersionMinor = 0;
+    ver.s.nRevision = 0;
+    ver.s.nStep = 0;
+    GetAndroidNativeBufferUsageParams params = {
+        sizeof(GetAndroidNativeBufferUsageParams), ver, portIndex, 0,
+    };
+
+    err = OMX_GetParameter(mHandle, index, &params);
+
+    if (err != OMX_ErrorNone) {
+        LOGE("OMX_GetAndroidNativeBufferUsage failed with error %d (0x%08x)",
+                err, err);
+        return UNKNOWN_ERROR;
+    }
+
+    *usage = params.nUsage;
+
+    return OK;
+}
+
 status_t OMXNodeInstance::storeMetaDataInBuffers(
         OMX_U32 portIndex,
         OMX_BOOL enable) {

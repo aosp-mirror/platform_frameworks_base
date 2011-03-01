@@ -33,6 +33,7 @@ enum {
     EMPTY_BUFFER,
     GET_EXTENSION_INDEX,
     OBSERVER_ON_MSG,
+    GET_GRAPHIC_BUFFER_USAGE,
 };
 
 class BpOMX : public BpInterface<IOMX> {
@@ -191,6 +192,19 @@ public:
         remote()->transact(ENABLE_GRAPHIC_BUFFERS, data, &reply);
 
         status_t err = reply.readInt32();
+        return err;
+    }
+
+    virtual status_t getGraphicBufferUsage(
+            node_id node, OMX_U32 port_index, OMX_U32* usage) {
+        Parcel data, reply;
+        data.writeInterfaceToken(IOMX::getInterfaceDescriptor());
+        data.writeIntPtr((intptr_t)node);
+        data.writeInt32(port_index);
+        remote()->transact(GET_GRAPHIC_BUFFER_USAGE, data, &reply);
+
+        status_t err = reply.readInt32();
+        *usage = reply.readInt32();
         return err;
     }
 
@@ -504,6 +518,21 @@ status_t BnOMX::onTransact(
 
             status_t err = enableGraphicBuffers(node, port_index, enable);
             reply->writeInt32(err);
+
+            return NO_ERROR;
+        }
+
+        case GET_GRAPHIC_BUFFER_USAGE:
+        {
+            CHECK_INTERFACE(IOMX, data, reply);
+
+            node_id node = (void*)data.readIntPtr();
+            OMX_U32 port_index = data.readInt32();
+
+            OMX_U32 usage = 0;
+            status_t err = getGraphicBufferUsage(node, port_index, &usage);
+            reply->writeInt32(err);
+            reply->writeInt32(usage);
 
             return NO_ERROR;
         }
