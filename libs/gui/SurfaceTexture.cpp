@@ -96,6 +96,11 @@ SurfaceTexture::~SurfaceTexture() {
 
 status_t SurfaceTexture::setBufferCount(int bufferCount) {
     LOGV("SurfaceTexture::setBufferCount");
+
+    if (bufferCount < MIN_BUFFER_SLOTS) {
+        return BAD_VALUE;
+    }
+
     Mutex::Autolock lock(mMutex);
     freeAllBuffers();
     mBufferCount = bufferCount;

@@ -143,8 +143,21 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
 int SurfaceTextureClient::query(int what, int* value) {
     LOGV("SurfaceTextureClient::query");
     Mutex::Autolock lock(mMutex);
-    // XXX: Implement this!
-    return INVALID_OPERATION;
+    switch (what) {
+    case NATIVE_WINDOW_WIDTH:
+    case NATIVE_WINDOW_HEIGHT:
+        // XXX: How should SurfaceTexture behave if setBuffersGeometry didn't
+        // override the size?
+        *value = 0;
+        return NO_ERROR;
+    case NATIVE_WINDOW_FORMAT:
+        *value = DEFAULT_FORMAT;
+        return NO_ERROR;
+    case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
+        *value = MIN_UNDEQUEUED_BUFFERS;
+        return NO_ERROR;
+    }
+    return BAD_VALUE;
 }
 
 int SurfaceTextureClient::perform(int operation, va_list args)

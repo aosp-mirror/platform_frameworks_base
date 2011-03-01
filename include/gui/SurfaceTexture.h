@@ -37,7 +37,8 @@ class IGraphicBufferAlloc;
 
 class SurfaceTexture : public BnSurfaceTexture {
 public:
-    enum { MIN_BUFFER_SLOTS = 3 };
+    enum { MIN_UNDEQUEUED_BUFFERS = 2 };
+    enum { MIN_BUFFER_SLOTS = MIN_UNDEQUEUED_BUFFERS + 1 };
     enum { NUM_BUFFER_SLOTS = 32 };
 
     struct FrameAvailableListener : public virtual RefBase {
