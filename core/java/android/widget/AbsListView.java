@@ -3018,7 +3018,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             case TOUCH_MODE_DONE_WAITING:
                 final int motionPosition = mMotionPosition;
                 final View child = getChildAt(motionPosition - mFirstPosition);
-                if (child != null && !child.hasFocusable()) {
+
+                final float x = ev.getX();
+                final boolean inList = x > mListPadding.left && x < getWidth() - mListPadding.right;
+
+                if (child != null && !child.hasFocusable() && inList) {
                     if (mTouchMode != TOUCH_MODE_DOWN) {
                         child.setPressed(false);
                     }
