@@ -392,4 +392,5 @@ final class BinderProxy implements IBinder {
     
     final private WeakReference mSelf;
     private int mObject;
+    private int mOrgue;
 }
