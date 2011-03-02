@@ -42,11 +42,13 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -1181,6 +1183,8 @@ public class TabletStatusBar extends StatusBar implements
                          // dragging off the bottom doesn't count
                          && (int)event.getY() < v.getBottom()) {
                             animateExpand();
+                            v.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                            v.playSoundEffect(SoundEffectConstants.CLICK);
                         }
 
                         mVT.recycle();
@@ -1264,17 +1268,23 @@ public class TabletStatusBar extends StatusBar implements
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
-                    if (action == MotionEvent.ACTION_UP
-                            // was this a sloppy tap?
-                            && Math.abs(event.getX() - mInitialTouchX) < mTouchSlop 
-                            && Math.abs(event.getY() - mInitialTouchY) < (mTouchSlop / 3)
-                            // dragging off the bottom doesn't count
-                            && (int)event.getY() < v.getBottom()) {
-                        Message peekMsg = mHandler.obtainMessage(MSG_OPEN_NOTIFICATION_PEEK);
-                        peekMsg.arg1 = mPeekIndex;
-                        mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
-                        mHandler.sendMessage(peekMsg);
-                        peeking = true; // not technically true yet, but the next line will run
+                    if (!peeking) {
+                        if (action == MotionEvent.ACTION_UP
+                                // was this a sloppy tap?
+                                && Math.abs(event.getX() - mInitialTouchX) < mTouchSlop 
+                                && Math.abs(event.getY() - mInitialTouchY) < (mTouchSlop / 3)
+                                // dragging off the bottom doesn't count
+                                && (int)event.getY() < v.getBottom()) {
+                            Message peekMsg = mHandler.obtainMessage(MSG_OPEN_NOTIFICATION_PEEK);
+                            peekMsg.arg1 = mPeekIndex;
+                            mHandler.removeMessages(MSG_OPEN_NOTIFICATION_PEEK);
+                            mHandler.sendMessage(peekMsg);
+
+                            v.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                            v.playSoundEffect(SoundEffectConstants.CLICK);
+
+                            peeking = true; // not technically true yet, but the next line will run
+                        }
                     }
 
                     if (peeking) {
