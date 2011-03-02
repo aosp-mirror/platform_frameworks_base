@@ -58,7 +58,7 @@ public:
      * Creates a new font associated with the specified font state.
      */
     static Font* create(FontRenderer* state, uint32_t fontId, float fontSize,
-            int flags, uint32_t italicStyle);
+            int flags, uint32_t italicStyle, uint32_t scaleX);
 
 protected:
     friend class FontRenderer;
@@ -104,7 +104,8 @@ protected:
         SkFixed mRsbDelta;
     };
 
-    Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags, uint32_t italicStyle);
+    Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags, uint32_t italicStyle,
+            uint32_t scaleX);
 
     DefaultKeyedVector<int32_t, CachedGlyphInfo*> mCachedGlyphs;
 
@@ -124,6 +125,7 @@ protected:
     float mFontSize;
     int mFlags;
     uint32_t mItalicStyle;
+    uint32_t mScaleX;
 };
 
 class FontRenderer {
