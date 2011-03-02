@@ -568,12 +568,9 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         if (nWindow == 0) {
             return;
         }
-        if (StrictMode.vmSqliteObjectLeaksEnabled()) {
-            StrictMode.onSqliteObjectLeaked(
-                    "Releasing cursor in a finalizer. Please ensure " +
-                    "that you explicitly call close() on your cursor: ",
-                    mStackTrace);
-        }
+        // due to bugs 3329504, 3502276, cursorwindow sometimes is closed in fialize()
+        // don't print any warning saying "don't release cursor in finzlize"
+        // because it is a bug in framework code - NOT an app bug.
         recordClosingOfWindow(nWindow);
         close_native();
     }
