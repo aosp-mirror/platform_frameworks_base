@@ -13,8 +13,8 @@ LOCAL_SRC_FILES:= 	       \
 	EGL/hooks.cpp 	       \
 	EGL/Loader.cpp 	       \
 #
-
-LOCAL_SHARED_LIBRARIES += libcutils libutils
+LOCAL_STATIC_LIBRARIES += libGLESv2_dbg libprotobuf-cpp-2.3.0-lite
+LOCAL_SHARED_LIBRARIES += libcutils libutils libstlport
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
 
@@ -164,3 +164,6 @@ LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libETC1
 
 include $(BUILD_SHARED_LIBRARY)
+
+include $(call all-makefiles-under,$(LOCAL_PATH))
+

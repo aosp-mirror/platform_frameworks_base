@@ -296,9 +296,9 @@ EGLAPI pthread_key_t gGLTraceKey = -1;
 
 // ----------------------------------------------------------------------------
 
-static int gEGLTraceLevel;
+static int gEGLTraceLevel, gEGLDebugLevel;
 static int gEGLApplicationTraceLevel;
-extern EGLAPI gl_hooks_t gHooksTrace;
+extern EGLAPI gl_hooks_t gHooksTrace, gHooksDebug;
 
 static inline void setGlTraceThreadSpecific(gl_hooks_t const *value) {
     pthread_setspecific(gGLTraceKey, value);
@@ -314,12 +314,37 @@ static void initEglTraceLevel() {
     int propertyLevel = atoi(value);
     int applicationLevel = gEGLApplicationTraceLevel;
     gEGLTraceLevel = propertyLevel > applicationLevel ? propertyLevel : applicationLevel;
+    
+    property_get("debug.egl.debug_proc", value, "");
+    long pid = getpid();
+    char procPath[128] = {};
+    sprintf(procPath, "/proc/%ld/cmdline", pid);
+    FILE * file = fopen(procPath, "r");
+    if (file)
+    {
+        char cmdline[256] = {};
+        if (fgets(cmdline, sizeof(cmdline) - 1, file))
+        {
+            LOGD("\n*\n*\n* initEglTraceLevel cmdline='%s' \n*\n*", cmdline);
+            if (!strcmp(value, cmdline))
+                gEGLDebugLevel = 1;
+        }    
+        fclose(file);
+    }
+    
+    extern void StartDebugServer();
+    if (gEGLDebugLevel > 0)
+        StartDebugServer();
 }
 
 static void setGLHooksThreadSpecific(gl_hooks_t const *value) {
     if (gEGLTraceLevel > 0) {
         setGlTraceThreadSpecific(value);
         setGlThreadSpecific(&gHooksTrace);
+    } else if (gEGLDebugLevel > 0) {
+        setGlTraceThreadSpecific(value);
+        setGlThreadSpecific(&gHooksDebug);
+        LOGD("\n* setGLHooksThreadSpecific gHooksDebug");
     } else {
         setGlThreadSpecific(value);
     }
@@ -1597,7 +1622,7 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
                     cnx->hooks[GLESv1_INDEX]->ext.extensions[slot] =
                     cnx->hooks[GLESv2_INDEX]->ext.extensions[slot] =
 #if EGL_TRACE
-                    gHooksTrace.ext.extensions[slot] =
+                    gHooksDebug.ext.extensions[slot] = gHooksTrace.ext.extensions[slot] =
 #endif
                             cnx->egl.eglGetProcAddress(procname);
                 }
