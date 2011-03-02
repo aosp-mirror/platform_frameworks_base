@@ -144,6 +144,8 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
 
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    mSnapshot->fbo = getTargetFbo();
+
     mSaveCount = 1;
 
     glViewport(0, 0, mWidth, mHeight);
