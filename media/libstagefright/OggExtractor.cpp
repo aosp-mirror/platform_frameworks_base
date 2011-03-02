@@ -73,6 +73,7 @@ struct MyVorbisExtractor {
     // Returns an approximate bitrate in bits per second.
     uint64_t approxBitrate();
 
+    status_t seekToTime(int64_t timeUs);
     status_t seekToOffset(off64_t offset);
     status_t readNextPacket(MediaBuffer **buffer);
 
@@ -88,6 +89,11 @@ private:
         uint8_t mFlags;
         uint8_t mNumSegments;
         uint8_t mLace[255];
+    };
+
+    struct TOCEntry {
+        off64_t mPageOffset;
+        int64_t mTimeUs;
     };
 
     sp<DataSource> mSource;
@@ -107,6 +113,8 @@ private:
     sp<MetaData> mMeta;
     sp<MetaData> mFileMeta;
 
+    Vector<TOCEntry> mTableOfContents;
+
     ssize_t readPage(off64_t offset, Page *page);
     status_t findNextPage(off64_t startOffset, off64_t *pageOffset);
 
@@ -115,7 +123,9 @@ private:
 
     void parseFileMetaData();
 
-    uint64_t findPrevGranulePosition(off64_t pageOffset);
+    status_t findPrevGranulePosition(off64_t pageOffset, uint64_t *granulePos);
+
+    void buildTableOfContents();
 
     MyVorbisExtractor(const MyVorbisExtractor &);
     MyVorbisExtractor &operator=(const MyVorbisExtractor &);
@@ -164,10 +174,7 @@ status_t OggSource::read(
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
     if (options && options->getSeekTo(&seekTimeUs, &mode)) {
-        off64_t pos = seekTimeUs * mExtractor->mImpl->approxBitrate() / 8000000ll;
-        LOGV("seeking to offset %ld", pos);
-
-        if (mExtractor->mImpl->seekToOffset(pos) != OK) {
+        if (mExtractor->mImpl->seekToTime(seekTimeUs) != OK) {
             return ERROR_END_OF_STREAM;
         }
     }
@@ -237,7 +244,7 @@ status_t MyVorbisExtractor::findNextPage(
 
         if (!memcmp(signature, "OggS", 4)) {
             if (*pageOffset > startOffset) {
-                LOGV("skipped %ld bytes of junk to reach next frame",
+                LOGV("skipped %lld bytes of junk to reach next frame",
                      *pageOffset - startOffset);
             }
 
@@ -252,7 +259,10 @@ status_t MyVorbisExtractor::findNextPage(
 // it (if any) and return its granule position.
 // To do this we back up from the "current" page's offset until we find any
 // page preceding it and then scan forward to just before the current page.
-uint64_t MyVorbisExtractor::findPrevGranulePosition(off64_t pageOffset) {
+status_t MyVorbisExtractor::findPrevGranulePosition(
+        off64_t pageOffset, uint64_t *granulePos) {
+    *granulePos = 0;
+
     off64_t prevPageOffset = 0;
     off64_t prevGuess = pageOffset;
     for (;;) {
@@ -262,9 +272,12 @@ uint64_t MyVorbisExtractor::findPrevGranulePosition(off64_t pageOffset) {
             prevGuess = 0;
         }
 
-        LOGV("backing up %ld bytes", pageOffset - prevGuess);
+        LOGV("backing up %lld bytes", pageOffset - prevGuess);
 
-        CHECK_EQ(findNextPage(prevGuess, &prevPageOffset), (status_t)OK);
+        status_t err = findNextPage(prevGuess, &prevPageOffset);
+        if (err != OK) {
+            return err;
+        }
 
         if (prevPageOffset < pageOffset || prevGuess == 0) {
             break;
@@ -273,25 +286,62 @@ uint64_t MyVorbisExtractor::findPrevGranulePosition(off64_t pageOffset) {
 
     if (prevPageOffset == pageOffset) {
         // We did not find a page preceding this one.
-        return 0;
+        return UNKNOWN_ERROR;
     }
 
-    LOGV("prevPageOffset at %ld, pageOffset at %ld", prevPageOffset, pageOffset);
+    LOGV("prevPageOffset at %lld, pageOffset at %lld",
+         prevPageOffset, pageOffset);
 
     for (;;) {
         Page prevPage;
         ssize_t n = readPage(prevPageOffset, &prevPage);
 
         if (n <= 0) {
-            return 0;
+            return (status_t)n;
         }
 
         prevPageOffset += n;
 
         if (prevPageOffset == pageOffset) {
-            return prevPage.mGranulePosition;
+            *granulePos = prevPage.mGranulePosition;
+            return OK;
         }
     }
+}
+
+status_t MyVorbisExtractor::seekToTime(int64_t timeUs) {
+    if (mTableOfContents.isEmpty()) {
+        // Perform approximate seeking based on avg. bitrate.
+
+        off64_t pos = timeUs * approxBitrate() / 8000000ll;
+
+        LOGV("seeking to offset %lld", pos);
+        return seekToOffset(pos);
+    }
+
+    size_t left = 0;
+    size_t right = mTableOfContents.size();
+    while (left < right) {
+        size_t center = left / 2 + right / 2 + (left & right & 1);
+
+        const TOCEntry &entry = mTableOfContents.itemAt(center);
+
+        if (timeUs < entry.mTimeUs) {
+            right = center;
+        } else if (timeUs > entry.mTimeUs) {
+            left = center + 1;
+        } else {
+            left = right = center;
+            break;
+        }
+    }
+
+    const TOCEntry &entry = mTableOfContents.itemAt(left);
+
+    LOGV("seeking to entry %d / %d at offset %lld",
+         left, mTableOfContents.size(), entry.mPageOffset);
+
+    return seekToOffset(entry.mPageOffset);
 }
 
 status_t MyVorbisExtractor::seekToOffset(off64_t offset) {
@@ -311,7 +361,7 @@ status_t MyVorbisExtractor::seekToOffset(off64_t offset) {
     // We found the page we wanted to seek to, but we'll also need
     // the page preceding it to determine how many valid samples are on
     // this page.
-    mPrevGranulePosition = findPrevGranulePosition(pageOffset);
+    findPrevGranulePosition(pageOffset, &mPrevGranulePosition);
 
     mOffset = pageOffset;
 
@@ -330,7 +380,8 @@ ssize_t MyVorbisExtractor::readPage(off64_t offset, Page *page) {
     uint8_t header[27];
     if (mSource->readAt(offset, header, sizeof(header))
             < (ssize_t)sizeof(header)) {
-        LOGV("failed to read %d bytes at offset 0x%08lx", sizeof(header), offset);
+        LOGV("failed to read %d bytes at offset 0x%016llx",
+             sizeof(header), offset);
 
         return ERROR_IO;
     }
@@ -447,7 +498,8 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                     packetSize);
 
             if (n < (ssize_t)packetSize) {
-                LOGV("failed to read %d bytes at 0x%08lx", packetSize, dataOffset);
+                LOGV("failed to read %d bytes at 0x%016llx",
+                     packetSize, dataOffset);
                 return ERROR_IO;
             }
 
@@ -563,7 +615,64 @@ status_t MyVorbisExtractor::init() {
 
     mFirstDataOffset = mOffset + mCurrentPageSize;
 
+    off64_t size;
+    uint64_t lastGranulePosition;
+    if (!(mSource->flags() & DataSource::kIsCachingDataSource)
+            && mSource->getSize(&size) == OK
+            && findPrevGranulePosition(size, &lastGranulePosition) == OK) {
+        // Let's assume it's cheap to seek to the end.
+        // The granule position of the final page in the stream will
+        // give us the exact duration of the content, something that
+        // we can only approximate using avg. bitrate if seeking to
+        // the end is too expensive or impossible (live streaming).
+
+        int64_t durationUs = lastGranulePosition * 1000000ll / mVi.rate;
+
+        mMeta->setInt64(kKeyDuration, durationUs);
+
+        buildTableOfContents();
+    }
+
     return OK;
+}
+
+void MyVorbisExtractor::buildTableOfContents() {
+    off64_t offset = mFirstDataOffset;
+    Page page;
+    ssize_t pageSize;
+    while ((pageSize = readPage(offset, &page)) > 0) {
+        mTableOfContents.push();
+
+        TOCEntry &entry =
+            mTableOfContents.editItemAt(mTableOfContents.size() - 1);
+
+        entry.mPageOffset = offset;
+        entry.mTimeUs = page.mGranulePosition * 1000000ll / mVi.rate;
+
+        offset += (size_t)pageSize;
+    }
+
+    // Limit the maximum amount of RAM we spend on the table of contents,
+    // if necessary thin out the table evenly to trim it down to maximum
+    // size.
+
+    static const size_t kMaxTOCSize = 8192;
+    static const size_t kMaxNumTOCEntries = kMaxTOCSize / sizeof(TOCEntry);
+
+    size_t numerator = mTableOfContents.size();
+
+    if (numerator > kMaxNumTOCEntries) {
+        size_t denom = numerator - kMaxNumTOCEntries;
+
+        size_t accum = 0;
+        for (ssize_t i = mTableOfContents.size() - 1; i >= 0; --i) {
+            accum += denom;
+            if (accum >= numerator) {
+                mTableOfContents.removeAt(i);
+                accum -= numerator;
+            }
+        }
+    }
 }
 
 status_t MyVorbisExtractor::verifyHeader(
