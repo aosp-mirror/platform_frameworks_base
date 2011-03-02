@@ -227,13 +227,10 @@ class ZoomManager {
         assert density > 0;
 
         if (Math.abs(density - mDefaultScale) > MINIMUM_SCALE_INCREMENT) {
-            // Remember the current zoom density before it gets changed.
-            final float originalDefault = mDefaultScale;
             // set the new default density
             setDefaultZoomScale(density);
-            float scaleChange = (originalDefault > 0.0) ? density / originalDefault: 1.0f;
             // adjust the scale if it falls outside the new zoom bounds
-            setZoomScale(mActualScale * scaleChange, true);
+            setZoomScale(mActualScale, true);
         }
     }
 
@@ -724,7 +721,10 @@ class ZoomManager {
         }
 
         public boolean onScale(ScaleGestureDetector detector) {
-            float scale = computeScaleWithLimits(detector.getScaleFactor() * mActualScale);
+            // Prevent scaling beyond overview scale.
+            float scale = Math.max(
+                    computeScaleWithLimits(detector.getScaleFactor() * mActualScale),
+                    getZoomOverviewScale());
             if (mPinchToZoomAnimating || willScaleTriggerZoom(scale)) {
                 mPinchToZoomAnimating = true;
                 // limit the scale change per step
@@ -780,6 +780,13 @@ class ZoomManager {
 
         // update mMinZoomScale if the minimum zoom scale is not fixed
         if (!mMinZoomScaleFixed) {
+            // when change from narrow screen to wide screen, the new viewWidth
+            // can be wider than the old content width. We limit the minimum
+            // scale to 1.0f. The proper minimum scale will be calculated when
+            // the new picture shows up.
+            mMinZoomScale = Math.min(1.0f, (float) mWebView.getViewWidth()
+                    / (mWebView.drawHistory() ? mWebView.getHistoryPictureWidth()
+                            : mZoomOverviewWidth));
             // limit the minZoomScale to the initialScale if it is set
             if (mInitialScale > 0 && mInitialScale < mMinZoomScale) {
                 mMinZoomScale = mInitialScale;
@@ -816,7 +823,7 @@ class ZoomManager {
                 // Keep overview mode unchanged when rotating.
                 final float zoomOverviewScale = getZoomOverviewScale();
                 final float newScale = (mInZoomOverviewBeforeSizeChange) ?
-                    zoomOverviewScale : mActualScale;
+                    zoomOverviewScale : Math.max(mActualScale, zoomOverviewScale); 
                 setZoomScale(newScale, mUpdateTextWrap, true);
                 // update the zoom buttons as the scale can be changed
                 updateZoomPicker();
@@ -872,15 +879,21 @@ class ZoomManager {
             }
         }
 
+        if (!mMinZoomScaleFixed) {
+            mMinZoomScale = newZoomOverviewScale;
+        }
         // fit the content width to the current view for the first new picture
         // after first layout.
         boolean scaleHasDiff = exceedsMinScaleIncrement(newZoomOverviewScale, mActualScale);
+        // Make sure the actual scale is no less than zoom overview scale.
+        boolean scaleLessThanOverview =
+                (newZoomOverviewScale - mActualScale) >= MINIMUM_SCALE_INCREMENT;
         // Make sure mobile sites are correctly handled since mobile site will
         // change content width after rotating.
         boolean mobileSiteInOverview = mInZoomOverview &&
                 !exceedsMinScaleIncrement(newZoomOverviewScale, 1.0f);
         if (!mWebView.drawHistory() &&
-                (mInitialZoomOverview || mobileSiteInOverview) &&
+                (mInitialZoomOverview || scaleLessThanOverview || mobileSiteInOverview) &&
                 scaleHasDiff && zoomOverviewWidthChanged) {
             mInitialZoomOverview = false;
             setZoomScale(newZoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
@@ -954,11 +967,10 @@ class ZoomManager {
                 mTextWrapScale = viewState.mTextWrapScale;
                 scale = viewState.mViewScale;
             } else {
-                scale = mDefaultScale;
-                mTextWrapScale = mDefaultScale;
-                if (settings.getUseWideViewPort()
-                        && settings.getLoadWithOverviewMode()) {
-                    scale = Math.max(overviewScale, scale);
+                scale = overviewScale;
+                if (!settings.getUseWideViewPort()
+                    || !settings.getLoadWithOverviewMode()) {
+                    scale = Math.max(viewState.mTextWrapScale, scale);
                 }
                 if (settings.isNarrowColumnLayout() &&
                     settings.getUseFixedViewport()) {
@@ -969,7 +981,7 @@ class ZoomManager {
             }
             boolean reflowText = false;
             if (!viewState.mIsRestored) {
-                if (settings.getUseFixedViewport() && settings.getLoadWithOverviewMode()) {
+                if (settings.getUseFixedViewport()) {
                     // Override the scale only in case of fixed viewport.
                     scale = Math.max(scale, overviewScale);
                     mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
