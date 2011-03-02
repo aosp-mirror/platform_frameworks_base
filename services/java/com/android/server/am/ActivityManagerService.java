@@ -180,6 +180,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
     
     private static final String SYSTEM_SECURE = "ro.secure";
+    private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
     // This is the maximum number of application processes we would like
     // to have running.  Due to the asynchronous nature of things, we can
@@ -12940,8 +12941,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
                 
-                boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
-                if (isSecure) {
+                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                if (!isDebuggable) {
                     if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                         throw new SecurityException("Process not debuggable: " + proc);
                     }
@@ -13002,8 +13003,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
 
-                boolean isSecure = "1".equals(SystemProperties.get(SYSTEM_SECURE, "0"));
-                if (isSecure) {
+                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                if (!isDebuggable) {
                     if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
                         throw new SecurityException("Process not debuggable: " + proc);
                     }
