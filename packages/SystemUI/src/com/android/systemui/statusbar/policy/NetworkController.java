@@ -105,6 +105,8 @@ public class NetworkController extends BroadcastReceiver {
     private int mInetCondition = 0;
     private static final int INET_CONDITION_THRESHOLD = 50;
 
+    private boolean mAirplaneMode = false;
+
     // our ui
     Context mContext;
     ArrayList<ImageView> mPhoneSignalIconViews = new ArrayList<ImageView>();
@@ -170,7 +172,11 @@ public class NetworkController extends BroadcastReceiver {
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         context.registerReceiver(this, filter);
+
+        // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
+        updateAirplaneMode();
 
         // yuck
         mBatteryStats = BatteryStatsService.getService();
@@ -227,6 +233,9 @@ public class NetworkController extends BroadcastReceiver {
             updateConnectivity(intent);
             refreshViews();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+            refreshViews();
+        } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+            updateAirplaneMode();
             refreshViews();
         }
     }
@@ -343,18 +352,17 @@ public class NetworkController extends BroadcastReceiver {
         return (! "wifi-only".equals(SystemProperties.get("ro.carrier")));
     }
 
+
+    private void updateAirplaneMode() {
+        mAirplaneMode = (Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.AIRPLANE_MODE_ON, 0) == 1);
+    }
+
     private final void updateTelephonySignalStrength() {
-        // Display signal strength while in "emergency calls only" mode
-        if (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly())) {
+        if (!hasService()) {
             //Slog.d(TAG, "updateTelephonySignalStrength: no service");
-            if (Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
-                mPhoneSignalIconId = R.drawable.stat_sys_signal_flightmode;
-                mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
-            } else {
-                mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
-            }
+            mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+            mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
         } else {
             if (mSignalStrength == null) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
@@ -719,6 +727,12 @@ public class NetworkController extends BroadcastReceiver {
             label = mContext.getString(R.string.bluetooth_tethered);
             combinedSignalIconId = mBluetoothTetherIconId;
             dataTypeIconId = 0;
+        } else if (mAirplaneMode &&
+                (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly()))) {
+            // Only display the flight-mode icon if not in "emergency calls only" mode.
+            label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
+            combinedSignalIconId = R.drawable.stat_sys_signal_flightmode;
+            dataTypeIconId = 0;
         } else {
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             // On devices without mobile radios, we want to show the wifi icon
@@ -732,6 +746,7 @@ public class NetworkController extends BroadcastReceiver {
                     + Integer.toHexString(combinedSignalIconId)
                     + "/" + getResourceName(combinedSignalIconId)
                     + " dataDirectionOverlayIconId=0x" + Integer.toHexString(dataDirectionOverlayIconId)
+                    + " mAirplaneMode=" + mAirplaneMode
                     + " mDataActivity=" + mDataActivity
                     + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
                     + " mDataDirectionIconId=0x" + Integer.toHexString(mDataDirectionIconId)
