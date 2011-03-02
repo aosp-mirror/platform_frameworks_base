@@ -36,7 +36,7 @@
         <LinearLayout android:id="@+id/recents_glow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-52dip"
+            android:layout_marginBottom="-49dip"
             android:layout_gravity="bottom"
             android:background="@drawable/recents_blue_glow"
             android:orientation="horizontal"
@@ -52,7 +52,7 @@
                 android:fadingEdge="vertical"
                 android:scrollbars="none"
                 android:fadingEdgeLength="30dip"
-                android:listSelector="@drawable/recents_thumbnail_bg_press"
+                android:listSelector="@drawable/recents_thumbnail_bg_selector"
             />
 
         </LinearLayout>
