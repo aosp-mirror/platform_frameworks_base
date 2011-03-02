@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 class StatusView {
     public static final int LOCK_ICON = 0; // R.drawable.ic_lock_idle_lock;
-    public static final int ALARM_ICON = 0; // R.drawable.ic_lock_idle_alarm;
+    public static final int ALARM_ICON = R.drawable.ic_lock_idle_alarm;
     public static final int CHARGING_ICON = 0; //R.drawable.ic_lock_idle_charging;
     public static final int BATTERY_LOW_ICON = 0; //R.drawable.ic_lock_idle_low_battery;
 
