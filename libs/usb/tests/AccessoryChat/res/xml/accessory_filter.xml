@@ -13,10 +13,6 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<!-- This is the standard feature indicating that the device supports USB accessories. -->
-<permissions>
-    <feature name="android.hardware.usb.accessory" />
-    <library name="com.android.future.usb.accessory"
-            file="/system/framework/com.android.future.usb.accessory.jar" />
-</permissions>
+<resources>
+    <usb-accessory manufacturer="Google, Inc." model="AccessoryChat" type="Sample Program" version="1.0" />
+</resources>
