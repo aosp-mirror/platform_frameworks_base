@@ -115,7 +115,7 @@ public class TabletStatusBar extends StatusBar implements
     View mNotificationArea;
     View mNotificationTrigger;
     NotificationIconArea mNotificationIconArea;
-    View mNavigationArea;
+    ViewGroup mNavigationArea;
 
     boolean mNotificationDNDMode;
     NotificationData.Entry mNotificationDNDDummyEntry;
@@ -146,7 +146,8 @@ public class TabletStatusBar extends StatusBar implements
     LocationController mLocationController;
     NetworkController mNetworkController;
 
-    View mBarContents;
+    ViewGroup mBarContents;
+    LayoutTransition mBarContentsLayoutTransition;
 
     // hide system chrome ("lights out") support
     View mShadow;
@@ -346,7 +347,20 @@ public class TabletStatusBar extends StatusBar implements
 
         sb.setHandler(mHandler);
 
-        mBarContents = sb.findViewById(R.id.bar_contents);
+        mBarContents = (ViewGroup) sb.findViewById(R.id.bar_contents);
+        // layout transitions for the status bar's contents
+        mBarContentsLayoutTransition = new LayoutTransition();
+        // add/removal will fade as normal
+        mBarContentsLayoutTransition.setAnimator(LayoutTransition.APPEARING,
+                ObjectAnimator.ofFloat(null, "alpha", 0f, 1f));
+        mBarContentsLayoutTransition.setAnimator(LayoutTransition.DISAPPEARING,
+                ObjectAnimator.ofFloat(null, "alpha", 1f, 0f));
+        // no animations for siblings on change: just jump into place please
+        mBarContentsLayoutTransition.setAnimator(LayoutTransition.CHANGE_APPEARING, null);
+        mBarContentsLayoutTransition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, null);
+        // quick like bunny
+        mBarContentsLayoutTransition.setDuration(250 * (DEBUG?10:1));
+        mBarContents.setLayoutTransition(mBarContentsLayoutTransition);
 
         // the whole right-hand side of the bar
         mNotificationArea = sb.findViewById(R.id.notificationArea);
@@ -385,11 +399,12 @@ public class TabletStatusBar extends StatusBar implements
 
         // The navigation buttons
         mBackButton = (ImageView)sb.findViewById(R.id.back);
-        mNavigationArea = sb.findViewById(R.id.navigationArea);
+        mNavigationArea = (ViewGroup) sb.findViewById(R.id.navigationArea);
         mHomeButton = mNavigationArea.findViewById(R.id.home);
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
+        mNavigationArea.setLayoutTransition(mBarContentsLayoutTransition);
 
         // The bar contents buttons
         mNotificationAndImeArea = (ViewGroup)sb.findViewById(R.id.notificationAndImeArea);
@@ -574,7 +589,7 @@ public class TabletStatusBar extends StatusBar implements
                     if (!mNotificationPanel.isShowing()) {
                         mNotificationPeekWindow.setVisibility(View.GONE);
                         mNotificationPanel.show(true, true);
-                        mNotificationArea.setVisibility(View.GONE);
+                        mNotificationArea.setVisibility(View.INVISIBLE);
                         mTicker.halt();
                     }
                     break;
@@ -832,7 +847,7 @@ public class TabletStatusBar extends StatusBar implements
         if ((diff & StatusBarManager.DISABLE_NAVIGATION) != 0) {
             if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
                 Slog.i(TAG, "DISABLE_NAVIGATION: yes");
-                mNavigationArea.setVisibility(View.GONE);
+                mNavigationArea.setVisibility(View.INVISIBLE);
                 mInputMethodSwitchButton.setScreenLocked(true);
             } else {
                 Slog.i(TAG, "DISABLE_NAVIGATION: no");
