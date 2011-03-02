@@ -127,6 +127,11 @@ extern const char* getAxisLabel(int32_t axisId);
  */
 extern int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState);
 
+/**
+ * Returns true if a key is a meta key like ALT or CAPS_LOCK.
+ */
+extern bool isMetaKey(int32_t keyCode);
+
 } // namespace android
 
 #endif // _UI_KEYBOARD_H

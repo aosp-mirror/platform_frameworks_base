@@ -399,6 +399,17 @@ bool InputReader::shouldDropVirtualKey(nsecs_t now,
     }
 }
 
+void InputReader::fadePointer() {
+    { // acquire device registry reader lock
+        RWLock::AutoRLock _rl(mDeviceRegistryLock);
+
+        for (size_t i = 0; i < mDevices.size(); i++) {
+            InputDevice* device = mDevices.valueAt(i);
+            device->fadePointer();
+        }
+    } // release device registry reader lock
+}
+
 void InputReader::getInputConfiguration(InputConfiguration* outConfiguration) {
     { // acquire state lock
         AutoMutex _l(mStateLock);
@@ -695,6 +706,14 @@ int32_t InputDevice::getMetaState() {
     return result;
 }
 
+void InputDevice::fadePointer() {
+    size_t numMappers = mMappers.size();
+    for (size_t i = 0; i < numMappers; i++) {
+        InputMapper* mapper = mMappers[i];
+        mapper->fadePointer();
+    }
+}
+
 
 // --- InputMapper ---
 
@@ -737,6 +756,9 @@ bool InputMapper::markSupportedKeyCodes(uint32_t sourceMask, size_t numCodes,
 
 int32_t InputMapper::getMetaState() {
     return 0;
+}
+
+void InputMapper::fadePointer() {
 }
 
 void InputMapper::dumpRawAbsoluteAxisInfo(String8& dump,
@@ -965,6 +987,10 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
 
     if (metaStateChanged) {
         getContext()->updateGlobalMetaState();
+    }
+
+    if (down && !isMetaKey(keyCode)) {
+        getContext()->fadePointer();
     }
 
     if (policyFlags & POLICY_FLAG_FUNCTION) {
@@ -1348,6 +1374,9 @@ void CursorInputMapper::sync(nsecs_t when) {
         } else {
             hscroll = 0;
         }
+        if (hscroll != 0 || vscroll != 0) {
+            mPointerController->unfade();
+        }
     } // release lock
 
     int32_t metaState = mContext->getGlobalMetaState();
@@ -1374,6 +1403,13 @@ int32_t CursorInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCod
     } else {
         return AKEY_STATE_UNKNOWN;
     }
+}
+
+void CursorInputMapper::fadePointer() {
+    { // acquire lock
+        AutoMutex _l(mLock);
+        mPointerController->fade();
+    } // release lock
 }
 
 
@@ -2275,7 +2311,6 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
     uint32_t policyFlags = 0;
 
     // Preprocess pointer data.
-
     if (mParameters.useBadTouchFilter) {
         if (applyBadTouchFilter()) {
             havePointerIds = false;
@@ -2303,8 +2338,12 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         savedTouch = & mCurrentTouch;
     }
 
-    // Process touches and virtual keys.
+    // Hide the pointer on an initial down.
+    if (mLastTouch.pointerCount == 0 && mCurrentTouch.pointerCount != 0) {
+        getContext()->fadePointer();
+    }
 
+    // Process touches and virtual keys.
     TouchResult touchResult = consumeOffScreenTouches(when, policyFlags);
     if (touchResult == DISPATCH_TOUCH) {
         detectGestures(when);
@@ -2312,7 +2351,6 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
     }
 
     // Copy current touch to last touch in preparation for the next cycle.
-
     if (touchResult == DROP_STROKE) {
         mLastTouch.clear();
     } else {

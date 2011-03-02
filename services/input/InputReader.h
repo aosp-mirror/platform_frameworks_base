@@ -157,6 +157,8 @@ public:
     virtual bool shouldDropVirtualKey(nsecs_t now,
             InputDevice* device, int32_t keyCode, int32_t scanCode) = 0;
 
+    virtual void fadePointer() = 0;
+
     virtual InputReaderPolicyInterface* getPolicy() = 0;
     virtual InputDispatcherInterface* getDispatcher() = 0;
     virtual EventHubInterface* getEventHub() = 0;
@@ -241,6 +243,8 @@ private:
     virtual void updateGlobalMetaState();
     virtual int32_t getGlobalMetaState();
 
+    virtual void fadePointer();
+
     InputConfiguration mInputConfiguration;
     void updateInputConfiguration();
 
@@ -299,6 +303,8 @@ public:
 
     int32_t getMetaState();
 
+    void fadePointer();
+
     inline const PropertyMap& getConfiguration() {
         return mConfiguration;
     }
@@ -350,6 +356,8 @@ public:
             const int32_t* keyCodes, uint8_t* outFlags);
 
     virtual int32_t getMetaState();
+
+    virtual void fadePointer();
 
 protected:
     InputDevice* mDevice;
@@ -458,6 +466,8 @@ public:
     virtual void process(const RawEvent* rawEvent);
 
     virtual int32_t getScanCodeState(uint32_t sourceMask, int32_t scanCode);
+
+    virtual void fadePointer();
 
 private:
     // Amount that trackball needs to move in order to generate a key event.

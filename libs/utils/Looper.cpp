@@ -19,9 +19,26 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <limits.h>
 
 
 namespace android {
+
+// --- WeakMessageHandler ---
+
+WeakMessageHandler::WeakMessageHandler(const wp<MessageHandler>& handler) :
+        mHandler(handler) {
+}
+
+void WeakMessageHandler::handleMessage(const Message& message) {
+    sp<MessageHandler> handler = mHandler.promote();
+    if (handler != NULL) {
+        handler->handleMessage(message);
+    }
+}
+
+
+// --- Looper ---
 
 #ifdef LOOPER_USES_EPOLL
 // Hint for number of file descriptors to be associated with the epoll instance.
@@ -35,8 +52,8 @@ static pthread_once_t gTLSOnce = PTHREAD_ONCE_INIT;
 static pthread_key_t gTLSKey = 0;
 
 Looper::Looper(bool allowNonCallbacks) :
-        mAllowNonCallbacks(allowNonCallbacks),
-        mResponseIndex(0) {
+        mAllowNonCallbacks(allowNonCallbacks), mSendingMessage(false),
+        mResponseIndex(0), mNextMessageUptime(LLONG_MAX) {
     int wakeFds[2];
     int result = pipe(wakeFds);
     LOG_ALWAYS_FATAL_IF(result != 0, "Could not create wake pipe.  errno=%d", errno);
@@ -161,17 +178,21 @@ int Looper::pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outDa
     for (;;) {
         while (mResponseIndex < mResponses.size()) {
             const Response& response = mResponses.itemAt(mResponseIndex++);
-            if (! response.request.callback) {
+            ALooper_callbackFunc callback = response.request.callback;
+            if (!callback) {
+                int ident = response.request.ident;
+                int fd = response.request.fd;
+                int events = response.events;
+                void* data = response.request.data;
 #if DEBUG_POLL_AND_WAKE
                 LOGD("%p ~ pollOnce - returning signalled identifier %d: "
-                        "fd=%d, events=0x%x, data=%p", this,
-                        response.request.ident, response.request.fd,
-                        response.events, response.request.data);
+                        "fd=%d, events=0x%x, data=%p",
+                        this, ident, fd, events, data);
 #endif
-                if (outFd != NULL) *outFd = response.request.fd;
-                if (outEvents != NULL) *outEvents = response.events;
-                if (outData != NULL) *outData = response.request.data;
-                return response.request.ident;
+                if (outFd != NULL) *outFd = fd;
+                if (outEvents != NULL) *outEvents = events;
+                if (outData != NULL) *outData = data;
+                return ident;
             }
         }
 
@@ -194,6 +215,25 @@ int Looper::pollInner(int timeoutMillis) {
     LOGD("%p ~ pollOnce - waiting: timeoutMillis=%d", this, timeoutMillis);
 #endif
 
+    // Adjust the timeout based on when the next message is due.
+    if (timeoutMillis != 0 && mNextMessageUptime != LLONG_MAX) {
+        nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+        if (mNextMessageUptime <= now) {
+            timeoutMillis = 0;
+        } else {
+            uint64_t delay = (mNextMessageUptime - now + 999999LL) / 1000000LL;
+            if (delay < INT_MAX
+                    && (timeoutMillis < 0 || int(delay) < timeoutMillis)) {
+                timeoutMillis = int(delay);
+            }
+        }
+#if DEBUG_POLL_AND_WAKE
+        LOGD("%p ~ pollOnce - next message in %lldns, adjusted timeout: timeoutMillis=%d",
+                this, mNextMessageUptime - now, timeoutMillis);
+#endif
+    }
+
+    // Poll.
     int result = ALOOPER_POLL_WAKE;
     mResponses.clear();
     mResponseIndex = 0;
@@ -205,7 +245,6 @@ int Looper::pollInner(int timeoutMillis) {
 #ifdef LOOPER_USES_EPOLL
     struct epoll_event eventItems[EPOLL_MAX_EVENTS];
     int eventCount = epoll_wait(mEpollFd, eventItems, EPOLL_MAX_EVENTS, timeoutMillis);
-    bool acquiredLock = false;
 #else
     // Wait for wakeAndLock() waiters to run then set mPolling to true.
     mLock.lock();
@@ -219,16 +258,20 @@ int Looper::pollInner(int timeoutMillis) {
     int eventCount = poll(mRequestedFds.editArray(), requestedCount, timeoutMillis);
 #endif
 
+    // Acquire lock.
+    mLock.lock();
+
+    // Check for poll error.
     if (eventCount < 0) {
         if (errno == EINTR) {
             goto Done;
         }
-
         LOGW("Poll failed with an unexpected error, errno=%d", errno);
         result = ALOOPER_POLL_ERROR;
         goto Done;
     }
 
+    // Check for poll timeout.
     if (eventCount == 0) {
 #if DEBUG_POLL_AND_WAKE
         LOGD("%p ~ pollOnce - timeout", this);
@@ -237,6 +280,7 @@ int Looper::pollInner(int timeoutMillis) {
         goto Done;
     }
 
+    // Handle all events.
 #if DEBUG_POLL_AND_WAKE
     LOGD("%p ~ pollOnce - handling events from %d fds", this, eventCount);
 #endif
@@ -252,11 +296,6 @@ int Looper::pollInner(int timeoutMillis) {
                 LOGW("Ignoring unexpected epoll events 0x%x on wake read pipe.", epollEvents);
             }
         } else {
-            if (! acquiredLock) {
-                mLock.lock();
-                acquiredLock = true;
-            }
-
             ssize_t requestIndex = mRequests.indexOfKey(fd);
             if (requestIndex >= 0) {
                 int events = 0;
@@ -270,9 +309,6 @@ int Looper::pollInner(int timeoutMillis) {
                         "no longer registered.", epollEvents, fd);
             }
         }
-    }
-    if (acquiredLock) {
-        mLock.unlock();
     }
 Done: ;
 #else
@@ -301,15 +337,12 @@ Done: ;
             }
         }
     }
-
 Done:
     // Set mPolling to false and wake up the wakeAndLock() waiters.
-    mLock.lock();
     mPolling = false;
     if (mWaiters != 0) {
         mAwake.broadcast();
     }
-    mLock.unlock();
 #endif
 
 #ifdef LOOPER_STATISTICS
@@ -335,19 +368,59 @@ Done:
     }
 #endif
 
+    // Invoke pending message callbacks.
+    mNextMessageUptime = LLONG_MAX;
+    while (mMessageEnvelopes.size() != 0) {
+        nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+        const MessageEnvelope& messageEnvelope = mMessageEnvelopes.itemAt(0);
+        if (messageEnvelope.uptime <= now) {
+            // Remove the envelope from the list.
+            // We keep a strong reference to the handler until the call to handleMessage
+            // finishes.  Then we drop it so that the handler can be deleted *before*
+            // we reacquire our lock.
+            { // obtain handler
+                sp<MessageHandler> handler = messageEnvelope.handler;
+                Message message = messageEnvelope.message;
+                mMessageEnvelopes.removeAt(0);
+                mSendingMessage = true;
+                mLock.unlock();
+
+#if DEBUG_POLL_AND_WAKE || DEBUG_CALLBACKS
+                LOGD("%p ~ pollOnce - sending message: handler=%p, what=%d",
+                        this, handler.get(), message.what);
+#endif
+                handler->handleMessage(message);
+            } // release handler
+
+            mLock.lock();
+            mSendingMessage = false;
+            result = ALOOPER_POLL_CALLBACK;
+        } else {
+            // The last message left at the head of the queue determines the next wakeup time.
+            mNextMessageUptime = messageEnvelope.uptime;
+            break;
+        }
+    }
+
+    // Release lock.
+    mLock.unlock();
+
+    // Invoke all response callbacks.
     for (size_t i = 0; i < mResponses.size(); i++) {
         const Response& response = mResponses.itemAt(i);
-        if (response.request.callback) {
+        ALooper_callbackFunc callback = response.request.callback;
+        if (callback) {
+            int fd = response.request.fd;
+            int events = response.events;
+            void* data = response.request.data;
 #if DEBUG_POLL_AND_WAKE || DEBUG_CALLBACKS
-            LOGD("%p ~ pollOnce - invoking callback: fd=%d, events=0x%x, data=%p", this,
-                    response.request.fd, response.events, response.request.data);
+            LOGD("%p ~ pollOnce - invoking fd event callback %p: fd=%d, events=0x%x, data=%p",
+                    this, callback, fd, events, data);
 #endif
-            int callbackResult = response.request.callback(
-                    response.request.fd, response.events, response.request.data);
+            int callbackResult = callback(fd, events, data);
             if (callbackResult == 0) {
-                removeFd(response.request.fd);
+                removeFd(fd);
             }
-
             result = ALOOPER_POLL_CALLBACK;
         }
     }
@@ -592,5 +665,84 @@ void Looper::wakeAndLock() {
     }
 }
 #endif
+
+void Looper::sendMessage(const sp<MessageHandler>& handler, const Message& message) {
+    sendMessageAtTime(LLONG_MIN, handler, message);
+}
+
+void Looper::sendMessageDelayed(nsecs_t uptimeDelay, const sp<MessageHandler>& handler,
+        const Message& message) {
+    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+    sendMessageAtTime(now + uptimeDelay, handler, message);
+}
+
+void Looper::sendMessageAtTime(nsecs_t uptime, const sp<MessageHandler>& handler,
+        const Message& message) {
+#if DEBUG_CALLBACKS
+    LOGD("%p ~ sendMessageAtTime - uptime=%lld, handler=%p, what=%d",
+            this, uptime, handler.get(), message.what);
+#endif
+
+    size_t i = 0;
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        size_t messageCount = mMessageEnvelopes.size();
+        while (i < messageCount && uptime >= mMessageEnvelopes.itemAt(i).uptime) {
+            i += 1;
+        }
+
+        MessageEnvelope messageEnvelope(uptime, handler, message);
+        mMessageEnvelopes.insertAt(messageEnvelope, i, 1);
+
+        // Optimization: If the Looper is currently sending a message, then we can skip
+        // the call to wake() because the next thing the Looper will do after processing
+        // messages is to decide when the next wakeup time should be.  In fact, it does
+        // not even matter whether this code is running on the Looper thread.
+        if (mSendingMessage) {
+            return;
+        }
+    } // release lock
+
+    // Wake the poll loop only when we enqueue a new message at the head.
+    if (i == 0) {
+        wake();
+    }
+}
+
+void Looper::removeMessages(const sp<MessageHandler>& handler) {
+#if DEBUG_CALLBACKS
+    LOGD("%p ~ removeMessages - handler=%p", this, handler.get());
+#endif
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        for (size_t i = mMessageEnvelopes.size(); i != 0; ) {
+            const MessageEnvelope& messageEnvelope = mMessageEnvelopes.itemAt(--i);
+            if (messageEnvelope.handler == handler) {
+                mMessageEnvelopes.removeAt(i);
+            }
+        }
+    } // release lock
+}
+
+void Looper::removeMessages(const sp<MessageHandler>& handler, int what) {
+#if DEBUG_CALLBACKS
+    LOGD("%p ~ removeMessages - handler=%p, what=%d", this, handler.get(), what);
+#endif
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        for (size_t i = mMessageEnvelopes.size(); i != 0; ) {
+            const MessageEnvelope& messageEnvelope = mMessageEnvelopes.itemAt(--i);
+            if (messageEnvelope.handler == handler
+                    && messageEnvelope.message.what == what) {
+                mMessageEnvelopes.removeAt(i);
+            }
+        }
+    } // release lock
+}
 
 } // namespace android

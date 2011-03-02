@@ -322,5 +322,26 @@ int32_t updateMetaState(int32_t keyCode, bool down, int32_t oldMetaState) {
     }
 }
 
+bool isMetaKey(int32_t keyCode) {
+    switch (keyCode) {
+    case AKEYCODE_ALT_LEFT:
+    case AKEYCODE_ALT_RIGHT:
+    case AKEYCODE_SHIFT_LEFT:
+    case AKEYCODE_SHIFT_RIGHT:
+    case AKEYCODE_SYM:
+    case AKEYCODE_FUNCTION:
+    case AKEYCODE_CTRL_LEFT:
+    case AKEYCODE_CTRL_RIGHT:
+    case AKEYCODE_META_LEFT:
+    case AKEYCODE_META_RIGHT:
+    case AKEYCODE_CAPS_LOCK:
+    case AKEYCODE_NUM_LOCK:
+    case AKEYCODE_SCROLL_LOCK:
+        return true;
+    default:
+        return false;
+    }
+}
+
 
 } // namespace android

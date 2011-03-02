@@ -31,11 +31,13 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <utils/Log.h>
+#include <utils/Looper.h>
 #include <utils/threads.h>
 
 #include <input/InputManager.h>
 #include <input/PointerController.h>
 
+#include <android_os_MessageQueue.h>
 #include <android_view_KeyEvent.h>
 #include <android_view_MotionEvent.h>
 #include <android_view_InputChannel.h>
@@ -136,7 +138,7 @@ protected:
     virtual ~NativeInputManager();
 
 public:
-    NativeInputManager(jobject callbacksObj);
+    NativeInputManager(jobject callbacksObj, const sp<Looper>& looper);
 
     inline sp<InputManager> getInputManager() const { return mInputManager; }
 
@@ -152,6 +154,7 @@ public:
     void setInputWindows(JNIEnv* env, jobjectArray windowObjArray);
     void setFocusedApplication(JNIEnv* env, jobject applicationObj);
     void setInputDispatchMode(bool enabled, bool frozen);
+    void setSystemUiVisibility(int32_t visibility);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -188,6 +191,7 @@ private:
     sp<InputManager> mInputManager;
 
     jobject mCallbacksObj;
+    sp<Looper> mLooper;
 
     // Cached filtering policies.
     int32_t mFilterTouchEvents;
@@ -203,9 +207,14 @@ private:
         int32_t displayWidth, displayHeight; // -1 when initialized
         int32_t displayOrientation;
 
+        // System UI visibility.
+        int32_t systemUiVisibility;
+
         // Pointer controller singleton, created and destroyed as needed.
         wp<PointerController> pointerController;
     } mLocked;
+
+    void updateInactivityFadeDelayLocked(const sp<PointerController>& controller);
 
     // Power manager interactions.
     bool isScreenOn();
@@ -220,9 +229,10 @@ private:
 
 
 
-NativeInputManager::NativeInputManager(jobject callbacksObj) :
-    mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1), mVirtualKeyQuietTime(-1),
-    mMaxEventsPerSecond(-1) {
+NativeInputManager::NativeInputManager(jobject callbacksObj, const sp<Looper>& looper) :
+        mLooper(looper),
+        mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1), mVirtualKeyQuietTime(-1),
+        mMaxEventsPerSecond(-1) {
     JNIEnv* env = jniEnv();
 
     mCallbacksObj = env->NewGlobalRef(callbacksObj);
@@ -232,6 +242,8 @@ NativeInputManager::NativeInputManager(jobject callbacksObj) :
         mLocked.displayWidth = -1;
         mLocked.displayHeight = -1;
         mLocked.displayOrientation = ROTATION_0;
+
+        mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
     }
 
     sp<EventHub> eventHub = new EventHub();
@@ -408,7 +420,7 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
             layer = -1;
         }
 
-        controller = new PointerController(layer);
+        controller = new PointerController(mLooper, layer);
         mLocked.pointerController = controller;
 
         controller->setDisplaySize(mLocked.displayWidth, mLocked.displayHeight);
@@ -428,6 +440,8 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
             }
             env->DeleteLocalRef(iconObj);
         }
+
+        updateInactivityFadeDelayLocked(controller);
     }
     return controller;
 }
@@ -569,6 +583,26 @@ void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationO
 
 void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
     mInputManager->getDispatcher()->setInputDispatchMode(enabled, frozen);
+}
+
+void NativeInputManager::setSystemUiVisibility(int32_t visibility) {
+    AutoMutex _l(mLock);
+
+    if (mLocked.systemUiVisibility != visibility) {
+        mLocked.systemUiVisibility = visibility;
+
+        sp<PointerController> controller = mLocked.pointerController.promote();
+        if (controller != NULL) {
+            updateInactivityFadeDelayLocked(controller);
+        }
+    }
+}
+
+void NativeInputManager::updateInactivityFadeDelayLocked(const sp<PointerController>& controller) {
+    bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
+    controller->setInactivityFadeDelay(lightsOut
+            ? PointerController::INACTIVITY_FADE_DELAY_SHORT
+            : PointerController::INACTIVITY_FADE_DELAY_NORMAL);
 }
 
 bool NativeInputManager::isScreenOn() {
@@ -751,9 +785,10 @@ static bool checkInputManagerUnitialized(JNIEnv* env) {
 }
 
 static void android_server_InputManager_nativeInit(JNIEnv* env, jclass clazz,
-        jobject callbacks) {
+        jobject callbacks, jobject messageQueueObj) {
     if (gNativeInputManager == NULL) {
-        gNativeInputManager = new NativeInputManager(callbacks);
+        sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
+        gNativeInputManager = new NativeInputManager(callbacks, looper);
     } else {
         LOGE("Input manager already initialized.");
         jniThrowRuntimeException(env, "Input manager already initialized.");
@@ -972,6 +1007,15 @@ static void android_server_InputManager_nativeSetInputDispatchMode(JNIEnv* env,
     gNativeInputManager->setInputDispatchMode(enabled, frozen);
 }
 
+static void android_server_InputManager_nativeSetSystemUiVisibility(JNIEnv* env,
+        jclass clazz, jint visibility) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->setSystemUiVisibility(visibility);
+}
+
 static jobject android_server_InputManager_nativeGetInputDevice(JNIEnv* env,
         jclass clazz, jint deviceId) {
     if (checkInputManagerUnitialized(env)) {
@@ -1079,7 +1123,7 @@ static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz)
 
 static JNINativeMethod gInputManagerMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeInit", "(Lcom/android/server/wm/InputManager$Callbacks;)V",
+    { "nativeInit", "(Lcom/android/server/wm/InputManager$Callbacks;Landroid/os/MessageQueue;)V",
             (void*) android_server_InputManager_nativeInit },
     { "nativeStart", "()V",
             (void*) android_server_InputManager_nativeStart },
@@ -1108,6 +1152,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeSetFocusedApplication },
     { "nativeSetInputDispatchMode", "(ZZ)V",
             (void*) android_server_InputManager_nativeSetInputDispatchMode },
+    { "nativeSetSystemUiVisibility", "(I)V",
+            (void*) android_server_InputManager_nativeSetSystemUiVisibility },
     { "nativeGetInputDevice", "(I)Landroid/view/InputDevice;",
             (void*) android_server_InputManager_nativeGetInputDevice },
     { "nativeGetInputDeviceIds", "()[I",

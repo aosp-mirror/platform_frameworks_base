@@ -19,7 +19,6 @@ package com.android.server.wm;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -31,6 +30,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
+import android.os.Looper;
+import android.os.MessageQueue;
 import android.os.SystemProperties;
 import android.util.Slog;
 import android.util.Xml;
@@ -41,13 +42,10 @@ import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -63,7 +61,7 @@ public class InputManager {
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
     
-    private static native void nativeInit(Callbacks callbacks);
+    private static native void nativeInit(Callbacks callbacks, MessageQueue messageQueue);
     private static native void nativeStart();
     private static native void nativeSetDisplaySize(int displayId, int width, int height);
     private static native void nativeSetDisplayOrientation(int displayId, int rotation);
@@ -83,6 +81,7 @@ public class InputManager {
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis);
     private static native void nativeSetInputWindows(InputWindow[] windows);
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
+    private static native void nativeSetSystemUiVisibility(int visibility);
     private static native void nativeSetFocusedApplication(InputApplication application);
     private static native InputDevice nativeGetInputDevice(int deviceId);
     private static native void nativeGetInputConfiguration(Configuration configuration);
@@ -120,15 +119,12 @@ public class InputManager {
     public InputManager(Context context, WindowManagerService windowManagerService) {
         this.mContext = context;
         this.mWindowManagerService = windowManagerService;
-        
         this.mCallbacks = new Callbacks();
-        
-        init();
-    }
-    
-    private void init() {
+
+        Looper looper = windowManagerService.mH.getLooper();
+
         Slog.i(TAG, "Initializing input manager");
-        nativeInit(mCallbacks);
+        nativeInit(mCallbacks, looper.getQueue());
     }
     
     public void start() {
@@ -338,7 +334,11 @@ public class InputManager {
     public void setInputDispatchMode(boolean enabled, boolean frozen) {
         nativeSetInputDispatchMode(enabled, frozen);
     }
-    
+
+    public void setSystemUiVisibility(int visibility) {
+        nativeSetSystemUiVisibility(visibility);
+    }
+
     /**
      * Atomically transfers touch focus from one window to another as identified by
      * their input channels.  It is possible for multiple windows to have
@@ -361,7 +361,7 @@ public class InputManager {
         }
         return nativeTransferTouchFocus(fromChannel, toChannel);
     }
-    
+
     public void dump(PrintWriter pw) {
         String dumpStr = nativeDump();
         if (dumpStr != null) {
