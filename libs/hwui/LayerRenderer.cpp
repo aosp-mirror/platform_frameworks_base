@@ -214,6 +214,11 @@ Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             layer->texture, 0);
 
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glEnable(GL_SCISSOR_TEST);
+
     glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
 
     return layer;
