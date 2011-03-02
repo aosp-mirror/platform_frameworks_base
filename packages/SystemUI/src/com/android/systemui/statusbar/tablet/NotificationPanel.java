@@ -164,7 +164,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     }
 
     public void setNotificationCount(int n) {
-        Slog.d(TAG, "notificationCount=" + n);
+//        Slog.d(TAG, "notificationCount=" + n);
         if (!mShowing) {
             // just do it, already
             setContentFrameVisible(n > 0, false);
