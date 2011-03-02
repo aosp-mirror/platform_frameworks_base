@@ -586,8 +586,7 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_OPEN_RECENTS_PANEL:
                     if (DEBUG) Slog.d(TAG, "opening recents panel");
                     if (mRecentsPanel != null) {
-                        disable(StatusBarManager.DISABLE_NAVIGATION
-                                | StatusBarManager.DISABLE_BACK);
+                        disable(StatusBarManager.DISABLE_BACK);
                         mRecentsPanel.setVisibility(View.VISIBLE);
                         mRecentsPanel.show(true, true);
                     }

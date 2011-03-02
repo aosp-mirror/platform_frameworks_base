@@ -40,7 +40,6 @@ import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -64,7 +63,6 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     private static final boolean DEBUG = TabletStatusBar.DEBUG;
     private static final int DISPLAY_TASKS = 20;
     private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
-    private static final int BOTTOM_OFFSET = 28; // TODO: Get from dimens.xml
     private TabletStatusBar mBar;
     private ArrayList<ActivityDescription> mActivityDescriptions;
     private int mIconDpi;
@@ -104,7 +102,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         }
     };
 
-    private static class ViewHolder {
+    /* package */ final static class ViewHolder {
         private ImageView thumbnailView;
         private ImageView iconView;
         private TextView labelView;
@@ -112,7 +110,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         private ActivityDescription activityDescription;
     }
 
-    private class ActvityDescriptionAdapter extends BaseAdapter {
+    /* package */ final class ActvityDescriptionAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
 
         public ActvityDescriptionAdapter(Context context) {
@@ -361,7 +359,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         View footer = inflater.inflate(R.layout.status_bar_recent_panel_footer,
                 mRecentsContainer, false);
         mRecentsContainer.setScrollbarFadingEnabled(true);
-        mRecentsContainer.addFooterView(footer);
+        mRecentsContainer.addFooterView(footer, null, false);
         mRecentsContainer.setAdapter(mListAdapter = new ActvityDescriptionAdapter(mContext));
         mRecentsContainer.setOnItemClickListener(this);
 
