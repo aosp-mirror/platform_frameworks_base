@@ -286,8 +286,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     com.android.internal.R.string.config_default_dns_server);
         }
         try {
-            mDefaultDns = InetAddress.getByName(dns);
-        } catch (UnknownHostException e) {
+            mDefaultDns = NetworkUtils.numericToInetAddress(dns);
+        } catch (IllegalArgumentException e) {
             loge("Error setting defaultDns using " + dns);
         }
 

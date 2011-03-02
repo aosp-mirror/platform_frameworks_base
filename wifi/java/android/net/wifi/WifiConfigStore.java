@@ -686,13 +686,15 @@ class WifiConfigStore {
                         } else if (key.equals(IP_ASSIGNMENT_KEY)) {
                             ipAssignment = IpAssignment.valueOf(in.readUTF());
                         } else if (key.equals(LINK_ADDRESS_KEY)) {
-                            LinkAddress linkAddr = new LinkAddress(InetAddress.getByName(
-                                    in.readUTF()), in.readInt());
+                            LinkAddress linkAddr = new LinkAddress(
+                                    NetworkUtils.numericToInetAddress(in.readUTF()), in.readInt());
                             linkProperties.addLinkAddress(linkAddr);
                         } else if (key.equals(GATEWAY_KEY)) {
-                            linkProperties.addGateway(InetAddress.getByName(in.readUTF()));
+                            linkProperties.addGateway(
+                                    NetworkUtils.numericToInetAddress(in.readUTF()));
                         } else if (key.equals(DNS_KEY)) {
-                            linkProperties.addDns(InetAddress.getByName(in.readUTF()));
+                            linkProperties.addDns(
+                                    NetworkUtils.numericToInetAddress(in.readUTF()));
                         } else if (key.equals(PROXY_SETTINGS_KEY)) {
                             proxySettings = ProxySettings.valueOf(in.readUTF());
                         } else if (key.equals(PROXY_HOST_KEY)) {
@@ -706,7 +708,7 @@ class WifiConfigStore {
                         } else {
                             Log.e(TAG, "Ignore unknown key " + key + "while reading");
                         }
-                    } catch (UnknownHostException e) {
+                    } catch (IllegalArgumentException e) {
                         Log.e(TAG, "Ignore invalid address while reading" + e);
                     }
                 } while (true);

@@ -28,6 +28,7 @@ import android.content.res.Resources.NotFoundException;
 import android.net.ConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
+import android.net.NetworkUtils;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.ServiceManager;
@@ -379,9 +380,9 @@ final class BluetoothPanProfileHandler {
             if (ifcg != null) {
                 InetAddress addr = null;
                 if (ifcg.addr == null || (addr = ifcg.addr.getAddress()) == null ||
-                        addr.equals(InetAddress.getByName("0.0.0.0")) ||
-                        addr.equals(InetAddress.getByName("::0"))) {
-                    addr = InetAddress.getByName(address);
+                        addr.equals(NetworkUtils.numericToInetAddress("0.0.0.0")) ||
+                        addr.equals(NetworkUtils.numericToInetAddress("::0"))) {
+                    addr = NetworkUtils.numericToInetAddress(address);
                 }
                 ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
                 ifcg.addr = new LinkAddress(addr, BLUETOOTH_PREFIX_LENGTH);

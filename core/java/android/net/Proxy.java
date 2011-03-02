@@ -233,17 +233,11 @@ public final class Proxy {
                 if (host.equalsIgnoreCase("localhost")) {
                     return true;
                 }
-                // Check we have a numeric address so we don't cause a DNS lookup in getByName.
-                if (InetAddress.isNumeric(host)) {
-                    if (InetAddress.getByName(host).isLoopbackAddress()) {
-                        return true;
-                    }
+                if (NetworkUtils.numericToInetAddress(host).isLoopbackAddress()) {
+                    return true;
                 }
             }
-        } catch (UnknownHostException ignored) {
-            // Can't happen for a numeric address (InetAddress.getByName).
         } catch (IllegalArgumentException iex) {
-            // Ignore (URI.create)
         }
         return false;
     }

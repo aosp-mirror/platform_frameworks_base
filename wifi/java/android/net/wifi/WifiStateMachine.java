@@ -996,7 +996,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                         ifcg = service.getInterfaceConfig(intf);
                         if (ifcg != null) {
                             /* IP/netmask: 192.168.43.1/255.255.255.0 */
-                            ifcg.addr = new LinkAddress(InetAddress.getByName("192.168.43.1"), 24);
+                            ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
+                                    "192.168.43.1"), 24);
                             ifcg.interfaceFlags = "[up]";
 
                             service.setInterfaceConfig(intf, ifcg);

@@ -34,6 +34,7 @@ import android.net.INetworkManagementEventObserver;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
+import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -567,7 +568,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     ifcg = service.getInterfaceConfig(iface);
                     if (ifcg != null) {
-                        InetAddress addr = InetAddress.getByName(USB_NEAR_IFACE_ADDR);
+                        InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
                         ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
                         if (enabled) {
                             ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
