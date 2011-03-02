@@ -3666,9 +3666,11 @@ public class WebView extends AbsoluteLayout
      * @param interfaceName The name of the interface to remove.
      */
     public void removeJavascriptInterface(String interfaceName) {
-        WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
-        arg.mInterfaceName = interfaceName;
-        mWebViewCore.sendMessage(EventHub.REMOVE_JS_INTERFACE, arg);
+        if (mWebViewCore != null) {
+            WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
+            arg.mInterfaceName = interfaceName;
+            mWebViewCore.sendMessage(EventHub.REMOVE_JS_INTERFACE, arg);
+        }
     }
 
     /**
