@@ -227,10 +227,13 @@ class ZoomManager {
         assert density > 0;
 
         if (Math.abs(density - mDefaultScale) > MINIMUM_SCALE_INCREMENT) {
+            // Remember the current zoom density before it gets changed.
+            final float originalDefault = mDefaultScale;
             // set the new default density
             setDefaultZoomScale(density);
+            float scaleChange = (originalDefault > 0.0) ? density / originalDefault: 1.0f;
             // adjust the scale if it falls outside the new zoom bounds
-            setZoomScale(mActualScale, true);
+            setZoomScale(mActualScale * scaleChange, true);
         }
     }
 
@@ -629,7 +632,7 @@ class ZoomManager {
     }
 
     /* package */ float getZoomOverviewScale() {
-        return computeScaleWithLimits(mWebView.getViewWidth() * mInvZoomOverviewWidth);
+        return mWebView.getViewWidth() * mInvZoomOverviewWidth;
     }
 
     public boolean isInZoomOverview() {
@@ -882,6 +885,7 @@ class ZoomManager {
 
         if (!mMinZoomScaleFixed) {
             mMinZoomScale = newZoomOverviewScale;
+            mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
         }
         // fit the content width to the current view for the first new picture
         // after first layout.
@@ -956,6 +960,10 @@ class ZoomManager {
         final Point viewSize = drawData.mViewSize;
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
         setupZoomOverviewWidth(drawData, mWebView.getViewWidth());
+        if (!mMinZoomScaleFixed) {
+            mMinZoomScale = getZoomOverviewScale();
+            mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
+        }
 
         if (!mWebView.drawHistory()) {
             float scale;
@@ -971,7 +979,7 @@ class ZoomManager {
                 scale = overviewScale;
                 if (!settings.getUseWideViewPort()
                     || !settings.getLoadWithOverviewMode()) {
-                    scale = Math.max(viewState.mTextWrapScale, scale);
+                    scale = Math.max(mDefaultScale, scale);
                 }
                 if (settings.isNarrowColumnLayout() &&
                     settings.getUseFixedViewport()) {
