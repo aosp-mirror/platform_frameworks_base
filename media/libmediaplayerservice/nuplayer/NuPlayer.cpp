@@ -191,6 +191,8 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
 
             mAudioEOS = false;
             mVideoEOS = false;
+            mSkipRenderingAudioUntilMediaTimeUs = -1;
+            mSkipRenderingVideoUntilMediaTimeUs = -1;
 
             mSource->start();
 
@@ -592,6 +594,31 @@ status_t NuPlayer::feedDecoderInputData(bool audio, const sp<AMessage> &msg) {
             LOGV("%s discontinuity (formatChange=%d)",
                  audio ? "audio" : "video", formatChange);
 
+            if (audio) {
+                mSkipRenderingAudioUntilMediaTimeUs = -1;
+            } else {
+                mSkipRenderingVideoUntilMediaTimeUs = -1;
+            }
+
+            sp<AMessage> extra;
+            if (accessUnit->meta()->findMessage("extra", &extra)
+                    && extra != NULL) {
+                int64_t resumeAtMediaTimeUs;
+                if (extra->findInt64(
+                            "resume-at-mediatimeUs", &resumeAtMediaTimeUs)) {
+                    LOGI("suppressing rendering of %s until %lld us",
+                            audio ? "audio" : "video", resumeAtMediaTimeUs);
+
+                    if (audio) {
+                        mSkipRenderingAudioUntilMediaTimeUs =
+                            resumeAtMediaTimeUs;
+                    } else {
+                        mSkipRenderingVideoUntilMediaTimeUs =
+                            resumeAtMediaTimeUs;
+                    }
+                }
+            }
+
             flushDecoder(audio, formatChange);
         }
 
@@ -626,6 +653,27 @@ void NuPlayer::renderBuffer(bool audio, const sp<AMessage> &msg) {
     CHECK(msg->findObject("buffer", &obj));
 
     sp<ABuffer> buffer = static_cast<ABuffer *>(obj.get());
+
+    int64_t &skipUntilMediaTimeUs =
+        audio
+            ? mSkipRenderingAudioUntilMediaTimeUs
+            : mSkipRenderingVideoUntilMediaTimeUs;
+
+    if (skipUntilMediaTimeUs >= 0) {
+        int64_t mediaTimeUs;
+        CHECK(buffer->meta()->findInt64("timeUs", &mediaTimeUs));
+
+        if (mediaTimeUs < skipUntilMediaTimeUs) {
+            LOGV("dropping %s buffer at time %lld as requested.",
+                 audio ? "audio" : "video",
+                 mediaTimeUs);
+
+            reply->post();
+            return;
+        }
+
+        skipUntilMediaTimeUs = -1;
+    }
 
     mRenderer->queueBuffer(audio, buffer, reply);
 }

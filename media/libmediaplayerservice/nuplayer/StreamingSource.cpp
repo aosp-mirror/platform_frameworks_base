@@ -54,7 +54,8 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
 
     for (int32_t i = 0; i < 10; ++i) {
         char buffer[188];
-        ssize_t n = mStreamListener->read(buffer, sizeof(buffer));
+        sp<AMessage> extra;
+        ssize_t n = mStreamListener->read(buffer, sizeof(buffer), &extra);
 
         if (n == 0) {
             LOGI("input data EOS reached.");
@@ -62,7 +63,8 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
             mEOS = true;
             break;
         } else if (n == INFO_DISCONTINUITY) {
-            mTSParser->signalDiscontinuity(ATSParser::DISCONTINUITY_SEEK);
+            mTSParser->signalDiscontinuity(
+                    ATSParser::DISCONTINUITY_SEEK, extra);
         } else if (n < 0) {
             CHECK_EQ(n, -EWOULDBLOCK);
             break;
@@ -72,7 +74,8 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
                 mTSParser->signalDiscontinuity(
                         buffer[1] == 0x00
                             ? ATSParser::DISCONTINUITY_SEEK
-                            : ATSParser::DISCONTINUITY_FORMATCHANGE);
+                            : ATSParser::DISCONTINUITY_FORMATCHANGE,
+                        extra);
             } else {
                 mTSParser->feedTSPacket(buffer, sizeof(buffer));
             }

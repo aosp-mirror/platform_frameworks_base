@@ -136,9 +136,11 @@ void AnotherPacketSource::queueAccessUnit(const sp<ABuffer> &buffer) {
 }
 
 void AnotherPacketSource::queueDiscontinuity(
-        ATSParser::DiscontinuityType type) {
+        ATSParser::DiscontinuityType type,
+        const sp<AMessage> &extra) {
     sp<ABuffer> buffer = new ABuffer(0);
     buffer->meta()->setInt32("discontinuity", static_cast<int32_t>(type));
+    buffer->meta()->setMessage("extra", extra);
 
     Mutex::Autolock autoLock(mLock);
 

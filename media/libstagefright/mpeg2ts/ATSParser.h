@@ -41,7 +41,10 @@ struct ATSParser : public RefBase {
     ATSParser();
 
     void feedTSPacket(const void *data, size_t size);
-    void signalDiscontinuity(DiscontinuityType type);
+
+    void signalDiscontinuity(
+            DiscontinuityType type, const sp<AMessage> &extra);
+
     void signalEOS(status_t finalResult);
 
     enum SourceType {

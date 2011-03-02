@@ -96,10 +96,12 @@ bool NuPlayer::HTTPLiveSource::feedMoreTSData() {
         } else {
             if (buffer[0] == 0x00) {
                 // XXX legacy
+                sp<AMessage> extra;
                 mTSParser->signalDiscontinuity(
                         buffer[1] == 0x00
                             ? ATSParser::DISCONTINUITY_SEEK
-                            : ATSParser::DISCONTINUITY_FORMATCHANGE);
+                            : ATSParser::DISCONTINUITY_FORMATCHANGE,
+                        extra);
             } else {
                 mTSParser->feedTSPacket(buffer, sizeof(buffer));
             }

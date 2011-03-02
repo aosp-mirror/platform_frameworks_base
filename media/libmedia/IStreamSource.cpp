@@ -26,6 +26,9 @@
 
 namespace android {
 
+// static
+const char *const IStreamListener::kKeyResumeAtPTS = "resume-at-PTS";
+
 enum {
     // IStreamSource
     SET_LISTENER = IBinder::FIRST_CALL_TRANSACTION,

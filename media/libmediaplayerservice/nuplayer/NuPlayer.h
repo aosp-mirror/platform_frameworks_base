@@ -112,6 +112,9 @@ private:
     bool mResetInProgress;
     bool mResetPostponed;
 
+    int64_t mSkipRenderingAudioUntilMediaTimeUs;
+    int64_t mSkipRenderingVideoUntilMediaTimeUs;
+
     status_t instantiateDecoder(bool audio, sp<Decoder> *decoder);
 
     status_t feedDecoderInputData(bool audio, const sp<AMessage> &msg);

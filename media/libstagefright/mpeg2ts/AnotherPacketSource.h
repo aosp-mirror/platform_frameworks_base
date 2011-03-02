@@ -46,7 +46,10 @@ struct AnotherPacketSource : public MediaSource {
     status_t nextBufferTime(int64_t *timeUs);
 
     void queueAccessUnit(const sp<ABuffer> &buffer);
-    void queueDiscontinuity(ATSParser::DiscontinuityType type);
+
+    void queueDiscontinuity(
+            ATSParser::DiscontinuityType type, const sp<AMessage> &extra);
+
     void signalEOS(status_t result);
 
     status_t dequeueAccessUnit(sp<ABuffer> *buffer);
