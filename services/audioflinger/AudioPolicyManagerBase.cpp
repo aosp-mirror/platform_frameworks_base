@@ -122,12 +122,12 @@ status_t AudioPolicyManagerBase::setDeviceConnectionState(AudioSystem::audio_dev
         // request routing change if necessary
         uint32_t newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
+        checkA2dpSuspend();
         checkOutputForAllStrategies();
         // A2DP outputs must be closed after checkOutputForAllStrategies() is executed
         if (state == AudioSystem::DEVICE_STATE_UNAVAILABLE && AudioSystem::isA2dpDevice(device)) {
             closeA2dpOutputs();
         }
-        checkA2dpSuspend();
 #endif
         updateDeviceForStrategy();
         setOutputDevice(mHardwareOutput, newDevice);
@@ -269,8 +269,8 @@ void AudioPolicyManagerBase::setPhoneState(int state)
     // check for device and output changes triggered by new phone state
     newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
-    checkOutputForAllStrategies();
     checkA2dpSuspend();
+    checkOutputForAllStrategies();
 #endif
     updateDeviceForStrategy();
 
@@ -378,8 +378,8 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
     // check for device and output changes triggered by new phone state
     uint32_t newDevice = getNewDevice(mHardwareOutput, false);
 #ifdef WITH_A2DP
-    checkOutputForAllStrategies();
     checkA2dpSuspend();
+    checkOutputForAllStrategies();
 #endif
     updateDeviceForStrategy();
     setOutputDevice(mHardwareOutput, newDevice);
@@ -1624,7 +1624,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             if (device) break;
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to A2DP
-            if (!isInCall()) {
+            if (!isInCall() && !mA2dpSuspended) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP;
                 if (device) break;
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES;
@@ -1647,7 +1647,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
 #ifdef WITH_A2DP
             // when not in a phone call, phone strategy should route STREAM_VOICE_CALL to
             // A2DP speaker when forcing to speaker output
-            if (!isInCall()) {
+            if (!isInCall() && !mA2dpSuspended) {
                 device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER;
                 if (device) break;
             }
@@ -1687,7 +1687,7 @@ uint32_t AudioPolicyManagerBase::getDeviceForStrategy(routing_strategy strategy,
             device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_WIRED_HEADSET;
         }
 #ifdef WITH_A2DP
-        if ((mA2dpOutput != 0) &&
+        if ((mA2dpOutput != 0) && !mA2dpSuspended &&
                 (strategy != STRATEGY_SONIFICATION || a2dpUsedForSonification())) {
             if (device2 == 0) {
                 device2 = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP;
