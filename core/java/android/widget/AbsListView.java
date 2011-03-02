@@ -624,6 +624,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     private boolean mForceTranscriptScroll;
 
+    private int mGlowPaddingLeft;
+    private int mGlowPaddingRight;
+
     /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
@@ -3314,9 +3317,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int scrollY = mScrollY;
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth() - mListPadding.left - mListPadding.right;
+                final int leftPadding = mListPadding.left + mGlowPaddingLeft;
+                final int rightPadding = mListPadding.right + mGlowPaddingRight;
+                final int width = getWidth() - leftPadding - rightPadding;
 
-                canvas.translate(mListPadding.left,
+                canvas.translate(leftPadding,
                         Math.min(0, scrollY + mFirstPositionDistanceGuess));
                 mEdgeGlowTop.setSize(width, getHeight());
                 if (mEdgeGlowTop.draw(canvas)) {
@@ -3326,10 +3331,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth() - mListPadding.left - mListPadding.right;
+                final int leftPadding = mListPadding.left + mGlowPaddingLeft;
+                final int rightPadding = mListPadding.right + mGlowPaddingRight;
+                final int width = getWidth() - leftPadding - rightPadding;
                 final int height = getHeight();
 
-                canvas.translate(-width + mListPadding.left,
+                canvas.translate(-width + leftPadding,
                         Math.max(height, scrollY + mLastPositionDistanceGuess));
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
@@ -3351,6 +3358,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mFastScroller.draw(canvas);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void setOverScrollEffectPadding(int leftPadding, int rightPadding) {
+        mGlowPaddingLeft = leftPadding;
+        mGlowPaddingRight = rightPadding;
     }
 
     @Override
