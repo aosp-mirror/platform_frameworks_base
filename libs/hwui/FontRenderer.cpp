@@ -40,9 +40,9 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Font::Font(FontRenderer* state, uint32_t fontId, float fontSize,
-        int flags, uint32_t italicStyle) :
+        int flags, uint32_t italicStyle, uint32_t scaleX) :
         mState(state), mFontId(fontId), mFontSize(fontSize),
-        mFlags(flags), mItalicStyle(italicStyle) {
+        mFlags(flags), mItalicStyle(italicStyle), mScaleX(scaleX) {
 }
 
 
@@ -279,18 +279,19 @@ Font::CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, int32_t glyph) {
 }
 
 Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize,
-        int flags, uint32_t italicStyle) {
+        int flags, uint32_t italicStyle, uint32_t scaleX) {
     Vector<Font*> &activeFonts = state->mActiveFonts;
 
     for (uint32_t i = 0; i < activeFonts.size(); i++) {
         Font* font = activeFonts[i];
         if (font->mFontId == fontId && font->mFontSize == fontSize &&
-                font->mFlags == flags && font->mItalicStyle == italicStyle) {
+                font->mFlags == flags && font->mItalicStyle == italicStyle &&
+                font->mScaleX == scaleX) {
             return font;
         }
     }
 
-    Font* newFont = new Font(state, fontId, fontSize, flags, italicStyle);
+    Font* newFont = new Font(state, fontId, fontSize, flags, italicStyle, scaleX);
     activeFonts.push(newFont);
     return newFont;
 }
@@ -657,7 +658,9 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
 
     const float skewX = paint->getTextSkewX();
     uint32_t italicStyle = *(uint32_t*) &skewX;
-    mCurrentFont = Font::create(this, fontId, fontSize, flags, italicStyle);
+    const float scaleXFloat = paint->getTextScaleX();
+    uint32_t scaleX = *(uint32_t*) &scaleXFloat;
+    mCurrentFont = Font::create(this, fontId, fontSize, flags, italicStyle, scaleX);
 
     const float maxPrecacheFontSize = 40.0f;
     bool isNewFont = currentNumFonts != mActiveFonts.size();
