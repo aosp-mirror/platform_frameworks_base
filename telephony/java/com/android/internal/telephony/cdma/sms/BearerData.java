@@ -37,6 +37,9 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
 
+import android.content.res.Resources;
+
+
 
 /**
  * An object to encode and decode CDMA SMS bearer data.
@@ -912,6 +915,16 @@ public final class BearerData {
         return true;
     }
 
+    private static String decodeUtf8(byte[] data, int offset, int numFields)
+        throws CodingException
+    {
+        try {
+            return new String(data, offset, numFields, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException ex) {
+            throw new CodingException("UTF-8 decode failed: " + ex);
+        }
+    }
+
     private static String decodeUtf16(byte[] data, int offset, int numFields)
         throws CodingException
     {
@@ -996,19 +1009,29 @@ public final class BearerData {
         }
         switch (userData.msgEncoding) {
         case UserData.ENCODING_OCTET:
-            // Strip off any padding bytes, meaning any differences between the length of the
-            // array and the target length specified by numFields.  This is to avoid any confusion
-            // by code elsewhere that only considers the payload array length.
-            byte[] payload = new byte[userData.numFields];
-            int copyLen = userData.numFields < userData.payload.length
-                    ? userData.numFields : userData.payload.length;
+            /*
+            *  Octet decoding depends on the carrier service.
+            */
+            boolean decodingtypeUTF8 = Resources.getSystem()
+                    .getBoolean(com.android.internal.R.bool.config_sms_utf8_support);
 
-            System.arraycopy(userData.payload, 0, payload, 0, copyLen);
-            userData.payload = payload;
+            if (!decodingtypeUTF8) {
+                // Strip off any padding bytes, meaning any differences between the length of the
+                // array and the target length specified by numFields.  This is to avoid any
+                // confusion by code elsewhere that only considers the payload array length.
+                byte[] payload = new byte[userData.numFields];
+                int copyLen = userData.numFields < userData.payload.length
+                        ? userData.numFields : userData.payload.length;
 
-            // There are many devices in the market that send 8bit text sms (latin encoded) as
-            // octet encoded.
-            userData.payloadStr = decodeLatin(userData.payload, offset, userData.numFields);
+                System.arraycopy(userData.payload, 0, payload, 0, copyLen);
+                userData.payload = payload;
+
+                // There are many devices in the market that send 8bit text sms (latin encoded) as
+                // octet encoded.
+                userData.payloadStr = decodeLatin(userData.payload, offset, userData.numFields);
+            } else {
+                userData.payloadStr = decodeUtf8(userData.payload, offset, userData.numFields);
+            }
             break;
         case UserData.ENCODING_IA5:
         case UserData.ENCODING_7BIT_ASCII:
