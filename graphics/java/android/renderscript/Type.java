@@ -142,7 +142,8 @@ public class Type extends BaseObj {
         }
 
         int count = x * y * z * faces;
-        if (hasLod && (x > 1) && (y > 1) && (z > 1)) {
+
+        while (hasLod && ((x > 1) || (y > 1) || (z > 1))) {
             if(x > 1) {
                 x >>= 1;
             }
