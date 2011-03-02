@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.usb;
+package com.android.future.usb;
 
 /**
  * A class representing a USB accessory.
