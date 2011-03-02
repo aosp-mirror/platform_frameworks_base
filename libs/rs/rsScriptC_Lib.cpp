@@ -35,6 +35,7 @@ using namespace android::renderscript;
 // Math routines
 //////////////////////////////////////////////////////////////////////////////
 
+#if 0
 static float SC_sinf_fast(float x) {
     const float A =   1.0f / (2.0f * M_PI);
     const float B = -16.0f;
@@ -70,6 +71,7 @@ static float SC_cosf_fast(float x) {
     const float y = B * x * fabsf(x) + C * x;
     return 0.2215f * (y * fabsf(y) - y) + y;
 }
+#endif
 
 static float SC_randf(float max) {
     float r = (float)rand();
