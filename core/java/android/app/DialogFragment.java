@@ -25,6 +25,9 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * A fragment that displays a dialog window, floating on top of its
  * activity's window.  This fragment contains a Dialog object, which it
@@ -177,8 +180,9 @@ public class DialogFragment extends Fragment
     int mBackStackId = -1;
 
     Dialog mDialog;
-    boolean mDestroyed;
-    boolean mRemoved;
+    boolean mViewDestroyed;
+    boolean mDismissed;
+    boolean mShownByMe;
 
     public DialogFragment() {
     }
@@ -219,6 +223,8 @@ public class DialogFragment extends Fragment
      * {@link FragmentTransaction#add(Fragment, String) FragmentTransaction.add}.
      */
     public void show(FragmentManager manager, String tag) {
+        mDismissed = false;
+        mShownByMe = true;
         FragmentTransaction ft = manager.beginTransaction();
         ft.add(this, tag);
         ft.commit();
@@ -234,8 +240,10 @@ public class DialogFragment extends Fragment
      * {@link FragmentTransaction#commit() FragmentTransaction.commit()}.
      */
     public int show(FragmentTransaction transaction, String tag) {
+        mDismissed = false;
+        mShownByMe = true;
         transaction.add(this, tag);
-        mRemoved = false;
+        mViewDestroyed = false;
         mBackStackId = transaction.commit();
         return mBackStackId;
     }
@@ -251,11 +259,16 @@ public class DialogFragment extends Fragment
     }
 
     void dismissInternal(boolean allowStateLoss) {
+        if (mDismissed) {
+            return;
+        }
+        mDismissed = true;
+        mShownByMe = false;
         if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
         }
-        mRemoved = true;
+        mViewDestroyed = true;
         if (mBackStackId >= 0) {
             getFragmentManager().popBackStack(mBackStackId,
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -329,6 +342,27 @@ public class DialogFragment extends Fragment
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (!mShownByMe) {
+            // If not explicitly shown through our API, take this as an
+            // indication that the dialog is no longer dismissed.
+            mDismissed = false;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (!mShownByMe && !mDismissed) {
+            // The fragment was not shown by a direct call here, it is not
+            // dismissed, and now it is being detached...  well, okay, thou
+            // art now dismissed.  Have fun.
+            mDismissed = true;
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -352,7 +386,6 @@ public class DialogFragment extends Fragment
         }
 
         mDialog = onCreateDialog(savedInstanceState);
-        mDestroyed = false;
         switch (mStyle) {
             case STYLE_NO_INPUT:
                 mDialog.getWindow().addFlags(
@@ -401,7 +434,7 @@ public class DialogFragment extends Fragment
     }
 
     public void onDismiss(DialogInterface dialog) {
-        if (!mRemoved) {
+        if (!mViewDestroyed) {
             // Note: we need to use allowStateLoss, because the dialog
             // dispatches this asynchronously so we can receive the call
             // after the activity is paused.  Worst case, when the user comes
@@ -443,7 +476,7 @@ public class DialogFragment extends Fragment
     public void onStart() {
         super.onStart();
         if (mDialog != null) {
-            mRemoved = false;
+            mViewDestroyed = false;
             mDialog.show();
         }
     }
@@ -488,14 +521,28 @@ public class DialogFragment extends Fragment
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mDestroyed = true;
         if (mDialog != null) {
             // Set removed here because this dismissal is just to hide
             // the dialog -- we don't want this to cause the fragment to
             // actually be removed.
-            mRemoved = true;
+            mViewDestroyed = true;
             mDialog.dismiss();
             mDialog = null;
         }
+    }
+
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
+        super.dump(prefix, fd, writer, args);
+        writer.print(prefix); writer.println("DialogFragment:");
+        writer.print(prefix); writer.print("  mStyle="); writer.print(mStyle);
+                writer.print(" mTheme=0x"); writer.println(Integer.toHexString(mTheme));
+        writer.print(prefix); writer.print("  mCancelable="); writer.print(mCancelable);
+                writer.print(" mShowsDialog="); writer.print(mShowsDialog);
+                writer.print(" mBackStackId="); writer.println(mBackStackId);
+        writer.print(prefix); writer.print("  mDialog="); writer.println(mDialog);
+        writer.print(prefix); writer.print("  mViewDestroyed="); writer.print(mViewDestroyed);
+                writer.print(" mDismissed="); writer.print(mDismissed);
+                writer.print(" mShownByMe="); writer.println(mShownByMe);
     }
 }
