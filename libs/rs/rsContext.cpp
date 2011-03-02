@@ -741,7 +741,7 @@ Context::~Context() {
         mWorkers.mLaunchSignals[ct].set();
     }
     for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
-        int status = pthread_join(mWorkers.mThreadId[ct], &res);
+        status = pthread_join(mWorkers.mThreadId[ct], &res);
     }
     rsAssert(!mWorkers.mRunningCount);
 

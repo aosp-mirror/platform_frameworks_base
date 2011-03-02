@@ -4,7 +4,6 @@
 static inline void rsHCAPI_ContextFinish (RsContext rsc) {
     ThreadIO *io = &((Context *)rsc)->mIO;
     uint32_t size = sizeof(RS_CMD_ContextFinish);
-    RS_CMD_ContextFinish *cmd = static_cast<RS_CMD_ContextFinish *>(io->mToCore.reserve(size));
     io->mToCore.commitSync(RS_CMD_ID_ContextFinish, size);
 }
 
