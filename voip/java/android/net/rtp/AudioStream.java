@@ -27,8 +27,8 @@ import java.net.SocketException;
  * configured {@link AudioCodec}. On the other side, An {@link AudioGroup}
  * represents a local endpoint which mixes all the AudioStreams and optionally
  * interacts with the speaker and the microphone at the same time. The simplest
- * usage includes one for each endpoints. For other combinations, users should
- * be aware of the limitations described in {@link AudioGroup}.
+ * usage includes one for each endpoints. For other combinations, developers
+ * should be aware of the limitations described in {@link AudioGroup}.
  *
  * <p>An AudioStream becomes busy when it joins an AudioGroup. In this case most
  * of the setter methods are disabled. This is designed to ease the task of
