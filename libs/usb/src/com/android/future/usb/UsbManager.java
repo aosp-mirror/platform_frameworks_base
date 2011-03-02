@@ -15,7 +15,7 @@
  */
 
 
-package com.google.android.usb;
+package com.android.future.usb;
 
 import android.content.Context;
 import android.content.Intent;

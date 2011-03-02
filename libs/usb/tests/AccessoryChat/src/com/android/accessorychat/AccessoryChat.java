@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.accessorychat;
+package com.android.accessorychat;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -31,8 +31,8 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.android.usb.UsbAccessory;
-import com.google.android.usb.UsbManager;
+import com.android.future.usb.UsbAccessory;
+import com.android.future.usb.UsbManager;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;

@@ -22,6 +22,6 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_MODULE:= com.google.android.usb
+LOCAL_MODULE:= com.android.future.usb.accessory
 
 include $(BUILD_JAVA_LIBRARY)
