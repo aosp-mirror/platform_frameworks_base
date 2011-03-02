@@ -1,6 +1,7 @@
 #define LOG_TAG "BitmapFactory"
 
 #include "BitmapFactory.h"
+#include "NinePatchPeeker.h"
 #include "SkImageDecoder.h"
 #include "SkImageRef_ashmem.h"
 #include "SkImageRef_GlobalPool.h"
@@ -46,65 +47,6 @@ static jfieldID gFileDescriptor_descriptor;
 #endif
 
 using namespace android;
-
-class NinePatchPeeker : public SkImageDecoder::Peeker {
-    SkImageDecoder* fHost;
-public:
-    NinePatchPeeker(SkImageDecoder* host) {
-        // the host lives longer than we do, so a raw ptr is safe
-        fHost = host;
-        fPatchIsValid = false;
-    }
-
-    ~NinePatchPeeker() {
-        if (fPatchIsValid) {
-            free(fPatch);
-        }
-    }
-
-    bool    fPatchIsValid;
-    Res_png_9patch*  fPatch;
-
-    virtual bool peek(const char tag[], const void* data, size_t length) {
-        if (strcmp("npTc", tag) == 0 && length >= sizeof(Res_png_9patch)) {
-            Res_png_9patch* patch = (Res_png_9patch*) data;
-            size_t patchSize = patch->serializedSize();
-            assert(length == patchSize);
-            // You have to copy the data because it is owned by the png reader
-            Res_png_9patch* patchNew = (Res_png_9patch*) malloc(patchSize);
-            memcpy(patchNew, patch, patchSize);
-            // this relies on deserialization being done in place
-            Res_png_9patch::deserialize(patchNew);
-            patchNew->fileToDevice();
-            if (fPatchIsValid) {
-                free(fPatch);
-            }
-            fPatch = patchNew;
-            //printf("9patch: (%d,%d)-(%d,%d)\n",
-            //       fPatch.sizeLeft, fPatch.sizeTop,
-            //       fPatch.sizeRight, fPatch.sizeBottom);
-            fPatchIsValid = true;
-
-            // now update our host to force index or 32bit config
-            // 'cause we don't want 565 predithered, since as a 9patch, we know
-            // we will be stretched, and therefore we want to dither afterwards.
-            static const SkBitmap::Config gNo565Pref[] = {
-                SkBitmap::kIndex8_Config,
-                SkBitmap::kIndex8_Config,
-                SkBitmap::kARGB_8888_Config,
-                SkBitmap::kARGB_8888_Config,
-                SkBitmap::kARGB_8888_Config,
-                SkBitmap::kARGB_8888_Config,
-            };
-            fHost->setPrefConfigTable(gNo565Pref);
-        } else {
-            fPatch = NULL;
-        }
-        return true;    // keep on decoding
-    }
-};
-
-///////////////////////////////////////////////////////////////////////////////
 
 static inline int32_t validOrNeg1(bool isValid, int32_t value) {
 //    return isValid ? value : -1;
