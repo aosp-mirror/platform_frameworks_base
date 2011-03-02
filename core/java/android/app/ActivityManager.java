@@ -1253,8 +1253,13 @@ public class ActivityManager {
                 return new HashMap<String, Integer>();
             }
 
+            PkgUsageStats[] allPkgUsageStats = usageStatsService.getAllPkgUsageStats();
+            if (allPkgUsageStats == null) {
+                return new HashMap<String, Integer>();
+            }
+
             Map<String, Integer> launchCounts = new HashMap<String, Integer>();
-            for (PkgUsageStats pkgUsageStats : usageStatsService.getAllPkgUsageStats()) {
+            for (PkgUsageStats pkgUsageStats : allPkgUsageStats) {
                 launchCounts.put(pkgUsageStats.packageName, pkgUsageStats.launchCount);
             }
 
