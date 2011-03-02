@@ -35,8 +35,22 @@ namespace android {
 
 // --- PointerController ---
 
-PointerController::PointerController(int32_t pointerLayer) :
-    mPointerLayer(pointerLayer) {
+// Time to wait before starting the fade when the pointer is inactive.
+static const nsecs_t INACTIVITY_FADE_DELAY_TIME_NORMAL = 15 * 1000 * 1000000LL; // 15 seconds
+static const nsecs_t INACTIVITY_FADE_DELAY_TIME_SHORT = 3 * 1000 * 1000000LL; // 3 seconds
+
+// Time to spend fading out the pointer completely.
+static const nsecs_t FADE_DURATION = 500 * 1000000LL; // 500 ms
+
+// Time to wait between frames.
+static const nsecs_t FADE_FRAME_INTERVAL = 1000000000LL / 60;
+
+// Amount to subtract from alpha per frame.
+static const float FADE_DECAY_PER_FRAME = float(FADE_FRAME_INTERVAL) / FADE_DURATION;
+
+
+PointerController::PointerController(const sp<Looper>& looper, int32_t pointerLayer) :
+        mLooper(looper), mPointerLayer(pointerLayer) {
     AutoMutex _l(mLock);
 
     mLocked.displayWidth = -1;
@@ -51,12 +65,19 @@ PointerController::PointerController(int32_t pointerLayer) :
     mLocked.iconHotSpotX = 0;
     mLocked.iconHotSpotY = 0;
 
+    mLocked.fadeAlpha = 1;
+    mLocked.inactivityFadeDelay = INACTIVITY_FADE_DELAY_NORMAL;
+
     mLocked.wantVisible = false;
     mLocked.visible = false;
     mLocked.drawn = false;
+
+    mHandler = new WeakMessageHandler(this);
 }
 
 PointerController::~PointerController() {
+    mLooper->removeMessages(mHandler);
+
     if (mSurfaceControl != NULL) {
         mSurfaceControl->clear();
         mSurfaceControl.clear();
@@ -120,7 +141,7 @@ void PointerController::setButtonState(uint32_t buttonState) {
 
     if (mLocked.buttonState != buttonState) {
         mLocked.buttonState = buttonState;
-        mLocked.wantVisible = true;
+        unfadeBeforeUpdateLocked();
         updateLocked();
     }
 }
@@ -157,7 +178,7 @@ void PointerController::setPositionLocked(float x, float y) {
         } else {
             mLocked.pointerY = y;
         }
-        mLocked.wantVisible = true;
+        unfadeBeforeUpdateLocked();
         updateLocked();
     }
 }
@@ -167,6 +188,29 @@ void PointerController::getPosition(float* outX, float* outY) const {
 
     *outX = mLocked.pointerX;
     *outY = mLocked.pointerY;
+}
+
+void PointerController::fade() {
+    AutoMutex _l(mLock);
+
+    startFadeLocked();
+}
+
+void PointerController::unfade() {
+    AutoMutex _l(mLock);
+
+    if (unfadeBeforeUpdateLocked()) {
+        updateLocked();
+    }
+}
+
+void PointerController::setInactivityFadeDelay(InactivityFadeDelay inactivityFadeDelay) {
+    AutoMutex _l(mLock);
+
+    if (mLocked.inactivityFadeDelay != inactivityFadeDelay) {
+        mLocked.inactivityFadeDelay = inactivityFadeDelay;
+        startInactivityFadeDelayLocked();
+    }
 }
 
 void PointerController::updateLocked() {
@@ -198,6 +242,12 @@ void PointerController::updateLocked() {
                 mLocked.pointerY - mLocked.iconHotSpotY);
         if (status) {
             LOGE("Error %d moving pointer surface.", status);
+            goto CloseTransaction;
+        }
+
+        status = mSurfaceControl->setAlpha(mLocked.fadeAlpha);
+        if (status) {
+            LOGE("Error %d setting pointer surface alpha.", status);
             goto CloseTransaction;
         }
 
@@ -410,6 +460,66 @@ bool PointerController::resizeSurfaceLocked(int32_t width, int32_t height) {
     }
 
     return true;
+}
+
+void PointerController::handleMessage(const Message& message) {
+    switch (message.what) {
+    case MSG_FADE_STEP: {
+        AutoMutex _l(mLock);
+        fadeStepLocked();
+        break;
+    }
+    }
+}
+
+bool PointerController::unfadeBeforeUpdateLocked() {
+    sendFadeStepMessageDelayedLocked(getInactivityFadeDelayTimeLocked());
+
+    if (isFadingLocked()) {
+        mLocked.wantVisible = true;
+        mLocked.fadeAlpha = 1;
+        return true; // update required to effect the unfade
+    }
+    return false; // update not required
+}
+
+void PointerController::startFadeLocked() {
+    if (!isFadingLocked()) {
+        sendFadeStepMessageDelayedLocked(0);
+    }
+}
+
+void PointerController::startInactivityFadeDelayLocked() {
+    if (!isFadingLocked()) {
+        sendFadeStepMessageDelayedLocked(getInactivityFadeDelayTimeLocked());
+    }
+}
+
+void PointerController::fadeStepLocked() {
+    if (mLocked.wantVisible) {
+        mLocked.fadeAlpha -= FADE_DECAY_PER_FRAME;
+        if (mLocked.fadeAlpha < 0) {
+            mLocked.fadeAlpha = 0;
+            mLocked.wantVisible = false;
+        } else {
+            sendFadeStepMessageDelayedLocked(FADE_FRAME_INTERVAL);
+        }
+        updateLocked();
+    }
+}
+
+bool PointerController::isFadingLocked() {
+    return !mLocked.wantVisible || mLocked.fadeAlpha != 1;
+}
+
+nsecs_t PointerController::getInactivityFadeDelayTimeLocked() {
+    return mLocked.inactivityFadeDelay == INACTIVITY_FADE_DELAY_SHORT
+            ? INACTIVITY_FADE_DELAY_TIME_SHORT : INACTIVITY_FADE_DELAY_TIME_NORMAL;
+}
+
+void PointerController::sendFadeStepMessageDelayedLocked(nsecs_t delayTime) {
+    mLooper->removeMessages(mHandler, MSG_FADE_STEP);
+    mLooper->sendMessageDelayed(delayTime, mHandler, Message(MSG_FADE_STEP));
 }
 
 } // namespace android

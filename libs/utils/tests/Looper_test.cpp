@@ -16,6 +16,13 @@
 
 namespace android {
 
+enum {
+    MSG_TEST1 = 1,
+    MSG_TEST2 = 2,
+    MSG_TEST3 = 3,
+    MSG_TEST4 = 4,
+};
+
 class DelayedWake : public DelayedTask {
     sp<Looper> mLooper;
 
@@ -79,6 +86,15 @@ protected:
         this->fd = fd;
         this->events = events;
         return nextResult;
+    }
+};
+
+class StubMessageHandler : public MessageHandler {
+public:
+    Vector<Message> messages;
+
+    virtual void handleMessage(const Message& message) {
+        messages.push(message);
     }
 };
 
@@ -421,5 +437,257 @@ TEST_F(LooperTest, PollOnce_WhenCallbackAddedTwice_OnlySecondCallbackShouldBeInv
             << "replacement handler callback should be invoked";
 }
 
+TEST_F(LooperTest, SendMessage_WhenOneMessageIsEnqueue_ShouldInvokeHandlerDuringNextPoll) {
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessage(handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(100);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was already sent";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+}
+
+TEST_F(LooperTest, SendMessage_WhenMultipleMessagesAreEnqueued_ShouldInvokeHandlersInOrderDuringNextPoll) {
+    sp<StubMessageHandler> handler1 = new StubMessageHandler();
+    sp<StubMessageHandler> handler2 = new StubMessageHandler();
+    mLooper->sendMessage(handler1, Message(MSG_TEST1));
+    mLooper->sendMessage(handler2, Message(MSG_TEST2));
+    mLooper->sendMessage(handler1, Message(MSG_TEST3));
+    mLooper->sendMessage(handler1, Message(MSG_TEST4));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(1000);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was already sent";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+    EXPECT_EQ(size_t(3), handler1->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler1->messages[0].what)
+            << "handled message";
+    EXPECT_EQ(MSG_TEST3, handler1->messages[1].what)
+            << "handled message";
+    EXPECT_EQ(MSG_TEST4, handler1->messages[2].what)
+            << "handled message";
+    EXPECT_EQ(size_t(1), handler2->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST2, handler2->messages[0].what)
+            << "handled message";
+}
+
+TEST_F(LooperTest, SendMessageDelayed_WhenSentToTheFuture_ShouldInvokeHandlerAfterDelayTime) {
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessageDelayed(ms2ns(100), handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(1000);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "first poll should end quickly because next message timeout was computed";
+    EXPECT_EQ(ALOOPER_POLL_WAKE, result)
+            << "pollOnce result should be ALOOPER_POLL_WAKE due to wakeup";
+    EXPECT_EQ(size_t(0), handler->messages.size())
+            << "no message handled yet";
+
+    result = mLooper->pollOnce(1000);
+    elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+    EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "second poll should end around the time of the delayed message dispatch";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+
+    result = mLooper->pollOnce(100);
+    elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(100 + 100, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "third poll should timeout";
+    EXPECT_EQ(ALOOPER_POLL_TIMEOUT, result)
+            << "pollOnce result should be ALOOPER_POLL_TIMEOUT because there were no messages left";
+}
+
+TEST_F(LooperTest, SendMessageDelayed_WhenSentToThePast_ShouldInvokeHandlerDuringNextPoll) {
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessageDelayed(ms2ns(-1000), handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(100);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was already sent";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+}
+
+TEST_F(LooperTest, SendMessageDelayed_WhenSentToThePresent_ShouldInvokeHandlerDuringNextPoll) {
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessageDelayed(0, handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(100);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was already sent";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+}
+
+TEST_F(LooperTest, SendMessageAtTime_WhenSentToTheFuture_ShouldInvokeHandlerAfterDelayTime) {
+    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessageAtTime(now + ms2ns(100), handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(1000);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "first poll should end quickly because next message timeout was computed";
+    EXPECT_EQ(ALOOPER_POLL_WAKE, result)
+            << "pollOnce result should be ALOOPER_POLL_WAKE due to wakeup";
+    EXPECT_EQ(size_t(0), handler->messages.size())
+            << "no message handled yet";
+
+    result = mLooper->pollOnce(1000);
+    elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+    EXPECT_NEAR(100, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "second poll should end around the time of the delayed message dispatch";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+
+    result = mLooper->pollOnce(100);
+    elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(100 + 100, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "third poll should timeout";
+    EXPECT_EQ(ALOOPER_POLL_TIMEOUT, result)
+            << "pollOnce result should be ALOOPER_POLL_TIMEOUT because there were no messages left";
+}
+
+TEST_F(LooperTest, SendMessageAtTime_WhenSentToThePast_ShouldInvokeHandlerDuringNextPoll) {
+    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessageAtTime(now - ms2ns(1000), handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(100);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was already sent";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+}
+
+TEST_F(LooperTest, SendMessageAtTime_WhenSentToThePresent_ShouldInvokeHandlerDuringNextPoll) {
+    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessageAtTime(now, handler, Message(MSG_TEST1));
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(100);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was already sent";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because message was sent";
+    EXPECT_EQ(size_t(1), handler->messages.size())
+            << "handled message";
+    EXPECT_EQ(MSG_TEST1, handler->messages[0].what)
+            << "handled message";
+}
+
+TEST_F(LooperTest, RemoveMessage_WhenRemovingAllMessagesForHandler_ShouldRemoveThoseMessage) {
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessage(handler, Message(MSG_TEST1));
+    mLooper->sendMessage(handler, Message(MSG_TEST2));
+    mLooper->sendMessage(handler, Message(MSG_TEST3));
+    mLooper->removeMessages(handler);
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(0);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was sent so looper was awoken";
+    EXPECT_EQ(ALOOPER_POLL_WAKE, result)
+            << "pollOnce result should be ALOOPER_POLL_WAKE because looper was awoken";
+    EXPECT_EQ(size_t(0), handler->messages.size())
+            << "no messages to handle";
+
+    result = mLooper->pollOnce(0);
+
+    EXPECT_EQ(ALOOPER_POLL_TIMEOUT, result)
+            << "pollOnce result should be ALOOPER_POLL_TIMEOUT because there was nothing to do";
+    EXPECT_EQ(size_t(0), handler->messages.size())
+            << "no messages to handle";
+}
+
+TEST_F(LooperTest, RemoveMessage_WhenRemovingSomeMessagesForHandler_ShouldRemoveThoseMessage) {
+    sp<StubMessageHandler> handler = new StubMessageHandler();
+    mLooper->sendMessage(handler, Message(MSG_TEST1));
+    mLooper->sendMessage(handler, Message(MSG_TEST2));
+    mLooper->sendMessage(handler, Message(MSG_TEST3));
+    mLooper->sendMessage(handler, Message(MSG_TEST4));
+    mLooper->removeMessages(handler, MSG_TEST3);
+    mLooper->removeMessages(handler, MSG_TEST1);
+
+    StopWatch stopWatch("pollOnce");
+    int result = mLooper->pollOnce(0);
+    int32_t elapsedMillis = ns2ms(stopWatch.elapsedTime());
+
+    EXPECT_NEAR(0, elapsedMillis, TIMING_TOLERANCE_MS)
+            << "elapsed time should approx. zero because message was sent so looper was awoken";
+    EXPECT_EQ(ALOOPER_POLL_CALLBACK, result)
+            << "pollOnce result should be ALOOPER_POLL_CALLBACK because two messages were sent";
+    EXPECT_EQ(size_t(2), handler->messages.size())
+            << "no messages to handle";
+    EXPECT_EQ(MSG_TEST2, handler->messages[0].what)
+            << "handled message";
+    EXPECT_EQ(MSG_TEST4, handler->messages[1].what)
+            << "handled message";
+
+    result = mLooper->pollOnce(0);
+
+    EXPECT_EQ(ALOOPER_POLL_TIMEOUT, result)
+            << "pollOnce result should be ALOOPER_POLL_TIMEOUT because there was nothing to do";
+    EXPECT_EQ(size_t(2), handler->messages.size())
+            << "no more messages to handle";
+}
 
 } // namespace android

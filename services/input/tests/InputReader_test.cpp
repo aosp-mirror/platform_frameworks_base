@@ -79,6 +79,12 @@ private:
         *outX = 0;
         *outY = 0;
     }
+
+    virtual void fade() {
+    }
+
+    virtual void unfade() {
+    }
 };
 
 
@@ -743,6 +749,9 @@ private:
             InputDevice* device, int32_t keyCode, int32_t scanCode) {
         return false;
     }
+
+    virtual void fadePointer() {
+    }
 };
 
 
@@ -874,6 +883,9 @@ private:
 
     virtual int32_t getMetaState() {
         return mMetaState;
+    }
+
+    virtual void fadePointer() {
     }
 };
 

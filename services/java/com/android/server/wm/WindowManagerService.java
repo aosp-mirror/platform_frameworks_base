@@ -8412,6 +8412,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void statusBarVisibilityChanged(int visibility) {
+        mInputManager.setSystemUiVisibility(visibility);
         synchronized (mWindowMap) {
             final int N = mWindows.size();
             for (int i = 0; i < N; i++) {

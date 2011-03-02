@@ -1678,7 +1678,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int STATUS_BAR_VISIBLE = 0;
 
     /**
-     * View has requested the status bar to be visible (the default).
+     * View has requested the status bar to be hidden.
      *
      * @see #setSystemUiVisibility(int)
      */

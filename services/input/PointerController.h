@@ -18,7 +18,9 @@
 #define _UI_POINTER_CONTROLLER_H
 
 #include <ui/DisplayInfo.h>
+#include <ui/Input.h>
 #include <utils/RefBase.h>
+#include <utils/Looper.h>
 #include <utils/String8.h>
 
 #include <surfaceflinger/Surface.h>
@@ -64,6 +66,12 @@ public:
 
     /* Gets the absolute location of the pointer. */
     virtual void getPosition(float* outX, float* outY) const = 0;
+
+    /* Fades the pointer out now. */
+    virtual void fade() = 0;
+
+    /* Makes the pointer visible if it has faded out. */
+    virtual void unfade() = 0;
 };
 
 
@@ -72,12 +80,17 @@ public:
  *
  * Handles pointer acceleration and animation.
  */
-class PointerController : public PointerControllerInterface {
+class PointerController : public PointerControllerInterface, public MessageHandler {
 protected:
     virtual ~PointerController();
 
 public:
-    PointerController(int32_t pointerLayer);
+    enum InactivityFadeDelay {
+        INACTIVITY_FADE_DELAY_NORMAL = 0,
+        INACTIVITY_FADE_DELAY_SHORT = 1,
+    };
+
+    PointerController(const sp<Looper>& looper, int32_t pointerLayer);
 
     virtual bool getBounds(float* outMinX, float* outMinY,
             float* outMaxX, float* outMaxY) const;
@@ -86,14 +99,22 @@ public:
     virtual uint32_t getButtonState() const;
     virtual void setPosition(float x, float y);
     virtual void getPosition(float* outX, float* outY) const;
+    virtual void fade();
+    virtual void unfade();
 
     void setDisplaySize(int32_t width, int32_t height);
     void setDisplayOrientation(int32_t orientation);
     void setPointerIcon(const SkBitmap* bitmap, float hotSpotX, float hotSpotY);
+    void setInactivityFadeDelay(InactivityFadeDelay inactivityFadeDelay);
 
 private:
+    enum {
+        MSG_FADE_STEP = 0,
+    };
+
     mutable Mutex mLock;
 
+    sp<Looper> mLooper;
     int32_t mPointerLayer;
     sp<SurfaceComposerClient> mSurfaceComposerClient;
     sp<SurfaceControl> mSurfaceControl;
@@ -111,10 +132,15 @@ private:
         float iconHotSpotX;
         float iconHotSpotY;
 
+        float fadeAlpha;
+        InactivityFadeDelay inactivityFadeDelay;
+
         bool wantVisible;
         bool visible;
         bool drawn;
     } mLocked;
+
+    sp<WeakMessageHandler> mHandler;
 
     bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
     void setPositionLocked(float x, float y);
@@ -122,6 +148,15 @@ private:
     bool createSurfaceIfNeededLocked();
     bool drawPointerIfNeededLocked();
     bool resizeSurfaceLocked(int32_t width, int32_t height);
+
+    void handleMessage(const Message& message);
+    bool unfadeBeforeUpdateLocked();
+    void startFadeLocked();
+    void startInactivityFadeDelayLocked();
+    void fadeStepLocked();
+    bool isFadingLocked();
+    nsecs_t getInactivityFadeDelayTimeLocked();
+    void sendFadeStepMessageDelayedLocked(nsecs_t delayTime);
 };
 
 } // namespace android

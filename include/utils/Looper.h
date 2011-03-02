@@ -45,6 +45,51 @@ struct ALooper {
 namespace android {
 
 /**
+ * A message that can be posted to a Looper.
+ */
+struct Message {
+    Message() : what(0) { }
+    Message(int what) : what(what) { }
+
+    /* The message type. (interpretation is left up to the handler) */
+    int what;
+};
+
+
+/**
+ * Interface for a Looper message handler.
+ *
+ * The Looper holds a strong reference to the message handler whenever it has
+ * a message to deliver to it.  Make sure to call Looper::removeMessages
+ * to remove any pending messages destined for the handler so that the handler
+ * can be destroyed.
+ */
+class MessageHandler : public virtual RefBase {
+protected:
+    virtual ~MessageHandler() { }
+
+public:
+    /**
+     * Handles a message.
+     */
+    virtual void handleMessage(const Message& message) = 0;
+};
+
+
+/**
+ * A simple proxy that holds a weak reference to a message handler.
+ */
+class WeakMessageHandler : public MessageHandler {
+public:
+    WeakMessageHandler(const wp<MessageHandler>& handler);
+    virtual void handleMessage(const Message& message);
+
+private:
+    wp<MessageHandler> mHandler;
+};
+
+
+/**
  * A polling loop that supports monitoring file descriptor events, optionally
  * using callbacks.  The implementation uses epoll() internally.
  *
@@ -166,6 +211,52 @@ public:
     int removeFd(int fd);
 
     /**
+     * Enqueues a message to be processed by the specified handler.
+     *
+     * The handler must not be null.
+     * This method can be called on any thread.
+     */
+    void sendMessage(const sp<MessageHandler>& handler, const Message& message);
+
+    /**
+     * Enqueues a message to be processed by the specified handler after all pending messages
+     * after the specified delay.
+     *
+     * The time delay is specified in uptime nanoseconds.
+     * The handler must not be null.
+     * This method can be called on any thread.
+     */
+    void sendMessageDelayed(nsecs_t uptimeDelay, const sp<MessageHandler>& handler,
+            const Message& message);
+
+    /**
+     * Enqueues a message to be processed by the specified handler after all pending messages
+     * at the specified time.
+     *
+     * The time is specified in uptime nanoseconds.
+     * The handler must not be null.
+     * This method can be called on any thread.
+     */
+    void sendMessageAtTime(nsecs_t uptime, const sp<MessageHandler>& handler,
+            const Message& message);
+
+    /**
+     * Removes all messages for the specified handler from the queue.
+     *
+     * The handler must not be null.
+     * This method can be called on any thread.
+     */
+    void removeMessages(const sp<MessageHandler>& handler);
+
+    /**
+     * Removes all messages of a particular type for the specified handler from the queue.
+     *
+     * The handler must not be null.
+     * This method can be called on any thread.
+     */
+    void removeMessages(const sp<MessageHandler>& handler, int what);
+
+    /**
      * Prepares a looper associated with the calling thread, and returns it.
      * If the thread already has a looper, it is returned.  Otherwise, a new
      * one is created, associated with the thread, and returned.
@@ -201,11 +292,26 @@ private:
         Request request;
     };
 
+    struct MessageEnvelope {
+        MessageEnvelope() : uptime(0) { }
+
+        MessageEnvelope(nsecs_t uptime, const sp<MessageHandler> handler,
+                const Message& message) : uptime(uptime), handler(handler), message(message) {
+        }
+
+        nsecs_t uptime;
+        sp<MessageHandler> handler;
+        Message message;
+    };
+
     const bool mAllowNonCallbacks; // immutable
 
     int mWakeReadPipeFd;  // immutable
     int mWakeWritePipeFd; // immutable
     Mutex mLock;
+
+    Vector<MessageEnvelope> mMessageEnvelopes; // guarded by mLock
+    bool mSendingMessage; // guarded by mLock
 
 #ifdef LOOPER_USES_EPOLL
     int mEpollFd; // immutable
@@ -256,6 +362,7 @@ private:
     // it runs on a single thread.
     Vector<Response> mResponses;
     size_t mResponseIndex;
+    nsecs_t mNextMessageUptime; // set to LLONG_MAX when none
 
     int pollInner(int timeoutMillis);
     void awoken();
