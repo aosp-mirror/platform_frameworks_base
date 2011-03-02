@@ -222,7 +222,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mLayoutInflater.inflate(layoutResID, mContentParent);
         final Callback cb = getCallback();
-        if (cb != null) {
+        if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
         }
     }
@@ -241,7 +241,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mContentParent.addView(view, params);
         final Callback cb = getCallback();
-        if (cb != null) {
+        if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
         }
     }
@@ -253,7 +253,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
         mContentParent.addView(view, params);
         final Callback cb = getCallback();
-        if (cb != null) {
+        if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
         }
     }
@@ -316,6 +316,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      *         returns false.
      */
     public final boolean preparePanel(PanelFeatureState st, KeyEvent event) {
+        if (isDestroyed()) {
+            return false;
+        }
+
         // Already prepared (isPrepared will be reset to false later)
         if (st.isPrepared)
             return true;
@@ -437,7 +441,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // System.out.println("Open panel: isOpen=" + st.isOpen);
 
         // Already open, return
-        if (st.isOpen) {
+        if (st.isOpen || isDestroyed()) {
             return;
         }
 
@@ -609,7 +613,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             closed = true;
         }
         Callback cb = getCallback();
-        if (cb != null && closed) {
+        if (cb != null && closed && !isDestroyed()) {
             cb.onPanelClosed(FEATURE_ACTION_BAR, menu);
         }
         mClosingActionMenu = false;
@@ -688,7 +692,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionBar.getVisibility() == View.VISIBLE) {
                     if (!mActionBar.isOverflowMenuShowing()) {
                         final Callback cb = getCallback();
-                        if (cb != null &&
+                        if (cb != null && !isDestroyed() &&
                                 cb.onPreparePanel(featureId, st.createdPanelView, st.menu)) {
                             playSoundEffect = mActionBar.showOverflowMenu();
                         }
@@ -837,7 +841,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
         final Callback cb = getCallback();
-        if (cb != null) {
+        if (cb != null && !isDestroyed()) {
             final PanelFeatureState panel = findMenuPanel(menu.getRootMenu());
             if (panel != null) {
                 return cb.onMenuItemSelected(panel.featureId, item);
@@ -881,7 +885,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mActionButtonPopup = new ActionButtonSubmenu(getContext(), subMenu);
                     mActionButtonPopup.show();
                     Callback cb = getCallback();
-                    if (cb != null) {
+                    if (cb != null && !isDestroyed()) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, subMenu);
                     }
                 }
@@ -902,7 +906,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mActionBar != null) {
             final Callback cb = getCallback();
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
-                if (cb != null && mActionBar.getVisibility() == View.VISIBLE) {
+                if (cb != null && !isDestroyed() && mActionBar.getVisibility() == View.VISIBLE) {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
                     if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
@@ -911,7 +915,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             } else {
                 mActionBar.hideOverflowMenu();
-                if (cb != null) {
+                if (cb != null && !isDestroyed()) {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
                     cb.onPanelClosed(FEATURE_ACTION_BAR, st.menu);
                 }
@@ -1641,11 +1645,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 return true;
             }
 
-            final Callback cb = getCallback();
-            final boolean handled = cb != null && mFeatureId < 0 ? cb.dispatchKeyEvent(event)
-                    : super.dispatchKeyEvent(event);
-            if (handled) {
-                return true;
+            if (!isDestroyed()) {
+                final Callback cb = getCallback();
+                final boolean handled = cb != null && mFeatureId < 0 ? cb.dispatchKeyEvent(event)
+                        : super.dispatchKeyEvent(event);
+                if (handled) {
+                    return true;
+                }
             }
             return isDown ? PhoneWindow.this.onKeyDown(mFeatureId, event.getKeyCode(), event)
                     : PhoneWindow.this.onKeyUp(mFeatureId, event.getKeyCode(), event);
@@ -1667,29 +1673,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             // Shortcut not handled by the panel.  Dispatch to the view hierarchy.
             final Callback cb = getCallback();
-            return cb != null && mFeatureId < 0 ? cb.dispatchKeyShortcutEvent(ev) : super
-                    .dispatchKeyShortcutEvent(ev);
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchKeyShortcutEvent(ev)
+                    : super.dispatchKeyShortcutEvent(ev);
         }
 
         @Override
         public boolean dispatchTouchEvent(MotionEvent ev) {
             final Callback cb = getCallback();
-            return cb != null && mFeatureId < 0 ? cb.dispatchTouchEvent(ev) : super
-                    .dispatchTouchEvent(ev);
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchTouchEvent(ev)
+                    : super.dispatchTouchEvent(ev);
         }
 
         @Override
         public boolean dispatchTrackballEvent(MotionEvent ev) {
             final Callback cb = getCallback();
-            return cb != null && mFeatureId < 0 ? cb.dispatchTrackballEvent(ev) : super
-                    .dispatchTrackballEvent(ev);
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchTrackballEvent(ev)
+                    : super.dispatchTrackballEvent(ev);
         }
 
         @Override
         public boolean dispatchGenericMotionEvent(MotionEvent ev) {
             final Callback cb = getCallback();
-            return cb != null && mFeatureId < 0 ? cb.dispatchGenericMotionEvent(ev) : super
-                    .dispatchGenericMotionEvent(ev);
+            return cb != null && !isDestroyed() && mFeatureId < 0 ? cb.dispatchGenericMotionEvent(ev)
+                    : super.dispatchGenericMotionEvent(ev);
         }
 
         public boolean superDispatchKeyEvent(KeyEvent event) {
@@ -1822,7 +1828,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
             final Callback cb = getCallback();
-            if (cb != null) {
+            if (cb != null && !isDestroyed()) {
                 if (cb.dispatchPopulateAccessibilityEvent(event)) {
                     return true;
                 }
@@ -1953,10 +1959,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             final ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
             ActionMode mode = null;
-            try {
-                mode = getCallback().onWindowStartingActionMode(wrappedCallback);
-            } catch (AbstractMethodError ame) {
-                // Older apps might not implement this callback method.
+            if (getCallback() != null && !isDestroyed()) {
+                try {
+                    mode = getCallback().onWindowStartingActionMode(wrappedCallback);
+                } catch (AbstractMethodError ame) {
+                    // Older apps might not implement this callback method.
+                }
             }
             if (mode != null) {
                 mActionMode = mode;
@@ -2008,7 +2016,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
             }
-            if (mActionMode != null) {
+            if (mActionMode != null && getCallback() != null && !isDestroyed()) {
                 try {
                     getCallback().onActionModeStarted(mActionMode);
                 } catch (AbstractMethodError ame) {
@@ -2140,7 +2148,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             final Callback cb = getCallback();
-            if (cb != null && mFeatureId < 0) {
+            if (cb != null && !isDestroyed() && mFeatureId < 0) {
                 cb.onWindowFocusChanged(hasWindowFocus);
             }
         }
@@ -2158,7 +2166,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             updateWindowResizeState();
             
             final Callback cb = getCallback();
-            if (cb != null && mFeatureId < 0) {
+            if (cb != null && !isDestroyed() && mFeatureId < 0) {
                 cb.onAttachedToWindow();
             }
 
@@ -2179,7 +2187,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             super.onDetachedFromWindow();
             
             final Callback cb = getCallback();
-            if (cb != null && mFeatureId < 0) {
+            if (cb != null && !isDestroyed() && mFeatureId < 0) {
                 cb.onDetachedFromWindow();
             }
 
@@ -2268,10 +2276,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (mActionModeView != null) {
                     mActionModeView.removeAllViews();
                 }
-                try {
-                    getCallback().onActionModeFinished(mActionMode);
-                } catch (AbstractMethodError ame) {
-                    // Older apps might not implement this callback method.
+                if (getCallback() != null && !isDestroyed()) {
+                    try {
+                        getCallback().onActionModeFinished(mActionMode);
+                    } catch (AbstractMethodError ame) {
+                        // Older apps might not implement this callback method.
+                    }
                 }
                 mActionMode = null;
             }
@@ -2820,7 +2830,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if ((panel != null) && (!panel.isOpen))
             return;
 
-        cb.onPanelClosed(featureId, menu);
+        if (!isDestroyed()) {
+            cb.onPanelClosed(featureId, menu);
+        }
     }
 
     /**
@@ -2831,7 +2843,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      */
     private boolean launchDefaultSearch() {
         final Callback cb = getCallback();
-        if (cb == null) {
+        if (cb == null || isDestroyed()) {
             return false;
         } else {
             sendCloseSystemWindows("search");
@@ -3065,7 +3077,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
             if (allMenusAreClosing) {
                 Callback callback = getCallback();
-                if (callback != null) callback.onPanelClosed(mFeatureId, menu);
+                if (callback != null && !isDestroyed()) {
+                    callback.onPanelClosed(mFeatureId, menu);
+                }
 
                 if (menu == mContextMenu) {
                     dismissContextMenu();
@@ -3081,12 +3095,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         public void onCloseSubMenu(SubMenuBuilder menu) {
             Callback callback = getCallback();
-            if (callback != null) callback.onPanelClosed(mFeatureId, menu.getRootMenu());
+            if (callback != null && !isDestroyed()) {
+                callback.onPanelClosed(mFeatureId, menu.getRootMenu());
+            }
         }
 
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
             Callback callback = getCallback();
-            return (callback != null) && callback.onMenuItemSelected(mFeatureId, item);
+            return (callback != null && !isDestroyed())
+                    && callback.onMenuItemSelected(mFeatureId, item);
         }
 
         public void onMenuModeChange(MenuBuilder menu) {
@@ -3145,7 +3162,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public void run() {
             if (tryShow()) {
                 Callback cb = getCallback();
-                if (cb != null) {
+                if (cb != null && !isDestroyed()) {
                     cb.onMenuOpened(FEATURE_ACTION_BAR, mSubMenu);
                 }
             }
