@@ -1919,14 +1919,14 @@ class MediaArtistNativeHelper {
                 overlayData = null;
             }
 
-            mPreviewProgressListener.onProgress(mVideoEditor, progress, overlayData);
-
             if (progress != 0) {
                 mPreviewProgress = progress;
             }
 
             if (isFinished) {
                 mPreviewProgressListener.onStop(mVideoEditor);
+            } else {
+                mPreviewProgressListener.onProgress(mVideoEditor, progress, overlayData);
             }
         }
     }
