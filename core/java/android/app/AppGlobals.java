@@ -38,12 +38,23 @@ public class AppGlobals {
     public static String getInitialPackage() {
         return ActivityThread.currentPackageName();
     }
-    
+
     /**
      * Return the raw interface to the package manager.
-     * @return
+     * @return The package manager.
      */
     public static IPackageManager getPackageManager() {
         return ActivityThread.getPackageManager();
+    }
+
+    /**
+     * Gets the value of an integer core setting.
+     *
+     * @param key The setting key.
+     * @param defaultValue The setting default value.
+     * @return The core settings.
+     */
+    public static int getIntCoreSetting(String key, int defaultValue) {
+        return ActivityThread.currentActivityThread().getIntCoreSetting(key, defaultValue);
     }
 }

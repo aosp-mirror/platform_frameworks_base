@@ -257,10 +257,11 @@ public abstract class ApplicationThreadNative extends Binder
             boolean restrictedBackupMode = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
+            Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info,
                             providers, testName, profileName,
                             testArgs, testWatcher, testMode, restrictedBackupMode,
-                            config, services);
+                            config, services, coreSettings);
             return true;
         }
         
@@ -452,6 +453,13 @@ public abstract class ApplicationThreadNative extends Binder
                 } catch (IOException e) {
                 }
             }
+            return true;
+        }
+
+        case SET_CORE_SETTINGS: {
+            data.enforceInterface(IApplicationThread.descriptor);
+            Bundle settings = data.readBundle();
+            setCoreSettings(settings);
             return true;
         }
         }
@@ -712,7 +720,7 @@ class ApplicationThreadProxy implements IApplicationThread {
             List<ProviderInfo> providers, ComponentName testName,
             String profileName, Bundle testArgs, IInstrumentationWatcher testWatcher, int debugMode,
             boolean restrictedBackupMode, Configuration config,
-            Map<String, IBinder> services) throws RemoteException {
+            Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -731,6 +739,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(restrictedBackupMode ? 1 : 0);
         config.writeToParcel(data, 0);
         data.writeMap(services);
+        data.writeBundle(coreSettings);
         mRemote.transact(BIND_APPLICATION_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -937,5 +946,12 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStringArray(args);
         mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, 0);
         data.recycle();
+    }
+
+    public void setCoreSettings(Bundle coreSettings) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeBundle(coreSettings);
+        mRemote.transact(SET_CORE_SETTINGS, data, null, IBinder.FLAG_ONEWAY);
     }
 }

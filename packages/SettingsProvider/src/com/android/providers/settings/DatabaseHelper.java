@@ -819,6 +819,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              upgradeVersion = 64;
          }
 
+        if (upgradeVersion == 64) {
+            // New setting to configure the long press timeout.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadIntegerSetting(stmt, Settings.Secure.LONG_PRESS_TIMEOUT,
+                        R.integer.def_long_press_timeout_millis);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 65;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1332,6 +1350,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 loadSetting(stmt, Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
                         Integer.toString(recommendedMaxBytes));
             }
+
+            loadIntegerSetting(stmt, Settings.Secure.LONG_PRESS_TIMEOUT,
+                    R.integer.def_long_press_timeout_millis);
         } finally {
             if (stmt != null) stmt.close();
         }

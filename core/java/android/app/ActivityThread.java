@@ -98,7 +98,6 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import dalvik.system.CloseGuard;
-import dalvik.system.SamplingProfiler;
 
 final class SuperNotCalledException extends AndroidRuntimeException {
     public SuperNotCalledException(String msg) {
@@ -355,6 +354,7 @@ public final class ActivityThread {
         boolean restrictedBackupMode;
         Configuration config;
         boolean handlingProfiling;
+        Bundle coreSettings;
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
@@ -552,7 +552,7 @@ public final class ActivityThread {
                 ComponentName instrumentationName, String profileFile,
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 int debugMode, boolean isRestrictedBackupMode, Configuration config,
-                Map<String, IBinder> services) {
+                Map<String, IBinder> services, Bundle coreSettings) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -570,6 +570,7 @@ public final class ActivityThread {
             data.debugMode = debugMode;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.config = config;
+            data.coreSettings = coreSettings;
             queueOrSendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -896,6 +897,10 @@ public final class ActivityThread {
         private void printRow(PrintWriter pw, String format, Object...objs) {
             pw.println(String.format(format, objs));
         }
+
+        public void setCoreSettings(Bundle settings) {
+            queueOrSendMessage(H.SET_CORE_SETTINGS, settings);
+        }
     }
 
     private final class H extends Handler {
@@ -937,6 +942,7 @@ public final class ActivityThread {
         public static final int DUMP_HEAP               = 135;
         public static final int DUMP_ACTIVITY           = 136;
         public static final int SLEEPING                = 137;
+        public static final int SET_CORE_SETTINGS       = 138;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -978,6 +984,7 @@ public final class ActivityThread {
                     case DUMP_HEAP: return "DUMP_HEAP";
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                     case SLEEPING: return "SLEEPING";
+                    case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
                 }
             }
             return "(unknown)";
@@ -1112,6 +1119,9 @@ public final class ActivityThread {
                     break;
                 case SLEEPING:
                     handleSleeping((IBinder)msg.obj, msg.arg1 != 0);
+                    break;
+                case SET_CORE_SETTINGS:
+                    handleSetCoreSettings((Bundle) msg.obj);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
@@ -2709,6 +2719,14 @@ public final class ActivityThread {
         }
     }
 
+    private void handleSetCoreSettings(Bundle coreSettings) {
+        if (mBoundApplication != null) {
+            synchronized (mBoundApplication) {
+                mBoundApplication.coreSettings = coreSettings;
+            }
+        }
+    }
+
     private final void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
         final int N = results.size();
         for (int i=0; i<N; i++) {
@@ -3968,6 +3986,20 @@ public final class ActivityThread {
         if (providers != null) {
             installContentProviders(mInitialApplication,
                                     (List<ProviderInfo>)providers);
+        }
+    }
+
+    public int getIntCoreSetting(String key, int defaultValue) {
+        if (mBoundApplication == null) {
+            return defaultValue;
+        }
+        synchronized (mBoundApplication) {
+            Bundle coreSettings = mBoundApplication.coreSettings;
+            if (coreSettings != null) {
+                return coreSettings.getInt(key, defaultValue);
+            } else {
+                return defaultValue;
+            }
         }
     }
 
