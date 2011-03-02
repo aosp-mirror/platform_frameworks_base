@@ -284,8 +284,17 @@ MediaProfiles::createEncoderOutputFileFormat(const char **atts)
     return static_cast<output_format>(format);
 }
 
+static bool isCameraIdFound(int cameraId, const Vector<int>& cameraIds) {
+    for (int i = 0, n = cameraIds.size(); i < n; ++i) {
+        if (cameraId == cameraIds[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /*static*/ MediaProfiles::CamcorderProfile*
-MediaProfiles::createCamcorderProfile(int cameraId, const char **atts)
+MediaProfiles::createCamcorderProfile(int cameraId, const char **atts, Vector<int>& cameraIds)
 {
     CHECK(!strcmp("quality",    atts[0]) &&
           !strcmp("fileFormat", atts[2]) &&
@@ -301,6 +310,9 @@ MediaProfiles::createCamcorderProfile(int cameraId, const char **atts)
 
     MediaProfiles::CamcorderProfile *profile = new MediaProfiles::CamcorderProfile;
     profile->mCameraId = cameraId;
+    if (!isCameraIdFound(cameraId, cameraIds)) {
+        cameraIds.add(cameraId);
+    }
     profile->mFileFormat = static_cast<output_format>(fileFormat);
     profile->mQuality = static_cast<camcorder_quality>(quality);
     profile->mDuration = atoi(atts[5]);
@@ -370,9 +382,164 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char 
         profiles->mCurrentCameraId = getCameraId(atts);
     } else if (strcmp("EncoderProfile", name) == 0) {
         profiles->mCamcorderProfiles.add(
-            createCamcorderProfile(profiles->mCurrentCameraId, atts));
+            createCamcorderProfile(profiles->mCurrentCameraId, atts, profiles->mCameraIds));
     } else if (strcmp("ImageEncoding", name) == 0) {
         profiles->addImageEncodingQualityLevel(profiles->mCurrentCameraId, atts);
+    }
+}
+
+static bool isCamcorderProfile(camcorder_quality quality) {
+    return quality >= CAMCORDER_QUALITY_LIST_START &&
+           quality <= CAMCORDER_QUALITY_LIST_END;
+}
+
+static bool isTimelapseProfile(camcorder_quality quality) {
+    return quality >= CAMCORDER_QUALITY_TIME_LAPSE_LIST_START &&
+           quality <= CAMCORDER_QUALITY_TIME_LAPSE_LIST_END;
+}
+
+void MediaProfiles::initRequiredProfileRefs(const Vector<int>& cameraIds) {
+    LOGV("Number of camera ids: %d", cameraIds.size());
+    CHECK(cameraIds.size() > 0);
+    mRequiredProfileRefs = new RequiredProfiles[cameraIds.size()];
+    for (size_t i = 0, n = cameraIds.size(); i < n; ++i) {
+        mRequiredProfileRefs[i].mCameraId = cameraIds[i];
+        for (size_t j = 0; j < kNumRequiredProfiles; ++j) {
+            mRequiredProfileRefs[i].mRefs[j].mHasRefProfile = false;
+            mRequiredProfileRefs[i].mRefs[j].mRefProfileIndex = -1;
+            if ((j & 1) == 0) {  // low resolution
+                mRequiredProfileRefs[i].mRefs[j].mResolutionProduct = 0x7FFFFFFF;
+            } else {             // high resolution
+                mRequiredProfileRefs[i].mRefs[j].mResolutionProduct = 0;
+            }
+        }
+    }
+}
+
+int MediaProfiles::getRequiredProfileRefIndex(int cameraId) {
+    for (size_t i = 0, n = mCameraIds.size(); i < n; ++i) {
+        if (mCameraIds[i] == cameraId) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void MediaProfiles::checkAndAddRequiredProfilesIfNecessary() {
+    if (sIsInitialized) {
+        return;
+    }
+
+    initRequiredProfileRefs(mCameraIds);
+
+    for (size_t i = 0, n = mCamcorderProfiles.size(); i < n; ++i) {
+        int product = mCamcorderProfiles[i]->mVideoCodec->mFrameWidth *
+                      mCamcorderProfiles[i]->mVideoCodec->mFrameHeight;
+
+        camcorder_quality quality = mCamcorderProfiles[i]->mQuality;
+        int cameraId = mCamcorderProfiles[i]->mCameraId;
+        int index = -1;
+        int refIndex = getRequiredProfileRefIndex(cameraId);
+        CHECK(refIndex != -1);
+        RequiredProfileRefInfo *info;
+        camcorder_quality refQuality;
+        VideoCodec *codec = NULL;
+
+        // Check high and low from either camcorder profile or timelapse profile
+        // but not both. Default, check camcorder profile
+        size_t j = 0;
+        size_t n = 2;
+        if (isTimelapseProfile(quality)) {
+            // Check timelapse profile instead.
+            j = 2;
+            n = kNumRequiredProfiles;
+        } else {
+            // Must be camcorder profile.
+            CHECK(isCamcorderProfile(quality));
+        }
+        for (; j < n; ++j) {
+            info = &(mRequiredProfileRefs[refIndex].mRefs[j]);
+            if ((j % 2 == 0 && product > info->mResolutionProduct) ||  // low
+                (j % 2 != 0 && product < info->mResolutionProduct)) {  // high
+                continue;
+            }
+            switch (j) {
+                case 0:
+                   refQuality = CAMCORDER_QUALITY_LOW;
+                   break;
+                case 1:
+                   refQuality = CAMCORDER_QUALITY_HIGH;
+                   break;
+                case 2:
+                   refQuality = CAMCORDER_QUALITY_TIME_LAPSE_LOW;
+                   break;
+                case 3:
+                   refQuality = CAMCORDER_QUALITY_TIME_LAPSE_HIGH;
+                   break;
+                default:
+                    CHECK(!"Should never reach here");
+            }
+
+            if (!info->mHasRefProfile) {
+                index = getCamcorderProfileIndex(cameraId, refQuality);
+            }
+            if (index == -1) {
+                // New high or low quality profile is found.
+                // Update its reference.
+                info->mHasRefProfile = true;
+                info->mRefProfileIndex = i;
+                info->mResolutionProduct = product;
+            }
+        }
+    }
+
+    for (size_t cameraId = 0; cameraId < mCameraIds.size(); ++cameraId) {
+        for (size_t j = 0; j < kNumRequiredProfiles; ++j) {
+            int refIndex = getRequiredProfileRefIndex(cameraId);
+            CHECK(refIndex != -1);
+            RequiredProfileRefInfo *info =
+                    &mRequiredProfileRefs[refIndex].mRefs[j];
+
+            if (info->mHasRefProfile) {
+
+                CamcorderProfile *profile =
+                    new CamcorderProfile(
+                            *mCamcorderProfiles[info->mRefProfileIndex]);
+
+                // Overwrite the quality
+                switch (j % kNumRequiredProfiles) {
+                    case 0:
+                        profile->mQuality = CAMCORDER_QUALITY_LOW;
+                        break;
+                    case 1:
+                        profile->mQuality = CAMCORDER_QUALITY_HIGH;
+                        break;
+                    case 2:
+                        profile->mQuality = CAMCORDER_QUALITY_TIME_LAPSE_LOW;
+                        break;
+                    case 3:
+                        profile->mQuality = CAMCORDER_QUALITY_TIME_LAPSE_HIGH;
+                        break;
+                    default:
+                        CHECK(!"Should never come here");
+                }
+
+                int index = getCamcorderProfileIndex(cameraId, profile->mQuality);
+                if (index != -1) {
+                    LOGV("Profile quality %d for camera %d already exists",
+                        profile->mQuality, cameraId);
+                    CHECK(index == refIndex);
+                    continue;
+                }
+
+                // Insert the new profile
+                LOGV("Add a profile: quality %d=>%d for camera %d",
+                        mCamcorderProfiles[info->mRefProfileIndex]->mQuality,
+                        profile->mQuality, cameraId);
+
+                mCamcorderProfiles.add(profile);
+            }
+        }
     }
 }
 
@@ -396,6 +563,9 @@ MediaProfiles::getInstance()
         } else {
             sInstance = createInstanceFromXmlFile(value);
         }
+        CHECK(sInstance != NULL);
+        sInstance->checkAndAddRequiredProfilesIfNecessary();
+        sIsInitialized = true;
     }
 
     return sInstance;
@@ -613,7 +783,6 @@ MediaProfiles::createDefaultInstance()
     createDefaultAudioDecoders(profiles);
     createDefaultEncoderOutputFileFormats(profiles);
     createDefaultImageEncodingQualityLevels(profiles);
-    sIsInitialized = true;
     return profiles;
 }
 
@@ -667,9 +836,6 @@ MediaProfiles::createInstanceFromXmlFile(const char *xml)
 exit:
     ::XML_ParserFree(parser);
     ::fclose(fp);
-    if (profiles) {
-        sIsInitialized = true;
-    }
     return profiles;
 }
 
