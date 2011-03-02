@@ -6204,10 +6204,10 @@ class PackageManagerService extends IPackageManager.Stub {
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
-                final boolean succeded = deletePackageX(packageName, true, true, flags);
+                final int returnCode = deletePackageX(packageName, true, true, flags);
                 if (observer != null) {
                     try {
-                        observer.packageDeleted(succeded);
+                        observer.packageDeleted(packageName, returnCode);
                     } catch (RemoteException e) {
                         Log.i(TAG, "Observer no longer exists.");
                     } //end catch
@@ -6230,17 +6230,17 @@ class PackageManagerService extends IPackageManager.Stub {
      *  persisting settings for later use
      *  sending a broadcast if necessary
      */
-    private boolean deletePackageX(String packageName, boolean sendBroadCast,
+    private int deletePackageX(String packageName, boolean sendBroadCast,
                                    boolean deleteCodeAndResources, int flags) {
-        PackageRemovedInfo info = new PackageRemovedInfo();
-        boolean res;
+        final PackageRemovedInfo info = new PackageRemovedInfo();
+        final boolean res;
 
         IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
         try {
             if (dpm != null && dpm.packageHasActiveAdmins(packageName)) {
                 Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
-                return false;
+                return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
             }
         } catch (RemoteException e) {
         }
@@ -6250,7 +6250,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     flags | REMOVE_CHATTY, info, true);
         }
 
-        if(res && sendBroadCast) {
+        if (res && sendBroadCast) {
             boolean systemUpdate = info.isRemovedPackageSystemUpdate;
             info.sendBroadcast(deleteCodeAndResources, systemUpdate);
 
@@ -6278,7 +6278,8 @@ class PackageManagerService extends IPackageManager.Stub {
                 info.args.doPostDeleteLI(deleteCodeAndResources);
             }
         }
-        return res;
+
+        return res ? PackageManager.DELETE_SUCCEEDED : PackageManager.DELETE_FAILED_INTERNAL_ERROR;
     }
 
     static class PackageRemovedInfo {

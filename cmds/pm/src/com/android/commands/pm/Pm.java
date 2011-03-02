@@ -767,10 +767,10 @@ public final class Pm {
         boolean finished;
         boolean result;
 
-        public void packageDeleted(boolean succeeded) {
+        public void packageDeleted(String packageName, int returnCode) {
             synchronized (this) {
                 finished = true;
-                result = succeeded;
+                result = returnCode == PackageManager.DELETE_SUCCEEDED;
                 notifyAll();
             }
         }
