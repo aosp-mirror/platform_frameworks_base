@@ -295,6 +295,7 @@ public final class CookieManager {
     public void setCookie(String url, String value) {
         if (JniUtil.useChromiumHttpStack()) {
             setCookie(url, value, false);
+            return;
         }
 
         WebAddress uri;
