@@ -159,7 +159,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 Telephony.Carriers.CONTENT_URI, true, mApnObserver);
 
         /** Create the default connection */
-        createDataConnection(Phone.APN_TYPE_DEFAULT);
+        int id = createDataConnection(Phone.APN_TYPE_DEFAULT);
+        mRetryMgr = mDataConnections.get(id).getRetryMgr();
+        mRetryMgr.resetRetryCount();
+
         broadcastMessenger();
     }
 
