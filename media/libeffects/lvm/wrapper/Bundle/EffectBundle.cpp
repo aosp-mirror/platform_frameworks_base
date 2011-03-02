@@ -53,6 +53,11 @@ extern "C" const struct effect_interface_s gLvmEffectInterface;
 namespace android {
 namespace {
 
+// Flag to allow a one time init of global memory, only happens on first call ever
+int LvmInitFlag = LVM_FALSE;
+SessionContext GlobalSessionMemory[LVM_MAX_SESSIONS];
+int SessionIndex[LVM_MAX_SESSIONS];
+
 /* local functions */
 #define CHECK_ARG(cond) {                     \
     if (!(cond)) {                            \
@@ -61,11 +66,6 @@ namespace {
     }                                         \
 }
 
-// Flag to allow a one time init of global memory, only happens on first call ever
-int LvmInitFlag = LVM_FALSE;
-SessionContext GlobalSessionMemory[LVM_MAX_SESSIONS];
-
-int SessionIndex[LVM_MAX_SESSIONS];
 
 // NXP SW BassBoost UUID
 const effect_descriptor_t gBassBoostDescriptor = {
@@ -2588,9 +2588,11 @@ extern "C" int Effect_process(effect_interface_t     self,
             pContext->pBundledContext->SamplesToExitCountBb -= outBuffer->frameCount * 2; // STEREO
             //LOGV("\tEffect_process: Waiting to turn off BASS_BOOST, %d samples left",
             //    pContext->pBundledContext->SamplesToExitCountBb);
-        } else {
+        }
+        if(pContext->pBundledContext->SamplesToExitCountBb <= 0) {
             status = -ENODATA;
             pContext->pBundledContext->NumberEffectsEnabled--;
+            LOGV("\tEffect_process() this is the last frame for LVM_BASS_BOOST");
         }
     }
     if ((pContext->pBundledContext->bVolumeEnabled == LVM_FALSE)&&
@@ -2606,9 +2608,11 @@ extern "C" int Effect_process(effect_interface_t     self,
             pContext->pBundledContext->SamplesToExitCountEq -= outBuffer->frameCount * 2; // STEREO
             //LOGV("\tEffect_process: Waiting to turn off EQUALIZER, %d samples left",
             //    pContext->pBundledContext->SamplesToExitCountEq);
-        } else {
+        }
+        if(pContext->pBundledContext->SamplesToExitCountEq <= 0) {
             status = -ENODATA;
             pContext->pBundledContext->NumberEffectsEnabled--;
+            LOGV("\tEffect_process() this is the last frame for LVM_EQUALIZER");
         }
     }
     if ((pContext->pBundledContext->bVirtualizerEnabled == LVM_FALSE)&&
@@ -2618,9 +2622,11 @@ extern "C" int Effect_process(effect_interface_t     self,
             pContext->pBundledContext->SamplesToExitCountVirt -= outBuffer->frameCount * 2;// STEREO
             //LOGV("\tEffect_process: Waiting for to turn off VIRTUALIZER, %d samples left",
             //    pContext->pBundledContext->SamplesToExitCountVirt);
-        } else {
+        }
+        if(pContext->pBundledContext->SamplesToExitCountVirt <= 0) {
             status = -ENODATA;
             pContext->pBundledContext->NumberEffectsEnabled--;
+            LOGV("\tEffect_process() this is the last frame for LVM_VIRTUALIZER");
         }
     }
 
