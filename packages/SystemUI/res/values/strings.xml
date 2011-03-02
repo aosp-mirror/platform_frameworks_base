@@ -81,7 +81,7 @@
     <string name="status_bar_settings_airplane">Airplane mode</string>
 
     <!-- Label in system panel saying the device will use the orientation sensor to rotate [CHAR LIMIT=30] -->
-    <string name="status_bar_settings_rotation_lock">Lock screen orientation</string>
+    <string name="status_bar_settings_auto_rotation">Auto-rotate screen</string>
 
     <!-- Abbreviation / label for mute brightness mode button. Should be all caps. [CHAR LIMIT=6] -->
     <string name="status_bar_settings_mute_label">MUTE</string>

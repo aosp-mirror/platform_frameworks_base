@@ -79,7 +79,7 @@
         <TextView
                 android:id="@+id/rotate_label"
                 style="@style/StatusBarPanelSettingsContents"
-                android:text="@string/status_bar_settings_rotation_lock"
+                android:text="@string/status_bar_settings_auto_rotation"
                 />
         <Switch
                 android:id="@+id/rotate_checkbox"
