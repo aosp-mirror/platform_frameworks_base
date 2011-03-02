@@ -30,7 +30,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.hardware.UsbManager;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;

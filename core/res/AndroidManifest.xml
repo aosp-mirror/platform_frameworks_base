@@ -82,9 +82,9 @@
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
 
-    <protected-broadcast android:name="android.hardware.action.USB_CONNECTED" />
-    <protected-broadcast android:name="android.hardware.action.USB_DISCONNECTED" />
-    <protected-broadcast android:name="android.hardware.action.USB_STATE" />
+    <protected-broadcast android:name="android.hardware.usb.action.USB_STATE" />
+    <protected-broadcast android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+    <protected-broadcast android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
@@ -453,13 +453,13 @@
         android:label="@string/permlab_flashlight"
         android:description="@string/permdesc_flashlight" />
 
-    <!-- Allows an application to access USB devices
+    <!-- Allows an application to manage preferences and permissions for USB devices
          @hide -->
-    <permission android:name="android.permission.ACCESS_USB"
+    <permission android:name="android.permission.MANAGE_USB"
         android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
         android:protectionLevel="signatureOrSystem"
-        android:label="@string/permlab_accessUsb"
-        android:description="@string/permdesc_accessUsb" />
+        android:label="@string/permlab_manageUsb"
+        android:description="@string/permdesc_manageUsb" />
 
     <!-- Allows access to hardware peripherals.  Intended only for hardware testing -->
     <permission android:name="android.permission.HARDWARE_TEST"
@@ -1327,6 +1327,12 @@
         </activity>
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
                 android:theme="@style/Theme.Dialog.Alert"
+                android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name="com.android.server.usb.UsbResolverActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true">
         </activity>
 
