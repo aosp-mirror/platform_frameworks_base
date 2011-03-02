@@ -35,39 +35,39 @@ public class AutoRotateController implements CompoundButton.OnCheckedChangeListe
     private Context mContext;
     private CompoundButton mCheckBox;
 
-    private boolean mLockRotation;
+    private boolean mAutoRotation;
 
     public AutoRotateController(Context context, CompoundButton checkbox) {
         mContext = context;
-        mLockRotation = getLockRotation();
+        mAutoRotation = getAutoRotation();
         mCheckBox = checkbox;
-        checkbox.setChecked(mLockRotation);
+        checkbox.setChecked(mAutoRotation);
         checkbox.setOnCheckedChangeListener(this);
     }
 
     public void onCheckedChanged(CompoundButton view, boolean checked) {
-        if (checked != mLockRotation) {
-            setLockRotation(checked);
+        if (checked != mAutoRotation) {
+            setAutoRotation(checked);
         }
     }
 
-    private boolean getLockRotation() {
+    private boolean getAutoRotation() {
         ContentResolver cr = mContext.getContentResolver();
-        return 0 == Settings.System.getInt(cr, Settings.System.ACCELEROMETER_ROTATION, 0);
+        return 0 != Settings.System.getInt(cr, Settings.System.ACCELEROMETER_ROTATION, 0);
     }
 
-    private void setLockRotation(final boolean locked) {
-        mLockRotation = locked;
+    private void setAutoRotation(final boolean autorotate) {
+        mAutoRotation = autorotate;
         AsyncTask.execute(new Runnable() {
                 public void run() {
                     try {
                         IWindowManager wm = IWindowManager.Stub.asInterface(
                                 ServiceManager.getService(Context.WINDOW_SERVICE));
                         ContentResolver cr = mContext.getContentResolver();
-                        if (locked) {
-                            wm.freezeRotation();
-                        } else {
+                        if (autorotate) {
                             wm.thawRotation();
+                        } else {
+                            wm.freezeRotation();
                         }
                     } catch (RemoteException exc) {
                     }
