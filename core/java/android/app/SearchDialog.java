@@ -255,6 +255,7 @@ public class SearchDialog extends Dialog {
             // of any bad state in the AutoCompleteTextView etc
             createContentView();
             mSearchView.setSearchableInfo(mSearchable);
+            mSearchView.setAppSearchData(mAppSearchData);
 
             show();
         }
