@@ -2150,8 +2150,8 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     sh = (!sh) ? hw_h : sh;
     const size_t size = sw * sh * 4;
 
-    LOGD("screenshot: sw=%d, sh=%d, minZ=%d, maxZ=%d",
-            sw, sh, minLayerZ, maxLayerZ);
+    //LOGD("screenshot: sw=%d, sh=%d, minZ=%d, maxZ=%d",
+    //        sw, sh, minLayerZ, maxLayerZ);
 
     // make sure to clear all GL error flags
     while ( glGetError() != GL_NO_ERROR ) ;
@@ -2236,7 +2236,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
 
     hw.compositionComplete();
 
-    LOGD("screenshot: result = %s", result<0 ? strerror(result) : "OK");
+    // LOGD("screenshot: result = %s", result<0 ? strerror(result) : "OK");
 
     return result;
 }
