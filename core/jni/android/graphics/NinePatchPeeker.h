@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef NinePatchPeeker_h
+#define NinePatchPeeker_h
+
 #include "SkImageDecoder.h"
 #include <utils/ResourceTypes.h>
 
@@ -40,3 +43,4 @@ public:
     virtual bool peek(const char tag[], const void* data, size_t length);
 };
 
+#endif // NinePatchPeeker_h
