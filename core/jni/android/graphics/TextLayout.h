@@ -20,6 +20,8 @@
 #include "SkPaint.h"
 #include "unicode/utypes.h"
 
+#include "TextLayoutCache.h"
+
 namespace android {
 
 #define UNICODE_NOT_A_CHAR              0xffff
@@ -33,6 +35,11 @@ namespace android {
  * Temporary buffer size
  */
 #define CHAR_BUFFER_SIZE 80
+
+/**
+ * Turn on for using the Cache
+ */
+#define USE_TEXT_LAYOUT_CACHE 1
 
 class TextLayout {
 public:
@@ -62,22 +69,23 @@ public:
                             jint start, jint count, jint contextCount,
                             int dirFlags, jfloat x, jfloat y, SkCanvas* canvas);
 
-    static void getTextRunAdvances(SkPaint *paint, const jchar *chars, jint start,
+    static void getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
                                    jint count, jint contextCount, jint dirFlags,
-                                   jfloat *resultAdvances, jfloat &resultTotalAdvance);
+                                   jfloat* resultAdvances, jfloat& resultTotalAdvance);
 
     static void drawText(SkPaint* paint, const jchar* text, jsize len,
                          jint bidiFlags, jfloat x, jfloat y, SkCanvas* canvas);
 
-    static void getTextPath(SkPaint *paint, const jchar *text, jsize len,
-                            jint bidiFlags, jfloat x, jfloat y, SkPath *path);
+    static void getTextPath(SkPaint* paint, const jchar* text, jsize len,
+                            jint bidiFlags, jfloat x, jfloat y, SkPath* path);
 
     static void drawTextOnPath(SkPaint* paint, const jchar* text, jsize len,
                                int bidiFlags, jfloat hOffset, jfloat vOffset,
                                SkPath* path, SkCanvas* canvas);
                                
-   static bool prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
+    static bool prepareText(SkPaint* paint, const jchar* text, jsize len, jint bidiFlags,
         const jchar** outText, int32_t* outBytes, jchar** outBuffer);
+
     static bool prepareRtlTextRun(const jchar* context, jsize start, jsize& count,
         jsize contextCount, jchar* shaped);
         
@@ -85,11 +93,15 @@ public:
 private:
     static bool needsLayout(const jchar* text, jint len, jint bidiFlags);
     static int shapeRtlText(const jchar* context, jsize start, jsize count, jsize contextCount,
-                            jchar* shaped, UErrorCode &status);
+                            jchar* shaped, UErrorCode& status);
     static jint layoutLine(const jchar* text, jint len, jint flags, int &dir, jchar* buffer,
                            UErrorCode &status);
-    static void handleText(SkPaint *paint, const jchar* text, jsize len,
-                           int bidiFlags, jfloat x, jfloat y,SkCanvas *canvas, SkPath *path);
+    static void handleText(SkPaint* paint, const jchar* text, jsize len,
+                           int bidiFlags, jfloat x, jfloat y, SkCanvas* canvas, SkPath* path);
+
+#if USE_TEXT_LAYOUT_CACHE
+    static TextLayoutCache mCache;
+#endif
 };
 
 }

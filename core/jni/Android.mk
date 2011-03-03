@@ -113,6 +113,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Shader.cpp \
 	android/graphics/SurfaceTexture.cpp \
 	android/graphics/TextLayout.cpp \
+	android/graphics/TextLayoutCache.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/Utils.cpp \
 	android/graphics/Xfermode.cpp \
