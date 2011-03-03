@@ -1003,6 +1003,8 @@ final class WebViewCore {
 
         static final int PROXY_CHANGED = 193;
 
+        static final int EXECUTE_JS = 194;
+
         // private message ids
         private static final int DESTROY =     200;
 
@@ -1561,6 +1563,15 @@ final class WebViewCore {
                             nativeAutoFillForm(msg.arg1);
                             mWebView.mPrivateHandler.obtainMessage(WebView.AUTOFILL_COMPLETE, null)
                                     .sendToTarget();
+                            break;
+
+                        case EXECUTE_JS:
+                            if (msg.obj instanceof String) {
+                                if (DebugFlags.WEB_VIEW_CORE) {
+                                    Log.d(LOGTAG, "Executing JS : " + msg.obj);
+                                }
+                                mBrowserFrame.stringByEvaluatingJavaScriptFromString((String) msg.obj);
+                            }
                             break;
                     }
                 }

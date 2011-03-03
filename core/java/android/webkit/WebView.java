@@ -5033,6 +5033,13 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * @hide pending API Council approval.
+     */
+    public SearchBox getSearchBox() {
+        return mWebViewCore.getBrowserFrame().getSearchBox();
+    }
+
+    /**
      * Returns the currently highlighted text as a string.
      */
     String getSelection() {
@@ -8389,7 +8396,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetBaseLayer(int layer, Rect invalRect,
-            boolean showVisualIndciator);
+            boolean showVisualIndicator);
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
