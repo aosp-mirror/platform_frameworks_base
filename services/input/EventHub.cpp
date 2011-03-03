@@ -933,6 +933,11 @@ int EventHub::openDevice(const char *devicePath) {
         return -1;
     }
 
+    // Determine whether the device is external or internal.
+    if (isExternalDevice(device)) {
+        device->classes |= INPUT_DEVICE_CLASS_EXTERNAL;
+    }
+
     LOGI("New device: id=%d, fd=%d, path='%s', name='%s', classes=0x%x, "
             "configuration='%s', keyLayout='%s', keyCharacterMap='%s', builtinKeyboard=%s",
          deviceId, fd, devicePath, device->identifier.name.string(),
@@ -995,6 +1000,17 @@ void EventHub::setKeyboardProperties(Device* device, bool builtInKeyboard) {
 void EventHub::clearKeyboardProperties(Device* device, bool builtInKeyboard) {
     int32_t id = builtInKeyboard ? 0 : device->id;
     android::clearKeyboardProperties(id);
+}
+
+bool EventHub::isExternalDevice(Device* device) {
+    if (device->configuration) {
+        bool value;
+        if (device->configuration->tryGetProperty(String8("device.internal"), value)
+                && value) {
+            return false;
+        }
+    }
+    return device->identifier.bus == BUS_USB || device->identifier.bus == BUS_BLUETOOTH;
 }
 
 bool EventHub::hasKeycodeLocked(Device* device, int keycode) const {

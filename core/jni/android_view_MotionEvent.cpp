@@ -429,6 +429,12 @@ static void android_view_MotionEvent_nativeSetAction(JNIEnv* env, jclass clazz,
     event->setAction(action);
 }
 
+static jboolean android_view_MotionEvent_nativeIsTouchEvent(JNIEnv* env, jclass clazz,
+        jint nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->isTouchEvent();
+}
+
 static jint android_view_MotionEvent_nativeGetFlags(JNIEnv* env, jclass clazz,
         jint nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -661,6 +667,9 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeSetAction",
             "(II)V",
             (void*)android_view_MotionEvent_nativeSetAction },
+    { "nativeIsTouchEvent",
+            "(I)Z",
+            (void*)android_view_MotionEvent_nativeIsTouchEvent },
     { "nativeGetFlags",
             "(I)I",
             (void*)android_view_MotionEvent_nativeGetFlags },

@@ -476,6 +476,11 @@ public:
     status_t writeToParcel(Parcel* parcel) const;
 #endif
 
+    static bool isTouchEvent(int32_t source, int32_t action);
+    inline bool isTouchEvent() const {
+        return isTouchEvent(mSource, mAction);
+    }
+
     // Low-level accessors.
     inline const int32_t* getPointerIds() const { return mPointerIds.array(); }
     inline const nsecs_t* getSampleEventTimes() const { return mSampleEventTimes.array(); }

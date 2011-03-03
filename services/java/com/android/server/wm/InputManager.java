@@ -448,7 +448,13 @@ public class InputManager {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(
                     event, policyFlags, isScreenOn);
         }
-        
+
+        @SuppressWarnings("unused")
+        public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
+            return mWindowManagerService.mInputMonitor.interceptMotionBeforeQueueingWhenScreenOff(
+                    policyFlags);
+        }
+
         @SuppressWarnings("unused")
         public boolean interceptKeyBeforeDispatching(InputWindowHandle focus,
                 KeyEvent event, int policyFlags) {

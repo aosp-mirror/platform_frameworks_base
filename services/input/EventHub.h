@@ -126,6 +126,9 @@ enum {
 
     /* The input device is a joystick (implies gamepad, has joystick absolute axes). */
     INPUT_DEVICE_CLASS_JOYSTICK      = 0x00000100,
+
+    /* The input device is external (not built-in). */
+    INPUT_DEVICE_CLASS_EXTERNAL      = 0x80000000,
 };
 
 /*
@@ -303,6 +306,8 @@ private:
     status_t loadKeyMap(Device* device);
     void setKeyboardProperties(Device* device, bool builtInKeyboard);
     void clearKeyboardProperties(Device* device, bool builtInKeyboard);
+
+    bool isExternalDevice(Device* device);
 
     // Protect all internal state.
     mutable Mutex mLock;

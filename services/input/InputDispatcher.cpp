@@ -1572,7 +1572,7 @@ String8 InputDispatcher::getApplicationWindowLabelLocked(const InputApplication*
 }
 
 void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
-    int32_t eventType = POWER_MANAGER_BUTTON_EVENT;
+    int32_t eventType = POWER_MANAGER_OTHER_EVENT;
     switch (eventEntry->type) {
     case EventEntry::TYPE_MOTION: {
         const MotionEntry* motionEntry = static_cast<const MotionEntry*>(eventEntry);
@@ -1580,7 +1580,7 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
             return;
         }
 
-        if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
+        if (MotionEvent::isTouchEvent(motionEntry->source, motionEntry->action)) {
             eventType = POWER_MANAGER_TOUCH_EVENT;
         }
         break;
@@ -1590,6 +1590,7 @@ void InputDispatcher::pokeUserActivityLocked(const EventEntry* eventEntry) {
         if (keyEntry->flags & AKEY_EVENT_FLAG_CANCELED) {
             return;
         }
+        eventType = POWER_MANAGER_BUTTON_EVENT;
         break;
     }
     }
@@ -2304,7 +2305,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
     }
 
     policyFlags |= POLICY_FLAG_TRUSTED;
-    mPolicy->interceptGenericBeforeQueueing(eventTime, /*byref*/ policyFlags);
+    mPolicy->interceptMotionBeforeQueueing(eventTime, /*byref*/ policyFlags);
 
     bool needWake;
     { // acquire lock
@@ -2498,7 +2499,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         }
 
         nsecs_t eventTime = motionEvent->getEventTime();
-        mPolicy->interceptGenericBeforeQueueing(eventTime, /*byref*/ policyFlags);
+        mPolicy->interceptMotionBeforeQueueing(eventTime, /*byref*/ policyFlags);
 
         mLock.lock();
         const nsecs_t* sampleEventTimes = motionEvent->getSampleEventTimes();

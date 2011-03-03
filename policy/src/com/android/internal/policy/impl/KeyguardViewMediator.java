@@ -810,6 +810,28 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
     }
 
     /**
+     * When a wake motion such as an external mouse movement is received when the screen
+     * is off and the keyguard is showing, we need to decide whether to actually turn
+     * on the screen, and if so, tell the keyguard to prepare itself and poke the wake
+     * lock when it is ready.
+     *
+     * The 'Tq' suffix is per the documentation in {@link WindowManagerPolicy}.
+     * Be sure not to take any action that takes a long time; any significant
+     * action should be posted to a handler.
+     *
+     * @return Whether we poked the wake lock (and turned the screen on)
+     */
+    public boolean onWakeMotionWhenKeyguardShowingTq() {
+        if (DEBUG) Log.d(TAG, "onWakeMotionWhenKeyguardShowing()");
+
+        // give the keyguard view manager a chance to adjust the state of the
+        // keyguard based on the key that woke the device before poking
+        // the wake lock
+        wakeWhenReadyLocked(KeyEvent.KEYCODE_UNKNOWN);
+        return true;
+    }
+
+    /**
      * Callbacks from {@link KeyguardViewManager}.
      */
 

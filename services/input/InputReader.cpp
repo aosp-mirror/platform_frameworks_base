@@ -233,6 +233,11 @@ void InputReader::removeDevice(int32_t deviceId) {
 InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, uint32_t classes) {
     InputDevice* device = new InputDevice(this, deviceId, name);
 
+    // External devices.
+    if (classes & INPUT_DEVICE_CLASS_EXTERNAL) {
+        device->setExternal(true);
+    }
+
     // Switch-like devices.
     if (classes & INPUT_DEVICE_CLASS_SWITCH) {
         device->addMapper(new SwitchInputMapper(device));
@@ -565,7 +570,7 @@ bool InputReaderThread::threadLoop() {
 // --- InputDevice ---
 
 InputDevice::InputDevice(InputReaderContext* context, int32_t id, const String8& name) :
-        mContext(context), mId(id), mName(name), mSources(0) {
+        mContext(context), mId(id), mName(name), mSources(0), mIsExternal(false) {
 }
 
 InputDevice::~InputDevice() {
@@ -582,6 +587,7 @@ void InputDevice::dump(String8& dump) {
 
     dump.appendFormat(INDENT "Device %d: %s\n", deviceInfo.getId(),
             deviceInfo.getName().string());
+    dump.appendFormat(INDENT2 "IsExternal: %s\n", toString(mIsExternal));
     dump.appendFormat(INDENT2 "Sources: 0x%08x\n", deviceInfo.getSources());
     dump.appendFormat(INDENT2 "KeyboardType: %d\n", deviceInfo.getKeyboardType());
 
@@ -985,6 +991,16 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
         downTime = mLocked.downTime;
     } // release lock
 
+    // Key down on external an keyboard should wake the device.
+    // We don't do this for internal keyboards to prevent them from waking up in your pocket.
+    // For internal keyboards, the key layout file should specify the policy flags for
+    // each wake key individually.
+    // TODO: Use the input device configuration to control this behavior more finely.
+    if (down && getDevice()->isExternal()
+            && !(policyFlags & (POLICY_FLAG_WAKE | POLICY_FLAG_WAKE_DROPPED))) {
+        policyFlags |= POLICY_FLAG_WAKE_DROPPED;
+    }
+
     if (metaStateChanged) {
         getContext()->updateGlobalMetaState();
     }
@@ -1379,9 +1395,18 @@ void CursorInputMapper::sync(nsecs_t when) {
         }
     } // release lock
 
+    // Moving an external trackball or mouse should wake the device.
+    // We don't do this for internal cursor devices to prevent them from waking up
+    // the device in your pocket.
+    // TODO: Use the input device configuration to control this behavior more finely.
+    uint32_t policyFlags = 0;
+    if (getDevice()->isExternal()) {
+        policyFlags |= POLICY_FLAG_WAKE_DROPPED;
+    }
+
     int32_t metaState = mContext->getGlobalMetaState();
     int32_t pointerId = 0;
-    getDispatcher()->notifyMotion(when, getDeviceId(), mSources, 0,
+    getDispatcher()->notifyMotion(when, getDeviceId(), mSources, policyFlags,
             motionEventAction, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
             1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
 
@@ -1391,7 +1416,7 @@ void CursorInputMapper::sync(nsecs_t when) {
         pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_VSCROLL, vscroll);
         pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_HSCROLL, hscroll);
 
-        getDispatcher()->notifyMotion(when, getDeviceId(), mSources, 0,
+        getDispatcher()->notifyMotion(when, getDeviceId(), mSources, policyFlags,
                 AMOTION_EVENT_ACTION_SCROLL, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
                 1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
     }
@@ -2308,8 +2333,6 @@ void TouchInputMapper::reset() {
 }
 
 void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
-    uint32_t policyFlags = 0;
-
     // Preprocess pointer data.
     if (mParameters.useBadTouchFilter) {
         if (applyBadTouchFilter()) {
@@ -2338,9 +2361,18 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         savedTouch = & mCurrentTouch;
     }
 
-    // Hide the pointer on an initial down.
+    uint32_t policyFlags = 0;
     if (mLastTouch.pointerCount == 0 && mCurrentTouch.pointerCount != 0) {
+        // Hide the pointer on an initial down.
         getContext()->fadePointer();
+
+        // Initial downs on external touch devices should wake the device.
+        // We don't do this for internal touch screens to prevent them from waking
+        // up in your pocket.
+        // TODO: Use the input device configuration to control this behavior more finely.
+        if (getDevice()->isExternal()) {
+            policyFlags |= POLICY_FLAG_WAKE_DROPPED;
+        }
     }
 
     // Process touches and virtual keys.
@@ -4017,8 +4049,14 @@ void JoystickInputMapper::sync(nsecs_t when, bool force) {
         axis.oldValue = axis.newValue;
     }
 
+    // Moving a joystick axis should not wake the devide because joysticks can
+    // be fairly noisy even when not in use.  On the other hand, pushing a gamepad
+    // button will likely wake the device.
+    // TODO: Use the input device configuration to control this behavior more finely.
+    uint32_t policyFlags = 0;
+
     int32_t pointerId = 0;
-    getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_JOYSTICK, 0,
+    getDispatcher()->notifyMotion(when, getDeviceId(), AINPUT_SOURCE_JOYSTICK, policyFlags,
             AMOTION_EVENT_ACTION_MOVE, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
             1, &pointerId, &pointerCoords, 0, 0, 0);
 }

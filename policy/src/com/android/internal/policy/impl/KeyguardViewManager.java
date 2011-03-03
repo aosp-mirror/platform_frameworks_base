@@ -201,7 +201,8 @@ public class KeyguardViewManager implements KeyguardWindowController {
      * Be sure not to take any action that takes a long time; any significant
      * action should be posted to a handler.
      *
-     * @param keyCode The wake key.
+     * @param keyCode The wake key.  May be {@link KeyEvent#KEYCODE_UNKNOWN} if waking
+     * for a reason other than a key press.
      */
     public boolean wakeWhenReadyTq(int keyCode) {
         if (DEBUG) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
