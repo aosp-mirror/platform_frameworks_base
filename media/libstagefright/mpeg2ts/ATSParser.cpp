@@ -369,7 +369,18 @@ void ATSParser::Stream::parse(
     size_t payloadSizeBits = br->numBitsLeft();
     CHECK_EQ(payloadSizeBits % 8, 0u);
 
-    CHECK_LE(mBuffer->size() + payloadSizeBits / 8, mBuffer->capacity());
+    size_t neededSize = mBuffer->size() + payloadSizeBits / 8;
+    if (mBuffer->capacity() < neededSize) {
+        // Increment in multiples of 64K.
+        neededSize = (neededSize + 65535) & ~65535;
+
+        LOGI("resizing buffer to %d bytes", neededSize);
+
+        sp<ABuffer> newBuffer = new ABuffer(neededSize);
+        memcpy(newBuffer->data(), mBuffer->data(), mBuffer->size());
+        newBuffer->setRange(0, mBuffer->size());
+        mBuffer = newBuffer;
+    }
 
     memcpy(mBuffer->data() + mBuffer->size(), br->data(), payloadSizeBits / 8);
     mBuffer->setRange(0, mBuffer->size() + payloadSizeBits / 8);
