@@ -610,6 +610,12 @@
         <attr name="actionModeCopyDrawable" format="reference" />
         <!-- Drawable to use for the Paste action button in Contextual Action Bar -->
         <attr name="actionModePasteDrawable" format="reference" />
+        <!-- Drawable to use for the Share action button in WebView selection action modes -->
+        <attr name="actionModeShareDrawable" format="reference" />
+        <!-- Drawable to use for the Find action button in WebView selection action modes -->
+        <attr name="actionModeFindDrawable" format="reference" />
+        <!-- Drawable to use for the Web Search action button in WebView selection action modes -->
+        <attr name="actionModeWebSearchDrawable" format="reference" />
 
         <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
         <attr name="actionModePopupWindowStyle" format="reference" />

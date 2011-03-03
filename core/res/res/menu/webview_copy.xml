@@ -25,17 +25,17 @@
         android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/share"
-        android:icon="@drawable/ic_menu_share"
+        android:icon="?android:attr/actionModeShareDrawable"
         android:title="@string/share"
         android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/find"
-        android:icon="@drawable/ic_menu_find"
+        android:icon="?android:attr/actionModeFindDrawable"
         android:title="@string/find"
         android:showAsAction="ifRoom|withText"
         />
     <item android:id="@+id/websearch"
-        android:icon="@drawable/ic_menu_search"
+        android:icon="?android:attr/actionModeWebSearchDrawable"
         android:title="@string/websearch"
         android:showAsAction="ifRoom|withText"
         />
