@@ -184,7 +184,10 @@ bool DrmManager::canHandle(int uniqueId, const String8& path, const String8& mim
             IDrmEngine& rDrmEngine = mPlugInManager.getPlugIn(plugInId);
             result = rDrmEngine.canHandle(uniqueId, path);
         } else {
-            result = canHandle(uniqueId, path);
+            String8 extension = path.getPathExtension();
+            if (String8("") != extension) {
+                result = canHandle(uniqueId, path);
+            }
         }
     }
     return result;

@@ -56,7 +56,7 @@ bool DrmSupportInfo::isSupportedFileSuffix(const String8& fileType) const {
     for (unsigned int i = 0; i < mFileSuffixVector.size(); i++) {
         const String8 item = mFileSuffixVector.itemAt(i);
 
-        if (String8("") != fileType && item.find(fileType) != -1) {
+        if (item.find(fileType) != -1) {
             return true;
         }
     }
