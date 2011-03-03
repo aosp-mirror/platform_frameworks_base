@@ -92,8 +92,8 @@ public class UsbService extends IUsbManager.Stub {
     private boolean mSystemReady;
 
     private UsbAccessory mCurrentAccessory;
-    // functions to restore after exiting accessory mode
-    private final ArrayList<String> mAccessoryRestoreFunctions = new ArrayList<String>();
+    // USB functions that are enabled by default, to restore after exiting accessory mode
+    private final ArrayList<String> mDefaultFunctions = new ArrayList<String>();
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -107,20 +107,6 @@ public class UsbService extends IUsbManager.Stub {
         boolean enteringAccessoryMode =
             (mHasUsbAccessory && enabled && UsbManager.USB_FUNCTION_ACCESSORY.equals(function));
 
-        if (enteringAccessoryMode) {
-            // keep a list of functions to reenable after exiting accessory mode
-            mAccessoryRestoreFunctions.clear();
-            int count = mEnabledFunctions.size();
-            for (int i = 0; i < count; i++) {
-                String f = mEnabledFunctions.get(i);
-                // RNDIS should not be restored and adb is handled automatically
-                if (!UsbManager.USB_FUNCTION_RNDIS.equals(f) &&
-                    !UsbManager.USB_FUNCTION_ADB.equals(f) &&
-                    !UsbManager.USB_FUNCTION_ACCESSORY.equals(f)) {
-                    mAccessoryRestoreFunctions.add(f);
-                }
-            }
-        }
         if (enabled) {
             if (!mEnabledFunctions.contains(function)) {
                 mEnabledFunctions.add(function);
@@ -246,6 +232,11 @@ public class UsbService extends IUsbManager.Stub {
                 String functionName = files[i].getName();
                 if (value == 1) {
                     mEnabledFunctions.add(functionName);
+                    // adb is enabled/disabled automatically by the adbd daemon,
+                    // so don't treat it as a default function
+                    if (!UsbManager.USB_FUNCTION_ADB.equals(functionName)) {
+                        mDefaultFunctions.add(functionName);
+                    }
                 } else {
                     mDisabledFunctions.add(functionName);
                 }
@@ -338,29 +329,24 @@ public class UsbService extends IUsbManager.Stub {
                 switch (msg.what) {
                     case MSG_UPDATE_STATE:
                         if (mConnected != mLastConnected || mConfiguration != mLastConfiguration) {
-                            if (mConnected == 0 && mCurrentAccessory != null) {
-                                // turn off accessory mode when we are disconnected
+                            if (mConnected == 0) {
+                                // make sure accessory mode is off, and restore default functions
                                 if (UsbManager.setFunctionEnabled(
                                         UsbManager.USB_FUNCTION_ACCESSORY, false)) {
                                     Log.d(TAG, "exited USB accessory mode");
 
-                                    // restore previously enabled functions
-                                    for (String function : mAccessoryRestoreFunctions) {
+                                    int count = mDefaultFunctions.size();
+                                    for (int i = 0; i < count; i++) {
+                                        String function = mDefaultFunctions.get(i);
                                         if (UsbManager.setFunctionEnabled(function, true)) {
                                             Log.e(TAG, "could not reenable function " + function);
                                         }
                                     }
-                                    mAccessoryRestoreFunctions.clear();
+                                }
 
+                                if (mCurrentAccessory != null) {
                                     mDeviceManager.accessoryDetached(mCurrentAccessory);
                                     mCurrentAccessory = null;
-
-                                    // this will cause an immediate reset of the USB bus,
-                                    // so there is no point in sending the
-                                    // function disabled broadcast.
-                                    return;
-                                } else {
-                                    Log.e(TAG, "could not disable USB_FUNCTION_ACCESSORY");
                                 }
                             }
 
@@ -416,8 +402,13 @@ public class UsbService extends IUsbManager.Stub {
                 pw.print(mDisabledFunctions.get(i) + " ");
             }
             pw.println("");
+            pw.print("    Default Functions: ");
+            for (int i = 0; i < mDefaultFunctions.size(); i++) {
+                pw.print(mDefaultFunctions.get(i) + " ");
+            }
+            pw.println("");
             pw.println("    mConnected: " + mConnected + ", mConfiguration: " + mConfiguration);
-            pw.println("  mCurrentAccessory: " + mCurrentAccessory);
+            pw.println("    mCurrentAccessory: " + mCurrentAccessory);
 
             mDeviceManager.dump(fd, pw);
         }
