@@ -67,6 +67,8 @@ static struct {
     jmethodID filterJumpyTouchEvents;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
+    jmethodID getKeyRepeatTimeout;
+    jmethodID getKeyRepeatDelay;
     jmethodID getMaxEventsPerSecond;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
@@ -199,6 +201,10 @@ private:
     int32_t mFilterJumpyTouchEvents;
     nsecs_t mVirtualKeyQuietTime;
 
+    // Cached key repeat policy.
+    nsecs_t mKeyRepeatTimeout;
+    nsecs_t mKeyRepeatDelay;
+
     // Cached throttling policy.
     int32_t mMaxEventsPerSecond;
 
@@ -234,6 +240,7 @@ private:
 NativeInputManager::NativeInputManager(jobject callbacksObj, const sp<Looper>& looper) :
         mLooper(looper),
         mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1), mVirtualKeyQuietTime(-1),
+        mKeyRepeatTimeout(-1), mKeyRepeatDelay(-1),
         mMaxEventsPerSecond(-1) {
     JNIEnv* env = jniEnv();
 
@@ -526,13 +533,34 @@ nsecs_t NativeInputManager::getKeyRepeatTimeout() {
         // Disable key repeat when the screen is off.
         return -1;
     } else {
-        // TODO use ViewConfiguration.getLongPressTimeout()
-        return milliseconds_to_nanoseconds(500);
+        if (mKeyRepeatTimeout < 0) {
+            JNIEnv* env = jniEnv();
+
+            jint result = env->CallIntMethod(mCallbacksObj,
+                    gCallbacksClassInfo.getKeyRepeatTimeout);
+            if (checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
+                result = 500;
+            }
+
+            mKeyRepeatTimeout = milliseconds_to_nanoseconds(result);
+        }
+        return mKeyRepeatTimeout;
     }
 }
 
 nsecs_t NativeInputManager::getKeyRepeatDelay() {
-    return milliseconds_to_nanoseconds(50);
+    if (mKeyRepeatDelay < 0) {
+        JNIEnv* env = jniEnv();
+
+        jint result = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.getKeyRepeatDelay);
+        if (checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
+            result = 50;
+        }
+
+        mKeyRepeatDelay = milliseconds_to_nanoseconds(result);
+    }
+    return mKeyRepeatDelay;
 }
 
 int32_t NativeInputManager::getMaxEventsPerSecond() {
@@ -1261,6 +1289,12 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatTimeout, gCallbacksClassInfo.clazz,
+            "getKeyRepeatTimeout", "()I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatDelay, gCallbacksClassInfo.clazz,
+            "getKeyRepeatDelay", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, gCallbacksClassInfo.clazz,
             "getMaxEventsPerSecond", "()I");
