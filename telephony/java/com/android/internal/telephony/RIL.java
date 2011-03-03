@@ -638,13 +638,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RILConstants.NETWORK_MODE_GLOBAL:
                 mPhoneType = RILConstants.CDMA_PHONE;
                 break;
-            case RILConstants.NETWORK_MODE_LTE_ONLY:
-                if (SystemProperties.getBoolean("ro.mot.lte_on_cdma", false)) {
-                    mPhoneType = RILConstants.CDMA_PHONE;
-                } else {
-                    mPhoneType = RILConstants.GSM_PHONE;
-                }
-                break;
             default:
                 mPhoneType = RILConstants.CDMA_PHONE;
         }
@@ -2071,14 +2064,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                  */
                 if (RILJ_LOGD) Log.d(LOG_TAG, "Radio ON @ init; reset to OFF");
                 setRadioPower(false, null);
-                // MultimodeRIL needs to know the preferred network at power up.
-                RILRequest rrPnt = RILRequest.obtain(
-                                   RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE, null);
-                rrPnt.mp.writeInt(1);
-                rrPnt.mp.writeInt(mNetworkMode);
-                if (RILJ_LOGD) riljLog(rrPnt.serialString() + "> "
-                        + requestToString(rrPnt.mRequest) + " : " + mNetworkMode);
-                send(rrPnt);
             } else {
                 if (DBG) Log.d(LOG_TAG, "Radio OFF @ init");
                 setRadioState(newState);

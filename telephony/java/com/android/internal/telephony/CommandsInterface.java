@@ -20,29 +20,25 @@ import com.android.internal.telephony.gsm.SmsBroadcastConfigInfo;
 
 import android.os.Message;
 import android.os.Handler;
-import android.os.SystemProperties;
 
 
 /**
  * {@hide}
  */
 public interface CommandsInterface {
-    // TODO: Get rid of mot from property.
-    static final boolean LTE_AVAILABLE_ON_CDMA =
-        SystemProperties.getBoolean("ro.mot.lte_on_cdma", false);
     enum RadioState {
-        RADIO_OFF(0),         /* Radio explictly powered off (eg CFUN=0) */
-        RADIO_UNAVAILABLE(0), /* Radio unavailable (eg, resetting or not booted) */
-        SIM_NOT_READY(1),     /* Radio is on, but the SIM interface is not ready */
-        SIM_LOCKED_OR_ABSENT(1),  /* SIM PIN locked, PUK required, network
-                                     personalization, or SIM absent */
-        SIM_READY(1),         /* Radio is on and SIM interface is available */
-        RUIM_NOT_READY(2),    /* Radio is on, but the RUIM interface is not ready */
-        RUIM_READY(2),        /* Radio is on and the RUIM interface is available */
-        RUIM_LOCKED_OR_ABSENT(2), /* RUIM PIN locked, PUK required, network
-                                     personalization locked, or RUIM absent */
-        NV_NOT_READY(3),      /* Radio is on, but the NV interface is not available */
-        NV_READY(3);          /* Radio is on and the NV interface is available */
+        RADIO_OFF,         /* Radio explicitly powered off (e.g. CFUN=0) */
+        RADIO_UNAVAILABLE, /* Radio unavailable (e.g. resetting or not booted) */
+        SIM_NOT_READY,     /* Radio is on, but the SIM interface is not ready */
+        SIM_LOCKED_OR_ABSENT,  /* SIM PIN locked, PUK required, network
+                               personalization, or SIM absent */
+        SIM_READY,         /* Radio is on and SIM interface is available */
+        RUIM_NOT_READY,    /* Radio is on, but the RUIM interface is not ready */
+        RUIM_READY,        /* Radio is on and the RUIM interface is available */
+        RUIM_LOCKED_OR_ABSENT, /* RUIM PIN locked, PUK required, network
+                                  personalization locked, or RUIM absent */
+        NV_NOT_READY,      /* Radio is on, but the NV interface is not available */
+        NV_READY;          /* Radio is on and the NV interface is available */
 
         public boolean isOn() /* and available...*/ {
             return this == SIM_NOT_READY
@@ -53,14 +49,6 @@ public interface CommandsInterface {
                     || this == RUIM_LOCKED_OR_ABSENT
                     || this == NV_NOT_READY
                     || this == NV_READY;
-        }
-        private int stateType;
-        private RadioState (int type) {
-            stateType = type;
-        }
-
-        public int getType() {
-            return stateType;
         }
 
         public boolean isAvailable() {
@@ -80,25 +68,17 @@ public interface CommandsInterface {
         }
 
         public boolean isGsm() {
-            if (LTE_AVAILABLE_ON_CDMA) {
-                return false;
-            } else {
-                return this == SIM_NOT_READY
-                        || this == SIM_LOCKED_OR_ABSENT
-                        || this == SIM_READY;
-            }
+            return this == SIM_NOT_READY
+                    || this == SIM_LOCKED_OR_ABSENT
+                    || this == SIM_READY;
         }
 
         public boolean isCdma() {
-            if (LTE_AVAILABLE_ON_CDMA) {
-                return true;
-            } else {
-                return this ==  RUIM_NOT_READY
-                        || this == RUIM_READY
-                        || this == RUIM_LOCKED_OR_ABSENT
-                        || this == NV_NOT_READY
-                        || this == NV_READY;
-            }
+            return this ==  RUIM_NOT_READY
+                    || this == RUIM_READY
+                    || this == RUIM_LOCKED_OR_ABSENT
+                    || this == NV_NOT_READY
+                    || this == NV_READY;
         }
     }
 
@@ -173,9 +153,6 @@ public interface CommandsInterface {
     //***** Methods
 
     RadioState getRadioState();
-    RadioState getSimState();
-    RadioState getRuimState();
-    RadioState getNvState();
 
     /**
      * Fires on any RadioState transition

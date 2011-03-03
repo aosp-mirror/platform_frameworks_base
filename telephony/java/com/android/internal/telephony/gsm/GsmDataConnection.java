@@ -19,12 +19,10 @@ package com.android.internal.telephony.gsm;
 import android.os.Message;
 import android.util.Log;
 import android.util.Patterns;
-import android.text.TextUtils;
 
 import com.android.internal.telephony.ApnSetting;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;
 
@@ -38,10 +36,8 @@ public class GsmDataConnection extends DataConnection {
     //***** Instance Variables
     private ApnSetting apn;
 
-    protected int mProfileId = RILConstants.DATA_PROFILE_DEFAULT;
-    protected String mActiveApnType = Phone.APN_TYPE_DEFAULT;
     //***** Constructor
-    private GsmDataConnection(PhoneBase phone, String name, RetryManager rm) {
+    private GsmDataConnection(GSMPhone phone, String name, RetryManager rm) {
         super(phone, name, rm);
     }
 
@@ -53,7 +49,7 @@ public class GsmDataConnection extends DataConnection {
      * @param rm the RetryManager
      * @return GsmDataConnection that was created.
      */
-    static GsmDataConnection makeDataConnection(PhoneBase phone, int id, RetryManager rm) {
+    static GsmDataConnection makeDataConnection(GSMPhone phone, int id, RetryManager rm) {
         synchronized (mCountLock) {
             mCount += 1;
         }
@@ -106,27 +102,9 @@ public class GsmDataConnection extends DataConnection {
 
         phone.mCM.setupDataCall(
                 Integer.toString(RILConstants.SETUP_DATA_TECH_GSM),
-                Integer.toString(mProfileId),
-                apn.apn, apn.user, apn.password,
-                Integer.toString(authType),
+                Integer.toString(RILConstants.DATA_PROFILE_DEFAULT),
+                apn.apn, apn.user, apn.password, Integer.toString(authType),
                 protocol, msg);
-    }
-
-    public void setProfileId(int profileId) {
-        mProfileId = profileId;
-    }
-
-    public int getProfileId() {
-        return mProfileId;
-    }
-
-    public int getCid() {
-        // 'cid' has been defined in parent class
-        return cid;
-    }
-
-    public void setActiveApnType(String apnType) {
-        mActiveApnType = apnType;
     }
 
     @Override
@@ -172,35 +150,17 @@ public class GsmDataConnection extends DataConnection {
     }
 
     private void setHttpProxy(String httpProxy, String httpPort) {
-
-        if (DBG) log("set http proxy for"
-                + "' APN: '" + mActiveApnType
-                + "' proxy: '" + apn.proxy + "' port: '" + apn.port);
-        if(TextUtils.equals(mActiveApnType, Phone.APN_TYPE_DEFAULT)) {
-            if (httpProxy == null || httpProxy.length() == 0) {
-                phone.setSystemProperty("net.gprs.http-proxy", null);
-                return;
-            }
-
-            if (httpPort == null || httpPort.length() == 0) {
-                httpPort = "8080";     // Default to port 8080
-            }
-
-            phone.setSystemProperty("net.gprs.http-proxy",
-                    "http://" + httpProxy + ":" + httpPort + "/");
-        } else {
-            if (httpProxy == null || httpProxy.length() == 0) {
-                phone.setSystemProperty("net.gprs.http-proxy." + mActiveApnType, null);
-                return;
-            }
-
-            if (httpPort == null || httpPort.length() == 0) {
-                httpPort = "8080";  // Default to port 8080
-            }
-
-            phone.setSystemProperty("net.gprs.http-proxy." + mActiveApnType,
-                    "http://" + httpProxy + ":" + httpPort + "/");
+        if (httpProxy == null || httpProxy.length() == 0) {
+            phone.setSystemProperty("net.gprs.http-proxy", null);
+            return;
         }
+
+        if (httpPort == null || httpPort.length() == 0) {
+            httpPort = "8080";     // Default to port 8080
+        }
+
+        phone.setSystemProperty("net.gprs.http-proxy",
+                "http://" + httpProxy + ":" + httpPort + "/");
     }
 
     private boolean isIpAddress(String address) {
