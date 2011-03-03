@@ -129,13 +129,14 @@ public class KeyButtonView extends ImageView {
                 setPressed(false);
                 if (mSending) {
                     mSending = false;
+                    final int flags = KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY;
                     removeCallbacks(mCheckLongPress);
                     if (doIt) {
-                        sendEvent(KeyEvent.ACTION_UP,
-                                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY);
-
+                        sendEvent(KeyEvent.ACTION_UP, flags);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                         playSoundEffect(SoundEffectConstants.CLICK);
+                    } else {
+                        sendEvent(KeyEvent.ACTION_UP, flags | KeyEvent.FLAG_CANCELED);
                     }
                 }
                 break;
