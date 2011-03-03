@@ -40,6 +40,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.Surface;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
 import java.io.File;
@@ -529,7 +530,17 @@ public class InputManager {
             
             return names.toArray(new String[names.size()]);
         }
-        
+
+        @SuppressWarnings("unused")
+        public int getKeyRepeatTimeout() {
+            return ViewConfiguration.getKeyRepeatTimeout();
+        }
+
+        @SuppressWarnings("unused")
+        public int getKeyRepeatDelay() {
+            return ViewConfiguration.getKeyRepeatDelay();
+        }
+
         @SuppressWarnings("unused")
         public int getMaxEventsPerSecond() {
             int result = 0;

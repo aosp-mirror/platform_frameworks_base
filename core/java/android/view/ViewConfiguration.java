@@ -74,11 +74,16 @@ public class ViewConfiguration {
     private static final int PRESSED_STATE_DURATION = 125;
     
     /**
-     * Defines the duration in milliseconds before a press turns into
+     * Defines the default duration in milliseconds before a press turns into
      * a long press
      */
-    private static final int DEFAULTLONG_PRESS_TIMEOUT = 500;
-    
+    private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;
+
+    /**
+     * Defines the time between successive key repeats in milliseconds.
+     */
+    private static final int KEY_REPEAT_DELAY = 50;
+
     /**
      * Defines the duration in milliseconds a user needs to hold down the
      * appropriate button to bring up the global actions dialog (power off,
@@ -330,7 +335,21 @@ public class ViewConfiguration {
      */
     public static int getLongPressTimeout() {
         return AppGlobals.getIntCoreSetting(Settings.Secure.LONG_PRESS_TIMEOUT,
-                DEFAULTLONG_PRESS_TIMEOUT);
+                DEFAULT_LONG_PRESS_TIMEOUT);
+    }
+
+    /**
+     * @return the time before the first key repeat in milliseconds.
+     */
+    public static int getKeyRepeatTimeout() {
+        return getLongPressTimeout();
+    }
+
+    /**
+     * @return the time between successive key repeats in milliseconds.
+     */
+    public static int getKeyRepeatDelay() {
+        return KEY_REPEAT_DELAY;
     }
 
     /**
