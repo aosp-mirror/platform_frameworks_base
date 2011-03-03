@@ -163,15 +163,6 @@ public class MtpClient {
         mContext.unregisterReceiver(mUsbReceiver);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
-        }
-    }
-
     /**
      * Registers a {@link android.mtp.MtpClient.Listener} interface to receive
      * notifications when MTP or PTP devices are added or removed.
