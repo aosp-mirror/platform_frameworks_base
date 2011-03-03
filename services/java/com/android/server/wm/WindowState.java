@@ -594,7 +594,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         + " / " + this);
             } catch (Surface.OutOfResourcesException e) {
                 Slog.w(WindowManagerService.TAG, "OutOfResourcesException creating surface");
-                mService.reclaimSomeSurfaceMemoryLocked(this, "create");
+                mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
                 return null;
             } catch (Exception e) {
                 Slog.e(WindowManagerService.TAG, "Exception creating surface", e);
@@ -628,7 +628,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     }
                 } catch (RuntimeException e) {
                     Slog.w(WindowManagerService.TAG, "Error creating surface in " + w, e);
-                    mService.reclaimSomeSurfaceMemoryLocked(this, "create-init");
+                    mService.reclaimSomeSurfaceMemoryLocked(this, "create-init", true);
                 }
                 mLastHidden = true;
             } finally {

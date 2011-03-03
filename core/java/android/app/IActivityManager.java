@@ -250,7 +250,7 @@ public interface IActivityManager extends IInterface {
     
     public void noteWakeupAlarm(IIntentSender sender) throws RemoteException;
     
-    public boolean killPids(int[] pids, String reason) throws RemoteException;
+    public boolean killPids(int[] pids, String reason, boolean secure) throws RemoteException;
     
     // Special low-level communication with activity manager.
     public void startRunning(String pkg, String cls, String action,

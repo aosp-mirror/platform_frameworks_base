@@ -108,14 +108,14 @@ public abstract class HardwareRenderer {
      * 
      * @return True if the initialization was successful, false otherwise.
      */
-    abstract boolean initialize(SurfaceHolder holder);
+    abstract boolean initialize(SurfaceHolder holder) throws Surface.OutOfResourcesException;
     
     /**
      * Updates the hardware renderer for the specified surface.
      * 
      * @param holder The holder for the surface to hardware accelerate.
      */
-    abstract void updateSurface(SurfaceHolder holder);
+    abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
 
     /**
      * Setup the hardware renderer for drawing. This is called for every
@@ -189,7 +189,7 @@ public abstract class HardwareRenderer {
      * @param holder
      */
     void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
-            SurfaceHolder holder) {
+            SurfaceHolder holder) throws Surface.OutOfResourcesException {
         if (isRequested()) {
             // We lost the gl context, so recreate it.
             if (!isEnabled()) {
@@ -366,7 +366,7 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        boolean initialize(SurfaceHolder holder) {
+        boolean initialize(SurfaceHolder holder) throws Surface.OutOfResourcesException {
             if (isRequested() && !isEnabled()) {
                 initializeEgl();
                 mGl = createEglSurface(holder);
@@ -395,7 +395,7 @@ public abstract class HardwareRenderer {
         }
         
         @Override
-        void updateSurface(SurfaceHolder holder) {
+        void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException {
             if (isRequested() && isEnabled()) {
                 createEglSurface(holder);
             }
@@ -446,7 +446,7 @@ public abstract class HardwareRenderer {
             sEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
         }
 
-        GL createEglSurface(SurfaceHolder holder) {
+        GL createEglSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException {
             // Check preconditions.
             if (sEgl == null) {
                 throw new RuntimeException("egl not initialized");
@@ -494,7 +494,7 @@ public abstract class HardwareRenderer {
              * the context is current and bound to a surface.
              */
             if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
-                throw new RuntimeException("eglMakeCurrent failed "
+                throw new Surface.OutOfResourcesException("eglMakeCurrent failed "
                         + getEGLErrorString(sEgl.eglGetError()));
             }
             
@@ -516,7 +516,7 @@ public abstract class HardwareRenderer {
 
         @Override
         void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
-                SurfaceHolder holder) {
+                SurfaceHolder holder) throws Surface.OutOfResourcesException {
             if (isRequested()) {
                 checkEglErrors();
                 super.initializeIfNeeded(width, height, attachInfo, holder);
