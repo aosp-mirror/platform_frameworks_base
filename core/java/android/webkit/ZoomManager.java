@@ -169,7 +169,7 @@ class ZoomManager {
     private int mInitialScrollY;
     private long mZoomStart;
 
-    private static final int ZOOM_ANIMATION_LENGTH = 500;
+    private static final int ZOOM_ANIMATION_LENGTH = 175;
 
     // whether support multi-touch
     private boolean mSupportMultiTouch;
