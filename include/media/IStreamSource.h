@@ -45,6 +45,12 @@ struct IStreamListener : public IInterface {
 
     virtual void queueBuffer(size_t index, size_t size) = 0;
 
+    // When signalling a discontinuity you can optionally
+    // specify an int64_t PTS timestamp in "msg".
+    // If present, rendering of data following the discontinuity
+    // will be suppressed until media time reaches this timestamp.
+    static const char *const kKeyResumeAtPTS;
+
     virtual void issueCommand(
             Command cmd, bool synchronous, const sp<AMessage> &msg = NULL) = 0;
 };

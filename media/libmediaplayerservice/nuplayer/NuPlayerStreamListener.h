@@ -37,7 +37,7 @@ struct NuPlayer::NuPlayerStreamListener : public BnStreamListener {
             Command cmd, bool synchronous, const sp<AMessage> &extra);
 
     void start();
-    ssize_t read(void *data, size_t size);
+    ssize_t read(void *data, size_t size, sp<AMessage> *extra);
 
 private:
     enum {

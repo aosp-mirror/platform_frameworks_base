@@ -32,6 +32,7 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MetaData.h>
+#include <media/IStreamSource.h>
 #include <utils/KeyedVector.h>
 
 namespace android {
@@ -49,7 +50,9 @@ struct ATSParser::Program : public RefBase {
             unsigned pid, unsigned payload_unit_start_indicator,
             ABitReader *br);
 
-    void signalDiscontinuity(DiscontinuityType type);
+    void signalDiscontinuity(
+            DiscontinuityType type, const sp<AMessage> &extra);
+
     void signalEOS(status_t finalResult);
 
     sp<MediaSource> getSource(SourceType type);
@@ -83,7 +86,9 @@ struct ATSParser::Stream : public RefBase {
             unsigned payload_unit_start_indicator,
             ABitReader *br);
 
-    void signalDiscontinuity(DiscontinuityType type);
+    void signalDiscontinuity(
+            DiscontinuityType type, const sp<AMessage> &extra);
+
     void signalEOS(status_t finalResult);
 
     sp<MediaSource> getSource(SourceType type);
@@ -100,6 +105,7 @@ private:
     sp<AnotherPacketSource> mSource;
     bool mPayloadStarted;
     DiscontinuityType mPendingDiscontinuity;
+    sp<AMessage> mPendingDiscontinuityExtra;
 
     ElementaryStreamQueue mQueue;
 
@@ -112,7 +118,8 @@ private:
 
     void extractAACFrames(const sp<ABuffer> &buffer);
 
-    void deferDiscontinuity(DiscontinuityType type);
+    void deferDiscontinuity(
+            DiscontinuityType type, const sp<AMessage> &extra);
 
     DISALLOW_EVIL_CONSTRUCTORS(Stream);
 };
@@ -150,9 +157,10 @@ bool ATSParser::Program::parsePID(
     return true;
 }
 
-void ATSParser::Program::signalDiscontinuity(DiscontinuityType type) {
+void ATSParser::Program::signalDiscontinuity(
+        DiscontinuityType type, const sp<AMessage> &extra) {
     for (size_t i = 0; i < mStreams.size(); ++i) {
-        mStreams.editValueAt(i)->signalDiscontinuity(type);
+        mStreams.editValueAt(i)->signalDiscontinuity(type, extra);
     }
 }
 
@@ -283,7 +291,8 @@ void ATSParser::Program::parseProgramMap(ABitReader *br) {
             mStreams.add(info.mPID, stream);
 
             if (PIDsChanged) {
-                stream->signalDiscontinuity(DISCONTINUITY_FORMATCHANGE);
+                sp<AMessage> extra;
+                stream->signalDiscontinuity(DISCONTINUITY_FORMATCHANGE, extra);
             }
         }
     }
@@ -366,7 +375,8 @@ void ATSParser::Stream::parse(
     mBuffer->setRange(0, mBuffer->size() + payloadSizeBits / 8);
 }
 
-void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
+void ATSParser::Stream::signalDiscontinuity(
+        DiscontinuityType type, const sp<AMessage> &extra) {
     mPayloadStarted = false;
     mBuffer->setRange(0, 0);
 
@@ -378,10 +388,21 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
 
             mQueue.clear(!isASeek);
 
+            uint64_t resumeAtPTS;
+            if (extra != NULL
+                    && extra->findInt64(
+                        IStreamListener::kKeyResumeAtPTS,
+                        (int64_t *)&resumeAtPTS)) {
+                int64_t resumeAtMediaTimeUs =
+                    mProgram->convertPTSToTimestamp(resumeAtPTS);
+
+                extra->setInt64("resume-at-mediatimeUs", resumeAtMediaTimeUs);
+            }
+
             if (mSource != NULL) {
-                mSource->queueDiscontinuity(type);
+                mSource->queueDiscontinuity(type, extra);
             } else {
-                deferDiscontinuity(type);
+                deferDiscontinuity(type, extra);
             }
             break;
         }
@@ -392,10 +413,12 @@ void ATSParser::Stream::signalDiscontinuity(DiscontinuityType type) {
     }
 }
 
-void ATSParser::Stream::deferDiscontinuity(DiscontinuityType type) {
+void ATSParser::Stream::deferDiscontinuity(
+        DiscontinuityType type, const sp<AMessage> &extra) {
     if (type > mPendingDiscontinuity) {
         // Only upgrade discontinuities.
         mPendingDiscontinuity = type;
+        mPendingDiscontinuityExtra = extra;
     }
 }
 
@@ -596,8 +619,10 @@ void ATSParser::Stream::onPayloadData(
                 mSource = new AnotherPacketSource(meta);
 
                 if (mPendingDiscontinuity != DISCONTINUITY_NONE) {
-                    mSource->queueDiscontinuity(mPendingDiscontinuity);
+                    mSource->queueDiscontinuity(
+                            mPendingDiscontinuity, mPendingDiscontinuityExtra);
                     mPendingDiscontinuity = DISCONTINUITY_NONE;
+                    mPendingDiscontinuityExtra.clear();
                 }
 
                 mSource->queueAccessUnit(accessUnit);
@@ -639,9 +664,10 @@ void ATSParser::feedTSPacket(const void *data, size_t size) {
     parseTS(&br);
 }
 
-void ATSParser::signalDiscontinuity(DiscontinuityType type) {
+void ATSParser::signalDiscontinuity(
+        DiscontinuityType type, const sp<AMessage> &extra) {
     for (size_t i = 0; i < mPrograms.size(); ++i) {
-        mPrograms.editItemAt(i)->signalDiscontinuity(type);
+        mPrograms.editItemAt(i)->signalDiscontinuity(type, extra);
     }
 }
 

@@ -92,8 +92,11 @@ void NuPlayer::NuPlayerStreamListener::issueCommand(
     }
 }
 
-ssize_t NuPlayer::NuPlayerStreamListener::read(void *data, size_t size) {
+ssize_t NuPlayer::NuPlayerStreamListener::read(
+        void *data, size_t size, sp<AMessage> *extra) {
     CHECK_GT(size, 0u);
+
+    extra->clear();
 
     Mutex::Autolock autoLock(mLock);
 
@@ -122,6 +125,8 @@ ssize_t NuPlayer::NuPlayerStreamListener::read(void *data, size_t size) {
 
             case DISCONTINUITY:
             {
+                *extra = entry->mExtra;
+
                 mQueue.erase(mQueue.begin());
                 entry = NULL;
 
