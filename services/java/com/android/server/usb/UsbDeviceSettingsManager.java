@@ -615,8 +615,11 @@ class UsbDeviceSettingsManager {
             defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
         }
 
+        int count = matches.size();
+        // don't show the resolver activity if there are no choices available
+        if (count == 0) return;
+
         if (defaultPackage != null) {
-            int count = matches.size();
             for (int i = 0; i < count; i++) {
                 ResolveInfo rInfo = matches.get(i);
                 if (rInfo.activityInfo != null &&
