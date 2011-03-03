@@ -121,4 +121,8 @@
     <integer name="def_download_manager_max_bytes_over_mobile">-1</integer>
     <!-- Default for Settings.Secure.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE. <=0 if no limit -->
     <integer name="def_download_manager_recommended_max_bytes_over_mobile">-1</integer>
+
+    <!-- Default for Settings.Secure.LONG_PRESS_TIMEOUT_MILLIS -->
+    <integer name="def_long_press_timeout_millis">500</integer>
+
 </resources>

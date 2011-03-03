@@ -82,7 +82,8 @@ public interface IApplicationThread extends IInterface {
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, String profileName, Bundle testArguments, 
             IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
-            Configuration config, Map<String, IBinder> services) throws RemoteException;
+            Configuration config, Map<String, IBinder> services,
+            Bundle coreSettings) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void requestThumbnail(IBinder token) throws RemoteException;
@@ -110,6 +111,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleCrash(String msg) throws RemoteException;
     void dumpActivity(FileDescriptor fd, IBinder servicetoken, String prefix, String[] args)
             throws RemoteException;
+    void setCoreSettings(Bundle coreSettings) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -151,4 +153,5 @@ public interface IApplicationThread extends IInterface {
     int DUMP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
     int CLEAR_DNS_CACHE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+37;
     int SET_HTTP_PROXY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
+    int SET_CORE_SETTINGS = IBinder.FIRST_CALL_TRANSACTION+39;
 }

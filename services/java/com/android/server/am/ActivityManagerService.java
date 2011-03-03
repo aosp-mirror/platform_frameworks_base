@@ -717,6 +717,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     final private SparseArray<HashMap<Uri, UriPermission>> mGrantedUriPermissions
             = new SparseArray<HashMap<Uri, UriPermission>>();
 
+    CoreSettingsObserver mCoreSettingsObserver;
+
     /**
      * Thread-local storage used to carry caller permissions over through
      * indirect content-provider access.
@@ -3589,7 +3591,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
                     isRestrictedBackupMode || !normalMode,
-                    mConfiguration, getCommonServicesLocked());
+                    mConfiguration, getCommonServicesLocked(),
+                    mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, true);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {
@@ -5772,6 +5775,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (providers != null) {
             mSystemThread.installSystemProviders(providers);
         }
+
+        mSelf.mCoreSettingsObserver = new CoreSettingsObserver(mSelf);
     }
 
     /**
@@ -13029,5 +13034,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     /** In this method we try to acquire our lock to make sure that we have not deadlocked */
     public void monitor() {
         synchronized (this) { }
+    }
+
+    public void onCoreSettingsChange(Bundle settings) {
+        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+            ProcessRecord processRecord = mLruProcesses.get(i);
+            try {
+                if (processRecord.thread != null) {
+                    processRecord.thread.setCoreSettings(settings);
+                }
+            } catch (RemoteException re) {
+                /* ignore */
+            }
+        }
     }
 }

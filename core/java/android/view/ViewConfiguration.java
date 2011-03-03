@@ -16,8 +16,11 @@
 
 package android.view;
 
+import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Bundle;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
@@ -74,7 +77,7 @@ public class ViewConfiguration {
      * Defines the duration in milliseconds before a press turns into
      * a long press
      */
-    private static final int LONG_PRESS_TIMEOUT = 500;
+    private static final int DEFAULTLONG_PRESS_TIMEOUT = 500;
     
     /**
      * Defines the duration in milliseconds a user needs to hold down the
@@ -320,15 +323,16 @@ public class ViewConfiguration {
     public static int getPressedStateDuration() {
         return PRESSED_STATE_DURATION;
     }
-    
+
     /**
      * @return the duration in milliseconds before a press turns into
      * a long press
      */
     public static int getLongPressTimeout() {
-        return LONG_PRESS_TIMEOUT;
+        return AppGlobals.getIntCoreSetting(Settings.Secure.LONG_PRESS_TIMEOUT,
+                DEFAULTLONG_PRESS_TIMEOUT);
     }
-    
+
     /**
      * @return the duration in milliseconds we will wait to see if a touch event
      * is a tap or a scroll. If the user does not move within this interval, it is
