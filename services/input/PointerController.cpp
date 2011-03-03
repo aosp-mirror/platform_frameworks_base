@@ -109,12 +109,12 @@ bool PointerController::getBoundsLocked(float* outMinX, float* outMinY,
     switch (mLocked.displayOrientation) {
     case DISPLAY_ORIENTATION_90:
     case DISPLAY_ORIENTATION_270:
-        *outMaxX = mLocked.displayHeight;
-        *outMaxY = mLocked.displayWidth;
+        *outMaxX = mLocked.displayHeight - 1;
+        *outMaxY = mLocked.displayWidth - 1;
         break;
     default:
-        *outMaxX = mLocked.displayWidth;
-        *outMaxY = mLocked.displayHeight;
+        *outMaxX = mLocked.displayWidth - 1;
+        *outMaxY = mLocked.displayHeight - 1;
         break;
     }
     return true;
@@ -309,48 +309,53 @@ void PointerController::setDisplayOrientation(int32_t orientation) {
     AutoMutex _l(mLock);
 
     if (mLocked.displayOrientation != orientation) {
-        float absoluteX, absoluteY;
+        // Apply offsets to convert from the pixel top-left corner position to the pixel center.
+        // This creates an invariant frame of reference that we can easily rotate when
+        // taking into account that the pointer may be located at fractional pixel offsets.
+        float x = mLocked.pointerX + 0.5f;
+        float y = mLocked.pointerY + 0.5f;
+        float temp;
 
-        // Map from oriented display coordinates to absolute display coordinates.
+        // Undo the previous rotation.
         switch (mLocked.displayOrientation) {
         case DISPLAY_ORIENTATION_90:
-            absoluteX = mLocked.displayWidth - mLocked.pointerY;
-            absoluteY = mLocked.pointerX;
+            temp = x;
+            x = mLocked.displayWidth - y;
+            y = temp;
             break;
         case DISPLAY_ORIENTATION_180:
-            absoluteX = mLocked.displayWidth - mLocked.pointerX;
-            absoluteY = mLocked.displayHeight - mLocked.pointerY;
+            x = mLocked.displayWidth - x;
+            y = mLocked.displayHeight - y;
             break;
         case DISPLAY_ORIENTATION_270:
-            absoluteX = mLocked.pointerY;
-            absoluteY = mLocked.displayHeight - mLocked.pointerX;
-            break;
-        default:
-            absoluteX = mLocked.pointerX;
-            absoluteY = mLocked.pointerY;
+            temp = x;
+            x = y;
+            y = mLocked.displayHeight - temp;
             break;
         }
 
-        // Map from absolute display coordinates to oriented display coordinates.
+        // Perform the new rotation.
         switch (orientation) {
         case DISPLAY_ORIENTATION_90:
-            mLocked.pointerX = absoluteY;
-            mLocked.pointerY = mLocked.displayWidth - absoluteX;
+            temp = x;
+            x = y;
+            y = mLocked.displayWidth - x;
             break;
         case DISPLAY_ORIENTATION_180:
-            mLocked.pointerX = mLocked.displayWidth - absoluteX;
-            mLocked.pointerY = mLocked.displayHeight - absoluteY;
+            x = mLocked.displayWidth - x;
+            y = mLocked.displayHeight - y;
             break;
         case DISPLAY_ORIENTATION_270:
-            mLocked.pointerX = mLocked.displayHeight - absoluteY;
-            mLocked.pointerY = absoluteX;
-            break;
-        default:
-            mLocked.pointerX = absoluteX;
-            mLocked.pointerY = absoluteY;
+            temp = x;
+            x = mLocked.displayHeight - y;
+            y = temp;
             break;
         }
 
+        // Apply offsets to convert from the pixel center to the pixel top-left corner position
+        // and save the results.
+        mLocked.pointerX = x - 0.5f;
+        mLocked.pointerY = y - 0.5f;
         mLocked.displayOrientation = orientation;
 
         updateLocked();

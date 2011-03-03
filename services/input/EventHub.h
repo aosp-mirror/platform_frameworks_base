@@ -85,8 +85,6 @@ struct RawAbsoluteAxisInfo {
     int32_t flat;      // center flat position, eg. flat == 8 means center is between -8 and 8
     int32_t fuzz;      // error tolerance, eg. fuzz == 4 means value is +/- 4 due to noise
 
-    inline int32_t getRange() const { return maxValue - minValue; }
-
     inline void clear() {
         valid = false;
         minValue = 0;

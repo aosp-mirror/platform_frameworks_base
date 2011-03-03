@@ -2157,6 +2157,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * MotionEvent. For touch events, clients can use this to determine if the
      * user's finger was touching the edge of the display.
      *
+     * This property is only set for {@link #ACTION_DOWN} events.
+     *
      * @see #EDGE_LEFT
      * @see #EDGE_TOP
      * @see #EDGE_RIGHT
