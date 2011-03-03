@@ -34,7 +34,8 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим польоту"</string>
-    <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"Заблокувати орієнтацію екрана"</string>
+    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
+    <skip />
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ІГНОР."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"АВТОМ."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Сповіщення"</string>

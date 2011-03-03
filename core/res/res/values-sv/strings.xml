@@ -361,8 +361,10 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Tillåter att programmet styr vibratorn."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"styra lampa"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillåter att programmet styr lampan."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"åtkomst till USB-enheter"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillåter att programmet använder USB-enheter."</string>
+    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
+    <skip />
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementera MTP-protokoll"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Ger åtkomst till MTP-kerneldrivrutinen för att implementera MTP/USB-protokollet."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testa maskinvara"</string>
@@ -814,6 +816,8 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Använd som standard för denna åtgärd."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Rensa standardinställning i Startinställningar &gt; Appar &gt; Hantera appar."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Välj en åtgärd"</string>
+    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
+    <skip />
     <string name="noApplications" msgid="1691104391758345586">"Inga appar kan utföra den här åtgärden."</string>
     <string name="aerr_title" msgid="653922989522758100">"Tyvärr!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Processen <xliff:g id="PROCESS">%2$s</xliff:g> för programmet <xliff:g id="APPLICATION">%1$s</xliff:g> stoppades oväntat. Försök igen."</string>
