@@ -326,35 +326,44 @@ Manifest:</p>
 &lt;activity android:theme="@style/CustomTheme">
 </pre>
 
+
 <h3 id="SelectATheme">Select a theme based on platform version</h3>
 
 <p>Newer versions of Android have additional themes available to applications,
-and you may want to use these while running on those platforms while still being
+and you might want to use these while running on those platforms while still being
 compatible with older versions.  You can accomplish this through a custom theme
-that uses resource selection to switch between different parent themes.</p>
+that uses resource selection to switch between different parent themes, based on the platform
+version.</p>
 
 <p>For example, here is the declaration for a custom theme which is simply
 the standard platforms default light theme.  It would go in an XML file under
 <code>res/values</code> (typically <code>res/values/styles.xml</code>):
 <pre>
 &lt;style name="LightThemeSelector" parent="android:Theme.Light">
+    ...
 &lt;/style>
 </pre>
 
-<p>To have this theme use the newer "holo" theme when the application is running
-on {@link android.os.Build.VERSION_CODES#HONEYCOMB}, you can place another
-declaration for it in a file in <code>res/values-11</code>:</p>
+<p>To have this theme use the newer holographic theme when the application is running
+on Android 3.0 (API Level 11) or higher, you can place an alternative
+declaration for the theme in an XML file in <code>res/values-v11</code>, but make the parent theme
+the holographic theme:</p>
 <pre>
 &lt;style name="LightThemeSelector" parent="android:Theme.Holo.Light">
+    ...
 &lt;/style>
 </pre>
 
 <p>Now use this theme like you would any other, and your application will
-automatically switch to the holo theme if running on
-{@link android.os.Build.VERSION_CODES#HONEYCOMB} or later.</p>
+automatically switch to the holographic theme if running on Android 3.0 or higher.</p>
 
 <p>A list of the standard attributes that you can use in themes can be
 found at {@link android.R.styleable#Theme R.styleable.Theme}.</p>
+
+<p>For more information about providing alternative resources, such as themes and layouts, based
+on the platform version or other device configurations, see the <a
+href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a>
+document.</p>
 
 <!-- This currently has some bugs
 
