@@ -168,7 +168,9 @@ public class LayoutTransition {
      */
     private final HashMap<View, Animator> pendingAnimations = new HashMap<View, Animator>();
     private final HashMap<View, Animator> currentChangingAnimations = new HashMap<View, Animator>();
-    private final HashMap<View, Animator> currentVisibilityAnimations =
+    private final HashMap<View, Animator> currentAppearingAnimations =
+            new HashMap<View, Animator>();
+    private final HashMap<View, Animator> currentDisappearingAnimations =
             new HashMap<View, Animator>();
 
     /**
@@ -709,7 +711,8 @@ public class LayoutTransition {
      * @return true if any animations in the transition are running.
      */
     public boolean isRunning() {
-        return (currentChangingAnimations.size() > 0 || currentVisibilityAnimations.size() > 0);
+        return (currentChangingAnimations.size() > 0 || currentAppearingAnimations.size() > 0 ||
+                currentDisappearingAnimations.size() > 0);
     }
 
     /**
@@ -721,17 +724,74 @@ public class LayoutTransition {
      * @hide
      */
     public void cancel() {
-        HashMap<View, Animator> currentAnimCopy =
-                (HashMap<View, Animator>) currentChangingAnimations.clone();
-        for (Animator anim : currentAnimCopy.values()) {
-            anim.cancel();
+        if (currentChangingAnimations.size() > 0) {
+            HashMap<View, Animator> currentAnimCopy =
+                    (HashMap<View, Animator>) currentChangingAnimations.clone();
+            for (Animator anim : currentAnimCopy.values()) {
+                anim.cancel();
+            }
+            currentChangingAnimations.clear();
         }
-        currentChangingAnimations.clear();
-        currentAnimCopy = (HashMap<View, Animator>) currentVisibilityAnimations.clone();
-        for (Animator anim : currentAnimCopy.values()) {
-            anim.end();
+        if (currentAppearingAnimations.size() > 0) {
+            HashMap<View, Animator> currentAnimCopy =
+                    (HashMap<View, Animator>) currentAppearingAnimations.clone();
+            for (Animator anim : currentAnimCopy.values()) {
+                anim.end();
+            }
+            currentAppearingAnimations.clear();
         }
-        currentVisibilityAnimations.clear();
+        if (currentDisappearingAnimations.size() > 0) {
+            HashMap<View, Animator> currentAnimCopy =
+                    (HashMap<View, Animator>) currentDisappearingAnimations.clone();
+            for (Animator anim : currentAnimCopy.values()) {
+                anim.end();
+            }
+            currentDisappearingAnimations.clear();
+        }
+    }
+
+    /**
+     * Cancels the specified type of transition. Note that we cancel() the changing animations
+     * but end() the visibility animations. This is because this method is currently called
+     * in the context of starting a new transition, so we want to move things from their mid-
+     * transition positions, but we want them to have their end-transition visibility.
+     *
+     * @hide
+     */
+    public void cancel(int transitionType) {
+        switch (transitionType) {
+            case CHANGE_APPEARING:
+            case CHANGE_DISAPPEARING:
+                if (currentChangingAnimations.size() > 0) {
+                    HashMap<View, Animator> currentAnimCopy =
+                            (HashMap<View, Animator>) currentChangingAnimations.clone();
+                    for (Animator anim : currentAnimCopy.values()) {
+                        anim.cancel();
+                    }
+                    currentChangingAnimations.clear();
+                }
+                break;
+            case APPEARING:
+                if (currentAppearingAnimations.size() > 0) {
+                    HashMap<View, Animator> currentAnimCopy =
+                            (HashMap<View, Animator>) currentAppearingAnimations.clone();
+                    for (Animator anim : currentAnimCopy.values()) {
+                        anim.end();
+                    }
+                    currentAppearingAnimations.clear();
+                }
+                break;
+            case DISAPPEARING:
+                if (currentDisappearingAnimations.size() > 0) {
+                    HashMap<View, Animator> currentAnimCopy =
+                            (HashMap<View, Animator>) currentDisappearingAnimations.clone();
+                    for (Animator anim : currentAnimCopy.values()) {
+                        anim.end();
+                    }
+                    currentDisappearingAnimations.clear();
+                }
+                break;
+        }
     }
 
     /**
@@ -741,7 +801,7 @@ public class LayoutTransition {
      * @param child The View being added to the ViewGroup.
      */
     private void runAppearingTransition(final ViewGroup parent, final View child) {
-        Animator currentAnimation = currentVisibilityAnimations.get(child);
+        Animator currentAnimation = currentDisappearingAnimations.get(child);
         if (currentAnimation != null) {
             currentAnimation.cancel();
         }
@@ -764,14 +824,14 @@ public class LayoutTransition {
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator anim) {
-                    currentVisibilityAnimations.remove(child);
+                    currentAppearingAnimations.remove(child);
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, APPEARING);
                     }
                 }
             });
         }
-        currentVisibilityAnimations.put(child, anim);
+        currentAppearingAnimations.put(child, anim);
         anim.start();
     }
 
@@ -782,7 +842,7 @@ public class LayoutTransition {
      * @param child The View being removed from the ViewGroup.
      */
     private void runDisappearingTransition(final ViewGroup parent, final View child) {
-        Animator currentAnimation = currentVisibilityAnimations.get(child);
+        Animator currentAnimation = currentAppearingAnimations.get(child);
         if (currentAnimation != null) {
             currentAnimation.cancel();
         }
@@ -802,7 +862,7 @@ public class LayoutTransition {
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator anim) {
-                    currentVisibilityAnimations.remove(child);
+                    currentDisappearingAnimations.remove(child);
                     for (TransitionListener listener : mListeners) {
                         listener.endTransition(LayoutTransition.this, parent, child, DISAPPEARING);
                     }
@@ -812,7 +872,7 @@ public class LayoutTransition {
         if (anim instanceof ObjectAnimator) {
             ((ObjectAnimator) anim).setCurrentPlayTime(0);
         }
-        currentVisibilityAnimations.put(child, anim);
+        currentDisappearingAnimations.put(child, anim);
         anim.start();
     }
 
@@ -826,9 +886,10 @@ public class LayoutTransition {
      * @param child The View being added to the ViewGroup.
      */
     public void addChild(ViewGroup parent, View child) {
-        if (isRunning()) {
-            cancel();
-        }
+        // Want disappearing animations to finish up before proceeding
+        cancel(DISAPPEARING);
+        // Also, cancel changing animations so that we start fresh ones from current locations
+        cancel(CHANGE_APPEARING);
         if (mListeners != null) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, APPEARING);
@@ -861,9 +922,10 @@ public class LayoutTransition {
      * @param child The View being removed from the ViewGroup.
      */
     public void removeChild(ViewGroup parent, View child) {
-        if (isRunning()) {
-            cancel();
-        }
+        // Want appearing animations to finish up before proceeding
+        cancel(APPEARING);
+        // Also, cancel changing animations so that we start fresh ones from current locations
+        cancel(CHANGE_DISAPPEARING);
         if (mListeners != null) {
             for (TransitionListener listener : mListeners) {
                 listener.startTransition(this, parent, child, DISAPPEARING);
