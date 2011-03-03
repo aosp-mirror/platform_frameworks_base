@@ -18,7 +18,7 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:detachWallpaper="true" android:shareInterpolator="false">
+        android:background="#ff000000" android:shareInterpolator="false">
     <scale android:fromXScale="1.0" android:toXScale="1.0"
             android:fromYScale=".9" android:toYScale="1.0"
             android:pivotX="50%p" android:pivotY="50%p"

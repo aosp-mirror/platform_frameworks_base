@@ -180,6 +180,16 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final int WINDOW_LAYER_MULTIPLIER = 5;
 
+    /**
+     * Dim surface layer is immediately below target window.
+     */
+    static final int LAYER_OFFSET_DIM = 1;
+
+    /**
+     * Blur surface layer is immediately below dim layer.
+     */
+    static final int LAYER_OFFSET_BLUR = 2;
+
     /** The maximum length we will accept for a loaded animation duration:
      * this is 10 seconds.
      */
@@ -275,8 +285,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final IActivityManager mActivityManager;
 
     final IBatteryStats mBatteryStats;
-
-    private static final boolean mInEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
     /**
      * All currently active sessions with clients.
@@ -468,6 +476,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // visible behind it in case it animates in a way that would allow it to be
     // seen.
     WindowState mWindowDetachedWallpaper = null;
+    DimSurface mWindowAnimationBackgroundSurface = null;
     int mWallpaperAnimLayerAdjustment;
     float mLastWallpaperX = -1;
     float mLastWallpaperY = -1;
@@ -4940,7 +4949,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDisplayEnabled) {
                 // NOTE: We disable the rotation in the emulator because
                 //       it doesn't support hardware OpenGL emulation yet.
-                if (CUSTOM_SCREEN_ROTATION && !mInEmulator) {
+                if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
+                        && mScreenRotationAnimation.hasScreenshot()) {
                     Surface.freezeDisplay(0);
                     if (!inTransaction) {
                         if (SHOW_TRANSACTIONS) Slog.i(TAG,
@@ -6802,6 +6812,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean wallpaperMayChange = false;
                 boolean forceHiding = false;
                 WindowState windowDetachedWallpaper = null;
+                WindowState windowAnimationBackground = null;
+                int windowAnimationBackgroundColor = 0;
 
                 mPolicy.beginAnimationLw(dw, dh);
 
@@ -6851,8 +6863,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         // an animating window and take care of a request to run
                         // a detached wallpaper animation.
                         if (nowAnimating) {
-                            if (w.mAnimation != null && w.mAnimation.getDetachWallpaper()) {
-                                windowDetachedWallpaper = w;
+                            if (w.mAnimation != null) {
+                                if (w.mAnimation.getDetachWallpaper()) {
+                                    windowDetachedWallpaper = w;
+                                }
+                                if (w.mAnimation.getBackgroundColor() != 0) {
+                                    windowAnimationBackground = w;
+                                    windowAnimationBackgroundColor =
+                                            w.mAnimation.getBackgroundColor();
+                                }
                             }
                             animating = true;
                         }
@@ -6860,9 +6879,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         // If this window's app token is running a detached wallpaper
                         // animation, make a note so we can ensure the wallpaper is
                         // displayed behind it.
-                        if (w.mAppToken != null && w.mAppToken.animation != null
-                                && w.mAppToken.animation.getDetachWallpaper()) {
-                            windowDetachedWallpaper = w;
+                        if (w.mAppToken != null && w.mAppToken.animation != null) {
+                            if (w.mAppToken.animation.getDetachWallpaper()) {
+                                windowDetachedWallpaper = w;
+                            }
+                            if (w.mAppToken.animation.getBackgroundColor() != 0) {
+                                windowAnimationBackground = w;
+                                windowAnimationBackgroundColor =
+                                        w.mAppToken.animation.getBackgroundColor();
+                            }
                         }
 
                         if (wasAnimating && !w.mAnimating && mWallpaperTarget == w) {
@@ -7301,6 +7326,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     wallpaperMayChange = true;
                 }
 
+                if (windowAnimationBackgroundColor != 0) {
+                    if (mWindowAnimationBackgroundSurface == null) {
+                        mWindowAnimationBackgroundSurface = new DimSurface(mFxSession);
+                    }
+                    mWindowAnimationBackgroundSurface.show(dw, dh,
+                            windowAnimationBackground.mAnimLayer - LAYER_OFFSET_DIM,
+                            windowAnimationBackgroundColor);
+                } else if (mWindowAnimationBackgroundSurface != null) {
+                    mWindowAnimationBackgroundSurface.hide();
+                }
+
                 if (wallpaperMayChange) {
                     if (DEBUG_WALLPAPER) Slog.v(TAG,
                             "Wallpaper may change!  Adjusting");
@@ -7730,7 +7766,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                             dw + "x" + dh + "), layer=" + (w.mAnimLayer-1));
                                     mBlurSurface.setPosition(0, 0);
                                     mBlurSurface.setSize(dw, dh);
-                                    mBlurSurface.setLayer(w.mAnimLayer-2);
+                                    mBlurSurface.setLayer(w.mAnimLayer-LAYER_OFFSET_BLUR);
                                     if (!mBlurShown) {
                                         try {
                                             if (SHOW_TRANSACTIONS) Slog.i(TAG, "  BLUR "
@@ -7779,7 +7815,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     // Using the same layer as Dim because they will never be shown at the
                     // same time.  NOTE: we do NOT use mAnimLayer, because we don't
                     // want this surface dragged up in front of stuff that is animating.
-                    mBackgroundFillerSurface.setLayer(mBackgroundFillerTarget.mLayer - 1);
+                    mBackgroundFillerSurface.setLayer(mBackgroundFillerTarget.mLayer
+                            - LAYER_OFFSET_DIM);
                     mBackgroundFillerSurface.show();
                 } catch (RuntimeException e) {
                     Slog.e(TAG, "Exception showing filler surface");
@@ -8294,6 +8331,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
                         mDisplay, mFxSession, inTransaction);
             }
+            if (!mScreenRotationAnimation.hasScreenshot()) {
+                Surface.freezeDisplay(0);
+            }
         } else {
             Surface.freezeDisplay(0);
         }
@@ -8316,17 +8356,21 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean updateRotation = false;
         
-        if (CUSTOM_SCREEN_ROTATION) {
-            if (mScreenRotationAnimation != null) {
-                if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
-                        mTransitionAnimationScale)) {
-                    requestAnimationLocked(0);
-                } else {
-                    mScreenRotationAnimation = null;
-                    updateRotation = true;
-                }
+        if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
+                && mScreenRotationAnimation.hasScreenshot()) {
+            if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
+                    mTransitionAnimationScale)) {
+                requestAnimationLocked(0);
+            } else {
+                mScreenRotationAnimation = null;
+                updateRotation = true;
             }
         } else {
+            if (mScreenRotationAnimation != null) {
+                mScreenRotationAnimation.kill();
+                mScreenRotationAnimation = null;
+            }
+            updateRotation = true;
             Surface.unfreezeDisplay(0);
         }
 
@@ -8588,6 +8632,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mWindowDetachedWallpaper != null) {
                 pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
             }
+            if (mWindowAnimationBackgroundSurface != null) {
+                pw.println("  mWindowAnimationBackgroundSurface:");
+                mWindowAnimationBackgroundSurface.printTo("    ", pw);
+            }
             pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
             pw.print("  mInTouchMode="); pw.print(mInTouchMode);
                     pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
@@ -8596,7 +8644,8 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
                     pw.print(" mBlurShown="); pw.println(mBlurShown);
             if (mDimAnimator != null) {
-                mDimAnimator.printTo(pw);
+                pw.println("  mDimAnimator:");
+                mDimAnimator.printTo("    ", pw);
             } else {
                 pw.println( "  no DimAnimator ");
             }
