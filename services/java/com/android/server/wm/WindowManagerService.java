@@ -2717,6 +2717,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 | (displayed ? WindowManagerImpl.RELAYOUT_FIRST_TIME : 0);
     }
 
+    public boolean outOfMemoryWindow(Session session, IWindow client) {
+        long origId = Binder.clearCallingIdentity();
+
+        try {
+            synchronized(mWindowMap) {
+                WindowState win = windowForClientLocked(session, client, false);
+                if (win == null) {
+                    return false;
+                }
+                return reclaimSomeSurfaceMemoryLocked(win, "from-client", false);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     public void finishDrawingWindow(Session session, IWindow client) {
         final long origId = Binder.clearCallingIdentity();
         synchronized(mWindowMap) {
@@ -7443,7 +7459,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                         + " pos=(" + w.mShownFrame.left
                                         + "," + w.mShownFrame.top + ")", e);
                                 if (!recoveringMemory) {
-                                    reclaimSomeSurfaceMemoryLocked(w, "position");
+                                    reclaimSomeSurfaceMemoryLocked(w, "position", true);
                                 }
                             }
                         }
@@ -7471,7 +7487,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 Slog.e(TAG, "Error resizing surface of " + w
                                         + " size=(" + width + "x" + height + ")", e);
                                 if (!recoveringMemory) {
-                                    reclaimSomeSurfaceMemoryLocked(w, "size");
+                                    reclaimSomeSurfaceMemoryLocked(w, "size", true);
                                 }
                             }
                         }
@@ -7618,7 +7634,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             } catch (RuntimeException e) {
                                 Slog.w(TAG, "Error updating surface in " + w, e);
                                 if (!recoveringMemory) {
-                                    reclaimSomeSurfaceMemoryLocked(w, "update");
+                                    reclaimSomeSurfaceMemoryLocked(w, "update", true);
                                 }
                             }
                         }
@@ -8077,13 +8093,15 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG, "Failure showing surface " + win.mSurface + " in " + win, e);
         }
 
-        reclaimSomeSurfaceMemoryLocked(win, "show");
+        reclaimSomeSurfaceMemoryLocked(win, "show", true);
 
         return false;
     }
 
-    void reclaimSomeSurfaceMemoryLocked(WindowState win, String operation) {
+    boolean reclaimSomeSurfaceMemoryLocked(WindowState win, String operation, boolean secure) {
         final Surface surface = win.mSurface;
+        boolean leakedSurface = false;
+        boolean killedApps = false;
 
         EventLog.writeEvent(EventLogTags.WM_NO_SURFACE_MEMORY, win.toString(),
                 win.mSession.mPid, operation);
@@ -8098,7 +8116,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // window list to make sure we haven't left any dangling surfaces
             // around.
             int N = mWindows.size();
-            boolean leakedSurface = false;
             Slog.i(TAG, "Out of memory for surface!  Looking for leaks...");
             for (int i=0; i<N; i++) {
                 WindowState ws = mWindows.get(i);
@@ -8130,7 +8147,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            boolean killedApps = false;
             if (!leakedSurface) {
                 Slog.w(TAG, "No leaked surfaces; killing applicatons!");
                 SparseIntArray pidCandidates = new SparseIntArray();
@@ -8146,7 +8162,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         pids[i] = pidCandidates.keyAt(i);
                     }
                     try {
-                        if (mActivityManager.killPids(pids, "Free memory")) {
+                        if (mActivityManager.killPids(pids, "Free memory", secure)) {
                             killedApps = true;
                         }
                     } catch (RemoteException e) {
@@ -8173,6 +8189,8 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+
+        return leakedSurface || killedApps;
     }
 
     private boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {

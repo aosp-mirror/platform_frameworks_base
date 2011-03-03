@@ -1066,7 +1066,20 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mPreviousTransparentRegion.setEmpty();
 
                         if (mAttachInfo.mHardwareRenderer != null) {
-                            hwInitialized = mAttachInfo.mHardwareRenderer.initialize(mHolder);
+                            try {
+                                hwInitialized = mAttachInfo.mHardwareRenderer.initialize(mHolder);
+                            } catch (Surface.OutOfResourcesException e) {
+                                Log.e(TAG, "OutOfResourcesException initializing HW surface", e);
+                                try {
+                                    if (!sWindowSession.outOfMemory(mWindow)) {
+                                        Slog.w(TAG, "No processes killed for memory; killing self");
+                                        Process.killProcess(Process.myPid());
+                                    }
+                                } catch (RemoteException ex) {
+                                }
+                                mLayoutRequested = true;    // ask wm for a new surface next time.
+                                return;
+                            }
                         }
                     }
                 } else if (!mSurface.isValid()) {
@@ -1081,7 +1094,20 @@ public final class ViewRoot extends Handler implements ViewParent,
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
                     fullRedrawNeeded = true;
-                    mAttachInfo.mHardwareRenderer.updateSurface(mHolder);
+                    try {
+                        mAttachInfo.mHardwareRenderer.updateSurface(mHolder);
+                    } catch (Surface.OutOfResourcesException e) {
+                        Log.e(TAG, "OutOfResourcesException updating HW surface", e);
+                        try {
+                            if (!sWindowSession.outOfMemory(mWindow)) {
+                                Slog.w(TAG, "No processes killed for memory; killing self");
+                                Process.killProcess(Process.myPid());
+                            }
+                        } catch (RemoteException ex) {
+                        }
+                        mLayoutRequested = true;    // ask wm for a new surface next time.
+                        return;
+                    }
                 }
             } catch (RemoteException e) {
             }
@@ -1569,14 +1595,24 @@ public final class ViewRoot extends Handler implements ViewParent,
                 canvas.setDensity(mDensity);
             } catch (Surface.OutOfResourcesException e) {
                 Log.e(TAG, "OutOfResourcesException locking surface", e);
-                // TODO: we should ask the window manager to do something!
-                // for now we just do nothing
+                try {
+                    if (!sWindowSession.outOfMemory(mWindow)) {
+                        Slog.w(TAG, "No processes killed for memory; killing self");
+                        Process.killProcess(Process.myPid());
+                    }
+                } catch (RemoteException ex) {
+                }
                 mLayoutRequested = true;    // ask wm for a new surface next time.
                 return;
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "IllegalArgumentException locking surface", e);
-                // TODO: we should ask the window manager to do something!
-                // for now we just do nothing
+                try {
+                    if (!sWindowSession.outOfMemory(mWindow)) {
+                        Slog.w(TAG, "No processes killed for memory; killing self");
+                        Process.killProcess(Process.myPid());
+                    }
+                } catch (RemoteException ex) {
+                }
                 mLayoutRequested = true;    // ask wm for a new surface next time.
                 return;
             }
@@ -2033,8 +2069,22 @@ public final class ViewRoot extends Handler implements ViewParent,
                     if (mAttachInfo.mHardwareRenderer != null &&
                             mSurface != null && mSurface.isValid()) {
                         mFullRedrawNeeded = true;
-                        mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
-                                mAttachInfo, mHolder);
+                        try {
+                            mAttachInfo.mHardwareRenderer.initializeIfNeeded(mWidth, mHeight,
+                                    mAttachInfo, mHolder);
+                        } catch (Surface.OutOfResourcesException e) {
+                            Log.e(TAG, "OutOfResourcesException locking surface", e);
+                            try {
+                                if (!sWindowSession.outOfMemory(mWindow)) {
+                                    Slog.w(TAG, "No processes killed for memory; killing self");
+                                    Process.killProcess(Process.myPid());
+                                }
+                            } catch (RemoteException ex) {
+                            }
+                            // Retry in a bit.
+                            sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2), 500);
+                            return;
+                        }
                     }
                 }
 

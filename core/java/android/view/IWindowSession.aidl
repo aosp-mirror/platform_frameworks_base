@@ -84,6 +84,11 @@ interface IWindowSession {
             out Surface outSurface);
 
     /**
+     * Called by a client to report that it ran out of graphics memory.
+     */
+    boolean outOfMemory(IWindow window);
+
+    /**
      * Give the window manager a hint of the part of the window that is
      * completely transparent, allowing it to work with the surface flinger
      * to optimize compositing of this part of the window.

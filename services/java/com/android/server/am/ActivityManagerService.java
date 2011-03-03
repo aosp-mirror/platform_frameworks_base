@@ -6184,7 +6184,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public boolean killPids(int[] pids, String pReason) {
+    public boolean killPids(int[] pids, String pReason, boolean secure) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("killPids only available to the system");
         }
@@ -6207,11 +6207,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             
-            // If the worse oom_adj is somewhere in the hidden proc LRU range,
+            // If the worst oom_adj is somewhere in the hidden proc LRU range,
             // then constrain it so we will kill all hidden procs.
             if (worstType < EMPTY_APP_ADJ && worstType > HIDDEN_APP_MIN_ADJ) {
                 worstType = HIDDEN_APP_MIN_ADJ;
             }
+
+            // If this is not a secure call, don't let it kill processes that
+            // are important.
+            if (!secure && worstType < SECONDARY_SERVER_ADJ) {
+                worstType = SECONDARY_SERVER_ADJ;
+            }
+
             Slog.w(TAG, "Killing processes " + reason + " at adjustment " + worstType);
             for (int i=0; i<pids.length; i++) {
                 ProcessRecord proc = mPidsSelfLocked.get(pids[i]);

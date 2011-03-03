@@ -161,6 +161,10 @@ final class Session extends IWindowSession.Stub
         return res;
     }
 
+    public boolean outOfMemory(IWindow window) {
+        return mService.outOfMemoryWindow(this, window);
+    }
+
     public void setTransparentRegion(IWindow window, Region region) {
         mService.setTransparentRegionWindow(this, window, region);
     }

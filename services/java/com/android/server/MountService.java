@@ -374,7 +374,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                                 done = true;
                             } else {
                                 // Eliminate system process here?
-                                ams.killPids(pids, "unmount media");
+                                ams.killPids(pids, "unmount media", true);
                                 // Confirm if file references have been freed.
                                 pids = getStorageUsers(path);
                                 if (pids == null || pids.length == 0) {
