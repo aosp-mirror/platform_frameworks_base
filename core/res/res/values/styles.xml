@@ -1073,8 +1073,8 @@ please see styles_device_defaults.xml.
 
     <!-- Style for animating text selection handles. -->
     <style name="Animation.TextSelectHandle">
-        <item name="windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="windowExitAnimation">@android:anim/fade_out</item>
+        <item name="windowEnterAnimation">@android:anim/fast_fade_in</item>
+        <item name="windowExitAnimation">@android:anim/fast_fade_out</item>
     </style>
 
     <!-- Style for the popup window that contains text suggestions. -->
