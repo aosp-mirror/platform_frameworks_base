@@ -2510,6 +2510,7 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                             synchronized (mDhcpInfoInternal) {
                                 mDhcpInfoInternal = dhcpInfoInternal;
                             }
+                            WifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
                             sendMessage(CMD_IP_CONFIG_SUCCESS);
                         } else {
                             Log.d(TAG, "DHCP request failed: " +
