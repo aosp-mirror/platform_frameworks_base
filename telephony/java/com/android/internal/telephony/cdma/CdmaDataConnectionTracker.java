@@ -104,8 +104,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         p.mCM.registerForDataNetworkStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
         p.mCT.registerForVoiceCallEnded (this, EVENT_VOICE_CALL_ENDED, null);
         p.mCT.registerForVoiceCallStarted (this, EVENT_VOICE_CALL_STARTED, null);
-        p.mSST.registerForCdmaDataConnectionAttached(this, EVENT_TRY_SETUP_DATA, null);
-        p.mSST.registerForCdmaDataConnectionDetached(this, EVENT_CDMA_DATA_DETACHED, null);
+        p.mSST.registerForDataConnectionAttached(this, EVENT_TRY_SETUP_DATA, null);
+        p.mSST.registerForDataConnectionDetached(this, EVENT_CDMA_DATA_DETACHED, null);
         p.mSST.registerForRoamingOn(this, EVENT_ROAMING_ON, null);
         p.mSST.registerForRoamingOff(this, EVENT_ROAMING_OFF, null);
         p.mCM.registerForCdmaOtaProvision(this, EVENT_CDMA_OTA_PROVISION, null);
@@ -128,8 +128,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         mPhone.mCM.unregisterForDataNetworkStateChanged(this);
         mCdmaPhone.mCT.unregisterForVoiceCallEnded(this);
         mCdmaPhone.mCT.unregisterForVoiceCallStarted(this);
-        mCdmaPhone.mSST.unregisterForCdmaDataConnectionAttached(this);
-        mCdmaPhone.mSST.unregisterForCdmaDataConnectionDetached(this);
+        mCdmaPhone.mSST.unregisterForDataConnectionAttached(this);
+        mCdmaPhone.mSST.unregisterForDataConnectionDetached(this);
         mCdmaPhone.mSST.unregisterForRoamingOn(this);
         mCdmaPhone.mSST.unregisterForRoamingOff(this);
         mPhone.mCM.unregisterForCdmaOtaProvision(this);

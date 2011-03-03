@@ -36,7 +36,7 @@ import android.os.Message;
 import android.util.Log;
 import android.util.EventLog;
 
-import com.android.internal.telephony.gsm.RestrictedState;
+import com.android.internal.telephony.RestrictedState;
 import com.android.internal.telephony.gsm.GsmDataConnectionTracker;
 
 public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
@@ -44,110 +44,14 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     CDMALTEPhone mCdmaLtePhone;
 
-    private RestrictedState rs;
-
     private int gprsState = ServiceState.STATE_OUT_OF_SERVICE;
 
     private int newGPRSState = ServiceState.STATE_OUT_OF_SERVICE;
 
-    private RegistrantList gprsAttachedRegistrants = new RegistrantList();
-
-    private RegistrantList gprsDetachedRegistrants = new RegistrantList();
-
-    private RegistrantList psRestrictEnabledRegistrants = new RegistrantList();
-
-    private RegistrantList psRestrictDisabledRegistrants = new RegistrantList();
-
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
         mCdmaLtePhone = phone;
-        rs = new RestrictedState();
         log("CdmaLteServiceStateTracker Constructors");
-    }
-
-    // Added 9 new functions needed in GsmDataConnectionTracker, functions were
-    // copied over from GsmServiceStateTracker.
-    /**
-     * Registration point for transition into GPRS attached.
-     *
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    public void registerForDataConnectionAttached(Handler h, int what, Object obj) {
-        log("registerForDataConnectionAttached ");
-        Registrant r = new Registrant(h, what, obj);
-        gprsAttachedRegistrants.add(r);
-
-        if (gprsState == ServiceState.STATE_IN_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    public void unregisterForDataConnectionAttached(Handler h) {
-        gprsAttachedRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition into GPRS detached.
-     *
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    public void registerForDataConnectionDetached(Handler h, int what, Object obj) {
-        log("registerForDataConnectionDetached ");
-        Registrant r = new Registrant(h, what, obj);
-        gprsDetachedRegistrants.add(r);
-        if (gprsState == ServiceState.STATE_OUT_OF_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    public void unregisterForDataConnectionDetached(Handler h) {
-        gprsDetachedRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition into packet service restricted zone.
-     *
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    public void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
-        log("registerForPsRestrictedEnabled ");
-        Registrant r = new Registrant(h, what, obj);
-        psRestrictEnabledRegistrants.add(r);
-
-        if (rs.isPsRestricted()) {
-            r.notifyRegistrant();
-        }
-    }
-
-    public void unregisterForPsRestrictedEnabled(Handler h) {
-        psRestrictEnabledRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition out of packet service restricted zone.
-     *
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    public void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
-        log("registerForPsRestrictedDisabled ");
-        Registrant r = new Registrant(h, what, obj);
-        psRestrictDisabledRegistrants.add(r);
-
-        if (rs.isPsRestricted()) {
-            r.notifyRegistrant();
-        }
-    }
-
-    public void unregisterForPsRestrictedDisabled(Handler h) {
-        psRestrictDisabledRegistrants.remove(h);
     }
 
     /**
@@ -426,7 +330,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         if (hasRegistered) {
-            networkAttachedRegistrants.notifyRegistrants();
+            mNetworkAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasChanged) {
@@ -484,12 +388,12 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
         if (hasCdmaDataConnectionAttached) {
             cdmaDataConnectionAttachedRegistrants.notifyRegistrants();
-            gprsAttachedRegistrants.notifyRegistrants();
+            mAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasCdmaDataConnectionDetached) {
             cdmaDataConnectionDetachedRegistrants.notifyRegistrants();
-            gprsDetachedRegistrants.notifyRegistrants();
+            mDetachedRegistrants.notifyRegistrants();
         }
 
         if ((hasCdmaDataConnectionChanged || hasNetworkTypeChanged)
@@ -498,11 +402,11 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         if (hasRoamingOn) {
-            roamingOnRegistrants.notifyRegistrants();
+            mRoamingOnRegistrants.notifyRegistrants();
         }
 
         if (hasRoamingOff) {
-            roamingOffRegistrants.notifyRegistrants();
+            mRoamingOffRegistrants.notifyRegistrants();
         }
 
         if (hasLocationChanged) {
