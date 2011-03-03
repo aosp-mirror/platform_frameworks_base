@@ -1179,21 +1179,20 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * <code>contextStart</code>, <code>contextEnd</code> and <code>offset</code> are relative to
      * the start of the string.</p>
      *
-     * <p>If cursorOpt is {@link Paint#CURSOR_AT} and the offset is not a valid cursor position,
+     * <p>If cursorOpt is CURSOR_AT and the offset is not a valid cursor position,
      * this returns -1.  Otherwise this will never return a value before contextStart or after
      * contextEnd.</p>
      *
      * @param contextStart the start index of the context
      * @param contextEnd the (non-inclusive) end index of the context
-     * @param flags either {@link Paint#DIRECTION_RTL} or {@link Paint#DIRECTION_LTR}
+     * @param flags either DIRECTION_RTL or DIRECTION_LTR
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link Paint#CURSOR_AFTER},
-     * {@link Paint#CURSOR_AT_OR_AFTER}, {@link Paint#CURSOR_BEFORE},
-     * {@link Paint#CURSOR_AT_OR_BEFORE}, or {@link Paint#CURSOR_AT}
+     * @param cursorOpt how to move the cursor, one of CURSOR_AFTER,
+     * CURSOR_AT_OR_AFTER, CURSOR_BEFORE,
+     * CURSOR_AT_OR_BEFORE, or CURSOR_AT
      * @param p the Paint object that is requesting this information
      * @return the offset of the next position, or -1
      */
-    @Override
     public int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
             int cursorOpt, Paint p) {
 
