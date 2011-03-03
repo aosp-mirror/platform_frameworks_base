@@ -8488,12 +8488,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *         {@link #LAYER_TYPE_HARDWARE}
      *
      * @see #setLayerType(int, android.graphics.Paint)
+     * @see #buildLayer() 
      * @see #LAYER_TYPE_NONE
      * @see #LAYER_TYPE_SOFTWARE
      * @see #LAYER_TYPE_HARDWARE
      */
     public int getLayerType() {
         return mLayerType;
+    }
+
+    /**
+     * Forces this view's layer to be created and this view to be rendered
+     * into its layer. If this view's layer type is set to {@link #LAYER_TYPE_NONE},
+     * invoking this method will have no effect.
+     * 
+     * This method can for instance be used to render a view into its layer before
+     * starting an animation. If this view is complex, rendering into the layer
+     * before starting the animation will avoid skipping frames.
+     * 
+     * @throws IllegalStateException If this view is not attached to a window
+     * 
+     * @see #setLayerType(int, android.graphics.Paint) 
+     */
+    public void buildLayer() {
+        if (mLayerType == LAYER_TYPE_NONE) return;
+
+        if (mAttachInfo == null) {
+            throw new IllegalStateException("This view must be attached to a window first");
+        }
+
+        switch (mLayerType) {
+            case LAYER_TYPE_HARDWARE:
+                getHardwareLayer();
+                break;
+            case LAYER_TYPE_SOFTWARE:
+                buildDrawingCache(true);
+                break;
+        }
     }
 
     /**
