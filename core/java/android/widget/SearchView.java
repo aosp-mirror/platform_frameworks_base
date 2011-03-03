@@ -96,6 +96,7 @@ public class SearchView extends LinearLayout {
     private boolean mVoiceButtonEnabled;
 
     private SearchableInfo mSearchable;
+    private Bundle mAppSearchData;
 
     // For voice searching
     private final Intent mVoiceWebSearchIntent;
@@ -261,6 +262,15 @@ public class SearchView extends LinearLayout {
         // Cache the voice search capability
         mVoiceButtonEnabled = hasVoiceSearch();
         updateViewsVisibility(mIconifiedByDefault);
+    }
+
+    /**
+     * Sets the APP_DATA for legacy SearchDialog use.
+     * @param appSearchData bundle provided by the app when launching the search dialog
+     * @hide
+     */
+    public void setAppSearchData(Bundle appSearchData) {
+        mAppSearchData = appSearchData;
     }
 
     /** @hide */
@@ -1114,6 +1124,9 @@ public class SearchView extends LinearLayout {
         }
         if (extraData != null) {
             intent.putExtra(SearchManager.EXTRA_DATA_KEY, extraData);
+        }
+        if (mAppSearchData != null) {
+            intent.putExtra(SearchManager.APP_DATA, mAppSearchData);
         }
         if (actionKey != KeyEvent.KEYCODE_UNKNOWN) {
             intent.putExtra(SearchManager.ACTION_KEY, actionKey);
