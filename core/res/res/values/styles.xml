@@ -1611,6 +1611,8 @@
         <item name="android:thumb">@android:drawable/scrubber_control_selector_holo</item>
         <item name="android:thumbOffset">16dip</item>
         <item name="android:focusable">true</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
     </style>
 
     <style name="Widget.Holo.RatingBar" parent="Widget.RatingBar">
