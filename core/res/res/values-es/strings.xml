@@ -361,8 +361,10 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controlar linterna"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permite que la aplicación controle la función de linterna."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"acceso a dispositivos USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"La aplicación puede acceder a dispositivos USB."</string>
+    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
+    <skip />
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementar protocolo MTP"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite el acceso al controlador MTP del kernel para implementar el protocolo USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"probar hardware"</string>
@@ -814,6 +816,8 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de forma predeterminada para esta acción"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar valores predeterminados en la página de configuración de la pantalla de inicio del teléfono &gt; Aplicaciones &gt; Administrar aplicaciones\"."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Seleccionar una acción"</string>
+    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
+    <skip />
     <string name="noApplications" msgid="1691104391758345586">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_title" msgid="653922989522758100">"Lo sentimos."</string>
     <string name="aerr_application" msgid="4683614104336409186">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) se ha interrumpido inesperadamente. Inténtalo de nuevo."</string>
@@ -974,7 +978,7 @@
     <string name="tethered_notification_message" msgid="3067108323903048927">"Toca para iniciar la configuración."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Atrás"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Siguiente"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"Omitir"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Saltar"</string>
     <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Uso elevado datos móviles"</string>
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Más información sobre uso de datos"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Límite datos superado"</string>

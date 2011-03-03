@@ -361,8 +361,10 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permite aplicaţiei să controleze mecanismul de vibrare."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"control lanternă"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permite aplicaţiei să controleze lanterna."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"accesare dispozitive USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permite aplicaţiei să acceseze dispozitive USB."</string>
+    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
+    <skip />
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementare protocol MTP"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permite accesul la driverul MTP al nucleului pentru a implementa protocolul USB pentru MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testare hardware"</string>
@@ -814,6 +816,8 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Se utilizează în mod prestabilit pentru această acţiune."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Ştergeţi setările prestabilite din Setări pagină de pornire &gt; Aplicaţii &gt; Gestionare aplicaţii."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Selectaţi o acţiune"</string>
+    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
+    <skip />
     <string name="noApplications" msgid="1691104391758345586">"Această acţiune nu poate fi efectuată de nicio aplicaţie."</string>
     <string name="aerr_title" msgid="653922989522758100">"Ne pare rău!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) s-a oprit în mod neaşteptat. Încercaţi din nou."</string>
