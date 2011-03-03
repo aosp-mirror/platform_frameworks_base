@@ -822,8 +822,10 @@ int EventHub::openDevice(const char *devicePath) {
     bool haveKeyboardKeys = containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
             || containsNonZeroByte(key_bitmask, sizeof_bit_array(KEY_OK),
                     sizeof_bit_array(KEY_MAX + 1));
-    bool haveGamepadButtons =containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_JOYSTICK),
-                sizeof_bit_array(BTN_DIGI));
+    bool haveGamepadButtons = containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_MISC),
+                    sizeof_bit_array(BTN_MOUSE))
+            || containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_JOYSTICK),
+                    sizeof_bit_array(BTN_DIGI));
     if (haveKeyboardKeys || haveGamepadButtons) {
         device->classes |= INPUT_DEVICE_CLASS_KEYBOARD;
     }
@@ -852,6 +854,16 @@ int EventHub::openDevice(const char *devicePath) {
         device->classes |= INPUT_DEVICE_CLASS_TOUCH;
     }
 
+    // See if this device is a joystick.
+    // Ignore touchscreens because they use the same absolute axes for other purposes.
+    // Assumes that joysticks always have gamepad buttons in order to distinguish them
+    // from other devices such as accelerometers that also have absolute axes.
+    if (haveGamepadButtons
+            && !(device->classes & INPUT_DEVICE_CLASS_TOUCH)
+            && containsNonZeroByte(abs_bitmask, 0, sizeof_bit_array(ABS_MAX + 1))) {
+        device->classes |= INPUT_DEVICE_CLASS_JOYSTICK;
+    }
+
     // figure out the switches this device reports
     bool haveSwitches = false;
     for (int i=0; i<EV_SW; i++) {
@@ -876,15 +888,21 @@ int EventHub::openDevice(const char *devicePath) {
         }
     }
 
-    if ((device->classes & INPUT_DEVICE_CLASS_KEYBOARD) != 0) {
+    // Load the key map.
+    // We need to do this for joysticks too because the key layout may specify axes.
+    status_t keyMapStatus = NAME_NOT_FOUND;
+    if (device->classes & (INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_JOYSTICK)) {
         // Load the keymap for the device.
-        status_t status = loadKeyMap(device);
+        keyMapStatus = loadKeyMap(device);
+    }
 
+    // Configure the keyboard, gamepad or virtual keyboard.
+    if (device->classes & INPUT_DEVICE_CLASS_KEYBOARD) {
         // Set system properties for the keyboard.
         setKeyboardProperties(device, false);
 
         // Register the keyboard as a built-in keyboard if it is eligible.
-        if (!status
+        if (!keyMapStatus
                 && mBuiltInKeyboardId == -1
                 && isEligibleBuiltInKeyboard(device->identifier,
                         device->configuration, &device->keyMap)) {
@@ -912,16 +930,6 @@ int EventHub::openDevice(const char *devicePath) {
                 device->classes |= INPUT_DEVICE_CLASS_GAMEPAD;
                 break;
             }
-        }
-    }
-
-    // See if this device is a joystick.
-    // Ignore touchscreens because they use the same absolute axes for other purposes.
-    // Assumes that joysticks always have buttons and the keymap has been loaded.
-    if (device->classes & INPUT_DEVICE_CLASS_GAMEPAD
-            && !(device->classes & INPUT_DEVICE_CLASS_TOUCH)) {
-        if (containsNonZeroByte(abs_bitmask, 0, sizeof_bit_array(ABS_MAX + 1))) {
-            device->classes |= INPUT_DEVICE_CLASS_JOYSTICK;
         }
     }
 
