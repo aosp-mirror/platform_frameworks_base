@@ -24,6 +24,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+#include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
 #include <binder/Parcel.h>
@@ -35,6 +36,7 @@
 
 #include <media/AudioTrack.h>
 #include <media/AudioRecord.h>
+#include <media/IMediaPlayerService.h>
 
 #include <private/media/AudioTrackShared.h>
 #include <private/media/AudioEffectShared.h>
@@ -119,6 +121,19 @@ static bool settingsAllowed() {
         LOGW("WARNING: Need to add android.permission.MODIFY_AUDIO_SETTINGS to manifest");
     return true;
 #endif
+}
+
+// To collect the amplifier usage
+static void addBatteryData(uint32_t params) {
+    sp<IBinder> binder =
+        defaultServiceManager()->getService(String16("media.player"));
+    sp<IMediaPlayerService> service = interface_cast<IMediaPlayerService>(binder);
+    if (service.get() == NULL) {
+        LOGW("Cannot connect to the MediaPlayerService for battery tracking");
+        return;
+    }
+
+    service->addBatteryData(params);
 }
 
 // ----------------------------------------------------------------------------
@@ -1833,6 +1848,27 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
             }
         }
         if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) {
+            // when changing the audio output device, call addBatteryData to notify
+            // the change
+            if (mDevice != value) {
+                uint32_t params = 0;
+                // check whether speaker is on
+                if (value & AudioSystem::DEVICE_OUT_SPEAKER) {
+                    params |= IMediaPlayerService::kBatteryDataSpeakerOn;
+                }
+
+                int deviceWithoutSpeaker
+                    = AudioSystem::DEVICE_OUT_ALL & ~AudioSystem::DEVICE_OUT_SPEAKER;
+                // check if any other device (except speaker) is on
+                if (value & deviceWithoutSpeaker ) {
+                    params |= IMediaPlayerService::kBatteryDataOtherAudioDeviceOn;
+                }
+
+                if (params != 0) {
+                    addBatteryData(params);
+                }
+            }
+
             // forward device change to effects that have requested to be
             // aware of attached audio device.
             mDevice = (uint32_t)value;
@@ -2831,6 +2867,9 @@ void AudioFlinger::PlaybackThread::Track::destroy()
                     AudioSystem::stopOutput(thread->id(),
                                             (AudioSystem::stream_type)mStreamType,
                                             mSessionId);
+
+                    // to track the speaker usage
+                    addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
                 }
                 AudioSystem::releaseOutput(thread->id());
             }
@@ -2941,6 +2980,11 @@ status_t AudioFlinger::PlaybackThread::Track::start()
                                               (AudioSystem::stream_type)mStreamType,
                                               mSessionId);
             thread->mLock.lock();
+
+            // to track the speaker usage
+            if (status == NO_ERROR) {
+                addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStart);
+            }
         }
         if (status == NO_ERROR) {
             PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
@@ -2976,6 +3020,9 @@ void AudioFlinger::PlaybackThread::Track::stop()
                                     (AudioSystem::stream_type)mStreamType,
                                     mSessionId);
             thread->mLock.lock();
+
+            // to track the speaker usage
+            addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
         }
     }
 }
@@ -2995,6 +3042,9 @@ void AudioFlinger::PlaybackThread::Track::pause()
                                         (AudioSystem::stream_type)mStreamType,
                                         mSessionId);
                 thread->mLock.lock();
+
+                // to track the speaker usage
+                addBatteryData(IMediaPlayerService::kBatteryDataAudioFlingerStop);
             }
         }
     }

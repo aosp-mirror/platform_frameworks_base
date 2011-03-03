@@ -214,6 +214,15 @@ MediaPlayerService::MediaPlayerService()
 {
     LOGV("MediaPlayerService created");
     mNextConnId = 1;
+
+    mBatteryAudio.refCount = 0;
+    for (int i = 0; i < NUM_AUDIO_DEVICES; i++) {
+        mBatteryAudio.deviceOn[i] = 0;
+        mBatteryAudio.lastTime[i] = 0;
+        mBatteryAudio.totalTime[i] = 0;
+    }
+    // speaker is on by default
+    mBatteryAudio.deviceOn[SPEAKER] = 1;
 }
 
 MediaPlayerService::~MediaPlayerService()
@@ -1777,12 +1786,88 @@ int MediaPlayerService::AudioCache::getSessionId()
 void MediaPlayerService::addBatteryData(uint32_t params)
 {
     Mutex::Autolock lock(mLock);
+
+    int32_t time = systemTime() / 1000000L;
+
+    // change audio output devices. This notification comes from AudioFlinger
+    if ((params & kBatteryDataSpeakerOn)
+            || (params & kBatteryDataOtherAudioDeviceOn)) {
+
+        int deviceOn[NUM_AUDIO_DEVICES];
+        for (int i = 0; i < NUM_AUDIO_DEVICES; i++) {
+            deviceOn[i] = 0;
+        }
+
+        if ((params & kBatteryDataSpeakerOn)
+                && (params & kBatteryDataOtherAudioDeviceOn)) {
+            deviceOn[SPEAKER_AND_OTHER] = 1;
+        } else if (params & kBatteryDataSpeakerOn) {
+            deviceOn[SPEAKER] = 1;
+        } else {
+            deviceOn[OTHER_AUDIO_DEVICE] = 1;
+        }
+
+        for (int i = 0; i < NUM_AUDIO_DEVICES; i++) {
+            if (mBatteryAudio.deviceOn[i] != deviceOn[i]){
+
+                if (mBatteryAudio.refCount > 0) { // if playing audio
+                    if (!deviceOn[i]) {
+                        mBatteryAudio.lastTime[i] += time;
+                        mBatteryAudio.totalTime[i] += mBatteryAudio.lastTime[i];
+                        mBatteryAudio.lastTime[i] = 0;
+                    } else {
+                        mBatteryAudio.lastTime[i] = 0 - time;
+                    }
+                }
+
+                mBatteryAudio.deviceOn[i] = deviceOn[i];
+            }
+        }
+        return;
+    }
+
+    // an sudio stream is started
+    if (params & kBatteryDataAudioFlingerStart) {
+        // record the start time only if currently no other audio
+        // is being played
+        if (mBatteryAudio.refCount == 0) {
+            for (int i = 0; i < NUM_AUDIO_DEVICES; i++) {
+                if (mBatteryAudio.deviceOn[i]) {
+                    mBatteryAudio.lastTime[i] -= time;
+                }
+            }
+        }
+
+        mBatteryAudio.refCount ++;
+        return;
+
+    } else if (params & kBatteryDataAudioFlingerStop) {
+        if (mBatteryAudio.refCount <= 0) {
+            LOGW("Battery track warning: refCount is <= 0");
+            return;
+        }
+
+        // record the stop time only if currently this is the only
+        // audio being played
+        if (mBatteryAudio.refCount == 1) {
+            for (int i = 0; i < NUM_AUDIO_DEVICES; i++) {
+                if (mBatteryAudio.deviceOn[i]) {
+                    mBatteryAudio.lastTime[i] += time;
+                    mBatteryAudio.totalTime[i] += mBatteryAudio.lastTime[i];
+                    mBatteryAudio.lastTime[i] = 0;
+                }
+            }
+        }
+
+        mBatteryAudio.refCount --;
+        return;
+    }
+
     int uid = IPCThreadState::self()->getCallingUid();
     if (uid == AID_MEDIA) {
         return;
     }
     int index = mBatteryData.indexOfKey(uid);
-    int32_t time = systemTime() / 1000000L;
 
     if (index < 0) { // create a new entry for this UID
         BatteryUsageInfo info;
@@ -1792,7 +1877,10 @@ void MediaPlayerService::addBatteryData(uint32_t params)
         info.videoLastTime = 0;
         info.refCount = 0;
 
-        mBatteryData.add(uid, info);
+        if (mBatteryData.add(uid, info) == NO_MEMORY) {
+            LOGE("Battery track error: no memory for new app");
+            return;
+        }
     }
 
     BatteryUsageInfo &info = mBatteryData.editValueFor(uid);
@@ -1837,6 +1925,26 @@ void MediaPlayerService::addBatteryData(uint32_t params)
 
 status_t MediaPlayerService::pullBatteryData(Parcel* reply) {
     Mutex::Autolock lock(mLock);
+
+    // audio output devices usage
+    int32_t time = systemTime() / 1000000L; //in ms
+    int32_t totalTime;
+
+    for (int i = 0; i < NUM_AUDIO_DEVICES; i++) {
+        totalTime = mBatteryAudio.totalTime[i];
+
+        if (mBatteryAudio.deviceOn[i]
+            && (mBatteryAudio.lastTime[i] != 0)) {
+                int32_t tmpTime = mBatteryAudio.lastTime[i] + time;
+                totalTime += tmpTime;
+        }
+
+        reply->writeInt32(totalTime);
+        // reset the total time
+        mBatteryAudio.totalTime[i] = 0;
+   }
+
+    // codec usage
     BatteryUsageInfo info;
     int size = mBatteryData.size();
 

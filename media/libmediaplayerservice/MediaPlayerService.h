@@ -225,6 +225,25 @@ public:
     };
     KeyedVector<int, BatteryUsageInfo>    mBatteryData;
 
+    enum {
+        SPEAKER,
+        OTHER_AUDIO_DEVICE,
+        SPEAKER_AND_OTHER,
+        NUM_AUDIO_DEVICES
+    };
+
+    struct BatteryAudioFlingerUsageInfo {
+        int refCount; // how many audio streams are being played
+        int deviceOn[NUM_AUDIO_DEVICES]; // whether the device is currently used
+        int32_t lastTime[NUM_AUDIO_DEVICES]; // in ms
+        // totalTime[]: total time of audio output devices usage
+        int32_t totalTime[NUM_AUDIO_DEVICES]; // in ms
+    };
+
+    // This varialble is used to record the usage of audio output device
+    // for battery app
+    BatteryAudioFlingerUsageInfo mBatteryAudio;
+
     // Collect info of the codec usage from media player and media recorder
     virtual void                addBatteryData(uint32_t params);
     // API for the Battery app to pull the data of codecs usage
