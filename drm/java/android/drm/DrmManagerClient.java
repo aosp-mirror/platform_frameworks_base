@@ -479,6 +479,9 @@ public class DrmManagerClient {
      */
     public int acquireRights(DrmInfoRequest drmInfoRequest) {
         DrmInfo drmInfo = acquireDrmInfo(drmInfoRequest);
+        if (null == drmInfo) {
+            return ERROR_UNKNOWN;
+        }
         return processDrmInfo(drmInfo);
     }
 
