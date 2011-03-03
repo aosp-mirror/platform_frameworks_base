@@ -55,6 +55,11 @@ public class AppGlobals {
      * @return The core settings.
      */
     public static int getIntCoreSetting(String key, int defaultValue) {
-        return ActivityThread.currentActivityThread().getIntCoreSetting(key, defaultValue);
+        ActivityThread currentActivityThread = ActivityThread.currentActivityThread();
+        if (currentActivityThread != null) {
+            return currentActivityThread.getIntCoreSetting(key, defaultValue);
+        } else {
+            return defaultValue;
+        }
     }
 }
