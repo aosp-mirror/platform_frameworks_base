@@ -429,16 +429,6 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         return err;
     }
 
-    // Increase the buffer count by one to allow for the ANativeWindow to hold
-    // on to one of the buffers.
-    def.nBufferCountActual++;
-    err = mOMX->setParameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-
-    if (err != OK) {
-        return err;
-    }
-
     // Set up the native window.
     OMX_U32 usage = 0;
     err = mOMX->getGraphicBufferUsage(mNode, kPortIndexOutput, &usage);
@@ -455,6 +445,33 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
     if (err != 0) {
         LOGE("native_window_set_usage failed: %s (%d)", strerror(-err), -err);
         return err;
+    }
+
+    int minUndequeuedBufs = 0;
+    err = mNativeWindow->query(
+            mNativeWindow.get(), NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
+            &minUndequeuedBufs);
+
+    if (err != 0) {
+        LOGE("NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: %s (%d)",
+                strerror(-err), -err);
+        return err;
+    }
+
+    // XXX: Is this the right logic to use?  It's not clear to me what the OMX
+    // buffer counts refer to - how do they account for the renderer holding on
+    // to buffers?
+    if (def.nBufferCountActual < def.nBufferCountMin + minUndequeuedBufs) {
+        OMX_U32 newBufferCount = def.nBufferCountMin + minUndequeuedBufs;
+        def.nBufferCountActual = newBufferCount;
+        err = mOMX->setParameter(
+                mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+
+        if (err != OK) {
+            LOGE("[%s] setting nBufferCountActual to %lu failed: %d",
+                    mComponentName.c_str(), newBufferCount, err);
+            return err;
+        }
     }
 
     err = native_window_set_buffer_count(
@@ -512,11 +529,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
         cancelEnd = mBuffers[kPortIndexOutput].size();
     } else {
         // Return the last two buffers to the native window.
-        // XXX TODO: The number of buffers the native window owns should
-        // probably be queried from it when we put the native window in
-        // fixed buffer pool mode (which needs to be implemented).
-        // Currently it's hard-coded to 2.
-        cancelStart = def.nBufferCountActual - 2;
+        cancelStart = def.nBufferCountActual - minUndequeuedBufs;
         cancelEnd = def.nBufferCountActual;
     }
 
