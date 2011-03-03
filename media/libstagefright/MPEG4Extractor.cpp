@@ -262,7 +262,7 @@ static const char *FourCC2MIME(uint32_t fourcc) {
 
 MPEG4Extractor::MPEG4Extractor(const sp<DataSource> &source)
     : mDataSource(source),
-      mHaveMetadata(false),
+      mInitCheck(NO_INIT),
       mHasVideo(false),
       mFirstTrack(NULL),
       mLastTrack(NULL),
@@ -361,8 +361,8 @@ sp<MetaData> MPEG4Extractor::getTrackMetaData(
 }
 
 status_t MPEG4Extractor::readMetaData() {
-    if (mHaveMetadata) {
-        return OK;
+    if (mInitCheck != NO_INIT) {
+        return mInitCheck;
     }
 
     off64_t offset = 0;
@@ -370,17 +370,20 @@ status_t MPEG4Extractor::readMetaData() {
     while ((err = parseChunk(&offset, 0)) == OK) {
     }
 
-    if (mHaveMetadata) {
+    if (mInitCheck == OK) {
         if (mHasVideo) {
             mFileMetaData->setCString(kKeyMIMEType, "video/mp4");
         } else {
             mFileMetaData->setCString(kKeyMIMEType, "audio/mp4");
         }
 
-        return OK;
+        mInitCheck = verifyIfStreamable();
+    } else {
+        mInitCheck = err;
     }
 
-    return err;
+    CHECK_NE(err, (status_t)NO_INIT);
+    return mInitCheck;
 }
 
 void MPEG4Extractor::setDrmFlag(bool flag) {
@@ -755,7 +758,7 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
                     return err;
                 }
             } else if (chunk_type == FOURCC('m', 'o', 'o', 'v')) {
-                mHaveMetadata = true;
+                mInitCheck = OK;
 
                 if (!mIsDrm) {
                     return UNKNOWN_ERROR;  // Return a dummy error.
@@ -2075,6 +2078,101 @@ status_t MPEG4Source::read(
 
         return OK;
     }
+}
+
+MPEG4Extractor::Track *MPEG4Extractor::findTrackByMimePrefix(
+        const char *mimePrefix) {
+    for (Track *track = mFirstTrack; track != NULL; track = track->next) {
+        const char *mime;
+        if (track->meta != NULL
+                && track->meta->findCString(kKeyMIMEType, &mime)
+                && !strncasecmp(mime, mimePrefix, strlen(mimePrefix))) {
+            return track;
+        }
+    }
+
+    return NULL;
+}
+
+status_t MPEG4Extractor::verifyIfStreamable() {
+    if (!(mDataSource->flags() & DataSource::kIsCachingDataSource)) {
+        return OK;
+    }
+
+    Track *audio = findTrackByMimePrefix("audio/");
+    Track *video = findTrackByMimePrefix("video/");
+
+    if (audio == NULL || video == NULL) {
+        return OK;
+    }
+
+    sp<SampleTable> audioSamples = audio->sampleTable;
+    sp<SampleTable> videoSamples = video->sampleTable;
+
+    off64_t maxOffsetDiff = 0;
+    int64_t maxOffsetTimeUs = -1;
+
+    for (uint32_t i = 0; i < videoSamples->countSamples(); ++i) {
+        off64_t videoOffset;
+        uint32_t videoTime;
+        bool isSync;
+        CHECK_EQ((status_t)OK, videoSamples->getMetaDataForSample(
+                    i, &videoOffset, NULL, &videoTime, &isSync));
+
+        int64_t videoTimeUs = (int64_t)(videoTime * 1E6 / video->timescale);
+
+        uint32_t reqAudioTime = (videoTimeUs * audio->timescale) / 1000000;
+        uint32_t j;
+        if (audioSamples->findSampleAtTime(
+            reqAudioTime, &j, SampleTable::kFlagClosest) != OK) {
+            continue;
+        }
+
+        off64_t audioOffset;
+        uint32_t audioTime;
+        CHECK_EQ((status_t)OK, audioSamples->getMetaDataForSample(
+                    j, &audioOffset, NULL, &audioTime));
+
+        int64_t audioTimeUs = (int64_t)(audioTime * 1E6 / audio->timescale);
+
+        off64_t offsetDiff = videoOffset - audioOffset;
+        if (offsetDiff < 0) {
+            offsetDiff = -offsetDiff;
+        }
+
+#if 0
+        printf("%s%d/%d videoTime %.2f secs audioTime %.2f secs "
+               "videoOffset %lld audioOffset %lld offsetDiff %lld\n",
+               isSync ? "*" : " ",
+               i,
+               j,
+               videoTimeUs / 1E6,
+               audioTimeUs / 1E6,
+               videoOffset,
+               audioOffset,
+               offsetDiff);
+#endif
+
+        if (offsetDiff > maxOffsetDiff) {
+            maxOffsetDiff = offsetDiff;
+            maxOffsetTimeUs = videoTimeUs;
+        }
+    }
+
+#if 0
+    printf("max offset diff: %lld at video time: %.2f secs\n",
+           maxOffsetDiff, maxOffsetTimeUs / 1E6);
+#endif
+
+    if (maxOffsetDiff < 1024 * 1024) {
+        return OK;
+    }
+
+    LOGE("This content is not streamable, "
+         "max offset diff: %lld at video time: %.2f secs",
+         maxOffsetDiff, maxOffsetTimeUs / 1E6);
+
+    return ERROR_UNSUPPORTED;
 }
 
 static bool LegacySniffMPEG4(

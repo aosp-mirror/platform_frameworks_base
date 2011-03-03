@@ -57,7 +57,7 @@ private:
     };
 
     sp<DataSource> mDataSource;
-    bool mHaveMetadata;
+    status_t mInitCheck;
     bool mHasVideo;
 
     Track *mFirstTrack, *mLastTrack;
@@ -89,6 +89,10 @@ private:
     status_t parseDrmSINF(off64_t *offset, off64_t data_offset);
 
     status_t parseTrackHeader(off64_t data_offset, off64_t data_size);
+
+    Track *findTrackByMimePrefix(const char *mimePrefix);
+
+    status_t verifyIfStreamable();
 
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);
