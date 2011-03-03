@@ -937,6 +937,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private static native int nativeSetSource(int nativePtr, int source);
     private static native int nativeGetAction(int nativePtr);
     private static native void nativeSetAction(int nativePtr, int action);
+    private static native boolean nativeIsTouchEvent(int nativePtr);
     private static native int nativeGetFlags(int nativePtr);
     private static native int nativeGetEdgeFlags(int nativePtr);
     private static native void nativeSetEdgeFlags(int nativePtr, int action);
@@ -1275,19 +1276,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public final boolean isTouchEvent() {
-        if ((getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            switch (getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_MOVE:
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_POINTER_DOWN:
-                case MotionEvent.ACTION_POINTER_UP:
-                case MotionEvent.ACTION_CANCEL:
-                case MotionEvent.ACTION_OUTSIDE:
-                    return true;
-            }
-        }
-        return false;
+        return nativeIsTouchEvent(mNativePtr);
     }
 
     /**

@@ -2364,6 +2364,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return result;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
+        int result = 0;
+
+        final boolean isWakeMotion = (policyFlags
+                & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
+        if (isWakeMotion) {
+            if (mKeyguardMediator.isShowing()) {
+                // If the keyguard is showing, let it decide what to do with the wake motion.
+                mKeyguardMediator.onWakeMotionWhenKeyguardShowingTq();
+            } else {
+                // Otherwise, wake the device ourselves.
+                result |= ACTION_POKE_USER_ACTIVITY;
+            }
+        }
+        return result;
+    }
+
     class PassHeadsetKey implements Runnable {
         KeyEvent mKeyEvent;
 

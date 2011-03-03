@@ -188,6 +188,8 @@ private:
 class FakeInputDispatcher : public InputDispatcherInterface {
 public:
     struct NotifyConfigurationChangedArgs {
+        NotifyConfigurationChangedArgs() : eventTime(0) { }
+
         nsecs_t eventTime;
     };
 
@@ -685,6 +687,10 @@ private:
         if (device) {
             outVirtualKeys.appendVector(device->virtualKeys);
         }
+    }
+
+    virtual bool isExternal(int32_t deviceId) const {
+        return false;
     }
 
     virtual void dump(String8& dump) {

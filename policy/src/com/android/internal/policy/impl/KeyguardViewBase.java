@@ -108,7 +108,8 @@ public abstract class KeyguardViewBase extends FrameLayout {
      * action should be posted to a handler.
      *
      * @param keyCode The wake key, which may be relevant for configuring the
-     *   keyguard.
+     *   keyguard.  May be {@link KeyEvent#KEYCODE_UNKNOWN} if waking for a reason
+     *   other than a key press.
      */
     abstract public void wakeWhenReadyTq(int keyCode);
 

@@ -286,6 +286,9 @@ public:
     inline const String8& getName() { return mName; }
     inline uint32_t getSources() { return mSources; }
 
+    inline bool isExternal() { return mIsExternal; }
+    inline void setExternal(bool external) { mIsExternal = external; }
+
     inline bool isIgnored() { return mMappers.isEmpty(); }
 
     void dump(String8& dump);
@@ -317,6 +320,7 @@ private:
 
     String8 mName;
     uint32_t mSources;
+    bool mIsExternal;
 
     typedef int32_t (InputMapper::*GetStateFunc)(uint32_t sourceMask, int32_t code);
     int32_t getState(uint32_t sourceMask, int32_t code, GetStateFunc getStateFunc);

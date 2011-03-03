@@ -616,6 +616,23 @@ status_t MotionEvent::writeToParcel(Parcel* parcel) const {
 }
 #endif
 
+bool MotionEvent::isTouchEvent(int32_t source, int32_t action) {
+    if (source & AINPUT_SOURCE_CLASS_POINTER) {
+        // Specifically excludes HOVER_MOVE and SCROLL.
+        switch (action & AMOTION_EVENT_ACTION_MASK) {
+        case AMOTION_EVENT_ACTION_DOWN:
+        case AMOTION_EVENT_ACTION_MOVE:
+        case AMOTION_EVENT_ACTION_UP:
+        case AMOTION_EVENT_ACTION_POINTER_DOWN:
+        case AMOTION_EVENT_ACTION_POINTER_UP:
+        case AMOTION_EVENT_ACTION_CANCEL:
+        case AMOTION_EVENT_ACTION_OUTSIDE:
+            return true;
+        }
+    }
+    return false;
+}
+
 
 // --- InputDeviceInfo ---
 

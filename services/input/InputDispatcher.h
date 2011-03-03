@@ -165,14 +165,14 @@ public:
      */
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) = 0;
 
-    /* Intercepts a generic touch, trackball or other event before queueing it.
+    /* Intercepts a touch, trackball or other motion event before queueing it.
      * The policy can use this method as an opportunity to perform power management functions
      * and early event preprocessing such as updating policy flags.
      *
      * This method is expected to set the POLICY_FLAG_PASS_TO_USER policy flag if the event
      * should be dispatched to applications.
      */
-    virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) = 0;
+    virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags) = 0;
 
     /* Allows the policy a chance to intercept a key before dispatching. */
     virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,

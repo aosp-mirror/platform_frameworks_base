@@ -58,7 +58,7 @@ private:
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) {
     }
 
-    virtual void interceptGenericBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
+    virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags) {
     }
 
     virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,

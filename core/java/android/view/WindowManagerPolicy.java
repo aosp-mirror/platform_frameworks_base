@@ -573,7 +573,21 @@ public interface WindowManagerPolicy {
      *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
      */
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
-    
+
+    /**
+     * Called from the input reader thread before a motion is enqueued when the screen is off.
+     *
+     * <p>There are some actions that need to be handled here because they
+     * affect the power state of the device, for example, waking on motions.
+     * Generally, it's best to keep as little as possible in the queue thread
+     * because it's the most fragile.
+     * @param policyFlags The policy flags associated with the motion.
+     *
+     * @return The bitwise or of the {@link #ACTION_PASS_TO_USER},
+     *          {@link #ACTION_POKE_USER_ACTIVITY} and {@link #ACTION_GO_TO_SLEEP} flags.
+     */
+    public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags);
+
     /**
      * Called from the input dispatcher thread before a key is dispatched to a window.
      *

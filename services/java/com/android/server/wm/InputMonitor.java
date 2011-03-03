@@ -258,7 +258,14 @@ final class InputMonitor {
             KeyEvent event, int policyFlags, boolean isScreenOn) {
         return mService.mPolicy.interceptKeyBeforeQueueing(event, policyFlags, isScreenOn);
     }
-    
+
+    /* Provides an opportunity for the window manager policy to intercept early
+     * motion event processing when the screen is off since these events are normally
+     * dropped. */
+    public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
+        return mService.mPolicy.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
+    }
+
     /* Provides an opportunity for the window manager policy to process a key before
      * ordinary dispatch. */
     public boolean interceptKeyBeforeDispatching(
