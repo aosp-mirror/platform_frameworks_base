@@ -362,6 +362,9 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         mRecentsContainer.addFooterView(footer, null, false);
         mRecentsContainer.setAdapter(mListAdapter = new ActvityDescriptionAdapter(mContext));
         mRecentsContainer.setOnItemClickListener(this);
+        final int leftPadding = mContext.getResources()
+            .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
+        mRecentsContainer.setOverScrollEffectPadding(leftPadding, 0);
 
         mRecentsGlowView = findViewById(R.id.recents_glow);
         mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
