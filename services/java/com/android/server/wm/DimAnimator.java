@@ -45,7 +45,7 @@ class DimAnimator {
                     + mDimSurface + ": CREATE");
             try {
                 mDimSurface = new Surface(session, 0,
-                        "DimSurface",
+                        "DimAnimator",
                         -1, 16, 16, PixelFormat.OPAQUE,
                         Surface.FX_SURFACE_DIM);
                 mDimSurface.setAlpha(0.0f);
@@ -84,7 +84,7 @@ class DimAnimator {
      * {@link updateSurface} after all windows are examined.
      */
     void updateParameters(Resources res, WindowState w, long currentTime) {
-        mDimSurface.setLayer(w.mAnimLayer-1);
+        mDimSurface.setLayer(w.mAnimLayer - WindowManagerService.LAYER_OFFSET_DIM);
 
         final float target = w.mExiting ? 0 : w.mAttrs.dimAmount;
         if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM " + mDimSurface
@@ -177,8 +177,11 @@ class DimAnimator {
         return animating;
     }
 
-    public void printTo(PrintWriter pw) {
-        pw.print("  mDimShown="); pw.print(mDimShown);
+    public void printTo(String prefix, PrintWriter pw) {
+        pw.print(prefix);
+        pw.print("mDimSurface="); pw.println(mDimSurface);
+        pw.print(prefix);
+        pw.print("mDimShown="); pw.print(mDimShown);
         pw.print(" current="); pw.print(mDimCurrentAlpha);
         pw.print(" target="); pw.print(mDimTargetAlpha);
         pw.print(" delta="); pw.print(mDimDeltaPerMs);

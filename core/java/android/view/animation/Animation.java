@@ -181,6 +181,11 @@ public abstract class Animation implements Cloneable {
     private int mZAdjustment;
 
     /**
+     * Desired background color behind animation.
+     */
+    private int mBackgroundColor;
+
+    /**
      * scalefactor to apply to pivot points, etc. during animation. Subclasses retrieve the
      * value via getScaleFactor().
      */
@@ -236,6 +241,8 @@ public abstract class Animation implements Cloneable {
 
         setZAdjustment(a.getInt(com.android.internal.R.styleable.Animation_zAdjustment, ZORDER_NORMAL));
         
+        setBackgroundColor(a.getInt(com.android.internal.R.styleable.Animation_background, 0));
+
         setDetachWallpaper(a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
         
         ensureInterpolator();
@@ -568,6 +575,16 @@ public abstract class Animation implements Cloneable {
     }
     
     /**
+     * Set background behind animation.
+     *
+     * @param bg The background color.  If 0, no background.  Currently must
+     * be black, with any desired alpha level.
+     */
+    public void setBackgroundColor(int bg) {
+        mBackgroundColor = bg;
+    }
+
+    /**
      * The scale factor is set by the call to <code>getTransformation</code>. Overrides of 
      * {@link #getTransformation(long, Transformation, float)} will get this value
      * directly. Overrides of {@link #applyTransformation(float, Transformation)} can
@@ -687,6 +704,13 @@ public abstract class Animation implements Cloneable {
      */
     public int getZAdjustment() {
         return mZAdjustment;
+    }
+
+    /**
+     * Returns the background color behind the animation.
+     */
+    public int getBackgroundColor() {
+        return mBackgroundColor;
     }
 
     /**

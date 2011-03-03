@@ -3596,6 +3596,10 @@
                  content for the duration of the animation. -->
             <enum name="bottom" value="-1" />
         </attr>
+        <!-- Special background behind animation.  Only for use with window
+             animations.  Can only be a color, and only black.  If 0, the
+             default, there is no background. -->
+        <attr name="background" />
         <!-- Special option for window animations: if this window is on top
              of a wallpaper, don't animate the wallpaper with it. -->
         <attr name="detachWallpaper" format="boolean" />

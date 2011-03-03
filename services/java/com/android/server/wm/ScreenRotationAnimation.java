@@ -110,17 +110,15 @@ class ScreenRotationAnimation {
 
         Bitmap screenshot = Surface.screenshot(0, 0);
 
-        if (screenshot != null) {
-            // Screenshot does NOT include rotation!
-            mSnapshotRotation = 0;
-            mWidth = screenshot.getWidth();
-            mHeight = screenshot.getHeight();
-        } else {
-            // Just in case.
-            mSnapshotRotation = display.getRotation();
-            mWidth = mDisplayMetrics.widthPixels;
-            mHeight = mDisplayMetrics.heightPixels;
+        if (screenshot == null) {
+            // Device is not capable of screenshots...  we can't do an animation.
+            return;
         }
+
+        // Screenshot does NOT include rotation!
+        mSnapshotRotation = 0;
+        mWidth = screenshot.getWidth();
+        mHeight = screenshot.getHeight();
 
         mOriginalRotation = display.getRotation();
         mOriginalWidth = mDisplayMetrics.widthPixels;
@@ -150,23 +148,19 @@ class ScreenRotationAnimation {
                     c = mSurface.lockCanvas(dirty);
                 } catch (IllegalArgumentException e) {
                     Slog.w(TAG, "Unable to lock surface", e);
-                    return;
                 } catch (Surface.OutOfResourcesException e) {
                     Slog.w(TAG, "Unable to lock surface", e);
-                    return;
                 }
                 if (c == null) {
-                    Slog.w(TAG, "Null surface");
+                    Slog.w(TAG, "Null surface canvas");
+                    mSurface.destroy();
+                    mSurface = null;
                     return;
                 }
         
-                if (screenshot != null) {
-                    Paint paint = new Paint(0);
-                    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
-                    c.drawBitmap(screenshot, 0, 0, paint);
-                } else {
-                    c.drawColor(Color.BLACK, PorterDuff.Mode.SRC);
-                }
+                Paint paint = new Paint(0);
+                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+                c.drawBitmap(screenshot, 0, 0, paint);
 
                 mSurface.unlockCanvasAndPost(c);
             }
@@ -177,10 +171,12 @@ class ScreenRotationAnimation {
                         "<<< CLOSE TRANSACTION ScreenRotationAnimation");
             }
     
-            if (screenshot != null) {
-                screenshot.recycle();
-            }
+            screenshot.recycle();
         }
+    }
+
+    boolean hasScreenshot() {
+        return mSurface != null;
     }
 
     static int deltaRotation(int oldRotation, int newRotation) {
@@ -250,16 +246,13 @@ class ScreenRotationAnimation {
      */
     public boolean dismiss(SurfaceSession session, long maxAnimationDuration,
             float animationScale) {
-        // Figure out how the screen has moved from the original rotation.
-        int delta = deltaRotation(mCurRotation, mOriginalRotation);
-        if (false && delta == 0) {
-            // Nothing changed, just remove the snapshot.
-            if (mSurface != null) {
-                mSurface.destroy();
-                mSurface = null;
-            }
+        if (mSurface == null) {
+            // Can't do animation.
             return false;
         }
+
+        // Figure out how the screen has moved from the original rotation.
+        int delta = deltaRotation(mCurRotation, mOriginalRotation);
 
         switch (delta) {
             case Surface.ROTATION_0:
