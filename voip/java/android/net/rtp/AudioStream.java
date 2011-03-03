@@ -41,7 +41,6 @@ import java.net.SocketException;
  *
  * @see RtpStream
  * @see AudioGroup
- * @hide
  */
 public class AudioStream extends RtpStream {
     private AudioCodec mCodec;

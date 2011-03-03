@@ -27,7 +27,6 @@ import java.net.SocketException;
  *
  * <p class="note">Using this class requires
  * {@link android.Manifest.permission#INTERNET} permission.</p>
- * @hide
  */
 public class RtpStream {
     /**
