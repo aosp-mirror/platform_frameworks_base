@@ -105,6 +105,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     /**
      * Return the char at the specified offset within the buffer.
      */
+    @Override
     public char charAt(int where) {
         int len = length();
         if (where < 0) {
@@ -123,6 +124,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     /**
      * Return the number of chars in the buffer.
      */
+    @Override
     public int length() {
         return mText.length - mGapLength;
     }
@@ -205,16 +207,19 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder insert(int where, CharSequence tb, int start, int end) {
         return replace(where, where, tb, start, end);
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder insert(int where, CharSequence tb) {
         return replace(where, where, tb, 0, tb.length());
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder delete(int start, int end) {
         SpannableStringBuilder ret = replace(start, end, "", 0, 0);
 
@@ -225,11 +230,13 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     // Documentation from interface
+    @Override
     public void clear() {
         replace(0, length(), "", 0, 0);
     }
     
     // Documentation from interface
+    @Override
     public void clearSpans() {
         for (int i = mSpanCount - 1; i >= 0; i--) {
             Object what = mSpans[i];
@@ -249,18 +256,21 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder append(CharSequence text) {
         int length = length();
         return replace(length, length, text, 0, text.length());
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder append(CharSequence text, int start, int end) {
         int length = length();
         return replace(length, length, text, start, end);
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder append(char text) {
         return append(String.valueOf(text));
     }
@@ -409,11 +419,13 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder replace(int start, int end, CharSequence tb) {
         return replace(start, end, tb, 0, tb.length());
     }
 
     // Documentation from interface
+    @Override
     public SpannableStringBuilder replace(final int start, final int end,
                         CharSequence tb, int tbstart, int tbend) {
         int filtercount = mFilters.length;
@@ -514,6 +526,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * The flags determine how the span will behave when text is
      * inserted at the start or end of the span's range.
      */
+    @Override
     public void setSpan(Object what, int start, int end, int flags) {
         setSpan(true, what, start, end, flags);
     }
@@ -618,6 +631,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     /**
      * Remove the specified markup object from the buffer.
      */
+    @Override
     public void removeSpan(Object what) {
         for (int i = mSpanCount - 1; i >= 0; i--) {
             if (mSpans[i] == what) {
@@ -649,6 +663,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Return the buffer offset of the beginning of the specified
      * markup object, or -1 if it is not attached to this buffer.
      */
+    @Override
     public int getSpanStart(Object what) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -671,6 +686,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Return the buffer offset of the end of the specified
      * markup object, or -1 if it is not attached to this buffer.
      */
+    @Override
     public int getSpanEnd(Object what) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -693,6 +709,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Return the flags of the end of the specified
      * markup object, or 0 if it is not attached to this buffer.
      */
+    @Override
     public int getSpanFlags(Object what) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -711,6 +728,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * the specified range of the buffer.  The kind may be Object.class to get
      * a list of all the spans regardless of type.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public <T> T[] getSpans(int queryStart, int queryEnd, Class<T> kind) {
         int spanCount = mSpanCount;
@@ -812,6 +830,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * equal to <code>limit</code> where a span of the specified type
      * begins or ends.
      */
+    @Override
     public int nextSpanTransition(int start, int limit, Class kind) {
         int count = mSpanCount;
         Object[] spans = mSpans;
@@ -846,6 +865,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Return a new CharSequence containing a copy of the specified
      * range of this buffer, including the overlapping spans.
      */
+    @Override
     public CharSequence subSequence(int start, int end) {
         return new SpannableStringBuilder(this, start, end);
     }
@@ -854,6 +874,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Copy the specified range of chars from this buffer into the
      * specified array, beginning at the specified offset.
      */
+    @Override
     public void getChars(int start, int end, char[] dest, int destoff) {
         checkRange("getChars", start, end);
 
@@ -1049,6 +1070,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
+    @Override
     public void drawText(Canvas c, int start, int end,
                          float x, float y, Paint p) {
         checkRange("drawText", start, end);
@@ -1071,6 +1093,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Don't call this yourself -- exists for Canvas to use internally.
      * {@hide}
      */
+    @Override
     public void drawTextRun(Canvas c, int start, int end,
             int contextStart, int contextEnd,
             float x, float y, int flags, Paint p) {
@@ -1095,6 +1118,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
+    @Override
     public float measureText(int start, int end, Paint p) {
         checkRange("measureText", start, end);
 
@@ -1119,6 +1143,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
+    @Override
     public int getTextWidths(int start, int end, float[] widths, Paint p) {
         checkRange("getTextWidths", start, end);
 
@@ -1144,6 +1169,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
+    @Override
     public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
             float[] advances, int advancesPos, Paint p) {
 
@@ -1169,6 +1195,31 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         return ret;
     }
 
+    /**
+     * Returns the next cursor position in the run.  This avoids placing the cursor between
+     * surrogates, between characters that form conjuncts, between base characters and combining
+     * marks, or within a reordering cluster.
+     *
+     * <p>The context is the shaping context for cursor movement, generally the bounds of the metric
+     * span enclosing the cursor in the direction of movement.
+     * <code>contextStart</code>, <code>contextEnd</code> and <code>offset</code> are relative to
+     * the start of the string.</p>
+     *
+     * <p>If cursorOpt is {@link Paint#CURSOR_AT} and the offset is not a valid cursor position,
+     * this returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextEnd.</p>
+     *
+     * @param contextStart the start index of the context
+     * @param contextEnd the (non-inclusive) end index of the context
+     * @param flags either {@link Paint#DIRECTION_RTL} or {@link Paint#DIRECTION_LTR}
+     * @param offset the cursor position to move from
+     * @param cursorOpt how to move the cursor, one of {@link Paint#CURSOR_AFTER},
+     * {@link Paint#CURSOR_AT_OR_AFTER}, {@link Paint#CURSOR_BEFORE},
+     * {@link Paint#CURSOR_AT_OR_BEFORE}, or {@link Paint#CURSOR_AT}
+     * @param p the Paint object that is requesting this information
+     * @return the offset of the next position, or -1
+     */
+    @Override
     public int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
             int cursorOpt, Paint p) {
 
@@ -1193,6 +1244,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     // Documentation from interface
+    @Override
     public void setFilters(InputFilter[] filters) {
         if (filters == null) {
             throw new IllegalArgumentException();
@@ -1202,6 +1254,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     // Documentation from interface
+    @Override
     public InputFilter[] getFilters() {
         return mFilters;
     }
