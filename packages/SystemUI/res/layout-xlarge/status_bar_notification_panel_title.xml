@@ -22,6 +22,7 @@
     android:layout_height="0dp"
     android:orientation="vertical"
     android:background="@drawable/notify_panel_clock_bg"
+    android:clickable="true"
     >
     <LinearLayout
         android:id="@+id/icons"
@@ -171,10 +172,12 @@
         android:layout_marginLeft="32dp"
         />
 
-    <Button
+    <view
+        class="com.android.systemui.statusbar.tablet.NotificationPanel$ModeToggle"
         android:id="@+id/mode_toggle"
         android:background="@null"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="true"
         />
 </RelativeLayout>

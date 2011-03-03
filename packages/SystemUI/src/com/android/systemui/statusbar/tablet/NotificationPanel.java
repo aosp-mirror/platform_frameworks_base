@@ -28,7 +28,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -51,7 +54,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     boolean mShowing;
     int mNotificationCount = 0;
     View mTitleArea;
-    View mModeToggle;
+    ModeToggle mModeToggle;
     View mSettingsButton;
     View mNotificationButton;
     View mNotificationScroller;
@@ -64,6 +67,48 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     float mContentFrameMissingTranslation;
 
     Choreographer mChoreo = new Choreographer();
+
+    static class ModeToggle extends View {
+        NotificationPanel mPanel;
+        View mTitle;
+        public ModeToggle(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+        public void setPanel(NotificationPanel p) {
+            mPanel = p;
+        }
+        public void setTitleArea(View v) {
+            mTitle = v;
+        }
+        @Override
+        public boolean onTouchEvent(MotionEvent e) {
+            final int x = (int)e.getX();
+            final int y = (int)e.getY();
+            switch (e.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mTitle.setPressed(true);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mTitle.setPressed(x >= 0
+                            && x < getWidth()
+                            && y >= 0
+                            && y < getHeight());
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    mTitle.setPressed(false);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (mTitle.isPressed()) {
+                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                        mPanel.swapPanels();
+                        mTitle.setPressed(false);
+                    }
+                    break;
+            }
+            return true;
+        }
+    }
 
     public NotificationPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -82,8 +127,10 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         mContentParent = (ViewGroup)findViewById(R.id.content_parent);
         mContentParent.bringToFront();
         mTitleArea = findViewById(R.id.title_area);
-        mModeToggle = findViewById(R.id.mode_toggle);
+        mModeToggle = (ModeToggle) findViewById(R.id.mode_toggle);
         mModeToggle.setOnClickListener(this);
+        mModeToggle.setPanel(this);
+        mModeToggle.setTitleArea(mTitleArea);
 
         mSettingsButton = (ImageView)findViewById(R.id.settings_button);
         mNotificationButton = (ImageView)findViewById(R.id.notification_button);
