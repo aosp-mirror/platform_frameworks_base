@@ -39,10 +39,10 @@
 namespace android {
 
 // Everything must match except for
-// protection, bitrate, padding, private bits, mode extension,
+// protection, bitrate, padding, private bits, mode, mode extension,
 // copyright bit, original bit and emphasis.
 // Yes ... there are things that must indeed match...
-static const uint32_t kMask = 0xfffe0cc0;
+static const uint32_t kMask = 0xfffe0c00;
 
 // static
 bool MP3Extractor::get_mp3_frame_size(
