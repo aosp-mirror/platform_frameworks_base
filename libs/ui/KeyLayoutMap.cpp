@@ -113,20 +113,23 @@ status_t KeyLayoutMap::findScanCodesForKey(int32_t keyCode, Vector<int32_t>* out
     return NO_ERROR;
 }
 
-status_t KeyLayoutMap::mapAxis(int32_t scanCode, int32_t* axis) const {
+status_t KeyLayoutMap::mapAxis(int32_t scanCode, AxisInfo* outAxisInfo) const {
     ssize_t index = mAxes.indexOfKey(scanCode);
     if (index < 0) {
 #if DEBUG_MAPPING
         LOGD("mapAxis: scanCode=%d ~ Failed.", scanCode);
 #endif
-        *axis = -1;
         return NAME_NOT_FOUND;
     }
 
-    *axis = mAxes.valueAt(index);
+    *outAxisInfo = mAxes.valueAt(index);
 
 #if DEBUG_MAPPING
-    LOGD("mapAxis: scanCode=%d ~ Result axis=%d.", scanCode, *axis);
+    LOGD("mapAxis: scanCode=%d ~ Result mode=%d, axis=%d, highAxis=%d, "
+            "splitValue=%d, flatOverride=%d.",
+            scanCode,
+            outAxisInfo->mode, outAxisInfo->axis, outAxisInfo->highAxis,
+            outAxisInfo->splitValue, outAxisInfo->flatOverride);
 #endif
     return NO_ERROR;
 }
@@ -249,19 +252,89 @@ status_t KeyLayoutMap::Parser::parseAxis() {
         return BAD_VALUE;
     }
 
+    AxisInfo axisInfo;
+
     mTokenizer->skipDelimiters(WHITESPACE);
-    String8 axisToken = mTokenizer->nextToken(WHITESPACE);
-    int32_t axis = getAxisByLabel(axisToken.string());
-    if (axis < 0) {
-        LOGE("%s: Expected axis label, got '%s'.", mTokenizer->getLocation().string(),
-                axisToken.string());
-        return BAD_VALUE;
+    String8 token = mTokenizer->nextToken(WHITESPACE);
+    if (token == "invert") {
+        axisInfo.mode = AxisInfo::MODE_INVERT;
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+        String8 axisToken = mTokenizer->nextToken(WHITESPACE);
+        axisInfo.axis = getAxisByLabel(axisToken.string());
+        if (axisInfo.axis < 0) {
+            LOGE("%s: Expected inverted axis label, got '%s'.",
+                    mTokenizer->getLocation().string(), axisToken.string());
+            return BAD_VALUE;
+        }
+    } else if (token == "split") {
+        axisInfo.mode = AxisInfo::MODE_SPLIT;
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+        String8 splitToken = mTokenizer->nextToken(WHITESPACE);
+        axisInfo.splitValue = int32_t(strtol(splitToken.string(), &end, 0));
+        if (*end) {
+            LOGE("%s: Expected split value, got '%s'.",
+                    mTokenizer->getLocation().string(), splitToken.string());
+            return BAD_VALUE;
+        }
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+        String8 lowAxisToken = mTokenizer->nextToken(WHITESPACE);
+        axisInfo.axis = getAxisByLabel(lowAxisToken.string());
+        if (axisInfo.axis < 0) {
+            LOGE("%s: Expected low axis label, got '%s'.",
+                    mTokenizer->getLocation().string(), lowAxisToken.string());
+            return BAD_VALUE;
+        }
+
+        mTokenizer->skipDelimiters(WHITESPACE);
+        String8 highAxisToken = mTokenizer->nextToken(WHITESPACE);
+        axisInfo.highAxis = getAxisByLabel(highAxisToken.string());
+        if (axisInfo.highAxis < 0) {
+            LOGE("%s: Expected high axis label, got '%s'.",
+                    mTokenizer->getLocation().string(), highAxisToken.string());
+            return BAD_VALUE;
+        }
+    } else {
+        axisInfo.axis = getAxisByLabel(token.string());
+        if (axisInfo.axis < 0) {
+            LOGE("%s: Expected axis label, 'split' or 'invert', got '%s'.",
+                    mTokenizer->getLocation().string(), token.string());
+            return BAD_VALUE;
+        }
+    }
+
+    for (;;) {
+        mTokenizer->skipDelimiters(WHITESPACE);
+        if (mTokenizer->isEol()) {
+            break;
+        }
+        String8 keywordToken = mTokenizer->nextToken(WHITESPACE);
+        if (keywordToken == "flat") {
+            mTokenizer->skipDelimiters(WHITESPACE);
+            String8 flatToken = mTokenizer->nextToken(WHITESPACE);
+            axisInfo.flatOverride = int32_t(strtol(flatToken.string(), &end, 0));
+            if (*end) {
+                LOGE("%s: Expected flat value, got '%s'.",
+                        mTokenizer->getLocation().string(), flatToken.string());
+                return BAD_VALUE;
+            }
+        } else {
+            LOGE("%s: Expected keyword 'flat', got '%s'.",
+                    mTokenizer->getLocation().string(), keywordToken.string());
+            return BAD_VALUE;
+        }
     }
 
 #if DEBUG_PARSER
-    LOGD("Parsed axis: scanCode=%d, axis=%d.", scanCode, axis);
+    LOGD("Parsed axis: scanCode=%d, mode=%d, axis=%d, highAxis=%d, "
+            "splitValue=%d, flatOverride=%d.",
+            scanCode,
+            axisInfo.mode, axisInfo.axis, axisInfo.highAxis,
+            axisInfo.splitValue, axisInfo.flatOverride);
 #endif
-    mMap->mAxes.add(scanCode, axis);
+    mMap->mAxes.add(scanCode, axisInfo);
     return NO_ERROR;
 }
 
