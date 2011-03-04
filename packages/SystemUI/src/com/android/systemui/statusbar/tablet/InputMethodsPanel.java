@@ -89,14 +89,12 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
         public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
             if (imi2 == null) return 0;
             if (imi1 == null) return 1;
-            if (mPackageManager != null) {
-                CharSequence imiId1 = imi1.loadLabel(mPackageManager) + "/" + imi1.getId();
-                CharSequence imiId2 = imi2.loadLabel(mPackageManager) + "/" + imi2.getId();
-                if (imiId1 != null && imiId2 != null) {
-                    return imiId1.toString().compareTo(imiId2.toString());
-                }
+            if (mPackageManager == null) {
+                return imi1.getId().compareTo(imi2.getId());
             }
-            return imi1.getId().compareTo(imi2.getId());
+            CharSequence imiId1 = imi1.loadLabel(mPackageManager) + "/" + imi1.getId();
+            CharSequence imiId2 = imi2.loadLabel(mPackageManager) + "/" + imi2.getId();
+            return imiId1.toString().compareTo(imiId2.toString());
         }
     }
 
@@ -267,7 +265,6 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
 
         Map<InputMethodInfo, List<InputMethodSubtype>> enabledIMIs =
                 getEnabledInputMethodAndSubtypeList();
-        // TODO: Sort by alphabet and mode.
         Set<InputMethodInfo> cachedImiSet = enabledIMIs.keySet();
         for (InputMethodInfo imi: cachedImiSet) {
             List<InputMethodSubtype> subtypes = enabledIMIs.get(imi);
