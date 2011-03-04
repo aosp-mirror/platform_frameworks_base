@@ -1761,7 +1761,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     enabledSubtypeSet.add(String.valueOf(subtype.hashCode()));
                 }
                 ArrayList<InputMethodSubtype> subtypes = getSubtypes(imi);
-                CharSequence label = imi.loadLabel(pm);
+                final CharSequence label = imi.loadLabel(pm);
                 if (showSubtypes && enabledSubtypeSet.size() > 0) {
                     final int subtypeCount = imi.getSubtypeCount();
                     for (int j = 0; j < subtypeCount; ++j) {
@@ -1771,8 +1771,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             int nameResId = subtype.getNameResId();
                             String mode = subtype.getMode();
                             if (nameResId != 0) {
-                                title = pm.getText(imi.getPackageName(), nameResId,
-                                        imi.getServiceInfo().applicationInfo);
+                                title = TextUtils.concat(pm.getText(imi.getPackageName(),
+                                        nameResId, imi.getServiceInfo().applicationInfo),
+                                        " (", label, ")");
                             } else {
                                 CharSequence language = subtype.getLocale();
                                 // TODO: Use more friendly Title and UI
