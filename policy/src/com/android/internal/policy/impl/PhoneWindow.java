@@ -2187,7 +2187,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             super.onDetachedFromWindow();
             
             final Callback cb = getCallback();
-            if (cb != null && !isDestroyed() && mFeatureId < 0) {
+            if (cb != null && mFeatureId < 0) {
                 cb.onDetachedFromWindow();
             }
 
