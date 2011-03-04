@@ -19,9 +19,9 @@ page.title=Publishing on Android Market
 <li><a href="#overview">About Android Market</a>
 <li><a href="#marketupgrade">Publishing Updates on Android Market</a></li>
 <li><a href="#marketLicensing">Using Android Market Licensing Service</a></li>
-<li><a href="#marketintent">Opening Android Market to View an App or Perform a Search</a>
+<li><a href="#marketintent">Linking to Your Apps on Android Market</a>
   <ol>
-    <li><a href="#OpeningDetails">Linking to Your Apps on Android Market</a></li>
+    <li><a href="#OpeningDetails">Opening an app's details page</a></li>
     <li><a href="#PerformingSearch">Performing a search</a></li>
     <li><a href="#UriSummary">Summary of URI formats</a></li>
   </ol>  
