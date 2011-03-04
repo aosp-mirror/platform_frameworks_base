@@ -3015,8 +3015,22 @@ public class ListView extends AbsListView {
 
     @Override
     public boolean isOpaque() {
-        return (mCachingActive && mIsCacheColorOpaque && mDividerIsOpaque &&
+        boolean retValue = (mCachingActive && mIsCacheColorOpaque && mDividerIsOpaque &&
                 hasOpaqueScrollbars()) || super.isOpaque();
+        if (retValue) {
+            // only return true if the list items cover the entire area of the view
+            final int listTop = mListPadding.top;
+            View first = getChildAt(0);
+            if (first == null || first.getTop() > listTop) {
+                return false;
+            }
+            final int listBottom = getHeight() - mListPadding.bottom;
+            View last = getChildAt(getChildCount() - 1);
+            if (last == null || last.getBottom() < listBottom) {
+                return false;
+            }
+        }
+        return retValue;
     }
 
     @Override
