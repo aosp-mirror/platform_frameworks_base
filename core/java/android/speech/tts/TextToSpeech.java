@@ -414,8 +414,10 @@ public class TextToSpeech {
 
         /**
          * {@hide}
+         * Total number of cached speech parameters.
+         * This number should be equal to (max param position/2) + 1.
          */
-        protected static final int NB_CACHED_PARAMS = 20;
+        protected static final int NB_CACHED_PARAMS = 10;
     }
 
     /**
