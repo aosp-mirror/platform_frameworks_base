@@ -155,7 +155,7 @@ public class RenderScriptGL extends RenderScript {
      * Construct a new RenderScriptGL context.
      *
      * @param ctx The context.
-     * @param sc The desired format of the primart rendering surface.
+     * @param sc The desired format of the primary rendering surface.
      */
     public RenderScriptGL(Context ctx, SurfaceConfig sc) {
         super(ctx);
