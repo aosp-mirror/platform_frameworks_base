@@ -549,7 +549,7 @@ public class InputManager {
             } catch (NumberFormatException e) {
             }
             if (result < 1) {
-                result = 60;
+                result = 55;
             }
             return result;
         }
