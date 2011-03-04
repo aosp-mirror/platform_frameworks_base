@@ -91,7 +91,7 @@ public class LinkProperties implements Parcelable {
     }
 
     public void addLinkAddress(LinkAddress address) {
-        mLinkAddresses.add(address);
+        if (address != null) mLinkAddresses.add(address);
     }
 
     public Collection<LinkAddress> getLinkAddresses() {
@@ -99,7 +99,7 @@ public class LinkProperties implements Parcelable {
     }
 
     public void addDns(InetAddress dns) {
-        mDnses.add(dns);
+        if (dns != null) mDnses.add(dns);
     }
 
     public Collection<InetAddress> getDnses() {
@@ -107,7 +107,7 @@ public class LinkProperties implements Parcelable {
     }
 
     public void addGateway(InetAddress gateway) {
-        mGateways.add(gateway);
+        if (gateway != null) mGateways.add(gateway);
     }
     public Collection<InetAddress> getGateways() {
         return Collections.unmodifiableCollection(mGateways);

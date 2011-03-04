@@ -99,6 +99,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Movie.cpp \
 	android/graphics/NinePatch.cpp \
 	android/graphics/NinePatchImpl.cpp \
+	android/graphics/NinePatchPeeker.cpp \
 	android/graphics/Paint.cpp \
 	android/graphics/Path.cpp \
 	android/graphics/PathMeasure.cpp \
@@ -112,6 +113,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Shader.cpp \
 	android/graphics/SurfaceTexture.cpp \
 	android/graphics/TextLayout.cpp \
+	android/graphics/TextLayoutCache.cpp \
 	android/graphics/Typeface.cpp \
 	android/graphics/Utils.cpp \
 	android/graphics/Xfermode.cpp \

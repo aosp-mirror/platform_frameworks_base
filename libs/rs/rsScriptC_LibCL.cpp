@@ -42,6 +42,7 @@ static float SC_mad(float v1, float v2, float v3) {
     return v1 * v2 + v3;
 }
 
+#if 0
 static float SC_pown(float v, int p) {
     return powf(v, (float)p);
 }
@@ -49,6 +50,7 @@ static float SC_pown(float v, int p) {
 static float SC_powr(float v, float p) {
     return powf(v, p);
 }
+#endif
 
 float SC_rootn(float v, int r) {
     return pow(v, 1.f / r);

@@ -15,6 +15,7 @@
  */
 
 #include "TextLayout.h"
+#include "TextLayoutCache.h"
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -23,10 +24,12 @@
 #include "unicode/ushape.h"
 #include <utils/Log.h>
 
-// Log debug messages from RTL related allocations
-#define DEBUG_RTL_ALLOCATIONS 0
-
 namespace android {
+
+#if USE_TEXT_LAYOUT_CACHE
+TextLayoutCache TextLayout::mCache;
+#endif
+
 // Returns true if we might need layout.  If bidiFlags force LTR, assume no layout, if
 // bidiFlags indicate there probably is RTL, assume we do, otherwise scan the text
 // looking for a character >= the first RTL character in unicode and assume we do if
@@ -60,13 +63,9 @@ bool TextLayout::needsLayout(const jchar* text, jint len, jint bidiFlags) {
  * @return the length of the shaped text, or -1 if error
  */
 int TextLayout::shapeRtlText(const jchar* context, jsize start, jsize count, jsize contextCount,
-                        jchar* shaped, UErrorCode &status) {
+                        jchar* shaped, UErrorCode& status) {
     SkAutoSTMalloc<CHAR_BUFFER_SIZE, jchar> tempBuffer(contextCount);
     jchar* buffer = tempBuffer.get();
-
-#if DEBUG_RTL_ALLOCATIONS
-    LOGD("TextLayout::shapeRtlText - allocated buffer with size: %d", contextCount);
-#endif
 
     // Use fixed length since we need to keep start and count valid
     u_shapeArabic(context, contextCount, buffer, contextCount,
@@ -105,8 +104,8 @@ int TextLayout::shapeRtlText(const jchar* context, jsize start, jsize count, jsi
  * @flags line bidi flags
  * @return the length of the reordered, shaped line, or -1 if error
  */
-jint TextLayout::layoutLine(const jchar* text, jint len, jint flags, int &dir, jchar* buffer,
-        UErrorCode &status) {
+jint TextLayout::layoutLine(const jchar* text, jint len, jint flags, int& dir, jchar* buffer,
+        UErrorCode& status) {
     static const int RTL_OPTS = UBIDI_DO_MIRRORING | UBIDI_KEEP_BASE_COMBINING |
             UBIDI_REMOVE_BIDI_CONTROLS | UBIDI_OUTPUT_REVERSE;
 
@@ -156,7 +155,7 @@ jint TextLayout::layoutLine(const jchar* text, jint len, jint flags, int &dir, j
     return result;
 }
 
-bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint bidiFlags,
+bool TextLayout::prepareText(SkPaint* paint, const jchar* text, jsize len, jint bidiFlags,
         const jchar** outText, int32_t* outBytes, jchar** outBuffer) {
     const jchar *workText = text;
     jchar *buffer = NULL;
@@ -166,11 +165,6 @@ bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint 
         if (!buffer) {
             return false;
         }
-
-#if DEBUG_RTL_ALLOCATIONS
-    LOGD("TextLayout::prepareText - allocated buffer with size: %d", len);
-#endif
-
         UErrorCode status = U_ZERO_ERROR;
         len = layoutLine(text, len, bidiFlags, dir, buffer, status); // might change len, dir
         if (!U_SUCCESS(status)) {
@@ -178,7 +172,6 @@ bool TextLayout::prepareText(SkPaint *paint, const jchar* text, jsize len, jint 
             free(buffer);
             return false; // can't render
         }
-
         workText = buffer; // use the shaped text
     }
 
@@ -262,74 +255,24 @@ void TextLayout::drawTextRun(SkPaint* paint, const jchar* chars,
      }
  }
 
-void TextLayout::getTextRunAdvances(SkPaint *paint, const jchar *chars, jint start,
+void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
                                     jint count, jint contextCount, jint dirFlags,
-                                    jfloat *resultAdvances, jfloat &resultTotalAdvance) {
-    resultTotalAdvance = 0;
-
-    SkAutoSTMalloc<CHAR_BUFFER_SIZE, jchar> tempBuffer(contextCount);
-    jchar* buffer = tempBuffer.get();
-
-#if DEBUG_RTL_ALLOCATIONS
-    LOGD("TextLayout::getTextRunAdvances - allocated buffer with size: %d", contextCount);
+                                    jfloat* resultAdvances, jfloat& resultTotalAdvance) {
+#if USE_TEXT_LAYOUT_CACHE
+    // Return advances from the cache. Compute them if needed
+    mCache.getRunAdvances(paint, chars, start, count, contextCount,
+            dirFlags, resultAdvances, &resultTotalAdvance);
+#else
+    // Compute advances and return them
+    RunAdvanceDescription::computeAdvances(paint, chars, start, count, contextCount, dirFlags,
+            resultAdvances, &resultTotalAdvance);
 #endif
-
-    SkScalar* scalarArray = (SkScalar*)resultAdvances;
-
-    // this is where we'd call harfbuzz
-    // for now we just use ushape.c
-
-    int widths;
-    const jchar* text;
-    if (dirFlags & 0x1) { // rtl, call arabic shaping in case
-        UErrorCode status = U_ZERO_ERROR;
-        // Use fixed length since we need to keep start and count valid
-        u_shapeArabic(chars, contextCount, buffer, contextCount,
-                      U_SHAPE_LENGTH_FIXED_SPACES_NEAR |
-                      U_SHAPE_TEXT_DIRECTION_LOGICAL | U_SHAPE_LETTERS_SHAPE |
-                      U_SHAPE_X_LAMALEF_SUB_ALTERNATE, &status);
-        // we shouldn't fail unless there's an out of memory condition,
-        // in which case we're hosed anyway
-        for (int i = start, e = i + count; i < e; ++i) {
-          if (buffer[i] == UNICODE_NOT_A_CHAR) {
-            buffer[i] = UNICODE_ZWSP; // zero-width-space for skia
-          }
-        }
-        text = buffer + start;
-        widths = paint->getTextWidths(text, count << 1, scalarArray);
-    } else {
-        text = chars + start;
-        widths = paint->getTextWidths(text, count << 1, scalarArray);
-    }
-
-    if (widths < count) {
-        // Skia operates on code points, not code units, so surrogate pairs return only
-        // one value. Expand the result so we have one value per UTF-16 code unit.
-
-        // Note, skia's getTextWidth gets confused if it encounters a surrogate pair,
-        // leaving the remaining widths zero.  Not nice.
-        for (int i = 0, p = 0; i < widths; ++i) {
-            resultTotalAdvance += resultAdvances[p++] = SkScalarToFloat(scalarArray[i]);
-            if (p < count &&
-                    text[p] >= UNICODE_FIRST_LOW_SURROGATE &&
-                    text[p] < UNICODE_FIRST_PRIVATE_USE &&
-                    text[p-1] >= UNICODE_FIRST_HIGH_SURROGATE &&
-                    text[p-1] < UNICODE_FIRST_LOW_SURROGATE) {
-                resultAdvances[p++] = 0;
-            }
-        }
-    } else {
-        for (int i = 0; i < count; i++) {
-            resultTotalAdvance += resultAdvances[i] = SkScalarToFloat(scalarArray[i]);
-        }
-    }
 }
 
 
 // Draws a paragraph of text on a single line, running bidi and shaping
 void TextLayout::drawText(SkPaint* paint, const jchar* text, jsize len,
                           int bidiFlags, jfloat x, jfloat y, SkCanvas* canvas) {
-
     handleText(paint, text, len, bidiFlags, x, y, canvas, NULL);
 }
 
@@ -352,10 +295,6 @@ void TextLayout::drawTextOnPath(SkPaint* paint, const jchar* text, int count,
     }
 
     SkAutoSTMalloc<CHAR_BUFFER_SIZE, jchar> buffer(count);
-
-#if DEBUG_RTL_ALLOCATIONS
-    LOGD("TextLayout::drawTextOnPath - allocated buffer with size: %d", count);
-#endif
 
     int dir = kDirection_LTR;
     UErrorCode status = U_ZERO_ERROR;

@@ -378,7 +378,7 @@ static void Surface_unlockCanvasAndPost(
         JNIEnv* env, jobject clazz, jobject argCanvas)
 {
     jobject canvas = env->GetObjectField(clazz, so.canvas);
-    if (canvas != argCanvas) {
+    if (env->IsSameObject(canvas, argCanvas) == JNI_FALSE) {
         doThrow(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }

@@ -159,7 +159,7 @@ public class GSMPhone extends PhoneBase {
         mCM.registerForOn(this, EVENT_RADIO_ON, null);
         mCM.setOnUSSD(this, EVENT_USSD, null);
         mCM.setOnSuppServiceNotification(this, EVENT_SSN, null);
-        mSST.registerForNetworkAttach(this, EVENT_REGISTERED_TO_NETWORK, null);
+        mSST.registerForNetworkAttached(this, EVENT_REGISTERED_TO_NETWORK, null);
 
         if (false) {
             try {
@@ -209,7 +209,7 @@ public class GSMPhone extends PhoneBase {
             mSIMRecords.unregisterForRecordsLoaded(this); //EVENT_SIM_RECORDS_LOADED
             mCM.unregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
             mCM.unregisterForOn(this); //EVENT_RADIO_ON
-            mSST.unregisterForNetworkAttach(this); //EVENT_REGISTERED_TO_NETWORK
+            mSST.unregisterForNetworkAttached(this); //EVENT_REGISTERED_TO_NETWORK
             mCM.unSetOnUSSD(this);
             mCM.unSetOnSuppServiceNotification(this);
 

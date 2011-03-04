@@ -1806,7 +1806,9 @@ int register_android_content_AssetManager(JNIEnv* env)
         = env->GetFieldID(assetManager, "mObject", "I");
     LOG_FATAL_IF(gAssetManagerOffsets.mObject == NULL, "Unable to find AssetManager.mObject");
 
-    g_stringClass = env->FindClass("java/lang/String");
+    jclass stringClass = env->FindClass("java/lang/String");
+    LOG_FATAL_IF(stringClass == NULL, "Unable to find class java/lang/String");
+    g_stringClass = (jclass)env->NewGlobalRef(stringClass);
 
     return AndroidRuntime::registerNativeMethods(env,
             "android/content/res/AssetManager", gAssetManagerMethods, NELEM(gAssetManagerMethods));

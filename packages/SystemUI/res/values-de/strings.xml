@@ -34,13 +34,12 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Einstellungen"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flugmodus"</string>
-    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
-    <skip />
+    <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"Bildschirmausrichtung sperren"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"STUMM"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Benachrichtigungen"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Zuletzt verwendet"</string>
-    <string name="recent_tasks_empty" msgid="1905484479067697884">"Keine zuletzt verwendeten Anwendungen"</string>
+    <string name="recent_tasks_empty" msgid="1905484479067697884">"Keine neuen Anwendungen"</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"Google Apps"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-Tethering aktiv"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Eingabemethoden konfigurieren"</string>
