@@ -5036,6 +5036,9 @@ public class WebView extends AbsoluteLayout
      * @hide pending API Council approval.
      */
     public SearchBox getSearchBox() {
+        if ((mWebViewCore == null) || (mWebViewCore.getBrowserFrame() == null)) {
+            return null;
+        }
         return mWebViewCore.getBrowserFrame().getSearchBox();
     }
 
