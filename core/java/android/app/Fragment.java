@@ -859,32 +859,57 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
     
     /**
+     * @deprecated Use {@link #onInflate(Activity, AttributeSet, Bundle)} instead.
+     */
+    @Deprecated
+    public void onInflate(AttributeSet attrs, Bundle savedInstanceState) {
+        mCalled = true;
+    }
+
+    /**
      * Called when a fragment is being created as part of a view layout
      * inflation, typically from setting the content view of an activity.  This
-     * will be called immediately after the fragment is created from a <fragment>
+     * may be called immediately after the fragment is created from a <fragment>
      * tag in a layout file.  Note this is <em>before</em> the fragment's
      * {@link #onAttach(Activity)} has been called; all you should do here is
-     * parse the attributes and save them away.  A convenient thing to do is
-     * simply copy them into a Bundle that is given to {@link #setArguments(Bundle)}.
+     * parse the attributes and save them away.
      * 
      * <p>This is called every time the fragment is inflated, even if it is
-     * being inflated into a new instance with saved state.  Because a fragment's
-     * arguments are retained across instances, it may make no sense to re-parse
-     * the attributes into new arguments.  You may want to first check
-     * {@link #getArguments()} and only parse the attributes if it returns null,
-     * the assumption being that if it is non-null those are the same arguments
-     * from the first time the fragment was inflated.  (That said, you may want
-     * to have layouts change for different configurations such as landscape
-     * and portrait, which can have different attributes.  If so, you will need
-     * to re-parse the attributes each time this is called to generate new
-     * arguments.)</p>
+     * being inflated into a new instance with saved state.  It typically makes
+     * sense to re-parse the parameters each time, to allow them to change with
+     * different configurations.</p>
+     *
+     * <p>Here is a typical implementation of a fragment that can take parameters
+     * both through attributes supplied here as well from {@link #getArguments()}:</p>
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentArguments.java
+     *      fragment}
+     *
+     * <p>Note that parsing the XML attributes uses a "styleable" resource.  The
+     * declaration for the styleable used here is:</p>
+     *
+     * {@sample development/samples/ApiDemos/res/values/attrs.xml fragment_arguments}
      * 
+     * <p>The fragment can then be declared within its activity's content layout
+     * through a tag like this:</p>
+     *
+     * {@sample development/samples/ApiDemos/res/layout/fragment_arguments.xml from_attributes}
+     *
+     * <p>This fragment can also be created dynamically from arguments given
+     * at runtime in the arguments Bundle; here is an example of doing so at
+     * creation of the containing activity:</p>
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentArguments.java
+     *      create}
+     *
+     * @param activity The Activity that is inflating this fragment.
      * @param attrs The attributes at the tag where the fragment is
      * being created.
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
-    public void onInflate(AttributeSet attrs, Bundle savedInstanceState) {
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        onInflate(attrs, savedInstanceState);
         mCalled = true;
     }
     
