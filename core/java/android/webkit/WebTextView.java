@@ -415,7 +415,7 @@ import junit.framework.Assert;
             }
             CharSequence text = getText();
             // Copy from the existing Layout.
-            mLayout = new WebTextViewLayout(text, text, getPaint(), w,
+            mLayout = new WebTextViewLayout(text, text, getPaint(), mLayout.getWidth(),
                     mLayout.getAlignment(), mLayout.getSpacingMultiplier(),
                     mLayout.getSpacingAdd(), false, null, ellipsisWidth,
                     lineHeight);
