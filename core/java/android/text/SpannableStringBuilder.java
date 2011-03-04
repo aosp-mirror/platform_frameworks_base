@@ -1192,7 +1192,9 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * CURSOR_AT_OR_BEFORE, or CURSOR_AT
      * @param p the Paint object that is requesting this information
      * @return the offset of the next position, or -1
+     * @deprecated This is an internal method, refrain from using it in your code
      */
+    @Deprecated
     public int getTextRunCursor(int contextStart, int contextEnd, int flags, int offset,
             int cursorOpt, Paint p) {
 
