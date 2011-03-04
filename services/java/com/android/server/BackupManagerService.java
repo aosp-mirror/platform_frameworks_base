@@ -379,6 +379,10 @@ class BackupManagerService extends IBackupManager.Stub {
                         }
                     }
 
+                    // Done: reset the session timeout clock
+                    removeMessages(MSG_RESTORE_TIMEOUT);
+                    sendEmptyMessageDelayed(MSG_RESTORE_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
+
                     mWakelock.release();
                 }
                 break;
