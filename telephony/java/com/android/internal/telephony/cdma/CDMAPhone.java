@@ -142,15 +142,19 @@ public class CDMAPhone extends PhoneBase {
     // Constructors
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
         super(notifier, context, ci, false);
-        mSST = new CdmaServiceStateTracker (this);
+        initSST();
         init(context, notifier);
     }
 
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
             boolean unitTestMode) {
         super(notifier, context, ci, unitTestMode);
-        mSST = new CdmaServiceStateTracker (this);
+        initSST();
         init(context, notifier);
+    }
+
+    protected void initSST() {
+        mSST = new CdmaServiceStateTracker(this);
     }
 
     protected void init(Context context, PhoneNotifier notifier) {
