@@ -461,6 +461,25 @@ class WifiConfigStore {
     }
 
     /**
+     * set IP configuration for a given network id
+     */
+    static void setIpConfiguration(int netId, DhcpInfoInternal dhcpInfo) {
+        LinkProperties linkProperties = dhcpInfo.makeLinkProperties();
+
+        synchronized (sConfiguredNetworks) {
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config != null) {
+                // add old proxy details
+                if(config.linkProperties != null) {
+                    linkProperties.setHttpProxy(config.linkProperties.getHttpProxy());
+                }
+                config.linkProperties = linkProperties;
+            }
+        }
+    }
+
+
+    /**
      * Fetch the proxy properties for a given network id
      */
     static ProxyProperties getProxyProperties(int netId) {
