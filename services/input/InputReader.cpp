@@ -88,6 +88,18 @@ static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
+static int32_t rotateValueUsingRotationMap(int32_t value, int32_t orientation,
+        const int32_t map[][4], size_t mapSize) {
+    if (orientation != DISPLAY_ORIENTATION_0) {
+        for (size_t i = 0; i < mapSize; i++) {
+            if (value == map[i][0]) {
+                return map[i][orientation];
+            }
+        }
+    }
+    return value;
+}
+
 static const int32_t keyCodeRotationMap[][4] = {
         // key codes enumerated counter-clockwise with the original (unrotated) key first
         // no rotation,        90 degree rotation,  180 degree rotation, 270 degree rotation
@@ -96,18 +108,32 @@ static const int32_t keyCodeRotationMap[][4] = {
         { AKEYCODE_DPAD_UP,     AKEYCODE_DPAD_LEFT,   AKEYCODE_DPAD_DOWN,   AKEYCODE_DPAD_RIGHT },
         { AKEYCODE_DPAD_LEFT,   AKEYCODE_DPAD_DOWN,   AKEYCODE_DPAD_RIGHT,  AKEYCODE_DPAD_UP },
 };
-static const int keyCodeRotationMapSize =
+static const size_t keyCodeRotationMapSize =
         sizeof(keyCodeRotationMap) / sizeof(keyCodeRotationMap[0]);
 
 int32_t rotateKeyCode(int32_t keyCode, int32_t orientation) {
-    if (orientation != DISPLAY_ORIENTATION_0) {
-        for (int i = 0; i < keyCodeRotationMapSize; i++) {
-            if (keyCode == keyCodeRotationMap[i][0]) {
-                return keyCodeRotationMap[i][orientation];
-            }
-        }
-    }
-    return keyCode;
+    return rotateValueUsingRotationMap(keyCode, orientation,
+            keyCodeRotationMap, keyCodeRotationMapSize);
+}
+
+static const int32_t edgeFlagRotationMap[][4] = {
+        // edge flags enumerated counter-clockwise with the original (unrotated) edge flag first
+        // no rotation,        90 degree rotation,  180 degree rotation, 270 degree rotation
+        { AMOTION_EVENT_EDGE_FLAG_BOTTOM,   AMOTION_EVENT_EDGE_FLAG_RIGHT,
+                AMOTION_EVENT_EDGE_FLAG_TOP,     AMOTION_EVENT_EDGE_FLAG_LEFT },
+        { AMOTION_EVENT_EDGE_FLAG_RIGHT,  AMOTION_EVENT_EDGE_FLAG_TOP,
+                AMOTION_EVENT_EDGE_FLAG_LEFT,   AMOTION_EVENT_EDGE_FLAG_BOTTOM },
+        { AMOTION_EVENT_EDGE_FLAG_TOP,     AMOTION_EVENT_EDGE_FLAG_LEFT,
+                AMOTION_EVENT_EDGE_FLAG_BOTTOM,   AMOTION_EVENT_EDGE_FLAG_RIGHT },
+        { AMOTION_EVENT_EDGE_FLAG_LEFT,   AMOTION_EVENT_EDGE_FLAG_BOTTOM,
+                AMOTION_EVENT_EDGE_FLAG_RIGHT,  AMOTION_EVENT_EDGE_FLAG_TOP },
+};
+static const size_t edgeFlagRotationMapSize =
+        sizeof(edgeFlagRotationMap) / sizeof(edgeFlagRotationMap[0]);
+
+static int32_t rotateEdgeFlag(int32_t edgeFlag, int32_t orientation) {
+    return rotateValueUsingRotationMap(edgeFlag, orientation,
+            edgeFlagRotationMap, edgeFlagRotationMapSize);
 }
 
 static inline bool sourcesMatchMask(uint32_t sources, uint32_t sourceMask) {
@@ -919,6 +945,7 @@ void KeyboardInputMapper::process(const RawEvent* rawEvent) {
 bool KeyboardInputMapper::isKeyboardOrGamepadKey(int32_t scanCode) {
     return scanCode < BTN_MOUSE
         || scanCode >= KEY_OK
+        || (scanCode >= BTN_MISC && scanCode < BTN_MOUSE)
         || (scanCode >= BTN_JOYSTICK && scanCode < BTN_DIGI);
 }
 
@@ -1293,7 +1320,8 @@ void CursorInputMapper::sync(nsecs_t when) {
         return; // no new state changes, so nothing to do
     }
 
-    int motionEventAction;
+    int32_t motionEventAction;
+    int32_t motionEventEdgeFlags;
     PointerCoords pointerCoords;
     nsecs_t downTime;
     float vscroll, hscroll;
@@ -1364,6 +1392,8 @@ void CursorInputMapper::sync(nsecs_t when) {
 
         pointerCoords.clear();
 
+        motionEventEdgeFlags = AMOTION_EVENT_EDGE_FLAG_NONE;
+
         if (mPointerController != NULL) {
             mPointerController->move(deltaX, deltaY);
             if (downChanged) {
@@ -1373,6 +1403,22 @@ void CursorInputMapper::sync(nsecs_t when) {
             mPointerController->getPosition(&x, &y);
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_X, x);
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, y);
+
+            if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
+                float minX, minY, maxX, maxY;
+                if (mPointerController->getBounds(&minX, &minY, &maxX, &maxY)) {
+                    if (x <= minX) {
+                        motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
+                    } else if (x >= maxX) {
+                        motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
+                    }
+                    if (y <= minY) {
+                        motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
+                    } else if (y >= maxY) {
+                        motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
+                    }
+                }
+            }
         } else {
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_X, deltaX);
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, deltaY);
@@ -1407,7 +1453,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     int32_t metaState = mContext->getGlobalMetaState();
     int32_t pointerId = 0;
     getDispatcher()->notifyMotion(when, getDeviceId(), mSources, policyFlags,
-            motionEventAction, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
+            motionEventAction, 0, metaState, motionEventEdgeFlags,
             1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
 
     mAccumulator.clear();
@@ -1510,8 +1556,6 @@ void TouchInputMapper::dump(String8& dump) {
         dumpCalibration(dump);
         dumpSurfaceLocked(dump);
         dump.appendFormat(INDENT3 "Translation and Scaling Factors:\n");
-        dump.appendFormat(INDENT4 "XOrigin: %d\n", mLocked.xOrigin);
-        dump.appendFormat(INDENT4 "YOrigin: %d\n", mLocked.yOrigin);
         dump.appendFormat(INDENT4 "XScale: %0.3f\n", mLocked.xScale);
         dump.appendFormat(INDENT4 "YScale: %0.3f\n", mLocked.yScale);
         dump.appendFormat(INDENT4 "XPrecision: %0.3f\n", mLocked.xPrecision);
@@ -1657,10 +1701,17 @@ void TouchInputMapper::dumpRawAxes(String8& dump) {
 }
 
 bool TouchInputMapper::configureSurfaceLocked() {
+    // Ensure we have valid X and Y axes.
+    if (!mRawAxes.x.valid || !mRawAxes.y.valid) {
+        LOGW(INDENT "Touch device '%s' did not report support for X or Y axis!  "
+                "The device will be inoperable.", getDeviceName().string());
+        return false;
+    }
+
     // Update orientation and dimensions if needed.
     int32_t orientation = DISPLAY_ORIENTATION_0;
-    int32_t width = mRawAxes.x.getRange();
-    int32_t height = mRawAxes.y.getRange();
+    int32_t width = mRawAxes.x.maxValue - mRawAxes.x.minValue + 1;
+    int32_t height = mRawAxes.y.maxValue - mRawAxes.y.minValue + 1;
 
     if (mParameters.associatedDisplayId >= 0) {
         bool wantSize = mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN;
@@ -1688,32 +1739,12 @@ bool TouchInputMapper::configureSurfaceLocked() {
         mLocked.surfaceHeight = height;
 
         // Configure X and Y factors.
-        if (mRawAxes.x.valid && mRawAxes.y.valid) {
-            mLocked.xOrigin = mCalibration.haveXOrigin
-                    ? mCalibration.xOrigin
-                    : mRawAxes.x.minValue;
-            mLocked.yOrigin = mCalibration.haveYOrigin
-                    ? mCalibration.yOrigin
-                    : mRawAxes.y.minValue;
-            mLocked.xScale = mCalibration.haveXScale
-                    ? mCalibration.xScale
-                    : float(width) / mRawAxes.x.getRange();
-            mLocked.yScale = mCalibration.haveYScale
-                    ? mCalibration.yScale
-                    : float(height) / mRawAxes.y.getRange();
-            mLocked.xPrecision = 1.0f / mLocked.xScale;
-            mLocked.yPrecision = 1.0f / mLocked.yScale;
+        mLocked.xScale = float(width) / (mRawAxes.x.maxValue - mRawAxes.x.minValue + 1);
+        mLocked.yScale = float(height) / (mRawAxes.y.maxValue - mRawAxes.y.minValue + 1);
+        mLocked.xPrecision = 1.0f / mLocked.xScale;
+        mLocked.yPrecision = 1.0f / mLocked.yScale;
 
-            configureVirtualKeysLocked();
-        } else {
-            LOGW(INDENT "Touch device did not report support for X or Y axis!");
-            mLocked.xOrigin = 0;
-            mLocked.yOrigin = 0;
-            mLocked.xScale = 1.0f;
-            mLocked.yScale = 1.0f;
-            mLocked.xPrecision = 1.0f;
-            mLocked.yPrecision = 1.0f;
-        }
+        configureVirtualKeysLocked();
 
         // Scale factor for terms that are not oriented in a particular axis.
         // If the pixels are square then xScale == yScale otherwise we fake it
@@ -1847,38 +1878,51 @@ bool TouchInputMapper::configureSurfaceLocked() {
     }
 
     if (orientationChanged || sizeChanged) {
-        // Compute oriented surface dimensions, precision, and scales.
-        float orientedXScale, orientedYScale;
+        // Compute oriented surface dimensions, precision, scales and ranges.
+        // Note that the maximum value reported is an inclusive maximum value so it is one
+        // unit less than the total width or height of surface.
         switch (mLocked.surfaceOrientation) {
         case DISPLAY_ORIENTATION_90:
         case DISPLAY_ORIENTATION_270:
             mLocked.orientedSurfaceWidth = mLocked.surfaceHeight;
             mLocked.orientedSurfaceHeight = mLocked.surfaceWidth;
+
             mLocked.orientedXPrecision = mLocked.yPrecision;
             mLocked.orientedYPrecision = mLocked.xPrecision;
-            orientedXScale = mLocked.yScale;
-            orientedYScale = mLocked.xScale;
+
+            mLocked.orientedRanges.x.min = 0;
+            mLocked.orientedRanges.x.max = (mRawAxes.y.maxValue - mRawAxes.y.minValue)
+                    * mLocked.yScale;
+            mLocked.orientedRanges.x.flat = 0;
+            mLocked.orientedRanges.x.fuzz = mLocked.yScale;
+
+            mLocked.orientedRanges.y.min = 0;
+            mLocked.orientedRanges.y.max = (mRawAxes.x.maxValue - mRawAxes.x.minValue)
+                    * mLocked.xScale;
+            mLocked.orientedRanges.y.flat = 0;
+            mLocked.orientedRanges.y.fuzz = mLocked.xScale;
             break;
+
         default:
             mLocked.orientedSurfaceWidth = mLocked.surfaceWidth;
             mLocked.orientedSurfaceHeight = mLocked.surfaceHeight;
+
             mLocked.orientedXPrecision = mLocked.xPrecision;
             mLocked.orientedYPrecision = mLocked.yPrecision;
-            orientedXScale = mLocked.xScale;
-            orientedYScale = mLocked.yScale;
+
+            mLocked.orientedRanges.x.min = 0;
+            mLocked.orientedRanges.x.max = (mRawAxes.x.maxValue - mRawAxes.x.minValue)
+                    * mLocked.xScale;
+            mLocked.orientedRanges.x.flat = 0;
+            mLocked.orientedRanges.x.fuzz = mLocked.xScale;
+
+            mLocked.orientedRanges.y.min = 0;
+            mLocked.orientedRanges.y.max = (mRawAxes.y.maxValue - mRawAxes.y.minValue)
+                    * mLocked.yScale;
+            mLocked.orientedRanges.y.flat = 0;
+            mLocked.orientedRanges.y.fuzz = mLocked.yScale;
             break;
         }
-
-        // Configure position ranges.
-        mLocked.orientedRanges.x.min = 0;
-        mLocked.orientedRanges.x.max = mLocked.orientedSurfaceWidth;
-        mLocked.orientedRanges.x.flat = 0;
-        mLocked.orientedRanges.x.fuzz = orientedXScale;
-
-        mLocked.orientedRanges.y.min = 0;
-        mLocked.orientedRanges.y.max = mLocked.orientedSurfaceHeight;
-        mLocked.orientedRanges.y.flat = 0;
-        mLocked.orientedRanges.y.fuzz = orientedYScale;
     }
 
     return true;
@@ -1891,8 +1935,6 @@ void TouchInputMapper::dumpSurfaceLocked(String8& dump) {
 }
 
 void TouchInputMapper::configureVirtualKeysLocked() {
-    assert(mRawAxes.x.valid && mRawAxes.y.valid);
-
     Vector<VirtualKeyDefinition> virtualKeyDefinitions;
     getEventHub()->getVirtualKeyDefinitions(getDeviceId(), virtualKeyDefinitions);
 
@@ -1906,8 +1948,8 @@ void TouchInputMapper::configureVirtualKeysLocked() {
 
     int32_t touchScreenLeft = mRawAxes.x.minValue;
     int32_t touchScreenTop = mRawAxes.y.minValue;
-    int32_t touchScreenWidth = mRawAxes.x.getRange();
-    int32_t touchScreenHeight = mRawAxes.y.getRange();
+    int32_t touchScreenWidth = mRawAxes.x.maxValue - mRawAxes.x.minValue + 1;
+    int32_t touchScreenHeight = mRawAxes.y.maxValue - mRawAxes.y.minValue + 1;
 
     for (size_t i = 0; i < virtualKeyDefinitions.size(); i++) {
         const VirtualKeyDefinition& virtualKeyDefinition =
@@ -1942,7 +1984,6 @@ void TouchInputMapper::configureVirtualKeysLocked() {
                 * touchScreenHeight / mLocked.surfaceHeight + touchScreenTop;
         virtualKey.hitBottom = (virtualKeyDefinition.centerY + halfHeight)
                 * touchScreenHeight / mLocked.surfaceHeight + touchScreenTop;
-
     }
 }
 
@@ -1964,12 +2005,6 @@ void TouchInputMapper::dumpVirtualKeysLocked(String8& dump) {
 void TouchInputMapper::parseCalibration() {
     const PropertyMap& in = getDevice()->getConfiguration();
     Calibration& out = mCalibration;
-
-    // Position
-    out.haveXOrigin = in.tryGetProperty(String8("touch.position.xOrigin"), out.xOrigin);
-    out.haveYOrigin = in.tryGetProperty(String8("touch.position.yOrigin"), out.yOrigin);
-    out.haveXScale = in.tryGetProperty(String8("touch.position.xScale"), out.xScale);
-    out.haveYScale = in.tryGetProperty(String8("touch.position.yScale"), out.yScale);
 
     // Touch Size
     out.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_DEFAULT;
@@ -2181,20 +2216,6 @@ void TouchInputMapper::resolveCalibration() {
 
 void TouchInputMapper::dumpCalibration(String8& dump) {
     dump.append(INDENT3 "Calibration:\n");
-
-    // Position
-    if (mCalibration.haveXOrigin) {
-        dump.appendFormat(INDENT4 "touch.position.xOrigin: %d\n", mCalibration.xOrigin);
-    }
-    if (mCalibration.haveYOrigin) {
-        dump.appendFormat(INDENT4 "touch.position.yOrigin: %d\n", mCalibration.yOrigin);
-    }
-    if (mCalibration.haveXScale) {
-        dump.appendFormat(INDENT4 "touch.position.xScale: %0.3f\n", mCalibration.xScale);
-    }
-    if (mCalibration.haveYScale) {
-        dump.appendFormat(INDENT4 "touch.position.yScale: %0.3f\n", mCalibration.yScale);
-    }
 
     // Touch Size
     switch (mCalibration.touchSizeCalibration) {
@@ -2623,7 +2644,7 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
         int32_t motionEventAction) {
     int32_t pointerIds[MAX_POINTERS];
     PointerCoords pointerCoords[MAX_POINTERS];
-    int32_t motionEventEdgeFlags = 0;
+    int32_t motionEventEdgeFlags = AMOTION_EVENT_EDGE_FLAG_NONE;
     float xPrecision, yPrecision;
 
     { // acquire lock
@@ -2637,10 +2658,6 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
             uint32_t inIndex = touch->idToIndex[id];
 
             const PointerData& in = touch->pointers[inIndex];
-
-            // X and Y
-            float x = float(in.x - mLocked.xOrigin) * mLocked.xScale;
-            float y = float(in.y - mLocked.yOrigin) * mLocked.yScale;
 
             // ToolMajor and ToolMinor
             float toolMajor, toolMinor;
@@ -2779,33 +2796,34 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
                 orientation = 0;
             }
 
-            // Adjust coords for orientation.
+            // X and Y
+            // Adjust coords for surface orientation.
+            float x, y;
             switch (mLocked.surfaceOrientation) {
-            case DISPLAY_ORIENTATION_90: {
-                float xTemp = x;
-                x = y;
-                y = mLocked.surfaceWidth - xTemp;
+            case DISPLAY_ORIENTATION_90:
+                x = float(in.y - mRawAxes.y.minValue) * mLocked.yScale;
+                y = float(mRawAxes.x.maxValue - in.x) * mLocked.xScale;
                 orientation -= M_PI_2;
                 if (orientation < - M_PI_2) {
                     orientation += M_PI;
                 }
                 break;
-            }
-            case DISPLAY_ORIENTATION_180: {
-                x = mLocked.surfaceWidth - x;
-                y = mLocked.surfaceHeight - y;
+            case DISPLAY_ORIENTATION_180:
+                x = float(mRawAxes.x.maxValue - in.x) * mLocked.xScale;
+                y = float(mRawAxes.y.maxValue - in.y) * mLocked.yScale;
                 break;
-            }
-            case DISPLAY_ORIENTATION_270: {
-                float xTemp = x;
-                x = mLocked.surfaceHeight - y;
-                y = xTemp;
+            case DISPLAY_ORIENTATION_270:
+                x = float(mRawAxes.y.maxValue - in.y) * mLocked.yScale;
+                y = float(in.x - mRawAxes.x.minValue) * mLocked.xScale;
                 orientation += M_PI_2;
                 if (orientation > M_PI_2) {
                     orientation -= M_PI;
                 }
                 break;
-            }
+            default:
+                x = float(in.x - mRawAxes.x.minValue) * mLocked.xScale;
+                y = float(in.y - mRawAxes.y.minValue) * mLocked.yScale;
+                break;
             }
 
             // Write output coords.
@@ -2831,18 +2849,22 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
         // Check edge flags by looking only at the first pointer since the flags are
         // global to the event.
         if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
-            float x = pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X);
-            float y = pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y);
+            uint32_t inIndex = touch->idToIndex[pointerIds[0]];
+            const PointerData& in = touch->pointers[inIndex];
 
-            if (x <= 0) {
-                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
-            } else if (x >= mLocked.orientedSurfaceWidth) {
-                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
+            if (in.x <= mRawAxes.x.minValue) {
+                motionEventEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_LEFT,
+                        mLocked.surfaceOrientation);
+            } else if (in.x >= mRawAxes.x.maxValue) {
+                motionEventEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_RIGHT,
+                        mLocked.surfaceOrientation);
             }
-            if (y <= 0) {
-                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
-            } else if (y >= mLocked.orientedSurfaceHeight) {
-                motionEventEdgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
+            if (in.y <= mRawAxes.y.minValue) {
+                motionEventEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_TOP,
+                        mLocked.surfaceOrientation);
+            } else if (in.y >= mRawAxes.y.maxValue) {
+                motionEventEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_BOTTOM,
+                        mLocked.surfaceOrientation);
             }
         }
 
@@ -2857,11 +2879,8 @@ void TouchInputMapper::dispatchTouch(nsecs_t when, uint32_t policyFlags,
 }
 
 bool TouchInputMapper::isPointInsideSurfaceLocked(int32_t x, int32_t y) {
-    if (mRawAxes.x.valid && mRawAxes.y.valid) {
-        return x >= mRawAxes.x.minValue && x <= mRawAxes.x.maxValue
-                && y >= mRawAxes.y.minValue && y <= mRawAxes.y.maxValue;
-    }
-    return true;
+    return x >= mRawAxes.x.minValue && x <= mRawAxes.x.maxValue
+            && y >= mRawAxes.y.minValue && y <= mRawAxes.y.maxValue;
 }
 
 const TouchInputMapper::VirtualKey* TouchInputMapper::findVirtualKeyHitLocked(
@@ -3069,11 +3088,6 @@ void TouchInputMapper::calculatePointerIds() {
  * points has moved more than a screen height from the last position,
  * then drop it. */
 bool TouchInputMapper::applyBadTouchFilter() {
-    // This hack requires valid axis parameters.
-    if (! mRawAxes.y.valid) {
-        return false;
-    }
-
     uint32_t pointerCount = mCurrentTouch.pointerCount;
 
     // Nothing to do if there are no points.
@@ -3092,7 +3106,7 @@ bool TouchInputMapper::applyBadTouchFilter() {
     // the long size of the screen to be bad.  This was a magic value
     // determined by looking at the maximum distance it is feasible
     // to actually move in one sample.
-    int32_t maxDeltaY = mRawAxes.y.getRange() * 7 / 16;
+    int32_t maxDeltaY = (mRawAxes.y.maxValue - mRawAxes.y.minValue + 1) * 7 / 16;
 
     // XXX The original code in InputDevice.java included commented out
     //     code for testing the X axis.  Note that when we drop a point
@@ -3153,11 +3167,6 @@ bool TouchInputMapper::applyBadTouchFilter() {
  * the coordinate value for one axis has jumped to the other pointer's location.
  */
 bool TouchInputMapper::applyJumpyTouchFilter() {
-    // This hack requires valid axis parameters.
-    if (! mRawAxes.y.valid) {
-        return false;
-    }
-
     uint32_t pointerCount = mCurrentTouch.pointerCount;
     if (mLastTouch.pointerCount != pointerCount) {
 #if DEBUG_HACKS
@@ -3214,7 +3223,7 @@ bool TouchInputMapper::applyJumpyTouchFilter() {
     }
 
     if (mJumpyTouchFilter.jumpyPointsDropped < JUMPY_DROP_LIMIT) {
-        int jumpyEpsilon = mRawAxes.y.getRange() / JUMPY_EPSILON_DIVISOR;
+        int jumpyEpsilon = (mRawAxes.y.maxValue - mRawAxes.y.minValue + 1) / JUMPY_EPSILON_DIVISOR;
 
         // We only replace the single worst jumpy point as characterized by pointer distance
         // in a single axis.

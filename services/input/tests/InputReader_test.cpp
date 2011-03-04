@@ -2007,15 +2007,15 @@ TEST_F(CursorInputMapperTest, WhenModeIsPointer_PopulateDeviceInfo_ReturnsRangeF
             0.0f, 1.0f, 0.0f, 0.0f));
 
     // When the bounds are set, then there should be a valid motion range.
-    mFakePointerController->setBounds(1, 2, 800, 480);
+    mFakePointerController->setBounds(1, 2, 800 - 1, 480 - 1);
 
     InputDeviceInfo info2;
     mapper->populateDeviceInfo(&info2);
 
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_X,
-            1, 800, 0.0f, 0.0f));
+            1, 800 - 1, 0.0f, 0.0f));
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_Y,
-            2, 480, 0.0f, 0.0f));
+            2, 480 - 1, 0.0f, 0.0f));
     ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_PRESSURE,
             0.0f, 1.0f, 0.0f, 0.0f));
 }
@@ -2320,9 +2320,9 @@ protected:
 };
 
 const int32_t TouchInputMapperTest::RAW_X_MIN = 25;
-const int32_t TouchInputMapperTest::RAW_X_MAX = 1020;
+const int32_t TouchInputMapperTest::RAW_X_MAX = 1019;
 const int32_t TouchInputMapperTest::RAW_Y_MIN = 30;
-const int32_t TouchInputMapperTest::RAW_Y_MAX = 1010;
+const int32_t TouchInputMapperTest::RAW_Y_MAX = 1009;
 const int32_t TouchInputMapperTest::RAW_TOUCH_MIN = 0;
 const int32_t TouchInputMapperTest::RAW_TOUCH_MAX = 31;
 const int32_t TouchInputMapperTest::RAW_TOOL_MIN = 0;
@@ -2333,8 +2333,8 @@ const int32_t TouchInputMapperTest::RAW_ORIENTATION_MIN = -7;
 const int32_t TouchInputMapperTest::RAW_ORIENTATION_MAX = 7;
 const int32_t TouchInputMapperTest::RAW_ID_MIN = 0;
 const int32_t TouchInputMapperTest::RAW_ID_MAX = 9;
-const float TouchInputMapperTest::X_PRECISION = float(RAW_X_MAX - RAW_X_MIN) / DISPLAY_WIDTH;
-const float TouchInputMapperTest::Y_PRECISION = float(RAW_Y_MAX - RAW_Y_MIN) / DISPLAY_HEIGHT;
+const float TouchInputMapperTest::X_PRECISION = float(RAW_X_MAX - RAW_X_MIN + 1) / DISPLAY_WIDTH;
+const float TouchInputMapperTest::Y_PRECISION = float(RAW_Y_MAX - RAW_Y_MIN + 1) / DISPLAY_HEIGHT;
 
 const VirtualKeyDefinition TouchInputMapperTest::VIRTUAL_KEYS[2] = {
         { KEY_HOME, 60, DISPLAY_HEIGHT + 15, 20, 20 },
@@ -2353,19 +2353,19 @@ void TouchInputMapperTest::prepareVirtualKeys() {
 }
 
 int32_t TouchInputMapperTest::toRawX(float displayX) {
-    return int32_t(displayX * (RAW_X_MAX - RAW_X_MIN) / DISPLAY_WIDTH + RAW_X_MIN);
+    return int32_t(displayX * (RAW_X_MAX - RAW_X_MIN + 1) / DISPLAY_WIDTH + RAW_X_MIN);
 }
 
 int32_t TouchInputMapperTest::toRawY(float displayY) {
-    return int32_t(displayY * (RAW_Y_MAX - RAW_Y_MIN) / DISPLAY_HEIGHT + RAW_Y_MIN);
+    return int32_t(displayY * (RAW_Y_MAX - RAW_Y_MIN + 1) / DISPLAY_HEIGHT + RAW_Y_MIN);
 }
 
 float TouchInputMapperTest::toDisplayX(int32_t rawX) {
-    return float(rawX - RAW_X_MIN) * DISPLAY_WIDTH / (RAW_X_MAX - RAW_X_MIN);
+    return float(rawX - RAW_X_MIN) * DISPLAY_WIDTH / (RAW_X_MAX - RAW_X_MIN + 1);
 }
 
 float TouchInputMapperTest::toDisplayY(int32_t rawY) {
-    return float(rawY - RAW_Y_MIN) * DISPLAY_HEIGHT / (RAW_Y_MAX - RAW_Y_MIN);
+    return float(rawY - RAW_Y_MIN) * DISPLAY_HEIGHT / (RAW_Y_MAX - RAW_Y_MIN + 1);
 }
 
 
@@ -2950,12 +2950,12 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
 
     // Rotation 90.
     prepareDisplay(DISPLAY_ORIENTATION_90);
-    processDown(mapper, toRawX(50), toRawY(75));
+    processDown(mapper, RAW_X_MAX - toRawX(75) + RAW_X_MIN, toRawY(50));
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
-    ASSERT_NEAR(DISPLAY_WIDTH - 50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
+    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -2963,12 +2963,12 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
 
     // Rotation 180.
     prepareDisplay(DISPLAY_ORIENTATION_180);
-    processDown(mapper, toRawX(50), toRawY(75));
+    processDown(mapper, RAW_X_MAX - toRawX(50) + RAW_X_MIN, RAW_Y_MAX - toRawY(75) + RAW_Y_MIN);
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(DISPLAY_WIDTH - 50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
-    ASSERT_NEAR(DISPLAY_HEIGHT - 75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
+    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -2976,12 +2976,12 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
 
     // Rotation 270.
     prepareDisplay(DISPLAY_ORIENTATION_270);
-    processDown(mapper, toRawX(50), toRawY(75));
+    processDown(mapper, toRawX(75), RAW_Y_MAX - toRawY(50) + RAW_Y_MIN);
     processSync(mapper);
 
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_NEAR(DISPLAY_HEIGHT - 75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
-    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
+    ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
+    ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
@@ -3601,8 +3601,8 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
     float y = toDisplayY(rawY);
     float pressure = float(rawTouchMajor) / RAW_TOUCH_MAX;
     float size = avg(rawToolMajor, rawToolMinor) / RAW_TOOL_MAX;
-    float scale = avg(float(DISPLAY_WIDTH) / (RAW_X_MAX - RAW_X_MIN),
-            float(DISPLAY_HEIGHT) / (RAW_Y_MAX - RAW_Y_MIN));
+    float scale = avg(float(DISPLAY_WIDTH) / (RAW_X_MAX - RAW_X_MIN + 1),
+            float(DISPLAY_HEIGHT) / (RAW_Y_MAX - RAW_Y_MIN + 1));
     float toolMajor = float(rawToolMajor) * scale;
     float toolMinor = float(rawToolMinor) * scale;
     float touchMajor = min(float(rawTouchMajor) * scale, toolMajor);
