@@ -82,8 +82,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1750,10 +1750,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             hideInputMethodMenuLocked();
 
-            final Map<CharSequence, Pair<InputMethodInfo, Integer>> imMap =
-                new TreeMap<CharSequence, Pair<InputMethodInfo, Integer>>(Collator.getInstance());
+            final TreeMap<InputMethodInfo, List<InputMethodSubtype>> sortedImmis =
+                    new TreeMap<InputMethodInfo, List<InputMethodSubtype>>(
+                            new Comparator<InputMethodInfo>() {
+                                @Override
+                                public int compare(InputMethodInfo imi1, InputMethodInfo imi2) {
+                                    if (imi2 == null) return 0;
+                                    if (imi1 == null) return 1;
+                                    if (pm == null) {
+                                        return imi1.getId().compareTo(imi2.getId());
+                                    }
+                                    CharSequence imiId1 = imi1.loadLabel(pm) + "/" + imi1.getId();
+                                    CharSequence imiId2 = imi2.loadLabel(pm) + "/" + imi2.getId();
+                                    return imiId1.toString().compareTo(imiId2.toString());
+                                }
+                            });
 
-            for (InputMethodInfo imi: immis.keySet()) {
+            sortedImmis.putAll(immis);
+
+            final ArrayList<Pair<CharSequence, Pair<InputMethodInfo, Integer>>> imList =
+                    new ArrayList<Pair<CharSequence, Pair<InputMethodInfo, Integer>>>();
+
+            for (InputMethodInfo imi : sortedImmis.keySet()) {
                 if (imi == null) continue;
                 List<InputMethodSubtype> explicitlyOrImplicitlyEnabledSubtypeList = immis.get(imi);
                 HashSet<String> enabledSubtypeSet = new HashSet<String>();
@@ -1767,35 +1785,39 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     for (int j = 0; j < subtypeCount; ++j) {
                         InputMethodSubtype subtype = imi.getSubtypeAt(j);
                         if (enabledSubtypeSet.contains(String.valueOf(subtype.hashCode()))) {
-                            CharSequence title;
+                            final CharSequence title;
                             int nameResId = subtype.getNameResId();
                             String mode = subtype.getMode();
                             if (nameResId != 0) {
                                 title = TextUtils.concat(pm.getText(imi.getPackageName(),
                                         nameResId, imi.getServiceInfo().applicationInfo),
-                                        " (", label, ")");
+                                        (TextUtils.isEmpty(label) ? "" : " (" + label + ")"));
                             } else {
                                 CharSequence language = subtype.getLocale();
                                 // TODO: Use more friendly Title and UI
                                 title = label + "," + (mode == null ? "" : mode) + ","
                                         + (language == null ? "" : language);
                             }
-                            imMap.put(title, new Pair<InputMethodInfo, Integer>(imi, j));
+                            imList.add(new Pair<CharSequence, Pair<InputMethodInfo, Integer>>(
+                                    title, new Pair<InputMethodInfo, Integer>(imi, j)));
                         }
                     }
                 } else {
-                    imMap.put(label,
-                            new Pair<InputMethodInfo, Integer>(imi, NOT_A_SUBTYPE_ID));
+                    imList.add(new Pair<CharSequence, Pair<InputMethodInfo, Integer>>(
+                            label, new Pair<InputMethodInfo, Integer>(imi, NOT_A_SUBTYPE_ID)));
                 }
             }
 
-            final int N = imMap.size();
-            mItems = imMap.keySet().toArray(new CharSequence[N]);
+            final int N = imList.size();
+            mItems = new CharSequence[N];
+            for (int i = 0; i < N; ++i) {
+                mItems[i] = imList.get(i).first;
+            }
             mIms = new InputMethodInfo[N];
             mSubtypeIds = new int[N];
             int checkedItem = 0;
             for (int i = 0; i < N; ++i) {
-                Pair<InputMethodInfo, Integer> value = imMap.get(mItems[i]);
+                Pair<InputMethodInfo, Integer> value = imList.get(i).second;
                 mIms[i] = value.first;
                 mSubtypeIds[i] = value.second;
                 if (mIms[i].getId().equals(lastInputMethodId)) {
