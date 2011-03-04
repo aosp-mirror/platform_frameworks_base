@@ -1011,38 +1011,50 @@ public:
 private:
     struct Axis {
         RawAbsoluteAxisInfo rawAxisInfo;
+        AxisInfo axisInfo;
 
-        int32_t axis;  // axis id
         bool explicitlyMapped; // true if the axis was explicitly assigned an axis id
 
         float scale;   // scale factor from raw to normalized values
         float offset;  // offset to add after scaling for normalization
+        float highScale;  // scale factor from raw to normalized values of high split
+        float highOffset; // offset to add after scaling for normalization of high split
 
         float min;     // normalized inclusive minimum
         float max;     // normalized inclusive maximum
         float flat;    // normalized flat region size
         float fuzz;    // normalized error tolerance
 
-        float oldValue; // previous value
-        float newValue; // most recent value
-
         float filter;  // filter out small variations of this size
+        float currentValue; // current value
+        float newValue; // most recent value
+        float highCurrentValue; // current value of high split
+        float highNewValue; // most recent value of high split
 
-        void initialize(const RawAbsoluteAxisInfo& rawAxisInfo,
-                int32_t axis, bool explicitlyMapped, float scale, float offset,
+        void initialize(const RawAbsoluteAxisInfo& rawAxisInfo, const AxisInfo& axisInfo,
+                bool explicitlyMapped, float scale, float offset,
+                float highScale, float highOffset,
                 float min, float max, float flat, float fuzz) {
             this->rawAxisInfo = rawAxisInfo;
-            this->axis = axis;
+            this->axisInfo = axisInfo;
             this->explicitlyMapped = explicitlyMapped;
             this->scale = scale;
             this->offset = offset;
+            this->highScale = highScale;
+            this->highOffset = highOffset;
             this->min = min;
             this->max = max;
             this->flat = flat;
             this->fuzz = fuzz;
             this->filter = 0;
-            this->oldValue = 0;
+            resetValue();
+        }
+
+        void resetValue() {
+            this->currentValue = 0;
             this->newValue = 0;
+            this->highCurrentValue = 0;
+            this->highNewValue = 0;
         }
     };
 
@@ -1051,9 +1063,14 @@ private:
 
     void sync(nsecs_t when, bool force);
 
-    bool haveAxis(int32_t axis);
+    bool haveAxis(int32_t axisId);
     void pruneAxes(bool ignoreExplicitlyMappedAxes);
-    bool haveAxesChangedSignificantly();
+    bool filterAxes(bool force);
+
+    static bool hasValueChangedSignificantly(float filter,
+            float newValue, float currentValue, float min, float max);
+    static bool hasMovedNearerToValueWithinFilteredRange(float filter,
+            float newValue, float currentValue, float thresholdValue);
 
     static bool isCenteredAxis(int32_t axis);
 };

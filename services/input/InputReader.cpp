@@ -3854,7 +3854,10 @@ void JoystickInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
 
     for (size_t i = 0; i < mAxes.size(); i++) {
         const Axis& axis = mAxes.valueAt(i);
-        info->addMotionRange(axis.axis, axis.min, axis.max, axis.flat, axis.fuzz);
+        info->addMotionRange(axis.axisInfo.axis, axis.min, axis.max, axis.flat, axis.fuzz);
+        if (axis.axisInfo.mode == AxisInfo::MODE_SPLIT) {
+            info->addMotionRange(axis.axisInfo.highAxis, axis.min, axis.max, axis.flat, axis.fuzz);
+        }
     }
 }
 
@@ -3865,18 +3868,29 @@ void JoystickInputMapper::dump(String8& dump) {
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
         const Axis& axis = mAxes.valueAt(i);
-        const char* label = getAxisLabel(axis.axis);
-        char name[32];
+        const char* label = getAxisLabel(axis.axisInfo.axis);
         if (label) {
-            strncpy(name, label, sizeof(name));
-            name[sizeof(name) - 1] = '\0';
+            dump.appendFormat(INDENT4 "%s", label);
         } else {
-            snprintf(name, sizeof(name), "%d", axis.axis);
+            dump.appendFormat(INDENT4 "%d", axis.axisInfo.axis);
         }
-        dump.appendFormat(INDENT4 "%s: min=%0.3f, max=%0.3f, flat=%0.3f, fuzz=%0.3f, "
-                "scale=%0.3f, offset=%0.3f\n",
-                name, axis.min, axis.max, axis.flat, axis.fuzz,
-                axis.scale, axis.offset);
+        if (axis.axisInfo.mode == AxisInfo::MODE_SPLIT) {
+            label = getAxisLabel(axis.axisInfo.highAxis);
+            if (label) {
+                dump.appendFormat(" / %s (split at %d)", label, axis.axisInfo.splitValue);
+            } else {
+                dump.appendFormat(" / %d (split at %d)", axis.axisInfo.highAxis,
+                        axis.axisInfo.splitValue);
+            }
+        } else if (axis.axisInfo.mode == AxisInfo::MODE_INVERT) {
+            dump.append(" (invert)");
+        }
+
+        dump.appendFormat(": min=%0.5f, max=%0.5f, flat=%0.5f, fuzz=%0.5f\n",
+                axis.min, axis.max, axis.flat, axis.fuzz);
+        dump.appendFormat(INDENT4 "  scale=%0.5f, offset=%0.5f, "
+                "highScale=%0.5f, highOffset=%0.5f\n",
+                axis.scale, axis.offset, axis.highScale, axis.highOffset);
         dump.appendFormat(INDENT4 "  rawAxis=%d, rawMin=%d, rawMax=%d, rawFlat=%d, rawFuzz=%d\n",
                 mAxes.keyAt(i), axis.rawAxisInfo.minValue, axis.rawAxisInfo.maxValue,
                 axis.rawAxisInfo.flat, axis.rawAxisInfo.fuzz);
@@ -3891,25 +3905,38 @@ void JoystickInputMapper::configure() {
         RawAbsoluteAxisInfo rawAxisInfo;
         getEventHub()->getAbsoluteAxisInfo(getDeviceId(), abs, &rawAxisInfo);
         if (rawAxisInfo.valid) {
-            int32_t axisId;
-            bool explicitlyMapped = !getEventHub()->mapAxis(getDeviceId(), abs, &axisId);
+            // Map axis.
+            AxisInfo axisInfo;
+            bool explicitlyMapped = !getEventHub()->mapAxis(getDeviceId(), abs, &axisInfo);
             if (!explicitlyMapped) {
                 // Axis is not explicitly mapped, will choose a generic axis later.
-                axisId = -1;
+                axisInfo.mode = AxisInfo::MODE_NORMAL;
+                axisInfo.axis = -1;
             }
 
+            // Apply flat override.
+            int32_t rawFlat = axisInfo.flatOverride < 0
+                    ? rawAxisInfo.flat : axisInfo.flatOverride;
+
+            // Calculate scaling factors and limits.
             Axis axis;
-            if (isCenteredAxis(axisId)) {
+            if (axisInfo.mode == AxisInfo::MODE_SPLIT) {
+                float scale = 1.0f / (axisInfo.splitValue - rawAxisInfo.minValue);
+                float highScale = 1.0f / (rawAxisInfo.maxValue - axisInfo.splitValue);
+                axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
+                        scale, 0.0f, highScale, 0.0f,
+                        0.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
+            } else if (isCenteredAxis(axisInfo.axis)) {
                 float scale = 2.0f / (rawAxisInfo.maxValue - rawAxisInfo.minValue);
                 float offset = avg(rawAxisInfo.minValue, rawAxisInfo.maxValue) * -scale;
-                axis.initialize(rawAxisInfo, axisId, explicitlyMapped,
-                        scale, offset, -1.0f, 1.0f,
-                        rawAxisInfo.flat * scale, rawAxisInfo.fuzz * scale);
+                axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
+                        scale, offset, scale, offset,
+                        -1.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
             } else {
                 float scale = 1.0f / (rawAxisInfo.maxValue - rawAxisInfo.minValue);
-                axis.initialize(rawAxisInfo, axisId, explicitlyMapped,
-                        scale, 0.0f, 0.0f, 1.0f,
-                        rawAxisInfo.flat * scale, rawAxisInfo.fuzz * scale);
+                axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
+                        scale, 0.0f, scale, 0.0f,
+                        0.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
             }
 
             // To eliminate noise while the joystick is at rest, filter out small variations
@@ -3934,14 +3961,14 @@ void JoystickInputMapper::configure() {
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
         Axis& axis = mAxes.editValueAt(i);
-        if (axis.axis < 0) {
+        if (axis.axisInfo.axis < 0) {
             while (nextGenericAxisId <= AMOTION_EVENT_AXIS_GENERIC_16
                     && haveAxis(nextGenericAxisId)) {
                 nextGenericAxisId += 1;
             }
 
             if (nextGenericAxisId <= AMOTION_EVENT_AXIS_GENERIC_16) {
-                axis.axis = nextGenericAxisId;
+                axis.axisInfo.axis = nextGenericAxisId;
                 nextGenericAxisId += 1;
             } else {
                 LOGI("Ignoring joystick '%s' axis %d because all of the generic axis ids "
@@ -3954,10 +3981,13 @@ void JoystickInputMapper::configure() {
     }
 }
 
-bool JoystickInputMapper::haveAxis(int32_t axis) {
+bool JoystickInputMapper::haveAxis(int32_t axisId) {
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
-        if (mAxes.valueAt(i).axis == axis) {
+        const Axis& axis = mAxes.valueAt(i);
+        if (axis.axisInfo.axis == axisId
+                || (axis.axisInfo.mode == AxisInfo::MODE_SPLIT
+                        && axis.axisInfo.highAxis == axisId)) {
             return true;
         }
     }
@@ -3987,6 +4017,8 @@ bool JoystickInputMapper::isCenteredAxis(int32_t axis) {
     case AMOTION_EVENT_AXIS_HAT_X:
     case AMOTION_EVENT_AXIS_HAT_Y:
     case AMOTION_EVENT_AXIS_ORIENTATION:
+    case AMOTION_EVENT_AXIS_RUDDER:
+    case AMOTION_EVENT_AXIS_WHEEL:
         return true;
     default:
         return false;
@@ -4000,7 +4032,7 @@ void JoystickInputMapper::reset() {
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
         Axis& axis = mAxes.editValueAt(i);
-        axis.newValue = 0;
+        axis.resetValue();
     }
 
     sync(when, true /*force*/);
@@ -4014,10 +4046,34 @@ void JoystickInputMapper::process(const RawEvent* rawEvent) {
         ssize_t index = mAxes.indexOfKey(rawEvent->scanCode);
         if (index >= 0) {
             Axis& axis = mAxes.editValueAt(index);
-            float newValue = rawEvent->value * axis.scale + axis.offset;
-            if (newValue != axis.newValue) {
-                axis.newValue = newValue;
+            float newValue, highNewValue;
+            switch (axis.axisInfo.mode) {
+            case AxisInfo::MODE_INVERT:
+                newValue = (axis.rawAxisInfo.maxValue - rawEvent->value)
+                        * axis.scale + axis.offset;
+                highNewValue = 0.0f;
+                break;
+            case AxisInfo::MODE_SPLIT:
+                if (rawEvent->value < axis.axisInfo.splitValue) {
+                    newValue = (axis.axisInfo.splitValue - rawEvent->value)
+                            * axis.scale + axis.offset;
+                    highNewValue = 0.0f;
+                } else if (rawEvent->value > axis.axisInfo.splitValue) {
+                    newValue = 0.0f;
+                    highNewValue = (rawEvent->value - axis.axisInfo.splitValue)
+                            * axis.highScale + axis.highOffset;
+                } else {
+                    newValue = 0.0f;
+                    highNewValue = 0.0f;
+                }
+                break;
+            default:
+                newValue = rawEvent->value * axis.scale + axis.offset;
+                highNewValue = 0.0f;
+                break;
             }
+            axis.newValue = newValue;
+            axis.highNewValue = highNewValue;
         }
         break;
     }
@@ -4033,7 +4089,7 @@ void JoystickInputMapper::process(const RawEvent* rawEvent) {
 }
 
 void JoystickInputMapper::sync(nsecs_t when, bool force) {
-    if (!force && !haveAxesChangedSignificantly()) {
+    if (!filterAxes(force)) {
         return;
     }
 
@@ -4044,9 +4100,11 @@ void JoystickInputMapper::sync(nsecs_t when, bool force) {
 
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
-        Axis& axis = mAxes.editValueAt(i);
-        pointerCoords.setAxisValue(axis.axis, axis.newValue);
-        axis.oldValue = axis.newValue;
+        const Axis& axis = mAxes.valueAt(i);
+        pointerCoords.setAxisValue(axis.axisInfo.axis, axis.currentValue);
+        if (axis.axisInfo.mode == AxisInfo::MODE_SPLIT) {
+            pointerCoords.setAxisValue(axis.axisInfo.highAxis, axis.highCurrentValue);
+        }
     }
 
     // Moving a joystick axis should not wake the devide because joysticks can
@@ -4061,12 +4119,49 @@ void JoystickInputMapper::sync(nsecs_t when, bool force) {
             1, &pointerId, &pointerCoords, 0, 0, 0);
 }
 
-bool JoystickInputMapper::haveAxesChangedSignificantly() {
+bool JoystickInputMapper::filterAxes(bool force) {
+    bool atLeastOneSignificantChange = force;
     size_t numAxes = mAxes.size();
     for (size_t i = 0; i < numAxes; i++) {
-        const Axis& axis = mAxes.valueAt(i);
-        if (axis.newValue != axis.oldValue
-                && fabs(axis.newValue - axis.oldValue) > axis.filter) {
+        Axis& axis = mAxes.editValueAt(i);
+        if (force || hasValueChangedSignificantly(axis.filter,
+                axis.newValue, axis.currentValue, axis.min, axis.max)) {
+            axis.currentValue = axis.newValue;
+            atLeastOneSignificantChange = true;
+        }
+        if (axis.axisInfo.mode == AxisInfo::MODE_SPLIT) {
+            if (force || hasValueChangedSignificantly(axis.filter,
+                    axis.highNewValue, axis.highCurrentValue, axis.min, axis.max)) {
+                axis.highCurrentValue = axis.highNewValue;
+                atLeastOneSignificantChange = true;
+            }
+        }
+    }
+    return atLeastOneSignificantChange;
+}
+
+bool JoystickInputMapper::hasValueChangedSignificantly(
+        float filter, float newValue, float currentValue, float min, float max) {
+    if (newValue != currentValue) {
+        // Filter out small changes in value unless the value is converging on the axis
+        // bounds or center point.  This is intended to reduce the amount of information
+        // sent to applications by particularly noisy joysticks (such as PS3).
+        if (fabs(newValue - currentValue) > filter
+                || hasMovedNearerToValueWithinFilteredRange(filter, newValue, currentValue, min)
+                || hasMovedNearerToValueWithinFilteredRange(filter, newValue, currentValue, max)
+                || hasMovedNearerToValueWithinFilteredRange(filter, newValue, currentValue, 0)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool JoystickInputMapper::hasMovedNearerToValueWithinFilteredRange(
+        float filter, float newValue, float currentValue, float thresholdValue) {
+    float newDistance = fabs(newValue - thresholdValue);
+    if (newDistance < filter) {
+        float oldDistance = fabs(currentValue - thresholdValue);
+        if (newDistance < oldDistance) {
             return true;
         }
     }

@@ -352,14 +352,13 @@ status_t EventHub::mapKey(int32_t deviceId, int scancode,
     return NAME_NOT_FOUND;
 }
 
-status_t EventHub::mapAxis(int32_t deviceId, int scancode,
-        int32_t* outAxis) const
+status_t EventHub::mapAxis(int32_t deviceId, int scancode, AxisInfo* outAxisInfo) const
 {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);
 
     if (device && device->keyMap.haveKeyLayout()) {
-        status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxis);
+        status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxisInfo);
         if (err == NO_ERROR) {
             return NO_ERROR;
         }
@@ -369,14 +368,13 @@ status_t EventHub::mapAxis(int32_t deviceId, int scancode,
         device = getDeviceLocked(mBuiltInKeyboardId);
 
         if (device && device->keyMap.haveKeyLayout()) {
-            status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxis);
+            status_t err = device->keyMap.keyLayoutMap->mapAxis(scancode, outAxisInfo);
             if (err == NO_ERROR) {
                 return NO_ERROR;
             }
         }
     }
 
-    *outAxis = -1;
     return NAME_NOT_FOUND;
 }
 
