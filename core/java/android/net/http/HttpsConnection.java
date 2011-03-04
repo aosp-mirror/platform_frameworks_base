@@ -289,11 +289,9 @@ public class HttpsConnection extends Connection {
         } else {
             // if we do not have a proxy, we simply connect to the host
             try {
-                sslSock = (SSLSocket) getSocketFactory().createSocket();
-
+                sslSock = (SSLSocket) getSocketFactory().createSocket(
+                        mHost.getHostName(), mHost.getPort());
                 sslSock.setSoTimeout(SOCKET_TIMEOUT);
-                sslSock.connect(new InetSocketAddress(mHost.getHostName(),
-                        mHost.getPort()));
             } catch(IOException e) {
                 if (sslSock != null) {
                     sslSock.close();
