@@ -2025,10 +2025,10 @@ class PackageManagerService extends IPackageManager.Stub {
                 final int M = prefs.size();
                 for (int i=0; i<M; i++) {
                     PreferredActivity pa = prefs.get(i);
-                    if (pa.mMatch != match) {
+                    if (pa.mPref.mMatch != match) {
                         continue;
                     }
-                    ActivityInfo ai = getActivityInfo(pa.mActivity, flags);
+                    ActivityInfo ai = getActivityInfo(pa.mPref.mComponent, flags);
                     if (DEBUG_PREFERRED) {
                         Log.v(TAG, "Got preferred activity:");
                         if (ai != null) {
@@ -2052,7 +2052,7 @@ class PackageManagerService extends IPackageManager.Stub {
                             // If the result set is different from when this
                             // was created, we need to clear it and re-ask the
                             // user their preference.
-                            if (!pa.sameSet(query, priority)) {
+                            if (!pa.mPref.sameSet(query, priority)) {
                                 Slog.i(TAG, "Result set changed, dropping preferred activity for "
                                         + intent + " type " + resolvedType);
                                 mSettings.mPreferredActivities.removeFilter(pa);
@@ -6358,7 +6358,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 // remove from preferred activities.
                 ArrayList<PreferredActivity> removed = new ArrayList<PreferredActivity>();
                 for (PreferredActivity pa : mSettings.mPreferredActivities.filterSet()) {
-                    if (pa.mActivity.getPackageName().equals(deletedPs.name)) {
+                    if (pa.mPref.mComponent.getPackageName().equals(deletedPs.name)) {
                         removed.add(pa);
                     }
                 }
@@ -6805,7 +6805,7 @@ class PackageManagerService extends IPackageManager.Stub {
                 PreferredActivity pa = it.next();
                 if (pa.getAction(0).equals(action) && pa.getCategory(0).equals(category)) {
                     it.remove();
-                    Log.i(TAG, "Removed preferred activity " + pa.mActivity + ":");
+                    Log.i(TAG, "Removed preferred activity " + pa.mPref.mComponent + ":");
                     filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
                 }
             }
@@ -6843,7 +6843,7 @@ class PackageManagerService extends IPackageManager.Stub {
         Iterator<PreferredActivity> it = mSettings.mPreferredActivities.filterIterator();
         while (it.hasNext()) {
             PreferredActivity pa = it.next();
-            if (pa.mActivity.getPackageName().equals(packageName)) {
+            if (pa.mPref.mComponent.getPackageName().equals(packageName)) {
                 it.remove();
                 changed = true;
             }
@@ -6860,12 +6860,12 @@ class PackageManagerService extends IPackageManager.Stub {
             while (it.hasNext()) {
                 PreferredActivity pa = it.next();
                 if (packageName == null
-                        || pa.mActivity.getPackageName().equals(packageName)) {
+                        || pa.mPref.mComponent.getPackageName().equals(packageName)) {
                     if (outFilters != null) {
                         outFilters.add(new IntentFilter(pa));
                     }
                     if (outActivities != null) {
-                        outActivities.add(pa.mActivity);
+                        outActivities.add(pa.mPref.mComponent);
                     }
                 }
             }
@@ -7717,168 +7717,41 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    static class PreferredActivity extends IntentFilter {
-        final int mMatch;
-        final String[] mSetPackages;
-        final String[] mSetClasses;
-        final String[] mSetComponents;
-        final ComponentName mActivity;
-        final String mShortActivity;
-        String mParseError;
+    static class PreferredActivity extends IntentFilter implements PreferredComponent.Callbacks {
+        final PreferredComponent mPref;
 
         PreferredActivity(IntentFilter filter, int match, ComponentName[] set,
                 ComponentName activity) {
             super(filter);
-            mMatch = match&IntentFilter.MATCH_CATEGORY_MASK;
-            mActivity = activity;
-            mShortActivity = activity.flattenToShortString();
-            mParseError = null;
-            if (set != null) {
-                final int N = set.length;
-                String[] myPackages = new String[N];
-                String[] myClasses = new String[N];
-                String[] myComponents = new String[N];
-                for (int i=0; i<N; i++) {
-                    ComponentName cn = set[i];
-                    if (cn == null) {
-                        mSetPackages = null;
-                        mSetClasses = null;
-                        mSetComponents = null;
-                        return;
-                    }
-                    myPackages[i] = cn.getPackageName().intern();
-                    myClasses[i] = cn.getClassName().intern();
-                    myComponents[i] = cn.flattenToShortString().intern();
-                }
-                mSetPackages = myPackages;
-                mSetClasses = myClasses;
-                mSetComponents = myComponents;
-            } else {
-                mSetPackages = null;
-                mSetClasses = null;
-                mSetComponents = null;
-            }
+            mPref = new PreferredComponent(this, match, set, activity);
         }
 
         PreferredActivity(XmlPullParser parser) throws XmlPullParserException,
                 IOException {
-            mShortActivity = parser.getAttributeValue(null, "name");
-            mActivity = ComponentName.unflattenFromString(mShortActivity);
-            if (mActivity == null) {
-                mParseError = "Bad activity name " + mShortActivity;
-            }
-            String matchStr = parser.getAttributeValue(null, "match");
-            mMatch = matchStr != null ? Integer.parseInt(matchStr, 16) : 0;
-            String setCountStr = parser.getAttributeValue(null, "set");
-            int setCount = setCountStr != null ? Integer.parseInt(setCountStr) : 0;
-
-            String[] myPackages = setCount > 0 ? new String[setCount] : null;
-            String[] myClasses = setCount > 0 ? new String[setCount] : null;
-            String[] myComponents = setCount > 0 ? new String[setCount] : null;
-
-            int setPos = 0;
-
-            int outerDepth = parser.getDepth();
-            int type;
-            while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-                   && (type != XmlPullParser.END_TAG
-                           || parser.getDepth() > outerDepth)) {
-                if (type == XmlPullParser.END_TAG
-                        || type == XmlPullParser.TEXT) {
-                    continue;
-                }
-
-                String tagName = parser.getName();
-                //Log.i(TAG, "Parse outerDepth=" + outerDepth + " depth="
-                //        + parser.getDepth() + " tag=" + tagName);
-                if (tagName.equals("set")) {
-                    String name = parser.getAttributeValue(null, "name");
-                    if (name == null) {
-                        if (mParseError == null) {
-                            mParseError = "No name in set tag in preferred activity "
-                                + mShortActivity;
-                        }
-                    } else if (setPos >= setCount) {
-                        if (mParseError == null) {
-                            mParseError = "Too many set tags in preferred activity "
-                                + mShortActivity;
-                        }
-                    } else {
-                        ComponentName cn = ComponentName.unflattenFromString(name);
-                        if (cn == null) {
-                            if (mParseError == null) {
-                                mParseError = "Bad set name " + name + " in preferred activity "
-                                    + mShortActivity;
-                            }
-                        } else {
-                            myPackages[setPos] = cn.getPackageName();
-                            myClasses[setPos] = cn.getClassName();
-                            myComponents[setPos] = name;
-                            setPos++;
-                        }
-                    }
-                    XmlUtils.skipCurrentTag(parser);
-                } else if (tagName.equals("filter")) {
-                    //Log.i(TAG, "Starting to parse filter...");
-                    readFromXml(parser);
-                    //Log.i(TAG, "Finished filter: outerDepth=" + outerDepth + " depth="
-                    //        + parser.getDepth() + " tag=" + parser.getName());
-                } else {
-                    reportSettingsProblem(Log.WARN,
-                            "Unknown element under <preferred-activities>: "
-                            + parser.getName());
-                    XmlUtils.skipCurrentTag(parser);
-                }
-            }
-
-            if (setPos != setCount) {
-                if (mParseError == null) {
-                    mParseError = "Not enough set tags (expected " + setCount
-                        + " but found " + setPos + ") in " + mShortActivity;
-                }
-            }
-
-            mSetPackages = myPackages;
-            mSetClasses = myClasses;
-            mSetComponents = myComponents;
+            mPref = new PreferredComponent(this, parser);
         }
 
         public void writeToXml(XmlSerializer serializer) throws IOException {
-            final int NS = mSetClasses != null ? mSetClasses.length : 0;
-            serializer.attribute(null, "name", mShortActivity);
-            serializer.attribute(null, "match", Integer.toHexString(mMatch));
-            serializer.attribute(null, "set", Integer.toString(NS));
-            for (int s=0; s<NS; s++) {
-                serializer.startTag(null, "set");
-                serializer.attribute(null, "name", mSetComponents[s]);
-                serializer.endTag(null, "set");
-            }
+            mPref.writeToXml(serializer);
             serializer.startTag(null, "filter");
             super.writeToXml(serializer);
             serializer.endTag(null, "filter");
         }
 
-        boolean sameSet(List<ResolveInfo> query, int priority) {
-            if (mSetPackages == null) return false;
-            final int NQ = query.size();
-            final int NS = mSetPackages.length;
-            int numMatch = 0;
-            for (int i=0; i<NQ; i++) {
-                ResolveInfo ri = query.get(i);
-                if (ri.priority != priority) continue;
-                ActivityInfo ai = ri.activityInfo;
-                boolean good = false;
-                for (int j=0; j<NS; j++) {
-                    if (mSetPackages[j].equals(ai.packageName)
-                            && mSetClasses[j].equals(ai.name)) {
-                        numMatch++;
-                        good = true;
-                        break;
-                    }
-                }
-                if (!good) return false;
+        public boolean onReadTag(String tagName, XmlPullParser parser)
+                throws XmlPullParserException, IOException {
+            if (tagName.equals("filter")) {
+                //Log.i(TAG, "Starting to parse filter...");
+                readFromXml(parser);
+                //Log.i(TAG, "Finished filter: outerDepth=" + outerDepth + " depth="
+                //        + parser.getDepth() + " tag=" + parser.getName());
+            } else {
+                reportSettingsProblem(Log.WARN,
+                        "Unknown element under <preferred-activities>: "
+                        + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
             }
-            return numMatch == NS;
+            return true;
         }
     }
 
@@ -8161,24 +8034,12 @@ class PackageManagerService extends IPackageManager.Stub {
                     new IntentResolver<PreferredActivity, PreferredActivity>() {
             @Override
             protected String packageForFilter(PreferredActivity filter) {
-                return filter.mActivity.getPackageName();
+                return filter.mPref.mComponent.getPackageName();
             }
             @Override
             protected void dumpFilter(PrintWriter out, String prefix,
                     PreferredActivity filter) {
-                out.print(prefix); out.print(
-                        Integer.toHexString(System.identityHashCode(filter)));
-                        out.print(' ');
-                        out.print(filter.mActivity.flattenToShortString());
-                        out.print(" match=0x");
-                        out.println( Integer.toHexString(filter.mMatch));
-                if (filter.mSetComponents != null) {
-                    out.print(prefix); out.println("  Selected from:");
-                    for (int i=0; i<filter.mSetComponents.length; i++) {
-                        out.print(prefix); out.print("    ");
-                                out.println(filter.mSetComponents[i]);
-                    }
-                }
+                filter.mPref.dump(out, prefix, filter);
             }
         };
         private final HashMap<String, SharedUserSetting> mSharedUsers =
@@ -10010,12 +9871,12 @@ class PackageManagerService extends IPackageManager.Stub {
                 String tagName = parser.getName();
                 if (tagName.equals("item")) {
                     PreferredActivity pa = new PreferredActivity(parser);
-                    if (pa.mParseError == null) {
+                    if (pa.mPref.getParseError() == null) {
                         mPreferredActivities.addFilter(pa);
                     } else {
                         reportSettingsProblem(Log.WARN,
                                 "Error in package manager settings: <preferred-activity> "
-                                + pa.mParseError + " at "
+                                + pa.mPref.getParseError() + " at "
                                 + parser.getPositionDescription());
                     }
                 } else {
