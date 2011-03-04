@@ -21,8 +21,6 @@
 #include <GLES/glext.h>
 #endif //ANDROID_RS_SERIALIZE
 
-static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va);
-
 using namespace android;
 using namespace android::renderscript;
 
@@ -601,6 +599,8 @@ void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {
 /////////////////
 //
 #ifndef ANDROID_RS_SERIALIZE
+
+static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va);
 
 namespace android {
 namespace renderscript {
