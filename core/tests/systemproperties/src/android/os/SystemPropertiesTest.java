@@ -23,8 +23,19 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 public class SystemPropertiesTest extends TestCase {
     private static final String KEY = "sys.testkey";
+    private static final String PERSIST_KEY = "persist.sys.testkey";
+
     @SmallTest
-    public void testLongSequencialProperties() throws Exception {
+    public void testStressPersistPropertyConsistency() throws Exception {
+        for (int i = 0; i < 100; ++i) {
+            SystemProperties.set(PERSIST_KEY, Long.toString(i));
+            long ret = SystemProperties.getLong(PERSIST_KEY, -1);
+            assertEquals(i, ret);
+        }
+    }
+
+    @SmallTest
+    public void testStressMemoryPropertyConsistency() throws Exception {
         for (int i = 0; i < 100; ++i) {
             SystemProperties.set(KEY, Long.toString(i));
             long ret = SystemProperties.getLong(KEY, -1);
