@@ -19,6 +19,7 @@
 #include <stdio.h>
 
 #include <gui/SurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -62,6 +63,15 @@ sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz)
     sp<SurfaceTexture> surfaceTexture(
         (SurfaceTexture*)env->GetIntField(thiz, fields.surfaceTexture));
     return surfaceTexture;
+}
+
+sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
+        JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    sp<SurfaceTextureClient> surfaceTextureClient(surfaceTexture != NULL ?
+            new SurfaceTextureClient(surfaceTexture) : NULL);
+    return surfaceTextureClient;
 }
 
 // ----------------------------------------------------------------------------

@@ -20,11 +20,20 @@
 #include <android/native_window_jni.h>
 #include <surfaceflinger/Surface.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 
 using namespace android;
 
 ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface) {
     sp<ANativeWindow> win = android_Surface_getNativeWindow(env, surface);
+    if (win != NULL) {
+        win->incStrong((void*)ANativeWindow_acquire);
+    }
+    return win.get();
+}
+
+ANativeWindow* ANativeWindow_fromSurfaceTexture(JNIEnv* env, jobject surfaceTexture) {
+    sp<ANativeWindow> win = android_SurfaceTexture_getNativeWindow(env, surfaceTexture);
     if (win != NULL) {
         win->incStrong((void*)ANativeWindow_acquire);
     }
