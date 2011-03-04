@@ -52,7 +52,7 @@ class CoreSettingsObserver extends ContentObserver {
         super(activityManagerService.mHandler);
         mActivityManagerService = activityManagerService;
         beginObserveCoreSettings();
-        populateCoreSettings(mCoreSettings);
+        sendCoreSettings();
     }
 
     public Bundle getCoreSettingsLocked() {
@@ -62,9 +62,13 @@ class CoreSettingsObserver extends ContentObserver {
     @Override
     public void onChange(boolean selfChange) {
         synchronized (mActivityManagerService) {
-            populateCoreSettings(mCoreSettings);
-            mActivityManagerService.onCoreSettingsChange(mCoreSettings);
+            sendCoreSettings();
         }
+    }
+
+    private void sendCoreSettings() {
+        populateCoreSettings(mCoreSettings);
+        mActivityManagerService.onCoreSettingsChange(mCoreSettings);
     }
 
     private void beginObserveCoreSettings() {

@@ -200,6 +200,8 @@ public final class ActivityThread {
 
     static Handler sMainThreadHandler;  // set once in main()
 
+    Bundle mCoreSettings = null;
+
     private static final class ActivityClientRecord {
         IBinder token;
         int ident;
@@ -354,7 +356,6 @@ public final class ActivityThread {
         boolean restrictedBackupMode;
         Configuration config;
         boolean handlingProfiling;
-        Bundle coreSettings;
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
@@ -559,6 +560,8 @@ public final class ActivityThread {
                 ServiceManager.initServiceCache(services);
             }
 
+            setCoreSettings(coreSettings);
+
             AppBindData data = new AppBindData();
             data.processName = processName;
             data.appInfo = appInfo;
@@ -570,7 +573,6 @@ public final class ActivityThread {
             data.debugMode = debugMode;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.config = config;
-            data.coreSettings = coreSettings;
             queueOrSendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -898,8 +900,8 @@ public final class ActivityThread {
             pw.println(String.format(format, objs));
         }
 
-        public void setCoreSettings(Bundle settings) {
-            queueOrSendMessage(H.SET_CORE_SETTINGS, settings);
+        public void setCoreSettings(Bundle coreSettings) {
+            queueOrSendMessage(H.SET_CORE_SETTINGS, coreSettings);
         }
     }
 
@@ -2720,10 +2722,8 @@ public final class ActivityThread {
     }
 
     private void handleSetCoreSettings(Bundle coreSettings) {
-        if (mBoundApplication != null) {
-            synchronized (mBoundApplication) {
-                mBoundApplication.coreSettings = coreSettings;
-            }
+        synchronized (mPackages) {
+            mCoreSettings = coreSettings;
         }
     }
 
@@ -3990,13 +3990,9 @@ public final class ActivityThread {
     }
 
     public int getIntCoreSetting(String key, int defaultValue) {
-        if (mBoundApplication == null) {
-            return defaultValue;
-        }
-        synchronized (mBoundApplication) {
-            Bundle coreSettings = mBoundApplication.coreSettings;
-            if (coreSettings != null) {
-                return coreSettings.getInt(key, defaultValue);
+        synchronized (mPackages) {
+            if (mCoreSettings != null) {
+                return mCoreSettings.getInt(key, defaultValue);
             } else {
                 return defaultValue;
             }
