@@ -660,6 +660,12 @@ final class FragmentManagerImpl extends FragmentManager {
         }
         
         if (f.mState < newState) {
+            // For fragments that are created from a layout, when restoring from
+            // state we don't want to allow them to be created until they are
+            // being reloaded from the layout.
+            if (f.mFromLayout && !f.mInLayout) {
+                return;
+            }
             if (f.mAnimatingAway != null) {
                 // The fragment is currently being animated...  but!  Now we
                 // want to move our state back up.  Give up on waiting for the
