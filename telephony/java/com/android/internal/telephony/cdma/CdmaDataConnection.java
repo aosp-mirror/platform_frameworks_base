@@ -85,9 +85,12 @@ public class CdmaDataConnection extends DataConnection {
         // msg.obj will be returned in AsyncResult.userObj;
         Message msg = obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE, cp);
         msg.obj = cp;
-        phone.mCM.setupDataCall(Integer.toString(RILConstants.SETUP_DATA_TECH_CDMA),
-                Integer.toString(dataProfile), null, null,
-                null, Integer.toString(RILConstants.SETUP_DATA_AUTH_PAP_CHAP), msg);
+        phone.mCM.setupDataCall(
+                Integer.toString(RILConstants.SETUP_DATA_TECH_CDMA),
+                Integer.toString(dataProfile),
+                null, null, null,
+                Integer.toString(RILConstants.SETUP_DATA_AUTH_PAP_CHAP),
+                RILConstants.SETUP_DATA_PROTOCOL_IP, msg);
     }
 
     @Override
