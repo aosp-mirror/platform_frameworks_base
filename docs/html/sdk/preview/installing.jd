@@ -1,62 +1,8 @@
-page.title=Getting Started with Honeycomb
 @jd:body
 
-<p>First, you need to set up your development environment with the new SDK Tools and preview
-platform:</p>
+<script type="text/javascript">
+  document.location=toRoot+"sdk/installing.html"
+</script>
 
-<ol>
-  <li>Unpack the SDK Tools r8 package you've received.
-    <p>If you have an existing Android SDK directory, simply replace your existing {@code
-tools/} directory with the one from the new package and add the {@code platform-tools/}
-directory along side it (at the root of the SDK directory).</p></li>
-  <li>Unpack the platform package ({@code android-Froyo}) and place it in your SDK's {@code
-platforms/} directory.</li>
-  <li>If you're using Eclipse, also update your Eclipse plugin using the provided archive file.
-    <ol>
-      <li>Select <strong>Help > Install new software</strong>.</li>
-      <li>Click <strong>Add</strong>.</li>
-      <li>Click <strong>Archive</strong>.</li>
-      <li>Locate and select the archive file. Click <strong>OK</strong>.
-        <p>Developer Tools now appear in the Available Software window and you can proceed
-to install the plugin.</p>
-      </li>
-    </ol>
-  </li>
-</ol>
-
-<p class="note"><strong>Note:</strong> Beginning with SDK Tools r8 (the version you've received),
-the {@code adb} tool is now located in the {@code &lt;sdk&gt;/platform-tools/} directory (instead
-of in {@code &lt;sdk&gt;/tools/}). Be sure to update your {@code PATH} environment variable and any
-build/debugging scripts you have.</p>
-
-
-
-<h2 id="Setup">Set Up Your AVD and Application</h2>
-
-<p>With your SDK now set up, follow these steps to start developing an application for
-Honeycomb.</p>
-
-<ol>
-
-  <li>Create a new AVD targeted to "Android Froyo (Preview)" and with a custom skin resolution of
-1280 x 800.</li>
-
-  <li>Set the build target of your application to "Android Froyo (Preview)".</li>
-  <li>Set your manifest file's {@code &lt;uses-sdk&gt;} element to use {@code
-android:minSdkVersion="Froyo"}. For example:
-<pre>
-&lt;manifest&gt;
-    &lt;uses-sdk android:minSdkVersion="Froyo" /&gt;
-    ...
-&lt;/manifest&gt;
-</pre>
-<p>"Froyo" is a provisional API Level for the Honeycomb release, used only during the preview
-period. When the APIs are
-finalized and the SDK is released publicly, you must update this with the appropriate API Level
-integer.</p>
-<p class="note"><strong>Note:</strong> By providing your {@code &lt;uses-sdk&gt;} element in the
-manifest file <em>before</em> the {@code &lt;application&gt;} element, your application will
-automatically apply the new Holographic theme.</p>
-</li>
-
-</ol>
+<p>You should have already been redirected by your browser. Please go to
+<a href="{@docRoot}sdk/installing.html">Installing the SDK</a>.</p>
