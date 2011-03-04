@@ -281,11 +281,13 @@ static void SC_allocationSyncAll(RsAllocation va) {
     static_cast<Allocation *>(va)->syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
 }
 
+#if 0
 static void SC_allocationSyncAll2(RsAllocation va, RsAllocationUsageType source) {
     CHECK_OBJ(va);
     GET_TLS();
     static_cast<Allocation *>(va)->syncAll(rsc, source);
 }
+#endif
 
 static void SC_ClearColor(float r, float g, float b, float a) {
     GET_TLS();
