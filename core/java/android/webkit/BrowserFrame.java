@@ -1043,13 +1043,16 @@ class BrowserFrame extends Handler {
     // These ids need to be in sync with enum rawResId in PlatformBridge.h
     private static final int NODOMAIN = 1;
     private static final int LOADERROR = 2;
-    private static final int DRAWABLEDIR = 3;
+    /* package */ static final int DRAWABLEDIR = 3;
     private static final int FILE_UPLOAD_LABEL = 4;
     private static final int RESET_LABEL = 5;
     private static final int SUBMIT_LABEL = 6;
     private static final int FILE_UPLOAD_NO_FILE_CHOSEN = 7;
 
-    String getRawResFilename(int id) {
+    private String getRawResFilename(int id) {
+        return getRawResFilename(id, mContext);
+    }
+    /* package */ static String getRawResFilename(int id, Context context) {
         int resid;
         switch (id) {
             case NODOMAIN:
@@ -1066,19 +1069,19 @@ class BrowserFrame extends Handler {
                 break;
 
             case FILE_UPLOAD_LABEL:
-                return mContext.getResources().getString(
+                return context.getResources().getString(
                         com.android.internal.R.string.upload_file);
 
             case RESET_LABEL:
-                return mContext.getResources().getString(
+                return context.getResources().getString(
                         com.android.internal.R.string.reset);
 
             case SUBMIT_LABEL:
-                return mContext.getResources().getString(
+                return context.getResources().getString(
                         com.android.internal.R.string.submit);
 
             case FILE_UPLOAD_NO_FILE_CHOSEN:
-                return mContext.getResources().getString(
+                return context.getResources().getString(
                         com.android.internal.R.string.no_file_chosen);
 
             default:
@@ -1086,7 +1089,7 @@ class BrowserFrame extends Handler {
                 return "";
         }
         TypedValue value = new TypedValue();
-        mContext.getResources().getValue(resid, value, true);
+        context.getResources().getValue(resid, value, true);
         if (id == DRAWABLEDIR) {
             String path = value.string.toString();
             int index = path.lastIndexOf('/');
