@@ -679,7 +679,7 @@ public class RenderScript {
 
     /**
      * Base class application should derive from for handling RS messages
-     * comming from their scripts.  When a script calls sendToClient the data
+     * coming from their scripts.  When a script calls sendToClient the data
      * fields will be filled in and then the run method called by a message
      * handling thread.  This will occur some time after sendToClient completes
      * in the script.
