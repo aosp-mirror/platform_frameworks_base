@@ -104,11 +104,19 @@ public class GsmDataConnection extends DataConnection {
             authType = (apn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
                 RILConstants.SETUP_DATA_AUTH_NONE;
         }
+
+        String protocol;
+        if (phone.getServiceState().getRoaming()) {
+            protocol = apn.roamingProtocol;
+        } else {
+            protocol = apn.protocol;
+        }
+
         phone.mCM.setupDataCall(
                 Integer.toString(RILConstants.SETUP_DATA_TECH_GSM),
                 Integer.toString(RILConstants.DATA_PROFILE_DEFAULT),
                 apn.apn, apn.user, apn.password, Integer.toString(authType),
-                RILConstants.SETUP_DATA_PROTOCOL_IP, msg);
+                protocol, msg);
     }
 
     @Override
