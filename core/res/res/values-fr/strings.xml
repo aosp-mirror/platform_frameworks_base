@@ -160,7 +160,7 @@
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Permet de lire et rédiger vos SMS, e-mails et autres messages."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vos informations personnelles"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Accéder directement aux contacts et à l\'agenda enregistrés sur la tablette"</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Accédez directement aux contacts et à l\'agenda enregistrés sur votre téléphone."</string>
+    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Accéder directement aux contacts et à l\'agenda enregistrés sur votre téléphone"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Votre position"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Suivre votre position géographique"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Communications réseau"</string>
