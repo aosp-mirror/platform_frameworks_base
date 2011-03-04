@@ -66,7 +66,6 @@ import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.UUSInfo;
-import com.android.internal.telephony.CallTracker;
 
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
@@ -98,6 +97,7 @@ public class CDMAPhone extends PhoneBase {
 
     // Instance Variables
     CdmaCallTracker mCT;
+    CdmaSMSDispatcher mSMS;
     CdmaServiceStateTracker mSST;
     RuimRecords mRuimRecords;
     RuimCard mRuimCard;
@@ -141,21 +141,16 @@ public class CDMAPhone extends PhoneBase {
 
     // Constructors
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
-        super(notifier, context, ci, false);
-        mSST = new CdmaServiceStateTracker (this);
-        init(context, notifier);
+        this(context,ci,notifier, false);
     }
 
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
             boolean unitTestMode) {
         super(notifier, context, ci, unitTestMode);
-        mSST = new CdmaServiceStateTracker (this);
-        init(context, notifier);
-    }
 
-    protected void init(Context context, PhoneNotifier notifier) {
         mCM.setPhoneType(Phone.PHONE_TYPE_CDMA);
         mCT = new CdmaCallTracker(this);
+        mSST = new CdmaServiceStateTracker (this);
         mSMS = new CdmaSMSDispatcher(this);
         mIccFileHandler = new RuimFileHandler(this);
         mRuimRecords = new RuimRecords(this);
@@ -275,16 +270,8 @@ public class CDMAPhone extends PhoneBase {
         return mSST.ss;
     }
 
-    public CallTracker getCallTracker() {
-        return mCT;
-    }
-
     public Phone.State getState() {
         return mCT.state;
-    }
-
-    public ServiceStateTracker getServiceStateTracker() {
-        return mSST;
     }
 
     public String getPhoneName() {
@@ -638,7 +625,7 @@ public class CDMAPhone extends PhoneBase {
                 case CONNECTED:
                 case DISCONNECTING:
                     if ( mCT.state != Phone.State.IDLE
-                            && !mSST.isConcurrentVoiceAndDataAllowed()) {
+                            && !mSST.isConcurrentVoiceAndData()) {
                         ret = DataState.SUSPENDED;
                     } else {
                         ret = DataState.CONNECTED;

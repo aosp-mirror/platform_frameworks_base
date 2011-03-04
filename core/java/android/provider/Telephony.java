@@ -1723,14 +1723,6 @@ public final class Telephony {
 
         public static final String TYPE = "type";
 
-        public static final String INACTIVE_TIMER = "inactivetimer";
-
-        // Only if enabled try Data Connection.
-        public static final String ENABLED = "enabled";
-
-        // Rules apply based on class.
-        public static final String CLASS = "class";
-
         /**
          * The protocol to be used to connect to this APN.
          *

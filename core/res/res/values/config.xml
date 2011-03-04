@@ -51,11 +51,6 @@
          manager will disable alpha trasformation in animations where not
          strictly needed. -->
     <bool name="config_sf_limitedAlpha">false</bool>
-
-    <!-- Default value used to block data calls if ims is not
-         connected.  If you use the ims apn DCT will block
-         any other apn from connecting until ims apn is connected-->
-    <bool name="ImsConnectedDefaultValue">false</bool>
     
     <!-- Flag indicating whether the surface flinger is inefficient
          at performing a blur.  Used by parts of the UI to turn off
@@ -138,9 +133,6 @@
         <item>"mobile_mms,2,0,2"</item>
         <item>"mobile_supl,3,0,2"</item>
         <item>"mobile_hipri,5,0,3"</item>
-        <item>"mobile_fota,8,0,2"</item>
-        <item>"mobile_ims,9,0,2"</item>
-        <item>"mobile_cbs,10,0,2"</item>
     </string-array>
 
     <!-- This string array should be overridden by the device to present a list of radio

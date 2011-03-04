@@ -134,10 +134,6 @@ public final class CdmaCallTracker extends CallTracker {
     public void registerForVoiceCallStarted(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
         voiceCallStartedRegistrants.add(r);
-        // Notify if in call when registering
-        if (state != Phone.State.IDLE) {
-            r.notifyRegistrant(new AsyncResult(null, null, null));
-        }
     }
     public void unregisterForVoiceCallStarted(Handler h) {
         voiceCallStartedRegistrants.remove(h);

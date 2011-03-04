@@ -45,8 +45,6 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final int DATA_ACCESS_HSUPA = 10;
     protected static final int DATA_ACCESS_HSPA = 11;
     protected static final int DATA_ACCESS_CDMA_EvDo_B = 12;
-    protected static final int DATA_ACCESS_LTE = 13;
-    protected static final int DATA_ACCESS_EHRPD = 14;
 
     protected CommandsInterface cm;
 
@@ -282,51 +280,12 @@ public abstract class ServiceStateTracker extends Handler {
     protected abstract void setPowerStateToDesired();
     protected abstract void log(String s);
 
-    private void logUnexpectedGsmMethodCall(String name) {
-        log("SSST" + "Error! " + name + "() in ServiceStateTracker should not be " +
-        "called, GsmServiceStateTracker inactive.");
-    }
-
-    public abstract int getCurrentDataConnectionState();
-    public abstract boolean isConcurrentVoiceAndDataAllowed();
-    public void registerForDataConnectionAttached(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForDataConnectionAttached");
-    }
-
-    public void unregisterForDataConnectionAttached(Handler h) {
-        logUnexpectedGsmMethodCall("unregisterForDataConnectionAttached");
-    }
-
-    public void registerForDataConnectionDetached(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForDataConnectionDetached");
-    }
-
-    public void unregisterForDataConnectionDetached(Handler h) {
-        logUnexpectedGsmMethodCall("unregisterForDataConnectionDetached");
-    }
-
-    public void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForPsRestrictedEnabled");
-    }
-
-    public void unregisterForPsRestrictedEnabled(Handler h) {
-        logUnexpectedGsmMethodCall("unregisterForPsRestrictedEnabled");
-    }
-
-    public void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForPsRestrictedDisabled");
-    }
-
-    public void unregisterForPsRestrictedDisabled(Handler h) {
-        logUnexpectedGsmMethodCall("registerForPsRestrictedDisabled");
-    }
-
     /**
      * Clean up existing voice and data connection then turn off radio power.
      *
      * Hang up the existing voice calls to decrease call drop rate.
      */
-    public abstract void powerOffRadioSafely();
+    protected abstract void powerOffRadioSafely();
 
     /** Cancel a pending (if any) pollState() operation */
     protected void cancelPollState() {

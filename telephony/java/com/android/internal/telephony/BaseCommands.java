@@ -34,9 +34,6 @@ public abstract class BaseCommands implements CommandsInterface {
     //***** Instance Variables
     protected Context mContext;
     protected RadioState mState = RadioState.RADIO_UNAVAILABLE;
-    protected RadioState mSimState = RadioState.RADIO_UNAVAILABLE;
-    protected RadioState mRuimState = RadioState.RADIO_UNAVAILABLE;
-    protected RadioState mNvState = RadioState.RADIO_UNAVAILABLE;
     protected Object mStateMonitor = new Object();
 
     protected RegistrantList mRadioStateChangedRegistrants = new RegistrantList();
@@ -106,18 +103,6 @@ public abstract class BaseCommands implements CommandsInterface {
 
     public RadioState getRadioState() {
         return mState;
-    }
-
-    public RadioState getSimState() {
-        return mSimState;
-    }
-
-    public RadioState getRuimState() {
-        return mRuimState;
-    }
-
-    public RadioState getNvState() {
-        return mNvState;
     }
 
 
@@ -215,7 +200,7 @@ public abstract class BaseCommands implements CommandsInterface {
         synchronized (mStateMonitor) {
             mSIMReadyRegistrants.add(r);
 
-            if (mSimState.isSIMReady()) {
+            if (mState.isSIMReady()) {
                 r.notifyRegistrant(new AsyncResult(null, null, null));
             }
         }
@@ -234,7 +219,7 @@ public abstract class BaseCommands implements CommandsInterface {
         synchronized (mStateMonitor) {
             mRUIMReadyRegistrants.add(r);
 
-            if (mRuimState.isRUIMReady()) {
+            if (mState.isRUIMReady()) {
                 r.notifyRegistrant(new AsyncResult(null, null, null));
             }
         }
@@ -253,7 +238,7 @@ public abstract class BaseCommands implements CommandsInterface {
         synchronized (mStateMonitor) {
             mNVReadyRegistrants.add(r);
 
-            if (mNvState.isNVReady()) {
+            if (mState.isNVReady()) {
                 r.notifyRegistrant(new AsyncResult(null, null, null));
             }
         }
@@ -271,7 +256,7 @@ public abstract class BaseCommands implements CommandsInterface {
         synchronized (mStateMonitor) {
             mSIMLockedRegistrants.add(r);
 
-            if (mSimState == RadioState.SIM_LOCKED_OR_ABSENT) {
+            if (mState == RadioState.SIM_LOCKED_OR_ABSENT) {
                 r.notifyRegistrant(new AsyncResult(null, null, null));
             }
         }
@@ -289,7 +274,7 @@ public abstract class BaseCommands implements CommandsInterface {
         synchronized (mStateMonitor) {
             mRUIMLockedRegistrants.add(r);
 
-            if (mRuimState == RadioState.RUIM_LOCKED_OR_ABSENT) {
+            if (mState == RadioState.RUIM_LOCKED_OR_ABSENT) {
                 r.notifyRegistrant(new AsyncResult(null, null, null));
             }
         }
@@ -666,22 +651,6 @@ public abstract class BaseCommands implements CommandsInterface {
             if (oldState == mState) {
                 // no state transition
                 return;
-            }
-
-            // FIXME: Use Constants or Enums
-            if(mState.getType() == 0) {
-                mSimState = mState;
-                mRuimState = mState;
-                mNvState = mState;
-            }
-            else if (mState.getType() == 1) {
-                mSimState = mState;
-            }
-            else if (mState.getType() == 2) {
-                mRuimState = mState;
-            }
-            else if (mState.getType() == 3) {
-                mNvState = mState;
             }
 
             mRadioStateChangedRegistrants.notifyRegistrants();

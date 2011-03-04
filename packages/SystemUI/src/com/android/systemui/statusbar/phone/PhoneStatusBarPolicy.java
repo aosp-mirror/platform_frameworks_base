@@ -246,16 +246,6 @@ public class PhoneStatusBarPolicy {
               R.drawable.stat_sys_data_fully_out_3g,
               R.drawable.stat_sys_data_fully_inandout_3g }
         };
-    private static final int[][] sDataNetType_4g = {
-            { R.drawable.stat_sys_data_connected_4g,
-              R.drawable.stat_sys_data_in_4g,
-              R.drawable.stat_sys_data_out_4g,
-              R.drawable.stat_sys_data_inandout_4g },
-            { R.drawable.stat_sys_data_fully_connected_4g,
-              R.drawable.stat_sys_data_fully_in_4g,
-              R.drawable.stat_sys_data_fully_out_4g,
-              R.drawable.stat_sys_data_fully_inandout_4g }
-        };
     private static final int[][] sDataNetType_e = {
             { R.drawable.stat_sys_data_connected_e,
               R.drawable.stat_sys_data_in_e,
@@ -680,12 +670,9 @@ public class PhoneStatusBarPolicy {
         case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
         case TelephonyManager.NETWORK_TYPE_EVDO_A:
         case TelephonyManager.NETWORK_TYPE_EVDO_B:
-        case TelephonyManager.NETWORK_TYPE_EHRPD:
             mDataIconList = sDataNetType_3g[mInetCondition];
             break;
-        case TelephonyManager.NETWORK_TYPE_LTE:
-            mDataIconList = sDataNetType_4g[mInetCondition];
-            break;
+        // TODO - add support for NETWORK_TYPE_LTE and NETWORK_TYPE_EHRPD
         default:
             mDataIconList = sDataNetType_g[mInetCondition];
         break;

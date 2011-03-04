@@ -437,8 +437,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 retValue = true;
                 break;
             case Phone.APN_REQUEST_STARTED:
-                // set IDLE here , avoid the following second FAILED not sent out
-                mNetworkInfo.setDetailedState(DetailedState.IDLE, null, null);
+                // no need to do anything - we're already due some status update intents
                 retValue = true;
                 break;
             case Phone.APN_REQUEST_FAILED:
@@ -547,12 +546,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 return Phone.APN_TYPE_DUN;
             case ConnectivityManager.TYPE_MOBILE_HIPRI:
                 return Phone.APN_TYPE_HIPRI;
-            case ConnectivityManager.TYPE_MOBILE_FOTA:
-                return Phone.APN_TYPE_FOTA;
-            case ConnectivityManager.TYPE_MOBILE_IMS:
-                return Phone.APN_TYPE_IMS;
-            case ConnectivityManager.TYPE_MOBILE_CBS:
-                return Phone.APN_TYPE_CBS;
             default:
                 sloge("Error mapping networkType " + netType + " to apnType.");
                 return null;
