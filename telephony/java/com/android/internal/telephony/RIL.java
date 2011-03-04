@@ -1402,19 +1402,23 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                                    RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE, null);
                     rrCs.mp.writeInt(1);
                     rrCs.mp.writeInt(mCdmaSubscription);
-                    if (RILJ_LOGD) riljLog(rrCs.serialString() + "> "
-                    + requestToString(rrCs.mRequest) + " : " + mCdmaSubscription);
+                    if (RILJ_LOGD) {
+                        riljLog(rrCs.serialString() + "> "
+                                + requestToString(rrCs.mRequest) + " : " + mCdmaSubscription);
+                    }
                     send(rrCs);
                 }
             }
         }
-        RILRequest rr
-                = RILRequest.obtain(RIL_REQUEST_RADIO_POWER, result);
+        RILRequest rr = RILRequest.obtain(RIL_REQUEST_RADIO_POWER, result);
 
         rr.mp.writeInt(1);
         rr.mp.writeInt(on ? 1 : 0);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
+        if (RILJ_LOGD) {
+            riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
+                    + (on ? " on" : " off"));
+        }
 
         send(rr);
     }
