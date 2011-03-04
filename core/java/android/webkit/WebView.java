@@ -847,6 +847,9 @@ public class WebView extends AbsoluteLayout
     private Rect mScrollingLayerBounds = new Rect();
     private boolean mSentAutoScrollMessage = false;
 
+    // used for serializing asynchronously handled touch events.
+    private final TouchEventQueue mTouchEventQueue = new TouchEventQueue();
+
     // Used to notify listeners of a new picture.
     private PictureListener mPictureListener;
     /**
@@ -5081,6 +5084,8 @@ public class WebView extends AbsoluteLayout
         }
 
         addAccessibilityApisToJavaScript();
+
+        mTouchEventQueue.reset();
     }
 
     @Override
@@ -5432,34 +5437,17 @@ public class WebView extends AbsoluteLayout
                 + " numPointers=" + ev.getPointerCount());
         }
 
-        int action = ev.getActionMasked();
-        if (ev.getPointerCount() > 1) {  // Multi-touch
-            mIsHandlingMultiTouch = true;
-
-            // If WebKit already showed no interests in this sequence of events,
-            // WebView handles them directly.
-            if (mPreventDefault == PREVENT_DEFAULT_NO) {
-                handleMultiTouchInWebView(ev);
-            } else {
-                passMultiTouchToWebKit(ev);
-            }
-            return true;
+        // If WebKit wasn't interested in this multitouch gesture, enqueue
+        // the event for handling directly rather than making the round trip
+        // to WebKit and back.
+        if (ev.getPointerCount() > 1 && mPreventDefault != PREVENT_DEFAULT_NO) {
+            passMultiTouchToWebKit(ev, mTouchEventQueue.nextTouchSequence());
         } else {
-            final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
-            if (detector != null) {
-                // ScaleGestureDetector needs a consistent event stream to operate properly.
-                // It won't take any action with fewer than two pointers, but it needs to
-                // update internal bookkeeping state.
-                detector.onTouchEvent(ev);
-            }
+            mTouchEventQueue.enqueueTouchEvent(ev);
         }
 
-        // Skip ACTION_MOVE for single touch if it's still handling multi-touch.
-        if (mIsHandlingMultiTouch && action == MotionEvent.ACTION_MOVE) {
-            return false;
-        }
-
-        return handleTouchEventCommon(ev, action, Math.round(ev.getX()), Math.round(ev.getY()));
+        // Since all events are handled asynchronously, we always want the gesture stream.
+        return true;
     }
 
     /*
@@ -5579,6 +5567,7 @@ public class WebView extends AbsoluteLayout
                         ted.mReprocess = mDeferTouchProcess;
                         ted.mNativeLayer = nativeScrollableLayer(
                                 contentX, contentY, ted.mNativeLayerRect, null);
+                        ted.mDontEnqueueResult = true;
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (mDeferTouchProcess) {
                             // still needs to set them for compute deltaX/Y
@@ -5625,6 +5614,7 @@ public class WebView extends AbsoluteLayout
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
+                    ted.mDontEnqueueResult = true;
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     mLastSentTouchTime = eventTime;
                     if (mDeferTouchProcess) {
@@ -5806,6 +5796,7 @@ public class WebView extends AbsoluteLayout
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
+                    ted.mDontEnqueueResult = true;
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
@@ -5828,6 +5819,7 @@ public class WebView extends AbsoluteLayout
                             ted.mNativeLayer = nativeScrollableLayer(
                                     contentX, contentY,
                                     ted.mNativeLayerRect, null);
+                            ted.mDontEnqueueResult = true;
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mPreventDefault != PREVENT_DEFAULT_YES){
                             mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
@@ -5952,7 +5944,7 @@ public class WebView extends AbsoluteLayout
         return true;
     }
 
-    private void passMultiTouchToWebKit(MotionEvent ev) {
+    private void passMultiTouchToWebKit(MotionEvent ev, long sequence) {
         TouchEventData ted = new TouchEventData();
         ted.mAction = ev.getActionMasked();
         final int count = ev.getPointerCount();
@@ -5967,6 +5959,7 @@ public class WebView extends AbsoluteLayout
         ted.mMetaState = ev.getMetaState();
         ted.mReprocess = true;
         ted.mMotionEvent = MotionEvent.obtain(ev);
+        ted.mSequence = sequence;
         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
         cancelLongPress();
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -6016,7 +6009,7 @@ public class WebView extends AbsoluteLayout
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             cancelTouch();
             action = MotionEvent.ACTION_DOWN;
-        } else if (action == MotionEvent.ACTION_POINTER_UP) {
+        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() == 2) {
             // set mLastTouchX/Y to the remaining point
             mLastTouchX = Math.round(x);
             mLastTouchY = Math.round(y);
@@ -6044,6 +6037,7 @@ public class WebView extends AbsoluteLayout
             ted.mAction = MotionEvent.ACTION_CANCEL;
             ted.mNativeLayer = nativeScrollableLayer(
                     x, y, ted.mNativeLayerRect, null);
+            ted.mDontEnqueueResult = true;
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mPreventDefault = PREVENT_DEFAULT_IGNORE;
         }
@@ -7121,6 +7115,297 @@ public class WebView extends AbsoluteLayout
         return mWebViewCore;
     }
 
+    /**
+     * Used only by TouchEventQueue to store pending touch events.
+     */
+    private static class QueuedTouch {
+        long mSequence;
+        MotionEvent mEvent; // Optional
+        TouchEventData mTed; // Optional
+
+        QueuedTouch mNext;
+
+        public QueuedTouch set(TouchEventData ted) {
+            mSequence = ted.mSequence;
+            mTed = ted;
+            mEvent = null;
+            mNext = null;
+            return this;
+        }
+
+        public QueuedTouch set(MotionEvent ev, long sequence) {
+            mEvent = MotionEvent.obtain(ev);
+            mSequence = sequence;
+            mTed = null;
+            mNext = null;
+            return this;
+        }
+
+        public QueuedTouch add(QueuedTouch other) {
+            if (other.mSequence < mSequence) {
+                other.mNext = this;
+                return other;
+            }
+
+            QueuedTouch insertAt = this;
+            while (insertAt.mNext != null && insertAt.mNext.mSequence < other.mSequence) {
+                insertAt = insertAt.mNext;
+            }
+            other.mNext = insertAt.mNext;
+            insertAt.mNext = other;
+            return this;
+        }
+    }
+
+    /**
+     * WebView handles touch events asynchronously since some events must be passed to WebKit
+     * for potentially slower processing. TouchEventQueue serializes touch events regardless
+     * of which path they take to ensure that no events are ever processed out of order
+     * by WebView.
+     */
+    private class TouchEventQueue {
+        private long mNextTouchSequence = Long.MIN_VALUE + 1;
+        private long mLastHandledTouchSequence = Long.MIN_VALUE;
+        private QueuedTouch mTouchEventQueue;
+        private QueuedTouch mQueuedTouchRecycleBin;
+        private int mQueuedTouchRecycleCount;
+        private static final int MAX_RECYCLED_QUEUED_TOUCH = 15;
+
+        private QueuedTouch obtainQueuedTouch() {
+            if (mQueuedTouchRecycleBin != null) {
+                QueuedTouch result = mQueuedTouchRecycleBin;
+                mQueuedTouchRecycleBin = result.mNext;
+                mQueuedTouchRecycleCount--;
+                return result;
+            }
+            return new QueuedTouch();
+        }
+
+        private void recycleQueuedTouch(QueuedTouch qd) {
+            if (mQueuedTouchRecycleCount < MAX_RECYCLED_QUEUED_TOUCH) {
+                qd.mNext = mQueuedTouchRecycleBin;
+                mQueuedTouchRecycleBin = qd;
+                mQueuedTouchRecycleCount++;
+            }
+        }
+
+        /**
+         * Reset the touch event queue. This will dump any pending events
+         * and reset the sequence numbering.
+         */
+        public void reset() {
+            mNextTouchSequence = Long.MIN_VALUE + 1;
+            mLastHandledTouchSequence = Long.MIN_VALUE;
+            while (mTouchEventQueue != null) {
+                QueuedTouch recycleMe = mTouchEventQueue;
+                mTouchEventQueue = mTouchEventQueue.mNext;
+                recycleQueuedTouch(recycleMe);
+            }
+        }
+
+        /**
+         * Return the next valid sequence number for tagging incoming touch events.
+         * @return The next touch event sequence number
+         */
+        public long nextTouchSequence() {
+            return mNextTouchSequence++;
+        }
+
+        /**
+         * Enqueue a touch event in the form of TouchEventData.
+         * The sequence number will be read from the mSequence field of the argument.
+         *
+         * If the touch event's sequence number is the next in line to be processed, it will
+         * be handled before this method returns. Any subsequent events that have already
+         * been queued will also be processed in their proper order.
+         *
+         * @param ted Touch data to be processed in order.
+         */
+        public void enqueueTouchEvent(TouchEventData ted) {
+            if (mLastHandledTouchSequence + 1 == ted.mSequence) {
+                handleQueuedTouchEventData(ted);
+
+                mLastHandledTouchSequence++;
+
+                // Do we have any more? Run them if so.
+                QueuedTouch qd = mTouchEventQueue;
+                while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
+                    handleQueuedTouch(qd);
+                    QueuedTouch recycleMe = qd;
+                    qd = qd.mNext;
+                    recycleQueuedTouch(recycleMe);
+                    mLastHandledTouchSequence++;
+                }
+                mTouchEventQueue = qd;
+            } else {
+                QueuedTouch qd = obtainQueuedTouch().set(ted);
+                mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
+            }
+        }
+
+        /**
+         * Enqueue a touch event in the form of a MotionEvent from the framework.
+         *
+         * If the touch event's sequence number is the next in line to be processed, it will
+         * be handled before this method returns. Any subsequent events that have already
+         * been queued will also be processed in their proper order.
+         *
+         * @param ev MotionEvent to be processed in order
+         */
+        public void enqueueTouchEvent(MotionEvent ev) {
+            final long sequence = nextTouchSequence();
+            if (mLastHandledTouchSequence + 1 == sequence) {
+                handleQueuedMotionEvent(ev);
+
+                mLastHandledTouchSequence++;
+
+                // Do we have any more? Run them if so.
+                QueuedTouch qd = mTouchEventQueue;
+                while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
+                    handleQueuedTouch(qd);
+                    QueuedTouch recycleMe = qd;
+                    qd = qd.mNext;
+                    recycleQueuedTouch(recycleMe);
+                    mLastHandledTouchSequence++;
+                }
+                mTouchEventQueue = qd;
+            } else {
+                QueuedTouch qd = obtainQueuedTouch().set(ev, sequence);
+                mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
+            }
+        }
+
+        private void handleQueuedTouch(QueuedTouch qt) {
+            if (qt.mTed != null) {
+                handleQueuedTouchEventData(qt.mTed);
+            } else {
+                handleQueuedMotionEvent(qt.mEvent);
+                qt.mEvent.recycle();
+            }
+        }
+
+        private void handleQueuedMotionEvent(MotionEvent ev) {
+            int action = ev.getActionMasked();
+            if (ev.getPointerCount() > 1) {  // Multi-touch
+                mIsHandlingMultiTouch = true;
+
+                handleMultiTouchInWebView(ev);
+            } else {
+                final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
+                if (detector != null) {
+                    // ScaleGestureDetector needs a consistent event stream to operate properly.
+                    // It won't take any action with fewer than two pointers, but it needs to
+                    // update internal bookkeeping state.
+                    detector.onTouchEvent(ev);
+                }
+
+                handleTouchEventCommon(ev, action, Math.round(ev.getX()), Math.round(ev.getY()));
+            }
+        }
+
+        private void handleQueuedTouchEventData(TouchEventData ted) {
+            if (!ted.mReprocess) {
+                if (ted.mAction == MotionEvent.ACTION_DOWN
+                        && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES) {
+                    // if prevent default is called from WebCore, UI
+                    // will not handle the rest of the touch events any
+                    // more.
+                    mPreventDefault = ted.mNativeResult ? PREVENT_DEFAULT_YES
+                            : PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN;
+                } else if (ted.mAction == MotionEvent.ACTION_MOVE
+                        && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
+                    // the return for the first ACTION_MOVE will decide
+                    // whether UI will handle touch or not. Currently no
+                    // support for alternating prevent default
+                    mPreventDefault = ted.mNativeResult ? PREVENT_DEFAULT_YES
+                            : PREVENT_DEFAULT_NO;
+                }
+                if (mPreventDefault == PREVENT_DEFAULT_YES) {
+                    mTouchHighlightRegion.setEmpty();
+                }
+            } else {
+                if (ted.mPoints.length > 1) {  // multi-touch
+                    if (ted.mAction == MotionEvent.ACTION_POINTER_UP &&
+                            ted.mMotionEvent.getPointerCount() == 2) {
+                        mIsHandlingMultiTouch = false;
+                    }
+                    if (!ted.mNativeResult) {
+                        mPreventDefault = PREVENT_DEFAULT_NO;
+                        handleMultiTouchInWebView(ted.mMotionEvent);
+                    } else {
+                        mPreventDefault = PREVENT_DEFAULT_YES;
+                    }
+                    return;
+                }
+
+                // prevent default is not called in WebCore, so the
+                // message needs to be reprocessed in UI
+                if (!ted.mNativeResult) {
+                    // Following is for single touch.
+                    switch (ted.mAction) {
+                        case MotionEvent.ACTION_DOWN:
+                            mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
+                                    - mScrollX;
+                            mLastDeferTouchY = contentToViewY(ted.mPoints[0].y)
+                                    - mScrollY;
+                            mDeferTouchMode = TOUCH_INIT_MODE;
+                            break;
+                        case MotionEvent.ACTION_MOVE: {
+                            // no snapping in defer process
+                            int x = contentToViewX(ted.mPoints[0].x) - mScrollX;
+                            int y = contentToViewY(ted.mPoints[0].y) - mScrollY;
+                            if (mDeferTouchMode != TOUCH_DRAG_MODE) {
+                                mDeferTouchMode = TOUCH_DRAG_MODE;
+                                mLastDeferTouchX = x;
+                                mLastDeferTouchY = y;
+                                startScrollingLayer(x, y);
+                                startDrag();
+                            }
+                            int deltaX = pinLocX((int) (mScrollX
+                                    + mLastDeferTouchX - x))
+                                    - mScrollX;
+                            int deltaY = pinLocY((int) (mScrollY
+                                    + mLastDeferTouchY - y))
+                                    - mScrollY;
+                            doDrag(deltaX, deltaY);
+                            if (deltaX != 0) mLastDeferTouchX = x;
+                            if (deltaY != 0) mLastDeferTouchY = y;
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP:
+                        case MotionEvent.ACTION_CANCEL:
+                            if (mDeferTouchMode == TOUCH_DRAG_MODE) {
+                                // no fling in defer process
+                                mScroller.springBack(mScrollX, mScrollY, 0,
+                                        computeMaxScrollX(), 0,
+                                        computeMaxScrollY());
+                                invalidate();
+                                WebViewCore.resumePriority();
+                                WebViewCore.resumeUpdatePicture(mWebViewCore);
+                            }
+                            mDeferTouchMode = TOUCH_DONE_MODE;
+                            break;
+                        case WebViewCore.ACTION_DOUBLETAP:
+                            // doDoubleTap() needs mLastTouchX/Y as anchor
+                            mLastTouchX = contentToViewX(ted.mPoints[0].x) - mScrollX;
+                            mLastTouchY = contentToViewY(ted.mPoints[0].y) - mScrollY;
+                            mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
+                            mDeferTouchMode = TOUCH_DONE_MODE;
+                            break;
+                        case WebViewCore.ACTION_LONGPRESS:
+                            HitTestResult hitTest = getHitTestResult();
+                            if (hitTest != null && hitTest.mType
+                                    != HitTestResult.UNKNOWN_TYPE) {
+                                performLongClick();
+                            }
+                            mDeferTouchMode = TOUCH_DONE_MODE;
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     //-------------------------------------------------------------------------
     // Methods can be called from a separate thread, like WebViewCore
     // If it needs to call the View system, it has to send message.
@@ -7236,6 +7521,7 @@ public class WebView extends AbsoluteLayout
                         ted.mNativeLayer = nativeScrollableLayer(
                                 ted.mPoints[0].x, ted.mPoints[0].y,
                                 ted.mNativeLayerRect, null);
+                        ted.mDontEnqueueResult = true;
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
@@ -7450,105 +7736,9 @@ public class WebView extends AbsoluteLayout
                     if (inFullScreenMode()) {
                         break;
                     }
-                    if (msg.obj == null) {
-                        if (msg.arg1 == MotionEvent.ACTION_DOWN
-                                && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES) {
-                            // if prevent default is called from WebCore, UI
-                            // will not handle the rest of the touch events any
-                            // more.
-                            mPreventDefault = msg.arg2 == 1 ? PREVENT_DEFAULT_YES
-                                    : PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN;
-                        } else if (msg.arg1 == MotionEvent.ACTION_MOVE
-                                && mPreventDefault == PREVENT_DEFAULT_NO_FROM_TOUCH_DOWN) {
-                            // the return for the first ACTION_MOVE will decide
-                            // whether UI will handle touch or not. Currently no
-                            // support for alternating prevent default
-                            mPreventDefault = msg.arg2 == 1 ? PREVENT_DEFAULT_YES
-                                    : PREVENT_DEFAULT_NO;
-                        }
-                        if (mPreventDefault == PREVENT_DEFAULT_YES) {
-                            mTouchHighlightRegion.setEmpty();
-                        }
-                    } else {
-                        TouchEventData ted = (TouchEventData) msg.obj;
-
-                        if (ted.mPoints.length > 1) {  // multi-touch
-                            if (ted.mAction == MotionEvent.ACTION_POINTER_UP) {
-                                mIsHandlingMultiTouch = false;
-                            }
-                            if (msg.arg2 == 0) {
-                                mPreventDefault = PREVENT_DEFAULT_NO;
-                                handleMultiTouchInWebView(ted.mMotionEvent);
-                            } else {
-                                mPreventDefault = PREVENT_DEFAULT_YES;
-                            }
-                            break;
-                        }
-
-                        // prevent default is not called in WebCore, so the
-                        // message needs to be reprocessed in UI
-                        if (msg.arg2 == 0) {
-                            // Following is for single touch.
-                            switch (ted.mAction) {
-                                case MotionEvent.ACTION_DOWN:
-                                    mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
-                                            - mScrollX;
-                                    mLastDeferTouchY = contentToViewY(ted.mPoints[0].y)
-                                            - mScrollY;
-                                    mDeferTouchMode = TOUCH_INIT_MODE;
-                                    break;
-                                case MotionEvent.ACTION_MOVE: {
-                                    // no snapping in defer process
-                                    int x = contentToViewX(ted.mPoints[0].x) - mScrollX;
-                                    int y = contentToViewY(ted.mPoints[0].y) - mScrollY;
-                                    if (mDeferTouchMode != TOUCH_DRAG_MODE) {
-                                        mDeferTouchMode = TOUCH_DRAG_MODE;
-                                        mLastDeferTouchX = x;
-                                        mLastDeferTouchY = y;
-                                        startScrollingLayer(x, y);
-                                        startDrag();
-                                    }
-                                    int deltaX = pinLocX((int) (mScrollX
-                                            + mLastDeferTouchX - x))
-                                            - mScrollX;
-                                    int deltaY = pinLocY((int) (mScrollY
-                                            + mLastDeferTouchY - y))
-                                            - mScrollY;
-                                    doDrag(deltaX, deltaY);
-                                    if (deltaX != 0) mLastDeferTouchX = x;
-                                    if (deltaY != 0) mLastDeferTouchY = y;
-                                    break;
-                                }
-                                case MotionEvent.ACTION_UP:
-                                case MotionEvent.ACTION_CANCEL:
-                                    if (mDeferTouchMode == TOUCH_DRAG_MODE) {
-                                        // no fling in defer process
-                                        mScroller.springBack(mScrollX, mScrollY, 0,
-                                                computeMaxScrollX(), 0,
-                                                computeMaxScrollY());
-                                        invalidate();
-                                        WebViewCore.resumePriority();
-                                        WebViewCore.resumeUpdatePicture(mWebViewCore);
-                                    }
-                                    mDeferTouchMode = TOUCH_DONE_MODE;
-                                    break;
-                                case WebViewCore.ACTION_DOUBLETAP:
-                                    // doDoubleTap() needs mLastTouchX/Y as anchor
-                                    mLastTouchX = contentToViewX(ted.mPoints[0].x) - mScrollX;
-                                    mLastTouchY = contentToViewY(ted.mPoints[0].y) - mScrollY;
-                                    mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
-                                    mDeferTouchMode = TOUCH_DONE_MODE;
-                                    break;
-                                case WebViewCore.ACTION_LONGPRESS:
-                                    HitTestResult hitTest = getHitTestResult();
-                                    if (hitTest != null && hitTest.mType
-                                            != HitTestResult.UNKNOWN_TYPE) {
-                                        performLongClick();
-                                    }
-                                    mDeferTouchMode = TOUCH_DONE_MODE;
-                                    break;
-                            }
-                        }
+                    TouchEventData ted = (TouchEventData) msg.obj;
+                    if (!ted.mDontEnqueueResult) {
+                        mTouchEventQueue.enqueueTouchEvent(ted);
                     }
                     break;
 
