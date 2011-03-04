@@ -4137,7 +4137,7 @@ public class Activity extends ContextThemeWrapper
             fragment.mInLayout = true;
             fragment.mImmediateActivity = this;
             fragment.mFragmentManager = mFragments;
-            fragment.onInflate(attrs, fragment.mSavedFragmentState);
+            fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
             mFragments.addFragment(fragment, true);
 
         } else if (fragment.mInLayout) {
@@ -4156,7 +4156,7 @@ public class Activity extends ContextThemeWrapper
             // from last saved state), then give it the attributes to
             // initialize itself.
             if (!fragment.mRetaining) {
-                fragment.onInflate(attrs, fragment.mSavedFragmentState);
+                fragment.onInflate(this, attrs, fragment.mSavedFragmentState);
             }
             mFragments.moveToState(fragment);
         }

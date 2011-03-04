@@ -1028,7 +1028,6 @@ public final class Bundle implements Parcelable, Cloneable {
         }
     }
 
-
     /**
      * Returns the value associated with the given key, or null if
      * no mapping of the desired type exists for the given key or a null
@@ -1052,6 +1051,28 @@ public final class Bundle implements Parcelable, Cloneable {
     }
 
     /**
+     * Returns the value associated with the given key, or defaultValue if
+     * no mapping of the desired type exists for the given key.
+     *
+     * @param key a String, or null
+     * @param defaultValue Value to return if key does not exist
+     * @return a String value, or null
+     */
+    public String getString(String key, String defaultValue) {
+        unparcel();
+        Object o = mMap.get(key);
+        if (o == null) {
+            return defaultValue;
+        }
+        try {
+            return (String) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "String", e);
+            return defaultValue;
+        }
+    }
+
+    /**
      * Returns the value associated with the given key, or null if
      * no mapping of the desired type exists for the given key or a null
      * value is explicitly associated with the key.
@@ -1070,6 +1091,28 @@ public final class Bundle implements Parcelable, Cloneable {
         } catch (ClassCastException e) {
             typeWarning(key, o, "CharSequence", e);
             return null;
+        }
+    }
+
+    /**
+     * Returns the value associated with the given key, or defaultValue if
+     * no mapping of the desired type exists for the given key.
+     *
+     * @param key a String, or null
+     * @param defaultValue Value to return if key does not exist
+     * @return a CharSequence value, or null
+     */
+    public CharSequence getCharSequence(String key, CharSequence defaultValue) {
+        unparcel();
+        Object o = mMap.get(key);
+        if (o == null) {
+            return defaultValue;
+        }
+        try {
+            return (CharSequence) o;
+        } catch (ClassCastException e) {
+            typeWarning(key, o, "CharSequence", e);
+            return defaultValue;
         }
     }
 
