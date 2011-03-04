@@ -28,8 +28,7 @@ public class IccCardApplication {
         APPTYPE_SIM,
         APPTYPE_USIM,
         APPTYPE_RUIM,
-        APPTYPE_CSIM,
-        APPTYPE_ISIM
+        APPTYPE_CSIM
     };
 
     public enum AppState{
@@ -116,7 +115,6 @@ public class IccCardApplication {
             case 2: newType = AppType.APPTYPE_USIM;    break;
             case 3: newType = AppType.APPTYPE_RUIM;    break;
             case 4: newType = AppType.APPTYPE_CSIM;    break;
-            case 5: newType = AppType.APPTYPE_ISIM;    break;
             default:
                 throw new RuntimeException(
                             "Unrecognized RIL_AppType: " +type);

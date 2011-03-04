@@ -94,7 +94,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     @Override
-    public int dispatchMessage(SmsMessageBase smsb) {
+    protected int dispatchMessage(SmsMessageBase smsb) {
 
         // If sms is null, means there was a parsing error.
         if (smsb == null) {
@@ -485,19 +485,19 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
 
     /** {@inheritDoc} */
     @Override
-    public void activateCellBroadcastSms(int activate, Message response) {
+    protected void activateCellBroadcastSms(int activate, Message response) {
         mCm.setCdmaBroadcastActivation((activate == 0), response);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void getCellBroadcastSmsConfig(Message response) {
+    protected void getCellBroadcastSmsConfig(Message response) {
         mCm.getCdmaBroadcastConfig(response);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setCellBroadcastConfig(int[] configValuesArray, Message response) {
+    protected void setCellBroadcastConfig(int[] configValuesArray, Message response) {
         mCm.setCdmaBroadcastConfig(configValuesArray, response);
     }
 

@@ -58,21 +58,21 @@ public class ApnSettingTest extends TestCase {
         testString = "Vodafone IT,web.omnitel.it,,,,,,,,,222,10,,DUN";
         expected_apn =  new ApnSetting(
                 -1, "22210", "Vodafone IT", "web.omnitel.it", "", "",
-                "", "", "", "", "", 0, dunTypes, "IP", "IP", true, 0, 0);
+                "", "", "", "", "", 0, dunTypes, "IP", "IP");
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
 
         // A v2 string.
         testString = "[ApnSettingV2] Name,apn,,,,,,,,,123,45,,mms|*,IPV6,IP";
         expected_apn =  new ApnSetting(
                 -1, "12345", "Name", "apn", "", "",
-                "", "", "", "", "", 0, mmsTypes, "IPV6", "IP", true, 0, 0);
+                "", "", "", "", "", 0, mmsTypes, "IPV6", "IP");
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
 
         // A v2 string with spaces.
         testString = "[ApnSettingV2] Name,apn, ,,,,,,,,123,45,,mms|*,IPV4V6, IP";
         expected_apn =  new ApnSetting(
                 -1, "12345", "Name", "apn", "", "",
-                "", "", "", "", "", 0, mmsTypes, "IPV4V6", "IP", true, 0, 0);
+                "", "", "", "", "", 0, mmsTypes, "IPV4V6", "IP");
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
 
         // Return null if insufficient fields given.
@@ -87,7 +87,7 @@ public class ApnSettingTest extends TestCase {
         String[] incorrectTypes = {"mms|*", "IPV6"};
         expected_apn =  new ApnSetting(
                 -1, "12345", "Name", "apn", "", "",
-                "", "", "", "", "", 0, incorrectTypes, "IP", "IP", true, 0, 0);
+                "", "", "", "", "", 0, incorrectTypes, "IP", "IP");
         assertApnSettingEqual(expected_apn, ApnSetting.fromString(testString));
     }
 
@@ -98,7 +98,7 @@ public class ApnSettingTest extends TestCase {
         ApnSetting apn =  new ApnSetting(
                 99, "12345", "Name", "apn", "proxy", "port",
                 "mmsc", "mmsproxy", "mmsport", "user", "password", 0,
-                types, "IPV4V6", "IP", true, 0, 0);
+                types, "IPV4V6", "IP");
         String expected = "[ApnSettingV2] Name, 99, 12345, apn, proxy, " +
                 "mmsc, mmsproxy, mmsport, port, 0, default | *, " +
                 "IPV4V6, IP";
