@@ -3,11 +3,13 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-    src/DebuggerMessage.pb.cpp \
     src/api.cpp \
+    src/debugger_message.pb.cpp \
+    src/egl.cpp \
     src/server.cpp \
     src/shader.cpp \
-    src/texture.cpp
+    src/texture.cpp \
+    src/vertex.cpp
 
 LOCAL_C_INCLUDES :=	\
     $(LOCAL_PATH) \
@@ -15,9 +17,6 @@ LOCAL_C_INCLUDES :=	\
     external/stlport/stlport \
     external/protobuf/src \
     bionic
-
-LOCAL_SHARED_LIBRARIES := libstlport libcutils libutils
-LOCAL_LDLIBS := -lpthread
 
 #LOCAL_CFLAGS += -O0 -g -DDEBUG -UNDEBUG
 LOCAL_CFLAGS := -DGOOGLE_PROTOBUF_NO_RTTI

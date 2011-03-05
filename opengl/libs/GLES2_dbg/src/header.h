@@ -19,15 +19,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <sys/socket.h>
-
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
 #include <cutils/log.h>
-#include <cutils/properties.h>
+#include <utils/Timers.h>
 #include <../../../libcore/include/StaticAssert.h>
 
 #define EGL_TRACE 1
@@ -36,9 +32,10 @@
 #define GL_ENTRY(_r, _api, ...) _r Debug_##_api ( __VA_ARGS__ );
 #include "../include/glesv2_dbg.h"
 
-#include "DebuggerMessage.pb.h"
+#include "debugger_message.pb.h"
 
 using namespace android;
+using namespace com::android;
 
 #define API_ENTRY(_api) Debug_##_api
 
@@ -57,9 +54,21 @@ using namespace android;
 
 namespace android
 {
-extern int clientSock, serverSock;
-#define BUFFSIZE 256
-extern char sockBuff [BUFFSIZE];
+struct FunctionCall {
+    virtual const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) = 0;
+    virtual ~FunctionCall() {}
+};
 
-void Send(const GLESv2Debugger::Message & msg, GLESv2Debugger::Message & cmd);
+extern bool capture;
+extern int timeMode; // SYSTEM_TIME_
+
+extern int clientSock, serverSock;
+
+unsigned GetBytesPerPixel(const GLenum format, const GLenum type);
+
+int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
+                  const bool expectResponse, const glesv2debugger::Message_Function function);
+void Receive(glesv2debugger::Message & cmd);
+float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd);
+void SetProp(const glesv2debugger::Message & cmd);
 }; // namespace android {

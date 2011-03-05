@@ -34,10 +34,10 @@ void API_ENTRY(glBlendFunc)(GLenum sfactor, GLenum dfactor) {
 void API_ENTRY(glBlendFuncSeparate)(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha) {
     CALL_GL_API(glBlendFuncSeparate, srcRGB, dstRGB, srcAlpha, dstAlpha);
 }
-void API_ENTRY(glBufferData)(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
+void API_ENTRY(glBufferData)(GLenum target, GLsizeiptr size, const GLvoid:size:in data, GLenum usage) {
     CALL_GL_API(glBufferData, target, size, data, usage);
 }
-void API_ENTRY(glBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data) {
+void API_ENTRY(glBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid:size:in data) {
     CALL_GL_API(glBufferSubData, target, offset, size, data);
 }
 GLenum API_ENTRY(glCheckFramebufferStatus)(GLenum target) {

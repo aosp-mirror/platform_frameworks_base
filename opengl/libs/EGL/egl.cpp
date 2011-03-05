@@ -1650,6 +1650,10 @@ __eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname)
 
 EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 {
+    EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw);
+    if (gEGLDebugLevel > 0)
+        Debug_eglSwapBuffers(dpy, draw);
+
     clearError();
 
     SurfaceRef _s(draw);
