@@ -189,6 +189,9 @@ status_t AACEncoder::stop() {
     delete mApiHandle;
     mApiHandle = NULL;
 
+    delete mMemOperator;
+    mMemOperator = NULL;
+
     mStarted = false;
 
     return OK;
