@@ -44,6 +44,13 @@
 //#undef LOGV
 //#define LOGV(...) fprintf(stderr, __VA_ARGS__)
 
+#define DEBUG_DEATH 0
+#if DEBUG_DEATH
+#define LOGDEATH LOGD
+#else
+#define LOGDEATH LOGV
+#endif
+
 using namespace android;
 
 // ----------------------------------------------------------------------------
@@ -363,6 +370,7 @@ class DeathRecipientList : public RefBase {
     Mutex mLock;
 
 public:
+    DeathRecipientList();
     ~DeathRecipientList();
 
     void add(const sp<JavaDeathRecipient>& recipient);
@@ -380,6 +388,7 @@ public:
     {
         // These objects manage their own lifetimes so are responsible for final bookkeeping.
         // The list holds a strong reference to this object.
+        LOGDEATH("Adding JDR %p to DRL %p", this, list.get());
         list->add(this);
 
         android_atomic_inc(&gNumDeathRefs);
@@ -390,7 +399,7 @@ public:
     {
         JNIEnv* env = javavm_to_jnienv(mVM);
 
-        LOGV("Receiving binderDied() on JavaDeathRecipient %p\n", this);
+        LOGDEATH("Receiving binderDied() on JavaDeathRecipient %p\n", this);
 
         env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
             gBinderProxyOffsets.mSendDeathNotice, mObject);
@@ -399,15 +408,16 @@ public:
             report_exception(env, excep,
                 "*** Uncaught exception returned from death notification!");
         }
-
-        clearReference();
     }
 
     void clearReference()
     {
         sp<DeathRecipientList> list = mList.promote();
         if (list != NULL) {
+            LOGDEATH("Removing JDR %p from DRL %p", this, list.get());
             list->remove(this);
+        } else {
+            LOGDEATH("clearReference() on JDR %p but DRL wp purged", this);
         }
     }
 
@@ -433,7 +443,12 @@ private:
 
 // ----------------------------------------------------------------------------
 
+DeathRecipientList::DeathRecipientList() {
+    LOGDEATH("New DRL @ %p", this);
+}
+
 DeathRecipientList::~DeathRecipientList() {
+    LOGDEATH("Destroy DRL @ %p", this);
     AutoMutex _l(mLock);
 
     // Should never happen -- the JavaDeathRecipient objects that have added themselves
@@ -447,6 +462,7 @@ DeathRecipientList::~DeathRecipientList() {
 void DeathRecipientList::add(const sp<JavaDeathRecipient>& recipient) {
     AutoMutex _l(mLock);
 
+    LOGDEATH("DRL @ %p : add JDR %p", this, recipient.get());
     mList.push_back(recipient);
 }
 
@@ -456,6 +472,7 @@ void DeathRecipientList::remove(const sp<JavaDeathRecipient>& recipient) {
     List< sp<JavaDeathRecipient> >::iterator iter;
     for (iter = mList.begin(); iter != mList.end(); iter++) {
         if (*iter == recipient) {
+            LOGDEATH("DRL @ %p : remove JDR %p", this, recipient.get());
             mList.erase(iter);
             return;
         }
@@ -518,7 +535,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 
     object = env->NewObject(gBinderProxyOffsets.mClass, gBinderProxyOffsets.mConstructor);
     if (object != NULL) {
-        LOGV("objectForBinder %p: created new proxy %p !\n", val.get(), object);
+        LOGDEATH("objectForBinder %p: created new proxy %p !\n", val.get(), object);
         // The proxy holds a reference to the native object.
         env->SetIntField(object, gBinderProxyOffsets.mObject, (int)val.get());
         val->incStrong(object);
@@ -1030,7 +1047,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
         assert(false);
     }
 
-    LOGV("linkToDeath: binder=%p recipient=%p\n", target, recipient);
+    LOGDEATH("linkToDeath: binder=%p recipient=%p\n", target, recipient);
 
     if (!target->localBinder()) {
         DeathRecipientList* list = (DeathRecipientList*)
@@ -1062,7 +1079,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     }
 
-    LOGV("unlinkToDeath: binder=%p recipient=%p\n", target, recipient);
+    LOGDEATH("unlinkToDeath: binder=%p recipient=%p\n", target, recipient);
 
     if (!target->localBinder()) {
         status_t err = NAME_NOT_FOUND;
@@ -1071,6 +1088,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
         DeathRecipientList* list = (DeathRecipientList*)
                 env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
         sp<JavaDeathRecipient> origJDR = list->find(recipient);
+        LOGDEATH("   unlink found list %p and JDR %p", list, origJDR.get());
         if (origJDR != NULL) {
             wp<IBinder::DeathRecipient> dr;
             err = target->unlinkToDeath(origJDR, NULL, flags, &dr);
@@ -1101,7 +1119,7 @@ static void android_os_BinderProxy_destroy(JNIEnv* env, jobject obj)
     DeathRecipientList* drl = (DeathRecipientList*)
             env->GetIntField(obj, gBinderProxyOffsets.mOrgue);
 
-    LOGV("Destroying BinderProxy %p: binder=%p drl=%p\n", obj, b, drl);
+    LOGDEATH("Destroying BinderProxy %p: binder=%p drl=%p\n", obj, b, drl);
     env->SetIntField(obj, gBinderProxyOffsets.mObject, 0);
     env->SetIntField(obj, gBinderProxyOffsets.mOrgue, 0);
     drl->decStrong((void*)javaObjectForIBinder);
