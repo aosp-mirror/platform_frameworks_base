@@ -282,6 +282,8 @@
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="searchViewTextField">@drawable/textfield_searchview_holo_dark</item>
+        <item name="searchViewTextFieldRight">@drawable/textfield_searchview_right_holo_dark</item>
         <item name="searchViewCloseIcon">@android:drawable/ic_clear</item>
         <item name="searchViewSearchIcon">@android:drawable/ic_search</item>
         <item name="searchViewGoIcon">@android:drawable/ic_go</item>
@@ -387,6 +389,8 @@
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
+        <item name="searchViewTextField">@drawable/textfield_searchview_holo_light</item>
+        <item name="searchViewTextFieldRight">@drawable/textfield_searchview_right_holo_light</item>
         <item name="searchViewCloseIcon">@android:drawable/ic_clear_holo_light</item>
         <item name="searchViewSearchIcon">@android:drawable/ic_search_api_holo_light</item>
         <item name="searchViewGoIcon">@android:drawable/ic_go_search_api_holo_light</item>

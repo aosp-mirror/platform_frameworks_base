@@ -64,7 +64,7 @@
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:orientation="horizontal"
-            android:background="?android:attr/editTextBackground">
+            android:background="?android:attr/searchViewTextField">
 
             <ImageView
                 android:id="@+id/search_app_icon"
@@ -91,7 +91,7 @@
                 android:inputType="text|textAutoComplete"
                 android:imeOptions="actionSearch"
                 android:dropDownHeight="wrap_content"
-                android:dropDownAnchor="@id/search_plate"
+                android:dropDownAnchor="@id/search_edit_frame"
                 android:dropDownVerticalOffset="0dip"
                 android:dropDownHorizontalOffset="0dip"
             />
@@ -110,38 +110,39 @@
 
         </LinearLayout>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/submit_area"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/search_go_btn"
+        <LinearLayout
+            android:id="@+id/submit_area"
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="16dip"
-            android:paddingRight="16dip"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="?android:attr/searchViewGoIcon"
-            android:visibility="gone"
-            android:focusable="true"
-        />
-
-        <ImageView
-            android:id="@+id/search_voice_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="16dip"
-            android:paddingRight="16dip"
-            android:src="?android:attr/searchViewVoiceIcon"
-            android:background="?android:attr/selectableItemBackground"
-            android:visibility="gone"
-            android:focusable="true"
-        />
+            android:background="?android:attr/searchViewTextFieldRight">
+    
+            <ImageView
+                android:id="@+id/search_go_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="16dip"
+                android:paddingRight="16dip"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="?android:attr/searchViewGoIcon"
+                android:visibility="gone"
+                android:focusable="true"
+            />
+    
+            <ImageView
+                android:id="@+id/search_voice_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="16dip"
+                android:paddingRight="16dip"
+                android:src="?android:attr/searchViewVoiceIcon"
+                android:background="?android:attr/selectableItemBackground"
+                android:visibility="gone"
+                android:focusable="true"
+            />
+        </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>
