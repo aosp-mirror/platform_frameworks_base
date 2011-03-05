@@ -387,12 +387,10 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         if (hasCdmaDataConnectionAttached) {
-            cdmaDataConnectionAttachedRegistrants.notifyRegistrants();
             mAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasCdmaDataConnectionDetached) {
-            cdmaDataConnectionDetachedRegistrants.notifyRegistrants();
             mDetachedRegistrants.notifyRegistrants();
         }
 

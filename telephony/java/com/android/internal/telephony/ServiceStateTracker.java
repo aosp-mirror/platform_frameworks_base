@@ -320,7 +320,7 @@ public abstract class ServiceStateTracker extends Handler {
         Registrant r = new Registrant(h, what, obj);
         mDetachedRegistrants.add(r);
 
-        if (getCurrentDataConnectionState() == ServiceState.STATE_OUT_OF_SERVICE) {
+        if (getCurrentDataConnectionState() != ServiceState.STATE_IN_SERVICE) {
             r.notifyRegistrant();
         }
     }
