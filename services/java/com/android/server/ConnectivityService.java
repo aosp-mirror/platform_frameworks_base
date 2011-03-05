@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
+import android.net.EthernetDataTracker;
 import android.net.IConnectivityManager;
 import android.net.LinkProperties;
 import android.net.MobileDataStateTracker;
@@ -418,6 +419,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 break;
             case ConnectivityManager.TYPE_BLUETOOTH:
                 mNetTrackers[netType] = BluetoothTetheringDataTracker.getInstance();
+                mNetTrackers[netType].startMonitoring(context, mHandler);
+                break;
+            case ConnectivityManager.TYPE_ETHERNET:
+                mNetTrackers[netType] = EthernetDataTracker.getInstance();
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
             default:
