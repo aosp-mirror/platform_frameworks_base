@@ -174,7 +174,7 @@ public:
             int32_t* outKeycode, uint32_t* outFlags) const = 0;
 
     virtual status_t mapAxis(int32_t deviceId, int scancode,
-            int32_t* outAxis) const = 0;
+            AxisInfo* outAxisInfo) const = 0;
 
     // exclude a particular device from opening
     // this can be used to ignore input devices for sensors
@@ -233,7 +233,7 @@ public:
             int32_t* outKeycode, uint32_t* outFlags) const;
 
     virtual status_t mapAxis(int32_t deviceId, int scancode,
-            int32_t* outAxis) const;
+            AxisInfo* outAxisInfo) const;
 
     virtual void addExcludedDevice(const char* deviceName);
 

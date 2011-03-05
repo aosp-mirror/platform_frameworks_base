@@ -592,7 +592,7 @@ private:
     }
 
     virtual status_t mapAxis(int32_t deviceId, int scancode,
-            int32_t* outAxis) const {
+            AxisInfo* outAxisInfo) const {
         return NAME_NOT_FOUND;
     }
 
