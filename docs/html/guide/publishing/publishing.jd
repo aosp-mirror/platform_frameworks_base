@@ -259,16 +259,17 @@ site:</p>
 </p>
 
 <p>The <code>&lt;query&gt;</code> is a placeholder for the search query to execute in Android
-Market. The query can be a raw text string or you can include parameters that perform a search
-based on the publisher name or application package name:</p>
+Market. The query can be a raw text string or you can include a parameter that performs a search
+based on the publisher name:</p>
 
 <ul>
-  <li>To search based on the publisher name, use the {@code pub:} parameter:
+  <li>To perform a raw text search, append the query string:
+  <p><code>&lt;URI_prefix&gt;<b>search?q=</b>&lt;search_query&gt;</code></p></li>
+
+  <li>To search based on the publisher name, use the {@code pub:} parameter in the query, followed
+by the publisher name:
   <p><code>&lt;URI_prefix&gt;<b>search?q=pub:</b>&lt;publisher_name&gt;</code></p>
   <p>You can use this type of search to show all of your published applications.</p></li>
-
-  <li>To search based on the package name, use the {@code pname:} parameter:
-  <p><code>&lt;URI_prefix&gt;<b>search?q=pname:</b>&lt;package_name&gt;</code></p></li>
 </ul>
 
 
@@ -279,7 +280,7 @@ based on the publisher name or application package name:</p>
 
 <p style="margin-left:2em"><code>market://search?q=&lt;query&gt;</code></p>
 
-<p>The query may include the {@code pub:} or {@code pname:} parameters described above.</p>
+<p>The query may include the {@code pub:} parameter described above.</p>
 
 <p>For example, here's how you can initiate a search in the Android Market application, based on the
 publisher name:</p>
@@ -289,6 +290,9 @@ Intent intent = new Intent(Intent.ACTION_VIEW);
 intent.setData(Uri.parse("market://search?q=pub:Your Publisher Name"));
 startActivity(intent);
 </pre>
+
+<p>The search result shows all applications published by the publisher and which are compatible with
+the current device.</p>
 
 
 <h4>Searching the Android Market web site</h4>
@@ -300,7 +304,7 @@ format:</p>
   <code>http://market.android.com/search?q=&lt;query&gt;</code>
 </p>
 
-<p>The query may include the {@code pub:} or {@code pname:} parameters described above.</p>
+<p>The query may include the {@code pub:} parameter described above.</p>
 
 <p>For example, here's a link that initiates a search on the Android Market web site, based on the
 publisher name:</p>
@@ -308,6 +312,8 @@ publisher name:</p>
 <pre>
 &lt;a href="http://market.android.com/search?q=pub:Your Publisher Name">Search Link&lt;/a>
 </pre>
+
+<p>The search result shows all applications published by the publisher.</p>
 
 
 
@@ -339,12 +345,6 @@ the web and in the Android application), as discussed in the previous sections.<
 <td>Search for applications by publisher name</td>
 <td><nobr><code>http://market.android.com/search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
 <td><nobr><code>market://search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
-</tr>
-
-<tr>
-<td>Search for an application by its fully qualified package name</td>
-<td><code>http://market.android.com/search?q=pname:&lt;package_name&gt;</code></td>
-<td><code>market://search?q=pname:&lt;package_name&gt;</code></td>
 </tr>
 
 </table>
