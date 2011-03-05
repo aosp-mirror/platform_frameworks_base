@@ -19,6 +19,7 @@ package com.android.connectivitymanagertest;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
+
 import com.android.connectivitymanagertest.stress.WifiApStress;
 import com.android.connectivitymanagertest.stress.WifiStressTest;
 
@@ -44,8 +45,18 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
-        suite.addTestSuite(WifiApStress.class);
-        suite.addTestSuite(WifiStressTest.class);
+        if (!UtilHelper.isWifiOnly()) {
+            suite.addTestSuite(WifiApStress.class);
+            suite.addTestSuite(WifiStressTest.class);
+        } else {
+            // create a new test suite
+            suite.setName("WifiOnlyStressTests");
+            String[] methodNames = {"testWifiScanning"};
+            Class<WifiStressTest> testClass = WifiStressTest.class;
+            for (String method: methodNames) {
+                suite.addTest(TestSuite.createTest(testClass, method));
+            }
+        }
         return suite;
     }
 
