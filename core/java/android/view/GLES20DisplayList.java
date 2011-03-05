@@ -40,13 +40,6 @@ class GLES20DisplayList extends DisplayList {
         hostView = new WeakReference<View>(view);
     }
 
-    public void invalidateView() {
-        View v = hostView.get();
-        if (v != null) {
-            v.invalidate();
-        }
-    }
-
     @Override
     HardwareCanvas start() {
         if (mStarted) {
