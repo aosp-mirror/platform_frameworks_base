@@ -229,6 +229,15 @@ public class WifiService extends IWifiManager.Stub {
                     }
                     break;
                 }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                    if (msg.arg1 == AsyncChannel.STATUS_SEND_UNSUCCESSFUL) {
+                        Slog.d(TAG, "Send failed, client connection lost");
+                    } else {
+                        Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
+                    }
+                    mClients.remove((AsyncChannel) msg.obj);
+                    break;
+                }
                 case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
                     AsyncChannel ac = new AsyncChannel();
                     ac.connect(mContext, this, msg.replyTo);
