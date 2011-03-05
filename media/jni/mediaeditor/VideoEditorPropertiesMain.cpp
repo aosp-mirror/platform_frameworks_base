@@ -204,10 +204,17 @@ jobject videoEditProp_getProperties(
                 result = getClipProperties(
                         pEnv, thiz, pFile, clipType, pClipProperties);
 
-                // Check if the creation succeeded.
-                videoEditJava_checkAndThrowIllegalArgumentException(
-                        &gotten, pEnv,(M4NO_ERROR != result),
-                        "Invalid File or File not found");
+                if (M4MCS_ERR_FILE_DRM_PROTECTED == result) {
+                    // Check if the creation succeeded.
+                    videoEditJava_checkAndThrowIllegalArgumentException(
+                            &gotten, pEnv,(M4NO_ERROR != result),
+                            "Invalid File - DRM Protected ");
+                } else {
+                    // Check if the creation succeeded.
+                    videoEditJava_checkAndThrowIllegalArgumentException(
+                            &gotten, pEnv,(M4NO_ERROR != result),
+                            "Invalid File or File not found ");
+                }
 
                 /**
                  * Max resolution supported is 1280 x 720.

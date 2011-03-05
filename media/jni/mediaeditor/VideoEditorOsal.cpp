@@ -207,6 +207,7 @@ static const VideoEdit_Osal_Result gkRESULTS[] =
     VIDEOEDIT_OSAL_RESULT_INIT(M4MCS_ERR_AUDIOBITRATE_TOO_HIGH                        ),
     VIDEOEDIT_OSAL_RESULT_INIT(M4MCS_ERR_OUTPUT_FILE_SIZE_TOO_SMALL                   ),
     VIDEOEDIT_OSAL_RESULT_INIT(M4MCS_ERR_NOMORE_SPACE                                 ),
+    VIDEOEDIT_OSAL_RESULT_INIT(M4MCS_ERR_FILE_DRM_PROTECTED                           ),
 
     // M4READER_Common.h
     VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_READER_UNKNOWN_STREAM_TYPE                       ),
