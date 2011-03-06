@@ -91,8 +91,7 @@ static JNINativeMethod gMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
@@ -100,15 +99,16 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_content_res_ObbScanner(JNIEnv* env)
 {
-    FIND_CLASS(gObbInfoClassInfo.clazz, "android/content/res/ObbInfo");
+    jclass clazz;
+    FIND_CLASS(clazz, "android/content/res/ObbInfo");
 
-    GET_FIELD_ID(gObbInfoClassInfo.packageName, gObbInfoClassInfo.clazz,
+    GET_FIELD_ID(gObbInfoClassInfo.packageName, clazz,
             "packageName", "Ljava/lang/String;");
-    GET_FIELD_ID(gObbInfoClassInfo.version, gObbInfoClassInfo.clazz,
+    GET_FIELD_ID(gObbInfoClassInfo.version, clazz,
             "version", "I");
-    GET_FIELD_ID(gObbInfoClassInfo.flags, gObbInfoClassInfo.clazz,
+    GET_FIELD_ID(gObbInfoClassInfo.flags, clazz,
             "flags", "I");
-    GET_FIELD_ID(gObbInfoClassInfo.salt, gObbInfoClassInfo.clazz,
+    GET_FIELD_ID(gObbInfoClassInfo.salt, clazz,
             "salt", "[B");
 
     return AndroidRuntime::registerNativeMethods(env, "android/content/res/ObbScanner", gMethods,
@@ -116,4 +116,3 @@ int register_android_content_res_ObbScanner(JNIEnv* env)
 }
 
 }; // namespace android
-

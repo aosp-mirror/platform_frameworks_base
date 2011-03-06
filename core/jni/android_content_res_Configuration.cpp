@@ -26,8 +26,6 @@
 namespace android {
 
 static struct {
-    jclass clazz;
-
     jfieldID mcc;
     jfieldID mnc;
     jfieldID locale;
@@ -75,8 +73,7 @@ static JNINativeMethod gMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
@@ -84,31 +81,32 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_content_res_Configuration(JNIEnv* env)
 {
-    FIND_CLASS(gConfigurationClassInfo.clazz, "android/content/res/Configuration");
+    jclass clazz;
+    FIND_CLASS(clazz, "android/content/res/Configuration");
 
-    GET_FIELD_ID(gConfigurationClassInfo.mcc, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.mcc, clazz,
             "mcc", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.mnc, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.mnc, clazz,
             "mnc", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.locale, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.locale, clazz,
             "locale", "Ljava/util/Locale;");
-    GET_FIELD_ID(gConfigurationClassInfo.screenLayout, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.screenLayout, clazz,
             "screenLayout", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, clazz,
             "touchscreen", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.keyboard, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.keyboard, clazz,
             "keyboard", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.keyboardHidden, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.keyboardHidden, clazz,
             "keyboardHidden", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.hardKeyboardHidden, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.hardKeyboardHidden, clazz,
             "hardKeyboardHidden", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.navigation, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.navigation, clazz,
             "navigation", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.navigationHidden, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.navigationHidden, clazz,
             "navigationHidden", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.orientation, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.orientation, clazz,
             "orientation", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.uiMode, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.uiMode, clazz,
             "uiMode", "I");
 
     return AndroidRuntime::registerNativeMethods(env, "android/content/res/Configuration", gMethods,

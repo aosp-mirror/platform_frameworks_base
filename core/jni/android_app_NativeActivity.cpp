@@ -42,8 +42,6 @@ namespace android
 {
 
 static struct {
-    jclass clazz;
-
     jmethodID dispatchUnhandledKeyEvent;
     jmethodID preDispatchKeyEvent;
     jmethodID finish;
@@ -1054,8 +1052,7 @@ static const char* const kNativeActivityPathName = "android/app/NativeActivity";
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class %s", className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class %s", className);
 
 #define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
         var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
@@ -1064,30 +1061,30 @@ static const char* const kNativeActivityPathName = "android/app/NativeActivity";
 int register_android_app_NativeActivity(JNIEnv* env)
 {
     //LOGD("register_android_app_NativeActivity");
+    jclass clazz;
+    FIND_CLASS(clazz, kNativeActivityPathName);
 
-    FIND_CLASS(gNativeActivityClassInfo.clazz, kNativeActivityPathName);
-    
     GET_METHOD_ID(gNativeActivityClassInfo.dispatchUnhandledKeyEvent,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "dispatchUnhandledKeyEvent", "(Landroid/view/KeyEvent;)Z");
     GET_METHOD_ID(gNativeActivityClassInfo.preDispatchKeyEvent,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "preDispatchKeyEvent", "(Landroid/view/KeyEvent;I)V");
 
     GET_METHOD_ID(gNativeActivityClassInfo.finish,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "finish", "()V");
     GET_METHOD_ID(gNativeActivityClassInfo.setWindowFlags,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "setWindowFlags", "(II)V");
     GET_METHOD_ID(gNativeActivityClassInfo.setWindowFormat,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "setWindowFormat", "(I)V");
     GET_METHOD_ID(gNativeActivityClassInfo.showIme,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "showIme", "(I)V");
     GET_METHOD_ID(gNativeActivityClassInfo.hideIme,
-            gNativeActivityClassInfo.clazz,
+            clazz,
             "hideIme", "(I)V");
 
     return AndroidRuntime::registerNativeMethods(

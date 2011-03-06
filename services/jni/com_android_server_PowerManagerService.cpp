@@ -35,8 +35,6 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static struct {
-    jclass clazz;
-
     jmethodID goToSleep;
     jmethodID userActivity;
 } gPowerManagerServiceClassInfo;
@@ -144,8 +142,7 @@ static JNINativeMethod gPowerManagerServiceMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
         var = env->GetMethodID(clazz, methodName, methodDescriptor); \
@@ -162,12 +159,13 @@ int register_android_server_PowerManagerService(JNIEnv* env) {
 
     // Callbacks
 
-    FIND_CLASS(gPowerManagerServiceClassInfo.clazz, "com/android/server/PowerManagerService");
+    jclass clazz;
+    FIND_CLASS(clazz, "com/android/server/PowerManagerService");
 
-    GET_METHOD_ID(gPowerManagerServiceClassInfo.goToSleep, gPowerManagerServiceClassInfo.clazz,
+    GET_METHOD_ID(gPowerManagerServiceClassInfo.goToSleep, clazz,
             "goToSleep", "(J)V");
 
-    GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivity, gPowerManagerServiceClassInfo.clazz,
+    GET_METHOD_ID(gPowerManagerServiceClassInfo.userActivity, clazz,
             "userActivity", "(JZIZ)V");
 
     // Initialize
