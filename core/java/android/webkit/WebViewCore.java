@@ -825,6 +825,9 @@ final class WebViewCore {
         MotionEvent mMotionEvent;
         int mNativeLayer;
         Rect mNativeLayerRect = new Rect();
+        long mSequence;
+        boolean mNativeResult;
+        boolean mDontEnqueueResult;
     }
 
     static class GeolocationPermissionsData {
@@ -1332,13 +1335,14 @@ final class WebViewCore {
                                 nativeScrollLayer(ted.mNativeLayer,
                                         ted.mNativeLayerRect);
                             }
+                            ted.mNativeResult = nativeHandleTouchEvent(ted.mAction, ted.mIds,
+                                    xArray, yArray, count, ted.mMetaState);
                             Message.obtain(
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID,
                                     ted.mAction,
-                                    nativeHandleTouchEvent(ted.mAction, ted.mIds,
-                                        xArray, yArray, count, ted.mMetaState) ? 1 : 0,
-                                    ted.mReprocess ? ted : null).sendToTarget();
+                                    ted.mNativeResult ? 1 : 0,
+                                    ted).sendToTarget();
                             break;
                         }
 
