@@ -18,11 +18,15 @@ package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Slog;
+import android.view.MotionEvent;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
 
 public class NotificationPeekPanel extends RelativeLayout implements StatusBarPanel {
+    TabletStatusBar mBar;
+
     public NotificationPeekPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
@@ -39,5 +43,16 @@ public class NotificationPeekPanel extends RelativeLayout implements StatusBarPa
         return x >= l && x < r && y >= t && y < b;
     }
 
+    public void setBar(TabletStatusBar bar) {
+        mBar = bar;
+    }
+
+    // We don't really want to intercept the touch event, but we *do* want to reset the fade timer
+    // in case the user is interacting with some custom controls or something.
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        mBar.resetNotificationPeekFadeTimer();
+        return false;
+    }
 }
 
