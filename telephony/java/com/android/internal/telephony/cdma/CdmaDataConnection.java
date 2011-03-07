@@ -33,8 +33,8 @@ public class CdmaDataConnection extends DataConnection {
     private static final String LOG_TAG = "CDMA";
 
     // ***** Constructor
-    private CdmaDataConnection(CDMAPhone phone, String name, RetryManager rm) {
-        super(phone, name, rm);
+    private CdmaDataConnection(CDMAPhone phone, String name, int id, RetryManager rm) {
+        super(phone, name, id, rm);
     }
 
     /**
@@ -49,11 +49,10 @@ public class CdmaDataConnection extends DataConnection {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone,
-                "CdmaDataConnection-" + mCount, rm);
+        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone, "CdmaDataConnection-" + mCount,
+                id, rm);
         cdmaDc.start();
         if (DBG) cdmaDc.log("Made " + cdmaDc.getName());
-        cdmaDc.mId = id;
         return cdmaDc;
     }
 

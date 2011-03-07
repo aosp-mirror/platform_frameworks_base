@@ -546,7 +546,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
             if (defaultApnContext.getState() == State.FAILED) {
                 cleanUpConnection(false, defaultApnContext);
-                mRetryMgr.resetRetryCount();
+                defaultApnContext.getDataConnection().resetRetryCount();
             }
             trySetupData(Phone.REASON_GPRS_ATTACHED, Phone.APN_TYPE_DEFAULT);
         }
@@ -934,7 +934,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         cleanUpAllConnections(isConnected, Phone.REASON_APN_CHANGED);
         if (!isConnected) {
             // TODO: Won't work for multiple connections!!!!
-            mRetryMgr.resetRetryCount();
+            defaultApnContext.getDataConnection().resetRetryCount();
             defaultApnContext.setReason(Phone.REASON_APN_CHANGED);
             trySetupData(defaultApnContext);
         }
@@ -1032,7 +1032,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
         startNetStatPoll();
         // reset reconnect timer
-        mRetryMgr.resetRetryCount();
+        apnContext.getDataConnection().resetRetryCount();
     }
 
     // TODO: For multiple Active APNs not exactly sure how to do this.
@@ -1233,7 +1233,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
         if (apnContext.getState() == State.FAILED) {
-            if (!mRetryMgr.isRetryNeeded()) {
+            if (!apnContext.getDataConnection().isRetryNeeded()) {
                 if (!apnContext.getApnType().equals(Phone.APN_TYPE_DEFAULT)){
                     // if no more retries on a secondary APN attempt, tell the world and revert.
                     notifyDataConnection(Phone.REASON_APN_FAILED);
@@ -1241,18 +1241,18 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 }
                 if (mReregisterOnReconnectFailure) {
                     // We've re-registerd once now just retry forever.
-                    mRetryMgr.retryForeverUsingLastTimeout();
+                    apnContext.getDataConnection().retryForeverUsingLastTimeout();
                 } else {
                     // Try to Re-register to the network.
                     log("PDP activate failed, Reregistering to the network");
                     mReregisterOnReconnectFailure = true;
                     mPhone.getServiceStateTracker().reRegisterNetwork(null);
-                    mRetryMgr.resetRetryCount();
+                    apnContext.getDataConnection().resetRetryCount();
                     return;
                 }
             }
 
-            int nextReconnectDelay = mRetryMgr.getRetryTimer();
+            int nextReconnectDelay = apnContext.getDataConnection().getRetryTimer();
             log("PDP activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
@@ -1268,7 +1268,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     SystemClock.elapsedRealtime() + nextReconnectDelay,
                     apnContext.getReconnectIntent());
 
-            mRetryMgr.increaseRetryCount();
+            apnContext.getDataConnection().increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 Log.d(LOG_TAG, "NOT Posting GPRS Unavailable notification "
@@ -1308,14 +1308,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (apnContext.getApnType().equals(Phone.APN_TYPE_DEFAULT)) {
             log("onEnableNewApn default type");
             ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
-            mRetryMgr = defaultApnContext.getDataConnection().getRetryMgr();
-            mRetryMgr.resetRetryCount();
+            defaultApnContext.getDataConnection().resetRetryCount();
         } else if (mApnToDataConnectionId.get(apnContext.getApnType()) == null) {
             log("onEnableNewApn ApnType=" + apnContext.getApnType() +
                     " missing, make a new connection");
             int id = createDataConnection(apnContext.getApnType());
-            mRetryMgr = mDataConnections.get(id).getRetryMgr();
-            mRetryMgr.resetRetryCount();
+            mDataConnections.get(id).resetRetryCount();
         } else {
             log("oneEnableNewApn connection already exists, nothing to setup");
         }
@@ -1378,7 +1376,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void onRadioOffOrNotAvailable() {
         // Make sure our reconnect delay starts at the initial value
         // next time the radio comes on
-        mRetryMgr.resetRetryCount();
+
+        for (DataConnection dc : mDataConnections.values()) {
+            dc.resetRetryCount();
+        }
         mReregisterOnReconnectFailure = false;
 
         if (mPhone.getSimulatedRadioControl() != null) {
@@ -1568,7 +1569,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         } else {
             // reset reconnect timer
-            mRetryMgr.resetRetryCount();
+            ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
+            defaultApnContext.getDataConnection().resetRetryCount();
             mReregisterOnReconnectFailure = false;
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED, Phone.APN_TYPE_DEFAULT);
@@ -1883,7 +1885,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     // TODO: Should all PDN states be checked to fail?
                     if (mState == State.FAILED) {
                         cleanUpAllConnections(false, Phone.REASON_PS_RESTRICT_ENABLED);
-                        mRetryMgr.resetRetryCount();
+                        resetAllRetryCounts();
                         mReregisterOnReconnectFailure = false;
                     }
                     trySetupData(Phone.REASON_PS_RESTRICT_ENABLED, Phone.APN_TYPE_DEFAULT);

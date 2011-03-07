@@ -209,9 +209,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected int mNoRecvPollCount = 0;
     protected boolean mNetStatPollEnabled = false;
 
-    /** Manage the behavior of data retry after failure (TODO: One per connection in the future?) */
-    protected RetryManager mRetryMgr = new RetryManager();
-
     // wifi connection status will be updated by sticky intent
     protected boolean mIsWifiConnected = false;
 
@@ -397,7 +394,7 @@ public abstract class DataConnectionTracker extends Handler {
                 Settings.Secure.DATA_ROAMING, enabled ? 1 : 0);
             if (mPhone.getServiceState().getRoaming()) {
                 if (enabled) {
-                    mRetryMgr.resetRetryCount();
+                    resetAllRetryCounts();
                 }
                 sendMessage(obtainMessage(EVENT_ROAMING_ON));
             }
@@ -449,7 +446,7 @@ public abstract class DataConnectionTracker extends Handler {
 
             case EVENT_ROAMING_OFF:
                 if (getDataOnRoamingEnabled() == false) {
-                    mRetryMgr.resetRetryCount();
+                    resetAllRetryCounts();
                 }
                 onRoamingOff();
                 break;
@@ -883,7 +880,7 @@ public abstract class DataConnectionTracker extends Handler {
             }
             if (prevEnabled != getAnyDataEnabled()) {
                 if (!prevEnabled) {
-                    mRetryMgr.resetRetryCount();
+                    resetAllRetryCounts();
                     onTrySetupData(Phone.REASON_DATA_ENABLED);
                 } else {
                     cleanUpAllConnections();
@@ -917,12 +914,18 @@ public abstract class DataConnectionTracker extends Handler {
                     Settings.Secure.MOBILE_DATA, enable ? 1 : 0);
             if (prevEnabled != getAnyDataEnabled()) {
                 if (!prevEnabled) {
-                    mRetryMgr.resetRetryCount();
+                    resetAllRetryCounts();
                     onTrySetupData(Phone.REASON_DATA_ENABLED);
                 } else {
                     onCleanUpConnection(true, APN_DEFAULT_ID, Phone.REASON_DATA_DISABLED);
                 }
             }
+        }
+    }
+
+    protected void resetAllRetryCounts() {
+        for (DataConnection dc : mDataConnections.values()) {
+            dc.resetRetryCount();
         }
     }
 }

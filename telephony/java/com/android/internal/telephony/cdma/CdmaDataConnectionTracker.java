@@ -328,7 +328,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         setState(State.CONNECTED);
         notifyDataConnection(reason);
         startNetStatPoll();
-        mRetryMgr.resetRetryCount();
+        mDataConnections.get(0).resetRetryCount();
     }
 
     private void resetPollStats() {
@@ -478,7 +478,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
              * at the last time until the state is changed.
              * TODO: Make this configurable?
              */
-            int nextReconnectDelay = mRetryMgr.getRetryTimer();
+            int nextReconnectDelay = mDataConnections.get(0).getRetryTimer();
             log("Data Connection activate failed. Scheduling next attempt for "
                     + (nextReconnectDelay / 1000) + "s");
 
@@ -492,7 +492,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     SystemClock.elapsedRealtime() + nextReconnectDelay,
                     mReconnectIntent);
 
-            mRetryMgr.increaseRetryCount();
+            mDataConnections.get(0).increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 log("NOT Posting Data Connection Unavailable notification "
@@ -593,7 +593,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
      */
     @Override
     protected void onRadioOffOrNotAvailable() {
-        mRetryMgr.resetRetryCount();
+        mDataConnections.get(0).resetRetryCount();
 
         if (mPhone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
@@ -708,7 +708,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             }
             notifyDataAvailability(Phone.REASON_VOICE_CALL_ENDED);
         } else {
-            mRetryMgr.resetRetryCount();
+            mDataConnections.get(0).resetRetryCount();
             // in case data setup was attempted when we were on a voice call
             trySetupData(Phone.REASON_VOICE_CALL_ENDED);
         }
@@ -730,7 +730,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         CdmaDataConnection dataConn;
 
         /** TODO: Use one retry manager for all connections for now */
-        RetryManager rm = mRetryMgr;
+        RetryManager rm = new RetryManager();
         if (!rm.configure(SystemProperties.get("ro.cdma.data_retry_config"))) {
             if (!rm.configure(DEFAULT_DATA_RETRY_CONFIG)) {
                 // Should never happen, log an error and default to a simple linear sequence.
@@ -761,7 +761,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         } else {
             if (mState == State.FAILED) {
                 cleanUpConnection(false, Phone.REASON_CDMA_DATA_DETACHED);
-                mRetryMgr.resetRetryCount();
+                mDataConnections.get(0).resetRetryCount();
 
                 CdmaCellLocation loc = (CdmaCellLocation)(mPhone.getCellLocation());
                 EventLog.writeEvent(EventLogTags.CDMA_DATA_SETUP_FAILED,
@@ -779,7 +779,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 switch (otaPrivision[0]) {
                 case Phone.CDMA_OTA_PROVISION_STATUS_COMMITTED:
                 case Phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED:
-                    mRetryMgr.resetRetryCount();
+                    mDataConnections.get(0).resetRetryCount();
                     break;
                 default:
                     break;
