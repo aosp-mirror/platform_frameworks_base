@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -602,50 +603,20 @@ class UsbDeviceSettingsManager {
     }
 
     public void deviceAttached(UsbDevice device) {
-        Intent deviceIntent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        deviceIntent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        deviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         ArrayList<ResolveInfo> matches;
         String defaultPackage;
         synchronized (mLock) {
-            matches = getDeviceMatchesLocked(device, deviceIntent);
+            matches = getDeviceMatchesLocked(device, intent);
             // Launch our default activity directly, if we have one.
             // Otherwise we will start the UsbResolverActivity to allow the user to choose.
             defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
         }
 
-        int count = matches.size();
-        // don't show the resolver activity if there are no choices available
-        if (count == 0) return;
-
-        if (defaultPackage != null) {
-            for (int i = 0; i < count; i++) {
-                ResolveInfo rInfo = matches.get(i);
-                if (rInfo.activityInfo != null &&
-                        defaultPackage.equals(rInfo.activityInfo.packageName)) {
-                    try {
-                        deviceIntent.setComponent(new ComponentName(
-                                defaultPackage, rInfo.activityInfo.name));
-                        mContext.startActivity(deviceIntent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(TAG, "startActivity failed", e);
-                    }
-                    return;
-                }
-            }
-        }
-
-        Intent intent = new Intent(mContext, UsbResolverActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        intent.putExtra(Intent.EXTRA_INTENT, deviceIntent);
-        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS, matches);
-        try {
-            mContext.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "unable to start UsbResolverActivity");
-        }
+        resolveActivity(intent, matches, defaultPackage, device, null);
     }
 
     public void deviceDetached(UsbDevice device) {
@@ -656,49 +627,82 @@ class UsbDeviceSettingsManager {
     }
 
     public void accessoryAttached(UsbAccessory accessory) {
-        Intent accessoryIntent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
-        accessoryIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        accessoryIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         ArrayList<ResolveInfo> matches;
         String defaultPackage;
         synchronized (mLock) {
-            matches = getAccessoryMatchesLocked(accessory, accessoryIntent);
+            matches = getAccessoryMatchesLocked(accessory, intent);
             // Launch our default activity directly, if we have one.
             // Otherwise we will start the UsbResolverActivity to allow the user to choose.
             defaultPackage = mAccessoryPreferenceMap.get(new AccessoryFilter(accessory));
         }
 
+        resolveActivity(intent, matches, defaultPackage, null, accessory);
+    }
+
+    private void resolveActivity(Intent intent, ArrayList<ResolveInfo> matches,
+            String defaultPackage, UsbDevice device, UsbAccessory accessory) {
         int count = matches.size();
         // don't show the resolver activity if there are no choices available
         if (count == 0) return;
 
-        if (defaultPackage != null) {
-            for (int i = 0; i < count; i++) {
-                ResolveInfo rInfo = matches.get(i);
-                if (rInfo.activityInfo != null &&
-                        defaultPackage.equals(rInfo.activityInfo.packageName)) {
-                    try {
-                        accessoryIntent.setComponent(new ComponentName(
-                                defaultPackage, rInfo.activityInfo.name));
-                        mContext.startActivity(accessoryIntent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(TAG, "startActivity failed", e);
-                    }
-                    return;
+        ResolveInfo defaultRI = null;
+        if (count == 1 && defaultPackage == null) {
+            // Check to see if our single choice is on the system partition.
+            // If so, treat it as our default without calling UsbResolverActivity
+            ResolveInfo rInfo = matches.get(0);
+            if (rInfo.activityInfo != null &&
+                    rInfo.activityInfo.applicationInfo != null &&
+                    (rInfo.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                defaultRI = rInfo;
+                int uid = rInfo.activityInfo.applicationInfo.uid;
+                // grant permission
+                if (device != null) {
+                    grantDevicePermission(device, uid);
+                } else if (accessory != null) {
+                    grantAccessoryPermission(accessory, uid);
                 }
             }
         }
 
-        Intent intent = new Intent(mContext, UsbResolverActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (defaultRI == null && defaultPackage != null) {
+            // look for default activity
+            for (int i = 0; i < count; i++) {
+                ResolveInfo rInfo = matches.get(i);
+                if (rInfo.activityInfo != null &&
+                        defaultPackage.equals(rInfo.activityInfo.packageName)) {
+                    defaultRI = rInfo;
+                    break;
+                }
+            }
+        }
 
-        intent.putExtra(Intent.EXTRA_INTENT, accessoryIntent);
-        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS, matches);
-        try {
-            mContext.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "unable to start UsbResolverActivity");
+        if (defaultRI != null) {
+            // start default activity directly
+            try {
+                intent.setComponent(
+                        new ComponentName(defaultRI.activityInfo.packageName,
+                                defaultRI.activityInfo.name));
+                mContext.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "startActivity failed", e);
+            }
+        } else {
+            // start UsbResolverActivity so user can choose an activity
+            Intent resolverIntent = new Intent(mContext, UsbResolverActivity.class);
+            resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
+            resolverIntent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS,
+                    matches);
+            try {
+                mContext.startActivity(resolverIntent);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "unable to start UsbResolverActivity");
+            }
         }
     }
 
