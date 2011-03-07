@@ -16,6 +16,9 @@
 
 package android.webkit;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
@@ -23,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -112,6 +116,24 @@ class ZoomManager {
     private float mZoomCenterY;
 
     /*
+     * Similar to mZoomCenterX(Y), these track the focus point of the scale
+     * gesture. The difference is these get updated every time when onScale is
+     * invoked no matter if a zooming really happens.
+     */
+    private float mFocusX;
+    private float mFocusY;
+
+    /*
+     * mFocusMovement keeps track of the total movement that the focus point
+     * has been through. Comparing to the difference of mCurrlen and mPrevLen,
+     * it determines if the gesture is for panning or zooming or both.
+     */
+    private static final int FOCUS_QUEUE_SIZE = 5;
+    private float mFocusMovementSum;
+    private Queue<Float> mFocusMovementQueue;
+
+
+    /*
      * These values represent the point around which the screen should be
      * centered after zooming. In other words it is used to determine the center
      * point of the visible document after the page has finished zooming. This
@@ -196,6 +218,8 @@ class ZoomManager {
          * viewport size is.
          */
         setZoomOverviewWidth(WebView.DEFAULT_VIEWPORT_WIDTH);
+
+        mFocusMovementQueue = new LinkedList<Float>();
     }
 
     /**
@@ -715,10 +739,11 @@ class ZoomManager {
     }
 
     private class ScaleDetectorListener implements ScaleGestureDetector.OnScaleGestureListener {
-
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             mInitialZoomOverview = false;
             dismissZoomPicker();
+            mFocusMovementSum = 0;
+            mFocusMovementQueue.clear();
             mWebView.mViewManager.startZoom();
             mWebView.onPinchToZoomAnimationStart();
             return true;
@@ -729,6 +754,29 @@ class ZoomManager {
             float scale = Math.max(
                     computeScaleWithLimits(detector.getScaleFactor() * mActualScale),
                     getZoomOverviewScale());
+
+            float prevFocusX = mFocusX;
+            float prevFocusY = mFocusY;
+            mFocusX = detector.getFocusX();
+            mFocusY = detector.getFocusY();
+            float focusDelta = (prevFocusX == 0 && prevFocusY == 0) ? 0 :
+                    FloatMath.sqrt((mFocusX - prevFocusX) * (mFocusX - prevFocusX)
+                                   + (mFocusY - prevFocusY) * (mFocusY - prevFocusY));
+            mFocusMovementSum += focusDelta;
+            mFocusMovementQueue.add(focusDelta);
+            if (mFocusMovementQueue.size() > FOCUS_QUEUE_SIZE) {
+                mFocusMovementSum -= mFocusMovementQueue.remove();
+            }
+            float deltaSpan = Math.abs(detector.getCurrentSpan() - detector.getPreviousSpan());
+
+            // If the user moves the fingers but keeps the same distance between them,
+            // we should do panning only.
+            if (mFocusMovementSum > deltaSpan) {
+                mFocusMovementSum = 0;
+                mFocusMovementQueue.clear();
+                return true;
+            }
+
             if (mPinchToZoomAnimating || willScaleTriggerZoom(scale)) {
                 mPinchToZoomAnimating = true;
                 // limit the scale change per step
