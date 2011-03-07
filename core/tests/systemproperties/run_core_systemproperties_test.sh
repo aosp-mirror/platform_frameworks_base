@@ -16,6 +16,9 @@ fi
 if [[ $rebuild == true ]]; then
   make -j4 FrameworksCoreSystemPropertiesTests
   TESTAPP=${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreSystemPropertiesTests.apk
+  COMMAND="adb install -r $TESTAPP"
+  echo $COMMAND
+  $COMMAND
 fi
 
 adb shell am instrument -w -e class android.os.SystemPropertiesTest com.android.frameworks.coretests.systemproperties/android.test.InstrumentationTestRunner

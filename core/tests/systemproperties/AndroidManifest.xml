@@ -24,7 +24,7 @@
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-            android:targetPackage="com.android.frameworks.coretests"
-            android:label="Frameworks Core Tests" />
+            android:targetPackage="com.android.frameworks.coretests.systemproperties"
+            android:label="Frameworks SystemProperties Core Tests" />
 
 </manifest>
