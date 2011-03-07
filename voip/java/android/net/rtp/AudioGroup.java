@@ -59,7 +59,6 @@ import java.util.Map;
  * the AudioGroups is in use.</p>
  *
  * @see AudioStream
- * @hide
  */
 public class AudioGroup {
     /**
