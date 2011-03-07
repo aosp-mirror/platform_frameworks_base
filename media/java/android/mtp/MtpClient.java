@@ -29,6 +29,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -43,7 +44,10 @@ public class MtpClient {
     private final Context mContext;
     private final UsbManager mUsbManager;
     private final ArrayList<Listener> mListeners = new ArrayList<Listener>();
-    private final ArrayList<MtpDevice> mDeviceList = new ArrayList<MtpDevice>();
+    // mDevices contains all MtpDevices that have been seen by our client,
+    // so we can inform when the device has been detached.
+    // mDevices is also used for synchronization in this class.
+    private final HashMap<String, MtpDevice> mDevices = new HashMap<String, MtpDevice>();
 
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
@@ -51,21 +55,21 @@ public class MtpClient {
             UsbDevice usbDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
             String deviceName = usbDevice.getDeviceName();
 
-            synchronized (mDeviceList) {
-                MtpDevice mtpDevice = getDeviceLocked(deviceName);
+            synchronized (mDevices) {
+                MtpDevice mtpDevice = mDevices.get(deviceName);
 
                 if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {
                     if (mtpDevice == null) {
-                        mtpDevice = openDevice(usbDevice);
+                        mtpDevice = openDeviceLocked(usbDevice);
                     }
                     if (mtpDevice != null) {
-                        mDeviceList.add(mtpDevice);
+                        mDevices.put(deviceName, mtpDevice);
                         for (Listener listener : mListeners) {
                             listener.deviceAdded(mtpDevice);
                         }
                     }
                 } else if (mtpDevice != null) {
-                    mDeviceList.remove(mtpDevice);
+                    mDevices.remove(deviceName);
                     for (Listener listener : mListeners) {
                         listener.deviceRemoved(mtpDevice);
                     }
@@ -127,16 +131,6 @@ public class MtpClient {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         context.registerReceiver(mUsbReceiver, filter);
-
-        for (UsbDevice usbDevice : mUsbManager.getDeviceList().values()) {
-            MtpDevice mtpDevice = getDeviceLocked(usbDevice.getDeviceName());
-            if (mtpDevice == null) {
-                mtpDevice = openDevice(usbDevice);
-            }
-            if (mtpDevice != null) {
-                mDeviceList.add(mtpDevice);
-            }
-        }
     }
 
     /**
@@ -146,7 +140,7 @@ public class MtpClient {
      * @param device the device to open
      * @return an MtpDevice for the device.
      */
-    private MtpDevice openDevice(UsbDevice usbDevice) {
+    private MtpDevice openDeviceLocked(UsbDevice usbDevice) {
         if (isCamera(usbDevice)) {
             MtpDevice mtpDevice = new MtpDevice(usbDevice);
             if (mtpDevice.open(mUsbManager)) {
@@ -170,7 +164,7 @@ public class MtpClient {
      * @param listener the listener to register
      */
     public void addListener(Listener listener) {
-        synchronized (mDeviceList) {
+        synchronized (mDevices) {
             if (!mListeners.contains(listener)) {
                 mListeners.add(listener);
             }
@@ -183,7 +177,7 @@ public class MtpClient {
      * @param listener the listener to unregister
      */
     public void removeListener(Listener listener) {
-        synchronized (mDeviceList) {
+        synchronized (mDevices) {
             mListeners.remove(listener);
         }
     }
@@ -196,8 +190,8 @@ public class MtpClient {
      * @return the MtpDevice, or null if it does not exist
      */
     public MtpDevice getDevice(String deviceName) {
-        synchronized (mDeviceList) {
-            return getDeviceLocked(deviceName);
+        synchronized (mDevices) {
+            return mDevices.get(deviceName);
         }
     }
 
@@ -209,18 +203,9 @@ public class MtpClient {
      * @return the MtpDevice, or null if it does not exist
      */
     public MtpDevice getDevice(int id) {
-        synchronized (mDeviceList) {
-            return getDeviceLocked(UsbDevice.getDeviceName(id));
+        synchronized (mDevices) {
+            return mDevices.get(UsbDevice.getDeviceName(id));
         }
-    }
-
-    private MtpDevice getDeviceLocked(String deviceName) {
-        for (MtpDevice device : mDeviceList) {
-            if (device.getDeviceName().equals(deviceName)) {
-                return device;
-            }
-        }
-        return null;
     }
 
     /**
@@ -229,8 +214,21 @@ public class MtpClient {
      * @return the list of MtpDevices
      */
     public List<MtpDevice> getDeviceList() {
-        synchronized (mDeviceList) {
-            return new ArrayList<MtpDevice>(mDeviceList);
+        synchronized (mDevices) {
+            // Query the USB manager since devices might have attached
+            // before we added our listener.
+            for (UsbDevice usbDevice : mUsbManager.getDeviceList().values()) {
+                String deviceName = usbDevice.getDeviceName();
+                MtpDevice mtpDevice = mDevices.get(deviceName);
+                if (mtpDevice == null) {
+                   mtpDevice = openDeviceLocked(usbDevice);
+                }
+                if (mtpDevice != null) {
+                    mDevices.put(deviceName, mtpDevice);
+                }
+            }
+
+            return new ArrayList<MtpDevice>(mDevices.values());
         }
     }
 
