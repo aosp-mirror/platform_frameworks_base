@@ -4115,7 +4115,7 @@ public class WebView extends AbsoluteLayout
         }
         if (animateZoom) {
             mZoomManager.animateZoom(canvas);
-        } else {
+        } else if (!canvas.isHardwareAccelerated()) {
             canvas.scale(mZoomManager.getScale(), mZoomManager.getScale());
         }
 
