@@ -376,8 +376,8 @@ public class DownloadManager {
         /**
          * This download shows in the notifications after completion ONLY.
          * It is usuable only with
-         * {@link DownloadManager#completedDownload(String, String, boolean, String,
-         * String, long, boolean)}.
+         * {@link DownloadManager#addCompletedDownload(String, String,
+         * boolean, String, String, long, boolean)}.
          */
         public static final int VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION = 3;
 
@@ -1111,7 +1111,7 @@ public class DownloadManager {
      * @return  an ID for the download entry added to the downloads app, unique across the system
      * This ID is used to make future calls related to this download.
      */
-    public long completedDownload(String title, String description,
+    public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification) {
         // make sure the input args are non-null/non-zero
