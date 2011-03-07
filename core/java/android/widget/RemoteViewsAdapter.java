@@ -889,7 +889,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             boolean isConnected = mServiceConnection.isConnected();
             boolean hasNewItems = false;
 
-            if (!isConnected) {
+            if (!isInCache && !isConnected) {
                 // Requesting bind service will trigger a super.notifyDataSetChanged(), which will
                 // in turn trigger another request to getView()
                 requestBindService();
