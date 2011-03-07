@@ -217,6 +217,8 @@ public class TabletStatusBar extends StatusBar implements
         // Notification preview window
         mNotificationPeekWindow = (NotificationPeekPanel) View.inflate(context,
                 R.layout.status_bar_notification_peek, null);
+        mNotificationPeekWindow.setBar(this);
+
         mNotificationPeekRow = (ViewGroup) mNotificationPeekWindow.findViewById(R.id.content);
         mNotificationPeekWindow.setVisibility(View.GONE);
         mNotificationPeekWindow.setOnTouchListener(
@@ -1211,10 +1213,20 @@ public class TabletStatusBar extends StatusBar implements
         }
     }
 
-    private class NotificationIconTouchListener implements View.OnTouchListener {
-        final static int NOTIFICATION_PEEK_HOLD_THRESH = 200; // ms
-        final static int NOTIFICATION_PEEK_FADE_DELAY = 5000; // ms
+    final static int NOTIFICATION_PEEK_HOLD_THRESH = 200; // ms
+    final static int NOTIFICATION_PEEK_FADE_DELAY = 3000; // ms
 
+    public void resetNotificationPeekFadeTimer() {
+        if (DEBUG) {
+            Slog.d(TAG, "setting peek fade timer for " + NOTIFICATION_PEEK_FADE_DELAY
+                + "ms from now");
+        }
+        mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PEEK);
+        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK,
+                NOTIFICATION_PEEK_FADE_DELAY);
+    }
+
+    private class NotificationIconTouchListener implements View.OnTouchListener {
         VelocityTracker mVT;
         int mPeekIndex;
         float mInitialTouchX, mInitialTouchY;
@@ -1303,8 +1315,7 @@ public class TabletStatusBar extends StatusBar implements
                     }
 
                     if (peeking) {
-                        mHandler.sendEmptyMessageDelayed(MSG_CLOSE_NOTIFICATION_PEEK,
-                                NOTIFICATION_PEEK_FADE_DELAY);
+                        resetNotificationPeekFadeTimer();
                     }
 
                     mVT.recycle();
