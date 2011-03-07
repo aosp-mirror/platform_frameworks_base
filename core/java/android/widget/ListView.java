@@ -3019,12 +3019,13 @@ public class ListView extends AbsListView {
                 hasOpaqueScrollbars()) || super.isOpaque();
         if (retValue) {
             // only return true if the list items cover the entire area of the view
-            final int listTop = mListPadding.top;
+            final int listTop = mListPadding != null ? mListPadding.top : mPaddingTop;
             View first = getChildAt(0);
             if (first == null || first.getTop() > listTop) {
                 return false;
             }
-            final int listBottom = getHeight() - mListPadding.bottom;
+            final int listBottom = getHeight() -
+                    (mListPadding != null ? mListPadding.bottom : mPaddingBottom);
             View last = getChildAt(getChildCount() - 1);
             if (last == null || last.getBottom() < listBottom) {
                 return false;
