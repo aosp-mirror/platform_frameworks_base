@@ -24,6 +24,36 @@
 
 namespace android {
 
+struct AxisInfo {
+    enum Mode {
+        // Axis value is reported directly.
+        MODE_NORMAL = 0,
+        // Axis value should be inverted before reporting.
+        MODE_INVERT = 1,
+        // Axis value should be split into two axes
+        MODE_SPLIT = 2,
+    };
+
+    // Axis mode.
+    Mode mode;
+
+    // Axis id.
+    // When split, this is the axis used for values smaller than the split position.
+    int32_t axis;
+
+    // When split, this is the axis used for values after higher than the split position.
+    int32_t highAxis;
+
+    // The split value, or 0 if not split.
+    int32_t splitValue;
+
+    // The flat value, or -1 if none.
+    int32_t flatOverride;
+
+    AxisInfo() : mode(MODE_NORMAL), axis(-1), highAxis(-1), splitValue(0), flatOverride(-1) {
+    }
+};
+
 /**
  * Describes a mapping from keyboard scan codes and joystick axes to Android key codes and axes.
  */
@@ -36,7 +66,7 @@ public:
     status_t mapKey(int32_t scanCode, int32_t* keyCode, uint32_t* flags) const;
     status_t findScanCodesForKey(int32_t keyCode, Vector<int32_t>* outScanCodes) const;
 
-    status_t mapAxis(int32_t scanCode, int32_t* axis) const;
+    status_t mapAxis(int32_t scanCode, AxisInfo* outAxisInfo) const;
 
 private:
     struct Key {
@@ -45,7 +75,7 @@ private:
     };
 
     KeyedVector<int32_t, Key> mKeys;
-    KeyedVector<int32_t, int32_t> mAxes;
+    KeyedVector<int32_t, AxisInfo> mAxes;
 
     KeyLayoutMap();
 

@@ -675,6 +675,87 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int AXIS_RTRIGGER = 18;
 
     /**
+     * Constant used to identify the Throttle axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the throttle control.
+     * The value is normalized to a range from 0.0 (fully open) to 1.0 (fully closed).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_THROTTLE = 19;
+
+    /**
+     * Constant used to identify the Rudder axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the rudder control.
+     * The value is normalized to a range from -1.0 (turn left) to 1.0 (turn right).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_RUDDER = 20;
+
+    /**
+     * Constant used to identify the Wheel axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the steering wheel control.
+     * The value is normalized to a range from -1.0 (turn left) to 1.0 (turn right).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_WHEEL = 21;
+
+    /**
+     * Constant used to identify the Gas axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the gas (accelerator) control.
+     * The value is normalized to a range from 0.0 (no acceleration)
+     * to 1.0 (maximum acceleration).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_GAS = 22;
+
+    /**
+     * Constant used to identify the Brake axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a joystick, reports the absolute position of the brake control.
+     * The value is normalized to a range from 0.0 (no braking) to 1.0 (maximum braking).
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_BRAKE = 23;
+
+    /**
      * Constant used to identify the Generic 1 axis of a motion event.
      * The interpretation of a generic axis is device-specific.
      *
@@ -877,6 +958,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_HAT_Y, "AXIS_HAT_Y");
         names.append(AXIS_LTRIGGER, "AXIS_LTRIGGER");
         names.append(AXIS_RTRIGGER, "AXIS_RTRIGGER");
+        names.append(AXIS_THROTTLE, "AXIS_THROTTLE");
+        names.append(AXIS_RUDDER, "AXIS_RUDDER");
+        names.append(AXIS_WHEEL, "AXIS_WHEEL");
+        names.append(AXIS_GAS, "AXIS_GAS");
+        names.append(AXIS_BRAKE, "AXIS_BRAKE");
         names.append(AXIS_GENERIC_1, "AXIS_GENERIC_1");
         names.append(AXIS_GENERIC_2, "AXIS_GENERIC_2");
         names.append(AXIS_GENERIC_3, "AXIS_GENERIC_3");
