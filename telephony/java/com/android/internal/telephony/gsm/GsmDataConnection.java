@@ -41,8 +41,8 @@ public class GsmDataConnection extends DataConnection {
     protected int mProfileId = RILConstants.DATA_PROFILE_DEFAULT;
     protected String mActiveApnType = Phone.APN_TYPE_DEFAULT;
     //***** Constructor
-    private GsmDataConnection(PhoneBase phone, String name, RetryManager rm) {
-        super(phone, name, rm);
+    private GsmDataConnection(PhoneBase phone, String name, int id, RetryManager rm) {
+        super(phone, name, id, rm);
     }
 
     /**
@@ -57,11 +57,10 @@ public class GsmDataConnection extends DataConnection {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDataConnection-" + mCount, rm);
+        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDataConnection-" + mCount,
+                id, rm);
         gsmDc.start();
         if (DBG) gsmDc.log("Made " + gsmDc.getName());
-        gsmDc.mId = id;
-        gsmDc.mRetryMgr = rm;
         return gsmDc;
     }
 
