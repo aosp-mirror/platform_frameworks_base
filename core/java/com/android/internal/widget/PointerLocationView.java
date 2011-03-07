@@ -23,6 +23,7 @@ import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
 import android.util.Log;
 import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -97,7 +98,8 @@ public class PointerLocationView extends View {
     
     public PointerLocationView(Context c) {
         super(c);
-        setFocusable(true);
+        setFocusableInTouchMode(true);
+
         mVC = ViewConfiguration.get(c);
         mTextPaint = new Paint();
         mTextPaint.setAntiAlias(true);
@@ -505,22 +507,69 @@ public class PointerLocationView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         addPointerEvent(event);
+
+        if (event.getAction() == MotionEvent.ACTION_DOWN && !isFocused()) {
+            requestFocus();
+        }
         return true;
     }
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+        final int source = event.getSource();
+        if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             addPointerEvent(event);
+        } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+            Log.i(TAG, "Joystick: " + event);
+        } else if ((source & InputDevice.SOURCE_CLASS_POSITION) != 0) {
+            Log.i(TAG, "Position: " + event);
+        } else {
+            Log.i(TAG, "Generic: " + event);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (shouldLogKey(keyCode)) {
+            final int repeatCount = event.getRepeatCount();
+            if (repeatCount == 0) {
+                Log.i(TAG, "Key Down: " + event);
+            } else {
+                Log.i(TAG, "Key Repeat #" + repeatCount + ": " + event);
+            }
             return true;
         }
-        return super.onGenericMotionEvent(event);
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (shouldLogKey(keyCode)) {
+            Log.i(TAG, "Key Up: " + event);
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    private static boolean shouldLogKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                return true;
+            default:
+                return KeyEvent.isGamepadButton(keyCode)
+                    || KeyEvent.isModifierKey(keyCode);
+        }
     }
 
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
         Log.i(TAG, "Trackball: " + event);
-        return super.onTrackballEvent(event);
+        return true;
     }
     
     // HACK
