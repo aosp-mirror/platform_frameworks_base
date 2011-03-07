@@ -385,7 +385,7 @@ public class ActionBarView extends ViewGroup {
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
                 mHomeAsUpView.setVisibility((options & ActionBar.DISPLAY_HOME_AS_UP) != 0
-                        ? VISIBLE : INVISIBLE);
+                        ? VISIBLE : GONE);
             }
 
             if ((flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
