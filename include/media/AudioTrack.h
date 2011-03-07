@@ -437,7 +437,7 @@ private:
     };
 
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
-            status_t createTrack(int streamType,
+            status_t createTrack_l(int streamType,
                                  uint32_t sampleRate,
                                  int format,
                                  int channelCount,
@@ -446,6 +446,10 @@ private:
                                  const sp<IMemory>& sharedBuffer,
                                  audio_io_handle_t output,
                                  bool enforceFrameCount);
+            void flush_l();
+            status_t setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCount);
+            audio_io_handle_t getOutput_l();
+            status_t restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart);
 
     sp<IAudioTrack>         mAudioTrack;
     sp<IMemory>             mCblkMemory;
