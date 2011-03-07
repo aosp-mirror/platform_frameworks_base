@@ -219,10 +219,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
 
     //***** Member Variables
-    protected int mId;
     protected int mTag;
     protected PhoneBase phone;
-    protected RetryManager mRetryMgr;
     protected int cid;
     protected LinkProperties mLinkProperties = new LinkProperties();
     protected LinkCapabilities mCapabilities = new LinkCapabilities();
@@ -244,10 +242,11 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
 
    //***** Constructor
-    protected DataConnection(PhoneBase phone, String name, RetryManager rm) {
+    protected DataConnection(PhoneBase phone, String name, int id, RetryManager rm) {
         super(name);
         if (DBG) log("DataConnection constructor E");
         this.phone = phone;
+        mId = id;
         mRetryMgr = rm;
         this.cid = -1;
         clearSettings();
@@ -342,9 +341,87 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         clearSettings();
     }
 
-    public RetryManager getRetryMgr() {
-        return mRetryMgr;
+    /*
+     * **************************************************************************
+     * Begin Members and methods owned by DataConnectionTracker but stored
+     * in a DataConnection because there is one per connection.
+     * **************************************************************************
+     */
+
+    /*
+     * The id is owned by DataConnectionTracker.
+     */
+    private int mId;
+
+    /**
+     * Get the DataConnection ID
+     */
+    public int getDataConnectionId() {
+        return mId;
     }
+
+    /*
+     * The retry manager is currently owned by the DataConnectionTracker but is stored
+     * in the DataConnection because there is one per connection. These methods
+     * should only be used by the DataConnectionTracker although someday the retrying
+     * maybe managed by the DataConnection itself and these methods could disappear.
+     */
+    private RetryManager mRetryMgr;
+
+    /**
+     * @return retry manager retryCount
+     */
+    public int getRetryCount() {
+        return mRetryMgr.getRetryCount();
+    }
+
+    /**
+     * @return retry manager retryTimer
+     */
+    public int getRetryTimer() {
+        return mRetryMgr.getRetryTimer();
+    }
+
+    /**
+     * increaseRetryCount of retry manager
+     */
+    public void increaseRetryCount() {
+        mRetryMgr.increaseRetryCount();
+    }
+
+    /**
+     * @return retry manager isRetryNeeded
+     */
+    public boolean isRetryNeeded() {
+        return mRetryMgr.isRetryNeeded();
+    }
+
+    /**
+     * resetRetryCount of retry manager
+     */
+    public void resetRetryCount() {
+        mRetryMgr.resetRetryCount();
+    }
+
+    /**
+     * set retryForeverUsingLasttimeout of retry manager
+     */
+    public void retryForeverUsingLastTimeout() {
+        mRetryMgr.retryForeverUsingLastTimeout();
+    }
+
+    /**
+     * @return retry manager isRetryForever
+     */
+    public boolean isRetryForever() {
+        return mRetryMgr.isRetryForever();
+    }
+
+    /*
+     * **************************************************************************
+     * End members owned by DataConnectionTracker
+     * **************************************************************************
+     */
 
     /**
      * Clear all settings called when entering mInactiveState.
@@ -961,13 +1038,6 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     public boolean isActive() {
         boolean retVal = getCurrentState() == mActiveState;
         return retVal;
-    }
-
-    /**
-     * Get the DataConnection ID
-     */
-    public int getDataConnectionId() {
-        return mId;
     }
 
     /**
