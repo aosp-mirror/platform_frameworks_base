@@ -22,7 +22,6 @@
     android:layout_height="0dp"
     android:orientation="vertical"
     android:background="@drawable/notify_panel_clock_bg"
-    android:clickable="true"
     >
     <LinearLayout
         android:id="@+id/icons"
