@@ -398,5 +398,25 @@ public class MediaMetadataRetriever
      * The metadata key to retrieve the music album compilation status.
      */
     public static final int METADATA_KEY_COMPILATION     = 15;
+    /**
+     * If this key exists the media contains audio content.
+     */
+    public static final int METADATA_KEY_HAS_AUDIO       = 16;
+    /**
+     * If this key exists the media contains video content.
+     */
+    public static final int METADATA_KEY_HAS_VIDEO       = 17;
+    /**
+     * If the media contains video, this key retrieves its width.
+     */
+    public static final int METADATA_KEY_VIDEO_WIDTH     = 18;
+    /**
+     * If the media contains video, this key retrieves its height.
+     */
+    public static final int METADATA_KEY_VIDEO_HEIGHT    = 19;
+    /**
+     * This key retrieves the average bitrate (in bits/sec), if available.
+     */
+    public static final int METADATA_KEY_BITRATE         = 20;
     // Add more here...
 }

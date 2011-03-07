@@ -411,6 +411,12 @@ void StagefrightMetadataRetriever::parseMetaData() {
 
     mMetaData.add(METADATA_KEY_NUM_TRACKS, String8(tmp));
 
+    bool hasAudio = false;
+    bool hasVideo = false;
+    int32_t videoWidth = -1;
+    int32_t videoHeight = -1;
+    int32_t audioBitrate = -1;
+
     // The overall duration is the duration of the longest track.
     int64_t maxDurationUs = 0;
     for (size_t i = 0; i < numTracks; ++i) {
@@ -422,11 +428,54 @@ void StagefrightMetadataRetriever::parseMetaData() {
                 maxDurationUs = durationUs;
             }
         }
+
+        const char *mime;
+        if (trackMeta->findCString(kKeyMIMEType, &mime)) {
+            if (!hasAudio && !strncasecmp("audio/", mime, 6)) {
+                hasAudio = true;
+
+                if (!trackMeta->findInt32(kKeyBitRate, &audioBitrate)) {
+                    audioBitrate = -1;
+                }
+            } else if (!hasVideo && !strncasecmp("video/", mime, 6)) {
+                hasVideo = true;
+
+                CHECK(trackMeta->findInt32(kKeyWidth, &videoWidth));
+                CHECK(trackMeta->findInt32(kKeyHeight, &videoHeight));
+            }
+        }
     }
 
     // The duration value is a string representing the duration in ms.
     sprintf(tmp, "%lld", (maxDurationUs + 500) / 1000);
     mMetaData.add(METADATA_KEY_DURATION, String8(tmp));
+
+    if (hasAudio) {
+        mMetaData.add(METADATA_KEY_HAS_AUDIO, String8("yes"));
+    }
+
+    if (hasVideo) {
+        mMetaData.add(METADATA_KEY_HAS_VIDEO, String8("yes"));
+
+        sprintf(tmp, "%d", videoWidth);
+        mMetaData.add(METADATA_KEY_VIDEO_WIDTH, String8(tmp));
+
+        sprintf(tmp, "%d", videoHeight);
+        mMetaData.add(METADATA_KEY_VIDEO_HEIGHT, String8(tmp));
+    }
+
+    if (numTracks == 1 && hasAudio && audioBitrate >= 0) {
+        sprintf(tmp, "%ld", audioBitrate);
+        mMetaData.add(METADATA_KEY_BITRATE, String8(tmp));
+    } else {
+        off64_t sourceSize;
+        if (mSource->getSize(&sourceSize) == OK) {
+            int64_t avgBitRate = (int64_t)(sourceSize * 8E6 / maxDurationUs);
+
+            sprintf(tmp, "%lld", avgBitRate);
+            mMetaData.add(METADATA_KEY_BITRATE, String8(tmp));
+        }
+    }
 
     if (numTracks == 1) {
         const char *fileMIME;
