@@ -735,6 +735,7 @@ public class DrmManagerClient {
      * This method expects uri in the following format
      *     content://media/<table_name>/<row_index> (or)
      *     file://sdcard/test.mp4
+     *     http://test.com/test.mp4
      *
      * Here <table_name> shall be "video" or "audio" or "images"
      * <row_index> the index of the content in given table
@@ -746,6 +747,10 @@ public class DrmManagerClient {
             if (null == scheme || scheme.equals("") ||
                     scheme.equals(ContentResolver.SCHEME_FILE)) {
                 path = uri.getPath();
+
+            } else if (scheme.equals("http")) {
+                path = uri.toString();
+
             } else if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {
                 String[] projection = new String[] {MediaStore.MediaColumns.DATA};
                 Cursor cursor = null;
