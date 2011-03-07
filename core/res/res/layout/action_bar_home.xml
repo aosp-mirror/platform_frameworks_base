@@ -14,16 +14,18 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="wrap_content"
-             android:layout_height="match_parent"
-             android:background="?android:attr/selectableItemBackground">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="?android:attr/selectableItemBackground"
+              android:orientation="horizontal">
     <ImageView android:id="@android:id/up"
                android:src="?android:attr/homeAsUpIndicator"
                android:layout_gravity="top|left"
-               android:visibility="invisible"
+               android:visibility="gone"
                android:layout_width="wrap_content"
-               android:layout_height="wrap_content" />
+               android:layout_height="wrap_content"
+               android:layout_marginRight="-12dip" />
     <ImageView android:id="@android:id/home"
                android:layout_width="wrap_content"
                android:layout_height="match_parent"
@@ -31,4 +33,4 @@
                android:paddingRight="16dip"
                android:layout_gravity="center"
                android:scaleType="center" />
-</FrameLayout>
+</LinearLayout>
