@@ -712,6 +712,10 @@ int Surface::query(int what, int* value)
     case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
         *value = MIN_UNDEQUEUED_BUFFERS;
         return NO_ERROR;
+    case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
+        sp<ISurfaceComposer> sf(ComposerService::getComposerService());
+        *value = sf->authenticateSurface(mSurface) ? 1 : 0;
+        return NO_ERROR;
     }
     return BAD_VALUE;
 }

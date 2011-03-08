@@ -25,9 +25,11 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
+#include <surfaceflinger/ISurfaceComposer.h>
+
 #include <ui/DisplayInfo.h>
 
-#include <surfaceflinger/ISurfaceComposer.h>
+#include <utils/Log.h>
 
 // ---------------------------------------------------------------------------
 
@@ -178,6 +180,40 @@ public:
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
         remote()->transact(BnSurfaceComposer::SIGNAL, data, &reply, IBinder::FLAG_ONEWAY);
     }
+
+    virtual bool authenticateSurface(const sp<ISurface>& surface) const
+    {
+        Parcel data, reply;
+        int err = NO_ERROR;
+        err = data.writeInterfaceToken(
+                ISurfaceComposer::getInterfaceDescriptor());
+        if (err != NO_ERROR) {
+            LOGE("ISurfaceComposer::authenticateSurface: error writing "
+                    "interface descriptor: %s (%d)", strerror(-err), -err);
+            return false;
+        }
+        err = data.writeStrongBinder(surface->asBinder());
+        if (err != NO_ERROR) {
+            LOGE("ISurfaceComposer::authenticateSurface: error writing strong "
+                    "binder to parcel: %s (%d)", strerror(-err), -err);
+            return false;
+        }
+        err = remote()->transact(BnSurfaceComposer::AUTHENTICATE_SURFACE, data,
+                &reply);
+        if (err != NO_ERROR) {
+            LOGE("ISurfaceComposer::authenticateSurface: error performing "
+                    "transaction: %s (%d)", strerror(-err), -err);
+            return false;
+        }
+        int32_t result = 0;
+        err = reply.readInt32(&result);
+        if (err != NO_ERROR) {
+            LOGE("ISurfaceComposer::authenticateSurface: error retrieving "
+                    "result: %s (%d)", strerror(-err), -err);
+            return false;
+        }
+        return result != 0;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceComposer, "android.ui.ISurfaceComposer");
@@ -272,6 +308,12 @@ status_t BnSurfaceComposer::onTransact(
             int32_t mode = data.readInt32();
             status_t res = turnElectronBeamOn(mode);
             reply->writeInt32(res);
+        } break;
+        case AUTHENTICATE_SURFACE: {
+            CHECK_INTERFACE(ISurfaceComposer, data, reply);
+            sp<ISurface> surface = interface_cast<ISurface>(data.readStrongBinder());
+            int32_t result = authenticateSurface(surface) ? 1 : 0;
+            reply->writeInt32(result);
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);
