@@ -488,17 +488,28 @@ public final class BridgeTypedArray extends TypedArray {
             return defValue;
         }
 
-        float f = getDimension(index, defValue);
-        final int res = (int)(f+0.5f);
-        if (res != 0) return res;
-        if (f == 0) return 0;
-        if (f > 0) return 1; // this is to support ]0;1[ range (since >=1 is handled 2 lines above)
-        if (f < 0) {
-            // negative values are not allowed in pixel dimensions
-            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                    "Negative pixel dimension: " + s,
-                    null, null /*data*/);
+        if (ResourceHelper.stringToFloat(s, mValue)) {
+            float f = mValue.getDimension(mBridgeResources.mMetrics);
+
+            if (f < 0) {
+                // negative values are not allowed in pixel dimensions
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                        "Negative pixel dimension: " + s,
+                        null, null /*data*/);
+                return defValue;
+            }
+
+            if (f == 0) return 0;
+            if (f < 1) return 1;
+
+            return (int)(f+0.5f);
         }
+
+        // looks like we were unable to resolve the dimension value
+        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
+                String.format(
+                    "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
+                    s, mNames[index]), null /*data*/);
 
         return defValue;
     }
