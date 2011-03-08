@@ -20,7 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.SparseArray;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Describes the capabilities of a particular input device.
@@ -43,8 +45,7 @@ public final class InputDevice implements Parcelable {
     private int mSources;
     private int mKeyboardType;
 
-    private final SparseArray<MotionRange> mMotionRanges = new SparseArray<MotionRange>();
-    private int[] mMotionAxes;
+    private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     /**
      * A mask for input source classes.
@@ -354,6 +355,11 @@ public final class InputDevice implements Parcelable {
 
     /**
      * Gets information about the range of values for a particular {@link MotionEvent} axis.
+     * If the device supports multiple sources, the same axis may have different meanings
+     * for each source.  Returns information about the first axis found for any source.
+     * To obtain information about the axis for a specific source, use
+     * {@link #getMotionRange(int, int)}.
+     *
      * @param axis The axis constant.
      * @return The range of values, or null if the requested axis is not
      * supported by the device.
@@ -363,30 +369,55 @@ public final class InputDevice implements Parcelable {
      * @see #getSupportedAxes()
      */
     public MotionRange getMotionRange(int axis) {
-        return mMotionRanges.get(axis);
+        final int numRanges = mMotionRanges.size();
+        for (int i = 0; i < numRanges; i++) {
+            final MotionRange range = mMotionRanges.get(i);
+            if (range.mAxis == axis) {
+                return range;
+            }
+        }
+        return null;
     }
 
     /**
-     * Gets the axis ids of all motion axes supported by this device.
-     * @return The axis ids of all motion axes supported by this device.
+     * Gets information about the range of values for a particular {@link MotionEvent} axis
+     * used by a particular source on the device.
+     * If the device supports multiple sources, the same axis may have different meanings
+     * for each source.
      *
-     * @see #getMotionRange(int)
+     * @param axis The axis constant.
+     * @param source The source for which to return information.
+     * @return The range of values, or null if the requested axis is not
+     * supported by the device.
+     *
+     * @see MotionEvent#AXIS_X
+     * @see MotionEvent#AXIS_Y
+     * @see #getSupportedAxes()
      */
-    public int[] getMotionAxes() {
-        synchronized (this) {
-            if (mMotionAxes == null) {
-                final int count = mMotionRanges.size();
-                mMotionAxes = new int[count];
-                for (int i = 0; i < count; i++) {
-                    mMotionAxes[i] = mMotionRanges.keyAt(i);
-                }
+    public MotionRange getMotionRange(int axis, int source) {
+        final int numRanges = mMotionRanges.size();
+        for (int i = 0; i < numRanges; i++) {
+            final MotionRange range = mMotionRanges.get(i);
+            if (range.mAxis == axis && range.mSource == source) {
+                return range;
             }
-            return mMotionAxes;
         }
+        return null;
     }
 
-    private void addMotionRange(int axis, float min, float max, float flat, float fuzz) {
-        mMotionRanges.append(axis, new MotionRange(min, max, flat, fuzz));
+    /**
+     * Gets the ranges for all axes supported by the device.
+     * @return The motion ranges for the device.
+     *
+     * @see #getMotionRange(int, int)
+     */
+    public List<MotionRange> getMotionRanges() {
+        return mMotionRanges;
+    }
+
+    private void addMotionRange(int axis, int source,
+            float min, float max, float flat, float fuzz) {
+        mMotionRanges.add(new MotionRange(axis, source, min, max, flat, fuzz));
     }
 
     /**
@@ -395,16 +426,36 @@ public final class InputDevice implements Parcelable {
      * @see InputDevice#getMotionRange(int)
      */
     public static final class MotionRange {
+        private int mAxis;
+        private int mSource;
         private float mMin;
         private float mMax;
         private float mFlat;
         private float mFuzz;
 
-        private MotionRange(float min, float max, float flat, float fuzz) {
+        private MotionRange(int axis, int source, float min, float max, float flat, float fuzz) {
+            mAxis = axis;
+            mSource = source;
             mMin = min;
             mMax = max;
             mFlat = flat;
             mFuzz = fuzz;
+        }
+
+        /**
+         * Gets the axis id.
+         * @return The axis id.
+         */
+        public int getAxis() {
+            return mAxis;
+        }
+
+        /**
+         * Gets the source for which the axis is defined.
+         * @return The source.
+         */
+        public int getSource() {
+            return mSource;
         }
 
         /**
@@ -480,7 +531,8 @@ public final class InputDevice implements Parcelable {
             if (axis < 0) {
                 break;
             }
-            addMotionRange(axis, in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
+            addMotionRange(axis, in.readInt(),
+                    in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat());
         }
     }
 
@@ -491,11 +543,11 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mSources);
         out.writeInt(mKeyboardType);
 
-        final int numAxes = mMotionRanges.size();
-        for (int i = 0; i < numAxes; i++) {
-            int axis = mMotionRanges.keyAt(i);
-            MotionRange range = mMotionRanges.valueAt(i);
-            out.writeInt(axis);
+        final int numRanges = mMotionRanges.size();
+        for (int i = 0; i < numRanges; i++) {
+            MotionRange range = mMotionRanges.get(i);
+            out.writeInt(range.mAxis);
+            out.writeInt(range.mSource);
             out.writeFloat(range.mMin);
             out.writeFloat(range.mMax);
             out.writeFloat(range.mFlat);
@@ -528,7 +580,7 @@ public final class InputDevice implements Parcelable {
         }
         description.append("\n");
 
-        description.append("  Sources: ").append(Integer.toHexString(mSources)).append(" (");
+        description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");
         appendSourceDescriptionIfApplicable(description, SOURCE_DPAD, "dpad");
         appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHSCREEN, "touchscreen");
@@ -541,10 +593,10 @@ public final class InputDevice implements Parcelable {
 
         final int numAxes = mMotionRanges.size();
         for (int i = 0; i < numAxes; i++) {
-            int axis = mMotionRanges.keyAt(i);
-            MotionRange range = mMotionRanges.valueAt(i);
-            description.append("    ").append(MotionEvent.axisToString(axis));
-            description.append(": min=").append(range.mMin);
+            MotionRange range = mMotionRanges.get(i);
+            description.append("    ").append(MotionEvent.axisToString(range.mAxis));
+            description.append(": source=0x").append(Integer.toHexString(range.mSource));
+            description.append(" min=").append(range.mMin);
             description.append(" max=").append(range.mMax);
             description.append(" flat=").append(range.mFlat);
             description.append(" fuzz=").append(range.mFuzz);

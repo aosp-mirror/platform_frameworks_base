@@ -2343,17 +2343,17 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                 }
 
                 MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
-                if (motionEntry->deviceId != deviceId) {
-                    // Keep looking for this device.
+                if (motionEntry->deviceId != deviceId
+                        || motionEntry->source != source) {
+                    // Keep looking for this device and source.
                     continue;
                 }
 
                 if (motionEntry->action != action
-                        || motionEntry->source != source
                         || motionEntry->pointerCount != pointerCount
                         || motionEntry->isInjected()) {
-                    // Last motion event in the queue for this device is not compatible for
-                    // appending new samples.  Stop here.
+                    // Last motion event in the queue for this device and source is
+                    // not compatible for appending new samples.  Stop here.
                     goto NoBatchingOrStreaming;
                 }
 

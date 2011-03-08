@@ -657,23 +657,30 @@ void InputDeviceInfo::initialize(int32_t id, const String8& name) {
     mMotionRanges.clear();
 }
 
-const InputDeviceInfo::MotionRange* InputDeviceInfo::getMotionRange(int32_t axis) const {
-    ssize_t index = mMotionRanges.indexOfKey(axis);
-    return index >= 0 ? & mMotionRanges.valueAt(index) : NULL;
+const InputDeviceInfo::MotionRange* InputDeviceInfo::getMotionRange(
+        int32_t axis, uint32_t source) const {
+    size_t numRanges = mMotionRanges.size();
+    for (size_t i = 0; i < numRanges; i++) {
+        const MotionRange& range = mMotionRanges.itemAt(i);
+        if (range.axis == axis && range.source == source) {
+            return &range;
+        }
+    }
+    return NULL;
 }
 
 void InputDeviceInfo::addSource(uint32_t source) {
     mSources |= source;
 }
 
-void InputDeviceInfo::addMotionRange(int32_t axis, float min, float max,
+void InputDeviceInfo::addMotionRange(int32_t axis, uint32_t source, float min, float max,
         float flat, float fuzz) {
-    MotionRange range = { min, max, flat, fuzz };
-    addMotionRange(axis, range);
+    MotionRange range = { axis, source, min, max, flat, fuzz };
+    mMotionRanges.add(range);
 }
 
-void InputDeviceInfo::addMotionRange(int32_t axis, const MotionRange& range) {
-    mMotionRanges.add(axis, range);
+void InputDeviceInfo::addMotionRange(const MotionRange& range) {
+    mMotionRanges.add(range);
 }
 
 } // namespace android
