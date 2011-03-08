@@ -19,6 +19,7 @@ package android.view;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
+import android.util.Log;
 
 /**
  * Detects transformation gestures involving more than one pointer ("multitouch")
@@ -36,6 +37,8 @@ import android.util.FloatMath;
  * </ul>
  */
 public class ScaleGestureDetector {
+    private static final String TAG = "ScaleGestureDetector";
+
     /**
      * The listener for receiving notifications when gestures occur.
      * If you want to listen for all the different gestures then implement
@@ -170,6 +173,10 @@ public class ScaleGestureDetector {
         final int action = event.getActionMasked();
         boolean handled = true;
 
+        if (action == MotionEvent.ACTION_DOWN) {
+            reset(); // Start fresh
+        }
+
         if (!mGestureInProgress) {
             switch (action) {
             case MotionEvent.ACTION_DOWN: {
@@ -197,6 +204,11 @@ public class ScaleGestureDetector {
                 int index1 = event.getActionIndex();
                 int index0 = event.findPointerIndex(mActiveId0);
                 mActiveId1 = event.getPointerId(index1);
+                if (index0 < 0 || index0 == index1) {
+                    // Probably someone sending us a broken event stream.
+                    index0 = findNewActiveIndex(event, index0 == index1 ? -1 : mActiveId1, index0);
+                    mActiveId0 = event.getPointerId(index0);
+                }
                 mActive0MostRecent = false;
 
                 setContext(event);
@@ -315,6 +327,7 @@ public class ScaleGestureDetector {
                         final int index = event.findPointerIndex(actionId == mActiveId0 ?
                                 mActiveId1 : mActiveId0);
                         mActiveId0 = event.getPointerId(index);
+
                         mActive0MostRecent = true;
                         mActiveId1 = -1;
                         mFocusX = event.getX(index);
@@ -337,6 +350,18 @@ public class ScaleGestureDetector {
                     mActiveId0 = mActive0MostRecent ? oldActive0 : oldActive1;
                     mActiveId1 = event.getPointerId(event.getActionIndex());
                     mActive0MostRecent = false;
+
+                    int index0 = event.findPointerIndex(mActiveId0);
+                    if (index0 < 0 || mActiveId0 == mActiveId1) {
+                        // Probably someone sending us a broken event stream.
+                        Log.e(TAG, "Got " + MotionEvent.actionToString(action) +
+                                " with bad state while a gesture was in progress. " +
+                                "Did you forget to pass an event to " +
+                                "ScaleGestureDetector#onTouchEvent?");
+                        index0 = findNewActiveIndex(event,
+                                mActiveId0 == mActiveId1 ? -1 : mActiveId1, index0);
+                        mActiveId0 = event.getPointerId(index0);
+                    }
 
                     setContext(event);
 
