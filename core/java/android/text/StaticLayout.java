@@ -235,6 +235,8 @@ public class StaticLayout extends Layout {
                     } else {
                         MetricAffectingSpan[] spans =
                             spanned.getSpans(spanStart, spanEnd, MetricAffectingSpan.class);
+                        spans = TextUtils.removeEmptySpans(spans, spanned,
+                                MetricAffectingSpan.class);
                         measured.addStyleRun(paint, spans, spanLen, fm);
                     }
                 }

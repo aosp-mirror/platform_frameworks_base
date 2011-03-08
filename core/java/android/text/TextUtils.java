@@ -44,6 +44,7 @@ import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Printer;
 
+import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -54,7 +55,7 @@ public class TextUtils {
 
     public static void getChars(CharSequence s, int start, int end,
                                 char[] dest, int destoff) {
-        Class c = s.getClass();
+        Class<? extends CharSequence> c = s.getClass();
 
         if (c == String.class)
             ((String) s).getChars(start, end, dest, destoff);
@@ -75,7 +76,7 @@ public class TextUtils {
     }
 
     public static int indexOf(CharSequence s, char ch, int start) {
-        Class c = s.getClass();
+        Class<? extends CharSequence> c = s.getClass();
 
         if (c == String.class)
             return ((String) s).indexOf(ch, start);
@@ -84,7 +85,7 @@ public class TextUtils {
     }
 
     public static int indexOf(CharSequence s, char ch, int start, int end) {
-        Class c = s.getClass();
+        Class<? extends CharSequence> c = s.getClass();
 
         if (s instanceof GetChars || c == StringBuffer.class ||
             c == StringBuilder.class || c == String.class) {
@@ -125,7 +126,7 @@ public class TextUtils {
     }
 
     public static int lastIndexOf(CharSequence s, char ch, int last) {
-        Class c = s.getClass();
+        Class<? extends CharSequence> c = s.getClass();
 
         if (c == String.class)
             return ((String) s).lastIndexOf(ch, last);
@@ -142,7 +143,7 @@ public class TextUtils {
 
         int end = last + 1;
 
-        Class c = s.getClass();
+        Class<? extends CharSequence> c = s.getClass();
 
         if (s instanceof GetChars || c == StringBuffer.class ||
             c == StringBuilder.class || c == String.class) {
@@ -499,6 +500,7 @@ public class TextUtils {
             return new String(buf);
         }
 
+        @Override
         public String toString() {
             return subSequence(0, length()).toString();
         }
@@ -621,7 +623,7 @@ public class TextUtils {
          * Read and return a new CharSequence, possibly with styles,
          * from the parcel.
          */
-        public  CharSequence createFromParcel(Parcel p) {
+        public CharSequence createFromParcel(Parcel p) {
             int kind = p.readInt();
 
             if (kind == 1)
@@ -760,7 +762,7 @@ public class TextUtils {
 
             if (where >= 0)
                 tb.setSpan(sources[i], where, where + sources[i].length(),
-                           Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                           Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         for (int i = 0; i < sources.length; i++) {
@@ -1114,7 +1116,6 @@ public class TextUtils {
             int remaining = commaCount + 1;
 
             int ok = 0;
-            int okRemaining = remaining;
             String okFormat = "";
 
             int w = 0;
@@ -1146,7 +1147,6 @@ public class TextUtils {
 
                     if (w + moreWid <= avail) {
                         ok = i + 1;
-                        okRemaining = remaining;
                         okFormat = format;
                     }
                 }
@@ -1179,6 +1179,7 @@ public class TextUtils {
                         MetricAffectingSpan.class);
                 MetricAffectingSpan[] spans = sp.getSpans(
                         spanStart, spanEnd, MetricAffectingSpan.class);
+                spans = TextUtils.removeEmptySpans(spans, sp, MetricAffectingSpan.class);
                 width += mt.addStyleRun(paint, spans, spanEnd - spanStart, null);
             }
         }
@@ -1535,6 +1536,56 @@ public class TextUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Removes empty spans from the <code>spans</code> array.
+     *
+     * When parsing a Spanned using {@link Spanned#nextSpanTransition(int, int, Class)}, empty spans
+     * will (correctly) create span transitions, and calling getSpans on a slice of text bounded by
+     * one of these transitions will (correctly) include the empty overlapping span.
+     *
+     * However, these empty spans should not be taken into account when layouting or rendering the
+     * string and this method provides a way to filter getSpans' results accordingly.
+     *
+     * @param spans A list of spans retrieved using {@link Spanned#getSpans(int, int, Class)} from
+     * the <code>spanned</code>
+     * @param spanned The Spanned from which spans were extracted
+     * @return A subset of spans where empty spans ({@link Spanned#getSpanStart(Object)}  ==
+     * {@link Spanned#getSpanEnd(Object)} have been removed. The initial order is preserved
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T[] removeEmptySpans(T[] spans, Spanned spanned, Class<T> klass) {
+        T[] copy = null;
+        int count = 0;
+
+        for (int i = 0; i < spans.length; i++) {
+            final T span = spans[i];
+            final int start = spanned.getSpanStart(span);
+            final int end = spanned.getSpanEnd(span);
+
+            if (start == end) {
+                if (copy == null) {
+                    copy = (T[]) Array.newInstance(klass, spans.length - 1);
+                    System.arraycopy(spans, 0, copy, 0, i);
+                    count = i;
+                }
+            } else {
+                if (copy != null) {
+                    copy[count] = span;
+                    count++;
+                }
+            }
+        }
+
+        if (copy != null) {
+            T[] result = (T[]) Array.newInstance(klass, count);
+            System.arraycopy(copy, 0, result, 0, count);
+            return result;
+        } else {
+            return spans;
+        }
     }
 
     private static Object sLock = new Object();
