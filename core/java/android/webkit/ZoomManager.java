@@ -960,14 +960,15 @@ class ZoomManager {
         final Point viewSize = drawData.mViewSize;
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
         setupZoomOverviewWidth(drawData, mWebView.getViewWidth());
+        final float overviewScale = getZoomOverviewScale();
         if (!mMinZoomScaleFixed) {
-            mMinZoomScale = getZoomOverviewScale();
+            mMinZoomScale = (mInitialScale > 0) ?
+                    Math.min(mInitialScale, overviewScale) : overviewScale;
             mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
         }
 
         if (!mWebView.drawHistory()) {
             float scale;
-            final float overviewScale = getZoomOverviewScale();
             WebSettings settings = mWebView.getSettings();
 
             if (mInitialScale > 0) {
