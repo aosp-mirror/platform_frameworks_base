@@ -15,7 +15,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		LayerCache.cpp \
 		LayerRenderer.cpp \
 		Matrix.cpp \
-		OpenGLDebugRenderer.cpp \
 		OpenGLRenderer.cpp \
 		Patch.cpp \
 		PatchCache.cpp \

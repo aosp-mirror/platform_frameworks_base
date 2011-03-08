@@ -70,7 +70,7 @@ public:
     virtual void interrupt();
     virtual void resume();
 
-    virtual bool callDrawGLFunction(Functor *functor);
+    virtual bool callDrawGLFunction(Functor *functor, Rect& dirty);
 
     int getSaveCount() const;
     virtual int save(int flags);
@@ -96,7 +96,7 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    virtual bool drawDisplayList(DisplayList* displayList, uint32_t level = 0);
+    virtual bool drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
