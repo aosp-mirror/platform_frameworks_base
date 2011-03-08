@@ -29,4 +29,20 @@ public class EGLSurfaceImpl extends EGLSurface {
         mEGLSurface = surface;
         mNativePixelRef = 0;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EGLSurfaceImpl that = (EGLSurfaceImpl) o;
+
+        return mEGLSurface == that.mEGLSurface;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return mEGLSurface;
+    }
 }
