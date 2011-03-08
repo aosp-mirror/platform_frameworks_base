@@ -1036,9 +1036,6 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
         getContext()->fadePointer();
     }
 
-    if (policyFlags & POLICY_FLAG_FUNCTION) {
-        newMetaState |= AMETA_FUNCTION_ON;
-    }
     getDispatcher()->notifyKey(when, getDeviceId(), mSources, policyFlags,
             down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP,
             AKEY_EVENT_FLAG_FROM_SYSTEM, keyCode, scanCode, newMetaState, downTime);
