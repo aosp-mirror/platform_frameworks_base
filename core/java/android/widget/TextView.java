@@ -6285,15 +6285,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (isFocused()) {
-            // This offsets because getInterestingRect() is in terms of
-            // viewport coordinates, but requestRectangleOnScreen()
-            // is in terms of content coordinates.
+            // This offsets because getInterestingRect() is in terms of viewport coordinates, but
+            // requestRectangleOnScreen() is in terms of content coordinates.
 
-            Rect r = new Rect(x, top, x + 1, bottom);
-            getInterestingRect(r, line);
-            r.offset(mScrollX, mScrollY);
+            if (mTempRect == null) mTempRect = new Rect();
+            mTempRect.set(x, top, x + 1, bottom);
+            getInterestingRect(mTempRect, line);
+            mTempRect.offset(mScrollX, mScrollY);
 
-            if (requestRectangleOnScreen(r)) {
+            if (requestRectangleOnScreen(mTempRect)) {
                 changed = true;
             }
         }
@@ -8829,9 +8829,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             final TextView hostView = TextView.this;
 
-            if (mTempRect == null) {
-                mTempRect = new Rect();
-            }
+            if (mTempRect == null) mTempRect = new Rect();
             final Rect clip = mTempRect;
             clip.left = compoundPaddingLeft;
             clip.top = extendedPaddingTop;
