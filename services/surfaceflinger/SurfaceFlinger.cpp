@@ -1054,7 +1054,7 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
 {
     sp<LayerBaseClient> lbc(layerBase->getLayerBaseClient());
     if (lbc != 0) {
-        mLayerMap.removeItem( lbc->getSurface()->asBinder() );
+        mLayerMap.removeItem( lbc->getSurfaceBinder() );
     }
     ssize_t index = mCurrentState.layersSortedByZ.remove(layerBase);
     if (index >= 0) {

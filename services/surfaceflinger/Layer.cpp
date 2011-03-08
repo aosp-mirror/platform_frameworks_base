@@ -120,7 +120,8 @@ void Layer::onRemoved()
 
 sp<LayerBaseClient::Surface> Layer::createSurface() const
 {
-    return mSurface;
+    sp<Surface> sur(new SurfaceLayer(mFlinger, const_cast<Layer *>(this)));
+    return sur;
 }
 
 status_t Layer::ditch()
@@ -129,10 +130,6 @@ status_t Layer::ditch()
 
     // the layer is not on screen anymore. free as much resources as possible
     mFreezeLock.clear();
-
-    EGLDisplay dpy(mFlinger->graphicPlane(0).getEGLDisplay());
-    mBufferManager.destroy(dpy);
-    mSurface.clear();
 
     Mutex::Autolock _l(mLock);
     mWidth = mHeight = 0;
@@ -178,7 +175,6 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
     int layerRedsize = info.getSize(PixelFormatInfo::INDEX_RED);
     mNeedsDithering = layerRedsize > displayRedSize;
 
-    mSurface = new SurfaceLayer(mFlinger, this);
     return NO_ERROR;
 }
 
