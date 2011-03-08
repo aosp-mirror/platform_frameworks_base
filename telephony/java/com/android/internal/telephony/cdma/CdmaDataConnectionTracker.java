@@ -729,20 +729,19 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     private void createAllDataConnectionList() {
         CdmaDataConnection dataConn;
 
-        /** TODO: Use one retry manager for all connections for now */
-        RetryManager rm = new RetryManager();
-        if (!rm.configure(SystemProperties.get("ro.cdma.data_retry_config"))) {
-            if (!rm.configure(DEFAULT_DATA_RETRY_CONFIG)) {
-                // Should never happen, log an error and default to a simple linear sequence.
-                log("Could not configure using DEFAULT_DATA_RETRY_CONFIG="
-                        + DEFAULT_DATA_RETRY_CONFIG);
-                rm.configure(20, 2000, 1000);
-            }
-        }
-
+        String retryConfig = SystemProperties.get("ro.cdma.data_retry_config");
         for (int i = 0; i < DATA_CONNECTION_POOL_SIZE; i++) {
-            int id = mUniqueIdGenerator.getAndIncrement();
+            RetryManager rm = new RetryManager();
+            if (!rm.configure(retryConfig)) {
+                if (!rm.configure(DEFAULT_DATA_RETRY_CONFIG)) {
+                    // Should never happen, log an error and default to a simple linear sequence.
+                    log("Could not configure using DEFAULT_DATA_RETRY_CONFIG="
+                            + DEFAULT_DATA_RETRY_CONFIG);
+                    rm.configure(20, 2000, 1000);
+                }
+            }
 
+            int id = mUniqueIdGenerator.getAndIncrement();
             dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone, id, rm);
             mDataConnections.put(id, dataConn);
         }
