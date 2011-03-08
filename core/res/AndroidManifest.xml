@@ -1379,12 +1379,6 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <activity android:name="com.android.server.usb.UsbResolverActivity"
-            android:theme="@style/Theme.Holo.Dialog.Alert"
-            android:finishOnCloseSystemDialogs="true"
-            android:excludeFromRecents="true">
-        </activity>
-
         <service android:name="com.android.server.LoadAverageService"
                 android:exported="true" />
 

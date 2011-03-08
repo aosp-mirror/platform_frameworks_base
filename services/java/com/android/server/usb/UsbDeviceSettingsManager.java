@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -691,17 +692,21 @@ class UsbDeviceSettingsManager {
                 Log.e(TAG, "startActivity failed", e);
             }
         } else {
-            // start UsbResolverActivity so user can choose an activity
-            Intent resolverIntent = new Intent(mContext, UsbResolverActivity.class);
-            resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            long identity = Binder.clearCallingIdentity();
 
+            // start UsbResolverActivity so user can choose an activity
+            Intent resolverIntent = new Intent();
+            resolverIntent.setClassName("com.android.systemui",
+                    "com.android.systemui.usb.UsbResolverActivity");
+            resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
-            resolverIntent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS,
-                    matches);
+            resolverIntent.putParcelableArrayListExtra("rlist", matches);
             try {
                 mContext.startActivity(resolverIntent);
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG, "unable to start UsbResolverActivity");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
@@ -713,40 +718,121 @@ class UsbDeviceSettingsManager {
         mContext.sendBroadcast(intent);
     }
 
-    public void checkPermission(UsbDevice device) {
-        if (device == null) return;
+    public boolean hasPermission(UsbDevice device) {
         synchronized (mLock) {
-            ArrayList<DeviceFilter> filterList = mDevicePermissionMap.get(Binder.getCallingUid());
+            ArrayList<DeviceFilter> filterList =
+                    mDevicePermissionMap.get(Binder.getCallingUid());
             if (filterList != null) {
                 int count = filterList.size();
                 for (int i = 0; i < count; i++) {
                     DeviceFilter filter = filterList.get(i);
                     if (filter.equals(device)) {
                         // permission allowed
-                        return;
+                        return true;
                     }
                 }
             }
         }
-        throw new SecurityException("User has not given permission to device " + device);
+        return false;
     }
 
-    public void checkPermission(UsbAccessory accessory) {
-        if (accessory == null) return;
+    public boolean hasPermission(UsbAccessory accessory) {
         synchronized (mLock) {
-            ArrayList<AccessoryFilter> filterList = mAccessoryPermissionMap.get(Binder.getCallingUid());
+            ArrayList<AccessoryFilter> filterList =
+                    mAccessoryPermissionMap.get(Binder.getCallingUid());
             if (filterList != null) {
                 int count = filterList.size();
                 for (int i = 0; i < count; i++) {
                     AccessoryFilter filter = filterList.get(i);
                     if (filter.equals(accessory)) {
                         // permission allowed
-                        return;
+                        return true;
                     }
                 }
             }
         }
-        throw new SecurityException("User has not given permission to accessory " + accessory);
+        return false;
+    }
+
+    public void checkPermission(UsbDevice device) {
+        if (!hasPermission(device)) {
+            throw new SecurityException("User has not given permission to device " + device);
+        }
+    }
+
+    public void checkPermission(UsbAccessory accessory) {
+        if (!hasPermission(accessory)) {
+            throw new SecurityException("User has not given permission to accessory " + accessory);
+        }
+    }
+
+    private void requestPermissionDialog(Intent intent, String packageName, PendingIntent pi) {
+        int uid = Binder.getCallingUid();
+
+        // compare uid with packageName to foil apps pretending to be someone else
+        try {
+            ApplicationInfo aInfo = mContext.getPackageManager().getApplicationInfo(packageName, 0);
+            if (aInfo.uid != uid) {
+                throw new IllegalArgumentException("package " + packageName +
+                        " does not match caller's uid " + uid);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("package " + packageName + " not found");
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        intent.setClassName("com.android.systemui",
+                "com.android.systemui.usb.UsbPermissionActivity");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_INTENT, pi);
+        intent.putExtra("package", packageName);
+        intent.putExtra("uid", uid);
+        try {
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "unable to start UsbPermissionActivity");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    public void requestPermission(UsbDevice device, String packageName, PendingIntent pi) {
+      Intent intent = new Intent();
+
+        // respond immediately if permission has already been granted
+      if (hasPermission(device)) {
+            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+            intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
+            try {
+                pi.send(mContext, 0, intent);
+            } catch (PendingIntent.CanceledException e) {
+                Log.w(TAG, "requestPermission PendingIntent was cancelled");
+            }
+            return;
+        }
+
+        // start UsbPermissionActivity so user can choose an activity
+        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+        requestPermissionDialog(intent, packageName, pi);
+    }
+
+    public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi) {
+      Intent intent = new Intent();
+
+        // respond immediately if permission has already been granted
+        if (hasPermission(accessory)) {
+            intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+            intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
+           try {
+                pi.send(mContext, 0, intent);
+            } catch (PendingIntent.CanceledException e) {
+                Log.w(TAG, "requestPermission PendingIntent was cancelled");
+            }
+            return;
+        }
+
+        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+        requestPermissionDialog(intent, packageName, pi);
     }
 
     public void setDevicePackage(UsbDevice device, String packageName) {
