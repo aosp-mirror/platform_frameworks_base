@@ -28,10 +28,12 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 
 /**
  * Delegate implementing the native methods of android.graphics.Path
@@ -331,58 +333,91 @@ public final class Path_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_addOval(int nPath, RectF oval, int dir) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addOval is not supported.", null, null /*data*/);
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return;
+        }
+
+        pathDelegate.mPath.append(new Ellipse2D.Float(
+                oval.left, oval.top, oval.width(), oval.height()), false);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addCircle(int nPath, float x, float y, float radius, int dir) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addCircle is not supported.", null, null /*data*/);
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return;
+        }
+
+        // because x/y is the center of the circle, need to offset this by the radius
+        pathDelegate.mPath.append(new Ellipse2D.Float(
+                x - radius, y - radius, radius * 2, radius * 2), false);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addArc(int nPath, RectF oval,
             float startAngle, float sweepAngle) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addArc is not supported.", null, null /*data*/);
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return;
+        }
+
+        // because x/y is the center of the circle, need to offset this by the radius
+        pathDelegate.mPath.append(new Arc2D.Float(
+                oval.left, oval.top, oval.width(), oval.height(),
+                startAngle, sweepAngle, Arc2D.OPEN), false);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addRoundRect(int nPath, RectF rect,
-            float rx, float ry, int dir) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addRoundRect is not supported.", null, null /*data*/);
+    /*package*/ static void native_addRoundRect(
+            int nPath, RectF rect, float rx, float ry, int dir) {
+
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return;
+        }
+
+        pathDelegate.mPath.append(new RoundRectangle2D.Float(
+                rect.left, rect.top, rect.width(), rect.height(), rx * 2, ry * 2), false);
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_addRoundRect(int nPath, RectF r, float[] radii, int dir) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addRoundRect is not supported.", null, null /*data*/);
+    /*package*/ static void native_addRoundRect(int nPath, RectF rect, float[] radii, int dir) {
+        // Java2D doesn't support different rounded corners in each corner, so just use the
+        // first value.
+        native_addRoundRect(nPath, rect, radii[0], radii[1], dir);
+
+        // there can be a case where this API is used but with similar values for all corners, so
+        // in that case we don't warn.
+        // we only care if 2 corners are different so just compare to the next one.
+        for (int i = 0 ; i < 3 ; i++) {
+            if (radii[i * 2] != radii[(i + 1) * 2] || radii[i * 2 + 1] != radii[(i + 1) * 2 + 1]) {
+                Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                        "Different corner size is not support in Path.addRoundRect.",
+                        null, null /*data*/);
+                break;
+            }
+        }
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addPath(int nPath, int src, float dx, float dy) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addPath is not supported.", null, null /*data*/);
+        addPath(nPath, src, AffineTransform.getTranslateInstance(dx, dy));
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addPath(int nPath, int src) {
-        native_addPath(nPath, src, 0, 0);
+        addPath(nPath, src, null /*transform*/);
     }
 
     @LayoutlibDelegate
     /*package*/ static void native_addPath(int nPath, int src, int matrix) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Path.addPath is not supported.", null, null /*data*/);
+        Matrix_Delegate matrixDelegate = Matrix_Delegate.getDelegate(matrix);
+        if (matrixDelegate == null) {
+            return;
+        }
+
+        addPath(nPath, src, matrixDelegate.getAffineTransform());
     }
 
     @LayoutlibDelegate
@@ -486,6 +521,26 @@ public final class Path_Delegate {
         assert false;
         return null;
     }
+
+    private static void addPath(int destPath, int srcPath, AffineTransform transform) {
+        Path_Delegate destPathDelegate = sManager.getDelegate(destPath);
+        if (destPathDelegate == null) {
+            return;
+        }
+
+        Path_Delegate srcPathDelegate = sManager.getDelegate(srcPath);
+        if (srcPathDelegate == null) {
+            return;
+        }
+
+        if (transform != null) {
+            destPathDelegate.mPath.append(
+                    srcPathDelegate.mPath.getPathIterator(transform), false);
+        } else {
+            destPathDelegate.mPath.append(srcPathDelegate.mPath, false);
+        }
+    }
+
 
     /**
      * Returns whether the path is empty.
