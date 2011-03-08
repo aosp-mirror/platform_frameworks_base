@@ -3016,7 +3016,8 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Start an ActionMode for finding text in this WebView.
+     * Start an ActionMode for finding text in this WebView.  Only works if this
+     *              WebView is attached to the view system.
      * @param text If non-null, will be the initial text to search for.
      *             Otherwise, the last String searched for in this WebView will
      *             be used to start.
@@ -3026,7 +3027,7 @@ public class WebView extends AbsoluteLayout
      */
     public boolean showFindDialog(String text, boolean showIme) {
         FindActionModeCallback callback = new FindActionModeCallback(mContext);
-        if (startActionMode(callback) == null) {
+        if (getParent() == null || startActionMode(callback) == null) {
             // Could not start the action mode, so end Find on page
             return false;
         }
