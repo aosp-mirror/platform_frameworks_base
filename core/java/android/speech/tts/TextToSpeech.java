@@ -44,6 +44,8 @@ import java.util.Locale;
  */
 public class TextToSpeech {
 
+    private static final String TAG = "TextToSpeech";
+
     /**
      * Denotes a successful operation.
      */
@@ -579,28 +581,15 @@ public class TextToSpeech {
                 mITts.addSpeech(mPackageName, text, packagename, resourceId);
                 return SUCCESS;
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addSpeech", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addSpeech", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addSpeech", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addSpeech", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addSpeech", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addSpeech", e);
             }
             return ERROR;
         }
     }
-
 
     /**
      * Adds a mapping between a string of text and a sound file. Using this, it
@@ -626,23 +615,11 @@ public class TextToSpeech {
                 mITts.addSpeechFile(mPackageName, text, filename);
                 return SUCCESS;
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addSpeech", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addSpeech", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addSpeech", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addSpeech", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addSpeech", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addSpeech", e);
             }
             return ERROR;
         }
@@ -683,23 +660,11 @@ public class TextToSpeech {
                 mITts.addEarcon(mPackageName, earcon, packagename, resourceId);
                 return SUCCESS;
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addEarcon", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addEarcon", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addEarcon", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addEarcon", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addEarcon", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addEarcon", e);
             }
             return ERROR;
         }
@@ -730,23 +695,11 @@ public class TextToSpeech {
                 mITts.addEarconFile(mPackageName, earcon, filename);
                 return SUCCESS;
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addEarcon", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addEarcon", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addEarcon", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addEarcon", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - addEarcon", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("addEarcon", e);
             }
             return ERROR;
         }
@@ -790,27 +743,15 @@ public class TextToSpeech {
                 }
                 result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - speak", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("speak", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - speak", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("speak", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - speak", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("speak", e);
             } finally {
                 resetCachedParams();
-                return result;
             }
+            return result;
         }
     }
 
@@ -849,27 +790,15 @@ public class TextToSpeech {
                 }
                 result = mITts.playEarcon(mPackageName, earcon, queueMode, null);
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - playEarcon", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("playEarcon", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - playEarcon", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("playEarcon", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - playEarcon", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("playEarcon", e);
             } finally {
                 resetCachedParams();
-                return result;
             }
+            return result;
         }
     }
 
@@ -901,27 +830,15 @@ public class TextToSpeech {
                 }
                 result = mITts.playSilence(mPackageName, durationInMs, queueMode, mCachedParams);
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - playSilence", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("playSilence", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - playSilence", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("playSilence", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - playSilence", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("playSilence", e);
             } finally {
                 resetCachedParams();
-                return result;
             }
+            return result;
         }
     }
 
@@ -939,23 +856,11 @@ public class TextToSpeech {
             try {
                 return mITts.isSpeaking();
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - isSpeaking", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("isSpeaking", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - isSpeaking", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("isSpeaking", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - isSpeaking", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("isSpeaking", e);
             }
             return false;
         }
@@ -977,26 +882,13 @@ public class TextToSpeech {
             try {
                 result = mITts.stop(mPackageName);
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - stop", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("stop", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - stop", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("stop", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - stop", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("stop", e);
             }
+            return result;
         }
     }
 
@@ -1032,20 +924,11 @@ public class TextToSpeech {
                     }
                 }
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setSpeechRate", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("setSpeechRate", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setSpeechRate", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("setSpeechRate", e);
             }
+            return result;
         }
     }
 
@@ -1077,20 +960,11 @@ public class TextToSpeech {
                     result = SUCCESS;
                 }
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setPitch", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("setPitch", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setPitch", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("setPitch", e);
             }
+            return result;
         }
     }
 
@@ -1141,26 +1015,13 @@ public class TextToSpeech {
                     }
                 }
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setLanguage", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("setLanguage", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setLanguage", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("setLanguage", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setLanguage", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("setLanguage", e);
             }
+            return result;
         }
     }
 
@@ -1191,23 +1052,11 @@ public class TextToSpeech {
                             mCachedParams[Engine.PARAM_POSITION_VARIANT + 1]);
                 }
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - getLanguage", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("getLanguage", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - getLanguage", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("getLanguage", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - getLanguage", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("getLanguage", e);
             }
             return null;
         }
@@ -1233,26 +1082,13 @@ public class TextToSpeech {
                 result = mITts.isLanguageAvailable(loc.getISO3Language(),
                         loc.getISO3Country(), loc.getVariant(), mCachedParams);
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - isLanguageAvailable", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("isLanguageAvailable", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - isLanguageAvailable", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("isLanguageAvailable", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - isLanguageAvailable", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("isLanguageAvailable", e);
             }
+            return result;
         }
     }
 
@@ -1293,27 +1129,15 @@ public class TextToSpeech {
                 result = mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename) ?
                         SUCCESS : ERROR;
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - synthesizeToFile", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("synthesizeToFile", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - synthesizeToFile", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("synthesizeToFile", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - synthesizeToFile", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("synthesizeToFile", e);
             } finally {
                 resetCachedParams();
-                return result;
             }
+            return result;
         }
     }
 
@@ -1366,26 +1190,13 @@ public class TextToSpeech {
             try {
                 result = mITts.registerCallback(mPackageName, mITtscallback);
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - registerCallback", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("registerCallback", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - registerCallback", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("registerCallback", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - registerCallback", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("registerCallback", e);
             }
+            return result;
         }
     }
 
@@ -1409,26 +1220,13 @@ public class TextToSpeech {
                     mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = enginePackageName;
                 }
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setEngineByPackageName", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("setEngineByPackageName", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setEngineByPackageName", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("setEngineByPackageName", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setEngineByPackageName", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return result;
+                restart("setEngineByPackageName", e);
             }
+            return result;
         }
     }
 
@@ -1447,26 +1245,13 @@ public class TextToSpeech {
             try {
                 engineName = mITts.getDefaultEngine();
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setEngineByPackageName", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("getDefaultEngine", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setEngineByPackageName", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("getDefaultEngine", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - setEngineByPackageName", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return engineName;
+                restart("getDefaultEngine", e);
             }
+            return engineName;
         }
     }
 
@@ -1486,26 +1271,23 @@ public class TextToSpeech {
             try {
                 defaultsEnforced = mITts.areDefaultsEnforced();
             } catch (RemoteException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - areDefaultsEnforced", "RemoteException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("areDefaultsEnforced", e);
             } catch (NullPointerException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - areDefaultsEnforced", "NullPointerException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
+                restart("areDefaultsEnforced", e);
             } catch (IllegalStateException e) {
-                // TTS died; restart it.
-                Log.e("TextToSpeech.java - areDefaultsEnforced", "IllegalStateException");
-                e.printStackTrace();
-                mStarted = false;
-                initTts();
-            } finally {
-                return defaultsEnforced;
+                restart("areDefaultsEnforced", e);
             }
+            return defaultsEnforced;
         }
+    }
+
+    /**
+     * Restarts the TTS after a failure.
+     */
+    private void restart(String method, Exception e) {
+        // TTS died; restart it.
+        Log.e(TAG, method, e);
+        mStarted = false;
+        initTts();
     }
 }
