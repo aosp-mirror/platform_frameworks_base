@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Google Inc.
+ * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,31 @@
  */
 package android.speech.tts;
 
-import android.speech.tts.ITts;
-import android.speech.tts.ITtsCallback;
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.media.AudioManager;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  *
@@ -49,11 +58,11 @@ public class TextToSpeech {
     /**
      * Denotes a successful operation.
      */
-    public static final int SUCCESS                = 0;
+    public static final int SUCCESS = 0;
     /**
      * Denotes a generic operation failure.
      */
-    public static final int ERROR                  = -1;
+    public static final int ERROR = -1;
 
     /**
      * Queue mode where all entries in the playback queue (media to be played
@@ -65,19 +74,16 @@ public class TextToSpeech {
      */
     public static final int QUEUE_ADD = 1;
 
-
     /**
      * Denotes the language is available exactly as specified by the locale.
      */
     public static final int LANG_COUNTRY_VAR_AVAILABLE = 2;
-
 
     /**
      * Denotes the language is available for the language and country specified 
      * by the locale, but not the variant.
      */
     public static final int LANG_COUNTRY_AVAILABLE = 1;
-
 
     /**
      * Denotes the language is available for the language by the locale, 
@@ -95,7 +101,6 @@ public class TextToSpeech {
      */
     public static final int LANG_NOT_SUPPORTED = -2;
 
-
     /**
      * Broadcast Action: The TextToSpeech synthesizer has completed processing
      * of all the text in the speech queue.
@@ -104,7 +109,6 @@ public class TextToSpeech {
     public static final String ACTION_TTS_QUEUE_PROCESSING_COMPLETED =
             "android.speech.tts.TTS_QUEUE_PROCESSING_COMPLETED";
 
-
     /**
      * Interface definition of a callback to be invoked indicating the completion of the
      * TextToSpeech engine initialization.
@@ -112,102 +116,116 @@ public class TextToSpeech {
     public interface OnInitListener {
         /**
          * Called to signal the completion of the TextToSpeech engine initialization.
+         *
          * @param status {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
          */
         public void onInit(int status);
     }
 
     /**
-     * Interface definition of a callback to be invoked indicating the TextToSpeech engine has
-     * completed synthesizing an utterance with an utterance ID set.
-     *
+     * Listener that will be called when the TTS service has
+     * completed synthesizing an utterance. This is only called if the utterance
+     * has an utterance ID (see {@link TextToSpeech.Engine#KEY_PARAM_UTTERANCE_ID}).
      */
     public interface OnUtteranceCompletedListener {
         /**
-         * Called to signal the completion of the synthesis of the utterance that was identified
-         * with the string parameter. This identifier is the one originally passed in the
-         * parameter hashmap of the synthesis request in
-         * {@link TextToSpeech#speak(String, int, HashMap)} or
-         * {@link TextToSpeech#synthesizeToFile(String, HashMap, String)} with the
-         * {@link TextToSpeech.Engine#KEY_PARAM_UTTERANCE_ID} key.
+         * Called when an utterance has been synthesized.
+         *
          * @param utteranceId the identifier of the utterance.
          */
         public void onUtteranceCompleted(String utteranceId);
     }
 
-
     /**
-     * Internal constants for the TextToSpeech functionality
-     *
+     * Constants and parameter names for controlling text-to-speech.
      */
     public class Engine {
-        // default values for a TTS engine when settings are not found in the provider
+
         /**
-         * {@hide}
+         * Default speech rate.
+         * @hide
          */
-        public static final int DEFAULT_RATE = 100; // 1x
+        public static final int DEFAULT_RATE = 100;
+
         /**
-         * {@hide}
+         * Default pitch.
+         * @hide
          */
-        public static final int DEFAULT_PITCH = 100;// 1x
+        public static final int DEFAULT_PITCH = 100;
+
         /**
-         * {@hide}
+         * Default volume.
+         * @hide
          */
         public static final float DEFAULT_VOLUME = 1.0f;
+
         /**
-         * {@hide}
-         */
-        protected static final String DEFAULT_VOLUME_STRING = "1.0";
-        /**
-         * {@hide}
+         * Default pan (centered).
+         * @hide
          */
         public static final float DEFAULT_PAN = 0.0f;
-        /**
-         * {@hide}
-         */
-        protected static final String DEFAULT_PAN_STRING = "0.0";
 
         /**
-         * {@hide}
+         * Default value for {@link Settings.Secure#TTS_USE_DEFAULTS}.
+         * @hide
          */
         public static final int USE_DEFAULTS = 0; // false
-        /**
-         * {@hide}
-         */
-        public static final String DEFAULT_SYNTH = "com.svox.pico";
 
-        // default values for rendering
+        /**
+         * Package name of the default TTS engine.
+         *
+         * TODO: This should come from a system property
+         *
+         * @hide
+         */
+        public static final String DEFAULT_ENGINE = "com.svox.pico";
+
         /**
          * Default audio stream used when playing synthesized speech.
          */
         public static final int DEFAULT_STREAM = AudioManager.STREAM_MUSIC;
 
-        // return codes for a TTS engine's check data activity
         /**
          * Indicates success when checking the installation status of the resources used by the
          * TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_PASS = 1;
+
         /**
          * Indicates failure when checking the installation status of the resources used by the
          * TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_FAIL = 0;
+
         /**
          * Indicates erroneous data when checking the installation status of the resources used by
          * the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_BAD_DATA = -1;
+
         /**
          * Indicates missing resources when checking the installation status of the resources used
          * by the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_MISSING_DATA = -2;
+
         /**
          * Indicates missing storage volume when checking the installation status of the resources
          * used by the TextToSpeech engine with the {@link #ACTION_CHECK_TTS_DATA} intent.
          */
         public static final int CHECK_VOICE_DATA_MISSING_VOLUME = -3;
+
+        /**
+         * Intent for starting a TTS service. Services that handle this intent must
+         * extend {@link TextToSpeechService}. Normal applications should not use this intent
+         * directly, instead they should talk to the TTS service using the the methods in this
+         * class.
+         *
+         * @hide Pending API council approval
+         */
+        @SdkConstant(SdkConstantType.SERVICE_ACTION)
+        public static final String INTENT_ACTION_TTS_SERVICE =
+                "android.intent.action.TTS_SERVICE";
 
         // intents to ask engine to install data or check its data
         /**
@@ -231,6 +249,7 @@ public class TextToSpeech {
         @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
         public static final String ACTION_TTS_DATA_INSTALLED =
                 "android.speech.tts.engine.TTS_DATA_INSTALLED";
+
         /**
          * Activity Action: Starts the activity from the platform TextToSpeech
          * engine to verify the proper installation and availability of the
@@ -258,23 +277,36 @@ public class TextToSpeech {
         public static final String ACTION_CHECK_TTS_DATA =
                 "android.speech.tts.engine.CHECK_TTS_DATA";
 
+        /**
+         * Activity intent for getting some sample text to use for demonstrating TTS.
+         *
+         * @hide This intent was used by engines written against the old API.
+         * Not sure if it should be exposed.
+         */
+        @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_GET_SAMPLE_TEXT =
+                "android.speech.tts.engine.GET_SAMPLE_TEXT";
+
         // extras for a TTS engine's check data activity
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine specifies the path to its resources.
          */
         public static final String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine specifies the file names of its resources under the
          * resource path.
          */
         public static final String EXTRA_VOICE_DATA_FILES = "dataFiles";
+
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine specifies the locale associated with each resource file.
          */
         public static final String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
+
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine returns an ArrayList<String> of all the available voices.
@@ -282,6 +314,7 @@ public class TextToSpeech {
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
          */
         public static final String EXTRA_AVAILABLE_VOICES = "availableVoices";
+
         /**
          * Extra information received with the {@link #ACTION_CHECK_TTS_DATA} intent where
          * the TextToSpeech engine returns an ArrayList<String> of all the unavailable voices.
@@ -289,6 +322,7 @@ public class TextToSpeech {
          * optional (ie, "eng" or "eng-USA" or "eng-USA-FEMALE").
          */
         public static final String EXTRA_UNAVAILABLE_VOICES = "unavailableVoices";
+
         /**
          * Extra information sent with the {@link #ACTION_CHECK_TTS_DATA} intent where the
          * caller indicates to the TextToSpeech engine which specific sets of voice data to
@@ -311,134 +345,87 @@ public class TextToSpeech {
         // keys for the parameters passed with speak commands. Hidden keys are used internally
         // to maintain engine state for each TextToSpeech instance.
         /**
-         * {@hide}
+         * @hide
          */
         public static final String KEY_PARAM_RATE = "rate";
+
         /**
-         * {@hide}
+         * @hide
          */
         public static final String KEY_PARAM_LANGUAGE = "language";
+
         /**
-         * {@hide}
+         * @hide
          */
         public static final String KEY_PARAM_COUNTRY = "country";
+
         /**
-         * {@hide}
+         * @hide
          */
         public static final String KEY_PARAM_VARIANT = "variant";
+
         /**
-         * {@hide}
+         * @hide
          */
         public static final String KEY_PARAM_ENGINE = "engine";
+
         /**
-         * {@hide}
+         * @hide
          */
         public static final String KEY_PARAM_PITCH = "pitch";
+
         /**
          * Parameter key to specify the audio stream type to be used when speaking text
-         * or playing back a file.
+         * or playing back a file. The value should be one of the STREAM_ constants
+         * defined in {@link AudioManager}.
+         *
          * @see TextToSpeech#speak(String, int, HashMap)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_STREAM = "streamType";
+
         /**
          * Parameter key to identify an utterance in the
          * {@link TextToSpeech.OnUtteranceCompletedListener} after text has been
          * spoken, a file has been played back or a silence duration has elapsed.
+         *
          * @see TextToSpeech#speak(String, int, HashMap)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          * @see TextToSpeech#synthesizeToFile(String, HashMap, String)
          */
         public static final String KEY_PARAM_UTTERANCE_ID = "utteranceId";
+
         /**
          * Parameter key to specify the speech volume relative to the current stream type
          * volume used when speaking text. Volume is specified as a float ranging from 0 to 1
          * where 0 is silence, and 1 is the maximum volume (the default behavior).
+         *
          * @see TextToSpeech#speak(String, int, HashMap)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_VOLUME = "volume";
+
         /**
          * Parameter key to specify how the speech is panned from left to right when speaking text.
          * Pan is specified as a float ranging from -1 to +1 where -1 maps to a hard-left pan,
          * 0 to center (the default behavior), and +1 to hard-right.
+         *
          * @see TextToSpeech#speak(String, int, HashMap)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_PAN = "pan";
 
-        // key positions in the array of cached parameters
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_RATE = 0;
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_LANGUAGE = 2;
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_COUNTRY = 4;
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_VARIANT = 6;
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_STREAM = 8;
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_UTTERANCE_ID = 10;
-
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_ENGINE = 12;
-
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_PITCH = 14;
-
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_VOLUME = 16;
-
-        /**
-         * {@hide}
-         */
-        protected static final int PARAM_POSITION_PAN = 18;
-
-
-        /**
-         * {@hide}
-         * Total number of cached speech parameters.
-         * This number should be equal to (max param position/2) + 1.
-         */
-        protected static final int NB_CACHED_PARAMS = 10;
     }
 
-    /**
-     * Connection needed for the TTS.
-     */
-    private ServiceConnection mServiceConnection;
-
-    private ITts mITts = null;
-    private ITtsCallback mITtscallback = null;
-    private Context mContext = null;
-    private String mPackageName = "";
-    private OnInitListener mInitListener = null;
-    private boolean mStarted = false;
+    private final Context mContext;
+    private Connection mServiceConnection;
+    private OnInitListener mInitListener;
     private final Object mStartLock = new Object();
-    /**
-     * Used to store the cached parameters sent along with each synthesis request to the
-     * TTS service.
-     */
-    private String[] mCachedParams;
+
+    private String mRequestedEngine;
+    private final Map<String, Uri> mEarcons;
+    private final Map<String, Uri> mUtterances;
+    private final Bundle mParams = new Bundle();
 
     /**
      * The constructor for the TextToSpeech class.
@@ -451,84 +438,98 @@ public class TextToSpeech {
      *            TextToSpeech engine has initialized.
      */
     public TextToSpeech(Context context, OnInitListener listener) {
+        this(context, listener, null);
+    }
+
+    /**
+     * @hide pending approval
+     */
+    public TextToSpeech(Context context, OnInitListener listener, String engine) {
         mContext = context;
-        mPackageName = mContext.getPackageName();
         mInitListener = listener;
+        mRequestedEngine = engine;
 
-        mCachedParams = new String[2*Engine.NB_CACHED_PARAMS]; // store key and value
-        mCachedParams[Engine.PARAM_POSITION_RATE] = Engine.KEY_PARAM_RATE;
-        mCachedParams[Engine.PARAM_POSITION_LANGUAGE] = Engine.KEY_PARAM_LANGUAGE;
-        mCachedParams[Engine.PARAM_POSITION_COUNTRY] = Engine.KEY_PARAM_COUNTRY;
-        mCachedParams[Engine.PARAM_POSITION_VARIANT] = Engine.KEY_PARAM_VARIANT;
-        mCachedParams[Engine.PARAM_POSITION_STREAM] = Engine.KEY_PARAM_STREAM;
-        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID] = Engine.KEY_PARAM_UTTERANCE_ID;
-        mCachedParams[Engine.PARAM_POSITION_ENGINE] = Engine.KEY_PARAM_ENGINE;
-        mCachedParams[Engine.PARAM_POSITION_PITCH] = Engine.KEY_PARAM_PITCH;
-        mCachedParams[Engine.PARAM_POSITION_VOLUME] = Engine.KEY_PARAM_VOLUME;
-        mCachedParams[Engine.PARAM_POSITION_PAN] = Engine.KEY_PARAM_PAN;
-
-        // Leave all defaults that are shown in Settings uninitialized/at the default
-        // so that the values set in Settings will take effect if the application does
-        // not try to change these settings itself.
-        mCachedParams[Engine.PARAM_POSITION_RATE + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_STREAM + 1] =
-                String.valueOf(Engine.DEFAULT_STREAM);
-        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_PITCH + 1] = "100";
-        mCachedParams[Engine.PARAM_POSITION_VOLUME + 1] = Engine.DEFAULT_VOLUME_STRING;
-        mCachedParams[Engine.PARAM_POSITION_PAN + 1] = Engine.DEFAULT_PAN_STRING;
+        mEarcons = new HashMap<String, Uri>();
+        mUtterances = new HashMap<String, Uri>();
 
         initTts();
     }
 
-
-    private void initTts() {
-        mStarted = false;
-
-        // Initialize the TTS, run the callback after the binding is successful
-        mServiceConnection = new ServiceConnection() {
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                synchronized(mStartLock) {
-                    mITts = ITts.Stub.asInterface(service);
-                    mStarted = true;
-                    // Cache the default engine and current language
-                    setEngineByPackageName(getDefaultEngine());
-                    setLanguage(getLanguage());
-                    if (mInitListener != null) {
-                        // TODO manage failures and missing resources
-                        mInitListener.onInit(SUCCESS);
-                    }
-                }
-            }
-
-            public void onServiceDisconnected(ComponentName name) {
-                synchronized(mStartLock) {
-                    mITts = null;
-                    mInitListener = null;
-                    mStarted = false;
-                }
-            }
-        };
-
-        Intent intent = new Intent("android.intent.action.START_TTS_SERVICE");
-        intent.addCategory("android.intent.category.TTS");
-        boolean bound = mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-        if (!bound) {
-            Log.e("TextToSpeech.java", "initTts() failed to bind to service");
-            if (mInitListener != null) {
-                mInitListener.onInit(ERROR);
-            }
-        } else {
-            // initialization listener will be called inside ServiceConnection
-            Log.i("TextToSpeech.java", "initTts() successfully bound to service");
-        }
-        // TODO handle plugin failures
+    private String getPackageName() {
+        return mContext.getPackageName();
     }
 
+    private <R> R runActionNoReconnect(Action<R> action, R errorResult, String method) {
+        return runAction(action, errorResult, method, false);
+    }
+
+    private <R> R runAction(Action<R> action, R errorResult, String method) {
+        return runAction(action, errorResult, method, true);
+    }
+
+    private <R> R runAction(Action<R> action, R errorResult, String method, boolean reconnect) {
+        synchronized (mStartLock) {
+            if (mServiceConnection == null) {
+                Log.w(TAG, method + " failed: not bound to TTS engine");
+                return errorResult;
+            }
+            return mServiceConnection.runAction(action, errorResult, method, reconnect);
+        }
+    }
+
+    private int initTts() {
+        String defaultEngine = getDefaultEngine();
+        String engine = defaultEngine;
+        if (!areDefaultsEnforced() && !TextUtils.isEmpty(mRequestedEngine)
+                && isEngineEnabled(engine)) {
+            engine = mRequestedEngine;
+        }
+
+        // Try requested engine
+        if (connectToEngine(engine)) {
+            return SUCCESS;
+        }
+
+        // Fall back to user's default engine if different from the already tested one
+        if (!engine.equals(defaultEngine)) {
+            if (connectToEngine(defaultEngine)) {
+                return SUCCESS;
+            }
+        }
+
+        // Fall back to the hardcoded default if different from the two above
+        if (!defaultEngine.equals(Engine.DEFAULT_ENGINE)
+                && !engine.equals(Engine.DEFAULT_ENGINE)) {
+            if (connectToEngine(Engine.DEFAULT_ENGINE)) {
+                return SUCCESS;
+            }
+        }
+
+        return ERROR;
+    }
+
+    private boolean connectToEngine(String engine) {
+        Connection connection = new Connection();
+        Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
+        intent.setPackage(engine);
+        boolean bound = mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        if (!bound) {
+            Log.e(TAG, "Failed to bind to " + engine);
+            dispatchOnInit(ERROR);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void dispatchOnInit(int result) {
+        synchronized (mStartLock) {
+            if (mInitListener != null) {
+                mInitListener.onInit(result);
+                mInitListener = null;
+            }
+        }
+    }
 
     /**
      * Releases the resources used by the TextToSpeech engine.
@@ -536,14 +537,16 @@ public class TextToSpeech {
      * so the TextToSpeech engine can be cleanly stopped.
      */
     public void shutdown() {
-        try {
-            mContext.unbindService(mServiceConnection);
-        } catch (IllegalArgumentException e) {
-            // Do nothing and fail silently since an error here indicates that
-            // binding never succeeded in the first place.
-        }
+        runActionNoReconnect(new Action<Void>() {
+            @Override
+            public Void run(ITextToSpeechService service) throws RemoteException {
+                service.setCallback(getPackageName(), null);
+                service.stop(getPackageName());
+                mServiceConnection.disconnect();
+                return null;
+            }
+        }, null, "shutdown");
     }
-
 
     /**
      * Adds a mapping between a string of text and a sound resource in a
@@ -573,21 +576,9 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addSpeech(String text, String packagename, int resourceId) {
-        synchronized(mStartLock) {
-            if (!mStarted) {
-                return ERROR;
-            }
-            try {
-                mITts.addSpeech(mPackageName, text, packagename, resourceId);
-                return SUCCESS;
-            } catch (RemoteException e) {
-                restart("addSpeech", e);
-            } catch (NullPointerException e) {
-                restart("addSpeech", e);
-            } catch (IllegalStateException e) {
-                restart("addSpeech", e);
-            }
-            return ERROR;
+        synchronized (mStartLock) {
+            mUtterances.put(text, makeResourceUri(packagename, resourceId));
+            return SUCCESS;
         }
     }
 
@@ -608,20 +599,8 @@ public class TextToSpeech {
      */
     public int addSpeech(String text, String filename) {
         synchronized (mStartLock) {
-            if (!mStarted) {
-                return ERROR;
-            }
-            try {
-                mITts.addSpeechFile(mPackageName, text, filename);
-                return SUCCESS;
-            } catch (RemoteException e) {
-                restart("addSpeech", e);
-            } catch (NullPointerException e) {
-                restart("addSpeech", e);
-            } catch (IllegalStateException e) {
-                restart("addSpeech", e);
-            }
-            return ERROR;
+            mUtterances.put(text, Uri.parse(filename));
+            return SUCCESS;
         }
     }
 
@@ -653,23 +632,10 @@ public class TextToSpeech {
      */
     public int addEarcon(String earcon, String packagename, int resourceId) {
         synchronized(mStartLock) {
-            if (!mStarted) {
-                return ERROR;
-            }
-            try {
-                mITts.addEarcon(mPackageName, earcon, packagename, resourceId);
-                return SUCCESS;
-            } catch (RemoteException e) {
-                restart("addEarcon", e);
-            } catch (NullPointerException e) {
-                restart("addEarcon", e);
-            } catch (IllegalStateException e) {
-                restart("addEarcon", e);
-            }
-            return ERROR;
+            mEarcons.put(earcon, makeResourceUri(packagename, resourceId));
+            return SUCCESS;
         }
     }
-
 
     /**
      * Adds a mapping between a string of text and a sound file.
@@ -687,312 +653,199 @@ public class TextToSpeech {
      * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
      */
     public int addEarcon(String earcon, String filename) {
-        synchronized (mStartLock) {
-            if (!mStarted) {
-                return ERROR;
-            }
-            try {
-                mITts.addEarconFile(mPackageName, earcon, filename);
-                return SUCCESS;
-            } catch (RemoteException e) {
-                restart("addEarcon", e);
-            } catch (NullPointerException e) {
-                restart("addEarcon", e);
-            } catch (IllegalStateException e) {
-                restart("addEarcon", e);
-            }
-            return ERROR;
+        synchronized(mStartLock) {
+            mEarcons.put(earcon, Uri.parse(filename));
+            return SUCCESS;
         }
     }
 
+    private Uri makeResourceUri(String packageName, int resourceId) {
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .encodedAuthority(packageName)
+                .appendEncodedPath(String.valueOf(resourceId))
+                .build();
+    }
 
     /**
      * Speaks the string using the specified queuing strategy and speech
      * parameters.
      *
-     * @param text
-     *            The string of text to be spoken.
-     * @param queueMode
-     *            The queuing strategy to use.
-     *            {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
-     * @param params
-     *            The list of parameters to be used. Can be null if no parameters are given.
-     *            They are specified using a (key, value) pair, where the key can be
-     *            {@link Engine#KEY_PARAM_STREAM} or
-     *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+     * @param text The string of text to be spoken.
+     * @param queueMode The queuing strategy to use, {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
+     *            {@link Engine#KEY_PARAM_STREAM},
+     *            {@link Engine#KEY_PARAM_UTTERANCE_ID},
+     *            {@link Engine#KEY_PARAM_VOLUME},
+     *            {@link Engine#KEY_PARAM_PAN}.
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
-    public int speak(String text, int queueMode, HashMap<String,String> params)
-    {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            Log.i("TextToSpeech.java - speak", "speak text of length " + text.length());
-            if (!mStarted) {
-                Log.e("TextToSpeech.java - speak", "service isn't started");
-                return result;
-            }
-            try {
-                if ((params != null) && (!params.isEmpty())) {
-                    setCachedParam(params, Engine.KEY_PARAM_STREAM, Engine.PARAM_POSITION_STREAM);
-                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
-                            Engine.PARAM_POSITION_UTTERANCE_ID);
-                    setCachedParam(params, Engine.KEY_PARAM_ENGINE, Engine.PARAM_POSITION_ENGINE);
-                    setCachedParam(params, Engine.KEY_PARAM_VOLUME, Engine.PARAM_POSITION_VOLUME);
-                    setCachedParam(params, Engine.KEY_PARAM_PAN, Engine.PARAM_POSITION_PAN);
+    public int speak(final String text, final int queueMode, final HashMap<String, String> params) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                Uri utteranceUri = mUtterances.get(text);
+                if (utteranceUri != null) {
+                    return service.playAudio(getPackageName(), utteranceUri, queueMode,
+                            getParams(params));
+                } else {
+                    return service.speak(getPackageName(), text, queueMode, getParams(params));
                 }
-                result = mITts.speak(mPackageName, text, queueMode, mCachedParams);
-            } catch (RemoteException e) {
-                restart("speak", e);
-            } catch (NullPointerException e) {
-                restart("speak", e);
-            } catch (IllegalStateException e) {
-                restart("speak", e);
-            } finally {
-                resetCachedParams();
             }
-            return result;
-        }
+        }, ERROR, "speak");
     }
-
 
     /**
      * Plays the earcon using the specified queueing mode and parameters.
+     * The earcon must already have been added with {@link #addEarcon(String, String)} or
+     * {@link #addEarcon(String, String, int)}.
      *
-     * @param earcon
-     *            The earcon that should be played
-     * @param queueMode
-     *            {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
-     * @param params
-     *            The list of parameters to be used. Can be null if no parameters are given.
-     *            They are specified using a (key, value) pair, where the key can be
-     *            {@link Engine#KEY_PARAM_STREAM} or
+     * @param earcon The earcon that should be played
+     * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
+     *            {@link Engine#KEY_PARAM_STREAM},
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
-    public int playEarcon(String earcon, int queueMode,
-            HashMap<String,String> params) {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            if (!mStarted) {
-                return result;
-            }
-            try {
-                if ((params != null) && (!params.isEmpty())) {
-                    String extra = params.get(Engine.KEY_PARAM_STREAM);
-                    if (extra != null) {
-                        mCachedParams[Engine.PARAM_POSITION_STREAM + 1] = extra;
-                    }
-                    setCachedParam(params, Engine.KEY_PARAM_STREAM, Engine.PARAM_POSITION_STREAM);
-                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
-                            Engine.PARAM_POSITION_UTTERANCE_ID);
+    public int playEarcon(final String earcon, final int queueMode,
+            final HashMap<String, String> params) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                Uri earconUri = mEarcons.get(earcon);
+                if (earconUri == null) {
+                    return ERROR;
                 }
-                result = mITts.playEarcon(mPackageName, earcon, queueMode, null);
-            } catch (RemoteException e) {
-                restart("playEarcon", e);
-            } catch (NullPointerException e) {
-                restart("playEarcon", e);
-            } catch (IllegalStateException e) {
-                restart("playEarcon", e);
-            } finally {
-                resetCachedParams();
+                return service.playAudio(getPackageName(), earconUri, queueMode,
+                        getParams(params));
             }
-            return result;
-        }
+        }, ERROR, "playEarcon");
     }
 
     /**
      * Plays silence for the specified amount of time using the specified
      * queue mode.
      *
-     * @param durationInMs
-     *            A long that indicates how long the silence should last.
-     * @param queueMode
-     *            {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
-     * @param params
-     *            The list of parameters to be used. Can be null if no parameters are given.
-     *            They are specified using a (key, value) pair, where the key can be
+     * @param durationInMs The duration of the silence.
+     * @param queueMode {@link #QUEUE_ADD} or {@link #QUEUE_FLUSH}.
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
-    public int playSilence(long durationInMs, int queueMode, HashMap<String,String> params) {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            if (!mStarted) {
-                return result;
+    public int playSilence(final long durationInMs, final int queueMode,
+            final HashMap<String, String> params) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                return service.playSilence(getPackageName(), durationInMs, queueMode,
+                        getParams(params));
             }
-            try {
-                if ((params != null) && (!params.isEmpty())) {
-                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
-                            Engine.PARAM_POSITION_UTTERANCE_ID);
-                }
-                result = mITts.playSilence(mPackageName, durationInMs, queueMode, mCachedParams);
-            } catch (RemoteException e) {
-                restart("playSilence", e);
-            } catch (NullPointerException e) {
-                restart("playSilence", e);
-            } catch (IllegalStateException e) {
-                restart("playSilence", e);
-            } finally {
-                resetCachedParams();
-            }
-            return result;
-        }
+        }, ERROR, "playSilence");
     }
-
 
     /**
-     * Returns whether or not the TextToSpeech engine is busy speaking.
+     * Checks whether the TTS engine is busy speaking.
      *
-     * @return Whether or not the TextToSpeech engine is busy speaking.
+     * @return {@code true} if the TTS engine is speaking.
      */
     public boolean isSpeaking() {
-        synchronized (mStartLock) {
-            if (!mStarted) {
-                return false;
+        return runAction(new Action<Boolean>() {
+            @Override
+            public Boolean run(ITextToSpeechService service) throws RemoteException {
+                return service.isSpeaking();
             }
-            try {
-                return mITts.isSpeaking();
-            } catch (RemoteException e) {
-                restart("isSpeaking", e);
-            } catch (NullPointerException e) {
-                restart("isSpeaking", e);
-            } catch (IllegalStateException e) {
-                restart("isSpeaking", e);
-            }
-            return false;
-        }
+        }, false, "isSpeaking");
     }
-
 
     /**
      * Interrupts the current utterance (whether played or rendered to file) and discards other
      * utterances in the queue.
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
     public int stop() {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            if (!mStarted) {
-                return result;
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                return service.stop(getPackageName());
             }
-            try {
-                result = mITts.stop(mPackageName);
-            } catch (RemoteException e) {
-                restart("stop", e);
-            } catch (NullPointerException e) {
-                restart("stop", e);
-            } catch (IllegalStateException e) {
-                restart("stop", e);
-            }
-            return result;
-        }
+        }, ERROR, "stop");
     }
 
-
     /**
-     * Sets the speech rate for the TextToSpeech engine.
+     * Sets the speech rate.
      *
      * This has no effect on any pre-recorded speech.
      *
-     * @param speechRate
-     *            The speech rate for the TextToSpeech engine. 1 is the normal speed,
-     *            lower values slow down the speech (0.5 is half the normal speech rate),
-     *            greater values accelerate it (2 is twice the normal speech rate).
+     * @param speechRate Speech rate. {@code 1.0} is the normal speech rate,
+     *            lower values slow down the speech ({@code 0.5} is half the normal speech rate),
+     *            greater values accelerate it ({@code 2.0} is twice the normal speech rate).
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
     public int setSpeechRate(float speechRate) {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            if (!mStarted) {
-                return result;
-            }
-            try {
-                if (speechRate > 0) {
-                    int rate = (int)(speechRate*100);
-                    mCachedParams[Engine.PARAM_POSITION_RATE + 1] = String.valueOf(rate);
-                    // the rate is not set here, instead it is cached so it will be associated
-                    // with all upcoming utterances.
-                    if (speechRate > 0.0f) {
-                        result = SUCCESS;
-                    } else {
-                        result = ERROR;
-                    }
+        if (speechRate > 0.0f) {
+            int intRate = (int)(speechRate * 100);
+            if (intRate > 0) {
+                synchronized (mStartLock) {
+                    mParams.putInt(Engine.KEY_PARAM_RATE, intRate);
                 }
-            } catch (NullPointerException e) {
-                restart("setSpeechRate", e);
-            } catch (IllegalStateException e) {
-                restart("setSpeechRate", e);
+                return SUCCESS;
             }
-            return result;
         }
+        return ERROR;
     }
-
 
     /**
      * Sets the speech pitch for the TextToSpeech engine.
      *
      * This has no effect on any pre-recorded speech.
      *
-     * @param pitch
-     *            The pitch for the TextToSpeech engine. 1 is the normal pitch,
+     * @param pitch Speech pitch. {@code 1.0} is the normal pitch,
      *            lower values lower the tone of the synthesized voice,
      *            greater values increase it.
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
     public int setPitch(float pitch) {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            if (!mStarted) {
-                return result;
-            }
-            try {
-                // the pitch is not set here, instead it is cached so it will be associated
-                // with all upcoming utterances.
-                if (pitch > 0) {
-                    int p = (int)(pitch*100);
-                    mCachedParams[Engine.PARAM_POSITION_PITCH + 1] = String.valueOf(p);
-                    result = SUCCESS;
+        if (pitch > 0.0f) {
+            int intPitch = (int)(pitch * 100);
+            if (intPitch > 0) {
+                synchronized (mStartLock) {
+                    mParams.putInt(Engine.KEY_PARAM_PITCH, intPitch);
                 }
-            } catch (NullPointerException e) {
-                restart("setPitch", e);
-            } catch (IllegalStateException e) {
-                restart("setPitch", e);
+                return SUCCESS;
             }
-            return result;
         }
+        return ERROR;
     }
 
-
     /**
-     * Sets the language for the TextToSpeech engine.
-     * The TextToSpeech engine will try to use the closest match to the specified
+     * Sets the text-to-speech language.
+     * The TTS engine will try to use the closest match to the specified
      * language as represented by the Locale, but there is no guarantee that the exact same Locale
      * will be used. Use {@link #isLanguageAvailable(Locale)} to check the level of support
      * before choosing the language to use for the next utterances.
      *
-     * @param loc
-     *            The locale describing the language to be used.
+     * @param loc The locale describing the language to be used.
      *
-     * @return code indicating the support status for the locale. See {@link #LANG_AVAILABLE},
+     * @return Code indicating the support status for the locale. See {@link #LANG_AVAILABLE},
      *         {@link #LANG_COUNTRY_AVAILABLE}, {@link #LANG_COUNTRY_VAR_AVAILABLE},
      *         {@link #LANG_MISSING_DATA} and {@link #LANG_NOT_SUPPORTED}.
      */
-    public int setLanguage(Locale loc) {
-        synchronized (mStartLock) {
-            int result = LANG_NOT_SUPPORTED;
-            if (!mStarted) {
-                return result;
-            }
-            if (loc == null) {
-                return result;
-            }
-            try {
+    public int setLanguage(final Locale loc) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                if (loc == null) {
+                    return LANG_NOT_SUPPORTED;
+                }
                 String language = loc.getISO3Language();
                 String country = loc.getISO3Country();
                 String variant = loc.getVariant();
@@ -1000,294 +853,316 @@ public class TextToSpeech {
                 // the available parts.
                 // Note that the language is not actually set here, instead it is cached so it
                 // will be associated with all upcoming utterances.
-                result = mITts.isLanguageAvailable(language, country, variant, mCachedParams);
+                int result = service.loadLanguage(language, country, variant);
                 if (result >= LANG_AVAILABLE){
-                    mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1] = language;
-                    if (result >= LANG_COUNTRY_AVAILABLE){
-                        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = country;
-                    } else {
-                        mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1] = "";
+                    if (result < LANG_COUNTRY_VAR_AVAILABLE) {
+                        variant = "";
+                        if (result < LANG_COUNTRY_AVAILABLE) {
+                            country = "";
+                        }
                     }
-                    if (result >= LANG_COUNTRY_VAR_AVAILABLE){
-                        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = variant;
-                    } else {
-                        mCachedParams[Engine.PARAM_POSITION_VARIANT + 1] = "";
-                    }
+                    mParams.putString(Engine.KEY_PARAM_LANGUAGE, language);
+                    mParams.putString(Engine.KEY_PARAM_COUNTRY, country);
+                    mParams.putString(Engine.KEY_PARAM_VARIANT, variant);
                 }
-            } catch (RemoteException e) {
-                restart("setLanguage", e);
-            } catch (NullPointerException e) {
-                restart("setLanguage", e);
-            } catch (IllegalStateException e) {
-                restart("setLanguage", e);
+                return result;
             }
-            return result;
-        }
+        }, LANG_NOT_SUPPORTED, "setLanguage");
     }
-
 
     /**
      * Returns a Locale instance describing the language currently being used by the TextToSpeech
      * engine.
+     *
      * @return language, country (if any) and variant (if any) used by the engine stored in a Locale
-     *     instance, or null is the TextToSpeech engine has failed.
+     *     instance, or {@code null} on error.
      */
     public Locale getLanguage() {
-        synchronized (mStartLock) {
-            if (!mStarted) {
+        return runAction(new Action<Locale>() {
+            @Override
+            public Locale run(ITextToSpeechService service) throws RemoteException {
+                String[] locStrings = service.getLanguage();
+                if (locStrings != null && locStrings.length == 3) {
+                    return new Locale(locStrings[0], locStrings[1], locStrings[2]);
+                }
                 return null;
             }
-            try {
-                // Only do a call to the native synth if there is nothing in the cached params
-                if (mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1].length() < 1){
-                    String[] locStrings = mITts.getLanguage();
-                    if ((locStrings != null) && (locStrings.length == 3)) {
-                        return new Locale(locStrings[0], locStrings[1], locStrings[2]);
-                    } else {
-                        return null;
-                    }
-                } else {
-                    return new Locale(mCachedParams[Engine.PARAM_POSITION_LANGUAGE + 1],
-                            mCachedParams[Engine.PARAM_POSITION_COUNTRY + 1],
-                            mCachedParams[Engine.PARAM_POSITION_VARIANT + 1]);
-                }
-            } catch (RemoteException e) {
-                restart("getLanguage", e);
-            } catch (NullPointerException e) {
-                restart("getLanguage", e);
-            } catch (IllegalStateException e) {
-                restart("getLanguage", e);
-            }
-            return null;
-        }
+        }, null, "getLanguage");
     }
 
     /**
      * Checks if the specified language as represented by the Locale is available and supported.
      *
-     * @param loc
-     *            The Locale describing the language to be used.
+     * @param loc The Locale describing the language to be used.
      *
-     * @return code indicating the support status for the locale. See {@link #LANG_AVAILABLE},
+     * @return Code indicating the support status for the locale. See {@link #LANG_AVAILABLE},
      *         {@link #LANG_COUNTRY_AVAILABLE}, {@link #LANG_COUNTRY_VAR_AVAILABLE},
      *         {@link #LANG_MISSING_DATA} and {@link #LANG_NOT_SUPPORTED}.
      */
-    public int isLanguageAvailable(Locale loc) {
-        synchronized (mStartLock) {
-            int result = LANG_NOT_SUPPORTED;
-            if (!mStarted) {
-                return result;
+    public int isLanguageAvailable(final Locale loc) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                return service.isLanguageAvailable(loc.getISO3Language(),
+                        loc.getISO3Country(), loc.getVariant());
             }
-            try {
-                result = mITts.isLanguageAvailable(loc.getISO3Language(),
-                        loc.getISO3Country(), loc.getVariant(), mCachedParams);
-            } catch (RemoteException e) {
-                restart("isLanguageAvailable", e);
-            } catch (NullPointerException e) {
-                restart("isLanguageAvailable", e);
-            } catch (IllegalStateException e) {
-                restart("isLanguageAvailable", e);
-            }
-            return result;
-        }
+        }, LANG_NOT_SUPPORTED, "isLanguageAvailable");
     }
-
 
     /**
      * Synthesizes the given text to a file using the specified parameters.
      *
-     * @param text
-     *            The String of text that should be synthesized
-     * @param params
-     *            The list of parameters to be used. Can be null if no parameters are given.
-     *            They are specified using a (key, value) pair, where the key can be
+     * @param text Thetext that should be synthesized
+     * @param params Parameters for the request. Can be null.
+     *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
-     * @param filename
-     *            The string that gives the full output filename; it should be
+     * @param filename Absolute file filename to write the generated audio data to.It should be
      *            something like "/sdcard/myappsounds/mysound.wav".
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
-    public int synthesizeToFile(String text, HashMap<String,String> params,
-            String filename) {
-        Log.i("TextToSpeech.java", "synthesizeToFile()");
-        synchronized (mStartLock) {
-            int result = ERROR;
-            Log.i("TextToSpeech.java - synthesizeToFile", "synthesizeToFile text of length "
-                    + text.length());
-            if (!mStarted) {
-                Log.e("TextToSpeech.java - synthesizeToFile", "service isn't started");
-                return result;
+    public int synthesizeToFile(final String text, final HashMap<String, String> params,
+            final String filename) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                return service.synthesizeToFile(getPackageName(), text, filename,
+                        getParams(params));
             }
+        }, ERROR, "synthesizeToFile");
+    }
+
+    private Bundle getParams(HashMap<String, String> params) {
+        if (params != null && !params.isEmpty()) {
+            Bundle bundle = new Bundle(mParams);
+            copyIntParam(bundle, params, Engine.KEY_PARAM_STREAM);
+            copyStringParam(bundle, params, Engine.KEY_PARAM_UTTERANCE_ID);
+            copyFloatParam(bundle, params, Engine.KEY_PARAM_VOLUME);
+            copyFloatParam(bundle, params, Engine.KEY_PARAM_PAN);
+            return bundle;
+        } else {
+            return mParams;
+        }
+    }
+
+    private void copyStringParam(Bundle bundle, HashMap<String, String> params, String key) {
+        String value = params.get(key);
+        if (value != null) {
+            bundle.putString(key, value);
+        }
+    }
+
+    private void copyIntParam(Bundle bundle, HashMap<String, String> params, String key) {
+        String valueString = params.get(key);
+        if (!TextUtils.isEmpty(valueString)) {
             try {
-                if ((params != null) && (!params.isEmpty())) {
-                    // no need to read the stream type here
-                    setCachedParam(params, Engine.KEY_PARAM_UTTERANCE_ID,
-                            Engine.PARAM_POSITION_UTTERANCE_ID);
-                    setCachedParam(params, Engine.KEY_PARAM_ENGINE, Engine.PARAM_POSITION_ENGINE);
-                }
-                result = mITts.synthesizeToFile(mPackageName, text, mCachedParams, filename) ?
-                        SUCCESS : ERROR;
-            } catch (RemoteException e) {
-                restart("synthesizeToFile", e);
-            } catch (NullPointerException e) {
-                restart("synthesizeToFile", e);
-            } catch (IllegalStateException e) {
-                restart("synthesizeToFile", e);
-            } finally {
-                resetCachedParams();
+                int value = Integer.parseInt(valueString);
+                bundle.putInt(key, value);
+            } catch (NumberFormatException ex) {
+                // don't set the value in the bundle
             }
-            return result;
         }
     }
 
-
-    /**
-     * Convenience method to reset the cached parameters to the current default values
-     * if they are not persistent between calls to the service.
-     */
-    private void resetCachedParams() {
-        mCachedParams[Engine.PARAM_POSITION_STREAM + 1] =
-                String.valueOf(Engine.DEFAULT_STREAM);
-        mCachedParams[Engine.PARAM_POSITION_UTTERANCE_ID+ 1] = "";
-        mCachedParams[Engine.PARAM_POSITION_VOLUME + 1] = Engine.DEFAULT_VOLUME_STRING;
-        mCachedParams[Engine.PARAM_POSITION_PAN + 1] = Engine.DEFAULT_PAN_STRING;
-    }
-
-    /**
-     * Convenience method to save a parameter in the cached parameter array, at the given index,
-     * for a property saved in the given hashmap.
-     */
-    private void setCachedParam(HashMap<String,String> params, String key, int keyIndex) {
-        String extra = params.get(key);
-        if (extra != null) {
-            mCachedParams[keyIndex+1] = extra;
+    private void copyFloatParam(Bundle bundle, HashMap<String, String> params, String key) {
+        String valueString = params.get(key);
+        if (!TextUtils.isEmpty(valueString)) {
+            try {
+                float value = Float.parseFloat(valueString);
+                bundle.putFloat(key, value);
+            } catch (NumberFormatException ex) {
+                // don't set the value in the bundle
+            }
         }
     }
 
     /**
-     * Sets the OnUtteranceCompletedListener that will fire when an utterance completes.
+     * Sets the listener that will be notified when synthesis of an utterance completes.
      *
-     * @param listener
-     *            The OnUtteranceCompletedListener
+     * @param listener The listener to use.
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
-    public int setOnUtteranceCompletedListener(
-            final OnUtteranceCompletedListener listener) {
-        synchronized (mStartLock) {
-            int result = ERROR;
-            if (!mStarted) {
-                return result;
-            }
-            mITtscallback = new ITtsCallback.Stub() {
-                public void utteranceCompleted(String utteranceId) throws RemoteException {
-                    if (listener != null) {
-                        listener.onUtteranceCompleted(utteranceId);
+    public int setOnUtteranceCompletedListener(final OnUtteranceCompletedListener listener) {
+        return runAction(new Action<Integer>() {
+            @Override
+            public Integer run(ITextToSpeechService service) throws RemoteException {
+                ITextToSpeechCallback.Stub callback = new ITextToSpeechCallback.Stub() {
+                    public void utteranceCompleted(String utteranceId) {
+                        if (listener != null) {
+                            listener.onUtteranceCompleted(utteranceId);
+                        }
                     }
-                }
-            };
-            try {
-                result = mITts.registerCallback(mPackageName, mITtscallback);
-            } catch (RemoteException e) {
-                restart("registerCallback", e);
-            } catch (NullPointerException e) {
-                restart("registerCallback", e);
-            } catch (IllegalStateException e) {
-                restart("registerCallback", e);
+                };
+                service.setCallback(getPackageName(), callback);
+                return SUCCESS;
             }
-            return result;
-        }
+        }, ERROR, "setOnUtteranceCompletedListener");
     }
 
     /**
-     * Sets the speech synthesis engine to be used by its packagename.
+     * Sets the TTS engine to use.
      *
-     * @param enginePackageName
-     *            The packagename for the synthesis engine (ie, "com.svox.pico")
+     * @param enginePackageName The package name for the synthesis engine (e.g. "com.svox.pico")
      *
-     * @return Code indicating success or failure. See {@link #ERROR} and {@link #SUCCESS}.
+     * @return {@link #ERROR} or {@link #SUCCESS}.
      */
+    // TODO: add @Deprecated{This method does not tell the caller when the new engine
+    // has been initialized. You should create a new TextToSpeech object with the new
+    // engine instead.}
     public int setEngineByPackageName(String enginePackageName) {
-        synchronized (mStartLock) {
-            int result = TextToSpeech.ERROR;
-            if (!mStarted) {
-                return result;
-            }
-            try {
-                result = mITts.setEngineByPackageName(enginePackageName);
-                if (result == TextToSpeech.SUCCESS){
-                    mCachedParams[Engine.PARAM_POSITION_ENGINE + 1] = enginePackageName;
-                }
-            } catch (RemoteException e) {
-                restart("setEngineByPackageName", e);
-            } catch (NullPointerException e) {
-                restart("setEngineByPackageName", e);
-            } catch (IllegalStateException e) {
-                restart("setEngineByPackageName", e);
-            }
-            return result;
-        }
+        mRequestedEngine = enginePackageName;
+        return initTts();
     }
 
-
     /**
-     * Gets the packagename of the default speech synthesis engine.
+     * Gets the package name of the default speech synthesis engine.
      *
-     * @return Packagename of the TTS engine that the user has chosen as their default.
+     * @return Package name of the TTS engine that the user has chosen as their default.
      */
     public String getDefaultEngine() {
-        synchronized (mStartLock) {
-            String engineName = "";
-            if (!mStarted) {
-                return engineName;
-            }
-            try {
-                engineName = mITts.getDefaultEngine();
-            } catch (RemoteException e) {
-                restart("getDefaultEngine", e);
-            } catch (NullPointerException e) {
-                restart("getDefaultEngine", e);
-            } catch (IllegalStateException e) {
-                restart("getDefaultEngine", e);
-            }
-            return engineName;
-        }
+        String engine = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.TTS_DEFAULT_SYNTH);
+        return engine != null ? engine : Engine.DEFAULT_ENGINE;
     }
 
-
     /**
-     * Returns whether or not the user is forcing their defaults to override the
-     * Text-To-Speech settings set by applications.
-     *
-     * @return Whether or not defaults are enforced.
+     * Checks whether the user's settings should override settings requested by the calling
+     * application.
      */
     public boolean areDefaultsEnforced() {
-        synchronized (mStartLock) {
-            boolean defaultsEnforced = false;
-            if (!mStarted) {
-                return defaultsEnforced;
-            }
-            try {
-                defaultsEnforced = mITts.areDefaultsEnforced();
-            } catch (RemoteException e) {
-                restart("areDefaultsEnforced", e);
-            } catch (NullPointerException e) {
-                restart("areDefaultsEnforced", e);
-            } catch (IllegalStateException e) {
-                restart("areDefaultsEnforced", e);
-            }
-            return defaultsEnforced;
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.TTS_USE_DEFAULTS, Engine.USE_DEFAULTS) == 1;
+    }
+
+    private boolean isEngineEnabled(String engine) {
+        if (Engine.DEFAULT_ENGINE.equals(engine)) {
+            return true;
         }
+        for (String enabled : getEnabledEngines()) {
+            if (engine.equals(enabled)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String[] getEnabledEngines() {
+        String str = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.TTS_ENABLED_PLUGINS);
+        if (TextUtils.isEmpty(str)) {
+            return new String[0];
+        }
+        return str.split(" ");
     }
 
     /**
-     * Restarts the TTS after a failure.
+     * Gets a list of all installed TTS engines.
+     *
+     * @return A list of engine info objects. The list can be empty, but will never by {@code null}.
+     *
+     * @hide Pending approval
      */
-    private void restart(String method, Exception e) {
-        // TTS died; restart it.
-        Log.e(TAG, method, e);
-        mStarted = false;
-        initTts();
+    public List<EngineInfo> getEngines() {
+        PackageManager pm = mContext.getPackageManager();
+        Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
+        List<ResolveInfo> resolveInfos = pm.queryIntentServices(intent, 0);
+        if (resolveInfos == null) return Collections.emptyList();
+        List<EngineInfo> engines = new ArrayList<EngineInfo>(resolveInfos.size());
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            ServiceInfo service = resolveInfo.serviceInfo;
+            if (service != null) {
+                EngineInfo engine = new EngineInfo();
+                // Using just the package name isn't great, since it disallows having
+                // multiple engines in the same package, but that's what the existing API does.
+                engine.name = service.packageName;
+                CharSequence label = service.loadLabel(pm);
+                engine.label = TextUtils.isEmpty(label) ? engine.name : label.toString();
+                engine.icon = service.getIconResource();
+                engines.add(engine);
+            }
+        }
+        return engines;
+    }
+
+    private class Connection implements ServiceConnection {
+        private ITextToSpeechService mService;
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG, "Connected to " + name);
+            synchronized(mStartLock) {
+                if (mServiceConnection != null) {
+                    // Disconnect any previous service connection
+                    mServiceConnection.disconnect();
+                }
+                mServiceConnection = this;
+                mService = ITextToSpeechService.Stub.asInterface(service);
+                dispatchOnInit(SUCCESS);
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            synchronized(mStartLock) {
+                mService = null;
+                // If this is the active connection, clear it
+                if (mServiceConnection == this) {
+                    mServiceConnection = null;
+                }
+            }
+        }
+
+        public void disconnect() {
+            mContext.unbindService(this);
+        }
+
+        public <R> R runAction(Action<R> action, R errorResult, String method, boolean reconnect) {
+            try {
+                synchronized (mStartLock) {
+                    if (mService == null) {
+                        Log.w(TAG, method + " failed: not connected to TTS engine");
+                        return errorResult;
+                    }
+                    return action.run(mService);
+                }
+            } catch (RemoteException ex) {
+                Log.e(TAG, method + " failed", ex);
+                if (reconnect) {
+                    disconnect();
+                    initTts();
+                }
+                return errorResult;
+            }
+        }
+    }
+
+    private interface Action<R> {
+        R run(ITextToSpeechService service) throws RemoteException;
+    }
+
+    /**
+     * Information about an installed text-to-speech engine.
+     *
+     * @see TextToSpeech#getEngines
+     * @hide Pending approval
+     */
+    public static class EngineInfo {
+        /**
+         * Engine package name..
+         */
+        public String name;
+        /**
+         * Localized label for the engine.
+         */
+        public String label;
+        /**
+         * Icon for the engine.
+         */
+        public int icon;
+
+        @Override
+        public String toString() {
+            return "EngineInfo{name=" + name + "}";
+        }
+
     }
 }

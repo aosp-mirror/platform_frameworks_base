@@ -1,5 +1,0 @@
--keep class android.tts.SynthProxy {
-  int mJniData;
-  # keep all declarations for native methods
-  <methods>;
-}
