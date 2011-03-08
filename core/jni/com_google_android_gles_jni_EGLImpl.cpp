@@ -400,7 +400,7 @@ static jint jni_eglGetCurrentDisplay(JNIEnv *_env, jobject _this) {
 }
 
 static jint jni_eglGetCurrentSurface(JNIEnv *_env, jobject _this, jint readdraw) {
-    if (!(readdraw == EGL_READ) || (readdraw == EGL_DRAW)) {
+    if ((readdraw != EGL_READ) && (readdraw != EGL_DRAW)) {
         doThrow(_env, "java/lang/IllegalArgumentException");
         return 0;
     }
