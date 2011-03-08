@@ -1150,8 +1150,12 @@ public class DevicePolicyManager {
      * fail (most commonly returning {@link #ENCRYPTION_STATUS_ACTIVE}).
      *
      * <p>This policy controls encryption of the secure (application data) storage area.  Data
-     * written to other areas (e.g. the directory returned by
-     * {@link android.os.Environment#getExternalStorageDirectory()} may or may not be encrypted.
+     * written to other storage areas may or may not be encrypted, and this policy does not require
+     * or control the encryption of any other storage areas.
+     * There is one exception:  If {@link android.os.Environment#isExternalStorageEmulated()} is
+     * {@code true}, then the directory returned by
+     * {@link android.os.Environment#getExternalStorageDirectory()} must be written to disk
+     * within the encrypted storage area.
      *
      * <p>Important Note:  On some devices, it is possible to encrypt storage without requiring
      * the user to create a device PIN or Password.  In this case, the storage is encrypted, but
