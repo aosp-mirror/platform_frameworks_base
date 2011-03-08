@@ -183,20 +183,15 @@ public final class LruCacheTest extends TestCase {
      * Replacing the value for a key doesn't cause an eviction but it does bring
      * the replaced entry to the front of the queue.
      */
-    public void testPutDoesNotCauseEviction() {
-        final List<String> evictionLog = new ArrayList<String>();
-        List<String> expectedEvictionLog = new ArrayList<String>();
-        LruCache<String, String> cache = new LruCache<String, String>(3) {
-            @Override protected void entryEvicted(String key, String value) {
-                evictionLog.add(key + "=" + value);
-            }
-        };
+    public void testPutCauseEviction() {
+        List<String> log = new ArrayList<String>();
+        LruCache<String, String> cache = newRemovalLogCache(log);
 
         cache.put("a", "A");
         cache.put("b", "B");
         cache.put("c", "C");
         cache.put("b", "B2");
-        assertEquals(expectedEvictionLog, evictionLog);
+        assertEquals(Arrays.asList("b=B>B2"), log);
         assertSnapshot(cache, "a", "A", "c", "C", "b", "B2");
     }
 
