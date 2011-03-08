@@ -4498,8 +4498,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         */
 
         canvas.restore();
-
-        updateCursorControllerPositions();
     }
 
     private void updateCursorsPositions() {
@@ -4557,15 +4555,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     protected void updateCursorControllerPositions() {
-        // No need to create the controllers if they were not already
-        if (mInsertionPointCursorController != null &&
-                mInsertionPointCursorController.isShowing()) {
-            mInsertionPointCursorController.updatePosition();
-        }
-        if (mSelectionModifierCursorController != null &&
-                mSelectionModifierCursorController.isShowing()) {
-            mSelectionModifierCursorController.updatePosition();
-        }
+        // TODO remove
     }
 
     @Override
@@ -7356,14 +7346,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (isTextEditable() || mTextIsSelectable) {
-                if (mScrollX != oldScrollX || mScrollY != oldScrollY) {
+                if (mScrollX != oldScrollX || mScrollY != oldScrollY) { // TODO remove
                     // Hide insertion anchor while scrolling. Leave selection.
-                    hideInsertionPointCursorController();
-                    // No need to create the controller, since there is nothing to update.
-                    if (mSelectionModifierCursorController != null &&
-                            mSelectionModifierCursorController.isShowing()) {
-                        mSelectionModifierCursorController.updatePosition();
-                    }
+                    hideInsertionPointCursorController(); // TODO any motion should hide it
                 }
 
                 if (touchIsFinished) {
@@ -7372,7 +7357,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final InputMethodManager imm = InputMethodManager.peekInstance();
                         handled |= imm != null && imm.showSoftInput(this, 0);
                     }
-
 
                     boolean selectAllGotFocus = mSelectAllOnFocus && didTouchFocusSelect();
                     if (!selectAllGotFocus && hasSelection()) {
@@ -8653,26 +8637,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private class HandleView extends View implements ViewTreeObserver.OnScrollChangedListener {
+    private class HandleView extends View implements ViewTreeObserver.OnPreDrawListener {
         private Drawable mDrawable;
-        private final ScrollingPopupWindow mContainer;
-        private int mPositionX;
-        private int mPositionY;
+        private final PopupWindow mContainer;
+        // Position with respect to the parent TextView
+        private int mPositionX, mPositionY;
         private final CursorController mController;
         private boolean mIsDragging;
-        private float mTouchToWindowOffsetX;
-        private float mTouchToWindowOffsetY;
+        // Offset from touch position to mPosition
+        private float mTouchToWindowOffsetX, mTouchToWindowOffsetY;
         private float mHotspotX;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
         // Where the touch position should be on the handle to ensure a maximum cursor visibility
         private float mIdealVerticalOffset;
-        private int mLastParentX;
-        private int mLastParentY;
+        // Parent's (TextView) position in window
+        private int mLastParentX, mLastParentY;
         private float mDownPositionX, mDownPositionY;
+        // PopupWindow container absolute position with respect to the enclosing window
         private int mContainerPositionX, mContainerPositionY;
-        private long mTouchTimer;
+        // Visible or not (scrolled off screen), whether or not this handle should be visible
+        private boolean mIsActive = false;
+        // The insertion handle can have an associated PastePopupMenu
         private boolean mIsInsertionHandle = false;
+        // Used to detect taps on the insertion handle, which will affect the PastePopupMenu
+        private long mTouchTimer;
         private PastePopupMenu mPastePopupWindow;
 
         // Touch-up filter: number of previous positions remembered
@@ -8684,12 +8673,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mPreviousOffsetIndex = 0;
         private int mNumberPreviousOffsets = 0;
 
-        public void startTouchUpFilter(int offset) {
+        private void startTouchUpFilter(int offset) {
             mNumberPreviousOffsets = 0;
             addPositionToTouchUpFilter(offset);
         }
 
-        public void addPositionToTouchUpFilter(int offset) {
+        private void addPositionToTouchUpFilter(int offset) {
             if (mNumberPreviousOffsets > 0 &&
                     mPreviousOffsets[mPreviousOffsetIndex] == offset) {
                 // Make sure only actual changes of position are recorded.
@@ -8702,7 +8691,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mNumberPreviousOffsets++;
         }
 
-        public void filterOnTouchUp() {
+        private void filterOnTouchUp() {
             final long now = SystemClock.uptimeMillis();
             int i = 0;
             int index = mPreviousOffsetIndex;
@@ -8725,16 +8714,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public HandleView(CursorController controller, int pos) {
             super(TextView.this.mContext);
             mController = controller;
-            mContainer = new ScrollingPopupWindow(TextView.this.mContext, null,
+            mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
             mContainer.setClippingEnabled(false);
             mContainer.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+            mContainer.setContentView(this);
 
-            setOrientation(pos);
+            setPosition(pos);
         }
 
-        public void setOrientation(int pos) {
+        private void setPosition(int pos) {
             int handleWidth;
             switch (pos) {
                 case LEFT: {
@@ -8774,38 +8764,48 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             final int handleHeight = mDrawable.getIntrinsicHeight();
-
             mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
+
             invalidate();
         }
 
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            setMeasuredDimension(mDrawable.getIntrinsicWidth(),
-                    mDrawable.getIntrinsicHeight());
+            setMeasuredDimension(mDrawable.getIntrinsicWidth(), mDrawable.getIntrinsicHeight());
         }
 
         public void show() {
-            if (!isPositionVisible()) {
-                hide();
-                return;
-            }
-            mContainer.setContentView(this);
-            mContainerPositionX = mPositionX;
-            mContainerPositionY = mPositionY - TextView.this.getHeight();
-            mContainer.showAsDropDown(TextView.this, mContainerPositionX, mContainerPositionY);
+            updateContainerPosition();
+            if (isShowing()) {
+                mContainer.update(mContainerPositionX, mContainerPositionY,
+                        mRight - mLeft, mBottom - mTop);
 
-            // Hide paste view when handle is moved on screen.
+                hidePastePopupWindow();
+            } else {
+                mContainer.showAtLocation(TextView.this, 0,
+                        mContainerPositionX, mContainerPositionY);
+
+                mIsActive = true;
+
+                ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+                vto.addOnPreDrawListener(this);
+            }
+        }
+
+        private void dismiss() {
+            mIsDragging = false;
+            mContainer.dismiss();
             hidePastePopupWindow();
         }
 
         public void hide() {
-            mIsDragging = false;
-            mContainer.dismiss();
-            hidePastePopupWindow();
+            dismiss();
+
+            mIsActive = false;
+
             ViewTreeObserver vto = TextView.this.getViewTreeObserver();
-            vto.removeOnScrollChangedListener(this);
+            vto.removeOnPreDrawListener(this);
         }
 
         public boolean isShowing() {
@@ -8856,44 +8856,59 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private void moveTo(int x, int y) {
             mPositionX = x - TextView.this.mScrollX;
             mPositionY = y - TextView.this.mScrollY;
-            if (isPositionVisible()) {
-                int[] coords = null;
-                if (mContainer.isShowing()) {
-                    final int containerPositionX = mPositionX;
-                    final int containerPositionY = mPositionY - TextView.this.getHeight();
 
-                    if (containerPositionX != mContainerPositionX || 
-                        containerPositionY != mContainerPositionY) {
-                        mContainerPositionX = containerPositionX;
-                        mContainerPositionY = containerPositionY;
+            if (mIsDragging) {
+                TextView.this.getLocationInWindow(mTempCoords);
+                if (mTempCoords[0] != mLastParentX || mTempCoords[1] != mLastParentY) {
+                    mTouchToWindowOffsetX += mTempCoords[0] - mLastParentX;
+                    mTouchToWindowOffsetY += mTempCoords[1] - mLastParentY;
+                    mLastParentX = mTempCoords[0];
+                    mLastParentY = mTempCoords[1];
+                }
+                // Hide paste popup window as soon as the handle is dragged.
+                hidePastePopupWindow();
+            }
+        }
 
-                        mContainer.update(TextView.this, mContainerPositionX, mContainerPositionY,
-                                mRight - mLeft, mBottom - mTop);
+        /**
+         * Updates the global container's position.
+         * @return whether or not the position has actually changed
+         */
+        private boolean updateContainerPosition() {
+            // TODO Prevent this using different HandleView subclasses
+            mController.updateOffset(this, mController.getCurrentOffset(this));
+            TextView.this.getLocationInWindow(mTempCoords);
+            final int containerPositionX = mTempCoords[0] + mPositionX;
+            final int containerPositionY = mTempCoords[1] + mPositionY;
 
-                        // Hide paste popup window as soon as a scroll occurs.
-                        hidePastePopupWindow();
+            if (containerPositionX != mContainerPositionX ||
+                containerPositionY != mContainerPositionY) {
+                mContainerPositionX = containerPositionX;
+                mContainerPositionY = containerPositionY;
+                return true;
+            }
+            return false;
+        }
+
+        public boolean onPreDraw() {
+            if (updateContainerPosition()) {
+                if (isPositionVisible()) {
+                    mContainer.update(mContainerPositionX, mContainerPositionY,
+                            mRight - mLeft, mBottom - mTop);
+
+                    if (mIsActive && !isShowing()) {
+                        show();
                     }
                 } else {
-                    show();
+                    if (isShowing()) {
+                        dismiss();
+                    }
                 }
 
-                if (mIsDragging) {
-                    if (coords == null) {
-                        coords = mTempCoords;
-                        TextView.this.getLocationInWindow(coords);
-                    }
-                    if (coords[0] != mLastParentX || coords[1] != mLastParentY) {
-                        mTouchToWindowOffsetX += coords[0] - mLastParentX;
-                        mTouchToWindowOffsetY += coords[1] - mLastParentY;
-                        mLastParentX = coords[0];
-                        mLastParentY = coords[1];
-                    }
-                    // Hide paste popup window as soon as the handle is dragged.
-                    hidePastePopupWindow();
-                }
-            } else {
-                hide();
+                // Hide paste popup as soon as the view is scrolled or moved
+                hidePastePopupWindow();
             }
+            return true;
         }
 
         @Override
@@ -8979,7 +8994,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mIsDragging;
         }
 
-        void positionAtCursor(final int offset) {
+        void positionAtCursor(int offset) {
             addPositionToTouchUpFilter(offset);
             final int width = mDrawable.getIntrinsicWidth();
             final int height = mDrawable.getIntrinsicHeight();
@@ -9013,50 +9028,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mPastePopupWindow.hide();
             }
         }
-
-        /**
-         * A popup window, attached to a view, and that listens to scroll events in its anchors'
-         * view hierarchy, so that it is automatically moved on such events.
-         */
-        private class ScrollingPopupWindow extends PopupWindow {
-
-            private int[] mDrawingLocations = new int[2];
-
-            public ScrollingPopupWindow(Context context, AttributeSet attrs, int defStyle) {
-                super(context, attrs, defStyle);
-            }
-
-            @Override
-            public boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
-                    int xoff, int yoff) {
-                anchor.getLocationInWindow(mDrawingLocations);
-                p.x = mDrawingLocations[0] + xoff;
-                p.y = mDrawingLocations[1] + anchor.getHeight() + yoff;
-
-                // Hide paste popup as soon as the view is scrolled.
-                hidePastePopupWindow();
-
-                if (!isPositionVisible()) {
-                    dismiss();
-                    onHandleBecomeInvisible();
-                }
-
-                return false;
-            }
-        }
-
-        public void onScrollChanged() {
-            if (isPositionVisible()) {
-                show();
-                ViewTreeObserver vto = TextView.this.getViewTreeObserver();
-                vto.removeOnScrollChangedListener(this);
-            }
-        }
-
-        public void onHandleBecomeInvisible() {
-            ViewTreeObserver vto = TextView.this.getViewTreeObserver();
-            vto.addOnScrollChangedListener(this);
-        }
     }
 
     private class InsertionPointCursorController implements CursorController {
@@ -9074,7 +9045,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void show(int delayBeforePaste) {
-            updatePosition();
+            getHandle().show();
             hideDelayed();
             removePastePopupCallback();
             final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
@@ -9213,7 +9184,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEndHandle == null) mEndHandle = new HandleView(this, HandleView.RIGHT);
 
             mIsShowing = true;
-            updatePosition();
 
             mStartHandle.show();
             mEndHandle.show();
