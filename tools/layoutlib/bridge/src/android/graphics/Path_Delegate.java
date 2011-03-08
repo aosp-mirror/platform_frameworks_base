@@ -393,7 +393,7 @@ public final class Path_Delegate {
         for (int i = 0 ; i < 3 ; i++) {
             if (radii[i * 2] != radii[(i + 1) * 2] || radii[i * 2 + 1] != radii[(i + 1) * 2 + 1]) {
                 Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                        "Different corner size is not support in Path.addRoundRect.",
+                        "Different corner sizes are not supported in Path.addRoundRect.",
                         null, null /*data*/);
                 break;
             }
