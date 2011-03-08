@@ -412,9 +412,7 @@ public final class BridgeTypedArray extends TypedArray {
             return LayoutParams.MATCH_PARENT;
         } else if (s.equals(BridgeConstants.WRAP_CONTENT)) {
             return LayoutParams.WRAP_CONTENT;
-        }
-
-        if (RenderResources.REFERENCE_NULL.equals(s)) {
+        } else if (RenderResources.REFERENCE_NULL.equals(s)) {
             return defValue;
         }
 
@@ -486,23 +484,21 @@ public final class BridgeTypedArray extends TypedArray {
             return LayoutParams.MATCH_PARENT;
         } else if (s.equals(BridgeConstants.WRAP_CONTENT)) {
             return LayoutParams.WRAP_CONTENT;
-        }
-
-        if (RenderResources.REFERENCE_NULL.equals(s)) {
+        } else if (RenderResources.REFERENCE_NULL.equals(s)) {
             return defValue;
         }
-
-        // FIXME huh?
 
         float f = getDimension(index, defValue);
         final int res = (int)(f+0.5f);
         if (res != 0) return res;
         if (f == 0) return 0;
-        if (f > 0) return 1;
-
-        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT,
-                "Can't convert to dimension: " + Integer.toString(index),
-                null, null /*data*/);
+        if (f > 0) return 1; // this is to support ]0;1[ range (since >=1 is handled 2 lines above)
+        if (f < 0) {
+            // negative values are not allowed in pixel dimensions
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                    "Negative pixel dimension: " + s,
+                    null, null /*data*/);
+        }
 
         return defValue;
     }
