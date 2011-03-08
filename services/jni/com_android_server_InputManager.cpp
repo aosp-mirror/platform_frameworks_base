@@ -727,14 +727,14 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
     };
 
     if (wmActions & WM_ACTION_GO_TO_SLEEP) {
-#ifdef DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_INPUT_DISPATCHER_POLICY
         LOGD("handleInterceptActions: Going to sleep.");
 #endif
         android_server_PowerManagerService_goToSleep(when);
     }
 
     if (wmActions & WM_ACTION_POKE_USER_ACTIVITY) {
-#ifdef DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_INPUT_DISPATCHER_POLICY
         LOGD("handleInterceptActions: Poking user activity.");
 #endif
         android_server_PowerManagerService_userActivity(when, POWER_MANAGER_BUTTON_EVENT);
@@ -743,7 +743,7 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
     if (wmActions & WM_ACTION_PASS_TO_USER) {
         policyFlags |= POLICY_FLAG_PASS_TO_USER;
     } else {
-#ifdef DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_INPUT_DISPATCHER_POLICY
         LOGD("handleInterceptActions: Not passing key to user.");
 #endif
     }
