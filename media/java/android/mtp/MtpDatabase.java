@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaScanner;
@@ -62,8 +63,8 @@ public class MtpDatabase {
     // true if the database has been modified in the current MTP session
     private boolean mDatabaseModified;
 
-    // database for writable MTP device properties
-    private SQLiteDatabase mDevicePropDb;
+    // SharedPreferences for writable MTP device properties
+    private SharedPreferences mDeviceProperties;
     private static final int DEVICE_PROPERTIES_DATABASE_VERSION = 1;
 
     // FIXME - this should be passed in via the constructor
@@ -96,9 +97,6 @@ public class MtpDatabase {
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
                                             + Files.FileColumns.FORMAT + "=?";
 
-    private static final String[] DEVICE_PROPERTY_PROJECTION = new String[] { "_id", "value" };
-    private  static final String DEVICE_PROPERTY_WHERE = "code=?";
-
     private final MediaScanner mMediaScanner;
 
     static {
@@ -114,7 +112,7 @@ public class MtpDatabase {
         mMediaStoragePath = storagePath;
         mObjectsUri = Files.getMtpObjectsUri(volumeName);
         mMediaScanner = new MediaScanner(context);
-        openDevicePropertiesDatabase(context);
+        initDeviceProperties(context);
     }
 
     @Override
@@ -126,19 +124,38 @@ public class MtpDatabase {
         }
     }
 
-    private void openDevicePropertiesDatabase(Context context) {
-        mDevicePropDb = context.openOrCreateDatabase("device-properties", Context.MODE_PRIVATE, null);
-        int version = mDevicePropDb.getVersion();
+    private void initDeviceProperties(Context context) {
+        final String devicePropertiesName = "device-properties";
+        mDeviceProperties = context.getSharedPreferences(devicePropertiesName, Context.MODE_PRIVATE);
+        File databaseFile = context.getDatabasePath(devicePropertiesName);
 
-        // initialize if necessary
-        if (version != DEVICE_PROPERTIES_DATABASE_VERSION) {
-            mDevicePropDb.execSQL("CREATE TABLE properties (" +
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "code INTEGER UNIQUE ON CONFLICT REPLACE," +
-                    "value TEXT" +
-                    ");");
-            mDevicePropDb.execSQL("CREATE INDEX property_index ON properties (code);");
-            mDevicePropDb.setVersion(DEVICE_PROPERTIES_DATABASE_VERSION);
+        if (databaseFile.exists()) {
+            // for backward compatibility - read device properties from sqlite database
+            // and migrate them to shared prefs
+            SQLiteDatabase db = null;
+            Cursor c = null;
+            try {
+                db = context.openOrCreateDatabase("device-properties", Context.MODE_PRIVATE, null);
+                if (db != null) {
+                    c = db.query("properties", new String[] { "_id", "code", "value" },
+                            null, null, null, null, null);
+                    if (c != null) {
+                        SharedPreferences.Editor e = mDeviceProperties.edit();
+                        while (c.moveToNext()) {
+                            String name = c.getString(1);
+                            String value = c.getString(2);
+                            e.putString(name, value);
+                        }
+                        e.commit();
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "failed to migrate device properties", e);
+            } finally {
+                if (c != null) c.close();
+                if (db != null) db.close();
+            }
+            databaseFile.delete();
         }
     }
 
@@ -567,30 +584,15 @@ public class MtpDatabase {
         switch (property) {
             case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
-                // writable string properties kept in our device property database
-                Cursor c = null;
-                try {
-                    c = mDevicePropDb.query("properties", DEVICE_PROPERTY_PROJECTION,
-                        DEVICE_PROPERTY_WHERE, new String[] {  Integer.toString(property) },
-                        null, null, null);
-
-                    if (c != null && c.moveToNext()) {
-                        String value = c.getString(1);
-                        int length = value.length();
-                        if (length > 255) {
-                            length = 255;
-                        }
-                        value.getChars(0, length, outStringValue, 0);
-                        outStringValue[length] = 0;
-                    } else {
-                        outStringValue[0] = 0;
-                    }
-                    return MtpConstants.RESPONSE_OK;
-                } finally {
-                    if (c != null) {
-                        c.close();
-                    }
+                // writable string properties kept in shared preferences
+                String value = mDeviceProperties.getString(Integer.toString(property), "");
+                int length = value.length();
+                if (length > 255) {
+                    length = 255;
                 }
+                value.getChars(0, length, outStringValue, 0);
+                outStringValue[length] = 0;
+                return MtpConstants.RESPONSE_OK;
 
             case MtpConstants.DEVICE_PROPERTY_IMAGE_SIZE:
                 // use screen size as max image size
@@ -612,16 +614,11 @@ public class MtpDatabase {
         switch (property) {
             case MtpConstants.DEVICE_PROPERTY_SYNCHRONIZATION_PARTNER:
             case MtpConstants.DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
-                // writable string properties kept in our device property database
-                try {
-                    ContentValues values = new ContentValues();
-                    values.put("code", property);
-                    values.put("value", stringValue);
-                    mDevicePropDb.insert("properties", "code", values);
-                    return MtpConstants.RESPONSE_OK;
-                } catch (Exception e) {
-                    return MtpConstants.RESPONSE_GENERAL_ERROR;
-                }
+                // writable string properties kept in shared prefs
+                SharedPreferences.Editor e = mDeviceProperties.edit();
+                e.putString(Integer.toString(property), stringValue);
+                return (e.commit() ? MtpConstants.RESPONSE_OK
+                        : MtpConstants.RESPONSE_GENERAL_ERROR);
         }
 
         return MtpConstants.RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
