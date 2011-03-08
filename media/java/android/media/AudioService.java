@@ -805,7 +805,7 @@ public class AudioService extends IAudioService.Stub {
             if (mode != mMode) {
 
                 // automatically handle audio focus for mode changes
-                handleFocusForCalls(mMode, mode);
+                handleFocusForCalls(mMode, mode, cb);
 
                 if (AudioSystem.setPhoneState(mode) == AudioSystem.AUDIO_STATUS_OK) {
                     mMode = mode;
@@ -864,7 +864,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     /** pre-condition: oldMode != newMode */
-    private void handleFocusForCalls(int oldMode, int newMode) {
+    private void handleFocusForCalls(int oldMode, int newMode, IBinder cb) {
         // if ringing
         if (newMode == AudioSystem.MODE_RINGTONE) {
             // if not ringing silently
@@ -872,8 +872,8 @@ public class AudioService extends IAudioService.Stub {
             if (ringVolume > 0) {
                 // request audio focus for the communication focus entry
                 requestAudioFocus(AudioManager.STREAM_RING,
-                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
-                        null, null /* both allowed to be null only for this clientId */,
+                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, cb,
+                        null /* IAudioFocusDispatcher allowed to be null only for this clientId */,
                         IN_VOICE_COMM_FOCUS_ID /*clientId*/);
 
             }
@@ -884,8 +884,8 @@ public class AudioService extends IAudioService.Stub {
             // request audio focus for the communication focus entry
             // (it's ok if focus was already requested during ringing)
             requestAudioFocus(AudioManager.STREAM_RING,
-                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT,
-                    null, null /* both allowed to be null only for this clientId */,
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, cb,
+                    null /* IAudioFocusDispatcher allowed to be null only for this clientId */,
                     IN_VOICE_COMM_FOCUS_ID /*clientId*/);
         }
         // if exiting call
@@ -2547,10 +2547,9 @@ public class AudioService extends IAudioService.Stub {
         // the main stream type for the audio focus request is currently not used. It may
         // potentially be used to handle multiple stream type-dependent audio focuses.
 
-        // we need a valid binder callback for clients other than the AudioService's phone
-        // state listener
-        if (!IN_VOICE_COMM_FOCUS_ID.equals(clientId) && ((cb == null) || !cb.pingBinder())) {
-            Log.i(TAG, " AudioFocus  DOA client for requestAudioFocus(), exiting");
+        // we need a valid binder callback for clients
+        if (!cb.pingBinder()) {
+            Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
             return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
         }
 
@@ -2591,17 +2590,14 @@ public class AudioService extends IAudioService.Stub {
         }//synchronized(mAudioFocusLock)
 
         // handle the potential premature death of the new holder of the focus
-        // (premature death == death before abandoning focus) for a client which is not the
-        // AudioService's phone state listener
-        if (!IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
-            // Register for client death notification
-            AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
-            try {
-                cb.linkToDeath(afdh, 0);
-            } catch (RemoteException e) {
-                // client has already died!
-                Log.w(TAG, "AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
-            }
+        // (premature death == death before abandoning focus)
+        // Register for client death notification
+        AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
+        try {
+            cb.linkToDeath(afdh, 0);
+        } catch (RemoteException e) {
+            // client has already died!
+            Log.w(TAG, "AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
         }
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
