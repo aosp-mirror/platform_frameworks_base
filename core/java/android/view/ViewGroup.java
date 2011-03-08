@@ -3680,7 +3680,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     // flag coming from the child that initiated the invalidate
                     if (view != null) {
                         if ((view.mViewFlags & FADING_EDGE_MASK) != 0 &&
-                                view.getSolidColor() == 0 && !view.isOpaque()) {
+                                view.getSolidColor() == 0) {
                             opaqueFlag = DIRTY;
                         }
                         if ((view.mPrivateFlags & DIRTY_MASK) != DIRTY) {
