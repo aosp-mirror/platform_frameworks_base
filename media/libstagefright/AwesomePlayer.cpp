@@ -1597,8 +1597,10 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
     if (!strncasecmp("http://", mUri.string(), 7)
             || !strncasecmp("https://", mUri.string(), 8)) {
-        mConnectingDataSource = new NuHTTPDataSource(
-                (mFlags & INCOGNITO) ? NuHTTPDataSource::kFlagIncognito : 0);
+        mConnectingDataSource = HTTPBase::Create(
+                (mFlags & INCOGNITO)
+                    ? HTTPBase::kFlagIncognito
+                    : 0);
 
         mLock.unlock();
         status_t err = mConnectingDataSource->connect(mUri, &mUriHeaders);
