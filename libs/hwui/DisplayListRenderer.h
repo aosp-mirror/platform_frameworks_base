@@ -103,7 +103,7 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
-    bool replay(OpenGLRenderer& renderer, uint32_t level = 0);
+    bool replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level = 0);
 
 private:
     void init();
@@ -214,7 +214,7 @@ public:
     void prepareDirty(float left, float top, float right, float bottom, bool opaque);
     void finish();
 
-    bool callDrawGLFunction(Functor *functor);
+    bool callDrawGLFunction(Functor *functor, Rect& dirty);
 
     void interrupt();
     void resume();
@@ -238,7 +238,7 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    bool drawDisplayList(DisplayList* displayList, uint32_t level = 0);
+    bool drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level = 0);
     void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);

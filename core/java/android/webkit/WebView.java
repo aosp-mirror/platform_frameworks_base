@@ -351,7 +351,8 @@ public class WebView extends AbsoluteLayout
 
     private ZoomManager mZoomManager;
 
-    private Rect mGLRectViewport = new Rect();
+    private final Rect mGLRectViewport = new Rect();
+    private final Rect mViewRectViewport = new Rect();
     private boolean mGLViewportEmpty = false;
 
     /**
@@ -4152,7 +4153,7 @@ public class WebView extends AbsoluteLayout
 
         if (canvas.isHardwareAccelerated()) {
             int functor = nativeGetDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
-                    getScale(), extras);
+                    mGLViewportEmpty ? null : mViewRectViewport, getScale(), extras);
             ((HardwareCanvas) canvas).callDrawGLFunction(functor);
         } else {
             DrawFilter df = null;
@@ -5258,6 +5259,7 @@ public class WebView extends AbsoluteLayout
             // Then need to invert the Y axis, just for GL
             View rootView = getRootView();
             int rootViewHeight = rootView.getHeight();
+            mViewRectViewport.set(mGLRectViewport);
             int savedWebViewBottom = mGLRectViewport.bottom;
             mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeight();
             mGLRectViewport.top = rootViewHeight - savedWebViewBottom;
@@ -5265,7 +5267,8 @@ public class WebView extends AbsoluteLayout
         } else {
             mGLViewportEmpty = true;
         }
-        nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport);
+        nativeUpdateDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
+                mGLViewportEmpty ? null : mViewRectViewport);
     }
 
     /**
@@ -8531,8 +8534,9 @@ public class WebView extends AbsoluteLayout
             boolean splitIfNeeded);
     private native void     nativeDumpDisplayTree(String urlOrNull);
     private native boolean  nativeEvaluateLayersAnimations();
-    private native int      nativeGetDrawGLFunction(Rect rect, float scale, int extras);
-    private native void     nativeUpdateDrawGLFunction(Rect rect);
+    private native int      nativeGetDrawGLFunction(Rect rect, Rect viewRect,
+            float scale, int extras);
+    private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect);
     private native boolean  nativeDrawGL(Rect rect, float scale, int extras);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper,

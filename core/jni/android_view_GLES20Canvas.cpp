@@ -35,7 +35,6 @@
 
 #include <DisplayListRenderer.h>
 #include <LayerRenderer.h>
-#include <OpenGLDebugRenderer.h>
 #include <OpenGLRenderer.h>
 #include <SkiaShader.h>
 #include <SkiaColorFilter.h>
@@ -60,7 +59,6 @@ using namespace uirenderer;
 
 // Debug
 #define DEBUG_RENDERER 0
-#define PROFILE_RENDERER 0
 
 // Debug
 #if DEBUG_RENDERER
@@ -99,11 +97,7 @@ static jboolean android_view_GLES20Canvas_preserveBackBuffer(JNIEnv* env, jobjec
 
 static OpenGLRenderer* android_view_GLES20Canvas_createRenderer(JNIEnv* env, jobject clazz) {
     RENDERER_LOGD("Create OpenGLRenderer");
-#if PROFILE_RENDERER
-    return new OpenGLDebugRenderer;
-#else
     return new OpenGLRenderer;
-#endif
 }
 
 static void android_view_GLES20Canvas_destroyRenderer(JNIEnv* env, jobject clazz,
@@ -139,7 +133,8 @@ static void android_view_GLES20Canvas_finish(JNIEnv* env, jobject clazz,
 
 static bool android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, Functor *functor) {
-    return renderer->callDrawGLFunction(functor);
+    android::uirenderer::Rect dirty;
+    return renderer->callDrawGLFunction(functor, dirty);
 }
 
 // ----------------------------------------------------------------------------
@@ -503,8 +498,14 @@ static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
 }
 
 static bool android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
-        jobject clazz, OpenGLRenderer* renderer, DisplayList* displayList) {
-    return renderer->drawDisplayList(displayList);
+        jobject clazz, OpenGLRenderer* renderer, DisplayList* displayList, jobject dirty) {
+    android::uirenderer::Rect bounds;
+    bool redraw = renderer->drawDisplayList(displayList, bounds);
+    if (redraw && dirty != NULL) {
+        env->CallVoidMethod(dirty, gRectClassInfo.set,
+                int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom));
+    }
+    return redraw;
 }
 
 // ----------------------------------------------------------------------------
@@ -663,7 +664,8 @@ static JNINativeMethod gMethods[] = {
     { "nGetDisplayList",         "(I)I",       (void*) android_view_GLES20Canvas_getDisplayList },
     { "nDestroyDisplayList",     "(I)V",       (void*) android_view_GLES20Canvas_destroyDisplayList },
     { "nGetDisplayListRenderer", "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListRenderer },
-    { "nDrawDisplayList",        "(II)Z",      (void*) android_view_GLES20Canvas_drawDisplayList },
+    { "nDrawDisplayList",        "(IILandroid/graphics/Rect;)Z",
+                                               (void*) android_view_GLES20Canvas_drawDisplayList },
 
     { "nInterrupt",              "(I)V",       (void*) android_view_GLES20Canvas_interrupt },
     { "nResume",                 "(I)V",       (void*) android_view_GLES20Canvas_resume },

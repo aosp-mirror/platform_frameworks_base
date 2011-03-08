@@ -166,7 +166,7 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 void DisplayList::init() {
 }
 
-bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
+bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) {
     bool needsInvalidate = false;
     TextContainer text;
     mReader.rewind();
@@ -189,7 +189,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
             case DrawGLFunction: {
                 Functor *functor = (Functor *) getInt();
                 DISPLAY_LIST_LOGD("%s%s %p", (char*) indent, OP_NAMES[op], functor);
-                needsInvalidate |= renderer.callDrawGLFunction(functor);
+                needsInvalidate |= renderer.callDrawGLFunction(functor, dirty);
             }
             break;
             case Save: {
@@ -287,7 +287,7 @@ bool DisplayList::replay(OpenGLRenderer& renderer, uint32_t level) {
                 DisplayList* displayList = getDisplayList();
                 DISPLAY_LIST_LOGD("%s%s %p, %d", (char*) indent, OP_NAMES[op],
                     displayList, level + 1);
-                needsInvalidate |= renderer.drawDisplayList(displayList, level + 1);
+                needsInvalidate |= renderer.drawDisplayList(displayList, dirty, level + 1);
             }
             break;
             case DrawLayer: {
@@ -589,7 +589,8 @@ void DisplayListRenderer::interrupt() {
 void DisplayListRenderer::resume() {
 }
 
-bool DisplayListRenderer::callDrawGLFunction(Functor *functor) {
+bool DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
+    // Ignore dirty during recording, it matters only when we replay
     addOp(DisplayList::DrawGLFunction);
     addInt((int) functor);
     return false; // No invalidate needed at record-time
@@ -673,7 +674,9 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
 }
 
-bool DisplayListRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
+bool DisplayListRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level) {
+    // dirty is an out parameter and should not be recorded,
+    // it matters only when replaying the display list
     addOp(DisplayList::DrawDisplayList);
     addDisplayList(displayList);
     return false;
