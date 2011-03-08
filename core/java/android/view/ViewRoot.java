@@ -1606,13 +1606,9 @@ public final class ViewRoot extends Handler implements ViewParent,
                 return;
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "IllegalArgumentException locking surface", e);
-                try {
-                    if (!sWindowSession.outOfMemory(mWindow)) {
-                        Slog.w(TAG, "No processes killed for memory; killing self");
-                        Process.killProcess(Process.myPid());
-                    }
-                } catch (RemoteException ex) {
-                }
+                // Don't assume this is due to out of memory, it could be
+                // something else, and if it is something else then we could
+                // kill stuff (or ourself) for no reason.
                 mLayoutRequested = true;    // ask wm for a new surface next time.
                 return;
             }
