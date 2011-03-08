@@ -115,7 +115,7 @@ public class MediaVideoItem extends MediaItem {
         try {
              properties = mMANativeHelper.getMediaProperties(filename);
         } catch ( Exception e) {
-            throw new IllegalArgumentException("Unsupported file or file not found: " + filename);
+            throw new IllegalArgumentException(e.getMessage() + " : " + filename);
         }
 
         switch (mMANativeHelper.getFileType(properties.fileType)) {
