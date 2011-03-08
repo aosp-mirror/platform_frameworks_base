@@ -8563,6 +8563,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 canvas.onPreDraw(mLocalDirtyRect);
                 mLocalDirtyRect.setEmpty();
 
+                final int restoreCount = canvas.save();
+
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
 
@@ -8576,6 +8578,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     draw(canvas);
                 }
 
+                canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
                 mHardwareLayer.end(currentCanvas);
@@ -8725,6 +8728,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 // The dirty rect should always be null for a display list
                 canvas.onPreDraw(null);
 
+                final int restoreCount = canvas.save();
+
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
@@ -8737,6 +8742,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     draw(canvas);
                 }
 
+                canvas.restoreToCount(restoreCount);
             } finally {
                 canvas.onPostDraw();
 
