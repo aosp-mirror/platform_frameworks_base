@@ -140,7 +140,7 @@ public class AudioTrack {
         try {
           properties = mMANativeHelper.getMediaProperties(filename);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Unsupported file or file not found");
+            throw new IllegalArgumentException(e.getMessage() + " : " + filename);
         }
         switch (mMANativeHelper.getFileType(properties.fileType)) {
             case MediaProperties.FILE_3GP:
