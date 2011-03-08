@@ -24,4 +24,20 @@ public class EGLDisplayImpl extends EGLDisplay {
     public EGLDisplayImpl(int dpy) {
         mEGLDisplay = dpy;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EGLDisplayImpl that = (EGLDisplayImpl) o;
+
+        return mEGLDisplay == that.mEGLDisplay;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return mEGLDisplay;
+    }
 }

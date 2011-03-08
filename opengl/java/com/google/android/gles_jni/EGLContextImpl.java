@@ -32,4 +32,19 @@ public class EGLContextImpl extends EGLContext {
     public GL getGL() {
         return mGLContext;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EGLContextImpl that = (EGLContextImpl) o;
+
+        return mEGLContext == that.mEGLContext;
+    }
+
+    @Override
+    public int hashCode() {
+        return mEGLContext;
+    }
 }
