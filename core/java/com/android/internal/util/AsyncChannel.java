@@ -135,6 +135,8 @@ public class AsyncChannel {
      * channel is forcibly disconnected by the system or as a reply to CMD_CHANNEL_DISCONNECT.
      *
      * msg.arg1 == 0 : STATUS_SUCCESSFUL
+     *             1 : STATUS_BINDING_UNSUCCESSFUL
+     *             2 : STATUS_SEND_UNSUCCESSFUL
      *               : All other values signify failure and the channel state is indeterminate
      * msg.obj  == the AsyncChannel
      * msg.replyTo = messenger disconnecting or null if it was never connected.
@@ -146,6 +148,9 @@ public class AsyncChannel {
 
     /** Error attempting to bind on a connect */
     public static final int STATUS_BINDING_UNSUCCESSFUL = 1;
+
+    /** Error attempting to send a message */
+    public static final int STATUS_SEND_UNSUCCESSFUL = 2;
 
     /** Service connection */
     private AsyncChannelConnection mConnection;
@@ -345,11 +350,7 @@ public class AsyncChannel {
             mSrcContext.unbindService(mConnection);
         }
         if (mSrcHandler != null) {
-            Message msg = mSrcHandler.obtainMessage(CMD_CHANNEL_DISCONNECTED);
-            msg.arg1 = STATUS_SUCCESSFUL;
-            msg.obj = this;
-            msg.replyTo = mDstMessenger;
-            mSrcHandler.sendMessage(msg);
+            replyDisconnected(STATUS_SUCCESSFUL);
         }
     }
 
@@ -363,7 +364,7 @@ public class AsyncChannel {
         try {
             mDstMessenger.send(msg);
         } catch (RemoteException e) {
-            log("TODO: handle sendMessage RemoteException" + e);
+            replyDisconnected(STATUS_SEND_UNSUCCESSFUL);
         }
     }
 
@@ -712,6 +713,7 @@ public class AsyncChannel {
 
     /**
      * Reply to the src handler that we're half connected.
+     * see: CMD_CHANNEL_HALF_CONNECTED for message contents
      *
      * @param status to be stored in msg.arg1
      */
@@ -722,6 +724,21 @@ public class AsyncChannel {
         msg.replyTo = mDstMessenger;
         mSrcHandler.sendMessage(msg);
     }
+
+    /**
+     * Reply to the src handler that we are disconnected
+     * see: CMD_CHANNEL_DISCONNECTED for message contents
+     *
+     * @param status to be stored in msg.arg1
+     */
+    private void replyDisconnected(int status) {
+        Message msg = mSrcHandler.obtainMessage(CMD_CHANNEL_DISCONNECTED);
+        msg.arg1 = status;
+        msg.obj = this;
+        msg.replyTo = mDstMessenger;
+        mSrcHandler.sendMessage(msg);
+    }
+
 
     /**
      * ServiceConnection to receive call backs.
@@ -736,11 +753,7 @@ public class AsyncChannel {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Message msg = mSrcHandler.obtainMessage(CMD_CHANNEL_DISCONNECTED);
-            msg.arg1 = STATUS_SUCCESSFUL;
-            msg.obj = AsyncChannel.this;
-            msg.replyTo = mDstMessenger;
-            mSrcHandler.sendMessage(msg);
+            replyDisconnected(STATUS_SUCCESSFUL);
         }
     }
 
