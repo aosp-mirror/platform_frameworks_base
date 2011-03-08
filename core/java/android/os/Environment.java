@@ -423,9 +423,16 @@ public class Environment {
 
     /**
      * Returns whether the device has an external storage device which is
-     * emulated. If true, the device does not have real external storage
-     * and certain system services such as the package manager use this
+     * emulated. If true, the device does not have real external storage, and the directory
+     * returned by {@link #getExternalStorageDirectory()} will be allocated using a portion of
+     * the internal storage system.
+     *
+     * <p>Certain system services, such as the package manager, use this
      * to determine where to install an application.
+     *
+     * <p>Emulated external storage may also be encrypted - see
+     * {@link android.app.admin.DevicePolicyManager#setStorageEncryption(
+     * android.content.ComponentName, boolean)} for additional details.
      */
     public static boolean isExternalStorageEmulated() {
         if (mIsExternalStorageEmulated == null) {
