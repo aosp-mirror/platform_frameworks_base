@@ -157,31 +157,6 @@ public final class NfcAdapter {
     public static final String EXTRA_ID = "android.nfc.extra.ID";
 
     /**
-     * Broadcast Action: a transaction with a secure element has been detected.
-     * <p>
-     * Always contains the extra field
-     * {@link android.nfc.NfcAdapter#EXTRA_AID}
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_TRANSACTION_DETECTED =
-            "android.nfc.action.TRANSACTION_DETECTED";
-
-    /**
-     * Broadcast Action: an RF field ON has been detected.
-     * @hide
-     */
-    public static final String ACTION_RF_FIELD_ON_DETECTED =
-            "android.nfc.action.RF_FIELD_ON_DETECTED";
-
-    /**
-     * Broadcast Action: an RF Field OFF has been detected.
-     * @hide
-     */
-    public static final String ACTION_RF_FIELD_OFF_DETECTED =
-            "android.nfc.action.RF_FIELD_OFF_DETECTED";
-
-    /**
      * Broadcast Action: an adapter's state changed between enabled and disabled.
      *
      * The new value is stored in the extra EXTRA_NEW_BOOLEAN_STATE and just contains
@@ -199,15 +174,6 @@ public final class NfcAdapter {
      * @hide
      */
     public static final String EXTRA_NEW_BOOLEAN_STATE = "android.nfc.isEnabled";
-
-    /**
-     * Mandatory byte array extra field in
-     * {@link android.nfc.NfcAdapter#ACTION_TRANSACTION_DETECTED}.
-     * <p>
-     * Contains the AID of the applet involved in the transaction.
-     * @hide
-     */
-    public static final String EXTRA_AID = "android.nfc.extra.AID";
 
     /**
      * LLCP link status: The LLCP link is activated.
@@ -691,39 +657,14 @@ public final class NfcAdapter {
     }
 
     /**
-     * Create an Nfc Secure Element Connection
      * @hide
      */
-    public NfcSecureElement createNfcSecureElementConnection() {
+    public INfcAdapterExtras getNfcAdapterExtrasInterface() {
         try {
-            return new NfcSecureElement(sService.getNfcSecureElementInterface());
+            return sService.getNfcAdapterExtrasInterface();
         } catch (RemoteException e) {
-            Log.e(TAG, "createNfcSecureElementConnection failed", e);
+            attemptDeadServiceRecovery(e);
             return null;
-        }
-    }
-
-    /**
-     * To change the Secure Element Card Emulation state (ON/OFF)
-     * @hide
-     */
-    public void changeNfcSecureElementCardEmulationState(boolean state)
-    {
-        int seId = 11259375;
-        if(state){
-            /* Enable card emulation */
-            try {
-                sService.selectSecureElement(seId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Enable card emulation failed", e);
-            }
-        }else{
-            /* Disable card emulation */
-            try {
-                sService.deselectSecureElement();
-            } catch (RemoteException e) {
-                Log.e(TAG, " card emulation failed", e);
-            }
         }
     }
 }

@@ -87,7 +87,9 @@
     <protected-broadcast android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
-    <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
+    <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED" />
+    <protected-broadcast android:name="com.android.nfc_extras.action.AID_SELECTED" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
