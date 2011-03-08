@@ -721,6 +721,9 @@ MediaProfiles::createDefaultCamcorderProfiles(MediaProfiles *profiles)
     createDefaultCamcorderTimeLapseHighProfiles(&highTimeLapseProfile, &highSpecificTimeLapseProfile);
     profiles->mCamcorderProfiles.add(highTimeLapseProfile);
     profiles->mCamcorderProfiles.add(highSpecificTimeLapseProfile);
+
+    // We only have the back-facing camera support by default.
+    profiles->mCameraIds.add(0);
 }
 
 /*static*/ void
