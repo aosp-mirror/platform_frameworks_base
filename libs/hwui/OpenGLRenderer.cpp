@@ -210,7 +210,7 @@ void OpenGLRenderer::resume() {
     glBlendEquation(GL_FUNC_ADD);
 }
 
-bool OpenGLRenderer::callDrawGLFunction(Functor *functor) {
+bool OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     interrupt();
     if (mDirtyClip) {
         setScissorFromClip();
@@ -226,9 +226,16 @@ bool OpenGLRenderer::callDrawGLFunction(Functor *functor) {
     }
 #endif
 
-    status_t result = (*functor)();
+    float bounds[4];
+    status_t result = (*functor)(&bounds[0], 4);
+
+    if (result != 0) {
+        Rect localDirty(bounds[0], bounds[1], bounds[2], bounds[3]);
+        dirty.unionWith(localDirty);
+    }
+
     resume();
-    return (result == 0) ? false : true;
+    return result != 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1057,11 +1064,11 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t level) {
+bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level) {
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList) {
-        return displayList->replay(*this, level);
+        return displayList->replay(*this, dirty, level);
     }
     return false;
 }
@@ -1522,7 +1529,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
             break;
     }
 
-    // TODO: Handle paint->getTextScaleX()
     const float oldX = x;
     const float oldY = y;
     const bool pureTranslate = mSnapshot->transform->isPureTranslate();

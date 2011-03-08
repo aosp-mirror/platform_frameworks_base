@@ -26,6 +26,7 @@ public:
     Functor() {}
     virtual ~Functor() {}
     virtual status_t operator ()() { return true; }
+    virtual status_t operator ()(float* data, uint32_t len) { return true; }
 };
 
 }; // namespace android

@@ -42,6 +42,17 @@ struct ShadowText {
 
         textSize = paint->getTextSize();
         typeface = paint->getTypeface();
+
+        flags = 0;
+        if (paint->isFakeBoldText()) {
+            flags |= Font::kFakeBold;
+        }
+
+        const float skewX = paint->getTextSkewX();
+        italicStyle = *(uint32_t*) &skewX;
+
+        const float scaleXFloat = paint->getTextScaleX();
+        scaleX = *(uint32_t*) &scaleXFloat;
     }
 
     ~ShadowText() {
@@ -51,6 +62,9 @@ struct ShadowText {
     uint32_t len;
     float textSize;
     SkTypeface* typeface;
+    uint32_t flags;
+    uint32_t italicStyle;
+    uint32_t scaleX;
     const char16_t* text;
     String16 str;
 
@@ -65,7 +79,13 @@ struct ShadowText {
             LTE_INT(radius) {
                 LTE_FLOAT(textSize) {
                     LTE_INT(typeface) {
-                        return strncmp16(text, rhs.text, len >> 1) < 0;
+                        LTE_INT(flags) {
+                            LTE_INT(italicStyle) {
+                                LTE_INT(scaleX) {
+                                    return strncmp16(text, rhs.text, len >> 1) < 0;
+                                }
+                            }
+                        }
                     }
                 }
             }

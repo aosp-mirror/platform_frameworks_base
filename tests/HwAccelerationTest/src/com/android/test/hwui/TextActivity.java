@@ -58,10 +58,12 @@ public class TextActivity extends Activity {
             mScaledPaint = new Paint();
             mScaledPaint.setAntiAlias(true);
             mScaledPaint.setTextSize(16.0f);
+            mScaledPaint.setShadowLayer(3.0f, 3.0f, 3.0f, 0xff00ff00);
 
             mSkewPaint = new Paint();
             mSkewPaint.setAntiAlias(true);
-            mSkewPaint.setTextSize(16.0f);            
+            mSkewPaint.setTextSize(16.0f);
+            mSkewPaint.setShadowLayer(3.0f, 3.0f, 3.0f, 0xff000000);
         }
 
         @Override
@@ -106,11 +108,11 @@ public class TextActivity extends Activity {
             mStrikePaint.setUnderlineText(true);
             
             mSkewPaint.setTextSkewX(-0.25f);
-            canvas.drawText("Hello OpenGL renderer!", 680, 200, mSkewPaint);
+            canvas.drawText("Hello OpenGL renderer!", 980, 200, mSkewPaint);
             mSkewPaint.setTextSkewX(0.5f);
-            canvas.drawText("Hello OpenGL renderer!", 680, 230, mSkewPaint);
+            canvas.drawText("Hello OpenGL renderer!", 980, 230, mSkewPaint);
             mSkewPaint.setTextSkewX(0.0f);
-            canvas.drawText("Hello OpenGL renderer!", 680, 260, mSkewPaint);
+            canvas.drawText("Hello OpenGL renderer!", 980, 260, mSkewPaint);
 
             mScaledPaint.setTextScaleX(0.5f);
             canvas.drawText("Hello OpenGL renderer!", 500, 200, mScaledPaint);

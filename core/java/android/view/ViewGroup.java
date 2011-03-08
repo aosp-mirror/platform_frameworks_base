@@ -2585,7 +2585,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                 } else {
                     child.mPrivateFlags &= ~DIRTY_MASK;
-                    ((HardwareCanvas) canvas).drawDisplayList(displayList);
+                    ((HardwareCanvas) canvas).drawDisplayList(displayList, null);
                 }
             }
         } else if (cache != null) {
