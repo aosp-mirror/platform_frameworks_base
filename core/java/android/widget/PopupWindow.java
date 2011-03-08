@@ -1039,7 +1039,7 @@ public class PopupWindow {
      *
      * @return true if the popup is translated upwards to fit on screen
      */
-    boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
+    private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
             int xoff, int yoff) {
 
         anchor.getLocationInWindow(mDrawingLocation);
