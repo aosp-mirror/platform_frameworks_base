@@ -1374,6 +1374,9 @@
         <enum name="KEYCODE_BUTTON_14" value="201" />
         <enum name="KEYCODE_BUTTON_15" value="202" />
         <enum name="KEYCODE_BUTTON_16" value="203" />
+        <enum name="KEYCODE_LANGUAGE_SWITCH" value="204" />
+        <enum name="KEYCODE_MANNER_MODE" value="205" />
+        <enum name="KEYCODE_3D_MODE" value="206" />
     </attr>
 
     <!-- ***************************************************************** -->
