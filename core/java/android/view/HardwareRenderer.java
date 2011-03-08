@@ -269,7 +269,7 @@ public abstract class HardwareRenderer {
         static EGLDisplay sEglDisplay;
         static EGLConfig sEglConfig;
 
-        private static Thread sEglThread;        
+        private static Thread sEglThread;
 
         EGLSurface mEglSurface;
         
@@ -284,6 +284,8 @@ public abstract class HardwareRenderer {
         final boolean mTranslucent;
 
         private boolean mDestroyed;
+        
+        private final Rect mRedrawClip = new Rect();
 
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
@@ -606,8 +608,13 @@ public abstract class HardwareRenderer {
 
                         DisplayList displayList = view.getDisplayList();
                         if (displayList != null) {
-                            if (canvas.drawDisplayList(displayList)) {
-                                view.invalidate();
+                            if (canvas.drawDisplayList(displayList, mRedrawClip)) {
+                                if (mRedrawClip.isEmpty()) {
+                                    view.invalidate();
+                                } else {
+                                    view.getParent().invalidateChild(view, mRedrawClip);
+                                }
+                                mRedrawClip.setEmpty();
                             }
                         } else {
                             // Shouldn't reach here
@@ -646,8 +653,8 @@ public abstract class HardwareRenderer {
         private int checkCurrent() {
             // TODO: Don't check the current context when we have one per UI thread
             // TODO: Use a threadlocal flag to know whether the surface has changed
-            if (sEgl.eglGetCurrentContext() != sEglContext ||
-                    sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW) != mEglSurface) {
+            if (!sEglContext.equals(sEgl.eglGetCurrentContext()) ||
+                    !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW))) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
                     fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
