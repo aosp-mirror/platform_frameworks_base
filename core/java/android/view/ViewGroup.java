@@ -4275,11 +4275,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      *         does not exist within the group
      */
     public View getChildAt(int index) {
-        try {
-            return mChildren[index];
-        } catch (IndexOutOfBoundsException ex) {
+        if (index < 0 || index >= mChildrenCount) {
             return null;
         }
+        return mChildren[index];
     }
 
     /**
