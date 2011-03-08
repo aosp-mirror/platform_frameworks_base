@@ -30,6 +30,8 @@
 
 #include "unicode/ubidi.h"
 #include "unicode/ushape.h"
+#include "HarfbuzzSkia.h"
+#include "harfbuzz-shaper.h"
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -52,7 +54,13 @@
 // Define the interval in number of cache hits between two statistics dump
 #define DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL 100
 
+// Define if we want to have Advances debug values
+#define DEBUG_ADVANCES 0
+
 namespace android {
+
+// Harfbuzz uses 26.6 fixed point values for pixel offsets
+#define HB_FIXED_TO_FLOAT(v) (((float) v) * (1.0 / 64))
 
 /**
  * TextLayoutCacheKey is the Cache key
@@ -149,8 +157,18 @@ public:
         advances = new float[count];
         this->count = count;
 
-        computeAdvances(paint, chars, start, count, contextCount, dirFlags,
+#if RTL_USE_HARFBUZZ
+        computeAdvancesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
                 advances, &totalAdvance);
+#else
+        computeAdvancesWithICU(paint, chars, start, count, contextCount, dirFlags,
+                advances, &totalAdvance);
+#endif
+#if DEBUG_ADVANCES
+        LOGD("Advances - count=%d - countextCount=%d - totalAdvance=%f - "
+                "adv[0]=%f adv[1]=%f adv[2]=%f adv[3]=%f", count, contextCount, totalAdvance,
+                advances[0], advances[1], advances[2], advances[3]);
+#endif
     }
 
     void copyResult(jfloat* outAdvances, jfloat* outTotalAdvance) {
@@ -165,8 +183,108 @@ public:
         return sizeof(RunAdvanceDescription) + sizeof(jfloat) * count;
     }
 
-    static void computeAdvances(SkPaint* paint, const UChar* chars, size_t start, size_t count,
-            size_t contextCount, int dirFlags, jfloat* outAdvances, jfloat* outTotalAdvance) {
+    static void setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font, FontData* fontData,
+            SkPaint* paint, const UChar* chars, size_t start, size_t count, size_t contextCount,
+            int dirFlags) {
+        bool isRTL = dirFlags & 0x1;
+
+        font->klass = &harfbuzzSkiaClass;
+        font->userData = 0;
+        // The values which harfbuzzSkiaClass returns are already scaled to
+        // pixel units, so we just set all these to one to disable further
+        // scaling.
+        font->x_ppem = 1;
+        font->y_ppem = 1;
+        font->x_scale = 1;
+        font->y_scale = 1;
+
+        memset(shaperItem, 0, sizeof(*shaperItem));
+        shaperItem->font = font;
+        shaperItem->face = HB_NewFace(shaperItem->font, harfbuzzSkiaGetTable);
+
+        // We cannot know, ahead of time, how many glyphs a given script run
+        // will produce. We take a guess that script runs will not produce more
+        // than twice as many glyphs as there are code points plus a bit of
+        // padding and fallback if we find that we are wrong.
+        createGlyphArrays(shaperItem, (contextCount + 2) * 2);
+
+        // Free memory for clusters if needed and recreate the clusters array
+        if (shaperItem->log_clusters) {
+            delete shaperItem->log_clusters;
+        }
+        shaperItem->log_clusters = new unsigned short[contextCount];
+
+        shaperItem->item.pos = start;
+        shaperItem->item.length = count;
+        shaperItem->item.bidiLevel = isRTL;
+        shaperItem->item.script = isRTL ? HB_Script_Arabic : HB_Script_Common;
+
+        shaperItem->string = chars;
+        shaperItem->stringLength = contextCount;
+
+        fontData->textSize = paint->getTextSize();
+        fontData->fakeBold = paint->isFakeBoldText();
+        fontData->fakeItalic = (paint->getTextSkewX() > 0);
+        fontData->typeFace = paint->getTypeface();
+
+        shaperItem->font->userData = fontData;
+    }
+
+    static void shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontRec* font, FontData* fontData,
+            SkPaint* paint, const UChar* chars, size_t start, size_t count, size_t contextCount,
+            int dirFlags) {
+        // Setup Harfbuzz Shaper
+        setupShaperItem(shaperItem, font, fontData, paint, chars, start, count,
+                contextCount, dirFlags);
+
+        // Shape
+        resetGlyphArrays(shaperItem);
+        while (!HB_ShapeItem(shaperItem)) {
+            // We overflowed our arrays. Resize and retry.
+            // HB_ShapeItem fills in shaperItem.num_glyphs with the needed size.
+            deleteGlyphArrays(shaperItem);
+            createGlyphArrays(shaperItem, shaperItem->num_glyphs << 1);
+            resetGlyphArrays(shaperItem);
+        }
+    }
+
+    static void computeAdvancesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
+            size_t count, size_t contextCount, int dirFlags,
+            jfloat* outAdvances, jfloat* outTotalAdvance) {
+
+        bool isRTL = dirFlags & 0x1;
+
+        HB_ShaperItem shaperItem;
+        HB_FontRec font;
+        FontData fontData;
+        shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, chars, start, count,
+                contextCount, dirFlags);
+
+#if DEBUG_ADVANCES
+        LOGD("HARFBUZZ -- num_glypth=%d", shaperItem.num_glyphs);
+#endif
+
+        jfloat totalAdvance = 0;
+        for (size_t i = 0; i < count; i++) {
+            // Be careful: we need to use roundf() for doing the same way as Skia is doing
+            totalAdvance += outAdvances[i] = roundf(HB_FIXED_TO_FLOAT(shaperItem.advances[i]));
+
+#if DEBUG_ADVANCES
+            LOGD("hb-adv = %d - rebased = %f - total = %f", shaperItem.advances[i], outAdvances[i],
+                    totalAdvance);
+#endif
+        }
+
+        deleteGlyphArrays(&shaperItem);
+        HB_FreeFace(shaperItem.face);
+
+        *outTotalAdvance = totalAdvance;
+    }
+
+    static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars, size_t start,
+            size_t count, size_t contextCount, int dirFlags,
+            jfloat* outAdvances, jfloat* outTotalAdvance) {
+
         SkAutoSTMalloc<CHAR_BUFFER_SIZE, jchar> tempBuffer(contextCount);
         jchar* buffer = tempBuffer.get();
 
@@ -199,6 +317,9 @@ public:
 
         jfloat totalAdvance = 0;
         if (widths < count) {
+#if DEBUG_ADVANCES
+        LOGD("ICU -- count=%d", widths);
+#endif
             // Skia operates on code points, not code units, so surrogate pairs return only
             // one value. Expand the result so we have one value per UTF-16 code unit.
 
@@ -213,10 +334,19 @@ public:
                         text[p-1] < UNICODE_FIRST_LOW_SURROGATE) {
                     outAdvances[p++] = 0;
                 }
+#if DEBUG_ADVANCES
+                LOGD("icu-adv = %f - total = %f", outAdvances[i], totalAdvance);
+#endif
             }
         } else {
+#if DEBUG_ADVANCES
+        LOGD("ICU -- count=%d", count);
+#endif
             for (size_t i = 0; i < count; i++) {
                 totalAdvance += outAdvances[i] = SkScalarToFloat(scalarArray[i]);
+#if DEBUG_ADVANCES
+                LOGD("icu-adv = %f - total = %f", outAdvances[i], totalAdvance);
+#endif
             }
         }
         *outTotalAdvance = totalAdvance;
@@ -228,6 +358,32 @@ private:
     size_t count;
 
     uint32_t elapsedTime;
+
+    static void deleteGlyphArrays(HB_ShaperItem* shaperItem) {
+        delete[] shaperItem->glyphs;
+        delete[] shaperItem->attributes;
+        delete[] shaperItem->advances;
+        delete[] shaperItem->offsets;
+    }
+
+    static void createGlyphArrays(HB_ShaperItem* shaperItem, int size) {
+        shaperItem->glyphs = new HB_Glyph[size];
+        shaperItem->attributes = new HB_GlyphAttributes[size];
+        shaperItem->advances = new HB_Fixed[size];
+        shaperItem->offsets = new HB_FixedPoint[size];
+        shaperItem->num_glyphs = size;
+    }
+
+    static void resetGlyphArrays(HB_ShaperItem* shaperItem) {
+        int size = shaperItem->num_glyphs;
+        // All the types here don't have pointers. It is safe to reset to
+        // zero unless Harfbuzz breaks the compatibility in the future.
+        memset(shaperItem->glyphs, 0, size * sizeof(shaperItem->glyphs[0]));
+        memset(shaperItem->attributes, 0, size * sizeof(shaperItem->attributes[0]));
+        memset(shaperItem->advances, 0, size * sizeof(shaperItem->advances[0]));
+        memset(shaperItem->offsets, 0, size * sizeof(shaperItem->offsets[0]));
+    }
+
 }; // RunAdvanceDescription
 
 

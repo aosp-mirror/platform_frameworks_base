@@ -47,8 +47,16 @@ void TextLayoutCache::init() {
     if (mDebugEnabled) {
         LOGD("TextLayoutCache start time: %lld", mCacheStartTime);
     }
-
     mInitialized = true;
+
+    if (mDebugEnabled) {
+#if RTL_USE_HARFBUZZ
+        LOGD("TextLayoutCache is using HARFBUZZ");
+#else
+        LOGD("TextLayoutCache is using ICU");
+#endif
+    }
+
     if (mDebugEnabled) {
         LOGD("TextLayoutCache initialization is done");
     }

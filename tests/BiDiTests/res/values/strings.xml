@@ -1,0 +1,26 @@
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <string name="button_text">Button</string>
+    <string name="textview_text">This is a text for a TextView</string>
+    <string name="edittext_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
+    <string name="normal_text">Normal String</string>
+    <string name="normal_long_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
+    <string name="arabic_text">&#x0644;&#x0627;</string>
+    <string name="chinese_text">利比亚局势或影响美俄关系发展</string>
+    <string name="italic_text">Italic String</string>
+    <string name="bold_text">Bold String</string>
+    <string name="bold_italic_text">Bold Italic String</string>
+</resources>

@@ -45,5 +45,7 @@ static RtlDebugLevel readRtlDebugLevel() {
     return kRtlDebugDisabled;
 }
 
+#define RTL_USE_HARFBUZZ 1
+
 } // namespace android
 #endif // ANDROID_RTL_PROPERTIES_H

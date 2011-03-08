@@ -1455,6 +1455,43 @@ public class Paint {
     }
 
     /**
+     * Return the glypth Ids for the characters in the string.
+     *
+     * @param text   The text to measure
+     * @param start  The index of the first char to to measure
+     * @param end    The end of the text slice to measure
+     * @param contextStart the index of the first character to use for shaping context,
+     * must be <= start
+     * @param contextEnd the index past the last character to use for shaping context,
+     * must be >= end
+     * @param flags the flags to control the advances, either {@link #DIRECTION_LTR}
+     * or {@link #DIRECTION_RTL}
+     * @param glyphs array to receive the glyph Ids of the characters.
+     *               Must be at least a large as the text.
+     * @return       the number of glyphs in the returned array
+     *
+     * @hide
+     *
+     * Used only for BiDi / RTL Tests
+     */
+    public int getTextGlypths(String text, int start, int end, int contextStart, int contextEnd,
+            int flags, char[] glyphs) {
+        if ((start | end | contextStart | contextEnd | (end - start)
+                | (start - contextStart) | (contextEnd - end) | (text.length() - end)
+                | (text.length() - contextEnd)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (end - start > glyphs.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
+        }
+        return native_getTextGlyphs(mNativePaint, text, start, end, contextStart, contextEnd,
+                flags, glyphs);
+    }
+
+    /**
      * Convenience overload that takes a char array instead of a
      * String.
      *
@@ -1858,6 +1895,10 @@ public class Paint {
                             char[] text, int index, int count, float[] widths);
     private static native int native_getTextWidths(int native_object,
                             String text, int start, int end, float[] widths);
+
+    private static native int native_getTextGlyphs(int native_object,
+            String text, int start, int end, int contextStart, int contextEnd,
+            int flags, char[] glyphs);
 
     private static native float native_getTextRunAdvances(int native_object,
             char[] text, int index, int count, int contextIndex, int contextCount,
