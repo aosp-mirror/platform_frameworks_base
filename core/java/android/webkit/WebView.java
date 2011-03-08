@@ -497,15 +497,6 @@ public class WebView extends AbsoluteLayout
     // default is not set, the UI will continue handle them.
     private boolean mDeferTouchProcess;
 
-    // Currently, multi-touch events are sent to WebKit first then back to
-    // WebView while single-touch events are handled in WebView first.
-    // So there is a chance that a single-touch move event is handled in WebView
-    // before multi-touch events are finished.
-    // if mIsHandlingMultiTouch is true, which means multi-touch event handling
-    // is not finished, then any single-touch move event will be skipped.
-    // FIXME: send single-touch events to WebKit first then back to WebView.
-    private boolean mIsHandlingMultiTouch = false;
-
     // to avoid interfering with the current touch events, track them
     // separately. Currently no snapping or fling in the deferred process mode
     private int mDeferTouchMode = TOUCH_DONE_MODE;
@@ -5474,7 +5465,6 @@ public class WebView extends AbsoluteLayout
             case MotionEvent.ACTION_DOWN: {
                 mPreventDefault = PREVENT_DEFAULT_NO;
                 mConfirmMove = false;
-                mIsHandlingMultiTouch = false;
                 mInitialHitTestResult = null;
                 if (!mScroller.isFinished()) {
                     // stop the current scroll animation, but if this is
@@ -6012,7 +6002,6 @@ public class WebView extends AbsoluteLayout
             // set mLastTouchX/Y to the remaining point
             mLastTouchX = Math.round(x);
             mLastTouchY = Math.round(y);
-            mIsHandlingMultiTouch = false;
         } else if (action == MotionEvent.ACTION_MOVE) {
             // negative x or y indicate it is on the edge, skip it.
             if (x < 0 || y < 0) {
@@ -7286,8 +7275,6 @@ public class WebView extends AbsoluteLayout
         private void handleQueuedMotionEvent(MotionEvent ev) {
             int action = ev.getActionMasked();
             if (ev.getPointerCount() > 1) {  // Multi-touch
-                mIsHandlingMultiTouch = true;
-
                 handleMultiTouchInWebView(ev);
             } else {
                 final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
@@ -7326,7 +7313,6 @@ public class WebView extends AbsoluteLayout
                 if (ted.mPoints.length > 1) {  // multi-touch
                     if (ted.mAction == MotionEvent.ACTION_POINTER_UP &&
                             ted.mMotionEvent.getPointerCount() == 2) {
-                        mIsHandlingMultiTouch = false;
                     }
                     if (!ted.mNativeResult) {
                         mPreventDefault = PREVENT_DEFAULT_NO;
