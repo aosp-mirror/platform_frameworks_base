@@ -4791,13 +4791,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (maxLayer < ws.mAnimLayer) {
                     maxLayer = ws.mAnimLayer;
                 }
-                final Rect wf = ws.mFrame;
-                final Rect cr = ws.mContentInsets;
-                int left = wf.left + cr.left;
-                int top = wf.top + cr.top;
-                int right = wf.right - cr.right;
-                int bottom = wf.bottom - cr.bottom;
-                frame.union(left, top, right, bottom);
+                
+                // Don't include wallpaper in bounds calculation
+                if (!ws.mIsWallpaper) {
+                    final Rect wf = ws.mFrame;
+                    final Rect cr = ws.mContentInsets;
+                    int left = wf.left + cr.left;
+                    int top = wf.top + cr.top;
+                    int right = wf.right - cr.right;
+                    int bottom = wf.bottom - cr.bottom;
+                    frame.union(left, top, right, bottom);
+                }
             }
             Binder.restoreCallingIdentity(ident);
 
