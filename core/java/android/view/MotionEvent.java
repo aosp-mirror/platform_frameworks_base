@@ -172,6 +172,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * recent point, as well as any intermediate points since the last
      * hover move event.
      * <p>
+     * This action is always delivered to the window or view under the pointer.
+     * </p><p>
      * This action is not a touch event so it is delivered to
      * {@link View#onGenericMotionEvent(MotionEvent)} rather than
      * {@link View#onTouchEvent(MotionEvent)}.
@@ -184,8 +186,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * vertical and/or horizontal scroll offsets.  Use {@link #getAxisValue(int)}
      * to retrieve the information from {@link #AXIS_VSCROLL} and {@link #AXIS_HSCROLL}.
      * The pointer may or may not be down when this event is dispatched.
-     * This action is always delivered to the winder under the pointer, which
-     * may not be the window currently touched.
+     * <p></p>
+     * This action is always delivered to the window or view under the pointer, which
+     * may not be the window or view currently touched.
      * <p>
      * This action is not a touch event so it is delivered to
      * {@link View#onGenericMotionEvent(MotionEvent)} rather than
@@ -193,6 +196,32 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </p>
      */
     public static final int ACTION_SCROLL           = 8;
+
+    /**
+     * Constant for {@link #getAction}: The pointer is not down but has entered the
+     * boundaries of a window or view.
+     * <p>
+     * This action is always delivered to the window or view under the pointer.
+     * </p><p>
+     * This action is not a touch event so it is delivered to
+     * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+     * {@link View#onTouchEvent(MotionEvent)}.
+     * </p>
+     */
+    public static final int ACTION_HOVER_ENTER      = 9;
+
+    /**
+     * Constant for {@link #getAction}: The pointer is not down but has exited the
+     * boundaries of a window or view.
+     * <p>
+     * This action is always delivered to the window or view that was previously under the pointer.
+     * </p><p>
+     * This action is not a touch event so it is delivered to
+     * {@link View#onGenericMotionEvent(MotionEvent)} rather than
+     * {@link View#onTouchEvent(MotionEvent)}.
+     * </p>
+     */
+    public static final int ACTION_HOVER_EXIT       = 10;
 
     /**
      * Bits in the action code that represent a pointer index, used with
@@ -1354,9 +1383,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     /**
      * Returns true if this motion event is a touch event.
      * <p>
-     * Specifically excludes pointer events with action {@link #ACTION_HOVER_MOVE}
-     * or {@link #ACTION_SCROLL} because they are not actually touch events
-     * (the pointer is not down).
+     * Specifically excludes pointer events with action {@link #ACTION_HOVER_MOVE},
+     * {@link #ACTION_HOVER_ENTER}, {@link #ACTION_HOVER_EXIT}, or {@link #ACTION_SCROLL}
+     * because they are not actually touch events (the pointer is not down).
      * </p>
      * @return True if this motion event is a touch event.
      * @hide
@@ -2313,6 +2342,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 return "ACTION_HOVER_MOVE";
             case ACTION_SCROLL:
                 return "ACTION_SCROLL";
+            case ACTION_HOVER_ENTER:
+                return "ACTION_HOVER_ENTER";
+            case ACTION_HOVER_EXIT:
+                return "ACTION_HOVER_EXIT";
         }
         int index = (action & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
         switch (action & ACTION_MASK) {

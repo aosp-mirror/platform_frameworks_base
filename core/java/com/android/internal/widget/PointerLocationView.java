@@ -357,6 +357,12 @@ public class PointerLocationView extends View {
             case MotionEvent.ACTION_HOVER_MOVE:
                 prefix = "HOVER MOVE";
                 break;
+            case MotionEvent.ACTION_HOVER_ENTER:
+                prefix = "HOVER ENTER";
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                prefix = "HOVER EXIT";
+                break;
             case MotionEvent.ACTION_SCROLL:
                 prefix = "SCROLL";
                 break;
