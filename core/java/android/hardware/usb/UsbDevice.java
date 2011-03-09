@@ -270,6 +270,11 @@ public final class UsbDevice implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        return mName.hashCode();
+    }
+
+    @Override
     public String toString() {
         return "UsbDevice[mName=" + mName + ",mVendorId=" + mVendorId +
                 ",mProductId=" + mProductId + ",mClass=" + mClass +

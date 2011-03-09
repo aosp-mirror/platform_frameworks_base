@@ -483,14 +483,14 @@ public class UsbService extends IUsbManager.Stub {
         mDeviceManager.grantAccessoryPermission(accessory, uid);
     }
 
-    public boolean hasDefaults(String packageName, int uid) {
+    public boolean hasDefaults(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        return mDeviceManager.hasDefaults(packageName, uid);
+        return mDeviceManager.hasDefaults(packageName);
     }
 
-    public void clearDefaults(String packageName, int uid) {
+    public void clearDefaults(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        mDeviceManager.clearDefaults(packageName, uid);
+        mDeviceManager.clearDefaults(packageName);
     }
 
     /*
