@@ -1,0 +1,164 @@
+page.title=Distributing to Specific Screens
+parent.title=Supporting Multiple Screens
+parent.link=screens_support.html
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Quickview</h2>
+  <ul>
+    <li>If necessary, you can control distribution of your application based on the device
+screen configuration</li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#FilteringHansetApps">Filtering a Handset Application from Tablets</a></li>
+    <li><a href="#FilteringTabletApps">Filtering a Tablet Application from Handsets</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+    <li><a
+href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+
+<p>Although we recommend that you design your application to function properly on multiple
+configurations of screen size and density, you can instead choose to limit the distribution of your
+application to certain types of screens, such as only tablets and other large devices or only
+handsets and similar-sized devices. To do so, you can enable filtering by external services such as
+Android Market by adding elements to your manifest file that specify the screen configurations your
+application supports.</p>
+
+<p>However, before you decide to restrict your application to certain screen configurations, you
+should understand the techniques for <a
+href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a> and implement
+them to the best of your ability. By supporting multiple screens, your application can be made
+available to the greatest number of users with different devices, using a single {@code .apk}.</p>
+
+
+
+<h2 id="FilteringHandsetApps">Filtering a Handset Application from Tablets</h2>
+
+<p>Because the system generally scales applications to fit larger screens well, you shouldn't
+need to filter your application from larger screens. As long as you follow the <a
+href="{@docRoot}guide/practices/screens_support.html#screen-independence">Best Practices for Screen
+Independence</a>, your application should work well on larger screens such as tablets. However, you
+might discover that your application can't scale up well or perhaps you've decided to publish two
+versions of your application for different screen configurations. In such a case, you can use the <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element to manage the distribution of your application based on
+combinations of screen size and density. External services such as Android Market use this
+information to apply filtering to your application, so that only devices that have a screen
+configuration with which you declare compatibility can download your application.</p>
+
+<p>The <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element must contain one or more {@code &lt;screen&gt;} elements. Each
+{@code &lt;screen&gt;} element specifies a screen configuration with which your application is
+compatible, using both the {@code android:screenSize} and {@code android:screenDensity} attributes.
+Each {@code &lt;screen&gt;} element <strong>must include both attributes</strong> to specify an
+individual screen configuration&mdash;if either attribute is missing, then the element is invalid
+(external services such as Android Market will ignore it).</p>
+
+<p>For example, if your application is compatible with only small and normal size screens,
+regardless of screen density, you must specify eight different {@code &lt;screen&gt;} elements,
+because each screen size has four density configurations. You must declare each one of
+these; any combination of size and density that you do <em>not</em> specify is considered a screen
+configuration with which your application is <em>not</em> compatible. Here's what the manifest
+entry looks like if your application is compatible with only small and normal screen sizes:</p>
+
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;compatible-screens>
+        &lt;!-- all small size screens -->
+        &lt;screen android:screenSize="small" android:screenDensity="ldpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="mdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="hdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="xhdpi" />
+        &lt;!-- all normal size screens -->
+        &lt;screen android:screenSize="normal" android:screenDensity="ldpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="mdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="hdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="xhdpi" />
+    &lt;/compatible-screens>
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+
+<p class="note"><strong>Note:</strong> Although you can also use the <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element for the reverse scenario (when your application is not
+compatible with smaller screens), it's easier if you instead use the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> as discussed in the next section, because it doesn't require you
+to specify each screen density your application supports.</p>
+
+
+
+<h2 id="FilteringTabletApps">Filtering a Tablet Application from Handsets</h2>
+
+<p>If your application's UI is adversely affected when the system scales your application down to
+smaller screens, you should add <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
+layouts</a> for smaller screens to adjust the layout for those screens. However, sometimes your
+layout still might not fit a smaller screen or you've explicitly designed your application only for
+tablets and other large devices. In this case, you can manage the availability of your application
+to smaller screens by using the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> manifest element.</p>
+
+<p>For example, if you want your application to be available only to large and extra large
+screens, you can declare the element in your manifest like this:</p>
+
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;supports-screens android:smallScreens="false"
+                      android:normalScreens="false"
+                      android:largeScreens="true"
+                      android:xlargeScreens="true" /&gt;
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+
+<p>External services such as Android Market read this manifest element and use it to ensure that
+your application is available only to devices with either a large or an extra large screen.</p>
+
+<p class="caution"><strong>Caution:</strong> If you use the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> element for the reverse scenario (when your application is not compatible
+with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
+external services such as Android Market <strong>do not</strong> apply filtering. Your application
+will still be available to larger screens, but when it runs, it will not resize to fit the screen.
+Instead, the system will draw it in a "postage stamp" window that's the same relative size as the
+screen size that your application does support (see <a
+href="screens-support-1.5.html#CompatMode">compatibility mode</a> for more information). If you want
+to prevent your application from being downloaded on larger screens, use <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a>, as discussed in the previous section about <a
+href="#FilteringHandsetApps">Filtering a Handset Application from Tablets</a>.</p>
+
+<p>Remember, you should strive to make your application available to as many devices as possible by
+applying all necessary techniques for <a
+href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a>. You should
+use <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> or <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> only when you cannot provide compatibility on all screen configurations
+or you have decided to provide different versions of your application for different sets of screen
+configurations.</p>
+
