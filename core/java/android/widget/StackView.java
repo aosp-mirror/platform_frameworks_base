@@ -531,6 +531,8 @@ public class StackView extends AdapterViewAnimator {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        boolean expandClipRegion = false;
+
         canvas.getClipBounds(stackInvalidateRect);
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -540,12 +542,22 @@ public class StackView extends AdapterViewAnimator {
                     child.getAlpha() == 0f || child.getVisibility() != VISIBLE) {
                 lp.resetInvalidateRect();
             }
-            stackInvalidateRect.union(lp.getInvalidateRect());
+            Rect childInvalidateRect = lp.getInvalidateRect();
+            if (!childInvalidateRect.isEmpty()) {
+                expandClipRegion = true;
+                stackInvalidateRect.union(childInvalidateRect);
+            }
         }
-        canvas.save(Canvas.CLIP_SAVE_FLAG);
-        canvas.clipRect(stackInvalidateRect, Region.Op.UNION);
-        super.dispatchDraw(canvas);
-        canvas.restore();
+
+        // We only expand the clip bounds if necessary.
+        if (expandClipRegion) {
+            canvas.save(Canvas.CLIP_SAVE_FLAG);
+            canvas.clipRect(stackInvalidateRect, Region.Op.UNION);
+            super.dispatchDraw(canvas);
+            canvas.restore();
+        } else {
+            super.dispatchDraw(canvas);
+        }
     }
 
     private void onLayout() {
