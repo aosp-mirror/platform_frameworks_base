@@ -513,9 +513,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
             paint.setFilterBitmap(true);
             paint.setAlpha(255);
             final int srcWidth = thumbnail.getWidth();
-            final int height = thumbnail.getHeight();
-            final int srcHeight = srcWidth > height ? height
-                    : (height - height * srcWidth / height);
+            final int srcHeight = thumbnail.getHeight();
             canvas.drawBitmap(thumbnail,
                     new Rect(0, 0, srcWidth-1, srcHeight-1),
                     new RectF(GLOW_PADDING,
