@@ -31,7 +31,7 @@ class DebugFlags {
     public static final boolean CACHE_MANAGER = false;
     public static final boolean CALLBACK_PROXY = false;
     public static final boolean COOKIE_MANAGER = false;
-    public static final boolean COOKIE_SYNC_MANAGER = true;
+    public static final boolean COOKIE_SYNC_MANAGER = false;
     public static final boolean FRAME_LOADER = false;
     public static final boolean J_WEB_CORE_JAVA_BRIDGE = false;// HIGHLY VERBOSE
     public static final boolean LOAD_LISTENER = false;
@@ -41,7 +41,7 @@ class DebugFlags {
     public static final boolean URL_UTIL = false;
     public static final boolean WEB_BACK_FORWARD_LIST = false;
     public static final boolean WEB_SETTINGS = false;
-    public static final boolean WEB_SYNC_MANAGER = true;
+    public static final boolean WEB_SYNC_MANAGER = false;
     public static final boolean WEB_TEXT_VIEW = false;
     public static final boolean WEB_VIEW = false;
     public static final boolean WEB_VIEW_CORE = false;
