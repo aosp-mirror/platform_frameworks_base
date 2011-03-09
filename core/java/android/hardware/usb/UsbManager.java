@@ -281,6 +281,9 @@ public class UsbManager {
 
     /**
      * Returns true if the caller has permission to access the device.
+     * Permission might have been granted temporarily via
+     * {@link #requestPermission(android.hardware.usb.UsbDevice} or
+     * by the user choosing the caller as the default application for the device.
      *
      * @param device to check permissions for
      * @return true if caller has permission
@@ -296,6 +299,9 @@ public class UsbManager {
 
     /**
      * Returns true if the caller has permission to access the accessory.
+     * Permission might have been granted temporarily via
+     * {@link #requestPermission(android.hardware.usb.UsbAccessory} or
+     * by the user choosing the caller as the default application for the accessory.
      *
      * @param accessory to check permissions for
      * @return true if caller has permission
@@ -310,10 +316,13 @@ public class UsbManager {
     }
 
     /**
-     * Requests permission for the given package to access the device.
+     * Requests temporary permission for the given package to access the device.
      * This may result in a system dialog being displayed to the user
      * if permission had not already been granted.
      * Success or failure is returned via the {@link android.app.PendingIntent} pi.
+     * If successful, this grants the caller permission to access the device only
+     * until the device is disconnected.
+     *
      * The following extras will be added to pi:
      * <ul>
      * <li> {@link #EXTRA_DEVICE} containing the device passed into this call
@@ -333,10 +342,13 @@ public class UsbManager {
     }
 
     /**
-     * Requests permission for the given package to access the accessory.
+     * Requests temporary permission for the given package to access the accessory.
      * This may result in a system dialog being displayed to the user
      * if permission had not already been granted.
      * Success or failure is returned via the {@link android.app.PendingIntent} pi.
+     * If successful, this grants the caller permission to access the device only
+     * until the device is disconnected.
+     *
      * The following extras will be added to pi:
      * <ul>
      * <li> {@link #EXTRA_ACCESSORY} containing the accessory passed into this call

@@ -109,6 +109,14 @@ public class UsbAccessory implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        return ((mManufacturer == null ? 0 : mManufacturer.hashCode()) ^
+                (mModel == null ? 0 : mModel.hashCode()) ^
+                (mType == null ? 0 : mType.hashCode()) ^
+                (mVersion == null ? 0 : mVersion.hashCode()));
+    }
+
+    @Override
     public String toString() {
         return "UsbAccessory[mManufacturer=" + mManufacturer +
                             ", mModel=" + mModel +
