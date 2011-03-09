@@ -96,13 +96,14 @@ href="http://java.sun.com/javase/downloads/index.jsp">JDK</a>, if you don't have
 <p>If you will be developing in Eclipse with the Android Development
 Tools (ADT) Plugin&mdash;the recommended path if you are new to
 Android&mdash;make sure that you have a suitable version of Eclipse
-installed on your computer (3.4 or newer is recommended). If you need
-to install Eclipse, you can download it from this location: </p>
+installed on your computer as described in the
+<a href="requirements.html">System Requirements</a> document.
+If you need to install Eclipse, you can download it from this location: </p>
 
 <p style="margin-left:2em;"><a href=
 "http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a></p>
 
-<p>For Eclipse 3.5 or newer, the "Eclipse Classic" version is recommended. Otherwise, a Java or
+<p>The "Eclipse Classic" version is recommended. Otherwise, a Java or
 RCP version of Eclipse is recommended.</p>
 
 

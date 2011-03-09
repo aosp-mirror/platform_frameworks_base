@@ -594,13 +594,14 @@ href="#troubleshooting">Troubleshooting</a> section.</p>
 
 <p>ADT is a plugin for the Eclipse IDE. Before you can install or use ADT,
 you must have a compatible version of Eclipse installed on your development
-computer. </p>
+computer. Check the <a
+href="requirements.html">System Requirements</a> document for
+a list of Eclipse versions that are compatible with the Android SDK.</li></p>
 
 <ul>
 <li>If Eclipse is already installed on your computer, make sure that it is
-a version that is compatible with ADT and the Android SDK. Check the <a
-href="requirements.html">System Requirements</a> document for
-a list of Eclipse versions that are compatible with the Android SDK.</li>
+a version that is compatible with ADT and the Android SDK. 
+
 <li>If you need to install or update Eclipse, you can download it from this
 location:
 
@@ -608,7 +609,7 @@ location:
 "http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>
 </p>
 
-<p>For Eclipse 3.5 or newer, the "Eclipse Classic" version is recommended. Otherwise, a Java or RCP
+<p>The "Eclipse Classic" version is recommended. Otherwise, a Java or RCP
 version of Eclipse is recommended.</p></li>
 </ul>
 
@@ -624,19 +625,15 @@ ADT installation as described in the steps below. </p>
 
 <h3 id="downloading">Downloading the ADT Plugin</h3>
 
-<p>Use Update Manager feature of your Eclipse installation to install the latest
+<p>Use the Update Manager feature of your Eclipse installation to install the latest
 revision of ADT on your development computer.<p>
 
 <p>Assuming that you have a compatible version of the Eclipse IDE installed, as
 described in <a href="#preparing">Preparing for Installation</a>, above, follow
 these steps to download the ADT plugin and install it in your Eclipse
-environment. </p>
+environment.</p>
 
-<table style="font-size:100%">
-<tr><th>Eclipse 3.5 (Galileo) and 3.6 (Helios)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
-<tr>
-<td width="45%">
-<!-- 3.5+ steps -->
+
 <ol>
     <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Install New
 Software...</strong>.</li>
@@ -654,35 +651,6 @@ the checkbox next to Developer Tools and click <strong>Next</strong>.</li>
     <li>Read and accept the license agreements, then click <strong>Finish</strong>.</li>
     <li>When the installation completes, restart Eclipse. </li>
 </ol>
-
-</td>
-<td width="50%">
-
-<!-- 3.4 steps -->
-<ol>
-    <li>Start Eclipse, then select <strong>Help</strong> &gt; <strong>Software Updates...</strong>.
-In the dialog that appears, click the <strong>Available Software</strong> tab.</li>
-    <li>Click <strong>Add Site</strong>.</li>
-    <li>In the Add Site dialog that appears, enter this URL in the "Location" field:
-        <pre>https://dl-ssl.google.com/android/eclipse/</pre>
-        <p>Note: If you have trouble acquiring the plugin, you can try
-           using "http" in the URL, instead of "https" (https is preferred for
-           security reasons).</p>
-        <p>Click <strong>OK</strong>.</p>
-    </li>
-    <li>Back in the Available Software view, you should see the plugin listed by the URL,
-       with "Developer Tools" nested within it. Select the checkbox next to Developer Tools,
-        which will automatically select the nested tools. Then click
-        <strong>Install</strong></li>
-    <li>On the subsequent Install window, all of the included tools
-        should be checked. Click <strong>Next</strong>. </li>
-    <li>Read and accept the license agreements, then click <strong>Finish</strong>.</li>
-    <li>When the installation completes, restart Eclipse. </li>
-
-</ol>
-</td>
-</tr>
-</table>
 
 <h3 id="configuring">Configuring the ADT Plugin</h3>
 
@@ -807,11 +775,6 @@ Eclipse Installed Software window using <strong>Help</strong>
 <p>Follow the steps below to check whether an update is available and, if so,
 to install it. </p>
 
-<table style="font-size:100%">
-<tr><th>Eclipse 3.5 (Galileo) and 3.6 (Helios)</th><th>Eclipse 3.4 (Ganymede)</th></tr>
-<tr>
-<td>
-<!-- 3.5+ steps -->
 <ol>
     <li>Select <strong>Help</strong> &gt; <strong>Check for Updates</strong>.
       <p>If there are no updates available, a dialog will say so and you're done.</p></li>
@@ -823,25 +786,6 @@ to install it. </p>
       Android Development Tools.</li>
     <li>Restart Eclipse.</li>
 </ol>
-</td>
-
-<td width="50%">
-<!-- 3.4 steps -->
-<ol>
-    <li>Select <strong>Help</strong> &gt; <strong>Software Updates</strong>.</li>
-    <li>Select the <strong>Available Software</strong> tab.</li>
-    <li>If there are updates available, select Android DDMS, Android Development Tools,
-      and Android Hierarchy Viewer, then click <strong>Update</strong>.</li>
-    <li>In the resulting Available Updates dialog, ensure that each of the listed tools
-      are selected, then click <strong>Next</strong>.</li>
-    <li>Read and accept the license agreement and then click <strong>Finish</strong>.
-      This will download and install the latest version of Android DDMS and
-      Android Development Tools.</li>
-    <li>Restart Eclipse.</li>
-</ol>
-</td>
-</tr>
-</table>
 
 
 <p>If you encounter problems during the update, remove the existing ADT plugin from Eclipse, then
