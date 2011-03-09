@@ -100,7 +100,7 @@ public class UsbManager {
      *
      * This intent is sent when a USB accessory is detached.
      * <ul>
-     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.usb.UsbAccessory}
+     * <li> {@link #EXTRA_ACCESSORY} containing the {@link UsbAccessory}
      * for the attached accessory that was detached
      * </ul>
      */
@@ -180,10 +180,8 @@ public class UsbManager {
 
     /**
      * Name of extra added to the {@link android.app.PendingIntent}
-     * passed into
-     * {#requestPermission(android.content.Context, android.hardware.usb.UsbDevice, android.app.PendingIntent)}
-     * or
-     * {#requestPermission(android.content.Context, android.hardware.usb.UsbAccessory, android.app.PendingIntent)}
+     * passed into {@link #requestPermission(UsbDevice, PendingIntent)}
+     * or {@link #requestPermission(UsbAccessory, PendingIntent)}
      * containing a boolean value indicating whether the user granted permission or not.
      */
     public static final String EXTRA_PERMISSION_GRANTED = "permission";
@@ -282,7 +280,7 @@ public class UsbManager {
     /**
      * Returns true if the caller has permission to access the device.
      * Permission might have been granted temporarily via
-     * {@link #requestPermission(android.hardware.usb.UsbDevice} or
+     * {@link #requestPermission(UsbDevice, PendingIntent)} or
      * by the user choosing the caller as the default application for the device.
      *
      * @param device to check permissions for
@@ -300,7 +298,7 @@ public class UsbManager {
     /**
      * Returns true if the caller has permission to access the accessory.
      * Permission might have been granted temporarily via
-     * {@link #requestPermission(android.hardware.usb.UsbAccessory} or
+     * {@link #requestPermission(UsbAccessory, PendingIntent)} or
      * by the user choosing the caller as the default application for the accessory.
      *
      * @param accessory to check permissions for
