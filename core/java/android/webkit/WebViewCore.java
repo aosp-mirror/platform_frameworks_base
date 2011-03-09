@@ -827,7 +827,6 @@ final class WebViewCore {
         Rect mNativeLayerRect = new Rect();
         long mSequence;
         boolean mNativeResult;
-        boolean mDontEnqueueResult;
     }
 
     static class GeolocationPermissionsData {
