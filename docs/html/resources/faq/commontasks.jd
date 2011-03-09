@@ -223,7 +223,7 @@ public void onClick(View v){
 // Listen for results.
 protected void onActivityResult(int requestCode, int resultCode, Intent data){
     // See which child activity is calling us back.
-    switch (resultCode) {
+    switch (requestCode) {
         case CHOOSE_FIGHTER:
             // This is the standard resultCode that is sent back if the
             // activity crashed or didn't doesn't supply an explicit result.
@@ -257,7 +257,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data){
             stats.putString("height","6\'2\""); 
             stats.putString("weight", "190 lbs");
             stats.putString("reach", "73\"");
-            setResult(RESULT_OK, "Washington", Bundle);
+            setResult(RESULT_OK, "Washington", stats);
             finish();
         }
     };
@@ -289,7 +289,12 @@ your application is starting up. With the explicit method call, your application
 will have a title bar visible to the user until <code>onCreate</code> runs.</p>
 <p>(Note that this can be applied to either the <code>&lt;application&gt;</code>
 tag or to individual <code>&lt;activity&gt;</code> tags.)</p>
-<a name="localhostalias" id="localhostalias"></a><h2>Referring to localhost from the emulated environment</h2>
+<p class="caution"><strong>Caution:</strong> This theme will also hide the Action Bar on Android
+3.0 and higher. If you want to keep the Action Bar, but hide the title bar, see how you can <a
+href="{@docRoot}guide/topics/ui/themes.html#SelectATheme">select a theme based on platform
+version</a>.</p>
+<a name="localhostalias" id="localhostalias"></a><h2>Referring to localhost from the emulated
+environment</h2>
 <p>
 If you need to refer to your host computer's <em>localhost</em>, such as when you 
 want the emulator client to contact a server running on the same host, use the alias 
