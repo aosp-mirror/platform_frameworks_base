@@ -423,10 +423,7 @@ public class UsbService extends IUsbManager.Stub {
 
     /* returns the currently attached USB accessory (device mode) */
     public UsbAccessory getCurrentAccessory() {
-        synchronized (mLock) {
-            mDeviceManager.checkPermission(mCurrentAccessory);
-            return mCurrentAccessory;
-        }
+        return mCurrentAccessory;
     }
 
     /* opens the currently attached USB accessory (device mode) */
