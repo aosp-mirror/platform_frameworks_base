@@ -51,7 +51,7 @@
                 android:stackFromBottom="true"
                 android:fadingEdge="vertical"
                 android:scrollbars="none"
-                android:fadingEdgeLength="30dip"
+                android:fadingEdgeLength="20dip"
                 android:listSelector="@drawable/recents_thumbnail_bg_selector"
             />
 
