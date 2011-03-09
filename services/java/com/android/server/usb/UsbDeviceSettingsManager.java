@@ -16,11 +16,13 @@
 
 package com.android.server.usb;
 
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -602,50 +604,20 @@ class UsbDeviceSettingsManager {
     }
 
     public void deviceAttached(UsbDevice device) {
-        Intent deviceIntent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        deviceIntent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        deviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         ArrayList<ResolveInfo> matches;
         String defaultPackage;
         synchronized (mLock) {
-            matches = getDeviceMatchesLocked(device, deviceIntent);
+            matches = getDeviceMatchesLocked(device, intent);
             // Launch our default activity directly, if we have one.
             // Otherwise we will start the UsbResolverActivity to allow the user to choose.
             defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
         }
 
-        int count = matches.size();
-        // don't show the resolver activity if there are no choices available
-        if (count == 0) return;
-
-        if (defaultPackage != null) {
-            for (int i = 0; i < count; i++) {
-                ResolveInfo rInfo = matches.get(i);
-                if (rInfo.activityInfo != null &&
-                        defaultPackage.equals(rInfo.activityInfo.packageName)) {
-                    try {
-                        deviceIntent.setComponent(new ComponentName(
-                                defaultPackage, rInfo.activityInfo.name));
-                        mContext.startActivity(deviceIntent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(TAG, "startActivity failed", e);
-                    }
-                    return;
-                }
-            }
-        }
-
-        Intent intent = new Intent(mContext, UsbResolverActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        intent.putExtra(Intent.EXTRA_INTENT, deviceIntent);
-        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS, matches);
-        try {
-            mContext.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "unable to start UsbResolverActivity");
-        }
+        resolveActivity(intent, matches, defaultPackage, device, null);
     }
 
     public void deviceDetached(UsbDevice device) {
@@ -656,49 +628,86 @@ class UsbDeviceSettingsManager {
     }
 
     public void accessoryAttached(UsbAccessory accessory) {
-        Intent accessoryIntent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
-        accessoryIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        accessoryIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         ArrayList<ResolveInfo> matches;
         String defaultPackage;
         synchronized (mLock) {
-            matches = getAccessoryMatchesLocked(accessory, accessoryIntent);
+            matches = getAccessoryMatchesLocked(accessory, intent);
             // Launch our default activity directly, if we have one.
             // Otherwise we will start the UsbResolverActivity to allow the user to choose.
             defaultPackage = mAccessoryPreferenceMap.get(new AccessoryFilter(accessory));
         }
 
+        resolveActivity(intent, matches, defaultPackage, null, accessory);
+    }
+
+    private void resolveActivity(Intent intent, ArrayList<ResolveInfo> matches,
+            String defaultPackage, UsbDevice device, UsbAccessory accessory) {
         int count = matches.size();
         // don't show the resolver activity if there are no choices available
         if (count == 0) return;
 
-        if (defaultPackage != null) {
-            for (int i = 0; i < count; i++) {
-                ResolveInfo rInfo = matches.get(i);
-                if (rInfo.activityInfo != null &&
-                        defaultPackage.equals(rInfo.activityInfo.packageName)) {
-                    try {
-                        accessoryIntent.setComponent(new ComponentName(
-                                defaultPackage, rInfo.activityInfo.name));
-                        mContext.startActivity(accessoryIntent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(TAG, "startActivity failed", e);
-                    }
-                    return;
+        ResolveInfo defaultRI = null;
+        if (count == 1 && defaultPackage == null) {
+            // Check to see if our single choice is on the system partition.
+            // If so, treat it as our default without calling UsbResolverActivity
+            ResolveInfo rInfo = matches.get(0);
+            if (rInfo.activityInfo != null &&
+                    rInfo.activityInfo.applicationInfo != null &&
+                    (rInfo.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                defaultRI = rInfo;
+                int uid = rInfo.activityInfo.applicationInfo.uid;
+                // grant permission
+                if (device != null) {
+                    grantDevicePermission(device, uid);
+                } else if (accessory != null) {
+                    grantAccessoryPermission(accessory, uid);
                 }
             }
         }
 
-        Intent intent = new Intent(mContext, UsbResolverActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (defaultRI == null && defaultPackage != null) {
+            // look for default activity
+            for (int i = 0; i < count; i++) {
+                ResolveInfo rInfo = matches.get(i);
+                if (rInfo.activityInfo != null &&
+                        defaultPackage.equals(rInfo.activityInfo.packageName)) {
+                    defaultRI = rInfo;
+                    break;
+                }
+            }
+        }
 
-        intent.putExtra(Intent.EXTRA_INTENT, accessoryIntent);
-        intent.putParcelableArrayListExtra(UsbResolverActivity.EXTRA_RESOLVE_INFOS, matches);
-        try {
-            mContext.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "unable to start UsbResolverActivity");
+        if (defaultRI != null) {
+            // start default activity directly
+            try {
+                intent.setComponent(
+                        new ComponentName(defaultRI.activityInfo.packageName,
+                                defaultRI.activityInfo.name));
+                mContext.startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "startActivity failed", e);
+            }
+        } else {
+            long identity = Binder.clearCallingIdentity();
+
+            // start UsbResolverActivity so user can choose an activity
+            Intent resolverIntent = new Intent();
+            resolverIntent.setClassName("com.android.systemui",
+                    "com.android.systemui.usb.UsbResolverActivity");
+            resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
+            resolverIntent.putParcelableArrayListExtra("rlist", matches);
+            try {
+                mContext.startActivity(resolverIntent);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "unable to start UsbResolverActivity");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -709,40 +718,121 @@ class UsbDeviceSettingsManager {
         mContext.sendBroadcast(intent);
     }
 
-    public void checkPermission(UsbDevice device) {
-        if (device == null) return;
+    public boolean hasPermission(UsbDevice device) {
         synchronized (mLock) {
-            ArrayList<DeviceFilter> filterList = mDevicePermissionMap.get(Binder.getCallingUid());
+            ArrayList<DeviceFilter> filterList =
+                    mDevicePermissionMap.get(Binder.getCallingUid());
             if (filterList != null) {
                 int count = filterList.size();
                 for (int i = 0; i < count; i++) {
                     DeviceFilter filter = filterList.get(i);
                     if (filter.equals(device)) {
                         // permission allowed
-                        return;
+                        return true;
                     }
                 }
             }
         }
-        throw new SecurityException("User has not given permission to device " + device);
+        return false;
     }
 
-    public void checkPermission(UsbAccessory accessory) {
-        if (accessory == null) return;
+    public boolean hasPermission(UsbAccessory accessory) {
         synchronized (mLock) {
-            ArrayList<AccessoryFilter> filterList = mAccessoryPermissionMap.get(Binder.getCallingUid());
+            ArrayList<AccessoryFilter> filterList =
+                    mAccessoryPermissionMap.get(Binder.getCallingUid());
             if (filterList != null) {
                 int count = filterList.size();
                 for (int i = 0; i < count; i++) {
                     AccessoryFilter filter = filterList.get(i);
                     if (filter.equals(accessory)) {
                         // permission allowed
-                        return;
+                        return true;
                     }
                 }
             }
         }
-        throw new SecurityException("User has not given permission to accessory " + accessory);
+        return false;
+    }
+
+    public void checkPermission(UsbDevice device) {
+        if (!hasPermission(device)) {
+            throw new SecurityException("User has not given permission to device " + device);
+        }
+    }
+
+    public void checkPermission(UsbAccessory accessory) {
+        if (!hasPermission(accessory)) {
+            throw new SecurityException("User has not given permission to accessory " + accessory);
+        }
+    }
+
+    private void requestPermissionDialog(Intent intent, String packageName, PendingIntent pi) {
+        int uid = Binder.getCallingUid();
+
+        // compare uid with packageName to foil apps pretending to be someone else
+        try {
+            ApplicationInfo aInfo = mContext.getPackageManager().getApplicationInfo(packageName, 0);
+            if (aInfo.uid != uid) {
+                throw new IllegalArgumentException("package " + packageName +
+                        " does not match caller's uid " + uid);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("package " + packageName + " not found");
+        }
+
+        long identity = Binder.clearCallingIdentity();
+        intent.setClassName("com.android.systemui",
+                "com.android.systemui.usb.UsbPermissionActivity");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_INTENT, pi);
+        intent.putExtra("package", packageName);
+        intent.putExtra("uid", uid);
+        try {
+            mContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "unable to start UsbPermissionActivity");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    public void requestPermission(UsbDevice device, String packageName, PendingIntent pi) {
+      Intent intent = new Intent();
+
+        // respond immediately if permission has already been granted
+      if (hasPermission(device)) {
+            intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+            intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
+            try {
+                pi.send(mContext, 0, intent);
+            } catch (PendingIntent.CanceledException e) {
+                Log.w(TAG, "requestPermission PendingIntent was cancelled");
+            }
+            return;
+        }
+
+        // start UsbPermissionActivity so user can choose an activity
+        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+        requestPermissionDialog(intent, packageName, pi);
+    }
+
+    public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi) {
+      Intent intent = new Intent();
+
+        // respond immediately if permission has already been granted
+        if (hasPermission(accessory)) {
+            intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+            intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
+           try {
+                pi.send(mContext, 0, intent);
+            } catch (PendingIntent.CanceledException e) {
+                Log.w(TAG, "requestPermission PendingIntent was cancelled");
+            }
+            return;
+        }
+
+        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+        requestPermissionDialog(intent, packageName, pi);
     }
 
     public void setDevicePackage(UsbDevice device, String packageName) {
