@@ -24,7 +24,9 @@ Android applications using the Android SDK. </p>
 
 <h4 style="margin-top:.25em"><em>Eclipse IDE</em></h4>
     <ul>
-      <li>Eclipse 3.4 (Ganymede) or greater</li>
+      <li>Eclipse 3.5 (Galileo) or greater 
+<p class="note"><strong>Note:</strong> Eclipse 3.4 (Ganymede) is no longer
+supported with the latest version of ADT.</p></li>
       <li>Eclipse <a href="http://www.eclipse.org/jdt">JDT</a> plugin (included
 in most Eclipse IDE packages) </li>
       <li>If you need to install or update Eclipse, you can download it from <a
