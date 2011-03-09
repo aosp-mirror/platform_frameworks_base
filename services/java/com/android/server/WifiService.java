@@ -62,6 +62,7 @@ import android.util.Slog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -98,9 +99,6 @@ public class WifiService extends IWifiManager.Stub {
 
     /* Chipset supports background scan */
     private final boolean mBackgroundScanSupported;
-
-    // true if the user enabled Wifi while in airplane mode
-    private AtomicBoolean mAirplaneModeOverwridden = new AtomicBoolean(false);
 
     private final LockList mLocks = new LockList();
     // some wifi lock statistics
@@ -143,6 +141,14 @@ public class WifiService extends IWifiManager.Stub {
 
     private static final String ACTION_DEVICE_IDLE =
             "com.android.server.WifiManager.action.DEVICE_IDLE";
+
+    private static final int WIFI_DISABLED                  = 0;
+    private static final int WIFI_ENABLED                   = 1;
+    /* Wifi enabled while in airplane mode */
+    private static final int WIFI_ENABLED_AIRPLANE_OVERRIDE = 2;
+
+    private AtomicInteger mWifiState = new AtomicInteger(WIFI_DISABLED);
+    private AtomicBoolean mAirplaneModeOn = new AtomicBoolean(false);
 
     private boolean mIsReceiverRegistered = false;
 
@@ -338,11 +344,11 @@ public class WifiService extends IWifiManager.Stub {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        // clear our flag indicating the user has overwridden airplane mode
-                        mAirplaneModeOverwridden.set(false);
-                        // on airplane disable, restore Wifi if the saved state indicates so
-                        if (!isAirplaneModeOn() && testAndClearWifiSavedState()) {
-                            persistWifiEnabled(true);
+                        mAirplaneModeOn.set(isAirplaneModeOn());
+                        /* On airplane mode disable, restore wifi state if necessary */
+                        if (!mAirplaneModeOn.get() && (testAndClearWifiSavedState() ||
+                            mWifiState.get() == WIFI_ENABLED_AIRPLANE_OVERRIDE)) {
+                                persistWifiEnabled(true);
                         }
                         updateWifiState();
                     }
@@ -402,9 +408,10 @@ public class WifiService extends IWifiManager.Stub {
      * This function is used only at boot time
      */
     public void checkAndStartWifi() {
-        /* Start if Wi-Fi is enabled or the saved state indicates Wi-Fi was on */
-        boolean wifiEnabled = !isAirplaneModeOn()
-                && (getPersistedWifiEnabled() || testAndClearWifiSavedState());
+        mAirplaneModeOn.set(isAirplaneModeOn());
+        mWifiState.set(getPersistedWifiState());
+        /* Start if Wi-Fi should be enabled or the saved state indicates Wi-Fi was on */
+        boolean wifiEnabled = shouldWifiBeEnabled() || testAndClearWifiSavedState();
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
         setWifiEnabled(wifiEnabled);
@@ -423,20 +430,38 @@ public class WifiService extends IWifiManager.Stub {
         return (wifiSavedState == 1);
     }
 
-    private boolean getPersistedWifiEnabled() {
+    private int getPersistedWifiState() {
         final ContentResolver cr = mContext.getContentResolver();
         try {
-            return Settings.Secure.getInt(cr, Settings.Secure.WIFI_ON) == 1;
+            return Settings.Secure.getInt(cr, Settings.Secure.WIFI_ON);
         } catch (Settings.SettingNotFoundException e) {
-            Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, 0);
-            return false;
+            Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, WIFI_DISABLED);
+            return WIFI_DISABLED;
+        }
+    }
+
+    private boolean shouldWifiBeEnabled() {
+        if (mAirplaneModeOn.get()) {
+            return mWifiState.get() == WIFI_ENABLED_AIRPLANE_OVERRIDE;
+        } else {
+            return mWifiState.get() != WIFI_DISABLED;
         }
     }
 
     private void persistWifiEnabled(boolean enabled) {
         final ContentResolver cr = mContext.getContentResolver();
-        Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, enabled ? 1 : 0);
+        if (enabled) {
+            if (isAirplaneModeOn() && isAirplaneToggleable()) {
+                mWifiState.set(WIFI_ENABLED_AIRPLANE_OVERRIDE);
+            } else {
+                mWifiState.set(WIFI_ENABLED);
+            }
+        } else {
+            mWifiState.set(WIFI_DISABLED);
+        }
+        Settings.Secure.putInt(cr, Settings.Secure.WIFI_ON, mWifiState.get());
     }
+
 
     /**
      * see {@link android.net.wifi.WifiManager#pingSupplicant()}
@@ -488,11 +513,6 @@ public class WifiService extends IWifiManager.Stub {
 
         if (DBG) {
             Slog.e(TAG, "Invoking mWifiStateMachine.setWifiEnabled\n");
-        }
-
-        // set a flag if the user is enabling Wifi while in airplane mode
-        if (enable && isAirplaneModeOn() && isAirplaneToggleable()) {
-            mAirplaneModeOverwridden.set(true);
         }
 
         if (enable) {
@@ -1037,11 +1057,8 @@ public class WifiService extends IWifiManager.Stub {
     }
 
     private void updateWifiState() {
-        boolean wifiEnabled = getPersistedWifiEnabled();
-        boolean airplaneMode = isAirplaneModeOn() && !mAirplaneModeOverwridden.get();
         boolean lockHeld = mLocks.hasLocks();
         int strongestLockMode = WifiManager.WIFI_MODE_FULL;
-        boolean wifiShouldBeEnabled = wifiEnabled && !airplaneMode;
         boolean wifiShouldBeStarted = !mDeviceIdle || lockHeld;
 
         if (lockHeld) {
@@ -1053,11 +1070,11 @@ public class WifiService extends IWifiManager.Stub {
         }
 
         /* Disable tethering when airplane mode is enabled */
-        if (airplaneMode) {
+        if (mAirplaneModeOn.get()) {
             mWifiStateMachine.setWifiApEnabled(null, false);
         }
 
-        if (wifiShouldBeEnabled) {
+        if (shouldWifiBeEnabled()) {
             if (wifiShouldBeStarted) {
                 reportStartWorkSource();
                 mWifiStateMachine.setWifiEnabled(true);
