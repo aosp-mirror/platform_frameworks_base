@@ -311,9 +311,9 @@ android_mtp_MtpDevice_get_object_info(JNIEnv *env, jobject thiz, jint objectID)
     if (objectInfo->mName)
         env->SetObjectField(info, field_objectInfo_name, env->NewStringUTF(objectInfo->mName));
     if (objectInfo->mDateCreated)
-        env->SetLongField(info, field_objectInfo_dateCreated, objectInfo->mDateCreated);
+        env->SetLongField(info, field_objectInfo_dateCreated, objectInfo->mDateCreated * 1000LL);
     if (objectInfo->mDateModified)
-        env->SetLongField(info, field_objectInfo_dateModified, objectInfo->mDateModified);
+        env->SetLongField(info, field_objectInfo_dateModified, objectInfo->mDateModified * 1000LL);
     if (objectInfo->mKeywords)
         env->SetObjectField(info, field_objectInfo_keywords,
             env->NewStringUTF(objectInfo->mKeywords));

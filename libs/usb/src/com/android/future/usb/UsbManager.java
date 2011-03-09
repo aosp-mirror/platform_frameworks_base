@@ -17,6 +17,7 @@
 
 package com.android.future.usb;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.IUsbManager;
@@ -55,28 +56,39 @@ public class UsbManager {
     public static final String ACTION_USB_ACCESSORY_DETACHED =
             "android.hardware.usb.action.USB_ACCESSORY_DETACHED";
 
+    /**
+     * Name of extra added to the {@link android.app.PendingIntent}
+     * passed into {#requestPermission} or {#requestPermission}
+     * containing a boolean value indicating whether the user granted permission or not.
+     */
+    public static final String EXTRA_PERMISSION_GRANTED = "permission";
+
+    private final Context mContext;
     private final IUsbManager mService;
 
-    private UsbManager(IUsbManager service) {
+    private UsbManager(Context context, IUsbManager service) {
+        mContext = context;
         mService = service;
     }
 
     /**
      * Returns a new instance of this class.
      *
+     * @param context the caller's {@link android.content.Context}
      * @return UsbManager instance.
      */
-    public static UsbManager getInstance() {
+    public static UsbManager getInstance(Context context) {
         IBinder b = ServiceManager.getService(Context.USB_SERVICE);
-        return new UsbManager(IUsbManager.Stub.asInterface(b));
+        return new UsbManager(context, IUsbManager.Stub.asInterface(b));
     }
 
     /**
      * Returns the {@link com.google.android.usb.UsbAccessory} for
      * a {@link #ACTION_USB_ACCESSORY_ATTACHED} or {@link #ACTION_USB_ACCESSORY_ATTACHED}
-     * broadcast Intent
+     * broadcast Intent. This can also be used to retrieve the accessory from the result
+     * of a call to {#requestPermission}.
      *
-     * @return UsbAccessory for the broadcast.
+     * @return UsbAccessory for the intent.
      */
     public static UsbAccessory getAccessory(Intent intent) {
         android.hardware.usb.UsbAccessory accessory =
@@ -122,6 +134,50 @@ public class UsbManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openAccessory" , e);
             return null;
+        }
+    }
+
+    /**
+     * Returns true if the caller has permission to access the accessory.
+     * Permission might have been granted temporarily via
+     * {@link #requestPermission(android.hardware.usb.UsbAccessory} or
+     * by the user choosing the caller as the default application for the accessory.
+     *
+     * @param accessory to check permissions for
+     * @return true if caller has permission
+     */
+    public boolean hasPermission(UsbAccessory accessory) {
+        try {
+            return mService.hasAccessoryPermission(new android.hardware.usb.UsbAccessory(
+                        accessory.getManufacturer(),accessory.getModel(),
+                        accessory.getType(), accessory.getVersion()));
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in hasPermission", e);
+            return false;
+        }
+    }
+
+    /**
+     * Requests temporary permission for the given package to access the accessory.
+     * This may result in a system dialog being displayed to the user
+     * if permission had not already been granted.
+     * Success or failure is returned via the {@link android.app.PendingIntent} pi.
+     * The boolean extra {@link #EXTRA_PERMISSION_GRANTED} will be attached to the
+     * PendingIntent to indicate success or failure.
+     * If successful, this grants the caller permission to access the device only
+     * until the device is disconnected.
+     *
+     * @param accessory to request permissions for
+     * @param pi PendingIntent for returning result
+     */
+    public void requestPermission(UsbAccessory accessory, PendingIntent pi) {
+        try {
+            mService.requestAccessoryPermission(new android.hardware.usb.UsbAccessory(
+                        accessory.getManufacturer(),accessory.getModel(),
+                        accessory.getType(), accessory.getVersion()),
+                    mContext.getPackageName(), pi);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in requestPermission", e);
         }
     }
 }
