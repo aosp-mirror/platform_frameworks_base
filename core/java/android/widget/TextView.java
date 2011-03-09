@@ -43,6 +43,7 @@ import android.inputmethodservice.ExtractEditText;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -81,6 +82,7 @@ import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.style.ClickableSpan;
+import android.text.style.CorrectionSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
@@ -126,6 +128,7 @@ import android.widget.RemoteViews.RemoteView;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -8337,6 +8340,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(clip);
         sLastCutOrCopyTime = SystemClock.uptimeMillis();
+    }
+
+    public boolean setCorrectionSpan(IBinder token, CorrectionSpan span, int start, int end,
+            int flags) {
+        if (getWindowToken() != token || !(mText instanceof Spannable)) return false;
+        Spannable spannable = (Spannable)mText;
+        CorrectionSpan[] spans = spannable.getSpans(start, end, CorrectionSpan.class);
+        final int N = spans.length;
+        for (int i = 0; i < N; ++i) {
+            spannable.removeSpan(spans[i]);
+        }
+        spannable.setSpan(span, start, end, flags);
+        return true;
     }
 
     /**

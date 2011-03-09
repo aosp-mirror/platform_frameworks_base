@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.NoCopySpan;
@@ -29,6 +30,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.MetaKeyKeyListener;
+import android.text.style.CorrectionSpan;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.view.KeyCharacterMap;
@@ -187,6 +189,15 @@ public class BaseInputConnection implements InputConnection {
         replaceText(text, newCursorPosition, false);
         sendCurrentText();
         return true;
+    }
+
+    /**
+     * Default implementation does nothing and returns false.
+     */
+    @Override
+    public boolean setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
+            int end, int flags) {
+        return false;
     }
 
     /**

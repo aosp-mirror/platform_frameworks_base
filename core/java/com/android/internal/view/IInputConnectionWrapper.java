@@ -18,9 +18,11 @@ package com.android.internal.view;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.text.style.CorrectionSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -45,6 +47,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_PERFORM_EDITOR_ACTION = 58;
     private static final int DO_PERFORM_CONTEXT_MENU_ACTION = 59;
     private static final int DO_SET_COMPOSING_TEXT = 60;
+    private static final int DO_SET_SECURE_CORRECTION_SPAN = 61;
     private static final int DO_SET_COMPOSING_REGION = 63;
     private static final int DO_FINISH_COMPOSING_TEXT = 65;
     private static final int DO_SEND_KEY_EVENT = 70;
@@ -174,7 +177,14 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     public void performPrivateCommand(String action, Bundle data) {
         dispatchMessage(obtainMessageOO(DO_PERFORM_PRIVATE_COMMAND, action, data));
     }
-    
+
+    @Override
+    public void setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
+            int end, int flags) {
+        dispatchMessage(obtainMessageOOIII(DO_SET_SECURE_CORRECTION_SPAN, token, correctionSpan,
+                start, end, flags));
+    }
+
     void dispatchMessage(Message msg) {
         // If we are calling this from the main thread, then we can call
         // right through.  Otherwise, we need to send the message to the
@@ -420,6 +430,17 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                         (Bundle)args.arg2);
                 return;
             }
+            case DO_SET_SECURE_CORRECTION_SPAN: {
+                InputConnection ic = mInputConnection.get();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "setCorrectionSpan on inactive InputConnection");
+                    return;
+                }
+                SomeArgs args = (SomeArgs)msg.obj;
+                ic.setCorrectionSpan((IBinder)args.arg1, (CorrectionSpan)args.arg2, msg.arg1,
+                        msg.arg2, args.seq);
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -468,5 +489,13 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
         args.arg1 = arg1;
         args.arg2 = arg2;
         return mH.obtainMessage(what, 0, 0, args);
+    }
+
+    Message obtainMessageOOIII(int what, Object arg1, Object arg2, int arg3, int arg4, int arg5) {
+        SomeArgs args = new SomeArgs();
+        args.arg1 = arg1;
+        args.arg2 = arg2;
+        args.seq = arg5;
+        return mH.obtainMessage(what, arg3, arg4, args);
     }
 }

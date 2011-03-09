@@ -17,6 +17,8 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
+import android.os.IBinder;
+import android.text.style.CorrectionSpan;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
@@ -353,4 +355,10 @@ public interface InputConnection {
      * valid.
      */
     public boolean performPrivateCommand(String action, Bundle data);
+
+    /**
+     * Add a correction span.
+     */
+    public boolean setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
+            int end, int flags);
 }

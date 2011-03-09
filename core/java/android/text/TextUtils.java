@@ -565,6 +565,8 @@ public class TextUtils {
     public static final int TEXT_APPEARANCE_SPAN = 17;
     /** @hide */
     public static final int ANNOTATION = 18;
+    /** @hide */
+    public static final int CORRECTION_SPAN = 19;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
