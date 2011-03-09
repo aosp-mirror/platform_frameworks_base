@@ -43,6 +43,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -955,6 +956,62 @@ public class ActionBarView extends ViewGroup {
                 final View child = mTabLayout.getChildAt(i);
                 child.setSelected(child == view);
             }
+        }
+    }
+
+    private static class HomeView extends FrameLayout {
+        private View mUpView;
+        private View mIconView;
+
+        public HomeView(Context context) {
+            this(context, null);
+        }
+
+        public HomeView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        protected void onFinishInflate() {
+            mUpView = findViewById(com.android.internal.R.id.up);
+            mIconView = (ImageView) findViewById(com.android.internal.R.id.home);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            measureChildWithMargins(mUpView, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
+            int width = upLp.leftMargin + mUpView.getMeasuredWidth() + upLp.rightMargin;
+            int height = upLp.topMargin + mUpView.getMeasuredHeight() + upLp.bottomMargin;
+            measureChildWithMargins(mIconView, widthMeasureSpec, width, heightMeasureSpec, 0);
+            final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
+            width += iconLp.leftMargin + mIconView.getMeasuredWidth() + iconLp.rightMargin;
+            height = Math.max(height,
+                    iconLp.topMargin + mIconView.getMeasuredHeight() + iconLp.bottomMargin);
+            setMeasuredDimension(width, height);
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int l, int t, int r, int b) {
+            final int vCenter = (b - t) / 2;
+            int width = r - l;
+            if (mUpView.getVisibility() != GONE) {
+                final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
+                final int upHeight = mUpView.getMeasuredHeight();
+                final int upWidth = mUpView.getMeasuredWidth();
+                final int upTop = t + vCenter - upHeight / 2;
+                mUpView.layout(l, upTop, l + upWidth, upTop + upHeight);
+                final int upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
+                width -= upOffset;
+                l += upOffset;
+            }
+            final LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
+            final int iconHeight = mIconView.getMeasuredHeight();
+            final int iconWidth = mIconView.getMeasuredWidth();
+            final int hCenter = (r - l) / 2;
+            final int iconLeft = l + iconLp.leftMargin + hCenter - iconWidth / 2;
+            final int iconTop = t + iconLp.topMargin + vCenter - iconHeight / 2;
+            mIconView.layout(iconLeft, iconTop, iconLeft + iconWidth, iconTop + iconHeight);
         }
     }
 }
