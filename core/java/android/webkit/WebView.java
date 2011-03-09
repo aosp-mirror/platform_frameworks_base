@@ -5551,7 +5551,7 @@ public class WebView extends AbsoluteLayout
                         ted.mReprocess = mDeferTouchProcess;
                         ted.mNativeLayer = nativeScrollableLayer(
                                 contentX, contentY, ted.mNativeLayerRect, null);
-                        ted.mDontEnqueueResult = true;
+                        ted.mSequence = mTouchEventQueue.nextTouchSequence();
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (mDeferTouchProcess) {
                             // still needs to set them for compute deltaX/Y
@@ -5598,7 +5598,7 @@ public class WebView extends AbsoluteLayout
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
-                    ted.mDontEnqueueResult = true;
+                    ted.mSequence = mTouchEventQueue.nextTouchSequence();
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     mLastSentTouchTime = eventTime;
                     if (mDeferTouchProcess) {
@@ -5780,7 +5780,7 @@ public class WebView extends AbsoluteLayout
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
-                    ted.mDontEnqueueResult = true;
+                    ted.mSequence = mTouchEventQueue.nextTouchSequence();
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
@@ -5803,7 +5803,7 @@ public class WebView extends AbsoluteLayout
                             ted.mNativeLayer = nativeScrollableLayer(
                                     contentX, contentY,
                                     ted.mNativeLayerRect, null);
-                            ted.mDontEnqueueResult = true;
+                            ted.mSequence = mTouchEventQueue.nextTouchSequence();
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mPreventDefault != PREVENT_DEFAULT_YES){
                             mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
@@ -6021,7 +6021,7 @@ public class WebView extends AbsoluteLayout
             ted.mAction = MotionEvent.ACTION_CANCEL;
             ted.mNativeLayer = nativeScrollableLayer(
                     x, y, ted.mNativeLayerRect, null);
-            ted.mDontEnqueueResult = true;
+            ted.mSequence = mTouchEventQueue.nextTouchSequence();
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mPreventDefault = PREVENT_DEFAULT_IGNORE;
         }
@@ -7505,7 +7505,7 @@ public class WebView extends AbsoluteLayout
                         ted.mNativeLayer = nativeScrollableLayer(
                                 ted.mPoints[0].x, ted.mPoints[0].y,
                                 ted.mNativeLayerRect, null);
-                        ted.mDontEnqueueResult = true;
+                        ted.mSequence = mTouchEventQueue.nextTouchSequence();
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
@@ -7724,9 +7724,12 @@ public class WebView extends AbsoluteLayout
                         break;
                     }
                     TouchEventData ted = (TouchEventData) msg.obj;
-                    if (!ted.mDontEnqueueResult) {
-                        mTouchEventQueue.enqueueTouchEvent(ted);
-                    }
+
+                    // WebCore is responding to us; remove pending timeout.
+                    // It will be re-posted when needed.
+                    removeMessages(PREVENT_DEFAULT_TIMEOUT);
+
+                    mTouchEventQueue.enqueueTouchEvent(ted);
                     break;
 
                 case REQUEST_KEYBOARD:
