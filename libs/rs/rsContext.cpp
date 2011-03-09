@@ -592,11 +592,11 @@ void * Context::helperThreadProc(void *vrsc) {
 void Context::launchThreads(WorkerCallback_t cbk, void *data) {
     mWorkers.mLaunchData = data;
     mWorkers.mLaunchCallback = cbk;
-    mWorkers.mRunningCount = (int)mWorkers.mCount;
+    android_atomic_release_store(mWorkers.mCount, &mWorkers.mRunningCount);
     for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
         mWorkers.mLaunchSignals[ct].set();
     }
-    while (mWorkers.mRunningCount) {
+    while (android_atomic_acquire_load(&mWorkers.mRunningCount) != 0) {
         mWorkers.mCompleteSignal.wait();
     }
 }
@@ -707,8 +707,8 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     }
 
     mWorkers.mCompleteSignal.init();
-    mWorkers.mRunningCount = 0;
-    mWorkers.mLaunchCount = 0;
+    android_atomic_release_store(mWorkers.mCount, &mWorkers.mRunningCount);
+    android_atomic_release_store(0, &mWorkers.mLaunchCount);
     for (uint32_t ct=0; ct < mWorkers.mCount; ct++) {
         status = pthread_create(&mWorkers.mThreadId[ct], &threadAttr, helperThreadProc, this);
         if (status) {
@@ -716,6 +716,9 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
             LOGE("Created fewer than expected number of RS threads.");
             break;
         }
+    }
+    while (android_atomic_acquire_load(&mWorkers.mRunningCount) != 0) {
+        usleep(100);
     }
     pthread_attr_destroy(&threadAttr);
     return true;
@@ -736,14 +739,14 @@ Context::~Context() {
     // Cleanup compute threads.
     mWorkers.mLaunchData = NULL;
     mWorkers.mLaunchCallback = NULL;
-    mWorkers.mRunningCount = (int)mWorkers.mCount;
+    android_atomic_release_store(mWorkers.mCount, &mWorkers.mRunningCount);
     for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
         mWorkers.mLaunchSignals[ct].set();
     }
     for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
         status = pthread_join(mWorkers.mThreadId[ct], &res);
     }
-    rsAssert(!mWorkers.mRunningCount);
+    rsAssert(android_atomic_acquire_load(&mWorkers.mRunningCount) == 0);
 
     // Global structure cleanup.
     pthread_mutex_lock(&gInitMutex);
