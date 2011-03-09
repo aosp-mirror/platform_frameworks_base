@@ -609,7 +609,7 @@ public abstract class HardwareRenderer {
                         DisplayList displayList = view.getDisplayList();
                         if (displayList != null) {
                             if (canvas.drawDisplayList(displayList, mRedrawClip)) {
-                                if (mRedrawClip.isEmpty()) {
+                                if (mRedrawClip.isEmpty() || view.getParent() == null) {
                                     view.invalidate();
                                 } else {
                                     view.getParent().invalidateChild(view, mRedrawClip);
