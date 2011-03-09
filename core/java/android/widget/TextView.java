@@ -6756,25 +6756,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * This method is called when the text is changed, in case any
-     * subclasses would like to know.
+     * This method is called when the text is changed, in case any subclasses
+     * would like to know.
      *
-     * @param text The text the TextView is displaying.
-     * @param start The offset of the start of the range of the text
-     *              that was modified.
-     * @param before The offset of the former end of the range of the
-     *               text that was modified.  If text was simply inserted,
-     *               this will be the same as <code>start</code>.
-     *               If text was replaced with new text or deleted, the
-     *               length of the old text was <code>before-start</code>.
-     * @param after The offset of the end of the range of the text
-     *              that was modified.  If text was simply deleted,
-     *              this will be the same as <code>start</code>.
-     *              If text was replaced with new text or inserted,
-     *              the length of the new text is <code>after-start</code>.
+     * Within <code>text</code>, the <code>lengthAfter</code> characters
+     * beginning at <code>start</code> have just replaced old text that had
+     * length <code>lengthBefore</code>. It is an error to attempt to make
+     * changes to <code>text</code> from this callback.
+     *
+     * @param text The text the TextView is displaying
+     * @param start The offset of the start of the range of the text that was
+     * modified
+     * @param lengthBefore The length of the former text that has been replaced
+     * @param lengthAfter The length of the replacement modified text
      */
-    protected void onTextChanged(CharSequence text,
-                                 int start, int before, int after) {
+    protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
     }
 
     /**
