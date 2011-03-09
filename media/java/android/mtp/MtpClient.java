@@ -16,6 +16,7 @@
 
 package android.mtp;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,6 +42,9 @@ public class MtpClient {
 
     private static final String TAG = "MtpClient";
 
+    private static final String ACTION_USB_PERMISSION =
+            "android.mtp.MtpClient.action.USB_PERMISSION";
+
     private final Context mContext;
     private final UsbManager mUsbManager;
     private final ArrayList<Listener> mListeners = new ArrayList<Listener>();
@@ -49,29 +53,47 @@ public class MtpClient {
     // mDevices is also used for synchronization in this class.
     private final HashMap<String, MtpDevice> mDevices = new HashMap<String, MtpDevice>();
 
+    private final PendingIntent mPermissionIntent;
+
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
             UsbDevice usbDevice = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
             String deviceName = usbDevice.getDeviceName();
 
             synchronized (mDevices) {
                 MtpDevice mtpDevice = mDevices.get(deviceName);
 
-                if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {
+                if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                     if (mtpDevice == null) {
                         mtpDevice = openDeviceLocked(usbDevice);
                     }
                     if (mtpDevice != null) {
-                        mDevices.put(deviceName, mtpDevice);
                         for (Listener listener : mListeners) {
                             listener.deviceAdded(mtpDevice);
                         }
                     }
-                } else if (mtpDevice != null) {
-                    mDevices.remove(deviceName);
-                    for (Listener listener : mListeners) {
-                        listener.deviceRemoved(mtpDevice);
+                } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                    if (mtpDevice != null) {
+                        mDevices.remove(deviceName);
+                        for (Listener listener : mListeners) {
+                            listener.deviceRemoved(mtpDevice);
+                        }
+                    }
+                } else if (ACTION_USB_PERMISSION.equals(action)) {
+                    boolean permission = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED,
+                            false);
+                    Log.d(TAG, "ACTION_USB_PERMISSION: " + permission);
+                    if (permission) {
+                        if (mtpDevice == null) {
+                            mtpDevice = openDeviceLocked(usbDevice);
+                        }
+                        if (mtpDevice != null) {
+                            for (Listener listener : mListeners) {
+                                listener.deviceAdded(mtpDevice);
+                            }
+                        }
                     }
                 }
             }
@@ -126,10 +148,11 @@ public class MtpClient {
     public MtpClient(Context context) {
         mContext = context;
         mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
-
+        mPermissionIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        filter.addAction(ACTION_USB_PERMISSION);
         context.registerReceiver(mUsbReceiver, filter);
     }
 
@@ -142,9 +165,14 @@ public class MtpClient {
      */
     private MtpDevice openDeviceLocked(UsbDevice usbDevice) {
         if (isCamera(usbDevice)) {
-            MtpDevice mtpDevice = new MtpDevice(usbDevice);
-            if (mtpDevice.open(mUsbManager)) {
-                return mtpDevice;
+            if (!mUsbManager.hasPermission(usbDevice)) {
+                mUsbManager.requestPermission(usbDevice, mPermissionIntent);
+            } else {
+                MtpDevice mtpDevice = new MtpDevice(usbDevice);
+                if (mtpDevice.open(mUsbManager)) {
+                    mDevices.put(usbDevice.getDeviceName(), mtpDevice);
+                    return mtpDevice;
+                }
             }
         }
         return null;
@@ -218,13 +246,8 @@ public class MtpClient {
             // Query the USB manager since devices might have attached
             // before we added our listener.
             for (UsbDevice usbDevice : mUsbManager.getDeviceList().values()) {
-                String deviceName = usbDevice.getDeviceName();
-                MtpDevice mtpDevice = mDevices.get(deviceName);
-                if (mtpDevice == null) {
-                   mtpDevice = openDeviceLocked(usbDevice);
-                }
-                if (mtpDevice != null) {
-                    mDevices.put(deviceName, mtpDevice);
+                if (mDevices.get(usbDevice.getDeviceName()) == null) {
+                    openDeviceLocked(usbDevice);
                 }
             }
 
