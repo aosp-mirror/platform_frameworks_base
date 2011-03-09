@@ -14,14 +14,14 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="?android:attr/selectableItemBackground"
-              android:orientation="horizontal">
+<view xmlns:android="http://schemas.android.com/apk/res/android"
+      class="com.android.internal.widget.ActionBarView$HomeView"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:background="?android:attr/selectableItemBackground" >
     <ImageView android:id="@android:id/up"
                android:src="?android:attr/homeAsUpIndicator"
-               android:layout_gravity="top|left"
+               android:layout_gravity="center_vertical|left"
                android:visibility="gone"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
@@ -33,4 +33,4 @@
                android:paddingRight="16dip"
                android:layout_gravity="center"
                android:scaleType="center" />
-</LinearLayout>
+</view>
