@@ -27,8 +27,6 @@
 namespace android {
 
 static struct {
-    jclass clazz;
-
     jfieldID ptr;
     jfieldID inputApplicationHandle;
 } gInputWindowHandleClassInfo;
@@ -108,8 +106,7 @@ static JNINativeMethod gInputWindowHandleMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
@@ -120,13 +117,14 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
             gInputWindowHandleMethods, NELEM(gInputWindowHandleMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
-    FIND_CLASS(gInputWindowHandleClassInfo.clazz, "com/android/server/wm/InputWindowHandle");
+    jclass clazz;
+    FIND_CLASS(clazz, "com/android/server/wm/InputWindowHandle");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, gInputWindowHandleClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowHandleClassInfo.ptr, clazz,
             "ptr", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.inputApplicationHandle,
-            gInputWindowHandleClassInfo.clazz,
+            clazz,
             "inputApplicationHandle", "Lcom/android/server/wm/InputApplicationHandle;");
 
     return 0;

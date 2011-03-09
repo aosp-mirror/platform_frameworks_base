@@ -70,7 +70,6 @@ using namespace uirenderer;
 // ----------------------------------------------------------------------------
 
 static struct {
-    jclass clazz;
     jmethodID set;
 } gRectClassInfo;
 
@@ -683,9 +682,8 @@ static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     #define FIND_CLASS(var, className) \
             var = env->FindClass(className); \
-            LOG_FATAL_IF(! var, "Unable to find class " className); \
-            var = jclass(env->NewGlobalRef(var));
-    
+            LOG_FATAL_IF(! var, "Unable to find class " className);
+
     #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
             var = env->GetMethodID(clazz, methodName, methodDescriptor); \
             LOG_FATAL_IF(! var, "Unable to find method " methodName);
@@ -695,8 +693,9 @@ static JNINativeMethod gMethods[] = {
 #endif
 
 int register_android_view_GLES20Canvas(JNIEnv* env) {
-    FIND_CLASS(gRectClassInfo.clazz, "android/graphics/Rect");
-    GET_METHOD_ID(gRectClassInfo.set, gRectClassInfo.clazz, "set", "(IIII)V");
+    jclass clazz;
+    FIND_CLASS(clazz, "android/graphics/Rect");
+    GET_METHOD_ID(gRectClassInfo.set, clazz, "set", "(IIII)V");
 
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
 }

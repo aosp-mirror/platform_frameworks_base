@@ -28,8 +28,6 @@
 namespace android {
 
 static struct {
-    jclass clazz;
-
     jfieldID inputWindowHandle;
     jfieldID inputChannel;
     jfieldID name;
@@ -136,71 +134,71 @@ void android_server_InputWindow_toNative(
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputWindow(JNIEnv* env) {
-    FIND_CLASS(gInputWindowClassInfo.clazz, "com/android/server/wm/InputWindow");
+    jclass clazz;
+    FIND_CLASS(clazz, "com/android/server/wm/InputWindow");
 
-    GET_FIELD_ID(gInputWindowClassInfo.inputWindowHandle, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.inputWindowHandle, clazz,
             "inputWindowHandle", "Lcom/android/server/wm/InputWindowHandle;");
 
-    GET_FIELD_ID(gInputWindowClassInfo.inputChannel, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.inputChannel, clazz,
             "inputChannel", "Landroid/view/InputChannel;");
 
-    GET_FIELD_ID(gInputWindowClassInfo.name, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.name, clazz,
             "name", "Ljava/lang/String;");
 
-    GET_FIELD_ID(gInputWindowClassInfo.layoutParamsFlags, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.layoutParamsFlags, clazz,
             "layoutParamsFlags", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.layoutParamsType, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.layoutParamsType, clazz,
             "layoutParamsType", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.dispatchingTimeoutNanos, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.dispatchingTimeoutNanos, clazz,
             "dispatchingTimeoutNanos", "J");
 
-    GET_FIELD_ID(gInputWindowClassInfo.frameLeft, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.frameLeft, clazz,
             "frameLeft", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.frameTop, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.frameTop, clazz,
             "frameTop", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.frameRight, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.frameRight, clazz,
             "frameRight", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.frameBottom, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.frameBottom, clazz,
             "frameBottom", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.touchableRegion, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.touchableRegion, clazz,
             "touchableRegion", "Landroid/graphics/Region;");
 
-    GET_FIELD_ID(gInputWindowClassInfo.visible, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.visible, clazz,
             "visible", "Z");
 
-    GET_FIELD_ID(gInputWindowClassInfo.canReceiveKeys, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.canReceiveKeys, clazz,
             "canReceiveKeys", "Z");
 
-    GET_FIELD_ID(gInputWindowClassInfo.hasFocus, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.hasFocus, clazz,
             "hasFocus", "Z");
 
-    GET_FIELD_ID(gInputWindowClassInfo.hasWallpaper, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.hasWallpaper, clazz,
             "hasWallpaper", "Z");
 
-    GET_FIELD_ID(gInputWindowClassInfo.paused, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.paused, clazz,
             "paused", "Z");
 
-    GET_FIELD_ID(gInputWindowClassInfo.layer, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.layer, clazz,
             "layer", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.ownerPid, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.ownerPid, clazz,
             "ownerPid", "I");
 
-    GET_FIELD_ID(gInputWindowClassInfo.ownerUid, gInputWindowClassInfo.clazz,
+    GET_FIELD_ID(gInputWindowClassInfo.ownerUid, clazz,
             "ownerUid", "I");
     return 0;
 }

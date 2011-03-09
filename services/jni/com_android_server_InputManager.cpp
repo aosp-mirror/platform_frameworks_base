@@ -52,8 +52,6 @@
 namespace android {
 
 static struct {
-    jclass clazz;
-
     jmethodID notifyConfigurationChanged;
     jmethodID notifyLidSwitchChanged;
     jmethodID notifyInputChannelBroken;
@@ -95,16 +93,12 @@ static struct {
 } gInputDeviceClassInfo;
 
 static struct {
-    jclass clazz;
-
     jfieldID touchscreen;
     jfieldID keyboard;
     jfieldID navigation;
 } gConfigurationClassInfo;
 
 static struct {
-    jclass clazz;
-
     jfieldID bitmap;
     jfieldID hotSpotX;
     jfieldID hotSpotY;
@@ -1227,8 +1221,7 @@ static JNINativeMethod gInputManagerMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
         var = env->GetMethodID(clazz, methodName, methodDescriptor); \
@@ -1245,77 +1238,82 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     // Callbacks
 
-    FIND_CLASS(gCallbacksClassInfo.clazz, "com/android/server/wm/InputManager$Callbacks");
+    jclass clazz;
+    FIND_CLASS(clazz, "com/android/server/wm/InputManager$Callbacks");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyConfigurationChanged, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.notifyConfigurationChanged, clazz,
             "notifyConfigurationChanged", "(J)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyLidSwitchChanged, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.notifyLidSwitchChanged, clazz,
             "notifyLidSwitchChanged", "(JZ)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelBroken, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.notifyInputChannelBroken, clazz,
             "notifyInputChannelBroken", "(Lcom/android/server/wm/InputWindowHandle;)V");
 
-    GET_METHOD_ID(gCallbacksClassInfo.notifyANR, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.notifyANR, clazz,
             "notifyANR",
             "(Lcom/android/server/wm/InputApplicationHandle;Lcom/android/server/wm/InputWindowHandle;)J");
 
-    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, clazz,
             "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;IZ)I");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptMotionBeforeQueueingWhenScreenOff,
-            gCallbacksClassInfo.clazz,
+            clazz,
             "interceptMotionBeforeQueueingWhenScreenOff", "(I)I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
             "(Lcom/android/server/wm/InputWindowHandle;Landroid/view/KeyEvent;I)Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
             "(Lcom/android/server/wm/InputWindowHandle;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
 
-    GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.filterTouchEvents, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.filterTouchEvents, clazz,
             "filterTouchEvents", "()Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.filterJumpyTouchEvents, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.filterJumpyTouchEvents, clazz,
             "filterJumpyTouchEvents", "()Z");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyQuietTimeMillis, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyQuietTimeMillis, clazz,
             "getVirtualKeyQuietTimeMillis", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getExcludedDeviceNames, clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatTimeout, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatTimeout, clazz,
             "getKeyRepeatTimeout", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatDelay, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatDelay, clazz,
             "getKeyRepeatDelay", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, clazz,
             "getMaxEventsPerSecond", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getPointerLayer, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getPointerLayer, clazz,
             "getPointerLayer", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getPointerIcon, gCallbacksClassInfo.clazz,
+    GET_METHOD_ID(gCallbacksClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "()Lcom/android/server/wm/InputManager$PointerIcon;");
 
     // KeyEvent
 
     FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
+    gKeyEventClassInfo.clazz = jclass(env->NewGlobalRef(gKeyEventClassInfo.clazz));
+
 
     // MotionEvent
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
+    gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));
 
     // InputDevice
 
     FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
+    gInputDeviceClassInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceClassInfo.clazz));
 
     GET_METHOD_ID(gInputDeviceClassInfo.ctor, gInputDeviceClassInfo.clazz,
             "<init>", "()V");
@@ -1337,28 +1335,28 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     // Configuration
 
-    FIND_CLASS(gConfigurationClassInfo.clazz, "android/content/res/Configuration");
+    FIND_CLASS(clazz, "android/content/res/Configuration");
 
-    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, clazz,
             "touchscreen", "I");
 
-    GET_FIELD_ID(gConfigurationClassInfo.keyboard, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.keyboard, clazz,
             "keyboard", "I");
 
-    GET_FIELD_ID(gConfigurationClassInfo.navigation, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.navigation, clazz,
             "navigation", "I");
 
     // PointerIcon
 
-    FIND_CLASS(gPointerIconClassInfo.clazz, "com/android/server/wm/InputManager$PointerIcon");
+    FIND_CLASS(clazz, "com/android/server/wm/InputManager$PointerIcon");
 
-    GET_FIELD_ID(gPointerIconClassInfo.bitmap, gPointerIconClassInfo.clazz,
+    GET_FIELD_ID(gPointerIconClassInfo.bitmap, clazz,
             "bitmap", "Landroid/graphics/Bitmap;");
 
-    GET_FIELD_ID(gPointerIconClassInfo.hotSpotX, gPointerIconClassInfo.clazz,
+    GET_FIELD_ID(gPointerIconClassInfo.hotSpotX, clazz,
             "hotSpotX", "F");
 
-    GET_FIELD_ID(gPointerIconClassInfo.hotSpotY, gPointerIconClassInfo.clazz,
+    GET_FIELD_ID(gPointerIconClassInfo.hotSpotY, clazz,
             "hotSpotY", "F");
 
     return 0;

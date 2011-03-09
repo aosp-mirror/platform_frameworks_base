@@ -26,8 +26,6 @@
 namespace android {
 
 static struct {
-    jclass clazz;
-
     jfieldID inputApplicationHandle;
     jfieldID name;
     jfieldID dispatchingTimeoutNanos;
@@ -69,25 +67,25 @@ void android_server_InputApplication_toNative(
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
         LOG_FATAL_IF(! var, "Unable to find field " fieldName);
 
 int register_android_server_InputApplication(JNIEnv* env) {
-    FIND_CLASS(gInputApplicationClassInfo.clazz, "com/android/server/wm/InputApplication");
+    jclass clazz;
+    FIND_CLASS(clazz, "com/android/server/wm/InputApplication");
 
     GET_FIELD_ID(gInputApplicationClassInfo.inputApplicationHandle,
-            gInputApplicationClassInfo.clazz,
+            clazz,
             "inputApplicationHandle", "Lcom/android/server/wm/InputApplicationHandle;");
 
-    GET_FIELD_ID(gInputApplicationClassInfo.name, gInputApplicationClassInfo.clazz,
+    GET_FIELD_ID(gInputApplicationClassInfo.name, clazz,
             "name", "Ljava/lang/String;");
 
     GET_FIELD_ID(gInputApplicationClassInfo.dispatchingTimeoutNanos,
-            gInputApplicationClassInfo.clazz,
+            clazz,
             "dispatchingTimeoutNanos", "J");
     return 0;
 }

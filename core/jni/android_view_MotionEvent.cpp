@@ -42,8 +42,6 @@ static struct {
 } gMotionEventClassInfo;
 
 static struct {
-    jclass clazz;
-
     jfieldID mPackedAxisBits;
     jfieldID mPackedAxisValues;
     jfieldID x;
@@ -734,8 +732,7 @@ static JNINativeMethod gMotionEventMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_STATIC_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
         var = env->GetStaticMethodID(clazz, methodName, fieldDescriptor); \
@@ -755,6 +752,7 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
+    gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));
 
     GET_STATIC_METHOD_ID(gMotionEventClassInfo.obtain, gMotionEventClassInfo.clazz,
             "obtain", "()Landroid/view/MotionEvent;");
@@ -763,29 +761,30 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     GET_FIELD_ID(gMotionEventClassInfo.mNativePtr, gMotionEventClassInfo.clazz,
             "mNativePtr", "I");
 
-    FIND_CLASS(gPointerCoordsClassInfo.clazz, "android/view/MotionEvent$PointerCoords");
+    jclass clazz;
+    FIND_CLASS(clazz, "android/view/MotionEvent$PointerCoords");
 
-    GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisBits, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisBits, clazz,
             "mPackedAxisBits", "J");
-    GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisValues, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisValues, clazz,
             "mPackedAxisValues", "[F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.x, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.x, clazz,
             "x", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.y, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.y, clazz,
             "y", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.pressure, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.pressure, clazz,
             "pressure", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.size, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.size, clazz,
             "size", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.touchMajor, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.touchMajor, clazz,
             "touchMajor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.touchMinor, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.touchMinor, clazz,
             "touchMinor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.toolMajor, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.toolMajor, clazz,
             "toolMajor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.toolMinor, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.toolMinor, clazz,
             "toolMinor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.orientation, gPointerCoordsClassInfo.clazz,
+    GET_FIELD_ID(gPointerCoordsClassInfo.orientation, clazz,
             "orientation", "F");
 
     return 0;

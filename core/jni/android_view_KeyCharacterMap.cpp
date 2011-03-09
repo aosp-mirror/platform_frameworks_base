@@ -30,8 +30,6 @@ static struct {
 } gKeyEventClassInfo;
 
 static struct {
-    jclass clazz;
-
     jfieldID keyCode;
     jfieldID metaState;
 } gFallbackActionClassInfo;
@@ -165,8 +163,7 @@ static JNINativeMethod g_methods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
+        LOG_FATAL_IF(! var, "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
@@ -175,13 +172,15 @@ static JNINativeMethod g_methods[] = {
 int register_android_text_KeyCharacterMap(JNIEnv* env)
 {
     FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
+    gKeyEventClassInfo.clazz = jclass(env->NewGlobalRef(gKeyEventClassInfo.clazz));
 
-    FIND_CLASS(gFallbackActionClassInfo.clazz, "android/view/KeyCharacterMap$FallbackAction");
+    jclass clazz;
+    FIND_CLASS(clazz, "android/view/KeyCharacterMap$FallbackAction");
 
-    GET_FIELD_ID(gFallbackActionClassInfo.keyCode, gFallbackActionClassInfo.clazz,
+    GET_FIELD_ID(gFallbackActionClassInfo.keyCode, clazz,
             "keyCode", "I");
 
-    GET_FIELD_ID(gFallbackActionClassInfo.metaState, gFallbackActionClassInfo.clazz,
+    GET_FIELD_ID(gFallbackActionClassInfo.metaState, clazz,
             "metaState", "I");
 
     return AndroidRuntime::registerNativeMethods(env,
