@@ -315,7 +315,11 @@ static jint android_media_AudioRecord_readInByteArray(JNIEnv *env,  jobject thiz
     }
 
     // get the pointer to where we'll record the audio
-    recordBuff = (jbyte *)env->GetPrimitiveArrayCritical(javaAudioData, NULL);
+    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
+    // a way that it becomes much more efficient. When doing so, we will have to prevent the
+    // AudioSystem callback to be called while in critical section (in case of media server
+    // process crash for instance)
+    recordBuff = (jbyte *)env->GetByteArrayElements(javaAudioData, NULL);
 
     if (recordBuff == NULL) {
         LOGE("Error retrieving destination for recorded audio data, can't record");
@@ -327,7 +331,7 @@ static jint android_media_AudioRecord_readInByteArray(JNIEnv *env,  jobject thiz
     ssize_t readSize = lpRecorder->read(recordBuff + offsetInBytes, 
                                         sizeInBytes > (jint)recorderBuffSize ? 
                                             (jint)recorderBuffSize : sizeInBytes );
-    env->ReleasePrimitiveArrayCritical(javaAudioData, recordBuff, 0);
+    env->ReleaseByteArrayElements(javaAudioData, recordBuff, 0);
 
     return (jint) readSize;
 }

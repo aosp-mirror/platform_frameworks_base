@@ -148,6 +148,7 @@ status_t AudioTrack::set(
 
     LOGV_IF(sharedBuffer != 0, "sharedBuffer: %p, size: %d", sharedBuffer->pointer(), sharedBuffer->size());
 
+    AutoMutex lock(mLock);
     if (mAudioTrack != 0) {
         LOGE("Track already in use");
         return INVALID_OPERATION;
@@ -211,8 +212,15 @@ status_t AudioTrack::set(
     mAuxEffectId = 0;
 
     // create the IAudioTrack
-    status_t status = createTrack(streamType, sampleRate, format, channelCount,
-                                  frameCount, flags, sharedBuffer, output, true);
+    status_t status = createTrack_l(streamType,
+                                  sampleRate,
+                                  format,
+                                  channelCount,
+                                  frameCount,
+                                  flags,
+                                  sharedBuffer,
+                                  output,
+                                  true);
 
     if (status != NO_ERROR) {
         return status;
@@ -312,37 +320,38 @@ void AudioTrack::start()
      }
 
     AutoMutex lock(mLock);
+    // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
+    // while we are accessing the cblk
+    sp <IAudioTrack> audioTrack = mAudioTrack;
+    sp <IMemory> iMem = mCblkMemory;
+    audio_track_cblk_t* cblk = mCblk;
+
     if (mActive == 0) {
         mActive = 1;
-        mNewPosition = mCblk->server + mUpdatePeriod;
-        mCblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
-        mCblk->waitTimeMs = 0;
-        mCblk->flags &= ~CBLK_DISABLED_ON;
+        mNewPosition = cblk->server + mUpdatePeriod;
+        cblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
+        cblk->waitTimeMs = 0;
+        cblk->flags &= ~CBLK_DISABLED_ON;
         if (t != 0) {
            t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
         } else {
             setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
         }
 
-        if (mCblk->flags & CBLK_INVALID_MSK) {
-            LOGW("start() track %p invalidated, creating a new one", this);
-            // no need to clear the invalid flag as this cblk will not be used anymore
-            // force new track creation
-            status = DEAD_OBJECT;
-        } else {
+        LOGV("start %p before lock cblk %p", this, mCblk);
+        cblk->lock.lock();
+        if (!(cblk->flags & CBLK_INVALID_MSK)) {
+            cblk->lock.unlock();
             status = mAudioTrack->start();
-        }
-        if (status == DEAD_OBJECT) {
-            LOGV("start() dead IAudioTrack: creating a new one");
-            status = createTrack(mStreamType, mCblk->sampleRate, mFormat, mChannelCount,
-                                 mFrameCount, mFlags, mSharedBuffer, getOutput(), false);
-            if (status == NO_ERROR) {
-                status = mAudioTrack->start();
-                if (status == NO_ERROR) {
-                    mNewPosition = mCblk->server + mUpdatePeriod;
-                }
+            cblk->lock.lock();
+            if (status == DEAD_OBJECT) {
+                cblk->flags |= CBLK_INVALID_MSK;
             }
         }
+        if (cblk->flags & CBLK_INVALID_MSK) {
+            status = restoreTrack_l(cblk, true);
+        }
+        cblk->lock.unlock();
         if (status != NO_ERROR) {
             LOGV("start() failed");
             mActive = 0;
@@ -375,14 +384,14 @@ void AudioTrack::stop()
         mAudioTrack->stop();
         // Cancel loops (If we are in the middle of a loop, playback
         // would not stop until loopCount reaches 0).
-        setLoop(0, 0, 0);
+        setLoop_l(0, 0, 0);
         // the playback head position will reset to 0, so if a marker is set, we need
         // to activate it again
         mMarkerReached = false;
         // Force flush if a shared buffer is used otherwise audioflinger
         // will not stop before end of buffer is reached.
         if (mSharedBuffer != 0) {
-            flush();
+            flush_l();
         }
         if (t != 0) {
             t->requestExit();
@@ -402,6 +411,13 @@ bool AudioTrack::stopped() const
 }
 
 void AudioTrack::flush()
+{
+    AutoMutex lock(mLock);
+    flush_l();
+}
+
+// must be called with mLock held
+void AudioTrack::flush_l()
 {
     LOGV("flush");
 
@@ -445,6 +461,7 @@ status_t AudioTrack::setVolume(float left, float right)
         return BAD_VALUE;
     }
 
+    AutoMutex lock(mLock);
     mVolume[LEFT] = left;
     mVolume[RIGHT] = right;
 
@@ -470,6 +487,7 @@ status_t AudioTrack::setAuxEffectSendLevel(float level)
     if (level > 1.0f) {
         return BAD_VALUE;
     }
+    AutoMutex lock(mLock);
 
     mSendLevel = level;
 
@@ -495,16 +513,25 @@ status_t AudioTrack::setSampleRate(int rate)
     // Resampler implementation limits input sampling rate to 2 x output sampling rate.
     if (rate <= 0 || rate > afSamplingRate*2 ) return BAD_VALUE;
 
+    AutoMutex lock(mLock);
     mCblk->sampleRate = rate;
     return NO_ERROR;
 }
 
 uint32_t AudioTrack::getSampleRate()
 {
+    AutoMutex lock(mLock);
     return mCblk->sampleRate;
 }
 
 status_t AudioTrack::setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount)
+{
+    AutoMutex lock(mLock);
+    return setLoop_l(loopStart, loopEnd, loopCount);
+}
+
+// must be called with mLock held
+status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCount)
 {
     audio_track_cblk_t* cblk = mCblk;
 
@@ -540,6 +567,7 @@ status_t AudioTrack::setLoop(uint32_t loopStart, uint32_t loopEnd, int loopCount
 
 status_t AudioTrack::getLoop(uint32_t *loopStart, uint32_t *loopEnd, int *loopCount)
 {
+    AutoMutex lock(mLock);
     if (loopStart != 0) {
         *loopStart = mCblk->loopStart;
     }
@@ -599,6 +627,7 @@ status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod)
 
 status_t AudioTrack::setPosition(uint32_t position)
 {
+    AutoMutex lock(mLock);
     Mutex::Autolock _l(mCblk->lock);
 
     if (!stopped()) return INVALID_OPERATION;
@@ -614,7 +643,7 @@ status_t AudioTrack::setPosition(uint32_t position)
 status_t AudioTrack::getPosition(uint32_t *position)
 {
     if (position == 0) return BAD_VALUE;
-
+    AutoMutex lock(mLock);
     *position = mCblk->server;
 
     return NO_ERROR;
@@ -622,9 +651,11 @@ status_t AudioTrack::getPosition(uint32_t *position)
 
 status_t AudioTrack::reload()
 {
+    AutoMutex lock(mLock);
+
     if (!stopped()) return INVALID_OPERATION;
 
-    flush();
+    flush_l();
 
     mCblk->stepUser(mCblk->frameCount);
 
@@ -632,6 +663,13 @@ status_t AudioTrack::reload()
 }
 
 audio_io_handle_t AudioTrack::getOutput()
+{
+    AutoMutex lock(mLock);
+    return getOutput_l();
+}
+
+// must be called with mLock held
+audio_io_handle_t AudioTrack::getOutput_l()
 {
     return AudioSystem::getOutput((AudioSystem::stream_type)mStreamType,
             mCblk->sampleRate, mFormat, mChannels, (AudioSystem::output_flags)mFlags);
@@ -654,7 +692,8 @@ status_t AudioTrack::attachAuxEffect(int effectId)
 
 // -------------------------------------------------------------------------
 
-status_t AudioTrack::createTrack(
+// must be called with mLock held
+status_t AudioTrack::createTrack_l(
         int streamType,
         uint32_t sampleRate,
         int format,
@@ -774,6 +813,7 @@ status_t AudioTrack::createTrack(
 
 status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
+    AutoMutex lock(mLock);
     int active;
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
@@ -800,12 +840,17 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                 return WOULD_BLOCK;
             }
             if (!(cblk->flags & CBLK_INVALID_MSK)) {
+                mLock.unlock();
                 result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
-            }
-            if (cblk->flags & CBLK_INVALID_MSK) {
-                LOGW("obtainBuffer() track %p invalidated, creating a new one", this);
-                // no need to clear the invalid flag as this cblk will not be used anymore
                 cblk->lock.unlock();
+                mLock.lock();
+                if (mActive == 0) {
+                    return status_t(STOPPED);
+                }
+                cblk->lock.lock();
+            }
+
+            if (cblk->flags & CBLK_INVALID_MSK) {
                 goto create_new_track;
             }
             if (__builtin_expect(result!=NO_ERROR, false)) {
@@ -819,18 +864,17 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                         //unlock cblk mutex before calling mAudioTrack->start() (see issue #1617140)
                         cblk->lock.unlock();
                         result = mAudioTrack->start();
-                        if (result == DEAD_OBJECT) {
-                            LOGW("obtainBuffer() dead IAudioTrack: creating a new one");
-create_new_track:
-                            result = createTrack(mStreamType, cblk->sampleRate, mFormat, mChannelCount,
-                                                 mFrameCount, mFlags, mSharedBuffer, getOutput(), false);
-                            if (result == NO_ERROR) {
-                                cblk = mCblk;
-                                cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
-                                mAudioTrack->start();
-                            }
-                        }
                         cblk->lock.lock();
+                        if (result == DEAD_OBJECT) {
+                            cblk->flags |= CBLK_INVALID_MSK;
+create_new_track:
+                            result = restoreTrack_l(cblk, false);
+                        }
+                        if (result != NO_ERROR) {
+                            LOGW("obtainBuffer create Track error %d", result);
+                            cblk->lock.unlock();
+                            return result;
+                        }
                     }
                     cblk->waitTimeMs = 0;
                 }
@@ -848,7 +892,7 @@ create_new_track:
     }
 
     // restart track if it was disabled by audioflinger due to previous underrun
-    if (cblk->flags & CBLK_DISABLED_MSK) {
+    if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
         cblk->flags &= ~CBLK_DISABLED_ON;
         LOGW("obtainBuffer() track %p disabled, restarting", this);
         mAudioTrack->start();
@@ -883,8 +927,8 @@ create_new_track:
 
 void AudioTrack::releaseBuffer(Buffer* audioBuffer)
 {
-    audio_track_cblk_t* cblk = mCblk;
-    cblk->stepUser(audioBuffer->frameCount);
+    AutoMutex lock(mLock);
+    mCblk->stepUser(audioBuffer->frameCount);
 }
 
 // -------------------------------------------------------------------------
@@ -902,6 +946,13 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     }
 
     LOGV("write %p: %d bytes, mActive=%d", this, userSize, mActive);
+
+    // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
+    // while we are accessing the cblk
+    mLock.lock();
+    sp <IAudioTrack> audioTrack = mAudioTrack;
+    sp <IMemory> iMem = mCblkMemory;
+    mLock.unlock();
 
     ssize_t written = 0;
     const int8_t *src = (const int8_t *)buffer;
@@ -953,21 +1004,29 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     uint32_t frames;
     size_t writtenSize;
 
+    mLock.lock();
+    // acquire a strong reference on the IMemory and IAudioTrack so that they cannot be destroyed
+    // while we are accessing the cblk
+    sp <IAudioTrack> audioTrack = mAudioTrack;
+    sp <IMemory> iMem = mCblkMemory;
+    audio_track_cblk_t* cblk = mCblk;
+    mLock.unlock();
+
     // Manage underrun callback
-    if (mActive && (mCblk->framesReady() == 0)) {
-        LOGV("Underrun user: %x, server: %x, flags %04x", mCblk->user, mCblk->server, mCblk->flags);
-        if ((mCblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
+    if (mActive && (cblk->framesReady() == 0)) {
+        LOGV("Underrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
+        if ((cblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
             mCbf(EVENT_UNDERRUN, mUserData, 0);
-            if (mCblk->server == mCblk->frameCount) {
+            if (cblk->server == cblk->frameCount) {
                 mCbf(EVENT_BUFFER_END, mUserData, 0);
             }
-            mCblk->flags |= CBLK_UNDERRUN_ON;
+            cblk->flags |= CBLK_UNDERRUN_ON;
             if (mSharedBuffer != 0) return false;
         }
     }
 
     // Manage loop end callback
-    while (mLoopCount > mCblk->loopCount) {
+    while (mLoopCount > cblk->loopCount) {
         int loopCount = -1;
         mLoopCount--;
         if (mLoopCount >= 0) loopCount = mLoopCount;
@@ -977,7 +1036,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 
     // Manage marker callback
     if (!mMarkerReached && (mMarkerPosition > 0)) {
-        if (mCblk->server >= mMarkerPosition) {
+        if (cblk->server >= mMarkerPosition) {
             mCbf(EVENT_MARKER, mUserData, (void *)&mMarkerPosition);
             mMarkerReached = true;
         }
@@ -985,7 +1044,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
 
     // Manage new position callback
     if (mUpdatePeriod > 0) {
-        while (mCblk->server >= mNewPosition) {
+        while (cblk->server >= mNewPosition) {
             mCbf(EVENT_NEW_POS, mUserData, (void *)&mNewPosition);
             mNewPosition += mUpdatePeriod;
         }
@@ -1066,6 +1125,84 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         mRemainingFrames = frames;
     }
     return true;
+}
+
+// must be called with mLock and cblk.lock held. Callers must also hold strong references on
+// the IAudioTrack and IMemory in case they are recreated here.
+// If the IAudioTrack is successfully restored, the cblk pointer is updated
+status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
+{
+    status_t result;
+
+    if (!(cblk->flags & CBLK_RESTORING_MSK)) {
+        LOGW("dead IAudioTrack, creating a new one from %s",
+             fromStart ? "start()" : "obtainBuffer()");
+
+        cblk->flags |= CBLK_RESTORING_ON;
+        // signal old cblk condition so that other threads waiting for available buffers stop
+        // waiting now
+        cblk->cv.broadcast();
+        cblk->lock.unlock();
+
+        // if the new IAudioTrack is created, createTrack_l() will modify the
+        // following member variables: mAudioTrack, mCblkMemory and mCblk.
+        // It will also delete the strong references on previous IAudioTrack and IMemory
+        result = createTrack_l(mStreamType,
+                               cblk->sampleRate,
+                               mFormat,
+                               mChannelCount,
+                               mFrameCount,
+                               mFlags,
+                               mSharedBuffer,
+                               getOutput_l(),
+                               false);
+
+        if (result == NO_ERROR) {
+            if (!fromStart) {
+                mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+            }
+            result = mAudioTrack->start();
+            if (fromStart && result == NO_ERROR) {
+                mNewPosition = mCblk->server + mUpdatePeriod;
+            }
+        }
+        if (result != NO_ERROR) {
+            mActive = false;
+        }
+
+        // signal old cblk condition for other threads waiting for restore completion
+        cblk->lock.lock();
+        cblk->flags |= CBLK_RESTORED_MSK;
+        cblk->cv.broadcast();
+        cblk->lock.unlock();
+    } else {
+        if (!(cblk->flags & CBLK_RESTORED_MSK)) {
+            LOGW("dead IAudioTrack, waiting for a new one");
+            mLock.unlock();
+            result = cblk->cv.waitRelative(cblk->lock, milliseconds(RESTORE_TIMEOUT_MS));
+            cblk->lock.unlock();
+            mLock.lock();
+        } else {
+            LOGW("dead IAudioTrack, already restored");
+            result = NO_ERROR;
+            cblk->lock.unlock();
+        }
+        if (result != NO_ERROR || mActive == 0) {
+            result = status_t(STOPPED);
+        }
+    }
+    LOGV("restoreTrack_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
+         result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
+
+    if (result == NO_ERROR) {
+        // from now on we switch to the newly created cblk
+        cblk = mCblk;
+    }
+    cblk->lock.lock();
+
+    LOGW_IF(result != NO_ERROR, "restoreTrack_l() error %d", result);
+
+    return result;
 }
 
 status_t AudioTrack::dump(int fd, const Vector<String16>& args) const
@@ -1197,7 +1334,9 @@ bool audio_track_cblk_t::stepServer(uint32_t frameCount)
 
     this->server = s;
 
-    cv.signal();
+    if (!(flags & CBLK_INVALID_MSK)) {
+        cv.signal();
+    }
     lock.unlock();
     return true;
 }

@@ -128,6 +128,9 @@ status_t AudioRecord::set(
 {
 
     LOGV("set(): sampleRate %d, channels %d, frameCount %d",sampleRate, channels, frameCount);
+
+    AutoMutex lock(mLock);
+
     if (mAudioRecord != 0) {
         return INVALID_OPERATION;
     }
@@ -183,7 +186,7 @@ status_t AudioRecord::set(
     mSessionId = sessionId;
 
     // create the IAudioRecord
-    status = openRecord(sampleRate, format, channelCount,
+    status = openRecord_l(sampleRate, format, channelCount,
                         frameCount, flags, input);
     if (status != NO_ERROR) {
         return status;
@@ -282,21 +285,31 @@ status_t AudioRecord::start()
      }
 
     AutoMutex lock(mLock);
+    // acquire a strong reference on the IAudioRecord and IMemory so that they cannot be destroyed
+    // while we are accessing the cblk
+    sp <IAudioRecord> audioRecord = mAudioRecord;
+    sp <IMemory> iMem = mCblkMemory;
+    audio_track_cblk_t* cblk = mCblk;
     if (mActive == 0) {
         mActive = 1;
-        ret = mAudioRecord->start();
-        if (ret == DEAD_OBJECT) {
-            LOGV("start() dead IAudioRecord: creating a new one");
-            ret = openRecord(mCblk->sampleRate, mFormat, mChannelCount,
-                    mFrameCount, mFlags, getInput());
-            if (ret == NO_ERROR) {
-                ret = mAudioRecord->start();
+
+        cblk->lock.lock();
+        if (!(cblk->flags & CBLK_INVALID_MSK)) {
+            cblk->lock.unlock();
+            ret = mAudioRecord->start();
+            cblk->lock.lock();
+            if (ret == DEAD_OBJECT) {
+                cblk->flags |= CBLK_INVALID_MSK;
             }
         }
+        if (cblk->flags & CBLK_INVALID_MSK) {
+            ret = restoreRecord_l(cblk);
+        }
+        cblk->lock.unlock();
         if (ret == NO_ERROR) {
-            mNewPosition = mCblk->user + mUpdatePeriod;
-            mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
-            mCblk->waitTimeMs = 0;
+            mNewPosition = cblk->user + mUpdatePeriod;
+            cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
+            cblk->waitTimeMs = 0;
             if (t != 0) {
                t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
             } else {
@@ -353,6 +366,7 @@ bool AudioRecord::stopped() const
 
 uint32_t AudioRecord::getSampleRate()
 {
+    AutoMutex lock(mLock);
     return mCblk->sampleRate;
 }
 
@@ -400,6 +414,7 @@ status_t AudioRecord::getPosition(uint32_t *position)
 {
     if (position == 0) return BAD_VALUE;
 
+    AutoMutex lock(mLock);
     *position = mCblk->user;
 
     return NO_ERROR;
@@ -415,7 +430,8 @@ unsigned int AudioRecord::getInputFramesLost()
 
 // -------------------------------------------------------------------------
 
-status_t AudioRecord::openRecord(
+// must be called with mLock held
+status_t AudioRecord::openRecord_l(
         uint32_t sampleRate,
         int format,
         int channelCount,
@@ -459,6 +475,7 @@ status_t AudioRecord::openRecord(
 
 status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 {
+    AutoMutex lock(mLock);
     int active;
     status_t result;
     audio_track_cblk_t* cblk = mCblk;
@@ -483,7 +500,19 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                 cblk->lock.unlock();
                 return WOULD_BLOCK;
             }
-            result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
+            if (!(cblk->flags & CBLK_INVALID_MSK)) {
+                mLock.unlock();
+                result = cblk->cv.waitRelative(cblk->lock, milliseconds(waitTimeMs));
+                cblk->lock.unlock();
+                mLock.lock();
+                if (mActive == 0) {
+                    return status_t(STOPPED);
+                }
+                cblk->lock.lock();
+            }
+            if (cblk->flags & CBLK_INVALID_MSK) {
+                goto create_new_record;
+            }
             if (__builtin_expect(result!=NO_ERROR, false)) {
                 cblk->waitTimeMs += waitTimeMs;
                 if (cblk->waitTimeMs >= cblk->bufferTimeoutMs) {
@@ -491,16 +520,17 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                             "user=%08x, server=%08x", cblk->user, cblk->server);
                     cblk->lock.unlock();
                     result = mAudioRecord->start();
-                    if (result == DEAD_OBJECT) {
-                        LOGW("obtainBuffer() dead IAudioRecord: creating a new one");
-                        result = openRecord(cblk->sampleRate, mFormat, mChannelCount,
-                                            mFrameCount, mFlags, getInput());
-                        if (result == NO_ERROR) {
-                            cblk = mCblk;
-                            mAudioRecord->start();
-                        }
-                    }
                     cblk->lock.lock();
+                    if (result == DEAD_OBJECT) {
+                        cblk->flags |= CBLK_INVALID_MSK;
+create_new_record:
+                        result = AudioRecord::restoreRecord_l(cblk);
+                    }
+                    if (result != NO_ERROR) {
+                        LOGW("obtainBuffer create Track error %d", result);
+                        cblk->lock.unlock();
+                        return result;
+                    }
                     cblk->waitTimeMs = 0;
                 }
                 if (--waitCount == 0) {
@@ -540,11 +570,18 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
 
 void AudioRecord::releaseBuffer(Buffer* audioBuffer)
 {
-    audio_track_cblk_t* cblk = mCblk;
-    cblk->stepUser(audioBuffer->frameCount);
+    AutoMutex lock(mLock);
+    mCblk->stepUser(audioBuffer->frameCount);
 }
 
 audio_io_handle_t AudioRecord::getInput()
+{
+    AutoMutex lock(mLock);
+    return getInput_l();
+}
+
+// must be called with mLock held
+audio_io_handle_t AudioRecord::getInput_l()
 {
     mInput = AudioSystem::getInput(mInputSource,
                                 mCblk->sampleRate,
@@ -573,6 +610,12 @@ ssize_t AudioRecord::read(void* buffer, size_t userSize)
         return BAD_VALUE;
     }
 
+    mLock.lock();
+    // acquire a strong reference on the IAudioRecord and IMemory so that they cannot be destroyed
+    // while we are accessing the cblk
+    sp <IAudioRecord> audioRecord = mAudioRecord;
+    sp <IMemory> iMem = mCblkMemory;
+    mLock.unlock();
 
     do {
 
@@ -613,9 +656,17 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
     uint32_t frames = mRemainingFrames;
     size_t readSize;
 
+    mLock.lock();
+    // acquire a strong reference on the IAudioRecord and IMemory so that they cannot be destroyed
+    // while we are accessing the cblk
+    sp <IAudioRecord> audioRecord = mAudioRecord;
+    sp <IMemory> iMem = mCblkMemory;
+    audio_track_cblk_t* cblk = mCblk;
+    mLock.unlock();
+
     // Manage marker callback
     if (!mMarkerReached && (mMarkerPosition > 0)) {
-        if (mCblk->user >= mMarkerPosition) {
+        if (cblk->user >= mMarkerPosition) {
             mCbf(EVENT_MARKER, mUserData, (void *)&mMarkerPosition);
             mMarkerReached = true;
         }
@@ -623,7 +674,7 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
     // Manage new position callback
     if (mUpdatePeriod > 0) {
-        while (mCblk->user >= mNewPosition) {
+        while (cblk->user >= mNewPosition) {
             mCbf(EVENT_NEW_POS, mUserData, (void *)&mNewPosition);
             mNewPosition += mUpdatePeriod;
         }
@@ -669,11 +720,11 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
 
 
     // Manage overrun callback
-    if (mActive && (mCblk->framesAvailable_l() == 0)) {
-        LOGV("Overrun user: %x, server: %x, flags %04x", mCblk->user, mCblk->server, mCblk->flags);
-        if ((mCblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
+    if (mActive && (cblk->framesAvailable() == 0)) {
+        LOGV("Overrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
+        if ((cblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
             mCbf(EVENT_OVERRUN, mUserData, 0);
-            mCblk->flags |= CBLK_UNDERRUN_ON;
+            cblk->flags |= CBLK_UNDERRUN_ON;
         }
     }
 
@@ -683,6 +734,69 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
         mRemainingFrames = frames;
     }
     return true;
+}
+
+// must be called with mLock and cblk.lock held. Callers must also hold strong references on
+// the IAudioRecord and IMemory in case they are recreated here.
+// If the IAudioRecord is successfully restored, the cblk pointer is updated
+status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
+{
+    status_t result;
+
+    if (!(cblk->flags & CBLK_RESTORING_MSK)) {
+        LOGW("dead IAudioRecord, creating a new one");
+
+        cblk->flags |= CBLK_RESTORING_ON;
+        // signal old cblk condition so that other threads waiting for available buffers stop
+        // waiting now
+        cblk->cv.broadcast();
+        cblk->lock.unlock();
+
+        // if the new IAudioRecord is created, openRecord_l() will modify the
+        // following member variables: mAudioRecord, mCblkMemory and mCblk.
+        // It will also delete the strong references on previous IAudioRecord and IMemory
+        result = openRecord_l(cblk->sampleRate, mFormat, mChannelCount,
+                mFrameCount, mFlags, getInput_l());
+        if (result == NO_ERROR) {
+            result = mAudioRecord->start();
+        }
+        if (result != NO_ERROR) {
+            mActive = false;
+        }
+
+        // signal old cblk condition for other threads waiting for restore completion
+        cblk->lock.lock();
+        cblk->flags |= CBLK_RESTORED_MSK;
+        cblk->cv.broadcast();
+        cblk->lock.unlock();
+    } else {
+        if (!(cblk->flags & CBLK_RESTORED_MSK)) {
+            LOGW("dead IAudioRecord, waiting for a new one to be created");
+            mLock.unlock();
+            result = cblk->cv.waitRelative(cblk->lock, milliseconds(RESTORE_TIMEOUT_MS));
+            cblk->lock.unlock();
+            mLock.lock();
+        } else {
+            LOGW("dead IAudioRecord, already restored");
+            result = NO_ERROR;
+            cblk->lock.unlock();
+        }
+        if (result != NO_ERROR || mActive == 0) {
+            result = status_t(STOPPED);
+        }
+    }
+    LOGV("restoreRecord_l() status %d mActive %d cblk %p, old cblk %p flags %08x old flags %08x",
+         result, mActive, mCblk, cblk, mCblk->flags, cblk->flags);
+
+    if (result == NO_ERROR) {
+        // from now on we switch to the newly created cblk
+        cblk = mCblk;
+    }
+    cblk->lock.lock();
+
+    LOGW_IF(result != NO_ERROR, "restoreRecord_l() error %d", result);
+
+    return result;
 }
 
 // =========================================================================
