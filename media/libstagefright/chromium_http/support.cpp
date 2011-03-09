@@ -26,6 +26,7 @@
 #include "base/thread.h"
 #include "net/base/host_resolver.h"
 #include "net/base/ssl_config_service.h"
+#include "net/http/http_auth_handler_factory.h"
 #include "net/http/http_cache.h"
 #include "net/proxy/proxy_config_service_android.h"
 
@@ -130,7 +131,7 @@ SfRequestContext::SfRequestContext() {
             dns_cert_checker_.get(),
             proxy_service_.get(),
             ssl_config_service_.get(),
-            NULL, // http_auth_handler_factory
+            net::HttpAuthHandlerFactory::CreateDefault(host_resolver_),
             network_delegate_,
             net_log_,
             NULL);  // backend_factory
