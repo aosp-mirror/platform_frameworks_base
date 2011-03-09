@@ -220,15 +220,27 @@ status_t HTTPStream::connect(const char *server, int port, bool https) {
         return ERROR_ALREADY_CONNECTED;
     }
 
-    struct hostent *ent = gethostbyname(server);
-    if (ent == NULL) {
+    if (port < 0 || port > (int) USHRT_MAX) {
+        return UNKNOWN_ERROR;
+    }
+
+    char service[sizeof("65536")];
+    sprintf(service, "%d", port);
+    struct addrinfo hints, *ai;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = AI_ADDRCONFIG | AI_NUMERICSERV;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int ret = getaddrinfo(server, service, &hints, &ai);
+    if (ret) {
         return ERROR_UNKNOWN_HOST;
     }
 
     CHECK_EQ(mSocket, -1);
-    mSocket = socket(AF_INET, SOCK_STREAM, 0);
+    mSocket = socket(ai[0].ai_family, ai[0].ai_socktype, ai[0].ai_protocol);
 
     if (mSocket < 0) {
+        freeaddrinfo(ai);
         return UNKNOWN_ERROR;
     }
 
@@ -240,13 +252,9 @@ status_t HTTPStream::connect(const char *server, int port, bool https) {
 
     mLock.unlock();
 
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = *(in_addr_t *)ent->h_addr;
-    memset(addr.sin_zero, 0, sizeof(addr.sin_zero));
+    status_t res = MyConnect(s, ai[0].ai_addr, ai[0].ai_addrlen);
 
-    status_t res = MyConnect(s, (const struct sockaddr *)&addr, sizeof(addr));
+    freeaddrinfo(ai);
 
     mLock.lock();
 
