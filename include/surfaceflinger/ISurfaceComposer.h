@@ -138,6 +138,10 @@ public:
      * This is an ASYNCHRONOUS call.
      */
     virtual void signal() const = 0;
+
+    /* verify that an ISurface was created by SurfaceFlinger.
+     */
+    virtual bool authenticateSurface(const sp<ISurface>& surface) const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -161,7 +165,8 @@ public:
         SIGNAL,
         CAPTURE_SCREEN,
         TURN_ELECTRON_BEAM_OFF,
-        TURN_ELECTRON_BEAM_ON
+        TURN_ELECTRON_BEAM_ON,
+        AUTHENTICATE_SURFACE,
     };
 
     virtual status_t    onTransact( uint32_t code,

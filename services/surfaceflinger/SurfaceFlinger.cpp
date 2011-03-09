@@ -327,6 +327,40 @@ void SurfaceFlinger::signal() const {
     const_cast<SurfaceFlinger*>(this)->signalEvent();
 }
 
+bool SurfaceFlinger::authenticateSurface(const sp<ISurface>& surface) const {
+    Mutex::Autolock _l(mStateLock);
+    sp<IBinder> surfBinder(surface->asBinder());
+
+    // Check the visible layer list for the ISurface
+    const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
+    size_t count = currentLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const sp<LayerBase>& layer(currentLayers[i]);
+        sp<LayerBaseClient> lbc(layer->getLayerBaseClient());
+        if (lbc != NULL && lbc->getSurfaceBinder() == surfBinder) {
+            return true;
+        }
+    }
+
+    // Check the layers in the purgatory.  This check is here so that if a
+    // Surface gets destroyed before all the clients are done using it, the
+    // error will not be reported as "surface XYZ is not authenticated", but
+    // will instead fail later on when the client tries to use the surface,
+    // which should be reported as "surface XYZ returned an -ENODEV".  The
+    // purgatorized layers are no less authentic than the visible ones, so this
+    // should not cause any harm.
+    size_t purgatorySize =  mLayerPurgatory.size();
+    for (size_t i=0 ; i<purgatorySize ; i++) {
+        const sp<LayerBase>& layer(mLayerPurgatory.itemAt(i));
+        sp<LayerBaseClient> lbc(layer->getLayerBaseClient());
+        if (lbc != NULL && lbc->getSurfaceBinder() == surfBinder) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 status_t SurfaceFlinger::postMessageAsync(const sp<MessageBase>& msg,
         nsecs_t reltime, uint32_t flags)
 {
