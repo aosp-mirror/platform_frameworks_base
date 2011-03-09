@@ -21,7 +21,7 @@
 #include "include/OggExtractor.h"
 #include "include/MPEG2TSExtractor.h"
 #include "include/NuCachedSource2.h"
-#include "include/NuHTTPDataSource.h"
+#include "include/HTTPBase.h"
 #include "include/DRMExtractor.h"
 #include "include/FLACExtractor.h"
 #include "include/AACExtractor.h"
@@ -127,7 +127,7 @@ sp<DataSource> DataSource::CreateFromURI(
         source = new FileSource(uri + 7);
     } else if (!strncasecmp("http://", uri, 7)
             || !strncasecmp("https://", uri, 8)) {
-        sp<NuHTTPDataSource> httpSource = new NuHTTPDataSource;
+        sp<HTTPBase> httpSource = HTTPBase::Create();
         if (httpSource->connect(uri, headers) != OK) {
             return NULL;
         }

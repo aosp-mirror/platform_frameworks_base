@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef NU_HTTP_DATA_SOURCE_H_
+#ifndef CHROME_HTTP_DATA_SOURCE_H_
 
-#define NU_HTTP_DATA_SOURCE_H_
+#define CHROME_HTTP_DATA_SOURCE_H_
 
-#include <utils/List.h>
-#include <utils/String8.h>
+#include <media/stagefright/foundation/AString.h>
 #include <utils/threads.h>
 
-#include "HTTPStream.h"
-#include "include/HTTPBase.h"
+#include "HTTPBase.h"
 
 namespace android {
 
-struct NuHTTPDataSource : public HTTPBase {
-    NuHTTPDataSource(uint32_t flags = 0);
+struct SfDelegate;
+
+struct ChromiumHTTPDataSource : public HTTPBase {
+    ChromiumHTTPDataSource(uint32_t flags = 0);
 
     virtual status_t connect(
             const char *uri,
@@ -43,22 +43,26 @@ struct NuHTTPDataSource : public HTTPBase {
     virtual status_t getSize(off64_t *size);
     virtual uint32_t flags();
 
-    // Returns true if bandwidth could successfully be estimated,
-    // false otherwise.
     virtual bool estimateBandwidth(int32_t *bandwidth_bps);
 
-    virtual DecryptHandle* DrmInitialization();
+    virtual DecryptHandle *DrmInitialization();
+
     virtual void getDrmInfo(DecryptHandle **handle, DrmManagerClient **client);
+
     virtual String8 getUri();
 
 protected:
-    virtual ~NuHTTPDataSource();
+    virtual ~ChromiumHTTPDataSource();
 
 private:
+    friend struct SfDelegate;
+
     enum State {
         DISCONNECTED,
         CONNECTING,
-        CONNECTED
+        CONNECTED,
+        READING,
+        DISCONNECTING
     };
 
     struct BandwidthEntry {
@@ -66,28 +70,25 @@ private:
         size_t mNumBytes;
     };
 
-    Mutex mLock;
+    const uint32_t mFlags;
 
-    uint32_t mFlags;
+    mutable Mutex mLock;
+    Condition mCondition;
 
     State mState;
 
-    String8 mHost;
-    unsigned mPort;
-    String8 mPath;
-    bool mHTTPS;
-    String8 mHeaders;
-    String8 mUri;
+    SfDelegate *mDelegate;
 
-    HTTPStream mHTTP;
-    off64_t mOffset;
-    off64_t mContentLength;
-    bool mContentLengthValid;
-    bool mHasChunkedTransferEncoding;
+    AString mURI;
+    KeyedVector<String8, String8> mHeaders;
 
-    // The number of data bytes in the current chunk before any subsequent
-    // chunk header (or -1 if no more chunks).
-    ssize_t mChunkDataBytesLeft;
+    off64_t mCurrentOffset;
+
+    // Any connection error or the result of a read operation
+    // (for the lattter this is the number of bytes read, if successful).
+    ssize_t mIOResult;
+
+    int64_t mContentSize;
 
     List<BandwidthEntry> mBandwidthHistory;
     size_t mNumBandwidthHistoryItems;
@@ -97,29 +98,30 @@ private:
     DecryptHandle *mDecryptHandle;
     DrmManagerClient *mDrmManagerClient;
 
-    status_t connect(
-            const char *uri, const String8 &headers, off64_t offset);
+    void disconnect_l();
 
-    status_t connect(
-            const char *host, unsigned port, const char *path,
-            bool https,
-            const String8 &headers,
+    status_t connect_l(
+            const char *uri,
+            const KeyedVector<String8, String8> *headers,
             off64_t offset);
 
-    // Read up to "size" bytes of data, respect transfer encoding.
-    ssize_t internalRead(void *data, size_t size);
+    static void InitiateRead(
+            ChromiumHTTPDataSource *me, void *data, size_t size);
 
-    void applyTimeoutResponse();
+    void initiateRead(void *data, size_t size);
+
+    void onConnectionEstablished(int64_t contentSize);
+    void onConnectionFailed(status_t err);
+    void onReadCompleted(ssize_t size);
+    void onDisconnectComplete();
+
     void addBandwidthMeasurement_l(size_t numBytes, int64_t delayUs);
 
-    static void MakeFullHeaders(
-            const KeyedVector<String8, String8> *overrides,
-            String8 *headers);
+    void clearDRMState_l();
 
-    NuHTTPDataSource(const NuHTTPDataSource &);
-    NuHTTPDataSource &operator=(const NuHTTPDataSource &);
+    DISALLOW_EVIL_CONSTRUCTORS(ChromiumHTTPDataSource);
 };
 
 }  // namespace android
 
-#endif  // NU_HTTP_DATA_SOURCE_H_
+#endif  // CHROME_HTTP_DATA_SOURCE_H_

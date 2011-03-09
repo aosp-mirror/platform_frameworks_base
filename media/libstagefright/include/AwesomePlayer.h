@@ -18,7 +18,7 @@
 
 #define AWESOME_PLAYER_H_
 
-#include "NuHTTPDataSource.h"
+#include "HTTPBase.h"
 #include "TimedEventQueue.h"
 
 #include <media/MediaPlayerInterface.h>
@@ -209,7 +209,7 @@ private:
 
     MediaBuffer *mVideoBuffer;
 
-    sp<NuHTTPDataSource> mConnectingDataSource;
+    sp<HTTPBase> mConnectingDataSource;
     sp<NuCachedSource2> mCachedSource;
 
     sp<ALooper> mLooper;

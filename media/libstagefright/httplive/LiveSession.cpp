@@ -23,7 +23,7 @@
 #include "LiveDataSource.h"
 
 #include "include/M3UParser.h"
-#include "include/NuHTTPDataSource.h"
+#include "include/HTTPBase.h"
 
 #include <cutils/properties.h>
 #include <media/stagefright/foundation/hexdump.h>
@@ -45,9 +45,9 @@ LiveSession::LiveSession(uint32_t flags)
     : mFlags(flags),
       mDataSource(new LiveDataSource),
       mHTTPDataSource(
-              new NuHTTPDataSource(
+              HTTPBase::Create(
                   (mFlags & kFlagIncognito)
-                    ? NuHTTPDataSource::kFlagIncognito
+                    ? HTTPBase::kFlagIncognito
                     : 0)),
       mPrevBandwidthIndex(-1),
       mLastPlaylistFetchTimeUs(-1),
@@ -625,7 +625,12 @@ status_t LiveSession::decryptBuffer(
     } else {
         key = new ABuffer(16);
 
-        sp<NuHTTPDataSource> keySource = new NuHTTPDataSource;
+        sp<HTTPBase> keySource =
+              HTTPBase::Create(
+                  (mFlags & kFlagIncognito)
+                    ? HTTPBase::kFlagIncognito
+                    : 0);
+
         status_t err = keySource->connect(keyURI.c_str());
 
         if (err == OK) {

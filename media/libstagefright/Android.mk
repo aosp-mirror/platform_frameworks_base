@@ -19,6 +19,7 @@ LOCAL_SRC_FILES:=                         \
         ESDS.cpp                          \
         FileSource.cpp                    \
         FLACExtractor.cpp                 \
+        HTTPBase.cpp                      \
         HTTPStream.cpp                    \
         JPEGSource.cpp                    \
         MP3Extractor.cpp                  \
@@ -75,7 +76,12 @@ LOCAL_SHARED_LIBRARIES := \
         libdrmframework  \
         libcrypto        \
         libssl           \
-        libgui
+        libgui           \
+        liblog           \
+        libicuuc         \
+        libicui18n       \
+        libz             \
+        libdl            \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
@@ -100,6 +106,14 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_id3 \
         libstagefright_g711dec \
         libFLAC \
+        libstagefright_chromium_http \
+        libchromium_net         \
+        libwebcore              \
+
+ifneq ($(TARGET_SIMULATOR),true)
+LOCAL_SHARED_LIBRARIES += libstlport
+include external/stlport/libstlport.mk
+endif
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \

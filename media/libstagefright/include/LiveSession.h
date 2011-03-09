@@ -26,7 +26,7 @@ struct ABuffer;
 struct DataSource;
 struct LiveDataSource;
 struct M3UParser;
-struct NuHTTPDataSource;
+struct HTTPBase;
 
 struct LiveSession : public AHandler {
     enum Flags {
@@ -75,7 +75,7 @@ private:
 
     sp<LiveDataSource> mDataSource;
 
-    sp<NuHTTPDataSource> mHTTPDataSource;
+    sp<HTTPBase> mHTTPDataSource;
 
     AString mMasterURL;
     Vector<BandwidthItem> mBandwidthItems;
