@@ -237,30 +237,40 @@ status_t HTTPStream::connect(const char *server, int port, bool https) {
     }
 
     CHECK_EQ(mSocket, -1);
-    mSocket = socket(ai[0].ai_family, ai[0].ai_socktype, ai[0].ai_protocol);
-
-    if (mSocket < 0) {
-        freeaddrinfo(ai);
-        return UNKNOWN_ERROR;
-    }
-
-    setReceiveTimeout(30);  // Time out reads after 30 secs by default
 
     mState = CONNECTING;
+    status_t res = -1;
+    struct addrinfo *tmp;
+    for (tmp = ai; tmp; tmp = tmp->ai_next) {
+        mSocket = socket(tmp->ai_family, tmp->ai_socktype, tmp->ai_protocol);
+        if (mSocket < 0) {
+            continue;
+        }
 
-    int s = mSocket;
+        setReceiveTimeout(30);  // Time out reads after 30 secs by default.
 
-    mLock.unlock();
+        int s = mSocket;
 
-    status_t res = MyConnect(s, ai[0].ai_addr, ai[0].ai_addrlen);
+        mLock.unlock();
+
+        res = MyConnect(s, tmp->ai_addr, tmp->ai_addrlen);
+
+        mLock.lock();
+
+        if (mState != CONNECTING) {
+            close(s);
+            freeaddrinfo(ai);
+            return UNKNOWN_ERROR;
+        }
+
+        if (res == OK) {
+            break;
+        }
+
+        close(s);
+    }
 
     freeaddrinfo(ai);
-
-    mLock.lock();
-
-    if (mState != CONNECTING) {
-        return UNKNOWN_ERROR;
-    }
 
     if (res != OK) {
         close(mSocket);
