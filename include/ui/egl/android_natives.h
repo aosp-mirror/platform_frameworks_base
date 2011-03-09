@@ -95,6 +95,21 @@ enum {
      * 5. Queue, dequeue, queue, dequeue, ad infinitum
      */
     NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
+
+    /* Check whether queueBuffer operations on the ANativeWindow send the buffer
+     * to the window compositor.  The query sets the returned 'value' argument
+     * to 1 if the ANativeWindow DOES send queued buffers directly to the window
+     * compositor and 0 if the buffers do not go directly to the window
+     * compositor.
+     *
+     * This can be used to determine whether protected buffer content should be
+     * sent to the ANativeWindow.  Note, however, that a result of 1 does NOT
+     * indicate that queued buffers will be protected from applications or users
+     * capturing their contents.  If that behavior is desired then some other
+     * mechanism (e.g. the GRALLOC_USAGE_PROTECTED flag) should be used in
+     * conjunction with this query.
+     */
+    NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER,
 };
 
 /* valid operations for the (*perform)() hook */

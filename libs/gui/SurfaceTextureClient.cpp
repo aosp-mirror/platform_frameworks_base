@@ -156,6 +156,10 @@ int SurfaceTextureClient::query(int what, int* value) {
     case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
         *value = MIN_UNDEQUEUED_BUFFERS;
         return NO_ERROR;
+    case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
+        // SurfaceTextureClient currently never queues frames to SurfaceFlinger.
+        *value = 0;
+        return NO_ERROR;
     }
     return BAD_VALUE;
 }

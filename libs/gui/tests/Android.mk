@@ -6,13 +6,13 @@ ifneq ($(TARGET_SIMULATOR),true)
 
 # Build the unit tests.
 test_src_files := \
-    Surface_test.cpp \
+    SurfaceTextureClient_test.cpp \
 
 shared_libraries := \
 	libcutils \
 	libutils \
 	libbinder \
-	libsurfaceflinger_client \
+	libgui \
 	libstlport \
 
 static_libraries := \
