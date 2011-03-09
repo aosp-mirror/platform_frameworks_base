@@ -16,44 +16,44 @@
 
 #include "header.h"
 
-static inline void GetFormatAndBytesPerPixel(const GLenum format, unsigned & bytesPerPixel)
+namespace android
 {
-    switch (format) {
-    case GL_ALPHA:
-        bytesPerPixel = 1;
-        break;
-    case GL_LUMINANCE:
-        bytesPerPixel = 1;
-        break;
-    case GL_LUMINANCE_ALPHA:
-        bytesPerPixel = 2;
-        break;
-    case GL_RGB:
-        bytesPerPixel = 3;
-        break;
-    case GL_RGBA:
-        bytesPerPixel = 4;
-        break;
-
-        // internal formats to avoid conversion
+unsigned GetBytesPerPixel(const GLenum format, const GLenum type)
+{
+    switch (type) {
     case GL_UNSIGNED_SHORT_5_6_5:
-        bytesPerPixel = 2;
-        break;
+        return 2;
     case GL_UNSIGNED_SHORT_4_4_4_4:
-        bytesPerPixel = 2;
-        break;
+        return 2;
     case GL_UNSIGNED_SHORT_5_5_5_1:
-        bytesPerPixel = 2;
+        return 2;
+    case GL_UNSIGNED_BYTE:
         break;
     default:
         assert(0);
-        return;
+    }
+
+    switch (format) {
+    case GL_ALPHA:
+        return 1;
+    case GL_LUMINANCE:
+        return 1;
+        break;
+    case GL_LUMINANCE_ALPHA:
+        return 2;
+    case GL_RGB:
+        return 3;
+    case GL_RGBA:
+        return 4;
+    default:
+        assert(0);
+        return 0;
     }
 }
 
 #define USE_RLE 0
 #if USE_RLE
-template<typename T>
+export template<typename T>
 void * RLEEncode(const void * pixels, unsigned count, unsigned * encodedSize)
 {
     // first is a byte indicating data size [1,2,4] bytes
@@ -75,14 +75,14 @@ void * RLEEncode(const void * pixels, unsigned count, unsigned * encodedSize)
             if (data[0] != data[run]) {
                 repeat = false;
                 break;
-            } else if (run > 127)
+            } else if (run > 126)
                 break;
         if (!repeat) {
             // find literal length
             for (run = 1; run < count; run++)
                 if (data[run - 1] == data[run])
                     break;
-                else if (run > 127)
+                else if (run > 126)
                     break;
             unsigned bytesToWrite = 1 + sizeof(T) * run;
             if (bufferWritten + bytesToWrite > bufferSize) {
@@ -129,19 +129,39 @@ void * RLEEncode(const void * pixels, const unsigned bytesPerPixel, const unsign
     }
 }
 #endif
+}; // namespace android
 
-void API_ENTRY(glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width,
-                             GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid * pixels)
+void Debug_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
 {
-//    LOGD("\n*\n* GLESv2_dbg: %s \n*", "glTexImage2D");
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
-
-    GLESv2Debugger::Message msg, cmd;
-    msg.set_context_id(0);
-    msg.set_has_next_message(true);
+    glesv2debugger::Message msg;
     const bool expectResponse = false;
-    msg.set_expect_response(expectResponse);
-    msg.set_function(GLESv2Debugger::Message_Function_glTexImage2D);
+    struct : public FunctionCall {
+        GLenum target;
+        GLint level;
+        GLint internalformat;
+        GLsizei width;
+        GLsizei height;
+        GLint border;
+        GLenum format;
+        GLenum type;
+        const GLvoid* pixels;
+
+        const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
+            nsecs_t c0 = systemTime(timeMode);
+            _c->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+            msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
+            return 0;
+        }
+    } caller;
+    caller.target = target;
+    caller.level = level;
+    caller.internalformat = internalformat;
+    caller.width = width;
+    caller.height = height;
+    caller.border = border;
+    caller.format = format;
+    caller.type = type;
+    caller.pixels = pixels;
 
     msg.set_arg0(target);
     msg.set_arg1(level);
@@ -151,26 +171,13 @@ void API_ENTRY(glTexImage2D)(GLenum target, GLint level, GLint internalformat, G
     msg.set_arg5(border);
     msg.set_arg6(format);
     msg.set_arg7(type);
+    msg.set_arg8(reinterpret_cast<int>(pixels));
 
     if (pixels) {
         assert(internalformat == format);
         assert(0 == border);
 
-        GLenum newFormat = internalformat;
-        switch (type) {
-        case GL_UNSIGNED_BYTE:
-            break;
-        case GL_UNSIGNED_SHORT_5_6_5:
-        case GL_UNSIGNED_SHORT_4_4_4_4:
-        case GL_UNSIGNED_SHORT_5_5_5_1:
-            newFormat = type;
-            break;
-        default:
-            LOGD("GLESv2_dbg: glTexImage2D type=0x%.4X", type);
-            assert(0);
-        }
-        unsigned bytesPerPixel = 0;
-        GetFormatAndBytesPerPixel(newFormat, bytesPerPixel);
+        unsigned bytesPerPixel = GetBytesPerPixel(format, type);
         assert(0 < bytesPerPixel);
 
 //        LOGD("GLESv2_dbg: glTexImage2D width=%d height=%d level=%d bytesPerPixel=%d",
@@ -186,48 +193,42 @@ void API_ENTRY(glTexImage2D)(GLenum target, GLint level, GLint internalformat, G
         msg.set_data(pixels, bytesPerPixel * width * height);
 #endif
     }
-    assert(msg.has_arg3());
-    Send(msg, cmd);
-    if (!expectResponse)
-        cmd.set_function(GLESv2Debugger::Message_Function_CONTINUE);
-
-    while (true) {
-        msg.Clear();
-        clock_t c0 = clock();
-        switch (cmd.function()) {
-        case GLESv2Debugger::Message_Function_CONTINUE:
-            _c->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-            msg.set_time((float(clock()) - c0) / CLOCKS_PER_SEC);
-            msg.set_context_id(0);
-            msg.set_function(GLESv2Debugger::Message_Function_glTexImage2D);
-            msg.set_has_next_message(false);
-            msg.set_expect_response(expectResponse);
-            assert(!msg.has_arg3());
-            Send(msg, cmd);
-            if (!expectResponse)
-                cmd.set_function(GLESv2Debugger::Message_Function_SKIP);
-            break;
-        case GLESv2Debugger::Message_Function_SKIP:
-            return;
-        default:
-            ASSERT(0); //GenerateCall(msg, cmd);
-            break;
-        }
-    }
+    
+    int * ret = MessageLoop(caller, msg, expectResponse,
+                            glesv2debugger::Message_Function_glTexImage2D);
 }
 
-void API_ENTRY(glTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint yoffset,
-                                    GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels)
+void Debug_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels)
 {
-//    LOGD("\n*\n* GLESv2_dbg: %s \n*", "glTexSubImage2D");
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
-
-    GLESv2Debugger::Message msg, cmd;
-    msg.set_context_id(0);
-    msg.set_has_next_message(true);
+    glesv2debugger::Message msg;
     const bool expectResponse = false;
-    msg.set_expect_response(expectResponse);
-    msg.set_function(GLESv2Debugger::Message_Function_glTexSubImage2D);
+    struct : public FunctionCall {
+        GLenum target;
+        GLint level;
+        GLint xoffset;
+        GLint yoffset;
+        GLsizei width;
+        GLsizei height;
+        GLenum format;
+        GLenum type;
+        const GLvoid* pixels;
+
+        const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
+            nsecs_t c0 = systemTime(timeMode);
+            _c->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+            msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
+            return 0;
+        }
+    } caller;
+    caller.target = target;
+    caller.level = level;
+    caller.xoffset = xoffset;
+    caller.yoffset = yoffset;
+    caller.width = width;
+    caller.height = height;
+    caller.format = format;
+    caller.type = type;
+    caller.pixels = pixels;
 
     msg.set_arg0(target);
     msg.set_arg1(level);
@@ -237,23 +238,11 @@ void API_ENTRY(glTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint
     msg.set_arg5(height);
     msg.set_arg6(format);
     msg.set_arg7(type);
+    msg.set_arg8(reinterpret_cast<int>(pixels));
 
     assert(pixels);
     if (pixels) {
-        GLenum newFormat = format;
-        switch (type) {
-        case GL_UNSIGNED_BYTE:
-            break;
-        case GL_UNSIGNED_SHORT_5_6_5:
-        case GL_UNSIGNED_SHORT_4_4_4_4:
-        case GL_UNSIGNED_SHORT_5_5_5_1:
-            newFormat = type;
-            break;
-        default:
-            assert(0);
-        }
-        unsigned bytesPerPixel = 0;
-        GetFormatAndBytesPerPixel(newFormat, bytesPerPixel);
+        unsigned bytesPerPixel = GetBytesPerPixel(format, type);
         assert(0 < bytesPerPixel);
 
 //        LOGD("GLESv2_dbg: glTexSubImage2D width=%d height=%d level=%d bytesPerPixel=%d",
@@ -270,31 +259,7 @@ void API_ENTRY(glTexSubImage2D)(GLenum target, GLint level, GLint xoffset, GLint
         msg.set_data(pixels, bytesPerPixel * width * height);
 #endif
     }
-
-    Send(msg, cmd);
-    if (!expectResponse)
-        cmd.set_function(GLESv2Debugger::Message_Function_CONTINUE);
-
-    while (true) {
-        msg.Clear();
-        clock_t c0 = clock();
-        switch (cmd.function()) {
-        case GLESv2Debugger::Message_Function_CONTINUE:
-            _c->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
-            msg.set_time((float(clock()) - c0) / CLOCKS_PER_SEC);
-            msg.set_function(GLESv2Debugger::Message_Function_glTexImage2D);
-            msg.set_context_id(0);
-            msg.set_has_next_message(false);
-            msg.set_expect_response(expectResponse);
-            Send(msg, cmd);
-            if (!expectResponse)
-                cmd.set_function(GLESv2Debugger::Message_Function_SKIP);
-            break;
-        case GLESv2Debugger::Message_Function_SKIP:
-            return;
-        default:
-            ASSERT(0); //GenerateCall(msg, cmd);
-            break;
-        }
-    }
+    
+    int * ret = MessageLoop(caller, msg, expectResponse,
+                            glesv2debugger::Message_Function_glTexSubImage2D);
 }

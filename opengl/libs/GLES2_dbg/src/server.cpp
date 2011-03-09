@@ -14,6 +14,9 @@
  ** limitations under the License.
  */
 
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <sys/socket.h>
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -24,9 +27,9 @@
 namespace android
 {
 
-char sockBuff [BUFFSIZE];
-
 int serverSock = -1, clientSock = -1;
+
+int timeMode = SYSTEM_TIME_THREAD;
 
 void StopDebugServer();
 
@@ -79,11 +82,11 @@ void StartDebugServer()
     LOGD("Client connected: %s\n", inet_ntoa(client.sin_addr));
 //    fcntl(clientSock, F_SETFL, O_NONBLOCK);
 
-    GLESv2Debugger::Message msg, cmd;
+    glesv2debugger::Message msg, cmd;
     msg.set_context_id(0);
-    msg.set_function(GLESv2Debugger::Message_Function_ACK);
-    msg.set_has_next_message(false);
-    msg.set_expect_response(true);
+    msg.set_function(glesv2debugger::Message_Function_ACK);
+    msg.set_type(glesv2debugger::Message_Type_Response);
+    msg.set_expect_response(false);
     Send(msg, cmd);
 }
 
@@ -101,41 +104,18 @@ void StopDebugServer()
 
 }
 
-void Send(const GLESv2Debugger::Message & msg, GLESv2Debugger::Message & cmd)
+void Receive(glesv2debugger::Message & cmd)
 {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_mutex_lock(&mutex); // TODO: this is just temporary
+    unsigned len = 0;
 
-    static std::string str;
-    const_cast<GLESv2Debugger::Message &>(msg).set_context_id(pthread_self());
-    msg.SerializeToString(&str);
-    unsigned len = str.length();
-    len = htonl(len);
-    int sent = -1;
-    sent = send(clientSock, (const char *)&len, sizeof(len), 0);
-    if (sent != sizeof(len)) {
-        LOGD("actual sent=%d expected=%d clientSock=%d", sent, sizeof(len), clientSock);
-        Die("Failed to send message length");
-    }
-    sent = send(clientSock, str.c_str(), str.length(), 0);
-    if (sent != str.length()) {
-        LOGD("actual sent=%d expected=%d clientSock=%d", sent, str.length(), clientSock);
-        Die("Failed to send message");
-    }
-
-    if (!msg.expect_response()) {
-        pthread_mutex_unlock(&mutex);
-        return;
-    }
-
-    int received = recv(clientSock, sockBuff, 4, MSG_WAITALL);
+    int received = recv(clientSock, &len, 4, MSG_WAITALL);
     if (received < 0)
-        Die("Failed to receive response");
+        Die("Failed to receive response length");
     else if (4 != received) {
-        LOGD("received %dB: %.8X", received, *(unsigned *)sockBuff);
+        LOGD("received %dB: %.8X", received, len);
         Die("Received length mismatch, expected 4");
     }
-    len = ntohl(*(unsigned *)sockBuff);
+    len = ntohl(len);
     static void * buffer = NULL;
     static unsigned bufferSize = 0;
     if (bufferSize < len) {
@@ -150,9 +130,100 @@ void Send(const GLESv2Debugger::Message & msg, GLESv2Debugger::Message & cmd)
         Die("Received length mismatch");
     cmd.Clear();
     cmd.ParseFromArray(buffer, len);
+}
+
+float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
+{
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex); // TODO: this is just temporary
+
+    static std::string str;
+    const_cast<glesv2debugger::Message &>(msg).set_context_id(pthread_self());
+    msg.SerializeToString(&str);
+    unsigned len = str.length();
+    len = htonl(len);
+    int sent = -1;
+    sent = send(clientSock, (const char *)&len, sizeof(len), 0);
+    if (sent != sizeof(len)) {
+        LOGD("actual sent=%d expected=%d clientSock=%d", sent, sizeof(len), clientSock);
+        Die("Failed to send message length");
+    }
+    nsecs_t c0 = systemTime(timeMode);
+    sent = send(clientSock, str.c_str(), str.length(), 0);
+    float t = (float)ns2ms(systemTime(timeMode) - c0);
+    if (sent != str.length()) {
+        LOGD("actual sent=%d expected=%d clientSock=%d", sent, str.length(), clientSock);
+        Die("Failed to send message");
+    }
+
+    if (!msg.expect_response()) {
+        pthread_mutex_unlock(&mutex);
+        return t;
+    }
+
+    Receive(cmd);
 
     //LOGD("Message sent tid=%lu len=%d", pthread_self(), str.length());
     pthread_mutex_unlock(&mutex);
+    return t;
 }
 
+void SetProp(const glesv2debugger::Message & cmd)
+{
+    switch (cmd.prop()) {
+    case glesv2debugger::Message_Prop_Capture:
+        LOGD("SetProp Message_Prop_Capture %d", cmd.arg0());
+        capture = cmd.arg0();
+        break;
+    case glesv2debugger::Message_Prop_TimeMode:
+        LOGD("SetProp Message_Prop_TimeMode %d", cmd.arg0());
+        timeMode = cmd.arg0();
+        break;
+    default:
+        assert(0);
+    }
+}
+
+int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
+                  const bool expectResponse, const glesv2debugger::Message_Function function)
+{
+    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
+    const int * ret = 0;
+    glesv2debugger::Message cmd;
+    msg.set_context_id(0);
+    msg.set_type(glesv2debugger::Message_Type_BeforeCall);
+    msg.set_expect_response(expectResponse);
+    msg.set_function(function);
+    Send(msg, cmd);
+    if (!expectResponse)
+        cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    while (true) {
+        msg.Clear();
+        nsecs_t c0 = systemTime(timeMode);
+        switch (cmd.function()) {
+        case glesv2debugger::Message_Function_CONTINUE:
+            ret = functionCall(_c, msg);
+            if (!msg.has_time()) // some has output data copy, so time inside call
+                msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
+            msg.set_context_id(0);
+            msg.set_function(function);
+            msg.set_type(glesv2debugger::Message_Type_AfterCall);
+            msg.set_expect_response(expectResponse);
+            Send(msg, cmd);
+            if (!expectResponse)
+                cmd.set_function(glesv2debugger::Message_Function_SKIP);
+            break;
+        case glesv2debugger::Message_Function_SKIP:
+            return const_cast<int *>(ret);
+        case glesv2debugger::Message_Function_SETPROP:
+            SetProp(cmd);
+            Receive(cmd);
+            break;
+        default:
+            ASSERT(0); //GenerateCall(msg, cmd);
+            break;
+        }
+    }
+    return 0;
+}
 }; // namespace android {

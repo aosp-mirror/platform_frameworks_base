@@ -17,7 +17,7 @@ LOCAL_STATIC_LIBRARIES += libGLESv2_dbg libprotobuf-cpp-2.3.0-lite
 LOCAL_SHARED_LIBRARIES += libcutils libutils libstlport
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
-
+LOCAL_LDFLAGS += -Wl,--exclude-libs=ALL
 # needed on sim build because of weird logging issues
 ifeq ($(TARGET_SIMULATOR),true)
 else
