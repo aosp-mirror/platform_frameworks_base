@@ -83,6 +83,7 @@ public class SearchView extends LinearLayout {
     private CursorAdapter mSuggestionsAdapter;
     private View mSearchButton;
     private View mSubmitButton;
+    private View mSearchPlate;
     private View mSubmitArea;
     private ImageView mCloseButton;
     private View mSearchEditFrame;
@@ -190,6 +191,7 @@ public class SearchView extends LinearLayout {
         mQueryTextView.setSearchView(this);
 
         mSearchEditFrame = findViewById(R.id.search_edit_frame);
+        mSearchPlate = findViewById(R.id.search_plate);
         mSubmitArea = findViewById(R.id.submit_area);
         mSubmitButton = findViewById(R.id.search_go_btn);
         mCloseButton = (ImageView) findViewById(R.id.search_close_btn);
@@ -258,6 +260,7 @@ public class SearchView extends LinearLayout {
         mSearchable = searchable;
         if (mSearchable != null) {
             updateSearchAutoComplete();
+            updateQueryHint();
         }
         // Cache the voice search capability
         mVoiceButtonEnabled = hasVoiceSearch();
@@ -575,19 +578,19 @@ public class SearchView extends LinearLayout {
     }
 
     private void updateSubmitButton(boolean hasText) {
-        mSubmitButton.setVisibility(
-                isSubmitAreaEnabled() ? (hasText ? VISIBLE : INVISIBLE) : GONE);
+        int visibility = GONE;
+        if (isSubmitAreaEnabled() && hasFocus() && (hasText || !mVoiceButtonEnabled)) {
+            visibility = VISIBLE;
+        }
+        mSubmitButton.setVisibility(visibility);
     }
 
     private void updateSubmitArea() {
         int visibility = GONE;
-        if (isSubmitAreaEnabled()) {
-            if (mSubmitButton.getVisibility() == VISIBLE
-                    || mVoiceButton.getVisibility() == VISIBLE) {
-                visibility = VISIBLE;
-            } else {
-                visibility = INVISIBLE;
-            }
+        if (isSubmitAreaEnabled()
+                && (mSubmitButton.getVisibility() == VISIBLE
+                        || mVoiceButton.getVisibility() == VISIBLE)) {
+            visibility = VISIBLE;
         }
         mSubmitArea.setVisibility(visibility);
     }
@@ -599,6 +602,11 @@ public class SearchView extends LinearLayout {
         final boolean showClose = hasText || mIconifiedByDefault || mQueryTextView.hasFocus();
         mCloseButton.setVisibility(showClose ? VISIBLE : INVISIBLE);
         mCloseButton.getDrawable().setState(hasText ? ENABLED_STATE_SET : EMPTY_STATE_SET);
+    }
+
+    private void updateFocusedState(boolean focused) {
+        mSearchPlate.getBackground().setState(focused ? FOCUSED_STATE_SET : EMPTY_STATE_SET);
+        mSubmitArea.getBackground().setState(focused ? FOCUSED_STATE_SET : EMPTY_STATE_SET);
     }
 
     private void setImeVisibility(boolean visible) {
@@ -851,16 +859,11 @@ public class SearchView extends LinearLayout {
      * Update the visibility of the voice button.  There are actually two voice search modes,
      * either of which will activate the button.
      * @param empty whether the search query text field is empty. If it is, then the other
-     * criteria apply to make the voice button visible. Otherwise the voice button will not
-     * be visible - i.e., if the user has typed a query, remove the voice button.
+     * criteria apply to make the voice button visible.
      */
     private void updateVoiceButton(boolean empty) {
-        // If the voice button is to be visible, show it
-        // Else, make it gone if the submit button is enabled, otherwise invisible to
-        // avoid losing the real-estate
-        int visibility = mSubmitButtonEnabled ? GONE : INVISIBLE;
-
-        if (mVoiceButtonEnabled && !isIconified() && empty) {
+        int visibility = GONE;
+        if (mVoiceButtonEnabled && !isIconified() && (empty || !mSubmitButtonEnabled)) {
             visibility = VISIBLE;
             mSubmitButton.setVisibility(GONE);
         }
@@ -958,7 +961,8 @@ public class SearchView extends LinearLayout {
     }
 
     void onTextFocusChanged() {
-        updateCloseButton();
+        updateViewsVisibility(isIconified());
+        updateFocusedState(mQueryTextView.hasFocus());
     }
 
     private boolean onItemClicked(int position, int actionKey, String actionMsg) {
