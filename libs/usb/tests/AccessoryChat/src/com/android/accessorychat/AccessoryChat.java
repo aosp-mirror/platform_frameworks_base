@@ -17,9 +17,11 @@
 package com.android.accessorychat;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -42,17 +44,46 @@ import java.io.IOException;
 public class AccessoryChat extends Activity implements Runnable, TextView.OnEditorActionListener {
 
     private static final String TAG = "AccessoryChat";
-    TextView mLog;
-    EditText mEditText;
-    ParcelFileDescriptor mFileDescriptor;
-    FileInputStream mInputStream;
-    FileOutputStream mOutputStream;
+
+    private static final String ACTION_USB_PERMISSION =
+            "com.android.accessorychat.action.USB_PERMISSION";
+
+    private TextView mLog;
+    private EditText mEditText;
+    private ParcelFileDescriptor mFileDescriptor;
+    private FileInputStream mInputStream;
+    private FileOutputStream mOutputStream;
+    private UsbManager mUsbManager;
+    private PendingIntent mPermissionIntent;
+    private boolean mPermissionRequestPending;
 
     private static final int MESSAGE_LOG = 1;
+
+   private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_USB_PERMISSION.equals(intent.getAction())) {
+                synchronized (this) {
+                    UsbAccessory accessory = UsbManager.getAccessory(intent);
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        openAccessory(accessory);
+                    } else {
+                        Log.d(TAG, "permission denied for accessory " + accessory);
+                    }
+                    mPermissionRequestPending = false;
+                }
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mUsbManager = UsbManager.getInstance(this);
+        mPermissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(mUsbReceiver, filter);
 
         setContentView(R.layout.accessory_chat);
         mLog = (TextView)findViewById(R.id.log);
@@ -66,21 +97,20 @@ public class AccessoryChat extends Activity implements Runnable, TextView.OnEdit
 
         Intent intent = getIntent();
         Log.d(TAG, "intent: " + intent);
-        UsbManager manager = UsbManager.getInstance();
-        UsbAccessory[] accessories = manager.getAccessoryList();
+        UsbAccessory[] accessories = mUsbManager.getAccessoryList();
         UsbAccessory accessory = (accessories == null ? null : accessories[0]);
         if (accessory != null) {
-            mFileDescriptor = manager.openAccessory(accessory);
-            if (mFileDescriptor != null) {
-                FileDescriptor fd = mFileDescriptor.getFileDescriptor();
-                mInputStream = new FileInputStream(fd);
-                mOutputStream = new FileOutputStream(fd);
-                Thread thread = new Thread(null, this, "AccessoryChat");
-                thread.start();
+            if (mUsbManager.hasPermission(accessory)) {
+                openAccessory(accessory);
             } else {
-                Log.d(TAG, "openAccessory fail");
+                synchronized (mUsbReceiver) {
+                    if (!mPermissionRequestPending) {
+                        mUsbManager.requestPermission(accessory, mPermissionIntent);
+                        mPermissionRequestPending = true;
+                    }
+                }
             }
-        } else {
+         } else {
             Log.d(TAG, "mAccessory is null");
         }
     }
@@ -100,7 +130,22 @@ public class AccessoryChat extends Activity implements Runnable, TextView.OnEdit
 
     @Override
     public void onDestroy() {
+        unregisterReceiver(mUsbReceiver);
        super.onDestroy();
+    }
+
+    private void openAccessory(UsbAccessory accessory) {
+       mFileDescriptor = mUsbManager.openAccessory(accessory);
+        if (mFileDescriptor != null) {
+            FileDescriptor fd = mFileDescriptor.getFileDescriptor();
+            mInputStream = new FileInputStream(fd);
+            mOutputStream = new FileOutputStream(fd);
+            Thread thread = new Thread(null, this, "AccessoryChat");
+            thread.start();
+            Log.d(TAG, "openAccessory succeeded");
+        } else {
+            Log.d(TAG, "openAccessory fail");
+        }
     }
 
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
