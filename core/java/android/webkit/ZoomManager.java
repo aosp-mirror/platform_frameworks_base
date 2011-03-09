@@ -360,6 +360,10 @@ class ZoomManager {
         return scale;
     }
 
+    public final boolean isScaleOverLimits(float scale) {
+        return scale <= mMinZoomScale || scale >= mMaxZoomScale;
+    }
+
     public final boolean isZoomScaleFixed() {
         return mMinZoomScale >= mMaxZoomScale;
     }
@@ -749,12 +753,9 @@ class ZoomManager {
             return true;
         }
 
-        public boolean onScale(ScaleGestureDetector detector) {
-            // Prevent scaling beyond overview scale.
-            float scale = Math.max(
-                    computeScaleWithLimits(detector.getScaleFactor() * mActualScale),
-                    getZoomOverviewScale());
-
+            // If the user moves the fingers but keeps the same distance between them,
+            // we should do panning only.
+        public boolean isPanningOnly(ScaleGestureDetector detector) {
             float prevFocusX = mFocusX;
             float prevFocusY = mFocusY;
             mFocusX = detector.getFocusX();
@@ -768,14 +769,19 @@ class ZoomManager {
                 mFocusMovementSum -= mFocusMovementQueue.remove();
             }
             float deltaSpan = Math.abs(detector.getCurrentSpan() - detector.getPreviousSpan());
+            return mFocusMovementSum > deltaSpan;
+        }
 
-            // If the user moves the fingers but keeps the same distance between them,
-            // we should do panning only.
-            if (mFocusMovementSum > deltaSpan) {
-                mFocusMovementSum = 0;
-                mFocusMovementQueue.clear();
-                return true;
-            }
+        public boolean handleScale(ScaleGestureDetector detector) {
+            float scale = detector.getScaleFactor() * mActualScale;
+
+            // if scale is limited by any reason, don't zoom but do ask
+            // the detector to update the event.
+            boolean isScaleLimited =
+                    isScaleOverLimits(scale) || scale < getZoomOverviewScale();
+
+            // Prevent scaling beyond overview scale.
+            scale = Math.max(computeScaleWithLimits(scale), getZoomOverviewScale());
 
             if (mPinchToZoomAnimating || willScaleTriggerZoom(scale)) {
                 mPinchToZoomAnimating = true;
@@ -788,11 +794,20 @@ class ZoomManager {
                 scale = computeScaleWithLimits(scale);
                 // if the scale change is too small, regard it as jitter and skip it.
                 if (Math.abs(scale - mActualScale) < MINIMUM_SCALE_WITHOUT_JITTER) {
-                    return false;
+                    return isScaleLimited;
                 }
                 setZoomCenter(detector.getFocusX(), detector.getFocusY());
                 setZoomScale(scale, false);
                 mWebView.invalidate();
+                return true;
+            }
+            return isScaleLimited;
+        }
+
+        public boolean onScale(ScaleGestureDetector detector) {
+            if (isPanningOnly(detector) || handleScale(detector)) {
+                mFocusMovementSum = 0;
+                mFocusMovementQueue.clear();
                 return true;
             }
             return false;
