@@ -1581,7 +1581,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             
             // Update discharge amounts.
             if (mOnBatteryInternal) {
-                updateDischargeScreenLevels(false, true);
+                updateDischargeScreenLevelsLocked(false, true);
             }
         }
     }
@@ -1602,7 +1602,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             
             // Update discharge amounts.
             if (mOnBatteryInternal) {
-                updateDischargeScreenLevels(true, false);
+                updateDischargeScreenLevelsLocked(true, false);
             }
         }
     }
@@ -4030,7 +4030,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         clearHistoryLocked();
     }
 
-    void updateDischargeScreenLevels(boolean oldScreenOn, boolean newScreenOn) {
+    void updateDischargeScreenLevelsLocked(boolean oldScreenOn, boolean newScreenOn) {
         if (oldScreenOn) {
             int diff = mDischargeScreenOnUnplugLevel - mDischargeCurrentLevel;
             if (diff > 0) {
@@ -4055,69 +4055,73 @@ public final class BatteryStatsImpl extends BatteryStats {
     
     void setOnBattery(boolean onBattery, int oldStatus, int level) {
         synchronized(this) {
-            boolean doWrite = false;
-            Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
-            m.arg1 = onBattery ? 1 : 0;
-            mHandler.sendMessage(m);
-            mOnBattery = mOnBatteryInternal = onBattery;
+            setOnBatteryLocked(onBattery, oldStatus, level);
+        }
+    }
 
-            long uptime = SystemClock.uptimeMillis() * 1000;
-            long mSecRealtime = SystemClock.elapsedRealtime();
-            long realtime = mSecRealtime * 1000;
-            if (onBattery) {
-                // We will reset our status if we are unplugging after the
-                // battery was last full, or the level is at 100, or
-                // we have gone through a significant charge (from a very low
-                // level to a now very high level).
-                if (oldStatus == BatteryManager.BATTERY_STATUS_FULL
-                        || level >= 90
-                        || (mDischargeCurrentLevel < 20 && level >= 80)) {
-                    doWrite = true;
-                    resetAllStatsLocked();
-                    mDischargeStartLevel = level;
-                }
-                updateKernelWakelocksLocked();
-                mHistoryCur.batteryLevel = (byte)level;
-                mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Battery unplugged to: "
-                        + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(mSecRealtime);
-                mTrackBatteryUptimeStart = uptime;
-                mTrackBatteryRealtimeStart = realtime;
-                mUnpluggedBatteryUptime = getBatteryUptimeLocked(uptime);
-                mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(realtime);
-                mDischargeCurrentLevel = mDischargeUnplugLevel = level;
-                if (mScreenOn) {
-                    mDischargeScreenOnUnplugLevel = level;
-                    mDischargeScreenOffUnplugLevel = 0;
-                } else {
-                    mDischargeScreenOnUnplugLevel = 0;
-                    mDischargeScreenOffUnplugLevel = level;
-                }
-                mDischargeAmountScreenOn = 0;
-                mDischargeAmountScreenOff = 0;
-                doUnplugLocked(mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
-            } else {
-                updateKernelWakelocksLocked();
-                mHistoryCur.batteryLevel = (byte)level;
-                mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
-                if (DEBUG_HISTORY) Slog.v(TAG, "Battery plugged to: "
-                        + Integer.toHexString(mHistoryCur.states));
-                addHistoryRecordLocked(mSecRealtime);
-                mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
-                mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
-                mDischargeCurrentLevel = level;
-                if (level < mDischargeUnplugLevel) {
-                    mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
-                    mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
-                }
-                updateDischargeScreenLevels(mScreenOn, mScreenOn);
-                doPlugLocked(getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
+    void setOnBatteryLocked(boolean onBattery, int oldStatus, int level) {
+        boolean doWrite = false;
+        Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
+        m.arg1 = onBattery ? 1 : 0;
+        mHandler.sendMessage(m);
+        mOnBattery = mOnBatteryInternal = onBattery;
+
+        long uptime = SystemClock.uptimeMillis() * 1000;
+        long mSecRealtime = SystemClock.elapsedRealtime();
+        long realtime = mSecRealtime * 1000;
+        if (onBattery) {
+            // We will reset our status if we are unplugging after the
+            // battery was last full, or the level is at 100, or
+            // we have gone through a significant charge (from a very low
+            // level to a now very high level).
+            if (oldStatus == BatteryManager.BATTERY_STATUS_FULL
+                    || level >= 90
+                    || (mDischargeCurrentLevel < 20 && level >= 80)) {
+                doWrite = true;
+                resetAllStatsLocked();
+                mDischargeStartLevel = level;
             }
-            if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
-                if (mFile != null) {
-                    writeAsyncLocked();
-                }
+            updateKernelWakelocksLocked();
+            mHistoryCur.batteryLevel = (byte)level;
+            mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Battery unplugged to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(mSecRealtime);
+            mTrackBatteryUptimeStart = uptime;
+            mTrackBatteryRealtimeStart = realtime;
+            mUnpluggedBatteryUptime = getBatteryUptimeLocked(uptime);
+            mUnpluggedBatteryRealtime = getBatteryRealtimeLocked(realtime);
+            mDischargeCurrentLevel = mDischargeUnplugLevel = level;
+            if (mScreenOn) {
+                mDischargeScreenOnUnplugLevel = level;
+                mDischargeScreenOffUnplugLevel = 0;
+            } else {
+                mDischargeScreenOnUnplugLevel = 0;
+                mDischargeScreenOffUnplugLevel = level;
+            }
+            mDischargeAmountScreenOn = 0;
+            mDischargeAmountScreenOff = 0;
+            doUnplugLocked(mUnpluggedBatteryUptime, mUnpluggedBatteryRealtime);
+        } else {
+            updateKernelWakelocksLocked();
+            mHistoryCur.batteryLevel = (byte)level;
+            mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "Battery plugged to: "
+                    + Integer.toHexString(mHistoryCur.states));
+            addHistoryRecordLocked(mSecRealtime);
+            mTrackBatteryPastUptime += uptime - mTrackBatteryUptimeStart;
+            mTrackBatteryPastRealtime += realtime - mTrackBatteryRealtimeStart;
+            mDischargeCurrentLevel = level;
+            if (level < mDischargeUnplugLevel) {
+                mLowDischargeAmountSinceCharge += mDischargeUnplugLevel-level-1;
+                mHighDischargeAmountSinceCharge += mDischargeUnplugLevel-level;
+            }
+            updateDischargeScreenLevelsLocked(mScreenOn, mScreenOn);
+            doPlugLocked(getBatteryUptimeLocked(uptime), getBatteryRealtimeLocked(realtime));
+        }
+        if (doWrite || (mLastWriteTime + (60 * 1000)) < mSecRealtime) {
+            if (mFile != null) {
+                writeAsyncLocked();
             }
         }
     }
@@ -4127,71 +4131,73 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void setBatteryState(int status, int health, int plugType, int level,
             int temp, int volt) {
-        boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
-        int oldStatus = mHistoryCur.batteryStatus;
-        if (!mHaveBatteryLevel) {
-            mHaveBatteryLevel = true;
-            // We start out assuming that the device is plugged in (not
-            // on battery).  If our first report is now that we are indeed
-            // plugged in, then twiddle our state to correctly reflect that
-            // since we won't be going through the full setOnBattery().
-            if (onBattery == mOnBattery) {
-                if (onBattery) {
-                    mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
-                } else {
-                    mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
+        synchronized(this) {
+            boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
+            int oldStatus = mHistoryCur.batteryStatus;
+            if (!mHaveBatteryLevel) {
+                mHaveBatteryLevel = true;
+                // We start out assuming that the device is plugged in (not
+                // on battery).  If our first report is now that we are indeed
+                // plugged in, then twiddle our state to correctly reflect that
+                // since we won't be going through the full setOnBattery().
+                if (onBattery == mOnBattery) {
+                    if (onBattery) {
+                        mHistoryCur.states &= ~HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
+                    } else {
+                        mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
+                    }
+                }
+                oldStatus = status;
+            }
+            if (onBattery) {
+                mDischargeCurrentLevel = level;
+                mRecordingHistory = true;
+            }
+            if (onBattery != mOnBattery) {
+                mHistoryCur.batteryLevel = (byte)level;
+                mHistoryCur.batteryStatus = (byte)status;
+                mHistoryCur.batteryHealth = (byte)health;
+                mHistoryCur.batteryPlugType = (byte)plugType;
+                mHistoryCur.batteryTemperature = (char)temp;
+                mHistoryCur.batteryVoltage = (char)volt;
+                setOnBatteryLocked(onBattery, oldStatus, level);
+            } else {
+                boolean changed = false;
+                if (mHistoryCur.batteryLevel != level) {
+                    mHistoryCur.batteryLevel = (byte)level;
+                    changed = true;
+                }
+                if (mHistoryCur.batteryStatus != status) {
+                    mHistoryCur.batteryStatus = (byte)status;
+                    changed = true;
+                }
+                if (mHistoryCur.batteryHealth != health) {
+                    mHistoryCur.batteryHealth = (byte)health;
+                    changed = true;
+                }
+                if (mHistoryCur.batteryPlugType != plugType) {
+                    mHistoryCur.batteryPlugType = (byte)plugType;
+                    changed = true;
+                }
+                if (temp >= (mHistoryCur.batteryTemperature+10)
+                        || temp <= (mHistoryCur.batteryTemperature-10)) {
+                    mHistoryCur.batteryTemperature = (char)temp;
+                    changed = true;
+                }
+                if (volt > (mHistoryCur.batteryVoltage+20)
+                        || volt < (mHistoryCur.batteryVoltage-20)) {
+                    mHistoryCur.batteryVoltage = (char)volt;
+                    changed = true;
+                }
+                if (changed) {
+                    addHistoryRecordLocked(SystemClock.elapsedRealtime());
                 }
             }
-            oldStatus = status;
-        }
-        if (onBattery) {
-            mDischargeCurrentLevel = level;
-            mRecordingHistory = true;
-        }
-        if (onBattery != mOnBattery) {
-            mHistoryCur.batteryLevel = (byte)level;
-            mHistoryCur.batteryStatus = (byte)status;
-            mHistoryCur.batteryHealth = (byte)health;
-            mHistoryCur.batteryPlugType = (byte)plugType;
-            mHistoryCur.batteryTemperature = (char)temp;
-            mHistoryCur.batteryVoltage = (char)volt;
-            setOnBattery(onBattery, oldStatus, level);
-        } else {
-            boolean changed = false;
-            if (mHistoryCur.batteryLevel != level) {
-                mHistoryCur.batteryLevel = (byte)level;
-                changed = true;
+            if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {
+                // We don't record history while we are plugged in and fully charged.
+                // The next time we are unplugged, history will be cleared.
+                mRecordingHistory = false;
             }
-            if (mHistoryCur.batteryStatus != status) {
-                mHistoryCur.batteryStatus = (byte)status;
-                changed = true;
-            }
-            if (mHistoryCur.batteryHealth != health) {
-                mHistoryCur.batteryHealth = (byte)health;
-                changed = true;
-            }
-            if (mHistoryCur.batteryPlugType != plugType) {
-                mHistoryCur.batteryPlugType = (byte)plugType;
-                changed = true;
-            }
-            if (temp >= (mHistoryCur.batteryTemperature+10)
-                    || temp <= (mHistoryCur.batteryTemperature-10)) {
-                mHistoryCur.batteryTemperature = (char)temp;
-                changed = true;
-            }
-            if (volt > (mHistoryCur.batteryVoltage+20)
-                    || volt < (mHistoryCur.batteryVoltage-20)) {
-                mHistoryCur.batteryVoltage = (char)volt;
-                changed = true;
-            }
-            if (changed) {
-                addHistoryRecordLocked(SystemClock.elapsedRealtime());
-            }
-        }
-        if (!onBattery && status == BatteryManager.BATTERY_STATUS_FULL) {
-            // We don't record history while we are plugged in and fully charged.
-            // The next time we are unplugged, history will be cleared.
-            mRecordingHistory = false;
         }
     }
 
