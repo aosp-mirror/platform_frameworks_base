@@ -57,6 +57,7 @@ public class UsbPermissionActivity extends AlertActivity
     private String mPackageName;
     private int mUid;
     private boolean mPermissionGranted;
+    private UsbDisconnectedReceiver mDisconnectedReceiver;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -85,8 +86,10 @@ public class UsbPermissionActivity extends AlertActivity
         ap.mTitle = appName;
         if (mDevice == null) {
             ap.mMessage = getString(R.string.usb_accessory_permission_prompt, appName);
+            mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
         } else {
             ap.mMessage = getString(R.string.usb_device_permission_prompt, appName);
+            mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
         }
         ap.mPositiveButtonText = getString(com.android.internal.R.string.ok);
         ap.mNegativeButtonText = getString(com.android.internal.R.string.cancel);
@@ -142,6 +145,9 @@ public class UsbPermissionActivity extends AlertActivity
             Log.e(TAG, "IUsbService connection failed", e);
         }
 
+        if (mDisconnectedReceiver != null) {
+            unregisterReceiver(mDisconnectedReceiver);
+        }
         super.onDestroy();
     }
 

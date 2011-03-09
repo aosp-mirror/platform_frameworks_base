@@ -39,6 +39,10 @@ public class UsbResolverActivity extends ResolverActivity {
     public static final String TAG = "UsbResolverActivity";
     public static final String EXTRA_RESOLVE_INFOS = "rlist";
 
+    private UsbDevice mDevice;
+    private UsbAccessory mAccessory;
+    private UsbDisconnectedReceiver mDisconnectedReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
@@ -57,6 +61,27 @@ public class UsbResolverActivity extends ResolverActivity {
                          This is necessary because this activity is needed for the user to allow
                          the application permission to access the device */
                 );
+
+        mDevice = (UsbDevice)target.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+        if (mDevice != null) {
+            mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
+        } else {
+            mAccessory = (UsbAccessory)target.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+            if (mAccessory == null) {
+                Log.e(TAG, "no device or accessory");
+                finish();
+                return;
+            }
+            mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mDisconnectedReceiver != null) {
+            unregisterReceiver(mDisconnectedReceiver);
+        }
+        super.onDestroy();
     }
 
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
@@ -64,28 +89,24 @@ public class UsbResolverActivity extends ResolverActivity {
             IBinder b = ServiceManager.getService(USB_SERVICE);
             IUsbManager service = IUsbManager.Stub.asInterface(b);
             int uid = ri.activityInfo.applicationInfo.uid;
-            String action = intent.getAction();
 
-            if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-                UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+            if (mDevice != null) {
                 // grant permission for the device
-                service.grantDevicePermission(device, uid);
+                service.grantDevicePermission(mDevice, uid);
                 // set or clear default setting
                 if (alwaysCheck) {
-                    service.setDevicePackage(device, ri.activityInfo.packageName);
+                    service.setDevicePackage(mDevice, ri.activityInfo.packageName);
                 } else {
-                    service.setDevicePackage(device, null);
+                    service.setDevicePackage(mDevice, null);
                 }
-            } else if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
-                UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(
-                        UsbManager.EXTRA_ACCESSORY);
+            } else if (mAccessory != null) {
                 // grant permission for the accessory
-                service.grantAccessoryPermission(accessory, uid);
+                service.grantAccessoryPermission(mAccessory, uid);
                 // set or clear default setting
                 if (alwaysCheck) {
-                    service.setAccessoryPackage(accessory, ri.activityInfo.packageName);
+                    service.setAccessoryPackage(mAccessory, ri.activityInfo.packageName);
                 } else {
-                    service.setAccessoryPackage(accessory, null);
+                    service.setAccessoryPackage(mAccessory, null);
                 }
             }
 
