@@ -27,6 +27,7 @@
 #include "net/base/host_resolver.h"
 #include "net/base/ssl_config_service.h"
 #include "net/http/http_cache.h"
+#include "net/proxy/proxy_config_service_android.h"
 
 #include "include/ChromiumHTTPDataSource.h"
 
@@ -120,7 +121,8 @@ SfRequestContext::SfRequestContext() {
     ssl_config_service_ =
         net::SSLConfigService::CreateSystemSSLConfigService();
 
-    proxy_service_ = net::ProxyService::CreateDirect();
+    proxy_service_ = net::ProxyService::CreateWithoutProxyResolver(
+            new net::ProxyConfigServiceAndroid, net_log_);
 
     http_transaction_factory_ = new net::HttpCache(
             host_resolver_,
