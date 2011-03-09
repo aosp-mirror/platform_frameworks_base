@@ -477,8 +477,7 @@ public class HorizontalScrollView extends FrameLayout {
                 break;
             case MotionEvent.ACTION_POINTER_DOWN: {
                 final int index = ev.getActionIndex();
-                final float x = ev.getX(index);
-                mLastMotionX = x;
+                mLastMotionX = ev.getX(index);
                 mActivePointerId = ev.getPointerId(index);
                 break;
             }
@@ -1446,6 +1445,7 @@ public class HorizontalScrollView extends FrameLayout {
         super.setOverScrollMode(mode);
     }
 
+    @SuppressWarnings({"SuspiciousNameCombination"})
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
