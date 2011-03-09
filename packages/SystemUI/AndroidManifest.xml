@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.MANAGE_USB" />
 
     <application
         android:persistent="true"
@@ -39,5 +40,22 @@
             android:exported="true">
         </activity>
 
+        <!-- started from UsbDeviceSettingsManager -->
+        <activity android:name=".usb.UsbPermissionActivity"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_USB"
+            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <!-- started from UsbDeviceSettingsManager -->
+        <activity android:name=".usb.UsbResolverActivity"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_USB"
+            android:theme="@*android:style/Theme.Holo.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
     </application>
 </manifest>

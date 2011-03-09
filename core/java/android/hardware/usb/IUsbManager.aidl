@@ -16,6 +16,7 @@
 
 package android.hardware.usb;
 
+import android.app.PendingIntent;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
@@ -49,6 +50,25 @@ interface IUsbManager
      * (or clears it if the package name is null)
      */
     void setAccessoryPackage(in UsbAccessory accessory, String packageName);
+
+    /* Returns true if the caller has permission to access the device. */
+    boolean hasDevicePermission(in UsbDevice device);
+
+    /* Returns true if the caller has permission to access the accessory. */
+    boolean hasAccessoryPermission(in UsbAccessory accessory);
+
+    /* Requests permission for the given package to access the device.
+     * Will display a system dialog to query the user if permission
+     * had not already been given.
+     */
+    void requestDevicePermission(in UsbDevice device, String packageName, in PendingIntent pi);
+
+    /* Requests permission for the given package to access the accessory.
+     * Will display a system dialog to query the user if permission
+     * had not already been given. Result is returned via pi.
+     */
+    void requestAccessoryPermission(in UsbAccessory accessory, String packageName,
+            in PendingIntent pi);
 
     /* Grants permission for the given UID to access the device */
     void grantDevicePermission(in UsbDevice device, int uid);

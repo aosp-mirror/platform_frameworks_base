@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -452,6 +453,24 @@ public class UsbService extends IUsbManager.Stub {
     public void setAccessoryPackage(UsbAccessory accessory, String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         mDeviceManager.setAccessoryPackage(accessory, packageName);
+    }
+
+    public boolean hasDevicePermission(UsbDevice device) {
+        return mDeviceManager.hasPermission(device);
+    }
+
+    public boolean hasAccessoryPermission(UsbAccessory accessory) {
+        return mDeviceManager.hasPermission(accessory);
+    }
+
+    public void requestDevicePermission(UsbDevice device, String packageName,
+            PendingIntent pi) {
+        mDeviceManager.requestPermission(device, packageName, pi);
+    }
+
+    public void requestAccessoryPermission(UsbAccessory accessory, String packageName,
+            PendingIntent pi) {
+        mDeviceManager.requestPermission(accessory, packageName, pi);
     }
 
     public void grantDevicePermission(UsbDevice device, int uid) {
