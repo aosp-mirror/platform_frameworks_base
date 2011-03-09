@@ -26,14 +26,15 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ResultReceiver;
 import android.text.BoringLayout.Metrics;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Layout;
-import android.text.Layout.Alignment;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextPaint;
@@ -136,6 +137,23 @@ import junit.framework.Assert;
     // Used to determine whether onFocusChanged was called as a result of
     // calling remove().
     private boolean mInsideRemove;
+    private class MyResultReceiver extends ResultReceiver {
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == InputMethodManager.RESULT_SHOWN
+                    && mWebView != null) {
+                mWebView.revealSelection();
+            }
+        }
+
+        /**
+         * @param handler
+         */
+        public MyResultReceiver(Handler handler) {
+            super(handler);
+        }
+    }
+    private MyResultReceiver mReceiver;
 
     // Types used with setType.  Keep in sync with CachedInput.h
     private static final int NORMAL_TEXT_FIELD = 0;
@@ -184,7 +202,7 @@ import junit.framework.Assert;
                 }
             }
         };
-
+        mReceiver = new MyResultReceiver(mHandler);
     }
 
     public void setAutoFillable(int queryId) {
@@ -361,6 +379,8 @@ import junit.framework.Assert;
             }
         }
     }
+
+    /* package */ ResultReceiver getResultReceiver() { return mReceiver; }
 
     /**
      *  Determine whether this WebTextView currently represents the node
