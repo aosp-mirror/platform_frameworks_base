@@ -27,9 +27,8 @@ import android.os.SystemProperties;
  * {@hide}
  */
 public interface CommandsInterface {
-    // TODO: Get rid of mot from property.
     static final boolean LTE_AVAILABLE_ON_CDMA =
-        SystemProperties.getBoolean("ro.mot.lte_on_cdma", false);
+        SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
     enum RadioState {
         RADIO_OFF(0),         /* Radio explictly powered off (eg CFUN=0) */
         RADIO_UNAVAILABLE(0), /* Radio unavailable (eg, resetting or not booted) */

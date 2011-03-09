@@ -639,7 +639,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 mPhoneType = RILConstants.CDMA_PHONE;
                 break;
             case RILConstants.NETWORK_MODE_LTE_ONLY:
-                if (SystemProperties.getBoolean("ro.mot.lte_on_cdma", false)) {
+                if (SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA,
+                        false)) {
                     mPhoneType = RILConstants.CDMA_PHONE;
                 } else {
                     mPhoneType = RILConstants.GSM_PHONE;

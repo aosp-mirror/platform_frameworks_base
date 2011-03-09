@@ -20,6 +20,7 @@ import android.util.Log;
 
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.PhoneBase;
+import com.android.internal.telephony.TelephonyProperties;
 import android.os.SystemProperties;
 
 /**
@@ -46,7 +47,7 @@ public final class SimCard extends IccCard {
         mPhone.mCM.registerForSIMReady(mHandler, EVENT_ICC_READY, null);
         updateStateProperty();
 
-        if(SystemProperties.getBoolean("ro.mot.lte_on_cdma", false)) {
+        if(SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false)) {
             mPhone.mCM.registerForNVReady(mHandler, EVENT_ICC_READY, null);
         }
     }
