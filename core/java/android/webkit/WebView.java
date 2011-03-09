@@ -4023,15 +4023,10 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    void setBaseLayer(int layer, Rect invalRect, boolean showVisualIndciator) {
+    void setBaseLayer(int layer, Region invalRegion, boolean showVisualIndicator) {
         if (mNativeClass == 0)
             return;
-        if (invalRect == null) {
-            Rect rect = new Rect(0, 0, mContentWidth, mContentHeight);
-            nativeSetBaseLayer(layer, rect, showVisualIndciator);
-        } else {
-            nativeSetBaseLayer(layer, invalRect, showVisualIndciator);
-        }
+        nativeSetBaseLayer(layer, invalRegion, showVisualIndicator);
     }
 
     private void onZoomAnimationStart() {
@@ -7556,7 +7551,7 @@ public class WebView extends AbsoluteLayout
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion.getBounds(),
+                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
                             getSettings().getShowVisualIndicator());
                     final Point viewSize = draw.mViewSize;
                     WebViewCore.ViewState viewState = draw.mViewState;
@@ -8597,7 +8592,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsEmpty();
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
-    private native void     nativeSetBaseLayer(int layer, Rect invalRect,
+    private native void     nativeSetBaseLayer(int layer, Region invalRegion,
             boolean showVisualIndicator);
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
