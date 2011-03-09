@@ -114,6 +114,8 @@ Loader::Loader()
 
 Loader::~Loader()
 {
+    extern void StopDebugServer();
+    StopDebugServer();
 }
 
 const char* Loader::getTag(int dpy, int impl)

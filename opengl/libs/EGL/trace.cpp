@@ -325,7 +325,7 @@ static void Tracing_ ## _api _args {                                      \
 
 #define TRACE_GL(_type, _api, _args, _argList, ...)                       \
 static _type Tracing_ ## _api _args {                                     \
-    TraceGL(#_api, __VA_ARGS__);                                          \
+    TraceGL(#_api, __VA_ARGS__);                                        \
     gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;  \
     return _c->_api _argList;                                             \
 }
@@ -333,12 +333,54 @@ static _type Tracing_ ## _api _args {                                     \
 extern "C" {
 #include "../trace.in"
 }
+
 #undef TRACE_GL_VOID
 #undef TRACE_GL
 
 #define GL_ENTRY(_r, _api, ...) Tracing_ ## _api,
-
 EGLAPI gl_hooks_t gHooksTrace = {
+    {
+        #include "entries.in"
+    },
+    {
+        {0}
+    }
+};
+#undef GL_ENTRY
+
+
+#undef TRACE_GL_VOID
+#undef TRACE_GL
+
+// define the ES 1.0 Debug_gl* functions as Tracing_gl functions
+#define TRACE_GL_VOID(_api, _args, _argList, ...)                         \
+static void Debug_ ## _api _args {                                      \
+    TraceGL(#_api, __VA_ARGS__);                                          \
+    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;  \
+    _c->_api _argList;                                                    \
+}
+
+#define TRACE_GL(_type, _api, _args, _argList, ...)                       \
+static _type Debug_ ## _api _args {                                     \
+    TraceGL(#_api, __VA_ARGS__);                                        \
+    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;  \
+    return _c->_api _argList;                                             \
+}
+
+extern "C" {
+#include "../debug.in"
+}
+
+#undef TRACE_GL_VOID
+#undef TRACE_GL
+
+// declare all Debug_gl* functions
+#define GL_ENTRY(_r, _api, ...) _r Debug_##_api ( __VA_ARGS__ );
+#include "../GLES2_dbg/include/glesv2_dbg.h"
+#undef GL_ENTRY
+
+#define GL_ENTRY(_r, _api, ...) Debug_ ## _api,
+EGLAPI gl_hooks_t gHooksDebug = {
     {
         #include "entries.in"
     },
