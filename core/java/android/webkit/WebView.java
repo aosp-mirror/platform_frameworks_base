@@ -4257,7 +4257,7 @@ public class WebView extends AbsoluteLayout
         if (isTextView) {
             rebuildWebTextView();
             if (inEditingMode()) {
-                imm.showSoftInput(mWebTextView, 0);
+                imm.showSoftInput(mWebTextView, 0, mWebTextView.getResultReceiver());
                 if (zoom) {
                     didUpdateWebTextViewDimensions(INTERSECTS_SCREEN);
                 }
