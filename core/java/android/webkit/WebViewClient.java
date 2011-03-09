@@ -256,4 +256,18 @@ public class WebViewClient {
      */
     public void onScaleChanged(WebView view, float oldScale, float newScale) {
     }
+
+    /**
+     * Notify the host application that a request to automatically log in the
+     * user has been processed.
+     * @param view The WebView requesting the login.
+     * @param realm The account realm used to look up accounts.
+     * @param account An optional account. If not null, the account should be
+     *                checked against accounts on the device. If it is a valid
+     *                account, it should be used to log in the user.
+     * @param args Authenticator specific arguments used to log in the user.
+     */
+    public void onReceivedLoginRequest(WebView view, String realm,
+            String account, String args) {
+    }
 }
