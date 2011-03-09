@@ -346,12 +346,14 @@ private:
     };
 
             bool processAudioBuffer(const sp<ClientRecordThread>& thread);
-            status_t openRecord(uint32_t sampleRate,
+            status_t openRecord_l(uint32_t sampleRate,
                                 int format,
                                 int channelCount,
                                 int frameCount,
                                 uint32_t flags,
                                 audio_io_handle_t input);
+            audio_io_handle_t getInput_l();
+            status_t restoreRecord_l(audio_track_cblk_t*& cblk);
 
     sp<IAudioRecord>        mAudioRecord;
     sp<IMemory>             mCblkMemory;

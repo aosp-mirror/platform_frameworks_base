@@ -530,8 +530,12 @@ static jint android_media_AudioTrack_native_write(JNIEnv *env,  jobject thiz,
     }
 
     // get the pointer for the audio data from the java array
+    // NOTE: We may use GetPrimitiveArrayCritical() when the JNI implementation changes in such
+    // a way that it becomes much more efficient. When doing so, we will have to prevent the
+    // AudioSystem callback to be called while in critical section (in case of media server
+    // process crash for instance)
     if (javaAudioData) {
-        cAudioData = (jbyte *)env->GetPrimitiveArrayCritical(javaAudioData, NULL);
+        cAudioData = (jbyte *)env->GetByteArrayElements(javaAudioData, NULL);
         if (cAudioData == NULL) {
             LOGE("Error retrieving source of audio data to play, can't play");
             return 0; // out of memory or no data to load
@@ -543,7 +547,7 @@ static jint android_media_AudioTrack_native_write(JNIEnv *env,  jobject thiz,
 
     jint written = writeToTrack(lpTrack, javaAudioFormat, cAudioData, offsetInBytes, sizeInBytes);
 
-    env->ReleasePrimitiveArrayCritical(javaAudioData, cAudioData, 0);
+    env->ReleaseByteArrayElements(javaAudioData, cAudioData, 0);
 
     //LOGV("write wrote %d (tried %d) bytes in the native AudioTrack with offset %d",
     //     (int)written, (int)(sizeInBytes), (int)offsetInBytes);
