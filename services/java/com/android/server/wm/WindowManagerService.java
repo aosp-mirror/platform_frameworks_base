@@ -4727,7 +4727,15 @@ public class WindowManagerService extends IWindowManager.Stub
         SystemProperties.set(StrictMode.VISUAL_PROPERTY, value);
     }
 
-    public Bitmap screenshotApplications(IBinder appToken, int maxWidth, int maxHeight) {
+    /**
+     * Takes a snapshot of the screen.  In landscape mode this grabs the whole screen.
+     * In portrait mode, it grabs the upper region of the screen based on the vertical dimension
+     * of the target image.
+     * 
+     * @param width the width of the target bitmap
+     * @param height the height of the target bitmap
+     */
+    public Bitmap screenshotApplications(IBinder appToken, int width, int height) {
         if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                 "screenshotApplications()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
@@ -4739,7 +4747,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final Rect frame = new Rect();
 
         float scale;
-        int sw, sh, dw, dh;
+        int dw, dh;
         int rot;
 
         synchronized(mWindowMap) {
@@ -4803,7 +4811,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Constrain frame to the screen size.
             frame.intersect(0, 0, dw, dh);
-            
+
             if (frame.isEmpty() || maxLayer == 0) {
                 return null;
             }
@@ -4814,15 +4822,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int fh = frame.height();
 
             // First try reducing to fit in x dimension.
-            scale = maxWidth/(float)fw;
-            sw = maxWidth;
-            sh = (int)(fh*scale);
-            if (sh > maxHeight) {
-                // y dimension became too long; constrain by that.
-                scale = maxHeight/(float)fh;
-                sw = (int)(fw*scale);
-                sh = maxHeight;
-            }
+            scale = width/(float)fw;
 
             // The screen shot will contain the entire screen.
             dw = (int)(dw*scale);
@@ -4841,8 +4841,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     + ") to layer " + maxLayer);
             return null;
         }
-        
-        Bitmap bm = Bitmap.createBitmap(sw, sh, rawss.getConfig());
+
+        Bitmap bm = Bitmap.createBitmap(width, height, rawss.getConfig());
         Matrix matrix = new Matrix();
         ScreenRotationAnimation.createRotationMatrix(rot, dw, dh, matrix);
         matrix.postTranslate(-(int)(frame.left*scale), -(int)(frame.top*scale));
