@@ -77,8 +77,8 @@ interface IUsbManager
     void grantAccessoryPermission(in UsbAccessory accessory, int uid);
 
     /* Returns true if the USB manager has default preferences or permissions for the package */
-    boolean hasDefaults(String packageName, int uid);
+    boolean hasDefaults(String packageName);
 
     /* Clears default preferences and permissions for the package */
-    oneway void clearDefaults(String packageName, int uid);
+    oneway void clearDefaults(String packageName);
 }
