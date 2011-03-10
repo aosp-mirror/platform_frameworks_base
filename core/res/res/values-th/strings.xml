@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะเปิดการใช้งานนโยบาย เฉพาะผู้ดูแลอุปกรณ์คนแรกเท่านั้นที่ตั้งค่าพร็อกซีส่วนกลางที่มีผลบังคับ"</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"ตั้งค่าการหมดอายุของรหัสผ่าน"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"ควบคุมระยะเวลาก่อนที่จะต้องเปลี่ยนรหัสผ่านการล็อกหน้าจอ"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"ตั้งค่าวันหมดอายุของรหัสผ่านล็อกหน้าจอ"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"ควบคุมความถี่ในการเปลี่ยนรหัสผ่านล็อกหน้าจอ"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ตั้งค่าการเข้ารหัสที่เก็บข้อมูล"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"กำหนดว่าแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
   <string-array name="phoneTypes">

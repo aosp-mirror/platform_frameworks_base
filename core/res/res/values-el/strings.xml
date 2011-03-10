@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Διαγραφή των δεδομένων του τηλεφώνου χωρίς προειδοποίηση με επαναφορά των εργοστασιακών δεδομένων"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ρύθμιση του γενικού διακομιστή μεσολάβησης της συσκευής"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ορίστε τη χρήση του γενικού διακομιστή μεσολάβησης της συσκευής όταν είναι ενεργοποιημένη η πολιτική. Μόνο ο διαχειριστής της πρώτης συσκευής ορίζει τον ισχύοντα γενικό διακομιστή μεσολάβησης."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Ορισμός λήξης κωδικού πρόσβασης"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Ελέγξτε πόσος χρόνος απομένει προτού πρέπει να αλλάξετε τον κωδικό πρόσβασης κλειδώματος της οθόνης"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Ορισμός λήξης κωδ. κλειδ. οθ."</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Επιλέξτε πόσο συχνά θα πρέπει να αλλάζει ο κωδικός πρόσβασης κλειδώματος οθόνης"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ορισμός κρυπτογρ. αποθ. χώρου"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Να απαιτείται η κρυπτογράφηση των αποθηκευμένων δεδομένων εφαρμογής"</string>
   <string-array name="phoneTypes">

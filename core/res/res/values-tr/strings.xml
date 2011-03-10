@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silin"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Etkin genel proxy\'yi yalnızca ilk cihaz yöneticisi ayarlar."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Şifre süre sonu tarihi ayarla"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Ekran kilitleme şifresinin ne kadar süre sonra değiştirilmesi gerekeceğini denetleyin."</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Ekr kilt şifr süre sonu ayarla"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Ekran kilitleme şifresinin hangi sıklıkla değiştirilmesi gerektiğini denetleyin"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Deplm şifrelemesini ayarla"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Depolanan uygulama verisinin şifrelenmiş olmasını gerektir"</string>
   <string-array name="phoneTypes">

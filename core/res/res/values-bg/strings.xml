@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Изтриване на данните в телефона без предупреждение чрез възстановяване на фабричните настройки"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Задаване на глобален прокси сървър за устройството"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Задаване на глобалния прокси сървър, който да се използва, когато правилото е активирано. Само първият администратор на устройството задава действителния глобален прокси сървър."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Задаване на срок на валидност на паролата"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Контролирайте след колко време трябва да се променя паролата за заключване на екрана"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Изтичане на паролата"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Контролирайте колко често трябва да се променя паролата за заключен екран"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Шифроване за хранилището"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Изисква съхраняваните данни за приложенията да бъдат шифровани"</string>
   <string-array name="phoneTypes">

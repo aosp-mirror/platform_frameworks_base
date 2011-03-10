@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia telefónu"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastaviť globálny server proxy zariadenia"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globálny server proxy, ktorý sa bude používať po aktivácii pravidiel. Platný globálny server proxy nastavuje iba prvý správca zariadenia."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Nastaviť dátum vypršania platnosti hesla"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Ovládanie doby, po uplynutí ktorej treba zmeniť heslo na odomknutie obrazovky"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastav. koniec platnosti hesla"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Nastavte, ako často sa musí zmeniť heslo na uzamknutie obrazovky"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastaviť šifr. ukl. priestoru"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Vyžaduje šifrovanie uložených údajov aplikácií"</string>
   <string-array name="phoneTypes">

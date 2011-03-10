@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Ta bort data från telefonen utan förvarning genom att återställa standardinställningarna"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ange global proxyserver"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ange vilken global proxyserver som ska användas när policyn är aktiverad. Endast den första enhetsadministratören anger den faktiska globala proxyservern."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Ange lösenordets utgångsdatum"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Se hur långt det är kvar till du måste ändra lösenordet till låsningsskärmen"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Ange lösenordets utgångsdatum"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Styr hur ofta lösenordet till skärmlåset måste ändras"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ange krypterad lagring"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Kräv att sparade applikationsdata krypteras."</string>
   <string-array name="phoneTypes">

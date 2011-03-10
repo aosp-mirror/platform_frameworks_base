@@ -61,4 +61,8 @@
     <skip />
     <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
     <skip />
+    <!-- no translation found for usb_device_permission_prompt (5340926456453429244) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
+    <skip />
 </resources>

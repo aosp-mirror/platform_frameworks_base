@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Bez upozornění smazat všechna data telefonu obnovením továrních dat"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavit globální proxy server zařízení"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globální proxy server, který se bude používat, když jsou zásady aktivní. Aktuální globální proxy server nastavuje pouze první správce zařízení."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Nastavit konec platnosti hesla"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Ovládání doby, po jejímž uplynutí je nutné změnit heslo pro odemknutí obrazovky"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastavit vypršení hesla zámku"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Určuje, jak často je třeba měnit heslo pro uzamčení obrazovky"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavit šifrování úložiště"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Požadovat šifrování ukládaných dat"</string>
   <string-array name="phoneTypes">
