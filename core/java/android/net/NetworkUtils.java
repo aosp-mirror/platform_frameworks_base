@@ -209,4 +209,16 @@ public class NetworkUtils {
         }
         return result;
     }
+
+    /**
+     * Start the DHCP renew service for wimax,
+     * This call blocks until it obtains a result (either success
+     * or failure) from the daemon.
+     * @param interfaceName the name of the interface to configure
+     * @param ipInfo if the request succeeds, this object is filled in with
+     * the IP address information.
+     * @return {@code true} for success, {@code false} for failure
+     * {@hide}
+     */
+    public native static boolean runDhcpRenew(String interfaceName, DhcpInfo ipInfo);
 }

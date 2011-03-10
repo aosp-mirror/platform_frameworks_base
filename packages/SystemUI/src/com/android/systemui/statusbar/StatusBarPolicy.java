@@ -74,6 +74,7 @@ import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.server.am.BatteryStatsService;
 
 import com.android.systemui.R;
+import android.net.wimax.WimaxManagerConstants;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
@@ -341,6 +342,19 @@ public class StatusBarPolicy {
     private int mLastWifiSignalLevel = -1;
     private boolean mIsWifiConnected = false;
 
+    //4G
+    private static final int[][] sDataNetType_4g = {
+            { R.drawable.stat_sys_data_connected_4g,
+              R.drawable.stat_sys_data_out_4g,
+              R.drawable.stat_sys_data_in_4g,
+              R.drawable.stat_sys_data_inandout_4g },
+            { R.drawable.stat_sys_data_fully_connected_4g,
+              R.drawable.stat_sys_data_fully_out_4g,
+              R.drawable.stat_sys_data_fully_in_4g,
+              R.drawable.stat_sys_data_fully_inandout_4g }
+        };
+    private boolean mIsWimaxConnected = false;
+
     // state of inet connection - 0 not connected, 100 connected
     private int mInetCondition = 0;
 
@@ -398,6 +412,9 @@ public class StatusBarPolicy {
                 // TODO - stop using other means to get wifi/mobile info
                 updateConnectivity(intent);
             }
+            else if (action.equals(WimaxManagerConstants.WIMAX_DATA_USED_ACTION)) {
+                updateWiMAX(intent);
+            }
         }
     };
 
@@ -437,6 +454,15 @@ public class StatusBarPolicy {
         mService.setIcon("wifi", sWifiSignalImages[0][0], 0);
         mService.setIconVisibility("wifi", false);
         // wifi will get updated by the sticky intents
+
+        // wimax
+        //enable/disable wimax depending on the value in config.xml
+        boolean isWimaxEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wimaxEnabled);
+        if (isWimaxEnabled) {
+            mService.setIcon("wimax", R.drawable.stat_sys_data_connected_4g, 0);
+            mService.setIconVisibility("wimax", false);
+        }
 
         // TTY status
         mService.setIcon("tty",  R.drawable.stat_sys_tty_mode, 0);
@@ -503,6 +529,8 @@ public class StatusBarPolicy {
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
+        filter.addAction(WimaxManagerConstants.WIMAX_DATA_USED_ACTION);
+
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
         // load config to determine if to distinguish Hspa data icon
@@ -743,6 +771,17 @@ public class StatusBarPolicy {
                 mService.setIconVisibility("wifi", false);
             }
             updateSignalStrength(); // apply any change in mInetCondition
+            break;
+        case ConnectivityManager.TYPE_WIMAX:
+            mInetCondition = inetCondition;
+            if (info.isConnected()) {
+                mIsWimaxConnected = true;
+                mService.setIconVisibility("wimax", true);
+            } else {
+                mIsWimaxConnected = false;
+                mService.setIconVisibility("wimax", false);
+            }
+            updateWiMAX(intent);
             break;
         }
     }
@@ -1121,6 +1160,17 @@ public class StatusBarPolicy {
                 }
                 mService.setIcon("wifi", iconId, 0);
             }
+        }
+    }
+
+    private final void updateWiMAX(Intent intent) {
+        final String action = intent.getAction();
+        int iconId = sDataNetType_4g[0][0];
+        if (action.equals(WimaxManagerConstants.WIMAX_DATA_USED_ACTION)) {
+            int nUpDown = intent.getIntExtra(WimaxManagerConstants.EXTRA_UP_DOWN_DATA, 0);
+            iconId = sDataNetType_4g[mInetCondition][nUpDown];
+            mService.setIcon("wimax", iconId, 0);
+            mService.setIconVisibility("wimax", mIsWimaxConnected);
         }
     }
 
