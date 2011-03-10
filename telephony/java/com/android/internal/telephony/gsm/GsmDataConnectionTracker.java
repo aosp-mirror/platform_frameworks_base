@@ -361,6 +361,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected boolean isApnTypeActive(String type) {
         // TODO: support simultaneous with List instead
+        if (Phone.APN_TYPE_DUN.equals(type)) {
+            ApnSetting dunApn = fetchDunApn();
+            if (dunApn != null) {
+                return ((mActiveApn != null) && (dunApn.toString().equals(mActiveApn.toString())));
+            }
+        }
         return mActiveApn != null && mActiveApn.canHandleType(type);
     }
 
