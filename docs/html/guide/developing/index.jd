@@ -23,7 +23,7 @@ page.title=Introduction
       before continuing.</p>
     </li>
 
-    <li>Set up Android Virtual Devices or hardware devices</a>.
+    <li>Set up Android Virtual Devices or hardware devices.
 
       <p>You need to create Android Virtual Devices (AVD) or connect hardware devices on which
       you will install your applications.</p>
@@ -66,8 +66,8 @@ information.
       run tests within an emulator or device.</p>
     </li>
   </ol>
-
-  <h2 id="EssentialTools">Essential command line tools</h2>
+ 
+<h2 id="EssentialTools">Essential command line tools</h2>
 
   <p>When developing in IDEs or editors other than Eclipse, be familiar with
   all of the tools below, because you will have to run them from the command line.</p>
@@ -112,6 +112,43 @@ information.
   Eclipse, such as the <code>adb</code> shell commands. You might also need to call Keytool and Jarsigner to
   sign your applications, but you can set up Eclipse to do this automatically as well.</p>
   
-  <p>For more information on the tools provided with the Android SDK, see the
+<p>For more information on the tools provided with the Android SDK, see the
   <a href="{@docRoot}guide/developing/tools/index.html">Tools</a> section of the documentation.</p>
+  
+<h2 id="ThirdParty">Third-Party Development Tools</h2>
+<p>
+	The tools described in this section are not developed by the Android SDK team. The Android Dev Guide
+	    does not provide documentation for these tools. Please refer to the linked documents in each
+	    section for documentation.
+</p>  
+<h3 id="IntelliJ">Developing in IntelliJ IDEA</h3>
+<div style="float: right">
+<img alt="The IntelliJ graphical user interface" height="500px" src="{@docRoot}images/developing/intellijidea_android_ide.png"/>
+</div>
+<p>
+	IntelliJ IDEA is a powerful Java IDE from JetBrains that provides
+	full-cycle Android development support in both the free Community
+	Edition and the Ultimate edition.
+</p>
+<p>
+	The IDE ensures compatibility with the latest Android SDK and offers a
+	smart code editor with completion, quick navigation between code and
+	resources, a graphical debugger, unit testing support using Android
+	Testing Framework, and the ability to run applications in either the
+	emulator or a USB-connected device.
+</p>
+<p>
+	<strong>Links:</strong>
+</p>
+<ul>
+	<li>
+    	<a href="http://www.jetbrains.com/idea">IntelliJ IDEA official website</a>
+</li>
+	<li>
+    	<a href="http://www.jetbrains.com/idea/features/google_android.html">Android support in IntelliJ IDEA</a>
+</li>
+	<li>
+    	<a href="http://wiki.jetbrains.net/intellij/Android">IntelliJ IDEA Android Tutorials</a>
+	</li>
+</ul> 
 
