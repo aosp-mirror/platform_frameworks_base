@@ -27,6 +27,7 @@
 #include <utils/Timers.h>
 #include <utils/RefBase.h>
 #include <utils/String8.h>
+#include <utils/BitSet.h>
 
 #ifdef HAVE_ANDROID_OS
 class SkMatrix;
@@ -207,6 +208,13 @@ struct PointerCoords {
     status_t readFromParcel(Parcel* parcel);
     status_t writeToParcel(Parcel* parcel) const;
 #endif
+
+    bool operator==(const PointerCoords& other) const;
+    inline bool operator!=(const PointerCoords& other) const {
+        return !(*this == other);
+    }
+
+    void copyFrom(const PointerCoords& other);
 
 private:
     void tooManyAxes(int axis);
@@ -540,6 +548,53 @@ public:
 private:
     KeyEvent mKeyEvent;
     MotionEvent mMotionEvent;
+};
+
+/*
+ * Calculates the velocity of pointer motions over time.
+ * Uses essentially the same algorithm as android.view.VelocityTracker.
+ */
+class VelocityTracker {
+public:
+    struct Position {
+        float x, y;
+    };
+
+    VelocityTracker();
+
+    // Resets the velocity tracker state.
+    void clear();
+
+    // Adds movement information for a set of pointers.
+    // The idBits bitfield specifies the pointer ids of the pointers whose positions
+    // are included in the movement.
+    // The positions array contains position information for each pointer in order by
+    // increasing id.  Its size should be equal to the number of one bits in idBits.
+    void addMovement(nsecs_t eventTime, BitSet32 idBits, const Position* positions);
+
+    // Gets the velocity of the specified pointer id in position units per second.
+    // Returns false and sets the velocity components to zero if there is no movement
+    // information for the pointer.
+    bool getVelocity(uint32_t id, float* outVx, float* outVy) const;
+
+private:
+    // Number of samples to keep.
+    static const uint32_t HISTORY_SIZE = 10;
+
+    // Oldest sample to consider when calculating the velocity.
+    static const nsecs_t MAX_AGE = 200 * 1000000; // 200 ms
+
+    // The minimum duration between samples when estimating velocity.
+    static const nsecs_t MIN_DURATION = 5 * 1000000; // 5 ms
+
+    struct Movement {
+        nsecs_t eventTime;
+        BitSet32 idBits;
+        Position positions[MAX_POINTERS];
+    };
+
+    uint32_t mIndex;
+    Movement mMovements[HISTORY_SIZE];
 };
 
 /*

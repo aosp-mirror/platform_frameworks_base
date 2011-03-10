@@ -2135,8 +2135,8 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
         if (pointerIds.hasBit(pointerId)) {
             splitPointerIndexMap[splitPointerCount] = originalPointerIndex;
             splitPointerIds[splitPointerCount] = pointerId;
-            splitPointerCoords[splitPointerCount] =
-                    originalMotionEntry->firstSample.pointerCoords[originalPointerIndex];
+            splitPointerCoords[splitPointerCount].copyFrom(
+                    originalMotionEntry->firstSample.pointerCoords[originalPointerIndex]);
             splitPointerCount += 1;
         }
     }
@@ -2199,8 +2199,8 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
         for (uint32_t splitPointerIndex = 0; splitPointerIndex < splitPointerCount;
                 splitPointerIndex++) {
             uint32_t originalPointerIndex = splitPointerIndexMap[splitPointerIndex];
-            splitPointerCoords[splitPointerIndex] =
-                    originalMotionSample->pointerCoords[originalPointerIndex];
+            splitPointerCoords[splitPointerIndex].copyFrom(
+                    originalMotionSample->pointerCoords[originalPointerIndex]);
         }
 
         mAllocator.appendMotionSample(splitMotionEntry, originalMotionSample->eventTime,
@@ -3453,7 +3453,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
     entry->lastSample = & entry->firstSample;
     for (uint32_t i = 0; i < pointerCount; i++) {
         entry->pointerIds[i] = pointerIds[i];
-        entry->firstSample.pointerCoords[i] = pointerCoords[i];
+        entry->firstSample.pointerCoords[i].copyFrom(pointerCoords[i]);
     }
     return entry;
 }
@@ -3556,7 +3556,7 @@ void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
     sample->eventTime = eventTime;
     uint32_t pointerCount = motionEntry->pointerCount;
     for (uint32_t i = 0; i < pointerCount; i++) {
-        sample->pointerCoords[i] = pointerCoords[i];
+        sample->pointerCoords[i].copyFrom(pointerCoords[i]);
     }
 
     sample->next = NULL;
@@ -3693,7 +3693,7 @@ void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* 
     pointerCount = entry->pointerCount;
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
         pointerIds[i] = entry->pointerIds[i];
-        pointerCoords[i] = entry->lastSample->pointerCoords[i];
+        pointerCoords[i].copyFrom(entry->lastSample->pointerCoords[i]);
     }
 }
 
