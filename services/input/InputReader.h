@@ -389,7 +389,7 @@ private:
 
 class KeyboardInputMapper : public InputMapper {
 public:
-    KeyboardInputMapper(InputDevice* device, uint32_t sources, int32_t keyboardType);
+    KeyboardInputMapper(InputDevice* device, uint32_t source, int32_t keyboardType);
     virtual ~KeyboardInputMapper();
 
     virtual uint32_t getSources();
@@ -414,7 +414,7 @@ private:
         int32_t scanCode;
     };
 
-    uint32_t mSources;
+    uint32_t mSource;
     int32_t mKeyboardType;
 
     // Immutable configuration parameters.
@@ -493,7 +493,7 @@ private:
 
     struct Accumulator {
         enum {
-            FIELD_BTN_MOUSE = 1,
+            FIELD_BUTTONS = 1,
             FIELD_REL_X = 2,
             FIELD_REL_Y = 4,
             FIELD_REL_WHEEL = 8,
@@ -502,7 +502,9 @@ private:
 
         uint32_t fields;
 
-        bool btnMouse;
+        uint32_t buttonDown;
+        uint32_t buttonUp;
+
         int32_t relX;
         int32_t relY;
         int32_t relWheel;
@@ -513,7 +515,7 @@ private:
         }
     } mAccumulator;
 
-    int32_t mSources;
+    int32_t mSource;
     float mXScale;
     float mYScale;
     float mXPrecision;
@@ -527,7 +529,7 @@ private:
     sp<PointerControllerInterface> mPointerController;
 
     struct LockedState {
-        bool down;
+        uint32_t buttonState;
         nsecs_t downTime;
     } mLocked;
 
@@ -629,7 +631,7 @@ protected:
     };
 
     // Input sources supported by the device.
-    int32_t mSources;
+    uint32_t mTouchSource; // sources when reporting touch data
 
     // Immutable configuration parameters.
     struct Parameters {
@@ -744,6 +746,10 @@ protected:
         // The surface orientation and width and height set by configureSurfaceLocked().
         int32_t surfaceOrientation;
         int32_t surfaceWidth, surfaceHeight;
+
+        // The associated display orientation and width and height set by configureSurfaceLocked().
+        int32_t associatedDisplayOrientation;
+        int32_t associatedDisplayWidth, associatedDisplayHeight;
 
         // Translation and scaling factors, orientation-independent.
         float xScale;
@@ -870,7 +876,7 @@ private:
     void dispatchTouch(nsecs_t when, uint32_t policyFlags, TouchData* touch,
             BitSet32 idBits, uint32_t changedId, uint32_t pointerCount,
             int32_t motionEventAction);
-    void detectGestures(nsecs_t when);
+    void suppressSwipeOntoVirtualKeys(nsecs_t when);
 
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
     const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
@@ -900,7 +906,7 @@ private:
             FIELD_ABS_X = 2,
             FIELD_ABS_Y = 4,
             FIELD_ABS_PRESSURE = 8,
-            FIELD_ABS_TOOL_WIDTH = 16
+            FIELD_ABS_TOOL_WIDTH = 16,
         };
 
         uint32_t fields;

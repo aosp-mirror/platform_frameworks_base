@@ -405,7 +405,8 @@ class FakeEventHub : public EventHubInterface {
         String8 name;
         uint32_t classes;
         PropertyMap configuration;
-        KeyedVector<int, RawAbsoluteAxisInfo> axes;
+        KeyedVector<int, RawAbsoluteAxisInfo> absoluteAxes;
+        KeyedVector<int, bool> relativeAxes;
         KeyedVector<int32_t, int32_t> keyCodeStates;
         KeyedVector<int32_t, int32_t> scanCodeStates;
         KeyedVector<int32_t, int32_t> switchStates;
@@ -460,7 +461,7 @@ public:
         device->configuration.addAll(configuration);
     }
 
-    void addAxis(int32_t deviceId, int axis,
+    void addAbsoluteAxis(int32_t deviceId, int axis,
             int32_t minValue, int32_t maxValue, int flat, int fuzz) {
         Device* device = getDevice(deviceId);
 
@@ -470,7 +471,12 @@ public:
         info.maxValue = maxValue;
         info.flat = flat;
         info.fuzz = fuzz;
-        device->axes.add(axis, info);
+        device->absoluteAxes.add(axis, info);
+    }
+
+    void addRelativeAxis(int32_t deviceId, int32_t axis) {
+        Device* device = getDevice(deviceId);
+        device->relativeAxes.add(axis, true);
     }
 
     void setKeyCodeState(int32_t deviceId, int32_t keyCode, int32_t state) {
@@ -560,9 +566,9 @@ private:
             RawAbsoluteAxisInfo* outAxisInfo) const {
         Device* device = getDevice(deviceId);
         if (device) {
-            ssize_t index = device->axes.indexOfKey(axis);
+            ssize_t index = device->absoluteAxes.indexOfKey(axis);
             if (index >= 0) {
-                *outAxisInfo = device->axes.valueAt(index);
+                *outAxisInfo = device->absoluteAxes.valueAt(index);
                 return OK;
             }
         }
@@ -570,6 +576,10 @@ private:
     }
 
     virtual bool hasRelativeAxis(int32_t deviceId, int axis) const {
+        Device* device = getDevice(deviceId);
+        if (device) {
+            return device->relativeAxes.indexOfKey(axis) >= 0;
+        }
         return false;
     }
 
@@ -1487,13 +1497,15 @@ protected:
     }
 
     static void assertMotionRange(const InputDeviceInfo& info,
-            int32_t rangeType, float min, float max, float flat, float fuzz) {
-        const InputDeviceInfo::MotionRange* range = info.getMotionRange(rangeType);
-        ASSERT_TRUE(range != NULL) << "Range: " << rangeType;
-        ASSERT_NEAR(min, range->min, EPSILON) << "Range: " << rangeType;
-        ASSERT_NEAR(max, range->max, EPSILON) << "Range: " << rangeType;
-        ASSERT_NEAR(flat, range->flat, EPSILON) << "Range: " << rangeType;
-        ASSERT_NEAR(fuzz, range->fuzz, EPSILON) << "Range: " << rangeType;
+            int32_t axis, uint32_t source, float min, float max, float flat, float fuzz) {
+        const InputDeviceInfo::MotionRange* range = info.getMotionRange(axis, source);
+        ASSERT_TRUE(range != NULL) << "Axis: " << axis << " Source: " << source;
+        ASSERT_EQ(axis, range->axis) << "Axis: " << axis << " Source: " << source;
+        ASSERT_EQ(source, range->source) << "Axis: " << axis << " Source: " << source;
+        ASSERT_NEAR(min, range->min, EPSILON) << "Axis: " << axis << " Source: " << source;
+        ASSERT_NEAR(max, range->max, EPSILON) << "Axis: " << axis << " Source: " << source;
+        ASSERT_NEAR(flat, range->flat, EPSILON) << "Axis: " << axis << " Source: " << source;
+        ASSERT_NEAR(fuzz, range->fuzz, EPSILON) << "Axis: " << axis << " Source: " << source;
     }
 
     static void assertPointerCoords(const PointerCoords& coords,
@@ -2001,10 +2013,10 @@ TEST_F(CursorInputMapperTest, WhenModeIsPointer_PopulateDeviceInfo_ReturnsRangeF
     mapper->populateDeviceInfo(&info);
 
     // Initially there may not be a valid motion range.
-    ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_X));
-    ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_Y));
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_PRESSURE,
-            0.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_X, AINPUT_SOURCE_MOUSE));
+    ASSERT_EQ(NULL, info.getMotionRange(AINPUT_MOTION_RANGE_Y, AINPUT_SOURCE_MOUSE));
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info,
+            AINPUT_MOTION_RANGE_PRESSURE, AINPUT_SOURCE_MOUSE, 0.0f, 1.0f, 0.0f, 0.0f));
 
     // When the bounds are set, then there should be a valid motion range.
     mFakePointerController->setBounds(1, 2, 800 - 1, 480 - 1);
@@ -2012,11 +2024,14 @@ TEST_F(CursorInputMapperTest, WhenModeIsPointer_PopulateDeviceInfo_ReturnsRangeF
     InputDeviceInfo info2;
     mapper->populateDeviceInfo(&info2);
 
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_X,
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2,
+            AINPUT_MOTION_RANGE_X, AINPUT_SOURCE_MOUSE,
             1, 800 - 1, 0.0f, 0.0f));
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_Y,
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2,
+            AINPUT_MOTION_RANGE_Y, AINPUT_SOURCE_MOUSE,
             2, 480 - 1, 0.0f, 0.0f));
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2, AINPUT_MOTION_RANGE_PRESSURE,
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info2,
+            AINPUT_MOTION_RANGE_PRESSURE, AINPUT_SOURCE_MOUSE,
             0.0f, 1.0f, 0.0f, 0.0f));
 }
 
@@ -2028,11 +2043,14 @@ TEST_F(CursorInputMapperTest, WhenModeIsNavigation_PopulateDeviceInfo_ReturnsSca
     InputDeviceInfo info;
     mapper->populateDeviceInfo(&info);
 
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_X,
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info,
+            AINPUT_MOTION_RANGE_X, AINPUT_SOURCE_TRACKBALL,
             -1.0f, 1.0f, 0.0f, 1.0f / TRACKBALL_MOVEMENT_THRESHOLD));
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_Y,
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info,
+            AINPUT_MOTION_RANGE_Y, AINPUT_SOURCE_TRACKBALL,
             -1.0f, 1.0f, 0.0f, 1.0f / TRACKBALL_MOVEMENT_THRESHOLD));
-    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info, AINPUT_MOTION_RANGE_PRESSURE,
+    ASSERT_NO_FATAL_FAILURE(assertMotionRange(info,
+            AINPUT_MOTION_RANGE_PRESSURE, AINPUT_SOURCE_TRACKBALL,
             0.0f, 1.0f, 0.0f, 0.0f));
 }
 
@@ -2385,14 +2403,18 @@ protected:
 
 void SingleTouchInputMapperTest::prepareAxes(int axes) {
     if (axes & POSITION) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_X, RAW_X_MIN, RAW_X_MAX, 0, 0);
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_Y, RAW_Y_MIN, RAW_Y_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_X,
+                RAW_X_MIN, RAW_X_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_Y,
+                RAW_Y_MIN, RAW_Y_MAX, 0, 0);
     }
     if (axes & PRESSURE) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_PRESSURE, RAW_PRESSURE_MIN, RAW_PRESSURE_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_PRESSURE,
+                RAW_PRESSURE_MIN, RAW_PRESSURE_MAX, 0, 0);
     }
     if (axes & TOOL) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_TOOL_WIDTH, RAW_TOOL_MIN, RAW_TOOL_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_TOOL_WIDTH,
+                RAW_TOOL_MIN, RAW_TOOL_MAX, 0, 0);
     }
 }
 
@@ -3040,33 +3062,37 @@ protected:
 
 void MultiTouchInputMapperTest::prepareAxes(int axes) {
     if (axes & POSITION) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_POSITION_X, RAW_X_MIN, RAW_X_MAX, 0, 0);
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_POSITION_Y, RAW_Y_MIN, RAW_Y_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_POSITION_X,
+                RAW_X_MIN, RAW_X_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_POSITION_Y,
+                RAW_Y_MIN, RAW_Y_MAX, 0, 0);
     }
     if (axes & TOUCH) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_TOUCH_MAJOR, RAW_TOUCH_MIN, RAW_TOUCH_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_TOUCH_MAJOR,
+                RAW_TOUCH_MIN, RAW_TOUCH_MAX, 0, 0);
         if (axes & MINOR) {
-            mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_TOUCH_MINOR,
+            mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_TOUCH_MINOR,
                     RAW_TOUCH_MIN, RAW_TOUCH_MAX, 0, 0);
         }
     }
     if (axes & TOOL) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_WIDTH_MAJOR, RAW_TOOL_MIN, RAW_TOOL_MAX, 0, 0);
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_WIDTH_MAJOR,
+                RAW_TOOL_MIN, RAW_TOOL_MAX, 0, 0);
         if (axes & MINOR) {
-            mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_WIDTH_MINOR,
+            mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_WIDTH_MINOR,
                     RAW_TOOL_MAX, RAW_TOOL_MAX, 0, 0);
         }
     }
     if (axes & ORIENTATION) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_ORIENTATION,
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_ORIENTATION,
                 RAW_ORIENTATION_MIN, RAW_ORIENTATION_MAX, 0, 0);
     }
     if (axes & PRESSURE) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_PRESSURE,
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_PRESSURE,
                 RAW_PRESSURE_MIN, RAW_PRESSURE_MAX, 0, 0);
     }
     if (axes & ID) {
-        mFakeEventHub->addAxis(DEVICE_ID, ABS_MT_TRACKING_ID,
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_TRACKING_ID,
                 RAW_ID_MIN, RAW_ID_MAX, 0, 0);
     }
 }
