@@ -250,7 +250,7 @@ on the data that is currently displayed.</td></tr>
               android:icon="@drawable/group_item1_icon" />
         &lt;item android:id="@+id/group_item2"
               android:onClick="onGroupItemClick"
-              android:title="G@string/group_item2"
+              android:title="@string/group_item2"
               android:icon="@drawable/group_item2_icon" />
     &lt;/group>
     &lt;item android:id="@+id/submenu"
