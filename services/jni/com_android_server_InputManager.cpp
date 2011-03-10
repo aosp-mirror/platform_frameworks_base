@@ -1097,12 +1097,11 @@ static jobject android_server_InputManager_nativeGetInputDevice(JNIEnv* env,
     env->SetIntField(deviceObj, gInputDeviceClassInfo.mSources, deviceInfo.getSources());
     env->SetIntField(deviceObj, gInputDeviceClassInfo.mKeyboardType, deviceInfo.getKeyboardType());
 
-    const KeyedVector<int, InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
+    const Vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (size_t i = 0; i < ranges.size(); i++) {
-        int rangeType = ranges.keyAt(i);
-        const InputDeviceInfo::MotionRange& range = ranges.valueAt(i);
+        const InputDeviceInfo::MotionRange& range = ranges.itemAt(i);
         env->CallVoidMethod(deviceObj, gInputDeviceClassInfo.addMotionRange,
-                rangeType, range.min, range.max, range.flat, range.fuzz);
+                range.axis, range.source, range.min, range.max, range.flat, range.fuzz);
         if (env->ExceptionCheck()) {
             return NULL;
         }
@@ -1319,7 +1318,7 @@ int register_android_server_InputManager(JNIEnv* env) {
             "<init>", "()V");
 
     GET_METHOD_ID(gInputDeviceClassInfo.addMotionRange, gInputDeviceClassInfo.clazz,
-            "addMotionRange", "(IFFFF)V");
+            "addMotionRange", "(IIFFFF)V");
 
     GET_FIELD_ID(gInputDeviceClassInfo.mId, gInputDeviceClassInfo.clazz,
             "mId", "I");

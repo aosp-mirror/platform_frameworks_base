@@ -144,6 +144,14 @@ enum {
 };
 
 /*
+ * Button state.
+ */
+enum {
+    // Primary button pressed (left mouse button).
+    BUTTON_STATE_PRIMARY = 1 << 0,
+};
+
+/*
  * Describes the basic configuration of input devices that are present.
  */
 struct InputConfiguration {
@@ -544,6 +552,8 @@ public:
     ~InputDeviceInfo();
 
     struct MotionRange {
+        int32_t axis;
+        uint32_t source;
         float min;
         float max;
         float flat;
@@ -556,16 +566,17 @@ public:
     inline const String8 getName() const { return mName; }
     inline uint32_t getSources() const { return mSources; }
 
-    const MotionRange* getMotionRange(int32_t axis) const;
+    const MotionRange* getMotionRange(int32_t axis, uint32_t source) const;
 
     void addSource(uint32_t source);
-    void addMotionRange(int32_t axis, float min, float max, float flat, float fuzz);
-    void addMotionRange(int32_t axis, const MotionRange& range);
+    void addMotionRange(int32_t axis, uint32_t source,
+            float min, float max, float flat, float fuzz);
+    void addMotionRange(const MotionRange& range);
 
     inline void setKeyboardType(int32_t keyboardType) { mKeyboardType = keyboardType; }
     inline int32_t getKeyboardType() const { return mKeyboardType; }
 
-    inline const KeyedVector<int32_t, MotionRange> getMotionRanges() const {
+    inline const Vector<MotionRange>& getMotionRanges() const {
         return mMotionRanges;
     }
 
@@ -575,7 +586,7 @@ private:
     uint32_t mSources;
     int32_t mKeyboardType;
 
-    KeyedVector<int32_t, MotionRange> mMotionRanges;
+    Vector<MotionRange> mMotionRanges;
 };
 
 /*

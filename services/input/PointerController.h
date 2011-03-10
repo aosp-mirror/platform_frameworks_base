@@ -31,10 +31,6 @@
 
 namespace android {
 
-enum {
-    POINTER_BUTTON_1 = 1 << 0,
-};
-
 /**
  * Interface for tracking a single (mouse) pointer.
  *
