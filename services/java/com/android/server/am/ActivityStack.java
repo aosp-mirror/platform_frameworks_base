@@ -1299,6 +1299,9 @@ public class ActivityStack {
             AppGlobals.getPackageManager().setPackageStoppedState(
                     next.packageName, false);
         } catch (RemoteException e1) {
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Failed trying to unstop package "
+                    + next.packageName + ": " + e);
         }
 
         // We are starting up the next activity, so tell the window manager
