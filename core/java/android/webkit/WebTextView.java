@@ -51,8 +51,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsoluteLayout.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -515,7 +515,6 @@ import junit.framework.Assert;
             int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
             imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
         }
-        updateCursorControllerPositions();
     }
 
     @Override
