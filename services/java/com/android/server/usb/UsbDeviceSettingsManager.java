@@ -236,22 +236,18 @@ class UsbDeviceSettingsManager {
         public final String mManufacturer;
         // USB accessory model (or null for unspecified)
         public final String mModel;
-        // USB accessory type (or null for unspecified)
-        public final String mType;
         // USB accessory version (or null for unspecified)
         public final String mVersion;
 
-        public AccessoryFilter(String manufacturer, String model, String type, String version) {
+        public AccessoryFilter(String manufacturer, String model, String version) {
             mManufacturer = manufacturer;
             mModel = model;
-            mType = type;
             mVersion = version;
         }
 
         public AccessoryFilter(UsbAccessory accessory) {
             mManufacturer = accessory.getManufacturer();
             mModel = accessory.getModel();
-            mType = accessory.getType();
             mVersion = accessory.getVersion();
         }
 
@@ -259,7 +255,6 @@ class UsbDeviceSettingsManager {
                 throws XmlPullParserException, IOException {
             String manufacturer = null;
             String model = null;
-            String type = null;
             String version = null;
 
             int count = parser.getAttributeCount();
@@ -271,13 +266,11 @@ class UsbDeviceSettingsManager {
                     manufacturer = value;
                 } else if ("model".equals(name)) {
                     model = value;
-                } else if ("type".equals(name)) {
-                    type = value;
                 } else if ("version".equals(name)) {
                     version = value;
                 }
              }
-             return new AccessoryFilter(manufacturer, model, type, version);
+             return new AccessoryFilter(manufacturer, model, version);
         }
 
         public void write(XmlSerializer serializer)throws IOException {
@@ -288,9 +281,6 @@ class UsbDeviceSettingsManager {
             if (mModel != null) {
                 serializer.attribute(null, "model", mModel);
             }
-            if (mType != null) {
-                serializer.attribute(null, "type", mType);
-            }
             if (mVersion != null) {
                 serializer.attribute(null, "version", mVersion);
             }
@@ -300,7 +290,6 @@ class UsbDeviceSettingsManager {
         public boolean matches(UsbAccessory acc) {
             if (mManufacturer != null && !acc.getManufacturer().equals(mManufacturer)) return false;
             if (mModel != null && !acc.getModel().equals(mModel)) return false;
-            if (mType != null && !acc.getType().equals(mType)) return false;
             if (mVersion != null && !acc.getVersion().equals(mVersion)) return false;
             return true;
         }
@@ -308,21 +297,19 @@ class UsbDeviceSettingsManager {
         @Override
         public boolean equals(Object obj) {
             // can't compare if we have wildcard strings
-            if (mManufacturer == null || mModel == null || mType == null || mVersion == null) {
+            if (mManufacturer == null || mModel == null || mVersion == null) {
                 return false;
             }
             if (obj instanceof AccessoryFilter) {
                 AccessoryFilter filter = (AccessoryFilter)obj;
                 return (mManufacturer.equals(filter.mManufacturer) &&
                         mModel.equals(filter.mModel) &&
-                        mType.equals(filter.mType) &&
                         mVersion.equals(filter.mVersion));
             }
             if (obj instanceof UsbAccessory) {
                 UsbAccessory accessory = (UsbAccessory)obj;
                 return (mManufacturer.equals(accessory.getManufacturer()) &&
                         mModel.equals(accessory.getModel()) &&
-                        mType.equals(accessory.getType()) &&
                         mVersion.equals(accessory.getVersion()));
             }
             return false;
@@ -332,7 +319,6 @@ class UsbDeviceSettingsManager {
         public int hashCode() {
             return ((mManufacturer == null ? 0 : mManufacturer.hashCode()) ^
                     (mModel == null ? 0 : mModel.hashCode()) ^
-                    (mType == null ? 0 : mType.hashCode()) ^
                     (mVersion == null ? 0 : mVersion.hashCode()));
         }
 
@@ -340,7 +326,6 @@ class UsbDeviceSettingsManager {
         public String toString() {
             return "AccessoryFilter[mManufacturer=\"" + mManufacturer +
                                 "\", mModel=\"" + mModel +
-                                "\", mType=\"" + mType +
                                 "\", mVersion=\"" + mVersion + "\"]";
         }
     }
