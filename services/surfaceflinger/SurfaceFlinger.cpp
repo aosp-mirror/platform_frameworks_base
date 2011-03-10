@@ -2169,6 +2169,19 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
     if (UNLIKELY(uint32_t(dpy) >= DISPLAY_COUNT))
         return BAD_VALUE;
 
+    // make sure none of the layers are protected
+    const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
+    const size_t count = layers.size();
+    for (size_t i=0 ; i<count ; ++i) {
+        const sp<LayerBase>& layer(layers[i]);
+        const uint32_t z = layer->drawingState().z;
+        if (z >= minLayerZ && z <= maxLayerZ) {
+            if (layer->isProtected()) {
+                return INVALID_OPERATION;
+            }
+        }
+    }
+
     if (!GLExtensions::getInstance().haveFramebufferObject())
         return INVALID_OPERATION;
 
@@ -2217,8 +2230,6 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         glClearColor(0,0,0,1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        const Vector< sp<LayerBase> >& layers(mVisibleLayersSortedByZ);
-        const size_t count = layers.size();
         for (size_t i=0 ; i<count ; ++i) {
             const sp<LayerBase>& layer(layers[i]);
             const uint32_t z = layer->drawingState().z;

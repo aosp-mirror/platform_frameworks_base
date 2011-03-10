@@ -197,16 +197,10 @@ public:
     virtual bool isSecure() const       { return false; }
 
     /**
-     * isProtectedByApp - true if application says this surface is protected, that
-     * is if it requires a hardware-protected data path to an external sink.
+     * isProtected - true if the layer may contain protected content in the
+     * GRALLOC_USAGE_PROTECTED sense.
      */
-    virtual bool isProtectedByApp() const   { return false; }
-
-    /**
-     * isProtectedByDRM - true if DRM agent says this surface is protected, that
-     * is if it requires a hardware-protected data path to an external sink.
-     */
-    virtual bool isProtectedByDRM() const   { return false; }
+    virtual bool isProtected() const   { return false; }
 
     /** Called from the main thread, when the surface is removed from the
      * draw list */
