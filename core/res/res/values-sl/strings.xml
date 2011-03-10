@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Brisanje (s tovarniško ponastavitvijo) vseh podatkov v telefonu brez opozorila"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavitev globalnega strežnika proxy za napravo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nastavite globalni strežnik proxy naprave, ki bo v uporabi, ko je pravilnik omogočen. Samo skrbnik prve naprave lahko nastavi veljaven globalni strežnik proxy."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Nastavitev poteka gesla"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Nastavite, koliko časa prej je treba spremeniti geslo za odklepanje zaslona"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastavitev poteka gesla za zaklepanje zaslona"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Določite, kako pogosto je treba spremeniti geslo za zaklepanje zaslona"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavitev šifriranja shrambe"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Shranjeni podatki programa morajo biti šifrirani"</string>
   <string-array name="phoneTypes">

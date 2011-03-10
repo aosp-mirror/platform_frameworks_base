@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"공장 초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"기기 전체 프록시 설정"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 전체 프록시만 유효합니다."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"비밀번호 만료 설정"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"화면 잠금 비밀번호를 변경해야 하는 기간 변경"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"화면 잠금 비밀번호 만료 설정"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"화면 잠금 비밀번호 변경 빈도 설정"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"저장소 암호화 설정"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"저장한 애플리케이션 데이터를 암호화해야 합니다."</string>
   <string-array name="phoneTypes">

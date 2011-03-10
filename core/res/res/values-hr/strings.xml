@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Izbriši podatke telefona bez upozorenja vraćanjem u tvorničko stanje"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"postavi globalni proxy uređaja"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Postavi globalni proxy uređaja za upotrebu dok su pravila omogućena. Samo prvi administrator uređaja postavlja djelotvoran globalni proxy."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Postavi istek zaporke"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Nadzirite za koliko vremena zaporka za zaključani zaslon treba biti promijenjena"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Post. istek zap. zaklj. zasl."</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Nadzirite koliko se često mora mijenjati zaporka za zaključavanje zaslona"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Postavi enkripciju za pohranu"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Zahtijevaj da pohranjeni podaci aplikacije budu kriptirani"</string>
   <string-array name="phoneTypes">

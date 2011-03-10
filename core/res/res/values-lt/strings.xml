@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Be įspėjimo ištrinti telefono duomenis iš naujo nustatant gamyklinius duomenis"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nustatyti įrenginio bendrąjį tarpinį serverį"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nustatyti įrenginio bendrąjį tarpinį serverį, kad būtų naudojamas, kol įgalinta politika. Tik pirmasis įrenginio administratorius nustato efektyvų bendrąjį tarpinį serverį."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Nustatyti slaptažodžio galiojimo pabaigą"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Valdyti, per kiek laiko iki ekrano užrakinimo turi būti pakeistas slaptažodis"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Nust. ekr. užr. slapt. gal. pab."</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Valdykite, kaip dažnai reikia keisti ekrano užrakto slaptažodį"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nustatyti atmintinės šifruotę"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Saugomos programos duomenys turi būti šifruoti"</string>
   <string-array name="phoneTypes">

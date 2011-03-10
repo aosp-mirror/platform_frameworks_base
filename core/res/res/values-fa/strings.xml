@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"پاک کردن داده های گوشی بدون هشدار با انجام یک عملکرد بازنشانی داده های کارخانه"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"تنظیم پروکسی جهانی دستگاه"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"پروکسی جهانی دستگاه مورد نظر را جهت استفاده هنگام فعال بودن خط مشی تنظیم کنید. فقط اولین سرپرست دستگاه پروکسی جهانی مفید را تنظیم می کند."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"تنظیم زمان انقضای رمز ورود"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"کنترل مدت زمانی که رمز ورود صفحه قفل قبل از تغییر یافتن لازم دارد"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"تنظیم زمان انقضای رمز ورود قفل صفحه"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"کنترل تعداد دفعات تغییر رمز ورود قفل صفحه"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تنظیم رمزگذاری حافظه"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"نیاز به رمزگذاری داده های برنامه کاربردی ذخیره شده دارد"</string>
   <string-array name="phoneTypes">

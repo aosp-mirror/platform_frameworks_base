@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"محو بيانات الهاتف بدون تحذير، وذلك عبر إجراء إعادة الضبط بحسب بيانات المصنع"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"تعيين الخادم الوكيل العمومي للجهاز"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"تعيين الخادم الوكيل العمومي للجهاز لكي يتم استخدامه أثناء تمكين السياسة. يعين مشرف الجهاز الأول فقط الخادم الوكيل العمومي الفعال."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"تعيين انتهاء صلاحية كلمة المرور"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"التحكم في الوقت المستغرق قبل الحاجة إلى تغيير كلمة مرور شاشة التوقف"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"ضبط انتهاء كلمة مرور تأمين شاشة"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"التحكم في عدد مرات تغيير كلمة مرور تأمين الشاشة"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تعيين تشفير التخزين"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"طلب تشفير بيانات التطبيق المخزنة"</string>
   <string-array name="phoneTypes">

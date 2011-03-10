@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"執行重設為原廠設定時，系統會直接清除手機資料而不提出警告"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"設定裝置全域 Proxy"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域 Proxy，只有第一個裝置管理員所設定的全域 Proxy 具有效力。"</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"設定密碼到期日"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"控制螢幕鎖定密碼的使用期限"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"設定螢幕上鎖密碼到期日"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"控制螢幕上鎖密碼的變更頻率"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"設定儲存裝置加密"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"必須為儲存的應用程式資料加密"</string>
   <string-array name="phoneTypes">

@@ -45,4 +45,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Zdieľané dátové pripojenie cez Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Konfigurovať metódy vstupu"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Použiť fyzickú klávesnicu"</string>
+    <!-- no translation found for usb_device_permission_prompt (5340926456453429244) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
+    <skip />
 </resources>

@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Effacer les données du téléphone sans avertissement, en restaurant la configuration usine"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Définir le proxy global du mobile"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Indiquer le proxy global à utiliser pour ce mobile lorsque les règles sont activées. Seul l\'administrateur principal du mobile peut définir le proxy global utilisé."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Définir la date d\'expiration du mot de passe"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Définir la fréquence de changement du mot de passe de verrouillage d\'écran"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Définir exp. mot passe verr."</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Contrôler la fréquence de modification du mot de passe de verrouillage de l\'écran"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Définir cryptage du stockage"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Exiger que les données d\'application stockées soient cryptées"</string>
   <string-array name="phoneTypes">

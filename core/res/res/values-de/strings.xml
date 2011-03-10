@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Telefon ohne Warnung löschen"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Den globalen Proxy des Geräts festlegen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den bei aktivierter Richtlinie zu verwendenden globalen Proxy des Geräts festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf des Passworts festlegen"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Zeitraum bis zur Änderung des Passworts für die Bildschirmsperre festlegen"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf von Sperr-Passwort festlegen"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Legen Sie fest, wie häufig das Passwort zum Sperren des Bildschirms geändert werden muss."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Speicherverschlüsselung"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Anforderung, dass gespeicherte Anwendungsdaten verschlüsselt werden"</string>
   <string-array name="phoneTypes">
@@ -811,7 +811,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"Achtung"</string>
     <string name="loading" msgid="1760724998928255250">"Wird geladen..."</string>
     <string name="capital_on" msgid="1544682755514494298">"EIN"</string>
-    <string name="capital_off" msgid="6815870386972805832">"Aus"</string>
+    <string name="capital_off" msgid="6815870386972805832">"AUS"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Aktion durchführen mit"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Standardmäßig für diese Aktion verwenden"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Standardeinstellung zurücksetzen unter \"Einstellungen &gt; Anwendungen &gt; Anwendungen verwalten\""</string>
