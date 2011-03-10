@@ -131,6 +131,11 @@ public abstract class Transition {
         if (durationMs > getMaximumDuration()) {
             throw new IllegalArgumentException("The duration is too large");
         }
+        if (afterMediaItem != null) {
+            mNativeHelper = afterMediaItem.getNativeContext();
+        }else {
+            mNativeHelper = beforeMediaItem.getNativeContext();
+        }
     }
 
     /**
