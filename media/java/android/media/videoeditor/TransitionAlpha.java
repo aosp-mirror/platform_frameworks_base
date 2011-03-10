@@ -104,13 +104,6 @@ public class TransitionAlpha extends Transition {
         mWidth = dbo.outWidth;
         mHeight = dbo.outHeight;
 
-        if (afterMediaItem != null) {
-            mNativeHelper = afterMediaItem.getNativeContext();
-        }else {
-            mNativeHelper = beforeMediaItem.getNativeContext();
-        }
-
-
         mRGBMaskFile = String.format(mNativeHelper.getProjectPath() +
                 "/" + "mask" + transitionId+ ".rgb");
 
