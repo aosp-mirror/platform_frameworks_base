@@ -564,6 +564,9 @@ class FastScroller {
             }
         } else {
             int index = (int) (position * count);
+            // Don't overflow
+            if (index > count - 1) index = count - 1;
+
             if (mList instanceof ExpandableListView) {
                 ExpandableListView expList = (ExpandableListView) mList;
                 expList.setSelectionFromTop(expList.getFlatListPosition(
