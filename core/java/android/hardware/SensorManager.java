@@ -2026,8 +2026,8 @@ public class SensorManager
         if (rv.length == 4) {
             Q[0] = rv[3];
         } else {
-            //In this case, the w component of the quaternion is known to be a positive number
-            Q[0] = (float)Math.sqrt(1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2]);
+            Q[0] = 1 - rv[0]*rv[0] - rv[1]*rv[1] - rv[2]*rv[2];
+            Q[0] = (Q[0] > 0) ? (float)Math.sqrt(Q[0]) : 0;
         }
         Q[1] = rv[0];
         Q[2] = rv[1];
