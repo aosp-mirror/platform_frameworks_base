@@ -260,8 +260,8 @@ looks like this:</p>
 
 <p>To fix this problem, simply delete the <code>debug.keystore</code> file. 
 The default storage location for AVDs is in <code>~/.android/</code> on OS X and Linux, 
-in <code>C:\Documents and Settings\<user>\.android\</code> on Windows XP, and in
-<code>C:\Users\<user>\.android\</code> on Windows Vista.</p>
+in <code>C:\Documents and Settings\&lt;user>\.android\</code> on Windows XP, and in
+<code>C:\Users\&lt;user>\.android\</code> on Windows Vista and Windows 7.</p>
 
 
 <p>The next time you build, the build tools will regenerate a new keystore and debug key.</p>

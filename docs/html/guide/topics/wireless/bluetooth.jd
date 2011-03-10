@@ -554,7 +554,7 @@ private class AcceptThread extends Thread {
         BluetoothServerSocket tmp = null;
         try {
             // MY_UUID is the app's UUID string, also used by the client code
-            tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
+            tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
         } catch (IOException e) { }
         mmServerSocket = tmp;
     }
@@ -690,7 +690,7 @@ private class ConnectThread extends Thread {
 
     public void run() {
         // Cancel discovery because it will slow down the connection
-        mAdapter.cancelDiscovery();
+        mBluetoothAdapter.cancelDiscovery();
 
         try {
             // Connect the device through the socket. This will block
