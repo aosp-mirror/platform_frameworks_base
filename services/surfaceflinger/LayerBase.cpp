@@ -515,21 +515,13 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
     result.append(buffer);
 }
 
-void LayerBase::shortDump(String8& result, char* scratch, size_t size) const
-{
-    LayerBase::dump(result, scratch, size);
-}
-
-
 // ---------------------------------------------------------------------------
 
 int32_t LayerBaseClient::sIdentity = 1;
 
 LayerBaseClient::LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
         const sp<Client>& client)
-    : LayerBase(flinger, display),
-      mHasSurface(false),
-      mClientRef(client),
+    : LayerBase(flinger, display), mClientRef(client),
       mIdentity(uint32_t(android_atomic_inc(&sIdentity)))
 {
 }
@@ -546,18 +538,12 @@ sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
 {
     sp<Surface> s;
     Mutex::Autolock _l(mLock);
-
-    LOG_ALWAYS_FATAL_IF(mHasSurface,
-            "LayerBaseClient::getSurface() has already been called");
-
-    mHasSurface = true;
-    s = createSurface();
-    mClientSurfaceBinder = s->asBinder();
+    s = mClientSurface.promote();
+    if (s == 0) {
+        s = createSurface();
+        mClientSurface = s;
+    }
     return s;
-}
-
-wp<IBinder> LayerBaseClient::getSurfaceBinder() const {
-    return mClientSurfaceBinder;
 }
 
 sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
@@ -578,12 +564,6 @@ void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
             client.get(), getIdentity());
 
     result.append(buffer);
-}
-
-
-void LayerBaseClient::shortDump(String8& result, char* scratch, size_t size) const
-{
-    LayerBaseClient::dump(result, scratch, size);
 }
 
 // ---------------------------------------------------------------------------

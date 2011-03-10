@@ -63,7 +63,7 @@ void GraphicBufferAllocator::dump(String8& result) const
     const size_t c = list.size();
     for (size_t i=0 ; i<c ; i++) {
         const alloc_rec_t& rec(list.valueAt(i));
-        snprintf(buffer, SIZE, "%10p: %7.2f KiB | %4u (%4u) x %4u | %8X | 0x%08x\n",
+        snprintf(buffer, SIZE, "%10p: %7.2f KiB | %4u (%4u) x %4u | %2d | 0x%08x\n",
             list.keyAt(i), rec.size/1024.0f, 
             rec.w, rec.s, rec.h, rec.format, rec.usage);
         result.append(buffer);
