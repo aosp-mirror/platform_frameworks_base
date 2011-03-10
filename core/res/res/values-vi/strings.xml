@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Xóa dữ liệu trên điện thoại mà không cần cảnh báo, bằng cách thực hiện đặt lại về dữ liệu gốc"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Đặt proxy chung của điện thoại"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Đặt proxy chung của điện thoại được sử dụng trong khi chính sách được bật. Chỉ quản trị viên đầu tiên của điện thoại mới có thể đặt proxy chung hiệu quả."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Đặt hết hạn mật khẩu"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kiểm soát thời lượng trước khi mật khẩu khóa màn hình cần được thay đổi"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Đặt hết hạn mật khẩu khóa màn hình"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kiểm soát tần suất bắt buộc phải thay đổi mật khẩu khóa màn hình"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Đặt mã hóa dung lượng lưu trữ"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa"</string>
   <string-array name="phoneTypes">

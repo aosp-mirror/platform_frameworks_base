@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"מחק את נתוני הטלפון ללא אזהרה, על ידי ביצוע איפוס נתוני יצרן"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"הגדר את שרת ה-proxy הגלובלי של ההתקן"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"הגדר את שרת proxy הגלובלי של ההתקן לשימוש כאשר המדיניות מופעלת. רק מנהל ההתקן הראשון מגדיר את שרת ה-proxy הגלובלי הפעיל."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"הגדר תפוגת תוקף של סיסמה"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"שלוט בפרק הזמן הדרוש לשינוי הסיסמה של נעילת המסך"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"הגדר תאריך תפוגה לסיסמה של נעילת המסך"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"שלוט בתדירות שבה הסיסמה של נעילת המסך חייבת להשתנות"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"הגדר הצפנת אחסון"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"דורש שנתוני היישום המאוחסנים יהיו מוצפנים"</string>
   <string-array name="phoneTypes">

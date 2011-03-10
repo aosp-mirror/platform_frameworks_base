@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Уничтожить все данные на телефоне без предупреждения путем сброса настроек"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Глобальный прокси-сервер"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Настройте глобальный прокси-сервер устройства, который будет использоваться при активной политике. Глобальный прокси-сервер должен настроить первый администратор устройства."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Задать время действия пароля"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Задать время действия пароля перед появлением экрана блокировки"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Задать срок действия пароля"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Укажите, как часто следует менять пароль блокировки экрана"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Настроить шифрование хранилища"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Требует шифровать данные приложений, находящиеся в хранилище."</string>
   <string-array name="phoneTypes">

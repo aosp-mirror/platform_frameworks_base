@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Borrado de los datos del teléfono sin avisar restableciendo datos de fábrica"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir el servidor proxy global"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el primer administrador de dispositivos define el servidor proxy global efectivo."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Definir caducidad de contraseña"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Permite controlar cuándo se debe cambiar la contraseña de bloqueo de la pantalla."</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Definir caducidad bloqueo pantalla"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Controlar la frecuencia con la que se debe cambiar el bloqueo de pantalla"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptación de almacenamiento"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Exige que se encripten los datos de la aplicación almacenados."</string>
   <string-array name="phoneTypes">

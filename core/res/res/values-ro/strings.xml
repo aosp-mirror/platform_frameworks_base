@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Ştergeţi datele din telefon fără avertisment, efectuând resetarea configurării din fabrică"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Setaţi serverul proxy global pentru dispozitiv"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Setaţi serverul proxy global pentru dispozitiv care să fie utilizat cât timp politica este activă. Numai primul administrator al dispozitivului poate seta serverul proxy global activ."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Setaţi expirarea parolei"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Controlarea duratei până când parola de blocare a ecranului trebuie modificată"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Expirare parolă blocare ecran"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Stabiliţi frecvenţa de schimbare a parolei de blocare a ecranului"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setaţi criptarea stocării"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Necesită ca datele aplicaţiei stocate să fie criptate"</string>
   <string-array name="phoneTypes">

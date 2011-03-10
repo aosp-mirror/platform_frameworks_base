@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Tilbakestill telefonens data uten advarsel ved å utføre tilbakestilling til fabrikkstandard"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Angi enhetens globale mellomtjener"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angir den globale mellomtjeneren på enheten som skal brukes når regelen er aktivert. Kun den opprinnelige administratoren av enheten kan angi den globale mellomtjeneren."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Angi utløpsdato for passordet"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Velg hvor lenge det skal gå før passordet til låseskjermen må byttes"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Angi utløpsdato for skjermlåspassordet"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Velg hvor lenge det skal gå før passordet til skjermlåsen må byttes"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Angi lagringskryptering"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Krever at lagrede programdata krypteres"</string>
   <string-array name="phoneTypes">
@@ -924,7 +924,7 @@
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Minnekortet er skadet. Du må kanskje formatere det."</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-lagring fjernet uventet"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Minnekortet ble tatt ut uventet"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Koble fra USB-lagring før enheten tas ut av maskinen for å unngå tap av data."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Koble fra USB-enheten før du tar den ut av maskinen for å unngå tap av data."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Avmonter minnekortet før det tas ut, for å unngå datatap."</string>
     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB-lagring kan trygt fjernes"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Trygt å ta ut minnekort"</string>

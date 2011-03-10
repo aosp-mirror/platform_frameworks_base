@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"警告せずにデータの初期化を実行して端末内のデータを消去します。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"端末のグローバルプロキシを設定"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"パスワードの有効期限の設定"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"画面ロックパスワードの変更が必要になるまでの期間を指定します"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"解除パスワードの有効期限の設定"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"ロック解除パスワードの変更が必要になる頻度を指定します"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ストレージ暗号化の設定"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"保存したアプリケーションデータが暗号化されるようにする"</string>
   <string-array name="phoneTypes">

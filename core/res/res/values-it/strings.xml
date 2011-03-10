@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dati di fabbrica"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Imposta il proxy globale del dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale effettivo è impostabile solo dal primo amministratore del dispositivo."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Imposta scadenza password"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Stabilisci la scadenza della password di blocco dello schermo"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Imposta scadenza password blocco schermo"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Stabilisci la frequenza di modifica della password di blocco dello schermo"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Imposta crittografia archivio"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Richiede la crittografia dei dati applicazione memorizzati"</string>
   <string-array name="phoneTypes">

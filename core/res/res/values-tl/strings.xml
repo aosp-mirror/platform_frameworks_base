@@ -486,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Burahin ang data ng telepono nang walang babala, sa pamamagitan ng pagsasagawa ng pag-reset sa data ng factory"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Itakda ang pandaigdigang proxy ng device"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Itakda ang pandaigdigang proxy ng device na gagamitin habang pinagana ang patakaran. Tanging ang unang admin ng device ang magtatakda sa may bisang pandaigdigang proxy."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Itakda pag-expire ng password"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kontrolin kung gaano katagal bago kailangang palitan ang password sa pag-lock ng screen"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Itakda expire password pag-lock scr"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kontrolin kung gaano kadalas dapat na mapalitan ang password sa pag-lock ng screen"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng imbakan"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Hinging naka-encrypt ang nakaimbak na data ng application"</string>
   <string-array name="phoneTypes">
