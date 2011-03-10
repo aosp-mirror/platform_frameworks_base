@@ -1054,7 +1054,7 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
 {
     sp<LayerBaseClient> lbc(layerBase->getLayerBaseClient());
     if (lbc != 0) {
-        mLayerMap.removeItem( lbc->getSurfaceBinder() );
+        mLayerMap.removeItem( lbc->getSurface()->asBinder() );
     }
     ssize_t index = mCurrentState.layersSortedByZ.remove(layerBase);
     if (index >= 0) {
@@ -1066,12 +1066,8 @@ status_t SurfaceFlinger::removeLayer_l(const sp<LayerBase>& layerBase)
 
 status_t SurfaceFlinger::purgatorizeLayer_l(const sp<LayerBase>& layerBase)
 {
-    // First add the layer to the purgatory list, which makes sure it won't
-    // go away, then remove it from the main list (through a transaction).
+    // remove the layer from the main list (through a transaction).
     ssize_t err = removeLayer_l(layerBase);
-    if (err >= 0) {
-        mLayerPurgatory.add(layerBase);
-    }
 
     layerBase->onRemoved();
 
@@ -1342,19 +1338,6 @@ status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
              * to use the purgatory.
              */
             status_t err = flinger->removeLayer_l(l);
-            if (err == NAME_NOT_FOUND) {
-                // The surface wasn't in the current list, which means it was
-                // removed already, which means it is in the purgatory,
-                // and need to be removed from there.
-                // This needs to happen from the main thread since its dtor
-                // must run from there (b/c of OpenGL ES). Additionally, we
-                // can't really acquire our internal lock from
-                // destroySurface() -- see postMessage() below.
-                ssize_t idx = flinger->mLayerPurgatory.remove(l);
-                LOGE_IF(idx < 0,
-                        "layer=%p is not in the purgatory list", l.get());
-            }
-
             LOGE_IF(err<0 && err != NAME_NOT_FOUND,
                     "error removing layer=%p (%s)", l.get(), strerror(-err));
             return true;
@@ -1470,13 +1453,8 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
-        /*
-         * Dump the visible layer list
-         */
         const LayerVector& currentLayers = mCurrentState.layersSortedByZ;
         const size_t count = currentLayers.size();
-        snprintf(buffer, SIZE, "Visible layers (count = %d)\n", count);
-        result.append(buffer);
         for (size_t i=0 ; i<count ; i++) {
             const sp<LayerBase>& layer(currentLayers[i]);
             layer->dump(result, buffer, SIZE);
@@ -1486,24 +1464,6 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             layer->visibleRegionScreen.dump(result, "visibleRegionScreen");
         }
 
-        /*
-         * Dump the layers in the purgatory
-         */
-
-        const size_t purgatorySize =  mLayerPurgatory.size();
-        snprintf(buffer, SIZE, "Purgatory state (%d entries)\n", purgatorySize);
-        result.append(buffer);
-        for (size_t i=0 ; i<purgatorySize ; i++) {
-            const sp<LayerBase>& layer(mLayerPurgatory.itemAt(i));
-            layer->shortDump(result, buffer, SIZE);
-        }
-
-        /*
-         * Dump SurfaceFlinger global state
-         */
-
-        snprintf(buffer, SIZE, "SurfaceFlinger global state\n");
-        result.append(buffer);
         mWormholeRegion.dump(result, "WormholeRegion");
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         snprintf(buffer, SIZE,
@@ -1529,9 +1489,6 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
             result.append(buffer);
         }
 
-        /*
-         * Dump gralloc state
-         */
         const GraphicBufferAllocator& alloc(GraphicBufferAllocator::get());
         alloc.dump(result);
 

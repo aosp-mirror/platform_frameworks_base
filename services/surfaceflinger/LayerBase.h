@@ -206,7 +206,6 @@ public:
     
     /** always call base class first */
     virtual void dump(String8& result, char* scratch, size_t size) const;
-    virtual void shortDump(String8& result, char* scratch, size_t size) const;
 
 
     enum { // flags for doTransaction()
@@ -285,7 +284,6 @@ public:
     virtual ~LayerBaseClient();
 
             sp<Surface> getSurface();
-            wp<IBinder> getSurfaceBinder() const;
     virtual sp<Surface> createSurface() const;
     virtual sp<LayerBaseClient> getLayerBaseClient() const {
         return const_cast<LayerBaseClient*>(this); }
@@ -327,12 +325,10 @@ public:
 
 protected:
     virtual void dump(String8& result, char* scratch, size_t size) const;
-    virtual void shortDump(String8& result, char* scratch, size_t size) const;
 
 private:
     mutable Mutex mLock;
-    mutable bool mHasSurface;
-    wp<IBinder> mClientSurfaceBinder;
+    mutable wp<Surface> mClientSurface;
     const wp<Client> mClientRef;
     // only read
     const uint32_t mIdentity;
