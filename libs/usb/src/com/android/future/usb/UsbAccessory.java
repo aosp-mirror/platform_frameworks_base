@@ -23,14 +23,16 @@ public final class UsbAccessory {
 
     private final String mManufacturer;
     private final String mModel;
-    private final String mType;
+    private final String mDescription;
     private final String mVersion;
+    private final String mUri;
 
     /* package */ UsbAccessory(android.hardware.usb.UsbAccessory accessory) {
         mManufacturer = accessory.getManufacturer();
         mModel = accessory.getModel();
-        mType = accessory.getType();
+        mDescription = accessory.getDescription();
         mVersion = accessory.getVersion();
+        mUri = accessory.getUri();
     }
 
     /**
@@ -52,12 +54,12 @@ public final class UsbAccessory {
     }
 
     /**
-     * Returns the type of the accessory.
+     * Returns a user visible description of the accessory.
      *
-     * @return the accessory type
+     * @return the accessory description
      */
-    public String getType() {
-        return mType;
+    public String getDescription() {
+        return mDescription;
     }
 
     /**
@@ -67,6 +69,17 @@ public final class UsbAccessory {
      */
     public String getVersion() {
         return mVersion;
+    }
+
+    /**
+     * Returns the URI for the accessory.
+     * This is an optional URI that might show information about the accessory
+     * or provide the option to download an application for the accessory
+     *
+     * @return the accessory URI
+     */
+    public String getUri() {
+        return mUri;
     }
 
     private static boolean compare(String s1, String s2) {
@@ -80,17 +93,28 @@ public final class UsbAccessory {
             UsbAccessory accessory = (UsbAccessory)obj;
             return (compare(mManufacturer, accessory.getManufacturer()) &&
                     compare(mModel, accessory.getModel()) &&
-                    compare(mType, accessory.getType()) &&
-                    compare(mVersion, accessory.getVersion()));
+                    compare(mDescription, accessory.getDescription()) &&
+                    compare(mVersion, accessory.getVersion()) &&
+                    compare(mUri, accessory.getUri()));
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return ((mManufacturer == null ? 0 : mManufacturer.hashCode()) ^
+                (mModel == null ? 0 : mModel.hashCode()) ^
+                (mDescription == null ? 0 : mDescription.hashCode()) ^
+                (mVersion == null ? 0 : mVersion.hashCode()) ^
+                (mUri == null ? 0 : mUri.hashCode()));
     }
 
     @Override
     public String toString() {
         return "UsbAccessory[mManufacturer=" + mManufacturer +
                             ", mModel=" + mModel +
-                            ", mType=" + mType +
-                            ", mVersion=" + mVersion + "]";
+                            ", mDescription=" + mDescription +
+                            ", mVersion=" + mVersion +
+                            ", mUri=" + mUri + "]";
     }
 }
