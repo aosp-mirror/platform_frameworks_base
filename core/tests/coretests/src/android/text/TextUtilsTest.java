@@ -16,27 +16,19 @@
 
 package android.text;
 
-import android.graphics.Paint;
+import com.google.android.collect.Lists;
+
+import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.SpannedString;
-import android.text.TextPaint;
-import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.text.util.Rfc822Token;
 import android.text.util.Rfc822Tokenizer;
-import android.test.MoreAsserts;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * TextUtilsTest tests {@link TextUtils}.
@@ -354,12 +346,113 @@ public class TextUtilsTest extends TestCase {
             return mString.charAt(off);
         }
 
+        @Override
         public String toString() {
             return mString.toString();
         }
 
         public CharSequence subSequence(int start, int end) {
             return new Wrapper(mString.subSequence(start, end));
+        }
+    }
+
+    @LargeTest
+    public void testRemoveEmptySpans() {
+        MockSpanned spanned = new MockSpanned();
+
+        spanned.test();
+        spanned.addSpan().test();
+        spanned.addSpan().test();
+        spanned.addSpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addSpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addSpan().test();
+
+        spanned.clear();
+        spanned.addEmptySpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addSpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addSpan().test();
+
+        spanned.clear();
+        spanned.addSpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addSpan().test();
+        spanned.addEmptySpan().test();
+        spanned.addSpan().test();
+        spanned.addSpan().test();
+    }
+
+    protected static class MockSpanned implements Spanned {
+
+        private List<Object> allSpans = new ArrayList<Object>();
+        private List<Object> nonEmptySpans = new ArrayList<Object>();
+
+        public void clear() {
+            allSpans.clear();
+            nonEmptySpans.clear();
+        }
+
+        public MockSpanned addSpan() {
+            Object o = new Object();
+            allSpans.add(o);
+            nonEmptySpans.add(o);
+            return this;
+        }
+
+        public MockSpanned addEmptySpan() {
+            Object o = new Object();
+            allSpans.add(o);
+            return this;
+        }
+
+        public void test() {
+            Object[] nonEmpty = TextUtils.removeEmptySpans(allSpans.toArray(), this, Object.class);
+            assertEquals("Mismatched array size", nonEmptySpans.size(), nonEmpty.length);
+            for (int i=0; i<nonEmpty.length; i++) {
+                assertEquals("Span differ", nonEmptySpans.get(i), nonEmpty[i]);
+            }
+        }
+
+        public char charAt(int arg0) {
+            return 0;
+        }
+
+        public int length() {
+            return 0;
+        }
+
+        public CharSequence subSequence(int arg0, int arg1) {
+            return null;
+        }
+
+        @Override
+        public <T> T[] getSpans(int start, int end, Class<T> type) {
+            return null;
+        }
+
+        @Override
+        public int getSpanStart(Object tag) {
+            return 0;
+        }
+
+        @Override
+        public int getSpanEnd(Object tag) {
+            return nonEmptySpans.contains(tag) ? 1 : 0;
+        }
+
+        @Override
+        public int getSpanFlags(Object tag) {
+            return 0;
+        }
+
+        @Override
+        public int nextSpanTransition(int start, int limit, Class type) {
+            return 0;
         }
     }
 }

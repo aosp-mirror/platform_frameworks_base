@@ -127,12 +127,12 @@ class TextLine {
         boolean hasReplacement = false;
         if (text instanceof Spanned) {
             mSpanned = (Spanned) text;
-            hasReplacement = mSpanned.getSpans(start, limit,
-                    ReplacementSpan.class).length > 0;
+            ReplacementSpan[] spans = mSpanned.getSpans(start, limit, ReplacementSpan.class);
+            spans = TextUtils.removeEmptySpans(spans, mSpanned, ReplacementSpan.class);
+            hasReplacement = spans.length > 0;
         }
 
-        mCharsValid = hasReplacement || hasTabs ||
-            directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
+        mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
 
         if (mCharsValid) {
             if (mChars == null || mChars.length < mLen) {
@@ -147,10 +147,11 @@ class TextLine {
                 // zero-width characters.
                 char[] chars = mChars;
                 for (int i = start, inext; i < limit; i = inext) {
-                    inext = mSpanned.nextSpanTransition(i, limit,
-                            ReplacementSpan.class);
-                    if (mSpanned.getSpans(i, inext, ReplacementSpan.class)
-                            .length > 0) { // transition into a span
+                    inext = mSpanned.nextSpanTransition(i, limit, ReplacementSpan.class);
+                    ReplacementSpan[] spans = mSpanned.getSpans(i, inext, ReplacementSpan.class);
+                    spans = TextUtils.removeEmptySpans(spans, mSpanned, ReplacementSpan.class);
+                    if (spans.length > 0) {
+                        // transition into a span
                         chars[i - start] = '\ufffc';
                         for (int j = i - start + 1, e = inext - start; j < e; ++j) {
                             chars[j] = '\ufeff'; // used as ZWNBS, marks positions to skip
@@ -197,7 +198,6 @@ class TextLine {
             boolean runIsRtl = (runs[i+1] & Layout.RUN_RTL_FLAG) != 0;
 
             int segstart = runStart;
-            char[] chars = mChars;
             for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; j++) {
                 int codept = 0;
                 Bitmap bm = null;
@@ -629,6 +629,7 @@ class TextLine {
 
             MetricAffectingSpan[] spans = mSpanned.getSpans(mStart + spanStart,
                     mStart + spanLimit, MetricAffectingSpan.class);
+            spans = TextUtils.removeEmptySpans(spans, mSpanned, MetricAffectingSpan.class);
 
             if (spans.length > 0) {
                 ReplacementSpan replacement = null;
@@ -835,6 +836,7 @@ class TextLine {
                 mlimit = inext < measureLimit ? inext : measureLimit;
                 MetricAffectingSpan[] spans = mSpanned.getSpans(mStart + i,
                         mStart + mlimit, MetricAffectingSpan.class);
+                spans = TextUtils.removeEmptySpans(spans, mSpanned, MetricAffectingSpan.class);
 
                 if (spans.length > 0) {
                     ReplacementSpan replacement = null;
@@ -868,6 +870,7 @@ class TextLine {
 
                     CharacterStyle[] spans = mSpanned.getSpans(mStart + j,
                             mStart + jnext, CharacterStyle.class);
+                    spans = TextUtils.removeEmptySpans(spans, mSpanned, CharacterStyle.class);
 
                     wp.set(mPaint);
                     for (int k = 0; k < spans.length; k++) {
