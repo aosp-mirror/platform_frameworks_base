@@ -18,6 +18,7 @@ package com.android.connectivitymanagertest.stress;
 
 import com.android.connectivitymanagertest.ConnectivityManagerStressTestRunner;
 import com.android.connectivitymanagertest.ConnectivityManagerTestActivity;
+import com.android.connectivitymanagertest.UtilHelper;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -264,18 +265,22 @@ public class WifiStressTest
             assertTrue("Wait for Wi-Fi to idle timeout",
                     mAct.waitForNetworkState(ConnectivityManager.TYPE_WIFI, State.DISCONNECTED,
                     6 * ConnectivityManagerTestActivity.SHORT_TIMEOUT));
-            // use long timeout as the pppd startup may take several retries.
-            assertTrue("Wait for cellular connection timeout",
-                    mAct.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
-                    ConnectivityManagerTestActivity.LONG_TIMEOUT));
+            if (!UtilHelper.isWifiOnly()) {
+                // use long timeout as the pppd startup may take several retries.
+                assertTrue("Wait for cellular connection timeout",
+                        mAct.waitForNetworkState(ConnectivityManager.TYPE_MOBILE, State.CONNECTED,
+                        ConnectivityManagerTestActivity.LONG_TIMEOUT));
+            }
             sleep(mWifiSleepTime + WIFI_IDLE_DELAY, "Interrupted while device is in sleep mode");
             // Verify the wi-fi is still off and data connection is on
             assertEquals("Wi-Fi is reconnected", State.DISCONNECTED,
                     mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState());
-            assertEquals("Cellular connection is down", State.CONNECTED,
-                    mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
 
-            assertTrue("Mobile is connected, but no data connection.", mAct.pingTest(null));
+            if (!UtilHelper.isWifiOnly()) {
+                assertEquals("Cellular connection is down", State.CONNECTED,
+                             mAct.mCM.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState());
+                assertTrue("Mobile is connected, but no data connection.", mAct.pingTest(null));
+            }
 
             // Turn screen on again
             mAct.turnScreenOn();
