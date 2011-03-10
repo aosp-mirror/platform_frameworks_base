@@ -193,12 +193,13 @@ static jobjectArray android_server_UsbService_getAccessoryStrings(JNIEnv *env, j
         return NULL;
     }
     jclass stringClass = env->FindClass("java/lang/String");
-    jobjectArray strArray = env->NewObjectArray(4, stringClass, NULL);
+    jobjectArray strArray = env->NewObjectArray(5, stringClass, NULL);
     if (!strArray) goto out;
     set_accessory_string(env, fd, ACCESSORY_GET_STRING_MANUFACTURER, strArray, 0);
     set_accessory_string(env, fd, ACCESSORY_GET_STRING_MODEL, strArray, 1);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_TYPE, strArray, 2);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_DESCRIPTION, strArray, 2);
     set_accessory_string(env, fd, ACCESSORY_GET_STRING_VERSION, strArray, 3);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_URI, strArray, 4);
 
 out:
     close(fd);
