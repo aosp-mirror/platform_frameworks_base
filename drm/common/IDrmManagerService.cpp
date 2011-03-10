@@ -596,7 +596,7 @@ DecryptHandle* BpDrmManagerService::openDecryptSession(int uniqueId, const char*
             handle->decryptInfo->decryptBufferLength = reply.readInt32();
         }
     } else {
-        LOGE("no decryptHandle is generated in service side");
+        LOGV("no decryptHandle is generated in service side");
     }
     return handle;
 }
@@ -1308,7 +1308,7 @@ status_t BnDrmManagerService::onTransact(
                 delete handle->decryptInfo; handle->decryptInfo = NULL;
             }
         } else {
-            LOGE("NULL decryptHandle is returned");
+            LOGV("NULL decryptHandle is returned");
         }
         delete handle; handle = NULL;
         return DRM_NO_ERROR;
