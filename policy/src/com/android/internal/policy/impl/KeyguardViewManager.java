@@ -103,6 +103,8 @@ public class KeyguardViewManager implements KeyguardWindowController {
             int flags = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
                     | WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED_SYSTEM
                     /*| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR*/ ;
             if (!mNeedsInput) {
@@ -142,7 +144,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
                 mKeyguardView.onScreenTurnedOn();
             }
         }
-
+        mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
         mKeyguardHost.setVisibility(View.VISIBLE);
         mKeyguardView.requestFocus();
     }

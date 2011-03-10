@@ -498,15 +498,21 @@ public final class ViewRoot extends Handler implements ViewParent,
         mAttachInfo.mHardwareAccelerationRequested = false;
 
         // Try to enable hardware acceleration if requested
-        if (attrs != null &&
-                (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0) {
+        final boolean hardwareAccelerated = 
+                (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
+
+        if (attrs != null && hardwareAccelerated) {
             // Only enable hardware acceleration if we are not in the system process
             // The window manager creates ViewRoots to display animated preview windows
             // of launching apps and we don't want those to be hardware accelerated
-            if (!HardwareRenderer.sRendererDisabled) {
+
+            final boolean systemHwAccelerated =
+                (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED_SYSTEM) != 0;
+
+            if (!HardwareRenderer.sRendererDisabled || systemHwAccelerated) {
                 // Don't enable hardware acceleration when we're not on the main thread
-                if (Looper.getMainLooper() != Looper.myLooper()) {
-                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware " 
+                if (!systemHwAccelerated && Looper.getMainLooper() != Looper.myLooper()) {
+                    Log.w(HardwareRenderer.LOG_TAG, "Attempting to initialize hardware "
                             + "acceleration outside of the main thread, aborting");
                     return;
                 }
