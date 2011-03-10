@@ -3030,4 +3030,6 @@
   <java-symbol type="array" name="config_allowedSecureInstantAppSettings" />
 
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
+
+  <java-symbol type="integer" name="config_inCallNotificationVolumeRelative" />
 </resources>

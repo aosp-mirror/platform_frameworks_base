@@ -96,6 +96,7 @@ import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -300,6 +301,10 @@ public class NotificationManagerService extends SystemService {
     private boolean mScreenOn = true;
     private boolean mInCall = false;
     private boolean mNotificationPulseEnabled;
+
+    // for generating notification tones in-call
+    private ToneGenerator mInCallToneGenerator;
+    private final Object mInCallToneGeneratorLock = new Object();
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -854,6 +859,30 @@ public class NotificationManagerService extends SystemService {
                 mInCall = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
                 updateNotificationPulse();
+                synchronized (mInCallToneGeneratorLock) {
+                    if (mInCall) {
+                        if (mInCallToneGenerator == null) {
+                            int relativeToneVolume = getContext().getResources().getInteger(
+                                    R.integer.config_inCallNotificationVolumeRelative);
+                            if (relativeToneVolume < ToneGenerator.MIN_VOLUME
+                                    || relativeToneVolume > ToneGenerator.MAX_VOLUME) {
+                                relativeToneVolume = ToneGenerator.MAX_VOLUME;
+                            }
+                            try {
+                                mInCallToneGenerator = new ToneGenerator(
+                                        AudioManager.STREAM_VOICE_CALL, relativeToneVolume);
+                            } catch (RuntimeException e) {
+                                Log.e(TAG, "Error creating local tone generator: " + e);
+                                mInCallToneGenerator = null;
+                            }
+                        }
+                    } else {
+                        if (mInCallToneGenerator != null) {
+                            mInCallToneGenerator.release();
+                            mInCallToneGenerator = null;
+                        }
+                     }
+                }
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0) {
@@ -3723,14 +3752,21 @@ public class NotificationManagerService extends SystemService {
             hasValidVibrate = vibration != null;
 
             if (!shouldMuteNotificationLocked(record)) {
-
                 sendAccessibilityEvent(notification, record.sbn.getPackageName());
+
                 if (hasValidSound) {
                     mSoundNotificationKey = key;
-                    beep = playSound(record, soundUri);
+                    if (mInCall) {
+                        playInCallNotification();
+                        beep = true;
+                    } else {
+                        beep = playSound(record, soundUri);
+                    }
                 }
-                if (hasValidVibrate && !(mAudioManager.getRingerModeInternal()
-                        == AudioManager.RINGER_MODE_SILENT)) {
+
+                final boolean ringerModeSilent =
+                        mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT;
+                if (!mInCall && hasValidVibrate && !ringerModeSilent) {
                     mVibrateNotificationKey = key;
 
                     buzz = playVibration(record, vibration);
@@ -3837,6 +3873,26 @@ public class NotificationManagerService extends SystemService {
         } finally{
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private void playInCallNotification() {
+        new Thread() {
+            @Override
+            public void run() {
+                // If toneGenerator creation fails, just continue the call
+                // without playing the notification sound.
+                try {
+                    synchronized (mInCallToneGeneratorLock) {
+                        if (mInCallToneGenerator != null) {
+                            // limit this tone to 1 second; BEEP2 should in fact be much shorter
+                            mInCallToneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP2, 1000);
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Exception from ToneGenerator: " + e);
+                }
+            }
+        }.start();
     }
 
     void showNextToastLocked() {
