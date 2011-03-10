@@ -397,7 +397,7 @@ class SipSessionGroup implements SipListener {
 
         // for registration
         boolean mReRegisterFlag = false;
-        int mRPort;
+        int mRPort = 0;
 
         // lightweight timer
         class SessionTimer {
@@ -447,7 +447,6 @@ class SipSessionGroup implements SipListener {
             mState = SipSession.State.READY_TO_CALL;
             mInviteReceived = null;
             mPeerSessionDescription = null;
-            mRPort = 0;
             mAuthenticationRetryCount = 0;
 
             if (mDialog != null) mDialog.delete();
