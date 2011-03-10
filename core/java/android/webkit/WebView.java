@@ -1127,10 +1127,13 @@ public class WebView extends AbsoluteLayout
             protected Set<String> doInBackground(Void... unused) {
                 Set<String> installedPackages = new HashSet<String>();
                 PackageManager pm = mContext.getPackageManager();
-                List<PackageInfo> packages = pm.getInstalledPackages(0);
-                for (PackageInfo p : packages) {
-                    if (sGoogleApps.contains(p.packageName)) {
-                        installedPackages.add(p.packageName);
+                for (String name : sGoogleApps) {
+                    try {
+                        PackageInfo pInfo = pm.getPackageInfo(name,
+                                PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES);
+                        installedPackages.add(name);
+                    } catch(PackageManager.NameNotFoundException e) {
+                        // package not found
                     }
                 }
                 return installedPackages;
