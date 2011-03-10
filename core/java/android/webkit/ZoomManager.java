@@ -535,7 +535,7 @@ class ZoomManager {
             mTextWrapScale = scale;
         }
 
-        if (exceedsMinScaleIncrement(scale, mActualScale) || force) {
+        if (scale != mActualScale || force) {
             float oldScale = mActualScale;
             float oldInvScale = mInvActualScale;
 
