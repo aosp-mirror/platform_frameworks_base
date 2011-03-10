@@ -4549,15 +4549,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (translate) canvas.translate(0, -cursorOffsetVertical);
     }
 
-    /**
-     * Update the positions of the CursorControllers.  Needed by WebTextView,
-     * which does not draw.
-     * @hide
-     */
-    protected void updateCursorControllerPositions() {
-        // TODO remove
-    }
-
     @Override
     public void getFocusedRect(Rect r) {
         if (mLayout == null) {
