@@ -38,6 +38,8 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -360,7 +362,24 @@ public abstract class DataConnectionTracker extends Handler {
 
     public boolean isApnTypeActive(String type) {
         // TODO: support simultaneous with List instead
+        if (Phone.APN_TYPE_DUN.equals(type)) {
+            ApnSetting dunApn = fetchDunApn();
+            if (dunApn != null) {
+                return ((mActiveApn != null) && (dunApn.toString().equals(mActiveApn.toString())));
+            }
+        }
         return mActiveApn != null && mActiveApn.canHandleType(type);
+    }
+
+    protected ApnSetting fetchDunApn() {
+        Context c = mPhone.getContext();
+        String apnData = Settings.Secure.getString(c.getContentResolver(),
+                Settings.Secure.TETHER_DUN_APN);
+        ApnSetting dunSetting = ApnSetting.fromString(apnData);
+        if (dunSetting != null) return dunSetting;
+
+        apnData = c.getResources().getString(R.string.config_tether_apndata);
+        return ApnSetting.fromString(apnData);
     }
 
     public String[] getActiveApnTypes() {

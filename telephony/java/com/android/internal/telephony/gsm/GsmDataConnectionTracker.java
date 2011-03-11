@@ -1164,17 +1164,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
     }
 
-    private ApnSetting fetchDunApn() {
-        Context c = mPhone.getContext();
-        String apnData = Settings.Secure.getString(c.getContentResolver(),
-                                    Settings.Secure.TETHER_DUN_APN);
-        ApnSetting dunSetting = ApnSetting.fromString(apnData);
-        if (dunSetting != null) return dunSetting;
-
-        apnData = c.getResources().getString(R.string.config_tether_apndata);
-        return ApnSetting.fromString(apnData);
-    }
-
     /**
      * Build a list of APNs to be used to create PDP's.
      *
