@@ -37,10 +37,10 @@
 namespace android {
 
 // Everything must match except for
-// protection, bitrate, padding, private bits, mode extension,
+// protection, bitrate, padding, private bits, mode, mode extension,
 // copyright bit, original bit and emphasis.
 // Yes ... there are things that must indeed match...
-static const uint32_t kMask = 0xfffe0cc0;
+static const uint32_t kMask = 0xfffe0c00;
 
 static bool get_mp3_frame_size(
         uint32_t header, size_t *frame_size,
@@ -344,22 +344,55 @@ static bool Resync(
 
     off_t pos = *inout_pos;
     bool valid = false;
+
+    const size_t kMaxReadBytes = 1024;
+    const off_t kMaxBytesChecked = 128 * 1024;
+    uint8_t buf[kMaxReadBytes];
+    ssize_t bytesToRead = kMaxReadBytes;
+    ssize_t totalBytesRead = 0;
+    ssize_t remainingBytes = 0;
+    bool reachEOS = false;
+    uint8_t *tmp = buf;
+
     do {
-        if (pos >= *inout_pos + 128 * 1024) {
+        if (pos >= *inout_pos + kMaxBytesChecked) {
             // Don't scan forever.
             LOGV("giving up at offset %ld", pos);
             break;
         }
 
-        uint8_t tmp[4];
-        if (source->readAt(pos, tmp, 4) != 4) {
-            break;
+        if (remainingBytes < 4) {
+            if (reachEOS) {
+                break;
+            } else {
+                memcpy(buf, tmp, remainingBytes);
+                bytesToRead = kMaxReadBytes - remainingBytes;
+
+                /*
+                 * The next read position should start from the end of
+                 * the last buffer, and thus should include the remaining
+                 * bytes in the buffer.
+                 */
+                totalBytesRead = source->readAt(pos + remainingBytes,
+                                                buf + remainingBytes,
+                                                bytesToRead);
+                if (totalBytesRead <= 0) {
+                    break;
+                }
+                reachEOS = (totalBytesRead != bytesToRead);
+                totalBytesRead += remainingBytes;
+                remainingBytes = totalBytesRead;
+                tmp = buf;
+                continue;
+            }
         }
 
         uint32_t header = U32_AT(tmp);
 
         if (match_header != 0 && (header & kMask) != (match_header & kMask)) {
             ++pos;
+            ++tmp;
+            --remainingBytes;
             continue;
         }
 
@@ -368,6 +401,8 @@ static bool Resync(
         if (!get_mp3_frame_size(header, &frame_size,
                                &sample_rate, &num_channels, &bitrate)) {
             ++pos;
+            ++tmp;
+            --remainingBytes;
             continue;
         }
 
@@ -417,6 +452,8 @@ static bool Resync(
         }
 
         ++pos;
+        ++tmp;
+        --remainingBytes;
     } while (!valid);
 
     return valid;
