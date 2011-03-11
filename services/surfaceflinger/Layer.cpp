@@ -59,7 +59,8 @@ Layer::Layer(SurfaceFlinger* flinger,
         mProtectedByApp(false),
         mTextureManager(),
         mBufferManager(mTextureManager),
-        mWidth(0), mHeight(0), mNeedsScaling(false), mFixedSize(false)
+        mWidth(0), mHeight(0), mFormat(PIXEL_FORMAT_NONE),
+        mNeedsScaling(false), mFixedSize(false)
 {
 }
 
