@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package android.nfc;
 
+import android.os.Bundle;
+
 /**
  * {@hide}
  */
-interface INfcSecureElement {
-    int openSecureElementConnection();
-    int closeSecureElementConnection(int nativeHandle);
-    byte[] exchangeAPDU(int nativeHandle, in byte[] data);
-    int[] getSecureElementTechList(int nativeHandle);
-    byte[] getSecureElementUid(int nativeHandle);
+interface INfcAdapterExtras {
+    Bundle open(IBinder b);
+    Bundle close();
+    Bundle transceive(in byte[] data_in);
+    int getCardEmulationRoute();
+    void setCardEmulationRoute(int route);    
 }
