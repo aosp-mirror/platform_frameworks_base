@@ -128,7 +128,7 @@ device.startActivity(component=runComponent)
 device.press('KEYCODE_MENU','DOWN_AND_UP')
 
 # Takes a screenshot
-result = device.takeSnapShot()
+result = device.takeSnapshot()
 
 # Writes the screenshot to a file
 result.writeToFile('myproject/shot1.png','png')
