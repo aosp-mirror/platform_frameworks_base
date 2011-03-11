@@ -1049,7 +1049,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(com.android.internal.R.id.prefs, f);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
     }
 
     /**
@@ -1144,7 +1144,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         } else {
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         }
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
     }
 
     /**
@@ -1184,7 +1184,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             }
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.addToBackStack(BACK_STACK_PREFS);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         }
     }
     
