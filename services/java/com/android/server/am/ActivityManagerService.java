@@ -3151,6 +3151,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     pm.setPackageStoppedState(packageName, true);
                 } catch (RemoteException e) {
+                } catch (IllegalArgumentException e) {
+                    Slog.w(TAG, "Failed trying to unstop package "
+                            + packageName + ": " + e);
                 }
             }
         } finally {
@@ -5559,6 +5562,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             AppGlobals.getPackageManager().setPackageStoppedState(
                                     cpr.appInfo.packageName, false);
                         } catch (RemoteException e) {
+                        } catch (IllegalArgumentException e) {
+                            Slog.w(TAG, "Failed trying to unstop package "
+                                    + cpr.appInfo.packageName + ": " + e);
                         }
 
                         ProcessRecord proc = startProcessLocked(cpi.processName,
@@ -5840,6 +5846,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             AppGlobals.getPackageManager().setPackageStoppedState(
                     info.packageName, false);
         } catch (RemoteException e) {
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Failed trying to unstop package "
+                    + info.packageName + ": " + e);
         }
 
         if ((info.flags&(ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT))
@@ -9396,6 +9405,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             AppGlobals.getPackageManager().setPackageStoppedState(
                     r.packageName, false);
         } catch (RemoteException e) {
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "Failed trying to unstop package "
+                    + r.packageName + ": " + e);
         }
 
         final String appName = r.processName;
@@ -10297,6 +10309,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 AppGlobals.getPackageManager().setPackageStoppedState(
                         app.packageName, false);
             } catch (RemoteException e) {
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, "Failed trying to unstop package "
+                        + app.packageName + ": " + e);
             }
 
             BackupRecord r = new BackupRecord(ss, app, backupMode);
@@ -11625,6 +11640,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 AppGlobals.getPackageManager().setPackageStoppedState(
                         r.curComponent.getPackageName(), false);
             } catch (RemoteException e) {
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, "Failed trying to unstop package "
+                        + r.curComponent.getPackageName() + ": " + e);
             }
 
             // Is this receiver's application already running?
