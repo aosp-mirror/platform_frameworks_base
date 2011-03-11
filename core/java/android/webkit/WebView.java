@@ -5969,10 +5969,9 @@ public class WebView extends AbsoluteLayout
         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
         cancelLongPress();
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-        mPreventDefault = PREVENT_DEFAULT_IGNORE;
     }
 
-    private void handleMultiTouchInWebView(MotionEvent ev) {
+    void handleMultiTouchInWebView(MotionEvent ev) {
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "multi-touch: " + ev + " at " + ev.getEventTime()
                 + " mTouchMode=" + mTouchMode
@@ -5990,24 +5989,26 @@ public class WebView extends AbsoluteLayout
         float x = ev.getX();
         float y = ev.getY();
 
-        detector.onTouchEvent(ev);
+        if (mPreventDefault != PREVENT_DEFAULT_YES) {
+            detector.onTouchEvent(ev);
 
-        if (detector.isInProgress()) {
-            if (DebugFlags.WEB_VIEW) {
-                Log.v(LOGTAG, "detector is in progress");
-            }
-            mLastTouchTime = ev.getEventTime();
-            x = detector.getFocusX();
-            y = detector.getFocusY();
+            if (detector.isInProgress()) {
+                if (DebugFlags.WEB_VIEW) {
+                    Log.v(LOGTAG, "detector is in progress");
+                }
+                mLastTouchTime = ev.getEventTime();
+                x = detector.getFocusX();
+                y = detector.getFocusY();
 
-            cancelLongPress();
-            mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
-            if (!mZoomManager.supportsPanDuringZoom()) {
-                return;
-            }
-            mTouchMode = TOUCH_DRAG_MODE;
-            if (mVelocityTracker == null) {
-                mVelocityTracker = VelocityTracker.obtain();
+                cancelLongPress();
+                mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                if (!mZoomManager.supportsPanDuringZoom()) {
+                    return;
+                }
+                mTouchMode = TOUCH_DRAG_MODE;
+                if (mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
+                }
             }
         }
 
@@ -7306,12 +7307,14 @@ public class WebView extends AbsoluteLayout
         }
 
         private void dropStaleGestures(MotionEvent ev, long sequence) {
-            if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN &&
-                    mTouchEventQueue != null) {
+            if (mTouchEventQueue == null) return;
+
+            MotionEvent nextQueueEvent = mTouchEventQueue.mTed != null ?
+                    mTouchEventQueue.mTed.mMotionEvent : mTouchEventQueue.mEvent;
+
+            if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN && nextQueueEvent != null) {
                 long eventTime = ev.getEventTime();
-                long nextQueueTime = mTouchEventQueue.mTed != null ?
-                        mTouchEventQueue.mTed.mMotionEvent.getEventTime() :
-                        mTouchEventQueue.mEvent.getEventTime();
+                long nextQueueTime = nextQueueEvent.getEventTime();
                 if (eventTime > nextQueueTime + QUEUED_GESTURE_TIMEOUT) {
                     Log.w(LOGTAG, "Got ACTION_DOWN but still waiting on stale event. " +
                             "Ignoring previous queued events.");
@@ -7354,7 +7357,7 @@ public class WebView extends AbsoluteLayout
                 handleMultiTouchInWebView(ev);
             } else {
                 final ScaleGestureDetector detector = mZoomManager.getMultiTouchGestureDetector();
-                if (detector != null) {
+                if (detector != null && mPreventDefault != PREVENT_DEFAULT_YES) {
                     // ScaleGestureDetector needs a consistent event stream to operate properly.
                     // It won't take any action with fewer than two pointers, but it needs to
                     // update internal bookkeeping state.
@@ -7387,10 +7390,7 @@ public class WebView extends AbsoluteLayout
                 }
             } else {
                 if (ted.mPoints.length > 1) {  // multi-touch
-                    if (ted.mAction == MotionEvent.ACTION_POINTER_UP &&
-                            ted.mMotionEvent.getPointerCount() == 2) {
-                    }
-                    if (!ted.mNativeResult) {
+                    if (!ted.mNativeResult && mPreventDefault != PREVENT_DEFAULT_YES) {
                         mPreventDefault = PREVENT_DEFAULT_NO;
                         handleMultiTouchInWebView(ted.mMotionEvent);
                     } else {
