@@ -568,8 +568,31 @@ class UsbDeviceSettingsManager {
     private void resolveActivity(Intent intent, ArrayList<ResolveInfo> matches,
             String defaultPackage, UsbDevice device, UsbAccessory accessory) {
         int count = matches.size();
+
         // don't show the resolver activity if there are no choices available
-        if (count == 0) return;
+        if (count == 0) {
+            if (accessory != null) {
+                String uri = accessory.getUri();
+                if (uri != null && uri.length() > 0) {
+                    // display URI to user
+                    // start UsbResolverActivity so user can choose an activity
+                    Intent dialogIntent = new Intent();
+                    dialogIntent.setClassName("com.android.systemui",
+                            "com.android.systemui.usb.UsbAccessoryUriActivity");
+                    dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    dialogIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+                    dialogIntent.putExtra("uri", uri);
+                    try {
+                        mContext.startActivity(dialogIntent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.e(TAG, "unable to start UsbAccessoryUriActivity");
+                    }
+                }
+            }
+
+            // do nothing
+            return;
+        }
 
         ResolveInfo defaultRI = null;
         if (count == 1 && defaultPackage == null) {
@@ -613,8 +636,6 @@ class UsbDeviceSettingsManager {
                 Log.e(TAG, "startActivity failed", e);
             }
         } else {
-            long identity = Binder.clearCallingIdentity();
-
             // start UsbResolverActivity so user can choose an activity
             Intent resolverIntent = new Intent();
             resolverIntent.setClassName("com.android.systemui",
@@ -626,8 +647,6 @@ class UsbDeviceSettingsManager {
                 mContext.startActivity(resolverIntent);
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG, "unable to start UsbResolverActivity");
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
     }
