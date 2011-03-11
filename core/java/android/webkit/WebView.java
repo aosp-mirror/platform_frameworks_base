@@ -44,6 +44,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.SurfaceTexture;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.net.Proxy;
@@ -608,6 +609,10 @@ public class WebView extends AbsoluteLayout
     private Paint mTouchCrossHairColor;
     private int mTouchHighlightX;
     private int mTouchHighlightY;
+
+    // Basically this proxy is used to tell the Video to update layer tree at
+    // SetBaseLayer time and to pause when WebView paused.
+    private HTML5VideoViewProxy mHTML5VideoViewProxy;
 
     /*
      * Private message ids
@@ -1181,6 +1186,7 @@ public class WebView extends AbsoluteLayout
         // Initially use a size of two, since the user is likely to only hold
         // down two keys at a time (shift + another key)
         mKeysPressed = new Vector<Integer>(2);
+        mHTML5VideoViewProxy = null ;
     }
 
     /**
@@ -2889,6 +2895,11 @@ public class WebView extends AbsoluteLayout
         if (!mIsPaused) {
             mIsPaused = true;
             mWebViewCore.sendMessage(EventHub.ON_PAUSE);
+            // We want to pause the current playing video when switching out
+            // from the current WebView/tab.
+            if (mHTML5VideoViewProxy != null) {
+                mHTML5VideoViewProxy.pauseAndDispatch();
+            }
         }
     }
 
@@ -4021,6 +4032,9 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass == 0)
             return;
         nativeSetBaseLayer(layer, invalRegion, showVisualIndicator);
+        if (mHTML5VideoViewProxy != null) {
+            mHTML5VideoViewProxy.setBaseLayer(layer);
+        }
     }
 
     private void onZoomAnimationStart() {
@@ -8494,6 +8508,15 @@ public class WebView extends AbsoluteLayout
      */
     public void drawPage(Canvas canvas) {
         nativeDraw(canvas, 0, 0, false);
+    }
+
+    /**
+     * Enable the communication b/t the webView and VideoViewProxy
+     *
+     * @hide only used by the Browser
+     */
+    public void setHTML5VideoViewProxy(HTML5VideoViewProxy proxy) {
+        mHTML5VideoViewProxy = proxy;
     }
 
     /**

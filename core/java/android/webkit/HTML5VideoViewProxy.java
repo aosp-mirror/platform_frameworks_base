@@ -19,6 +19,7 @@ package android.webkit;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -59,7 +60,8 @@ import java.util.TimerTask;
 class HTML5VideoViewProxy extends Handler
                           implements MediaPlayer.OnPreparedListener,
                           MediaPlayer.OnCompletionListener,
-                          MediaPlayer.OnErrorListener {
+                          MediaPlayer.OnErrorListener,
+                          SurfaceTexture.OnFrameAvailableListener {
     // Logging tag.
     private static final String LOGTAG = "HTML5VideoViewProxy";
 
@@ -101,7 +103,7 @@ class HTML5VideoViewProxy extends Handler
         private static HTML5VideoViewProxy mCurrentProxy;
         // The VideoView instance. This is a singleton for now, at least until
         // http://b/issue?id=1973663 is fixed.
-        private static VideoView mVideoView;
+        private static HTML5VideoView mHTML5VideoView;
         // The progress view.
         private static View mProgressView;
         // The container for the progress view and video view
@@ -122,131 +124,149 @@ class HTML5VideoViewProxy extends Handler
         }
         // The spec says the timer should fire every 250 ms or less.
         private static final int TIMEUPDATE_PERIOD = 250;  // ms
-        static boolean isVideoSelfEnded = false;
+        private static boolean isVideoSelfEnded = false;
+        // By using the baseLayer and the current video Layer ID, we can
+        // identify the exact layer on the UI thread to use the SurfaceTexture.
+        private static int mBaseLayer = 0;
 
-        private static final WebChromeClient.CustomViewCallback mCallback =
-            new WebChromeClient.CustomViewCallback() {
-                public void onCustomViewHidden() {
-                    // At this point the videoview is pretty much destroyed.
-                    // It listens to SurfaceHolder.Callback.SurfaceDestroyed event
-                    // which happens when the video view is detached from its parent
-                    // view. This happens in the WebChromeClient before this method
-                    // is invoked.
-                    mTimer.cancel();
-                    mTimer = null;
-                    if (mVideoView.isPlaying()) {
-                        mVideoView.stopPlayback();
+        // TODO: [FULL SCREEN SUPPORT]
+
+        // Every time webView setBaseLayer, this will be called.
+        // When we found the Video layer, then we set the Surface Texture to it.
+        // Otherwise, we may want to delete the Surface Texture to save memory.
+        public static void setBaseLayer(int layer) {
+            if (mHTML5VideoView != null) {
+                mBaseLayer = layer;
+                SurfaceTexture surfTexture = mHTML5VideoView.getSurfaceTexture();
+                int textureName = mHTML5VideoView.getTextureName();
+
+                int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
+                if (layer != 0 && surfTexture != null && currentVideoLayerId != -1) {
+                    boolean readyToUseSurfTex =
+                        mHTML5VideoView.getReadyToUseSurfTex();
+                    boolean foundInTree = nativeSendSurfaceTexture(surfTexture,
+                            layer, currentVideoLayerId, textureName,
+                            readyToUseSurfTex);
+                    if (readyToUseSurfTex && !foundInTree) {
+                        mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
+                        mHTML5VideoView.deleteSurfaceTexture();
                     }
-                    if (isVideoSelfEnded)
-                        mCurrentProxy.dispatchOnEnded();
-                    else
-                        mCurrentProxy.dispatchOnPaused();
-
-                    // Re enable plugin views.
-                    mCurrentProxy.getWebView().getViewManager().showAll();
-
-                    isVideoSelfEnded = false;
-                    mCurrentProxy = null;
-                    mLayout.removeView(mVideoView);
-                    mVideoView = null;
-                    if (mProgressView != null) {
-                        mLayout.removeView(mProgressView);
-                        mProgressView = null;
-                    }
-                    mLayout = null;
                 }
-            };
-
-        public static void play(String url, int time, HTML5VideoViewProxy proxy,
-                WebChromeClient client) {
-            if (mCurrentProxy == proxy) {
-                if (!mVideoView.isPlaying()) {
-                    mVideoView.start();
-                }
-                return;
             }
+        }
 
-            if (mCurrentProxy != null) {
+        // When a WebView is paused, we also want to pause the video in it.
+        public static void pauseAndDispatch() {
+            if (mHTML5VideoView != null) {
+                mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
+                // When switching out, clean the video content on the old page
+                // by telling the layer not readyToUseSurfTex.
+                setBaseLayer(mBaseLayer);
+            }
+        }
+
+        // This is on the UI thread.
+        // When native tell Java to play, we need to check whether or not it is
+        // still the same video by using videoLayerId and treat it differently.
+        public static void play(String url, int time, HTML5VideoViewProxy proxy,
+                WebChromeClient client, int videoLayerId) {
+            int currentVideoLayerId = -1;
+            if (mHTML5VideoView != null)
+                currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
+
+            if (currentVideoLayerId != videoLayerId
+                || mHTML5VideoView.getSurfaceTexture() == null) {
+                // Here, we handle the case when switching to a new video,
+                // either inside a WebView or across WebViews
+                // For switching videos within a WebView or across the WebView,
+                // we need to pause the old one and re-create a new media player
+                // inside the HTML5VideoView.
+                if (mHTML5VideoView != null) {
+                    mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
+                    // release the media player to avoid finalize error
+                    mHTML5VideoView.release();
+                }
+                // HTML5VideoView is singleton, however, the internal state will
+                // be reset since we are switching from one video to another.
+                // Then we need to set up all the source/listener etc...
+                mHTML5VideoView = HTML5VideoView.getInstance(videoLayerId);
+
+                mCurrentProxy = proxy;
+
+                // TODO: [FULL SCREEN SUPPORT]
+
+                boolean isPrivate = mCurrentProxy.getWebView().isPrivateBrowsingEnabled();
+                String cookieValue = CookieManager.getInstance().getCookie(url, isPrivate);
+                Map<String, String> headers = new HashMap<String, String>();
+                if (cookieValue != null) {
+                    headers.put(COOKIE, cookieValue);
+                }
+                if (isPrivate) {
+                    headers.put(HIDE_URL_LOGS, "true");
+                }
+
+                mHTML5VideoView.setVideoURI(url, headers);
+                mHTML5VideoView.setOnCompletionListener(proxy);
+                mHTML5VideoView.setOnPreparedListener(proxy);
+                mHTML5VideoView.setOnErrorListener(proxy);
+                mHTML5VideoView.setFrameAvailableListener(proxy);
+
+                mHTML5VideoView.seekTo(time);
+
+                mTimer = new Timer();
+
+            } else if (mCurrentProxy == proxy) {
+                // Here, we handle the case when we keep playing with one video
+                if (!mHTML5VideoView.isPlaying()) {
+                    mHTML5VideoView.seekTo(time);
+                    mHTML5VideoView.start();
+                }
+            } else if (mCurrentProxy != null) {
                 // Some other video is already playing. Notify the caller that its playback ended.
                 proxy.dispatchOnEnded();
-                return;
             }
-
-            mCurrentProxy = proxy;
-            // Create a FrameLayout that will contain the VideoView and the
-            // progress view (if any).
-            mLayout = new FrameLayout(proxy.getContext());
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    Gravity.CENTER);
-            mVideoView = new VideoView(proxy.getContext());
-            mVideoView.setWillNotDraw(false);
-            mVideoView.setMediaController(new MediaController(proxy.getContext()));
-
-            boolean isPrivate = mCurrentProxy.getWebView().isPrivateBrowsingEnabled();
-            String cookieValue = CookieManager.getInstance().getCookie(url, isPrivate);
-            Map<String, String> headers = new HashMap<String, String>();
-            if (cookieValue != null) {
-                headers.put(COOKIE, cookieValue);
-            }
-            if (isPrivate) {
-                headers.put(HIDE_URL_LOGS, "true");
-            }
-
-            mVideoView.setVideoURI(Uri.parse(url), headers);
-            mVideoView.setOnCompletionListener(proxy);
-            mVideoView.setOnPreparedListener(proxy);
-            mVideoView.setOnErrorListener(proxy);
-            mVideoView.seekTo(time);
-            mLayout.addView(mVideoView, layoutParams);
-            mProgressView = client.getVideoLoadingProgressView();
-            if (mProgressView != null) {
-                mLayout.addView(mProgressView, layoutParams);
-                mProgressView.setVisibility(View.VISIBLE);
-            }
-            mLayout.setVisibility(View.VISIBLE);
-            mTimer = new Timer();
-            mVideoView.start();
-            client.onShowCustomView(mLayout, mCallback);
-            // Plugins like Flash will draw over the video so hide
-            // them while we're playing.
-            mCurrentProxy.getWebView().getViewManager().hideAll();
         }
 
         public static boolean isPlaying(HTML5VideoViewProxy proxy) {
-            return (mCurrentProxy == proxy && mVideoView != null && mVideoView.isPlaying());
+            return (mCurrentProxy == proxy && mHTML5VideoView != null
+                    && mHTML5VideoView.isPlaying());
         }
 
         public static int getCurrentPosition() {
             int currentPosMs = 0;
-            if (mVideoView != null) {
-                currentPosMs = mVideoView.getCurrentPosition();
+            if (mHTML5VideoView != null) {
+                currentPosMs = mHTML5VideoView.getCurrentPosition();
             }
             return currentPosMs;
         }
 
         public static void seek(int time, HTML5VideoViewProxy proxy) {
-            if (mCurrentProxy == proxy && time >= 0 && mVideoView != null) {
-                mVideoView.seekTo(time);
+            if (mCurrentProxy == proxy && time >= 0 && mHTML5VideoView != null) {
+                mHTML5VideoView.seekTo(time);
             }
         }
 
         public static void pause(HTML5VideoViewProxy proxy) {
-            if (mCurrentProxy == proxy && mVideoView != null) {
-                mVideoView.pause();
+            if (mCurrentProxy == proxy && mHTML5VideoView != null) {
+                mHTML5VideoView.pause();
                 mTimer.purge();
             }
         }
 
         public static void onPrepared() {
-            if (mProgressView == null || mLayout == null) {
-                return;
-            }
+            mHTML5VideoView.start();
             mTimer.schedule(new TimeupdateTask(mCurrentProxy), TIMEUPDATE_PERIOD, TIMEUPDATE_PERIOD);
-            mProgressView.setVisibility(View.GONE);
-            mLayout.removeView(mProgressView);
-            mProgressView = null;
+            // TODO: [FULL SCREEN SUPPORT]
+        }
+
+        public static void end() {
+            if (mCurrentProxy != null) {
+                if (isVideoSelfEnded)
+                    mCurrentProxy.dispatchOnEnded();
+                else
+                    mCurrentProxy.dispatchOnPaused();
+            }
+            isVideoSelfEnded = false;
         }
     }
 
@@ -292,6 +312,14 @@ class HTML5VideoViewProxy extends Handler
         sendMessage(obtainMessage(TIMEUPDATE));
     }
 
+    // When there is a frame ready from surface texture, we should tell WebView
+    // to refresh.
+    @Override
+    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+        // TODO: This should support partial invalidation too.
+        mWebView.invalidate();
+    }
+
     // Handler for the messages from WebCore or Timer thread to the UI thread.
     @Override
     public void handleMessage(Message msg) {
@@ -300,8 +328,9 @@ class HTML5VideoViewProxy extends Handler
             case PLAY: {
                 String url = (String) msg.obj;
                 WebChromeClient client = mWebView.getWebChromeClient();
+                int videoLayerID = msg.arg1;
                 if (client != null) {
-                    VideoPlayer.play(url, mSeekPosition, this, client);
+                    VideoPlayer.play(url, mSeekPosition, this, client, videoLayerID);
                 }
                 break;
             }
@@ -318,6 +347,10 @@ class HTML5VideoViewProxy extends Handler
             case ENDED:
                 if (msg.arg1 == 1)
                     VideoPlayer.isVideoSelfEnded = true;
+                VideoPlayer.end();
+                break;
+                // TODO: [FULL SCREEN SUPPORT]
+                // For full screen case, end may need hide the view.
             case ERROR: {
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
@@ -500,6 +533,10 @@ class HTML5VideoViewProxy extends Handler
         super(Looper.getMainLooper());
         // Save the WebView object.
         mWebView = webView;
+        // Pass Proxy into webview, such that every time we have a setBaseLayer
+        // call, we tell this Proxy to call the native to update the layer tree
+        // for the Video Layer's surface texture info
+        mWebView.setHTML5VideoViewProxy(this);
         // Save the native ptr
         mNativePointer = nativePtr;
         // create the message handler for this thread
@@ -565,7 +602,7 @@ class HTML5VideoViewProxy extends Handler
      * Play a video stream.
      * @param url is the URL of the video stream.
      */
-    public void play(String url, int position) {
+    public void play(String url, int position, int videoLayerID) {
         if (url == null) {
             return;
         }
@@ -573,8 +610,8 @@ class HTML5VideoViewProxy extends Handler
         if (position > 0) {
             seek(position);
         }
-
         Message message = obtainMessage(PLAY);
+        message.arg1 = videoLayerID;
         message.obj = url;
         sendMessage(message);
     }
@@ -628,6 +665,14 @@ class HTML5VideoViewProxy extends Handler
         mPosterDownloader.start();
     }
 
+    // These two function are called from UI thread only by WebView.
+    public void setBaseLayer(int layer) {
+        VideoPlayer.setBaseLayer(layer);
+    }
+
+    public void pauseAndDispatch() {
+        VideoPlayer.pauseAndDispatch();
+    }
     /**
      * The factory for HTML5VideoViewProxy instances.
      * @param webViewCore is the WebViewCore that is requesting the proxy.
@@ -647,4 +692,7 @@ class HTML5VideoViewProxy extends Handler
     private native void nativeOnPaused(int nativePointer);
     private native void nativeOnPosterFetched(Bitmap poster, int nativePointer);
     private native void nativeOnTimeupdate(int position, int nativePointer);
+    private native static boolean nativeSendSurfaceTexture(SurfaceTexture texture,
+            int baseLayer, int videoLayerId, int textureName,
+            boolean updateTexture);
 }
