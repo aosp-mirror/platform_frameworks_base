@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -64,6 +65,7 @@ class UsbDeviceSettingsManager {
     private static final File sSettingsFile = new File("/data/system/usb_device_manager.xml");
 
     private final Context mContext;
+    private final PackageManager mPackageManager;
 
     // Temporary mapping USB device name to list of UIDs with permissions for the device
     private final HashMap<String, SparseBooleanArray> mDevicePermissionMap =
@@ -187,6 +189,14 @@ class UsbDeviceSettingsManager {
             return false;
         }
 
+        public boolean matches(DeviceFilter f) {
+            if (mVendorId != -1 && f.mVendorId != mVendorId) return false;
+            if (mProductId != -1 && f.mProductId != mProductId) return false;
+
+            // check device class/subclass/protocol
+            return matches(f.mClass, f.mSubclass, f.mProtocol);
+        }
+
         @Override
         public boolean equals(Object obj) {
             // can't compare if we have wildcard strings
@@ -294,6 +304,13 @@ class UsbDeviceSettingsManager {
             return true;
         }
 
+        public boolean matches(AccessoryFilter f) {
+            if (mManufacturer != null && !f.mManufacturer.equals(mManufacturer)) return false;
+            if (mModel != null && !f.mModel.equals(mModel)) return false;
+            if (mVersion != null && !f.mVersion.equals(mVersion)) return false;
+            return true;
+        }
+
         @Override
         public boolean equals(Object obj) {
             // can't compare if we have wildcard strings
@@ -331,19 +348,24 @@ class UsbDeviceSettingsManager {
     }
 
     private class MyPackageMonitor extends PackageMonitor {
+
+        public void onPackageAdded(String packageName, int uid) {
+            handlePackageUpdate(packageName);
+        }
+
+        public void onPackageChanged(String packageName, int uid, String[] components) {
+            handlePackageUpdate(packageName);
+        }
+
         public void onPackageRemoved(String packageName, int uid) {
-            synchronized (mLock) {
-                // clear all activity preferences for the package
-                if (clearPackageDefaultsLocked(packageName)) {
-                    writeSettingsLocked();
-                }
-            }
+            clearDefaults(packageName);
         }
     }
     MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
     public UsbDeviceSettingsManager(Context context) {
         mContext = context;
+        mPackageManager = context.getPackageManager();
         synchronized (mLock) {
             readSettingsLocked();
         }
@@ -445,11 +467,10 @@ class UsbDeviceSettingsManager {
     private boolean packageMatchesLocked(ResolveInfo info, String metaDataName,
             UsbDevice device, UsbAccessory accessory) {
         ActivityInfo ai = info.activityInfo;
-        PackageManager pm = mContext.getPackageManager();
 
         XmlResourceParser parser = null;
         try {
-            parser = ai.loadXmlMetaData(pm, metaDataName);
+            parser = ai.loadXmlMetaData(mPackageManager, metaDataName);
             if (parser == null) {
                 Log.w(TAG, "no meta-data for " + info);
                 return false;
@@ -482,8 +503,7 @@ class UsbDeviceSettingsManager {
 
     private final ArrayList<ResolveInfo> getDeviceMatchesLocked(UsbDevice device, Intent intent) {
         ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
-        PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent,
+        List<ResolveInfo> resolveInfos = mPackageManager.queryIntentActivities(intent,
                 PackageManager.GET_META_DATA);
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
@@ -498,8 +518,7 @@ class UsbDeviceSettingsManager {
     private final ArrayList<ResolveInfo> getAccessoryMatchesLocked(
             UsbAccessory accessory, Intent intent) {
         ArrayList<ResolveInfo> matches = new ArrayList<ResolveInfo>();
-        PackageManager pm = mContext.getPackageManager();
-        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(intent,
+        List<ResolveInfo> resolveInfos = mPackageManager.queryIntentActivities(intent,
                 PackageManager.GET_META_DATA);
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
@@ -651,6 +670,97 @@ class UsbDeviceSettingsManager {
         }
     }
 
+    private boolean clearCompatibleMatchesLocked(String packageName, DeviceFilter filter) {
+        boolean changed = false;
+        for (DeviceFilter test : mDevicePreferenceMap.keySet()) {
+            if (filter.matches(test)) {
+                mDevicePreferenceMap.remove(test);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    private boolean clearCompatibleMatchesLocked(String packageName, AccessoryFilter filter) {
+        boolean changed = false;
+        for (AccessoryFilter test : mAccessoryPreferenceMap.keySet()) {
+            if (filter.matches(test)) {
+                mAccessoryPreferenceMap.remove(test);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
+    private boolean handlePackageUpdateLocked(String packageName, ActivityInfo aInfo,
+            String metaDataName) {
+        XmlResourceParser parser = null;
+        boolean changed = false;
+
+        try {
+            parser = aInfo.loadXmlMetaData(mPackageManager, metaDataName);
+            if (parser == null) return false;
+
+            XmlUtils.nextElement(parser);
+            while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                String tagName = parser.getName();
+                if ("usb-device".equals(tagName)) {
+                    DeviceFilter filter = DeviceFilter.read(parser);
+                    if (clearCompatibleMatchesLocked(packageName, filter)) {
+                        changed = true;
+                    }
+                }
+                else if ("usb-accessory".equals(tagName)) {
+                    AccessoryFilter filter = AccessoryFilter.read(parser);
+                    if (clearCompatibleMatchesLocked(packageName, filter)) {
+                        changed = true;
+                    }
+                }
+                XmlUtils.nextElement(parser);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Unable to load component info " + aInfo.toString(), e);
+        } finally {
+            if (parser != null) parser.close();
+        }
+        return changed;
+    }
+
+    // Check to see if the package supports any USB devices or accessories.
+    // If so, clear any non-matching preferences for matching devices/accessories.
+    private void handlePackageUpdate(String packageName) {
+        synchronized (mLock) {
+            PackageInfo info;
+            boolean changed = false;
+
+            try {
+                info = mPackageManager.getPackageInfo(packageName,
+                        PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "handlePackageUpdate could not find package " + packageName, e);
+                return;
+            }
+
+            ActivityInfo[] activities = info.activities;
+            if (activities == null) return;
+            for (int i = 0; i < activities.length; i++) {
+                // check for meta-data, both for devices and accessories
+                if (handlePackageUpdateLocked(packageName, activities[i],
+                        UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+                    changed = true;
+                }
+                if (handlePackageUpdateLocked(packageName, activities[i],
+                        UsbManager.ACTION_USB_ACCESSORY_ATTACHED)) {
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                writeSettingsLocked();
+            }
+        }
+    }
+
     public boolean hasPermission(UsbDevice device) {
         synchronized (mLock) {
             SparseBooleanArray uidList = mDevicePermissionMap.get(device.getDeviceName());
@@ -688,7 +798,7 @@ class UsbDeviceSettingsManager {
 
         // compare uid with packageName to foil apps pretending to be someone else
         try {
-            ApplicationInfo aInfo = mContext.getPackageManager().getApplicationInfo(packageName, 0);
+            ApplicationInfo aInfo = mPackageManager.getApplicationInfo(packageName, 0);
             if (aInfo.uid != uid) {
                 throw new IllegalArgumentException("package " + packageName +
                         " does not match caller's uid " + uid);
