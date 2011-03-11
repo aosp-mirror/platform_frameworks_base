@@ -229,7 +229,6 @@ bool Message_Function_IsValid(int value) {
     case 188:
     case 189:
     case 190:
-    case 191:
       return true;
     default:
       return false;
@@ -428,7 +427,6 @@ const Message_Function Message::NEG;
 const Message_Function Message::CONTINUE;
 const Message_Function Message::SKIP;
 const Message_Function Message::SETPROP;
-const Message_Function Message::CAPTURE;
 const Message_Function Message::Function_MIN;
 const Message_Function Message::Function_MAX;
 const int Message::Function_ARRAYSIZE;

@@ -226,12 +226,11 @@ enum Message_Function {
   Message_Function_NEG = 187,
   Message_Function_CONTINUE = 188,
   Message_Function_SKIP = 189,
-  Message_Function_SETPROP = 190,
-  Message_Function_CAPTURE = 191
+  Message_Function_SETPROP = 190
 };
 bool Message_Function_IsValid(int value);
 const Message_Function Message_Function_Function_MIN = Message_Function_glActiveTexture;
-const Message_Function Message_Function_Function_MAX = Message_Function_CAPTURE;
+const Message_Function Message_Function_Function_MAX = Message_Function_SETPROP;
 const int Message_Function_Function_ARRAYSIZE = Message_Function_Function_MAX + 1;
 
 enum Message_Type {
@@ -488,7 +487,6 @@ class Message : public ::google::protobuf::MessageLite {
   static const Function CONTINUE = Message_Function_CONTINUE;
   static const Function SKIP = Message_Function_SKIP;
   static const Function SETPROP = Message_Function_SETPROP;
-  static const Function CAPTURE = Message_Function_CAPTURE;
   static inline bool Function_IsValid(int value) {
     return Message_Function_IsValid(value);
   }

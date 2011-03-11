@@ -19,7 +19,7 @@
 EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = true;
+    const bool expectResponse = false;
     struct : public FunctionCall {
         EGLDisplay dpy;
         EGLSurface draw;
