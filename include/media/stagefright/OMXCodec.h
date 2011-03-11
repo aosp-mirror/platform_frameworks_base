@@ -50,6 +50,9 @@ struct OMXCodec : public MediaSource,
 
         // Only submit one input buffer at one time.
         kOnlySubmitOneInputBufferAtOneTime = 64,
+
+        // Enable GRALLOC_USAGE_PROTECTED for output buffers from native window
+        kEnableGrallocUsageProtected = 128,
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,
@@ -197,6 +200,7 @@ private:
 
     bool mIsMetaDataStoredInVideoBuffers;
     bool mOnlySubmitOneBufferAtOneTime;
+    bool mEnableGrallocUsageProtected;
 
     OMXCodec(const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
              bool isEncoder, const char *mime, const char *componentName,

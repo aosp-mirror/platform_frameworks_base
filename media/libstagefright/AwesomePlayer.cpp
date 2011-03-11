@@ -45,6 +45,7 @@
 #include <surfaceflinger/Surface.h>
 #include <gui/ISurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
+#include <surfaceflinger/ISurfaceComposer.h>
 
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -1189,6 +1190,19 @@ void AwesomePlayer::setVideoSource(sp<MediaSource> source) {
 }
 
 status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
+
+    // Either the application or the DRM system can independently say
+    // that there must be a hardware-protected path to an external video sink.
+    // For now we always require a hardware-protected path to external video sink
+    // if content is DRMed, but eventually this could be optional per DRM agent.
+    // When the application wants protection, then
+    //   (USE_SURFACE_ALLOC && (mSurface != 0) &&
+    //   (mSurface->getFlags() & ISurfaceComposer::eProtectedByApp))
+    // will be true, but that part is already handled by SurfaceFlinger.
+    if (mDecryptHandle != NULL) {
+        flags |= OMXCodec::kEnableGrallocUsageProtected;
+    }
+    LOGV("initVideoDecoder flags=0x%x", flags);
     mVideoSource = OMXCodec::Create(
             mClient.interface(), mVideoTrack->getFormat(),
             false, // createEncoder
