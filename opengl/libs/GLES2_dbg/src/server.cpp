@@ -31,8 +31,6 @@ int serverSock = -1, clientSock = -1;
 
 int timeMode = SYSTEM_TIME_THREAD;
 
-void StopDebugServer();
-
 static void Die(const char * msg)
 {
     LOGD("\n*\n*\n* GLESv2_dbg: Die: %s \n*\n*", msg);
@@ -120,7 +118,7 @@ void Receive(glesv2debugger::Message & cmd)
     static unsigned bufferSize = 0;
     if (bufferSize < len) {
         buffer = realloc(buffer, len);
-        ASSERT(buffer);
+        assert(buffer);
         bufferSize = len;
     }
     received = recv(clientSock, buffer, len, MSG_WAITALL);
@@ -137,8 +135,9 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_lock(&mutex); // TODO: this is just temporary
 
+    if (msg.function() != glesv2debugger::Message_Function_ACK)
+        assert(msg.has_context_id() && msg.context_id() != 0);
     static std::string str;
-    const_cast<glesv2debugger::Message &>(msg).set_context_id(pthread_self());
     msg.SerializeToString(&str);
     unsigned len = str.length();
     len = htonl(len);
@@ -187,10 +186,10 @@ void SetProp(const glesv2debugger::Message & cmd)
 int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
                   const bool expectResponse, const glesv2debugger::Message_Function function)
 {
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     const int * ret = 0;
     glesv2debugger::Message cmd;
-    msg.set_context_id(0);
+    msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
     msg.set_expect_response(expectResponse);
     msg.set_function(function);
@@ -202,10 +201,10 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
         nsecs_t c0 = systemTime(timeMode);
         switch (cmd.function()) {
         case glesv2debugger::Message_Function_CONTINUE:
-            ret = functionCall(_c, msg);
+            ret = functionCall(&dbg->hooks->gl, msg);
             if (!msg.has_time()) // some has output data copy, so time inside call
                 msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
-            msg.set_context_id(0);
+            msg.set_context_id(reinterpret_cast<int>(dbg));
             msg.set_function(function);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
@@ -220,7 +219,7 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
             Receive(cmd);
             break;
         default:
-            ASSERT(0); //GenerateCall(msg, cmd);
+            assert(0); //GenerateCall(msg, cmd);
             break;
         }
     }

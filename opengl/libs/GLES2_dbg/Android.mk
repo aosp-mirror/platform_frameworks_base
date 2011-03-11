@@ -4,10 +4,10 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     src/api.cpp \
+    src/dbgcontext.cpp \
     src/debugger_message.pb.cpp \
     src/egl.cpp \
     src/server.cpp \
-    src/shader.cpp \
     src/texture.cpp \
     src/vertex.cpp
 

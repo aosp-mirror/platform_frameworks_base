@@ -45,6 +45,7 @@
 #include "hooks.h"
 #include "egl_impl.h"
 #include "Loader.h"
+#include "glesv2dbg.h"
 
 #define setError(_e, _r) setErrorEtc(__FUNCTION__, __LINE__, _e, _r)
 
@@ -223,8 +224,14 @@ struct egl_context_t : public egl_object_t
     egl_context_t(EGLDisplay dpy, EGLContext context, EGLConfig config,
             int impl, egl_connection_t const* cnx, int version) 
     : dpy(dpy), context(context), config(config), read(0), draw(0), impl(impl),
-      cnx(cnx), version(version)
+      cnx(cnx), version(version), dbg(NULL)
     {
+    }
+    ~egl_context_t()
+    {
+        if (dbg)
+            DestroyDbgContext(dbg);
+        dbg = NULL;
     }
     EGLDisplay                  dpy;
     EGLContext                  context;
@@ -234,6 +241,7 @@ struct egl_context_t : public egl_object_t
     int                         impl;
     egl_connection_t const*     cnx;
     int                         version;
+    DbgContext *                dbg;
 };
 
 struct egl_image_t : public egl_object_t
@@ -325,14 +333,12 @@ static void initEglTraceLevel() {
         char cmdline[256] = {};
         if (fgets(cmdline, sizeof(cmdline) - 1, file))
         {
-            LOGD("\n*\n*\n* initEglTraceLevel cmdline='%s' \n*\n*", cmdline);
             if (!strcmp(value, cmdline))
                 gEGLDebugLevel = 1;
         }    
         fclose(file);
     }
     
-    extern void StartDebugServer();
     if (gEGLDebugLevel > 0)
         StartDebugServer();
 }
@@ -341,7 +347,7 @@ static void setGLHooksThreadSpecific(gl_hooks_t const *value) {
     if (gEGLTraceLevel > 0) {
         setGlTraceThreadSpecific(value);
         setGlThreadSpecific(&gHooksTrace);
-    } else if (gEGLDebugLevel > 0) {
+    } else if (gEGLDebugLevel > 0 && value != &gHooksNoContext) {
         setGlTraceThreadSpecific(value);
         setGlThreadSpecific(&gHooksDebug);
         LOGD("\n* setGLHooksThreadSpecific gHooksDebug");
@@ -584,6 +590,11 @@ egl_surface_t* get_surface(EGLSurface surface) {
 static inline
 egl_context_t* get_context(EGLContext context) {
     return egl_to_native_cast<egl_context_t>(context);
+}
+
+DbgContext * getDbgContextThreadSpecific()
+{
+    return get_context(getContext())->dbg;
 }
 
 static inline
@@ -1393,6 +1404,8 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         loseCurrent(cur_c);
 
         if (ctx != EGL_NO_CONTEXT) {
+            if (!c->dbg && gEGLDebugLevel > 0)
+                c->dbg = CreateDbgContext(c->version, c->cnx->hooks[c->version]);
             setGLHooksThreadSpecific(c->cnx->hooks[c->version]);
             setContext(ctx);
             _c.acquire();

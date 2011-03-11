@@ -376,7 +376,7 @@ extern "C" {
 
 // declare all Debug_gl* functions
 #define GL_ENTRY(_r, _api, ...) _r Debug_##_api ( __VA_ARGS__ );
-#include "../GLES2_dbg/include/glesv2_dbg.h"
+#include "glesv2dbg_functions.h"
 #undef GL_ENTRY
 
 #define GL_ENTRY(_r, _api, ...) Debug_ ## _api,
