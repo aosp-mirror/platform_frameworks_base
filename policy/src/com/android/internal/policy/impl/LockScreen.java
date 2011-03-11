@@ -232,6 +232,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
         /** {@inheritDoc} */
         public void onGrabbedStateChange(View v, int grabbedState) {
+            if (DBG) Log.v(TAG, "*** LockScreen accel is " 
+                    + (mEnergyWave.isHardwareAccelerated() ? "on":"off"));
             // Don't poke the wake lock when returning to a state where the handle is
             // not grabbed since that can happen when the system (instead of the user)
             // cancels the grab.
