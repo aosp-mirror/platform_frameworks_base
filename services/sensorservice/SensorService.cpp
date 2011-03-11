@@ -340,11 +340,14 @@ status_t SensorService::enable(const sp<SensorEventConnection>& connection,
             if (rec->addConnection(connection)) {
                 // this sensor is already activated, but we are adding a
                 // connection that uses it. Immediately send down the last
-                // known value of the requested sensor.
-                sensors_event_t scratch;
-                sensors_event_t& event(mLastEventSeen.editValueFor(handle));
-                if (event.version == sizeof(sensors_event_t)) {
-                    connection->sendEvents(&event, 1);
+                // known value of the requested sensor if it's not a
+                // "continuous" sensor.
+                if (sensor->getSensor().getMinDelay() == 0) {
+                    sensors_event_t scratch;
+                    sensors_event_t& event(mLastEventSeen.editValueFor(handle));
+                    if (event.version == sizeof(sensors_event_t)) {
+                        connection->sendEvents(&event, 1);
+                    }
                 }
             }
         }
