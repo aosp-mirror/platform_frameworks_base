@@ -16,9 +16,6 @@
 
 package android.webkit;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
@@ -124,14 +121,12 @@ class ZoomManager {
     private float mFocusY;
 
     /*
-     * mFocusMovement keeps track of the total movement that the focus point
-     * has been through. Comparing to the difference of mCurrlen and mPrevLen,
-     * it determines if the gesture is for panning or zooming or both.
+     * mFocusMovementQueue keeps track of the previous focus point movement
+     * has been through. Comparing to the difference of the gesture's previous
+     * span and current span, it determines if the gesture is for panning or
+     * zooming or both.
      */
-    private static final int FOCUS_QUEUE_SIZE = 5;
-    private float mFocusMovementSum;
-    private Queue<Float> mFocusMovementQueue;
-
+    private FocusMovementQueue mFocusMovementQueue;
 
     /*
      * These values represent the point around which the screen should be
@@ -219,7 +214,7 @@ class ZoomManager {
          */
         setZoomOverviewWidth(WebView.DEFAULT_VIEWPORT_WIDTH);
 
-        mFocusMovementQueue = new LinkedList<Float>();
+        mFocusMovementQueue = new FocusMovementQueue();
     }
 
     /**
@@ -742,11 +737,49 @@ class ZoomManager {
         return mScaleDetector;
     }
 
+    private class FocusMovementQueue {
+        private static final int QUEUE_CAPACITY = 5;
+        private float[] mQueue;
+        private float mSum;
+        private int mSize;
+        private int mIndex;
+
+        FocusMovementQueue() {
+            mQueue = new float[QUEUE_CAPACITY];
+            mSize = 0;
+            mSum = 0;
+            mIndex = 0;
+        }
+
+        private void clear() {
+            mSize = 0;
+            mSum = 0;
+            mIndex = 0;
+            for (int i = 0; i < QUEUE_CAPACITY; ++i) {
+                mQueue[i] = 0;
+            }
+        }
+
+        private void add(float focusDelta) {
+            mSum += focusDelta;
+            if (mSize < QUEUE_CAPACITY) {  // fill up the queue.
+                mSize++;
+            } else {  // circulate the queue.
+                mSum -= mQueue[mIndex];
+            }
+            mQueue[mIndex] = focusDelta;
+            mIndex = (mIndex + 1) % QUEUE_CAPACITY;
+        }
+
+        private float getSum() {
+            return mSum;
+        }
+    }
+
     private class ScaleDetectorListener implements ScaleGestureDetector.OnScaleGestureListener {
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             mInitialZoomOverview = false;
             dismissZoomPicker();
-            mFocusMovementSum = 0;
             mFocusMovementQueue.clear();
             mWebView.mViewManager.startZoom();
             mWebView.onPinchToZoomAnimationStart();
@@ -763,13 +796,9 @@ class ZoomManager {
             float focusDelta = (prevFocusX == 0 && prevFocusY == 0) ? 0 :
                     FloatMath.sqrt((mFocusX - prevFocusX) * (mFocusX - prevFocusX)
                                    + (mFocusY - prevFocusY) * (mFocusY - prevFocusY));
-            mFocusMovementSum += focusDelta;
             mFocusMovementQueue.add(focusDelta);
-            if (mFocusMovementQueue.size() > FOCUS_QUEUE_SIZE) {
-                mFocusMovementSum -= mFocusMovementQueue.remove();
-            }
             float deltaSpan = Math.abs(detector.getCurrentSpan() - detector.getPreviousSpan());
-            return mFocusMovementSum > deltaSpan;
+            return mFocusMovementQueue.getSum() > deltaSpan;
         }
 
         public boolean handleScale(ScaleGestureDetector detector) {
@@ -806,7 +835,6 @@ class ZoomManager {
 
         public boolean onScale(ScaleGestureDetector detector) {
             if (isPanningOnly(detector) || handleScale(detector)) {
-                mFocusMovementSum = 0;
                 mFocusMovementQueue.clear();
                 return true;
             }
