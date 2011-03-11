@@ -621,11 +621,6 @@ status_t BpDrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* d
 
     remote()->transact(CLOSE_DECRYPT_SESSION, data, &reply);
 
-    if (NULL != decryptHandle->decryptInfo) {
-        LOGV("deleting decryptInfo");
-        delete decryptHandle->decryptInfo; decryptHandle->decryptInfo = NULL;
-    }
-    delete decryptHandle; decryptHandle = NULL;
     return reply.readInt32();
 }
 

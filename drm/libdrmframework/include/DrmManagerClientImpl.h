@@ -189,7 +189,7 @@ public:
      * @return status_t
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    status_t consumeRights(int uniqueId, DecryptHandle* decryptHandle, int action, bool reserve);
+    status_t consumeRights(int uniqueId, sp<DecryptHandle> &decryptHandle, int action, bool reserve);
 
     /**
      * Informs the DRM engine about the playback actions performed on the DRM files.
@@ -203,7 +203,7 @@ public:
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
     status_t setPlaybackStatus(
-            int uniqueId, DecryptHandle* decryptHandle, int playbackStatus, int64_t position);
+            int uniqueId, sp<DecryptHandle> &decryptHandle, int playbackStatus, int64_t position);
 
     /**
      * Validates whether an action on the DRM content is allowed or not.
@@ -303,7 +303,7 @@ public:
      * @return
      *     Handle for the decryption session
      */
-    DecryptHandle* openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
+    sp<DecryptHandle> openDecryptSession(int uniqueId, int fd, off64_t offset, off64_t length);
 
     /**
      * Open the decrypt session to decrypt the given protected content
@@ -313,7 +313,7 @@ public:
      * @return
      *     Handle for the decryption session
      */
-    DecryptHandle* openDecryptSession(int uniqueId, const char* uri);
+    sp<DecryptHandle> openDecryptSession(int uniqueId, const char* uri);
 
     /**
      * Close the decrypt session for the given handle
@@ -323,7 +323,7 @@ public:
      * @return status_t
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    status_t closeDecryptSession(int uniqueId, DecryptHandle* decryptHandle);
+    status_t closeDecryptSession(int uniqueId, sp<DecryptHandle> &decryptHandle);
 
     /**
      * Initialize decryption for the given unit of the protected content
@@ -335,7 +335,7 @@ public:
      * @return status_t
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    status_t initializeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle,
+    status_t initializeDecryptUnit(int uniqueId, sp<DecryptHandle> &decryptHandle,
             int decryptUnitId, const DrmBuffer* headerInfo);
 
     /**
@@ -355,7 +355,7 @@ public:
      *     DRM_ERROR_SESSION_NOT_OPENED, DRM_ERROR_DECRYPT_UNIT_NOT_INITIALIZED,
      *     DRM_ERROR_DECRYPT for failure.
      */
-    status_t decrypt(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId,
+    status_t decrypt(int uniqueId, sp<DecryptHandle> &decryptHandle, int decryptUnitId,
             const DrmBuffer* encBuffer, DrmBuffer** decBuffer, DrmBuffer* IV);
 
     /**
@@ -367,7 +367,7 @@ public:
      * @return status_t
      *     Returns DRM_NO_ERROR for success, DRM_ERROR_UNKNOWN for failure
      */
-    status_t finalizeDecryptUnit(int uniqueId, DecryptHandle* decryptHandle, int decryptUnitId);
+    status_t finalizeDecryptUnit(int uniqueId, sp<DecryptHandle> &decryptHandle, int decryptUnitId);
 
     /**
      * Reads the specified number of bytes from an open DRM file.
@@ -380,7 +380,7 @@ public:
      *
      * @return Number of bytes read. Returns -1 for Failure.
      */
-    ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
+    ssize_t pread(int uniqueId, sp<DecryptHandle> &decryptHandle,
             void* buffer, ssize_t numBytes, off64_t offset);
 
     /**

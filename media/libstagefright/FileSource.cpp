@@ -125,7 +125,7 @@ status_t FileSource::getSize(off64_t *size) {
     return OK;
 }
 
-DecryptHandle* FileSource::DrmInitialization() {
+sp<DecryptHandle> FileSource::DrmInitialization() {
     if (mDrmManagerClient == NULL) {
         mDrmManagerClient = new DrmManagerClient();
     }
@@ -147,8 +147,8 @@ DecryptHandle* FileSource::DrmInitialization() {
     return mDecryptHandle;
 }
 
-void FileSource::getDrmInfo(DecryptHandle **handle, DrmManagerClient **client) {
-    *handle = mDecryptHandle;
+void FileSource::getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client) {
+    handle = mDecryptHandle;
 
     *client = mDrmManagerClient;
 }

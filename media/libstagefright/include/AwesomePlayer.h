@@ -217,7 +217,7 @@ private:
     sp<ARTSPController> mConnectingRTSPController;
 
     DrmManagerClient *mDrmManagerClient;
-    DecryptHandle *mDecryptHandle;
+    sp<DecryptHandle> mDecryptHandle;
 
     status_t setDataSource_l(
             const char *uri,

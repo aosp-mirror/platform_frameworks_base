@@ -19,6 +19,7 @@
 
 #include <utils/Vector.h>
 #include <utils/KeyedVector.h>
+#include <utils/RefBase.h>
 #include <utils/String8.h>
 #include <utils/Errors.h>
 
@@ -240,7 +241,7 @@ public:
 /**
  * Defines decryption handle
  */
-class DecryptHandle {
+class DecryptHandle : public RefBase {
 public:
     /**
      * Decryption session Handle
@@ -285,8 +286,13 @@ public:
             decryptId(INVALID_VALUE),
             mimeType(""),
             decryptApiType(INVALID_VALUE),
-            status(INVALID_VALUE) {
+            status(INVALID_VALUE),
+            decryptInfo(NULL) {
 
+    }
+
+    ~DecryptHandle() {
+        delete decryptInfo; decryptInfo = NULL;
     }
 
     bool operator<(const DecryptHandle& handle) const {
