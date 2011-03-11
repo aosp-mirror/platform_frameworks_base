@@ -433,7 +433,7 @@ The entire file should now look like this:
 </pre>
 </li>
 
-<li>Now open and modify your <code>HelloAndroid</code> class use the
+<li>Now open and modify your <code>HelloAndroid</code> class and use the
 XML layout. Edit the file to look like this:
 <pre>
 package com.example.helloandroid;

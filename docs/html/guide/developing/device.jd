@@ -119,7 +119,7 @@ USB device support on Linux. The USB Vendor ID is the value given to the
 
 <table>
   <tr>
-    <th>Manufacturer</th><th>USB Vendor ID</th></tr>
+    <th>Company</th><th>USB Vendor ID</th></tr>
   <tr>
     <td>Acer</td>
     <td><code>0502</code></td></tr>
@@ -132,6 +132,9 @@ USB device support on Linux. The USB Vendor ID is the value given to the
   <tr>
     <td>Garmin-Asus</td>
     <td><code>091E</code></td></tr>
+  <tr>
+    <td>Google</td>
+    <td><code>18d1</code></td></tr>
   <tr>
     <td>HTC</td>
     <td><code>0bb4</code></td></tr>
