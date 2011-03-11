@@ -665,6 +665,17 @@ public interface WindowManager extends ViewManager {
          * XML attribute is set to true on an activity or on the application.</p>
          */
         public static final int FLAG_HARDWARE_ACCELERATED = 0x01000000;
+        
+        /**
+         * Like {@link #FLAG_HARDWARE_ACCELERATED} except for trusted system windows
+         * that need hardware acceleration (e.g. LockScreen), where hardware acceleration
+         * is generally disabled. This flag must be specified in addition to 
+         * {@link #FLAG_HARDWARE_ACCELERATED} to enable hardware acceleration for system
+         * windows.
+         * 
+         * @hide
+         */
+        public static final int FLAG_HARDWARE_ACCELERATED_SYSTEM = 0x02000000;
 
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.

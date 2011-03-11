@@ -40,7 +40,7 @@ import com.android.internal.R;
 public class WaveView extends View implements ValueAnimator.AnimatorUpdateListener {
     private static final String TAG = "WaveView";
     private static final boolean DBG = false;
-    private static final int WAVE_COUNT = 5; // default wave count
+    private static final int WAVE_COUNT = 20; // default wave count
     private static final long VIBRATE_SHORT = 20;  // msec
     private static final long VIBRATE_LONG = 20;  // msec
 
