@@ -104,5 +104,7 @@ interface IWifiManager
     void clearBlacklist();
 
     Messenger getMessenger();
+
+    String getConfigFile();
 }
 

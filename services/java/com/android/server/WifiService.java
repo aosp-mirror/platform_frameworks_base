@@ -29,12 +29,12 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.wifi.IWifiManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiStateMachine;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WpsConfiguration;
 import android.net.wifi.WpsResult;
@@ -882,8 +882,6 @@ public class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.clearBlacklist();
     }
 
-
-
     /**
      * Get a reference to handler. This is used by a client to establish
      * an AsyncChannel communication with WifiService
@@ -896,6 +894,14 @@ public class WifiService extends IWifiManager.Stub {
         enforceAccessPermission();
         enforceChangePermission();
         return new Messenger(mAsyncServiceHandler);
+    }
+
+    /**
+     * Get the IP and proxy configuration file
+     */
+    public String getConfigFile() {
+        enforceAccessPermission();
+        return mWifiStateMachine.getConfigFile();
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
