@@ -6682,8 +6682,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mProcessCrashTimes.remove(app.info.processName, app.info.uid);
                 app.removed = true;
                 removeProcessLocked(app, false);
+                mMainStack.resumeTopActivityLocked(null);
                 return false;
             }
+            mMainStack.resumeTopActivityLocked(null);
         } else {
             ActivityRecord r = mMainStack.topRunningActivityLocked(null);
             if (r.app == app) {
@@ -6789,7 +6791,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param crashInfo describing the exception
      */
     public void handleApplicationCrash(IBinder app, ApplicationErrorReport.CrashInfo crashInfo) {
-        ProcessRecord r = findAppProcess(app);
+        ProcessRecord r = findAppProcess(app, "Crash");
 
         EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
                 app == null ? "system" : (r == null ? "unknown" : r.processName),
@@ -6808,7 +6810,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             IBinder app,
             int violationMask,
             StrictMode.ViolationInfo info) {
-        ProcessRecord r = findAppProcess(app);
+        ProcessRecord r = findAppProcess(app, "StrictMode");
+        if (r == null) {
+            return;
+        }
 
         if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
             Integer stackFingerprint = info.hashCode();
@@ -6982,7 +6987,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public boolean handleApplicationWtf(IBinder app, String tag,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        ProcessRecord r = findAppProcess(app);
+        ProcessRecord r = findAppProcess(app, "WTF");
 
         EventLog.writeEvent(EventLogTags.AM_WTF, Binder.getCallingPid(),
                 app == null ? "system" : (r == null ? "unknown" : r.processName),
@@ -7004,7 +7009,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param app object of some object (as stored in {@link com.android.internal.os.RuntimeInit})
      * @return the corresponding {@link ProcessRecord} object, or null if none could be found
      */
-    private ProcessRecord findAppProcess(IBinder app) {
+    private ProcessRecord findAppProcess(IBinder app, String reason) {
         if (app == null) {
             return null;
         }
@@ -7020,7 +7025,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            Slog.w(TAG, "Can't find mystery application: " + app);
+            Slog.w(TAG, "Can't find mystery application for " + reason
+                    + " from pid=" + Binder.getCallingPid()
+                    + " uid=" + Binder.getCallingUid() + ": " + app);
             return null;
         }
     }
