@@ -271,7 +271,7 @@ public final class MtpConstants {
 
     /**
       * Returns true if the object is abstract (that is, it has no representation
-      * in the underlying file system.
+      * in the underlying file system).
       *
       * @param format the format of the object
       * @return true if the object is abstract

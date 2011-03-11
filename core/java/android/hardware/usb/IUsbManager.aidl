@@ -44,9 +44,9 @@ interface IUsbManager
     /* Sets the default package for a USB device
      * (or clears it if the package name is null)
      */
-    oneway void setDevicePackage(in UsbDevice device, String packageName);
+    void setDevicePackage(in UsbDevice device, String packageName);
 
-    /* Sets the default package for a USB device
+    /* Sets the default package for a USB accessory
      * (or clears it if the package name is null)
      */
     void setAccessoryPackage(in UsbAccessory accessory, String packageName);
@@ -80,5 +80,5 @@ interface IUsbManager
     boolean hasDefaults(String packageName);
 
     /* Clears default preferences and permissions for the package */
-    oneway void clearDefaults(String packageName);
+    void clearDefaults(String packageName);
 }

@@ -198,7 +198,7 @@ public final class MtpDevice {
      * @param objectHandle handle of the object to query
      * @return the object's storage unit ID
      */
-    public long getStorageID(int objectHandle) {
+    public long getStorageId(int objectHandle) {
         return native_get_storage_id(objectHandle);
     }
 
