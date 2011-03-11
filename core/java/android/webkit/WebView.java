@@ -6019,6 +6019,7 @@ public class WebView extends AbsoluteLayout
         if (shouldForwardTouchEvent()) {
             if (removeEvents) {
                 mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
+                mTouchEventQueue.ignoreCurrentlyMissingEvents();
             }
             TouchEventData ted = new TouchEventData();
             ted.mIds = new int[1];
@@ -7157,10 +7158,14 @@ public class WebView extends AbsoluteLayout
     private class TouchEventQueue {
         private long mNextTouchSequence = Long.MIN_VALUE + 1;
         private long mLastHandledTouchSequence = Long.MIN_VALUE;
+        private long mIgnoreUntilSequence = Long.MIN_VALUE;
         private QueuedTouch mTouchEventQueue;
         private QueuedTouch mQueuedTouchRecycleBin;
         private int mQueuedTouchRecycleCount;
         private static final int MAX_RECYCLED_QUEUED_TOUCH = 15;
+
+        // milliseconds until we abandon hope of getting all of a previous gesture
+        private static final int QUEUED_GESTURE_TIMEOUT = 2000;
 
         private QueuedTouch obtainQueuedTouch() {
             if (mQueuedTouchRecycleBin != null) {
@@ -7170,6 +7175,13 @@ public class WebView extends AbsoluteLayout
                 return result;
             }
             return new QueuedTouch();
+        }
+
+        /**
+         * Allow events with any currently missing sequence numbers to be skipped in processing.
+         */
+        public void ignoreCurrentlyMissingEvents() {
+            mIgnoreUntilSequence = mNextTouchSequence;
         }
 
         private void recycleQueuedTouch(QueuedTouch qd) {
@@ -7187,6 +7199,7 @@ public class WebView extends AbsoluteLayout
         public void reset() {
             mNextTouchSequence = Long.MIN_VALUE + 1;
             mLastHandledTouchSequence = Long.MIN_VALUE;
+            mIgnoreUntilSequence = Long.MIN_VALUE;
             while (mTouchEventQueue != null) {
                 QueuedTouch recycleMe = mTouchEventQueue;
                 mTouchEventQueue = mTouchEventQueue.mNext;
@@ -7213,6 +7226,15 @@ public class WebView extends AbsoluteLayout
          * @param ted Touch data to be processed in order.
          */
         public void enqueueTouchEvent(TouchEventData ted) {
+            if (ted.mSequence < mLastHandledTouchSequence) {
+                // Stale event and we already moved on; drop it. (Should not be common.)
+                Log.w(LOGTAG, "Stale touch event " + MotionEvent.actionToString(ted.mAction) +
+                        " received from webcore; ignoring");
+                return;
+            }
+
+            dropStaleGestures(ted.mMotionEvent, ted.mSequence);
+
             if (mLastHandledTouchSequence + 1 == ted.mSequence) {
                 handleQueuedTouchEventData(ted);
 
@@ -7245,6 +7267,9 @@ public class WebView extends AbsoluteLayout
          */
         public void enqueueTouchEvent(MotionEvent ev) {
             final long sequence = nextTouchSequence();
+
+            dropStaleGestures(ev, sequence);
+
             if (mLastHandledTouchSequence + 1 == sequence) {
                 handleQueuedMotionEvent(ev);
 
@@ -7263,6 +7288,40 @@ public class WebView extends AbsoluteLayout
             } else {
                 QueuedTouch qd = obtainQueuedTouch().set(ev, sequence);
                 mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
+            }
+        }
+
+        private void dropStaleGestures(MotionEvent ev, long sequence) {
+            if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN &&
+                    mTouchEventQueue != null) {
+                long eventTime = ev.getEventTime();
+                long nextQueueTime = mTouchEventQueue.mTed != null ?
+                        mTouchEventQueue.mTed.mMotionEvent.getEventTime() :
+                        mTouchEventQueue.mEvent.getEventTime();
+                if (eventTime > nextQueueTime + QUEUED_GESTURE_TIMEOUT) {
+                    Log.w(LOGTAG, "Got ACTION_DOWN but still waiting on stale event. " +
+                            "Ignoring previous queued events.");
+                    QueuedTouch qd = mTouchEventQueue;
+                    while (qd != null && qd.mSequence < sequence) {
+                        QueuedTouch recycleMe = qd;
+                        qd = qd.mNext;
+                        recycleQueuedTouch(recycleMe);
+                    }
+                    mTouchEventQueue = qd;
+                    mLastHandledTouchSequence = sequence - 1;
+                }
+            }
+
+            if (mIgnoreUntilSequence > mLastHandledTouchSequence) {
+                QueuedTouch qd = mTouchEventQueue;
+                while (qd != null && qd.mSequence < mIgnoreUntilSequence &&
+                        qd.mSequence < sequence) {
+                    mLastHandledTouchSequence = qd.mSequence;
+                    QueuedTouch recycleMe = qd;
+                    qd = qd.mNext;
+                    recycleQueuedTouch(recycleMe);
+                }
+                mTouchEventQueue = qd;
             }
         }
 
