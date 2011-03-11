@@ -16,7 +16,10 @@
 
 #include "include/HTTPBase.h"
 
+#if CHROMIUM_AVAILABLE
 #include "include/ChromiumHTTPDataSource.h"
+#endif
+
 #include "include/NuHTTPDataSource.h"
 
 #include <cutils/properties.h>
@@ -27,11 +30,14 @@ HTTPBase::HTTPBase() {}
 
 // static
 sp<HTTPBase> HTTPBase::Create(uint32_t flags) {
+#if CHROMIUM_AVAILABLE
     char value[PROPERTY_VALUE_MAX];
     if (!property_get("media.stagefright.use-chromium", value, NULL)
             || (strcasecmp("false", value) && strcmp("0", value))) {
         return new ChromiumHTTPDataSource(flags);
-    } else {
+    } else
+#endif
+    {
         return new NuHTTPDataSource(flags);
     }
 }
