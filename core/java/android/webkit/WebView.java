@@ -671,6 +671,7 @@ public class WebView extends AbsoluteLayout
 
     static final int SELECT_AT                          = 135;
     static final int SCREEN_ON                          = 136;
+    static final int ENTER_FULLSCREEN_VIDEO             = 137;
 
     private static final int FIRST_PACKAGE_MSG_ID = SCROLL_TO_MSG_ID;
     private static final int LAST_PACKAGE_MSG_ID = SET_TOUCH_HIGHLIGHT_RECTS;
@@ -725,7 +726,8 @@ public class WebView extends AbsoluteLayout
         "SET_AUTOFILLABLE", //               = 133;
         "AUTOFILL_COMPLETE", //              = 134;
         "SELECT_AT", //                      = 135;
-        "SCREEN_ON" //                       = 136;
+        "SCREEN_ON", //                      = 136;
+        "ENTER_FULLSCREEN_VIDEO" //          = 137;
     };
 
     // If the site doesn't use the viewport meta tag to specify the viewport,
@@ -7843,6 +7845,11 @@ public class WebView extends AbsoluteLayout
 
                 case SCREEN_ON:
                     setKeepScreenOn(msg.arg1 == 1);
+                    break;
+
+                case ENTER_FULLSCREEN_VIDEO:
+                    int layerId = msg.arg1;
+                    Log.v(LOGTAG, "Display the video layer " + layerId + " fullscreen");
                     break;
 
                 case SHOW_FULLSCREEN: {
