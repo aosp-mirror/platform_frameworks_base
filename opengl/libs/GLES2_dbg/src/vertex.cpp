@@ -25,9 +25,9 @@ void * RLEEncode(const void * pixels, const unsigned bytesPerPixel, const unsign
 
 void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels)
 {
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg, cmd;
-    msg.set_context_id(0);
+    msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
     const bool expectResponse = false;
     msg.set_expect_response(expectResponse);
@@ -50,9 +50,9 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
         nsecs_t c0 = systemTime(timeMode);
         switch (cmd.function()) {
         case glesv2debugger::Message_Function_CONTINUE:
-            _c->glReadPixels(x, y, width, height, format, type, pixels);
+            dbg->hooks->gl.glReadPixels(x, y, width, height, format, type, pixels);
             msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
-            msg.set_context_id(0);
+            msg.set_context_id(reinterpret_cast<int>(dbg));
             msg.set_function(glesv2debugger::Message_Function_glReadPixels);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
@@ -68,14 +68,14 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             msg.clear_data();
             msg.set_expect_response(false);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
-            Send(msg, cmd);
+            //Send(msg, cmd);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
             break;
         case glesv2debugger::Message_Function_SKIP:
             return;
         default:
-            ASSERT(0); //GenerateCall(msg, cmd);
+            assert(0); //GenerateCall(msg, cmd);
             break;
         }
     }
@@ -83,9 +83,9 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
 
 void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
 {
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg, cmd;
-    msg.set_context_id(0);
+    msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
     const bool expectResponse = false;
     msg.set_expect_response(expectResponse);
@@ -93,7 +93,16 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
     msg.set_arg0(mode);
     msg.set_arg1(first);
     msg.set_arg2(count);
-    void * data = NULL;
+
+    msg.set_arg7(dbg->maxAttrib); // indicate capturing vertex data
+    if (dbg->hasNonVBOAttribs) {
+        std::string * const data = msg.mutable_data();
+        for (unsigned i = 0; i < count; i++)
+            dbg->Fetch(i + first, data);
+    }
+
+    void * pixels = NULL;
+    GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
     Send(msg, cmd);
     if (!expectResponse)
@@ -103,9 +112,9 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
         nsecs_t c0 = systemTime(timeMode);
         switch (cmd.function()) {
         case glesv2debugger::Message_Function_CONTINUE:
-            _c->glDrawArrays(mode, first, count);
+            dbg->hooks->gl.glDrawArrays(mode, first, count);
             msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
-            msg.set_context_id(0);
+            msg.set_context_id(reinterpret_cast<int>(dbg));
             msg.set_function(glesv2debugger::Message_Function_glDrawArrays);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
@@ -118,27 +127,41 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
         case glesv2debugger::Message_Function_SKIP:
             return;
         case glesv2debugger::Message_Function_CAPTURE:
-            _c->glGetIntegerv(GL_VIEWPORT, viewport);
-            LOGD("glDrawArrays CAPTURE: glGetIntegerv GL_VIEWPORT x=%d y=%d width=%d height=%d",
-                 viewport[0], viewport[1], viewport[2], viewport[3]);
-            data = malloc(viewport[2] * viewport[3] * 4);
+            dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
+            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+            LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+                 viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
+            pixels = malloc(viewport[2] * viewport[3] * 4);
             Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                               GL_RGBA, GL_UNSIGNED_BYTE, data);
-            free(data);
+                               readFormat, readType, pixels);
+            free(pixels);
             cmd.set_function(glesv2debugger::Message_Function_SKIP);
             break;
         default:
-            ASSERT(0); //GenerateCall(msg, cmd);
+            assert(0); //GenerateCall(msg, cmd);
             break;
         }
     }
 }
 
+template<typename T>
+static inline void FetchIndexed(const unsigned count, const T * indices,
+                                std::string * const data, const DbgContext * const ctx)
+{
+    for (unsigned i = 0; i < count; i++) {
+        if (!ctx->indexBuffer)
+            data->append((const char *)(indices + i), sizeof(*indices));
+        if (ctx->hasNonVBOAttribs)
+            ctx->Fetch(indices[i], data);
+    }
+}
+
 void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices)
 {
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg, cmd;
-    msg.set_context_id(0);
+    msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
     const bool expectResponse = false;
     msg.set_expect_response(expectResponse);
@@ -147,7 +170,24 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     msg.set_arg1(count);
     msg.set_arg2(type);
     msg.set_arg3(reinterpret_cast<int>(indices));
-    void * data = NULL;
+
+    msg.set_arg7(dbg->maxAttrib); // indicate capturing vertex data
+    std::string * const data = msg.mutable_data();
+    if (GL_UNSIGNED_BYTE == type) {
+        if (dbg->indexBuffer)
+            FetchIndexed(count, (unsigned char *)dbg->indexBuffer->data + (unsigned long)indices, data, dbg);
+        else
+            FetchIndexed(count, (unsigned char *)indices, data, dbg);
+    } else if (GL_UNSIGNED_SHORT == type) {
+        if (dbg->indexBuffer)
+            FetchIndexed(count, (unsigned short *)((char *)dbg->indexBuffer->data + (unsigned long)indices), data, dbg);
+        else
+            FetchIndexed(count, (unsigned short *)indices, data, dbg);
+    } else
+        assert(0);
+
+    void * pixels = NULL;
+    GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
     Send(msg, cmd);
     if (!expectResponse)
@@ -157,9 +197,9 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
         nsecs_t c0 = systemTime(timeMode);
         switch (cmd.function()) {
         case glesv2debugger::Message_Function_CONTINUE:
-            _c->glDrawElements(mode, count, type, indices);
+            dbg->hooks->gl.glDrawElements(mode, count, type, indices);
             msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
-            msg.set_context_id(0);
+            msg.set_context_id(reinterpret_cast<int>(dbg));
             msg.set_function(glesv2debugger::Message_Function_glDrawElements);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
@@ -172,17 +212,19 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
         case glesv2debugger::Message_Function_SKIP:
             return;
         case glesv2debugger::Message_Function_CAPTURE:
-            _c->glGetIntegerv(GL_VIEWPORT, viewport);
-            LOGD("glDrawElements CAPTURE: glGetIntegerv GL_VIEWPORT x=%d y=%d width=%d height=%d",
-                 viewport[0], viewport[1], viewport[2], viewport[3]);
-            data = malloc(viewport[2] * viewport[3] * 4);
+            dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
+            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+            LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+                 viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
+            pixels = malloc(viewport[2] * viewport[3] * 4);
             Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                               GL_RGBA, GL_UNSIGNED_BYTE, data);
-            free(data);
+                               readFormat, readType, pixels);
+            free(pixels);
             cmd.set_function(glesv2debugger::Message_Function_SKIP);
             break;
         default:
-            ASSERT(0); //GenerateCall(msg, cmd);
+            assert(0); //GenerateCall(msg, cmd);
             break;
         }
     }

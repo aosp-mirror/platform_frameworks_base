@@ -30,6 +30,7 @@
 #include "egl_impl.h"
 
 #include "Loader.h"
+#include "glesv2dbg.h"
 
 // ----------------------------------------------------------------------------
 namespace android {
@@ -114,7 +115,6 @@ Loader::Loader()
 
 Loader::~Loader()
 {
-    extern void StopDebugServer();
     StopDebugServer();
 }
 

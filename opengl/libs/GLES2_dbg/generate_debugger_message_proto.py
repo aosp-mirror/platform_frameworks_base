@@ -39,7 +39,7 @@ def generate_gl_entries(output,lines,i):
 
 if __name__ == "__main__":
     output = open("debugger_message.proto",'w')
-    output.write("""
+    output.write("""\
 /*
  * Copyright (C) 2011 The Android Open Source Project
  *
