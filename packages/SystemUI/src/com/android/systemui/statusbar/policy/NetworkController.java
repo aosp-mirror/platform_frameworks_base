@@ -94,6 +94,7 @@ public class NetworkController extends BroadcastReceiver {
     int mWifiLevel;
     String mWifiSsid;
     int mWifiIconId = 0;
+    int mWifiActivity = WifiManager.DATA_ACTIVITY_NONE;
 
     // bluetooth
     private boolean mBluetoothTethered = false;
@@ -153,9 +154,7 @@ public class NetworkController extends BroadcastReceiver {
 
         // wifi
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        HandlerThread handlerThread = new HandlerThread("WifiServiceThread");
-        handlerThread.start();
-        Handler handler = new WifiHandler(handlerThread.getLooper());
+        Handler handler = new WifiHandler();
         mWifiChannel = new AsyncChannel();
         Messenger wifiMessenger = mWifiManager.getMessenger();
         if (wifiMessenger != null) {
@@ -549,11 +548,6 @@ public class NetworkController extends BroadcastReceiver {
     // ===== Wifi ===================================================================
 
     class WifiHandler extends Handler {
-
-        WifiHandler(Looper looper) {
-            super(looper);
-        }
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -566,17 +560,9 @@ public class NetworkController extends BroadcastReceiver {
                     }
                     break;
                 case WifiManager.DATA_ACTIVITY_NOTIFICATION:
-                    int dataActivity = msg.arg1;
-                    /* TODO: update icons based on data activity */
-                    switch (dataActivity) {
-                        case WifiManager.DATA_ACTIVITY_IN:
-                            break;
-                        case WifiManager.DATA_ACTIVITY_OUT:
-                            break;
-                        case WifiManager.DATA_ACTIVITY_INOUT:
-                            break;
-                        case WifiManager.DATA_ACTIVITY_NONE:
-                            break;
+                    if (msg.arg1 != mWifiActivity) {
+                        mWifiActivity = msg.arg1;
+                        refreshViews();
                     }
                     break;
                 default:
@@ -697,6 +683,19 @@ public class NetworkController extends BroadcastReceiver {
                 label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
             } else {
                 label = mWifiSsid;
+                switch (mWifiActivity) {
+                    case WifiManager.DATA_ACTIVITY_IN:
+                        dataDirectionOverlayIconId = R.drawable.stat_sys_wifi_in;
+                        break;
+                    case WifiManager.DATA_ACTIVITY_OUT:
+                        dataDirectionOverlayIconId = R.drawable.stat_sys_wifi_out;
+                        break;
+                    case WifiManager.DATA_ACTIVITY_INOUT:
+                        dataDirectionOverlayIconId = R.drawable.stat_sys_wifi_inout;
+                        break;
+                    case WifiManager.DATA_ACTIVITY_NONE:
+                        break;
+                }
             }
             combinedSignalIconId = mWifiIconId;
             dataTypeIconId = 0;
@@ -884,6 +883,9 @@ public class NetworkController extends BroadcastReceiver {
         pw.println(mWifiSsid);
         pw.print("  mWifiIconId=");
         pw.println(mWifiIconId);
+        pw.print("  mWifiActivity=");
+        pw.println(mWifiActivity);
+
 
         pw.println("  - Bluetooth ----");
         pw.print(" mBtReverseTethered=");
