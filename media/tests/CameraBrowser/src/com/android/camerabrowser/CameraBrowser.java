@@ -20,7 +20,6 @@ import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.mtp.MtpClient;
 import android.mtp.MtpDevice;
 import android.mtp.MtpDeviceInfo;
 import android.os.Bundle;
@@ -79,8 +78,8 @@ public class CameraBrowser extends ListActivity implements MtpClient.Listener {
                 view = (TwoLineListItem)convertView;
             }
 
-            TextView textView1 = (TextView)view.findViewById(com.android.internal.R.id.text1);
-            TextView textView2 = (TextView)view.findViewById(com.android.internal.R.id.text2);
+            TextView textView1 = (TextView)view.findViewById(android.R.id.text1);
+            TextView textView2 = (TextView)view.findViewById(android.R.id.text2);
             MtpDevice device = mDeviceList.get(position);
             MtpDeviceInfo info = device.getDeviceInfo();
             if (info != null) {

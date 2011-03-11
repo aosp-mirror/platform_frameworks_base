@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.mtp;
+package com.android.camerabrowser;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -26,6 +26,10 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.mtp.MtpDevice;
+import android.mtp.MtpDeviceInfo;
+import android.mtp.MtpObjectInfo;
+import android.mtp.MtpStorageInfo;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
