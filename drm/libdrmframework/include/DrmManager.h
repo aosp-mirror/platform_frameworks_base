@@ -147,6 +147,7 @@ private:
     int mDecryptSessionId;
     int mConvertId;
     Mutex mLock;
+    Mutex mListenerLock;
     Mutex mDecryptLock;
     Mutex mConvertLock;
     TPlugInManager<IDrmEngine> mPlugInManager;
