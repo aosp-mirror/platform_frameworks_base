@@ -57,7 +57,6 @@ Layer::Layer(SurfaceFlinger* flinger,
         mNeedsDithering(false),
         mSecure(false),
         mProtectedByApp(false),
-        mProtectedByDRM(false),
         mTextureManager(),
         mBufferManager(mTextureManager),
         mWidth(0), mHeight(0), mNeedsScaling(false), mFixedSize(false)
@@ -191,7 +190,6 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
 
     mSecure = (flags & ISurfaceComposer::eSecure) ? true : false;
     mProtectedByApp = (flags & ISurfaceComposer::eProtectedByApp) ? true : false;
-    mProtectedByDRM = (flags & ISurfaceComposer::eProtectedByDRM) ? true : false;
     mNeedsBlending = (info.h_alpha - info.l_alpha) > 0 &&
             (flags & ISurfaceComposer::eOpaque) == 0;
 
@@ -392,6 +390,12 @@ bool Layer::needsFiltering() const
     return LayerBase::needsFiltering();
 }
 
+bool Layer::isProtected() const
+{
+    sp<GraphicBuffer> activeBuffer(mBufferManager.getActiveBuffer());
+    return (activeBuffer != 0) &&
+            (activeBuffer->getUsage() & GRALLOC_USAGE_PROTECTED);
+}
 
 status_t Layer::setBufferCount(int bufferCount)
 {
@@ -515,7 +519,7 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
         // request EGLImage for all buffers
         usage |= GraphicBuffer::USAGE_HW_TEXTURE;
     }
-    if (mProtectedByApp || mProtectedByDRM) {
+    if (mProtectedByApp) {
         // need a hardware-protected path to external video sink
         usage |= GraphicBuffer::USAGE_PROTECTED;
     }
