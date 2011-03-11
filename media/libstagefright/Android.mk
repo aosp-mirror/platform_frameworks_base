@@ -77,11 +77,6 @@ LOCAL_SHARED_LIBRARIES := \
         libcrypto        \
         libssl           \
         libgui           \
-        liblog           \
-        libicuuc         \
-        libicui18n       \
-        libz             \
-        libdl            \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
@@ -106,6 +101,46 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_id3 \
         libstagefright_g711dec \
         libFLAC \
+
+################################################################################
+
+# The following was shamelessly copied from external/webkit/Android.mk and
+# currently must follow the same logic to determine how webkit was built and
+# if it's safe to link against libchromium.net
+
+# V8 also requires an ARMv7 CPU, and since we must use jsc, we cannot
+# use the Chrome http stack either.
+ifneq ($(strip $(ARCH_ARM_HAVE_ARMV7A)),true)
+  USE_ALT_HTTP := true
+endif
+
+# See if the user has specified a stack they want to use
+HTTP_STACK = $(HTTP)
+# We default to the Chrome HTTP stack.
+DEFAULT_HTTP = chrome
+ALT_HTTP = android
+
+ifneq ($(HTTP_STACK),chrome)
+  ifneq ($(HTTP_STACK),android)
+    # No HTTP stack is specified, pickup the one we want as default.
+    ifeq ($(USE_ALT_HTTP),true)
+      HTTP_STACK = $(ALT_HTTP)
+    else
+      HTTP_STACK = $(DEFAULT_HTTP)
+    endif
+  endif
+endif
+
+ifeq ($(HTTP_STACK),chrome)
+
+LOCAL_SHARED_LIBRARIES += \
+        liblog           \
+        libicuuc         \
+        libicui18n       \
+        libz             \
+        libdl            \
+
+LOCAL_STATIC_LIBRARIES += \
         libstagefright_chromium_http \
         libchromium_net         \
         libwebcore              \
@@ -114,6 +149,12 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libstlport
 include external/stlport/libstlport.mk
 endif
+
+LOCAL_CPPFLAGS += -DCHROMIUM_AVAILABLE=1
+
+endif  # ifeq ($(HTTP_STACK),chrome)
+
+################################################################################
 
 LOCAL_SHARED_LIBRARIES += \
         libstagefright_amrnb_common \
