@@ -23,9 +23,9 @@ import java.nio.ByteBuffer;
 /**
  * A class representing USB request packet.
  * This can be used for both reading and writing data to or from a
- * {@link android.hardware.usb.UsbDevice}.
+ * {@link android.hardware.usb.UsbDeviceConnection}.
  * UsbRequests are sent asynchronously via {@link #queue} and the results
- * are read by {@link android.hardware.usb.UsbDevice#requestWait}.
+ * are read by {@link android.hardware.usb.UsbDeviceConnection#requestWait}.
  */
 public class UsbRequest {
 
@@ -53,10 +53,9 @@ public class UsbRequest {
      * @param endpoint the endpoint to be used for this request.
      * @return true if the request was successfully opened.
      */
-    public boolean initialize(UsbEndpoint endpoint) {
+    public boolean initialize(UsbDeviceConnection connection, UsbEndpoint endpoint) {
         mEndpoint = endpoint;
-        return native_init(endpoint.getDevice(),
-                endpoint.getAddress(), endpoint.getAttributes(),
+        return native_init(connection, endpoint.getAddress(), endpoint.getAttributes(),
                 endpoint.getMaxPacketSize(), endpoint.getInterval());
     }
 
@@ -94,7 +93,7 @@ public class UsbRequest {
      * This can be used in conjunction with {@link #setClientData}
      * to associate another object with this request, which can be useful for
      * maintaining state between calls to {@link #queue} and
-     * {@link android.hardware.usb.UsbDevice#requestWait}
+     * {@link android.hardware.usb.UsbDeviceConnection#requestWait}
      *
      * @return the client data for the request
      */
@@ -107,7 +106,7 @@ public class UsbRequest {
      * This can be used in conjunction with {@link #getClientData}
      * to associate another object with this request, which can be useful for
      * maintaining state between calls to {@link #queue} and
-     * {@link android.hardware.usb.UsbDevice#requestWait}
+     * {@link android.hardware.usb.UsbDeviceConnection#requestWait}
      *
      * @param data the client data for the request
      */
@@ -121,7 +120,7 @@ public class UsbRequest {
      * For IN endpoints, the endpoint will attempt to read the given number of bytes
      * into the specified buffer.
      * If the queueing operation is successful, we return true and the result will be
-     * returned via {@link android.hardware.usb.UsbDevice#requestWait}
+     * returned via {@link android.hardware.usb.UsbDeviceConnection#requestWait}
      *
      * @param buffer the buffer containing the bytes to write, or location to store
      * the results of a read
@@ -166,8 +165,8 @@ public class UsbRequest {
         return native_cancel();
     }
 
-    private native boolean native_init(UsbDevice device, int ep_address, int ep_attributes,
-            int ep_max_packet_size, int ep_interval);
+    private native boolean native_init(UsbDeviceConnection connection, int ep_address,
+            int ep_attributes, int ep_max_packet_size, int ep_interval);
     private native void native_close();
     private native boolean native_queue_array(byte[] buffer, int length, boolean out);
     private native void native_dequeue_array(byte[] buffer, int length, boolean out);

@@ -25,15 +25,11 @@ import android.os.Parcelable;
  */
 public class UsbInterface implements Parcelable {
 
-    private int mId;
-    private int mClass;
-    private int mSubclass;
-    private int mProtocol;
-    private UsbDevice mDevice;
-    private Parcelable[] mEndpoints;
-
-    private UsbInterface() {
-    }
+    private final int mId;
+    private final int mClass;
+    private final int mSubclass;
+    private final int mProtocol;
+    private final Parcelable[] mEndpoints;
 
     /**
      * UsbInterface should only be instantiated by UsbService implementation
@@ -104,20 +100,6 @@ public class UsbInterface implements Parcelable {
         return (UsbEndpoint)mEndpoints[index];
     }
 
-    /**
-     * Returns the {@link android.hardware.usb.UsbDevice} this interface belongs to.
-     *
-     * @return the interface's device
-     */
-    public UsbDevice getDevice() {
-        return mDevice;
-    }
-
-    // only used for parcelling
-    /* package */ void setDevice(UsbDevice device) {
-        mDevice = device;
-    }
-
     @Override
     public String toString() {
         return "UsbInterface[mId=" + mId + ",mClass=" + mClass +
@@ -133,11 +115,7 @@ public class UsbInterface implements Parcelable {
             int subClass = in.readInt();
             int protocol = in.readInt();
             Parcelable[] endpoints = in.readParcelableArray(UsbEndpoint.class.getClassLoader());
-            UsbInterface result = new UsbInterface(id, Class, subClass, protocol, endpoints);
-            for (int i = 0; i < endpoints.length; i++) {
-                ((UsbEndpoint)endpoints[i]).setInterface(result);
-            }
-            return result;
+            return new UsbInterface(id, Class, subClass, protocol, endpoints);
         }
 
         public UsbInterface[] newArray(int size) {

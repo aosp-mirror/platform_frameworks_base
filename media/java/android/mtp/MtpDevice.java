@@ -17,7 +17,7 @@
 package android.mtp;
 
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbDeviceConnection;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -44,17 +44,20 @@ public final class MtpDevice {
     }
 
     /**
-     * Opens the MTP or PTP device and return an {@link android.mtp.MtpDevice} for it.
+     * Opens the MTP device.  Once the device is open it takes ownership of the
+     * {@link android.hardware.usb.UsbDeviceConnection}.  
+     * The connection will be closed when you call {@link #close()}
+     * The connection will also be closed if this method fails.
      *
-     * @param manager reference to {@link android.hardware.usb.UsbManager}
+     * @param connection an open {@link android.hardware.usb.UsbDeviceConnection} for the device
      * @return true if the device was successfully opened.
      */
-    public boolean open(UsbManager manager) {
-        if (manager.openDevice(mDevice)) {
-            return native_open(mDevice.getDeviceName(), mDevice.getFileDescriptor());
-        } else {
-            return false;
+    public boolean open(UsbDeviceConnection connection) {
+        boolean result = native_open(mDevice.getDeviceName(), connection.getFileDescriptor());
+        if (!result) {
+            connection.close();
         }
+        return result;
     }
 
     /**

@@ -55,6 +55,8 @@ public class UsbManager {
      * {@link #USB_FUNCTION_MASS_STORAGE}, {@link #USB_FUNCTION_ADB}, {@link #USB_FUNCTION_RNDIS},
      * {@link #USB_FUNCTION_MTP} and {@link #USB_FUNCTION_ACCESSORY}.
      * </ul>
+     *
+     * {@hide}
      */
     public static final String ACTION_USB_STATE =
             "android.hardware.usb.action.USB_STATE";
@@ -110,42 +112,56 @@ public class UsbManager {
     /**
      * Boolean extra indicating whether USB is connected or disconnected.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
+     *
+     * {@hide}
      */
     public static final String USB_CONNECTED = "connected";
 
     /**
      * Integer extra containing currently set USB configuration.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
+     *
+     * {@hide}
      */
     public static final String USB_CONFIGURATION = "configuration";
 
     /**
      * Name of the USB mass storage USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_MASS_STORAGE = "mass_storage";
 
     /**
      * Name of the adb USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_ADB = "adb";
 
     /**
      * Name of the RNDIS ethernet USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_RNDIS = "rndis";
 
     /**
      * Name of the MTP USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_MTP = "mtp";
 
     /**
      * Name of the Accessory USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_ACCESSORY = "accessory";
 
@@ -153,6 +169,8 @@ public class UsbManager {
      * Value indicating that a USB function is enabled.
      * Used in {@link #USB_CONFIGURATION} extras bundle for the
      * {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_ENABLED = "enabled";
 
@@ -160,6 +178,8 @@ public class UsbManager {
      * Value indicating that a USB function is disabled.
      * Used in {@link #USB_CONFIGURATION} extras bundle for the
      * {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
      */
     public static final String USB_FUNCTION_DISABLED = "disabled";
 
@@ -227,19 +247,22 @@ public class UsbManager {
      * @param device the device to open
      * @return true if we successfully opened the device
      */
-    public boolean openDevice(UsbDevice device) {
+    public UsbDeviceConnection openDevice(UsbDevice device) {
         try {
-            ParcelFileDescriptor pfd = mService.openDevice(device.getDeviceName());
-            if (pfd == null) {
-                return false;
+            String deviceName = device.getDeviceName();
+            ParcelFileDescriptor pfd = mService.openDevice(deviceName);
+            if (pfd != null) {
+                UsbDeviceConnection connection = new UsbDeviceConnection(device);
+                boolean result = connection.open(deviceName, pfd);
+                pfd.close();
+                if (result) {
+                    return connection;
+                }
             }
-            boolean result = device.open(pfd);
-            pfd.close();
-            return result;
         } catch (Exception e) {
             Log.e(TAG, "exception in UsbManager.openDevice", e);
-            return false;
         }
+        return null;
     }
 
     /**
@@ -375,6 +398,8 @@ public class UsbManager {
      *
      * @param function name of the USB function
      * @return true if the USB function is supported.
+     *
+     * {@hide}
      */
     public static boolean isFunctionSupported(String function) {
         return getFunctionEnableFile(function).exists();
@@ -385,6 +410,8 @@ public class UsbManager {
      *
      * @param function name of the USB function
      * @return true if the USB function is enabled.
+     *
+     * {@hide}
      */
     public static boolean isFunctionEnabled(String function) {
         try {
@@ -400,7 +427,7 @@ public class UsbManager {
     /**
      * Enables or disables a USB function.
      *
-     * @hide
+     * {@hide}
      */
     public static boolean setFunctionEnabled(String function, boolean enable) {
         try {

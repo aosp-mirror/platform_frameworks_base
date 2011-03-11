@@ -35,8 +35,8 @@ struct usb_request* get_request_from_object(JNIEnv* env, jobject java_request)
     return (struct usb_request*)env->GetIntField(java_request, field_context);
 }
 
-// in android_hardware_UsbDevice.cpp
-extern struct usb_device* get_device_from_object(JNIEnv* env, jobject java_device);
+// in android_hardware_UsbDeviceConnection.cpp
+extern struct usb_device* get_device_from_object(JNIEnv* env, jobject connection);
 
 static jboolean
 android_hardware_UsbRequest_init(JNIEnv *env, jobject thiz, jobject java_device,
@@ -107,7 +107,7 @@ android_hardware_UsbRequest_queue_array(JNIEnv *env, jobject thiz,
         }
         return false;
     } else {
-        // save a reference to ourselves so UsbDevice.waitRequest() can find us
+        // save a reference to ourselves so UsbDeviceConnection.waitRequest() can find us
         request->client_data = (void *)env->NewGlobalRef(thiz);
         return true;
     }
@@ -155,7 +155,7 @@ android_hardware_UsbRequest_queue_direct(JNIEnv *env, jobject thiz,
         request->buffer = NULL;
         return false;
     } else {
-        // save a reference to ourselves so UsbDevice.waitRequest() can find us
+        // save a reference to ourselves so UsbDeviceConnection.waitRequest() can find us
         // we also need this to make sure our native buffer is not deallocated
         // while IO is active
         request->client_data = (void *)env->NewGlobalRef(thiz);
@@ -187,7 +187,7 @@ android_hardware_UsbRequest_cancel(JNIEnv *env, jobject thiz)
 }
 
 static JNINativeMethod method_table[] = {
-    {"native_init",             "(Landroid/hardware/usb/UsbDevice;IIII)Z",
+    {"native_init",             "(Landroid/hardware/usb/UsbDeviceConnection;IIII)Z",
                                             (void *)android_hardware_UsbRequest_init},
     {"native_close",            "()V",      (void *)android_hardware_UsbRequest_close},
     {"native_queue_array",      "([BIZ)Z",  (void *)android_hardware_UsbRequest_queue_array},

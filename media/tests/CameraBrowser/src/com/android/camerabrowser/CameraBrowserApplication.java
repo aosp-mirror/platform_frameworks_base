@@ -17,8 +17,6 @@
 package com.android.camerabrowser;
 
 import android.app.Application;
-import android.mtp.MtpClient;
-
 
 public class CameraBrowserApplication extends Application {
 

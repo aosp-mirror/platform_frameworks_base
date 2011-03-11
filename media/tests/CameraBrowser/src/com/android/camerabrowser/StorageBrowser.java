@@ -19,7 +19,6 @@ package com.android.camerabrowser;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
-import android.mtp.MtpClient;
 import android.mtp.MtpDevice;
 import android.mtp.MtpStorageInfo;
 import android.os.Bundle;
