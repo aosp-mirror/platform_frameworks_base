@@ -480,6 +480,15 @@ final class WebViewCore {
         mCallbackProxy.setInstallableWebApp();
     }
 
+    /**
+     * Notify the webview that we want to display the video layer fullscreen.
+     */
+    protected void enterFullscreenForVideoLayer(int layerId) {
+        if (mWebView == null) return;
+        Message.obtain(mWebView.mPrivateHandler,
+                       WebView.ENTER_FULLSCREEN_VIDEO, layerId, 0).sendToTarget();
+    }
+
     //-------------------------------------------------------------------------
     // JNI methods
     //-------------------------------------------------------------------------
