@@ -164,7 +164,7 @@ static void SystemProperties_set(JNIEnv *env, jobject clazz,
 
     if (keyJ == NULL) {
         jniThrowException(env, "java/lang/NullPointerException",
-                                "key must not be null.");
+                          "key must not be null.");
         return ;
     }
     key = env->GetStringUTFChars(keyJ, NULL);
@@ -174,15 +174,20 @@ static void SystemProperties_set(JNIEnv *env, jobject clazz,
     } else {
         val = env->GetStringUTFChars(valJ, NULL);
     }
-    
+
     err = property_set(key, val);
-    
+
     env->ReleaseStringUTFChars(keyJ, key);
-    
+
     if (valJ != NULL) {
-    	env->ReleaseStringUTFChars(valJ, val);
+        env->ReleaseStringUTFChars(valJ, val);
     }
-} 
+
+    if (err < 0) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                          "failed to set system property");
+    }
+}
 
 static JNINativeMethod method_table[] = {
     { "native_get", "(Ljava/lang/String;)Ljava/lang/String;",
