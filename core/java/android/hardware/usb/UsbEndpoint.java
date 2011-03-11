@@ -23,16 +23,12 @@ import android.os.Parcelable;
 /**
  * A class representing an endpoint on a {@link android.hardware.usb.UsbInterface}.
  */
-public final class UsbEndpoint implements Parcelable {
+public class UsbEndpoint implements Parcelable {
 
-    private int mAddress;
-    private int mAttributes;
-    private int mMaxPacketSize;
-    private int mInterval;
-    private UsbInterface mInterface;
-
-    private UsbEndpoint() {
-    }
+    private final int mAddress;
+    private final int mAttributes;
+    private final int mMaxPacketSize;
+    private final int mInterval;
 
     /**
      * UsbEndpoint should only be instantiated by UsbService implementation
@@ -117,29 +113,6 @@ public final class UsbEndpoint implements Parcelable {
      */
     public int getInterval() {
         return mInterval;
-    }
-
-    /**
-     * Returns the {@link android.hardware.usb.UsbInterface} this endpoint belongs to.
-     *
-     * @return the endpoint's interface
-     */
-    public UsbInterface getInterface() {
-        return mInterface;
-    }
-
-    /**
-     * Returns the {@link android.hardware.usb.UsbDevice} this endpoint belongs to.
-     *
-     * @return the endpoint's device
-     */
-    public UsbDevice getDevice() {
-        return mInterface.getDevice();
-    }
-
-    // only used for parcelling
-    /* package */ void setInterface(UsbInterface intf) {
-        mInterface = intf;
     }
 
     @Override

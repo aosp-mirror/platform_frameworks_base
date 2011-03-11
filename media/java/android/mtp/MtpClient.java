@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
@@ -168,10 +169,13 @@ public class MtpClient {
             if (!mUsbManager.hasPermission(usbDevice)) {
                 mUsbManager.requestPermission(usbDevice, mPermissionIntent);
             } else {
-                MtpDevice mtpDevice = new MtpDevice(usbDevice);
-                if (mtpDevice.open(mUsbManager)) {
-                    mDevices.put(usbDevice.getDeviceName(), mtpDevice);
-                    return mtpDevice;
+                UsbDeviceConnection connection = mUsbManager.openDevice(usbDevice);
+                if (connection != null) {
+                    MtpDevice mtpDevice = new MtpDevice(usbDevice);
+                    if (mtpDevice.open(connection)) {
+                        mDevices.put(usbDevice.getDeviceName(), mtpDevice);
+                        return mtpDevice;
+                    }
                 }
             }
         }

@@ -124,6 +124,7 @@ LOCAL_SRC_FILES:= \
 	android_hardware_Camera.cpp \
 	android_hardware_SensorManager.cpp \
 	android_hardware_UsbDevice.cpp \
+	android_hardware_UsbDeviceConnection.cpp \
 	android_hardware_UsbRequest.cpp \
 	android_debug_JNITest.cpp \
 	android_util_FileObserver.cpp \

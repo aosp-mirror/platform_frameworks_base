@@ -78,6 +78,7 @@ extern int register_android_opengl_jni_GLES20(JNIEnv* env);
 extern int register_android_hardware_Camera(JNIEnv *env);
 extern int register_android_hardware_SensorManager(JNIEnv *env);
 extern int register_android_hardware_UsbDevice(JNIEnv *env);
+extern int register_android_hardware_UsbDeviceConnection(JNIEnv *env);
 extern int register_android_hardware_UsbRequest(JNIEnv *env);
 
 extern int register_android_media_AudioRecord(JNIEnv *env);
@@ -1274,6 +1275,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_hardware_Camera),
     REG_JNI(register_android_hardware_SensorManager),
     REG_JNI(register_android_hardware_UsbDevice),
+    REG_JNI(register_android_hardware_UsbDeviceConnection),
     REG_JNI(register_android_hardware_UsbRequest),
     REG_JNI(register_android_media_AudioRecord),
     REG_JNI(register_android_media_AudioSystem),

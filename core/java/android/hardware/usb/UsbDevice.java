@@ -19,33 +19,24 @@ package android.hardware.usb;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import java.io.FileDescriptor;
 
-
 /**
  * A class representing a USB device.
  */
-public final class UsbDevice implements Parcelable {
+public class UsbDevice implements Parcelable {
 
     private static final String TAG = "UsbDevice";
 
-    private String mName;
-    private int mVendorId;
-    private int mProductId;
-    private int mClass;
-    private int mSubclass;
-    private int mProtocol;
-    private Parcelable[] mInterfaces;
-
-    // used by the JNI code
-    private int mNativeContext;
-
-    private UsbDevice() {
-    }
-
+    private final String mName;
+    private final int mVendorId;
+    private final int mProductId;
+    private final int mClass;
+    private final int mSubclass;
+    private final int mProtocol;
+    private final Parcelable[] mInterfaces;
 
     /**
      * UsbDevice should only be instantiated by UsbService implementation
@@ -150,114 +141,6 @@ public final class UsbDevice implements Parcelable {
         return (UsbInterface)mInterfaces[index];
     }
 
-    /* package */ boolean open(ParcelFileDescriptor pfd) {
-        return native_open(mName, pfd.getFileDescriptor());
-    }
-
-    /**
-     * Releases all system resources related to the device.
-     */
-    public void close() {
-        native_close();
-    }
-
-    /**
-     * Returns an integer file descriptor for the device, or
-     * -1 if the device is not opened.
-     * This is intended for passing to native code to access the device
-     */
-    public int getFileDescriptor() {
-        return native_get_fd();
-    }
-
-    /**
-     * Claims exclusive access to a {@link android.hardware.usb.UsbInterface}.
-     * This must be done before sending or receiving data on any
-     * {@link android.hardware.usb.UsbEndpoint}s belonging to the interface
-     * @param intf the interface to claim
-     * @param force true to disconnect kernel driver if necessary
-     * @return true if the interface was successfully claimed
-     */
-    public boolean claimInterface(UsbInterface intf, boolean force) {
-        return native_claim_interface(intf.getId(), force);
-    }
-
-    /**
-     * Releases exclusive access to a {@link android.hardware.usb.UsbInterface}.
-     *
-     * @return true if the interface was successfully released
-     */
-    public boolean releaseInterface(UsbInterface intf) {
-        return native_release_interface(intf.getId());
-    }
-
-    /**
-     * Performs a control transaction on endpoint zero for this device.
-     * The direction of the transfer is determined by the request type.
-     * If requestType & {@link UsbConstants#USB_ENDPOINT_DIR_MASK} is
-     * {@link UsbConstants#USB_DIR_OUT}, then the transfer is a write,
-     * and if it is {@link UsbConstants#USB_DIR_IN}, then the transfer
-     * is a read.
-     *
-     * @param requestType request type for this transaction
-     * @param request request ID for this transaction
-     * @param value value field for this transaction
-     * @param index index field for this transaction
-     * @param buffer buffer for data portion of transaction,
-     * or null if no data needs to be sent or received
-     * @param length the length of the data to send or receive
-     * @param timeout in milliseconds
-     * @return length of data transferred (or zero) for success,
-     * or negative value for failure
-     */
-    public int controlTransfer(int requestType, int request, int value,
-            int index, byte[] buffer, int length, int timeout) {
-        return native_control_request(requestType, request, value, index, buffer, length, timeout);
-    }
-
-    /**
-     * Performs a bulk transaction on the given endpoint.
-     * The direction of the transfer is determined by the direction of the endpoint
-     *
-     * @param endpoint the endpoint for this transaction
-     * @param buffer buffer for data to send or receive,
-     * @param length the length of the data to send or receive
-     * @param timeout in milliseconds
-     * @return length of data transferred (or zero) for success,
-     * or negative value for failure
-     */
-    public int bulkTransfer(UsbEndpoint endpoint, byte[] buffer, int length, int timeout) {
-        return native_bulk_request(endpoint.getAddress(), buffer, length, timeout);
-    }
-
-    /**
-     * Waits for the result of a {@link android.hardware.usb.UsbRequest#queue} operation
-     * Note that this may return requests queued on multiple 
-     * {@link android.hardware.usb.UsbEndpoint}s.
-     * When multiple endpoints are in use, {@link android.hardware.usb.UsbRequest#getEndpoint} and
-     * {@link android.hardware.usb.UsbRequest#getClientData} can be useful in determining
-     * how to process the result of this function.
-     *
-     * @return a completed USB request, or null if an error occurred
-     */
-    public UsbRequest requestWait() {
-        UsbRequest request = native_request_wait();
-        if (request != null) {
-            request.dequeue();
-        }
-        return request;
-    }
-
-    /**
-     * Returns the serial number for the device.
-     * This will return null if the device has not been opened.
-     *
-     * @return the device serial number
-     */
-    public String getSerial() {
-        return native_get_serial();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o instanceof UsbDevice) {
@@ -292,11 +175,7 @@ public final class UsbDevice implements Parcelable {
             int subClass = in.readInt();
             int protocol = in.readInt();
             Parcelable[] interfaces = in.readParcelableArray(UsbInterface.class.getClassLoader());
-            UsbDevice result = new UsbDevice(name, vendorId, productId, clasz, subClass, protocol, interfaces);
-            for (int i = 0; i < interfaces.length; i++) {
-                ((UsbInterface)interfaces[i]).setDevice(result);
-            }
-            return result;
+            return new UsbDevice(name, vendorId, productId, clasz, subClass, protocol, interfaces);
         }
 
         public UsbDevice[] newArray(int size) {
@@ -325,17 +204,6 @@ public final class UsbDevice implements Parcelable {
     public static String getDeviceName(int id) {
         return native_get_device_name(id);
     }
-
-    private native boolean native_open(String deviceName, FileDescriptor pfd);
-    private native void native_close();
-    private native int native_get_fd();
-    private native boolean native_claim_interface(int interfaceID, boolean force);
-    private native boolean native_release_interface(int interfaceID);
-    private native int native_control_request(int requestType, int request, int value,
-            int index, byte[] buffer, int length, int timeout);
-    private native int native_bulk_request(int endpoint, byte[] buffer, int length, int timeout);
-    private native UsbRequest native_request_wait();
-    private native String native_get_serial();
 
     private static native int native_get_device_id(String name);
     private static native String native_get_device_name(int id);

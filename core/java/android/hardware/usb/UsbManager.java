@@ -227,19 +227,22 @@ public class UsbManager {
      * @param device the device to open
      * @return true if we successfully opened the device
      */
-    public boolean openDevice(UsbDevice device) {
+    public UsbDeviceConnection openDevice(UsbDevice device) {
         try {
-            ParcelFileDescriptor pfd = mService.openDevice(device.getDeviceName());
-            if (pfd == null) {
-                return false;
+            String deviceName = device.getDeviceName();
+            ParcelFileDescriptor pfd = mService.openDevice(deviceName);
+            if (pfd != null) {
+                UsbDeviceConnection connection = new UsbDeviceConnection(device);
+                boolean result = connection.open(deviceName, pfd);
+                pfd.close();
+                if (result) {
+                    return connection;
+                }
             }
-            boolean result = device.open(pfd);
-            pfd.close();
-            return result;
         } catch (Exception e) {
             Log.e(TAG, "exception in UsbManager.openDevice", e);
-            return false;
         }
+        return null;
     }
 
     /**
