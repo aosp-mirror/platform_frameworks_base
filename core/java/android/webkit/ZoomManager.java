@@ -777,12 +777,15 @@ class ZoomManager {
     }
 
     private class ScaleDetectorListener implements ScaleGestureDetector.OnScaleGestureListener {
+        private float mAccumulatedSpan;
+
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             mInitialZoomOverview = false;
             dismissZoomPicker();
             mFocusMovementQueue.clear();
             mWebView.mViewManager.startZoom();
             mWebView.onPinchToZoomAnimationStart();
+            mAccumulatedSpan = 0;
             return true;
         }
 
@@ -797,8 +800,15 @@ class ZoomManager {
                     FloatMath.sqrt((mFocusX - prevFocusX) * (mFocusX - prevFocusX)
                                    + (mFocusY - prevFocusY) * (mFocusY - prevFocusY));
             mFocusMovementQueue.add(focusDelta);
-            float deltaSpan = Math.abs(detector.getCurrentSpan() - detector.getPreviousSpan());
-            return mFocusMovementQueue.getSum() > deltaSpan;
+            float deltaSpan = detector.getCurrentSpan() - detector.getPreviousSpan() +
+                    mAccumulatedSpan;
+            final boolean result = mFocusMovementQueue.getSum() > Math.abs(deltaSpan);
+            if (result) {
+                mAccumulatedSpan += deltaSpan;
+            } else {
+                mAccumulatedSpan = 0;
+            }
+            return result;
         }
 
         public boolean handleScale(ScaleGestureDetector detector) {
