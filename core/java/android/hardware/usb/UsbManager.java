@@ -367,7 +367,7 @@ public class UsbManager {
      * This may result in a system dialog being displayed to the user
      * if permission had not already been granted.
      * Success or failure is returned via the {@link android.app.PendingIntent} pi.
-     * If successful, this grants the caller permission to access the device only
+     * If successful, this grants the caller permission to access the accessory only
      * until the device is disconnected.
      *
      * The following extras will be added to pi:
