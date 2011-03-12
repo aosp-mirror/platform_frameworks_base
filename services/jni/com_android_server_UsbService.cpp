@@ -63,7 +63,6 @@ static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strA
     buffer[0] = 0;
     int length = ioctl(fd, cmd, buffer);
     if (buffer[0]) {
-        LOGD("string %d: %s", index, buffer);
         jstring obj = env->NewStringUTF(buffer);
         env->SetObjectArrayElement(strArray, index, obj);
         env->DeleteLocalRef(obj);
@@ -73,19 +72,19 @@ static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strA
 
 static jobjectArray android_server_UsbService_getAccessoryStrings(JNIEnv *env, jobject thiz)
 {
-    LOGD("getAccessoryStrings");
     int fd = open(DRIVER_NAME, O_RDWR);
     if (fd < 0) {
         LOGE("could not open %s", DRIVER_NAME);
         return NULL;
     }
     jclass stringClass = env->FindClass("java/lang/String");
-    jobjectArray strArray = env->NewObjectArray(4, stringClass, NULL);
+    jobjectArray strArray = env->NewObjectArray(5, stringClass, NULL);
     if (!strArray) goto out;
     set_accessory_string(env, fd, ACCESSORY_GET_STRING_MANUFACTURER, strArray, 0);
     set_accessory_string(env, fd, ACCESSORY_GET_STRING_MODEL, strArray, 1);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_TYPE, strArray, 2);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_DESCRIPTION, strArray, 2);
     set_accessory_string(env, fd, ACCESSORY_GET_STRING_VERSION, strArray, 3);
+    set_accessory_string(env, fd, ACCESSORY_GET_STRING_URI, strArray, 4);
 
 out:
     close(fd);

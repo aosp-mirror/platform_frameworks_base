@@ -16,6 +16,7 @@
 
 package com.android.server.usb;
 
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -267,10 +268,7 @@ public class UsbService extends IUsbManager.Stub {
 
     /* returns the currently attached USB accessory (device mode) */
     public UsbAccessory getCurrentAccessory() {
-        synchronized (mLock) {
-            mDeviceManager.checkPermission(mCurrentAccessory);
-            return mCurrentAccessory;
-        }
+        return mCurrentAccessory;
     }
 
     /* opens the currently attached USB accessory (device mode) */
@@ -294,19 +292,28 @@ public class UsbService extends IUsbManager.Stub {
         mDeviceManager.setAccessoryPackage(accessory, packageName);
     }
 
+    public boolean hasAccessoryPermission(UsbAccessory accessory) {
+        return mDeviceManager.hasPermission(accessory);
+    }
+
+    public void requestAccessoryPermission(UsbAccessory accessory, String packageName,
+            PendingIntent pi) {
+        mDeviceManager.requestPermission(accessory, packageName, pi);
+    }
+
     public void grantAccessoryPermission(UsbAccessory accessory, int uid) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         mDeviceManager.grantAccessoryPermission(accessory, uid);
     }
 
-    public boolean hasDefaults(String packageName, int uid) {
+    public boolean hasDefaults(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        return mDeviceManager.hasDefaults(packageName, uid);
+        return mDeviceManager.hasDefaults(packageName);
     }
 
-    public void clearDefaults(String packageName, int uid) {
+    public void clearDefaults(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        mDeviceManager.clearDefaults(packageName, uid);
+        mDeviceManager.clearDefaults(packageName);
     }
 
     /*

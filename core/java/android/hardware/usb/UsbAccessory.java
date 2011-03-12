@@ -31,18 +31,21 @@ public class UsbAccessory implements Parcelable {
 
     private final String mManufacturer;
     private final String mModel;
-    private final String mType;
+    private final String mDescription;
     private final String mVersion;
+    private final String mUri;
 
     /**
      * UsbAccessory should only be instantiated by UsbService implementation
      * @hide
      */
-    public UsbAccessory(String manufacturer, String model, String type, String version) {
+    public UsbAccessory(String manufacturer, String model, String description,
+            String version, String uri) {
         mManufacturer = manufacturer;
         mModel = model;
-        mType = type;
+        mDescription = description;
         mVersion = version;
+        mUri = uri;
     }
 
     /**
@@ -52,8 +55,9 @@ public class UsbAccessory implements Parcelable {
     public UsbAccessory(String[] strings) {
         mManufacturer = strings[0];
         mModel = strings[1];
-        mType = strings[2];
+        mDescription = strings[2];
         mVersion = strings[3];
+        mUri = strings[4];
     }
 
     /**
@@ -75,12 +79,12 @@ public class UsbAccessory implements Parcelable {
     }
 
     /**
-     * Returns the type of the accessory.
+     * Returns a user visible description of the accessory.
      *
-     * @return the accessory type
+     * @return the accessory description
      */
-    public String getType() {
-        return mType;
+    public String getDescription() {
+        return mDescription;
     }
 
     /**
@@ -90,6 +94,17 @@ public class UsbAccessory implements Parcelable {
      */
     public String getVersion() {
         return mVersion;
+    }
+
+    /**
+     * Returns the URI for the accessory.
+     * This is an optional URI that might show information about the accessory
+     * or provide the option to download an application for the accessory
+     *
+     * @return the accessory URI
+     */
+    public String getUri() {
+        return mUri;
     }
 
     private static boolean compare(String s1, String s2) {
@@ -103,18 +118,29 @@ public class UsbAccessory implements Parcelable {
             UsbAccessory accessory = (UsbAccessory)obj;
             return (compare(mManufacturer, accessory.getManufacturer()) &&
                     compare(mModel, accessory.getModel()) &&
-                    compare(mType, accessory.getType()) &&
-                    compare(mVersion, accessory.getVersion()));
+                    compare(mDescription, accessory.getDescription()) &&
+                    compare(mVersion, accessory.getVersion()) &&
+                    compare(mUri, accessory.getUri()));
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return ((mManufacturer == null ? 0 : mManufacturer.hashCode()) ^
+                (mModel == null ? 0 : mModel.hashCode()) ^
+                (mDescription == null ? 0 : mDescription.hashCode()) ^
+                (mVersion == null ? 0 : mVersion.hashCode()) ^
+                (mUri == null ? 0 : mUri.hashCode()));
     }
 
     @Override
     public String toString() {
         return "UsbAccessory[mManufacturer=" + mManufacturer +
                             ", mModel=" + mModel +
-                            ", mType=" + mType +
-                            ", mVersion=" + mVersion + "]";
+                            ", mDescription=" + mDescription +
+                            ", mVersion=" + mVersion +
+                            ", mUri=" + mUri + "]";
     }
 
     public static final Parcelable.Creator<UsbAccessory> CREATOR =
@@ -122,9 +148,10 @@ public class UsbAccessory implements Parcelable {
         public UsbAccessory createFromParcel(Parcel in) {
             String manufacturer = in.readString();
             String model = in.readString();
-            String type = in.readString();
+            String description = in.readString();
             String version = in.readString();
-            return new UsbAccessory(manufacturer, model, type, version);
+            String uri = in.readString();
+            return new UsbAccessory(manufacturer, model, description, version, uri);
         }
 
         public UsbAccessory[] newArray(int size) {
@@ -139,7 +166,8 @@ public class UsbAccessory implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mManufacturer);
         parcel.writeString(mModel);
-        parcel.writeString(mType);
+        parcel.writeString(mDescription);
         parcel.writeString(mVersion);
+        parcel.writeString(mUri);
    }
 }

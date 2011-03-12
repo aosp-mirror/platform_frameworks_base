@@ -133,10 +133,19 @@ static int usb_device_added(const char *devname, void* client_data) {
         } else {
             printf("Found possible android device - attempting to switch to accessory mode\n");
 
+            uint16_t protocol;
+            ret = usb_device_control_transfer(device, USB_DIR_IN | USB_TYPE_VENDOR,
+                    ACCESSORY_GET_PROTOCOL, 0, 0, &protocol, sizeof(protocol), 0);
+            if (ret == 2)
+                printf("device supports protocol version %d\n", protocol);
+            else
+                fprintf(stderr, "failed to read protocol version\n");
+
             send_string(device, ACCESSORY_STRING_MANUFACTURER, "Google, Inc.");
             send_string(device, ACCESSORY_STRING_MODEL, "AccessoryChat");
-            send_string(device, ACCESSORY_STRING_TYPE, "Sample Program");
+            send_string(device, ACCESSORY_STRING_DESCRIPTION, "Sample Program");
             send_string(device, ACCESSORY_STRING_VERSION, "1.0");
+            send_string(device, ACCESSORY_STRING_URI, "http://www.android.com");
 
             ret = usb_device_control_transfer(device, USB_DIR_OUT | USB_TYPE_VENDOR,
                     ACCESSORY_START, 0, 0, 0, 0, 0);
