@@ -52,6 +52,7 @@ template <typename T> inline T min(T a, T b) {
 Layer::Layer(SurfaceFlinger* flinger,
         DisplayID display, const sp<Client>& client)
     :   LayerBaseClient(flinger, display, client),
+        mFormat(PIXEL_FORMAT_NONE),
         mGLExtensions(GLExtensions::getInstance()),
         mNeedsBlending(true),
         mNeedsDithering(false),
@@ -59,7 +60,7 @@ Layer::Layer(SurfaceFlinger* flinger,
         mProtectedByApp(false),
         mTextureManager(),
         mBufferManager(mTextureManager),
-        mWidth(0), mHeight(0), mFormat(PIXEL_FORMAT_NONE),
+        mWidth(0), mHeight(0),
         mNeedsScaling(false), mFixedSize(false)
 {
 }
