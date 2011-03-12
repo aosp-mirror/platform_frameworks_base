@@ -66,6 +66,8 @@ public interface RILConstants {
     int NETWORK_MODE_EVDO_NO_CDMA   = 6; /* EvDo only */
     int NETWORK_MODE_GLOBAL         = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
                                             AVAILABLE Application Settings menu*/
+    int NETWORK_MODE_LTE_ONLY       = 8; /* LTE Only mode. Used only for testing purposes.Not
+                                            user selectable from regular UI */
     int PREFERRED_NETWORK_MODE      = NETWORK_MODE_WCDMA_PREF;
 
     /* CDMA subscription source. See ril.h RIL_REQUEST_CDMA_SET_SUBSCRIPTION */
@@ -138,10 +140,12 @@ cat include/telephony/ril.h | \
     int RIL_RESTRICTED_STATE_PS_ALL = 0x10;
 
     /** Data profile for RIL_REQUEST_SETUP_DATA_CALL */
-    static final int DATA_PROFILE_DEFAULT   = 0;
-    static final int DATA_PROFILE_TETHERED  = 1;
-    static final int DATA_PROFILE_OEM_BASE  = 1000;
-
+    public static final int DATA_PROFILE_DEFAULT   = 0;
+    public static final int DATA_PROFILE_TETHERED  = 1;
+    public static final int DATA_PROFILE_IMS       = 2;
+    public static final int DATA_PROFILE_FOTA      = 3;
+    public static final int DATA_PROFILE_CBS       = 4;
+    public static final int DATA_PROFILE_OEM_BASE  = 1000;
 
     int RIL_REQUEST_GET_SIM_STATUS = 1;
     int RIL_REQUEST_ENTER_SIM_PIN = 2;

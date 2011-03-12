@@ -427,10 +427,14 @@ public class NetworkController extends BroadcastReceiver {
             case TelephonyManager.NETWORK_TYPE_EVDO_0: //fall through
             case TelephonyManager.NETWORK_TYPE_EVDO_A:
             case TelephonyManager.NETWORK_TYPE_EVDO_B:
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
                 mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
                 mDataTypeIconId = R.drawable.stat_sys_signal_3g;
                 break;
-            // TODO - add support for NETWORK_TYPE_LTE and NETWORK_TYPE_EHRPD
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
+                mDataTypeIconId = R.drawable.stat_sys_signal_4g;
+                break;
             default:
                 mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
                 mDataTypeIconId = R.drawable.stat_sys_signal_gprs;

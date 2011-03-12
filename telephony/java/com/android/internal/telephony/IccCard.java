@@ -28,6 +28,7 @@ import android.util.Log;
 
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.CommandsInterface.RadioState;
+import android.os.SystemProperties;
 
 /**
  * {@hide}
@@ -84,6 +85,10 @@ public abstract class IccCard {
     private static final int EVENT_CHANGE_ICC_PASSWORD_DONE = 9;
     private static final int EVENT_QUERY_FACILITY_FDN_DONE = 10;
     private static final int EVENT_CHANGE_FACILITY_FDN_DONE = 11;
+
+    // FIXME: remove mot from property
+    static final boolean LTE_AVAILABLE_ON_CDMA =
+        SystemProperties.getBoolean("ro.mot.lte_on_cdma", false);
 
     /*
       UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
@@ -426,6 +431,9 @@ public abstract class IccCard {
             broadcastIccStateChangedIntent(INTENT_VALUE_ICC_LOCKED,
                   INTENT_VALUE_LOCKED_NETWORK);
         }
+        if (oldState != State.READY && newState == State.READY && LTE_AVAILABLE_ON_CDMA) {
+            mPhone.mSIMRecords.onSimReady();
+        }
     }
 
     /**
@@ -612,14 +620,16 @@ public abstract class IccCard {
             currentRadioState == RadioState.SIM_NOT_READY     ||
             currentRadioState == RadioState.RUIM_NOT_READY    ||
             currentRadioState == RadioState.NV_NOT_READY      ||
-            currentRadioState == RadioState.NV_READY) {
+            (currentRadioState == RadioState.NV_READY && !LTE_AVAILABLE_ON_CDMA)) {
             return IccCard.State.NOT_READY;
         }
 
         if( currentRadioState == RadioState.SIM_LOCKED_OR_ABSENT  ||
             currentRadioState == RadioState.SIM_READY             ||
             currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
-            currentRadioState == RadioState.RUIM_READY) {
+            currentRadioState == RadioState.RUIM_READY ||
+            (currentRadioState == RadioState.NV_READY && LTE_AVAILABLE_ON_CDMA)) {
+
 
             int index;
 
