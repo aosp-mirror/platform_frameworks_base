@@ -600,7 +600,7 @@ sp<FreezeLock> SurfaceFlinger::getFreezeLock() const
 }
 
 void SurfaceFlinger::computeVisibleRegions(
-    LayerVector& currentLayers, Region& dirtyRegion, Region& opaqueRegion)
+    const LayerVector& currentLayers, Region& dirtyRegion, Region& opaqueRegion)
 {
     const GraphicPlane& plane(graphicPlane(0));
     const Transform& planeTransform(plane.transform());
@@ -735,8 +735,7 @@ void SurfaceFlinger::commitTransaction()
 void SurfaceFlinger::handlePageFlip()
 {
     bool visibleRegions = mVisibleRegionsDirty;
-    LayerVector& currentLayers(
-            const_cast<LayerVector&>(mDrawingState.layersSortedByZ));
+    const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
     visibleRegions |= lockPageFlip(currentLayers);
 
         const DisplayHardware& hw = graphicPlane(0).displayHardware();
@@ -748,9 +747,8 @@ void SurfaceFlinger::handlePageFlip()
             /*
              *  rebuild the visible layer list
              */
+            const size_t count = currentLayers.size();
             mVisibleLayersSortedByZ.clear();
-            const LayerVector& currentLayers(mDrawingState.layersSortedByZ);
-            size_t count = currentLayers.size();
             mVisibleLayersSortedByZ.setCapacity(count);
             for (size_t i=0 ; i<count ; i++) {
                 if (!currentLayers[i]->visibleRegionScreen.isEmpty())
@@ -2515,7 +2513,7 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
             }
             break;
         }
-        if (++name >= SharedBufferStack::NUM_LAYERS_MAX)
+        if (++name >= int32_t(SharedBufferStack::NUM_LAYERS_MAX))
             name = NO_MEMORY;
     } while(name >= 0);
 
@@ -2562,7 +2560,7 @@ sp<GraphicBuffer> GraphicBufferAlloc::createGraphicBuffer(uint32_t w, uint32_t h
 
 void GraphicBufferAlloc::freeAllGraphicBuffersExcept(int bufIdx) {
     Mutex::Autolock _l(mLock);
-    if (0 <= bufIdx && bufIdx < mBuffers.size()) {
+    if (bufIdx >= 0 && size_t(bufIdx) < mBuffers.size()) {
         sp<GraphicBuffer> b(mBuffers[bufIdx]);
         mBuffers.clear();
         mBuffers.add(b);
