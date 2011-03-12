@@ -68,9 +68,6 @@ LOCAL_CFLAGS += \
     -DUSE_STAGEFRIGHT_READERS \
     -DUSE_STAGEFRIGHT_3GPP_READER
 
-
-LOCAL_LDFLAGS += -fuse-ld=bfd
-
 LOCAL_STATIC_LIBRARIES := \
     libvideoeditor_core \
     libstagefright_color_conversion \
