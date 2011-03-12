@@ -304,7 +304,7 @@ private:
                             Vector< sp<LayerBase> >& ditchedLayers);
 
             void        computeVisibleRegions(
-                            LayerVector& currentLayers,
+                            const LayerVector& currentLayers,
                             Region& dirtyRegion,
                             Region& wormholeRegion);
 
@@ -371,7 +371,6 @@ private:
                 // access must be protected by mStateLock
     mutable     Mutex                   mStateLock;
                 State                   mCurrentState;
-                State                   mDrawingState;
     volatile    int32_t                 mTransactionFlags;
     volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
@@ -395,6 +394,7 @@ private:
                 
                 // Can only accessed from the main thread, these members
                 // don't need synchronization
+                State                       mDrawingState;
                 Region                      mDirtyRegion;
                 Region                      mDirtyRegionRemovedLayer;
                 Region                      mInvalidRegion;
