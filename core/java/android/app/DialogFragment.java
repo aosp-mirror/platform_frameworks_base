@@ -258,6 +258,16 @@ public class DialogFragment extends Fragment
         dismissInternal(false);
     }
 
+    /**
+     * Version of {@link #dismiss()} that uses
+     * {@link FragmentTransaction#commitAllowingStateLoss()
+     * FragmentTransaction.commitAllowingStateLoss()}.  See linked
+     * documentation for further details.
+     */
+    public void dismissAllowingStateLoss() {
+        dismissInternal(true);
+    }
+    
     void dismissInternal(boolean allowStateLoss) {
         if (mDismissed) {
             return;
