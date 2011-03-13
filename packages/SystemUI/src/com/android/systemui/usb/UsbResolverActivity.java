@@ -56,11 +56,7 @@ public class UsbResolverActivity extends ResolverActivity {
         ArrayList<ResolveInfo> rList = intent.getParcelableArrayListExtra(EXTRA_RESOLVE_INFOS);
         CharSequence title = getResources().getText(com.android.internal.R.string.chooseUsbActivity);
         super.onCreate(savedInstanceState, target, title, null, rList,
-                true, /* Set alwaysUseOption to true to enable "always use this app" checkbox. */
-                true  /* Set alwaysChoose to display activity when only one choice is available.
-                         This is necessary because this activity is needed for the user to allow
-                         the application permission to access the device */
-                );
+                true /* Set alwaysUseOption to true to enable "always use this app" checkbox. */ );
 
         mDevice = (UsbDevice)target.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (mDevice != null) {
