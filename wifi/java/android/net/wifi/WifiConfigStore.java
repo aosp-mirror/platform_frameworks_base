@@ -1347,4 +1347,8 @@ class WifiConfigStore {
         }
         return sb.toString();
     }
+
+    public static String getConfigFile() {
+        return ipConfigFile;
+    }
 }
