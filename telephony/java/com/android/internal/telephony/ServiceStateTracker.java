@@ -55,6 +55,9 @@ public abstract class ServiceStateTracker extends Handler {
 
     public SignalStrength mSignalStrength;
 
+    // TODO - this should not be public
+    public RestrictedState mRestrictedState = new RestrictedState();
+
     /* The otaspMode passed to PhoneStateListener#onOtaspChanged */
     static public final int OTASP_UNINITIALIZED = 0;
     static public final int OTASP_UNKNOWN = 1;
@@ -76,9 +79,14 @@ public abstract class ServiceStateTracker extends Handler {
      */
     protected boolean dontPollSignalStrength = false;
 
-    protected RegistrantList networkAttachedRegistrants = new RegistrantList();
-    protected RegistrantList roamingOnRegistrants = new RegistrantList();
-    protected RegistrantList roamingOffRegistrants = new RegistrantList();
+    protected RegistrantList mRoamingOnRegistrants = new RegistrantList();
+    protected RegistrantList mRoamingOffRegistrants = new RegistrantList();
+    protected RegistrantList mAttachedRegistrants = new RegistrantList();
+    protected RegistrantList mDetachedRegistrants = new RegistrantList();
+    protected RegistrantList mNetworkAttachedRegistrants = new RegistrantList();
+    protected RegistrantList mPsRestrictEnabledRegistrants = new RegistrantList();
+    protected RegistrantList mPsRestrictDisabledRegistrants = new RegistrantList();
+
 
     protected  static final boolean DBG = true;
 
@@ -165,7 +173,6 @@ public abstract class ServiceStateTracker extends Handler {
     protected static final String REGISTRATION_DENIED_AUTH = "Authentication Failure";
 
     public ServiceStateTracker() {
-
     }
 
     public boolean getDesiredPowerState() {
@@ -182,7 +189,7 @@ public abstract class ServiceStateTracker extends Handler {
      */
     public  void registerForRoamingOn(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
-        roamingOnRegistrants.add(r);
+        mRoamingOnRegistrants.add(r);
 
         if (ss.getRoaming()) {
             r.notifyRegistrant();
@@ -190,7 +197,7 @@ public abstract class ServiceStateTracker extends Handler {
     }
 
     public  void unregisterForRoamingOn(Handler h) {
-        roamingOnRegistrants.remove(h);
+        mRoamingOnRegistrants.remove(h);
     }
 
     /**
@@ -203,7 +210,7 @@ public abstract class ServiceStateTracker extends Handler {
      */
     public  void registerForRoamingOff(Handler h, int what, Object obj) {
         Registrant r = new Registrant(h, what, obj);
-        roamingOffRegistrants.add(r);
+        mRoamingOffRegistrants.add(r);
 
         if (!ss.getRoaming()) {
             r.notifyRegistrant();
@@ -211,7 +218,7 @@ public abstract class ServiceStateTracker extends Handler {
     }
 
     public  void unregisterForRoamingOff(Handler h) {
-        roamingOffRegistrants.remove(h);
+        mRoamingOffRegistrants.remove(h);
     }
 
     /**
@@ -282,43 +289,99 @@ public abstract class ServiceStateTracker extends Handler {
     protected abstract void setPowerStateToDesired();
     protected abstract void log(String s);
 
-    private void logUnexpectedGsmMethodCall(String name) {
-        log("SSST" + "Error! " + name + "() in ServiceStateTracker should not be " +
-        "called, GsmServiceStateTracker inactive.");
-    }
-
     public abstract int getCurrentDataConnectionState();
     public abstract boolean isConcurrentVoiceAndDataAllowed();
+
+    /**
+     * Registration point for transition into DataConnection attached.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
     public void registerForDataConnectionAttached(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForDataConnectionAttached");
-    }
+        Registrant r = new Registrant(h, what, obj);
+        mAttachedRegistrants.add(r);
 
+        if (getCurrentDataConnectionState() == ServiceState.STATE_IN_SERVICE) {
+            r.notifyRegistrant();
+        }
+    }
     public void unregisterForDataConnectionAttached(Handler h) {
-        logUnexpectedGsmMethodCall("unregisterForDataConnectionAttached");
+        mAttachedRegistrants.remove(h);
     }
 
+    /**
+     * Registration point for transition into DataConnection detached.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
     public void registerForDataConnectionDetached(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForDataConnectionDetached");
-    }
+        Registrant r = new Registrant(h, what, obj);
+        mDetachedRegistrants.add(r);
 
+        if (getCurrentDataConnectionState() == ServiceState.STATE_OUT_OF_SERVICE) {
+            r.notifyRegistrant();
+        }
+    }
     public void unregisterForDataConnectionDetached(Handler h) {
-        logUnexpectedGsmMethodCall("unregisterForDataConnectionDetached");
+        mDetachedRegistrants.remove(h);
     }
 
+    /**
+     * Registration point for transition into network attached.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj in Message.obj
+     */
+    public void registerForNetworkAttached(Handler h, int what, Object obj) {
+        Registrant r = new Registrant(h, what, obj);
+
+        mNetworkAttachedRegistrants.add(r);
+        if (ss.getState() == ServiceState.STATE_IN_SERVICE) {
+            r.notifyRegistrant();
+        }
+    }
+    public void unregisterForNetworkAttached(Handler h) {
+        mNetworkAttachedRegistrants.remove(h);
+    }
+
+    /**
+     * Registration point for transition into packet service restricted zone.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
     public void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForPsRestrictedEnabled");
+        Registrant r = new Registrant(h, what, obj);
+        mPsRestrictEnabledRegistrants.add(r);
+
+        if (mRestrictedState.isPsRestricted()) {
+            r.notifyRegistrant();
+        }
     }
 
     public void unregisterForPsRestrictedEnabled(Handler h) {
-        logUnexpectedGsmMethodCall("unregisterForPsRestrictedEnabled");
+        mPsRestrictEnabledRegistrants.remove(h);
     }
 
+    /**
+     * Registration point for transition out of packet service restricted zone.
+     * @param h handler to notify
+     * @param what what code of message when delivered
+     * @param obj placed in Message.obj
+     */
     public void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
-        logUnexpectedGsmMethodCall("registerForPsRestrictedDisabled");
+        Registrant r = new Registrant(h, what, obj);
+        mPsRestrictDisabledRegistrants.add(r);
+
+        if (mRestrictedState.isPsRestricted()) {
+            r.notifyRegistrant();
+        }
     }
 
     public void unregisterForPsRestrictedDisabled(Handler h) {
-        logUnexpectedGsmMethodCall("registerForPsRestrictedDisabled");
+        mPsRestrictDisabledRegistrants.remove(h);
     }
 
     /**
