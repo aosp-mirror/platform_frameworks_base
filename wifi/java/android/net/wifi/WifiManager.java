@@ -1176,6 +1176,18 @@ public class WifiManager {
     }
 
     /**
+     * Returns the file in which IP and proxy configuration data is stored
+     * @hide
+     */
+    public String getConfigFile() {
+        try {
+            return mService.getConfigFile();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Allows an application to keep the Wi-Fi radio awake.
      * Normally the Wi-Fi radio may turn off when the user has not used the device in a while.
      * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple
