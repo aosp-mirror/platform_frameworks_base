@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.usb;
+package com.android.systemui.usb;
 
 import com.android.internal.app.ResolverActivity;
 
@@ -38,6 +38,9 @@ public class UsbResolverActivity extends ResolverActivity {
     public static final String TAG = "UsbResolverActivity";
     public static final String EXTRA_RESOLVE_INFOS = "rlist";
 
+    private UsbAccessory mAccessory;
+    private UsbDisconnectedReceiver mDisconnectedReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
@@ -49,7 +52,6 @@ public class UsbResolverActivity extends ResolverActivity {
         }
         Intent target = (Intent)targetParcelable;
         ArrayList<ResolveInfo> rList = intent.getParcelableArrayListExtra(EXTRA_RESOLVE_INFOS);
-        Log.d(TAG, "rList.size() " + rList.size());
         CharSequence title = getResources().getText(com.android.internal.R.string.chooseUsbActivity);
         super.onCreate(savedInstanceState, target, title, null, rList,
                 true, /* Set alwaysUseOption to true to enable "always use this app" checkbox. */
@@ -57,6 +59,22 @@ public class UsbResolverActivity extends ResolverActivity {
                          This is necessary because this activity is needed for the user to allow
                          the application permission to access the device */
                 );
+
+        mAccessory = (UsbAccessory)target.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
+        if (mAccessory == null) {
+            Log.e(TAG, "accessory is null");
+            finish();
+            return;
+        }
+        mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mDisconnectedReceiver != null) {
+            unregisterReceiver(mDisconnectedReceiver);
+        }
+        super.onDestroy();
     }
 
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
@@ -64,19 +82,14 @@ public class UsbResolverActivity extends ResolverActivity {
             IBinder b = ServiceManager.getService(USB_SERVICE);
             IUsbManager service = IUsbManager.Stub.asInterface(b);
             int uid = ri.activityInfo.applicationInfo.uid;
-            String action = intent.getAction();
 
-            if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
-                UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(
-                        UsbManager.EXTRA_ACCESSORY);
-                // grant permission for the accessory
-                service.grantAccessoryPermission(accessory, uid);
-                // set or clear default setting
-                if (alwaysCheck) {
-                    service.setAccessoryPackage(accessory, ri.activityInfo.packageName);
-                } else {
-                    service.setAccessoryPackage(accessory, null);
-                }
+            // grant permission for the accessory
+            service.grantAccessoryPermission(mAccessory, uid);
+            // set or clear default setting
+            if (alwaysCheck) {
+                service.setAccessoryPackage(mAccessory, ri.activityInfo.packageName);
+            } else {
+                service.setAccessoryPackage(mAccessory, null);
             }
 
             try {

@@ -1158,7 +1158,7 @@ class ContextImpl extends Context {
             if (mUsbManager == null) {
                 IBinder b = ServiceManager.getService(USB_SERVICE);
                 IUsbManager service = IUsbManager.Stub.asInterface(b);
-                mUsbManager = new UsbManager(service);
+                mUsbManager = new UsbManager(this, service);
             }
         }
         return mUsbManager;
