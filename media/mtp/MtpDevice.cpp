@@ -819,6 +819,10 @@ MtpResponseCode MtpDevice::readResponse() {
         return mResponse.getResponseCode();
     }
     int ret = mResponse.read(mRequestIn1);
+    // handle zero length packets, which might occur if the data transfer
+    // ends on a packet boundary
+    if (ret == 0)
+        ret = mResponse.read(mRequestIn1);
     if (ret >= MTP_CONTAINER_HEADER_SIZE) {
         mResponse.dump();
         return mResponse.getResponseCode();
