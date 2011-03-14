@@ -28,7 +28,7 @@
 namespace android {
 
 MtpDataPacket::MtpDataPacket()
-    :   MtpPacket(512),
+    :   MtpPacket(16384),   // MAX_USBFS_BUFFER_SIZE
         mOffset(MTP_CONTAINER_HEADER_SIZE)
 {
 }
@@ -399,10 +399,10 @@ int MtpDataPacket::read(struct usb_request *request) {
     if (length >= MTP_CONTAINER_HEADER_SIZE) {
         // look at the length field to see if the data spans multiple packets
         uint32_t totalLength = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
+        allocate(totalLength);
         while (totalLength > length) {
-            allocate(length + mAllocationIncrement);
             request->buffer = mBuffer + length;
-            request->buffer_length = mAllocationIncrement;
+            request->buffer_length = totalLength - length;
             int ret = transfer(request);
             if (ret >= 0)
                 length += ret;
