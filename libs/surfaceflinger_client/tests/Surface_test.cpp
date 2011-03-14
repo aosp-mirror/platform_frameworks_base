@@ -130,4 +130,12 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
     ASSERT_TRUE(heap != NULL);
 }
 
+TEST_F(SurfaceTest, ConcreteTypeIsSurface) {
+    sp<ANativeWindow> anw(mSurface);
+    int result = -123;
+    int err = anw->query(anw.get(), NATIVE_WINDOW_CONCRETE_TYPE, &result);
+    EXPECT_EQ(NO_ERROR, err);
+    EXPECT_EQ(NATIVE_WINDOW_SURFACE, result);
+}
+
 }
