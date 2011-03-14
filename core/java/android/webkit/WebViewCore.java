@@ -572,7 +572,7 @@ final class WebViewCore {
             int framePtr, int nodePtr, int x, int y);
 
     private native boolean nativeHandleTouchEvent(int action, int[] idArray,
-            int[] xArray, int[] yArray, int count, int metaState);
+            int[] xArray, int[] yArray, int count, int actionIndex, int metaState);
 
     private native void nativeUpdateFrameCache();
 
@@ -829,6 +829,7 @@ final class WebViewCore {
         int mAction;
         int[] mIds;  // Ids of the touch points
         Point[] mPoints;
+        int mActionIndex;  // Associated pointer index for ACTION_POINTER_DOWN/UP
         int mMetaState;
         boolean mReprocess;
         MotionEvent mMotionEvent;
@@ -1344,7 +1345,7 @@ final class WebViewCore {
                                         ted.mNativeLayerRect);
                             }
                             ted.mNativeResult = nativeHandleTouchEvent(ted.mAction, ted.mIds,
-                                    xArray, yArray, count, ted.mMetaState);
+                                    xArray, yArray, count, ted.mActionIndex, ted.mMetaState);
                             Message.obtain(
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID,
