@@ -311,7 +311,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             apnId = mDefaultApnId;
         }
         mActiveApn = new ApnSetting(apnId, "", "", "", "", "", "", "", "", "",
-                                    "", 0, types, "IP", "IP", true, 0, 0);
+                                    "", 0, types, "IP", "IP");
         if (DBG) log("setupData: mActiveApn=" + mActiveApn);
 
         Message msg = obtainMessage();
