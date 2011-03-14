@@ -9203,7 +9203,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onDetached() {
-            if (mHandle == null) mHandle.onDetached();
+            if (mHandle != null) mHandle.onDetached();
         }
     }
 
