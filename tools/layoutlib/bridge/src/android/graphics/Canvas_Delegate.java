@@ -33,6 +33,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -290,7 +291,7 @@ public final class Canvas_Delegate {
             Paint paint) {
         draw(thisCanvas.mNativeCanvas, paint.mNativePaint, false /*compositeOnly*/,
                 false /*forceSrcMode*/, new GcSnapshot.Drawable() {
-                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                    public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
                         for (int i = 0 ; i < count ; i += 4) {
                             graphics.drawLine((int)pts[i + offset], (int)pts[i + offset + 1],
                                     (int)pts[i + offset + 2], (int)pts[i + offset + 3]);
@@ -314,12 +315,12 @@ public final class Canvas_Delegate {
             Canvas_Delegate newDelegate = new Canvas_Delegate(bitmapDelegate);
 
             return sManager.addNewDelegate(newDelegate);
-        } else {
-            // create a new Canvas_Delegate and return its new native int.
-            Canvas_Delegate newDelegate = new Canvas_Delegate();
-
-            return sManager.addNewDelegate(newDelegate);
         }
+
+        // create a new Canvas_Delegate and return its new native int.
+        Canvas_Delegate newDelegate = new Canvas_Delegate();
+
+        return sManager.addNewDelegate(newDelegate);
     }
 
     @LayoutlibDelegate
@@ -650,7 +651,7 @@ public final class Canvas_Delegate {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
-                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                    public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
                         graphics.drawLine((int)startX, (int)startY, (int)stopX, (int)stopY);
                     }
         });
@@ -668,8 +669,8 @@ public final class Canvas_Delegate {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
-                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                        int style = paint.getStyle();
+                    public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
+                        int style = paintDelegate.getStyle();
 
                         // draw
                         if (style == Paint.Style.FILL.nativeInt ||
@@ -692,8 +693,8 @@ public final class Canvas_Delegate {
         if (oval.right > oval.left && oval.bottom > oval.top) {
             draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                     new GcSnapshot.Drawable() {
-                        public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                            int style = paint.getStyle();
+                        public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
+                            int style = paintDelegate.getStyle();
 
                             // draw
                             if (style == Paint.Style.FILL.nativeInt ||
@@ -722,10 +723,32 @@ public final class Canvas_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static void native_drawArc(int nativeCanvas,
-            RectF oval, float startAngle, float sweep, boolean useCenter, int paint) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Canvas.drawArc is not supported.", null, null /*data*/);
+            final RectF oval, final float startAngle, final float sweep,
+            final boolean useCenter, int paint) {
+        if (oval.right > oval.left && oval.bottom > oval.top) {
+            draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
+                    new GcSnapshot.Drawable() {
+                        public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
+                            int style = paintDelegate.getStyle();
+
+                            Arc2D.Float arc = new Arc2D.Float(
+                                    oval.left, oval.top, oval.width(), oval.height(),
+                                    -startAngle, -sweep,
+                                    useCenter ? Arc2D.PIE : Arc2D.OPEN);
+
+                            // draw
+                            if (style == Paint.Style.FILL.nativeInt ||
+                                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                                graphics.fill(arc);
+                            }
+
+                            if (style == Paint.Style.STROKE.nativeInt ||
+                                    style == Paint.Style.FILL_AND_STROKE.nativeInt) {
+                                graphics.draw(arc);
+                            }
+                        }
+            });
+        }
     }
 
     @LayoutlibDelegate
@@ -734,8 +757,8 @@ public final class Canvas_Delegate {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
-                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                        int style = paint.getStyle();
+                    public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
+                        int style = paintDelegate.getStyle();
 
                         // draw
                         if (style == Paint.Style.FILL.nativeInt ||
@@ -766,9 +789,9 @@ public final class Canvas_Delegate {
 
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
-                    public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                    public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
                         Shape shape = pathDelegate.getJavaShape();
-                        int style = paint.getStyle();
+                        int style = paintDelegate.getStyle();
 
                         if (style == Paint.Style.FILL.nativeInt ||
                                 style == Paint.Style.FILL_AND_STROKE.nativeInt) {
@@ -947,23 +970,23 @@ public final class Canvas_Delegate {
             final float startX, final float startY, int flags, int paint) {
         draw(nativeCanvas, paint, false /*compositeOnly*/, false /*forceSrcMode*/,
                 new GcSnapshot.Drawable() {
-            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+            public void draw(Graphics2D graphics, Paint_Delegate paintDelegate) {
                 // WARNING: the logic in this method is similar to Paint_Delegate.measureText.
                 // Any change to this method should be reflected in Paint.measureText
                 // Paint.TextAlign indicates how the text is positioned relative to X.
                 // LEFT is the default and there's nothing to do.
                 float x = startX;
                 float y = startY;
-                if (paint.getTextAlign() != Paint.Align.LEFT.nativeInt) {
-                    float m = paint.measureText(text, index, count);
-                    if (paint.getTextAlign() == Paint.Align.CENTER.nativeInt) {
+                if (paintDelegate.getTextAlign() != Paint.Align.LEFT.nativeInt) {
+                    float m = paintDelegate.measureText(text, index, count);
+                    if (paintDelegate.getTextAlign() == Paint.Align.CENTER.nativeInt) {
                         x -= m / 2;
-                    } else if (paint.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
+                    } else if (paintDelegate.getTextAlign() == Paint.Align.RIGHT.nativeInt) {
                         x -= m;
                     }
                 }
 
-                List<FontInfo> fonts = paint.getFonts();
+                List<FontInfo> fonts = paintDelegate.getFonts();
 
                 if (fonts.size() > 0) {
                     FontInfo mainFont = fonts.get(0);
