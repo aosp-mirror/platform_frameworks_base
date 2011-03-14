@@ -16,8 +16,6 @@
 
 package com.android.internal.telephony.cdma;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC;
-
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataConnectionTracker;
@@ -102,8 +100,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     protected int cdmaDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
     protected int newCdmaDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
     protected int mRegistrationState = -1;
-    protected RegistrantList cdmaDataConnectionAttachedRegistrants = new RegistrantList();
-    protected RegistrantList cdmaDataConnectionDetachedRegistrants = new RegistrantList();
     protected RegistrantList cdmaForSubscriptionInfoReadyRegistrants = new RegistrantList();
 
     /**
@@ -1098,11 +1094,11 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasCdmaDataConnectionAttached) {
-            cdmaDataConnectionAttachedRegistrants.notifyRegistrants();
+            mAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasCdmaDataConnectionDetached) {
-            cdmaDataConnectionDetachedRegistrants.notifyRegistrants();
+            mDetachedRegistrants.notifyRegistrants();
         }
 
         if (hasCdmaDataConnectionChanged || hasNetworkTypeChanged) {
