@@ -181,7 +181,7 @@ public class DrmManagerClient {
         }
 
         public void handleMessage(Message msg) {
-            DrmInfoEvent event = null;
+            DrmInfoEvent info = null;
             DrmErrorEvent error = null;
 
             switch (msg.what) {
@@ -197,11 +197,15 @@ public class DrmManagerClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    event = new DrmInfoEvent(uniqueId, infoType, message);
+                    info = new DrmInfoEvent(uniqueId, infoType, message);
                     break;
                 }
-                case DrmInfoEvent.TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT: {
-                    event = new DrmInfoEvent(uniqueId, infoType, message);
+                case DrmInfoEvent.TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT:
+                case DrmInfoEvent.TYPE_RIGHTS_INSTALLED:
+                case DrmInfoEvent.TYPE_WAIT_FOR_RIGHTS:
+                case DrmInfoEvent.TYPE_ACCOUNT_ALREADY_REGISTERED:
+                case DrmInfoEvent.TYPE_RIGHTS_REMOVED: {
+                    info = new DrmInfoEvent(uniqueId, infoType, message);
                     break;
                 }
                 default:
@@ -209,8 +213,8 @@ public class DrmManagerClient {
                     break;
                 }
 
-                if (null != mOnInfoListener && null != event) {
-                    mOnInfoListener.onInfo(DrmManagerClient.this, event);
+                if (null != mOnInfoListener && null != info) {
+                    mOnInfoListener.onInfo(DrmManagerClient.this, info);
                 }
                 if (null != mOnErrorListener && null != error) {
                     mOnErrorListener.onError(DrmManagerClient.this, error);

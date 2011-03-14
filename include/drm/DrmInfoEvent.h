@@ -43,6 +43,8 @@ public:
     //! TYPE_ACCOUNT_ALREADY_REGISTERED, when registration has been
     //! already done for the given account.
     static const int TYPE_ACCOUNT_ALREADY_REGISTERED = 5;
+    //! TYPE_RIGHTS_REMOVED, when the rights has been removed.
+    static const int TYPE_RIGHTS_REMOVED = 6;
 
     /**
      * The following constant values should be in sync with DrmErrorEvent.java
@@ -61,6 +63,11 @@ public:
     static const int TYPE_NO_INTERNET_CONNECTION = 2005;
     //! TYPE_PROCESS_DRM_INFO_FAILED, when failed to process DrmInfo.
     static const int TYPE_PROCESS_DRM_INFO_FAILED = 2006;
+    //! TYPE_REMOVE_ALL_RIGHTS_FAILED, when failed to remove all the rights objects
+    //! associated with all DRM schemes.
+    static const int TYPE_REMOVE_ALL_RIGHTS_FAILED = 2007;
+    //! TYPE_ACQUIRE_DRM_INFO_FAILED, when failed to acquire DrmInfo.
+    static const int TYPE_ACQUIRE_DRM_INFO_FAILED = 2008;
 
 public:
     /**
