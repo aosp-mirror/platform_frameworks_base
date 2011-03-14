@@ -603,6 +603,15 @@ static jlong android_os_Binder_clearCallingIdentity(JNIEnv* env, jobject clazz)
 
 static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz, jlong token)
 {
+    // XXX temporary sanity check to debug crashes.
+    int uid = (int)(token>>32);
+    if (uid > 0 && uid < 999) {
+        // In Android currently there are no uids in this range.
+        char buf[128];
+        sprintf(buf, "Restoring bad calling ident: 0x%Lx", token);
+        jniThrowException(env, "java/lang/IllegalStateException", buf);
+        return;
+    }
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
