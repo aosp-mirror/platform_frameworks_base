@@ -28,7 +28,7 @@ import android.nfc.ILlcpConnectionlessSocket;
 import android.nfc.INfcTag;
 import android.nfc.IP2pTarget;
 import android.nfc.IP2pInitiator;
-import android.nfc.INfcSecureElement;
+import android.nfc.INfcAdapterExtras;
 
 /**
  * @hide
@@ -41,13 +41,12 @@ interface INfcAdapter
     INfcTag getNfcTagInterface();
     IP2pTarget getP2pTargetInterface();
     IP2pInitiator getP2pInitiatorInterface();
-    INfcSecureElement getNfcSecureElementInterface();
+    INfcAdapterExtras getNfcAdapterExtrasInterface();
 
     // NfcAdapter-class related methods
     boolean isEnabled();
     NdefMessage localGet();
     void localSet(in NdefMessage message);
-    void openTagConnection(in Tag tag);
     void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
     void disableForegroundDispatch(in ComponentName activity);
@@ -59,12 +58,8 @@ interface INfcAdapter
     int createLlcpConnectionlessSocket(int sap);
     int createLlcpServiceSocket(int sap, String sn, int miu, int rw, int linearBufferLength);
     int createLlcpSocket(int sap, int miu, int rw, int linearBufferLength);
-    int deselectSecureElement();
     boolean disable();
     boolean enable();
     String getProperties(String param);
-    int[] getSecureElementList();
-    int getSelectedSecureElement();
-    int selectSecureElement(int seId);
     int setProperties(String param, String value);
 }

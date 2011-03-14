@@ -95,7 +95,7 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/ModelViewer_inte
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/PerfTest_intermediates/)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/RSTest_intermediates/)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/hardware/IUsbManager.java)
-
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/nfc)
 
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
