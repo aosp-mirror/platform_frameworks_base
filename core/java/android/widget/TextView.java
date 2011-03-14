@@ -5227,6 +5227,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param text The auto complete text the user has selected.
      */
     public void onCommitCompletion(CompletionInfo text) {
+        // intentionally empty
     }
 
     /**
@@ -5413,6 +5414,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * of edit operations through a call to link {@link #beginBatchEdit()}.
      */
     public void onBeginBatchEdit() {
+        // intentionally empty
     }
     
     /**
@@ -5420,6 +5422,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * of edit operations through a call to link {@link #endBatchEdit}.
      */
     public void onEndBatchEdit() {
+        // intentionally empty
     }
     
     /**
@@ -6762,6 +6765,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param lengthAfter The length of the replacement modified text
      */
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
+        // intentionally empty
     }
 
     /**
@@ -6772,6 +6776,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param selEnd The new selection end location.
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
+        // intentionally empty
     }
     
     /**
