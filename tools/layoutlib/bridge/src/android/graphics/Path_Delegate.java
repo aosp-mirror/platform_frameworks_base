@@ -365,7 +365,7 @@ public final class Path_Delegate {
         // because x/y is the center of the circle, need to offset this by the radius
         pathDelegate.mPath.append(new Arc2D.Float(
                 oval.left, oval.top, oval.width(), oval.height(),
-                startAngle, sweepAngle, Arc2D.OPEN), false);
+                -startAngle, -sweepAngle, Arc2D.OPEN), false);
     }
 
     @LayoutlibDelegate
@@ -707,10 +707,9 @@ public final class Path_Delegate {
      *                    mod 360.
      * @param forceMoveTo If true, always begin a new contour with the arc
      */
-    private void arcTo(RectF oval, float startAngle, float sweepAngle,
-                      boolean forceMoveTo) {
-        Arc2D arc = new Arc2D.Float(oval.left, oval.top, oval.width(), oval.height(), startAngle,
-                sweepAngle, Arc2D.OPEN);
+    private void arcTo(RectF oval, float startAngle, float sweepAngle, boolean forceMoveTo) {
+        Arc2D arc = new Arc2D.Float(oval.left, oval.top, oval.width(), oval.height(), -startAngle,
+                -sweepAngle, Arc2D.OPEN);
         mPath.append(arc, true /*connect*/);
 
         resetLastPointFromPath();
