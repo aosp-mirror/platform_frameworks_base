@@ -61,6 +61,12 @@ struct BitSet32 {
     // Result is undefined if all bits are marked.
     inline uint32_t firstUnmarkedBit() const { return __builtin_clz(~ value); }
 
+    // Gets the index of the specified bit in the set, which is the number of
+    // marked bits that appear before the specified bit.
+    inline uint32_t getIndexOfBit(uint32_t n) const {
+        return __builtin_popcount(value & ~(0xffffffffUL >> n));
+    }
+
     inline bool operator== (const BitSet32& other) const { return value == other.value; }
     inline bool operator!= (const BitSet32& other) const { return value != other.value; }
 };
