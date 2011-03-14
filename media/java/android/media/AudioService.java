@@ -110,6 +110,8 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_PLAY_SOUND_EFFECT = 7;
     private static final int MSG_BTA2DP_DOCK_TIMEOUT = 8;
     private static final int MSG_LOAD_SOUND_EFFECTS = 9;
+    private static final int MSG_SET_FORCE_USE = 10;
+
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
 
@@ -1170,22 +1172,15 @@ public class AudioService extends IAudioService.Stub {
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
         }
-        if (on) {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_SPEAKER);
-            mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
-        } else {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
-            mForcedUseForComm = AudioSystem.FORCE_NONE;
-        }
+        mForcedUseForComm = on ? AudioSystem.FORCE_SPEAKER : AudioSystem.FORCE_NONE;
+
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SHARED_MSG, SENDMSG_QUEUE,
+                AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
     }
 
     /** @see AudioManager#isSpeakerphoneOn() */
     public boolean isSpeakerphoneOn() {
-        if (mForcedUseForComm == AudioSystem.FORCE_SPEAKER) {
-            return true;
-        } else {
-            return false;
-        }
+        return (mForcedUseForComm == AudioSystem.FORCE_SPEAKER);
     }
 
     /** @see AudioManager#setBluetoothScoOn() */
@@ -1193,24 +1188,17 @@ public class AudioService extends IAudioService.Stub {
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
-        if (on) {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_BT_SCO);
-            AudioSystem.setForceUse(AudioSystem.FOR_RECORD, AudioSystem.FORCE_BT_SCO);
-            mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
-        } else {
-            AudioSystem.setForceUse(AudioSystem.FOR_COMMUNICATION, AudioSystem.FORCE_NONE);
-            AudioSystem.setForceUse(AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE);
-            mForcedUseForComm = AudioSystem.FORCE_NONE;
-        }
+        mForcedUseForComm = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
+
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SHARED_MSG, SENDMSG_QUEUE,
+                AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SHARED_MSG, SENDMSG_QUEUE,
+                AudioSystem.FOR_RECORD, mForcedUseForComm, null, 0);
     }
 
     /** @see AudioManager#isBluetoothScoOn() */
     public boolean isBluetoothScoOn() {
-        if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
-            return true;
-        } else {
-            return false;
-        }
+        return (mForcedUseForComm == AudioSystem.FORCE_BT_SCO);
     }
 
     /** @see AudioManager#startBluetoothSco() */
@@ -1935,6 +1923,10 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
+        private void setForceUse(int usage, int config) {
+            AudioSystem.setForceUse(usage, config);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             int baseMsgWhat = getMsgBase(msg.what);
@@ -2025,6 +2017,10 @@ public class AudioService extends IAudioService.Stub {
                 case MSG_BTA2DP_DOCK_TIMEOUT:
                     // msg.obj  == address of BTA2DP device
                     makeA2dpDeviceUnavailableNow( (String) msg.obj );
+                    break;
+
+                case MSG_SET_FORCE_USE:
+                    setForceUse(msg.arg1, msg.arg2);
                     break;
             }
         }
