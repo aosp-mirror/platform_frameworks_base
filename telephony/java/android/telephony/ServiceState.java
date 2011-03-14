@@ -92,9 +92,11 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public static final int RADIO_TECHNOLOGY_EVDO_B = 12;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_LTE = 13;
+    public static final int RADIO_TECHNOLOGY_EHRPD = 13;
     /** @hide */
-    public static final int RADIO_TECHNOLOGY_EHRPD = 14;
+    public static final int RADIO_TECHNOLOGY_LTE = 14;
+    /** @hide */
+    public static final int RADIO_TECHNOLOGY_HSPAP = 15;
 
     /**
      * Available registration states for GSM, UMTS and CDMA.
@@ -429,10 +431,13 @@ public class ServiceState implements Parcelable {
             radioTechnology = "EvDo rev. B";
             break;
         case 13:
-            radioTechnology = "LTE";
+            radioTechnology = "eHRPD";
             break;
         case 14:
-            radioTechnology = "eHRPD";
+            radioTechnology = "LTE";
+            break;
+        case 15:
+            radioTechnology = "HSPAP";
             break;
         default:
             Log.w(LOG_TAG, "mRadioTechnology variable out of range.");
