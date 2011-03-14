@@ -58,6 +58,13 @@ public interface IccConstants {
     static final int EF_CST = 0x6f32;
     static final int EF_RUIM_SPN =0x6F41;
 
+    //ISIM access
+    static final int EF_IMPU = 0x6f04;
+    static final int EF_IMPI = 0x6f02;
+    static final int EF_DOMAIN = 0x6f03;
+    static final int EF_IST = 0x6f07;
+    static final int EF_PCSCF = 0x6f09;
+
     // SMS record length from TS 51.011 10.5.3
     static public final int SMS_RECORD_LENGTH = 176;
 
@@ -67,4 +74,7 @@ public interface IccConstants {
     static final String DF_GRAPHICS = "5F50";
     static final String DF_GSM = "7F20";
     static final String DF_CDMA = "7F25";
+
+    //ISIM access
+    static final String DF_ADFISIM = "7FFF";
 }

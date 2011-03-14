@@ -125,6 +125,12 @@ public interface Phone {
     static final String APN_TYPE_DUN = "dun";
     /** APN type for HiPri traffic */
     static final String APN_TYPE_HIPRI = "hipri";
+    /** APN type for FOTA */
+    static final String APN_TYPE_FOTA = "fota";
+    /** APN type for IMS */
+    static final String APN_TYPE_IMS = "ims";
+    /** APN type for CBS */
+    static final String APN_TYPE_CBS = "cbs";
 
     // "Features" accessible through the connectivity manager
     static final String FEATURE_ENABLE_MMS = "enableMMS";
@@ -132,6 +138,9 @@ public interface Phone {
     static final String FEATURE_ENABLE_DUN = "enableDUN";
     static final String FEATURE_ENABLE_HIPRI = "enableHIPRI";
     static final String FEATURE_ENABLE_DUN_ALWAYS = "enableDUNAlways";
+    static final String FEATURE_ENABLE_FOTA = "enableFOTA";
+    static final String FEATURE_ENABLE_IMS = "enableIMS";
+    static final String FEATURE_ENABLE_CBS = "enableCBS";
 
     /**
      * Return codes for <code>enableApnType()</code>
@@ -140,6 +149,7 @@ public interface Phone {
     static final int APN_REQUEST_STARTED    = 1;
     static final int APN_TYPE_NOT_AVAILABLE = 2;
     static final int APN_REQUEST_FAILED     = 3;
+    static final int APN_ALREADY_INACTIVE   = 4;
 
 
     /**
@@ -164,6 +174,7 @@ public interface Phone {
     static final String REASON_PS_RESTRICT_ENABLED = "psRestrictEnabled";
     static final String REASON_PS_RESTRICT_DISABLED = "psRestrictDisabled";
     static final String REASON_SIM_LOADED = "simLoaded";
+    static final String REASON_NW_TYPE_CHANGED = "nwTypeChanged";
 
     // Used for band mode selection methods
     static final int BM_UNSPECIFIED = 0; // selected by baseband automatically
@@ -193,6 +204,7 @@ public interface Phone {
     int NT_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
     int NT_MODE_GLOBAL       = RILConstants.NETWORK_MODE_GLOBAL;
 
+    int NT_MODE_LTE_ONLY     = RILConstants.NETWORK_MODE_LTE_ONLY;
     int PREFERRED_NT_MODE    = RILConstants.PREFERRED_NETWORK_MODE;
 
 

@@ -221,12 +221,32 @@ public class ConnectivityManager
 
     /** {@hide} */
     public static final int TYPE_DUMMY       = 8;
+
     /** {@hide} */
     public static final int TYPE_ETHERNET    = 9;
-    /** {@hide} TODO: Need to adjust this for WiMAX. */
-    public static final int MAX_RADIO_TYPE   = TYPE_DUMMY;
-    /** {@hide} TODO: Need to adjust this for WiMAX. */
-    public static final int MAX_NETWORK_TYPE = TYPE_DUMMY;
+    /**
+     * Over the air Adminstration.
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_FOTA = 10;
+
+    /**
+     * IP Multimedia Subsystem
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_IMS  = 11;
+
+    /**
+     * Carrier Branded Services
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_CBS  = 12;
+
+    /** {@hide} */
+    public static final int MAX_RADIO_TYPE   = TYPE_MOBILE_CBS;
+
+    /** {@hide} */
+    public static final int MAX_NETWORK_TYPE = TYPE_MOBILE_CBS;
 
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
