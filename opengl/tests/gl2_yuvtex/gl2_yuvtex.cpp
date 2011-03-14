@@ -186,11 +186,6 @@ const int yuvTexUsage = GraphicBuffer::USAGE_HW_TEXTURE |
         GraphicBuffer::USAGE_SW_WRITE_RARELY;
 const int yuvTexFormat = HAL_PIXEL_FORMAT_YV12;
 const int yuvTexOffsetY = 0;
-const int yuvTexStrideY = (yuvTexWidth + 0xf) & ~0xf;
-const int yuvTexOffsetV = yuvTexStrideY * yuvTexHeight;
-const int yuvTexStrideV = (yuvTexStrideY/2 + 0xf) & ~0xf; 
-const int yuvTexOffsetU = yuvTexOffsetV + yuvTexStrideV * yuvTexHeight/2;
-const int yuvTexStrideU = yuvTexStrideV;
 const bool yuvTexSameUV = false;
 static sp<GraphicBuffer> yuvTexBuffer;
 static GLuint yuvTex;
@@ -200,6 +195,11 @@ bool setupYuvTexSurface(EGLDisplay dpy, EGLContext context) {
     int blockHeight = yuvTexHeight > 16 ? yuvTexHeight / 16 : 1;
     yuvTexBuffer = new GraphicBuffer(yuvTexWidth, yuvTexHeight, yuvTexFormat,
             yuvTexUsage);
+    int yuvTexStrideY = yuvTexBuffer->getStride();
+    int yuvTexOffsetV = yuvTexStrideY * yuvTexHeight;
+    int yuvTexStrideV = (yuvTexStrideY/2 + 0xf) & ~0xf;
+    int yuvTexOffsetU = yuvTexOffsetV + yuvTexStrideV * yuvTexHeight/2;
+    int yuvTexStrideU = yuvTexStrideV;
     char* buf = NULL;
     status_t err = yuvTexBuffer->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&buf));
     if (err != 0) {
