@@ -129,7 +129,7 @@ class="new">new!</span></li>
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 10.0.0
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 10.0.1
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
