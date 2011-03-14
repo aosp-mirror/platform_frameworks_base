@@ -430,7 +430,7 @@ public class CdmaConnection extends Connection {
                 } else if (serviceState == ServiceState.STATE_OUT_OF_SERVICE
                         || serviceState == ServiceState.STATE_EMERGENCY_ONLY) {
                     return DisconnectCause.OUT_OF_SERVICE;
-                } else if (phone.mCM.getRadioState() != CommandsInterface.RadioState.NV_READY
+                } else if (phone.mCM.getNvState() != CommandsInterface.RadioState.NV_READY
                         && phone.getIccCard().getState() != RuimCard.State.READY) {
                     return DisconnectCause.ICC_ERROR;
                 } else if (causeCode==CallFailCause.NORMAL_CLEARING) {

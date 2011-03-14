@@ -696,15 +696,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // TODO - move this into the MobileDataStateTracker
         int usedNetworkType = networkType;
         if(networkType == ConnectivityManager.TYPE_MOBILE) {
-            if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
-                    TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
+            usedNetworkType = convertFeatureToNetworkType(feature);
+            if (usedNetworkType < 0) {
+                Slog.e(TAG, "Can't match any netTracker!");
+                usedNetworkType = networkType;
             }
         }
         NetworkStateTracker network = mNetTrackers[usedNetworkType];
@@ -848,15 +843,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // TODO - move to MobileDataStateTracker
             int usedNetworkType = networkType;
             if (networkType == ConnectivityManager.TYPE_MOBILE) {
-                if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
-                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
-                        TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
-                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
-                } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
-                    usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
+                usedNetworkType = convertFeatureToNetworkType(feature);
+                if (usedNetworkType < 0) {
+                    usedNetworkType = networkType;
                 }
             }
             tracker =  mNetTrackers[usedNetworkType];
@@ -2173,5 +2162,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void loge(String s) {
         Slog.e(TAG, s);
+    }
+    int convertFeatureToNetworkType(String feature){
+        int networkType = -1;
+        if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_MMS;
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_SUPL;
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
+                TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_DUN;
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_FOTA)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_FOTA;
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_IMS)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_IMS;
+        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_CBS)) {
+            networkType = ConnectivityManager.TYPE_MOBILE_CBS;
+        }
+        return networkType;
     }
 }

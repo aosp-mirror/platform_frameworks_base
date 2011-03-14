@@ -38,6 +38,8 @@ import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.telephony.test.SimulatedRadioControl;
+import com.android.internal.telephony.gsm.SIMRecords;
+import com.android.internal.telephony.gsm.SimCard;
 
 import java.util.Locale;
 
@@ -116,6 +118,9 @@ public abstract class PhoneBase extends Handler implements Phone {
     int mCallRingDelay;
     public boolean mIsTheCurrentActivePhone = true;
     boolean mIsVoiceCapable = true;
+    public SIMRecords mSIMRecords;
+    public SimCard mSimCard;
+    public SMSDispatcher mSMS;
 
     /**
      * Set a system property, unless we're in unit test mode
@@ -237,7 +242,8 @@ public abstract class PhoneBase extends Handler implements Phone {
     public void dispose() {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
             mCM.unSetOnCallRing(this);
-            mDataConnection.onCleanUpConnection(false, REASON_RADIO_TURNED_OFF);
+            // Must cleanup all connectionS and needs to use sendMessage!
+            mDataConnection.cleanUpAllConnections();
             mIsTheCurrentActivePhone = false;
         }
     }
@@ -662,6 +668,20 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     /**
+    * Retrieves the ServiceStateTracker of the phone instance.
+    */
+    public ServiceStateTracker getServiceStateTracker() {
+        return null;
+    }
+
+    /**
+    * Get call tracker
+    */
+    public CallTracker getCallTracker() {
+        return null;
+    }
+
+    /**
      *  Query the status of the CDMA roaming preference
      */
     public void queryCdmaRoamingPreference(Message response) {
@@ -1079,5 +1099,15 @@ public abstract class PhoneBase extends Handler implements Phone {
     private void logUnexpectedGsmMethodCall(String name) {
         Log.e(LOG_TAG, "Error! " + name + "() in PhoneBase should not be " +
                 "called, GSMPhone inactive.");
+    }
+
+    // Called by SimRecords which is constructed with a PhoneBase instead of a GSMPhone.
+    public void notifyCallForwardingIndicator() {
+        // This function should be overridden by the class GSMPhone. Not implemented in CDMAPhone.
+        Log.e(LOG_TAG, "Error! This function should never be executed, inactive CDMAPhone.");
+    }
+
+    public void notifyDataConnectionFailed(String reason, String apnType) {
+        mNotifier.notifyDataConnectionFailed(this, reason, apnType);
     }
 }
