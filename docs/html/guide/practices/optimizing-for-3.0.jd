@@ -5,20 +5,32 @@ page.title=Optimizing Apps for Android 3.0
 <div id="qv">
 <h2>In this document</h2>
 <ol>
-<li><a href="#Setup">Set Up Your SDK with Android 3.0</a></li>
-<li><a href="#SearchableConfiguration">Optimize Your App for Tablets and Similar Devices</a></li>
-<li><a href="#SearchableActivity">Upgrade or Develop a New App for Tablets and Similar
-Devices</a></li>
+<li><a href="#Setup">Setting Up Your SDK with Android 3.0</a></li>
+<li><a href="#Optimizing">Optimizing Your App for Tablets</a></li>
+<li><a href="#Upgrading">Upgrading or Developing a New App for Tablets</a></li>
+<li><a href="#ManagingAppDist">Managing App Distribution Based on Screen Configuration</a>
+  <ol>
+    <li><a href="#FilteringTabletApps">Filtering a tablet app from mobile devices</a></li>
+    <li><a href="#FilteringMobileApps">Filtering a mobile device app from tablets</a></li>
+  </ol>
+</li>
+<li><a href="#Issues">Other Issues</a>
+  <ol>
+    <li><a href="#Landscape">Adding support for landscape screens</a></li>
+    <li><a href="#Telephony">Using telephony or other variable features</a></li>
+  </ol>
+</li>
 </ol>
 
 </div>
 </div>
 
-<p>If you're developing an Android application, Android 3.0 introduces several features that allow
+<p>Android 3.0 introduces several features that allow
 you to enhance your user's experience on tablets and similar devices. Any application you've already
 published is compatible with devices running Android 3.0, by default, because Android applications
-are forward-compatible. However, there are some simple changes you should make to optimize your
-application for tablet-type devices.</p>
+are forward-compatible. However, new tablet devices running Android 3.0 are now available to the
+public and provide users a new Android experience on a larger screen, so you should make sure
+your application looks and works great on the new platform and new device form-factors.</p>
 
 <p>This document shows how you can optimize your existing application for Android 3.0 and
 maintain compatibility with older versions or upgrade your application completely with new APIs.</p>
@@ -27,18 +39,28 @@ maintain compatibility with older versions or upgrade your application completel
 <p><b>To get started:</b></p>
 
 <ol>
-  <li><a href="#Setup">Set up your SDK with Android 3.0</a>.</li>
-  <li>Then choose to either optimize or upgrade:
+  <li><a href="#Setup">Set up your SDK with Android 3.0</a>.
+    <p>Install the Android 3.0 platform, new tools, and set up a new AVD.</p></li>
+  <li>Choose to either optimize or upgrade:
     <ol type="a">
-      <li><a href="#Optimize">Optimize Your App for Tablets and Similar Devices</a>.
-        <p>When you have an existing application and want to maintain compatibility with
-older versions of Android.</p>
+      <li><a href="#Optimizing">Optimize your app for tablets and similar devices</a>.
+        <p>Read this section if you have an existing application and want to
+maintain compatibility with older versions of Android. All you need to do is update your
+manifest file to declare support for Android 3.0, test your application on the new platform, and
+add extra resources to support extra large screens, as appropriate.</p>
       </li>
-      <li><a href="#Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</a>.
-        <p>When you want to upgrade your application to use APIs introduced in Android 3.0 or
-    create a new application targeted to tablets and similar devices.</p></li>
+      <li><a href="#Upgrading">Upgrade or develop a new app for tablets and similar devices</a>.
+        <p>Read this section if you want to upgrade your application to use APIs introduced in
+Android 3.0 or create a new application targeted to tablets and similar devices. Compared to
+upgrading to previous versions of Android, there's nothing different about upgrading to Android 3.0.
+This section introduces some of the key features and APIs you should use to make an
+application that's fully enhanced for tablets.</p></li>
     </ol>
   </li>
+  <li>Consider whether you need to <a href="#ManagingAppDist">manage the distribution of your
+application based on screen configuration</a>.</li>
+  <li>Then review some <a href="#Issue">other issues</a> you might encounter when developing
+for tablets and similar devices.</li>
 </ol>
 
 
@@ -66,14 +88,16 @@ device:
   <p>Set the target to "Android 3.0" and the skin to "WXGA" (the default skin).</p></li>
 </ol>
 
+<p>The best way to test your application on Android 3.0 is to use real hardware running Android 3.0,
+such as the <a href="http://www.motorola.com/staticfiles/Consumers/XOOM/index.html">Motorola
+Xoom</a>. Of course, you can also use the Android emulator on your development machine, but because
+the Android emulator must simulate the ARM instruction set on your computer and the WXGA screen is
+significantly larger than a typical virtual device, emulator performance is much slower than a real
+device.</p>
 
 <h3>About emulator performance</h3>
 
-<p>Because the Android emulator must simulate the ARM instruction set on your computer
-and the WXGA screen is significantly larger than a typical virtual device, emulator performance is
-much slower than a real device.</p>
-
-<p>In particular, initializing the emulator can be slow and can take several minutes, depending on
+<p>Initializing the emulator can be slow and can take several minutes, depending on
 your hardware. When the emulator is booting, there is limited user feedback, so please be patient
 and wait until you see the home screen (or lock screen) appear. </p>
 
@@ -82,9 +106,10 @@ application&mdash;typically you only need to boot at the start of a session and 
 Also see the tip below for information about using a snapshot to drastically reduce startup time
 after the first initialization. </p>
 
-<p>We're working hard to resolve the performance issues and it will improve in future tools
-releases. For the time being, the emulator is still best way to evaluate your application's
-appearance and functionality on Android 3.0 without a real device.</p>
+<p>General performance in the emulator is also slow. We're working hard to resolve the performance
+issues and it will improve in future tools releases. If you don't yet have a real device running
+Android 3.0, the emulator is still best way to evaluate your application's appearance and
+functionality on Android 3.0.</p>
 
 <p class="note"><strong>Tip:</strong> To improve the startup time for the emulator, enable snapshots
 for the AVD when you create it with the SDK and AVD Manager (there's a checkbox in the AVD creator
@@ -97,7 +122,7 @@ time).</p>
 
 
 
-<h2 id="Optimize">Optimize Your Application for Tablets and Similar Devices</h2>
+<h2 id="Optimizing">Optimizing Your App for Tablets</h2>
 
 <p>If you've already developed an application for an earlier version of Android, there are a few
 things you can do to optimize it for a tablet-style experience on Android 3.0 without changing the
@@ -142,21 +167,24 @@ android:targetSdkVersion}</a> to {@code "11"}. For example:
 </pre>
     <p>By targeting the Android 3.0 platform, the system automatically applies the holographic theme
 to each activity when your application runs on an Android 3.0 device. The holographic theme
-provides a new design for widgets, such as buttons and text boxes, and restyles other
-visual elements. This is the standard theme in applications built for Android 3.0, so your
-application will look more at home by enabling the theme.</p>
-    <p>Additionally, the holographic theme enables the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> in your activities when running on an
-Android 3.0 device. The Action Bar replaces the traditional title bar at the top of the activity
-window and provides the user access to the activity's Options Menu.</p>
+provides a new design for widgets, such as buttons and text boxes, and new styles for other
+visual elements. This is the standard theme for applications built for Android 3.0, so your
+application will look and feel consistent with the system and other applications when it is
+enabled.</p>
+    <p>Additionally, when an activity uses the holographic theme, the system enables the <a
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> for the activity. The Action Bar
+replaces the traditional title bar at the top of the activity window and provides the user access to
+the activity's Options Menu.</p>
       </li>
-      <li>Continue to build your application against the minimum version specified by <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>,
-but install it on the Android 3.0 AVD. Repeat your tests to be sure that your user interface works
-well with the holographic theme.
+      <li>Build your application against the same version of the Android platform you have been
+using previously (such as the version declared in your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>),
+but install it on the Android 3.0 AVD. (You should not build against Android 3.0 unless you are
+using new APIs.) Repeat your tests to be sure that your user interface works well with the
+holographic theme.
         <p class="note"><strong>Note:</strong> If you have applied other themes directly to your
 activities, they will override the inherited holographic theme. To resolve this, you can use
-the <a href="{@docRoot}guide/topics/resources/providing-resources.html#VersionQualifier">system
+the <a href="{@docRoot}guide/topics/resources/providing-resources.html#VersionQualifier">platform
 version qualifier</a> to provide an alternative theme for Android 3.0 devices that's based on the
 holographic theme. For more information, read how to <a
 href="{@docRoot}guide/topics/ui/themes.html#SelectATheme">select a theme based on platform
@@ -177,15 +205,24 @@ screens:</p>
 (wide), so you should be sure that your activities offer a layout that's optimized for a wide
 viewing area. <p>You can specify landscape resources with the <code>land</code> resource
 qualifier, but if you want alternative resources for an extra large landscape screen, you
-should use both <code>xlarge</code> and <code>land</code> qualifiers. For example, {@code
+should use both the <code>xlarge</code> and <code>land</code> qualifiers. For example, {@code
 res/layout-xlarge-land/}. The order of the qualifier names is important; see <a
 href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
 Providing Alternative Resources</a> for more information.</p></li>
-      <li>Button position: Consider whether the position of the most common buttons in your UI are
-easily accessible while holding a tablet with two hands.</li>
+      <li>Button position and size: Consider whether the position and size of the most common
+buttons in your UI make them easily accessible while holding a tablet with two hands. In some
+cases, you might need to resize buttons, especially if they use {@code "wrap_content"}
+as the width value. To enlarge the buttons, if necessary, you should either: add
+extra padding to the button; specify dimension values with {@code dp} units; or use {@code
+android:layout_weight} when the button is in a <a
+href="{@docRoot}guide/topics/ui/layout-objects.html#linearlayout">linear layout</a>. Use your
+best judgment of proportions for each screen size&mdash;you don't want the buttons to be too big,
+either.</li>
       <li>Font sizes: Be sure your application uses {@code sp} units when setting font
-sizes. This alone should ensure a readable experience on tablet-style devices. In some cases,
-however, you might want to consider larger font sizes for <code>xlarge</code> configurations.</li>
+sizes. This alone should ensure a readable experience on tablet-style devices, because it is a
+scale-independent pixel unit, which will resize as appropriate for the current screen configuration.
+In some cases, however, you still might want to consider larger font sizes for <code>xlarge</code>
+configurations.</li>
     </ul>
     <p>In general, always be sure that your application follows the <a
 href="{@docRoot}guide/practices/screens_support.html#screen-independence">Best Practices
@@ -197,7 +234,29 @@ for Screen Independence</a>.</p>
 
 
 
-<h2 id="Upgrade">Upgrade or Develop a New App for Tablets and Similar Devices</h2>
+
+<h2 id="Upgrading">Upgrading or Developing a New App for Tablets</h2>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h3>Use new APIs and remain backward-compatible</h3>
+<p>It is possible for you to upgrade your application with some new
+APIs <em>and</em> remain compatible with older versions of Android. Usually, this requires that you
+use techniques such as reflection to check for the availability of certain APIs at runtime. However,
+to help you add features from Android 3.0 without requiring you to change your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+or build target, we're providing a static library called the "Android Compatibility package"
+(downloadable from the AVD and SDK Manager).</p>
+<p>This library includes APIs for <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>, <a
+href="{@docRoot}guide/topics/fundamentals/loaders.html">loaders</a>, and some updated classes. By
+simply adding this library to your Android project, you can use these APIs in your application and
+remain compatible with Android 1.6. For more information, see the blog post, <a
+href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">Fragments for
+All</a>.</p>
+</div>
+</div>
+
 
 <p>If you want to develop an application that's fully enhanced for tablet-type devices running
 Android 3.0, then you need to use new APIs in Android 3.0. This section introduces some of
@@ -206,9 +265,11 @@ the new features you should use.</p>
 
 <h3>Declare the minimum system version</h3>
 
-<p>The first thing to do when you create a project for Android 3.0 is set your manifest's <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
-to {@code "11"}. For example:</p>
+<p>The first thing to do when you upgrade or create a project for Android 3.0 is set your manifest's
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> to {@code "11"}. This declares that your application uses APIs available
+in Android 3.0 and greater, so it should not be available to devices running an older version of
+Android. For example:</p>
 
 <pre>
 &lt;manifest ... >
@@ -218,9 +279,11 @@ to {@code "11"}. For example:</p>
     &lt;application>
 &lt;/manifest>
 </pre>
-   
-<p>By targeting the Android 3.0 platform, the system automatically applies the new holographic theme
-to each of your activities.</p>
+
+<p>Not only is this necessary in order to declare the minimum API level your application requires,
+but it enables the new holographic theme to each of your activities. The holographic theme is the
+standard theme for the Android 3.0 system and all applications designed for it. It includes new
+designs for the system widgets and overall appearance.</p>
 
 <p>Additionally, the holographic theme enables the Action Bar for each activity.</p>
 
@@ -229,13 +292,14 @@ to each of your activities.</p>
 
 <p>The Action Bar is a widget for activities that replaces the traditional title bar at the top of
 the screen. By default, the Action Bar includes the application logo on the left side, followed by
-the activity title, and any available items from the Options Menu on the right side.</p>
+the activity title, and access to items from the Options Menu in a drop-down list on the right
+side.</p>
 
-<p>You can enable items from your activity's Options Menu to appear directly in the Action Bar as
-"action items" by adding {@code showAsAction="ifRoom"} to specific items in your <a
+<p>You can enable items from the Options Menu to appear directly in the Action Bar as
+"action items" by adding {@code showAsAction="ifRoom"} to specific menu items in your <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a>. You can also add
 navigation features to the Action Bar, such as tabs, and use the application icon to navigate to
-your application's "home" activity or "up" the activity hierarchy.</p>
+your application's "home" activity or to navigate "up" the application's activity hierarchy.</p>
 
 <p>For more information, read <a href="{@docRoot}guide/topics/ui/actionbar.html">Using the
 Action Bar</a>.</p>
@@ -244,11 +308,12 @@ Action Bar</a>.</p>
 
 <h3>Divide your activities into fragments</h3>
 
-<p>A fragment represents a behavior or a portion of user interface in an activity. You can combine
-multiple fragments in a single activity to build a multi-pane UI and reuse a fragment in multiple
-activities. You can think of a fragment as a modular section of an activity, which has its own
-lifecycle, receives its own input events, and which you can add or remove while the activity is
-running.</p>
+<p>A fragment represents a behavior or a portion of user interface in an activity. You can think of
+a fragment as a modular section of an activity, which has its own lifecycle, receives its own input
+events, and which you can add or remove while the activity is running. Fragments are an optional
+component for your activities that allow you to build a multi-pane UI and reuse them in multiple
+activities. If you're building an application for tablets, we recommend that you use fragments to
+create activities that offer a more dynamic and flexible user interface.</p>
 
 <p>For example, a news application can use one fragment to show a list of articles on the left and
 another fragment to display an article on the right&mdash;both fragments appear in one activity,
@@ -262,8 +327,8 @@ href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> document
 
 <h3>Use new animation APIs for transitions</h3>
 
-<p>An all new flexible animation framework allows you to animate arbitrary properties of any object
-(View, Drawable, Fragment, Object, or anything else). You can define several animation aspects
+<p>An all-new animation framework allows you to animate arbitrary properties of any object
+(such as a View, Drawable, Fragment, or anything else). You can define several animation aspects
 (such as duration, repeat, interpolation, and more) for an object's int, float, and hexadecimal
 color values, by default. That is, when an object has a property field for one of these types, you
 can change its value over time to affect an animation.</p>
@@ -279,8 +344,9 @@ href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a> doc
 
 <h3>Enable hardware acceleration</h3>
 
-<p>You can now enable the OpenGL renderer for your application by setting {@code
-android:hardwareAccelerated="true"} in your manifest's <a
+<p>Android 3.0 adds a hardware-accelerated OpenGL renderer that gives a performance boost to most 2D
+graphics operations. You can enable hardware-accelerated rendering in your application by setting
+{@code android:hardwareAccelerated="true"} in your manifest's <a
 href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
 element or for individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
 &lt;activity&gt;}</a> elements. Hardware acceleration results in smoother animations, smoother
@@ -314,48 +380,16 @@ new graphics engine called Renderscript, and more.</p>
 href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 
-<h3>Publish your app for extra large screens</h3>
-
-<p>You should also decide whether your application is <em>only</em> for
-tablet-type devices (specifically, <em>xlarge</em> devices) or for all types of screen sizes.</p>
-
-<p>If you want your application to be available to all screen sizes (for example, for all
-phones and tablets), there's nothing you need to do. By default, an application with <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-android:minSdkVersion}</a> set to {@code "4"} or higher will resize to fit any screen size.</p>
-
-<p>If your application is <em>only</em> for <em>xlarge</em> screens, include the <a
-href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element in your manifest and declare that the application supports
-only <em>xlarge</em> screens, by declaring all other sizes {@code "false"}. For example:</p>
-
-<pre>
-&lt;manifest ... >
-    ...
-    &lt;supports-screens android:smallScreens="false"
-                      android:normalScreens="false"
-                      android:largeScreens="false"
-                      android:xlargeScreens="true" /&gt;
-    &lt;application ... >
-        ...
-    &lt;application>
-&lt;/manifest>
-</pre>
-
-<p>With this declaration, you indicate that your application does not support any screen size except
-extra large. External services such as Android Market may then use this information to filter your
-application from devices that do not have an extra large screen.</p>
-
-
 
 <h3>Look at some samples</h3>
 
-<p>Many of the new features and APIs that are described in the <a
-href="{@docRoot}sdk/android-3.0.html#api">Android 3.0 Platform Preview</a> also have accompanying
-samples that can help you understand how to use them. To get the samples, download them from the SDK
-repository using the Android SDK Manager. After downloading the samples ("Samples for SDK API 11"), 
-you can find them in <code>&lt;sdk_root&gt;/samples/android-11/</code>. The links below can help you
-find samples for the features you are interested in:</p>
+<p>Many of the new features and APIs that are described above and in the <a
+href="{@docRoot}sdk/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
+samples that allow you to preview the effects and can help you understand how to use them. To get
+the samples, download them from the SDK repository <a href="{@docRoot}sdk/adding-components.html"
+>using the Android SDK and AVD Manager</a>. After downloading the samples ("Samples for SDK API
+11"), you can find them in <code>&lt;sdk_root&gt;/samples/android-11/</code>. The following list
+provides links to the browsable source code for some of the samples:</p>
 
 <ul>
   <li><a href="{@docRoot}resources/samples/HoneycombGallery/index.html">Honeycomb Gallery</a>:
@@ -395,3 +429,248 @@ different applications that demonstrate using renderscript APIs for computations
 graphics.</li>
 </ul>
 
+
+
+<h2 id="ManagingAppDist">Managing App Distribution Based on Screen Configuration</h2>
+
+<p>If your manifest file has either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> set to {@code "4"} or higher, then the Android system will scale your
+application's layout and assets to fit the current device screen, whether the device screen is
+smaller or larger than the one for which you originally designed your application. As such, you
+should always test your application on real or <a
+href="{@docRoot}guide/developing/devices/index.html">virtual devices</a> with various screen sizes
+and densities.</p>
+
+<p>Although we recommend that you design your application to function properly on multiple
+configurations of screen size and density, you can instead choose to limit the distribution of your
+application to certain types of screens, such as only tablets or only mobile devices. To do so, you
+can add elements to your Android manifest file that enable filtering based on screen configuration
+by external services such as Android Market.</p>
+
+<p>However, before you decide to restrict your application to certain screen configurations, you
+should understand the techniques for <a
+href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a> and employ
+them to the best of your ability. By supporting multiple screens, your application can be made
+available to the greatest number of users with different devices.</p>
+
+
+<h3 id="FilteringTabletApps">Filtering a tablet application from mobile devices</h3>
+
+<p>If the system scaling adversely affects your application UI when scaling your application down
+for smaller screens, you should add <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
+layouts</a> for smaller screens to adjust your layout. However, sometimes your layout still might
+not fit a smaller screen or you've explicitly designed your application only for tablets and other
+large devices. In this case, you can manage the availability of your application to smaller screens
+by using the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> manifest element.</p>
+
+<p>For example, if you want your application to be available only to extra large
+screens, you can declare the element in your manifest like this:</p>
+
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;supports-screens android:smallScreens="false"
+                      android:normalScreens="false"
+                      android:largeScreens="false"
+                      android:xlargeScreens="true" /&gt;
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+
+<p>External services such as Android Market read this manifest element and use it to ensure that
+your application is available only to devices with an extra large screen.</p>
+
+<p class="note"><strong>Note:</strong> If you use the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> element for the reverse scenario (when your application is not compatible
+with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
+external services such as Android Market <strong>do not</strong> apply filtering. Your application
+will still be available to larger screens, but when it runs, it will not fill the screen&mdash;the
+system will draw it in a "postage stamp" window that's the same relative size as the screen size
+that your application does support. If you want to prevent your application from being downloaded on
+larger screens, see the following section.</p>
+
+
+<h3 id="FilteringMobileApps">Filtering a mobile device application from tablets</h3>
+
+<p>Because Android automatically scales applications to fit larger screens, you shouldn't
+need to filter your application from larger screens. However, you might discover that your
+application can't scale up or perhaps you've decided to publish two versions of your application
+that each deliver different features for different screen configurations, so you don't want
+larger devices to download the version designed for smaller screens. In such a case, you can
+use the <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element to manage the distribution of your application based on the
+combination of screen size and density. External services such as
+Android Market uses this information to apply filtering to your application, so that only devices
+that have a screen configuration with which you declare compatibility can download your
+application.</p>
+
+<p>The <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element must contain one or more {@code &lt;screen&gt;} elements,
+which each specify a screen configuration with which your application is compatible, using both
+the {@code android:screenSize} and {@code android:screenDensity} attributes. Each {@code
+&lt;screen&gt;} element <strong>must include both attributes</strong> to specify an individual
+screen configuration&mdash;if either attribute is missing, then the element is invalid
+(external services such as Android Market will ignore it).</p>
+
+<p>For example, if your application is compatible with only small and normal screens, regardless
+of screen density, then you must specify eight different {@code &lt;screen&gt;} elements,
+because each screen size has four density configurations. You must declare each one of
+these; any combination of size and density that you do <em>not</em> specify is considered a screen
+configuration with which your application is <em>not</em> compatible. Here's what the manifest
+entry looks like if your application is compatible with only small and normal screens:</p>
+
+<pre>
+&lt;manifest ... >
+    ...
+    &lt;compatible-screens>
+        &lt;!-- all small size screens -->
+        &lt;screen android:screenSize="small" android:screenDensity="ldpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="mdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="hdpi" />
+        &lt;screen android:screenSize="small" android:screenDensity="xhdpi" />
+        &lt;!-- all normal size screens -->
+        &lt;screen android:screenSize="normal" android:screenDensity="ldpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="mdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="hdpi" />
+        &lt;screen android:screenSize="normal" android:screenDensity="xhdpi" />
+    &lt;/compatible-screens>
+    &lt;application ... >
+        ...
+    &lt;application>
+&lt;/manifest>
+</pre>
+
+<p class="note"><strong>Note:</strong> Although you can also use the <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element for the reverse scenario (when your application is not
+compatible with smaller screens), it's easier if you instead use the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> as discussed in the previous section, because it doesn't require you
+to specify each screen density your application supports.</p>
+
+<p>Remember, you should strive to make your application available to as many devices as possible by
+applying all necessary techniques for <a
+href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a>. You should
+then use the <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens>}</a> element to filter your application from certain devices only when you
+cannot offer compatibility on all screen configurations or you have decided to provide
+multiple versions of your application, each for a different set of screen configurations.</p>
+
+
+
+<h2 id="Issues">Other Issues</h2>
+
+<p>Whether you decide to optimize or upgrade your application for tablet-type devices, you
+should be aware that the functionality and availability of your application on new devices
+might be affected by the following issues:</p>
+
+<ul>
+  <li><a href="#Landscape">Tablets are often designed for use in the landscape orientation</a>
+  <p>Tablets and similar devices often have a screen that uses the landscape orientation
+by default. If your application assumes a portrait orientation or locks into portrait
+orientation, you should update your application to support landscape.</p></li>
+  <li><a href="#Telephony">Not all devices have telephony or other features</a>
+  <p>If your application declares the {@code "android.hardware.telephony"} feature in the manifest,
+then it will not be available to devices that do not offer telephony (such as tablets), based on
+Android Market filtering. If your application can function properly without telephony, you should
+update your application to gracefully disable the telephony features when not available on a
+device.</p></li>
+</ul>
+
+
+<h3 id="Landscape">Adding support for landscape screens</h3>
+
+<p>Although tablets can rotate to operate in any orientation, they are often designed for
+landscape orientation and that is how most users will use them. So, you should ensure that your
+application can function in landscape. Even if you want to avoid rotating the screen while your
+application is running, you should not assume that portrait is the device's default orientation. You
+should either ensure that your layout is usable in both portrait and landscape orientations or
+provide an <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources" 
+>alternative layout resource</a> for landscape orientation.</p>
+
+<p>If you believe your application or game provides its best experience when the screen is tall,
+consider that tablets and similar devices have a screen that's as tall or taller in landscape
+orientation than a phone in portrait orientation. With that in mind, you might be able to add a
+landscape design that adds padding or extra landscape scenery on the left and right sides, so
+the primary screen space still remains taller than it is wide.</p>
+
+<p>Ideally, your application should handle all orientation changes instead of locking into one
+orientation. When the user rotates the screen, the system restarts the current activity by calling
+{@link android.app.Activity#onDestroy onDestroy()} and {@link android.app.Activity#onCreate
+onCreate()}) in immediate succession. You should design your activity to account for these changes
+in the lifecycle, so the activity can save and restore its state. You can learn about the
+necessary lifecycle callback methods and how to save and restore the activity state in the <a
+href="{@docRoot}guide/topics/fundamentals/activities.html#Lifecycle">Activities</a>
+document. If your activity state is more complex and cannot retain it using the normal
+lifecycle callback methods, you can use alternative techniques described in <a
+href="{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime Changes</a>.</p>
+
+<p>In the worst-case scenario, however, you can avoid orientation changes by using the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
+android:screenOrientation}</a> attribute in the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+element. Instead of locking the orientation in landscape or portrait, however, you should
+specify a value of {@code "nosensor"}. This way, your activity uses whatever orientation the
+device specifies as its natural orientation and the screen will not rotate. You should still
+avoid using the <a
+href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
+android:screenOrientation}</a> attribute, but because it's sometimes necessary to lock the
+screen into one orientation, it's best if you do so in a way that uses the device's natural
+orientation instead of assuming one specific orientation.</p>
+
+<p>If your application uses the orientation sensors, such as the accelerometer (with the {@link
+android.hardware.SensorManager} APIs), also be aware that the landscape screen can also cause
+problems, due to false assumptions about which orientation is the natural position. For more
+information about how you should properly handle rotation changes when using the orientation
+sensors, read the blog post, <a
+href="http://android-developers.blogspot.com/2010/09/one-screen-turn-deserves-another.html">One
+Screen Turn Deserves Another</a>.</p>
+
+
+
+<h3 id="Telephony">Using telephony or other variable features</h3>
+
+<p>Tablets and similar devices might not include support for telephony, so they can't make
+traditional phone calls or handle SMS. Some devices might also omit
+other hardware features, such as Bluetooth. If your application uses these features, then your
+manifest file probably already includes (or should include) a declaration of the feature with the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element. Doing so prevents devices that do not declare support for the feature from downloading
+your applications. For example:</p>
+
+<pre>&lt;uses-feature android:name="android.hardware.telephony" /></pre>
+
+<p>By default, this declares that your application <em>requires</em> telephony features. So,
+external services such as Android Market use this information to filter your application from
+devices that do not offer telephony.</p>
+
+<p>If, however, your application uses, but does not require the feature, you should
+add to this element, {@code android:required="false"}. For example:</p>
+
+<pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /></pre>
+
+<p>This indicates that your application uses the feature, but is still functional if the feature is
+not available. So, it should still be available to devices that don't provide telephony hardware
+(or telephony features), such as tablets.</p>
+
+<p>Then in your application code, you must gracefully disable the features that use telephony
+when it's not available. You can check whether the feature is available using {@link
+android.content.pm.PackageManager#hasSystemFeature PackageManager.hasSystemFeature()}. For
+example:</p>
+
+<pre>
+PackageManager pm = getPackageManager();
+boolean hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+</pre>
+
+<p>For more information about these
+issues and how to future-proof your application for different hardware, read the blog post <a
+href="http://android-developers.blogspot.com/2010/10/five-steps-to-future-hardware-happiness.html">
+The Five Steps to Future Hardware Happiness</a>.</p>

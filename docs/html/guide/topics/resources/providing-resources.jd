@@ -596,7 +596,7 @@ orientation" described above.</p>
     </tr>
 -->
     <tr id="VersionQualifier">
-      <td>System Version (API Level)</td>
+      <td>Platform Version (API Level)</td>
       <td>Examples:<br/>
         <code>v3</code><br/>
         <code>v4</code><br/>
@@ -609,7 +609,7 @@ orientation" described above.</p>
 href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a> document for more information
 about these values.</p>
         <p class="caution"><strong>Caution:</strong> Android 1.5 and 1.6 only match resources
-with this qualifier when it exactly matches the system version. See the section below about <a
+with this qualifier when it exactly matches the platform version. See the section below about <a
 href="#KnownIssues">Known Issues</a> for more information.</p>
       </td>
     </tr>
@@ -975,7 +975,7 @@ href="accessing-resources.html">Accessing Resources</a>.</p>
 
 <p>The correct behavior is for the system to match resources marked with a <a
 href="#VersionQualifier">version qualifier</a> equal
-to or less than the system version on the device, but on Android 1.5 and 1.6, (API Level 3 and 4),
+to or less than the platform version on the device, but on Android 1.5 and 1.6, (API Level 3 and 4),
 there is a bug that causes the system to match resources marked with the version qualifier
 only when it exactly matches the version on the device.</p>
 
