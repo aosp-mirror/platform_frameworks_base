@@ -68,7 +68,7 @@ public class ResolverActivity extends AlertActivity implements
 
     protected void onCreate(Bundle savedInstanceState, Intent intent,
             CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean alwaysUseOption, boolean alwaysChoose) {
+            boolean alwaysUseOption) {
         super.onCreate(savedInstanceState);
         mPm = getPackageManager();
         intent.setComponent(null);
@@ -91,7 +91,7 @@ public class ResolverActivity extends AlertActivity implements
         }
         mAdapter = new ResolveListAdapter(this, intent, initialIntents, rList);
         int count = mAdapter.getCount();
-        if (count > 1 || (count == 1 && alwaysChoose)) {
+        if (count > 1) {
             ap.mAdapter = mAdapter;
         } else if (count == 1) {
             startActivity(mAdapter.intentForPosition(0));
@@ -103,12 +103,6 @@ public class ResolverActivity extends AlertActivity implements
 
         setupAlert();
     }
-
-    protected void onCreate(Bundle savedInstanceState, Intent intent,
-            CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean alwaysUseOption) {
-        onCreate(savedInstanceState, intent, title, initialIntents, rList, alwaysUseOption, false);
-      }
 
     public void onClick(DialogInterface dialog, int which) {
         ResolveInfo ri = mAdapter.resolveInfoForPosition(which);
