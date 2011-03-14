@@ -84,7 +84,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             NITZ_UPDATE_DIFF_DEFAULT);
 
     /**
-     *  Values correspond to ServiceStateTracker.DATA_ACCESS_ definitions.
+     *  Values correspond to ServiceState.RADIO_TECHNOLOGY_ definitions.
      */
     protected int networkType = 0;
     protected int newNetworkType = 0;
@@ -912,20 +912,20 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         String ret = "unknown";
 
         switch (type) {
-        case DATA_ACCESS_CDMA_IS95A:
-        case DATA_ACCESS_CDMA_IS95B:
+        case ServiceState.RADIO_TECHNOLOGY_IS95A:
+        case ServiceState.RADIO_TECHNOLOGY_IS95B:
             ret = "CDMA";
             break;
-        case DATA_ACCESS_CDMA_1xRTT:
+        case ServiceState.RADIO_TECHNOLOGY_1xRTT:
             ret = "CDMA - 1xRTT";
             break;
-        case DATA_ACCESS_CDMA_EvDo_0:
+        case ServiceState.RADIO_TECHNOLOGY_EVDO_0:
             ret = "CDMA - EvDo rev. 0";
             break;
-        case DATA_ACCESS_CDMA_EvDo_A:
+        case ServiceState.RADIO_TECHNOLOGY_EVDO_A:
             ret = "CDMA - EvDo rev. A";
             break;
-        case DATA_ACCESS_CDMA_EvDo_B:
+        case ServiceState.RADIO_TECHNOLOGY_EVDO_B:
             ret = "CDMA - EvDo rev. B";
             break;
         default:
