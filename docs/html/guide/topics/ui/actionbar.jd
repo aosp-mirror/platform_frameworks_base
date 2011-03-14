@@ -323,8 +323,7 @@ the item is enabled as an action item.</p>
 
 <p>When adding an action view for a menu item, it's important that you still allow the item to
 behave as a normal menu item when it does not appear in the Action Bar. For example, a menu item to
-perform a search should, by default, bring up the <a
-href="{@docRoot}guide/topics/search/search-dialog.html">search dialog</a>, but if the item is
+perform a search should, by default, bring up the Android search dialog, but if the item is
 placed in the Action Bar, the action view appears with a {@link android.widget.SearchView}
 widget. Figure 4 shows an example of  the {@link android.widget.SearchView} widget in an action
 view.</p>
@@ -369,9 +368,7 @@ always appear as an action view by setting {@code android:showAsAction} to {@cod
 <p>Now, when the menu item is displayed as an action item, it's action view appears instead of
 the icon and/or title text. However, if there's not enough room in the Action Bar, the item appears
 in the overflow menu as a normal menu item and you must respond to it from the {@link
-android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} callback method. (For a
-guide to providing search functionality, see the <a
-href="{@docRoot}guide/topics/search/index.html">Search</a> documentation.)</p>
+android.app.Activity#onOptionsItemSelected onOptionsItemSelected()} callback method.</p>
 
 <p>When the activity first starts, the system populates the Action Bar and overflow menu by calling
 {@link android.app.Activity#onCreateOptionsMenu onCreateOptionsMenu()}.
@@ -392,8 +389,8 @@ public boolean onCreateOptionsMenu(Menu menu) {
 }
 </pre>
 
-<p>For more information about enabling search in the Action Bar, see the <a
-href="{@docRoot}guide/topics/search/index.html">Search</a> developer guide.</p>
+<p>For more information about using the search widget, see <a
+href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface</a>.</p>
 
 
 
