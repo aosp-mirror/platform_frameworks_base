@@ -28,13 +28,15 @@ Configuration</a></li>
 </div>
 </div>
 
-<p>When using the Android search dialog, you can provide search suggestions based on recent search
+<p>When using the Android search dialog or search widget, you can provide search suggestions based
+on recent search
 queries. For example, if a user previously searched for "puppies," then that query appears as a
 suggestion once he or she begins typing the same query. Figure 1 shows an example of a search dialog
 with recent query suggestions.</p>
 
-<p>Before you begin, you need to implement the search dialog for basic searches in your application.
-If you haven't, see <a href="search-dialog.html">Using the Android Search Dialog</a>.</p>
+<p>Before you begin, you need to implement the search dialog or a search widget for basic searches
+in your application.
+If you haven't, see <a href="search-dialog.html">Creating a Search Interface</a>.</p>
 
 
 
@@ -47,16 +49,16 @@ suggestions.</p>
 </div>
 
 <p>Recent query suggestions are simply saved searches. When the user selects one of
-the suggestions, your searchable Activity receives a {@link
-android.content.Intent#ACTION_SEARCH} Intent with the suggestion as the search query, which your
-searchable Activity already handles (as described in <a href="search-dialog.html">Using the Android
-Search Dialog</a>).</p>
+the suggestions, your searchable activity receives a {@link
+android.content.Intent#ACTION_SEARCH} intent with the suggestion as the search query, which your
+searchable activity already handles (as described in <a href="search-dialog.html">Creating a Search
+Interface</a>).</p>
 
 <p>To provide recent queries suggestions, you need to:</p>
 
 <ul>
-  <li>Implement a searchable Activity, <a
-href="{@docRoot}guide/topics/search/search-dialog.html">using the Android Search Dialog</a>.</li>
+  <li>Implement a searchable activity, as described in <a
+href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface</a>.</li>
   <li>Create a content provider that extends {@link
 android.content.SearchRecentSuggestionsProvider} and declare it in your application manifest.</li>
   <li>Modify the searchable configuration with information about the content provider that
@@ -64,20 +66,19 @@ provides search suggestions.</li>
   <li>Save queries to your content provider each time a search is executed.</li>
 </ul>
 
-<p>Just as the Search Manager displays the search dialog, it also displays the
-search suggestions. All you need to do is provide a source from which the suggestions can be
-retrieved.</p>
+<p>Just as the Android system displays the search dialog, it also displays the
+search suggestions below the dialog or search widget. All you need to do is provide a source from
+which the system can retrieve suggestions.</p>
 
-<p>When the Search Manager identifies that your Activity is searchable and provides search
-suggestions, the following procedure takes place as soon as the user types into the search
-dialog:</p>
+<p>When the system identifies that your activity is searchable and provides search
+suggestions, the following procedure takes place as soon as the user begins typing a query:</p>
 
 <ol>
-  <li>Search Manager takes the search query text (whatever has been typed so far) and performs a
+  <li>The system takes the search query text (whatever has been typed so far) and performs a
 query to the content provider that contains your suggestions.</li>
   <li>Your content provider returns a {@link android.database.Cursor} that points to all
 suggestions that match the search query text.</li>
-  <li>Search Manager displays the list of suggestions provided by the Cursor.</li>
+  <li>The system displays the list of suggestions provided by the Cursor.</li>
 </ol>
 
 <p>Once the recent query suggestions are displayed, the following might happen:</p>
@@ -86,10 +87,10 @@ suggestions that match the search query text.</li>
   <li>If the user types another key, or changes the query in any way, the aforementioned steps are
 repeated and the suggestion list is updated.</li>
   <li>If the user executes the search, the suggestions are ignored and the search is delivered
-to your searchable Activity using the normal {@link android.content.Intent#ACTION_SEARCH}
-Intent.</li>
+to your searchable activity using the normal {@link android.content.Intent#ACTION_SEARCH}
+intent.</li>
   <li>If the user selects a suggestion, an
-{@link android.content.Intent#ACTION_SEARCH} Intent is delivered to your searchable Activity using
+{@link android.content.Intent#ACTION_SEARCH} intent is delivered to your searchable activity using
 the suggested text as the query.</li>
 </ul>
 
@@ -151,7 +152,7 @@ searchable configuration). For example:</p>
 
 <h2 id="RecentQuerySearchableConfiguration">Modifying the Searchable Configuration</h2>
 
-<p>To configure your search dialog to use your suggestions provider, you need to add
+<p>To configure the system to use your suggestions provider, you need to add
 the {@code android:searchSuggestAuthority} and {@code android:searchSuggestSelection} attributes to
 the {@code &lt;searchable&gt;} element in your searchable configuration file. For example:</p>
 
@@ -179,12 +180,12 @@ automatically replaced by the query text entered by the user).</p>
 <h2 id="SavingQueries">Saving Queries</h2>
 
 <p>To populate your collection of recent queries, add each query
-received by your searchable Activity to your {@link
+received by your searchable activity to your {@link
 android.content.SearchRecentSuggestionsProvider}. To do this, create an instance of {@link
 android.provider.SearchRecentSuggestions} and call {@link
 android.provider.SearchRecentSuggestions#saveRecentQuery(String,String) saveRecentQuery()} each time
-your searchable Activity receives a query. For example, here's how you can save the query during
-your Activity's {@link android.app.Activity#onCreate(Bundle) onCreate()} method:</p>
+your searchable activity receives a query. For example, here's how you can save the query during
+your activity's {@link android.app.Activity#onCreate(Bundle) onCreate()} method:</p>
 
 <pre>
 &#64;Override
@@ -192,10 +193,10 @@ public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    Intent Intent  = getIntent();
+    Intent intent  = getIntent();
 
-    if (Intent.ACTION_SEARCH.equals(Intent .getAction())) {
-        String query = Intent .getStringExtra(SearchManager.QUERY);
+    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        String query = intent.getStringExtra(SearchManager.QUERY);
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
                 MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
         suggestions.saveRecentQuery(query, null);
@@ -212,7 +213,7 @@ the search query string as the first parameter and, optionally, a second string 
 second line of the suggestion (or null). The second parameter is only used if you've enabled
 two-line mode for the search suggestions with {@link
 android.content.SearchRecentSuggestionsProvider#DATABASE_MODE_2LINES}. If you have enabled
-two-line mode, then the query text is also matched against this second line when the Search Manager
+two-line mode, then the query text is also matched against this second line when the system
 looks for matching suggestions.</p>
 
 
