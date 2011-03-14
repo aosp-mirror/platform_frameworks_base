@@ -1243,6 +1243,10 @@ public class StatusBarPolicy {
 
         switch (iconMode) {
             case EriInfo.ROAMING_ICON_MODE_NORMAL:
+                if (iconIndex >= iconList.length) {
+                    Slog.e(TAG, "unknown iconIndex " + iconIndex + ", skipping ERI icon update");
+                    return;
+                }
                 mService.setIcon("cdma_eri", iconList[iconIndex], 0);
                 mService.setIconVisibility("cdma_eri", true);
                 break;
