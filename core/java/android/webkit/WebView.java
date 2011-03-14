@@ -5955,6 +5955,10 @@ public class WebView extends AbsoluteLayout
             int y = viewToContentY((int) ev.getY(c) + mScrollY);
             ted.mPoints[c] = new Point(x, y);
         }
+        if (ted.mAction == MotionEvent.ACTION_POINTER_DOWN
+            || ted.mAction == MotionEvent.ACTION_POINTER_UP) {
+            ted.mActionIndex = ev.getActionIndex();
+        }
         ted.mMetaState = ev.getMetaState();
         ted.mReprocess = true;
         ted.mMotionEvent = MotionEvent.obtain(ev);
