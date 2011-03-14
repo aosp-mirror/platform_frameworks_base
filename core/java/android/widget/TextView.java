@@ -4210,6 +4210,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mPreDrawState == PREDRAW_DONE) {
+            final ViewTreeObserver observer = getViewTreeObserver();
+            observer.removeOnPreDrawListener(this);
+            mPreDrawState = PREDRAW_NOT_REGISTERED;
+        }
+
         if (mCurrentAlpha <= ViewConfiguration.ALPHA_THRESHOLD_INT) return;
 
         restartMarqueeIfNeeded();
@@ -4279,12 +4285,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 dr.mDrawableBottom.draw(canvas);
                 canvas.restore();
             }
-        }
-
-        if (mPreDrawState == PREDRAW_DONE) {
-            final ViewTreeObserver observer = getViewTreeObserver();
-            observer.removeOnPreDrawListener(this);
-            mPreDrawState = PREDRAW_NOT_REGISTERED;
         }
 
         int color = mCurTextColor;
