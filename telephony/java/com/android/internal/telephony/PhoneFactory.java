@@ -37,7 +37,7 @@ public class PhoneFactory {
     static final int SOCKET_OPEN_RETRY_MILLIS = 2 * 1000;
     static final int SOCKET_OPEN_MAX_RETRY = 3;
     static final boolean LTE_AVAILABLE_ON_CDMA =
-        SystemProperties.getBoolean("ro.mot.lte_on_cdma", false);
+            SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
 
     //***** Class Variables
 
@@ -160,7 +160,8 @@ public class PhoneFactory {
             return Phone.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
-            if (SystemProperties.getBoolean("ro.mot.lte_on_cdma", false)) {
+            if (SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA,
+                    false)) {
                 return Phone.PHONE_TYPE_CDMA;
             } else {
                 return Phone.PHONE_TYPE_GSM;

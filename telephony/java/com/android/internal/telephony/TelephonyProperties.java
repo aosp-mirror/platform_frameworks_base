@@ -72,6 +72,11 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_OPERATOR_ISO_COUNTRY = "gsm.operator.iso-country";
 
+    /** 'true' if device supports both LTE and CDMA mode of operation.
+     *  Availability: Set only on devices supporting LTE and CDMA.
+     */
+    static final String PROPERTY_NETWORK_LTE_ON_CDMA = "ro.telephony.lte_on_cdma";
+
     static final String CURRENT_ACTIVE_PHONE = "gsm.current.phone-type";
 
     //****** SIM Card

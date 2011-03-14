@@ -86,9 +86,8 @@ public abstract class IccCard {
     private static final int EVENT_QUERY_FACILITY_FDN_DONE = 10;
     private static final int EVENT_CHANGE_FACILITY_FDN_DONE = 11;
 
-    // FIXME: remove mot from property
     static final boolean LTE_AVAILABLE_ON_CDMA =
-        SystemProperties.getBoolean("ro.mot.lte_on_cdma", false);
+            SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
 
     /*
       UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
