@@ -17,6 +17,8 @@
 
 package android.hardware.usb;
 
+import android.app.PendingIntent;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -75,7 +77,7 @@ public class UsbManager {
      *
      * This intent is sent when a USB accessory is detached.
      * <ul>
-     * <li> {@link #EXTRA_ACCESSORY} containing the {@link android.hardware.usb.UsbAccessory}
+     * <li> {@link #EXTRA_ACCESSORY} containing the {@link UsbAccessory}
      * for the attached accessory that was detached
      * </ul>
      */
@@ -145,12 +147,22 @@ public class UsbManager {
      */
     public static final String EXTRA_ACCESSORY = "accessory";
 
-    private IUsbManager mService;
+    /**
+     * Name of extra added to the {@link android.app.PendingIntent}
+     * passed into {@link #requestPermission(UsbDevice, PendingIntent)}
+     * or {@link #requestPermission(UsbAccessory, PendingIntent)}
+     * containing a boolean value indicating whether the user granted permission or not.
+     */
+    public static final String EXTRA_PERMISSION_GRANTED = "permission";
+
+    private final Context mContext;
+    private final IUsbManager mService;
 
     /**
      * {@hide}
      */
-    public UsbManager(IUsbManager service) {
+    public UsbManager(Context context, IUsbManager service) {
+        mContext = context;
         mService = service;
     }
 
@@ -169,7 +181,7 @@ public class UsbManager {
                 return new UsbAccessory[] { accessory };
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getAccessoryList" , e);
+            Log.e(TAG, "RemoteException in getAccessoryList", e);
             return null;
         }
     }
@@ -184,8 +196,52 @@ public class UsbManager {
         try {
             return mService.openAccessory(accessory);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in openAccessory" , e);
+            Log.e(TAG, "RemoteException in openAccessory", e);
             return null;
+        }
+    }
+
+    /**
+     * Returns true if the caller has permission to access the accessory.
+     * Permission might have been granted temporarily via
+     * {@link #requestPermission(UsbAccessory, PendingIntent)} or
+     * by the user choosing the caller as the default application for the accessory.
+     *
+     * @param accessory to check permissions for
+     * @return true if caller has permission
+     */
+    public boolean hasPermission(UsbAccessory accessory) {
+        try {
+            return mService.hasAccessoryPermission(accessory);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in hasPermission", e);
+            return false;
+        }
+    }
+
+    /**
+     * Requests temporary permission for the given package to access the accessory.
+     * This may result in a system dialog being displayed to the user
+     * if permission had not already been granted.
+     * Success or failure is returned via the {@link android.app.PendingIntent} pi.
+     * If successful, this grants the caller permission to access the accessory only
+     * until the device is disconnected.
+     *
+     * The following extras will be added to pi:
+     * <ul>
+     * <li> {@link #EXTRA_ACCESSORY} containing the accessory passed into this call
+     * <li> {@link #EXTRA_PERMISSION_GRANTED} containing boolean indicating whether
+     * permission was granted by the user
+     * </ul>
+     *
+     * @param accessory to request permissions for
+     * @param pi PendingIntent for returning result
+     */
+    public void requestPermission(UsbAccessory accessory, PendingIntent pi) {
+        try {
+            mService.requestAccessoryPermission(accessory, mContext.getPackageName(), pi);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in requestPermission", e);
         }
     }
 
