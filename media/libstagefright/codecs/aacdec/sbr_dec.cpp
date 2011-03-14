@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------
- * Copyright (C) 1998-2009 PacketVideo
+ * Copyright (C) 1998-2010 PacketVideo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -447,7 +447,12 @@ void sbr_dec(Int16 *inPcmData,
 
             if (xoverBand > sbrDec->highSubband)
             {
-                xoverBand = 32; /* error condition, default to upsampling mode */
+                /*
+                 * error condition, default to upsampling mode
+                 * and make sure that the number of bands for xover does
+                 * not exceed the number of high freq bands.
+                 */
+                xoverBand = (sbrDec->highSubband > 32)? 32: sbrDec->highSubband;
             }
 
             m = sbrDec->bufReadOffs + i;    /*  2 + i */
@@ -558,17 +563,21 @@ void sbr_dec(Int16 *inPcmData,
         /*
          *  Set Circular buffer for PS hybrid analysis
          */
+
+        int32_t *pt_temp = &scratch_mem[2][32];
+
         for (i = 0, j = 0; i < 3; i++)
         {
 
-            pv_memmove(&scratch_mem[2][32 + j     ],
+            pv_memmove(&pt_temp[ j],
                        hParametricStereoDec->hHybrid->mQmfBufferReal[i],
                        HYBRID_FILTER_LENGTH_m_1*sizeof(*hParametricStereoDec->hHybrid->mQmfBufferReal));
-            pv_memmove(&scratch_mem[2][32 + j + 44],
+            pv_memmove(&pt_temp[ j + 44],
                        hParametricStereoDec->hHybrid->mQmfBufferImag[i],
                        HYBRID_FILTER_LENGTH_m_1*sizeof(*hParametricStereoDec->hHybrid->mQmfBufferImag));
             j += 88;
         }
+
 
         pv_memset((void *)&qmf_PS_generated_Real[hParametricStereoDec->usb],
                   0,
@@ -626,18 +635,22 @@ void sbr_dec(Int16 *inPcmData,
          *  Save Circular buffer history used on PS hybrid analysis
          */
 
+
+        pt_temp = &scratch_mem[2][64];
+
         for (i = 0, j = 0; i < 3; i++)
         {
             pv_memmove(hParametricStereoDec->hHybrid->mQmfBufferReal[i],
-                       &scratch_mem[2][ 64 + j     ],
+                       &pt_temp[ j],
                        HYBRID_FILTER_LENGTH_m_1*sizeof(*hParametricStereoDec->hHybrid->mQmfBufferReal));
 
             pv_memmove(hParametricStereoDec->hHybrid->mQmfBufferImag[i],
-                       &scratch_mem[2][ 64 + j + 44],
+                       &pt_temp[ j + 44],
                        HYBRID_FILTER_LENGTH_m_1*sizeof(*hParametricStereoDec->hHybrid->mQmfBufferImag));
 
             j += 88;
         }
+
 
         pv_memmove(hFrameData->V, &circular_buffer_s[0], 1152*sizeof(*circular_buffer_s));
 
@@ -746,7 +759,12 @@ void sbr_dec(Int16 *inPcmData,
 
                 if (xoverBand > sbrDec->highSubband)
                 {
-                    xoverBand = 32; /* error condition, default to upsampling mode */
+                    /*
+                     * error condition, default to upsampling mode
+                     * and make sure that the number of bands for xover does
+                     * not exceed the number of high freq bands.
+                     */
+                    xoverBand = (sbrDec->highSubband > 32)? 32: sbrDec->highSubband;
                 }
             }
             else
