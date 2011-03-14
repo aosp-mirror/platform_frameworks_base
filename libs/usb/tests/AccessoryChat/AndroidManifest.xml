@@ -20,7 +20,7 @@
     <application>
         <uses-library android:name="com.android.future.usb.accessory" />
 
-        <activity android:name="AccessoryChat" android:label="Accessory Chat GB">
+        <activity android:name="AccessoryChat" android:label="Accessory Chat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
