@@ -122,6 +122,12 @@
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_permission_prompt">Allow the application %1$s to access the USB accessory?</string>
 
+    <!-- Prompt for the USB device confirm dialog [CHAR LIMIT=80] -->
+    <string name="usb_device_confirm_prompt">Open %1$s when this USB device is connected?</string>
+
+    <!-- Prompt for the USB accessory confirm dialog [CHAR LIMIT=80] -->
+    <string name="usb_accessory_confirm_prompt">Open %1$s when this USB accessory is connected?</string>
+
     <!-- Prompt for the USB accessory URI dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_uri_prompt">Additional information for this device may be found at: %1$s</string>
 
