@@ -28,7 +28,6 @@ RSG_GENERATOR:=$(LOCAL_BUILT_MODULE)
 # slangdata_output_var_name := rs_runtime_lib_bc
 # LOCAL_MODULE := librslib_rt
 
-# LOCAL_PRELINK_MODULE := false
 # LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 
 # LOCAL_MODULE_TAGS := optional

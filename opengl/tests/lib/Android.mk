@@ -27,6 +27,6 @@ LOCAL_C_INCLUDES += system/extras/tests/include \
 LOCAL_CFLAGS := -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SHARED_LIBRARIES += libcutils libutils libstlport
-LOCAL_PRELINK_MODULE := false
+
 
 include $(BUILD_STATIC_LIBRARY)

@@ -27,7 +27,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libui \
 	libgui
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_MODULE:= libsensorservice
 

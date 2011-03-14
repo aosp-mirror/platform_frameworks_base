@@ -105,7 +105,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_MODULE:= libmusicbundle
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/Eq/lib \
@@ -168,7 +168,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_MODULE:= libreverb
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/Reverb/lib \

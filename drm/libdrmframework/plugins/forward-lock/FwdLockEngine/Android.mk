@@ -47,7 +47,7 @@ LOCAL_STATIC_LIBRARIES := \
     libfwdlock-converter \
     libfwdlock-decoder
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \

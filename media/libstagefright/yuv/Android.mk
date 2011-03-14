@@ -10,6 +10,6 @@ LOCAL_SHARED_LIBRARIES :=       \
 
 LOCAL_MODULE:= libstagefright_yuv
 
-LOCAL_PRELINK_MODULE := false
+
 
 include $(BUILD_SHARED_LIBRARY)

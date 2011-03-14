@@ -42,7 +42,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES := libcutils libutils libGLESv2 libskia libui
 	LOCAL_MODULE := libhwui
 	LOCAL_MODULE_TAGS := optional
-	LOCAL_PRELINK_MODULE := false
 	
 	include $(BUILD_SHARED_LIBRARY)
 
