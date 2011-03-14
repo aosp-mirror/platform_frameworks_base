@@ -556,11 +556,10 @@ keyboard) is visible, the popup does not overlap the IME it until the user touch
 menu.</p></li>
     
     <li>{@link android.widget.SearchView}
-    <p>Provides a search box that works in conjunction with the Search Manager (in the same manner
-as the traditional <a href="{@docRoot}guide/topics/search/search-dialog.html">search dialog</a>). It
-can also display recent query suggestions or custom suggestions as configured by the search
-provider. This widget is particularly useful for offering search in the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a>.</p></li>
+    <p>Provides a search box that you can configure to deliver search queries to a specified
+activity and display search suggestions (in the same manner as the traditional search dialog). This
+widget is particularly useful for offering a search widget in the Action Bar. For more information,
+see <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface</p>.</li>
     
     <li>{@link android.widget.StackView}
     <p>A view that displays its children in a 3D stack and allows users to swipe through
