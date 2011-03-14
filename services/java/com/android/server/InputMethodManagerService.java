@@ -60,7 +60,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
@@ -315,7 +314,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
     int mImeWindowVis;
-    long mOldSystemSettingsVersion;
 
     AlertDialog.Builder mDialogBuilder;
     AlertDialog mSwitchingDialog;
@@ -490,8 +488,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 handleMessage(msg);
             }
         });
-        // Initialize the system settings version to undefined.
-        mOldSystemSettingsVersion = -1;
 
         (new MyPackageMonitor()).register(mContext, true);
 
@@ -1012,15 +1008,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // TODO: Investigate and fix why are settings changes getting processed before the settings seq
-    // number is updated?
-    // TODO: Change this stuff to not rely on modifying settings for normal user interactions.
     void updateFromSettingsLocked() {
-        long newSystemSettingsVersion = getSystemSettingsVersion();
-        // This is a workaround to avoid a situation that old cached value in Settings.Secure
-        // will be handled.
-        if (newSystemSettingsVersion == mOldSystemSettingsVersion) return;
-
         // We are assuming that whoever is changing DEFAULT_INPUT_METHOD and
         // ENABLED_INPUT_METHODS is taking care of keeping them correctly in
         // sync, so we will never have a DEFAULT_INPUT_METHOD that is not
@@ -1989,7 +1977,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
             boolean setSubtypeOnly) {
-        mOldSystemSettingsVersion = getSystemSettingsVersion();
         // Update the history of InputMethod and Subtype
         saveCurrentInputMethodAndSubtypeToHistory();
 
@@ -2237,10 +2224,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             return null;
         }
-    }
-
-    private static long getSystemSettingsVersion() {
-        return SystemProperties.getLong(Settings.Secure.SYS_PROP_SETTING_VERSION, 0);
     }
 
     /**
