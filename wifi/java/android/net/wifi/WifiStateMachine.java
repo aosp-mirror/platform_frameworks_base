@@ -887,6 +887,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     /**
+     * Returns the wifi configuration file
+     */
+    public String getConfigFile() {
+        return WifiConfigStore.getConfigFile();
+    }
+
+    /**
      * Send a message indicating bluetooth adapter connection state changed
      */
     public void sendBluetoothAdapterStateChange(int state) {
