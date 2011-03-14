@@ -119,7 +119,7 @@ status_t DrmManager::unloadPlugIns() {
 
 status_t DrmManager::setDrmServiceListener(
             int uniqueId, const sp<IDrmServiceListener>& drmServiceListener) {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mListenerLock);
     if (NULL != drmServiceListener.get()) {
         mServiceListeners.add(uniqueId, drmServiceListener);
     } else {
@@ -573,7 +573,7 @@ String8 DrmManager::getSupportedPlugInIdFromPath(int uniqueId, const String8& pa
 }
 
 void DrmManager::onInfo(const DrmInfoEvent& event) {
-    Mutex::Autolock _l(mLock);
+    Mutex::Autolock _l(mListenerLock);
     for (unsigned int index = 0; index < mServiceListeners.size(); index++) {
         int uniqueId = mServiceListeners.keyAt(index);
 

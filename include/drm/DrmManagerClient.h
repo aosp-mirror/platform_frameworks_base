@@ -368,7 +368,6 @@ public:
 
 private:
     int mUniqueId;
-    Mutex mDecryptLock;
     DrmManagerClientImpl* mDrmManagerClientImpl;
 };
 
