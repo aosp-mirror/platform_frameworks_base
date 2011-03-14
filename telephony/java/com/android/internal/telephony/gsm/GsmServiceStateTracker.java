@@ -23,6 +23,7 @@ import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.RestrictedState;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.TelephonyIntents;
@@ -75,7 +76,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     GsmCellLocation cellLoc;
     GsmCellLocation newCellLoc;
     int mPreferredNetworkType;
-    RestrictedState rs;
 
     private int gprsState = ServiceState.STATE_OUT_OF_SERVICE;
     private int newGPRSState = ServiceState.STATE_OUT_OF_SERVICE;
@@ -106,11 +106,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * Mark when service state is in emergency call only mode
      */
     private boolean mEmergencyOnly = false;
-
-    private RegistrantList gprsAttachedRegistrants = new RegistrantList();
-    private RegistrantList gprsDetachedRegistrants = new RegistrantList();
-    private RegistrantList psRestrictEnabledRegistrants = new RegistrantList();
-    private RegistrantList psRestrictDisabledRegistrants = new RegistrantList();
 
     /**
      * Sometimes we get the NITZ time before we know what country we
@@ -206,7 +201,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         newSS = new ServiceState();
         cellLoc = new GsmCellLocation();
         newCellLoc = new GsmCellLocation();
-        rs = new RestrictedState();
         mSignalStrength = new SignalStrength();
 
         PowerManager powerManager =
@@ -270,99 +264,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     @Override
     protected Phone getPhone() {
         return phone;
-    }
-
-    /**
-     * Registration point for transition into GPRS attached.
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    @Override
-    public void registerForDataConnectionAttached(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-        gprsAttachedRegistrants.add(r);
-
-        if (gprsState == ServiceState.STATE_IN_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    @Override
-    public void unregisterForDataConnectionAttached(Handler h) {
-        gprsAttachedRegistrants.remove(h);
-    }
-
-    void registerForNetworkAttach(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-        networkAttachedRegistrants.add(r);
-
-        if (ss.getState() == ServiceState.STATE_IN_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    void unregisterForNetworkAttach(Handler h) {
-        networkAttachedRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition into GPRS detached.
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    void registerForGprsDetached(Handler h, int what, Object obj) {
-        Registrant r = new Registrant(h, what, obj);
-        gprsDetachedRegistrants.add(r);
-
-        if (gprsState == ServiceState.STATE_OUT_OF_SERVICE) {
-            r.notifyRegistrant();
-        }
-    }
-
-    void unregisterForGprsDetached(Handler h) {
-        gprsDetachedRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition into packet service restricted zone.
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    public void registerForPsRestrictedEnabled(Handler h, int what, Object obj) {
-        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedEnabled ");
-        Registrant r = new Registrant(h, what, obj);
-        psRestrictEnabledRegistrants.add(r);
-
-        if (rs.isPsRestricted()) {
-            r.notifyRegistrant();
-        }
-    }
-
-    public void unregisterForPsRestrictedEnabled(Handler h) {
-        psRestrictEnabledRegistrants.remove(h);
-    }
-
-    /**
-     * Registration point for transition out of packet service restricted zone.
-     * @param h handler to notify
-     * @param what what code of message when delivered
-     * @param obj placed in Message.obj
-     */
-    public void registerForPsRestrictedDisabled(Handler h, int what, Object obj) {
-        Log.d(LOG_TAG, "[DSAC DEB] " + "registerForPsRestrictedDisabled ");
-        Registrant r = new Registrant(h, what, obj);
-        psRestrictDisabledRegistrants.add(r);
-
-        if (rs.isPsRestricted()) {
-            r.notifyRegistrant();
-        }
-    }
-
-    public void unregisterForPsRestrictedDisabled(Handler h) {
-        psRestrictDisabledRegistrants.remove(h);
     }
 
     public void handleMessage (Message msg) {
@@ -978,7 +879,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRegistered) {
-            networkAttachedRegistrants.notifyRegistrants();
+            mNetworkAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasChanged) {
@@ -1055,11 +956,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasGprsAttached) {
-            gprsAttachedRegistrants.notifyRegistrants();
+            mAttachedRegistrants.notifyRegistrants();
         }
 
         if (hasGprsDetached) {
-            gprsDetachedRegistrants.notifyRegistrants();
+            mDetachedRegistrants.notifyRegistrants();
         }
 
         if (hasNetworkTypeChanged) {
@@ -1067,11 +968,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRoamingOn) {
-            roamingOnRegistrants.notifyRegistrants();
+            mRoamingOnRegistrants.notifyRegistrants();
         }
 
         if (hasRoamingOff) {
-            roamingOffRegistrants.notifyRegistrants();
+            mRoamingOffRegistrants.notifyRegistrants();
         }
 
         if (hasLocationChanged) {
@@ -1219,7 +1120,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         Log.d(LOG_TAG, "[DSAC DEB] " + "onRestrictedStateChanged");
         RestrictedState newRs = new RestrictedState();
 
-        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at enter "+ rs);
+        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at enter "+ mRestrictedState);
 
         if (ar.exception == null) {
             int[] ints = (int[])ar.result;
@@ -1239,11 +1140,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
             Log.d(LOG_TAG, "[DSAC DEB] " + "new rs "+ newRs);
 
-            if (!rs.isPsRestricted() && newRs.isPsRestricted()) {
-                psRestrictEnabledRegistrants.notifyRegistrants();
+            if (!mRestrictedState.isPsRestricted() && newRs.isPsRestricted()) {
+                mPsRestrictEnabledRegistrants.notifyRegistrants();
                 setNotification(PS_ENABLED);
-            } else if (rs.isPsRestricted() && !newRs.isPsRestricted()) {
-                psRestrictDisabledRegistrants.notifyRegistrants();
+            } else if (mRestrictedState.isPsRestricted() && !newRs.isPsRestricted()) {
+                mPsRestrictDisabledRegistrants.notifyRegistrants();
                 setNotification(PS_DISABLED);
             }
 
@@ -1252,7 +1153,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
              * there are 4 x 4 combinations in current and new restricted states
              * and we only need to notify when state is changed.
              */
-            if (rs.isCsRestricted()) {
+            if (mRestrictedState.isCsRestricted()) {
                 if (!newRs.isCsRestricted()) {
                     // remove all restriction
                     setNotification(CS_DISABLED);
@@ -1263,7 +1164,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     // remove emergency restriction
                     setNotification(CS_NORMAL_ENABLED);
                 }
-            } else if (rs.isCsEmergencyRestricted() && !rs.isCsNormalRestricted()) {
+            } else if (mRestrictedState.isCsEmergencyRestricted() &&
+                    !mRestrictedState.isCsNormalRestricted()) {
                 if (!newRs.isCsRestricted()) {
                     // remove all restriction
                     setNotification(CS_DISABLED);
@@ -1274,7 +1176,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     // remove emergency restriction and enable normal restriction
                     setNotification(CS_NORMAL_ENABLED);
                 }
-            } else if (!rs.isCsEmergencyRestricted() && rs.isCsNormalRestricted()) {
+            } else if (!mRestrictedState.isCsEmergencyRestricted() &&
+                    mRestrictedState.isCsNormalRestricted()) {
                 if (!newRs.isCsRestricted()) {
                     // remove all restriction
                     setNotification(CS_DISABLED);
@@ -1298,9 +1201,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
             }
 
-            rs = newRs;
+            mRestrictedState = newRs;
         }
-        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at return "+ rs);
+        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at return "+ mRestrictedState);
     }
 
     /** code is registration state 0-5 from TS 27.007 7.2 */

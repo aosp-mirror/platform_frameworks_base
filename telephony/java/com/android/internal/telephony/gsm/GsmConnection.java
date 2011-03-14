@@ -374,11 +374,11 @@ public class GsmConnection extends Connection {
                 } else if (phone.getIccCard().getState() != SimCard.State.READY) {
                     return DisconnectCause.ICC_ERROR;
                 } else if (causeCode == CallFailCause.ERROR_UNSPECIFIED) {
-                    if (phone.mSST.rs.isCsRestricted()) {
+                    if (phone.mSST.mRestrictedState.isCsRestricted()) {
                         return DisconnectCause.CS_RESTRICTED;
-                    } else if (phone.mSST.rs.isCsEmergencyRestricted()) {
+                    } else if (phone.mSST.mRestrictedState.isCsEmergencyRestricted()) {
                         return DisconnectCause.CS_RESTRICTED_EMERGENCY;
-                    } else if (phone.mSST.rs.isCsNormalRestricted()) {
+                    } else if (phone.mSST.mRestrictedState.isCsNormalRestricted()) {
                         return DisconnectCause.CS_RESTRICTED_NORMAL;
                     } else {
                         return DisconnectCause.ERROR_UNSPECIFIED;
