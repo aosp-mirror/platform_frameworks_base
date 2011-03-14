@@ -25,6 +25,6 @@ LOCAL_CFLAGS += -Wno-multichar
 
 LOCAL_MODULE:= libstagefright_foundation
 
-LOCAL_PRELINK_MODULE:= false
+
 
 include $(BUILD_SHARED_LIBRARY)

@@ -25,6 +25,6 @@ endif
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, graphics corecg)
 
-LOCAL_PRELINK_MODULE := false
+
 
 include $(BUILD_SHARED_LIBRARY)

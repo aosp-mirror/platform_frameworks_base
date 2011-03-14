@@ -41,7 +41,7 @@ LOCAL_C_INCLUDES += \
 	external/webkit/WebKit/android/plugins
 
 LOCAL_CFLAGS += -fvisibility=hidden 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_MODULE := libtestplugin
 LOCAL_MODULE_TAGS := tests

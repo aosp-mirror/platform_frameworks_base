@@ -40,7 +40,7 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/base/drm/libdrmframework/include \
     $(TOP)/frameworks/base/include
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_MODULE_TAGS := optional
 

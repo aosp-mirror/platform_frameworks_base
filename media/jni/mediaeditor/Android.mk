@@ -79,10 +79,6 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_MODULE:= libvideoeditor_jni
 
-# Don't prelink this library.  For more efficient code, you may want
-# to add this library to the prelink map and set this to true.
-LOCAL_PRELINK_MODULE := false
-
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)

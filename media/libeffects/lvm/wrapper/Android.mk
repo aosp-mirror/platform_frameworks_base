@@ -13,7 +13,7 @@ LOCAL_MODULE:= libbundlewrapper
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/soundfx
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_STATIC_LIBRARIES += libmusicbundle
 
@@ -47,7 +47,7 @@ LOCAL_MODULE:= libreverbwrapper
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/soundfx
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_STATIC_LIBRARIES += libreverb
 

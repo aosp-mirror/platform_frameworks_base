@@ -24,6 +24,6 @@ LOCAL_SHARED_LIBRARIES:= \
 
 LOCAL_MODULE:= invoke_mock_media_player
 LOCAL_MODULE_TAGS := tests eng
-LOCAL_PRELINK_MODULE:= false
+
 
 include $(BUILD_SHARED_LIBRARY)

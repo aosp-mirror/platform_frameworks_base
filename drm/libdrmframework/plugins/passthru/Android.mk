@@ -32,7 +32,7 @@ else
  LOCAL_SHARED_LIBRARIES += libdl
 endif
 
-LOCAL_PRELINK_MODULE := false
+
 
 LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/base/drm/libdrmframework/include \

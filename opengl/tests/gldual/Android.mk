@@ -44,7 +44,7 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE := libgldualjni
 
-LOCAL_PRELINK_MODULE := false
+
 
 include $(BUILD_SHARED_LIBRARY)
 
