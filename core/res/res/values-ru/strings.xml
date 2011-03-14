@@ -621,7 +621,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Повторите попытку"</string>
     <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Повторите попытку"</string>
     <string name="lockscreen_plugged_in" msgid="613343852842944435">"Идет зарядка (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
-    <string name="lockscreen_charged" msgid="4938930459620989972">"Заряжена."</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Батарея заряжена"</string>
     <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_low_battery" msgid="1482873981919249740">"Подключите зарядное устройство."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="7381499217732227295">"Нет SIM-карты."</string>
