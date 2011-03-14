@@ -19,8 +19,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
     main_drmserver.cpp \
     DrmManager.cpp \
-    DrmManagerService.cpp \
-    StringTokenizer.cpp
+    DrmManagerService.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libutils \
