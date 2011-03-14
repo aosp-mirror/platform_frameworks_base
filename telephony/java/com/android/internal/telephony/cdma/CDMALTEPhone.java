@@ -54,11 +54,14 @@ public class CDMALTEPhone extends CDMAPhone {
     public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
             boolean unitTestMode) {
         super(context, ci, notifier, false);
-        mSST = new CdmaLteServiceStateTracker(this);
-        init(context, notifier);
 
         mSIMRecords = new SIMRecords(this);
         mSimCard = new SimCard(this, LOG_TAG, DBG);
+    }
+
+    @Override
+    protected void initSST() {
+        mSST = new CdmaLteServiceStateTracker(this);
     }
 
     public void dispose() {
