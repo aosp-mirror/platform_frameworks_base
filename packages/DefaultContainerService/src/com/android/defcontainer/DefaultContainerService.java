@@ -47,7 +47,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -117,7 +117,7 @@ public class DefaultContainerService extends IntentService {
          * @return Returns PackageInfoLite object containing
          * the package info and recommended app location.
          */
-        public PackageInfoLite getMinimalPackageInfo(final Uri fileUri, int flags) {
+        public PackageInfoLite getMinimalPackageInfo(final Uri fileUri, int flags, long threshold) {
             PackageInfoLite ret = new PackageInfoLite();
             if (fileUri == null) {
                 Log.i(TAG, "Invalid package uri " + fileUri);
@@ -131,15 +131,9 @@ public class DefaultContainerService extends IntentService {
                 return ret;
             }
             String archiveFilePath = fileUri.getPath();
-            PackageParser packageParser = new PackageParser(archiveFilePath);
-            File sourceFile = new File(archiveFilePath);
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
-            PackageParser.PackageLite pkg = packageParser.parsePackageLite(
-                    archiveFilePath, 0);
-            // Nuke the parser reference right away and force a gc
-            packageParser = null;
-            Runtime.getRuntime().gc();
+            PackageParser.PackageLite pkg = PackageParser.parsePackageLite(archiveFilePath, 0);
             if (pkg == null) {
                 Log.w(TAG, "Failed to parse package");
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
@@ -147,12 +141,22 @@ public class DefaultContainerService extends IntentService {
             }
             ret.packageName = pkg.packageName;
             ret.installLocation = pkg.installLocation;
-            ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation, archiveFilePath, flags);
+            ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation,
+                    archiveFilePath, flags, threshold);
             return ret;
         }
 
-        public boolean checkFreeStorage(boolean external, Uri fileUri) {
-            return checkFreeStorageInner(external, fileUri);
+        @Override
+        public boolean checkInternalFreeStorage(Uri packageUri, long threshold)
+                throws RemoteException {
+            final File apkFile = new File(packageUri.getPath());
+            return isUnderInternalThreshold(apkFile, threshold);
+        }
+
+        @Override
+        public boolean checkExternalFreeStorage(Uri packageUri) throws RemoteException {
+            final File apkFile = new File(packageUri.getPath());
+            return isUnderExternalThreshold(apkFile);
         }
 
         public ObbInfo getObbInfo(String filename) {
@@ -225,41 +229,15 @@ public class DefaultContainerService extends IntentService {
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
 
+        // Native files we need to copy to the container.
+        List<Pair<ZipEntry, String>> nativeFiles = new ArrayList<Pair<ZipEntry, String>>();
+
         // Calculate size of container needed to hold base APK.
-        long sizeBytes = codeFile.length();
-
-        // Check all the native files that need to be copied and add that to the container size.
-        ZipFile zipFile;
-        List<Pair<ZipEntry, String>> nativeFiles;
-        try {
-            zipFile = new ZipFile(codeFile);
-
-            nativeFiles = new LinkedList<Pair<ZipEntry, String>>();
-
-            NativeLibraryHelper.listPackageNativeBinariesLI(zipFile, nativeFiles);
-
-            final int N = nativeFiles.size();
-            for (int i = 0; i < N; i++) {
-                final Pair<ZipEntry, String> entry = nativeFiles.get(i);
-
-                /*
-                 * Note that PackageHelper.createSdDir adds a 1MB padding on
-                 * our claimed size, so we don't have to worry about block
-                 * alignment here.
-                 */
-                sizeBytes += entry.first.getSize();
-            }
-        } catch (ZipException e) {
-            Log.w(TAG, "Failed to extract data from package file", e);
-            return null;
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to cache package shared libs", e);
-            return null;
-        }
+        final int sizeMb = calculateContainerSize(codeFile, nativeFiles);
 
         // Create new container
         String newCachePath = null;
-        if ((newCachePath = PackageHelper.createSdDir(sizeBytes, newCid, key, Process.myUid())) == null) {
+        if ((newCachePath = PackageHelper.createSdDir(sizeMb, newCid, key, Process.myUid())) == null) {
             Log.e(TAG, "Failed to create container " + newCid);
             return null;
         }
@@ -274,6 +252,8 @@ public class DefaultContainerService extends IntentService {
         }
 
         try {
+            ZipFile zipFile = new ZipFile(codeFile);
+
             File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
             sharedLibraryDir.mkdir();
 
@@ -386,159 +366,196 @@ public class DefaultContainerService extends IntentService {
         return true;
     }
 
-    // Constants related to app heuristics
-    // No-installation limit for internal flash: 10% or less space available
-    private static final double LOW_NAND_FLASH_TRESHOLD = 0.1;
+    private static final int PREFER_INTERNAL = 1;
+    private static final int PREFER_EXTERNAL = 2;
 
-    // SD-to-internal app size threshold: currently set to 1 MB
-    private static final long INSTALL_ON_SD_THRESHOLD = (1024 * 1024);
-    private static final int ERR_LOC = -1;
-
-    private int recommendAppInstallLocation(int installLocation,
-            String archiveFilePath, int flags) {
-        boolean checkInt = false;
-        boolean checkExt = false;
+    private int recommendAppInstallLocation(int installLocation, String archiveFilePath, int flags,
+            long threshold) {
+        int prefer;
         boolean checkBoth = false;
+
         check_inner : {
-            // Check flags.
+            /*
+             * Explicit install flags should override the manifest settings.
+             */
             if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
-                // Check for forward locked app
-                checkInt = true;
+                /*
+                 * Forward-locked applications cannot be installed on SD card,
+                 * so only allow checking internal storage.
+                 */
+                prefer = PREFER_INTERNAL;
                 break check_inner;
             } else if ((flags & PackageManager.INSTALL_INTERNAL) != 0) {
-                // Explicit flag to install internally.
-                // Check internal storage and return
-                checkInt = true;
+                prefer = PREFER_INTERNAL;
                 break check_inner;
             } else if ((flags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                // Explicit flag to install externally.
-                // Check external storage and return
-                checkExt = true;
+                prefer = PREFER_EXTERNAL;
                 break check_inner;
             }
-            // Check for manifest option
+
+            /* No install flags. Check for manifest option. */
             if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
-                checkInt = true;
+                prefer = PREFER_INTERNAL;
                 break check_inner;
             } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
-                checkExt = true;
+                prefer = PREFER_EXTERNAL;
                 checkBoth = true;
                 break check_inner;
             } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
-                checkInt = true;
+                // We default to preferring internal storage.
+                prefer = PREFER_INTERNAL;
                 checkBoth = true;
                 break check_inner;
             }
+
             // Pick user preference
             int installPreference = Settings.System.getInt(getApplicationContext()
                     .getContentResolver(),
                     Settings.Secure.DEFAULT_INSTALL_LOCATION,
                     PackageHelper.APP_INSTALL_AUTO);
             if (installPreference == PackageHelper.APP_INSTALL_INTERNAL) {
-                checkInt = true;
+                prefer = PREFER_INTERNAL;
                 break check_inner;
             } else if (installPreference == PackageHelper.APP_INSTALL_EXTERNAL) {
-                checkExt = true;
+                prefer = PREFER_EXTERNAL;
                 break check_inner;
             }
-            // Fall back to default policy if nothing else is specified.
-            checkInt = true;
+
+            /*
+             * Fall back to default policy of internal-only if nothing else is
+             * specified.
+             */
+            prefer = PREFER_INTERNAL;
         }
 
-        // Package size = code size + cache size + data size
-        // If code size > 1 MB, install on SD card.
-        // Else install on internal NAND flash, unless space on NAND is less than 10%
-        String status = Environment.getExternalStorageState();
-        long availSDSize = -1;
-        boolean mediaAvailable = false;
-        if (!Environment.isExternalStorageEmulated() && status.equals(Environment.MEDIA_MOUNTED)) {
-            StatFs sdStats = new StatFs(
-                    Environment.getExternalStorageDirectory().getPath());
-            availSDSize = (long)sdStats.getAvailableBlocks() *
-                    (long)sdStats.getBlockSize();
-            mediaAvailable = true;
+        final boolean emulated = Environment.isExternalStorageEmulated();
+
+        final File apkFile = new File(archiveFilePath);
+
+        boolean fitsOnInternal = false;
+        if (checkBoth || prefer == PREFER_INTERNAL) {
+            fitsOnInternal = isUnderInternalThreshold(apkFile, threshold);
         }
-        StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
-        long totalInternalSize = (long)internalStats.getBlockCount() *
-                (long)internalStats.getBlockSize();
-        long availInternalSize = (long)internalStats.getAvailableBlocks() *
-                (long)internalStats.getBlockSize();
 
-        double pctNandFree = (double)availInternalSize / (double)totalInternalSize;
-
-        File apkFile = new File(archiveFilePath);
-        long pkgLen = apkFile.length();
-        
-        // To make final copy
-        long reqInstallSize = pkgLen;
-        // For dex files. Just ignore and fail when extracting. Max limit of 2Gig for now.
-        long reqInternalSize = 0;
-        boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
-        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalSize);
         boolean fitsOnSd = false;
-        if (mediaAvailable && (reqInstallSize < availSDSize)) {
-            // If we do not have an internal size requirement
-            // don't do a threshold check.
-            if (reqInternalSize == 0) {
-                fitsOnSd = true;
-            } else if ((reqInternalSize < availInternalSize) && intThresholdOk) {
-                fitsOnSd = true;
-            }
+        if (!emulated && (checkBoth || prefer == PREFER_EXTERNAL)) {
+            fitsOnSd = isUnderExternalThreshold(apkFile);
         }
-        boolean fitsOnInt = intThresholdOk && intAvailOk;
-        if (checkInt) {
-            // Check for internal memory availability
-            if (fitsOnInt) {
+
+        if (prefer == PREFER_INTERNAL) {
+            if (fitsOnInternal) {
                 return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
             }
-        } else if (checkExt) {
+        } else if (!emulated && prefer == PREFER_EXTERNAL) {
             if (fitsOnSd) {
                 return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
             }
         }
+
         if (checkBoth) {
-            // Check for internal first
-            if (fitsOnInt) {
+            if (fitsOnInternal) {
                 return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
-            }
-            // Check for external next
-            if (fitsOnSd) {
+            } else if (!emulated && fitsOnSd) {
                 return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
             }
         }
-        if ((checkExt || checkBoth) && !mediaAvailable) {
+
+        /*
+         * If they requested to be on the external media by default, return that
+         * the media was unavailable. Otherwise, indicate there was insufficient
+         * storage space available.
+         */
+        if (!emulated && (checkBoth || prefer == PREFER_EXTERNAL)
+                && !Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             return PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE;
+        } else {
+            return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
         }
-        return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
     }
 
-    private boolean checkFreeStorageInner(boolean external, Uri packageURI) {
-        File apkFile = new File(packageURI.getPath());
-        long size = apkFile.length();
-        if (external) {
-            String status = Environment.getExternalStorageState();
-            long availSDSize = -1;
-            if (status.equals(Environment.MEDIA_MOUNTED)) {
-                StatFs sdStats = new StatFs(
-                        Environment.getExternalStorageDirectory().getPath());
-                availSDSize = (long)sdStats.getAvailableBlocks() *
-                (long)sdStats.getBlockSize();
-            }
-            return availSDSize > size;
-        }
-        StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
-        long totalInternalSize = (long)internalStats.getBlockCount() *
-        (long)internalStats.getBlockSize();
-        long availInternalSize = (long)internalStats.getAvailableBlocks() *
-        (long)internalStats.getBlockSize();
+    private boolean isUnderInternalThreshold(File apkFile, long threshold) {
+        final long size = apkFile.length();
 
-        double pctNandFree = (double)availInternalSize / (double)totalInternalSize;
-        // To make final copy
-        long reqInstallSize = size;
-        // For dex files. Just ignore and fail when extracting. Max limit of 2Gig for now.
-        long reqInternalSize = 0;
-        boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
-        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalSize);
-        return intThresholdOk && intAvailOk;
+        final StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
+        final long availInternalSize = (long) internalStats.getAvailableBlocks()
+                * (long) internalStats.getBlockSize();
+
+        return (availInternalSize - size) > threshold;
+    }
+
+
+    private boolean isUnderExternalThreshold(File apkFile) {
+        if (Environment.isExternalStorageEmulated()) {
+            return false;
+        }
+
+        final int sizeMb = calculateContainerSize(apkFile, null);
+
+        final int availSdMb;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            StatFs sdStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long availSdSize = (long) (sdStats.getAvailableBlocks() * sdStats.getBlockSize());
+            availSdMb = (int) (availSdSize >> 20);
+        } else {
+            availSdMb = -1;
+        }
+
+        return availSdMb > sizeMb;
+    }
+
+    /**
+     * Calculate the container size for an APK. Takes into account the
+     * 
+     * @param apkFile file from which to calculate size
+     * @return size in megabytes (2^20 bytes)
+     */
+    private int calculateContainerSize(File apkFile, List<Pair<ZipEntry, String>> outFiles) {
+        // Calculate size of container needed to hold base APK.
+        long sizeBytes = apkFile.length();
+
+        // Check all the native files that need to be copied and add that to the
+        // container size.
+        ZipFile zipFile;
+        final List<Pair<ZipEntry, String>> nativeFiles;
+        try {
+            zipFile = new ZipFile(apkFile);
+
+            if (outFiles != null) {
+                nativeFiles = outFiles;
+            } else {
+                nativeFiles = new ArrayList<Pair<ZipEntry, String>>();
+            }
+
+            NativeLibraryHelper.listPackageNativeBinariesLI(zipFile, nativeFiles);
+
+            final int N = nativeFiles.size();
+            for (int i = 0; i < N; i++) {
+                final Pair<ZipEntry, String> entry = nativeFiles.get(i);
+
+                /*
+                 * Note a 1MB padding is added to the claimed size, so we don't
+                 * have to worry about block alignment here.
+                 */
+                sizeBytes += entry.first.getSize();
+            }
+        } catch (ZipException e) {
+            Log.w(TAG, "Failed to extract data from package file", e);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to cache package shared libs", e);
+        }
+
+        int sizeMb = (int) (sizeBytes >> 20);
+        if ((sizeBytes - (sizeMb * 1024 * 1024)) > 0) {
+            sizeMb++;
+        }
+
+        /*
+         * Add buffer size because we don't have a good way to determine the
+         * real FAT size. Your FAT size varies with how many directory entries
+         * you need, how big the whole filesystem is, and other such headaches.
+         */
+        sizeMb++;
+
+        return sizeMb;
     }
 }
