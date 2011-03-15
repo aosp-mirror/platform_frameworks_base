@@ -35,6 +35,11 @@ protected:
     sp<SurfaceTextureClient> mSTC;
 };
 
+TEST_F(SurfaceTextureClientTest, GetISurfaceTextureIsNotNull) {
+    sp<ISurfaceTexture> ist(mSTC->getISurfaceTexture());
+    ASSERT_TRUE(ist != NULL);
+}
+
 TEST_F(SurfaceTextureClientTest, QueuesToWindowCompositorIsFalse) {
     sp<ANativeWindow> anw(mSTC);
     int result = -123;
