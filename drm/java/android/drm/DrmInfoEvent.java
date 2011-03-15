@@ -45,6 +45,10 @@ public class DrmInfoEvent extends DrmEvent {
      * already done for the given account.
      */
     public static final int TYPE_ACCOUNT_ALREADY_REGISTERED = 5;
+    /**
+     * TYPE_RIGHTS_REMOVED, when the rights has been removed.
+     */
+    public static final int TYPE_RIGHTS_REMOVED = 6;
 
     /**
      * constructor to create DrmInfoEvent object with given parameters
