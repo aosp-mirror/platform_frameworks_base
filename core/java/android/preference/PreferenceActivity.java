@@ -961,6 +961,27 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
+     * Called by {@link #startWithFragment(String, Bundle, Fragment, int)} when
+     * in single-pane mode, to build an Intent to launch a new activity showing
+     * the selected fragment.  The default implementation constructs an Intent
+     * that re-launches the current activity with the appropriate arguments to
+     * display the fragment.
+     * 
+     * @param fragmentName The name of the fragment to display.
+     * @param args Optional arguments to supply to the fragment.
+     * @return Returns an Intent that can be launched to display the given
+     * fragment.
+     */
+    public Intent onBuildStartFragmentIntent(String fragmentName, Bundle args) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setClass(this, getClass());
+        intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
+        intent.putExtra(EXTRA_NO_HEADERS, true);
+        return intent;
+    }
+    
+    /**
      * Start a new instance of this activity, showing only the given
      * preference fragment.  When launched in this mode, the header list
      * will be hidden and the given preference fragment will be instantiated
@@ -968,14 +989,14 @@ public abstract class PreferenceActivity extends ListActivity implements
      *
      * @param fragmentName The name of the fragment to display.
      * @param args Optional arguments to supply to the fragment.
+     * @param resultTo Option fragment that should receive the result of
+     * the activity launch.
+     * @param resultRequestCode If resultTo is non-null, this is the request
+     * code in which to report the result.
      */
     public void startWithFragment(String fragmentName, Bundle args,
             Fragment resultTo, int resultRequestCode) {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setClass(this, getClass());
-        intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
-        intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
-        intent.putExtra(EXTRA_NO_HEADERS, true);
+        Intent intent = onBuildStartFragmentIntent(fragmentName, args);
         if (resultTo == null) {
             startActivity(intent);
         } else {
