@@ -416,7 +416,7 @@ public class Notification implements Parcelable
         if (this.largeIcon != null) {
             that.largeIcon = Bitmap.createBitmap(this.largeIcon);
         }
-        that.iconLevel = that.iconLevel;
+        that.iconLevel = this.iconLevel;
         that.sound = this.sound; // android.net.Uri is immutable
         that.audioStreamType = this.audioStreamType;
 
