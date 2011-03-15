@@ -33,6 +33,7 @@ LOCAL_SRC_FILES:= \
     IEffectClient.cpp \
     AudioEffect.cpp \
     Visualizer.cpp \
+    MemoryLeakTrackUtil.cpp \
     fixedfft.cpp.arm
 
 LOCAL_SHARED_LIBRARIES := \

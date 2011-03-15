@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include <private/android_filesystem_config.h>
+#include <media/MemoryLeakTrackUtil.h>
 
 #include <errno.h>
 #include <utils/threads.h>
@@ -254,5 +255,33 @@ ssize_t DrmManagerService::pread(int uniqueId, DecryptHandle* decryptHandle,
             void* buffer, ssize_t numBytes, off64_t offset) {
     LOGV("Entering pread");
     return mDrmManager->pread(uniqueId, decryptHandle, buffer, numBytes, offset);
+}
+
+status_t DrmManagerService::dump(int fd, const Vector<String16>& args)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+    if (checkCallingPermission(String16("android.permission.DUMP")) == false) {
+        snprintf(buffer, SIZE, "Permission Denial: "
+                "can't dump DrmManagerService from pid=%d, uid=%d\n",
+                IPCThreadState::self()->getCallingPid(),
+                IPCThreadState::self()->getCallingUid());
+        result.append(buffer);
+    } else {
+#if DRM_MEMORY_LEAK_TRACK
+        bool dumpMem = false;
+        for (size_t i = 0; i < args.size(); i++) {
+            if (args[i] == String16("-m")) {
+                dumpMem = true;
+            }
+        }
+        if (dumpMem) {
+            dumpMemoryAddresses(fd);
+        }
+#endif
+    }
+    write(fd, result.string(), result.size());
+    return NO_ERROR;
 }
 

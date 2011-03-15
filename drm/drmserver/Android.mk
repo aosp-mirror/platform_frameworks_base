@@ -23,6 +23,7 @@ LOCAL_SRC_FILES:= \
     StringTokenizer.cpp
 
 LOCAL_SHARED_LIBRARIES := \
+    libmedia \
     libutils \
     libbinder
 
