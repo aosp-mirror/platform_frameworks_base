@@ -45,7 +45,7 @@ bool DrmSupportInfo::isSupportedMimeType(const String8& mimeType) const {
     for (unsigned int i = 0; i < mMimeTypeVector.size(); i++) {
         const String8 item = mMimeTypeVector.itemAt(i);
 
-        if (String8("") != mimeType && item.find(mimeType) != -1) {
+        if (!strcasecmp(item.string(), mimeType.string())) {
             return true;
         }
     }
@@ -56,7 +56,7 @@ bool DrmSupportInfo::isSupportedFileSuffix(const String8& fileType) const {
     for (unsigned int i = 0; i < mFileSuffixVector.size(); i++) {
         const String8 item = mFileSuffixVector.itemAt(i);
 
-        if (item.find(fileType) != -1) {
+        if (!strcasecmp(item.string(), fileType.string())) {
             return true;
         }
     }
