@@ -96,7 +96,8 @@ public:
     bool quickReject(float left, float top, float right, float bottom);
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    virtual bool drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level = 0);
+    virtual bool drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
+            Rect& dirty, uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
@@ -245,12 +246,6 @@ private:
      * @param swap If true, the source and destination are swapped
      */
     void composeLayerRect(Layer* layer, const Rect& rect, bool swap = false);
-
-    /**
-     * Clears all the regions corresponding to the current list of layers.
-     * This method MUST be invoked before any drawing operation.
-     */
-    void clearLayerRegions();
 
     /**
      * Mark the layer as dirty at the specified coordinates. The coordinates
@@ -498,9 +493,6 @@ private:
 
     // Various caches
     Caches& mCaches;
-
-    // List of rectangles to clear due to calls to saveLayer()
-    Vector<Rect*> mLayers;
 
     // Indentity matrix
     const mat4 mIdentity;

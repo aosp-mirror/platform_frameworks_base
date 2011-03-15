@@ -245,12 +245,13 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nDestroyDisplayList(int displayList);
 
     @Override
-    public boolean drawDisplayList(DisplayList displayList, Rect dirty) {
+    public boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty) {
         return nDrawDisplayList(mRenderer,
-                ((GLES20DisplayList) displayList).mNativeDisplayList, dirty);
+                ((GLES20DisplayList) displayList).mNativeDisplayList, width, height, dirty);
     }
 
-    private static native boolean nDrawDisplayList(int renderer, int displayList, Rect dirty);
+    private static native boolean nDrawDisplayList(int renderer, int displayList,
+            int width, int height, Rect dirty);
 
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
