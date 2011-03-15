@@ -119,7 +119,6 @@ public class VideoEditorImpl implements VideoEditor {
     private static final String ATTR_OVERLAY_FRAME_HEIGHT = "overlay_frame_height";
     private static final String ATTR_OVERLAY_RESIZED_RGB_FRAME_WIDTH = "resized_RGBframe_width";
     private static final String ATTR_OVERLAY_RESIZED_RGB_FRAME_HEIGHT = "resized_RGBframe_height";
-
     private static final int ENGINE_ACCESS_MAX_TIMEOUT_MS = 500;
     /*
      *  Instance variables
@@ -436,6 +435,12 @@ public class VideoEditorImpl implements VideoEditor {
                 final String message = "Unsupported bitrate value " + bitrate;
                 throw new IllegalArgumentException(message);
             }
+        }
+        computeTimelineDuration();
+        final long audioBitrate = MediaArtistNativeHelper.Bitrate.BR_96_KBPS;
+        final long fileSize = (mDurationMs * (bitrate + audioBitrate)) / 8000;
+        if (MAX_SUPPORTED_FILE_SIZE <= fileSize) {
+            throw new IllegalStateException("Export Size is more than 2GB");
         }
 
         boolean semAcquireDone = false;
