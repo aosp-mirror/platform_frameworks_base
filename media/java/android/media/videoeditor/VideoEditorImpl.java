@@ -899,6 +899,10 @@ public class VideoEditorImpl implements VideoEditor {
             throw new IllegalArgumentException("Surface could not be retrieved from Surface holder");
         }
 
+        if (surface.isValid() == false) {
+            throw new IllegalStateException("Surface is not valid");
+        }
+
         if (timeMs < 0) {
             throw new IllegalArgumentException("requested time not correct");
         } else if (timeMs > mDurationMs) {
@@ -1622,6 +1626,10 @@ public class VideoEditorImpl implements VideoEditor {
             throw new IllegalArgumentException("Surface could not be retrieved from surface holder");
         }
 
+        if (surface.isValid() == false) {
+            throw new IllegalStateException("Surface is not valid");
+        }
+
         if (listener == null) {
             throw new IllegalArgumentException();
         }
@@ -1856,6 +1864,10 @@ public class VideoEditorImpl implements VideoEditor {
         final Surface surface = surfaceHolder.getSurface();
         if (surface == null) {
             throw new IllegalArgumentException("Surface could not be retrieved from surface holder");
+        }
+
+        if (surface.isValid() == false) {
+            throw new IllegalStateException("Surface is not valid");
         }
 
         if (mMANativeHelper != null) {
