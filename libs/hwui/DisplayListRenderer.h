@@ -144,6 +144,10 @@ private:
         return mReader.readInt();
     }
 
+    inline uint32_t getUInt() {
+        return mReader.readU32();
+    }
+
     SkMatrix* getMatrix() {
         return (SkMatrix*) getInt();
     }
@@ -238,7 +242,8 @@ public:
 
     bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
 
-    bool drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level = 0);
+    bool drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
+            Rect& dirty, uint32_t level = 0);
     void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
@@ -321,6 +326,11 @@ private:
 
     inline void addInt(int value) {
         mWriter.writeInt(value);
+    }
+
+    inline void addSize(uint32_t w, uint32_t h) {
+        mWriter.writeInt(w);
+        mWriter.writeInt(h);
     }
 
     void addInts(const int32_t* values, uint32_t count) {

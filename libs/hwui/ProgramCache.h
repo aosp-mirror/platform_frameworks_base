@@ -231,9 +231,11 @@ struct ProgramDescription {
      * Logs the specified message followed by the key identifying this program.
      */
     void log(const char* message) const {
+#if DEBUG_PROGRAMS
         programid k = key();
         PROGRAM_LOGD("%s (key = 0x%.8x%.8x)", message, uint32_t(k >> 32),
                 uint32_t(k & 0xffffffff));
+#endif
     }
 
 private:

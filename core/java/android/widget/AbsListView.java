@@ -5226,6 +5226,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @return The cache color hint
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public int getCacheColorHint() {
         return mCacheColorHint;
     }

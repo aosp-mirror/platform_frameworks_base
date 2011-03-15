@@ -403,10 +403,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
     // Window coordinates of the layer
     Rect bounds(left, top, right, bottom);
-    if (fboLayer) {
-        // Clear the previous layer regions before we change the viewport
-        clearLayerRegions();
-    } else {
+    if (!fboLayer) {
         mSnapshot->transform->mapRect(bounds);
 
         // Layers only make sense if they are in the framebuffer's bounds
@@ -464,8 +461,14 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
                 glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
                         snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
             }
-            // Enqueue the buffer coordinates to clear the corresponding region later
-            mLayers.push(new Rect(bounds));
+
+            // Clear the framebuffer where the layer will draw
+            glScissor(bounds.left, mSnapshot->height - bounds.bottom,
+                    bounds.getWidth(), bounds.getHeight());
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            dirtyClip();
         }
     }
 
@@ -760,31 +763,6 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
 #endif
 }
 
-void OpenGLRenderer::clearLayerRegions() {
-    if (mLayers.size() == 0 || mSnapshot->isIgnored()) return;
-
-    Rect clipRect(*mSnapshot->clipRect);
-    clipRect.snapToPixelBoundaries();
-
-    for (uint32_t i = 0; i < mLayers.size(); i++) {
-        Rect* bounds = mLayers.itemAt(i);
-        if (clipRect.intersects(*bounds)) {
-            // Clear the framebuffer where the layer will draw
-            glScissor(bounds->left, mSnapshot->height - bounds->bottom,
-                    bounds->getWidth(), bounds->getHeight());
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            // Restore the clip
-            dirtyClip();
-        }
-
-        delete bounds;
-    }
-
-    mLayers.clear();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Transforms
 ///////////////////////////////////////////////////////////////////////////////
@@ -870,7 +848,6 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setupDraw() {
-    clearLayerRegions();
     if (mDirtyClip) {
         setScissorFromClip();
     }
@@ -1064,12 +1041,18 @@ void OpenGLRenderer::finishDrawTexture() {
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
 
-bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level) {
+bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
+        Rect& dirty, uint32_t level) {
+    if (quickReject(0.0f, 0.0f, width, height)) {
+        return false;
+    }
+
     // All the usual checks and setup operations (quickReject, setupDraw, etc.)
     // will be performed by the display list itself
     if (displayList) {
         return displayList->replay(*this, dirty, level);
     }
+
     return false;
 }
 
