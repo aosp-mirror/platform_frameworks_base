@@ -2607,6 +2607,9 @@ ResourceFilter::match(const ResTable_config& config) const
     if (!match(AXIS_SCREENSIZE, config.screenSize)) {
         return false;
     }
+    if (!match(AXIS_SCREENLAYOUTSIZE, config.screenLayout&ResTable_config::MASK_SCREENSIZE)) {
+        return false;
+    }
     if (!match(AXIS_VERSION, config.version)) {
         return false;
     }
