@@ -53,6 +53,10 @@ public class DrmErrorEvent extends DrmEvent {
      * associated with all DRM schemes.
      */
     public static final int TYPE_REMOVE_ALL_RIGHTS_FAILED = 2007;
+    /**
+     * TYPE_ACQUIRE_DRM_INFO_FAILED, when failed to acquire DrmInfo.
+     */
+    public static final int TYPE_ACQUIRE_DRM_INFO_FAILED = 2008;
 
     /**
      * constructor to create DrmErrorEvent object with given parameters
