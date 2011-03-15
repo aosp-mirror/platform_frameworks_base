@@ -462,6 +462,7 @@ public class ActionBarView extends ViewGroup {
     private void ensureTabsExist() {
         if (mTabScrollView == null) {
             mTabScrollView = new HorizontalScrollView(getContext());
+            mTabScrollView.setHorizontalFadingEdgeEnabled(true);
             mTabLayout = new LinearLayout(getContext(), null,
                     com.android.internal.R.attr.actionBarTabBarStyle);
             mTabScrollView.addView(mTabLayout);
