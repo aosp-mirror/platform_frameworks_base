@@ -28,8 +28,9 @@ using namespace android;
 
 #define INVALID_VALUE -1
 
-Mutex DrmManagerClientImpl::mMutex;
-sp<IDrmManagerService> DrmManagerClientImpl::mDrmManagerService;
+Mutex DrmManagerClientImpl::sMutex;
+sp<IDrmManagerService> DrmManagerClientImpl::sDrmManagerService;
+sp<DrmManagerClientImpl::DeathNotifier> DrmManagerClientImpl::sDeathNotifier;
 const String8 DrmManagerClientImpl::EMPTY_STRING("");
 
 DrmManagerClientImpl* DrmManagerClientImpl::create(int* pUniqueId) {
@@ -47,8 +48,8 @@ void DrmManagerClientImpl::remove(int uniqueId) {
 }
 
 const sp<IDrmManagerService>& DrmManagerClientImpl::getDrmManagerService() {
-    mMutex.lock();
-    if (NULL == mDrmManagerService.get()) {
+    Mutex::Autolock lock(sMutex);
+    if (NULL == sDrmManagerService.get()) {
         sp<IServiceManager> sm = defaultServiceManager();
         sp<IBinder> binder;
         do {
@@ -62,11 +63,13 @@ const sp<IDrmManagerService>& DrmManagerClientImpl::getDrmManagerService() {
             reqt.tv_nsec = 500000000; //0.5 sec
             nanosleep(&reqt, NULL);
         } while (true);
-
-        mDrmManagerService = interface_cast<IDrmManagerService>(binder);
+        if (NULL == sDeathNotifier.get()) {
+            sDeathNotifier = new DeathNotifier();
+        }
+        binder->linkToDeath(sDeathNotifier);
+        sDrmManagerService = interface_cast<IDrmManagerService>(binder);
     }
-    mMutex.unlock();
-    return mDrmManagerService;
+    return sDrmManagerService;
 }
 
 void DrmManagerClientImpl::addClient(int uniqueId) {
@@ -143,11 +146,8 @@ DrmInfo* DrmManagerClientImpl::acquireDrmInfo(
 status_t DrmManagerClientImpl::saveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath) {
     status_t status = DRM_ERROR_UNKNOWN;
-    if (EMPTY_STRING != contentPath) {
-        status = getDrmManagerService()->saveRights(
+    return getDrmManagerService()->saveRights(
                 uniqueId, drmRights, rightsPath, contentPath);
-    }
-    return status;
 }
 
 String8 DrmManagerClientImpl::getOriginalMimeType(
@@ -334,5 +334,18 @@ status_t DrmManagerClientImpl::notify(const DrmInfoEvent& event) {
         listener->onInfo(event);
     }
     return DRM_NO_ERROR;
+}
+
+DrmManagerClientImpl::DeathNotifier::~DeathNotifier() {
+    Mutex::Autolock lock(sMutex);
+    if (NULL != sDrmManagerService.get()) {
+        sDrmManagerService->asBinder()->unlinkToDeath(this);
+    }
+}
+
+void DrmManagerClientImpl::DeathNotifier::binderDied(const wp<IBinder>& who) {
+    Mutex::Autolock lock(sMutex);
+    DrmManagerClientImpl::sDrmManagerService.clear();
+    LOGW("DrmManager server died!");
 }
 

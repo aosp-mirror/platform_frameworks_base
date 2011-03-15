@@ -28,7 +28,7 @@ import java.util.Iterator;
  *
  */
 public class DrmInfoRequest {
-    // Changes in following constants should be in sync with DrmInfoRequest.cpp
+    // Changes in following constants should be in sync with DrmInfoRequest.h
     /**
      * Constants defines the type of {@link DrmInfoRequest}
      */
