@@ -4919,12 +4919,24 @@ class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Cannot install fwd locked apps on sdcard");
                 ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
             } else {
+                final long lowThreshold;
+
+                final DeviceStorageMonitorService dsm = (DeviceStorageMonitorService) ServiceManager
+                        .getService(DeviceStorageMonitorService.SERVICE);
+                if (dsm == null) {
+                    Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
+                    lowThreshold = 0L;
+                } else {
+                    lowThreshold = dsm.getMemoryLowThreshold();
+                }
+
                 // Remote call to find out default install location
                 final PackageInfoLite pkgLite;
                 try {
                     mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    pkgLite = mContainerService.getMinimalPackageInfo(packageURI, flags);
+                    pkgLite = mContainerService.getMinimalPackageInfo(packageURI, flags,
+                            lowThreshold);
                 } finally {
                     mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
@@ -5144,10 +5156,26 @@ class PackageManagerService extends IPackageManager.Stub {
         }
 
         boolean checkFreeStorage(IMediaContainerService imcs) throws RemoteException {
+            final long lowThreshold;
+
+            final DeviceStorageMonitorService dsm = (DeviceStorageMonitorService) ServiceManager
+                    .getService(DeviceStorageMonitorService.SERVICE);
+            if (dsm == null) {
+                Log.w(TAG, "Couldn't get low memory threshold; no free limit imposed");
+                lowThreshold = 0L;
+            } else {
+                if (dsm.isMemoryLow()) {
+                    Log.w(TAG, "Memory is reported as being too low; aborting package install");
+                    return false;
+                }
+
+                lowThreshold = dsm.getMemoryLowThreshold();
+            }
+
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkFreeStorage(false, packageURI);
+                return imcs.checkInternalFreeStorage(packageURI, lowThreshold);
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
@@ -5373,7 +5401,7 @@ class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                return imcs.checkFreeStorage(true, packageURI);
+                return imcs.checkExternalFreeStorage(packageURI);
             } finally {
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
