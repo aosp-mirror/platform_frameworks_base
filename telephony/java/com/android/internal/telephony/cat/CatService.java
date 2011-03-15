@@ -118,6 +118,8 @@ public class CatService extends Handler implements AppInterface {
     private static IccRecords mIccRecords;
 
     // Service members.
+    // Protects singleton instance lazy initialization.
+    private static final Object sInstanceLock = new Object();
     private static CatService sInstance;
     private CommandsInterface mCmdIf;
     private Context mContext;
@@ -515,26 +517,28 @@ public class CatService extends Handler implements AppInterface {
      */
     public static CatService getInstance(CommandsInterface ci, IccRecords ir,
             Context context, IccFileHandler fh, IccCard ic) {
-        if (sInstance == null) {
-            if (ci == null || ir == null || context == null || fh == null
-                    || ic == null) {
-                return null;
-            }
-            HandlerThread thread = new HandlerThread("Cat Telephony service");
-            thread.start();
-            sInstance = new CatService(ci, ir, context, fh, ic);
-            CatLog.d(sInstance, "NEW sInstance");
-        } else if ((ir != null) && (mIccRecords != ir)) {
-            CatLog.d(sInstance, "Reinitialize the Service with SIMRecords");
-            mIccRecords = ir;
+        synchronized (sInstanceLock) {
+            if (sInstance == null) {
+                if (ci == null || ir == null || context == null || fh == null
+                        || ic == null) {
+                    return null;
+                }
+                HandlerThread thread = new HandlerThread("Cat Telephony service");
+                thread.start();
+                sInstance = new CatService(ci, ir, context, fh, ic);
+                CatLog.d(sInstance, "NEW sInstance");
+            } else if ((ir != null) && (mIccRecords != ir)) {
+                CatLog.d(sInstance, "Reinitialize the Service with SIMRecords");
+                mIccRecords = ir;
 
-            // re-Register for SIM ready event.
-            mIccRecords.registerForRecordsLoaded(sInstance, MSG_ID_ICC_RECORDS_LOADED, null);
-            CatLog.d(sInstance, "sr changed reinitialize and return current sInstance");
-        } else {
-            CatLog.d(sInstance, "Return current sInstance");
+                // re-Register for SIM ready event.
+                mIccRecords.registerForRecordsLoaded(sInstance, MSG_ID_ICC_RECORDS_LOADED, null);
+                CatLog.d(sInstance, "sr changed reinitialize and return current sInstance");
+            } else {
+                CatLog.d(sInstance, "Return current sInstance");
+            }
+            return sInstance;
         }
-        return sInstance;
     }
 
     /**
