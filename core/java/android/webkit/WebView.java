@@ -5384,7 +5384,8 @@ public class WebView extends AbsoluteLayout
     private boolean shouldForwardTouchEvent() {
         return mFullScreenHolder != null || (mForwardTouchEvents
                 && !mSelectingText
-                && mPreventDefault != PREVENT_DEFAULT_IGNORE);
+                && mPreventDefault != PREVENT_DEFAULT_IGNORE
+                && mPreventDefault != PREVENT_DEFAULT_NO);
     }
 
     private boolean inFullScreenMode() {
