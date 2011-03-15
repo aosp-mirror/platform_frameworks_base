@@ -24,8 +24,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.CheckBox;
 import android.widget.Checkable;
 import android.widget.TextView;
 
@@ -90,8 +92,16 @@ public class CheckBoxPreference extends Preference {
                     checkboxView.isEnabled()) {
                 mSendAccessibilityEventViewClickedType = false;
 
-                int eventType = AccessibilityEvent.TYPE_VIEW_CLICKED;
-                checkboxView.sendAccessibilityEventUnchecked(AccessibilityEvent.obtain(eventType));
+                // we send an event on behalf of the check box because in onBind the latter
+                // is detached from its parent and such views do not send accessibility events
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_VIEW_CLICKED);
+                event.setClassName(checkboxView.getClass().getName());
+                event.setPackageName(getContext().getPackageName());
+                event.setEnabled(checkboxView.isEnabled());
+                event.setContentDescription(checkboxView.getContentDescription());
+                event.setChecked(((Checkable) checkboxView).isChecked());
+                mAccessibilityManager.sendAccessibilityEvent(event);
             }
         }
 
