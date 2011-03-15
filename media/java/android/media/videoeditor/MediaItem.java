@@ -131,6 +131,15 @@ public abstract class MediaItem {
         if (filename == null) {
             throw new IllegalArgumentException("MediaItem : filename is null");
         }
+        File file = new File(filename);
+        if (!file.exists()) {
+            throw new IOException(filename + " not found ! ");
+        }
+
+        /*Compare file_size with 2GB*/
+        if (VideoEditor.MAX_SUPPORTED_FILE_SIZE <= file.length()) {
+            throw new IllegalArgumentException("File size is more than 2GB");
+        }
         mUniqueId = mediaItemId;
         mFilename = filename;
         mRenderingMode = renderingMode;

@@ -49,7 +49,6 @@ public class AudioTrack {
     private final int mAudioType;
     private final int mAudioBitrate;
     private final int mAudioSamplingFrequency;
-
     /**
      *  Ducking variables
      */
@@ -127,9 +126,15 @@ public class AudioTrack {
                int duckThreshold, int duckedTrackVolume,
             String audioWaveformFilename) throws IOException {
         Properties properties = null;
+
         File file = new File(filename);
         if (!file.exists()) {
             throw new IOException(filename + " not found ! ");
+        }
+
+        /*Compare file_size with 2GB*/
+        if (VideoEditor.MAX_SUPPORTED_FILE_SIZE <= file.length()) {
+            throw new IllegalArgumentException("File size is more than 2GB");
         }
 
         if (editor instanceof VideoEditorImpl) {

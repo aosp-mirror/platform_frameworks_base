@@ -68,6 +68,11 @@ public interface VideoEditor {
     public final static int DURATION_OF_STORYBOARD = -1;
 
     /**
+     *  Maximum supported file size
+     */
+    public static final long MAX_SUPPORTED_FILE_SIZE = 2147483648L;
+
+    /**
      * This listener interface is used by the VideoEditor to emit preview
      * progress notifications. This callback should be invoked after the number
      * of frames specified by
