@@ -54,8 +54,14 @@
     <!-- Prompt for the USB accessory permission dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_permission_prompt">Allow the application %1$s to access the USB accessory?</string>
 
+    <!-- Prompt for the USB device confirm dialog [CHAR LIMIT=80] -->
+    <string name="usb_device_confirm_prompt">Open %1$s when this USB device is connected?</string>
+
+    <!-- Prompt for the USB accessory confirm dialog [CHAR LIMIT=80] -->
+    <string name="usb_accessory_confirm_prompt">Open %1$s when this USB accessory is connected?</string>
+
     <!-- Prompt for the USB accessory URI dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_uri_prompt">Additional information for this device may be found at: %1$s</string>
+    <string name="usb_accessory_uri_prompt">Additional information for this USB accessory may be found at: %1$s</string>
 
     <!-- Title for USB accessory dialog.  Used when the name of the accessory cannot be determined.  [CHAR LIMIT=50] -->
     <string name="title_usb_accessory">USB accessory</string>
@@ -63,7 +69,7 @@
     <!-- View button label for USB dialogs.  [CHAR LIMIT=15] -->
     <string name="label_view">View</string>
 
-    <!-- Ignore button label for USB dialogs.  [CHAR LIMIT=15] -->
-    <string name="label_ignore">Ignore</string>
+    <!-- Checkbox label for USB accessory dialogs.  [CHAR LIMIT=50] -->
+    <string name="always_use_accessory">Use by default for this USB accessory</string>
 
 </resources>

@@ -19,13 +19,14 @@ package com.android.future.usb;
 /**
  * A class representing a USB accessory.
  */
-public final class UsbAccessory {
+public class UsbAccessory {
 
     private final String mManufacturer;
     private final String mModel;
     private final String mDescription;
     private final String mVersion;
     private final String mUri;
+    private final String mSerial;
 
     /* package */ UsbAccessory(android.hardware.usb.UsbAccessory accessory) {
         mManufacturer = accessory.getManufacturer();
@@ -33,6 +34,7 @@ public final class UsbAccessory {
         mDescription = accessory.getDescription();
         mVersion = accessory.getVersion();
         mUri = accessory.getUri();
+        mSerial = accessory.getSerial();
     }
 
     /**
@@ -82,6 +84,17 @@ public final class UsbAccessory {
         return mUri;
     }
 
+    /**
+     * Returns the unique serial number for the accessory.
+     * This is an optional serial number that can be used to differentiate
+     * between individual accessories of the same model and manufacturer
+     *
+     * @return the unique serial number
+     */
+    public String getSerial() {
+        return mSerial;
+    }
+
     private static boolean compare(String s1, String s2) {
         if (s1 == null) return (s2 == null);
         return s1.equals(s2);
@@ -95,7 +108,8 @@ public final class UsbAccessory {
                     compare(mModel, accessory.getModel()) &&
                     compare(mDescription, accessory.getDescription()) &&
                     compare(mVersion, accessory.getVersion()) &&
-                    compare(mUri, accessory.getUri()));
+                    compare(mUri, accessory.getUri()) &&
+                    compare(mSerial, accessory.getSerial()));
         }
         return false;
     }
@@ -106,7 +120,8 @@ public final class UsbAccessory {
                 (mModel == null ? 0 : mModel.hashCode()) ^
                 (mDescription == null ? 0 : mDescription.hashCode()) ^
                 (mVersion == null ? 0 : mVersion.hashCode()) ^
-                (mUri == null ? 0 : mUri.hashCode()));
+                (mUri == null ? 0 : mUri.hashCode()) ^
+                (mSerial == null ? 0 : mSerial.hashCode()));
     }
 
     @Override
@@ -115,6 +130,7 @@ public final class UsbAccessory {
                             ", mModel=" + mModel +
                             ", mDescription=" + mDescription +
                             ", mVersion=" + mVersion +
-                            ", mUri=" + mUri + "]";
+                            ", mUri=" + mUri +
+                            ", mSerial=" + mSerial + "]";
     }
 }

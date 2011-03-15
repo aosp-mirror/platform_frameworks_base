@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <pthread.h>
+#include <time.h>
 
 #include <usbhost/usbhost.h>
 #include <linux/usb/f_accessory.h>
@@ -65,9 +66,20 @@ static void* write_thread(void* arg) {
     return NULL;
 }
 
+static void milli_sleep(int millis) {
+    struct timespec tm;
+
+    tm.tv_sec = 0;
+    tm.tv_nsec = millis * 1000000;
+    nanosleep(&tm, NULL);
+}
+
 static void send_string(struct usb_device *device, int index, const char* string) {
     int ret = usb_device_control_transfer(device, USB_DIR_OUT | USB_TYPE_VENDOR,
             ACCESSORY_SEND_STRING, 0, index, (void *)string, strlen(string) + 1, 0);
+
+    // some devices can't handle back-to-back requests, so delay a bit
+    milli_sleep(10);
 }
 
 static int usb_device_added(const char *devname, void* client_data) {
@@ -143,9 +155,10 @@ static int usb_device_added(const char *devname, void* client_data) {
 
             send_string(device, ACCESSORY_STRING_MANUFACTURER, "Google, Inc.");
             send_string(device, ACCESSORY_STRING_MODEL, "AccessoryChat");
-            send_string(device, ACCESSORY_STRING_DESCRIPTION, "Sample Program");
+            send_string(device, ACCESSORY_STRING_DESCRIPTION, "Accessory Chat");
             send_string(device, ACCESSORY_STRING_VERSION, "1.0");
             send_string(device, ACCESSORY_STRING_URI, "http://www.android.com");
+            send_string(device, ACCESSORY_STRING_SERIAL, "1234567890");
 
             ret = usb_device_control_transfer(device, USB_DIR_OUT | USB_TYPE_VENDOR,
                     ACCESSORY_START, 0, 0, 0, 0, 0);
