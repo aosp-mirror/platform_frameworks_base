@@ -141,7 +141,8 @@ public class Looper {
                     Log.wtf("Looper", "Thread identity changed from 0x"
                             + Long.toHexString(ident) + " to 0x"
                             + Long.toHexString(newIdent) + " while dispatching to "
-                            + msg.target + " " + msg.callback + " what=" + msg.what);
+                            + msg.target.getClass().getName() + " "
+                            + msg.callback + " what=" + msg.what);
                 }
                 
                 msg.recycle();
