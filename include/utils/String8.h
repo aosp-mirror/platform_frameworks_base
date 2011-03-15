@@ -165,8 +165,8 @@ public:
     String8 walkPath(String8* outRemains = NULL) const;
 
     /*
-     * Return the filename extension.  This is the last '.' and up to
-     * four characters that follow it.  The '.' is included in case we
+     * Return the filename extension.  This is the last '.' and any number
+     * of characters that follow it.  The '.' is included in case we
      * decide to expand our definition of what constitutes an extension.
      *
      * "/tmp/foo/bar.c" --> ".c"
