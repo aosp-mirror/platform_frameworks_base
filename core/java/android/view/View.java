@@ -59,7 +59,6 @@ import android.util.Pools;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.MeasureSpec;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
@@ -4651,6 +4650,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        //noinspection SimplifiableIfStatement
         if (mOnGenericMotionListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnGenericMotionListener.onGenericMotion(this, event)) {
             return true;
@@ -9326,7 +9326,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         final ScrollabilityCache scrollabilityCache = mScrollCache;
-        int length = scrollabilityCache.fadingEdgeLength;
+        final float fadeHeight = scrollabilityCache.fadingEdgeLength;        
+        int length = (int) fadeHeight;
 
         // clip the fade length if top and bottom fades overlap
         // overlapping fades produce odd-looking artifacts
@@ -9341,16 +9342,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         if (verticalEdges) {
             topFadeStrength = Math.max(0.0f, Math.min(1.0f, getTopFadingEdgeStrength()));
-            drawTop = topFadeStrength > 0.0f;
+            drawTop = topFadeStrength * fadeHeight > 1.0f;
             bottomFadeStrength = Math.max(0.0f, Math.min(1.0f, getBottomFadingEdgeStrength()));
-            drawBottom = bottomFadeStrength > 0.0f;
+            drawBottom = bottomFadeStrength * fadeHeight > 1.0f;
         }
 
         if (horizontalEdges) {
             leftFadeStrength = Math.max(0.0f, Math.min(1.0f, getLeftFadingEdgeStrength()));
-            drawLeft = leftFadeStrength > 0.0f;
+            drawLeft = leftFadeStrength * fadeHeight > 1.0f;
             rightFadeStrength = Math.max(0.0f, Math.min(1.0f, getRightFadingEdgeStrength()));
-            drawRight = rightFadeStrength > 0.0f;
+            drawRight = rightFadeStrength * fadeHeight > 1.0f;
         }
 
         saveCount = canvas.getSaveCount();
@@ -9388,7 +9389,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         final Paint p = scrollabilityCache.paint;
         final Matrix matrix = scrollabilityCache.matrix;
         final Shader fade = scrollabilityCache.shader;
-        final float fadeHeight = scrollabilityCache.fadingEdgeLength;
 
         if (drawTop) {
             matrix.setScale(1, fadeHeight * topFadeStrength);
@@ -9438,6 +9438,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return The known solid color background for this view, or 0 if the color may vary
      */
+    @ViewDebug.ExportedProperty(category = "drawing")
     public int getSolidColor() {
         return 0;
     }
@@ -11644,6 +11645,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return true if scrolling was clamped to an over-scroll boundary along either
      *          axis, false otherwise.
      */
+    @SuppressWarnings({"UnusedParameters"})
     protected boolean overScrollBy(int deltaX, int deltaY,
             int scrollX, int scrollY,
             int scrollRangeX, int scrollRangeY,

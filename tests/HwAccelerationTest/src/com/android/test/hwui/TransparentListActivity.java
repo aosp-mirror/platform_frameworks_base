@@ -79,7 +79,7 @@ public class TransparentListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.default_wallpaper));
+        getWindow().setBackgroundDrawable(getResources().getDrawable(R.drawable.gradient));
         setContentView(R.layout.list_activity);
 
         ListAdapter adapter = new SimpleListAdapter(this);
