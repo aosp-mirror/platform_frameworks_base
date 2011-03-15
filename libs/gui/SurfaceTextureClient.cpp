@@ -40,6 +40,10 @@ SurfaceTextureClient::SurfaceTextureClient(
     mAllocator = mSurfaceTexture->getAllocator();
 }
 
+sp<ISurfaceTexture> SurfaceTextureClient::getISurfaceTexture() const {
+    return mSurfaceTexture;
+}
+
 int SurfaceTextureClient::setSwapInterval(ANativeWindow* window, int interval) {
     SurfaceTextureClient* c = getSelf(window);
     return c->setSwapInterval(interval);
