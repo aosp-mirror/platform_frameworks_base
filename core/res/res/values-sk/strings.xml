@@ -361,8 +361,10 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ovládanie kontrolky"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Umožňuje aplikácii ovládať kontrolku."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"prístup k zariadeniam USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Umožní aplikácii prístup k zariadeniam USB."</string>
+    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
+    <skip />
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementovať protokol MTP"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Povoľuje prístup k ovládaču kernel MTP na implementáciu protokolu MTP USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testovanie hardvéru"</string>
@@ -484,8 +486,8 @@
     <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia telefónu"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastaviť globálny server proxy zariadenia"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globálny server proxy, ktorý sa bude používať po aktivácii pravidiel. Platný globálny server proxy nastavuje iba prvý správca zariadenia."</string>
-    <!-- outdated translation 4740941403188940274 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Nastaviť dátum vypršania platnosti hesla"</string>
-    <!-- outdated translation 6626724939177185949 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Ovládanie doby, po uplynutí ktorej treba zmeniť heslo na odomknutie obrazovky"</string>
+    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastav. koniec platnosti hesla"</string>
+    <string name="policydesc_expirePassword" msgid="4844430354224822074">"Nastavte, ako často sa musí zmeniť heslo na uzamknutie obrazovky"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastaviť šifr. ukl. priestoru"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Vyžaduje šifrovanie uložených údajov aplikácií"</string>
   <string-array name="phoneTypes">
@@ -814,6 +816,8 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Použiť ako predvolené nastavenie pre túto akciu."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Vymazanie predvolených hodnôt v časti Nastavenia plochy &gt; Aplikácie &gt; Správa aplikácií."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Vyberte akciu"</string>
+    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
+    <skip />
     <string name="noApplications" msgid="1691104391758345586">"Túto akciu nemôžu vykonávať žiadne aplikácie."</string>
     <string name="aerr_title" msgid="653922989522758100">"Je nám ľúto!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) bola neočakávane zastavená. Skúste to znova."</string>

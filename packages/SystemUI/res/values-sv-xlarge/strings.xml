@@ -24,8 +24,6 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi-ansluten"</string>
     <string name="gps_notification_searching_text" msgid="894185519046488403">"Sökning efter GPS pågår"</string>
     <string name="gps_notification_found_text" msgid="5306445324124275852">"Platsen har identifierats av GPS"</string>
-    <!-- no translation found for notifications_off_title (2297252328026582111) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (3754847213329718358) -->
-    <skip />
+    <string name="notifications_off_title" msgid="2297252328026582111">"Aviseringar inaktiverade"</string>
+    <string name="notifications_off_text" msgid="3754847213329718358">"Knacka lätt här om du vill aktivera aviseringar igen."</string>
 </resources>

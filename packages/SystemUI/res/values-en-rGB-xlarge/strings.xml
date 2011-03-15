@@ -24,8 +24,6 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="1456658018593445677">"Wi-Fi connected"</string>
     <string name="gps_notification_searching_text" msgid="894185519046488403">"Searching for GPS"</string>
     <string name="gps_notification_found_text" msgid="5306445324124275852">"Location set by GPS"</string>
-    <!-- no translation found for notifications_off_title (2297252328026582111) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (3754847213329718358) -->
-    <skip />
+    <string name="notifications_off_title" msgid="2297252328026582111">"Notifications off"</string>
+    <string name="notifications_off_text" msgid="3754847213329718358">"Tap here to turn notifications back on."</string>
 </resources>
