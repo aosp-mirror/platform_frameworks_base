@@ -390,6 +390,9 @@ public class DefaultContainerService extends IntentService {
     // No-installation limit for internal flash: 10% or less space available
     private static final double LOW_NAND_FLASH_TRESHOLD = 0.1;
 
+    // No-installation limit for internal flash: 150MB or less space available
+    private static final long NAND_MIN_FREE_SPACE = (1024L * 1024L * 150L);
+
     // SD-to-internal app size threshold: currently set to 1 MB
     private static final long INSTALL_ON_SD_THRESHOLD = (1024 * 1024);
     private static final int ERR_LOC = -1;
@@ -451,7 +454,8 @@ public class DefaultContainerService extends IntentService {
         String status = Environment.getExternalStorageState();
         long availSDSize = -1;
         boolean mediaAvailable = false;
-        if (!Environment.isExternalStorageEmulated() && status.equals(Environment.MEDIA_MOUNTED)) {
+        final boolean mediaEmulated = Environment.isExternalStorageEmulated();
+        if (!mediaEmulated && status.equals(Environment.MEDIA_MOUNTED)) {
             StatFs sdStats = new StatFs(
                     Environment.getExternalStorageDirectory().getPath());
             availSDSize = (long)sdStats.getAvailableBlocks() *
@@ -474,7 +478,7 @@ public class DefaultContainerService extends IntentService {
         // For dex files. Just ignore and fail when extracting. Max limit of 2Gig for now.
         long reqInternalSize = 0;
         boolean intThresholdOk = (pctNandFree >= LOW_NAND_FLASH_TRESHOLD);
-        boolean intAvailOk = ((reqInstallSize + reqInternalSize) < availInternalSize);
+        boolean intAvailOk = (reqInstallSize + reqInternalSize) < (availInternalSize - NAND_MIN_FREE_SPACE);
         boolean fitsOnSd = false;
         if (mediaAvailable && (reqInstallSize < availSDSize)) {
             // If we do not have an internal size requirement
@@ -485,7 +489,7 @@ public class DefaultContainerService extends IntentService {
                 fitsOnSd = true;
             }
         }
-        boolean fitsOnInt = intThresholdOk && intAvailOk;
+        boolean fitsOnInt = intThresholdOk || intAvailOk;
         if (checkInt) {
             // Check for internal memory availability
             if (fitsOnInt) {
@@ -506,7 +510,7 @@ public class DefaultContainerService extends IntentService {
                 return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
             }
         }
-        if ((checkExt || checkBoth) && !mediaAvailable) {
+        if (!mediaEmulated && (checkExt || checkBoth) && !mediaAvailable) {
             return PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE;
         }
         return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
