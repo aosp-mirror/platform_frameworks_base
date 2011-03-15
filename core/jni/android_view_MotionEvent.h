@@ -26,12 +26,11 @@ class MotionEvent;
 
 /* Obtains an instance of a DVM MotionEvent object as a copy of a native MotionEvent instance.
  * Returns NULL on error. */
-extern jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* event);
+extern jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* event);
 
-/* Copies the contents of a DVM MotionEvent object to a native MotionEvent instance.
- * Returns non-zero on error. */
-extern status_t android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
-        MotionEvent* event);
+/* Gets the underlying native MotionEvent instance within a DVM MotionEvent object.
+ * Returns NULL if the event is NULL or if it is uninitialized. */
+extern MotionEvent* android_view_MotionEvent_getNativePtr(JNIEnv* env, jobject eventObj);
 
 /* Recycles a DVM MotionEvent object.
  * Returns non-zero on error. */

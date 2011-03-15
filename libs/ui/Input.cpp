@@ -469,6 +469,16 @@ float MotionEvent::getHistoricalAxisValue(int32_t axis, size_t pointerIndex,
     return value;
 }
 
+ssize_t MotionEvent::findPointerIndex(int32_t pointerId) const {
+    size_t pointerCount = mPointerIds.size();
+    for (size_t i = 0; i < pointerCount; i++) {
+        if (mPointerIds.itemAt(i) == pointerId) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void MotionEvent::offsetLocation(float xOffset, float yOffset) {
     mXOffset += xOffset;
     mYOffset += yOffset;
@@ -668,12 +678,27 @@ VelocityTracker::VelocityTracker() {
 void VelocityTracker::clear() {
     mIndex = 0;
     mMovements[0].idBits.clear();
+    mActivePointerId = -1;
+}
+
+void VelocityTracker::clearPointers(BitSet32 idBits) {
+    BitSet32 remainingIdBits(mMovements[mIndex].idBits.value & ~idBits.value);
+    mMovements[mIndex].idBits = remainingIdBits;
+
+    if (mActivePointerId >= 0 && idBits.hasBit(mActivePointerId)) {
+        mActivePointerId = !remainingIdBits.isEmpty() ? remainingIdBits.firstMarkedBit() : -1;
+    }
 }
 
 void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Position* positions) {
     if (++mIndex == HISTORY_SIZE) {
         mIndex = 0;
     }
+
+    while (idBits.count() > MAX_POINTERS) {
+        idBits.clearBit(idBits.lastMarkedBit());
+    }
+
     Movement& movement = mMovements[mIndex];
     movement.eventTime = eventTime;
     movement.idBits = idBits;
@@ -682,8 +707,13 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
         movement.positions[i] = positions[i];
     }
 
+    if (mActivePointerId < 0 || !idBits.hasBit(mActivePointerId)) {
+        mActivePointerId = count != 0 ? idBits.firstMarkedBit() : -1;
+    }
+
 #if DEBUG_VELOCITY
-    LOGD("VelocityTracker: addMovement eventTime=%lld, idBits=0x%08x", eventTime, idBits.value);
+    LOGD("VelocityTracker: addMovement eventTime=%lld, idBits=0x%08x, activePointerId=%d",
+            eventTime, idBits.value, mActivePointerId);
     for (BitSet32 iterBits(idBits); !iterBits.isEmpty(); ) {
         uint32_t id = iterBits.firstMarkedBit();
         uint32_t index = idBits.getIndexOfBit(id);
@@ -691,7 +721,7 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
         float vx, vy;
         bool available = getVelocity(id, &vx, &vy);
         if (available) {
-            LOGD("  %d: position (%0.3f, %0.3f), velocity (%0.3f, %0.3f), speed %0.3f",
+            LOGD("  %d: position (%0.3f, %0.3f), vx=%0.3f, vy=%0.3f, speed=%0.3f",
                     id, positions[index].x, positions[index].y, vx, vy, sqrtf(vx * vx + vy * vy));
         } else {
             assert(vx == 0 && vy == 0);
@@ -700,6 +730,70 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
         }
     }
 #endif
+}
+
+void VelocityTracker::addMovement(const MotionEvent* event) {
+    int32_t actionMasked = event->getActionMasked();
+
+    switch (actionMasked) {
+    case AMOTION_EVENT_ACTION_DOWN:
+        // Clear all pointers on down before adding the new movement.
+        clear();
+        break;
+    case AMOTION_EVENT_ACTION_POINTER_DOWN: {
+        // Start a new movement trace for a pointer that just went down.
+        // We do this on down instead of on up because the client may want to query the
+        // final velocity for a pointer that just went up.
+        BitSet32 downIdBits;
+        downIdBits.markBit(event->getActionIndex());
+        clearPointers(downIdBits);
+        break;
+    }
+    case AMOTION_EVENT_ACTION_OUTSIDE:
+    case AMOTION_EVENT_ACTION_CANCEL:
+    case AMOTION_EVENT_ACTION_SCROLL:
+    case AMOTION_EVENT_ACTION_UP:
+    case AMOTION_EVENT_ACTION_POINTER_UP:
+        // Ignore these actions because they do not convey any new information about
+        // pointer movement.  We also want to preserve the last known velocity of the pointers.
+        // Note that ACTION_UP and ACTION_POINTER_UP always report the last known position
+        // of the pointers that went up.  ACTION_POINTER_UP does include the new position of
+        // pointers that remained down but we will also receive an ACTION_MOVE with this
+        // information if any of them actually moved.  Since we don't know how many pointers
+        // will be going up at once it makes sense to just wait for the following ACTION_MOVE
+        // before adding the movement.
+        return;
+    }
+
+    size_t pointerCount = event->getPointerCount();
+    if (pointerCount > MAX_POINTERS) {
+        pointerCount = MAX_POINTERS;
+    }
+
+    BitSet32 idBits;
+    for (size_t i = 0; i < pointerCount; i++) {
+        idBits.markBit(event->getPointerId(i));
+    }
+
+    nsecs_t eventTime;
+    Position positions[pointerCount];
+
+    size_t historySize = event->getHistorySize();
+    for (size_t h = 0; h < historySize; h++) {
+        eventTime = event->getHistoricalEventTime(h);
+        for (size_t i = 0; i < pointerCount; i++) {
+            positions[i].x = event->getHistoricalX(i, h);
+            positions[i].y = event->getHistoricalY(i, h);
+        }
+        addMovement(eventTime, idBits, positions);
+    }
+
+    eventTime = event->getEventTime();
+    for (size_t i = 0; i < pointerCount; i++) {
+        positions[i].x = event->getX(i);
+        positions[i].y = event->getY(i);
+    }
+    addMovement(eventTime, idBits, positions);
 }
 
 bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const {
@@ -719,36 +813,17 @@ bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const
             oldestIndex = nextOldestIndex;
         } while (++numTouches < HISTORY_SIZE);
 
-        // If we have a lot of samples, skip the last received sample since it is
-        // probably pretty noisy compared to the sum of all of the traces already acquired.
+        // Calculate an exponentially weighted moving average of the velocity estimate
+        // at different points in time measured relative to the oldest sample.
+        // This is essentially an IIR filter.  Newer samples are weighted more heavily
+        // than older samples.  Samples at equal time points are weighted more or less
+        // equally.
         //
-        // NOTE: This condition exists in the android.view.VelocityTracker and imposes a
-        // bias against the most recent data.
-        if (numTouches > 3) {
-            numTouches -= 1;
-        }
-
-        // Calculate an exponentially weighted moving average of the velocity at different
-        // points in time measured relative to the oldest samples.  This is essentially
-        // an IIR filter.
-        //
-        // One problem with this algorithm is that the sample data may be poorly conditioned.
+        // One tricky problem is that the sample data may be poorly conditioned.
         // Sometimes samples arrive very close together in time which can cause us to
         // overestimate the velocity at that time point.  Most samples might be measured
-        // 16ms apart but some consecutive samples could be only 0.5sm apart due to
-        // the way they are reported by the hardware or driver (sometimes in bursts or with
-        // significant jitter).  The instantaneous velocity for those samples 0.5ms apart will
-        // be calculated to be 32 times what it should have been.
-        // To work around this effect, we impose a minimum duration on the samples.
-        //
-        // FIXME: Samples close together in time can have an disproportionately large
-        // impact on the result because all samples are equally weighted.  The average should
-        // instead take the time factor into account.
-        //
-        // FIXME: The minimum duration condition does not exist in
-        // android.view.VelocityTracker yet.  It is less important there because sample times
-        // are truncated to the millisecond so back to back samples will often appear to be
-        // zero milliseconds apart and will be ignored if they are the oldest ones.
+        // 16ms apart but some consecutive samples could be only 0.5sm apart because
+        // the hardware or driver reports them irregularly or in bursts.
         float accumVx = 0;
         float accumVy = 0;
         uint32_t index = oldestIndex;
@@ -756,19 +831,27 @@ bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const
         const Movement& oldestMovement = mMovements[oldestIndex];
         const Position& oldestPosition =
                 oldestMovement.positions[oldestMovement.idBits.getIndexOfBit(id)];
+        nsecs_t lastDuration = 0;
         while (numTouches-- > 1) {
             if (++index == HISTORY_SIZE) {
                 index = 0;
             }
             const Movement& movement = mMovements[index];
             nsecs_t duration = movement.eventTime - oldestMovement.eventTime;
-            if (duration > MIN_DURATION) {
+
+            // If the duration between samples is small, we may significantly overestimate
+            // the velocity.  Consequently, we impose a minimum duration constraint on the
+            // samples that we include in the calculation.
+            if (duration >= MIN_DURATION) {
                 const Position& position = movement.positions[movement.idBits.getIndexOfBit(id)];
                 float scale = 1000000000.0f / duration; // one over time delta in seconds
                 float vx = (position.x - oldestPosition.x) * scale;
                 float vy = (position.y - oldestPosition.y) * scale;
-                accumVx = accumVx == 0 ? vx : (accumVx + vx) * 0.5f;
-                accumVy = accumVy == 0 ? vy : (accumVy + vy) * 0.5f;
+
+                accumVx = (accumVx * lastDuration + vx * duration) / (duration + lastDuration);
+                accumVy = (accumVy * lastDuration + vy * duration) / (duration + lastDuration);
+
+                lastDuration = duration;
                 samplesUsed += 1;
             }
         }
