@@ -33,6 +33,8 @@ class SurfaceTextureClient
 public:
     SurfaceTextureClient(const sp<ISurfaceTexture>& surfaceTexture);
 
+    sp<ISurfaceTexture> getISurfaceTexture() const;
+
 private:
 
     // can't be copied
