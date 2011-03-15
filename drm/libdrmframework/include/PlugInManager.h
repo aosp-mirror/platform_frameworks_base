@@ -230,11 +230,9 @@ private:
      */
     bool isPlugIn(const struct dirent* pEntry) const {
         String8 sName(pEntry->d_name);
-        int extentionPos = sName.size() - String8(PLUGIN_EXTENSION).size();
-        if (extentionPos < 0) {
-            return false;
-        }
-        return extentionPos == (int)sName.find(PLUGIN_EXTENSION);
+        String8 extension(sName.getPathExtension());
+        // Note that the plug-in extension must exactly match case
+        return extension == String8(PLUGIN_EXTENSION);
     }
 
     /**
