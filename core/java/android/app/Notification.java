@@ -374,7 +374,7 @@ public class Notification implements Parcelable
         if (this.contentView != null) {
             that.contentView = this.contentView.clone();
         }
-        that.iconLevel = that.iconLevel;
+        that.iconLevel = this.iconLevel;
         that.sound = this.sound; // android.net.Uri is immutable
         that.audioStreamType = this.audioStreamType;
 
