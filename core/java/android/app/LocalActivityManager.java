@@ -380,7 +380,7 @@ public class LocalActivityManager {
         if (r != null) {
             win = performDestroy(r, finish);
             if (finish) {
-                mActivities.remove(r);
+                mActivities.remove(id);
             }
         }
         return win;
