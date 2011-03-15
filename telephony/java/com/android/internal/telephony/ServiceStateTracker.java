@@ -29,25 +29,6 @@ import android.telephony.SignalStrength;
  */
 public abstract class ServiceStateTracker extends Handler {
 
-    /**
-     *  Access technology currently in use.
-     */
-    protected static final int DATA_ACCESS_UNKNOWN = 0;
-    protected static final int DATA_ACCESS_GPRS = 1;
-    protected static final int DATA_ACCESS_EDGE = 2;
-    protected static final int DATA_ACCESS_UMTS = 3;
-    protected static final int DATA_ACCESS_CDMA_IS95A = 4;
-    protected static final int DATA_ACCESS_CDMA_IS95B = 5;
-    protected static final int DATA_ACCESS_CDMA_1xRTT = 6;
-    protected static final int DATA_ACCESS_CDMA_EvDo_0 = 7;
-    protected static final int DATA_ACCESS_CDMA_EvDo_A = 8;
-    protected static final int DATA_ACCESS_HSDPA = 9;
-    protected static final int DATA_ACCESS_HSUPA = 10;
-    protected static final int DATA_ACCESS_HSPA = 11;
-    protected static final int DATA_ACCESS_CDMA_EvDo_B = 12;
-    protected static final int DATA_ACCESS_LTE = 13;
-    protected static final int DATA_ACCESS_EHRPD = 14;
-
     protected CommandsInterface cm;
 
     public ServiceState ss;

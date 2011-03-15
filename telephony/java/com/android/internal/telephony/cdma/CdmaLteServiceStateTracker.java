@@ -198,26 +198,26 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         String ret = "unknown";
 
         switch (type) {
-            case DATA_ACCESS_CDMA_IS95A:
-            case DATA_ACCESS_CDMA_IS95B:
+            case ServiceState.RADIO_TECHNOLOGY_IS95A:
+            case ServiceState.RADIO_TECHNOLOGY_IS95B:
                 ret = "CDMA";
                 break;
-            case DATA_ACCESS_CDMA_1xRTT:
+            case ServiceState.RADIO_TECHNOLOGY_1xRTT:
                 ret = "CDMA - 1xRTT";
                 break;
-            case DATA_ACCESS_CDMA_EvDo_0:
+            case ServiceState.RADIO_TECHNOLOGY_EVDO_0:
                 ret = "CDMA - EvDo rev. 0";
                 break;
-            case DATA_ACCESS_CDMA_EvDo_A:
+            case ServiceState.RADIO_TECHNOLOGY_EVDO_A:
                 ret = "CDMA - EvDo rev. A";
                 break;
-            case DATA_ACCESS_CDMA_EvDo_B:
+            case ServiceState.RADIO_TECHNOLOGY_EVDO_B:
                 ret = "CDMA - EvDo rev. B";
                 break;
-            case DATA_ACCESS_LTE:
+            case ServiceState.RADIO_TECHNOLOGY_LTE:
                 ret = "LTE";
                 break;
-            case DATA_ACCESS_EHRPD:
+            case ServiceState.RADIO_TECHNOLOGY_EHRPD:
                 ret = "CDMA - eHRPD";
             default:
                 if (DBG) {
@@ -261,16 +261,20 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         boolean hasLocationChanged = !newCellLoc.equals(cellLoc);
 
         boolean has4gHandoff =
-            ((networkType == DATA_ACCESS_LTE) && (newNetworkType == DATA_ACCESS_EHRPD))
-                || ((networkType == DATA_ACCESS_EHRPD) && (newNetworkType == DATA_ACCESS_LTE));
+                ((networkType == ServiceState.RADIO_TECHNOLOGY_LTE) &&
+                 (newNetworkType == ServiceState.RADIO_TECHNOLOGY_EHRPD)) ||
+                ((networkType == ServiceState.RADIO_TECHNOLOGY_EHRPD) &&
+                 (newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE));
 
         boolean hasMultiApnSupport =
-            (((newNetworkType == DATA_ACCESS_LTE) || (newNetworkType == DATA_ACCESS_EHRPD)) 
-                    && ((networkType != DATA_ACCESS_LTE) && (networkType != DATA_ACCESS_EHRPD)));
+                (((newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE) ||
+                  (newNetworkType == ServiceState.RADIO_TECHNOLOGY_EHRPD)) &&
+                 ((networkType != ServiceState.RADIO_TECHNOLOGY_LTE) &&
+                  (networkType != ServiceState.RADIO_TECHNOLOGY_EHRPD)));
 
         boolean hasLostMultiApnSupport =
-            ((newNetworkType >= DATA_ACCESS_CDMA_IS95A)
-                    && (newNetworkType <= DATA_ACCESS_CDMA_EvDo_A));
+            ((newNetworkType >= ServiceState.RADIO_TECHNOLOGY_IS95A) &&
+             (newNetworkType <= ServiceState.RADIO_TECHNOLOGY_EVDO_A));
 
         log("hasRegistered = " + hasRegistered + " hasCdmaDataConnectionAttached = "
                 + hasCdmaDataConnectionAttached + " hasCdmaDataConnectionChanged = "
@@ -457,7 +461,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         // Note: it needs to be confirmed which CDMA network types
         // can support voice and data calls concurrently.
         // For the time-being, the return value will be false.
-        // return (networkType >= DATA_ACCESS_LTE);
+        // return (networkType >= ServiceState.RADIO_TECHNOLOGY_LTE);
         return false;
     }
 
