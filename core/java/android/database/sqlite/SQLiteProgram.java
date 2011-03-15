@@ -105,12 +105,9 @@ public abstract class SQLiteProgram extends SQLiteClosable {
             case DatabaseUtils.STATEMENT_SELECT:
                 mStatementType = n | STATEMENT_CACHEABLE | STATEMENT_USE_POOLED_CONN;
                 break;
-            case DatabaseUtils.STATEMENT_ATTACH:
             case DatabaseUtils.STATEMENT_BEGIN:
             case DatabaseUtils.STATEMENT_COMMIT:
             case DatabaseUtils.STATEMENT_ABORT:
-            case DatabaseUtils.STATEMENT_DDL:
-            case DatabaseUtils.STATEMENT_UNPREPARED:
                 mStatementType = n | STATEMENT_DONT_PREPARE;
                 break;
             default:
@@ -353,13 +350,10 @@ public abstract class SQLiteProgram extends SQLiteClosable {
 
     /* package */ void compileAndbindAllArgs() {
         if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
-            // no need to prepare this SQL statement
-            if (SQLiteDebug.DEBUG_SQL_STATEMENTS) {
-                if (mBindArgs != null) {
-                    throw new IllegalArgumentException("no need to pass bindargs for this sql :" +
-                            mSql);
-                }
+            if (mBindArgs != null) {
+                throw new IllegalArgumentException("Can't pass bindargs for this sql :" + mSql);
             }
+            // no need to prepare this SQL statement
             return;
         }
         if (nStatement == 0) {

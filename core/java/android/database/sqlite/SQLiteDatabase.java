@@ -1885,10 +1885,6 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException if the SQL string is invalid
      */
     public void execSQL(String sql) throws SQLException {
-        if (DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_ATTACH) {
-            disableWriteAheadLogging();
-            mHasAttachedDbs = true;
-        }
         executeSql(sql, null);
     }
 
@@ -1943,6 +1939,10 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     private int executeSql(String sql, Object[] bindArgs) throws SQLException {
+        if (DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_ATTACH) {
+            disableWriteAheadLogging();
+            mHasAttachedDbs = true;
+        }
         SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
         try {
             return statement.executeUpdateDelete();
