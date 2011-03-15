@@ -76,7 +76,7 @@ public class UsbAccessoryUriActivity extends AlertActivity
         }
         ap.mMessage = getString(R.string.usb_accessory_uri_prompt, mUri);
         ap.mPositiveButtonText = getString(R.string.label_view);
-        ap.mNegativeButtonText = getString(R.string.label_ignore);
+        ap.mNegativeButtonText = getString(android.R.string.cancel);
         ap.mPositiveButtonListener = this;
         ap.mNegativeButtonListener = this;
 
