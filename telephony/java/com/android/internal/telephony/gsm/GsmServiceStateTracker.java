@@ -85,7 +85,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     private int mNewReasonDataDenied = -1;
 
     /**
-     *  Values correspond to ServiceStateTracker.DATA_ACCESS_ definitions.
+     *  Values correspond to ServiceState.RADIO_TECHNOLOGY_ definitions.
      */
     private int networkType = 0;
     private int newNetworkType = 0;
@@ -768,22 +768,22 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         String ret = "unknown";
 
         switch (type) {
-            case DATA_ACCESS_GPRS:
+            case ServiceState.RADIO_TECHNOLOGY_GPRS:
                 ret = "GPRS";
                 break;
-            case DATA_ACCESS_EDGE:
+            case ServiceState.RADIO_TECHNOLOGY_EDGE:
                 ret = "EDGE";
                 break;
-            case DATA_ACCESS_UMTS:
+            case ServiceState.RADIO_TECHNOLOGY_UMTS:
                 ret = "UMTS";
                 break;
-            case DATA_ACCESS_HSDPA:
+            case ServiceState.RADIO_TECHNOLOGY_HSDPA:
                 ret = "HSDPA";
                 break;
-            case DATA_ACCESS_HSUPA:
+            case ServiceState.RADIO_TECHNOLOGY_HSUPA:
                 ret = "HSUPA";
                 break;
-            case DATA_ACCESS_HSPA:
+            case ServiceState.RADIO_TECHNOLOGY_HSPA:
                 ret = "HSPA";
                 break;
             default:
@@ -1303,7 +1303,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * that could support voice and data simultaneously.
      */
     public boolean isConcurrentVoiceAndDataAllowed() {
-        return (networkType >= DATA_ACCESS_UMTS);
+        return (networkType >= ServiceState.RADIO_TECHNOLOGY_UMTS);
     }
 
     /**
