@@ -565,8 +565,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 return;
             }
 
-            if (err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW &&
-                    err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW) {
+            if (err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW) {
                 Log.e(LOG_TAG,
                         "RIL implementation has returned an error where it must succeed" +
                         ar.exception);
