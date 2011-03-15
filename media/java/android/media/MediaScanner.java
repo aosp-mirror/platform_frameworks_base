@@ -1585,6 +1585,17 @@ public class MediaScanner
     private static native final void native_init();
     private native final void native_setup();
     private native final void native_finalize();
+
+    /**
+     * Releases resouces associated with this MediaScanner object.
+     * It is considered good practice to call this method when
+     * one is done using the MediaScanner object. After this method
+     * is called, the MediaScanner object can no longer be used.
+     */
+    public void release() {
+        native_finalize();
+    }
+
     @Override
     protected void finalize() {
         mContext.getContentResolver().releaseProvider(mMediaProvider);
