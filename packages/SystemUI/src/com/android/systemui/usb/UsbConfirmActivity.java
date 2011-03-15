@@ -80,8 +80,8 @@ public class UsbConfirmActivity extends AlertActivity
             ap.mMessage = getString(R.string.usb_device_confirm_prompt, appName);
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
         }
-        ap.mPositiveButtonText = getString(com.android.internal.R.string.ok);
-        ap.mNegativeButtonText = getString(com.android.internal.R.string.cancel);
+        ap.mPositiveButtonText = getString(android.R.string.ok);
+        ap.mNegativeButtonText = getString(android.R.string.cancel);
         ap.mPositiveButtonListener = this;
         ap.mNegativeButtonListener = this;
 
@@ -90,7 +90,11 @@ public class UsbConfirmActivity extends AlertActivity
                 Context.LAYOUT_INFLATER_SERVICE);
         ap.mView = inflater.inflate(com.android.internal.R.layout.always_use_checkbox, null);
         mAlwaysUse = (CheckBox)ap.mView.findViewById(com.android.internal.R.id.alwaysUse);
-        mAlwaysUse.setText(com.android.internal.R.string.alwaysUse);
+        if (mDevice == null) {
+            mAlwaysUse.setText(R.string.always_use_accessory);
+        } else {
+            mAlwaysUse.setText(R.string.always_use_device);
+        }
         mAlwaysUse.setOnCheckedChangeListener(this);
         mClearDefaultHint = (TextView)ap.mView.findViewById(
                                                     com.android.internal.R.id.clearDefaultHint);
