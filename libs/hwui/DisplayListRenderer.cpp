@@ -285,9 +285,12 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             break;
             case DrawDisplayList: {
                 DisplayList* displayList = getDisplayList();
-                DISPLAY_LIST_LOGD("%s%s %p, %d", (char*) indent, OP_NAMES[op],
-                    displayList, level + 1);
-                needsInvalidate |= renderer.drawDisplayList(displayList, dirty, level + 1);
+                uint32_t width = getUInt();
+                uint32_t height = getUInt();
+                DISPLAY_LIST_LOGD("%s%s %p, %dx%d, %d", (char*) indent, OP_NAMES[op],
+                    displayList, width, height, level + 1);
+                needsInvalidate |= renderer.drawDisplayList(displayList, width, height,
+                        dirty, level + 1);
             }
             break;
             case DrawLayer: {
@@ -674,11 +677,13 @@ bool DisplayListRenderer::clipRect(float left, float top, float right, float bot
     return OpenGLRenderer::clipRect(left, top, right, bottom, op);
 }
 
-bool DisplayListRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty, uint32_t level) {
+bool DisplayListRenderer::drawDisplayList(DisplayList* displayList,
+        uint32_t width, uint32_t height, Rect& dirty, uint32_t level) {
     // dirty is an out parameter and should not be recorded,
     // it matters only when replaying the display list
     addOp(DisplayList::DrawDisplayList);
     addDisplayList(displayList);
+    addSize(width, height);
     return false;
 }
 

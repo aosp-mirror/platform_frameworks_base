@@ -53,13 +53,15 @@ public abstract class HardwareCanvas extends Canvas {
      * Draws the specified display list onto this canvas.
      * 
      * @param displayList The display list to replay.
+     * @param width The width of the display list.
+     * @param height The height of the display list.
      * @param dirty The dirty region to redraw in the next pass, matters only
      *        if this method returns true, can be null.
      * 
      * @return True if the content of the display list requires another
      *         drawing pass (invalidate()), false otherwise
      */
-    abstract boolean drawDisplayList(DisplayList displayList, Rect dirty);
+    abstract boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty);
 
     /**
      * Draws the specified layer onto this canvas.

@@ -119,7 +119,7 @@ static SkShader* LinearGradient_create1(JNIEnv* env, jobject o,
     const jint* colorValues = env->GetIntArrayElements(colorArray, NULL);
 
     SkAutoSTMalloc<8, SkScalar> storage(posArray ? count : 0);
-    SkScalar*                   pos = NULL;
+    SkScalar* pos = NULL;
 
     if (posArray) {
         AutoJavaFloatArray autoPos(env, posArray, count);
@@ -164,7 +164,11 @@ static SkiaShader* LinearGradient_postCreate1(JNIEnv* env, jobject o, SkShader* 
         }
     } else {
         storedPositions[0] = 0.0f;
-        storedPositions[1] = 1.0f;
+        const jfloat step = 1.0f / (count - 1);
+        for (size_t i = 1; i < count - 1; i++) {
+            storedPositions[i] = step * i;
+        }
+        storedPositions[count - 1] = 1.0f;
     }
 
     SkiaShader* skiaShader = new SkiaLinearGradientShader(storedBounds, storedColors,
@@ -289,7 +293,11 @@ static SkiaShader* RadialGradient_postCreate1(JNIEnv* env, jobject o, SkShader* 
         }
     } else {
         storedPositions[0] = 0.0f;
-        storedPositions[1] = 1.0f;
+        const jfloat step = 1.0f / (count - 1);
+        for (size_t i = 1; i < count - 1; i++) {
+            storedPositions[i] = step * i;
+        }
+        storedPositions[count - 1] = 1.0f;
     }
 
     SkiaShader* skiaShader = new SkiaCircularGradientShader(x, y, radius, storedColors,
@@ -384,7 +392,11 @@ static SkiaShader* SweepGradient_postCreate1(JNIEnv* env, jobject o, SkShader* s
         }
     } else {
         storedPositions[0] = 0.0f;
-        storedPositions[1] = 1.0f;
+        const jfloat step = 1.0f / (count - 1);
+        for (size_t i = 1; i < count - 1; i++) {
+            storedPositions[i] = step * i;
+        }
+        storedPositions[count - 1] = 1.0f;
     }
 
     SkiaShader* skiaShader = new SkiaSweepGradientShader(x, y, storedColors, storedPositions, count,

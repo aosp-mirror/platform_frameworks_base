@@ -193,6 +193,7 @@ public class GradientsActivity extends Activity {
         private final float mDrawWidth;
         private final float mDrawHeight;
         private final LinearGradient mGradient;
+        private final LinearGradient mGradientStops;
         private final Matrix mMatrix;
 
         ShadersView(Context c) {
@@ -202,6 +203,9 @@ public class GradientsActivity extends Activity {
             mDrawHeight = 200;
 
             mGradient = new LinearGradient(0, 0, 0, 1, 0xFF000000, 0, Shader.TileMode.CLAMP);
+            mGradientStops = new LinearGradient(0, 0, 0, 1,
+                    new int[] { 0xFFFF0000, 0xFF00FF00, 0xFF0000FF }, null, Shader.TileMode.CLAMP);
+
             mMatrix = new Matrix();
 
             mPaint = new Paint();
@@ -255,6 +259,19 @@ public class GradientsActivity extends Activity {
             mGradient.setLocalMatrix(mMatrix);
             canvas.drawRect(left, top, left + mDrawWidth, bottom, mPaint);
 
+            right = left + mDrawWidth;
+            left = 40.0f;
+            top = bottom + 20.0f;
+            bottom = top + 50.0f;
+
+            mPaint.setShader(mGradientStops);
+
+            mMatrix.setScale(1, mDrawWidth);
+            mMatrix.postRotate(90);
+            mMatrix.postTranslate(right, top);
+            mGradientStops.setLocalMatrix(mMatrix);
+            canvas.drawRect(left, top, right, bottom, mPaint);
+            
             canvas.restore();
         }
     }
