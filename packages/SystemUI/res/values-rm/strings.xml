@@ -42,7 +42,7 @@
     <skip />
     <!-- no translation found for status_bar_settings_airplane (4879879698500955300) -->
     <skip />
-    <!-- no translation found for status_bar_settings_rotation_lock (8361452930058000609) -->
+    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
     <skip />
     <!-- no translation found for status_bar_settings_mute_label (554682549917429396) -->
     <skip />
@@ -60,5 +60,21 @@
     <!-- no translation found for status_bar_input_method_settings_configure_input_methods (737483394044014246) -->
     <skip />
     <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
+    <skip />
+    <!-- no translation found for usb_device_permission_prompt (5340926456453429244) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
+    <skip />
+    <!-- no translation found for usb_device_confirm_prompt (2727793581411868504) -->
+    <skip />
+    <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
+    <skip />
+    <!-- no translation found for usb_accessory_uri_prompt (1896291816269399727) -->
+    <skip />
+    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
+    <skip />
+    <!-- no translation found for label_view (6304565553218192990) -->
+    <skip />
+    <!-- no translation found for label_ignore (5473234388203739668) -->
     <skip />
 </resources>

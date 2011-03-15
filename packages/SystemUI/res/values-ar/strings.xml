@@ -34,7 +34,8 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"الإعدادات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"وضع الطائرة"</string>
-    <string name="status_bar_settings_rotation_lock" msgid="8361452930058000609">"تأمين اتجاه الشاشة"</string>
+    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
+    <skip />
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"كتم"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"تلقائي"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"التنبيهات"</string>
@@ -44,4 +45,20 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"تم إنشاء الاتصال بالإنترنت عن طريق البلوتوث."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"تهيئة طرق الإدخال"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"استخدام لوحة المفاتيح الفعلية"</string>
+    <!-- no translation found for usb_device_permission_prompt (5340926456453429244) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
+    <skip />
+    <!-- no translation found for usb_device_confirm_prompt (2727793581411868504) -->
+    <skip />
+    <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
+    <skip />
+    <!-- no translation found for usb_accessory_uri_prompt (1896291816269399727) -->
+    <skip />
+    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
+    <skip />
+    <!-- no translation found for label_view (6304565553218192990) -->
+    <skip />
+    <!-- no translation found for label_ignore (5473234388203739668) -->
+    <skip />
 </resources>
