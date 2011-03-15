@@ -1,8 +1,8 @@
 page.title=ADT Plugin for Eclipse
-adt.zip.version=10.0.0
-adt.zip.download=ADT-10.0.0.zip
-adt.zip.bytes=4243777
-adt.zip.checksum=bf88bff62bc45c3b6d062e2beed67765
+adt.zip.version=10.0.1
+adt.zip.download=ADT-10.0.1.zip
+adt.zip.bytes=5096182
+adt.zip.checksum=e26a77db08377bdd2e62edeb9a3e3701
 
 @jd:body
 
@@ -33,7 +33,7 @@ to build Android applications.</p>
 <p>ADT extends the capabilities of Eclipse to let you quickly set up new Android
 projects, create an application UI, add components based on the Android
 Framework API, debug your applications using the Android SDK tools, and even
-export signed (or unsigned) APKs in order to distribute your application.</p>
+export signed (or unsigned) {@code .apk} files in order to distribute your application.</p>
 
 <p>Developing in Eclipse with ADT is highly recommended and is the fastest way
 to get started. With the guided project setup it provides, as well as tools
@@ -99,6 +99,36 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+ADT 10.0.1</a> <em>(March 2011)</em>
+  <div class="toggleme">
+
+<dl>
+
+<dt>Dependencies:</dt>
+
+<dd>ADT 10.0.1 is designed for use with SDK Tools r10. If you haven't
+already installed SDK Tools r10 into your SDK, use the Android SDK and AVD Manager to do
+so.</dd>
+
+<dt>General notes:</dt>
+<dd>
+  <ul>
+    <li>Temporary work-around to resolve the rare cases in which the layout editor will
+not open.</li>
+    <li>Fix issue in which ADT 10.0.0 would install on Eclipse 3.4 and lower, even though ADT
+requires Eclipse 3.5 or higher (as of 10.0.0).</li>
+  </ul>
+</dd>
+</dl>
+</div>
+</div>
+
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
 width="9px" />
 ADT 10.0.0</a> <em>(February 2011)</em>
   <div class="toggleme">
