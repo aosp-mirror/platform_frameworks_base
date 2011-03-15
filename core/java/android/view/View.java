@@ -1304,6 +1304,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int VIEW_STATE_PRESSED = 1 << 4;
     static final int VIEW_STATE_ACTIVATED = 1 << 5;
     static final int VIEW_STATE_ACCELERATED = 1 << 6;
+    static final int VIEW_STATE_HOVERED = 1 << 7;
 
     static final int[] VIEW_STATE_IDS = new int[] {
         R.attr.state_window_focused,    VIEW_STATE_WINDOW_FOCUSED,
@@ -1313,6 +1314,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         R.attr.state_pressed,           VIEW_STATE_PRESSED,
         R.attr.state_activated,         VIEW_STATE_ACTIVATED,
         R.attr.state_accelerated,       VIEW_STATE_ACCELERATED,
+        R.attr.state_hovered,           VIEW_STATE_HOVERED,
     };
 
     static {
@@ -10018,7 +10020,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // windows to better match their app.
             viewStateIndex |= VIEW_STATE_ACCELERATED;
         }
-        if ((privateFlags & HOVERED) != 0) viewStateIndex |= VIEW_STATE_PRESSED; // temporary
+        if ((privateFlags & HOVERED) != 0) viewStateIndex |= VIEW_STATE_HOVERED;
 
         drawableState = VIEW_STATE_SETS[viewStateIndex];
 
