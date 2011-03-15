@@ -44,4 +44,12 @@ TEST_F(SurfaceTextureClientTest, QueuesToWindowCompositorIsFalse) {
     EXPECT_EQ(0, result);
 }
 
+TEST_F(SurfaceTextureClientTest, ConcreteTypeIsSurfaceTextureClient) {
+    sp<ANativeWindow> anw(mSTC);
+    int result = -123;
+    int err = anw->query(anw.get(), NATIVE_WINDOW_CONCRETE_TYPE, &result);
+    EXPECT_EQ(NO_ERROR, err);
+    EXPECT_EQ(NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT, result);
+}
+
 }
