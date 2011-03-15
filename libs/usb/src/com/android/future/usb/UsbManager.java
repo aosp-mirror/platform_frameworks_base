@@ -130,7 +130,8 @@ public class UsbManager {
         try {
             return mService.openAccessory(new android.hardware.usb.UsbAccessory(
                     accessory.getManufacturer(),accessory.getModel(),
-                    accessory.getDescription(), accessory.getVersion(), accessory.getUri()));
+                    accessory.getDescription(), accessory.getVersion(),
+                    accessory.getUri(), accessory.getSerial()));
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openAccessory" , e);
             return null;
@@ -150,7 +151,8 @@ public class UsbManager {
         try {
             return mService.hasAccessoryPermission(new android.hardware.usb.UsbAccessory(
                     accessory.getManufacturer(),accessory.getModel(),
-                    accessory.getDescription(), accessory.getVersion(), accessory.getUri()));
+                    accessory.getDescription(), accessory.getVersion(),
+                    accessory.getUri(), accessory.getSerial()));
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in hasPermission", e);
             return false;
@@ -174,7 +176,8 @@ public class UsbManager {
         try {
             mService.requestAccessoryPermission(new android.hardware.usb.UsbAccessory(
                     accessory.getManufacturer(),accessory.getModel(),
-                    accessory.getDescription(), accessory.getVersion(), accessory.getUri()),
+                    accessory.getDescription(), accessory.getVersion(),
+                    accessory.getUri(), accessory.getSerial()),
                     mContext.getPackageName(), pi);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in requestPermission", e);

@@ -21,7 +21,7 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_PACKAGE_NAME := AccessoryChatGB
+LOCAL_PACKAGE_NAME := AccessoryChat
 
 LOCAL_JAVA_LIBRARIES := com.android.future.usb.accessory
 
