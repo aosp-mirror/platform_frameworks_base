@@ -67,11 +67,11 @@ static void* write_thread(void* arg) {
 }
 
 static void milli_sleep(int millis) {
-	struct timespec tm;
+    struct timespec tm;
 
-	tm.tv_sec = 0;
-	tm.tv_nsec = millis * 1000000;
-	nanosleep(&tm, NULL);
+    tm.tv_sec = 0;
+    tm.tv_nsec = millis * 1000000;
+    nanosleep(&tm, NULL);
 }
 
 static void send_string(struct usb_device *device, int index, const char* string) {
@@ -155,7 +155,7 @@ static int usb_device_added(const char *devname, void* client_data) {
 
             send_string(device, ACCESSORY_STRING_MANUFACTURER, "Google, Inc.");
             send_string(device, ACCESSORY_STRING_MODEL, "AccessoryChat");
-            send_string(device, ACCESSORY_STRING_DESCRIPTION, "Sample Program");
+            send_string(device, ACCESSORY_STRING_DESCRIPTION, "Accessory Chat");
             send_string(device, ACCESSORY_STRING_VERSION, "1.0");
             send_string(device, ACCESSORY_STRING_URI, "http://www.android.com");
             send_string(device, ACCESSORY_STRING_SERIAL, "1234567890");
