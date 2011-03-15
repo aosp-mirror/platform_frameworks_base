@@ -64,7 +64,7 @@ enum {
 
 static jfieldID offset_db_handle;
 static jmethodID method_custom_function_callback;
-static jclass string_class = NULL;
+static jclass string_class;
 static jint sSqliteSoftHeapLimit = 0;
 
 static char *createStr(const char *path, short extra) {
@@ -406,8 +406,6 @@ static void custom_function_callback(sqlite3_context * context, int argc, sqlite
     jobject function = (jobject)sqlite3_user_data(context);
 
     // pack up the arguments into a string array
-    if (!string_class)
-        string_class = (jclass)env->NewGlobalRef(env->FindClass("java/lang/String"));
     jobjectArray strArray = env->NewObjectArray(argc, string_class, NULL);
     if (!strArray)
         goto done;
@@ -425,6 +423,7 @@ static void custom_function_callback(sqlite3_context * context, int argc, sqlite
     }
 
     env->CallVoidMethod(function, method_custom_function_callback, strArray);
+    env->DeleteLocalRef(strArray);
 
 done:
     if (env->ExceptionCheck()) {
@@ -486,6 +485,12 @@ int register_android_database_SQLiteDatabase(JNIEnv *env)
     clazz = env->FindClass("android/database/sqlite/SQLiteDatabase");
     if (clazz == NULL) {
         LOGE("Can't find android/database/sqlite/SQLiteDatabase\n");
+        return -1;
+    }
+
+    string_class = (jclass)env->NewGlobalRef(env->FindClass("java/lang/String"));
+    if (string_class == NULL) {
+        LOGE("Can't find java/lang/String\n");
         return -1;
     }
 
