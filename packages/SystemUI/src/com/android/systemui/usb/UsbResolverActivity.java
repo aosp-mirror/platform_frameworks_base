@@ -30,6 +30,9 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.widget.CheckBox;
+
+import com.android.systemui.R;
 
 import java.util.ArrayList;
 
@@ -54,11 +57,12 @@ public class UsbResolverActivity extends ResolverActivity {
         ArrayList<ResolveInfo> rList = intent.getParcelableArrayListExtra(EXTRA_RESOLVE_INFOS);
         CharSequence title = getResources().getText(com.android.internal.R.string.chooseUsbActivity);
         super.onCreate(savedInstanceState, target, title, null, rList,
-                true, /* Set alwaysUseOption to true to enable "always use this app" checkbox. */
-                true  /* Set alwaysChoose to display activity when only one choice is available.
-                         This is necessary because this activity is needed for the user to allow
-                         the application permission to access the device */
-                );
+                true /* Set alwaysUseOption to true to enable "always use this app" checkbox. */ );
+
+        CheckBox alwaysUse = (CheckBox)findViewById(com.android.internal.R.id.alwaysUse);
+        if (alwaysUse != null) {
+            alwaysUse.setText(R.string.always_use_accessory);
+        }
 
         mAccessory = (UsbAccessory)target.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         if (mAccessory == null) {

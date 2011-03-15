@@ -430,17 +430,26 @@ class UsbDeviceSettingsManager {
                 Log.e(TAG, "startActivity failed", e);
             }
         } else {
-            // start UsbResolverActivity so user can choose an activity
             Intent resolverIntent = new Intent();
-            resolverIntent.setClassName("com.android.systemui",
-                    "com.android.systemui.usb.UsbResolverActivity");
             resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
-            resolverIntent.putParcelableArrayListExtra("rlist", matches);
+
+            if (count == 1) {
+                // start UsbConfirmActivity if there is only one choice
+                resolverIntent.setClassName("com.android.systemui",
+                        "com.android.systemui.usb.UsbConfirmActivity");
+                resolverIntent.putExtra("rinfo", matches.get(0));
+                resolverIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
+            } else {
+                // start UsbResolverActivity so user can choose an activity
+                resolverIntent.setClassName("com.android.systemui",
+                        "com.android.systemui.usb.UsbResolverActivity");
+                resolverIntent.putParcelableArrayListExtra("rlist", matches);
+                resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
+            }
             try {
                 mContext.startActivity(resolverIntent);
             } catch (ActivityNotFoundException e) {
-                Log.e(TAG, "unable to start UsbResolverActivity");
+                Log.e(TAG, "unable to start activity " + resolverIntent);
             }
         }
     }

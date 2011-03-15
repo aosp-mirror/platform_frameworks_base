@@ -135,7 +135,8 @@ public class AccessoryChat extends Activity implements Runnable, TextView.OnEdit
     }
 
     private void openAccessory(UsbAccessory accessory) {
-       mFileDescriptor = mUsbManager.openAccessory(accessory);
+        Log.d(TAG, "openAccessory: " + accessory);
+        mFileDescriptor = mUsbManager.openAccessory(accessory);
         if (mFileDescriptor != null) {
             FileDescriptor fd = mFileDescriptor.getFileDescriptor();
             mInputStream = new FileInputStream(fd);

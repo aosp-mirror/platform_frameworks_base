@@ -18,12 +18,13 @@ package com.android.systemui.usb;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
@@ -43,17 +44,15 @@ import com.android.internal.app.AlertController;
 
 import com.android.systemui.R;
 
-public class UsbPermissionActivity extends AlertActivity
+public class UsbConfirmActivity extends AlertActivity
         implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener {
 
-    private static final String TAG = "UsbPermissionActivity";
+    private static final String TAG = "UsbConfirmActivity";
 
     private CheckBox mAlwaysUse;
     private TextView mClearDefaultHint;
     private UsbAccessory mAccessory;
-    private PendingIntent mPendingIntent;
-    private String mPackageName;
-    private int mUid;
+    private ResolveInfo mResolveInfo;
     private boolean mPermissionGranted;
     private UsbDisconnectedReceiver mDisconnectedReceiver;
 
@@ -64,25 +63,15 @@ public class UsbPermissionActivity extends AlertActivity
         Intent intent = getIntent();
         mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
-        mPendingIntent = (PendingIntent)intent.getParcelableExtra(Intent.EXTRA_INTENT);
-        mUid = intent.getIntExtra("uid", 0);
-        mPackageName = intent.getStringExtra("package");
+        mResolveInfo = (ResolveInfo)intent.getParcelableExtra("rinfo");
 
         PackageManager packageManager = getPackageManager();
-        ApplicationInfo aInfo;
-        try {
-            aInfo = packageManager.getApplicationInfo(mPackageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "unable to look up package name", e);
-            finish();
-            return;
-        }
-        String appName = aInfo.loadLabel(packageManager).toString();
+        String appName = mResolveInfo.loadLabel(packageManager).toString();
 
         final AlertController.AlertParams ap = mAlertParams;
-        ap.mIcon = aInfo.loadIcon(packageManager);
+        ap.mIcon = mResolveInfo.loadIcon(packageManager);
         ap.mTitle = appName;
-        ap.mMessage = getString(R.string.usb_accessory_permission_prompt, appName);
+        ap.mMessage = getString(R.string.usb_accessory_confirm_prompt, appName);
         ap.mPositiveButtonText = getString(android.R.string.ok);
         ap.mNegativeButtonText = getString(android.R.string.cancel);
         ap.mPositiveButtonListener = this;
@@ -104,30 +93,7 @@ public class UsbPermissionActivity extends AlertActivity
     }
 
     @Override
-    public void onDestroy() {
-        IBinder b = ServiceManager.getService(USB_SERVICE);
-        IUsbManager service = IUsbManager.Stub.asInterface(b);
-
-        // send response via pending intent
-        Intent intent = new Intent();
-        try {
-            if (mAccessory != null) {
-                intent.putExtra(UsbManager.EXTRA_ACCESSORY, mAccessory);
-                if (mPermissionGranted) {
-                    service.grantAccessoryPermission(mAccessory, mUid);
-                    if (mAlwaysUse.isChecked()) {
-                        service.setAccessoryPackage(mAccessory, mPackageName);
-                    }
-                }
-            }
-            intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, mPermissionGranted);
-            mPendingIntent.send(this, 0, intent);
-        } catch (PendingIntent.CanceledException e) {
-            Log.w(TAG, "PendingIntent was cancelled");
-        } catch (RemoteException e) {
-            Log.e(TAG, "IUsbService connection failed", e);
-        }
-
+    protected void onDestroy() {
         if (mDisconnectedReceiver != null) {
             unregisterReceiver(mDisconnectedReceiver);
         }
@@ -136,7 +102,31 @@ public class UsbPermissionActivity extends AlertActivity
 
     public void onClick(DialogInterface dialog, int which) {
         if (which == AlertDialog.BUTTON_POSITIVE) {
-            mPermissionGranted = true;
+            try {
+                IBinder b = ServiceManager.getService(USB_SERVICE);
+                IUsbManager service = IUsbManager.Stub.asInterface(b);
+                int uid = mResolveInfo.activityInfo.applicationInfo.uid;
+                boolean alwaysUse = mAlwaysUse.isChecked();
+                Intent intent = new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+                intent.putExtra(UsbManager.EXTRA_ACCESSORY, mAccessory);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setComponent(
+                    new ComponentName(mResolveInfo.activityInfo.packageName,
+                            mResolveInfo.activityInfo.name));
+
+                // grant permission for the accessory
+                service.grantAccessoryPermission(mAccessory, uid);
+                // set or clear default setting
+                if (alwaysUse) {
+                    service.setAccessoryPackage(mAccessory,
+                            mResolveInfo.activityInfo.packageName);
+                } else {
+                    service.setAccessoryPackage(mAccessory, null);
+                }
+                startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to start activity", e);
+            }
         }
         finish();
     }

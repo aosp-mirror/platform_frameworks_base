@@ -34,18 +34,20 @@ public class UsbAccessory implements Parcelable {
     private final String mDescription;
     private final String mVersion;
     private final String mUri;
+    private final String mSerial;
 
     /**
      * UsbAccessory should only be instantiated by UsbService implementation
      * @hide
      */
     public UsbAccessory(String manufacturer, String model, String description,
-            String version, String uri) {
+            String version, String uri, String serial) {
         mManufacturer = manufacturer;
         mModel = model;
         mDescription = description;
         mVersion = version;
         mUri = uri;
+        mSerial = serial;
     }
 
     /**
@@ -58,6 +60,7 @@ public class UsbAccessory implements Parcelable {
         mDescription = strings[2];
         mVersion = strings[3];
         mUri = strings[4];
+        mSerial = strings[5];
     }
 
     /**
@@ -107,6 +110,17 @@ public class UsbAccessory implements Parcelable {
         return mUri;
     }
 
+    /**
+     * Returns the unique serial number for the accessory.
+     * This is an optional serial number that can be used to differentiate
+     * between individual accessories of the same model and manufacturer
+     *
+     * @return the unique serial number
+     */
+    public String getSerial() {
+        return mSerial;
+    }
+
     private static boolean compare(String s1, String s2) {
         if (s1 == null) return (s2 == null);
         return s1.equals(s2);
@@ -120,7 +134,8 @@ public class UsbAccessory implements Parcelable {
                     compare(mModel, accessory.getModel()) &&
                     compare(mDescription, accessory.getDescription()) &&
                     compare(mVersion, accessory.getVersion()) &&
-                    compare(mUri, accessory.getUri()));
+                    compare(mUri, accessory.getUri()) &&
+                    compare(mSerial, accessory.getSerial()));
         }
         return false;
     }
@@ -131,7 +146,8 @@ public class UsbAccessory implements Parcelable {
                 (mModel == null ? 0 : mModel.hashCode()) ^
                 (mDescription == null ? 0 : mDescription.hashCode()) ^
                 (mVersion == null ? 0 : mVersion.hashCode()) ^
-                (mUri == null ? 0 : mUri.hashCode()));
+                (mUri == null ? 0 : mUri.hashCode()) ^
+                (mSerial == null ? 0 : mSerial.hashCode()));
     }
 
     @Override
@@ -140,7 +156,8 @@ public class UsbAccessory implements Parcelable {
                             ", mModel=" + mModel +
                             ", mDescription=" + mDescription +
                             ", mVersion=" + mVersion +
-                            ", mUri=" + mUri + "]";
+                            ", mUri=" + mUri +
+                            ", mSerial=" + mSerial + "]";
     }
 
     public static final Parcelable.Creator<UsbAccessory> CREATOR =
@@ -151,7 +168,8 @@ public class UsbAccessory implements Parcelable {
             String description = in.readString();
             String version = in.readString();
             String uri = in.readString();
-            return new UsbAccessory(manufacturer, model, description, version, uri);
+            String serial = in.readString();
+            return new UsbAccessory(manufacturer, model, description, version, uri, serial);
         }
 
         public UsbAccessory[] newArray(int size) {
@@ -169,5 +187,6 @@ public class UsbAccessory implements Parcelable {
         parcel.writeString(mDescription);
         parcel.writeString(mVersion);
         parcel.writeString(mUri);
+        parcel.writeString(mSerial);
    }
 }
