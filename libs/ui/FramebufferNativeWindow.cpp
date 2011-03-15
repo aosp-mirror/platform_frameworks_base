@@ -286,6 +286,9 @@ int FramebufferNativeWindow::query(ANativeWindow* window,
         case NATIVE_WINDOW_FORMAT:
             *value = fb->format;
             return NO_ERROR;
+        case NATIVE_WINDOW_CONCRETE_TYPE:
+            *value = NATIVE_WINDOW_FRAMEBUFFER;
+            return NO_ERROR;
     }
     *value = 0;
     return BAD_VALUE;
