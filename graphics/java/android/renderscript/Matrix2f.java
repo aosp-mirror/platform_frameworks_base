@@ -42,7 +42,7 @@ public class Matrix2f {
     *                  floats long
     */
     public Matrix2f(float[] dataArray) {
-        mMat = new float[2];
+        mMat = new float[4];
         System.arraycopy(dataArray, 0, mMat, 0, mMat.length);
     }
 
