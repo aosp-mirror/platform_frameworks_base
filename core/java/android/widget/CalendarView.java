@@ -1066,7 +1066,10 @@ public class CalendarView extends FrameLayout {
         public boolean onTouch(View v, MotionEvent event) {
             if (mListView.isEnabled() && mGestureDetector.onTouchEvent(event)) {
                 WeekView weekView = (WeekView) v;
-                weekView.getDayFromLocation(event.getX(), mTempDate);
+                // if we cannot find a day for the given location we are done
+                if (!weekView.getDayFromLocation(event.getX(), mTempDate)) {
+                    return true;
+                }
                 // it is possible that the touched day is outside the valid range
                 // we draw whole weeks but range end can fall not on the week end
                 if (mTempDate.before(mMinDate) || mTempDate.after(mMaxDate)) {
@@ -1271,21 +1274,23 @@ public class CalendarView extends FrameLayout {
 
         /**
          * Calculates the day that the given x position is in, accounting for
-         * week number. Returns a Time referencing that day or null if
+         * week number.
          *
-         * @param x The x position of the touch eventy
+         * @param x The x position of the touch event.
+         * @return True if a day was found for the given location.
          */
-        public void getDayFromLocation(float x, Calendar outCalendar) {
+        public boolean getDayFromLocation(float x, Calendar outCalendar) {
             int dayStart = mShowWeekNumber ? mWidth / mNumCells : 0;
             if (x < dayStart || x > mWidth) {
                 outCalendar.clear();
-                return;
+                return false;
             }
             // Selection is (x - start) / (pixels/day) == (x -s) * day / pixels
             int dayPosition = (int) ((x - dayStart) * mDaysPerWeek
                     / (mWidth - dayStart));
             outCalendar.setTimeInMillis(mFirstDay.getTimeInMillis());
             outCalendar.add(Calendar.DAY_OF_MONTH, dayPosition);
+            return true;
         }
 
         @Override
