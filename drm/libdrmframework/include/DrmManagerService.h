@@ -115,6 +115,8 @@ public:
     ssize_t pread(int uniqueId, DecryptHandle* decryptHandle,
             void* buffer, ssize_t numBytes, off64_t offset);
 
+    virtual status_t dump(int fd, const Vector<String16>& args);
+
 private:
     DrmManager* mDrmManager;
 };
