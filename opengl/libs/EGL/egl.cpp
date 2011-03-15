@@ -1130,6 +1130,16 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
         EGLConfig iConfig = dp->configs[intptr_t(config)].config;
         EGLint format;
 
+        // for now fail if the window is not a Surface.
+        int type = -1;
+        ANativeWindow* anw = reinterpret_cast<ANativeWindow*>(window);
+        if ((anw->query(window, NATIVE_WINDOW_CONCRETE_TYPE, &type) != 0) ||
+                (type == NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT)) {
+            LOGE("native window is a SurfaceTextureClient (currently "
+                    "unsupported)");
+            return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
+        }
+
         // set the native window's buffers format to match this config
         if (cnx->egl.eglGetConfigAttrib(iDpy,
                 iConfig, EGL_NATIVE_VISUAL_ID, &format)) {

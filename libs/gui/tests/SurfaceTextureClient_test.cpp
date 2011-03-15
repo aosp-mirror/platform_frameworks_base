@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include <gui/SurfaceTextureClient.h>
+#include <EGL/egl.h>
 #include <gtest/gtest.h>
+#include <gui/SurfaceTextureClient.h>
 
 namespace android {
 
@@ -55,6 +56,48 @@ TEST_F(SurfaceTextureClientTest, ConcreteTypeIsSurfaceTextureClient) {
     int err = anw->query(anw.get(), NATIVE_WINDOW_CONCRETE_TYPE, &result);
     EXPECT_EQ(NO_ERROR, err);
     EXPECT_EQ(NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT, result);
+}
+
+TEST_F(SurfaceTextureClientTest, ANativeWindowLockFails) {
+    sp<ANativeWindow> anw(mSTC);
+    ANativeWindow_Buffer buf;
+    ASSERT_EQ(BAD_VALUE, ANativeWindow_lock(anw.get(), &buf, NULL));
+}
+
+TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceFails) {
+    sp<ANativeWindow> anw(mSTC);
+
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    ASSERT_NE(EGL_NO_DISPLAY, dpy);
+
+    EGLint majorVersion;
+    EGLint minorVersion;
+    EXPECT_TRUE(eglInitialize(dpy, &majorVersion, &minorVersion));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+    EGLConfig myConfig = {0};
+    EGLint numConfigs = 0;
+    EGLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_DEPTH_SIZE, 16,
+        EGL_STENCIL_SIZE, 8,
+        EGL_NONE };
+    EXPECT_TRUE(eglChooseConfig(dpy, configAttribs, &myConfig, 1,
+            &numConfigs));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+    EGLSurface eglSurface = eglCreateWindowSurface(dpy, myConfig, anw.get(),
+            NULL);
+    ASSERT_EQ(EGL_NO_SURFACE, eglSurface);
+    ASSERT_EQ(EGL_BAD_NATIVE_WINDOW, eglGetError());
+
+    eglTerminate(dpy);
 }
 
 }

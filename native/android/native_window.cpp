@@ -74,6 +74,12 @@ int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width,
 
 int32_t ANativeWindow_lock(ANativeWindow* window, ANativeWindow_Buffer* outBuffer,
         ARect* inOutDirtyBounds) {
+    int type = -1;
+    if (window->query(window, NATIVE_WINDOW_CONCRETE_TYPE, &type) != 0 ||
+            type != NATIVE_WINDOW_SURFACE) {
+        return BAD_VALUE;
+    }
+
     Region dirtyRegion;
     Region* dirtyParam = NULL;
     if (inOutDirtyBounds != NULL) {
