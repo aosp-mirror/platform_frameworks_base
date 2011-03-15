@@ -353,8 +353,6 @@ status_t WAVSource::read(
         return ERROR_END_OF_STREAM;
     }
 
-    mCurrentPos += n;
-
     buffer->set_range(0, n);
 
     if (mWaveFormat == WAVE_FORMAT_PCM) {
@@ -406,6 +404,7 @@ status_t WAVSource::read(
                 / (mNumChannels * bytesPerSample) / mSampleRate);
 
     buffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
+    mCurrentPos += n;
 
     *out = buffer;
 
