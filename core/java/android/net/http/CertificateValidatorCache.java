@@ -137,8 +137,8 @@ class CertificateValidatorCache {
 
         if (domain != null && domain.length() != 0) {
             if (secureHash != null && secureHash.length != 0) {
-                CacheEntry cacheEntry = (CacheEntry)mCacheMap.get(
-                    new Integer(mBigScrew ^ domain.hashCode()));
+                final Integer key = new Integer(mBigScrew ^ domain.hashCode());
+                CacheEntry cacheEntry = mCacheMap.get(key);
                 if (cacheEntry != null) {
                     if (!cacheEntry.expired()) {
                         rval = cacheEntry.has(domain, secureHash);
@@ -148,7 +148,7 @@ class CertificateValidatorCache {
                         }
                         // TODO: debug only!
                     } else {
-                        mCacheMap.remove(cacheEntry);
+                        mCacheMap.remove(key);
                     }
                 }
             }
