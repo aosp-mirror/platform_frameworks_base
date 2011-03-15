@@ -668,7 +668,7 @@
     <string name="save_password_label" msgid="6860261758665825069">"Potwierdź"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Wskazówka: dotknij dwukrotnie, aby powiększyć lub pomniejszyć."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"Autouzupełnianie"</string>
-    <string name="setup_autofill" msgid="8154593408885654044">"Konfiguruj autouzupełnianie"</string>
+    <string name="setup_autofill" msgid="8154593408885654044">"Opcje autouzupełniania"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
