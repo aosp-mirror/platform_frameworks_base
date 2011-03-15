@@ -588,7 +588,6 @@ public final class BearerData {
                     uData.payload = new byte[0];
                     uData.numFields = 0;
                 } else {
-                    uData.payload = uData.payload;
                     uData.numFields = uData.payload.length;
                 }
             } else {
