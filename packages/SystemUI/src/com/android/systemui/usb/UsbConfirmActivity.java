@@ -100,6 +100,14 @@ public class UsbConfirmActivity extends AlertActivity
 
     }
 
+    @Override
+    protected void onDestroy() {
+        if (mDisconnectedReceiver != null) {
+            unregisterReceiver(mDisconnectedReceiver);
+        }
+        super.onDestroy();
+    }
+
     public void onClick(DialogInterface dialog, int which) {
         if (which == AlertDialog.BUTTON_POSITIVE) {
             try {
