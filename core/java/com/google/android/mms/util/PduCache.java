@@ -235,7 +235,7 @@ public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
     }
 
     private void removeFromMessageBoxes(Uri key, PduCacheEntry entry) {
-        HashSet<Uri> msgBox = mThreads.get(entry.getMessageBox());
+        HashSet<Uri> msgBox = mThreads.get(Long.valueOf(entry.getMessageBox()));
         if (msgBox != null) {
             msgBox.remove(key);
         }
