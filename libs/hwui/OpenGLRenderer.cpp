@@ -407,15 +407,19 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         mSnapshot->transform->mapRect(bounds);
 
         // Layers only make sense if they are in the framebuffer's bounds
-        bounds.intersect(*snapshot->clipRect);
+        if (bounds.intersect(*snapshot->clipRect)) {
+            // We cannot work with sub-pixels in this case
+            bounds.snapToPixelBoundaries();
 
-        // We cannot work with sub-pixels in this case
-        bounds.snapToPixelBoundaries();
-
-        // When the layer is not an FBO, we may use glCopyTexImage so we
-        // need to make sure the layer does not extend outside the bounds
-        // of the framebuffer
-        bounds.intersect(snapshot->previous->viewport);
+            // When the layer is not an FBO, we may use glCopyTexImage so we
+            // need to make sure the layer does not extend outside the bounds
+            // of the framebuffer
+            if (!bounds.intersect(snapshot->previous->viewport)) {
+                bounds.setEmpty();
+            }
+        } else {
+            bounds.setEmpty();
+        }
     }
 
     if (bounds.isEmpty() || bounds.getWidth() > mCaches.maxTextureSize ||
