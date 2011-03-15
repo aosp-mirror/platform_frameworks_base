@@ -283,11 +283,42 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
     sp<GraphicBuffer>& buf(mSlots[mCurrentTexture].mGraphicBuffer);
     float tx, ty, sx, sy;
     if (!mCurrentCrop.isEmpty()) {
-        tx = float(mCurrentCrop.left) / float(buf->getWidth());
-        ty = float(buf->getHeight() - mCurrentCrop.bottom) /
-                float(buf->getHeight());
-        sx = float(mCurrentCrop.width()) / float(buf->getWidth());
-        sy = float(mCurrentCrop.height()) / float(buf->getHeight());
+        // In order to prevent bilinear sampling at the of the crop rectangle we
+        // may need to shrink it by 2 texels in each direction.  Normally this
+        // would just need to take 1/2 a texel off each end, but because the
+        // chroma channels will likely be subsampled we need to chop off a whole
+        // texel.  This will cause artifacts if someone does nearest sampling
+        // with 1:1 pixel:texel ratio, but it's impossible to simultaneously
+        // accomodate the bilinear and nearest sampling uses.
+        //
+        // If nearest sampling turns out to be a desirable usage of these
+        // textures then we could add the ability to switch a SurfaceTexture to
+        // nearest-mode.  Preferably, however, the image producers (video
+        // decoder, camera, etc.) would simply not use a crop rectangle (or at
+        // least not tell the framework about it) so that the GPU can do the
+        // correct edge behavior.
+        int xshrink = 0, yshrink = 0;
+        if (mCurrentCrop.left > 0) {
+            tx = float(mCurrentCrop.left + 1) / float(buf->getWidth());
+            xshrink++;
+        } else {
+            tx = 0.0f;
+        }
+        if (mCurrentCrop.right < buf->getWidth()) {
+            xshrink++;
+        }
+        if (mCurrentCrop.bottom < buf->getHeight()) {
+            ty = (float(buf->getHeight() - mCurrentCrop.bottom) + 1.0f) /
+                    float(buf->getHeight());
+            yshrink++;
+        } else {
+            ty = 0.0f;
+        }
+        if (mCurrentCrop.top > 0) {
+            yshrink++;
+        }
+        sx = float(mCurrentCrop.width() - xshrink) / float(buf->getWidth());
+        sy = float(mCurrentCrop.height() - yshrink) / float(buf->getHeight());
     } else {
         tx = 0.0f;
         ty = 0.0f;
@@ -298,7 +329,7 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
         sx, 0, 0, 0,
         0, sy, 0, 0,
         0, 0, 1, 0,
-        sx*tx, sy*ty, 0, 1,
+        tx, ty, 0, 1,
     };
 
     float mtxBeforeFlipV[16];
