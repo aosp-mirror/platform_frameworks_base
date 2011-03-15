@@ -27,6 +27,15 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
+        <activity android:name=".usb.UsbConfirmActivity"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_USB"
+            android:theme="@*android:style/Theme.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbPermissionActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
