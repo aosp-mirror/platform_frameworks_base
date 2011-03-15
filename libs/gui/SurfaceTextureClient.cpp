@@ -160,6 +160,9 @@ int SurfaceTextureClient::query(int what, int* value) {
         // SurfaceTextureClient currently never queues frames to SurfaceFlinger.
         *value = 0;
         return NO_ERROR;
+    case NATIVE_WINDOW_CONCRETE_TYPE:
+        *value = NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT;
+        return NO_ERROR;
     }
     return BAD_VALUE;
 }

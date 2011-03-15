@@ -110,6 +110,14 @@ enum {
      * conjunction with this query.
      */
     NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER,
+
+    /* Get the concrete type of a ANativeWindow.  See below for the list of
+     * possible return values.
+     *
+     * This query should not be used outside the Android framework and will
+     * likely be removed in the near future.
+     */
+    NATIVE_WINDOW_CONCRETE_TYPE,
 };
 
 /* valid operations for the (*perform)() hook */
@@ -140,6 +148,13 @@ enum {
     NATIVE_WINDOW_TRANSFORM_ROT_180 = HAL_TRANSFORM_ROT_180,
     /* rotate source image 270 degrees clock-wise */
     NATIVE_WINDOW_TRANSFORM_ROT_270 = HAL_TRANSFORM_ROT_270,
+};
+
+/* values returned by the NATIVE_WINDOW_CONCRETE_TYPE query */
+enum {
+    NATIVE_WINDOW_FRAMEBUFFER,                  // FramebufferNativeWindow
+    NATIVE_WINDOW_SURFACE,                      // Surface
+    NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT,       // SurfaceTextureClient
 };
 
 struct ANativeWindow 
