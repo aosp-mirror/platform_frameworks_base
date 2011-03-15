@@ -21,7 +21,6 @@
 
 namespace android {
 
-class DrmContentIds;
 class DrmConstraints;
 class DrmMetadata;
 class DrmRights;

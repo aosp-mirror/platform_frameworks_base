@@ -37,7 +37,6 @@
 
 using namespace android;
 
-Vector<int> DrmManager::mUniqueIdVector;
 const String8 DrmManager::EMPTY_STRING("");
 
 DrmManager::DrmManager() :

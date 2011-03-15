@@ -407,9 +407,17 @@ private:
     Mutex mLock;
     sp<DrmManagerClient::OnInfoListener> mOnInfoListener;
 
+    class DeathNotifier: public IBinder::DeathRecipient {
+        public:
+            DeathNotifier() {}
+            virtual ~DeathNotifier();
+            virtual void binderDied(const wp<IBinder>& who);
+    };
+
 private:
-    static Mutex mMutex;
-    static sp<IDrmManagerService> mDrmManagerService;
+    static Mutex sMutex;
+    static sp<DeathNotifier> sDeathNotifier;
+    static sp<IDrmManagerService> sDrmManagerService;
     static const sp<IDrmManagerService>& getDrmManagerService();
     static const String8 EMPTY_STRING;
 };
