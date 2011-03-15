@@ -4,39 +4,37 @@ include $(CLEAR_VARS)
 
 ifneq ($(TARGET_SIMULATOR),true)
 
-# Build the unit tests.
-test_src_files := \
-    SurfaceTextureClient_test.cpp \
+LOCAL_MODULE := SurfaceTexture_test
 
-shared_libraries := \
-	libcutils \
-	libutils \
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_SRC_FILES := \
+    SurfaceTextureClient_test.cpp \
+    SurfaceTexture_test.cpp \
+
+LOCAL_SHARED_LIBRARIES := \
+	libEGL \
+	libGLESv2 \
+	libandroid \
 	libbinder \
+	libcutils \
 	libgui \
 	libstlport \
+	libsurfaceflinger_client \
+	libui \
+	libutils \
 
-static_libraries := \
+LOCAL_STATIC_LIBRARIES := \
 	libgtest \
 	libgtest_main \
 
-c_includes := \
+LOCAL_C_INCLUDES := \
     bionic \
     bionic/libstdc++/include \
     external/gtest/include \
     external/stlport/stlport \
 
-module_tags := tests
-
-$(foreach file,$(test_src_files), \
-    $(eval include $(CLEAR_VARS)) \
-    $(eval LOCAL_SHARED_LIBRARIES := $(shared_libraries)) \
-    $(eval LOCAL_STATIC_LIBRARIES := $(static_libraries)) \
-    $(eval LOCAL_C_INCLUDES := $(c_includes)) \
-    $(eval LOCAL_SRC_FILES := $(file)) \
-    $(eval LOCAL_MODULE := $(notdir $(file:%.cpp=%))) \
-    $(eval LOCAL_MODULE_TAGS := $(module_tags)) \
-    $(eval include $(BUILD_EXECUTABLE)) \
-)
+include $(BUILD_EXECUTABLE)
 
 # Build the manual test programs.
 include $(call all-subdir-makefiles)
