@@ -2113,7 +2113,7 @@ public class WebView extends AbsoluteLayout
     public void clearView() {
         mContentWidth = 0;
         mContentHeight = 0;
-        setBaseLayer(0, null, false);
+        setBaseLayer(0, null, false, false);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -4043,10 +4043,12 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    void setBaseLayer(int layer, Region invalRegion, boolean showVisualIndicator) {
+    void setBaseLayer(int layer, Region invalRegion, boolean showVisualIndicator,
+            boolean isPictureAfterFirstLayout) {
         if (mNativeClass == 0)
             return;
-        nativeSetBaseLayer(layer, invalRegion, showVisualIndicator);
+        nativeSetBaseLayer(layer, invalRegion, showVisualIndicator,
+                isPictureAfterFirstLayout);
         if (mHTML5VideoViewProxy != null) {
             mHTML5VideoViewProxy.setBaseLayer(layer);
         }
@@ -7635,11 +7637,12 @@ public class WebView extends AbsoluteLayout
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
-                            getSettings().getShowVisualIndicator());
-                    final Point viewSize = draw.mViewSize;
                     WebViewCore.ViewState viewState = draw.mViewState;
                     boolean isPictureAfterFirstLayout = viewState != null;
+                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
+                            getSettings().getShowVisualIndicator(),
+                            isPictureAfterFirstLayout);
+                    final Point viewSize = draw.mViewSize;
                     if (isPictureAfterFirstLayout) {
                         // Reset the last sent data here since dealing with new page.
                         mLastWidthSent = 0;
@@ -8695,7 +8698,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetBaseLayer(int layer, Region invalRegion,
-            boolean showVisualIndicator);
+            boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
