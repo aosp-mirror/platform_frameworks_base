@@ -339,6 +339,7 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
             LOGW("setForceUse() invalid config %d for FOR_COMMUNICATION", config);
             return;
         }
+        forceVolumeReeval = true;
         mForceUse[usage] = config;
         break;
     case AudioSystem::FOR_MEDIA:
@@ -384,7 +385,7 @@ void AudioPolicyManagerBase::setForceUse(AudioSystem::force_use usage, AudioSyst
     updateDeviceForStrategy();
     setOutputDevice(mHardwareOutput, newDevice);
     if (forceVolumeReeval) {
-        applyStreamVolumes(mHardwareOutput, newDevice);
+        applyStreamVolumes(mHardwareOutput, newDevice, 0, true);
     }
 
     audio_io_handle_t activeInput = getActiveInput();
@@ -1973,7 +1974,13 @@ status_t AudioPolicyManagerBase::checkAndSetVolume(int stream, int index, audio_
             // offset value to reflect actual hardware volume that never reaches 0
             // 1% corresponds roughly to first step in VOICE_CALL stream volume setting (see AudioService.java)
             volume = 0.01 + 0.99 * volume;
+            // Force VOICE_CALL to track BLUETOOTH_SCO stream volume when bluetooth audio is
+            // enabled
+            if (stream == AudioSystem::BLUETOOTH_SCO) {
+                mpClientInterface->setStreamVolume(AudioSystem::VOICE_CALL, volume, output, delayMs);
+            }
         }
+
         mpClientInterface->setStreamVolume((AudioSystem::stream_type)stream, volume, output, delayMs);
     }
 
@@ -1986,6 +1993,7 @@ status_t AudioPolicyManagerBase::checkAndSetVolume(int stream, int index, audio_
         } else {
             voiceVolume = 1.0;
         }
+
         if (voiceVolume != mLastVoiceVolume && output == mHardwareOutput) {
             mpClientInterface->setVoiceVolume(voiceVolume, delayMs);
             mLastVoiceVolume = voiceVolume;
@@ -1995,12 +2003,12 @@ status_t AudioPolicyManagerBase::checkAndSetVolume(int stream, int index, audio_
     return NO_ERROR;
 }
 
-void AudioPolicyManagerBase::applyStreamVolumes(audio_io_handle_t output, uint32_t device, int delayMs)
+void AudioPolicyManagerBase::applyStreamVolumes(audio_io_handle_t output, uint32_t device, int delayMs, bool force)
 {
     LOGV("applyStreamVolumes() for output %d and device %x", output, device);
 
     for (int stream = 0; stream < AudioSystem::NUM_STREAM_TYPES; stream++) {
-        checkAndSetVolume(stream, mStreams[stream].mIndexCur, output, device, delayMs);
+        checkAndSetVolume(stream, mStreams[stream].mIndexCur, output, device, delayMs, force);
     }
 }
 
