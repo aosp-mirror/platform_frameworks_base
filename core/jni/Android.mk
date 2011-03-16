@@ -54,6 +54,7 @@ LOCAL_SRC_FILES:= \
 	android_view_KeyCharacterMap.cpp \
 	android_view_GLES20Canvas.cpp \
 	android_view_MotionEvent.cpp \
+	android_view_VelocityTracker.cpp \
 	android_text_AndroidCharacter.cpp \
 	android_text_AndroidBidi.cpp \
 	android_os_Debug.cpp \
