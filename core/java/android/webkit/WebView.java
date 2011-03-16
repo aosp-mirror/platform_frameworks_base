@@ -7854,7 +7854,11 @@ public class WebView extends AbsoluteLayout
 
                 case ENTER_FULLSCREEN_VIDEO:
                     int layerId = msg.arg1;
-                    Log.v(LOGTAG, "Display the video layer " + layerId + " fullscreen");
+
+                    String url = (String) msg.obj;
+                    if (mHTML5VideoViewProxy != null) {
+                        mHTML5VideoViewProxy.enterFullScreenVideo(layerId, url);
+                    }
                     break;
 
                 case SHOW_FULLSCREEN: {
