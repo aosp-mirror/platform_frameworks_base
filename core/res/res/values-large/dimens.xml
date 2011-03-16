@@ -19,4 +19,7 @@
 <resources>
     <item type="dimen" name="dialog_min_width_major">55%</item>
     <item type="dimen" name="dialog_min_width_minor">80%</item>
+
+    <!-- Preference UI dimensions for larger screens. -->
+    <dimen name="preference_widget_width">56dp</dimen>
 </resources>

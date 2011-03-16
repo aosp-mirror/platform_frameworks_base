@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -151,8 +152,14 @@ public abstract class PreferenceFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(com.android.internal.R.layout.preference_list_fragment,
-                container, false);
+        if (getResources().getConfiguration().isLayoutSizeAtLeast(
+                Configuration.SCREENLAYOUT_SIZE_LARGE)) {
+            return inflater.inflate(com.android.internal.R.layout.preference_list_fragment_large,
+                    container, false);
+        } else {
+            return inflater.inflate(com.android.internal.R.layout.preference_list_fragment,
+                    container, false);
+        }
     }
 
     @Override
