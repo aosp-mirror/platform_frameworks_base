@@ -47,30 +47,25 @@ import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.provider.Telephony.Sms.Intents;
+import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
-import android.telephony.SmsMessage;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.telephony.Phone;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
-import com.android.internal.telephony.GsmAlphabet;
-import com.android.internal.telephony.SmsHeader;
-import com.android.internal.util.HexDump;
+import com.android.internal.telephony.Phone;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringBufferInputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 /**

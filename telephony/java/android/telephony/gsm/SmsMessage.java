@@ -297,37 +297,14 @@ public class SmsMessage {
      */
     @Deprecated
     public static int[] calculateLength(CharSequence messageBody, boolean use7bitOnly) {
+        SmsMessageBase.TextEncodingDetails ted =
+                com.android.internal.telephony.gsm.SmsMessage
+                        .calculateLength(messageBody, use7bitOnly);
         int ret[] = new int[4];
-
-        try {
-            // Try GSM alphabet
-            int septets = GsmAlphabet.countGsmSeptets(messageBody, !use7bitOnly);
-            ret[1] = septets;
-            if (septets > MAX_USER_DATA_SEPTETS) {
-                ret[0] = (septets + (MAX_USER_DATA_SEPTETS_WITH_HEADER - 1)) /
-                            MAX_USER_DATA_SEPTETS_WITH_HEADER;
-                ret[2] = (ret[0] * MAX_USER_DATA_SEPTETS_WITH_HEADER) - septets;
-            } else {
-                ret[0] = 1;
-                ret[2] = MAX_USER_DATA_SEPTETS - septets;
-            }
-            ret[3] = ENCODING_7BIT;
-        } catch (EncodeException ex) {
-            // fall back to UCS-2
-            int octets = messageBody.length() * 2;
-            ret[1] = messageBody.length();
-            if (octets > MAX_USER_DATA_BYTES) {
-                // 6 is the size of the user data header
-                ret[0] = (octets + (MAX_USER_DATA_BYTES_WITH_HEADER - 1)) /
-                            MAX_USER_DATA_BYTES_WITH_HEADER;
-                ret[2] = ((ret[0] * MAX_USER_DATA_BYTES_WITH_HEADER) - octets) / 2;
-            } else {
-                ret[0] = 1;
-                ret[2] = (MAX_USER_DATA_BYTES - octets)/2;
-            }
-            ret[3] = ENCODING_16BIT;
-        }
-
+        ret[0] = ted.msgCount;
+        ret[1] = ted.codeUnitCount;
+        ret[2] = ted.codeUnitsRemaining;
+        ret[3] = ted.codeUnitSize;
         return ret;
     }
 
