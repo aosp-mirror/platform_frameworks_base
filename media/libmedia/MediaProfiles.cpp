@@ -722,8 +722,10 @@ MediaProfiles::createDefaultCamcorderProfiles(MediaProfiles *profiles)
     profiles->mCamcorderProfiles.add(highTimeLapseProfile);
     profiles->mCamcorderProfiles.add(highSpecificTimeLapseProfile);
 
-    // We only have the back-facing camera support by default.
-    profiles->mCameraIds.add(0);
+    // For emulator and other legacy devices which does not have a
+    // media_profiles.xml file, We assume that the default camera id
+    // is 0 and that is the only camera available.
+    profiles->mCameraIds.push(0);
 }
 
 /*static*/ void
