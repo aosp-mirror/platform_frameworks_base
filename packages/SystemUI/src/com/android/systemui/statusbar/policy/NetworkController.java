@@ -808,7 +808,9 @@ public class NetworkController extends BroadcastReceiver {
 
         // the data direction overlay
         if (mLastDataDirectionOverlayIconId != dataDirectionOverlayIconId) {
-            Slog.d(TAG, "changing data overlay icon id to " + dataDirectionOverlayIconId);
+            if (DEBUG) {
+                Slog.d(TAG, "changing data overlay icon id to " + dataDirectionOverlayIconId);
+            }
             mLastDataDirectionOverlayIconId = dataDirectionOverlayIconId;
             N = mDataDirectionOverlayIconViews.size();
             for (int i=0; i<N; i++) {
