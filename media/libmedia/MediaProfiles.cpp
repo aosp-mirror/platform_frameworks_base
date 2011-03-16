@@ -721,6 +721,11 @@ MediaProfiles::createDefaultCamcorderProfiles(MediaProfiles *profiles)
     createDefaultCamcorderTimeLapseHighProfiles(&highTimeLapseProfile, &highSpecificTimeLapseProfile);
     profiles->mCamcorderProfiles.add(highTimeLapseProfile);
     profiles->mCamcorderProfiles.add(highSpecificTimeLapseProfile);
+
+    // For emulator and other legacy devices which does not have a
+    // media_profiles.xml file, We assume that the default camera id
+    // is 0 and that is the only camera available.
+    profiles->mCameraIds.push(0);
 }
 
 /*static*/ void
