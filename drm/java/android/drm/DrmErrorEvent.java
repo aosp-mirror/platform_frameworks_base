@@ -16,6 +16,8 @@
 
 package android.drm;
 
+import java.util.HashMap;
+
 /**
  * This is an entity class which would be passed to caller in
  * {@link DrmManagerClient.OnErrorListener#onError(DrmManagerClient, DrmErrorEvent)}
@@ -62,11 +64,25 @@ public class DrmErrorEvent extends DrmEvent {
      * constructor to create DrmErrorEvent object with given parameters
      *
      * @param uniqueId Unique session identifier
-     * @param type Type of information
+     * @param type Type of the event. It could be one of the types defined above
      * @param message Message description
      */
     public DrmErrorEvent(int uniqueId, int type, String message) {
         super(uniqueId, type, message);
+    }
+
+    /**
+     * constructor to create DrmErrorEvent object with given parameters
+     *
+     * @param uniqueId Unique session identifier
+     * @param type Type of the event. It could be one of the types defined above
+     * @param message Message description
+     * @param attributes Attributes for extensible information. Could be any
+     * information provided by the plugin
+     */
+    public DrmErrorEvent(int uniqueId, int type, String message,
+                            HashMap<String, Object> attributes) {
+        super(uniqueId, type, message, attributes);
     }
 }
 
