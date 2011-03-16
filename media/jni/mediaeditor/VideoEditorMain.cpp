@@ -557,6 +557,10 @@ static void videoEditor_clearSurface(JNIEnv* pEnv,
 
     Surface* const p = (Surface*)pEnv->GetIntField(surface, surface_native);
     sp<Surface> previewSurface = sp<Surface>(p);
+    // Validate the mSurface's mNativeSurface field
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                                (NULL == previewSurface.get()),
+                                                "mNativeSurface is null");
 
     frameStr.pBuffer = M4OSA_NULL;
     frameStr.timeMs = 0;
@@ -634,6 +638,10 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
 
     Surface* const p = (Surface*)pEnv->GetIntField(mSurface, surface_native);
     sp<Surface> previewSurface = sp<Surface>(p);
+    // Validate the mSurface's mNativeSurface field
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                                (NULL == previewSurface.get()),
+                                                "mNativeSurface is null");
 
     /* Determine the total number of clips, total duration*/
     uiNumberOfClipsInStoryBoard = pContext->pEditSettings->uiClipNumber;
@@ -2058,6 +2066,10 @@ videoEditor_startPreview(
     Surface* const p = (Surface*)pEnv->GetIntField(mSurface, surface_native);
 
     sp<Surface> previewSurface = sp<Surface>(p);
+    // Validate the mSurface's mNativeSurface field
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                                (NULL == previewSurface.get()),
+                                                "mNativeSurface is null");
 
     result =  pContext->mPreviewController->setSurface(previewSurface);
     videoEditJava_checkAndThrowRuntimeException(&needToBeLoaded, pEnv,
