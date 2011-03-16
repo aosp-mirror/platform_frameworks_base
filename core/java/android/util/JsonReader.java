@@ -86,7 +86,11 @@ import java.util.List;
  *
  *   public List<Message> readJsonStream(InputStream in) throws IOException {
  *     JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
- *     return readMessagesArray(reader);
+ *     try {
+ *       return readMessagesArray(reader);
+ *     } finally {
+ *       reader.close();
+ *     }
  *   }
  *
  *   public List<Message> readMessagesArray(JsonReader reader) throws IOException {
