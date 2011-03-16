@@ -17,6 +17,8 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
+import android.os.IBinder;
+import android.text.style.CorrectionSpan;
 import android.view.KeyEvent;
 
 /**
@@ -125,5 +127,10 @@ public class InputConnectionWrapper implements InputConnection {
     
     public boolean performPrivateCommand(String action, Bundle data) {
         return mTarget.performPrivateCommand(action, data);
+    }
+
+    public boolean setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
+            int end, int flags) {
+        return mTarget.setCorrectionSpan(token, correctionSpan, start, end, flags);
     }
 }

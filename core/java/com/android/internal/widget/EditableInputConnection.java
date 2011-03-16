@@ -17,8 +17,10 @@
 package com.android.internal.widget;
 
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.Editable;
 import android.text.method.KeyListener;
+import android.text.style.CorrectionSpan;
 import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
@@ -143,5 +145,14 @@ public class EditableInputConnection extends BaseInputConnection {
         mTextView.hideErrorIfUnchanged();
 
         return success;
+    }
+
+    @Override
+    public boolean setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
+            int end, int flags) {
+        mTextView.beginBatchEdit();
+        boolean retval = mTextView.setCorrectionSpan(token, correctionSpan, start, end, flags);
+        mTextView.endBatchEdit();
+        return retval;
     }
 }
