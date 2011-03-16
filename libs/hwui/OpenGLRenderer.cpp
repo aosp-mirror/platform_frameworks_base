@@ -636,11 +636,13 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 #if RENDER_LAYERS_AS_REGIONS
+#if RENDER_LAYERS_RECT_AS_RECT
     if (layer->region.isRect()) {
         composeLayerRect(layer, rect);
         layer->region.clear();
         return;
     }
+#endif
 
     if (!layer->region.isEmpty()) {
         size_t count;
@@ -1646,10 +1648,14 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
 
 #if RENDER_LAYERS_AS_REGIONS
     if (!layer->region.isEmpty()) {
+#if RENDER_LAYERS_RECT_AS_RECT
         if (layer->region.isRect()) {
             const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
             composeLayerRect(layer, r);
         } else if (layer->mesh) {
+#else
+        if (layer->mesh) {
+#endif
             const float a = alpha / 255.0f;
             const Rect& rect = layer->layer;
 
