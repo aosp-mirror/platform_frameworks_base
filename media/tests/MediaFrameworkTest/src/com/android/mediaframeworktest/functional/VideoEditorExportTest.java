@@ -44,6 +44,7 @@ import android.util.Log;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.Suppress;
 import com.android.mediaframeworktest.VideoEditorHelper;
 
 public class VideoEditorExportTest extends
@@ -701,6 +702,7 @@ public class VideoEditorExportTest extends
      *
      * @throws Exception
      */
+    @Suppress
     @LargeTest
     public void testExportDuration1Hour() throws Exception {
         final String videoItemFilename1 = INPUT_FILE_PATH +
