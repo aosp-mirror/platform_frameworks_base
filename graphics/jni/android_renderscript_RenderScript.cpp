@@ -848,30 +848,23 @@ nScriptInvokeV(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
 
 // -----------------------------------
 
-static void
-nScriptCBegin(JNIEnv *_env, jobject _this, RsContext con)
+static jint
+nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con,
+               jstring resName, jstring cacheDir,
+               jbyteArray scriptRef, jint length)
 {
-    LOG_API("nScriptCBegin, con(%p)", con);
-    rsScriptCBegin(con);
-}
+    LOG_API("nScriptCCreate, con(%p)", con);
 
-static void
-nScriptCSetScript(JNIEnv *_env, jobject _this, RsContext con, jbyteArray scriptRef,
-                  jint offset, jint length)
-{
-    LOG_API("!!! nScriptCSetScript, con(%p)", con);
+    AutoJavaStringToUTF8 resNameUTF(_env, resName);
+    AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
+    jint ret = 0;
+
     jint _exception = 0;
     jint remaining;
-    jbyte* script_base = 0;
     jbyte* script_ptr;
     if (!scriptRef) {
         _exception = 1;
         //_env->ThrowNew(IAEClass, "script == null");
-        goto exit;
-    }
-    if (offset < 0) {
-        _exception = 1;
-        //_env->ThrowNew(IAEClass, "offset < 0");
         goto exit;
     }
     if (length < 0) {
@@ -879,34 +872,27 @@ nScriptCSetScript(JNIEnv *_env, jobject _this, RsContext con, jbyteArray scriptR
         //_env->ThrowNew(IAEClass, "length < 0");
         goto exit;
     }
-    remaining = _env->GetArrayLength(scriptRef) - offset;
+    remaining = _env->GetArrayLength(scriptRef);
     if (remaining < length) {
         _exception = 1;
         //_env->ThrowNew(IAEClass, "length > script.length - offset");
         goto exit;
     }
-    script_base = (jbyte *)
+    script_ptr = (jbyte *)
         _env->GetPrimitiveArrayCritical(scriptRef, (jboolean *)0);
-    script_ptr = script_base + offset;
 
-    rsScriptCSetText(con, (const char *)script_ptr, length);
+    //rsScriptCSetText(con, (const char *)script_ptr, length);
+
+    ret = (jint)rsScriptCCreate(con, resNameUTF.c_str(), cacheDirUTF.c_str(),
+                                (const char *)script_ptr, length);
 
 exit:
-    if (script_base) {
-        _env->ReleasePrimitiveArrayCritical(scriptRef, script_base,
+    if (script_ptr) {
+        _env->ReleasePrimitiveArrayCritical(scriptRef, script_ptr,
                 _exception ? JNI_ABORT: 0);
     }
-}
 
-static jint
-nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con, jstring packageName, jstring resName, jstring cacheDir)
-{
-    LOG_API("nScriptCCreate, con(%p)", con);
-    AutoJavaStringToUTF8 packageNameUTF(_env, packageName);
-    AutoJavaStringToUTF8 resNameUTF(_env, resName);
-    AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
-    jint i = (jint)rsScriptCCreate(con, packageNameUTF.c_str(), resNameUTF.c_str(), cacheDirUTF.c_str());
-    return i;
+    return ret;
 }
 
 // ---------------------------------------------------------------------------
@@ -1282,9 +1268,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptSetVarV",                 "(III[B)V",                              (void*)nScriptSetVarV },
 {"rsnScriptSetVarObj",               "(IIII)V",                               (void*)nScriptSetVarObj },
 
-{"rsnScriptCBegin",                  "(I)V",                                  (void*)nScriptCBegin },
-{"rsnScriptCSetScript",              "(I[BII)V",                              (void*)nScriptCSetScript },
-{"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",  (void*)nScriptCCreate },
+{"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;[BI)I",  (void*)nScriptCCreate },
 
 {"rsnProgramStoreBegin",             "(III)V",                                (void*)nProgramStoreBegin },
 {"rsnProgramStoreDepthFunc",         "(II)V",                                 (void*)nProgramStoreDepthFunc },

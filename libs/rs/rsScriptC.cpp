@@ -19,9 +19,6 @@
 #include "rsMatrix.h"
 #include "utils/Timers.h"
 #include "utils/StopWatch.h"
-extern "C" {
-#include "libdex/ZipArchive.h"
-}
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -36,94 +33,21 @@ using namespace android::renderscript;
     Context * rsc = tls->mContext; \
     ScriptC * sc = (ScriptC *) tls->mScript
 
-// Input: cacheDir
-// Input: resName
-// Input: extName
-//
-// Note: cacheFile = resName + extName
-//
-// Output: Returns cachePath == cacheDir + cacheFile
-char *genCacheFileName(const char *cacheDir,
-                       const char *resName,
-                       const char *extName) {
-    char cachePath[512];
-    char cacheFile[sizeof(cachePath)];
-    const size_t kBufLen = sizeof(cachePath) - 1;
-
-    cacheFile[0] = '\0';
-    // Note: resName today is usually something like
-    //       "/com.android.fountain:raw/fountain"
-    if (resName[0] != '/') {
-        // Get the absolute path of the raw/***.bc file.
-
-        // Generate the absolute path.  This doesn't do everything it
-        // should, e.g. if resName is "./out/whatever" it doesn't crunch
-        // the leading "./" out because this if-block is not triggered,
-        // but it'll make do.
-        //
-        if (getcwd(cacheFile, kBufLen) == NULL) {
-            LOGE("Can't get CWD while opening raw/***.bc file\n");
-            return NULL;
-        }
-        // Append "/" at the end of cacheFile so far.
-        strncat(cacheFile, "/", kBufLen);
-    }
-
-    // cacheFile = resName + extName
-    //
-    strncat(cacheFile, resName, kBufLen);
-    if (extName != NULL) {
-        // TODO(srhines): strncat() is a bit dangerous
-        strncat(cacheFile, extName, kBufLen);
-    }
-
-    // Turn the path into a flat filename by replacing
-    // any slashes after the first one with '@' characters.
-    char *cp = cacheFile + 1;
-    while (*cp != '\0') {
-        if (*cp == '/') {
-            *cp = '@';
-        }
-        cp++;
-    }
-
-    // Tack on the file name for the actual cache file path.
-    strncpy(cachePath, cacheDir, kBufLen);
-    strncat(cachePath, cacheFile, kBufLen);
-
-    LOGV("Cache file for '%s' '%s' is '%s'\n", resName, extName, cachePath);
-    return strdup(cachePath);
-}
-
 ScriptC::ScriptC(Context *rsc) : Script(rsc) {
-    mBccScript = NULL;
-    memset(&mProgram, 0, sizeof(mProgram));
 }
 
 ScriptC::~ScriptC() {
-    if (mBccScript) {
-        if (mProgram.mObjectSlotList) {
-            for (size_t ct=0; ct < mProgram.mObjectSlotCount; ct++) {
-                setVarObj(mProgram.mObjectSlotList[ct], NULL);
-            }
-            delete [] mProgram.mObjectSlotList;
-            mProgram.mObjectSlotList = NULL;
-            mProgram.mObjectSlotCount = 0;
-        }
+    mRSC->mHal.funcs.script.destroy(mRSC, this);
 
-
-        LOGD(">>>> ~ScriptC  bccDisposeScript(%p)", mBccScript);
-        bccDisposeScript(mBccScript);
-    }
-    free(mEnviroment.mScriptText);
-    mEnviroment.mScriptText = NULL;
+    //free(mEnviroment.mScriptText);
+    //mEnviroment.mScriptText = NULL;
 }
 
 void ScriptC::setupScript(Context *rsc) {
     mEnviroment.mStartTimeMillis
                 = nanoseconds_to_milliseconds(systemTime(SYSTEM_TIME_MONOTONIC));
 
-    for (uint32_t ct=0; ct < mEnviroment.mFieldCount; ct++) {
+    for (uint32_t ct=0; ct < mHal.info.exportedVariableCount; ct++) {
         if (mSlots[ct].get() && !mTypes[ct].get()) {
             mTypes[ct].set(mSlots[ct]->getType());
         }
@@ -134,27 +58,17 @@ void ScriptC::setupScript(Context *rsc) {
         if (mSlots[ct].get()) {
             ptr = mSlots[ct]->getPtr();
         }
-        void **dest = ((void ***)mEnviroment.mFieldAddress)[ct];
 
-        if (rsc->props.mLogScripts) {
-            if (mSlots[ct].get() != NULL) {
-                LOGV("%p ScriptC::setupScript slot=%i  dst=%p  src=%p  type=%p", rsc, ct, dest, ptr, mSlots[ct]->getType());
-            } else {
-                LOGV("%p ScriptC::setupScript slot=%i  dst=%p  src=%p  type=null", rsc, ct, dest, ptr);
-            }
-        }
-
-        if (dest) {
-            *dest = ptr;
-        }
+        rsc->mHal.funcs.script.setGlobalBind(rsc, this, ct, ptr);
     }
 }
 
 const Allocation *ScriptC::ptrToAllocation(const void *ptr) const {
+    //LOGE("ptr to alloc %p", ptr);
     if (!ptr) {
         return NULL;
     }
-    for (uint32_t ct=0; ct < mEnviroment.mFieldCount; ct++) {
+    for (uint32_t ct=0; ct < mHal.info.exportedVariableCount; ct++) {
         if (!mSlots[ct].get())
             continue;
         if (mSlots[ct]->getPtr() == ptr) {
@@ -190,7 +104,7 @@ void ScriptC::setupGLState(Context *rsc) {
 }
 
 uint32_t ScriptC::run(Context *rsc) {
-    if (mProgram.mRoot == NULL) {
+    if (mHal.info.root == NULL) {
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Attempted to run bad script");
         return 0;
     }
@@ -202,10 +116,10 @@ uint32_t ScriptC::run(Context *rsc) {
     Script * oldTLS = setTLS(this);
 
     if (rsc->props.mLogScripts) {
-        LOGV("%p ScriptC::run invoking root,  ptr %p", rsc, mProgram.mRoot);
+        LOGV("%p ScriptC::run invoking root,  ptr %p", rsc, mHal.info.root);
     }
 
-    ret = mProgram.mRoot();
+    ret = mHal.info.root();
 
     if (rsc->props.mLogScripts) {
         LOGV("%p ScriptC::run invoking complete, ret=%i", rsc, ret);
@@ -266,7 +180,7 @@ static void wc_xy(void *usr, uint32_t idx) {
             const uint8_t *xPtrIn = mtls->ptrIn + (mtls->eStrideIn * offset);
 
             for (uint32_t x = mtls->xStart; x < mtls->xEnd; x++) {
-                ((rs_t)mtls->script->mProgram.mRoot) (xPtrIn, xPtrOut, mtls->usr, x, y, 0, 0);
+                ((rs_t)mtls->script->mHal.info.root) (xPtrIn, xPtrOut, mtls->usr, x, y, 0, 0);
                 xPtrIn += mtls->eStrideIn;
                 xPtrOut += mtls->eStrideOut;
             }
@@ -291,7 +205,7 @@ static void wc_x(void *usr, uint32_t idx) {
         uint8_t *xPtrOut = mtls->ptrOut + (mtls->eStrideOut * xStart);
         const uint8_t *xPtrIn = mtls->ptrIn + (mtls->eStrideIn * xStart);
         for (uint32_t x = xStart; x < xEnd; x++) {
-            ((rs_t)mtls->script->mProgram.mRoot) (xPtrIn, xPtrOut, mtls->usr, x, 0, 0, 0);
+            ((rs_t)mtls->script->mHal.info.root) (xPtrIn, xPtrOut, mtls->usr, x, 0, 0, 0);
             xPtrIn += mtls->eStrideIn;
             xPtrOut += mtls->eStrideOut;
         }
@@ -306,6 +220,7 @@ void ScriptC::runForEach(Context *rsc,
     MTLaunchStruct mtls;
     memset(&mtls, 0, sizeof(mtls));
     Context::PushState ps(rsc);
+
 
     if (ain) {
         mtls.dimX = ain->getType()->getDimX();
@@ -377,7 +292,7 @@ void ScriptC::runForEach(Context *rsc,
         mtls.eStrideOut = aout->getType()->getElementSizeBytes();
     }
 
-    if ((rsc->getWorkerPoolSize() > 1) && mEnviroment.mIsThreadable) {
+    if ((rsc->getWorkerPoolSize() > 1) && mHal.info.isThreadable) {
         if (mtls.dimY > 1) {
             rsc->launchThreads(wc_xy, &mtls);
         } else {
@@ -397,7 +312,7 @@ void ScriptC::runForEach(Context *rsc,
                     const uint8_t *xPtrIn = mtls.ptrIn + (mtls.eStrideIn * offset);
 
                     for (uint32_t x = mtls.xStart; x < mtls.xEnd; x++) {
-                        ((rs_t)mProgram.mRoot) (xPtrIn, xPtrOut, usr, x, y, z, ar);
+                        ((rs_t)mHal.info.root) (xPtrIn, xPtrOut, usr, x, y, z, ar);
                         xPtrIn += mtls.eStrideIn;
                         xPtrOut += mtls.eStrideOut;
                     }
@@ -410,8 +325,7 @@ void ScriptC::runForEach(Context *rsc,
 }
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) {
-    if ((slot >= mEnviroment.mInvokeFunctionCount) ||
-        (mEnviroment.mInvokeFunctions[slot] == NULL)) {
+    if (slot >= mHal.info.exportedFunctionCount) {
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Calling invoke on bad script");
         return;
     }
@@ -419,13 +333,9 @@ void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len
     Script * oldTLS = setTLS(this);
 
     if (rsc->props.mLogScripts) {
-        LOGV("%p ScriptC::Invoke invoking slot %i,  ptr %p", rsc, slot, mEnviroment.mInvokeFunctions[slot]);
+        LOGV("%p ScriptC::Invoke invoking slot %i,  ptr %p", rsc, slot, this);
     }
-    ((void (*)(const void *, uint32_t))
-        mEnviroment.mInvokeFunctions[slot])(data, len);
-    if (rsc->props.mLogScripts) {
-        LOGV("%p ScriptC::Invoke complete", rsc);
-    }
+    rsc->mHal.funcs.script.invokeFunction(rsc, this, slot, data, len);
 
     setTLS(oldTLS);
 }
@@ -440,9 +350,9 @@ static void* symbolLookup(void* pContext, char const* name) {
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
     if (!strcmp(name, "__isThreadable")) {
-      return (void*) s->mEnviroment.mIsThreadable;
+      return (void*) s->mHal.info.isThreadable;
     } else if (!strcmp(name, "__clearThreadable")) {
-      s->mEnviroment.mIsThreadable = false;
+      s->mHal.info.isThreadable = false;
       return NULL;
     }
     sym = ScriptCState::lookupSymbol(name);
@@ -453,7 +363,7 @@ static void* symbolLookup(void* pContext, char const* name) {
         sym = ScriptCState::lookupSymbolGL(name);
     }
     if (sym) {
-        s->mEnviroment.mIsThreadable &= sym->threadable;
+        s->mHal.info.isThreadable &= sym->threadable;
         return sym->mPtr;
     }
     LOGE("ScriptC sym lookup failed for %s", name);
@@ -465,144 +375,86 @@ extern const char rs_runtime_lib_bc[];
 extern unsigned rs_runtime_lib_bc_size;
 #endif
 
-bool ScriptCState::runCompiler(Context *rsc,
-                               ScriptC *s,
-                               const char *resName,
-                               const char *cacheDir) {
-    s->mBccScript = bccCreateScript();
+bool ScriptC::runCompiler(Context *rsc,
+                          const char *resName,
+                          const char *cacheDir,
+                          const uint8_t *bitcode,
+                          size_t bitcodeLen) {
 
-    s->mEnviroment.mIsThreadable = true;
+    //LOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
 
-    if (bccRegisterSymbolCallback(s->mBccScript, symbolLookup, s) != 0) {
-        LOGE("bcc: FAILS to register symbol callback");
-        return false;
-    }
+    rsc->mHal.funcs.script.scriptInit(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0, symbolLookup);
 
-    if (bccReadBC(s->mBccScript,
-                  resName,
-                  s->mEnviroment.mScriptText,
-                  s->mEnviroment.mScriptTextLength, 0) != 0) {
-        LOGE("bcc: FAILS to read bitcode");
-        return false;
-    }
+    mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
+    mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
+    mEnviroment.mFragmentStore.set(rsc->getDefaultProgramStore());
+    mEnviroment.mRaster.set(rsc->getDefaultProgramRaster());
 
-#if 1
-    if (bccLinkFile(s->mBccScript, "/system/lib/libclcore.bc", 0) != 0) {
-        LOGE("bcc: FAILS to link bitcode");
-        return false;
-    }
-#endif
-    char *cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
+    rsc->mHal.funcs.script.invokeInit(rsc, this);
 
-    if (bccPrepareExecutable(s->mBccScript, cachePath, 0) != 0) {
-        LOGE("bcc: FAILS to prepare executable");
-        return false;
-    }
-
-    free(cachePath);
-
-    s->mProgram.mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(s->mBccScript, "root"));
-    s->mProgram.mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(s->mBccScript, "init"));
-
-    if (s->mProgram.mInit) {
-        s->mProgram.mInit();
-    }
-
-    s->mEnviroment.mInvokeFunctionCount = bccGetExportFuncCount(s->mBccScript);
-    if (s->mEnviroment.mInvokeFunctionCount <= 0)
-        s->mEnviroment.mInvokeFunctions = NULL;
-    else {
-        s->mEnviroment.mInvokeFunctions = (Script::InvokeFunc_t*) calloc(s->mEnviroment.mInvokeFunctionCount, sizeof(Script::InvokeFunc_t));
-        bccGetExportFuncList(s->mBccScript, s->mEnviroment.mInvokeFunctionCount, (void **) s->mEnviroment.mInvokeFunctions);
-    }
-
-    s->mEnviroment.mFieldCount = bccGetExportVarCount(s->mBccScript);
-    if (s->mEnviroment.mFieldCount <= 0)
-        s->mEnviroment.mFieldAddress = NULL;
-    else {
-        s->mEnviroment.mFieldAddress = (void **) calloc(s->mEnviroment.mFieldCount, sizeof(void *));
-        bccGetExportVarList(s->mBccScript, s->mEnviroment.mFieldCount, (void **) s->mEnviroment.mFieldAddress);
-        s->initSlots();
-    }
-
-    s->mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
-    s->mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());
-    s->mEnviroment.mFragmentStore.set(rsc->getDefaultProgramStore());
-    s->mEnviroment.mRaster.set(rsc->getDefaultProgramRaster());
-
-    const static int pragmaMax = 16;
-    size_t pragmaCount = bccGetPragmaCount(s->mBccScript);
-    char const *keys[pragmaMax];
-    char const *values[pragmaMax];
-    bccGetPragmaList(s->mBccScript, pragmaMax, keys, values);
-
-    for (size_t i=0; i < pragmaCount; ++i) {
+    for (size_t i=0; i < mHal.info.exportedPragmaCount; ++i) {
+        const char * key = mHal.info.exportedPragmaKeyList[i];
+        const char * value = mHal.info.exportedPragmaValueList[i];
         //LOGE("pragma %s %s", keys[i], values[i]);
-        if (!strcmp(keys[i], "version")) {
-            if (!strcmp(values[i], "1")) {
+        if (!strcmp(key, "version")) {
+            if (!strcmp(value, "1")) {
                 continue;
             }
-            LOGE("Invalid version pragma value: %s\n", values[i]);
+            LOGE("Invalid version pragma value: %s\n", value);
             return false;
         }
 
-        if (!strcmp(keys[i], "stateVertex")) {
-            if (!strcmp(values[i], "default")) {
+        if (!strcmp(key, "stateVertex")) {
+            if (!strcmp(value, "default")) {
                 continue;
             }
-            if (!strcmp(values[i], "parent")) {
-                s->mEnviroment.mVertex.clear();
+            if (!strcmp(value, "parent")) {
+                mEnviroment.mVertex.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateVertex", values[i]);
+            LOGE("Unrecognized value %s passed to stateVertex", value);
             return false;
         }
 
-        if (!strcmp(keys[i], "stateRaster")) {
-            if (!strcmp(values[i], "default")) {
+        if (!strcmp(key, "stateRaster")) {
+            if (!strcmp(value, "default")) {
                 continue;
             }
-            if (!strcmp(values[i], "parent")) {
-                s->mEnviroment.mRaster.clear();
+            if (!strcmp(value, "parent")) {
+                mEnviroment.mRaster.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateRaster", values[i]);
+            LOGE("Unrecognized value %s passed to stateRaster", value);
             return false;
         }
 
-        if (!strcmp(keys[i], "stateFragment")) {
-            if (!strcmp(values[i], "default")) {
+        if (!strcmp(key, "stateFragment")) {
+            if (!strcmp(value, "default")) {
                 continue;
             }
-            if (!strcmp(values[i], "parent")) {
-                s->mEnviroment.mFragment.clear();
+            if (!strcmp(value, "parent")) {
+                mEnviroment.mFragment.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateFragment", values[i]);
+            LOGE("Unrecognized value %s passed to stateFragment", value);
             return false;
         }
 
-        if (!strcmp(keys[i], "stateStore")) {
-            if (!strcmp(values[i], "default")) {
+        if (!strcmp(key, "stateStore")) {
+            if (!strcmp(value, "default")) {
                 continue;
             }
-            if (!strcmp(values[i], "parent")) {
-                s->mEnviroment.mFragmentStore.clear();
+            if (!strcmp(value, "parent")) {
+                mEnviroment.mFragmentStore.clear();
                 continue;
             }
-            LOGE("Unrecognized value %s passed to stateStore", values[i]);
+            LOGE("Unrecognized value %s passed to stateStore", value);
             return false;
         }
     }
 
-    size_t objectSlotCount = bccGetObjectSlotCount(s->mBccScript);
-    uint32_t *objectSlots = NULL;
-    if (objectSlotCount) {
-        objectSlots = new uint32_t[objectSlotCount];
-        bccGetObjectSlotList(s->mBccScript, objectSlotCount, objectSlots);
-        s->mProgram.mObjectSlotList = objectSlots;
-        s->mProgram.mObjectSlotCount = objectSlotCount;
-    }
+    mSlots = new ObjectBaseRef<Allocation>[mHal.info.exportedVariableCount];
+    mTypes = new ObjectBaseRef<const Type>[mHal.info.exportedVariableCount];
 
     return true;
 }
@@ -610,39 +462,19 @@ bool ScriptCState::runCompiler(Context *rsc,
 namespace android {
 namespace renderscript {
 
-void rsi_ScriptCBegin(Context * rsc) {
-}
-
-void rsi_ScriptCSetText(Context *rsc, const char *text, uint32_t len) {
-    ScriptCState *ss = &rsc->mScriptC;
-
-    char *t = (char *)malloc(len + 1);
-    memcpy(t, text, len);
-    t[len] = 0;
-    ss->mScriptText = t;
-    ss->mScriptLen = len;
-}
-
-
 RsScript rsi_ScriptCCreate(Context *rsc,
-                           const char *packageName /* deprecated */,
-                           const char *resName,
-                           const char *cacheDir)
+                           const char *resName, const char *cacheDir,
+                           const char *text, uint32_t len)
 {
-    ScriptCState *ss = &rsc->mScriptC;
-
     ScriptC *s = new ScriptC(rsc);
-    s->mEnviroment.mScriptText = ss->mScriptText;
-    s->mEnviroment.mScriptTextLength = ss->mScriptLen;
-    ss->mScriptText = NULL;
-    ss->mScriptLen = 0;
-    s->incUserRef();
 
-    if (!ss->runCompiler(rsc, s, resName, cacheDir)) {
+    if (!s->runCompiler(rsc, resName, cacheDir, (uint8_t *)text, len)) {
         // Error during compile, destroy s and return null.
         delete s;
         return NULL;
     }
+
+    s->incUserRef();
     return s;
 }
 

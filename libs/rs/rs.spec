@@ -181,10 +181,6 @@ ScriptBindAllocation {
 	}
 
 
-ScriptCBegin {
-	}
-
-
 ScriptSetTimeZone {
 	param RsScript s
 	param const char * timeZone
@@ -246,15 +242,11 @@ ScriptSetVarV {
 	}
 
 
-ScriptCSetText {
-	param const char * text
-	param uint32_t length
-	}
-
 ScriptCCreate {
-        param const char * packageName
         param const char * resName
         param const char * cacheDir
+	param const char * text
+	param uint32_t length
 	ret RsScript
 	}
 

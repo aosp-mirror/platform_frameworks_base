@@ -141,90 +141,74 @@ static float SC_getDt() {
 //
 //////////////////////////////////////////////////////////////////////////////
 
-static uint32_t SC_allocGetDimX(RsAllocation va) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static uint32_t SC_allocGetDimX(Allocation *a) {
     CHECK_OBJ(a);
-    //LOGE("SC_allocGetDimX a=%p  type=%p", a, a->getType());
-    return a->getType()->getDimX();
+    return a->mHal.state.dimensionX;
 }
 
-static uint32_t SC_allocGetDimY(RsAllocation va) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static uint32_t SC_allocGetDimY(Allocation *a) {
     CHECK_OBJ(a);
-    return a->getType()->getDimY();
+    return a->mHal.state.dimensionY;
 }
 
-static uint32_t SC_allocGetDimZ(RsAllocation va) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static uint32_t SC_allocGetDimZ(Allocation *a) {
     CHECK_OBJ(a);
-    return a->getType()->getDimZ();
+    return a->mHal.state.dimensionZ;
 }
 
-static uint32_t SC_allocGetDimLOD(RsAllocation va) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static uint32_t SC_allocGetDimLOD(Allocation *a) {
     CHECK_OBJ(a);
-    return a->getType()->getDimLOD();
+    return a->mHal.state.hasMipmaps;
 }
 
-static uint32_t SC_allocGetDimFaces(RsAllocation va) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static uint32_t SC_allocGetDimFaces(Allocation *a) {
     CHECK_OBJ(a);
-    return a->getType()->getDimFaces();
+    return a->mHal.state.hasFaces;
 }
 
-static const void * SC_getElementAtX(RsAllocation va, uint32_t x) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static const void * SC_getElementAtX(Allocation *a, uint32_t x) {
     CHECK_OBJ(a);
-    const Type *t = a->getType();
-    CHECK_OBJ(t);
     const uint8_t *p = (const uint8_t *)a->getPtr();
-    return &p[t->getElementSizeBytes() * x];
+    return &p[a->mHal.state.elementSizeBytes * x];
 }
 
-static const void * SC_getElementAtXY(RsAllocation va, uint32_t x, uint32_t y) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static const void * SC_getElementAtXY(Allocation *a, uint32_t x, uint32_t y) {
     CHECK_OBJ(a);
-    const Type *t = a->getType();
-    CHECK_OBJ(t);
     const uint8_t *p = (const uint8_t *)a->getPtr();
-    return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
+    return &p[a->mHal.state.elementSizeBytes * (x + y * a->mHal.state.dimensionX)];
 }
 
-static const void * SC_getElementAtXYZ(RsAllocation va, uint32_t x, uint32_t y, uint32_t z) {
-    const Allocation *a = static_cast<const Allocation *>(va);
+static const void * SC_getElementAtXYZ(Allocation *a, uint32_t x, uint32_t y, uint32_t z) {
     CHECK_OBJ(a);
-    const Type *t = a->getType();
-    CHECK_OBJ(t);
     const uint8_t *p = (const uint8_t *)a->getPtr();
-    return &p[t->getElementSizeBytes() * (x + y*t->getDimX())];
+    return &p[a->mHal.state.elementSizeBytes * (x + y * a->mHal.state.dimensionX +
+              z * a->mHal.state.dimensionX * a->mHal.state.dimensionY)];
 }
 
-static void SC_setObject(void **vdst, void * vsrc) {
-    //LOGE("SC_setObject  %p,%p  %p", vdst, *vdst, vsrc);
-    if (vsrc) {
-        CHECK_OBJ(vsrc);
-        static_cast<ObjectBase *>(vsrc)->incSysRef();
+void android::renderscript::rsiSetObject(ObjectBase **dst, ObjectBase * src) {
+    //LOGE("rsiSetObject  %p,%p  %p", vdst, *vdst, vsrc);
+    if (src) {
+        CHECK_OBJ(src);
+        src->incSysRef();
     }
-    if (vdst[0]) {
-        CHECK_OBJ(vdst[0]);
-        static_cast<ObjectBase *>(vdst[0])->decSysRef();
+    if (dst[0]) {
+        CHECK_OBJ(dst[0]);
+        dst[0]->decSysRef();
     }
-    *vdst = vsrc;
-    //LOGE("SC_setObject *");
+    *dst = src;
 }
 
-static void SC_clearObject(void **vdst) {
-    //LOGE("SC_clearObject  %p,%p", vdst, *vdst);
-    if (vdst[0]) {
-        CHECK_OBJ(vdst[0]);
-        static_cast<ObjectBase *>(vdst[0])->decSysRef();
+void android::renderscript::rsiClearObject(ObjectBase **dst) {
+    //LOGE("rsiClearObject  %p,%p", vdst, *vdst);
+    if (dst[0]) {
+        CHECK_OBJ(dst[0]);
+        dst[0]->decSysRef();
     }
-    *vdst = NULL;
-    //LOGE("SC_clearObject *");
+    *dst = NULL;
 }
 
-static bool SC_isObject(RsAllocation vsrc) {
-    return vsrc != NULL;
+bool android::renderscript::rsiIsObject(const ObjectBase *src) {
+    return src != NULL;
 }
 
 static void SC_debugF(const char *s, float f) {
@@ -873,49 +857,49 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY, true },
     { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ, true },
 
-    { "_Z11rsSetObjectP10rs_elementS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP10rs_element", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject10rs_element", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP10rs_elementS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP10rs_element", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject10rs_element", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP7rs_typeS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP7rs_type", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject7rs_type", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP7rs_typeS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP7rs_type", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject7rs_type", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP13rs_allocationS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP13rs_allocation", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject13rs_allocation", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP13rs_allocationS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP13rs_allocation", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject13rs_allocation", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP10rs_samplerS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP10rs_sampler", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject10rs_sampler", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP10rs_samplerS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP10rs_sampler", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject10rs_sampler", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP9rs_scriptS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP9rs_script", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject9rs_script", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP9rs_scriptS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP9rs_script", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject9rs_script", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP7rs_meshS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP7rs_mesh", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject7rs_mesh", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP7rs_meshS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP7rs_mesh", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject7rs_mesh", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP19rs_program_fragmentS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP19rs_program_fragment", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject19rs_program_fragment", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP19rs_program_fragmentS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP19rs_program_fragment", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject19rs_program_fragment", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP17rs_program_vertexS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP17rs_program_vertex", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject17rs_program_vertex", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP17rs_program_vertexS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP17rs_program_vertex", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject17rs_program_vertex", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP17rs_program_rasterS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP17rs_program_raster", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject17rs_program_raster", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP17rs_program_rasterS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP17rs_program_raster", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject17rs_program_raster", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP16rs_program_storeS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP16rs_program_store", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject16rs_program_store", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP16rs_program_storeS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP16rs_program_store", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject16rs_program_store", (void *)&rsiIsObject, true },
 
-    { "_Z11rsSetObjectP7rs_fontS_", (void *)&SC_setObject, true },
-    { "_Z13rsClearObjectP7rs_font", (void *)&SC_clearObject, true },
-    { "_Z10rsIsObject7rs_font", (void *)&SC_isObject, true },
+    { "_Z11rsSetObjectP7rs_fontS_", (void *)&rsiSetObject, true },
+    { "_Z13rsClearObjectP7rs_font", (void *)&rsiClearObject, true },
+    { "_Z10rsIsObject7rs_font", (void *)&rsiIsObject, true },
 
 
     { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_allocationMarkDirty, true },
@@ -1000,7 +984,7 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z17rsMatrixTransposeP12rs_matrix4x4", (void *)&SC_MatrixTranspose_2x2, true },
 
     { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach, false },
-    //{ "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach2, true },
+    //{ "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach2, false },
 
 ////////////////////////////////////////////////////////////////////
 
@@ -1021,3 +1005,7 @@ const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbol(const char *sym) 
     }
     return NULL;
 }
+
+
+
+
