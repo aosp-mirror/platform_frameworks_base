@@ -1362,7 +1362,7 @@ public class WebView extends AbsoluteLayout
     /**
      * Return the amount of the titlebarview (if any) that is visible
      *
-     * @deprecated
+     * @deprecated This method is now obsolete.
      */
     public int getVisibleTitleHeight() {
         // need to restrict mScrollY due to over scroll
