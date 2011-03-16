@@ -69,12 +69,14 @@
     <skip />
     <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (1896291816269399727) -->
+    <!-- no translation found for usb_accessory_uri_prompt (3536509438459769165) -->
     <skip />
     <!-- no translation found for title_usb_accessory (4966265263465181372) -->
     <skip />
     <!-- no translation found for label_view (6304565553218192990) -->
     <skip />
-    <!-- no translation found for label_ignore (5473234388203739668) -->
+    <!-- no translation found for always_use_device (1450287437017315906) -->
+    <skip />
+    <!-- no translation found for always_use_accessory (1210954576979621596) -->
     <skip />
 </resources>

@@ -34,8 +34,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"การตั้งค่า"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"โหมดใช้งานบนเครื่องบิน"</string>
-    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
-    <skip />
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ปิดเสียง"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"อัตโนมัติ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"การแจ้งเตือน"</string>
@@ -53,12 +52,14 @@
     <skip />
     <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (1896291816269399727) -->
+    <!-- no translation found for usb_accessory_uri_prompt (3536509438459769165) -->
     <skip />
     <!-- no translation found for title_usb_accessory (4966265263465181372) -->
     <skip />
     <!-- no translation found for label_view (6304565553218192990) -->
     <skip />
-    <!-- no translation found for label_ignore (5473234388203739668) -->
+    <!-- no translation found for always_use_device (1450287437017315906) -->
+    <skip />
+    <!-- no translation found for always_use_accessory (1210954576979621596) -->
     <skip />
 </resources>
