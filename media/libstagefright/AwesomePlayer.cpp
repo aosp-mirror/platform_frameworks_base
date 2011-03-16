@@ -750,8 +750,6 @@ status_t AwesomePlayer::play_l() {
     mFlags |= PLAYING;
     mFlags |= FIRST_FRAME;
 
-    bool deferredAudioSeek = false;
-
     if (mDecryptHandle != NULL) {
         int64_t position;
         getPosition(&position);
@@ -767,10 +765,11 @@ status_t AwesomePlayer::play_l() {
 
                 mTimeSource = mAudioPlayer;
 
-                deferredAudioSeek = true;
-
-                mWatchForAudioSeekComplete = false;
-                mWatchForAudioEOS = true;
+                // If there was a seek request before we ever started,
+                // honor the request now.
+                // Make sure to do this before starting the audio player
+                // to avoid a race condition.
+                seekAudioIfNecessary_l();
             }
         }
 
@@ -806,12 +805,6 @@ status_t AwesomePlayer::play_l() {
         if (mAudioSource != NULL && mVideoSource != NULL) {
             postVideoLagEvent_l();
         }
-    }
-
-    if (deferredAudioSeek) {
-        // If there was a seek request while we were paused
-        // and we're just starting up again, honor the request now.
-        seekAudioIfNecessary_l();
     }
 
     if (mFlags & AT_EOS) {
