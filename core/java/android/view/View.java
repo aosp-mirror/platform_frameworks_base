@@ -5241,6 +5241,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         final int viewFlags = mViewFlags;
 
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
+            if (event.getAction() == MotionEvent.ACTION_UP && (mPrivateFlags & PRESSED) != 0) {
+                mPrivateFlags &= ~PRESSED;
+                refreshDrawableState();
+            }
             // A disabled view that is clickable still consumes the touch
             // events, it just doesn't respond to them.
             return (((viewFlags & CLICKABLE) == CLICKABLE ||
