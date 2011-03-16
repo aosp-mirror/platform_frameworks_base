@@ -566,6 +566,19 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_BUTTON_15       = 202;
     /** Key code constant: Generic Game Pad Button #16.*/
     public static final int KEYCODE_BUTTON_16       = 203;
+    /** Key code constant: Language Switch key.
+     * Toggles the current input language such as switching between English and Japanese on
+     * a QWERTY keyboard.  On some devices, the same function may be performed by
+     * pressing Shift+Spacebar. */
+    public static final int KEYCODE_LANGUAGE_SWITCH = 204;
+    /** Key code constant: Manner Mode key.
+     * Toggles silent or vibrate mode on and off to make the device behave more politely
+     * in certain settings such as on a crowded train.  On some devices, the key may only
+     * operate when long-pressed. */
+    public static final int KEYCODE_MANNER_MODE     = 205;
+    /** Key code constant: 3D Mode key.
+     * Toggles the display between 2D and 3D mode. */
+    public static final int KEYCODE_3D_MODE         = 206;
 
     private static final int LAST_KEYCODE           = KEYCODE_BUTTON_16;
 
@@ -791,6 +804,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_BUTTON_14, "KEYCODE_BUTTON_14");
         names.append(KEYCODE_BUTTON_15, "KEYCODE_BUTTON_15");
         names.append(KEYCODE_BUTTON_16, "KEYCODE_BUTTON_16");
+        names.append(KEYCODE_LANGUAGE_SWITCH, "KEYCODE_LANGUAGE_SWITCH");
+        names.append(KEYCODE_MANNER_MODE, "KEYCODE_MANNER_MODE");
+        names.append(KEYCODE_3D_MODE, "KEYCODE_3D_MODE");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
