@@ -166,7 +166,6 @@ public final class MediaStore {
      * If the EXTRA_OUTPUT is present, then the full-sized image will be written to the Uri
      * value of EXTRA_OUTPUT.
      * @see #EXTRA_OUTPUT
-     * @see #EXTRA_VIDEO_QUALITY
      */
     public final static String ACTION_IMAGE_CAPTURE = "android.media.action.IMAGE_CAPTURE";
 
@@ -181,6 +180,9 @@ public final class MediaStore {
      * written to the standard location for videos, and the Uri of that location will be
      * returned in the data field of the Uri.
      * @see #EXTRA_OUTPUT
+     * @see #EXTRA_VIDEO_QUALITY
+     * @see #EXTRA_SIZE_LIMIT
+     * @see #EXTRA_DURATION_LIMIT
      */
     public final static String ACTION_VIDEO_CAPTURE = "android.media.action.VIDEO_CAPTURE";
 
