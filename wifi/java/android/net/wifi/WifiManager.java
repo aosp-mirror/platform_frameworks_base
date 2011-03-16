@@ -1193,16 +1193,19 @@ public class WifiManager {
      * Acquiring a WifiLock will keep the radio on until the lock is released.  Multiple
      * applications may hold WifiLocks, and the radio will only be allowed to turn off when no
      * WifiLocks are held in any application.
-     *
+     * <p>
      * Before using a WifiLock, consider carefully if your application requires Wi-Fi access, or
      * could function over a mobile network, if available.  A program that needs to download large
      * files should hold a WifiLock to ensure that the download will complete, but a program whose
      * network usage is occasional or low-bandwidth should not hold a WifiLock to avoid adversely
      * affecting battery life.
-     *
+     * <p>
      * Note that WifiLocks cannot override the user-level "Wi-Fi Enabled" setting, nor Airplane
      * Mode.  They simply keep the radio from turning off when Wi-Fi is already on but the device
      * is idle.
+     * <p>
+     * Any application using a WifiLock must request the {@code android.permission.WAKE_LOCK}
+     * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
      */
     public class WifiLock {
         private String mTag;
