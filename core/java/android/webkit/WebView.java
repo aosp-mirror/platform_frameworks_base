@@ -1359,10 +1359,10 @@ public class WebView extends AbsoluteLayout
         return mTitleBar != null ? mTitleBar.getHeight() : 0;
     }
 
-    /*
+    /**
      * Return the amount of the titlebarview (if any) that is visible
      *
-     * @hide
+     * @deprecated
      */
     public int getVisibleTitleHeight() {
         // need to restrict mScrollY due to over scroll
