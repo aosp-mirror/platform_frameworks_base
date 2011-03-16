@@ -361,10 +361,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"Contrôle de la lampe de poche"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet à l\'application de contrôler la lampe de poche."</string>
-    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
-    <skip />
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"gérer les préférences et les autorisations des périphériques USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Permet à l\'application de gérer les préférences et les autorisations des périphériques USB."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"mettre en œuvre le protocole MTP"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permet l\'accès au pilote MTP du noyau à des fins de mise en œuvre du protocole USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
@@ -816,8 +814,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Effacer les paramètres par défaut dans les Paramètres de page d\'accueil &gt; Applications &gt; Gérer les applications."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Sélectionner une action"</string>
-    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
-    <skip />
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Sélectionnez une application pour le périphérique USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Aucune application ne peut effectuer cette action."</string>
     <string name="aerr_title" msgid="653922989522758100">"Désolé !"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Fermeture soudaine de l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>). Merci de réessayer."</string>
