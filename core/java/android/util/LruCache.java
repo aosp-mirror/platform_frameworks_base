@@ -304,7 +304,8 @@ public class LruCache<K, V> {
     }
 
     /**
-     * Returns the number of times {@link #get} returned a value.
+     * Returns the number of times {@link #get} returned a value that was
+     * already present in the cache.
      */
     public synchronized final int hitCount() {
         return hitCount;
