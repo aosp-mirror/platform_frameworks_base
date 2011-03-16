@@ -97,7 +97,8 @@ import android.util.Log;
  *     </tbody>
  * </table>
  * 
- * 
+ * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
+ * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
  */
 public class PowerManager
 {
@@ -188,8 +189,11 @@ public class PowerManager
     
     /**
      * Class lets you say that you need to have the device on.
-     *
-     * <p>Call release when you are done and don't need the lock anymore.
+     * <p>
+     * Call release when you are done and don't need the lock anymore.
+     * <p>
+     * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
+     * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
      */
     public class WakeLock
     {
