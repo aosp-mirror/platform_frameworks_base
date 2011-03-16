@@ -92,7 +92,11 @@ Region* LayerRenderer::getRegion() {
 
 void LayerRenderer::generateMesh() {
 #if RENDER_LAYERS_AS_REGIONS
+#if RENDER_LAYERS_RECT_AS_RECT
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
+#else
+    if (mLayer->region.isEmpty()) {
+#endif
         if (mLayer->mesh) {
             delete mLayer->mesh;
             delete mLayer->meshIndices;
