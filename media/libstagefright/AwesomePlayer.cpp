@@ -1119,7 +1119,6 @@ void AwesomePlayer::seekAudioIfNecessary_l() {
 
         mWatchForAudioSeekComplete = true;
         mWatchForAudioEOS = true;
-        mSeekNotificationSent = false;
 
         if (mDecryptHandle != NULL) {
             mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
@@ -1244,11 +1243,11 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
         // If we're playing video only, report seek complete now,
         // otherwise audio player will notify us later.
         notifyListener_l(MEDIA_SEEK_COMPLETE);
+        mSeekNotificationSent = true;
     }
 
     mFlags |= FIRST_FRAME;
     mSeeking = NO_SEEK;
-    mSeekNotificationSent = false;
 
     if (mDecryptHandle != NULL) {
         mDrmManagerClient->setPlaybackStatus(mDecryptHandle,
