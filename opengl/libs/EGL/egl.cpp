@@ -2119,14 +2119,15 @@ EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
     if (!validate_display_context(dpy, ctx))
         return EGL_FALSE;
 
+    EGLBoolean result = EGL_FALSE;
     egl_context_t * const c = get_context(ctx);
-
     if (c->cnx->egl.eglDestroySyncKHR) {
-        return c->cnx->egl.eglDestroySyncKHR(
+        result = c->cnx->egl.eglDestroySyncKHR(
                 dp->disp[c->impl].dpy, syncObject->sync);
+        if (result)
+            _s.terminate();
     }
-
-    return EGL_FALSE;
+    return result;
 }
 
 EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
