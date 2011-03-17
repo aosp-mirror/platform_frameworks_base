@@ -65,8 +65,9 @@ void DbgContext::Fetch(const unsigned index, std::string * const data) const
 
 void DbgContext::glUseProgram(GLuint program)
 {
-    assert(GL_NO_ERROR == hooks->gl.glGetError());
-
+    while (GLenum error = hooks->gl.glGetError())
+        LOGD("DbgContext::glUseProgram: before glGetError() = 0x%.4X", error);
+        
     this->program = program;
 
     GLint activeAttributes = 0;
@@ -106,6 +107,9 @@ void DbgContext::glUseProgram(GLuint program)
             maxAttrib = slot;
     }
     delete name;
+    
+    while (GLenum error = hooks->gl.glGetError())
+        LOGD("DbgContext::glUseProgram: after glGetError() = 0x%.4X", error);
 }
 
 static bool HasNonVBOAttribs(const DbgContext * const ctx)

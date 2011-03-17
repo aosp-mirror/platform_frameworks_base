@@ -38,7 +38,7 @@ static void Die(const char * msg)
     exit(1);
 }
 
-void StartDebugServer()
+void StartDebugServer(unsigned short port)
 {
     LOGD("GLESv2_dbg: StartDebugServer");
     if (serverSock >= 0)
@@ -53,8 +53,8 @@ void StartDebugServer()
     }
     /* Construct the server sockaddr_in structure */
     server.sin_family = AF_INET;                  /* Internet/IP */
-    server.sin_addr.s_addr = htonl(INADDR_ANY);   /* Incoming addr */
-    server.sin_port = htons(5039);       /* server port */
+    server.sin_addr.s_addr = htonl(INADDR_LOOPBACK);   /* Incoming addr */
+    server.sin_port = htons(port);       /* server port */
 
     /* Bind the server socket */
     socklen_t sizeofSockaddr_in = sizeof(sockaddr_in);
@@ -79,13 +79,6 @@ void StartDebugServer()
 
     LOGD("Client connected: %s\n", inet_ntoa(client.sin_addr));
 //    fcntl(clientSock, F_SETFL, O_NONBLOCK);
-
-    glesv2debugger::Message msg, cmd;
-    msg.set_context_id(0);
-    msg.set_function(glesv2debugger::Message_Function_ACK);
-    msg.set_type(glesv2debugger::Message_Type_Response);
-    msg.set_expect_response(false);
-    Send(msg, cmd);
 }
 
 void StopDebugServer()
@@ -130,6 +123,27 @@ void Receive(glesv2debugger::Message & cmd)
     cmd.ParseFromArray(buffer, len);
 }
 
+bool TryReceive(glesv2debugger::Message & cmd)
+{
+    fd_set readSet;
+    FD_ZERO(&readSet);
+    FD_SET(clientSock, &readSet);
+    timeval timeout;
+    timeout.tv_sec = timeout.tv_usec = 0;
+
+    int rc = select(clientSock + 1, &readSet, NULL, NULL, &timeout);
+    if (rc < 0)
+        Die("failed to select clientSock");
+
+    bool received = false;
+    if (FD_ISSET(clientSock, &readSet)) {
+        LOGD("TryReceive: avaiable for read");
+        Receive(cmd);
+        return true;
+    }
+    return false;
+}
+
 float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -155,12 +169,18 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
         Die("Failed to send message");
     }
 
+    // try to receive commands even though not expecting response,
+    // since client can send SETPROP commands anytime
     if (!msg.expect_response()) {
-        pthread_mutex_unlock(&mutex);
-        return t;
-    }
-
-    Receive(cmd);
+        if (TryReceive(cmd)) {
+            LOGD("Send: TryReceived");
+            if (glesv2debugger::Message_Function_SETPROP == cmd.function())
+                LOGD("Send: received SETPROP");
+            else
+                LOGD("Send: received something else");
+        }
+    } else
+        Receive(cmd);
 
     //LOGD("Message sent tid=%lu len=%d", pthread_self(), str.length());
     pthread_mutex_unlock(&mutex);
@@ -193,24 +213,26 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
     msg.set_expect_response(expectResponse);
     msg.set_function(function);
-    Send(msg, cmd);
     if (!expectResponse)
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    Send(msg, cmd);
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
         switch (cmd.function()) {
         case glesv2debugger::Message_Function_CONTINUE:
             ret = functionCall(&dbg->hooks->gl, msg);
+            while (GLenum error = dbg->hooks->gl.glGetError())
+                LOGD("Function=%u glGetError() = 0x%.4X", function, error);
             if (!msg.has_time()) // some has output data copy, so time inside call
                 msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
             msg.set_context_id(reinterpret_cast<int>(dbg));
             msg.set_function(function);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            Send(msg, cmd);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
+            Send(msg, cmd);
             break;
         case glesv2debugger::Message_Function_SKIP:
             return const_cast<int *>(ret);

@@ -98,9 +98,6 @@ message Message
     output.write("        SETPROP = %d;\n" % (i))
     i += 1
     
-    output.write("        CAPTURE = %d;\n" % (i))
-    i += 1
-
     output.write("""    }
     required Function function = 2 [default = NEG]; // type/function of message
     enum Type

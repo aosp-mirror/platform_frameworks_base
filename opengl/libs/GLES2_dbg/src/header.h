@@ -113,7 +113,7 @@ struct FunctionCall {
     virtual ~FunctionCall() {}
 };
 
-// move these into DbgContext
+// move these into DbgContext as static
 extern bool capture;
 extern int timeMode; // SYSTEM_TIME_
 
@@ -121,8 +121,10 @@ extern int clientSock, serverSock;
 
 unsigned GetBytesPerPixel(const GLenum format, const GLenum type);
 
+// every Debug_gl* function calls this to send message to client and possibly receive commands
 int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
                   const bool expectResponse, const glesv2debugger::Message_Function function);
+
 void Receive(glesv2debugger::Message & cmd);
 float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd);
 void SetProp(const glesv2debugger::Message & cmd);

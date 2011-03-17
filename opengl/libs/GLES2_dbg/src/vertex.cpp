@@ -41,10 +41,10 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
     msg.set_arg6(reinterpret_cast<int>(pixels));
     //void * data = NULL;
     //unsigned encodedSize = 0;
-    Send(msg, cmd);
-    float t = 0;
     if (!expectResponse)
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    Send(msg, cmd);
+    float t = 0;
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
@@ -61,6 +61,8 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             //msg.set_data(data, encodedSize);
             //free(data);
             c0 = systemTime(timeMode);
+            if (!expectResponse)
+                cmd.set_function(glesv2debugger::Message_Function_SKIP);
             t = Send(msg, cmd);
             msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
             msg.set_clock(t);
@@ -69,11 +71,13 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             msg.set_expect_response(false);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             //Send(msg, cmd);
-            if (!expectResponse)
-                cmd.set_function(glesv2debugger::Message_Function_SKIP);
             break;
         case glesv2debugger::Message_Function_SKIP:
             return;
+        case glesv2debugger::Message_Function_SETPROP:
+            SetProp(cmd);
+            Receive(cmd);
+            break;
         default:
             assert(0); //GenerateCall(msg, cmd);
             break;
@@ -104,9 +108,9 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
     void * pixels = NULL;
     GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
-    Send(msg, cmd);
     if (!expectResponse)
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    Send(msg, cmd);
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
@@ -118,25 +122,26 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             msg.set_function(glesv2debugger::Message_Function_glDrawArrays);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            Send(msg, cmd);
-            if (capture)
-                cmd.set_function(glesv2debugger::Message_Function_CAPTURE);
-            else if (!expectResponse)
+            if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
+            Send(msg, cmd);
+            if (capture) {
+                dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
+                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
+                pixels = malloc(viewport[2] * viewport[3] * 4);
+                Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+                                   readFormat, readType, pixels);
+                free(pixels);
+            }
             break;
         case glesv2debugger::Message_Function_SKIP:
             return;
-        case glesv2debugger::Message_Function_CAPTURE:
-            dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
-            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
-            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-            LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
-                 viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
-            pixels = malloc(viewport[2] * viewport[3] * 4);
-            Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                               readFormat, readType, pixels);
-            free(pixels);
-            cmd.set_function(glesv2debugger::Message_Function_SKIP);
+        case glesv2debugger::Message_Function_SETPROP:
+            SetProp(cmd);
+            Receive(cmd);
             break;
         default:
             assert(0); //GenerateCall(msg, cmd);
@@ -189,9 +194,9 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     void * pixels = NULL;
     GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
-    Send(msg, cmd);
     if (!expectResponse)
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    Send(msg, cmd);
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
@@ -203,25 +208,26 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             msg.set_function(glesv2debugger::Message_Function_glDrawElements);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            Send(msg, cmd);
-            if (capture)
-                cmd.set_function(glesv2debugger::Message_Function_CAPTURE);
-            else if (!expectResponse)
+            if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
+            Send(msg, cmd);
+            if (capture) {
+                dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
+                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
+                pixels = malloc(viewport[2] * viewport[3] * 4);
+                Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+                                   readFormat, readType, pixels);
+                free(pixels);
+            }
             break;
         case glesv2debugger::Message_Function_SKIP:
             return;
-        case glesv2debugger::Message_Function_CAPTURE:
-            dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
-            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
-            dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-            LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
-                 viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
-            pixels = malloc(viewport[2] * viewport[3] * 4);
-            Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                               readFormat, readType, pixels);
-            free(pixels);
-            cmd.set_function(glesv2debugger::Message_Function_SKIP);
+        case glesv2debugger::Message_Function_SETPROP:
+            SetProp(cmd);
+            Receive(cmd);
             break;
         default:
             assert(0); //GenerateCall(msg, cmd);

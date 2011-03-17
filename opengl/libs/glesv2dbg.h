@@ -24,7 +24,7 @@ namespace android
     DbgContext * CreateDbgContext(const unsigned version, const gl_hooks_t * const hooks);
     void DestroyDbgContext(DbgContext * const dbg);
     
-    void StartDebugServer(); // create and bind socket if haven't already
+    void StartDebugServer(unsigned short port); // create and bind socket if haven't already
     void StopDebugServer(); // close socket if open
     
 }; // namespace android

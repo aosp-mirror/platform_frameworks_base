@@ -340,7 +340,10 @@ static void initEglTraceLevel() {
     }
     
     if (gEGLDebugLevel > 0)
-        StartDebugServer();
+    {
+        property_get("debug.egl.debug_port", value, "5039");
+        StartDebugServer(atoi(value));
+    }
 }
 
 static void setGLHooksThreadSpecific(gl_hooks_t const *value) {
@@ -350,7 +353,6 @@ static void setGLHooksThreadSpecific(gl_hooks_t const *value) {
     } else if (gEGLDebugLevel > 0 && value != &gHooksNoContext) {
         setGlTraceThreadSpecific(value);
         setGlThreadSpecific(&gHooksDebug);
-        LOGD("\n* setGLHooksThreadSpecific gHooksDebug");
     } else {
         setGlThreadSpecific(value);
     }
