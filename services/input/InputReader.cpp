@@ -231,7 +231,7 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
         const sp<InputReaderPolicyInterface>& policy,
         const sp<InputDispatcherInterface>& dispatcher) :
         mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher),
-        mGlobalMetaState(0), mDisableVirtualKeysTimeout(-1) {
+        mGlobalMetaState(0), mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX) {
     configureExcludedDevices();
     updateGlobalMetaState();
     updateInputConfiguration();
@@ -244,16 +244,28 @@ InputReader::~InputReader() {
 }
 
 void InputReader::loopOnce() {
+    int32_t timeoutMillis = -1;
+    if (mNextTimeout != LLONG_MAX) {
+        nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+        timeoutMillis = toMillisecondTimeoutDelay(now, mNextTimeout);
+    }
+
     RawEvent rawEvent;
-    mEventHub->getEvent(& rawEvent);
-
+    if (mEventHub->getEvent(timeoutMillis, &rawEvent)) {
 #if DEBUG_RAW_EVENTS
-    LOGD("Input event: device=%d type=0x%04x scancode=0x%04x keycode=0x%04x value=0x%04x",
-            rawEvent.deviceId, rawEvent.type, rawEvent.scanCode, rawEvent.keyCode,
-            rawEvent.value);
+        LOGD("Input event: device=%d type=0x%04x scancode=0x%04x keycode=0x%04x value=0x%04x",
+                rawEvent.deviceId, rawEvent.type, rawEvent.scanCode, rawEvent.keyCode,
+                rawEvent.value);
 #endif
-
-    process(& rawEvent);
+        process(&rawEvent);
+    } else {
+        nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+#if DEBUG_RAW_EVENTS
+        LOGD("Timeout expired, latency=%0.3fms", (now - mNextTimeout) * 0.000001f);
+#endif
+        mNextTimeout = LLONG_MAX;
+        timeoutExpired(now);
+    }
 }
 
 void InputReader::process(const RawEvent* rawEvent) {
@@ -415,6 +427,19 @@ void InputReader::consumeEvent(const RawEvent* rawEvent) {
     } // release device registry reader lock
 }
 
+void InputReader::timeoutExpired(nsecs_t when) {
+    { // acquire device registry reader lock
+        RWLock::AutoRLock _rl(mDeviceRegistryLock);
+
+        for (size_t i = 0; i < mDevices.size(); i++) {
+            InputDevice* device = mDevices.valueAt(i);
+            if (!device->isIgnored()) {
+                device->timeoutExpired(when);
+            }
+        }
+    } // release device registry reader lock
+}
+
 void InputReader::handleConfigurationChanged(nsecs_t when) {
     // Reset global meta state because it depends on the list of all configured devices.
     updateGlobalMetaState();
@@ -523,6 +548,12 @@ void InputReader::fadePointer() {
             device->fadePointer();
         }
     } // release device registry reader lock
+}
+
+void InputReader::requestTimeoutAtTime(nsecs_t when) {
+    if (when < mNextTimeout) {
+        mNextTimeout = when;
+    }
 }
 
 void InputReader::getInputConfiguration(InputConfiguration* outConfiguration) {
@@ -762,6 +793,14 @@ void InputDevice::process(const RawEvent* rawEvent) {
     }
 }
 
+void InputDevice::timeoutExpired(nsecs_t when) {
+    size_t numMappers = mMappers.size();
+    for (size_t i = 0; i < numMappers; i++) {
+        InputMapper* mapper = mMappers[i];
+        mapper->timeoutExpired(when);
+    }
+}
+
 void InputDevice::getDeviceInfo(InputDeviceInfo* outDeviceInfo) {
     outDeviceInfo->initialize(mId, mName);
 
@@ -851,6 +890,9 @@ void InputMapper::configure() {
 }
 
 void InputMapper::reset() {
+}
+
+void InputMapper::timeoutExpired(nsecs_t when) {
 }
 
 int32_t InputMapper::getKeyCodeState(uint32_t sourceMask, int32_t keyCode) {
@@ -2556,6 +2598,19 @@ void TouchInputMapper::reset() {
 }
 
 void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
+#if DEBUG_RAW_EVENTS
+    if (!havePointerIds) {
+        LOGD("syncTouch: pointerCount=%d, no pointer ids", mCurrentTouch.pointerCount);
+    } else {
+        LOGD("syncTouch: pointerCount=%d, up=0x%08x, down=0x%08x, move=0x%08x, "
+                "last=0x%08x, current=0x%08x", mCurrentTouch.pointerCount,
+                mLastTouch.idBits.value & ~mCurrentTouch.idBits.value,
+                mCurrentTouch.idBits.value & ~mLastTouch.idBits.value,
+                mLastTouch.idBits.value & mCurrentTouch.idBits.value,
+                mLastTouch.idBits.value, mCurrentTouch.idBits.value);
+    }
+#endif
+
     // Preprocess pointer data.
     if (mParameters.useBadTouchFilter) {
         if (applyBadTouchFilter()) {
@@ -2569,7 +2624,7 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         }
     }
 
-    if (! havePointerIds) {
+    if (!havePointerIds) {
         calculatePointerIds();
     }
 

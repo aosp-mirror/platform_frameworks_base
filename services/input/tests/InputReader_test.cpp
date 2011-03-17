@@ -610,7 +610,7 @@ private:
         mExcludedDevices.add(String8(deviceName));
     }
 
-    virtual bool getEvent(RawEvent* outEvent) {
+    virtual bool getEvent(int timeoutMillis, RawEvent* outEvent) {
         if (mEvents.empty()) {
             return false;
         }
@@ -767,6 +767,9 @@ private:
     }
 
     virtual void fadePointer() {
+    }
+
+    virtual void requestTimeoutAtTime(nsecs_t when) {
     }
 };
 
