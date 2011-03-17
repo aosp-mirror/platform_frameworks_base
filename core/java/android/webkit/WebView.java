@@ -7170,14 +7170,15 @@ public class WebView extends AbsoluteLayout
     private class TouchEventQueue {
         private long mNextTouchSequence = Long.MIN_VALUE + 1;
         private long mLastHandledTouchSequence = Long.MIN_VALUE;
-        private long mIgnoreUntilSequence = Long.MIN_VALUE;
+        private long mIgnoreUntilSequence = Long.MIN_VALUE + 1;
         private QueuedTouch mTouchEventQueue;
         private QueuedTouch mQueuedTouchRecycleBin;
         private int mQueuedTouchRecycleCount;
+        private long mLastEventTime = Long.MAX_VALUE;
         private static final int MAX_RECYCLED_QUEUED_TOUCH = 15;
 
         // milliseconds until we abandon hope of getting all of a previous gesture
-        private static final int QUEUED_GESTURE_TIMEOUT = 2000;
+        private static final int QUEUED_GESTURE_TIMEOUT = 1000;
 
         private QueuedTouch obtainQueuedTouch() {
             if (mQueuedTouchRecycleBin != null) {
@@ -7211,7 +7212,7 @@ public class WebView extends AbsoluteLayout
         public void reset() {
             mNextTouchSequence = Long.MIN_VALUE + 1;
             mLastHandledTouchSequence = Long.MIN_VALUE;
-            mIgnoreUntilSequence = Long.MIN_VALUE;
+            mIgnoreUntilSequence = Long.MIN_VALUE + 1;
             while (mTouchEventQueue != null) {
                 QueuedTouch recycleMe = mTouchEventQueue;
                 mTouchEventQueue = mTouchEventQueue.mNext;
@@ -7245,7 +7246,9 @@ public class WebView extends AbsoluteLayout
                 return;
             }
 
-            dropStaleGestures(ted.mMotionEvent, ted.mSequence);
+            if (dropStaleGestures(ted.mMotionEvent, ted.mSequence)) {
+                return;
+            }
 
             if (mLastHandledTouchSequence + 1 == ted.mSequence) {
                 handleQueuedTouchEventData(ted);
@@ -7280,7 +7283,9 @@ public class WebView extends AbsoluteLayout
         public void enqueueTouchEvent(MotionEvent ev) {
             final long sequence = nextTouchSequence();
 
-            dropStaleGestures(ev, sequence);
+            if (dropStaleGestures(ev, sequence)) {
+                return;
+            }
 
             if (mLastHandledTouchSequence + 1 == sequence) {
                 handleQueuedMotionEvent(ev);
@@ -7303,16 +7308,30 @@ public class WebView extends AbsoluteLayout
             }
         }
 
-        private void dropStaleGestures(MotionEvent ev, long sequence) {
-            if (mTouchEventQueue == null) return;
+        private boolean dropStaleGestures(MotionEvent ev, long sequence) {
+            if (ev != null && ev.getAction() == MotionEvent.ACTION_MOVE && !mConfirmMove) {
+                // This is to make sure that we don't attempt to process a tap
+                // or long press when webkit takes too long to get back to us.
+                // The movement will be properly confirmed when we process the
+                // enqueued event later.
+                final int dx = Math.round(ev.getX()) - mLastTouchX;
+                final int dy = Math.round(ev.getY()) - mLastTouchY;
+                if (dx * dx + dy * dy > mTouchSlopSquare) {
+                    mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
+                    mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
+                }
+            }
 
-            MotionEvent nextQueueEvent = mTouchEventQueue.mTed != null ?
-                    mTouchEventQueue.mTed.mMotionEvent : mTouchEventQueue.mEvent;
+            if (mTouchEventQueue == null) {
+                return sequence <= mLastHandledTouchSequence;
+            }
 
-            if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN && nextQueueEvent != null) {
+            // If we have a new down event and it's been a while since the last event
+            // we saw, just reset and keep going.
+            if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN) {
                 long eventTime = ev.getEventTime();
-                long nextQueueTime = nextQueueEvent.getEventTime();
-                if (eventTime > nextQueueTime + QUEUED_GESTURE_TIMEOUT) {
+                long lastHandledEventTime = mLastEventTime;
+                if (eventTime > lastHandledEventTime + QUEUED_GESTURE_TIMEOUT) {
                     Log.w(LOGTAG, "Got ACTION_DOWN but still waiting on stale event. " +
                             "Ignoring previous queued events.");
                     QueuedTouch qd = mTouchEventQueue;
@@ -7326,17 +7345,18 @@ public class WebView extends AbsoluteLayout
                 }
             }
 
-            if (mIgnoreUntilSequence > mLastHandledTouchSequence) {
+            if (mIgnoreUntilSequence - 1 > mLastHandledTouchSequence) {
                 QueuedTouch qd = mTouchEventQueue;
-                while (qd != null && qd.mSequence < mIgnoreUntilSequence &&
-                        qd.mSequence < sequence) {
-                    mLastHandledTouchSequence = qd.mSequence;
+                while (qd != null && qd.mSequence < mIgnoreUntilSequence) {
                     QueuedTouch recycleMe = qd;
                     qd = qd.mNext;
                     recycleQueuedTouch(recycleMe);
                 }
                 mTouchEventQueue = qd;
+                mLastHandledTouchSequence = mIgnoreUntilSequence - 1;
             }
+
+            return sequence <= mLastHandledTouchSequence;
         }
 
         private void handleQueuedTouch(QueuedTouch qt) {
@@ -7349,6 +7369,7 @@ public class WebView extends AbsoluteLayout
         }
 
         private void handleQueuedMotionEvent(MotionEvent ev) {
+            mLastEventTime = ev.getEventTime();
             int action = ev.getActionMasked();
             if (ev.getPointerCount() > 1) {  // Multi-touch
                 handleMultiTouchInWebView(ev);
@@ -7366,6 +7387,9 @@ public class WebView extends AbsoluteLayout
         }
 
         private void handleQueuedTouchEventData(TouchEventData ted) {
+            if (ted.mMotionEvent != null) {
+                mLastEventTime = ted.mMotionEvent.getEventTime();
+            }
             if (!ted.mReprocess) {
                 if (ted.mAction == MotionEvent.ACTION_DOWN
                         && mPreventDefault == PREVENT_DEFAULT_MAYBE_YES) {
