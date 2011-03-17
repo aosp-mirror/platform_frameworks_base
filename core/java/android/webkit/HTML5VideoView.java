@@ -243,14 +243,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         return false;
     }
 
-    public SurfaceView getSurfaceView() {
-        return null;
-    }
-
     public void decideDisplayMode() {
-    }
-
-    public void prepareForFullScreen() {
     }
 
     public boolean getReadyToUseSurfTex() {
