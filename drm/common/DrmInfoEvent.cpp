@@ -19,7 +19,7 @@
 
 using namespace android;
 
-DrmInfoEvent::DrmInfoEvent(int uniqueId, int infoType, const String8& message)
+DrmInfoEvent::DrmInfoEvent(int uniqueId, int infoType, const String8 message)
     : mUniqueId(uniqueId),
       mInfoType(infoType),
       mMessage(message) {
@@ -34,7 +34,7 @@ int DrmInfoEvent::getType() const {
     return mInfoType;
 }
 
-const String8& DrmInfoEvent::getMessage() const {
+const String8 DrmInfoEvent::getMessage() const {
     return mMessage;
 }
 

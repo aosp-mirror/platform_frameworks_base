@@ -77,7 +77,7 @@ public:
      * @param[in] infoType Type of information
      * @param[in] message Message description
      */
-    DrmInfoEvent(int uniqueId, int infoType, const String8& message);
+    DrmInfoEvent(int uniqueId, int infoType, const String8 message);
 
     /**
      * Destructor for DrmInfoEvent
@@ -104,12 +104,12 @@ public:
      *
      * @return Message description
      */
-    const String8& getMessage() const;
+    const String8 getMessage() const;
 
 private:
     int mUniqueId;
     int mInfoType;
-    const String8& mMessage;
+    const String8 mMessage;
 };
 
 };
