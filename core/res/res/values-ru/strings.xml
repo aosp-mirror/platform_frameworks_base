@@ -464,8 +464,8 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"изменять/удалять содержимое SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Разрешает приложению запись на USB-накопитель."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"изм./удал. содерж. мультимедиа"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Позволяет приложению изменять содержание внутреннего хранилища мультимедиа."</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"изменение/удаление данных из внутреннего хранилища мультимедиа"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Приложение сможет изменять содержание внутреннего хранилища мультимедиа."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"получать доступ к кэшу файловой системы"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Разрешает программам доступ для записи и чтения к кэшу файловой системы."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"совершать и принимать интернет-вызовы"</string>

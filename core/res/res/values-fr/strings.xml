@@ -464,7 +464,7 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Autorise une application à écrire sur la mémoire USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Autorise une application à écrire sur la carte SD."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne support"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet à une application de modifier le contenu de la mémoire de stockage interne du support."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet à une application de lire et d\'écrire dans le système de fichiers en cache."</string>
@@ -923,7 +923,7 @@
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Carte SD retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Désinstaller la mémoire de stockage USB avant de la retirer pour éviter toute perte de données."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Désinstaller la carte SD avant de la retirer pour éviter toute perte de données."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"La mémoire de stockage USB peut être retirée en toute sécurité."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Vous pouvez retirer la mémoire USB."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"La carte SD peut être retirée en toute sécurité"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Vous pouvez retirer la mémoire de stockage USB en toute sécurité."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Vous pouvez retirer la carte SD en toute sécurité."</string>

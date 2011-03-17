@@ -44,15 +44,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"تم إنشاء الاتصال بالإنترنت عن طريق البلوتوث."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"تهيئة طرق الإدخال"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"استخدام لوحة المفاتيح الفعلية"</string>
-    <!-- no translation found for usb_device_permission_prompt (5340926456453429244) -->
+    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
     <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
+    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
     <skip />
-    <!-- no translation found for usb_device_confirm_prompt (2727793581411868504) -->
+    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
     <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
+    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (3536509438459769165) -->
+    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
     <skip />
     <!-- no translation found for title_usb_accessory (4966265263465181372) -->
     <skip />
