@@ -25,8 +25,7 @@ class Functor {
 public:
     Functor() {}
     virtual ~Functor() {}
-    virtual status_t operator ()() { return true; }
-    virtual status_t operator ()(float* data, uint32_t len) { return true; }
+    virtual status_t operator ()(int what, void* data) { return NO_ERROR; }
 };
 
 }; // namespace android
