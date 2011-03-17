@@ -156,6 +156,7 @@ public class ScaleGestureDetector {
     private float mRightSlopEdge;
     private float mBottomSlopEdge;
     private boolean mSloppyGesture;
+    private boolean mInvalidGesture;
 
     // Pointer IDs currently responsible for the two fingers controlling the gesture
     private int mActiveId0;
@@ -176,6 +177,8 @@ public class ScaleGestureDetector {
         if (action == MotionEvent.ACTION_DOWN) {
             reset(); // Start fresh
         }
+
+        if (mInvalidGesture) return false;
 
         if (!mGestureInProgress) {
             switch (action) {
@@ -518,6 +521,15 @@ public class ScaleGestureDetector {
         final int currIndex0 = curr.findPointerIndex(mActiveId0);
         final int currIndex1 = curr.findPointerIndex(mActiveId1);
 
+        if (prevIndex0 < 0 || prevIndex1 < 0 || currIndex0 < 0 || currIndex1 < 0) {
+            mInvalidGesture = true;
+            Log.e(TAG, "Invalid MotionEvent stream detected.", new Throwable());
+            if (mGestureInProgress) {
+                mListener.onScaleEnd(this);
+            }
+            return;
+        }
+
         final float px0 = prev.getX(prevIndex0);
         final float py0 = prev.getY(prevIndex0);
         final float px1 = prev.getX(prevIndex1);
@@ -556,6 +568,7 @@ public class ScaleGestureDetector {
         mGestureInProgress = false;
         mActiveId0 = -1;
         mActiveId1 = -1;
+        mInvalidGesture = false;
     }
 
     /**
