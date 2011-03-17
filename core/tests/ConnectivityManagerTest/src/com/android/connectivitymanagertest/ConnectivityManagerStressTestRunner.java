@@ -19,8 +19,8 @@ package com.android.connectivitymanagertest;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import android.util.Log;
 import com.android.connectivitymanagertest.stress.WifiApStress;
+import com.android.connectivitymanagertest.stress.WifiStressTest;
 
 import junit.framework.TestSuite;
 
@@ -34,10 +34,18 @@ import junit.framework.TestSuite;
  */
 
 public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunner {
+    public int mSoftapIterations = 100;
+    public int mScanIterations = 100;
+    public int mReconnectIterations = 100;
+    public int mSleepTime = 30 * 1000;  // default sleep time is 30 seconds
+    public String mReconnectSsid = "securenetdhcp";
+    public String mReconnectPassword = "androidwifi";
+
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(WifiApStress.class);
+        suite.addTestSuite(WifiStressTest.class);
         return suite;
     }
 
@@ -49,14 +57,46 @@ public class ConnectivityManagerStressTestRunner extends InstrumentationTestRunn
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        String stressValue = (String) icicle.get("stressnum");
-        if (stressValue != null) {
-            int iteration = Integer.parseInt(stressValue);
+        String valueStr = (String) icicle.get("softap_iterations");
+        if (valueStr != null) {
+            int iteration = Integer.parseInt(valueStr);
             if (iteration > 0) {
-                numStress = iteration;
+                mSoftapIterations = iteration;
+            }
+        }
+
+        String scanIterationStr = (String) icicle.get("scan_iterations");
+        if (scanIterationStr != null) {
+            int scanIteration = Integer.parseInt(scanIterationStr);
+            if (scanIteration > 0) {
+                mScanIterations = scanIteration;
+            }
+        }
+
+        String ssidStr= (String) icicle.get("reconnect_ssid");
+        if (ssidStr != null) {
+            mReconnectSsid = ssidStr;
+        }
+
+        String passwordStr = (String) icicle.get("reconnect_password");
+        if (passwordStr != null) {
+            mReconnectPassword = passwordStr;
+        }
+
+        String reconnectStr = (String) icicle.get("reconnect_iterations");
+        if (reconnectStr != null) {
+            int iteration = Integer.parseInt(reconnectStr);
+            if (iteration > 0) {
+                mReconnectIterations = iteration;
+            }
+        }
+
+        String sleepTimeStr = (String) icicle.get("sleep_time");
+        if (sleepTimeStr != null) {
+            int sleepTime = Integer.parseInt(sleepTimeStr);
+            if (sleepTime > 0) {
+                mSleepTime = 1000 * sleepTime;
             }
         }
     }
-
-    public int numStress = 100;
 }
