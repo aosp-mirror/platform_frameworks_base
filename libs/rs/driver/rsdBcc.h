@@ -25,14 +25,23 @@ bool rsdScriptInit(const android::renderscript::Context *, android::renderscript
                    uint8_t const *bitcode, size_t bitcodeSize,
                    uint32_t flags, android::renderscript::RsHalSymbolLookupFunc lookupFunc);
 void rsdScriptInvokeFunction(const android::renderscript::Context *dc,
-                             const android::renderscript::Script *script,
+                             android::renderscript::Script *script,
                              uint32_t slot,
                              const void *params,
                              size_t paramLength);
+
+void rsdScriptInvokeForEach(const android::renderscript::Context *rsc,
+                            android::renderscript::Script *s,
+                            const android::renderscript::Allocation * ain,
+                            android::renderscript::Allocation * aout,
+                            const void * usr,
+                            uint32_t usrLen,
+                            const RsScriptCall *sc);
+
 int rsdScriptInvokeRoot(const android::renderscript::Context *dc,
-                        const android::renderscript::Script *script);
+                        android::renderscript::Script *script);
 void rsdScriptInvokeInit(const android::renderscript::Context *dc,
-                         const android::renderscript::Script *script);
+                         android::renderscript::Script *script);
 
 void rsdScriptSetGlobalVar(const android::renderscript::Context *,
                            const android::renderscript::Script *,

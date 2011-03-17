@@ -56,7 +56,7 @@ public:
     bool runCompiler(Context *rsc, const char *resName, const char *cacheDir,
                      const uint8_t *bitcode, size_t bitcodeLen);
 
-protected:
+//protected:
     void setupScript(Context *);
     void setupGLState(Context *);
     Script * setTLS(Script *);
