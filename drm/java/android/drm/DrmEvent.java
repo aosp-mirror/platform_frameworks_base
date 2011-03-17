@@ -16,6 +16,8 @@
 
 package android.drm;
 
+import java.util.HashMap;
+
 /**
  * This is the base class which would be used to notify the caller
  * about any event occurred in DRM framework.
@@ -33,10 +35,35 @@ public class DrmEvent {
     public static final int TYPE_DRM_INFO_PROCESSED = 1002;
 
     public static final String DRM_INFO_STATUS_OBJECT = "drm_info_status_object";
+    public static final String DRM_INFO_OBJECT = "drm_info_object";
 
     private final int mUniqueId;
     private final int mType;
     private String mMessage = "";
+
+    private HashMap<String, Object> mAttributes = new HashMap<String, Object>();
+
+    /**
+     * constructor for DrmEvent class
+     *
+     * @param uniqueId Unique session identifier
+     * @param type Type of information
+     * @param message Message description
+     * @param attributes Attributes for extensible information
+     */
+    protected DrmEvent(int uniqueId, int type, String message,
+                            HashMap<String, Object> attributes) {
+        mUniqueId = uniqueId;
+        mType = type;
+
+        if (null != message) {
+            mMessage = message;
+        }
+
+        if (null != attributes) {
+            mAttributes = attributes;
+        }
+    }
 
     /**
      * constructor for DrmEvent class
@@ -79,6 +106,16 @@ public class DrmEvent {
      */
     public String getMessage() {
         return mMessage;
+    }
+
+    /**
+     * Returns the attribute corresponding to the specified key
+     *
+     * @return one of the attributes or null if no mapping for
+     * the key is found
+     */
+    public Object getAttribute(String key) {
+        return mAttributes.get(key);
     }
 }
 

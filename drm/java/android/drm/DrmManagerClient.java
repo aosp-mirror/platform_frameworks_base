@@ -81,10 +81,8 @@ public class DrmManagerClient {
          *
          * @param client DrmManagerClient instance
          * @param event instance which wraps type and message
-         * @param attributes resultant values in key and value pair.
          */
-        public void onEvent(DrmManagerClient client, DrmEvent event,
-                HashMap<String, Object> attributes);
+        public void onEvent(DrmManagerClient client, DrmEvent event);
     }
 
     /**
@@ -128,12 +126,17 @@ public class DrmManagerClient {
             case ACTION_PROCESS_DRM_INFO: {
                 final DrmInfo drmInfo = (DrmInfo) msg.obj;
                 DrmInfoStatus status = _processDrmInfo(mUniqueId, drmInfo);
+
+                attributes.put(DrmEvent.DRM_INFO_STATUS_OBJECT, status);
+                attributes.put(DrmEvent.DRM_INFO_OBJECT, drmInfo);
+
                 if (null != status && DrmInfoStatus.STATUS_OK == status.statusCode) {
-                    attributes.put(DrmEvent.DRM_INFO_STATUS_OBJECT, status);
-                    event = new DrmEvent(mUniqueId, getEventType(status.infoType), null);
+                    event = new DrmEvent(mUniqueId,
+                            getEventType(status.infoType), null, attributes);
                 } else {
                     int infoType = (null != status) ? status.infoType : drmInfo.getInfoType();
-                    error = new DrmErrorEvent(mUniqueId, getErrorType(infoType), null);
+                    error = new DrmErrorEvent(mUniqueId,
+                            getErrorType(infoType), null, attributes);
                 }
                 break;
             }
@@ -151,7 +154,7 @@ public class DrmManagerClient {
                 return;
             }
             if (null != mOnEventListener && null != event) {
-                mOnEventListener.onEvent(DrmManagerClient.this, event, attributes);
+                mOnEventListener.onEvent(DrmManagerClient.this, event);
             }
             if (null != mOnErrorListener && null != error) {
                 mOnErrorListener.onError(DrmManagerClient.this, error);
