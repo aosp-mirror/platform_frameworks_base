@@ -218,6 +218,8 @@ public:
 
     void launchThreads(WorkerCallback_t cbk, void *data);
     uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mCount;}
+    uint32_t getDPI() const {return mDPI;}
+    void setDPI(uint32_t dpi) {mDPI = dpi;}
 
 protected:
     Device *mDev;
@@ -258,6 +260,7 @@ protected:
         float EXT_texture_max_aniso;
     } mGL;
 
+    uint32_t mDPI;
     uint32_t mWidth;
     uint32_t mHeight;
     int32_t mThreadPriority;

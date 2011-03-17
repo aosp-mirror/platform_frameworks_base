@@ -165,13 +165,14 @@ public class RenderScriptGL extends RenderScript {
         mWidth = 0;
         mHeight = 0;
         mDev = nDeviceCreate();
+        int dpi = ctx.getResources().getDisplayMetrics().densityDpi;
         mContext = nContextCreateGL(mDev, 0,
                                     mSurfaceConfig.mColorMin, mSurfaceConfig.mColorPref,
                                     mSurfaceConfig.mAlphaMin, mSurfaceConfig.mAlphaPref,
                                     mSurfaceConfig.mDepthMin, mSurfaceConfig.mDepthPref,
                                     mSurfaceConfig.mStencilMin, mSurfaceConfig.mStencilPref,
                                     mSurfaceConfig.mSamplesMin, mSurfaceConfig.mSamplesPref,
-                                    mSurfaceConfig.mSamplesQ);
+                                    mSurfaceConfig.mSamplesQ, dpi);
         if (mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }
