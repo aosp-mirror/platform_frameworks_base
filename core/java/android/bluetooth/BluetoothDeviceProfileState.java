@@ -679,7 +679,6 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         @Override
         protected boolean processMessage(Message message) {
             log("IncomingA2dp State->Processing Message: " + message.what);
-            Message deferMsg = new Message();
             switch(message.what) {
                 case CONNECT_HFP_OUTGOING:
                     deferMessage(message);
