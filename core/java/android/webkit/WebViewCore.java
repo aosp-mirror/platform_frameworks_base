@@ -483,10 +483,12 @@ final class WebViewCore {
     /**
      * Notify the webview that we want to display the video layer fullscreen.
      */
-    protected void enterFullscreenForVideoLayer(int layerId) {
+    protected void enterFullscreenForVideoLayer(int layerId, String url) {
         if (mWebView == null) return;
-        Message.obtain(mWebView.mPrivateHandler,
-                       WebView.ENTER_FULLSCREEN_VIDEO, layerId, 0).sendToTarget();
+        Message message = Message.obtain(mWebView.mPrivateHandler,
+                       WebView.ENTER_FULLSCREEN_VIDEO, layerId, 0);
+        message.obj = url;
+        message.sendToTarget();
     }
 
     //-------------------------------------------------------------------------
