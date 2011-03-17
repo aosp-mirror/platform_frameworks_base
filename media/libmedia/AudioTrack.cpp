@@ -329,6 +329,7 @@ void AudioTrack::start()
     if (mActive == 0) {
         mActive = 1;
         mNewPosition = cblk->server + mUpdatePeriod;
+        cblk->lock.lock();
         cblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
         cblk->waitTimeMs = 0;
         cblk->flags &= ~CBLK_DISABLED_ON;
@@ -339,7 +340,6 @@ void AudioTrack::start()
         }
 
         LOGV("start %p before lock cblk %p", this, mCblk);
-        cblk->lock.lock();
         if (!(cblk->flags & CBLK_INVALID_MSK)) {
             cblk->lock.unlock();
             status = mAudioTrack->start();
@@ -893,9 +893,14 @@ create_new_track:
 
     // restart track if it was disabled by audioflinger due to previous underrun
     if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
-        cblk->flags &= ~CBLK_DISABLED_ON;
-        LOGW("obtainBuffer() track %p disabled, restarting", this);
-        mAudioTrack->start();
+        AutoMutex _l(cblk->lock);
+        if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
+            cblk->flags &= ~CBLK_DISABLED_ON;
+            cblk->lock.unlock();
+            LOGW("obtainBuffer() track %p disabled, restarting", this);
+            mAudioTrack->start();
+            cblk->lock.lock();
+        }
     }
 
     cblk->waitTimeMs = 0;
@@ -957,9 +962,10 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     ssize_t written = 0;
     const int8_t *src = (const int8_t *)buffer;
     Buffer audioBuffer;
+    size_t frameSz = (size_t)frameSize();
 
     do {
-        audioBuffer.frameCount = userSize/frameSize();
+        audioBuffer.frameCount = userSize/frameSz;
 
         // Calling obtainBuffer() with a negative wait count causes
         // an (almost) infinite wait time.
@@ -991,7 +997,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
         written += toWrite;
 
         releaseBuffer(&audioBuffer);
-    } while (userSize);
+    } while (userSize >= frameSz);
 
     return written;
 }
@@ -1015,12 +1021,15 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     // Manage underrun callback
     if (mActive && (cblk->framesReady() == 0)) {
         LOGV("Underrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
+        AutoMutex _l(cblk->lock);
         if ((cblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
+            cblk->flags |= CBLK_UNDERRUN_ON;
+            cblk->lock.unlock();
             mCbf(EVENT_UNDERRUN, mUserData, 0);
             if (cblk->server == cblk->frameCount) {
                 mCbf(EVENT_BUFFER_END, mUserData, 0);
             }
-            cblk->flags |= CBLK_UNDERRUN_ON;
+            cblk->lock.lock();
             if (mSharedBuffer != 0) return false;
         }
     }
@@ -1279,7 +1288,12 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
     this->user = u;
 
     // Clear flow control error condition as new data has been written/read to/from buffer.
-    flags &= ~CBLK_UNDERRUN_MSK;
+    if (flags & CBLK_UNDERRUN_MSK) {
+        AutoMutex _l(lock);
+        if (flags & CBLK_UNDERRUN_MSK) {
+            flags &= ~CBLK_UNDERRUN_MSK;
+        }
+    }
 
     return u;
 }

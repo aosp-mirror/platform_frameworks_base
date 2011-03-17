@@ -722,9 +722,12 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
     // Manage overrun callback
     if (mActive && (cblk->framesAvailable() == 0)) {
         LOGV("Overrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
+        AutoMutex _l(cblk->lock);
         if ((cblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
-            mCbf(EVENT_OVERRUN, mUserData, 0);
             cblk->flags |= CBLK_UNDERRUN_ON;
+            cblk->lock.unlock();
+            mCbf(EVENT_OVERRUN, mUserData, 0);
+            cblk->lock.lock();
         }
     }
 
