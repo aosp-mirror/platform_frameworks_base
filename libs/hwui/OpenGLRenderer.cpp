@@ -216,21 +216,41 @@ bool OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
         setScissorFromClip();
     }
 
+    Rect clip(*mSnapshot->clipRect);
+    clip.snapToPixelBoundaries();
+
 #if RENDER_LAYERS_AS_REGIONS
     // Since we don't know what the functor will draw, let's dirty
     // tne entire clip region
     if (hasLayer()) {
-        Rect clip(*mSnapshot->clipRect);
-        clip.snapToPixelBoundaries();
         dirtyLayerUnchecked(clip, getRegion());
     }
 #endif
 
-    float bounds[4];
-    status_t result = (*functor)(&bounds[0], 4);
+    struct {
+        // Input: current clip rect
+        int clipLeft;
+        int clipTop;
+        int clipRight;
+        int clipBottom;
+
+        // Output: dirty region to redraw
+        float dirtyLeft;
+        float dirtyTop;
+        float dirtyRight;
+        float dirtyBottom;
+    } constraints;
+
+    constraints.clipLeft = clip.left;
+    constraints.clipTop = clip.top;
+    constraints.clipRight = clip.right;
+    constraints.clipBottom = clip.bottom;
+
+    status_t result = (*functor)(0, &constraints);
 
     if (result != 0) {
-        Rect localDirty(bounds[0], bounds[1], bounds[2], bounds[3]);
+        Rect localDirty(constraints.dirtyLeft, constraints.dirtyTop,
+                constraints.dirtyRight, constraints.dirtyBottom);
         dirty.unionWith(localDirty);
     }
 
