@@ -75,11 +75,17 @@ class BaseObj {
      * @param name The name to assign to the object.
      */
     public void setName(String name) {
+        if (name == null) {
+            throw new RSIllegalArgumentException(
+                "setName requires a string of non-zero length.");
+        }
         if(name.length() < 1) {
-            throw new RSIllegalArgumentException("setName does not accept a zero length string.");
+            throw new RSIllegalArgumentException(
+                "setName does not accept a zero length string.");
         }
         if(mName != null) {
-            throw new RSIllegalArgumentException("setName object already has a name.");
+            throw new RSIllegalArgumentException(
+                "setName object already has a name.");
         }
 
         try {
@@ -106,9 +112,9 @@ class BaseObj {
     }
 
     /**
-     * destroy disconnects the object from the native object effectivly
+     * destroy disconnects the object from the native object effectively
      * rendering this java object dead.  The primary use is to force immediate
-     * cleanup of resources when its believed the GC will not respond quickly
+     * cleanup of resources when it is believed the GC will not respond quickly
      * enough.
      */
     synchronized public void destroy() {
