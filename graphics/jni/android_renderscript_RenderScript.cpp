@@ -164,7 +164,8 @@ nContextCreateGL(JNIEnv *_env, jobject _this, jint dev, jint ver,
                  int alphaMin, int alphaPref,
                  int depthMin, int depthPref,
                  int stencilMin, int stencilPref,
-                 int samplesMin, int samplesPref, float samplesQ)
+                 int samplesMin, int samplesPref, float samplesQ,
+                 int dpi)
 {
     RsSurfaceConfig sc;
     sc.alphaMin = alphaMin;
@@ -178,7 +179,7 @@ nContextCreateGL(JNIEnv *_env, jobject _this, jint dev, jint ver,
     sc.samplesQ = samplesQ;
 
     LOG_API("nContextCreateGL");
-    return (jint)rsContextCreateGL((RsDevice)dev, ver, sc);
+    return (jint)rsContextCreateGL((RsDevice)dev, ver, sc, dpi);
 }
 
 static void
@@ -1213,7 +1214,7 @@ static JNINativeMethod methods[] = {
 
 // All methods below are thread protected in java.
 {"rsnContextCreate",                 "(II)I",                                 (void*)nContextCreate },
-{"rsnContextCreateGL",               "(IIIIIIIIIIIIF)I",                      (void*)nContextCreateGL },
+{"rsnContextCreateGL",               "(IIIIIIIIIIIIFI)I",                     (void*)nContextCreateGL },
 {"rsnContextFinish",                 "(I)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(II)V",                                 (void*)nContextSetPriority },
 {"rsnContextSetSurface",             "(IIILandroid/view/Surface;)V",          (void*)nContextSetSurface },

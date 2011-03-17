@@ -76,7 +76,8 @@ void rsDeviceDestroy(RsDevice);
 void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
 
 RsContext rsContextCreate(RsDevice, uint32_t version);
-RsContext rsContextCreateGL(RsDevice, uint32_t version, RsSurfaceConfig sc);
+RsContext rsContextCreateGL(RsDevice, uint32_t version,
+                            RsSurfaceConfig sc, uint32_t dpi);
 void rsContextDestroy(RsContext);
 
 enum RsMessageToClientType {
