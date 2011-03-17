@@ -429,6 +429,8 @@ void Context::displayDebugStats() {
     mStateFont.getFontColor(&oldR, &oldG, &oldB, &oldA);
     uint32_t bufferLen = strlen(buffer);
 
+    ObjectBaseRef<Font> lastFont(getFont());
+    setFont(NULL);
     float shadowCol = 0.1f;
     mStateFont.setFontColor(shadowCol, shadowCol, shadowCol, 1.0f);
     mStateFont.renderText(buffer, bufferLen, 5, getHeight() - 6);
@@ -436,6 +438,7 @@ void Context::displayDebugStats() {
     mStateFont.setFontColor(1.0f, 0.7f, 0.0f, 1.0f);
     mStateFont.renderText(buffer, bufferLen, 4, getHeight() - 7);
 
+    setFont(lastFont.get());
     mStateFont.setFontColor(oldR, oldG, oldB, oldA);
 }
 
