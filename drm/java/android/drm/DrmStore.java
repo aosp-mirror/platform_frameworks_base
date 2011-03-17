@@ -17,91 +17,97 @@
 package android.drm;
 
 /**
- * This class defines all the constants used by DRM framework
+ * Defines constants that are used by the DRM framework.
  *
  */
 public class DrmStore {
     /**
-     * Columns representing drm constraints
+     * Interface definition for the columns that represent DRM constraints.
      */
     public interface ConstraintsColumns {
         /**
-         * The max repeat count
-         * <P>Type: INTEGER</P>
+         * The maximum repeat count.
+         * <p>
+         * Type: INTEGER
          */
         public static final String MAX_REPEAT_COUNT = "max_repeat_count";
 
         /**
-         * The remaining repeat count
-         * <P>Type: INTEGER</P>
+         * The remaining repeat count.
+         * <p>
+         * Type: INTEGER
          */
         public static final String REMAINING_REPEAT_COUNT = "remaining_repeat_count";
 
         /**
-         * The time before which the protected file can not be played/viewed
-         * <P>Type: TEXT</P>
+         * The time before which the rights-protected file cannot be played/viewed.
+         * <p>
+         * Type: TEXT
          */
         public static final String LICENSE_START_TIME = "license_start_time";
 
         /**
-         * The time after which the protected file can not be played/viewed
-         * <P>Type: TEXT</P>
+         * The time after which the rights-protected file cannot be played/viewed.
+         * <p>
+         * Type: TEXT
          */
         public static final String LICENSE_EXPIRY_TIME = "license_expiry_time";
 
         /**
-         * The available time for license
-         * <P>Type: TEXT</P>
+         * The available time left before the license expires.
+         * <p>
+         * Type: TEXT
          */
         public static final String LICENSE_AVAILABLE_TIME = "license_available_time";
 
         /**
-         * The data stream for extended metadata
-         * <P>Type: TEXT</P>
+         * The data stream for extended metadata.
+         * <p>
+         * Type: TEXT
          */
         public static final String EXTENDED_METADATA = "extended_metadata";
     }
 
     /**
-     * Defines constants related to DRM types
+     * Defines DRM object types.
      */
     public static class DrmObjectType {
         /**
-         * Field specifies the unknown type
+         * An unknown object type.
          */
         public static final int UNKNOWN = 0x00;
         /**
-         * Field specifies the protected content type
+         * A rights-protected file object type.
          */
         public static final int CONTENT = 0x01;
         /**
-         * Field specifies the rights information
+         * A rights information object type.
          */
         public static final int RIGHTS_OBJECT = 0x02;
         /**
-         * Field specifies the trigger information
+         * A trigger information object type.
          */
         public static final int TRIGGER_OBJECT = 0x03;
     }
 
     /**
-     * Defines constants related to playback
+     * Defines playback states for content.
      */
     public static class Playback {
         /**
-         * Constant field signifies playback start
+         * Playback started.
          */
         public static final int START = 0x00;
         /**
-         * Constant field signifies playback stop
+         * Playback stopped.
          */
         public static final int STOP = 0x01;
         /**
-         * Constant field signifies playback paused
+         * Playback paused.
          */
         public static final int PAUSE = 0x02;
         /**
-         * Constant field signifies playback resumed
+         * Playback resumed.
          */
         public static final int RESUME = 0x03;
 
@@ -120,39 +126,39 @@ public class DrmStore {
     }
 
     /**
-     * Defines actions that can be performed on protected content
+     * Defines actions that can be performed on rights-protected content.
      */
     public static class Action {
         /**
-         * Constant field signifies that the default action
+         * The default action.
          */
         public static final int DEFAULT = 0x00;
         /**
-         * Constant field signifies that the content can be played
+         * The rights-protected content can be played.
          */
         public static final int PLAY = 0x01;
         /**
-         * Constant field signifies that the content can be set as ring tone
+         * The rights-protected content can be set as a ringtone.
          */
         public static final int RINGTONE = 0x02;
         /**
-         * Constant field signifies that the content can be transfered
+         * The rights-protected content can be transferred.
          */
         public static final int TRANSFER = 0x03;
         /**
-         * Constant field signifies that the content can be set as output
+         * The rights-protected content can be set as output.
          */
         public static final int OUTPUT = 0x04;
         /**
-         * Constant field signifies that preview is allowed
+         * The rights-protected content can be previewed.
          */
         public static final int PREVIEW = 0x05;
         /**
-         * Constant field signifies that the content can be executed
+         * The rights-protected content can be executed.
          */
         public static final int EXECUTE = 0x06;
         /**
-         * Constant field signifies that the content can displayed
+         * The rights-protected content can be displayed.
          */
         public static final int DISPLAY = 0x07;
 
@@ -175,23 +181,23 @@ public class DrmStore {
     }
 
     /**
-     * Defines constants related to status of the rights
+     * Defines status notifications for digital rights.
      */
     public static class RightsStatus {
         /**
-         * Constant field signifies that the rights are valid
+         * The digital rights are valid.
          */
         public static final int RIGHTS_VALID = 0x00;
         /**
-         * Constant field signifies that the rights are invalid
+         * The digital rights are invalid.
          */
         public static final int RIGHTS_INVALID = 0x01;
         /**
-         * Constant field signifies that the rights are expired for the content
+         * The digital rights have expired.
          */
         public static final int RIGHTS_EXPIRED = 0x02;
         /**
-         * Constant field signifies that the rights are not acquired for the content
+         * The digital rights have not been acquired for the rights-protected content.
          */
         public static final int RIGHTS_NOT_ACQUIRED = 0x03;
     }

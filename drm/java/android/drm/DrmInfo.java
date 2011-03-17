@@ -21,14 +21,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * This is an entity class in which necessary information required to transact
- * between device and online DRM server is described. DRM Framework achieves
- * server registration, license acquisition and any other server related transaction
- * by passing an instance of this class to {@link DrmManagerClient#processDrmInfo(DrmInfo)}.
- *
- * Caller can retrieve the {@link DrmInfo} instance by using
- * {@link DrmManagerClient#acquireDrmInfo(DrmInfoRequest)}
- * by passing {@link DrmInfoRequest} instance.
+ * An entity class that describes the information required to send transactions
+ * between a device and an online DRM server. The DRM framework achieves
+ * server registration, license acquisition, and any other server-related transactions
+ * by passing an instance of this class to {@link DrmManagerClient#processDrmInfo}.
+ *<p>
+ * The caller can retrieve the {@link DrmInfo} instance by passing a {@link DrmInfoRequest}
+ * instance to {@link DrmManagerClient#acquireDrmInfo}.
  *
  */
 public class DrmInfo {
@@ -40,11 +39,11 @@ public class DrmInfo {
     private final HashMap<String, Object> mAttributes = new HashMap<String, Object>();
 
     /**
-     * constructor to create DrmInfo object with given parameters
+     * Creates a <code>DrmInfo</code> object with the given parameters.
      *
-     * @param infoType Type of information
-     * @param data Trigger data
-     * @param mimeType MIME type
+     * @param infoType The type of information.
+     * @param data The trigger data.
+     * @param mimeType The MIME type.
      */
     public DrmInfo(int infoType, byte[] data, String mimeType) {
         mInfoType = infoType;
@@ -53,11 +52,11 @@ public class DrmInfo {
     }
 
     /**
-     * constructor to create DrmInfo object with given parameters
+     * Creates a <code>DrmInfo</code> object with the given parameters.
      *
-     * @param infoType Type of information
-     * @param path Trigger data
-     * @param mimeType MIME type
+     * @param infoType The type of information.
+     * @param path The trigger data.
+     * @param mimeType The MIME type.
      */
     public DrmInfo(int infoType, String path, String mimeType) {
         mInfoType = infoType;
@@ -73,67 +72,70 @@ public class DrmInfo {
     }
 
     /**
-     * Adds optional information as <key, value> pair to this object
+     * Adds optional information as key-value pairs to this object. To add a custom object
+     * to the <code>DrmInfo</code> object, you must override the {@link #toString} implementation.
      *
-     * @param key Key to add
-     * @param value Value to add
-     *     To put custom object into DrmInfo, custom object has to
-     *     override toString() implementation.
+     * @param key Key to add.
+     * @param value Value to add.
+     *
      */
     public void put(String key, Object value) {
         mAttributes.put(key, value);
     }
 
     /**
-     * Retrieves the value of given key, if not found returns null
+     * Retrieves the value of a given key.
      *
-     * @param key Key whose value to be retrieved
-     * @return The value or null
+     * @param key The key whose value is being retrieved.
+     *
+     * @return The value of the key being retrieved. Returns null if the key cannot be found.
      */
     public Object get(String key) {
         return mAttributes.get(key);
     }
 
     /**
-     * Returns Iterator object to walk through the keys associated with this instance
+     * Retrieves an iterator object that you can use to iterate over the keys associated with
+     * this <code>DrmInfo</code> object.
      *
-     * @return Iterator object
+     * @return The iterator object.
      */
     public Iterator<String> keyIterator() {
         return mAttributes.keySet().iterator();
     }
 
     /**
-     * Returns Iterator object to walk through the values associated with this instance
+     * Retrieves an iterator object that you can use to iterate over the values associated with
+     * this <code>DrmInfo</code> object.
      *
-     * @return Iterator object
+     * @return The iterator object.
      */
     public Iterator<Object> iterator() {
         return mAttributes.values().iterator();
     }
 
     /**
-     * Returns the trigger data associated with this object
+     * Retrieves the trigger data associated with this object.
      *
-     * @return Trigger data
+     * @return The trigger data.
      */
     public byte[] getData() {
         return mData;
     }
 
     /**
-     * Returns the mimetype associated with this object
+     * Retrieves the MIME type associated with this object.
      *
-     * @return MIME type
+     * @return The MIME type.
      */
     public String getMimeType() {
         return mMimeType;
     }
 
     /**
-     * Returns information type associated with this instance
+     * Retrieves the information type associated with this object.
      *
-     * @return Information type
+     * @return The information type.
      */
     public int getInfoType() {
         return mInfoType;
