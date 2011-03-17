@@ -1074,8 +1074,34 @@ int EventHub::closeDeviceAtIndexLocked(int index) {
     mDevices.removeAt(index);
     device->close();
 
-    device->next = mClosingDevices;
-    mClosingDevices = device;
+    // Unlink for opening devices list if it is present.
+    Device* pred = NULL;
+    bool found = false;
+    for (Device* entry = mOpeningDevices; entry != NULL; ) {
+        if (entry == device) {
+            found = true;
+            break;
+        }
+        pred = entry;
+        entry = entry->next;
+    }
+    if (found) {
+        // Unlink the device from the opening devices list then delete it.
+        // We don't need to tell the client that the device was closed because
+        // it does not even know it was opened in the first place.
+        LOGI("Device %s was immediately closed after opening.", device->path.string());
+        if (pred) {
+            pred->next = device->next;
+        } else {
+            mOpeningDevices = device->next;
+        }
+        delete device;
+    } else {
+        // Link into closing devices list.
+        // The device will be deleted later after we have informed the client.
+        device->next = mClosingDevices;
+        mClosingDevices = device;
+    }
     return 0;
 }
 
