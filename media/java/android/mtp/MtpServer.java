@@ -24,6 +24,9 @@ import android.util.Log;
  */
 public class MtpServer {
 
+    private final Object mLock = new Object();
+    private boolean mStarted;
+
     private static final String TAG = "MtpServer";
 
     static {
@@ -35,11 +38,19 @@ public class MtpServer {
     }
 
     public void start() {
-        native_start();
+        synchronized (mLock) {
+            native_start();
+            mStarted = true;
+        }
     }
 
     public void stop() {
-        native_stop();
+        synchronized (mLock) {
+            if (mStarted) {
+                native_stop();
+                mStarted = false;
+            }
+        }
     }
 
     public void sendObjectAdded(int handle) {
