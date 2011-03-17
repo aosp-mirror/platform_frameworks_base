@@ -135,7 +135,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 IRemoteViewsAdapterConnection.Stub.asInterface(mConnectionCb);
             try {
                 cb.onServiceConnected(service);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -147,7 +147,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                 IRemoteViewsAdapterConnection.Stub.asInterface(mConnectionCb);
             try {
                 cb.onServiceDisconnected();
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -541,7 +541,7 @@ class AppWidgetService extends IAppWidgetService.Stub
                     IRemoteViewsFactory.Stub.asInterface(service);
                 try {
                     cb.onDestroy(intent);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 mContext.unbindService(this);
