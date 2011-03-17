@@ -61,7 +61,7 @@
     <string name="usb_accessory_confirm_prompt">Open %1$s when this USB accessory is connected?</string>
 
     <!-- Prompt for the USB accessory URI dialog [CHAR LIMIT=80] -->
-    <string name="usb_accessory_uri_prompt">Additional information for this USB accessory may be found at: %1$s</string>
+    <string name="usb_accessory_uri_prompt">No installed applications work with this USB accessory. Learn more about this accessory at <xliff:g id="url">%1$s</xliff:g></string>
 
     <!-- Title for USB accessory dialog.  Used when the name of the accessory cannot be determined.  [CHAR LIMIT=50] -->
     <string name="title_usb_accessory">USB accessory</string>
