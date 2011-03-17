@@ -4121,8 +4121,11 @@ public class WebView extends AbsoluteLayout
         if (mNativeClass != 0 && nativeEvaluateLayersAnimations()) {
             UIAnimationsRunning = true;
             // If we have unfinished (or unstarted) animations,
-            // we ask for a repaint.
-            invalidate();
+            // we ask for a repaint. We only need to do this in software
+            // rendering (with hardware rendering we already have a different
+            // method of requesting a repaint)
+            if (!canvas.isHardwareAccelerated())
+                invalidate();
         }
 
         // decide which adornments to draw
