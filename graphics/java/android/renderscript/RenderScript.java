@@ -83,17 +83,17 @@ public class RenderScript {
                  int alphaMin, int alphaPref,
                  int depthMin, int depthPref,
                  int stencilMin, int stencilPref,
-                 int samplesMin, int samplesPref, float samplesQ);
+                 int samplesMin, int samplesPref, float samplesQ, int dpi);
     synchronized int nContextCreateGL(int dev, int ver,
                  int colorMin, int colorPref,
                  int alphaMin, int alphaPref,
                  int depthMin, int depthPref,
                  int stencilMin, int stencilPref,
-                 int samplesMin, int samplesPref, float samplesQ) {
+                 int samplesMin, int samplesPref, float samplesQ, int dpi) {
         return rsnContextCreateGL(dev, ver, colorMin, colorPref,
                                   alphaMin, alphaPref, depthMin, depthPref,
                                   stencilMin, stencilPref,
-                                  samplesMin, samplesPref, samplesQ);
+                                  samplesMin, samplesPref, samplesQ, dpi);
     }
     native int  rsnContextCreate(int dev, int ver);
     synchronized int nContextCreate(int dev, int ver) {
