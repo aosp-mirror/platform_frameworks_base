@@ -144,6 +144,21 @@ public class SurfaceTexture {
         nativeGetTransformMatrix(mtx);
     }
 
+    /**
+     * Retrieve the timestamp associated with the texture image set by the most recent call to
+     * updateTexImage.
+     *
+     * This timestamp is in nanoseconds, and is guaranteed to be monotonically increasing. The
+     * specific meaning and zero point of the timestamp depends on the source providing images to
+     * the SurfaceTexture. Unless otherwise specified by the image source, timestamps cannot
+     * generally be compared across SurfaceTexture instances, or across multiple program
+     * invocations. It is mostly useful for determining time offsets between subsequent frames.
+     * @hide
+     */
+    public long getTimestamp() {
+        return nativeGetTimestamp();
+    }
+
     protected void finalize() throws Throwable {
         try {
             nativeFinalize();
@@ -182,6 +197,7 @@ public class SurfaceTexture {
     private native void nativeInit(int texName, Object weakSelf);
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
+    private native long nativeGetTimestamp();
     private native void nativeUpdateTexImage();
 
     /*

@@ -226,7 +226,8 @@ private:
     int  dispatch_set_buffer_count(va_list args);
     int  dispatch_set_buffers_geometry(va_list args);
     int  dispatch_set_buffers_transform(va_list args);
-    
+    int  dispatch_set_buffers_timestamp(va_list args);
+
     void setUsage(uint32_t reqUsage);
     int  connect(int api);
     int  disconnect(int api);
@@ -234,6 +235,7 @@ private:
     int  setBufferCount(int bufferCount);
     int  setBuffersGeometry(int w, int h, int format);
     int  setBuffersTransform(int transform);
+    int  setBuffersTimestamp(int64_t timestamp);
 
     /*
      *  private stuff...

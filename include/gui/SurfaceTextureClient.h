@@ -63,6 +63,7 @@ private:
     int dispatchSetBufferCount(va_list args);
     int dispatchSetBuffersGeometry(va_list args);
     int dispatchSetBuffersTransform(va_list args);
+    int dispatchSetBuffersTimestamp(va_list args);
     int dispatchSetCrop(va_list args);
     int dispatchSetUsage(va_list args);
 
@@ -71,6 +72,7 @@ private:
     int setBufferCount(int bufferCount);
     int setBuffersGeometry(int w, int h, int format);
     int setBuffersTransform(int transform);
+    int setBuffersTimestamp(int64_t timestamp);
     int setCrop(Rect const* rect);
     int setUsage(uint32_t reqUsage);
 
@@ -113,6 +115,11 @@ private:
     // mReqUsage is the set of buffer usage flags that will be requested
     // at the next deuque operation. It is initialized to 0.
     uint32_t mReqUsage;
+
+    // mTimestamp is the timestamp that will be used for the next buffer queue
+    // operation. It defaults to NATIVE_WINDOW_TIMESTAMP_AUTO, which means that
+    // a timestamp is auto-generated when queueBuffer is called.
+    int64_t mTimestamp;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the

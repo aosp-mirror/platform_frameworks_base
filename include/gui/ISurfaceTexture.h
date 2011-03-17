@@ -62,8 +62,11 @@ public:
     // contents of the buffer associated with slot and transfers ownership of
     // that slot back to the server. It is not valid to call queueBuffer on a
     // slot that is not owned by the client or one for which a buffer associated
-    // via requestBuffer.
-    virtual status_t queueBuffer(int slot) = 0;
+    // via requestBuffer. In addition, a timestamp must be provided by the
+    // client for this buffer. The timestamp is measured in nanoseconds, and
+    // must be monotonically increasing. Its other properties (zero point, etc)
+    // are client-dependent, and should be documented by the client.
+    virtual status_t queueBuffer(int slot, int64_t timestamp) = 0;
 
     // cancelBuffer indicates that the client does not wish to fill in the
     // buffer associated with slot and transfers ownership of the slot back to

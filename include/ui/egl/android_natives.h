@@ -57,7 +57,7 @@ typedef struct android_native_base_t
 {
     /* a magic value defined by the actual EGL native type */
     int magic;
-    
+
     /* the sizeof() of the actual EGL native type */
     int version;
 
@@ -129,6 +129,7 @@ enum {
     NATIVE_WINDOW_SET_BUFFER_COUNT,
     NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
     NATIVE_WINDOW_SET_BUFFERS_TRANSFORM,
+    NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP,
 };
 
 /* parameter for NATIVE_WINDOW_[DIS]CONNECT */
@@ -157,7 +158,15 @@ enum {
     NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT,       // SurfaceTextureClient
 };
 
-struct ANativeWindow 
+/* parameter for NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP
+ *
+ * Special timestamp value to indicate that timestamps should be auto-generated
+ * by the native window when queueBuffer is called.  This is equal to INT64_MIN,
+ * defined directly to avoid problems with C99/C++ inclusion of stdint.h.
+ */
+const int64_t NATIVE_WINDOW_TIMESTAMP_AUTO = (-9223372036854775807LL-1);
+
+struct ANativeWindow
 {
 #ifdef __cplusplus
     ANativeWindow()
@@ -262,7 +271,8 @@ struct ANativeWindow
      *     NATIVE_WINDOW_SET_BUFFER_COUNT
      *     NATIVE_WINDOW_SET_BUFFERS_GEOMETRY
      *     NATIVE_WINDOW_SET_BUFFERS_TRANSFORM
-     *  
+     *     NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP
+     *
      */
     
     int     (*perform)(struct ANativeWindow* window,
@@ -387,6 +397,22 @@ static inline int native_window_set_buffers_transform(
 {
     return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_TRANSFORM,
             transform);
+}
+
+/*
+ * native_window_set_buffers_timestamp(..., int64_t timestamp)
+ * All buffers queued after this call will be associated with the timestamp
+ * parameter specified. If the timestamp is set to NATIVE_WINDOW_TIMESTAMP_AUTO
+ * (the default), timestamps will be generated automatically when queueBuffer is
+ * called. The timestamp is measured in nanoseconds, and must be monotonically
+ * increasing.
+ */
+static inline int native_window_set_buffers_timestamp(
+        ANativeWindow* window,
+        int64_t timestamp)
+{
+    return window->perform(window, NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP,
+            timestamp);
 }
 
 // ---------------------------------------------------------------------------

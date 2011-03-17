@@ -623,6 +623,11 @@ public class MediaPlayer
      * being played. Note that if a SurfaceTexture is used, the value
      * set via setScreenOnWhilePlaying has no effect.
      *
+     * The timestamps provided by {@link SurfaceTexture#getTimestamp()} for a
+     * SurfaceTexture set as the video sink have an unspecified zero point,
+     * and cannot be directly compared between different media sources or different
+     * instances of the same media source, or across multiple runs of the same
+     * program.
      * @hide
      */
     public void setTexture(SurfaceTexture st) {

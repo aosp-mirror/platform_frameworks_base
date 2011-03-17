@@ -26,7 +26,8 @@ namespace android {
 SurfaceTextureClient::SurfaceTextureClient(
         const sp<ISurfaceTexture>& surfaceTexture):
         mSurfaceTexture(surfaceTexture), mAllocator(0), mReqWidth(1),
-        mReqHeight(1), mReqFormat(DEFAULT_FORMAT), mReqUsage(0), mMutex() {
+        mReqHeight(1), mReqFormat(DEFAULT_FORMAT), mReqUsage(0),
+        mTimestamp(NATIVE_WINDOW_TIMESTAMP_AUTO), mMutex() {
     // Initialize the ANativeWindow function pointers.
     ANativeWindow::setSwapInterval  = setSwapInterval;
     ANativeWindow::dequeueBuffer    = dequeueBuffer;
@@ -135,9 +136,17 @@ int SurfaceTextureClient::lockBuffer(android_native_buffer_t* buffer) {
 int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
     LOGV("SurfaceTextureClient::queueBuffer");
     Mutex::Autolock lock(mMutex);
+    int64_t timestamp;
+    if (mTimestamp == NATIVE_WINDOW_TIMESTAMP_AUTO) {
+        timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+        LOGV("SurfaceTextureClient::queueBuffer making up timestamp: %.2f ms",
+             timestamp / 1000000.f);
+    } else {
+        timestamp = mTimestamp;
+    }
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         if (mSlots[i]->handle == buffer->handle) {
-            return mSurfaceTexture->queueBuffer(i);
+            return mSurfaceTexture->queueBuffer(i, timestamp);
         }
     }
     LOGE("queueBuffer: unknown buffer queued");
@@ -196,6 +205,9 @@ int SurfaceTextureClient::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
         res = dispatchSetBuffersTransform(args);
         break;
+    case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
+        res = dispatchSetBuffersTimestamp(args);
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
@@ -238,6 +250,11 @@ int SurfaceTextureClient::dispatchSetBuffersGeometry(va_list args) {
 int SurfaceTextureClient::dispatchSetBuffersTransform(va_list args) {
     int transform = va_arg(args, int);
     return setBuffersTransform(transform);
+}
+
+int SurfaceTextureClient::dispatchSetBuffersTimestamp(va_list args) {
+    int64_t timestamp = va_arg(args, int64_t);
+    return setBuffersTimestamp(timestamp);
 }
 
 int SurfaceTextureClient::connect(int api) {
@@ -321,6 +338,14 @@ int SurfaceTextureClient::setBuffersTransform(int transform)
     Mutex::Autolock lock(mMutex);
     status_t err = mSurfaceTexture->setTransform(transform);
     return err;
+}
+
+int SurfaceTextureClient::setBuffersTimestamp(int64_t timestamp)
+{
+    LOGV("SurfaceTextureClient::setBuffersTimestamp");
+    Mutex::Autolock lock(mMutex);
+    mTimestamp = timestamp;
+    return NO_ERROR;
 }
 
 void SurfaceTextureClient::freeAllBuffers() {

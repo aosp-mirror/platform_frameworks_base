@@ -66,7 +66,12 @@ public:
     // unmodified.
     virtual status_t dequeueBuffer(int *buf);
 
-    virtual status_t queueBuffer(int buf);
+    // queueBuffer returns a filled buffer to the SurfaceTexture. In addition, a
+    // timestamp must be provided for the buffer. The timestamp is in
+    // nanoseconds, and must be monotonically increasing. Its other semantics
+    // (zero point, etc) are client-dependent and should be documented by the
+    // client.
+    virtual status_t queueBuffer(int buf, int64_t timestamp);
     virtual void cancelBuffer(int buf);
     virtual status_t setCrop(const Rect& reg);
     virtual status_t setTransform(uint32_t transform);
@@ -97,6 +102,14 @@ public:
     // directly to OpenGL ES via the glLoadMatrixf or glUniformMatrix4fv
     // functions.
     void getTransformMatrix(float mtx[16]);
+
+    // getTimestamp retrieves the timestamp associated with the texture image
+    // set by the most recent call to updateTexImage.
+    //
+    // The timestamp is in nanoseconds, and is monotonically increasing. Its
+    // other semantics (zero point, etc) are source-dependent and should be
+    // documented by the source.
+    int64_t getTimestamp();
 
     // setFrameAvailableListener sets the listener object that will be notified
     // when a new frame becomes available.
@@ -172,6 +185,10 @@ private:
     // gets set to mLastQueuedTransform each time updateTexImage is called.
     uint32_t mCurrentTransform;
 
+    // mCurrentTimestamp is the timestamp for the current texture. It
+    // gets set to mLastQueuedTimestamp each time updateTexImage is called.
+    int64_t mCurrentTimestamp;
+
     // mLastQueued is the buffer slot index of the most recently enqueued buffer.
     // At construction time it is initialized to INVALID_BUFFER_SLOT, and is
     // updated each time queueBuffer is called.
@@ -186,6 +203,10 @@ private:
     // most recently queued. This gets set to mNextTransform each time
     // queueBuffer gets called.
     uint32_t mLastQueuedTransform;
+
+    // mLastQueuedTimestamp is the timestamp for the buffer that was most
+    // recently queued. This gets set by queueBuffer.
+    int64_t mLastQueuedTimestamp;
 
     // mNextCrop is the crop rectangle that will be used for the next buffer
     // that gets queued. It is set by calling setCrop.
