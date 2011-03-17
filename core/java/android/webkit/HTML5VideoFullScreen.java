@@ -25,7 +25,30 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     implements MediaPlayerControl, MediaPlayer.OnPreparedListener,
     View.OnTouchListener {
 
-    private SurfaceView mSurfaceView;
+    // Add this sub-class to handle the resizing when rotating screen.
+    private class VideoSurfaceView extends SurfaceView {
+
+        public VideoSurfaceView(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            int width = getDefaultSize(mVideoWidth, widthMeasureSpec);
+            int height = getDefaultSize(mVideoHeight, heightMeasureSpec);
+            if (mVideoWidth > 0 && mVideoHeight > 0) {
+                if ( mVideoWidth * height  > width * mVideoHeight ) {
+                    height = width * mVideoHeight / mVideoWidth;
+                } else if ( mVideoWidth * height  < width * mVideoHeight ) {
+                    width = height * mVideoWidth / mVideoHeight;
+                }
+            }
+            setMeasuredDimension(width, height);
+        }
+    }
+
+    // This view will contain the video.
+    private VideoSurfaceView mVideoSurfaceView;
 
     // We need the full screen state to decide which surface to render to and
     // when to create the MediaPlayer accordingly.
@@ -50,6 +73,11 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     private static View mProgressView;
     // The container for the progress view and video view
     private static FrameLayout mLayout;
+
+    // The video size will be ready when prepared. Used to make sure the aspect
+    // ratio is correct.
+    private int mVideoWidth;
+    private int mVideoHeight;
 
     SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback()
     {
@@ -82,14 +110,16 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         }
     };
 
-    public SurfaceView getSurfaceView() {
-        return mSurfaceView;
+    private SurfaceView getSurfaceView() {
+        return mVideoSurfaceView;
     }
 
     HTML5VideoFullScreen(Context context, int videoLayerId, int position,
             boolean autoStart) {
-        mSurfaceView = new SurfaceView(context);
+        mVideoSurfaceView = new VideoSurfaceView(context);
         mFullScreenMode = FULLSCREEN_OFF;
+        mVideoWidth = 0;
+        mVideoHeight = 0;
         init(videoLayerId, position, autoStart);
     }
 
@@ -101,7 +131,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     private void attachMediaController() {
         if (mPlayer != null && mMediaController != null) {
             mMediaController.setMediaPlayer(this);
-            mMediaController.setAnchorView(mSurfaceView);
+            mMediaController.setAnchorView(mVideoSurfaceView);
             //Will be enabled when prepared
             mMediaController.setEnabled(false);
         }
@@ -112,8 +142,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mPlayer.setDisplay(mSurfaceHolder);
     }
 
-    @Override
-    public void prepareForFullScreen() {
+    private void prepareForFullScreen() {
         // So in full screen, we reset the MediaPlayer
         mPlayer.reset();
         setMediaController(new MediaController(mProxy.getContext()));
@@ -134,7 +163,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
     public void onPrepared(MediaPlayer mp) {
         super.onPrepared(mp);
 
-        mSurfaceView.setOnTouchListener(this);
+        mVideoSurfaceView.setOnTouchListener(this);
         // Get the capabilities of the player for this stream
         Metadata data = mp.getMetadata(MediaPlayer.METADATA_ALL,
                 MediaPlayer.BYPASS_METADATA_FILTER);
@@ -165,6 +194,11 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             mLayout.removeView(mProgressView);
             mProgressView = null;
         }
+
+        mVideoWidth = mp.getVideoWidth();
+        mVideoHeight = mp.getVideoHeight();
+        // This will trigger the onMeasure to get the display size right.
+        mVideoSurfaceView.getHolder().setFixedSize(mVideoWidth, mVideoHeight);
     }
 
 
@@ -202,11 +236,11 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
         mProxy = proxy;
 
-        mSurfaceView.getHolder().addCallback(mSHCallback);
-        mSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        mSurfaceView.setFocusable(true);
-        mSurfaceView.setFocusableInTouchMode(true);
-        mSurfaceView.requestFocus();
+        mVideoSurfaceView.getHolder().addCallback(mSHCallback);
+        mVideoSurfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        mVideoSurfaceView.setFocusable(true);
+        mVideoSurfaceView.setFocusableInTouchMode(true);
+        mVideoSurfaceView.requestFocus();
 
         // Create a FrameLayout that will contain the VideoView and the
         // progress view (if any).
