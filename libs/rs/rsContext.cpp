@@ -630,6 +630,7 @@ Context::Context() {
     mPaused = false;
     mObjHead = NULL;
     mError = RS_ERROR_NONE;
+    mDPI = 96;
 }
 
 Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc) {
@@ -1078,10 +1079,12 @@ RsContext rsContextCreate(RsDevice vdev, uint32_t version) {
     return rsc;
 }
 
-RsContext rsContextCreateGL(RsDevice vdev, uint32_t version, RsSurfaceConfig sc) {
+RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
+                            RsSurfaceConfig sc, uint32_t dpi) {
     LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, &sc);
+    rsc->setDPI(dpi);
     LOGV("rsContextCreateGL ret %p ", rsc);
     return rsc;
 }

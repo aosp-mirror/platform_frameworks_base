@@ -733,7 +733,7 @@ void FontState::renderText(const char *text, uint32_t len, int32_t x, int32_t y,
             String8 fullPath(getenv("ANDROID_ROOT"));
             fullPath += fontsDir;
 
-            mDefault.set(Font::create(mRSC, fullPath.string(), 16, 96));
+            mDefault.set(Font::create(mRSC, fullPath.string(), 8, mRSC->getDPI()));
         }
         currentFont = mDefault.get();
     }
