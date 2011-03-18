@@ -52,7 +52,7 @@ static const int64_t kVideoMediaTimeAdjustPeriodTimeUs = 600000000LL;  // 10 min
 
 class MPEG4Writer::Track {
 public:
-    Track(MPEG4Writer *owner, const sp<MediaSource> &source);
+    Track(MPEG4Writer *owner, const sp<MediaSource> &source, size_t trackId);
 
     ~Track();
 
@@ -82,6 +82,7 @@ private:
     bool mIsAvc;
     bool mIsAudio;
     bool mIsMPEG4;
+    int32_t mTrackId;
     int64_t mTrackDurationUs;
 
     // For realtime applications, we need to adjust the media clock
@@ -295,7 +296,12 @@ status_t MPEG4Writer::Track::dump(
 }
 
 status_t MPEG4Writer::addSource(const sp<MediaSource> &source) {
-    Track *track = new Track(this, source);
+    Mutex::Autolock l(mLock);
+    if (mStarted) {
+        LOGE("Attempt to add source AFTER recording is started");
+        return UNKNOWN_ERROR;
+    }
+    Track *track = new Track(this, source, mTracks.size());
     mTracks.push_back(track);
 
     return OK;
@@ -945,7 +951,7 @@ size_t MPEG4Writer::numTracks() {
 ////////////////////////////////////////////////////////////////////////////////
 
 MPEG4Writer::Track::Track(
-        MPEG4Writer *owner, const sp<MediaSource> &source)
+        MPEG4Writer *owner, const sp<MediaSource> &source, size_t trackId)
     : mOwner(owner),
       mMeta(source->getFormat()),
       mSource(source),
@@ -953,6 +959,7 @@ MPEG4Writer::Track::Track(
       mPaused(false),
       mResumed(false),
       mStarted(false),
+      mTrackId(trackId),
       mTrackDurationUs(0),
       mEstimatedTrackSizeBytes(0),
       mSamplesHaveSameSize(true),
@@ -2030,7 +2037,7 @@ status_t MPEG4Writer::Track::threadEntry() {
         (OK != checkCodecSpecificData())) {          // no codec specific data
         err = ERROR_MALFORMED;
     }
-    mOwner->trackProgressStatus(this, -1, err);
+    mOwner->trackProgressStatus(mTrackId, -1, err);
 
     // Last chunk
     if (mOwner->numTracks() == 1) {
@@ -2077,41 +2084,34 @@ void MPEG4Writer::Track::trackProgressStatus(int64_t timeUs, status_t err) {
     if (mTrackEveryTimeDurationUs > 0 &&
         timeUs - mPreviousTrackTimeUs >= mTrackEveryTimeDurationUs) {
         LOGV("Fire time tracking progress status at %lld us", timeUs);
-        mOwner->trackProgressStatus(this, timeUs - mPreviousTrackTimeUs, err);
+        mOwner->trackProgressStatus(mTrackId, timeUs - mPreviousTrackTimeUs, err);
         mPreviousTrackTimeUs = timeUs;
     }
 }
 
 void MPEG4Writer::trackProgressStatus(
-        const MPEG4Writer::Track* track, int64_t timeUs, status_t err) {
+        size_t trackId, int64_t timeUs, status_t err) {
     Mutex::Autolock lock(mLock);
-    int32_t nTracks = mTracks.size();
-    CHECK(nTracks >= 1);
-    CHECK(nTracks < 64);  // Arbitrary number
-
-    int32_t trackNum = 0;
-    CHECK(trackNum < nTracks);
-    trackNum <<= 16;
+    int32_t trackNum = (trackId << 28);
 
     // Error notification
     // Do not consider ERROR_END_OF_STREAM an error
     if (err != OK && err != ERROR_END_OF_STREAM) {
-        notify(MEDIA_RECORDER_EVENT_ERROR,
-               trackNum | MEDIA_RECORDER_ERROR_UNKNOWN,
+        notify(MEDIA_RECORDER_TRACK_EVENT_ERROR,
+               trackNum | MEDIA_RECORDER_TRACK_ERROR_GENERAL,
                err);
         return;
     }
 
     if (timeUs == -1) {
         // Send completion notification
-        notify(MEDIA_RECORDER_EVENT_INFO,
-               trackNum | MEDIA_RECORDER_INFO_COMPLETION_STATUS,
+        notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+               trackNum | MEDIA_RECORDER_TRACK_INFO_COMPLETION_STATUS,
                err);
-        return;
     } else {
         // Send progress status
-        notify(MEDIA_RECORDER_EVENT_INFO,
-               trackNum | MEDIA_RECORDER_INFO_PROGRESS_TIME_STATUS,
+        notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+               trackNum | MEDIA_RECORDER_TRACK_INFO_PROGRESS_IN_TIME,
                timeUs / 1000);
     }
 }
