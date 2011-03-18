@@ -202,12 +202,12 @@ public class Build {
         public static final int GINGERBREAD = 9;
         
         /**
-         * Almost newest version of Android, version 2.3.3.
+         * February 2011: Android 2.3.3.
          */
         public static final int GINGERBREAD_MR1 = 10;
 
         /**
-         * Newest version of Android, version 3.0.
+         * February 2011: Android 3.0.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -225,6 +225,11 @@ public class Build {
          * </ul>
          */
         public static final int HONEYCOMB = 11;
+        
+        /**
+         * Newest version of Android, version 3.1.
+         */
+        public static final int HONEYCOMB_MR1 = 12;
     }
     
     /** The type of build, like "user" or "eng". */
