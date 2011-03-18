@@ -646,13 +646,11 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 #if RENDER_LAYERS_AS_REGIONS
-#if RENDER_LAYERS_RECT_AS_RECT
     if (layer->region.isRect()) {
-        composeLayerRect(layer, rect);
+        composeLayerRect(layer, layer->regionRect);
         layer->region.clear();
         return;
     }
-#endif
 
     if (!layer->region.isEmpty()) {
         size_t count;
@@ -1658,14 +1656,9 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
 
 #if RENDER_LAYERS_AS_REGIONS
     if (!layer->region.isEmpty()) {
-#if RENDER_LAYERS_RECT_AS_RECT
         if (layer->region.isRect()) {
-            const Rect r(x, y, x + layer->layer.getWidth(), y + layer->layer.getHeight());
-            composeLayerRect(layer, r);
+            composeLayerRect(layer, layer->regionRect);
         } else if (layer->mesh) {
-#else
-        if (layer->mesh) {
-#endif
             const float a = alpha / 255.0f;
             const Rect& rect = layer->layer;
 
@@ -1675,13 +1668,11 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
             setupDrawColorFilter();
             setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
             setupDrawProgram();
+            setupDrawModelViewTranslate(x, y,
+                    x + layer->layer.getWidth(), y + layer->layer.getHeight());
             setupDrawPureColorUniforms();
             setupDrawColorFilterUniforms();
             setupDrawTexture(layer->texture);
-            // TODO: The current layer, if any, will be dirtied with the bounding box
-            //       of the layer we are drawing. Since the layer we are drawing has
-            //       a mesh, we know the dirty region, we should use it instead
-            setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
             setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
 
             glDrawElements(GL_TRIANGLES, layer->meshElementCount,

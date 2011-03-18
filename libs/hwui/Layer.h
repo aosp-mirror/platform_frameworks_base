@@ -103,6 +103,11 @@ struct Layer {
      * have been drawn.
      */
     Region region;
+    /**
+     * If the region is a rectangle, coordinates of the
+     * region are stored here.
+     */
+    Rect regionRect;
 
     /**
      * Color filter used to draw this layer. Optional.
