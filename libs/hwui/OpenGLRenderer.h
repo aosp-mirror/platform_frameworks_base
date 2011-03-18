@@ -279,6 +279,8 @@ private:
     void drawShape(float left, float top, const PathTexture* texture, SkPaint* paint);
     void drawRectAsShape(float left, float top, float right, float bottom, SkPaint* p);
 
+    void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
+
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
