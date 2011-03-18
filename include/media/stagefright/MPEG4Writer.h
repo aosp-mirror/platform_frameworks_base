@@ -157,7 +157,7 @@ private:
     bool use32BitFileOffset() const;
     bool exceedsFileDurationLimit();
     bool isFileStreamable() const;
-    void trackProgressStatus(const Track* track, int64_t timeUs, status_t err = OK);
+    void trackProgressStatus(size_t trackId, int64_t timeUs, status_t err = OK);
     void writeCompositionMatrix(int32_t degrees);
 
     MPEG4Writer(const MPEG4Writer &);

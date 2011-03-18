@@ -104,35 +104,62 @@ enum video_encoder {
 };
 
 /*
- * The state machine of the media_recorder uses a set of different state names.
- * The mapping between the media_recorder and the pvauthorengine is shown below:
- *
- *    mediarecorder                        pvauthorengine
- * ----------------------------------------------------------------
- *    MEDIA_RECORDER_ERROR                 ERROR
- *    MEDIA_RECORDER_IDLE                  IDLE
- *    MEDIA_RECORDER_INITIALIZED           OPENED
- *    MEDIA_RECORDER_DATASOURCE_CONFIGURED
- *    MEDIA_RECORDER_PREPARED              INITIALIZED
- *    MEDIA_RECORDER_RECORDING             RECORDING
+ * The state machine of the media_recorder.
  */
 enum media_recorder_states {
+    // Error state.
     MEDIA_RECORDER_ERROR                 =      0,
+
+    // Recorder was just created.
     MEDIA_RECORDER_IDLE                  = 1 << 0,
+
+    // Recorder has been initialized.
     MEDIA_RECORDER_INITIALIZED           = 1 << 1,
+
+    // Configuration of the recorder has been completed.
     MEDIA_RECORDER_DATASOURCE_CONFIGURED = 1 << 2,
+
+    // Recorder is ready to start.
     MEDIA_RECORDER_PREPARED              = 1 << 3,
+
+    // Recording is in progress.
     MEDIA_RECORDER_RECORDING             = 1 << 4,
 };
 
 // The "msg" code passed to the listener in notify.
 enum media_recorder_event_type {
+    MEDIA_RECORDER_EVENT_LIST_START               = 1,
     MEDIA_RECORDER_EVENT_ERROR                    = 1,
-    MEDIA_RECORDER_EVENT_INFO                     = 2
+    MEDIA_RECORDER_EVENT_INFO                     = 2,
+    MEDIA_RECORDER_EVENT_LIST_END                 = 99,
+
+    // Track related event types
+    MEDIA_RECORDER_TRACK_EVENT_LIST_START         = 100,
+    MEDIA_RECORDER_TRACK_EVENT_ERROR              = 100,
+    MEDIA_RECORDER_TRACK_EVENT_INFO               = 101,
+    MEDIA_RECORDER_TRACK_EVENT_LIST_END           = 1000,
 };
 
+/*
+ * The (part of) "what" code passed to the listener in notify.
+ * When the error or info type is track specific, the what has
+ * the following layout:
+ * the left-most 16-bit is meant for error or info type.
+ * the right-most 4-bit is meant for track id.
+ * the rest is reserved.
+ *
+ * | track id | reserved |     error or info type     |
+ * 31         28         16                           0
+ *
+ */
 enum media_recorder_error_type {
-    MEDIA_RECORDER_ERROR_UNKNOWN                  = 1
+    MEDIA_RECORDER_ERROR_UNKNOWN                   = 1,
+
+    // Track related error type
+    MEDIA_RECORDER_TRACK_ERROR_LIST_START          = 100,
+    MEDIA_RECORDER_TRACK_ERROR_GENERAL             = 100,
+    MEDIA_RECORDER_ERROR_VIDEO_NO_SYNC_FRAME       = 200,
+    MEDIA_RECORDER_TRACK_ERROR_LIST_END            = 1000,
 };
 
 // The codes are distributed as follow:
@@ -141,11 +168,15 @@ enum media_recorder_error_type {
 //
 enum media_recorder_info_type {
     MEDIA_RECORDER_INFO_UNKNOWN                   = 1,
+
     MEDIA_RECORDER_INFO_MAX_DURATION_REACHED      = 800,
     MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED      = 801,
-    MEDIA_RECORDER_INFO_COMPLETION_STATUS         = 802,
-    MEDIA_RECORDER_INFO_PROGRESS_FRAME_STATUS     = 803,
-    MEDIA_RECORDER_INFO_PROGRESS_TIME_STATUS      = 804,
+
+    // All track related informtional events start here
+    MEDIA_RECORDER_TRACK_INFO_LIST_START           = 1000,
+    MEDIA_RECORDER_TRACK_INFO_COMPLETION_STATUS    = 1000,
+    MEDIA_RECORDER_TRACK_INFO_PROGRESS_IN_TIME     = 1001,
+    MEDIA_RECORDER_TRACK_INFO_LIST_END             = 2000,
 };
 
 // ----------------------------------------------------------------------------

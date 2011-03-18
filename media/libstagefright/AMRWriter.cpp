@@ -269,7 +269,7 @@ status_t AMRWriter::threadFunc() {
     }
 
     if (stoppedPrematurely) {
-        notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_INFO_COMPLETION_STATUS, UNKNOWN_ERROR);
+        notify(MEDIA_RECORDER_EVENT_INFO, MEDIA_RECORDER_TRACK_INFO_COMPLETION_STATUS, UNKNOWN_ERROR);
     }
 
     close(mFd);
