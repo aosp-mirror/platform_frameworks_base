@@ -831,6 +831,7 @@ final class WebViewCore {
         int mAction;
         int[] mIds;  // Ids of the touch points
         Point[] mPoints;
+        Point[] mPointsInView;  // the point coordinates in view axis.
         int mActionIndex;  // Associated pointer index for ACTION_POINTER_DOWN/UP
         int mMetaState;
         boolean mReprocess;
