@@ -218,14 +218,10 @@ int Looper::pollInner(int timeoutMillis) {
     // Adjust the timeout based on when the next message is due.
     if (timeoutMillis != 0 && mNextMessageUptime != LLONG_MAX) {
         nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
-        if (mNextMessageUptime <= now) {
-            timeoutMillis = 0;
-        } else {
-            uint64_t delay = (mNextMessageUptime - now + 999999LL) / 1000000LL;
-            if (delay < INT_MAX
-                    && (timeoutMillis < 0 || int(delay) < timeoutMillis)) {
-                timeoutMillis = int(delay);
-            }
+        int messageTimeoutMillis = toMillisecondTimeoutDelay(now, mNextMessageUptime);
+        if (messageTimeoutMillis >= 0
+                && (timeoutMillis < 0 || messageTimeoutMillis < timeoutMillis)) {
+            timeoutMillis = messageTimeoutMillis;
         }
 #if DEBUG_POLL_AND_WAKE
         LOGD("%p ~ pollOnce - next message in %lldns, adjusted timeout: timeoutMillis=%d",
@@ -444,12 +440,11 @@ int Looper::pollAll(int timeoutMillis, int* outFd, int* outEvents, void** outDat
                 return result;
             }
 
-            nsecs_t timeoutNanos = endTime - systemTime(SYSTEM_TIME_MONOTONIC);
-            if (timeoutNanos <= 0) {
+            nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+            timeoutMillis = toMillisecondTimeoutDelay(now, endTime);
+            if (timeoutMillis == 0) {
                 return ALOOPER_POLL_TIMEOUT;
             }
-
-            timeoutMillis = int(nanoseconds_to_milliseconds(timeoutNanos + 999999LL));
         }
     }
 }
