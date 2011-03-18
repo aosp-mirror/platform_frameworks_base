@@ -31,18 +31,21 @@ class Script;
 class ScriptC;
 
 
-typedef struct RsHalRec RsHal;
-
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
+typedef struct ScriptTLSStructRec {
+    Context * mContext;
+    Script * mScript;
+} ScriptTLSStruct;
 
 
 /**
  * Script management functions
  */
 typedef struct {
-    void (*shutdownDriver)(RsHal dc);
+    void (*shutdownDriver)(Context *);
     void (*getVersion)(unsigned int *major, unsigned int *minor);
+    void (*setPriority)(const Context *, int32_t priority);
 
 
 
@@ -55,12 +58,19 @@ typedef struct {
                            uint32_t flags,
                            RsHalSymbolLookupFunc lookupFunc);
 
-        void (*invokeFunction)(const Context *rsc, const Script *s,
+        void (*invokeFunction)(const Context *rsc, Script *s,
                                uint32_t slot,
                                const void *params,
                                size_t paramLength);
-        int (*invokeRoot)(const Context *rsc, const Script *s);
-        void (*invokeInit)(const Context *rsc, const Script *s);
+        int (*invokeRoot)(const Context *rsc, Script *s);
+        void (*invokeForEach)(const Context *rsc,
+                              Script *s,
+                              const Allocation * ain,
+                              Allocation * aout,
+                              const void * usr,
+                              uint32_t usrLen,
+                              const RsScriptCall *sc);
+        void (*invokeInit)(const Context *rsc, Script *s);
 
         void (*setGlobalVar)(const Context *rsc, const Script *s,
                              uint32_t slot,

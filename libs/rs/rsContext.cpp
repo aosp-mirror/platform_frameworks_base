@@ -554,56 +554,6 @@ void Context::destroyWorkerThreadResources() {
     mExit = true;
 }
 
-void * Context::helperThreadProc(void *vrsc) {
-     Context *rsc = static_cast<Context *>(vrsc);
-     uint32_t idx = (uint32_t)android_atomic_inc(&rsc->mWorkers.mLaunchCount);
-
-     //LOGV("RS helperThread starting %p idx=%i", rsc, idx);
-
-     rsc->mWorkers.mLaunchSignals[idx].init();
-     rsc->mWorkers.mNativeThreadId[idx] = gettid();
-
-#if 0
-     typedef struct {uint64_t bits[1024 / 64]; } cpu_set_t;
-     cpu_set_t cpuset;
-     memset(&cpuset, 0, sizeof(cpuset));
-     cpuset.bits[idx / 64] |= 1ULL << (idx % 64);
-     int ret = syscall(241, rsc->mWorkers.mNativeThreadId[idx],
-               sizeof(cpuset), &cpuset);
-     LOGE("SETAFFINITY ret = %i %s", ret, EGLUtils::strerror(ret));
-#endif
-
-     setpriority(PRIO_PROCESS, rsc->mWorkers.mNativeThreadId[idx], rsc->mThreadPriority);
-     int status = pthread_setspecific(rsc->gThreadTLSKey, rsc->mTlsStruct);
-     if (status) {
-         LOGE("pthread_setspecific %i", status);
-     }
-
-     while (!rsc->mExit) {
-         rsc->mWorkers.mLaunchSignals[idx].wait();
-         if (rsc->mWorkers.mLaunchCallback) {
-            rsc->mWorkers.mLaunchCallback(rsc->mWorkers.mLaunchData, idx);
-         }
-         android_atomic_dec(&rsc->mWorkers.mRunningCount);
-         rsc->mWorkers.mCompleteSignal.set();
-     }
-
-     //LOGV("RS helperThread exited %p idx=%i", rsc, idx);
-     return NULL;
-}
-
-void Context::launchThreads(WorkerCallback_t cbk, void *data) {
-    mWorkers.mLaunchData = data;
-    mWorkers.mLaunchCallback = cbk;
-    android_atomic_release_store(mWorkers.mCount, &mWorkers.mRunningCount);
-    for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
-        mWorkers.mLaunchSignals[ct].set();
-    }
-    while (android_atomic_acquire_load(&mWorkers.mRunningCount) != 0) {
-        mWorkers.mCompleteSignal.wait();
-    }
-}
-
 void Context::setPriority(int32_t p) {
     // Note: If we put this in the proper "background" policy
     // the wallpapers can become completly unresponsive at times.
@@ -620,9 +570,6 @@ void Context::setPriority(int32_t p) {
     }
 #else
     setpriority(PRIO_PROCESS, mNativeThreadId, p);
-    for (uint32_t ct=0; ct < mWorkers.mCount; ct++) {
-        setpriority(PRIO_PROCESS, mWorkers.mNativeThreadId[ct], p);
-    }
 #endif
 }
 
@@ -691,16 +638,8 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     if (!rsdHalInit(this, 0, 0)) {
         return false;
     }
+    mHal.funcs.setPriority(this, mThreadPriority);
 
-    int cpu = sysconf(_SC_NPROCESSORS_ONLN);
-    LOGV("RS Launching thread(s), reported CPU count %i", cpu);
-    if (cpu < 2) cpu = 0;
-
-    mWorkers.mCount = (uint32_t)cpu;
-    mWorkers.mThreadId = (pthread_t *) calloc(mWorkers.mCount, sizeof(pthread_t));
-    mWorkers.mNativeThreadId = (pid_t *) calloc(mWorkers.mCount, sizeof(pid_t));
-    mWorkers.mLaunchSignals = new Signal[mWorkers.mCount];
-    mWorkers.mLaunchCallback = NULL;
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
         LOGE("Failed to start rs context thread.");
@@ -714,20 +653,6 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
         return false;
     }
 
-    mWorkers.mCompleteSignal.init();
-    android_atomic_release_store(mWorkers.mCount, &mWorkers.mRunningCount);
-    android_atomic_release_store(0, &mWorkers.mLaunchCount);
-    for (uint32_t ct=0; ct < mWorkers.mCount; ct++) {
-        status = pthread_create(&mWorkers.mThreadId[ct], &threadAttr, helperThreadProc, this);
-        if (status) {
-            mWorkers.mCount = ct;
-            LOGE("Created fewer than expected number of RS threads.");
-            break;
-        }
-    }
-    while (android_atomic_acquire_load(&mWorkers.mRunningCount) != 0) {
-        usleep(100);
-    }
     pthread_attr_destroy(&threadAttr);
     return true;
 }
@@ -744,17 +669,10 @@ Context::~Context() {
     mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
 
-    // Cleanup compute threads.
-    mWorkers.mLaunchData = NULL;
-    mWorkers.mLaunchCallback = NULL;
-    android_atomic_release_store(mWorkers.mCount, &mWorkers.mRunningCount);
-    for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
-        mWorkers.mLaunchSignals[ct].set();
+
+    if (mHal.funcs.shutdownDriver) {
+        mHal.funcs.shutdownDriver(this);
     }
-    for (uint32_t ct = 0; ct < mWorkers.mCount; ct++) {
-        status = pthread_join(mWorkers.mThreadId[ct], &res);
-    }
-    rsAssert(android_atomic_acquire_load(&mWorkers.mRunningCount) == 0);
 
     // Global structure cleanup.
     pthread_mutex_lock(&gInitMutex);

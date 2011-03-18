@@ -20,28 +20,36 @@
 #include <rs_hal.h>
 #include <bcc/bcc.h>
 
-typedef void (* InvokeFunc_t)(void);
+#include "rsMutex.h"
+#include "rsSignal.h"
 
-struct RsHalRec {
+
+typedef void (* InvokeFunc_t)(void);
+typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
+
+typedef struct RsHalRec {
     uint32_t version_major;
     uint32_t version_minor;
-};
 
-struct RsHalProgramStoreRec {
-};
+    struct Workers {
+        volatile int mRunningCount;
+        volatile int mLaunchCount;
+        uint32_t mCount;
+        pthread_t *mThreadId;
+        pid_t *mNativeThreadId;
+        android::renderscript::Signal mCompleteSignal;
 
-struct RsHalProgramRasterRec {
-};
-
-struct RsHalProgramVertexRec {
-};
-
-struct RsHalProgramFragmentRec {
-
-};
+        android::renderscript::Signal *mLaunchSignals;
+        WorkerCallback_t mLaunchCallback;
+        void *mLaunchData;
+    };
+    Workers mWorkers;
+    bool mExit;
+} RsHal;
 
 
 
+void rsdLaunchThreads(android::renderscript::Context *rsc, WorkerCallback_t cbk, void *data);
 
 #endif
 

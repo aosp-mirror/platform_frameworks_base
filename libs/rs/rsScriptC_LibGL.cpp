@@ -32,8 +32,8 @@
 using namespace android;
 using namespace android::renderscript;
 
-#define GET_TLS()  Context::ScriptTLSStruct * tls = \
-    (Context::ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey); \
+#define GET_TLS()  ScriptTLSStruct * tls = \
+    (ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey); \
     Context * rsc = tls->mContext; \
     ScriptC * sc = (ScriptC *) tls->mScript
 

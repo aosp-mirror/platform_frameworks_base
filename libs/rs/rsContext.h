@@ -43,7 +43,6 @@
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
 
-
 #include <ui/egl/android_natives.h>
 #endif // ANDROID_RS_SERIALIZE
 
@@ -91,15 +90,6 @@ public:
     // Library mutex (for providing thread-safe calls from the runtime)
     static pthread_mutex_t gLibMutex;
 
-    struct ScriptTLSStruct {
-        Context * mContext;
-        Script * mScript;
-    };
-
-    //const RsHalComputeFunctions *mHalComputeFuncs;
-    //const RsHalGraphicsFunctions *mHalGraphicsFuncs;
-    //RsHal *mHal;
-
     class PushState {
     public:
         PushState(Context *);
@@ -117,9 +107,6 @@ public:
     ScriptTLSStruct *mTlsStruct;
     RsSurfaceConfig mUserSurfaceConfig;
 
-    typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
-
-    //StructuredAllocationContext mStateAllocation;
     ElementState mStateElement;
     TypeState mStateType;
     SamplerState mStateSampler;
@@ -230,8 +217,6 @@ public:
     uint32_t getMaxVertexUniformVectors() const {return mGL.mMaxVertexUniformVectors;}
     uint32_t getMaxVertexAttributes() const {return mGL.mMaxVertexAttribs;}
 
-    void launchThreads(WorkerCallback_t cbk, void *data);
-    uint32_t getWorkerPoolSize() const {return (uint32_t)mWorkers.mCount;}
     uint32_t getDPI() const {return mDPI;}
     void setDPI(uint32_t dpi) {mDPI = dpi;}
 
@@ -287,20 +272,6 @@ protected:
 
     pthread_t mThreadId;
     pid_t mNativeThreadId;
-
-    struct Workers {
-        volatile int mRunningCount;
-        volatile int mLaunchCount;
-        uint32_t mCount;
-        pthread_t *mThreadId;
-        pid_t *mNativeThreadId;
-        Signal mCompleteSignal;
-
-        Signal *mLaunchSignals;
-        WorkerCallback_t mLaunchCallback;
-        void *mLaunchData;
-    };
-    Workers mWorkers;
 
     ObjectBaseRef<Script> mRootScript;
     ObjectBaseRef<ProgramFragment> mFragment;
