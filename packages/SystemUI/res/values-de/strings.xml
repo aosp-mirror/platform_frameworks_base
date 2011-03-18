@@ -34,8 +34,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Einstellungen"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"WLAN"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Flugmodus"</string>
-    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
-    <skip />
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Bildschirm automatisch drehen"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"STUMM"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Benachrichtigungen"</string>
@@ -45,20 +44,22 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-Tethering aktiv"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Eingabemethoden konfigurieren"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Physische Tastatur"</string>
-    <!-- no translation found for usb_device_permission_prompt (5340926456453429244) -->
+    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
     <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
+    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
     <skip />
-    <!-- no translation found for usb_device_confirm_prompt (2727793581411868504) -->
+    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
     <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
+    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (1896291816269399727) -->
+    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
     <skip />
     <!-- no translation found for title_usb_accessory (4966265263465181372) -->
     <skip />
     <!-- no translation found for label_view (6304565553218192990) -->
     <skip />
-    <!-- no translation found for label_ignore (5473234388203739668) -->
+    <!-- no translation found for always_use_device (1450287437017315906) -->
+    <skip />
+    <!-- no translation found for always_use_accessory (1210954576979621596) -->
     <skip />
 </resources>

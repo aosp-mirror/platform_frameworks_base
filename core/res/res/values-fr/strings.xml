@@ -361,10 +361,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"Contrôle de la lampe de poche"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet à l\'application de contrôler la lampe de poche."</string>
-    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
-    <skip />
-    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
-    <skip />
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"gérer les préférences et les autorisations des périphériques USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Permet à l\'application de gérer les préférences et les autorisations des périphériques USB."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"mettre en œuvre le protocole MTP"</string>
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Permet l\'accès au pilote MTP du noyau à des fins de mise en œuvre du protocole USB MTP."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
@@ -462,11 +460,11 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permet à une application de lire tous les mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"Enregistrement dans le dictionnaire défini par l\'utilisateur"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modifier/supprimer le contenu de la mémoire de stockage USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modif./suppr. contenu mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Autorise une application à écrire sur la mémoire USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Autorise une application à écrire sur la carte SD."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne support"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet à une application de modifier le contenu de la mémoire de stockage interne du support."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet à une application de lire et d\'écrire dans le système de fichiers en cache."</string>
@@ -816,8 +814,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Effacer les paramètres par défaut dans les Paramètres de page d\'accueil &gt; Applications &gt; Gérer les applications."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Sélectionner une action"</string>
-    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
-    <skip />
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Sélectionnez une application pour le périphérique USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Aucune application ne peut effectuer cette action."</string>
     <string name="aerr_title" msgid="653922989522758100">"Désolé !"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Fermeture soudaine de l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>). Merci de réessayer."</string>
@@ -922,11 +919,11 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Carte SD endommagée"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"La mémoire de stockage USB est endommagée. Un reformatage est peut-être nécessaire."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"La carte SD est endommagée. Vous devrez peut-être la reformater."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Mémoire de stockage USB retirée inopinément"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Mémoire USB retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Carte SD retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Désinstaller la mémoire de stockage USB avant de la retirer pour éviter toute perte de données."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Désinstaller la carte SD avant de la retirer pour éviter toute perte de données."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"La mémoire de stockage USB peut être retirée en toute sécurité."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Vous pouvez retirer la mémoire USB."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"La carte SD peut être retirée en toute sécurité"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Vous pouvez retirer la mémoire de stockage USB en toute sécurité."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Vous pouvez retirer la carte SD en toute sécurité."</string>
