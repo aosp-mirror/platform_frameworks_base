@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ควบคุมไฟฉาย"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"อนุญาตให้แอปพลิเคชันควบคุมไฟฉาย"</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"เข้าถึงอุปกรณ์ USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"อนุญาตให้แอปพลิเคชันเข้าถึงอุปกรณ์ USB"</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"จัดการค่ากำหนดและการอนุญาตสำหรับอุปกรณ์ USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"อนุญาตให้แอปพลิเคชันจัดการค่ากำหนดและการอนุญาตสำหรับอุปกรณ์ USB"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"ทดสอบฮาร์ดแวร์"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"อนุญาตให้แอปพลิเคชันควบคุมอุปกรณ์ต่อพ่วงหลายอย่างเพื่อการทดสอบฮาร์ดแวร์"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"โทรติดต่อหมายเลขโทรศัพท์โดยตรง"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและตัดการเชื่อมต่อจากจุดเข้าใช้งาน Wi-Fi และเปลี่ยนแปลงเครือข่าย Wi-Fi ที่กำหนดค่าไว้"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"อนุญาตให้รับมัลติแคสต์ผ่าน Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"อนุญาตให้แอปพลิเคชันรับแพ็คเก็ตที่ไม่ได้ส่งถึงอุปกรณ์ของคุณโดยตรง วิธีนี้อาจเป็นประโยชน์เมื่อพบบริการที่นำเสนออยู่ใกล้ๆ แต่จะใช้พลังงานมากกว่าโหมดที่ไม่ใช่มัลติแคสต์"</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"ดูสถานะของ WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"อนุญาตให้แอปพลิเคชันดูข้อมูลเกี่ยวกับสถานะของ WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"เปลี่ยนสถานะของ WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"อนุญาตให้แอปพลิเคชันเชื่อมต่อและยกเลิกการเชื่อมต่อกับเครือข่าย WiMAX"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"การใช้บลูทูธ"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"อนุญาตให้แอปพลิเคชันกำหนดค่าโทรศัพท์บลูทูธในพื้นที่ ตลอดจนค้นหาและจับคู่กับอุปกรณ์ที่อยู่ระยะไกล"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"สร้างการเชื่อมต่อบลูทูธ"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"ใช้ค่าเริ่มต้นสำหรับการทำงานนี้"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"ล้างข้อมูลค่าเริ่มต้นในการตั้งค่าหน้าแรก &gt; แอปพลิเคชัน &gt; จัดการแอปพลิเคชัน"</string>
     <string name="chooseActivity" msgid="1009246475582238425">"เลือกการทำงาน"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"เลือกแอปพลิเคชันสำหรับอุปกรณ์ USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"ไม่มีแอปพลิเคชันใดทำงานนี้ได้"</string>
     <string name="aerr_title" msgid="653922989522758100">"ขออภัย!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> (กระบวนการ <xliff:g id="PROCESS">%2$s</xliff:g> หยุดทำงานโดยไม่คาดหมาย โปรดลองอีกครั้ง"</string>

@@ -226,9 +226,9 @@
     <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"關閉所有背景程式"</string>
     <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"允許應用程式控制哪些活動在被移到背景執行時，儘速結束。一般應用程式不需要此功能。"</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"編輯電池狀態"</string>
-    <string name="permdesc_batteryStats" msgid="5847319823772230560">"允許修改電池狀態。一般應用程式不會使用此功能。"</string>
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"允修改收集到的電池用量統計資料。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"控制系統備份與還原"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"允許應用程式控制系統備份與還原機制 (不建議一般應用程式使用)。"</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"允許應用程式控制系統的備份與還原機制。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"允許內部系統使用介面建立視窗。一般應用程式不會使用此功能。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"顯示系統警示"</string>
@@ -248,11 +248,11 @@
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允許應用程式將調用請求 (intent) 傳送至裝置管理員；一般應用程式不需使用此選項。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"變更螢幕顯示方向"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"允許應用程式隨時變更螢幕顯示方向。一般應用程式不需要此功能。"</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"允許應用程式可隨時變更螢幕旋轉方向。一般應用不應使用這項功能。"</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"傳送 Linux 訊號到應用程式"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"允許應用程式要求將支援的訊號傳送到所有持續的程序。"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"設定應用程式持續執行"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"允許應用程式持續執行，避免系統將它應用到其他程式。"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"允許應用程式部分持續執行，避免系統將它用於其他應用程式。"</string>
     <string name="permlab_deletePackages" msgid="3343439331576348805">"刪除應用程式"</string>
     <string name="permdesc_deletePackages" msgid="3634943677518723314">"允許應用程式刪除 Android 程式。請注意：惡意程式可能利用此功能刪除重要應用程式。"</string>
     <string name="permlab_clearAppUserData" msgid="2192134353540277878">"刪除其他應用程式資料"</string>
@@ -310,7 +310,7 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"允許應用程式編輯全域音訊設定，例如音量與路由。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"允許應用程式存取音訊錄製路徑。"</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"允許應用程式存取錄音檔路徑。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍照和拍攝影片"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"允許應用程式使用相機拍照和錄影，此功能可讓應用程式隨時透過相機收集圖片。"</string>
     <string name="permlab_brick" msgid="8337817093326370537">"永久停用電話"</string>
@@ -321,34 +321,34 @@
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"允許應用程式掛載/卸載抽取式儲存設備的檔案系統。"</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"將外接式儲存裝置格式化"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"允許應用程式將可移除式儲存裝置格式化。"</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"取得內存空間的資訊"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"允許應用程式取得內存空間的資訊。"</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"建立內存空間"</string>
-    <string name="permdesc_asec_create" msgid="2621346764995731250">"允許應用程式建立內存空間。"</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"銷毀內存空間"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"允許應用程式銷毀內存空間。"</string>
-    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"掛接/卸載內存空間"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"允許應用程式掛接/卸載內存空間。"</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"重新命名內存空間"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"允許應用程式重新命名內存空間。"</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"取得內部儲存空間的資訊"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"允許應用程式取得內部儲存空間的資訊。"</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"建立內部儲存空間"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"允許應用程式建立內部儲存空間。"</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"銷毀內部儲存空間"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"允許應用程式銷毀內部儲存空間。"</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"掛接/卸載內部儲存空間"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"允許應用程式掛接/卸載內部儲存空間。"</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"重新命名內部儲存空間"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"允許應用程式重新命名內部儲存空間。"</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"允許應用程式控制震動。"</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"控制閃光燈"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"允許應用程式控制閃光燈。"</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"存取 USB 裝置"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"允許應用程式存取 USB 裝置。"</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"管理 USB 裝置的偏好設定和權限"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"允許應用程式管理 USB 裝置的偏好設定和權限。"</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"測試硬體"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"允許應用程式控制各種週邊設備，以供測試用。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
     <string name="permdesc_callPhone" msgid="3369867353692722456">"允許應用程式自行撥打電話。請注意：惡意程式可能任意撥打電話，造成預期外的支出。但此選項並不允許應用程式撥打緊急電話號碼。"</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"直接撥打任何電話號碼"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"允許應用程式自行撥打任何電話號碼，包括緊急電話號碼。請注意：惡意程式可能利用此功能濫用緊急服務，撥打不必要或違法的電話。"</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"允許應用程式自行撥打任何電話號碼，包括緊急電話號碼。請注意：惡意應用程式可能會利用此權限，向緊急服務撥打騷擾甚至非法電話。"</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"直接起始 CDMA 手機設定程序"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"允許應用程式啟動 CDMA 服務 (惡意應用程式可能會在非必要的情況下啟動 CDMA 服務)。"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"控制位置更新通知"</string>
-    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"允許啟用/停用無線通訊位置更新通知。一般應用程式不會使用此功能。"</string>
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"允許從廣播中啟用/停用位置資訊更新通知。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"存取登機選項"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"允許讀寫登機服務上傳的資料。一般應用程式不會使用此功能。"</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"允許讀取/寫入由登錄服務所更新的屬性存取權。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"選擇小工具"</string>
     <string name="permdesc_bindGadget" msgid="2098697834497452046">"允許應用程式告知系統哪個應用程式可以使用哪些小工具。開啟此權限後，應用程式會讓其他程式使用個人資料，但一般應用程式不適合使用此功能。"</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"修改手機狀態"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"允許應用程式與 Wi-Fi 存取點連線或中斷連線，並可變更 Wi-Fi 網路設定。"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"允許接收 Wi-Fi 多點傳播封包"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"允許應用程式接收並非指定傳送給您裝置的封包，這在您發現附近有服務可使用時很有用，但消耗的電力比非多點傳播模式還要多。"</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"查看 WiMAX 狀態"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"允許應用程式查看 WiMAX 連線狀態相關資訊。"</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"變更 WiMAX 狀態"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"允許應用程式建立或中斷 WiMAX 網路連線。"</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"藍牙管理"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"允許應用程式設定本機藍牙電話，以及偵測與配對其他遠端裝置。"</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"建立藍牙連線"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"以此為本操作預設值。"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"清除首頁設定 (應用程式) 管理應用程式的預設值。"</string>
     <string name="chooseActivity" msgid="1009246475582238425">"選取一項操作"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="1691104391758345586">"沒有應用程式可執行此項操作。"</string>
     <string name="aerr_title" msgid="653922989522758100">"很抱歉！"</string>
     <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式 (程序：<xliff:g id="PROCESS">%2$s</xliff:g>) 異常終止。請再試一次。"</string>

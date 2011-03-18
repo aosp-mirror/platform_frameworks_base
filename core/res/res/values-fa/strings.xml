@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"به برنامه کاربردی اجازه می دهد لرزاننده را کنترل کند."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"کنترل چراغ قوه"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"به برنامه کاربردی اجازه می دهد چراغ قوه را کنترل کند."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"دسترسی به دستگاه های USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"به برنامه کاربردی اجازه می دهد به دستگاه های USB دسترسی پیدا کند."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"مدیریت تنظیمات برگزیده و مجوزها برای دستگاه های USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"به برنامه کاربردی جهت مدیریت تنظیمات برگزیده و مجوزها برای دستگاه های USB اجازه می دهد."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"تست سخت افزار"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"به برنامه کاربردی اجازه می دهد سایر برنامه های جانبی را برای تست سخت افزاری کنترل کند."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"تماس مستقیم با شماره تلفن ها"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"به یک برنامه کاربردی اجازه می دهد به نقاط دسترسی Wi-Fi متصل شده و از آنها جدا شود، همچنین تغییراتی را در مورد شبکه های Wi-Fi پیکربندی شده ایجاد کند."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"دریافت چندگانه Wi-Fi را مجاز می کند"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"به یک برنامه کاربردی اجازه می دهد بسته هایی را دریافت کند که مستقیماً برای دستگاه شما ارسال نشده باشد. این امر زمانی که در حال شناسایی سرویس های نزدیک به خود هستید، می تواند مؤثر باشد. در این حالت در مقایسه با حالت غیر چندگانه، از انرژِی بیشتری استفاده می شود."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"مشاهده وضعیت WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"به یک برنامه کاربردی امکان می دهد اطلاعات مربوط به وضعیت WiMAX را مشاهده کند."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"تغییر وضعیت WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"به یک برنامه کاربردی امکان می دهد به شبکه WiMAX متصل یا از آن قطع شود."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"سرپرست بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"به یک برنامه کاربردی اجازه می دهد تا تلفن محلی بلوتوث را پیکربندی کرده، دستگاه های راه دور را شناسایی کرده و با آنها جفت شود."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"ایجاد اتصال های بلوتوث"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"استفاده به صورت پیش فرض برای این عملکرد."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"پاک کردن موارد پیش فرض در تنظیمات صفحه اصلی &gt; برنامه های کاربردی &gt; مدیریت برنامه ها."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"انتخاب یک عملکرد"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"انتخاب یک برنامه کاربردی برای دستگاه USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"هیچ برنامه ای نمی تواند این عملکرد را اجرا کند."</string>
     <string name="aerr_title" msgid="653922989522758100">"متأسفیم!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"برنامه کاربردی <xliff:g id="APPLICATION">%1$s</xliff:g> ( فرآیند <xliff:g id="PROCESS">%2$s</xliff:g>) به طور غیر منتظره ای متوقف شد. لطفاً دوباره امتحان کنید."</string>

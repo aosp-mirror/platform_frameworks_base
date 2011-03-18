@@ -125,7 +125,7 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchroniser"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Synchronisation"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Trop de contenus supprimés (<xliff:g id="CONTENT_TYPE">%s</xliff:g>)."</string>
-    <string name="low_memory" msgid="6632412458436461203">"La mémoire du téléphone est pleine ! Supprimez des fichiers pour libérer de l\'espace."</string>
+    <string name="low_memory" msgid="6632412458436461203">"La mémoire du téléphone est pleine. Supprimez des fichiers pour libérer de l\'espace."</string>
     <string name="me" msgid="6545696007631404292">"Moi"</string>
     <string name="power_dialog" msgid="1319919075463988638">"Options du téléphone"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Mode silencieux"</string>
@@ -153,7 +153,7 @@
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Vos messages"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Permet de lire et rédiger vos SMS, e-mails et autres messages."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vos informations personnelles"</string>
-    <string name="permgroupdesc_personalInfo" msgid="5488050357388806068">"Accédez directement aux contacts et à l\'agenda enregistrés sur votre téléphone."</string>
+    <string name="permgroupdesc_personalInfo" msgid="5488050357388806068">"Accéder directement aux contacts et à l\'agenda enregistrés sur votre téléphone"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Votre position"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Suivre votre position géographique"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Communications réseau"</string>
@@ -170,7 +170,7 @@
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Ces fonctionnalités sont réservées aux développeurs d\'applications."</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Accéder à la  mémoire de stockage USB"</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accès à la carte SD"</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accéder à la carte SD"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="1365473595331989732">"Permet à une application de désactiver la barre d\'état ou d\'ajouter/supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"barre d\'état"</string>
@@ -246,7 +246,7 @@
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"Se fixer sur un fond d\'écran"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permet au support de se fixer sur l\'interface de plus haut niveau d\'un fond d\'écran. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur du périphérique"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur du périphérique. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur de l\'appareil. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Changement d\'orientation de l\'écran"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permet à une application de modifier la rotation de l\'écran à tout moment. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Envoi de signaux Linux aux applications"</string>
@@ -290,9 +290,9 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"Édition des données d\'un contact"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Permet à une application de modifier toutes les données de contact (adresses) enregistrées sur le téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour effacer ou modifier vos données de contact."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"lire des événements de l\'agenda"</string>
-    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permet à une application de lire tous les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonctionnalité pour envoyer les événements de votre agenda à d\'autres personnes."</string>
+    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Permet à une application de lire tous les événements de l\'agenda enregistrés sur votre téléphone. Des applications malveillantes peuvent exploiter cette fonctionnalité pour envoyer les événements de votre agenda à d\'autres personnes."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"ajouter ou modifier des événements d\'agenda et envoyer des e-mails aux invités"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Autorise les applications à ajouter ou à modifier des événements dans votre agenda, qui pourra envoyer des e-mails aux invités. Des logiciels malveillants peuvent utiliser cette fonctionnalité pour supprimer ou modifier des événements de l\'agenda ou envoyer des e-mails aux invités."</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Permet aux applications d\'ajouter ou de modifier des événements dans votre agenda, qui est susceptible d\'envoyer des e-mails aux invités. Des applications malveillantes peuvent exploiter cette fonctionnalité pour supprimer ou modifier des événements de l\'agenda ou envoyer des e-mails aux invités."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"Création de sources de localisation fictives à des fins de test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Permet de créer des sources de localisation fictives à des fins de test. Des applications malveillantes peuvent utiliser cette fonctionnalité pour remplacer la position géographique et/ou l\'état fournis par des sources réelles comme le GPS ou les fournisseurs d\'accès."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Accès aux commandes de fournisseur de position géographique supplémentaires"</string>
@@ -300,9 +300,9 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"autoriser l\'installation d\'un fournisseur de services de localisation"</string>
     <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Créer des sources de données de localisation factices à des fins de test. Les applications malveillantes peuvent exploiter cette fonction pour remplacer la position géographique et/ou l\'état renvoyé par les sources de données de localisation réelles, telles que le GPS ou les fournisseurs réseau, ou pour surveiller et transmettre votre position géographique à une source externe."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"Localisation OK (GPS)"</string>
-    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Permet d\'accéder à des sources de localisation précises comme le Global Positioning System (GPS) sur le téléphone, lorsque ces services sont disponibles. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer l\'endroit où vous vous trouvez et augmenter la consommation de la batterie de votre téléphone."</string>
+    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Permet d\'accéder à des sources de localisation précises telles que le système GPS du téléphone, lorsque ces services sont disponibles. Des applications malveillantes peuvent exploiter cette fonctionnalité pour déterminer votre position, ce qui peut entraîner une utilisation accrue de la batterie."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"Position géo. approximative (selon le réseau)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Accès à des sources de localisation approximative (par ex. des bases de données de réseaux mobiles) pour déterminer la position géographique du téléphone, lorsque cette option est disponible. Des applications malveillantes peuvent utiliser cette fonctionnalité pour déterminer approximativement l\'endroit où vous vous trouvez."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Permet d\'accéder à des sources de localisation approximatives telles que des bases de données de réseaux mobiles pour déterminer la position géographique du téléphone, lorsque cette option est disponible. Des applications malveillantes peuvent exploiter cette fonctionnalité pour déterminer votre position approximative."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"Accès à SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Permet à certaines applications d\'utiliser les fonctionnalités SurfaceFlinger de bas niveau."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Lecture de la mémoire tampon graphique"</string>
@@ -313,30 +313,30 @@
     <string name="permdesc_recordAudio" msgid="6493228261176552356">"Permet à l\'application d\'accéder au chemin de l\'enregistrement audio."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_camera" msgid="6004878235852154239">"Permet de prendre des photos et d\'enregistrer des vidéos avec l\'appareil photo. Cette fonctionnalité permet à l\'application de récupérer à tout moment les images perçues par l\'appareil."</string>
-    <string name="permlab_brick" msgid="8337817093326370537">"Désactivation définitive du téléphone"</string>
+    <string name="permlab_brick" msgid="8337817093326370537">"désactiver définitivement le téléphone"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Permet à l\'application de désactiver définitivement le téléphone. Cette fonctionnalité est très dangereuse."</string>
-    <string name="permlab_reboot" msgid="2898560872462638242">"Redémarrage forcé du téléphone"</string>
+    <string name="permlab_reboot" msgid="2898560872462638242">"forcer le redémarrage du téléphone"</string>
     <string name="permdesc_reboot" msgid="7914933292815491782">"Permet à l\'application de forcer le redémarrage du téléphone."</string>
-    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"Monter et démonter des systèmes de fichiers"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Permet à l\'application de monter et démonter des systèmes de fichiers pour des périphériques de stockage amovibles."</string>
+    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"Installer et désinstaller des systèmes de fichiers"</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Permet à l\'application d\'installer et de désinstaller des systèmes de fichiers pour des périphériques de stockage amovibles."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"Formatage du périphérique de stockage externe"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Permet à l\'application de formater le périphérique de stockage amovible."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"obtenir des informations sur la mémoire de stockage interne"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"Permet à l\'application d\'obtenir des informations sur le stockage interne."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"créer un stockage interne"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Permet à l\'application d\'obtenir des informations sur la mémoire de stockage interne."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"créer une mémoire de stockage interne"</string>
     <string name="permdesc_asec_create" msgid="2621346764995731250">"Permet à l\'application de créer une mémoire de stockage interne."</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"détruire la mémoire de stockage interne"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Permet à l\'application de détruire le stockage interne."</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Permet à l\'application de détruire la mémoire de stockage interne."</string>
     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"installer/désinstaller la mémoire de stockage interne"</string>
     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Permet l\'installation ou la désinstallation de la mémoire de stockage interne par l\'application."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"renommer la mémoire de stockage interne"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Permet à l\'application de renommer le stockage interne."</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Permet à l\'application de renommer la mémoire de stockage interne."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"Contrôle du vibreur"</string>
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"Contrôle de la lampe de poche"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet à l\'application de contrôler la lampe de poche."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"accéder aux périphériques USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Autorise l\'application à accéder aux périphériques USB"</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"gérer les préférences et les autorisations des périphériques USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Permet à l\'application de gérer les préférences et les autorisations des périphériques USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"Tests du matériel"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permet à l\'application de contrôler différents périphériques à des fins de test matériel."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Appel direct des numéros de téléphone"</string>
@@ -355,12 +355,12 @@
     <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Permet à une application de contrôler les fonctionnalités téléphoniques de l\'appareil. Une application bénéficiant de cette autorisation peut changer de réseau, éteindre et allumer le signal radio du téléphone, etc., sans vous en avertir."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"Lire l\'état et l\'identité du téléphone"</string>
     <string name="permdesc_readPhoneState" msgid="188877305147626781">"Permet à l\'application d\'accéder aux fonctionnalités d\'appel du téléphone. L\'application peut alors déterminer le numéro de téléphone et le numéro de série de l\'appareil, savoir si un appel est en cours, identifier le numéro appelé, etc."</string>
-    <string name="permlab_wakeLock" msgid="573480187941496130">"Arrêt du mode veille sur le téléphone"</string>
-    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Permet à une application d\'empêcher votre téléphone de passer en mode veille."</string>
+    <string name="permlab_wakeLock" msgid="573480187941496130">"empêcher le téléphone de passer en mode veille"</string>
+    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Permet à une application d\'empêcher le téléphone de passer en mode veille."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"Éteindre ou allumer le téléphone"</string>
     <string name="permdesc_devicePower" msgid="4577331933252444818">"Permet à l\'application d\'éteindre et d\'allumer le téléphone."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"Exécution en mode Test d\'usine"</string>
-    <string name="permdesc_factoryTest" msgid="8136644990319244802">"Permet d\'exécuter en tant que test fabricant de faible niveau en autorisant l\'accès au matériel du téléphone. Cette fonctionnalité est uniquement disponible lorsque le téléphone est en mode de test fabricant."</string>
+    <string name="permdesc_factoryTest" msgid="8136644990319244802">"Permet d\'exécuter une application en mode test fabricant de faible niveau en autorisant ainsi l\'accès au téléphone. Cette fonctionnalité est uniquement disponible lorsque le téléphone est en mode test fabricant."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"Configuration du fond d\'écran"</string>
     <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Permet à une application de définir le fond d\'écran du système."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"Sélection de la la taille du fond d\'écran"</string>
@@ -399,12 +399,16 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permet à une application de se connecter à des points d\'accès Wi-Fi, de s\'en déconnecter et de modifier des réseaux Wi-Fi configurés."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"autoriser la réception de données en Wi-Fi multidiffusion"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Autorise une application à recevoir des paquets qui ne sont pas directement adressés à votre mobile. Cela peut être utile pour la recherche de services disponibles à proximité. Consomme plus que le mode non multidiffusion."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"afficher l\'état du WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet à une application d\'afficher les informations concernant l\'état du WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"modifier l\'état du WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet à une application de se connecter au réseau WiMAX et de s\'en déconnecter."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Gestion Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permet à une application de configurer le téléphone Bluetooth local, d\'identifier des périphériques distants et de les associer au téléphone."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Création de connexions Bluetooth"</string>
-    <string name="permdesc_bluetooth" msgid="762515380679392945">"Permet à une application d\'obtenir la configuration du téléphone Bluetooth local et de créer et accepter des connexions à des appareils associés."</string>
+    <string name="permdesc_bluetooth" msgid="762515380679392945">"Permet à une application d\'obtenir la configuration du téléphone Bluetooth local, de se connecter à des appareils associés et d\'accepter leur connexion."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"contrôler la communication en champ proche"</string>
-    <string name="permdesc_nfc" msgid="9171401851954407226">"Autorise une application à communiquer avec des tags, cartes et lecteurs prenant en charge la communication en champ proche (NFC)."</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Permet à une application de communiquer avec des tags, cartes et lecteurs prenant en charge la communication en champ proche (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Désactivation du verrouillage des touches"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permet à une application de désactiver le verrouillage des touches et toute sécurité par mot de passe. Exemple : Votre téléphone désactive le verrouillage du clavier lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Lecture des paramètres de synchronisation"</string>
@@ -421,8 +425,8 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permet à une application de lire tous les mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"Enregistrement dans le dictionnaire défini par l\'utilisateur"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modifier/supprimer le contenu de la mémoire de stockage USB"</string>
-    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"Modifier/supprimer le contenu de la carte SD"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modif./suppr. contenu mémoire USB"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Autorise une application à écrire sur la mémoire USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Autorise une application à écrire sur la carte SD."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
@@ -432,13 +436,13 @@
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Gérer le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
-    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Gérer le nombre de mots de passe incorrects saisis lors du déverrouillage de l\'écran et verrouiller le téléphone ou effacer toutes ses données après un certain nombre de tentatives"</string>
+    <string name="policydesc_watchLogin" msgid="7227578260165172673">"Surveiller le nombre de mots de passe incorrects saisis lors du déverrouillage de l\'écran et verrouiller le téléphone ou effacer toutes ses données après un certain nombre de tentatives"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
     <string name="policydesc_resetPassword" msgid="5391240616981297361">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Verrouiller l\'écran"</string>
     <string name="policydesc_forceLock" msgid="5696964126226028442">"Gérer le mode et les conditions de verrouillage de l\'écran"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Effacer toutes les données"</string>
-    <string name="policydesc_wipeData" msgid="7669895333814222586">"Effacer les données du téléphone sans avertissement, en restaurant les valeurs d\'usine"</string>
+    <string name="policydesc_wipeData" msgid="7669895333814222586">"Effacer les données du téléphone sans avertissement, en restaurant la configuration usine"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -541,11 +545,11 @@
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Saisissez le code PIN"</string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Saisissez le mot de passe pour procéder au déverrouillage."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Le code PIN est incorrect !"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Pour débloquer le clavier, appuyez sur \"Menu\" puis sur 0."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Pour déverrouiller le clavier, appuyez sur \"Menu\" puis sur 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numéro d\'urgence"</string>
     <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Aucun service)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Écran verrouillé"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Appuyez sur \"Menu\" pour débloquer le téléphone ou appeler un numéro d\'urgence"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Appuyez sur \"Menu\" pour déverrouiller le téléphone ou appeler un numéro d\'urgence"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Appuyez sur \"Menu\" pour déverrouiller le téléphone."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Dessinez un schéma pour déverrouiller le téléphone"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Appel d\'urgence"</string>
@@ -566,7 +570,7 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"La carte SIM est verrouillée."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Déblocage de la carte SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Vous avez mal reproduit le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" msgid="3351013842320127827">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez déverrouiller votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Schéma oublié ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Déverrouillage du compte"</string>
@@ -577,7 +581,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Se connecter"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nom d\'utilisateur ou mot de passe incorrect."</string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Vérification..."</string>
-    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Débloquer"</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Déverrouiller"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Son activé"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Son désactivé"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
@@ -597,7 +601,7 @@
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lire l\'historique et les favoris du navigateur"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Autorise l\'application à lire toutes les URL auxquelles le navigateur a accédé et tous ses favoris."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"écrire dans l\'historique et les favoris du navigateur"</string>
-    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Autorise une application à modifier l\'historique du navigateur ou les favoris enregistrés sur votre téléphone. Des applications malveillantes peuvent utiliser cette fonction pour effacer ou modifier les données de votre navigateur."</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Permet à une application de modifier l\'historique du navigateur ou les favoris enregistrés sur votre téléphone. Des applications malveillantes peuvent exploiter cette fonction pour effacer ou modifier les données de votre navigateur."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"régler le réveil"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Permet à l\'application de définir une alarme dans un utilitaire faisant office de réveil. Certains réveils risquent ne pas prendre en charge cette fonctionnalité."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifier les autorisations de géolocalisation du navigateur"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utiliser cette application par défaut pour cette action"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Effacer les paramètres par défaut dans les Paramètres de page d\'accueil &gt; Applications &gt; Gérer les applications."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Sélectionner une action"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Sélectionnez une application pour le périphérique USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Aucune application ne peut effectuer cette action."</string>
     <string name="aerr_title" msgid="653922989522758100">"Désolé !"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Fermeture soudaine de l\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>). Merci de réessayer."</string>
@@ -828,22 +833,22 @@
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Recherche d\'erreurs"</string>
     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Mémoire de stockage USB vide"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Carte SD vide"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Le stockage USB est vide ou son système de fichiers n\'est pas pris en charge."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"La mémoire de stockage USB est vide ou son système de fichiers n\'est pas pris en charge."</string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"La carte SD est vide ou son système de fichiers n\'est pas pris en charge."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Stockage USB endommagé"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Mémoire de stockage USB endommagée"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Carte SD endommagée"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"La mémoire de stockage USB est endommagée. Un reformatage est peut-être nécessaire."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"La carte SD est endommagée. Vous devrez peut-être la reformater."</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Mémoire USB retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Carte SD retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Désinstaller la mémoire de stockage USB avant de la retirer pour éviter toute perte de données."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Désactiver la carte SD avant de la retirer pour éviter toute perte de données."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Retirez la mémoire USB en toute sécurité."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Désinstaller la carte SD avant de la retirer pour éviter toute perte de données."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Vous pouvez retirer la mémoire USB."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"La carte SD peut être retirée en toute sécurité"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"La mémoire de stockage USB peut être retirée en toute sécurité."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Vous pouvez retirer la mémoire de stockage USB en toute sécurité."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Vous pouvez retirer la carte SD en toute sécurité."</string>
     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Mémoire de stockage USB retirée"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Carte SD manquante"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Carte SD retirée"</string>
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Mémoire de stockage USB retirée. Insérez un nouveau support."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"La carte SD a été retirée. Insérez-en une autre."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Aucune activité correspondante trouvée"</string>
@@ -893,7 +898,7 @@
     <string name="throttled_notification_message" msgid="4712369856601275146">"Touchez pour en savoir plus sur l\'utilisation des données mobiles"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Désinstallation de la mémoire de stockage USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Désinstallation de la carte SD..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Effacement de la  mémoire de stockage USB..."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Effacement de la mémoire de stockage USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Effacement de la carte SD..."</string>
     <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Impossible d\'effacer la mémoire de stockage USB"</string>
     <string name="format_error" product="default" msgid="1343380371925238343">"Impossible d\'effacer la carte SD"</string>

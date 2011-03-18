@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permet a l\'aplicació controlar el vibrador."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controlar el flaix"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permet a l\'aplicació controlar el flaix."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"accedeix a dispositius USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permet que l\'aplicació accedeixi als dispositius USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"gestiona les preferències i els permisos dels dispositius USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Permet que l\'aplicació gestioni les preferències i els permisos dels dispositius USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"provar el maquinari"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permet a l\'aplicació controlar diversos perifèrics per fer proves de maquinari."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"trucar directament a números de telèfon"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permet a una aplicació connectar-se i desconnectar-se de punts d\'accés Wi-fi i fer canvis a les xarxes Wi-fi configurades."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permetre la recepció de multidifusió Wi-fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permet a una aplicació rebre paquets no adreçats directament al vostre dispositiu. Això pot ser útil en detectar serveis oferts a prop. Utilitza més energia que el mode que no utilitza la multidifusió."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"visualitza l\'estat de WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permet que una aplicació visualitzi la informació sobre l\'estat de WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"canvia l\'estat de WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permet que una aplicació es connecti i es desconnecti d\'una xarxa WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administració de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permet a una aplicació configurar el telèfon Bluetooth local i detectar dispositius remots i emparellar-se amb ells."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear connexions Bluetooth"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Esborra el valor predeterminat a Configuració de la pantalla d\'inici &gt; Aplicacions &gt; Gestiona les aplicacions."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Seleccioneu una acció"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Selecciona una aplicació per al dispositiu USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"No hi ha cap aplicació que pugui dur a terme aquesta acció."</string>
     <string name="aerr_title" msgid="653922989522758100">"Ho sentim."</string>
     <string name="aerr_application" msgid="4683614104336409186">"L\'aplicació <xliff:g id="APPLICATION">%1$s</xliff:g> (procés <xliff:g id="PROCESS">%2$s</xliff:g>) s\'ha aturat inesperadament. Torneu-ho a provar."</string>
@@ -762,17 +767,17 @@
     <string name="volume_ringtone" msgid="6885421406845734650">"Volum del timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volum de multimèdia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"S\'està reproduint a través de Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"So de trucada silenciós seleccionat"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"To de silenci seleccionat"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volum en trucada"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volum en trucada Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volum de l\'alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum de notificació"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"So de trucada predeterminat"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"So de trucada predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"To predeterminat"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"To predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenci"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sons de trucada"</string>
-    <string name="ringtone_unknown" msgid="5477919988701784788">"So de trucada desconegut"</string>
+    <string name="ringtone_unknown" msgid="5477919988701784788">"To desconegut"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"Xarxa Wi-fi disponible"</item>
     <item quantity="other" msgid="4192424489168397386">"Xarxes Wi-fi disponibles"</item>
@@ -790,7 +795,7 @@
     <string name="date_time_set" msgid="5777075614321087758">"Defineix"</string>
     <string name="default_permission_group" msgid="2690160991405646128">"Predeterminat"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No cal cap permís"</string>
-    <string name="perms_hide" msgid="7283915391320676226"><b>"Oculta"</b></string>
+    <string name="perms_hide" msgid="7283915391320676226"><b>"Oamaga"</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Mostra\'ls tots"</b></string>
     <string name="usb_storage_activity_title" msgid="2399289999608900443">"Emmagatzematge massiu USB"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"USB connectat"</string>

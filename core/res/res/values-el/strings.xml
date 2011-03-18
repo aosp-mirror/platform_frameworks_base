@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Επιτρέπει στην εφαρμογή τον έλεγχο του δονητή."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"έλεγχος φακού"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Επιτρέπει στην εφαρμογή τον έλεγχο του φακού."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"πρόσβαση σε συσκευές USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Επιτρέπει στην εφαρμογή την πρόσβαση σε συσκευές USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"διαχείριση προτιμήσεων και αδειών για συσκευές USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Επιτρέπει στην εφαρμογή να διαχειρίζεται προτιμήσεις και άδειες για συσκευές USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"δοκιμή υλικού"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Επιτρέπει σε μια εφαρμογή τον έλεγχο διαφόρων περιφερειακών για την εκτέλεση δοκιμών υλικού."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"απευθείας κλήση τηλεφωνικών αριθμών"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Επιτρέπει σε μια εφαρμογή τη σύνδεση σε σημεία πρόσβασης Wi-Fi και την αποσύνδεση από αυτά, καθώς και την πραγματοποίηση αλλαγών σε διαμορφωμένα δίκτυα Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"να επιτρέπεται η λήψη πολλαπλής διανομής Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Επιτρέπει στην εφαρμογή να λαμβάνει πακέτα τα οποία δεν αποστέλλονται απευθείας στη συσκευή σας. Αυτό μπορεί να φανεί χρήσιμο κατά την ανακάλυψη υπηρεσιών που προσφέρονται σε κοντινές τοποθεσίες. Χρησιμοποιεί περισσότερη ενέργεια σε σχέση με την κατάσταση μη πολλαπλής διανομής."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"προβολή κατάστασης WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Επιτρέπει σε μια εφαρμογή την προβολή των πληροφοριών σχετικά με την κατάσταση του WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"αλλαγή κατάστασης WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Επιτρέπει σε μια εφαρμογή τη σύνδεση και αποσύνδεση από το δίκτυο WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"διαχείριση Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Επιτρέπει σε μια εφαρμογή τη διαμόρφωση του τοπικού τηλεφώνου Bluetooth και την ανακάλυψη και σύζευξη με απομακρυσμένες συσκευές."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"δημιουργία συνδέσεων Bluetooth"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Χρήση από προεπιλογή για αυτήν την ενέργεια."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Εκκαθάριση προεπιλεγμένων σε Ρυθμίσεις αρχικής σελίδας &gt; Εφαρμογές &gt; Διαχείριση εφαρμογών."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Επιλέξτε μια ενέργεια"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Επιλέξτε μια εφαρμογή για τη συσκευή USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Δεν υπάρχουν εφαρμογές, οι οποίες μπορούν να εκτελέσουν αυτήν την ενέργεια."</string>
     <string name="aerr_title" msgid="653922989522758100">"Λυπούμαστε!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Υπήρξε μη αναμενόμενη διακοπή της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> (διαδικασία <xliff:g id="PROCESS">%2$s</xliff:g>). Προσπαθήστε ξανά."</string>

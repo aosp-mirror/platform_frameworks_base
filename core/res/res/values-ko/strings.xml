@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"애플리케이션이 진동을 제어할 수 있도록 합니다."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"카메라 플래시 제어"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"애플리케이션이 카메라 플래시를 제어할 수 있도록 합니다."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"USB 장치 액세스"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"애플리케이션이 USB 장치에 액세스하도록 허용합니다."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB 기기에 대한 환경설정 및 권한 관리"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"애플리케이션이 USB 기기에 대한 환경설정 및 권한을 관리하도록 허용합니다."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"하드웨어 테스트"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"애플리케이션이 하드웨어를 테스트할 목적으로 다양한 주변장치를 제어할 수 있도록 합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"애플리케이션이 Wi-Fi 액세스포인트에 연결하거나 연결을 끊고, 구성된 Wi-Fi 네트워크를 변경할 수 있도록 합니다."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi 멀티캐스트 수신 허용"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"애플리케이션이 휴대기기로 직접 주소가 지정되지 않은 패킷을 받을 수 있도록 합니다. 이 기능은 가까운 곳에서 제공되는 서비스를 검색할 때 유용하며 비멀티캐스트 모드보다 전원을 더 많이 소비합니다."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX 상태 보기"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"애플리케이션이 WiMAX의 상태에 대한 정보를 볼 수 있도록 합니다."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX 상태 변경"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"애플리케이션이 WiMAX 네트워크에 연결하거나 연결을 끊을 수 있도록 합니다."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Bluetooth 관리"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"애플리케이션이 로컬 Bluetooth 휴대전화를 구성한 다음 원격 장치를 검색하여 페어링할 수 있도록 합니다."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth 연결 만들기"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"이 작업에 대해 기본값으로 사용"</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"홈 설정 &gt; 애플리케이션 &gt; 애플리케이션 관리에서 기본값을 지웁니다."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"작업 선택"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"USB 기기에 대한 애플리케이션 선택"</string>
     <string name="noApplications" msgid="1691104391758345586">"작업을 수행할 수 있는 애플리케이션이 없습니다."</string>
     <string name="aerr_title" msgid="653922989522758100">"죄송합니다."</string>
     <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> 애플리케이션(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 예상치 않게 중지되었습니다. 다시 시도해 주세요."</string>
