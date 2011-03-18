@@ -42,7 +42,7 @@ public class SQLiteDirectCursorDriver implements SQLiteCursorDriver {
         SQLiteQuery query = null;
 
         try {
-            mDatabase.lock();
+            mDatabase.lock(mSql);
             mDatabase.closePendingStatements();
             query = new SQLiteQuery(mDatabase, mSql, 0, selectionArgs);
 
