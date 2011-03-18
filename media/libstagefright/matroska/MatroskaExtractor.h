@@ -20,6 +20,7 @@
 
 #include <media/stagefright/MediaExtractor.h>
 #include <utils/Vector.h>
+#include <utils/threads.h>
 
 namespace mkvparser {
 struct Segment;
@@ -45,25 +46,33 @@ struct MatroskaExtractor : public MediaExtractor {
 
     virtual sp<MetaData> getMetaData();
 
+    virtual uint32_t flags() const;
+
 protected:
     virtual ~MatroskaExtractor();
 
 private:
     friend struct MatroskaSource;
+    friend struct BlockIterator;
 
     struct TrackInfo {
         unsigned long mTrackNum;
         sp<MetaData> mMeta;
     };
+
+    Mutex mLock;
     Vector<TrackInfo> mTracks;
 
     sp<DataSource> mDataSource;
     DataSourceReader *mReader;
     mkvparser::Segment *mSegment;
     bool mExtractedThumbnails;
+    bool mIsLiveStreaming;
 
     void addTracks();
     void findThumbnails();
+
+    bool isLiveStreaming() const;
 
     MatroskaExtractor(const MatroskaExtractor &);
     MatroskaExtractor &operator=(const MatroskaExtractor &);
