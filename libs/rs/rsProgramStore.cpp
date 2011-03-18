@@ -15,11 +15,6 @@
  */
 
 #include "rsContext.h"
-#ifndef ANDROID_RS_SERIALIZE
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#endif //ANDROID_RS_SERIALIZE
-
 #include "rsProgramStore.h"
 
 using namespace android;
@@ -27,21 +22,23 @@ using namespace android::renderscript;
 
 
 ProgramStore::ProgramStore(Context *rsc) : Program(rsc) {
-    mDitherEnable = true;
-    mBlendEnable = false;
-    mColorRWriteEnable = true;
-    mColorGWriteEnable = true;
-    mColorBWriteEnable = true;
-    mColorAWriteEnable = true;
-    mBlendSrc = GL_ONE;
-    mBlendDst = GL_ZERO;
+    memset(&mHal, 0, sizeof(mHal));
 
-    mDepthTestEnable = false;
-    mDepthWriteEnable = true;
-    mDepthFunc = GL_LESS;
+    mHal.state.ditherEnable = true;
+
+    mHal.state.colorRWriteEnable = true;
+    mHal.state.colorGWriteEnable = true;
+    mHal.state.colorBWriteEnable = true;
+    mHal.state.colorAWriteEnable = true;
+    mHal.state.blendSrc = RS_BLEND_SRC_ONE;
+    mHal.state.blendDst = RS_BLEND_DST_ZERO;
+
+    mHal.state.depthWriteEnable = true;
+    mHal.state.depthFunc = RS_DEPTH_FUNC_LESS;
 }
 
 ProgramStore::~ProgramStore() {
+    mRSC->mHal.funcs.store.destroy(mRSC, this);
 }
 
 void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state) {
@@ -50,47 +47,11 @@ void ProgramStore::setupGL2(const Context *rsc, ProgramStoreState *state) {
     }
     state->mLast.set(this);
 
-    glColorMask(mColorRWriteEnable,
-                mColorGWriteEnable,
-                mColorBWriteEnable,
-                mColorAWriteEnable);
-    if (mBlendEnable) {
-        glEnable(GL_BLEND);
-        glBlendFunc(mBlendSrc, mBlendDst);
-    } else {
-        glDisable(GL_BLEND);
-    }
-
-    //LOGE("pfs  %i, %i, %x", mDepthWriteEnable, mDepthTestEnable, mDepthFunc);
-
-    if (rsc->mUserSurfaceConfig.depthMin > 0) {
-        glDepthMask(mDepthWriteEnable);
-        if (mDepthTestEnable || mDepthWriteEnable) {
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(mDepthFunc);
-        } else {
-            glDisable(GL_DEPTH_TEST);
-        }
-    } else {
-        glDepthMask(false);
-        glDisable(GL_DEPTH_TEST);
-    }
-
-    if (rsc->mUserSurfaceConfig.stencilMin > 0) {
-    } else {
-        glStencilMask(0);
-        glDisable(GL_STENCIL_TEST);
-    }
-
-    if (mDitherEnable) {
-        glEnable(GL_DITHER);
-    } else {
-        glDisable(GL_DITHER);
-    }
+    rsc->mHal.funcs.store.setActive(rsc, this);
 }
 
 void ProgramStore::setDitherEnable(bool enable) {
-    mDitherEnable = enable;
+    mHal.state.ditherEnable = enable;
 }
 
 void ProgramStore::serialize(OStream *stream) const {
@@ -101,108 +62,27 @@ ProgramStore *ProgramStore::createFromStream(Context *rsc, IStream *stream) {
 }
 
 void ProgramStore::setDepthFunc(RsDepthFunc func) {
-    mDepthTestEnable = true;
-
-    switch (func) {
-    case RS_DEPTH_FUNC_ALWAYS:
-        mDepthTestEnable = false;
-        mDepthFunc = GL_ALWAYS;
-        break;
-    case RS_DEPTH_FUNC_LESS:
-        mDepthFunc = GL_LESS;
-        break;
-    case RS_DEPTH_FUNC_LEQUAL:
-        mDepthFunc = GL_LEQUAL;
-        break;
-    case RS_DEPTH_FUNC_GREATER:
-        mDepthFunc = GL_GREATER;
-        break;
-    case RS_DEPTH_FUNC_GEQUAL:
-        mDepthFunc = GL_GEQUAL;
-        break;
-    case RS_DEPTH_FUNC_EQUAL:
-        mDepthFunc = GL_EQUAL;
-        break;
-    case RS_DEPTH_FUNC_NOTEQUAL:
-        mDepthFunc = GL_NOTEQUAL;
-        break;
-    }
+    mHal.state.depthFunc = func;
 }
 
 void ProgramStore::setDepthMask(bool mask) {
-    mDepthWriteEnable = mask;
+    mHal.state.depthWriteEnable = mask;
 }
 
 void ProgramStore::setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst) {
-    mBlendEnable = true;
-    if ((src == RS_BLEND_SRC_ONE) &&
-        (dst == RS_BLEND_DST_ZERO)) {
-        mBlendEnable = false;
-    }
-
-    switch (src) {
-    case RS_BLEND_SRC_ZERO:
-        mBlendSrc = GL_ZERO;
-        break;
-    case RS_BLEND_SRC_ONE:
-        mBlendSrc = GL_ONE;
-        break;
-    case RS_BLEND_SRC_DST_COLOR:
-        mBlendSrc = GL_DST_COLOR;
-        break;
-    case RS_BLEND_SRC_ONE_MINUS_DST_COLOR:
-        mBlendSrc = GL_ONE_MINUS_DST_COLOR;
-        break;
-    case RS_BLEND_SRC_SRC_ALPHA:
-        mBlendSrc = GL_SRC_ALPHA;
-        break;
-    case RS_BLEND_SRC_ONE_MINUS_SRC_ALPHA:
-        mBlendSrc = GL_ONE_MINUS_SRC_ALPHA;
-        break;
-    case RS_BLEND_SRC_DST_ALPHA:
-        mBlendSrc = GL_DST_ALPHA;
-        break;
-    case RS_BLEND_SRC_ONE_MINUS_DST_ALPHA:
-        mBlendSrc = GL_ONE_MINUS_DST_ALPHA;
-        break;
-    case RS_BLEND_SRC_SRC_ALPHA_SATURATE:
-        mBlendSrc = GL_SRC_ALPHA_SATURATE;
-        break;
-    }
-
-    switch (dst) {
-    case RS_BLEND_DST_ZERO:
-        mBlendDst = GL_ZERO;
-        break;
-    case RS_BLEND_DST_ONE:
-        mBlendDst = GL_ONE;
-        break;
-    case RS_BLEND_DST_SRC_COLOR:
-        mBlendDst = GL_SRC_COLOR;
-        break;
-    case RS_BLEND_DST_ONE_MINUS_SRC_COLOR:
-        mBlendDst = GL_ONE_MINUS_SRC_COLOR;
-        break;
-    case RS_BLEND_DST_SRC_ALPHA:
-        mBlendDst = GL_SRC_ALPHA;
-        break;
-    case RS_BLEND_DST_ONE_MINUS_SRC_ALPHA:
-        mBlendDst = GL_ONE_MINUS_SRC_ALPHA;
-        break;
-    case RS_BLEND_DST_DST_ALPHA:
-        mBlendDst = GL_DST_ALPHA;
-        break;
-    case RS_BLEND_DST_ONE_MINUS_DST_ALPHA:
-        mBlendDst = GL_ONE_MINUS_DST_ALPHA;
-        break;
-    }
+    mHal.state.blendSrc = src;
+    mHal.state.blendDst = dst;
 }
 
 void ProgramStore::setColorMask(bool r, bool g, bool b, bool a) {
-    mColorRWriteEnable = r;
-    mColorGWriteEnable = g;
-    mColorBWriteEnable = b;
-    mColorAWriteEnable = a;
+    mHal.state.colorRWriteEnable = r;
+    mHal.state.colorGWriteEnable = g;
+    mHal.state.colorBWriteEnable = b;
+    mHal.state.colorAWriteEnable = a;
+}
+
+void ProgramStore::init() {
+    mRSC->mHal.funcs.store.init(mRSC, this);
 }
 
 ProgramStoreState::ProgramStoreState() {
@@ -216,6 +96,7 @@ ProgramStoreState::~ProgramStoreState() {
 
 void ProgramStoreState::init(Context *rsc) {
     ProgramStore *pfs = new ProgramStore(rsc);
+    pfs->init();
     mDefault.set(pfs);
 }
 
@@ -223,6 +104,7 @@ void ProgramStoreState::deinit(Context *rsc) {
     mDefault.clear();
     mLast.clear();
 }
+
 
 namespace android {
 namespace renderscript {
@@ -250,6 +132,7 @@ void rsi_ProgramStoreBlendFunc(Context *rsc, RsBlendSrcFunc src, RsBlendDstFunc 
 
 RsProgramStore rsi_ProgramStoreCreate(Context *rsc) {
     ProgramStore *pfs = rsc->mStateFragmentStore.mPFS;
+    pfs->init();
     pfs->incUserRef();
     rsc->mStateFragmentStore.mPFS = 0;
     return pfs;

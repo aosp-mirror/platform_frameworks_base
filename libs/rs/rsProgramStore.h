@@ -45,22 +45,33 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_STORE; }
     static ProgramStore *createFromStream(Context *rsc, IStream *stream);
 
+    void init();
+
+    struct Hal {
+        mutable void *drv;
+
+        struct State {
+            bool ditherEnable;
+
+            //bool blendEnable;
+            bool colorRWriteEnable;
+            bool colorGWriteEnable;
+            bool colorBWriteEnable;
+            bool colorAWriteEnable;
+            RsBlendSrcFunc blendSrc;
+            RsBlendDstFunc blendDst;
+
+            //bool depthTestEnable;
+            bool depthWriteEnable;
+            RsDepthFunc depthFunc;
+        };
+        State state;
+
+
+    };
+    Hal mHal;
+
 protected:
-    bool mDitherEnable;
-
-    bool mBlendEnable;
-    bool mColorRWriteEnable;
-    bool mColorGWriteEnable;
-    bool mColorBWriteEnable;
-    bool mColorAWriteEnable;
-    int32_t mBlendSrc;
-    int32_t mBlendDst;
-
-    bool mDepthTestEnable;
-    bool mDepthWriteEnable;
-    int32_t mDepthFunc;
-
-    bool mStencilTestEnable;
 };
 
 class ProgramStoreState {

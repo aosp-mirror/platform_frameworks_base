@@ -16,6 +16,7 @@
 
 #include "rsdCore.h"
 #include "rsdBcc.h"
+#include "rsdProgramStore.h"
 
 #include <malloc.h>
 #include "rsContext.h"
@@ -48,7 +49,15 @@ static RsdHalFunctions FunctionTable = {
         rsdScriptSetGlobalBind,
         rsdScriptSetGlobalObj,
         rsdScriptDestroy
+    },
+
+
+    {
+        rsdProgramStoreInit,
+        rsdProgramStoreSetActive,
+        rsdProgramStoreDestroy
     }
+
 };
 
 

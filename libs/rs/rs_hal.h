@@ -29,7 +29,7 @@ class Type;
 class Allocation;
 class Script;
 class ScriptC;
-
+class ProgramStore;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
@@ -50,13 +50,13 @@ typedef struct {
 
 
     struct {
-        bool (*scriptInit)(const Context *rsc, ScriptC *s,
-                           char const *resName,
-                           char const *cacheDir,
-                           uint8_t const *bitcode,
-                           size_t bitcodeSize,
-                           uint32_t flags,
-                           RsHalSymbolLookupFunc lookupFunc);
+        bool (*init)(const Context *rsc, ScriptC *s,
+                     char const *resName,
+                     char const *cacheDir,
+                     uint8_t const *bitcode,
+                     size_t bitcodeSize,
+                     uint32_t flags,
+                     RsHalSymbolLookupFunc lookupFunc);
 
         void (*invokeFunction)(const Context *rsc, Script *s,
                                uint32_t slot,
@@ -85,6 +85,13 @@ typedef struct {
 
         void (*destroy)(const Context *rsc, Script *s);
     } script;
+
+
+    struct {
+        bool (*init)(const Context *rsc, const ProgramStore *ps);
+        void (*setActive)(const Context *rsc, const ProgramStore *ps);
+        void (*destroy)(const Context *rsc, const ProgramStore *ps);
+    } store;
 
 
 

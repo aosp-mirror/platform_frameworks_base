@@ -513,6 +513,7 @@ void FontState::initRenderState() {
     mFontProgramStore->setBlendFunc(RS_BLEND_SRC_SRC_ALPHA, RS_BLEND_DST_ONE_MINUS_SRC_ALPHA);
     mFontProgramStore->setDitherEnable(false);
     mFontProgramStore->setDepthMask(false);
+    mFontProgramStore->init();
 }
 
 void FontState::initTextTexture() {
