@@ -60,7 +60,10 @@ struct DataSourceReader : public mkvparser::IMkvReader {
     virtual int Length(long long* total, long long* available) {
         off64_t size;
         if (mSource->getSize(&size) != OK) {
-            return -1;
+            *total = -1;
+            *available = (long long)((1ull << 63) - 1);
+
+            return 0;
         }
 
         if (total) {
@@ -84,7 +87,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 
 struct BlockIterator {
-    BlockIterator(mkvparser::Segment *segment, unsigned long trackNum);
+    BlockIterator(MatroskaExtractor *extractor, unsigned long trackNum);
 
     bool eos() const;
 
@@ -96,11 +99,14 @@ struct BlockIterator {
     int64_t blockTimeUs() const;
 
 private:
-    mkvparser::Segment *mSegment;
+    MatroskaExtractor *mExtractor;
     unsigned long mTrackNum;
 
-    mkvparser::Cluster *mCluster;
+    const mkvparser::Cluster *mCluster;
     const mkvparser::BlockEntry *mBlockEntry;
+    long mBlockEntryIndex;
+
+    void advance_l();
 
     BlockIterator(const BlockIterator &);
     BlockIterator &operator=(const BlockIterator &);
@@ -150,7 +156,7 @@ MatroskaSource::MatroskaSource(
     : mExtractor(extractor),
       mTrackIndex(index),
       mType(OTHER),
-      mBlockIter(mExtractor->mSegment,
+      mBlockIter(mExtractor.get(),
                  mExtractor->mTracks.itemAt(index).mTrackNum),
       mNALSizeLen(0) {
     sp<MetaData> meta = mExtractor->mTracks.itemAt(index).mMeta;
@@ -199,11 +205,12 @@ sp<MetaData> MatroskaSource::getFormat() {
 ////////////////////////////////////////////////////////////////////////////////
 
 BlockIterator::BlockIterator(
-        mkvparser::Segment *segment, unsigned long trackNum)
-    : mSegment(segment),
+        MatroskaExtractor *extractor, unsigned long trackNum)
+    : mExtractor(extractor),
       mTrackNum(trackNum),
       mCluster(NULL),
-      mBlockEntry(NULL) {
+      mBlockEntry(NULL),
+      mBlockEntryIndex(0) {
     reset();
 }
 
@@ -212,45 +219,97 @@ bool BlockIterator::eos() const {
 }
 
 void BlockIterator::advance() {
-    while (!eos()) {
-        if (mBlockEntry != NULL) {
-            mBlockEntry = mCluster->GetNext(mBlockEntry);
-        } else if (mCluster != NULL) {
-            mCluster = mSegment->GetNext(mCluster);
+    Mutex::Autolock autoLock(mExtractor->mLock);
+    advance_l();
+}
 
-            if (eos()) {
+void BlockIterator::advance_l() {
+    for (;;) {
+        long res = mCluster->GetEntry(mBlockEntryIndex, mBlockEntry);
+        LOGV("GetEntry returned %ld", res);
+
+        long long pos;
+        long len;
+        if (res < 0) {
+            // Need to parse this cluster some more
+
+            CHECK_EQ(res, mkvparser::E_BUFFER_NOT_FULL);
+
+            res = mCluster->Parse(pos, len);
+            LOGV("Parse returned %ld", res);
+
+            if (res < 0) {
+                // I/O error
+
+                LOGE("Cluster::Parse returned result %ld", res);
+
+                mCluster = NULL;
                 break;
             }
 
-            mBlockEntry = mCluster->GetFirst();
+            continue;
+        } else if (res == 0) {
+            // We're done with this cluster
+
+            const mkvparser::Cluster *nextCluster;
+            res = mExtractor->mSegment->ParseNext(
+                    mCluster, nextCluster, pos, len);
+            LOGV("ParseNext returned %ld", res);
+
+            if (res > 0) {
+                // EOF
+
+                mCluster = NULL;
+                break;
+            }
+
+            CHECK_EQ(res, 0);
+            CHECK(nextCluster != NULL);
+            CHECK(!nextCluster->EOS());
+
+            mCluster = nextCluster;
+
+            res = mCluster->Parse(pos, len);
+            LOGV("Parse (2) returned %ld", res);
+            CHECK_GE(res, 0);
+
+            mBlockEntryIndex = 0;
+            continue;
         }
 
-        if (mBlockEntry != NULL
-                && mBlockEntry->GetBlock()->GetTrackNumber() == mTrackNum) {
+        CHECK(mBlockEntry != NULL);
+        CHECK(mBlockEntry->GetBlock() != NULL);
+        ++mBlockEntryIndex;
+
+        if (mBlockEntry->GetBlock()->GetTrackNumber() == mTrackNum) {
             break;
         }
     }
 }
 
 void BlockIterator::reset() {
-    mCluster = mSegment->GetFirst();
-    mBlockEntry = mCluster->GetFirst();
+    Mutex::Autolock autoLock(mExtractor->mLock);
 
-    while (!eos() && block()->GetTrackNumber() != mTrackNum) {
-        advance();
-    }
+    mCluster = mExtractor->mSegment->GetFirst();
+    mBlockEntryIndex = 0;
+
+    do {
+        advance_l();
+    } while (!eos() && block()->GetTrackNumber() != mTrackNum);
 }
 
 void BlockIterator::seek(int64_t seekTimeUs) {
-    mCluster = mSegment->FindCluster(seekTimeUs * 1000ll);
-    mBlockEntry = mCluster != NULL ? mCluster->GetFirst() : NULL;
+    Mutex::Autolock autoLock(mExtractor->mLock);
+
+    mCluster = mExtractor->mSegment->FindCluster(seekTimeUs * 1000ll);
+    mBlockEntryIndex = 0;
 
     while (!eos() && block()->GetTrackNumber() != mTrackNum) {
-        advance();
+        advance_l();
     }
 
     while (!eos() && !mBlockEntry->GetBlock()->IsKey()) {
-        advance();
+        advance_l();
     }
 }
 
@@ -291,16 +350,6 @@ void MatroskaSource::clearPendingFrames() {
     }
 }
 
-#define BAIL(err) \
-    do {                        \
-        if (bigbuf) {           \
-            bigbuf->release();  \
-            bigbuf = NULL;      \
-        }                       \
-                                \
-        return err;             \
-    } while (0)
-
 status_t MatroskaSource::readBlock() {
     CHECK(mPendingFrames.empty());
 
@@ -310,173 +359,30 @@ status_t MatroskaSource::readBlock() {
 
     const mkvparser::Block *block = mBlockIter.block();
 
-    size_t size = block->GetSize();
     int64_t timeUs = mBlockIter.blockTimeUs();
-    int32_t isSync = block->IsKey();
 
-    MediaBuffer *bigbuf = new MediaBuffer(size);
+    for (int i = 0; i < block->GetFrameCount(); ++i) {
+        const mkvparser::Block::Frame &frame = block->GetFrame(i);
 
-    long res = block->Read(
-            mExtractor->mReader, (unsigned char *)bigbuf->data());
+        MediaBuffer *mbuf = new MediaBuffer(frame.len);
+        mbuf->meta_data()->setInt64(kKeyTime, timeUs);
+        mbuf->meta_data()->setInt32(kKeyIsSyncFrame, block->IsKey());
 
-    if (res != 0) {
-        bigbuf->release();
-        bigbuf = NULL;
+        long n = frame.Read(mExtractor->mReader, (unsigned char *)mbuf->data());
+        if (n != 0) {
+            mPendingFrames.clear();
 
-        return ERROR_END_OF_STREAM;
+            mBlockIter.advance();
+            return ERROR_IO;
+        }
+
+        mPendingFrames.push_back(mbuf);
     }
 
     mBlockIter.advance();
 
-    bigbuf->meta_data()->setInt64(kKeyTime, timeUs);
-    bigbuf->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
-
-    unsigned lacing = (block->Flags() >> 1) & 3;
-
-    if (lacing == 0) {
-        mPendingFrames.push_back(bigbuf);
-        return OK;
-    }
-
-    LOGV("lacing = %u, size = %d", lacing, size);
-
-    const uint8_t *data = (const uint8_t *)bigbuf->data();
-    // hexdump(data, size);
-
-    if (size == 0) {
-        BAIL(ERROR_MALFORMED);
-    }
-
-    unsigned numFrames = (unsigned)data[0] + 1;
-    ++data;
-    --size;
-
-    Vector<uint64_t> frameSizes;
-
-    switch (lacing) {
-        case 1:  // Xiph
-        {
-            for (size_t i = 0; i < numFrames - 1; ++i) {
-                size_t frameSize = 0;
-                uint8_t byte;
-                do {
-                    if (size == 0) {
-                        BAIL(ERROR_MALFORMED);
-                    }
-                    byte = data[0];
-                    ++data;
-                    --size;
-
-                    frameSize += byte;
-                } while (byte == 0xff);
-
-                frameSizes.push(frameSize);
-            }
-
-            break;
-        }
-
-        case 2:  // fixed-size
-        {
-            if ((size % numFrames) != 0) {
-                BAIL(ERROR_MALFORMED);
-            }
-
-            size_t frameSize = size / numFrames;
-            for (size_t i = 0; i < numFrames - 1; ++i) {
-                frameSizes.push(frameSize);
-            }
-
-            break;
-        }
-
-        case 3:  // EBML
-        {
-            uint64_t lastFrameSize = 0;
-            for (size_t i = 0; i < numFrames - 1; ++i) {
-                uint8_t byte;
-
-                if (size == 0) {
-                    BAIL(ERROR_MALFORMED);
-                }
-                byte = data[0];
-                ++data;
-                --size;
-
-                size_t numLeadingZeroes = clz(byte);
-
-                uint64_t frameSize = byte & ~(0x80 >> numLeadingZeroes);
-                for (size_t j = 0; j < numLeadingZeroes; ++j) {
-                    if (size == 0) {
-                        BAIL(ERROR_MALFORMED);
-                    }
-
-                    frameSize = frameSize << 8;
-                    frameSize |= data[0];
-                    ++data;
-                    --size;
-                }
-
-                if (i == 0) {
-                    frameSizes.push(frameSize);
-                } else {
-                    size_t shift =
-                        7 - numLeadingZeroes + 8 * numLeadingZeroes;
-
-                    int64_t delta =
-                        (int64_t)frameSize - (1ll << (shift - 1)) + 1;
-
-                    frameSize = lastFrameSize + delta;
-
-                    frameSizes.push(frameSize);
-                }
-
-                lastFrameSize = frameSize;
-            }
-            break;
-        }
-
-        default:
-            TRESPASS();
-    }
-
-#if 0
-    AString out;
-    for (size_t i = 0; i < frameSizes.size(); ++i) {
-        if (i > 0) {
-            out.append(", ");
-        }
-        out.append(StringPrintf("%llu", frameSizes.itemAt(i)));
-    }
-    LOGV("sizes = [%s]", out.c_str());
-#endif
-
-    for (size_t i = 0; i < frameSizes.size(); ++i) {
-        uint64_t frameSize = frameSizes.itemAt(i);
-
-        if (size < frameSize) {
-            BAIL(ERROR_MALFORMED);
-        }
-
-        MediaBuffer *mbuf = new MediaBuffer(frameSize);
-        mbuf->meta_data()->setInt64(kKeyTime, timeUs);
-        mbuf->meta_data()->setInt32(kKeyIsSyncFrame, isSync);
-        memcpy(mbuf->data(), data, frameSize);
-        mPendingFrames.push_back(mbuf);
-
-        data += frameSize;
-        size -= frameSize;
-    }
-
-    size_t offset = bigbuf->range_length() - size;
-    bigbuf->set_range(offset, size);
-
-    mPendingFrames.push_back(bigbuf);
-
     return OK;
 }
-
-#undef BAIL
 
 status_t MatroskaSource::read(
         MediaBuffer **out, const ReadOptions *options) {
@@ -484,7 +390,8 @@ status_t MatroskaSource::read(
 
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
-    if (options && options->getSeekTo(&seekTimeUs, &mode)) {
+    if (options && options->getSeekTo(&seekTimeUs, &mode)
+            && !mExtractor->isLiveStreaming()) {
         clearPendingFrames();
         mBlockIter.seek(seekTimeUs);
     }
@@ -584,6 +491,13 @@ MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
       mReader(new DataSourceReader(mDataSource)),
       mSegment(NULL),
       mExtractedThumbnails(false) {
+    off64_t size;
+    mIsLiveStreaming =
+        (mDataSource->flags()
+            & (DataSource::kWantsPrefetching
+                | DataSource::kIsCachingDataSource))
+        && mDataSource->getSize(&size) != OK;
+
     mkvparser::EBMLHeader ebmlHeader;
     long long pos;
     if (ebmlHeader.Parse(mReader, pos) < 0) {
@@ -598,7 +512,16 @@ MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
         return;
     }
 
-    ret = mSegment->Load();
+    if (isLiveStreaming()) {
+        ret = mSegment->ParseHeaders();
+        CHECK_EQ(ret, 0);
+
+        long len;
+        ret = mSegment->LoadCluster(pos, len);
+        CHECK_EQ(ret, 0);
+    } else {
+        ret = mSegment->Load();
+    }
 
     if (ret < 0) {
         delete mSegment;
@@ -635,12 +558,17 @@ sp<MetaData> MatroskaExtractor::getTrackMetaData(
         return NULL;
     }
 
-    if ((flags & kIncludeExtensiveMetaData) && !mExtractedThumbnails) {
+    if ((flags & kIncludeExtensiveMetaData) && !mExtractedThumbnails
+            && !isLiveStreaming()) {
         findThumbnails();
         mExtractedThumbnails = true;
     }
 
     return mTracks.itemAt(index).mMeta;
+}
+
+bool MatroskaExtractor::isLiveStreaming() const {
+    return mIsLiveStreaming;
 }
 
 static void addESDSFromAudioSpecificInfo(
@@ -794,7 +722,7 @@ void MatroskaExtractor::findThumbnails() {
             continue;
         }
 
-        BlockIterator iter(mSegment, info->mTrackNum);
+        BlockIterator iter(this, info->mTrackNum);
         int32_t i = 0;
         int64_t thumbnailTimeUs = 0;
         size_t maxBlockSize = 0;
@@ -802,7 +730,11 @@ void MatroskaExtractor::findThumbnails() {
             if (iter.block()->IsKey()) {
                 ++i;
 
-                size_t blockSize = iter.block()->GetSize();
+                size_t blockSize = 0;
+                for (int i = 0; i < iter.block()->GetFrameCount(); ++i) {
+                    blockSize += iter.block()->GetFrame(i).len;
+                }
+
                 if (blockSize > maxBlockSize) {
                     maxBlockSize = blockSize;
                     thumbnailTimeUs = iter.blockTimeUs();
@@ -819,6 +751,15 @@ sp<MetaData> MatroskaExtractor::getMetaData() {
     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_CONTAINER_MATROSKA);
 
     return meta;
+}
+
+uint32_t MatroskaExtractor::flags() const {
+    uint32_t x = CAN_PAUSE;
+    if (!isLiveStreaming()) {
+        x |= CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD | CAN_SEEK;
+    }
+
+    return x;
 }
 
 bool SniffMatroska(
