@@ -410,73 +410,27 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
-     * Reorders the spinners according to the date format in the current
-     * {@link Locale}.
+     * Reorders the spinners according to the date format that is
+     * explicitly set by the user and if no such is set fall back
+     * to the current locale's default format.
      */
     private void reorderSpinners() {
-        java.text.DateFormat format;
-        String order;
-
-        /*
-         * If the user is in a locale where the medium date format is still
-         * numeric (Japanese and Czech, for example), respect the date format
-         * order setting. Otherwise, use the order that the locale says is
-         * appropriate for a spelled-out date.
-         */
-
-        if (getShortMonths()[0].startsWith("1")) {
-            format = DateFormat.getDateFormat(getContext());
-        } else {
-            format = DateFormat.getMediumDateFormat(getContext());
-        }
-
-        if (format instanceof SimpleDateFormat) {
-            order = ((SimpleDateFormat) format).toPattern();
-        } else {
-            // Shouldn't happen, but just in case.
-            order = new String(DateFormat.getDateFormatOrder(getContext()));
-        }
-
-        /*
-         * Remove the 3 spinners from their parent and then add them back in the
-         * required order.
-         */
-        LinearLayout parent = mSpinners;
-        parent.removeAllViews();
-
-        boolean quoted = false;
-        boolean didDay = false, didMonth = false, didYear = false;
-
-        for (int i = 0; i < order.length(); i++) {
-            char c = order.charAt(i);
-
-            if (c == '\'') {
-                quoted = !quoted;
+        mSpinners.removeAllViews();
+        char[] order = DateFormat.getDateFormatOrder(getContext());
+        for (int i = 0; i < order.length; i++) {
+            switch (order[i]) {
+                case DateFormat.DATE:
+                    mSpinners.addView(mDaySpinner);
+                    break;
+                case DateFormat.MONTH:
+                    mSpinners.addView(mMonthSpinner);
+                    break;
+                case DateFormat.YEAR:
+                    mSpinners.addView(mYearSpinner);
+                    break;
+                default:
+                    throw new IllegalArgumentException();
             }
-
-            if (!quoted) {
-                if (c == DateFormat.DATE && !didDay) {
-                    parent.addView(mDaySpinner);
-                    didDay = true;
-                } else if ((c == DateFormat.MONTH || c == 'L') && !didMonth) {
-                    parent.addView(mMonthSpinner);
-                    didMonth = true;
-                } else if (c == DateFormat.YEAR && !didYear) {
-                    parent.addView(mYearSpinner);
-                    didYear = true;
-                }
-            }
-        }
-
-        // Shouldn't happen, but just in case.
-        if (!didMonth) {
-            parent.addView(mMonthSpinner);
-        }
-        if (!didDay) {
-            parent.addView(mDaySpinner);
-        }
-        if (!didYear) {
-            parent.addView(mYearSpinner);
         }
     }
 
