@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -41,6 +43,8 @@ import android.view.Gravity;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -48,8 +52,6 @@ import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
 import android.widget.RemoteViews.RemoteView;
-
-import com.android.internal.R;
 
 
 /**
@@ -125,6 +127,7 @@ import com.android.internal.R;
 public class ProgressBar extends View {
     private static final int MAX_LEVEL = 10000;
     private static final int ANIMATION_RESOLUTION = 200;
+    private static final int TIMEOUT_SEND_ACCESSIBILITY_EVENT = 200;
 
     int mMinWidth;
     int mMaxWidth;
@@ -155,6 +158,8 @@ public class ProgressBar extends View {
     private boolean mInDrawing;
 
     private int mAnimationResolution;
+
+    private AccessibilityEventSender mAccessibilityEventSender;
 
     /**
      * Create a new progress bar with range 0...100 and initial progress of 0.
@@ -542,8 +547,11 @@ public class ProgressBar extends View {
             onProgressRefresh(scale, fromUser);
         }
     }
-    
-    void onProgressRefresh(float scale, boolean fromUser) {        
+
+    void onProgressRefresh(float scale, boolean fromUser) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            scheduleAccessibilityEventSender();
+        }
     }
 
     private synchronized void refreshProgress(int id, int progress, boolean fromUser) {
@@ -1007,8 +1015,48 @@ public class ProgressBar extends View {
         if (mIndeterminate) {
             stopAnimation();
         }
+        if(mRefreshProgressRunnable != null) {
+            removeCallbacks(mRefreshProgressRunnable);
+        }
+        if (mAccessibilityEventSender != null) {
+            removeCallbacks(mAccessibilityEventSender);
+        }
         // This should come after stopAnimation(), otherwise an invalidate message remains in the
         // queue, which can prevent the entire view hierarchy from being GC'ed during a rotation
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (!super.dispatchPopulateAccessibilityEvent(event)) {
+            event.setItemCount(mMax);
+            event.setCurrentItemIndex(mProgress);
+        }
+        return true;
+    }
+
+    /**
+     * Schedule a command for sending an accessibility event.
+     * </br>
+     * Note: A command is used to ensure that accessibility events
+     *       are sent at most one in a given time frame to save
+     *       system resources while the progress changes quickly.
+     */
+    private void scheduleAccessibilityEventSender() {
+        if (mAccessibilityEventSender == null) {
+            mAccessibilityEventSender = new AccessibilityEventSender();
+        } else {
+            removeCallbacks(mAccessibilityEventSender);
+        }
+        postDelayed(mAccessibilityEventSender, TIMEOUT_SEND_ACCESSIBILITY_EVENT);
+    }
+
+    /**
+     * Command for sending an accessibility event.
+     */
+    private class AccessibilityEventSender implements Runnable {
+        public void run() {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        }
     }
 }
