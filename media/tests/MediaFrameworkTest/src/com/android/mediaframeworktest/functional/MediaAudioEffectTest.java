@@ -744,7 +744,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
             assertNotNull(msg + ": could not create AudioEffect", effect);
             byte[] param = intToByteArray(Equalizer.PARAM_CURRENT_PRESET);
             byte[] value = new byte[2];
-            if (effect.getParameter(param, value) == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(effect.getParameter(param, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -777,8 +777,8 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
                                     0);
             assertNotNull(msg + ": could not create AudioEffect", effect);
             int[] value = new int[1];
-            if (effect.getParameter(EnvironmentalReverb.PARAM_DECAY_TIME, value)
-                    == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(
+                    effect.getParameter(EnvironmentalReverb.PARAM_DECAY_TIME, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -811,8 +811,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
                                     0);
             assertNotNull(msg + ": could not create AudioEffect", effect);
             short[] value = new short[1];
-            if (effect.getParameter(Equalizer.PARAM_CURRENT_PRESET, value)
-                    == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(effect.getParameter(Equalizer.PARAM_CURRENT_PRESET, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -845,8 +844,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
                                     0);
             assertNotNull(msg + ": could not create AudioEffect", effect);
             byte[] value = new byte[2];
-            if (effect.getParameter(Equalizer.PARAM_CURRENT_PRESET, value)
-                    == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(effect.getParameter(Equalizer.PARAM_CURRENT_PRESET, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -881,8 +879,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
             int[] param = new int[1];
             int[] value = new int[1];
             param[0] = EnvironmentalReverb.PARAM_DECAY_TIME;
-            if (effect.getParameter(param, value)
-                    == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(effect.getParameter(param, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -917,8 +914,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
             int[] param = new int[1];
             short[] value = new short[1];
             param[0] = Equalizer.PARAM_CURRENT_PRESET;
-            if (effect.getParameter(param, value)
-                    == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(effect.getParameter(param, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -953,8 +949,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
             int[] param = new int[1];
             byte[] value = new byte[2];
             param[0] = Equalizer.PARAM_CURRENT_PRESET;
-            if (effect.getParameter(param, value)
-                    == AudioEffect.SUCCESS) {
+            if (!AudioEffect.isError(effect.getParameter(param, value))) {
                 result = true;
             }
         } catch (IllegalArgumentException e) {
@@ -1082,8 +1077,8 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
 
             short[] value = new short[1];
             status = effect2.getParameter(Equalizer.PARAM_CURRENT_PRESET, value);
-            assertEquals(msg + ": Effect2 getParameter failed",
-                    AudioEffect.SUCCESS, status);
+            assertFalse(msg + ": Effect2 getParameter failed",
+                    AudioEffect.isError(status));
             assertEquals(msg + ": Effect1 changed parameter",
                     (short)0, value[0]);
 
@@ -1278,7 +1273,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
                 byte[] cmd = new byte[0];
                 byte[] reply = new byte[4];
                 int status = effect.command(3, cmd, reply);
-                assertEquals(msg + ": command failed", AudioEffect.SUCCESS, status);
+                assertFalse(msg + ": command failed", AudioEffect.isError(status));
                 assertTrue(msg + ": effect not enabled", effect.getEnabled());
                 result = true;
             } catch (IllegalStateException e) {

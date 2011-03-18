@@ -573,27 +573,16 @@ public class AudioEffect {
      *
      * @param param the identifier of the parameter to set
      * @param value the new value for the specified parameter
-     * @return {@link #SUCCESS} in case of success, {@link #ERROR_BAD_VALUE},
-     *         {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION} or
-     *         {@link #ERROR_DEAD_OBJECT} in case of failure When called, value.length
-     *         indicates the maximum size of the returned parameters value. When
-     *         returning, value.length is updated with the actual size of the
-     *         returned value.
+     * @return the number of meaningful bytes in value array in case of success or
+     *  {@link #ERROR_BAD_VALUE}, {@link #ERROR_NO_MEMORY}, {@link #ERROR_INVALID_OPERATION}
+     *  or {@link #ERROR_DEAD_OBJECT} in case of failure.
      * @throws IllegalStateException
      * @hide
      */
     public int getParameter(byte[] param, byte[] value)
             throws IllegalStateException {
         checkState("getParameter()");
-        int[] vSize = new int[1];
-        vSize[0] = value.length;
-        int status = native_getParameter(param.length, param, vSize, value);
-        if (value.length > vSize[0]) {
-            byte[] resizedValue = new byte[vSize[0]];
-            System.arraycopy(value, 0, resizedValue, 0, vSize[0]);
-            value = resizedValue;
-        }
-        return status;
+        return native_getParameter(param.length, param, value.length, value);
     }
 
     /**
@@ -615,6 +604,7 @@ public class AudioEffect {
      * array of 1 or 2 integers
      *
      * @see #getParameter(byte[], byte[])
+     * In case of success, returns the number of meaningful integers in value array.
      * @hide
      */
     public int getParameter(int param, int[] value)
@@ -628,9 +618,14 @@ public class AudioEffect {
 
         int status = getParameter(p, v);
 
-        value[0] = byteArrayToInt(v);
-        if (v.length > 4) {
-            value[1] = byteArrayToInt(v, 4);
+        if (status == 4 || status == 8) {
+            value[0] = byteArrayToInt(v);
+            if (status == 8) {
+                value[1] = byteArrayToInt(v, 4);
+            }
+            status /= 4;
+        } else {
+            status = ERROR;
         }
         return status;
     }
@@ -640,6 +635,7 @@ public class AudioEffect {
      * array of 1 or 2 short integers
      *
      * @see #getParameter(byte[], byte[])
+     * In case of success, returns the number of meaningful short integers in value array.
      * @hide
      */
     public int getParameter(int param, short[] value)
@@ -653,9 +649,14 @@ public class AudioEffect {
 
         int status = getParameter(p, v);
 
-        value[0] = byteArrayToShort(v);
-        if (v.length > 2) {
-            value[1] = byteArrayToShort(v, 2);
+        if (status == 2 || status == 4) {
+            value[0] = byteArrayToShort(v);
+            if (status == 4) {
+                value[1] = byteArrayToShort(v, 2);
+            }
+            status /= 2;
+        } else {
+            status = ERROR;
         }
         return status;
     }
@@ -665,6 +666,7 @@ public class AudioEffect {
      * the value is also an array of 1 or 2 integers
      *
      * @see #getParameter(byte[], byte[])
+     * In case of success, the returns the number of meaningful integers in value array.
      * @hide
      */
     public int getParameter(int[] param, int[] value)
@@ -681,9 +683,14 @@ public class AudioEffect {
 
         int status = getParameter(p, v);
 
-        value[0] = byteArrayToInt(v);
-        if (v.length > 4) {
-            value[1] = byteArrayToInt(v, 4);
+        if (status == 4 || status == 8) {
+            value[0] = byteArrayToInt(v);
+            if (status == 8) {
+                value[1] = byteArrayToInt(v, 4);
+            }
+            status /= 4;
+        } else {
+            status = ERROR;
         }
         return status;
     }
@@ -693,6 +700,7 @@ public class AudioEffect {
      * the value is an array of 1 or 2 short integers
      *
      * @see #getParameter(byte[], byte[])
+     * In case of success, returns the number of meaningful short integers in value array.
      * @hide
      */
     public int getParameter(int[] param, short[] value)
@@ -709,9 +717,14 @@ public class AudioEffect {
 
         int status = getParameter(p, v);
 
-        value[0] = byteArrayToShort(v);
-        if (v.length > 2) {
-            value[1] = byteArrayToShort(v, 2);
+        if (status == 2 || status == 4) {
+            value[0] = byteArrayToShort(v);
+            if (status == 4) {
+                value[1] = byteArrayToShort(v, 2);
+            }
+            status /= 2;
+        } else {
+            status = ERROR;
         }
         return status;
     }
@@ -740,24 +753,14 @@ public class AudioEffect {
     /**
      * Send a command to the effect engine. This method is intended to send
      * proprietary commands to a particular effect implementation.
-     *
+     * In case of success, returns the number of meaningful bytes in reply array.
+     * In case of failure, the returned value is negative and implementation specific.
      * @hide
      */
     public int command(int cmdCode, byte[] command, byte[] reply)
             throws IllegalStateException {
         checkState("command()");
-        int[] replySize = new int[1];
-        replySize[0] = reply.length;
-
-        int status = native_command(cmdCode, command.length, command,
-                replySize, reply);
-
-        if (reply.length > replySize[0]) {
-            byte[] resizedReply = new byte[replySize[0]];
-            System.arraycopy(reply, 0, resizedReply, 0, replySize[0]);
-            reply = resizedReply;
-        }
-        return status;
+        return native_command(cmdCode, command.length, command, reply.length, reply);
     }
 
     // --------------------------------------------------------------------------
@@ -1145,10 +1148,10 @@ public class AudioEffect {
             int vsize, byte[] value);
 
     private native final int native_getParameter(int psize, byte[] param,
-            int[] vsize, byte[] value);
+            int vsize, byte[] value);
 
     private native final int native_command(int cmdCode, int cmdSize,
-            byte[] cmdData, int[] repSize, byte[] repData);
+            byte[] cmdData, int repSize, byte[] repData);
 
     private static native Object[] native_query_effects();
 
@@ -1172,18 +1175,25 @@ public class AudioEffect {
      * @hide
      */
     public void checkStatus(int status) {
-        switch (status) {
-        case AudioEffect.SUCCESS:
-            break;
-        case AudioEffect.ERROR_BAD_VALUE:
-            throw (new IllegalArgumentException(
-                    "AudioEffect: bad parameter value"));
-        case AudioEffect.ERROR_INVALID_OPERATION:
-            throw (new UnsupportedOperationException(
-                    "AudioEffect: invalid parameter operation"));
-        default:
-            throw (new RuntimeException("AudioEffect: set/get parameter error"));
+        if (isError(status)) {
+            switch (status) {
+            case AudioEffect.ERROR_BAD_VALUE:
+                throw (new IllegalArgumentException(
+                        "AudioEffect: bad parameter value"));
+            case AudioEffect.ERROR_INVALID_OPERATION:
+                throw (new UnsupportedOperationException(
+                        "AudioEffect: invalid parameter operation"));
+            default:
+                throw (new RuntimeException("AudioEffect: set/get parameter error"));
+            }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isError(int status) {
+        return (status < 0);
     }
 
     /**
