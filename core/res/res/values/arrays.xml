@@ -242,15 +242,15 @@
        <item>@drawable/action_bar_background</item>
        <item>@drawable/action_bar_divider</item>
        <item>@drawable/ic_menu_close_clear_cancel</item>
-       <item>@drawable/ic_menu_copy_dark</item>
-       <item>@drawable/ic_menu_copy_light</item>
-       <item>@drawable/ic_menu_cut_dark</item>
-       <item>@drawable/ic_menu_cut_light</item>
+       <item>@drawable/ic_menu_copy_holo_dark</item>
+       <item>@drawable/ic_menu_copy_holo_light</item>
+       <item>@drawable/ic_menu_cut_holo_dark</item>
+       <item>@drawable/ic_menu_cut_holo_light</item>
        <item>@drawable/ic_menu_more</item>
        <item>@drawable/ic_menu_moreoverflow_holo_dark</item>
        <item>@drawable/ic_menu_moreoverflow_holo_light</item>
-       <item>@drawable/ic_menu_paste_dark</item>
-       <item>@drawable/ic_menu_paste_light</item>
+       <item>@drawable/ic_menu_paste_holo_dark</item>
+       <item>@drawable/ic_menu_paste_holo_light</item>
        <item>@drawable/dialog_bottom_holo_dark</item>
        <item>@drawable/dialog_bottom_holo_light</item>
        <item>@drawable/dialog_full_holo_dark</item>
