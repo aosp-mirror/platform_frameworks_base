@@ -26,6 +26,8 @@
 #include <utils/Log.h>
 #include <utils/StopWatch.h>
 
+#include <private/hwui/DrawGlInfo.h>
+
 #include <ui/Rect.h>
 
 #include "OpenGLRenderer.h"
@@ -227,30 +229,18 @@ bool OpenGLRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     }
 #endif
 
-    struct {
-        // Input: current clip rect
-        int clipLeft;
-        int clipTop;
-        int clipRight;
-        int clipBottom;
+    DrawGlInfo info;
+    info.clipLeft = clip.left;
+    info.clipTop = clip.top;
+    info.clipRight = clip.right;
+    info.clipBottom = clip.bottom;
+    info.isLayer = hasLayer();
+    getSnapshot()->transform->copyTo(&info.transform[0]);
 
-        // Output: dirty region to redraw
-        float dirtyLeft;
-        float dirtyTop;
-        float dirtyRight;
-        float dirtyBottom;
-    } constraints;
-
-    constraints.clipLeft = clip.left;
-    constraints.clipTop = clip.top;
-    constraints.clipRight = clip.right;
-    constraints.clipBottom = clip.bottom;
-
-    status_t result = (*functor)(0, &constraints);
+    status_t result = (*functor)(0, &info);
 
     if (result != 0) {
-        Rect localDirty(constraints.dirtyLeft, constraints.dirtyTop,
-                constraints.dirtyRight, constraints.dirtyBottom);
+        Rect localDirty(info.dirtyLeft, info.dirtyTop, info.dirtyRight, info.dirtyBottom);
         dirty.unionWith(localDirty);
     }
 
