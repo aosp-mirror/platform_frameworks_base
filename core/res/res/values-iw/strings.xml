@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"מאפשר ליישום לשלוט ברטט."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"שליטה בפנס"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"מאפשר ליישום לשלוט בפנס."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"גישה להתקני USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"מאפשר ליישום גישה להתקני USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"נהל העדפות ואישורים עבור התקני USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"מאפשר ליישום לנהל העדפות ואישורים עבור התקני USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"בדוק חומרה"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"מאפשר ליישום לשלוט בציוד היקפי מסוגים שונים לצורך בדיקת חומרה."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"התקשר ישירות למספרי טלפון"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"מאפשר ליישום להתחבר ולהתנתק מנקודות גישה של Wi-Fi, ולבצע שינויים ברשתות Wi-Fi מוגדרות."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"אפשר קבלת שידורים מרובים ב-Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"מאפשר ליישום לקבל חפיסות שלא ממוענות ישירות למכשיר שלך. יכולת זו שימושית בעת גילוי שירותים המוצעים בקרבת מקום. היא משתמשת במתח סוללה רב יותר לעומת מצב שאינו ריבוי שידורים."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"הצג את מצב WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"מאפשר ליישום להציג את המידע על המצב של WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"שנה את מצב WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"מאפשר ליישום להתחבר ולהתנתק מרשת WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"ניהול Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"מאפשר ליישום להגדיר את טלפון Bluetooth המקומי, ולגלות מכשירים מרוחקים ולבצע התאמה איתם."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"צור חיבורי Bluetooth"</string>
@@ -440,7 +444,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"מחק את כל הנתונים"</string>
     <string name="policydesc_wipeData" msgid="7669895333814222586">"מחק את נתוני הטלפון ללא אזהרה, על ידי ביצוע איפוס נתוני יצרן"</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"דף הבית"</item>
+    <item msgid="8901098336658710359">"בית"</item>
     <item msgid="869923650527136615">"נייד"</item>
     <item msgid="7897544654242874543">"עבודה"</item>
     <item msgid="1103601433382158155">"פקס בעבודה"</item>
@@ -450,19 +454,19 @@
     <item msgid="9192514806975898961">"מותאם אישית"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"דף הבית"</item>
+    <item msgid="8073994352956129127">"בית"</item>
     <item msgid="7084237356602625604">"עבודה"</item>
     <item msgid="1112044410659011023">"אחר"</item>
     <item msgid="2374913952870110618">"מותאם אישית"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"דף הבית"</item>
+    <item msgid="6880257626740047286">"בית"</item>
     <item msgid="5629153956045109251">"עבודה"</item>
     <item msgid="4966604264500343469">"אחר"</item>
     <item msgid="4932682847595299369">"מותאם אישית"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"דף הבית"</item>
+    <item msgid="1738585194601476694">"בית"</item>
     <item msgid="1359644565647383708">"עבודה"</item>
     <item msgid="7868549401053615677">"אחר"</item>
     <item msgid="3145118944639869809">"מותאם אישית"</item>
@@ -483,7 +487,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"מותאם אישית"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"דף הבית"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"בית"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"נייד"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"עבודה"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"פקס בעבודה"</string>
@@ -507,16 +511,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"יום השנה"</string>
     <string name="eventTypeOther" msgid="5834288791948564594">"אירוע"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"מותאם אישית"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"דף הבית"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"בית"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"עבודה"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"אחר"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"סלולרי"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"מותאם אישית"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"דף הבית"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"בית"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"עבודה"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"אחר"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"מותאם אישית"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"דף הבית"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"בית"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"עבודה"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"אחר"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"מותאם אישית"</string>
@@ -533,7 +537,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"אחר"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"מותאם אישית"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"מותאם אישית"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"דף הבית"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"בית"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"עבודה"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"אחר"</string>
     <string name="contact_status_update_attribution" msgid="5112589886094402795">"דרך <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"השתמש כברירת מחדל עבור פעולה זו."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"נקה את ברירת המחדל ב\'הגדרות דף הבית\' &gt; \'יישומים\' &gt; \'נהל יישומים\'."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"בחר פעולה"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"בחר יישום עבור התקן ה-USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"אין יישומים שיכולים לבצע פעולה זו."</string>
     <string name="aerr_title" msgid="653922989522758100">"מצטערים!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"היישום <xliff:g id="APPLICATION">%1$s</xliff:g> (תהליך <xliff:g id="PROCESS">%2$s</xliff:g>) הופסק באופן לא צפוי. נסה שוב."</string>

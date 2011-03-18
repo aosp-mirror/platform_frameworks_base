@@ -202,7 +202,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"habilitar el modo de auto"</string>
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Permite que una aplicación habilite el modo auto."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"eliminar los procesos de fondo"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Permite que una aplicación elimine los procesos de fondo de otras aplicaciones, aun si la memoria no es baja."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Permite que una aplicación elimine los procesos de fondo de otras aplicaciones, aun si la no queda poco espacio en la memoria."</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"forzar la detención de otras aplicaciones"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Permite que una aplicación provoque la detención de otras aplicaciones."</string>
     <string name="permlab_forceBack" msgid="1804196839880393631">"provocar que la aplicación se acerque"</string>
@@ -245,7 +245,7 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permite al propietario vincularse a la interfaz de nivel superior de un método de entrada. Se debe evitar utilizarlo en aplicaciones normales."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un fondo de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permite al propietario vincularse a la interfaz de nivel superior de un fondo de pantalla. Se debe evitar utilizarlo en aplicaciones normales."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con un administrador de dispositivo"</string>
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con un administrador de dispositivos"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permite que el propietario envíe sus intentos a un administrador de dispositivos. No se necesita para las aplicaciones normales."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"cambiar la orientación de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Admite una aplicación que cambia la rotación de la pantalla en cualquier momento. Se debe evitar utilizarlo en aplicaciones normales."</string>
@@ -264,11 +264,11 @@
     <string name="permlab_installPackages" msgid="335800214119051089">"instalar aplicaciones directamente"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Admite una aplicación que instala paquetes de Android nuevos o actualizados. Las aplicaciones maliciosas pueden utilizarlo para agregar aplicaciones nuevas con permisos arbitrariamente potentes."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"eliminar todos los datos de memoria caché de la aplicación"</string>
-    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Admite una aplicación que libera espacio de almacenamiento en el teléfono al eliminar archivos del directorio de memoria caché de la aplicación. En general, el acceso es muy restringido para el proceso del sistema."</string>
+    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Permite que una aplicación libere espacio de almacenamiento en el teléfono borrando archivos del directorio de memoria caché de la aplicación. En general el acceso está muy restringido al proceso del sistema."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Mover recursos de la aplicación"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Permite a una aplicación mover recursos de aplicación de medios internos a externos y viceversa."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lee los datos confidenciales del registro"</string>
-    <string name="permdesc_readLogs" msgid="8896449437464867766">"Admite una aplicación que lee diversos archivos de registro del sistema. Esto te permite descubrir información general acerca de lo que haces con el teléfono, y puede potencialmente incluir información personal o privada."</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Permite que una aplicación lea los diversos archivos de registro del sistema. Esto le permite descubrir información general acerca de lo que haces con el teléfono, y puede potencialmente incluir información personal o privada."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leer y escribir a recursos dentro del grupo de diagnóstico"</string>
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Admite una aplicación que lee y escribe a cualquier recurso dentro del grupo de diagnóstico; por ejemplo, archivos con /dev. Esto puede afectar potencialmente la estabilidad y la seguridad del sistema. Debe utilizarlo SÓLO el fabricante o el operador en los diagnósticos específicos del hardware."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"activar o desactivar componentes de la aplicación"</string>
@@ -281,12 +281,12 @@
     <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Permite a una aplicación modificar los datos de la configuración segura de los sistemas. Las aplicaciones normales no deben utilizarlo."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"modificar el mapa de servicios de Google"</string>
     <string name="permdesc_writeGservices" msgid="6602362746516676175">"Admite una aplicación que modifica el mapa de servicios de Google. Las aplicaciones normales no deben utilizarlo."</string>
-    <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"iniciar automáticamente durante la inicialización"</string>
-    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Admite una aplicación que se inicia cuando el sistema haya finalizado la inicialización. Esto puede ocasionar que se demore más tiempo en inicializar el teléfono y que la aplicación retarde el funcionamiento total del teléfono al estar en ejecución constante."</string>
+    <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"ejecutar automáticamente al iniciar"</string>
+    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Permite que una aplicación se inicie en cuanto el sistema haya finalizado la inicialización. Esto puede ocasionar que el teléfono tarde más en inicializarse y que la aplicación demore el funcionamiento total del teléfono al estar en ejecución constante."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"enviar emisiones pegajosas"</string>
     <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Admite una aplicación que envía emisiones pegajosas, las cuales permanecen luego de que finaliza la emisión. Las aplicaciones maliciosas pueden hacer lento e inestable al teléfono, ya que ocasiona que utilice demasiada memoria."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"leer datos de contacto"</string>
-    <string name="permdesc_readContacts" msgid="3371591512896545975">"Admite una aplicación que lee todos los datos de (direcciones) de contactos almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para enviar tus eventos de calendario a otras personas."</string>
+    <string name="permdesc_readContacts" msgid="3371591512896545975">"Permite que una aplicación lea todos los datos (direcciones) de contactos almacenados en tu tablet. Las aplicaciones maliciosas pueden utilizarlo para enviar tus datos a otras personas."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"escribir datos de contacto"</string>
     <string name="permdesc_writeContacts" msgid="3924383579108183601">"Admite una aplicación que modifica los datos de (dirección de) contacto guardados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar los datos de contacto."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"Leer eventos del calendario"</string>
@@ -315,8 +315,8 @@
     <string name="permdesc_camera" msgid="6004878235852154239">"Admite una aplicación que toma fotografías y graba video con la cámara. Esto permite que la aplicación en cualquier momento recopile imágenes que esté viendo la cámara."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"desactivar teléfono de manera permanente"</string>
     <string name="permdesc_brick" msgid="5569526552607599221">"Admite que la aplicación desactive todo el teléfono de manera permanente. Esto es muy peligroso."</string>
-    <string name="permlab_reboot" msgid="2898560872462638242">"provocar el reinicio del teléfono"</string>
-    <string name="permdesc_reboot" msgid="7914933292815491782">"Admite que la aplicación provoque que el teléfono se reinicie."</string>
+    <string name="permlab_reboot" msgid="2898560872462638242">"forzar reinicio del teléfono"</string>
+    <string name="permdesc_reboot" msgid="7914933292815491782">"Permite que la aplicación fuerce el reinicio del tablet."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"montar y desmontar filesystems"</string>
     <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Admite que la aplicación monte y desmonte filesystems para obtener almacenamiento extraíble."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"espacio de almacenamiento externo del formato"</string>
@@ -335,15 +335,15 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Admite que la aplicación controle el vibrador."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controlar linterna"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Admite que la aplicación controle la linterna."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"acceder a dispositivos USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permite que la aplicación acceda a dispositivos USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"administrar preferencias y permisos para los dispositivos USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Permite a la aplicación administrar preferencias y permisos para los dispositivos USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"probar el hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Admite que la aplicación controle diversos periféricos con el fin de probar el hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"llamar directamente a números de teléfono"</string>
     <string name="permdesc_callPhone" msgid="3369867353692722456">"Admite que la aplicación llame a ciertos números de teléfono sin tu permiso. Las aplicaciones maliciosas pueden ocasionar llamadas imprevistas en tu factura telefónica. Ten en cuenta que esto no admite que la aplicación llame a los números de emergencia."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"llamar directamente a cualquier número de teléfono"</string>
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Admite que la aplicación llame a cualquier número de teléfono, incluidos los números de emergencia, sin tu intervención. Las aplicaciones maliciosas pueden realizar llamadas innecesarias e ilegales a los servicios de emergencia."</string>
-    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"comienza directamente la configuración CDMA del teléfono"</string>
+    <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"iniciar directamente la configuración CDMA del teléfono"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Admite la aplicación para comenzar con el aprovisionamiento CDMA. Las aplicaciones maliciosas pueden comenzar con el aprovisionamiento CDMA sin necesidad."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controlar las notificaciones de actualización de ubicación"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Permite activar y desactivar las notificaciones de actualización de ubicación de la radio. Las aplicaciones normales no deben utilizarlo."</string>
@@ -390,7 +390,7 @@
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"cambiar la conectividad de la red"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Permite que una aplicación cambie el estado de la conectividad de red."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Cambiar la conectividad de anclaje a red"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Permite que una aplicación cambie el estado de la conectividad de red del anclaje."</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"ermite que una aplicación cambie el estado de la conectividad de anclaje a red."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"cambiar la configuración del uso de datos del fondo"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Admite una aplicación que cambia la configuración del uso de datos del fondo."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"ver el estado de Wi-Fi"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Admite una aplicación que se conecta y desconecta de los puntos de acceso de Wi-Fi y que hace cambios en las redes de Wi-Fi configuradas."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recepción de multidifusión Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite a una aplicación recibir paquetes que no están dirigidos directamente a tu dispositivo. Esta opción puede ser útil al descubrir servicios ofrecidos. Además, ejerce más potencia que el modo que no es de multidifusión."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"ver el estado de WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite que una aplicación vea la información acerca del estado de WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"cambiar estado de WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite que una aplicación se conecte a una red WiMAX y se desconecte de esta."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administración de bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Admite una aplicación que configura el teléfono Bluetooth local y descubre y se vincula con dispositivos remotos."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"crear conexiones de Bluetooth"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar de manera predeterminada en esta acción."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Borrar la predeterminación en Configuración de la página principal &gt; Aplicaciones &gt; Administrar aplicaciones."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Seleccionar una acción"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Selecciona una aplicación para el dispositivo USB."</string>
     <string name="noApplications" msgid="1691104391758345586">"Ninguna aplicación puede realizar esta acción."</string>
     <string name="aerr_title" msgid="653922989522758100">"¡Lo sentimos!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) se ha detenido de forma imprevista. Vuelve a intentarlo."</string>
@@ -750,7 +755,7 @@
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> se inició originalmente."</string>
     <string name="smv_application" msgid="295583804361236288">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha violado su política StrictMode autoimpuesta."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha violado su política StrictMode autoimpuesta."</string>
-    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> Correr"</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Selecciona cambiar la aplicación"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"¿Deseas cambiar aplicaciones?"</string>
     <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Ya se está ejecutando una aplicación que debe detenerse antes de iniciar una nueva."</string>
@@ -835,17 +840,17 @@
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Almacenamiento USB dañado. Es posible que debas reformatearlo."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Tarjeta SD dañada. Es posible que debas reformatearla."</string>
     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Almacenamiento USB extraído inesperadamente"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Tarjeta SD extraída de forma imprevista"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Almacenamiento USB extraído de forma imprevista"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Desmontar el almacenamiento USB antes de extraerlo para evitar la pérdida de datos."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Desmontar la tarjeta SD antes de extraerla para evitar la pérdida de datos."</string>
     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Es seguro extraer el almacenamiento USB"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Tarjeta SD fácil de extraer"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Es seguro extraer la tarjeta SD"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Puedes extraer de forma segura el almacenamiento USB."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Puedes eliminar la tarjeta SD sin riesgos."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Puedes extraer de forma segura la tarjeta SD."</string>
     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Almacenamiento USB extraído"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Tarjeta SD extraída"</string>
     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Almacenamiento USB eliminado. Insertar nuevos medios."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Tarjeta SD eliminada. Inserta una nueva."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Tarjeta SD extraída. Insertar una nueva."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"No se encontraron actividades coincidentes"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"actualizar la estadística de uso de los componentes"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Permite la modificación de estadísticas recopiladas sobre el uso de componentes. Las aplicaciones normales no deben utilizarlo."</string>
@@ -877,8 +882,8 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambiar fondo de pantalla"</string>
     <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocolo de túnel punto a punto"</string>
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocolo de túnel de nivel 2"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Clave previamente compartida según L2TP/IPSec VPN"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificado según L2TP/IPSec VPN"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basada en clave compartida previamente"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basada en certificado"</string>
     <string name="upload_file" msgid="2897957172366730416">"Elegir archivo"</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
@@ -896,7 +901,7 @@
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Borrando almacenamiento USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Borrando tarjeta SD..."</string>
     <string name="format_error" product="nosdcard" msgid="4320339096529911637">"No pudo borrar el almacenamiento USB."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"No pudo borrar la tarjeta SD."</string>
+    <string name="format_error" product="default" msgid="1343380371925238343">"No se pudo borrar la tarjeta SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Se ha extraído la tarjeta SD antes de ser desmontada."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Se está verificando el almacenamiento USB en este momento."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Se está verificando la tarjeta SD en este momento."</string>

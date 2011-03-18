@@ -136,7 +136,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Avslutar…"</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Din telefon stängs av."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Senaste"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Inga nya program."</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Inga nya appar."</string>
     <string name="global_actions" msgid="2406416831541615258">"Telefonalternativ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skärmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Stäng av"</string>
@@ -193,7 +193,7 @@
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Tillåter att program tar emot och bearbetar WAP-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem utan att visa dem för dig."</string>
     <string name="permlab_getTasks" msgid="5005277531132573353">"hämta appar som körs"</string>
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillåter att program hämtar information om uppgifter som körs och har körts. Skadliga program kan upptäcka privat information om andra program."</string>
-    <string name="permlab_reorderTasks" msgid="5669588525059921549">"byt ordning på program som körs"</string>
+    <string name="permlab_reorderTasks" msgid="5669588525059921549">"byt ordning på appar som körs"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillåter att ett program flyttar uppgifter till förgrunden eller bakgrunden. Skadliga program kan tvinga sig till förgrunden utan att du kan styra det."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktivera felsökning av appar"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillåter att ett program aktiverar felsökning för ett annat program. Skadliga program kan använda detta för att avsluta andra program."</string>
@@ -203,17 +203,17 @@
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Tillåter att ett program aktiverar trafikläge."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"avbryt bakgrundsprocesser"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Tillåter att ett program avslutar bakgrundsprocesser för andra program även om det inte finns för lite ledigt minne."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"framtvinga avslutning av andra program"</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"framtvinga avslutning av andra appar"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Tillåter att ett program framtvingar avslutning av andra program."</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"tvinga program att avsluta"</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"tvinga appar att avsluta"</string>
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Tillåter att ett program tvingar en aktivitet som finns i förgrunden att avsluta och gå tillbaka. Behövs inte för vanliga program."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"hämta systemets interna status"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Tillåter att ett program hämtar systemets interna status. Skadliga program kan hämta privat och skyddad information som de normalt aldrig ska behöva."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"avsluta delvis"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Sätter aktivitetshanteraren i avstängningsläge. Utför inte en fullständig avstängning."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"förhindrar programbyten"</string>
-    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hindrar att användaren byter till ett annat program."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"övervaka och styra alla program som öppnas"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hindrar att användaren byter till en annan app."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"övervaka och styra alla appar som öppnas"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Tillåter att ett program övervakar och styr hur systemet startar aktiviteter. Skadliga program kan bryta systemet helt. Den här behörigheten behövs bara för programmering, aldrig för vanlig telefonanvändning."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"skicka meddelande om borttaget paket"</string>
     <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Tillåter att ett program skickar ett meddelande om att ett programpaket har tagits bort. Skadliga program kan använda detta för att avsluta alla andra program som körs."</string>
@@ -244,7 +244,7 @@
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"binda till en metod för indata"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en inmatningsmetod. Ska inte behövas för vanliga program."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"binda till en bakgrund"</string>
-    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en bakgrund. Ska inte behövas för vanliga program."</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en bakgrund. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"arbeta med en enhetsadministratör"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga program behöver aldrig göra detta."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ändra bildskärmens rikting"</string>
@@ -261,7 +261,7 @@
     <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Tillåter att ett program raderar cachefiler."</string>
     <string name="permlab_getPackageSize" msgid="4799785352306641460">"mäta telefonens lagringsutrymme"</string>
     <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Tillåter att ett program hämtar kod, data och cachestorlekar"</string>
-    <string name="permlab_installPackages" msgid="335800214119051089">"installera program direkt"</string>
+    <string name="permlab_installPackages" msgid="335800214119051089">"installera appar direkt"</string>
     <string name="permdesc_installPackages" msgid="526669220850066132">"Tillåter att ett program installerar nya eller uppdaterade Android-paket. Skadliga program kan använda detta för att lägga till nya program med godtyckliga och starka behörigheter."</string>
     <string name="permlab_clearAppCache" msgid="4747698311163766540">"ta bort cacheinformation för alla appar"</string>
     <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillåter att ett program frigör lagringsutrymme i telefonen genom att ta bort filer i programmets katalog för cachelagring. Åtkomst är mycket begränsad, vanligtvis till systemprocesser."</string>
@@ -273,7 +273,7 @@
     <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillåter att ett program läser och skriver till en resurs som ägs av diag-gruppen; till exempel filer i /dev. Detta kan eventuellt påverka systemets stabilitet och säkerhet. Detta bör ENDAST används av tillverkaren eller operatören för maskinvaruspecifik diagnostik."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktivera eller inaktivera programkomponenter"</string>
     <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Tillåter att ett program ändrar inställningen för om en komponent i ett annat program har aktiverats eller inte. Skadliga program kan använda detta för att inaktivera viktiga telefonfunktioner. Var försiktig med behörigheten, eftersom programkomponenter kan bli oanvändbara, inkonsekventa eller ostabila."</string>
-    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"ange önskade program"</string>
+    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"ange önskade appar"</string>
     <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Tillåter att ett program ändrar dina önskade program. Skadliga program kan utan varning ändra de program som körs och förfalska dina befintliga program så att de samlar privata data från dig."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"ändra globala systeminställningar"</string>
     <string name="permdesc_writeSettings" msgid="838789419871034696">"Tillåter att ett program ändrar systemets inställningar. Skadliga program kan skada systemets konfiguration."</string>
@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Tillåter att programmet styr vibratorn."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"styra lampa"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillåter att programmet styr lampan."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"åtkomst till USB-enheter"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillåter att programmet använder USB-enheter."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"hantera inställningar och behörighet för USB-enheter"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Tillåter att programmet hanterar inställningar och behörigheter för USB-enheter."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testa maskinvara"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Tillåter att ett program styr kringutrustning i syfte att testa maskinvara."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillåter att ett program ansluter till och kopplar från Wi-Fi-åtkomstpunkter och gör ändringar i konfigurerade Wi-Fi-nätverk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillåt Wi-Fi multicast-mottagning"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillåter att ett program tar emot paket som inte är adresserade direkt till din enhet. Detta är användbart om du vill upptäcka tillgängliga tjänster i närheten. Det drar mer batteri än om telefonen inte är i multicast-läge."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"visa WiMAX-status"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Gör att en app kan visa information om WiMAX-status."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"ändra WiMAX-status"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Gör att en app kan anslutas till och kopplas ifrån WiMAX-nätverk."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administrera bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillåter att ett program konfigurerar den lokala Bluetooth-telefonen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"skapa Bluetooth-anslutningar"</string>
@@ -733,7 +737,8 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Använd som standard för denna åtgärd."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Rensa standardinställning i Startinställningar &gt; Appar &gt; Hantera appar."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Välj en åtgärd"</string>
-    <string name="noApplications" msgid="1691104391758345586">"Inga program kan utföra den här åtgärden."</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Välj ett program för USB-enheten"</string>
+    <string name="noApplications" msgid="1691104391758345586">"Inga appar kan utföra den här åtgärden."</string>
     <string name="aerr_title" msgid="653922989522758100">"Tyvärr!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Processen <xliff:g id="PROCESS">%2$s</xliff:g> för programmet <xliff:g id="APPLICATION">%1$s</xliff:g> stoppades oväntat. Försök igen."</string>
     <string name="aerr_process" msgid="1551785535966089511">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> avslutades oväntat. Försök igen."</string>
@@ -742,7 +747,7 @@
     <string name="anr_activity_process" msgid="5420826626009561014">"Aktiviteten <xliff:g id="ACTIVITY">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
     <string name="anr_application_process" msgid="4185842666452210193">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (i processen <xliff:g id="PROCESS">%2$s</xliff:g>) svarar inte."</string>
     <string name="anr_process" msgid="1246866008169975783">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarar inte."</string>
-    <string name="force_close" msgid="3653416315450806396">"Tvinga fram en stängning"</string>
+    <string name="force_close" msgid="3653416315450806396">"Tvinga stängning"</string>
     <string name="report" msgid="4060218260984795706">"Rapportera"</string>
     <string name="wait" msgid="7147118217226317732">"Vänta"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Programmet omdirigerades"</string>
@@ -752,8 +757,8 @@
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har brutit mot sin egen StrictMode-policy."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> körs"</string>
     <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Välj om du vill växla till programmet"</string>
-    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Vill du byta program?"</string>
-    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Ett annat program som körs måste avslutas innan du kan starta ett nytt."</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Vill du byta app?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"En annan app som körs måste avslutas innan du kan starta en ny."</string>
     <string name="old_app_action" msgid="493129172238566282">"Gå tillbaka till <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="old_app_description" msgid="942967900237208466">"Starta inte det nya programmet."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Starta <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
@@ -809,7 +814,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Inaktivera USB-lagring"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Ett problem uppstod när USB-lagringsplatsen skulle inaktiveras. Kontrollera att USB-värden har demonterats och försök igen."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Aktivera USB-lagring"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Om du aktiverar USB-lagring avbryts några av de program som körs och de kanske inte blir tillgängliga igen förrän du inaktiverar USB-lagring."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Om du aktiverar USB-lagring avbryts några av de appar som körs och de kanske inte blir tillgängliga igen förrän du inaktiverar USB-lagring."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-åtgärd misslyckades"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatera USB-enhet"</string>
@@ -849,8 +854,8 @@
     <string name="activity_list_empty" msgid="4168820609403385789">"Inga matchande aktiviteter hittades"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"uppdatera statistik över användning av komponenter"</string>
     <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillåter att samlad komponentstatistik ändras. Används inte av vanliga program."</string>
-    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Tillåter att innehåll kopieras genom att standardbehållartjänsten startas. Vanliga program behöver aldrig göra detta."</string>
-    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Tillåter att innehåll kopieras genom att standardbehållartjänsten startas. Vanliga program behöver aldrig göra detta."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Tillåter att innehåll kopieras genom att standardbehållartjänsten startas. Vanliga appar behöver aldrig göra detta."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Tillåter att innehåll kopieras genom att standardbehållartjänsten startas. Vanliga appar behöver aldrig göra detta."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Peka två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Fel när widgeten expanderades"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Kör"</string>
@@ -863,7 +868,7 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Skapa kontakt"\n"med <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"markerad"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"inte markerad"</string>
-    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Följande program begär behörighet till konto, både nu och i framtiden."</string>
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Följande appar begär behörighet till konto, både nu och i framtiden."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vill du tillåta den här begäran?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Begäran om åtkomst"</string>
     <string name="allow" msgid="7225948811296386551">"Tillåt"</string>

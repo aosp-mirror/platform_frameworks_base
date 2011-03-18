@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Permite à aplicação controlar o vibrador."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"controlar lanterna"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Permite à aplicação controlar a lanterna."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"aceder a dispositivos USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Permite à aplicação aceder a dispositivos USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"gerir preferências e permissões para dispositivos USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Permite à aplicação gerir as preferências e permissões para dispositivos USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"testar hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Permite à aplicação controlar vários periféricos para fins de teste de hardware."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone directamente"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Permite a uma aplicação ligar e desligar de pontos de acesso de Wi-Fi, bem como efectuar alterações a redes Wi-Fi configuradas."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recepção Multicast Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Permite que uma aplicação receba pacotes não enviados directamente para o dispositivo. Esta opção pode ser útil para descobrir serviços oferecidos na vizinhança. Utiliza mais energia do que o modo não multicast."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"ver estado do WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite a uma aplicação ver as informações acerca do estado do Wi-Fi."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"alterar estado do WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite a uma aplicação ligar-se e desligar-se da rede WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administração de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permite a uma aplicação configurar o telefone Bluetooth local, bem como descobrir e emparelhar com dispositivos remotos."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"criar ligações Bluetooth"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Limpar predefinição em Definições iniciais &gt; Aplicações &gt; Gerir aplicações."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Seleccionar uma acção"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Selecione uma aplicação para o dispositivo USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Nenhuma aplicação pode efectuar esta acção."</string>
     <string name="aerr_title" msgid="653922989522758100">"Lamentamos."</string>
     <string name="aerr_application" msgid="4683614104336409186">"A aplicação <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) parou de forma inesperada. Tente novamente."</string>

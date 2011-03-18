@@ -128,7 +128,7 @@
     <string name="low_memory" msgid="6632412458436461203">"Penyimpanan di ponsel penuh! Hapus sebagian berkas untuk mendapatkan ruang."</string>
     <string name="me" msgid="6545696007631404292">"Saya"</string>
     <string name="power_dialog" msgid="1319919075463988638">"Opsi telepon"</string>
-    <string name="silent_mode" msgid="7167703389802618663">"Mode senyap"</string>
+    <string name="silent_mode" msgid="7167703389802618663">"Modus senyap"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Hidupkan nirkabel"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Matikan nirkabel"</string>
     <string name="screen_lock" msgid="799094655496098153">"Kunci layar"</string>
@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Mengizinkan aplikasi mengontrol penggetar."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"mengontrol lampu senter"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Mengizinkan aplikasi mengontrol lampu senter."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"akses perangkat USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Mengizinkan aplikasi untuk perangkat USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"kelola preferensi dan izin untuk perangkat USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Membiarkan aplikasi mengelola preferensi dan izin untuk perangkat USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"uji perangkat keras"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Mengizinkan aplikasi mengontrol berbagai perangkat periferal untuk tujuan menguji perangkat keras."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil nomor telepon secara langsung"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Mengizinkan aplikasi tersambung dan diputus dari titik akses Wi-Fi, dan melakukan perubahan pada jaringan Wi-Fi yang dikonfigurasi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Izinkan penerimaan Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Mengizinkan aplikasi menerima paket yang tidak langsung dialamatkan ke perangkat Anda. Ini dapat bermanfaat ketika mencari perangkat yang ditawarkan di dekat Anda. Aplikasi ini menggunakan lebih banyak daya ketimbang mode selain multicast."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"lihat status WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Mengizinkan aplikasi melihat informasi tentang status WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"Ganti status WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Mengizinkan aplikasi menyambung ke dan memutus dari jaringan WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"Administrasi bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Mengizinkan aplikasi mengonfigurasi ponsel Bluetooth lokal, dan menemukan dan menyandingkan perangkat jarak jauh."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"buat sambungan Bluetooth"</string>
@@ -605,7 +609,7 @@
     <string name="save_password_message" msgid="767344687139195790">"Apakah Anda ingin peramban menyimpan sandi ini?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Tidak sekarang"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Ingat"</string>
-    <string name="save_password_never" msgid="8274330296785855105">"Tidak pernah"</string>
+    <string name="save_password_never" msgid="8274330296785855105">"Jangan"</string>
     <string name="open_permission_deny" msgid="5661861460947222274">"Anda tidak memiliki izin untuk membuka laman ini."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teks disalin ke clipboard."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Lainnya"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Gunakan secara bawaan untuk tindakan ini."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Bersihkan bawaan pada Setelan Beranda &gt; Aplikasi &gt; Kelola aplikasi."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Pilih tindakan"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Pilih sebuah aplikasi untuk perangkat USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tidak ada aplikasi dapat melakukan tindakan ini."</string>
     <string name="aerr_title" msgid="653922989522758100">"Maaf!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikasi (<xliff:g id="PROCESS">%2$s</xliff:g> proses) berhenti tiba-tiba. Harap coba lagi."</string>
