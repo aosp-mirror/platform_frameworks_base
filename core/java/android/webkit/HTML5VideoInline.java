@@ -17,24 +17,15 @@ public class HTML5VideoInline extends HTML5VideoView{
     private static SurfaceTexture mSurfaceTexture = null;
     private static int[] mTextureNames;
 
-    // Only when the video is prepared, we render using SurfaceTexture.
-    // This in fact is used to avoid showing the obsolete content when
-    // switching videos.
-    private static boolean mReadyToUseSurfTex = false;
-
     // Video control FUNCTIONS:
     @Override
     public void start() {
         super.start();
-        if (mCurrentState == STATE_PREPARED) {
-            mReadyToUseSurfTex = true;
-        }
     }
 
     HTML5VideoInline(int videoLayerId, int position,
             boolean autoStart) {
         init(videoLayerId, position, autoStart);
-        mReadyToUseSurfTex = false;
     }
 
     @Override
@@ -54,7 +45,6 @@ public class HTML5VideoInline extends HTML5VideoView{
     @Override
     public void pauseAndDispatch(HTML5VideoViewProxy proxy) {
         super.pauseAndDispatch(proxy);
-        mReadyToUseSurfTex = false;
     }
 
     // Inline Video specific FUNCTIONS:
@@ -85,11 +75,6 @@ public class HTML5VideoInline extends HTML5VideoView{
     @Override
     public int getTextureName() {
         return mTextureNames[0];
-    }
-
-    @Override
-    public boolean getReadyToUseSurfTex() {
-        return mReadyToUseSurfTex;
     }
 
     private void setFrameAvailableListener(SurfaceTexture.OnFrameAvailableListener l) {
