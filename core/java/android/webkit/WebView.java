@@ -1672,6 +1672,7 @@ public class WebView extends AbsoluteLayout
 
         mDrawHistory = true;
         mHistoryPicture = p;
+
         mScrollX = sx;
         mScrollY = sy;
         mZoomManager.restoreZoomState(b);
@@ -5473,7 +5474,6 @@ public class WebView extends AbsoluteLayout
     private boolean handleTouchEventCommon(MotionEvent ev, int action, int x, int y) {
         long eventTime = ev.getEventTime();
 
-
         // Due to the touch screen edge effect, a touch closer to the edge
         // always snapped to the edge. As getViewWidth() can be different from
         // getWidth() due to the scrollbar, adjusting the point to match
@@ -5577,6 +5577,8 @@ public class WebView extends AbsoluteLayout
                         ted.mIds[0] = ev.getPointerId(0);
                         ted.mPoints = new Point[1];
                         ted.mPoints[0] = new Point(contentX, contentY);
+                        ted.mPointsInView = new Point[1];
+                        ted.mPointsInView[0] = new Point(x, y);
                         ted.mMetaState = ev.getMetaState();
                         ted.mReprocess = mDeferTouchProcess;
                         ted.mNativeLayer = nativeScrollableLayer(
@@ -5624,6 +5626,8 @@ public class WebView extends AbsoluteLayout
                     ted.mIds[0] = ev.getPointerId(0);
                     ted.mPoints = new Point[1];
                     ted.mPoints[0] = new Point(contentX, contentY);
+                    ted.mPointsInView = new Point[1];
+                    ted.mPointsInView[0] = new Point(x, y);
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
@@ -5806,6 +5810,8 @@ public class WebView extends AbsoluteLayout
                     ted.mAction = action;
                     ted.mPoints = new Point[1];
                     ted.mPoints[0] = new Point(contentX, contentY);
+                    ted.mPointsInView = new Point[1];
+                    ted.mPointsInView[0] = new Point(x, y);
                     ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
@@ -5828,6 +5834,8 @@ public class WebView extends AbsoluteLayout
                             ted.mAction = WebViewCore.ACTION_DOUBLETAP;
                             ted.mPoints = new Point[1];
                             ted.mPoints[0] = new Point(contentX, contentY);
+                            ted.mPointsInView = new Point[1];
+                            ted.mPointsInView[0] = new Point(x, y);
                             ted.mMetaState = ev.getMetaState();
                             ted.mReprocess = mDeferTouchProcess;
                             ted.mNativeLayer = nativeScrollableLayer(
@@ -5964,11 +5972,13 @@ public class WebView extends AbsoluteLayout
         final int count = ev.getPointerCount();
         ted.mIds = new int[count];
         ted.mPoints = new Point[count];
+        ted.mPointsInView = new Point[count];
         for (int c = 0; c < count; c++) {
             ted.mIds[c] = ev.getPointerId(c);
             int x = viewToContentX((int) ev.getX(c) + mScrollX);
             int y = viewToContentY((int) ev.getY(c) + mScrollY);
             ted.mPoints[c] = new Point(x, y);
+            ted.mPointsInView[c] = new Point((int) ev.getX(c), (int) ev.getY(c));
         }
         if (ted.mAction == MotionEvent.ACTION_POINTER_DOWN
             || ted.mAction == MotionEvent.ACTION_POINTER_UP) {
@@ -6053,6 +6063,10 @@ public class WebView extends AbsoluteLayout
             ted.mIds[0] = 0;
             ted.mPoints = new Point[1];
             ted.mPoints[0] = new Point(x, y);
+            ted.mPointsInView = new Point[1];
+            int viewX = contentToViewX(x) - mScrollX;
+            int viewY = contentToViewY(y) - mScrollY;
+            ted.mPointsInView[0] = new Point(viewX, viewY);
             ted.mAction = MotionEvent.ACTION_CANCEL;
             ted.mNativeLayer = nativeScrollableLayer(
                     x, y, ted.mNativeLayerRect, null);
@@ -7441,16 +7455,15 @@ public class WebView extends AbsoluteLayout
                     // Following is for single touch.
                     switch (ted.mAction) {
                         case MotionEvent.ACTION_DOWN:
-                            mLastDeferTouchX = contentToViewX(ted.mPoints[0].x)
-                                    - mScrollX;
-                            mLastDeferTouchY = contentToViewY(ted.mPoints[0].y)
-                                    - mScrollY;
+                            mLastDeferTouchX = ted.mPointsInView[0].x;
+                            mLastDeferTouchY = ted.mPointsInView[0].y;
                             mDeferTouchMode = TOUCH_INIT_MODE;
                             break;
                         case MotionEvent.ACTION_MOVE: {
                             // no snapping in defer process
-                            int x = contentToViewX(ted.mPoints[0].x) - mScrollX;
-                            int y = contentToViewY(ted.mPoints[0].y) - mScrollY;
+                            int x = ted.mPointsInView[0].x;
+                            int y = ted.mPointsInView[0].y;
+
                             if (mDeferTouchMode != TOUCH_DRAG_MODE) {
                                 mDeferTouchMode = TOUCH_DRAG_MODE;
                                 mLastDeferTouchX = x;
@@ -7484,8 +7497,8 @@ public class WebView extends AbsoluteLayout
                             break;
                         case WebViewCore.ACTION_DOUBLETAP:
                             // doDoubleTap() needs mLastTouchX/Y as anchor
-                            mLastTouchX = contentToViewX(ted.mPoints[0].x) - mScrollX;
-                            mLastTouchY = contentToViewY(ted.mPoints[0].y) - mScrollY;
+                            mLastDeferTouchX = ted.mPointsInView[0].x;
+                            mLastDeferTouchY = ted.mPointsInView[0].y;
                             mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
                             mDeferTouchMode = TOUCH_DONE_MODE;
                             break;
@@ -7609,6 +7622,8 @@ public class WebView extends AbsoluteLayout
                         ted.mPoints = new Point[1];
                         ted.mPoints[0] = new Point(viewToContentX(mLastTouchX + mScrollX),
                                                    viewToContentY(mLastTouchY + mScrollY));
+                        ted.mPointsInView = new Point[1];
+                        ted.mPointsInView[0] = new Point(mLastTouchX, mLastTouchY);
                         // metaState for long press is tricky. Should it be the
                         // state when the press started or when the press was
                         // released? Or some intermediary key state? For
