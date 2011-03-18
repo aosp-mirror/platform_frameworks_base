@@ -16,7 +16,10 @@
 
 package com.android.mediaframeworktest;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -31,28 +34,58 @@ import android.util.Log;
  *
  */
 public class MediaTestUtil {
-    private MediaTestUtil(){
-    }
 
     private static String TAG = "MediaTestUtil";
-    private static final String STORAGE_PATH =
-        Environment.getExternalStorageDirectory().toString();
-    private static int mMediaStartMemory = 0;
-    private static int mDrmStartMemory = 0;
+    private static final String STORAGE_PATH = Environment.getExternalStorageDirectory().toString();
+    private int mStartMemory = 0;
+    private int mStartPid = 0;
+    private Writer mOutput = null;
+    private String mTestName = null;
+    private String mProcessName = null;
 
-    //Catpure the heapdump for memory leaksage analysis
-    public static void getNativeHeapDump (String name) throws Exception {
+    public MediaTestUtil(String memoryOutFileName, String testName, String processName)
+            throws Exception {
+        File memoryOut = new File(memoryOutFileName);
+        mOutput = new BufferedWriter(new FileWriter(memoryOut, true));
+        mProcessName = processName;
+        mTestName = testName;
+        mStartPid = getPid();
+        mStartMemory = getVsize();
+    }
+
+    // Catpure the heapdump for memory leaksage analysis
+    public static void getNativeHeapDump(String name) throws Exception {
         System.gc();
         System.runFinalization();
         Thread.sleep(1000);
-        FileOutputStream o = new FileOutputStream(STORAGE_PATH + '/' +name + ".dump");
+        FileOutputStream o = new FileOutputStream(STORAGE_PATH + '/' + name + ".dump");
         Debug.dumpNativeHeap(o.getFD());
         o.close();
     }
 
-    public static String captureMemInfo(String type) {
+    private void validateProcessStatus() throws Exception {
+        int currentPid = getPid();
+        //Process crash
+        if (mStartPid != currentPid) {
+            mOutput.write(mProcessName + " died. Test failed\n");
+        }
+    }
+
+    private int getPid() {
+        String memoryUsage = null;
+        int pidvalue = 0;
+        memoryUsage = captureMemInfo();
+        String[] poList2 = memoryUsage.split("\t|\\s+");
+        String pid = poList2[1];
+        pidvalue = Integer.parseInt(pid);
+        Log.v(TAG, "PID = " + pidvalue);
+        return pidvalue;
+    }
+
+    private String captureMemInfo() {
         String cm = "ps ";
-        cm += type;
+        cm += mProcessName;
+        Log.v(TAG, cm);
         String memoryUsage = null;
 
         int ch;
@@ -72,8 +105,8 @@ public class MediaTestUtil {
         return memusage;
     }
 
-    public static int getMediaServerVsize() {
-        String memoryUsage = captureMemInfo("mediaserver");
+    private int getVsize() {
+        String memoryUsage = captureMemInfo();
         String[] poList2 = memoryUsage.split("\t|\\s+");
         String vsize = poList2[3];
         int vsizevalue = Integer.parseInt(vsize);
@@ -81,71 +114,39 @@ public class MediaTestUtil {
         return vsizevalue;
     }
 
-    public static int getDrmServerVsize() {
-        String memoryUsage = captureMemInfo("drmserver");
-        String[] poList2 = memoryUsage.split("\t|\\s+");
-        String vsize = poList2[3];
-        int vsizevalue = Integer.parseInt(vsize);
-        Log.v(TAG, "VSIZE = " + vsizevalue);
-        return vsizevalue;
-    }
-
-    // Write the ps mediaserver output to the file
-    public static void getMediaServerMemoryLog(Writer output, int writeCount, int totalCount)
-            throws Exception {
+    // Write the startup media memory mOutput to the file
+    public void getStartMemoryLog() throws Exception {
         String memusage = null;
-
-        if (writeCount == 0) {
-            mMediaStartMemory = getMediaServerVsize();
-            output.write("Start memory : " + mMediaStartMemory + "\n");
-        }
-        memusage = captureMemInfo("mediaserver");
-        output.write(memusage);
+        mStartMemory = getVsize();
+        mOutput.write(mTestName + '\n');
+        mOutput.write("Start memory : " + mStartMemory + "\n");
+        memusage = captureMemInfo();
+        mOutput.write(memusage);
     }
 
-    // Write the ps drmserver output to the file
-    public static void getDrmServerMemoryLog(Writer output, int writeCount, int totalCount)
-            throws Exception {
+    // Write the ps mediaserver mOutput to the file
+    public void getMemoryLog() throws Exception {
         String memusage = null;
-
-        if (writeCount == 0) {
-            mDrmStartMemory = getDrmServerVsize();
-            output.write("Start memory : " + mDrmStartMemory + "\n");
-        }
-        memusage = captureMemInfo("drmserver");
-        output.write(memusage);
+        memusage = captureMemInfo();
+        mOutput.write(memusage);
+        mOutput.flush();
     }
 
-    // Write the ps drmserver output to the file
-    public static void getDrmServerMemorySummary(Writer output, String tag) throws Exception {
-
-        getTestMemorySummary(output, tag, "drmMem");
-    }
-
-    // Write the ps drmserver output to the file
-    public static void getMediaServerMemorySummary(Writer output, String tag) throws Exception {
-
-        getTestMemorySummary(output, tag, "mediaMem");
-    }
-
-    public static void getTestMemorySummary(Writer output, String tag, String type)
-            throws Exception {
-
+    public void getMemorySummary() throws Exception {
         int endMemory = 0;
         int memDiff = 0;
 
-        if (type == "mediaMem") {
-            endMemory = getMediaServerVsize();
-            memDiff = endMemory - mMediaStartMemory;
-        } else if (type == "drmMem") {
-            endMemory = getDrmServerVsize();
-            memDiff = endMemory - mDrmStartMemory;
-        }
-        output.write("End Memory :" + endMemory + "\n");
+        endMemory = getVsize();
+        memDiff = endMemory - mStartMemory;
+
+        mOutput.write("End Memory :" + endMemory + "\n");
         if (memDiff < 0) {
             memDiff = 0;
         }
-        output.write(tag + " total diff = " + memDiff);
-        output.write("\n\n");
+        mOutput.write(mTestName + " total diff = " + memDiff);
+        mOutput.write("\n\n");
+        validateProcessStatus();
+        mOutput.flush();
+        mOutput.close();
     }
 }
