@@ -876,6 +876,17 @@ void AwesomePlayer::notifyVideoSize_l() {
              cropLeft, cropTop, cropRight, cropBottom);
     }
 
+    int32_t displayWidth;
+    if (meta->findInt32(kKeyDisplayWidth, &displayWidth)) {
+        LOGV("Display width changed (%d=>%d)", mDisplayWidth, displayWidth);
+        mDisplayWidth = displayWidth;
+    }
+    int32_t displayHeight;
+    if (meta->findInt32(kKeyDisplayHeight, &displayHeight)) {
+        LOGV("Display height changed (%d=>%d)", mDisplayHeight, displayHeight);
+        mDisplayHeight = displayHeight;
+    }
+
     int32_t usableWidth = cropRight - cropLeft + 1;
     int32_t usableHeight = cropBottom - cropTop + 1;
     if (mDisplayWidth != 0) {
