@@ -41,8 +41,7 @@ struct PathCacheEntry: public ShapeCacheEntry {
         path = NULL;
     }
 
-    PathCacheEntry(const PathCacheEntry& entry):
-            ShapeCacheEntry(entry) {
+    PathCacheEntry(const PathCacheEntry& entry): ShapeCacheEntry(entry) {
         path = entry.path;
     }
 
@@ -55,6 +54,7 @@ struct PathCacheEntry: public ShapeCacheEntry {
     }
 
     SkPath* path;
+
 }; // PathCacheEntry
 
 /**

@@ -96,7 +96,7 @@ struct ShapeCacheEntry {
     ShapeCacheEntry(const ShapeCacheEntry& entry):
         shapeType(entry.shapeType), join(entry.join), cap(entry.cap),
         style(entry.style), miter(entry.miter),
-        strokeWidth(entry.strokeWidth) {
+        strokeWidth(entry.strokeWidth), pathEffect(entry.pathEffect) {
     }
 
     ShapeCacheEntry(ShapeType type, SkPaint* paint) {
@@ -108,18 +108,19 @@ struct ShapeCacheEntry {
         v = paint->getStrokeWidth();
         strokeWidth = *(uint32_t*) &v;
         style = paint->getStyle();
+        pathEffect = paint->getPathEffect();
     }
 
     virtual ~ShapeCacheEntry() {
     }
 
-    // shapeType must be checked in subclasses operator<
     ShapeType shapeType;
     SkPaint::Join join;
     SkPaint::Cap cap;
     SkPaint::Style style;
     uint32_t miter;
     uint32_t strokeWidth;
+    SkPathEffect* pathEffect;
 
     bool operator<(const ShapeCacheEntry& rhs) const {
         LTE_INT(shapeType) {
@@ -128,7 +129,9 @@ struct ShapeCacheEntry {
                     LTE_INT(style) {
                         LTE_INT(miter) {
                             LTE_INT(strokeWidth) {
-                                return lessThan(rhs);
+                                LTE_INT(pathEffect) {
+                                    return lessThan(rhs);
+                                }
                             }
                         }
                     }
