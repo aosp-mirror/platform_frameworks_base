@@ -534,7 +534,8 @@ status_t AVCDecoder::read(
             default:
             {
                 LOGE("Should not be here, unknown nalType %d", nalType);
-                CHECK(!"Should not be here");
+
+                err = ERROR_MALFORMED;
                 break;
             }
         }
