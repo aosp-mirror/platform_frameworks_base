@@ -22,6 +22,8 @@
 #include "rsAllocation.h"
 #include "rsMesh.h"
 
+#include "rs_hal.h"
+
 #ifndef ANDROID_RS_SERIALIZE
 #include "rsMutex.h"
 #include "rsThreadIO.h"
@@ -40,6 +42,7 @@
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
+
 
 #include <ui/egl/android_natives.h>
 #endif // ANDROID_RS_SERIALIZE
@@ -71,6 +74,13 @@ namespace renderscript {
 
 class Context {
 public:
+    struct Hal {
+        void * drv;
+
+        RsdHalFunctions funcs;
+    };
+    Hal mHal;
+
     static Context * createContext(Device *, const RsSurfaceConfig *sc);
     ~Context();
 
@@ -85,6 +95,10 @@ public:
         Context * mContext;
         Script * mScript;
     };
+
+    //const RsHalComputeFunctions *mHalComputeFuncs;
+    //const RsHalGraphicsFunctions *mHalGraphicsFuncs;
+    //RsHal *mHal;
 
     class PushState {
     public:

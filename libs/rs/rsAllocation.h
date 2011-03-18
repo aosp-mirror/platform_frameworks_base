@@ -29,10 +29,35 @@ class Allocation : public ObjectBase {
     // The graphics equilivent of malloc.  The allocation contains a structure of elements.
 
 public:
+    struct Hal {
+        void * drv;
+
+        struct State {
+            ObjectBaseRef<const Type> type;
+            void * mallocPtr;
+
+            uint32_t usageFlags;
+            RsAllocationMipmapControl mipmapControl;
+
+            // Cached fields from the Type and Element
+            // to prevent pointer chasing in critical loops.
+            uint32_t dimensionX;
+            uint32_t dimensionY;
+            uint32_t dimensionZ;
+            uint32_t elementSizeBytes;
+            bool hasMipmaps;
+            bool hasFaces;
+            bool hasReferences;
+        };
+        State state;
+    };
+    Hal mHal;
+
     Allocation(Context *rsc, const Type *, uint32_t usages,
                RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE);
 
     virtual ~Allocation();
+    void updateCache();
 
     void setCpuWritable(bool);
     void setGpuWritable(bool);
@@ -41,8 +66,8 @@ public:
 
     bool fixAllocation();
 
-    void * getPtr() const {return mPtr;}
-    const Type * getType() const {return mType.get();}
+    void * getPtr() const {return mHal.state.mallocPtr;}
+    const Type * getType() const {return mHal.state.type.get();}
 
     void syncAll(Context *rsc, RsAllocationUsageType src);
 
@@ -88,13 +113,13 @@ public:
     virtual void uploadCheck(Context *rsc);
 
     bool getIsScript() const {
-        return (mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT) != 0;
+        return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_SCRIPT) != 0;
     }
     bool getIsTexture() const {
-        return (mUsageFlags & RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE) != 0;
+        return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE) != 0;
     }
     bool getIsBufferObject() const {
-        return (mUsageFlags & RS_ALLOCATION_USAGE_GRAPHICS_VERTEX) != 0;
+        return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_VERTEX) != 0;
     }
 
     void incRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
@@ -102,14 +127,11 @@ public:
 
     void sendDirty() const;
     bool getHasGraphicsMipmaps() const {
-        return mMipmapControl != RS_ALLOCATION_MIPMAP_NONE;
+        return mHal.state.mipmapControl != RS_ALLOCATION_MIPMAP_NONE;
     }
 
 
 protected:
-    ObjectBaseRef<const Type> mType;
-    void * mPtr;
-
     Vector<const Program *> mToDirtyList;
 
     // Is we have a non-null user bitmap callback we do not own the bits and
@@ -122,9 +144,6 @@ protected:
     bool mCpuRead;
     bool mGpuWrite;
     bool mGpuRead;
-
-    uint32_t mUsageFlags;
-    RsAllocationMipmapControl mMipmapControl;
 
     // more usage hint data from the application
     // which can be used by a driver to pick the best memory type.

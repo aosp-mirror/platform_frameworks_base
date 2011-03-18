@@ -31,6 +31,45 @@ class ProgramStore;
 
 class Script : public ObjectBase {
 public:
+    struct Hal {
+        void * drv;
+
+        struct State {
+            ObjectBaseRef<const Type> type;
+            void * mallocPtr;
+
+            uint32_t usageFlags;
+            RsAllocationMipmapControl mipmapControl;
+
+            // Cached fields from the Type and Element
+            // to prevent pointer chasing in critical loops.
+            uint32_t dimensionX;
+            uint32_t dimensionY;
+            uint32_t dimensionZ;
+            uint32_t elementSizeBytes;
+            bool hasMipmaps;
+            bool hasFaces;
+            bool hasReferences;
+        };
+        State state;
+
+        struct DriverInfo {
+            int mVersionMajor;
+            int mVersionMinor;
+
+            size_t exportedVariableCount;
+            size_t exportedFunctionCount;
+            size_t exportedPragmaCount;
+            char const **exportedPragmaKeyList;
+            char const **exportedPragmaValueList;
+
+            int (* root)();
+            bool isThreadable;
+        };
+        DriverInfo info;
+    };
+    Hal mHal;
+
     typedef void (* InvokeFunc_t)(void);
 
     Script(Context *);
@@ -45,16 +84,6 @@ public:
         ObjectBaseRef<ProgramFragment> mFragment;
         ObjectBaseRef<ProgramRaster> mRaster;
         ObjectBaseRef<ProgramStore> mFragmentStore;
-
-        uint32_t mInvokeFunctionCount;
-        InvokeFunc_t *mInvokeFunctions;
-        uint32_t mFieldCount;
-        void ** mFieldAddress;
-
-        char * mScriptText;
-        uint32_t mScriptTextLength;
-
-        bool mIsThreadable;
     };
     Enviroment_t mEnviroment;
 

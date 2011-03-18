@@ -21,6 +21,7 @@ using namespace android::renderscript;
 
 Script::Script(Context *rsc) : ObjectBase(rsc) {
     memset(&mEnviroment, 0, sizeof(mEnviroment));
+    memset(&mHal, 0, sizeof(mHal));
 
     mSlots = NULL;
     mTypes = NULL;
@@ -37,48 +38,38 @@ Script::~Script() {
     }
 }
 
-void Script::initSlots() {
-    if (mEnviroment.mFieldCount > 0) {
-        mSlots = new ObjectBaseRef<Allocation>[mEnviroment.mFieldCount];
-        mTypes = new ObjectBaseRef<const Type>[mEnviroment.mFieldCount];
-    }
-}
-
 void Script::setSlot(uint32_t slot, Allocation *a) {
-    if (slot >= mEnviroment.mFieldCount) {
+    //LOGE("setSlot %i %p", slot, a);
+    if (slot >= mHal.info.exportedVariableCount) {
         LOGE("Script::setSlot unable to set allocation, invalid slot index");
         return;
     }
 
     mSlots[slot].set(a);
+    if (a != NULL) {
+        mRSC->mHal.funcs.script.setGlobalBind(mRSC, this, slot, a->getPtr());
+    } else {
+        mRSC->mHal.funcs.script.setGlobalBind(mRSC, this, slot, NULL);
+    }
 }
 
 void Script::setVar(uint32_t slot, const void *val, uint32_t len) {
-    int32_t *destPtr = ((int32_t **)mEnviroment.mFieldAddress)[slot];
-    if (destPtr) {
-        //LOGE("setVar f1  %f", ((const float *)destPtr)[0]);
-        //LOGE("setVar %p %i", destPtr, len);
-        memcpy(destPtr, val, len);
-        //LOGE("setVar f2  %f", ((const float *)destPtr)[0]);
-    } else {
-        //if (rsc->props.mLogScripts) {
-            LOGV("Calling setVar on slot = %i which is null", slot);
-        //}
+    //LOGE("setVar %i %p %i", slot, val, len);
+    if (slot >= mHal.info.exportedVariableCount) {
+        LOGE("Script::setVar unable to set allocation, invalid slot index");
+        return;
     }
+    mRSC->mHal.funcs.script.setGlobalVar(mRSC, this, slot, (void *)val, len);
 }
 
 void Script::setVarObj(uint32_t slot, ObjectBase *val) {
-    ObjectBase **destPtr = ((ObjectBase ***)mEnviroment.mFieldAddress)[slot];
-
-    if (destPtr) {
-        if (val != NULL) {
-            val->incSysRef();
-        }
-        if (*destPtr) {
-            (*destPtr)->decSysRef();
-        }
-        *destPtr = val;
+    //LOGE("setVarObj %i %p", slot, val);
+    if (slot >= mHal.info.exportedVariableCount) {
+        LOGE("Script::setVarObj unable to set allocation, invalid slot index");
+        return;
     }
+    //LOGE("setvarobj  %i %p", slot, val);
+    mRSC->mHal.funcs.script.setGlobalObj(mRSC, this, slot, val);
 }
 
 namespace android {

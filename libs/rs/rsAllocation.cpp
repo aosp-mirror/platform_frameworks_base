@@ -29,21 +29,22 @@ Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages,
     : ObjectBase(rsc) {
     init(rsc, type);
 
-    mUsageFlags = usages;
-    mMipmapControl = mc;
+    mHal.state.usageFlags = usages;
+    mHal.state.mipmapControl = mc;
 
     allocScriptMemory();
-    if (mType->getElement()->getHasReferences()) {
-        memset(mPtr, 0, mType->getSizeBytes());
+    if (mHal.state.type->getElement()->getHasReferences()) {
+        memset(mHal.state.mallocPtr, 0, mHal.state.type->getSizeBytes());
     }
-    if (!mPtr) {
+    if (!mHal.state.mallocPtr) {
         LOGE("Allocation::Allocation, alloc failure");
     }
 }
 
 
 void Allocation::init(Context *rsc, const Type *type) {
-    mPtr = NULL;
+    memset(&mHal, 0, sizeof(mHal));
+    mHal.state.mipmapControl = RS_ALLOCATION_MIPMAP_NONE;
 
     mCpuWrite = false;
     mCpuRead = false;
@@ -52,8 +53,6 @@ void Allocation::init(Context *rsc, const Type *type) {
 
     mReadWriteRatio = 0;
     mUpdateSize = 0;
-    mUsageFlags = 0;
-    mMipmapControl = RS_ALLOCATION_MIPMAP_NONE;
 
     mTextureID = 0;
     mBufferID = 0;
@@ -62,16 +61,25 @@ void Allocation::init(Context *rsc, const Type *type) {
     mUserBitmapCallback = NULL;
     mUserBitmapCallbackData = NULL;
 
-    mType.set(type);
-    rsAssert(type);
+    mHal.state.type.set(type);
+    updateCache();
+}
 
-    mPtr = NULL;
+void Allocation::updateCache() {
+    const Type *type = mHal.state.type.get();
+    mHal.state.dimensionX = type->getDimX();
+    mHal.state.dimensionY = type->getDimY();
+    mHal.state.dimensionZ = type->getDimZ();
+    mHal.state.hasFaces = type->getDimFaces();
+    mHal.state.hasMipmaps = type->getDimLOD();
+    mHal.state.elementSizeBytes = type->getElementSizeBytes();
+    mHal.state.hasReferences = mHal.state.type->getElement()->getHasReferences();
 }
 
 Allocation::~Allocation() {
     if (mUserBitmapCallback != NULL) {
         mUserBitmapCallback(mUserBitmapCallbackData);
-        mPtr = NULL;
+        mHal.state.mallocPtr = NULL;
     }
     freeScriptMemory();
 #ifndef ANDROID_RS_SERIALIZE
@@ -105,14 +113,14 @@ bool Allocation::fixAllocation() {
 }
 
 void Allocation::deferedUploadToTexture(const Context *rsc) {
-    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
+    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
     mUploadDefered = true;
 }
 
 uint32_t Allocation::getGLTarget() const {
 #ifndef ANDROID_RS_SERIALIZE
     if (getIsTexture()) {
-        if (mType->getDimFaces()) {
+        if (mHal.state.type->getDimFaces()) {
             return GL_TEXTURE_CUBE_MAP;
         } else {
             return GL_TEXTURE_2D;
@@ -126,14 +134,14 @@ uint32_t Allocation::getGLTarget() const {
 }
 
 void Allocation::allocScriptMemory() {
-    rsAssert(!mPtr);
-    mPtr = malloc(mType->getSizeBytes());
+    rsAssert(!mHal.state.mallocPtr);
+    mHal.state.mallocPtr = malloc(mHal.state.type->getSizeBytes());
 }
 
 void Allocation::freeScriptMemory() {
-    if (mPtr) {
-        free(mPtr);
-        mPtr = NULL;
+    if (mHal.state.mallocPtr) {
+        free(mHal.state.mallocPtr);
+        mHal.state.mallocPtr = NULL;
     }
 }
 
@@ -153,15 +161,15 @@ void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
 
 void Allocation::uploadToTexture(const Context *rsc) {
 #ifndef ANDROID_RS_SERIALIZE
-    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
-    GLenum type = mType->getElement()->getComponent().getGLType();
-    GLenum format = mType->getElement()->getComponent().getGLFormat();
+    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
+    GLenum type = mHal.state.type->getElement()->getComponent().getGLType();
+    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
 
     if (!type || !format) {
         return;
     }
 
-    if (!mPtr) {
+    if (!mHal.state.mallocPtr) {
         return;
     }
 
@@ -184,7 +192,7 @@ void Allocation::uploadToTexture(const Context *rsc) {
 
     upload2DTexture(isFirstUpload);
 
-    if (!(mUsageFlags & RS_ALLOCATION_USAGE_SCRIPT)) {
+    if (!(mHal.state.usageFlags & RS_ALLOCATION_USAGE_SCRIPT)) {
         freeScriptMemory();
     }
 
@@ -207,14 +215,14 @@ void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
                                  uint32_t lod, RsAllocationCubemapFace face,
                                  uint32_t w, uint32_t h) {
 #ifndef ANDROID_RS_SERIALIZE
-    GLenum type = mType->getElement()->getComponent().getGLType();
-    GLenum format = mType->getElement()->getComponent().getGLFormat();
+    GLenum type = mHal.state.type->getElement()->getComponent().getGLType();
+    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
     GLenum target = (GLenum)getGLTarget();
     rsAssert(mTextureID);
     glBindTexture(target, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     GLenum t = GL_TEXTURE_2D;
-    if (mType->getDimFaces()) {
+    if (mHal.state.hasFaces) {
         t = gFaceOrder[face];
     }
     glTexSubImage2D(t, lod, xoff, yoff, w, h, format, type, ptr);
@@ -223,57 +231,57 @@ void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
 
 void Allocation::upload2DTexture(bool isFirstUpload) {
 #ifndef ANDROID_RS_SERIALIZE
-    GLenum type = mType->getElement()->getComponent().getGLType();
-    GLenum format = mType->getElement()->getComponent().getGLFormat();
+    GLenum type = mHal.state.type->getElement()->getComponent().getGLType();
+    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
 
     GLenum target = (GLenum)getGLTarget();
     glBindTexture(target, mTextureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     uint32_t faceCount = 1;
-    if (mType->getDimFaces()) {
+    if (mHal.state.hasFaces) {
         faceCount = 6;
     }
 
     for (uint32_t face = 0; face < faceCount; face ++) {
-        for (uint32_t lod = 0; lod < mType->getLODCount(); lod++) {
-            const uint8_t *p = (const uint8_t *)mPtr;
-            p += mType->getLODFaceOffset(lod, (RsAllocationCubemapFace)face, 0, 0);
+        for (uint32_t lod = 0; lod < mHal.state.type->getLODCount(); lod++) {
+            const uint8_t *p = (const uint8_t *)mHal.state.mallocPtr;
+            p += mHal.state.type->getLODFaceOffset(lod, (RsAllocationCubemapFace)face, 0, 0);
 
             GLenum t = GL_TEXTURE_2D;
-            if (mType->getDimFaces()) {
+            if (mHal.state.hasFaces) {
                 t = gFaceOrder[face];
             }
 
             if (isFirstUpload) {
                 glTexImage2D(t, lod, format,
-                             mType->getLODDimX(lod), mType->getLODDimY(lod),
+                             mHal.state.type->getLODDimX(lod), mHal.state.type->getLODDimY(lod),
                              0, format, type, p);
             } else {
                 glTexSubImage2D(t, lod, 0, 0,
-                                mType->getLODDimX(lod), mType->getLODDimY(lod),
+                                mHal.state.type->getLODDimX(lod), mHal.state.type->getLODDimY(lod),
                                 format, type, p);
             }
         }
     }
 
-    if (mMipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
+    if (mHal.state.mipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
         glGenerateMipmap(target);
     }
 #endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::deferedUploadToBufferObject(const Context *rsc) {
-    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
+    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
     mUploadDefered = true;
 }
 
 void Allocation::uploadToBufferObject(const Context *rsc) {
 #ifndef ANDROID_RS_SERIALIZE
-    rsAssert(!mType->getDimY());
-    rsAssert(!mType->getDimZ());
+    rsAssert(!mHal.state.type->getDimY());
+    rsAssert(!mHal.state.type->getDimZ());
 
-    mUsageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
+    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
 
     if (!mBufferID) {
         glGenBuffers(1, &mBufferID);
@@ -285,7 +293,7 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     }
     GLenum target = (GLenum)getGLTarget();
     glBindBuffer(target, mBufferID);
-    glBufferData(target, mType->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
+    glBufferData(target, mHal.state.type->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(target, 0);
     rsc->checkError("Allocation::uploadToBufferObject");
 #endif //ANDROID_RS_SERIALIZE
@@ -298,23 +306,23 @@ void Allocation::uploadCheck(Context *rsc) {
 }
 
 void Allocation::read(void *data) {
-    memcpy(data, mPtr, mType->getSizeBytes());
+    memcpy(data, mHal.state.mallocPtr, mHal.state.type->getSizeBytes());
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
                          uint32_t count, const void *data, uint32_t sizeBytes) {
-    uint32_t eSize = mType->getElementSizeBytes();
-    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+    uint32_t eSize = mHal.state.type->getElementSizeBytes();
+    uint8_t * ptr = static_cast<uint8_t *>(mHal.state.mallocPtr);
     ptr += eSize * xoff;
     uint32_t size = count * eSize;
 
     if (size != sizeBytes) {
         LOGE("Allocation::subData called with mismatched size expected %i, got %i", size, sizeBytes);
-        mType->dumpLOGV("type info");
+        mHal.state.type->dumpLOGV("type info");
         return;
     }
 
-    if (mType->getElement()->getHasReferences()) {
+    if (mHal.state.hasReferences) {
         incRefs(data, count);
         decRefs(ptr, count);
     }
@@ -326,9 +334,9 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
              uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
-    uint32_t eSize = mType->getElementSizeBytes();
+    uint32_t eSize = mHal.state.elementSizeBytes;
     uint32_t lineSize = eSize * w;
-    uint32_t destW = mType->getDimX();
+    uint32_t destW = mHal.state.dimensionX;
 
     //LOGE("data2d %p,  %i %i %i %i %i %i %p %i", this, xoff, yoff, lod, face, w, h, data, sizeBytes);
 
@@ -338,14 +346,14 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
         return;
     }
 
-    if (mPtr) {
+    if (mHal.state.mallocPtr) {
         const uint8_t *src = static_cast<const uint8_t *>(data);
-        uint8_t *dst = static_cast<uint8_t *>(mPtr);
-        dst += mType->getLODFaceOffset(lod, face, xoff, yoff);
+        uint8_t *dst = static_cast<uint8_t *>(mHal.state.mallocPtr);
+        dst += mHal.state.type->getLODFaceOffset(lod, face, xoff, yoff);
 
         //LOGE("            %p  %p  %i  ", dst, src, eSize);
         for (uint32_t line=yoff; line < (yoff+h); line++) {
-            if (mType->getElement()->getHasReferences()) {
+            if (mHal.state.hasReferences) {
                 incRefs(src, w);
                 decRefs(dst, w);
             }
@@ -367,24 +375,24 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
 
 void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
                                 uint32_t cIdx, uint32_t sizeBytes) {
-    uint32_t eSize = mType->getElementSizeBytes();
-    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
+    uint32_t eSize = mHal.state.elementSizeBytes;
+    uint8_t * ptr = static_cast<uint8_t *>(mHal.state.mallocPtr);
     ptr += eSize * x;
 
-    if (cIdx >= mType->getElement()->getFieldCount()) {
+    if (cIdx >= mHal.state.type->getElement()->getFieldCount()) {
         LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
         return;
     }
 
-    if (x >= mType->getDimX()) {
+    if (x >= mHal.state.dimensionX) {
         LOGE("Error Allocation::subElementData X offset %i out of range.", x);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
         return;
     }
 
-    const Element * e = mType->getElement()->getField(cIdx);
-    ptr += mType->getElement()->getFieldOffsetBytes(cIdx);
+    const Element * e = mHal.state.type->getElement()->getField(cIdx);
+    ptr += mHal.state.type->getElement()->getFieldOffsetBytes(cIdx);
 
     if (sizeBytes != e->getSizeBytes()) {
         LOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
@@ -404,30 +412,30 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
 
 void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
                                 const void *data, uint32_t cIdx, uint32_t sizeBytes) {
-    uint32_t eSize = mType->getElementSizeBytes();
-    uint8_t * ptr = static_cast<uint8_t *>(mPtr);
-    ptr += eSize * (x + y * mType->getDimX());
+    uint32_t eSize = mHal.state.elementSizeBytes;
+    uint8_t * ptr = static_cast<uint8_t *>(mHal.state.mallocPtr);
+    ptr += eSize * (x + y * mHal.state.dimensionX);
 
-    if (x >= mType->getDimX()) {
+    if (x >= mHal.state.dimensionX) {
         LOGE("Error Allocation::subElementData X offset %i out of range.", x);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
         return;
     }
 
-    if (y >= mType->getDimY()) {
+    if (y >= mHal.state.dimensionY) {
         LOGE("Error Allocation::subElementData X offset %i out of range.", x);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData X offset out of range.");
         return;
     }
 
-    if (cIdx >= mType->getElement()->getFieldCount()) {
+    if (cIdx >= mHal.state.type->getElement()->getFieldCount()) {
         LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData component out of range.");
         return;
     }
 
-    const Element * e = mType->getElement()->getField(cIdx);
-    ptr += mType->getElement()->getFieldOffsetBytes(cIdx);
+    const Element * e = mHal.state.type->getElement()->getField(cIdx);
+    ptr += mHal.state.type->getElement()->getFieldOffsetBytes(cIdx);
 
     if (sizeBytes != e->getSizeBytes()) {
         LOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
@@ -468,15 +476,15 @@ void Allocation::dumpLOGV(const char *prefix) const {
 
     String8 s(prefix);
     s.append(" type ");
-    if (mType.get()) {
-        mType->dumpLOGV(s.string());
+    if (mHal.state.type.get()) {
+        mHal.state.type->dumpLOGV(s.string());
     }
 
     LOGV("%s allocation ptr=%p mCpuWrite=%i, mCpuRead=%i, mGpuWrite=%i, mGpuRead=%i",
-          prefix, mPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
+          prefix, mHal.state.mallocPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
 
     LOGV("%s allocation mUsageFlags=0x04%x, mMipmapControl=0x%04x, mTextureID=%i, mBufferID=%i",
-          prefix, mUsageFlags, mMipmapControl, mTextureID, mBufferID);
+          prefix, mHal.state.usageFlags, mHal.state.mipmapControl, mTextureID, mBufferID);
 }
 
 void Allocation::serialize(OStream *stream) const {
@@ -488,13 +496,13 @@ void Allocation::serialize(OStream *stream) const {
 
     // First thing we need to serialize is the type object since it will be needed
     // to initialize the class
-    mType->serialize(stream);
+    mHal.state.type->serialize(stream);
 
-    uint32_t dataSize = mType->getSizeBytes();
+    uint32_t dataSize = mHal.state.type->getSizeBytes();
     // Write how much data we are storing
     stream->addU32(dataSize);
     // Now write the data
-    stream->addByteArray(mPtr, dataSize);
+    stream->addByteArray(mHal.state.mallocPtr, dataSize);
 }
 
 Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
@@ -544,7 +552,7 @@ void Allocation::sendDirty() const {
 
 void Allocation::incRefs(const void *ptr, size_t ct, size_t startOff) const {
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
-    const Element *e = mType->getElement();
+    const Element *e = mHal.state.type->getElement();
     uint32_t stride = e->getSizeBytes();
 
     p += stride * startOff;
@@ -557,7 +565,7 @@ void Allocation::incRefs(const void *ptr, size_t ct, size_t startOff) const {
 
 void Allocation::decRefs(const void *ptr, size_t ct, size_t startOff) const {
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
-    const Element *e = mType->getElement();
+    const Element *e = mHal.state.type->getElement();
     uint32_t stride = e->getSizeBytes();
 
     p += stride * startOff;
@@ -572,24 +580,26 @@ void Allocation::copyRange1D(Context *rsc, const Allocation *src, int32_t srcOff
 }
 
 void Allocation::resize1D(Context *rsc, uint32_t dimX) {
-    Type *t = mType->cloneAndResize1D(rsc, dimX);
+    Type *t = mHal.state.type->cloneAndResize1D(rsc, dimX);
 
-    uint32_t oldDimX = mType->getDimX();
+    uint32_t oldDimX = mHal.state.dimensionX;
     if (dimX == oldDimX) {
         return;
     }
 
     if (dimX < oldDimX) {
-        decRefs(mPtr, oldDimX - dimX, dimX);
+        decRefs(mHal.state.mallocPtr, oldDimX - dimX, dimX);
     }
-    mPtr = realloc(mPtr, t->getSizeBytes());
+    mHal.state.mallocPtr = realloc(mHal.state.mallocPtr, t->getSizeBytes());
 
     if (dimX > oldDimX) {
-        const Element *e = mType->getElement();
+        const Element *e = mHal.state.type->getElement();
         uint32_t stride = e->getSizeBytes();
-        memset(((uint8_t *)mPtr) + stride * oldDimX, 0, stride * (dimX - oldDimX));
+        memset(((uint8_t *)mHal.state.mallocPtr) + stride * oldDimX, 0, stride * (dimX - oldDimX));
     }
-    mType.set(t);
+
+    mHal.state.type.set(t);
+    updateCache();
 }
 
 void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {

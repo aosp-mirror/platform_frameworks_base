@@ -457,20 +457,11 @@ public class RenderScript {
         rsnScriptSetVarObj(mContext, id, slot, val);
     }
 
-    native void rsnScriptCBegin(int con);
-    synchronized void nScriptCBegin() {
+    native int  rsnScriptCCreate(int con, String resName, String cacheDir,
+                                 byte[] script, int length);
+    synchronized int nScriptCCreate(String resName, String cacheDir, byte[] script, int length) {
         validate();
-        rsnScriptCBegin(mContext);
-    }
-    native void rsnScriptCSetScript(int con, byte[] script, int offset, int length);
-    synchronized void nScriptCSetScript(byte[] script, int offset, int length) {
-        validate();
-        rsnScriptCSetScript(mContext, script, offset, length);
-    }
-    native int  rsnScriptCCreate(int con, String packageName, String resName, String cacheDir);
-    synchronized int nScriptCCreate(String packageName, String resName, String cacheDir) {
-        validate();
-        return rsnScriptCCreate(mContext, packageName, resName, cacheDir);
+        return rsnScriptCCreate(mContext, resName, cacheDir, script, length);
     }
 
     native void rsnSamplerBegin(int con);

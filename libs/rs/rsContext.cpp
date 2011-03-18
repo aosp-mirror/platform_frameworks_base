@@ -688,6 +688,10 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     timerInit();
     timerSet(RS_TIMER_INTERNAL);
 
+    if (!rsdHalInit(this, 0, 0)) {
+        return false;
+    }
+
     int cpu = sysconf(_SC_NPROCESSORS_ONLN);
     LOGV("RS Launching thread(s), reported CPU count %i", cpu);
     if (cpu < 2) cpu = 0;

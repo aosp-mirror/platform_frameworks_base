@@ -21,7 +21,6 @@
 
 #include "RenderScriptEnv.h"
 
-struct BCCOpaqueScript;
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -36,21 +35,6 @@ public:
     ScriptC(Context *);
     virtual ~ScriptC();
 
-    struct Program_t {
-        int mVersionMajor;
-        int mVersionMinor;
-
-        RunScript_t mRoot;
-        VoidFunc_t mInit;
-
-        uint32_t * mObjectSlotList;
-        uint32_t mObjectSlotCount;
-    };
-
-
-    Program_t mProgram;
-
-    BCCOpaqueScript *mBccScript;
 
     const Allocation *ptrToAllocation(const void *) const;
 
@@ -69,6 +53,9 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_SCRIPT_C; }
     static Type *createFromStream(Context *rsc, IStream *stream) { return NULL; }
 
+    bool runCompiler(Context *rsc, const char *resName, const char *cacheDir,
+                     const uint8_t *bitcode, size_t bitcodeLen);
+
 protected:
     void setupScript(Context *);
     void setupGLState(Context *);
@@ -82,8 +69,6 @@ public:
 
     char * mScriptText;
     size_t mScriptLen;
-
-    bool runCompiler(Context *rsc, ScriptC *s, const char *resName, const char *cacheDir);
 
     struct SymbolTable_t {
         const char * mName;
