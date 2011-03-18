@@ -556,7 +556,7 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public int getLteDbm() {
-        log("STOPSHIP teach getLteDbm to compute dBm properly");
+        log("TODO: teach getLteDbm to compute dBm properly");
         int level = -1;
         if (DBG) log("getLteDbm=" + level);
         return level;
@@ -568,7 +568,7 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public int getLteLevel() {
-        log("STOPSHIP teach getLteLevel to compute Level properly");
+        log("TODO: teach getLteLevel to compute Level properly");
         int level = SIGNAL_STRENGTH_MODERATE;
         if (DBG) log("getLteLevel=" + level);
         return level;
@@ -580,7 +580,7 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public int getLteAsuLevel() {
-        log("STOPSHIP teach getLteAsuLevel to compute asu Level properly");
+        log("TODO: teach getLteAsuLevel to compute asu Level properly");
         int level = 4;
         if (DBG) log("getLteAsuLevel=" + level);
         return level;
