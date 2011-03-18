@@ -45,6 +45,7 @@ import android.graphics.Canvas;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
 import android.net.ProxyProperties;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -3426,6 +3427,14 @@ public final class ActivityThread {
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);
         android.ddm.DdmHandleAppName.setAppName(data.processName);
+
+        // If the app is Honeycomb MR1 or earlier, switch its AsyncTask
+        // implementation to use the pool executor.  Normally, we use the
+        // serialized executor as the default. This has to happen in the
+        // main thread so the main looper is set right.
+        if (data.appInfo.targetSdkVersion <= 12) {
+            AsyncTask.setDefaultExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
 
         /*
          * Before spawning a new process, reset the time zone to be the system time zone.

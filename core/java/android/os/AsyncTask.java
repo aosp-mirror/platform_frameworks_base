@@ -153,7 +153,6 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final int MAXIMUM_POOL_SIZE = 128;
     private static final int KEEP_ALIVE = 1;
 
-
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
@@ -183,6 +182,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
 
     private static final InternalHandler sHandler = new InternalHandler();
 
+    private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
     private final WorkerRunnable<Params, Result> mWorker;
     private final FutureTask<Result> mFuture;
 
@@ -238,6 +238,11 @@ public abstract class AsyncTask<Params, Progress, Result> {
     /** @hide Used to force static handler to be created. */
     public static void init() {
         sHandler.getLooper();
+    }
+
+    /** @hide */
+    public static void setDefaultExecutor(Executor exec) {
+        sDefaultExecutor = exec;
     }
 
     /**
@@ -496,7 +501,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      *         {@link AsyncTask.Status#RUNNING} or {@link AsyncTask.Status#FINISHED}.
      */
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
-        return executeOnExecutor(THREAD_POOL_EXECUTOR, params);
+        return executeOnExecutor(sDefaultExecutor, params);
     }
 
     /**
@@ -559,7 +564,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
      * a simple Runnable object.
      */
     public static void execute(Runnable runnable) {
-        THREAD_POOL_EXECUTOR.execute(runnable);
+        sDefaultExecutor.execute(runnable);
     }
 
     /**
