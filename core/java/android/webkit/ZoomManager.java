@@ -504,7 +504,7 @@ class ZoomManager {
     }
 
     public boolean isFixedLengthAnimationInProgress() {
-        return mZoomScale != 0;
+        return mZoomScale != 0 || mInHWAcceleratedZoom;
     }
 
     public void refreshZoomScale(boolean reflowText) {
