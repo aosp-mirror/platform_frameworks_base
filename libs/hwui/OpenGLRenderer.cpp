@@ -1070,6 +1070,42 @@ bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, u
     return false;
 }
 
+void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint) {
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+    float x = left;
+    float y = top;
+
+    bool ignoreTransform = false;
+    if (mSnapshot->transform->isPureTranslate()) {
+        x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
+        y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
+        ignoreTransform = true;
+    }
+
+    setupDraw();
+    setupDrawWithTexture(true);
+    setupDrawAlpha8Color(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelView(x, y, x + texture->width, y + texture->height, ignoreTransform);
+    setupDrawTexture(texture->id);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderUniforms();
+    setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+
+    finishDrawTexture();
+}
+
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint) {
     const float right = left + bitmap->width();
     const float bottom = top + bitmap->height();
@@ -1083,7 +1119,11 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    drawTextureRect(left, top, right, bottom, texture, paint);
+    if (bitmap->getConfig() == SkBitmap::kA8_Config) {
+        drawAlphaBitmap(texture, left, top, paint);
+    } else {
+        drawTextureRect(left, top, right, bottom, texture, paint);
+    }
 }
 
 void OpenGLRenderer::drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint) {
