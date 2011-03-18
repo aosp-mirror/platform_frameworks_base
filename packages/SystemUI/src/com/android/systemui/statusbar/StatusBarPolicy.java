@@ -499,17 +499,23 @@ public class StatusBarPolicy {
     private boolean mIsWifiConnected = false;
 
     //4G
-    private static final int[][] sDataNetType_4g = {
-            { R.drawable.stat_sys_data_connected_4g,
-              R.drawable.stat_sys_data_out_4g,
-              R.drawable.stat_sys_data_in_4g,
-              R.drawable.stat_sys_data_inandout_4g },
-            { R.drawable.stat_sys_data_fully_connected_4g,
-              R.drawable.stat_sys_data_fully_out_4g,
-              R.drawable.stat_sys_data_fully_in_4g,
-              R.drawable.stat_sys_data_fully_inandout_4g }
+    private static final int[][] sWimaxSignalImages = {
+            { R.drawable.stat_sys_data_wimax_signal_0,
+              R.drawable.stat_sys_data_wimax_signal_1,
+              R.drawable.stat_sys_data_wimax_signal_2,
+              R.drawable.stat_sys_data_wimax_signal_3 },
+            { R.drawable.stat_sys_data_wimax_signal_0_fully,
+              R.drawable.stat_sys_data_wimax_signal_1_fully,
+              R.drawable.stat_sys_data_wimax_signal_2_fully,
+              R.drawable.stat_sys_data_wimax_signal_3_fully }
         };
+    private static final int sWimaxDisconnectedImg =
+            R.drawable.stat_sys_data_wimax_signal_disconnected;
+    private static final int sWimaxIdleImg = R.drawable.stat_sys_data_wimax_signal_idle;
     private boolean mIsWimaxConnected = false;
+    private boolean mIsWimaxEnabled = false;
+    private int mWimaxSignal = 0;
+    private int mWimaxState = 0;
 
     // state of inet connection - 0 not connected, 100 connected
     private int mInetCondition = 0;
@@ -568,7 +574,9 @@ public class StatusBarPolicy {
                 // TODO - stop using other means to get wifi/mobile info
                 updateConnectivity(intent);
             }
-            else if (action.equals(WimaxManagerConstants.WIMAX_DATA_USED_ACTION)) {
+            else if (action.equals(WimaxManagerConstants.WIMAX_ENABLED_STATUS_CHANGED) ||
+                     action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION) ||
+                     action.equals(WimaxManagerConstants.WIMAX_STATE_CHANGED_ACTION)) {
                 updateWiMAX(intent);
             }
         }
@@ -616,7 +624,7 @@ public class StatusBarPolicy {
         boolean isWimaxEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_wimaxEnabled);
         if (isWimaxEnabled) {
-            mService.setIcon("wimax", R.drawable.stat_sys_data_connected_4g, 0);
+            mService.setIcon("wimax", sWimaxDisconnectedImg, 0);
             mService.setIconVisibility("wimax", false);
         }
 
@@ -685,7 +693,9 @@ public class StatusBarPolicy {
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
-        filter.addAction(WimaxManagerConstants.WIMAX_DATA_USED_ACTION);
+        filter.addAction(WimaxManagerConstants.WIMAX_STATE_CHANGED_ACTION);
+        filter.addAction(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION);
+        filter.addAction(WimaxManagerConstants.WIMAX_ENABLED_STATUS_CHANGED);
 
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
@@ -935,7 +945,6 @@ public class StatusBarPolicy {
                 mService.setIconVisibility("wimax", true);
             } else {
                 mIsWimaxConnected = false;
-                mService.setIconVisibility("wimax", false);
             }
             updateWiMAX(intent);
             break;
@@ -1321,13 +1330,44 @@ public class StatusBarPolicy {
 
     private final void updateWiMAX(Intent intent) {
         final String action = intent.getAction();
-        int iconId = sDataNetType_4g[0][0];
-        if (action.equals(WimaxManagerConstants.WIMAX_DATA_USED_ACTION)) {
-            int nUpDown = intent.getIntExtra(WimaxManagerConstants.EXTRA_UP_DOWN_DATA, 0);
-            iconId = sDataNetType_4g[mInetCondition][nUpDown];
+        int iconId = sWimaxDisconnectedImg;
+
+        if (action.equals(WimaxManagerConstants. WIMAX_ENABLED_STATUS_CHANGED)) {
+            int mWimaxStatus = intent.getIntExtra(WimaxManagerConstants.EXTRA_WIMAX_STATUS,
+                    WimaxManagerConstants.WIMAX_STATUS_DISABLED);
+            switch(mWimaxStatus) {
+                case WimaxManagerConstants.WIMAX_STATUS_ENABLED:
+                    mIsWimaxEnabled = true;
+                    break;
+                case WimaxManagerConstants.WIMAX_STATUS_DISABLED:
+                    mIsWimaxEnabled = false;
+                    break;
+            }
+        } else if (action.equals(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION)) {
+            mWimaxSignal = intent.getIntExtra(WimaxManagerConstants.EXTRA_NEW_SIGNAL_LEVEL, 0);
+        } else if (action.equals(WimaxManagerConstants.WIMAX_STATE_CHANGED_ACTION)) {
+            mWimaxState = intent.getIntExtra(WimaxManagerConstants.EXTRA_WIMAX_STATE,
+                    WimaxManagerConstants.WIMAX_STATE_UNKNOWN);
+            int mExtraWimaxState = intent.getIntExtra(
+                    WimaxManagerConstants.EXTRA_WIMAX_STATE_DETAIL,
+                    WimaxManagerConstants.WIMAX_DEREGISTRATION);
+
+            switch(mWimaxState) {
+                case WimaxManagerConstants.WIMAX_STATE_DISCONNECTED:
+                    iconId = sWimaxDisconnectedImg;
+                    break;
+                case WimaxManagerConstants.WIMAX_STATE_CONNECTED:
+                    if(mExtraWimaxState == WimaxManagerConstants.WIMAX_IDLE) {
+                        iconId = sWimaxIdleImg;
+                    }
+                    else {
+                        iconId = sWimaxSignalImages[mInetCondition][mWimaxSignal];
+                    }
+                    break;
+            }
             mService.setIcon("wimax", iconId, 0);
-            mService.setIconVisibility("wimax", mIsWimaxConnected);
         }
+        mService.setIconVisibility("wimax", mIsWimaxEnabled);
     }
 
     private final void updateGps(Intent intent) {
@@ -1414,7 +1454,6 @@ public class StatusBarPolicy {
         }
         mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
     }
-
 
     private class StatusBarHandler extends Handler {
         @Override
