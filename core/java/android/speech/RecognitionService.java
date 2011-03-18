@@ -68,6 +68,8 @@ public abstract class RecognitionService extends Service {
 
     private static final int MSG_CANCEL = 3;
 
+    private static final int MSG_RESET = 4;
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -81,6 +83,10 @@ public abstract class RecognitionService extends Service {
                     break;
                 case MSG_CANCEL:
                     dispatchCancel((IRecognitionListener) msg.obj);
+                    break;
+                case MSG_RESET:
+                    dispatchClearCallback();
+                    break;
             }
         }
     };
@@ -126,6 +132,10 @@ public abstract class RecognitionService extends Service {
             mCurrentCallback = null;
             if (DBG) Log.d(TAG, "canceling - setting mCurrentCallback to null");
         }
+    }
+
+    private void dispatchClearCallback() {
+        mCurrentCallback = null;
     }
 
     private class StartListeningArgs {
@@ -241,7 +251,7 @@ public abstract class RecognitionService extends Service {
          * @param error code is defined in {@link SpeechRecognizer}
          */
         public void error(int error) throws RemoteException {
-            mCurrentCallback = null;
+            Message.obtain(mHandler, MSG_RESET).sendToTarget();
             mListener.onError(error);
         }
 
@@ -278,7 +288,7 @@ public abstract class RecognitionService extends Service {
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void results(Bundle results) throws RemoteException {
-            mCurrentCallback = null;
+            Message.obtain(mHandler, MSG_RESET).sendToTarget();
             mListener.onResults(results);
         }
 
