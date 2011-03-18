@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Programu dovoljuje nadzor vibriranja."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"nadzor svetilke"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Programu dovoljuje nadzor svetilke."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"dostop do naprav USB"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Programu omogoča dostop do naprav USB."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"upravljanje nastavitev in dovoljenj za naprave USB"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Omogoči programu upravljanje nastavitev in dovoljenj za naprave USB."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"preskušanje strojne opreme"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Programu dovoljuje nadzor različnih zunanjih naprav za preskušanje strojne opreme."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"neposredno klicanje telefonskih številk"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Programu dovoljuje vzpostavljanje povezave z dostopnimi točkami brezžičnega omrežja in prekinitev povezave z njimi ter spreminjanje konfiguriranih brezžičnih omrežij."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"dovoljevanje sprejema večvrstnega brezžičnega oddajanja"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Programu dovoljuje prejemanje paketov, ki niso naslovljeni neposredno na vašo napravo. To je lahko uporabno, ko odkrivate storitve, ki so dane na voljo v bližini. Poraba je večja od načina delovanja brez večvrstnega oddajanja."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"prikaz stanja omrežja WiMAX"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Programu omogoča prikaz podatkov o stanju omrežja WiMAX."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"sprememba stanja omrežja WiMAX"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Programu omogoča povezovanje v omrežje WiMAX in prekinitev povezave."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"skrbništvo storitve Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Programu dovoljuje konfiguriranje lokalnega telefona s tehnologijo Bluetooth ter odkrivanje oddaljenih naprav in povezovanje z njimi."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"ustvarjanje povezav Bluetooth"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Privzeta uporaba za to dejanje."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Počistite privzete nastavitve v razdelku Osnovne nastavitve &gt; Programi &gt; Upravljanje programov."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Izberite dejanje"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Izberite program za napravo USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tega dejanja ne more izvesti noben program."</string>
     <string name="aerr_title" msgid="653922989522758100">"Oprostite."</string>
     <string name="aerr_application" msgid="4683614104336409186">"Program <xliff:g id="APPLICATION">%1$s</xliff:g> (postopek <xliff:g id="PROCESS">%2$s</xliff:g>) se je nepričakovano ustavil. Poskusite znova."</string>

@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader programmet kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillader, at programmet kontrollerer lommelygten."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"adgang til USB-enheder."</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Tillader, at programmet har adgang til USB-enheder."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"administrer præferencer og tilladelser for USB-enheder"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Tillader, at programmet administrerer præferencer og tilladelser for USB-enheder."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"test hardware"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Tillader, at et program kontrollerer forskellige perifere enheder for at teste hardwaren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ring direkte op til telefonnumre"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillader, at et program opretter og afbryder forbindelsen fra Wi-Fi-adgangspunkter og foretager ændringer i konfigurerede Wi-Fi-netværk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillad Wi-Fi-multicastmodtagelse"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillader, at et program modtager pakker, der ikke er direkte adresseret til din enhed. Dette kan være nyttigt, hvis du finder tjenester, der tilbydes i nærheden. Det bruger mere strøm end multicasttilstanden."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"vise WiMAX-tilstand"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Tillader, at en applikation viser oplysninger om WiMAX-tilstanden."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"skifte WiMAX-tilstand"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Tillader, at en applikation opretter og afbryder forbindelsen til WiMAX-netværk."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth-administration"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillader, at et program konfigurerer den lokale Bluetooth-telefon samt opdager og parrer med fjerne enheder."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opret Bluetooth-forbindelser"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Ryd standard i Startindstillinger &gt; Programmer &gt; Administrer programmer."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Vælg en handling"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Vælg et program for USB-enheden"</string>
     <string name="noApplications" msgid="1691104391758345586">"Der er ingen programmer, der kan foretage denne handling."</string>
     <string name="aerr_title" msgid="653922989522758100">"Beklager!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) er standset uventet. Prøv igen."</string>

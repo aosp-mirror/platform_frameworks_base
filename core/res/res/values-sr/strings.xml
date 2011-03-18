@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Омогућава да апликација контролише вибрације."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"контрола осветљења"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Омогућава да апликација контролише осветљење."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"приступ USB уређајима"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Омогућава апликацији приступ USB уређајима."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"управљање подешавањима и дозволама за USB уређаје"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Омогућава да апликација управља подешавањима и дозволама за USB уређаје."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тестирање хардвера"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Омогућава да апликација контролише разноврсне периферне уређаје у сврхе тестирања хардвера."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно позивање бројева телефона"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Омогућава да се апликација повезује са Wi-Fi приступним тачкама и да прекине везу са њима, као и да уноси промене у конфигурисане Wi-Fi мреже."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"омогућавање пријема вишесмерног Wi-Fi саобраћаја"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Омогућава да апликација прима пакете који нису директно намењени вашем уређају. То може бити корисно при откривању услуга које се нуде у вашој близини. Користи више напајања од режима једносмерног саобраћаја."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"преглед WiMAX статуса"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Омогућава апликацији преглед информација о WiMAX статусу."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"промена WiMAX статуса"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Омогућава апликацији повезивање и прекид везе са WiMAX мрежом."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"администрирање преко bluetooth-а"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Омогућава да апликација конфигурише локални Bluetooth телефон, као и да открије удаљене уређаје и упари се са њима."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"креирање Bluetooth веза"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Подразумевано користи за ову радњу."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Обришите подразумевана подешавања у оквиру ставки Подешавања почетне странице &gt; Апликације &gt; Управљање апликацијама."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Избор радње"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Избор апликације за USB уређај"</string>
     <string name="noApplications" msgid="1691104391758345586">"Ниједна апликација не може да изврши ову радњу."</string>
     <string name="aerr_title" msgid="653922989522758100">"Жао нам је!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) је неочекивано заустављена. Покушајте поново."</string>

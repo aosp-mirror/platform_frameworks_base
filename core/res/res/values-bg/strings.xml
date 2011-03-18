@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Разрешава на приложението да контролира устройството за вибрация."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"контролиране на фенерчето"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Разрешава на приложението да контролира фенерчето."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"достъп до USB устройства"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Разрешава на приложението достъп до USB устройства."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"управление на предпочитанията и разрешенията за USB устройства"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Разрешава на приложението да управлява предпочитанията и разрешенията за USB устройства."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"тест на хардуера"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Разрешава на приложението да контролира различни периферни устройства с цел тестване на хардуера."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"директно обаждане до телефонни номера"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Разрешава на приложението да се свързва към Wi-Fi точки за достъп и да прекратява връзката с тях, както и да извършва промени в конфигурирани Wi-Fi мрежи."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"разрешаване на приемане на мултикаст през Wi-Fi мрежата"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Разрешава на приложението да получава пакети, които не са адресирани директно към устройството ви. Това може да е полезно при откриване на предлагани в района услуги. Консумира се повече мощност, отколкото в режим без мултикаст."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"преглед на състоянието на WiMAX мрежата"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Разрешава на приложението да вижда информацията за състоянието на WiMAX мрежата."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"промяна на състоянието на WiMAX мрежата"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Разрешава на приложението да се свързва към WiMAX мрежа и да прекратява връзката с нея."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"администриране на Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Разрешава на приложението да конфигурира локалния Bluetooth телефон, както и да открива и да се сдвоява с отдалечени устройства."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"създаване на връзки през Bluetooth"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Използване по подразбиране за това действие."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Изчистване на стандартната стойност в „Начални настройки“ &gt; „Приложения“ &gt; „Управление на приложенията“."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Избиране на действие"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Избор на приложение за USB устройството"</string>
     <string name="noApplications" msgid="1691104391758345586">"Това действие не може да се изпълни от нито едно приложение."</string>
     <string name="aerr_title" msgid="653922989522758100">"Съжаляваме!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Приложението „<xliff:g id="APPLICATION">%1$s</xliff:g>“ (процес „<xliff:g id="PROCESS">%2$s</xliff:g>“) спря неочаквано. Моля, опитайте отново."</string>

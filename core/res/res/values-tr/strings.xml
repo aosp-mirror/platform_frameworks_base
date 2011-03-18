@@ -335,8 +335,8 @@
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Uygulamanın titreşimi denetlemesine izin verir."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"flaşı denetle"</string>
     <string name="permdesc_flashlight" msgid="6433045942283802309">"Uygulamaların flaş ışığını denetlemesine izin verir."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"USB cihazlarına erişme"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Uygulamaların USB cihazlarına erişimine izin verir"</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB cihazları için tercihleri ve izinleri yönet"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Uygulamanın USB cihazları için tercihleri ve izinleri yönetmesine izin verir."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"donanımı test et"</string>
     <string name="permdesc_hardware_test" msgid="3668894686500081699">"Uygulamanın donanım testi için çeşitli çevre birimlerini denetlemesine izin verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon numaralarına doğrudan çağrı yap"</string>
@@ -399,6 +399,10 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Uygulamaların kablosuz erişim noktalarına bağlanıp bunlarla bağlantısını kesmesine ve yapılandırılmış kablosuz ağlarda değişiklikler yapmasına izin verir."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Kablosuz Çoklu Yayın alımına izin ver"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Bir uygulamaya doğrudan cihazınıza yönlendirilmemiş paketleri alma izni verir. Yakın yerlerde sunulan hizmetlerin keşfedilmesi sırasında faydalı olabilir. Birden fazla noktaya yayın yapmayan moda göre daha fazla güç harcar."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX durumunu görüntüle"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Uygulamanın, WiMAX\'ın durumuyla ilgili bilgileri görüntülemesine izin verir."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX durumunu değiştir"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Uygulamanın, WiMAX ağına bağlanmasına veya bağlantısını kesmesine izin verir."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth yönetimi"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Uygulamaların yerel Bluetooth telefonunu yapılandırmasına ve uzak cihazları keşfedip bunlar ile eşleşmesine izin verir."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth bağlantıları oluştur"</string>
@@ -733,6 +737,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Varsayılan olarak bu işlem için kullan."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Giriş Ayarları &gt; Uygulamalar &gt; Uygulamaları yönet\'te varsayılanı temizleyin."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"İşlem seç"</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"USB cihazı için bir uygulama seçin"</string>
     <string name="noApplications" msgid="1691104391758345586">"Hiçbir uygulama bu işlemi yapamaz."</string>
     <string name="aerr_title" msgid="653922989522758100">"Üzgünüz!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işlemi) beklenmedik biçimde durdu. Lütfen yeniden deneyin."</string>
@@ -743,7 +748,7 @@
     <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işleminde) yanıt vermiyor."</string>
     <string name="anr_process" msgid="1246866008169975783">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi yanıt vermiyor."</string>
     <string name="force_close" msgid="3653416315450806396">"Kapanmaya zorla"</string>
-    <string name="report" msgid="4060218260984795706">"Rapor"</string>
+    <string name="report" msgid="4060218260984795706">"Bildir"</string>
     <string name="wait" msgid="7147118217226317732">"Bekle"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Uygulama yönlendirildi"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> şimdi çalışıyor."</string>

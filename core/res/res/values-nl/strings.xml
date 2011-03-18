@@ -172,75 +172,75 @@
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Toegang krijgen tot USB-opslag."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Toegang tot de SD-kaart."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"statusbalk uitschakelen of wijzigen"</string>
-    <string name="permdesc_statusBar" msgid="1365473595331989732">"Hiermee kan een toepassing de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
+    <string name="permdesc_statusBar" msgid="1365473595331989732">"Hiermee kan een app de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbalk"</string>
-    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Hiermee kan de toepassing de statusbalk zijn."</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Hiermee kan de app de statusbalk zijn."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"statusbalk uitvouwen/samenvouwen"</string>
-    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Hiermee kan de toepassing de statusbalk uitvouwen of samenvouwen."</string>
+    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Hiermee kan de app de statusbalk uitvouwen of samenvouwen."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"uitgaande oproepen onderscheppen"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Hiermee kan een toepassing uitgaande oproepen verwerken en het nummer wijzigen dat wordt gebeld. Schadelijke toepassingen kunnen uitgaande oproepen bijhouden, omleiden of tegenhouden."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Hiermee kan een app uitgaande oproepen verwerken en het nummer wijzigen dat wordt gebeld. Schadelijke apps kunnen uitgaande oproepen bijhouden, omleiden of tegenhouden."</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"SMS ontvangen"</string>
-    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Hiermee kan een toepassing SMS-berichten ontvangen en verwerken. Schadelijke toepassingen kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
+    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Hiermee kan een app SMS-berichten ontvangen en verwerken. Schadelijke apps kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS ontvangen"</string>
-    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Hiermee kan een toepassing MMS-berichten ontvangen en verwerken. Schadelijke toepassingen kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
+    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Hiermee kan een app MMS-berichten ontvangen en verwerken. Schadelijke apps kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-berichten verzenden"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"Hiermee kan de toepassing SMS-berichten verzenden. Schadelijke toepassingen kunnen u geld kosten door berichten te verzenden zonder uw toestemming."</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Hiermee kan de app SMS-berichten verzenden. Schadelijke apps kunnen u geld kosten door berichten te verzenden zonder uw toestemming."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS of MMS lezen"</string>
-    <string name="permdesc_readSms" msgid="3002170087197294591">"Hiermee kan een toepassing de op uw telefoon of SIM-kaart opgeslagen SMS-berichten lezen. Schadelijke toepassingen kunnen uw vertrouwelijke berichten mogelijk lezen."</string>
+    <string name="permdesc_readSms" msgid="3002170087197294591">"Hiermee kan een app de op uw telefoon of SIM-kaart opgeslagen SMS-berichten lezen. Schadelijke apps kunnen uw vertrouwelijke berichten mogelijk lezen."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS of MMS bewerken"</string>
-    <string name="permdesc_writeSms" msgid="6299398896177548095">"Hiermee kan een toepassing naar de op uw telefoon of SIM-kaart opgeslagen SMS-berichten schrijven. Schadelijke toepassingen kunnen uw berichten mogelijk verwijderen."</string>
+    <string name="permdesc_writeSms" msgid="6299398896177548095">"Hiermee kan een app naar de op uw telefoon of SIM-kaart opgeslagen SMS-berichten schrijven. Schadelijke apps kunnen uw berichten mogelijk verwijderen."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP ontvangen"</string>
-    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Hiermee kan een toepassing WAP-berichten ontvangen en verwerken. Schadelijke toepassingen kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
+    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Hiermee kan een app WAP-berichten ontvangen en verwerken. Schadelijke apps kunnen uw berichten bijhouden of deze verwijderen zonder dat u ze te zien krijgt."</string>
     <string name="permlab_getTasks" msgid="5005277531132573353">"actieve toepassingen ophalen"</string>
-    <string name="permdesc_getTasks" msgid="7048711358713443341">"Hiermee kan een toepassing informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke toepassingen kunnen op deze manier mogelijk privé-informatie over andere toepassingen achterhalen."</string>
+    <string name="permdesc_getTasks" msgid="7048711358713443341">"Hiermee kan een app informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke apps kunnen op deze manier mogelijk privé-informatie over andere apps achterhalen."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"actieve toepassingen opnieuw indelen"</string>
-    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Hiermee kan een toepassing taken naar de voor- en achtergrond verplaatsen. Schadelijke toepassingen kunnen zichzelf op de voorgrond plaatsen zonder dat u hier iets aan kunt doen."</string>
+    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Hiermee kan een app taken naar de voor- en achtergrond verplaatsen. Schadelijke apps kunnen zichzelf op de voorgrond plaatsen zonder dat u hier iets aan kunt doen."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"foutopsporing in toepassingen inschakelen"</string>
-    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Hiermee kan een toepassing de foutopsporing voor een andere toepassing inschakelen. Schadelijke toepassingen kunnen dit gebruiken om andere toepassingen af te sluiten."</string>
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Hiermee kan een app de foutopsporing voor een andere app inschakelen. Schadelijke apps kunnen dit gebruiken om andere apps af te sluiten."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"uw UI-instellingen wijzigen"</string>
-    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Hiermee kan een toepassing de huidige configuratie, zoals de landinstelling of de algemene lettergrootte, wijzigen."</string>
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Hiermee kan een app de huidige configuratie, zoals de landinstelling of de algemene lettergrootte, wijzigen."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"automodus inschakelen"</string>
-    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Staat een toepassing toe de automodus in te schakelen."</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Staat een app toe de automodus in te schakelen."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"processen op de achtergrond beëindigen"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Staat een toepassing toe processen op de achtergrond te beëindigen, zelfs als er voldoende geheugen beschikbaar is."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Staat een app toe processen op de achtergrond te beëindigen, zelfs als er voldoende geheugen beschikbaar is."</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"andere toepassingen gedwongen stoppen"</string>
-    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Staat een toepassing toe andere toepassingen te stoppen."</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"toepassing nu sluiten"</string>
-    <string name="permdesc_forceBack" msgid="6534109744159919013">"Hiermee kan een toepassing elke willekeurige activiteit die op de voorgrond wordt uitgevoerd, sluiten en naar de achtergrond verplaatsen. Nooit vereist voor normale toepassingen."</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Staat een app toe andere apps te stoppen."</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"app nu sluiten"</string>
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"Hiermee kan een app elke willekeurige activiteit die op de voorgrond wordt uitgevoerd, sluiten en naar de achtergrond verplaatsen. Nooit vereist voor normale apps."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"interne systeemstatus ophalen"</string>
-    <string name="permdesc_dump" msgid="2198776174276275220">"Hiermee kan een toepassing de interne status van het systeem ophalen. Schadelijke toepassingen kunnen privé- of veiligheidsgegevens ophalen die ze normaal niet nodig hebben."</string>
+    <string name="permdesc_dump" msgid="2198776174276275220">"Hiermee kan een app de interne status van het systeem ophalen. Schadelijke apps kunnen privé- of veiligheidsgegevens ophalen die ze normaal niet nodig hebben."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"gedeeltelijke uitschakeling"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Hiermee wordt activiteitenbeheer uitgeschakeld. Er wordt geen volledige uitschakeling uitgevoerd."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"schakelen tussen toepassingen voorkomen"</string>
-    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hiermee wordt voorkomen dat de gebruiker overschakelt naar een andere toepassing."</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Hiermee wordt voorkomen dat de gebruiker overschakelt naar een andere app."</string>
     <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"alle startende toepassingen bijhouden en beheren"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Hiermee kan een toepassing de manier waarop het systeem activiteiten start, bijhouden en beheren. Schadelijke toepassingen kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal telefoongebruik."</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Hiermee kan een app de manier waarop het systeem activiteiten start, bijhouden en beheren. Schadelijke apps kunnen het systeem volledig in gevaar brengen. Deze machtiging is alleen voor ontwikkeling vereist, nooit voor normaal telefoongebruik."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"melding verzenden dat pakket is verwijderd"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Hiermee kan een toepassing een melding verzenden dat een toepassingspakket is verwijderd. Schadelijke toepassingen kunnen hiervan gebruik maken om alle andere actieve toepassingen af te sluiten."</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Hiermee kan een app een melding verzenden dat een applicatiepakket (APK) is verwijderd. Schadelijke apps kunnen hiervan gebruik maken om alle andere actieve apps af te sluiten."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"melding over ontvangen SMS-bericht verzenden"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Hiermee kan een toepassing een melding verzenden dat een SMS-bericht is ontvangen. Schadelijke toepassingen kunnen hiervan gebruik maken om inkomende SMS-berichten te vervalsen."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Hiermee kan een app een melding verzenden dat een SMS-bericht is ontvangen. Schadelijke apps kunnen hiervan gebruik maken om inkomende SMS-berichten te vervalsen."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"melding over ontvangen WAP-PUSH-bericht verzenden"</string>
-    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Hiermee kan een toepassing een melding verzenden dat een WAP PUSH-bericht is ontvangen. Schadelijke toepassingen kunnen hiervan gebruik maken om een valse MMS-ontvangst te melden of de inhoud van willekeurige webpagina\'s door schadelijke varianten te vervangen."</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Hiermee kan een app een melding verzenden dat een WAP PUSH-bericht is ontvangen. Schadelijke apps kunnen hiervan gebruik maken om een valse MMS-ontvangst te melden of de inhoud van willekeurige webpagina\'s door schadelijke varianten te vervangen."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"aantal actieve processen beperken"</string>
-    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Hiermee kan een toepassing het maximum aantal processen bepalen dat wordt uitgevoerd. Nooit vereist voor normale toepassingen."</string>
+    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Hiermee kan een app het maximum aantal processen bepalen dat wordt uitgevoerd. Nooit vereist voor normale apps."</string>
     <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"alle achtergrondtoepassingen sluiten"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Hiermee kan een toepassing bepalen of activiteiten altijd worden afgesloten zodra deze naar de achtergrond gaan. Nooit nodig voor normale toepassingen."</string>
+    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Hiermee kan een app bepalen of activiteiten altijd worden afgesloten zodra deze naar de achtergrond gaan. Nooit nodig voor normale apps."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"accustatistieken aanpassen"</string>
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Hiermee kunnen verzamelde accustatistieken worden gewijzigd. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_backup" msgid="470013022865453920">"systeemback-up en -herstel beheren"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"Hiermee kan de toepassing het mechanisme voor systeemback-up en -herstel beheren. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Hiermee kan de app het mechanisme voor systeemback-up en -herstel beheren. Niet voor gebruik door normale apps."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"niet-geautoriseerde vensters weergeven"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Hiermee kunnen vensters worden gemaakt die door de interne systeemgebruikersinterface worden gebruikt. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"waarschuwingen op systeemniveau weergeven"</string>
-    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Hiermee kan een toepassing systeemwaarschuwingen weergeven. Schadelijke toepassingen kunnen op deze manier het hele scherm van de telefoon overnemen."</string>
+    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Hiermee kan een app systeemwaarschuwingen weergeven. Schadelijke apps kunnen op deze manier het hele scherm van de telefoon overnemen."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"algemene animatiesnelheid wijzigen"</string>
-    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Hiermee kan een toepassing op elk gewenst moment de algemene animatiesnelheid wijzigen (snellere of tragere animaties)."</string>
+    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Hiermee kan een app op elk gewenst moment de algemene animatiesnelheid wijzigen (snellere of tragere animaties)."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"toepassingstokens beheren"</string>
     <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Hiermee kunnen toepassingen hun eigen tokens maken en beheren, waarbij de normale Z-volgorde wordt overgeslagen. Nooit nodig voor normale toepassingen."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"drukken op toetsen en bedieningselementen"</string>
-    <string name="permdesc_injectEvents" msgid="3946098050410874715">"Hiermee kan een toepassing zijn eigen invoergebeurtenissen (toetsaanslagen, enzovoort) aan andere toepassingen doorgeven. Schadelijke toepassingen kunnen dit gebruiken om de telefoon over te nemen."</string>
+    <string name="permdesc_injectEvents" msgid="3946098050410874715">"Hiermee kan een app zijn de invoergebeurtenissen (toetsaanslagen, enzovoort) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de telefoon over te nemen."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"uw invoer en acties vastleggen"</string>
-    <string name="permdesc_readInputState" msgid="5132879321450325445">"Hiermee kan een toepassing uw toetsaanslagen registreren, zelfs tijdens de interactie met een andere toepassing (zoals de invoer van een wachtwoord). Nooit vereist voor normale toepassingen."</string>
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"Hiermee kan een app uw toetsaanslagen registreren, zelfs tijdens de interactie met een andere app (zoals de invoer van een wachtwoord). Nooit vereist voor normale apps."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"verbinden aan een invoermethode"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Hiermee staat u de houder toe zich te verbinden met de hoofdinterface van een invoermethode. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"verbinden met een achtergrond"</string>
@@ -248,51 +248,51 @@
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactie met apparaatbeheer"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Staat de houder toe intenties te verzenden naar een apparaatbeheerder. Nooit vereist voor normale toepassingen."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"schermstand wijzigen"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Hiermee kan een toepassing op elk gewenst moment de oriëntatie van het scherm wijzigen. Nooit vereist voor normale toepassingen."</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Hiermee kan een app op elk gewenst moment de oriëntatie van het scherm wijzigen. Nooit vereist voor normale apps."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linux-signalen verzenden naar toepassingen"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Hiermee kan de toepassing ervoor zorgen dat het geleverde signaal wordt verzonden naar alle persistente processen."</string>
-    <string name="permlab_persistentActivity" msgid="8659652042401085862">"toepassing altijd laten uitvoeren"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Hiermee kan een toepassing delen van zichzelf persistent maken, zodat het systeem dat deel niet voor andere toepassingen kan gebruiken."</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Hiermee kan de app ervoor zorgen dat het geleverde signaal wordt verzonden naar alle persistente processen."</string>
+    <string name="permlab_persistentActivity" msgid="8659652042401085862">"app altijd laten uitvoeren"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Hiermee kan een app delen van zichzelf persistent maken, zodat het systeem dat deel niet voor andere apps kan gebruiken."</string>
     <string name="permlab_deletePackages" msgid="3343439331576348805">"toepassingen verwijderen"</string>
-    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Hiermee kan een toepassing Android-pakketten verwijderen. Schadelijke toepassingen kunnen dit gebruiken om belangrijke toepassingen te verwijderen."</string>
+    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Hiermee kan een app Android-pakketten verwijderen. Schadelijke apps kunnen dit gebruiken om belangrijke apps te verwijderen."</string>
     <string name="permlab_clearAppUserData" msgid="2192134353540277878">"gegevens van andere toepassingen verwijderen"</string>
-    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Hiermee kan een toepassing gebruikersgegevens wissen."</string>
+    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Hiermee kan een app gebruikersgegevens wissen."</string>
     <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"caches van andere toepassingen verwijderen"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Hiermee kan een toepassing cachebestanden verwijderen."</string>
-    <string name="permlab_getPackageSize" msgid="4799785352306641460">"opslagruimte van toepassing bepalen"</string>
-    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Hiermee kan een toepassing de bijbehorende code, gegevens en cachegrootten ophalen."</string>
+    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Hiermee kan een app cachebestanden verwijderen."</string>
+    <string name="permlab_getPackageSize" msgid="4799785352306641460">"opslagruimte van app bepalen"</string>
+    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Hiermee kan een app de bijbehorende code, gegevens en cachegrootten ophalen."</string>
     <string name="permlab_installPackages" msgid="335800214119051089">"toepassingen rechtstreeks installeren"</string>
-    <string name="permdesc_installPackages" msgid="526669220850066132">"Hiermee kan een toepassing nieuwe of bijgewerkte Android-pakketten installeren. Schadelijke toepassingen kunnen hiervan gebruik maken om nieuwe toepassingen met willekeurig krachtige machtigingen toe te voegen."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"alle cachegegevens van toepassing verwijderen"</string>
-    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Hiermee kan een toepassing opslagruimte op de telefoon vrij maken door bestanden te verwijderen uit de cachemap van de toepassing. De toegang is doorgaans beperkt tot het systeemproces."</string>
+    <string name="permdesc_installPackages" msgid="526669220850066132">"Hiermee kan een app nieuwe of bijgewerkte Android-pakketten installeren. Schadelijke apps kunnen hiervan gebruik maken om nieuwe apps met willekeurig krachtige machtigingen toe te voegen."</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"alle cachegegevens van app verwijderen"</string>
+    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Hiermee kan een app opslagruimte op de telefoon vrij maken door bestanden te verwijderen uit de cachemap van de app. De toegang is doorgaans beperkt tot het systeemproces."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Toepassingsbronnen verplaatsen"</string>
-    <string name="permdesc_movePackage" msgid="6323049291923925277">"Een toepassing toestaan toepassingsbronnen te verplaatsen van interne naar externe media en omgekeerd."</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Een app toestaan app-bronnen te verplaatsen van interne naar externe media en omgekeerd."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"gevoelige logbestandsgegevens lezen"</string>
-    <string name="permdesc_readLogs" msgid="8896449437464867766">"Hiermee kan een toepassing de verschillende logbestanden van het systeem lezen. De toepassing kan op deze manier algemene informatie achterhalen over uw telefoongebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Hiermee kan een app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw telefoongebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lezen/schrijven naar bronnen van diag"</string>
-    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Hiermee kan een toepassing lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of operator."</string>
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Hiermee kan een app lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of operator."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"toepassingscomponenten in- of uitschakelen"</string>
-    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Hiermee kan een toepassing bepalen of een component van een andere toepassing is ingeschakeld. Schadelijke toepassingen kunnen hiervan gebruik maken om belangrijke telefoonfuncties uit te schakelen. Een machtiging moet zorgvuldig worden overwogen, aangezien toepassingscomponenten onbruikbaar, inconsistent of instabiel kunnen worden."</string>
+    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Hiermee kan een app bepalen of een component van een andere app is ingeschakeld. Schadelijke apps kunnen hiervan gebruik maken om belangrijke telefoonfuncties uit te schakelen. Een machtiging moet zorgvuldig worden overwogen, aangezien app-componenten onbruikbaar, inconsistent of instabiel kunnen worden."</string>
     <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"voorkeurstoepassingen instellen"</string>
-    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Hiermee kan een toepassing uw voorkeurstoepassingen wijzigen. Schadelijke toepassingen kunnen op deze manier de actieve toepassingen zonder uw medeweten wijzigen en uw bestaande toepassingen doorzoeken om privégegevens van u te verzamelen."</string>
+    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Hiermee kan een app uw voorkeurs-apps wijzigen. Schadelijke apps kunnen op deze manier de actieve apps zonder uw medeweten wijzigen en uw bestaande apps doorzoeken om privégegevens van u te verzamelen."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"algemene systeeminstellingen wijzigen"</string>
-    <string name="permdesc_writeSettings" msgid="838789419871034696">"Hiermee kan een toepassing de systeeminstellingen wijzigen. Schadelijke toepassingen kunnen hiermee uw systeemconfiguratie beschadigen."</string>
+    <string name="permdesc_writeSettings" msgid="838789419871034696">"Hiermee kan een app de systeeminstellingen wijzigen. Schadelijke apps kunnen hiermee uw systeemconfiguratie beschadigen."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"beveiligde systeeminstellingen wijzigen"</string>
-    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Hiermee kan een toepassing beveiligde systeeminstellingen wijzigen. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Hiermee kan een app beveiligde systeeminstellingen wijzigen. Niet voor gebruik door normale apps."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"de Google-serviceskaart wijzigen"</string>
-    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Hiermee kan een toepassing de Google-serviceskaart wijzigen. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Hiermee kan een app de Google-serviceskaart wijzigen. Niet voor gebruik door normale apps."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"automatisch starten bij opstarten"</string>
-    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Hiermee kan een toepassing zichzelf starten zodra het systeem klaar is met opstarten. Hierdoor kan het langer duren voordat de telefoon is opgestart en kan de toepassing de telefoonprocessen vertragen door altijd actief te zijn."</string>
+    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Hiermee kan een app zichzelf starten zodra het systeem klaar is met opstarten. Hierdoor kan het langer duren voordat de telefoon is opgestart en kan de app de telefoonprocessen vertragen door altijd actief te zijn."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sticky broadcast verzenden"</string>
-    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Hiermee kan een toepassing sticky broadcasts verzenden die achterblijven als de broadcast eindigt. Schadelijke toepassingen kunnen hiermee de telefoon traag of instabiel maken door ervoor te zorgen dat er te veel geheugenruimte wordt gebruikt."</string>
+    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Hiermee kan een app sticky broadcasts verzenden die achterblijven als de broadcast eindigt. Schadelijke apps kunnen hiermee de telefoon traag of instabiel maken door ervoor te zorgen dat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"contactgegevens lezen"</string>
-    <string name="permdesc_readContacts" msgid="3371591512896545975">"Hiermee kan een toepassing alle contactgegevens (adresgegevens) zien die op uw telefoon zijn opgeslagen. Schadelijke toepassingen kunnen hiervan gebruik maken om uw gegevens te verzenden naar andere personen."</string>
+    <string name="permdesc_readContacts" msgid="3371591512896545975">"Hiermee kan een app alle contactgegevens (adresgegevens) zien die op uw telefoon zijn opgeslagen. Schadelijke apps kunnen hiervan gebruik maken om uw gegevens te verzenden naar andere personen."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"contactgegevens schrijven"</string>
-    <string name="permdesc_writeContacts" msgid="3924383579108183601">"Hiermee kan een toepassing de op uw telefoon opgeslagen contactgegevens (adresgegevens) wijzigen. Schadelijke toepassingen kunnen hiermee uw contactgegevens verwijderen of wijzigen."</string>
+    <string name="permdesc_writeContacts" msgid="3924383579108183601">"Hiermee kan een app de op uw telefoon opgeslagen contactgegevens (adresgegevens) wijzigen. Schadelijke apps kunnen hiermee uw contactgegevens verwijderen of wijzigen."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"agendagebeurtenissen lezen"</string>
-    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Hiermee kan een toepassing alle agendagebeurtenissen lezen die zijn opgeslagen op uw telefoon. Schadelijke toepassingen kunnen hiervan gebruik maken om uw agendagebeurtenissen te verzenden naar andere personen."</string>
+    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Hiermee kan een app alle agendagebeurtenissen lezen die zijn opgeslagen op uw telefoon. Schadelijke apps kunnen hiervan gebruik maken om uw agendagebeurtenissen te verzenden naar andere personen."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"agendagebeurtenissen toevoegen of aanpassen en e-mail verzenden naar gasten"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Een toepassing toestaan gebeurtenissen aan uw agenda toe te voegen of te wijzigen, wat inhoudt dat er e-mails kunnen worden verzonden naar gasten. Schadelijke toepassingen kunnen dit gebruiken om uw agendagebeurtenissen te wissen of aan te passen of om e-mail naar gasten te verzenden."</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Een app toestaan gebeurtenissen aan uw agenda toe te voegen of te wijzigen, wat inhoudt dat er e-mails kunnen worden verzonden naar gasten. Schadelijke apps kunnen dit gebruiken om uw agendagebeurtenissen te wissen of aan te passen of om e-mail naar gasten te verzenden."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"neplocatiebronnen voor test"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Neplocatiebronnen voor testdoeleinden maken. Schadelijke toepassingen kunnen dit gebruiken om de locatie en/of status te overschrijven die door de echte locatiebronnen wordt aangegeven, zoals GPS of netwerkaanbieders."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"toegang tot extra opdrachten van locatieaanbieder"</string>
@@ -304,131 +304,135 @@
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"globale (netwerkgebaseerde) locatie"</string>
     <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Toegang tot globale locatiebronnen, zoals de mobiele netwerkdatabase om een globale telefoonlocatie te bepalen, indien beschikbaar. Schadelijke toepassingen kunnen hiervan gebruik maken om bij benadering te bepalen waar u zich bevindt."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"toegang tot SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Hiermee kan een toepassing SurfaceFlinger-functies op laag niveau gebruiken."</string>
+    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Hiermee kan een app SurfaceFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"framebuffer lezen"</string>
-    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Hiermee kan een toepassing de inhoud van de framebuffer lezen."</string>
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Hiermee kan een app de inhoud van de framebuffer lezen."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"uw audio-instellingen wijzigen"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Hiermee kan een toepassing de algemene audio-instellingen, zoals volume en omleiding, wijzigen."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Hiermee kan een app de algemene audio-instellingen, zoals volume en omleiding, wijzigen."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audio opnemen"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Hiermee krijgt de toepassing toegang tot het audio-opnamepad."</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Hiermee krijgt de app toegang tot het audio-opnamepad."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"foto\'s en video\'s maken"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"Hiermee kan een toepassing foto\'s en video\'s maken met de camera. De toepassing kan op deze manier op elk gewenste moment beelden verzamelen van wat de camera ziet."</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Hiermee kan een app foto\'s en video\'s maken met de camera. De app kan op deze manier op elk gewenste moment beelden verzamelen van wat de camera ziet."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"telefoon permanent uitschakelen"</string>
-    <string name="permdesc_brick" msgid="5569526552607599221">"Hiermee kan de toepassing de telefoon permanent uitschakelen. Dit is erg gevaarlijk."</string>
+    <string name="permdesc_brick" msgid="5569526552607599221">"Hiermee kan de app de telefoon permanent uitschakelen. Dit is erg gevaarlijk."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"telefoon nu opnieuw opstarten"</string>
-    <string name="permdesc_reboot" msgid="7914933292815491782">"Hiermee kan de toepassing de telefoon nu opnieuw opstarten."</string>
+    <string name="permdesc_reboot" msgid="7914933292815491782">"Hiermee kan de app de telefoon nu opnieuw opstarten."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"bestandssystemen koppelen en ontkoppelen"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Hiermee kan de toepassing bestandssystemen koppelen en ontkoppelen voor verwisselbare opslagruimte."</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Hiermee kan de app bestandssystemen koppelen en ontkoppelen voor verwisselbare opslagruimte."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"externe opslag formatteren"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Hiermee kan de toepassing de externe opslag formatteren."</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Hiermee kan de app de externe opslag formatteren."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"informatie over de interne opslag verkrijgen"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"Hiermee kan de toepassing informatie over de interne opslag verkrijgen."</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Hiermee kan de app informatie over de interne opslag verkrijgen."</string>
     <string name="permlab_asec_create" msgid="6414757234789336327">"interne opslag maken"</string>
-    <string name="permdesc_asec_create" msgid="2621346764995731250">"Hiermee kan de toepassing interne opslag maken."</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Hiermee kan de app interne opslag maken."</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"interne opslag vernietigen"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Hiermee kan de toepassing de interne opslag vernietigen."</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Hiermee kan de app de interne opslag vernietigen."</string>
     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"interne opslag koppelen/ontkoppelen"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Hiermee kan de toepassing de interne opslag koppelen/ontkoppelen."</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Hiermee kan de app de interne opslag koppelen/ontkoppelen."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"naam van interne opslag wijzigen"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Hiermee kan de toepassing de naam van de interne opslag wijzigen."</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Hiermee kan de app de naam van de interne opslag wijzigen."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"trilstand beheren"</string>
-    <string name="permdesc_vibrate" msgid="2886677177257789187">"Hiermee kan de toepassing de trilstand beheren."</string>
+    <string name="permdesc_vibrate" msgid="2886677177257789187">"Hiermee kan de app de trilstand beheren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"zaklamp bedienen"</string>
-    <string name="permdesc_flashlight" msgid="6433045942283802309">"Hiermee kan de toepassing de zaklamp bedienen."</string>
-    <string name="permlab_accessUsb" msgid="7362327818655760496">"toegang krijgen tot USB-apparaten"</string>
-    <string name="permdesc_accessUsb" msgid="2414271762914049292">"Hiermee kan de toepassing toegang krijgen tot USB-apparaten."</string>
+    <string name="permdesc_flashlight" msgid="6433045942283802309">"Hiermee kan de app de zaklamp bedienen."</string>
+    <string name="permlab_manageUsb" msgid="1113453430645402723">"voorkeuren en rechten voor USB-apparaten beheren"</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Hiermee kan de app voorkeuren en rechten voor USB-apparaten beheren."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"hardware testen"</string>
-    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Hiermee kan de toepassing verschillende randapparaten beheren om de hardware te testen."</string>
+    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Hiermee kan de app verschillende randapparaten beheren om de hardware te testen."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefoonnummers rechtstreeks bellen"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"Hiermee kan de toepassing telefoonnummers bellen zonder uw tussenkomst. Door schadelijke toepassingen kunnen onverwachte oproepen op uw telefoonrekening verschijnen. De toepassing kan hiermee geen alarmnummers bellen."</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Hiermee kan de app telefoonnummers bellen zonder uw tussenkomst. Door schadelijke apps kunnen onverwachte oproepen op uw telefoonrekening verschijnen. De app kan hiermee geen alarmnummers bellen."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"alle telefoonnummers rechtstreeks bellen"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Hiermee kan een toepassing elk telefoonnummer, inclusief alarmnummers, bellen zonder uw tussenkomst. Schadelijke toepassingen kunnen onnodige en illegale oproepen uitvoeren naar alarmdiensten."</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Hiermee kan een app elk telefoonnummer, inclusief alarmnummers, bellen zonder uw tussenkomst. Schadelijke apps kunnen onnodige en illegale oproepen uitvoeren naar alarmdiensten."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"meteen starten met CDMA-telefooninstelling"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Hiermee kan de toepassing starten met CDMA-provisioning. Schadelijke applicaties kunnen de CDMA-provisioning onnodig starten"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Hiermee kan de app starten met CDMA-provisioning. Schadelijke apps kunnen de CDMA-provisioning onnodig starten"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"meldingen over locatie-updates beheren"</string>
     <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Hiermee kunnen updatemeldingen voor locaties van de radio worden ingeschakeld/uitgeschakeld. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"toegang tot checkin-eigenschappen"</string>
     <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Hiermee wordt lees-/schrijftoegang gegeven tot eigenschappen die door de checkin-service zijn geüpload. Niet voor gebruik door normale toepassingen."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"widgets kiezen"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Hiermee kan een toepassing het systeem melden welke widgets door welke toepassing kunnen worden gebruikt. Met deze toestemming kunnen toepassingen andere toepassingen toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale toepassingen."</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Hiermee kan een app het systeem melden welke widgets door welke app kunnen worden gebruikt. Met deze toestemming kunnen apps andere apps toegang geven tot persoonlijke gegevens. Niet voor gebruik door normale apps."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"telefoonstatus wijzigen"</string>
-    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Hiermee kan de toepassing de telefoonfuncties van het apparaat beheren. Een toepassing met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Hiermee kan de app de telefoonfuncties van het apparaat beheren. Een app met deze machtiging kan schakelen tussen netwerken, de radio van de telefoon in- of uitschakelen en dergelijke zonder dat u hiervan op de hoogte wordt gesteld."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"telefoonstatus en -identiteit lezen"</string>
-    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Hiermee krijgt de toepassing toegang tot de telefoonfuncties van het apparaat. Een toepassing met de betreffende machtiging kan het telefoonnummer en serienummer van deze telefoon achterhalen, bepalen of een oproep actief is, het gekozen nummer achterhalen en dergelijke."</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Hiermee krijgt de app toegang tot de telefoonfuncties van het apparaat. Een app met de betreffende machtiging kan het telefoonnummer en serienummer van deze telefoon achterhalen, bepalen of een oproep actief is, het gekozen nummer achterhalen en dergelijke."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
-    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Hiermee kan een toepassing voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
+    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Hiermee kan een app voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"telefoon in- of uitschakelen"</string>
-    <string name="permdesc_devicePower" msgid="4577331933252444818">"Hiermee kan de toepassing de telefoon in- of uitschakelen."</string>
+    <string name="permdesc_devicePower" msgid="4577331933252444818">"Hiermee kan de app de telefoon in- of uitschakelen."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"uitvoeren in fabriekstestmodus"</string>
     <string name="permdesc_factoryTest" msgid="8136644990319244802">"Uitvoeren als fabrikanttest op laag niveau, waardoor toegang wordt gegeven tot de hardware van de telefoon. Alleen beschikbaar als een telefoon zich in de fabrikanttestmodus bevindt."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"achtergrond instellen"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Hiermee kan de toepassing de systeemachtergrond instellen."</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Hiermee kan de app de systeemachtergrond instellen."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"grootte achtergrond instellen"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Hiermee kan de toepassing de grootte van de achtergrond instellen."</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Hiermee kan de app de grootte van de achtergrond instellen."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"systeem terugzetten op fabrieksinstellingen"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"Hiermee kan een toepassing het systeem terugzetten op de fabrieksinstellingen, waarbij alle gegevens, configuraties en geïnstalleerde toepassingen worden verwijderd."</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Hiermee kan een app het systeem terugzetten op de fabrieksinstellingen, waarbij alle gegevens, configuraties en geïnstalleerde apps worden verwijderd."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"tijd instellen"</string>
-    <string name="permdesc_setTime" msgid="667294309287080045">"Staat een toepassing toe de kloktijd van de telefoon te wijzigen."</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Staat een app toe de kloktijd van de telefoon te wijzigen."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"tijdzone instellen"</string>
-    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Hiermee kan een toepassing de tijdzone van de telefoon wijzigen."</string>
+    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Hiermee kan een app de tijdzone van de telefoon wijzigen."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungeren als de AccountManagerService"</string>
-    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Hiermee kan een toepassing aanroepen plaatsen naar AccountAuthenticators"</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Hiermee kan een app aanroepen plaatsen naar AccountAuthenticators"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"bekende accounts zoeken"</string>
-    <string name="permdesc_getAccounts" msgid="6839262446413155394">"Hiermee kan een toepassing de lijst met accounts van een telefoon ophalen."</string>
+    <string name="permdesc_getAccounts" msgid="6839262446413155394">"Hiermee kan een app de lijst met accounts van een telefoon ophalen."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"fungeren als verificatie-instantie voor het account"</string>
-    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Hiermee kan een toepassing de mogelijkheden voor verificatie-instanties voor het account van de AccountManager gebruiken, waaronder het maken van accounts en het ophalen en instellen van de bijbehorende wachtwoorden."</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Hiermee kan een app de mogelijkheden voor verificatie-instanties voor het account van de AccountManager gebruiken, waaronder het maken van accounts en het ophalen en instellen van de bijbehorende wachtwoorden."</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"de lijst met accounts beheren"</string>
-    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Hiermee kan een toepassing bewerkingen uitvoeren, zoals het toevoegen en verwijderen van accounts en het verwijderen van de bijbehorende wachtwoorden."</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Hiermee kan een app bewerkingen uitvoeren, zoals het toevoegen en verwijderen van accounts en het verwijderen van de bijbehorende wachtwoorden."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"de verificatiegegevens van een account gebruiken"</string>
-    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Hiermee kan een toepassing verificatietokens aanvragen."</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Hiermee kan een app verificatietokens aanvragen."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"netwerkstatus bekijken"</string>
-    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Hiermee kan een toepassing de status van alle netwerken bekijken."</string>
+    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Hiermee kan een app de status van alle netwerken bekijken."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"volledige internettoegang"</string>
-    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Hiermee kan een toepassing netwerksockets maken."</string>
+    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Hiermee kan een app netwerksockets maken."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"instellingen voor toegangspuntnaam schrijven"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Hiermee kan een toepassing de APN-instellingen, zoals proxy en poort, van elke APN wijzigen."</string>
+    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Hiermee kan een app de APN-instellingen, zoals proxy en poort, van elke APN wijzigen."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"netwerkverbinding wijzigen"</string>
-    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Staat een toepassing toe de status van de netwerkverbinding te wijzigen."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Staat een app toe de status van de netwerkverbinding te wijzigen."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Getetherde verbinding wijzigen"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Staat een toepassing toe de status van de getetherde netwerkverbinding te wijzigen."</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Staat een app toe de status van de getetherde netwerkverbinding te wijzigen."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"instelling voor gebruik van achtergrondgegevens van gegevens wijzigen"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Hiermee kan een toepassing de instelling voor gebruik van achtergrondgegevens wijzigen."</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Hiermee kan een app de instelling voor gebruik van achtergrondgegevens wijzigen."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"Wi-Fi-status bekijken"</string>
-    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Hiermee kan een toepassing informatie over de Wi-Fi-status bekijken."</string>
+    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Hiermee kan een app informatie over de Wi-Fi-status bekijken."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"Wi-Fi-status wijzigen"</string>
-    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Hiermee kan een toepassing zich koppelen aan en loskoppelen van Wi-Fi toegangspunten en wijzigingen aanbrengen in geconfigureerde Wi-Fi-netwerken."</string>
+    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Hiermee kan een app zich koppelen aan en loskoppelen van Wi-Fi toegangspunten en wijzigingen aanbrengen in geconfigureerde Wi-Fi-netwerken."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi Multicast-ontvangst toestaan"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Hiermee kan een toepassing pakketten ontvangen die niet rechtstreeks zijn geadresseerd aan uw apparaat. Dit kan handig zijn wanneer services in de buurt worden ontdekt. Dit verbruikt meer energie dan de niet-multicastmodus."</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Hiermee kan een app pakketten ontvangen die niet rechtstreeks zijn geadresseerd aan uw apparaat. Dit kan handig zijn wanneer services in de buurt worden ontdekt. Dit verbruikt meer energie dan de niet-multicastmodus."</string>
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"WiMAX-status bekijken"</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Hiermee kan een app informatie over de WiMAX-status bekijken."</string>
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-status wijzigen"</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Hiermee kan een app verbinding maken met een WiMAX-netwerk en deze verbreken."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth-beheer"</string>
-    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Hiermee kan een toepassing de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en aansluiten."</string>
+    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Hiermee kan een app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en aansluiten."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"Bluetooth-verbindingen maken"</string>
-    <string name="permdesc_bluetooth" msgid="762515380679392945">"Hiermee kan een toepassing de configuratie van een lokale Bluetooth-telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
+    <string name="permdesc_bluetooth" msgid="762515380679392945">"Hiermee kan een app de configuratie van een lokale Bluetooth-telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Near Field Communication regelen"</string>
-    <string name="permdesc_nfc" msgid="9171401851954407226">"Hiermee kan een toepassing communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Hiermee kan een app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"toetsvergrendeling uitschakelen"</string>
-    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Hiermee kan een toepassing de toetsvergrendeling en bijbehorende wachtwoordbeveiliging uitschakelen. Een voorbeeld: de telefoon schakelt de toetsvergrendeling uit als er een oproep binnenkomt en schakelt de toetsvergrendeling weer in als de oproep is beëindigd."</string>
+    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Hiermee kan een app de toetsvergrendeling en bijbehorende wachtwoordbeveiliging uitschakelen. Een voorbeeld: de telefoon schakelt de toetsvergrendeling uit wanneer een oproep binnenkomt en schakelt de toetsvergrendeling weer in zodra de oproep wordt beëindigd."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"synchronisatie-instellingen lezen"</string>
-    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Hiermee kan een toepassing de synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
+    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Hiermee kan een app de synchronisatie-instellingen lezen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"synchronisatie-instellingen schrijven"</string>
-    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Hiermee kan een toepassing uw synchronisatie-instellingen wijzigen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
+    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Hiermee kan een app uw synchronisatie-instellingen wijzigen, bijvoorbeeld of de synchronisatie van contacten is ingeschakeld."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"synchronisatiestatistieken lezen"</string>
-    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Hiermee kan een toepassing de synchronisatiestatistieken lezen, zoals de geschiedenis van uitgevoerde synchronisaties."</string>
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Hiermee kan een app de synchronisatiestatistieken lezen, zoals de geschiedenis van uitgevoerde synchronisaties."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"geabonneerde feeds lezen"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Hiermee kan een toepassing details over de huidige gesynchroniseerde feeds achterhalen."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Hiermee kan een app details over de huidige gesynchroniseerde feeds achterhalen."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"geabonneerde feeds schrijven"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Hiermee kan een toepassing uw huidige gesynchroniseerde feeds wijzigen. Een schadelijke toepassing kan op deze manier uw gesynchroniseerde feeds wijzigen."</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Hiermee kan een app uw huidige gesynchroniseerde feeds wijzigen. Een schadelijke app kan op deze manier uw gesynchroniseerde feeds wijzigen."</string>
     <string name="permlab_readDictionary" msgid="432535716804748781">"door gebruiker gedefinieerd woordenboek lezen"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Hiermee kan een toepassing privéwoorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Hiermee kan een app privéwoorden, namen en woordcombinaties lezen die de gebruiker heeft opgeslagen in het gebruikerswoordenboek."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"schrijven naar door gebruiker gedefinieerd woordenboek"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Hiermee kan een toepassing nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Hiermee kan een app nieuwe woorden schrijven naar het gebruikerswoordenboek."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"inhoud van USB-opslag aanpassen/verwijderen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"inhoud op de SD-kaart aanpassen/verwijderen"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Hiermee kan een toepassing schrijven naar de USB-opslag."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Hiermee kan een toepassing schrijven naar de SD-kaart."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Hiermee kan een app schrijven naar de USB-opslag."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Hiermee kan een app schrijven naar de SD-kaart."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"het cachebestandssysteem openen"</string>
-    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Staat een toepassing toe het cachebestandssysteem te lezen en te schrijven."</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Staat een app toe het cachebestandssysteem te lezen en te schrijven."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"internetoproepen starten/ontvangen"</string>
-    <string name="permdesc_use_sip" msgid="6320376185606661843">"Hiermee kan een toepassing de SIP-service gebruiken om internetoproepen te starten/te ontvangen."</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Hiermee kan een app de SIP-service gebruiken om internetoproepen te starten/te ontvangen."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -595,13 +599,13 @@
     <string name="save_password_label" msgid="6860261758665825069">"Bevestigen"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: tik tweemaal om in of uit te zoomen."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"browsergeschiedenis en bladwijzers lezen"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Hiermee kan een toepassing de URL\'s lezen die u via de browser heeft bezocht, evenals alle bladwijzers van de browser."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Hiermee kan een app de URL\'s lezen die u via de browser heeft bezocht, evenals alle bladwijzers van de browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"browsergeschiedenis en bladwijzers schrijven"</string>
-    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Hiermee kan een toepassing de op uw telefoon opgeslagen browsergeschiedenis of bladwijzers wijzigen. Schadelijke toepassingen kunnen hiermee uw browsergegevens verwijderen of wijzigen."</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Hiermee kan een app de op uw telefoon opgeslagen browsergeschiedenis of bladwijzers wijzigen. Schadelijke apps kunnen hiermee uw browsergegevens verwijderen of wijzigen."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"alarm instellen in wekker"</string>
-    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Hiermee kan de toepassing een alarm instellen in een geïnstalleerde wekkertoepassing. Deze functie wordt door sommige wekkertoepassingen niet geïmplementeerd."</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Hiermee kan de app een alarm instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Geolocatierechten voor browser aanpassen"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Staat een toepassing toe de geolocatierechten van de browser aan te passen. Schadelijke toepassingen kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Staat een app toe de geolocatierechten van de browser aan te passen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wilt u dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Niet nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthouden"</string>
@@ -733,31 +737,32 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Standaard gebruiken voor deze actie."</string>
     <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Wis standaardinstelling via startscherm: \'Instellingen\' &gt; \'Toepassingen\' &gt; \'Toepassingen beheren\'."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Een actie selecteren"</string>
-    <string name="noApplications" msgid="1691104391758345586">"Geen enkele toepassing kan deze actie uitvoeren."</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Selecteer een app voor het USB-apparaat"</string>
+    <string name="noApplications" msgid="1691104391758345586">"Geen enkele app kan deze actie uitvoeren."</string>
     <string name="aerr_title" msgid="653922989522758100">"Helaas!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"De toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) is onverwachts gestopt. Probeer het opnieuw."</string>
+    <string name="aerr_application" msgid="4683614104336409186">"De app <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) is onverwachts gestopt. Probeer het opnieuw."</string>
     <string name="aerr_process" msgid="1551785535966089511">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> is onverwachts gestopt. Probeer het opnieuw."</string>
     <string name="anr_title" msgid="3100070910664756057">"Helaas!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Activiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> (in toepassing <xliff:g id="APPLICATION">%2$s</xliff:g>) reageert niet."</string>
+    <string name="anr_activity_application" msgid="3538242413112507636">"Activiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> (in app <xliff:g id="APPLICATION">%2$s</xliff:g>) reageert niet."</string>
     <string name="anr_activity_process" msgid="5420826626009561014">"Activiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"Toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
+    <string name="anr_application_process" msgid="4185842666452210193">"App <xliff:g id="APPLICATION">%1$s</xliff:g> (in proces <xliff:g id="PROCESS">%2$s</xliff:g>) reageert niet."</string>
     <string name="anr_process" msgid="1246866008169975783">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> reageert niet."</string>
     <string name="force_close" msgid="3653416315450806396">"Nu sluiten"</string>
     <string name="report" msgid="4060218260984795706">"Rapport"</string>
     <string name="wait" msgid="7147118217226317732">"Wachten"</string>
-    <string name="launch_warning_title" msgid="8323761616052121936">"Toepassing omgeleid"</string>
+    <string name="launch_warning_title" msgid="8323761616052121936">"App omgeleid"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> is nu actief."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> was het eerst gestart."</string>
-    <string name="smv_application" msgid="295583804361236288">"De toepassing <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
+    <string name="smv_application" msgid="295583804361236288">"De app <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="smv_process" msgid="5120397012047462446">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Selecteren om over te schakelen naar toepassing"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Selecteren om over te schakelen naar app"</string>
     <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Toepassingen wijzigen?"</string>
-    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Er wordt al een andere toepassing uitgevoerd die moet worden gestopt voordat u een nieuwe toepassing kunt starten."</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Er wordt al een andere app uitgevoerd die moet worden gestopt voordat u een nieuwe app kunt starten."</string>
     <string name="old_app_action" msgid="493129172238566282">"Terug naar <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="942967900237208466">"De nieuwe toepassing niet starten."</string>
+    <string name="old_app_description" msgid="942967900237208466">"De nieuwe app niet starten."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> starten"</string>
-    <string name="new_app_description" msgid="6830398339826789493">"De oude toepassing stoppen zonder opslaan."</string>
+    <string name="new_app_description" msgid="6830398339826789493">"De oude app stoppen zonder opslaan."</string>
     <string name="sendText" msgid="5132506121645618310">"Selecteer een actie voor tekst"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
@@ -782,7 +787,7 @@
     <item quantity="other" msgid="7915895323644292768">"Open Wi-Fi-netwerken beschikbaar"</item>
   </plurals>
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Onbekende toepassing"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Onbekende app"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Er wordt een groot aantal SMS-berichten verzonden. Selecteer \'OK\' om door te gaan of \'Annuleren\' om de verzending te stoppen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
