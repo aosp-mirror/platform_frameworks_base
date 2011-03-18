@@ -903,7 +903,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private void reopenMenu(boolean toggleMenuMode) {
-        if (mActionBar != null) {
+        if (mActionBar != null && mActionBar.isOverflowReserved()) {
             final Callback cb = getCallback();
             if (!mActionBar.isOverflowMenuShowing() || !toggleMenuMode) {
                 if (cb != null && !isDestroyed() && mActionBar.getVisibility() == View.VISIBLE) {
