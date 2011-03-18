@@ -513,6 +513,8 @@ public class MediaPropertiesTest extends
                 MediaItem.RENDERING_MODE_BLACK_BORDER);
         } catch (IllegalArgumentException e) {
             flagForException = true;
+        } catch (IOException e) {
+            flagForException = true;
         }
         assertTrue("Media Properties for non exsisting file", flagForException);
      }

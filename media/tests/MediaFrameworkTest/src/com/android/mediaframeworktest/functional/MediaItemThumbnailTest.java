@@ -585,7 +585,9 @@ public class MediaItemThumbnailTest extends
         try{
         final MediaImageItem mii = new MediaImageItem(mVideoEditor, "m1",
             imageItemFileName, 3000, renderingMode);
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
+            flagForException = true;
+        } catch (IOException e) {
             flagForException = true;
         }
         assertTrue(" Invalid File Path", flagForException);
