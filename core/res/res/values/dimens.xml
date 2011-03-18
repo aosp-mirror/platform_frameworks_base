@@ -52,12 +52,13 @@
     <dimen name="password_keyboard_key_height_numeric">56dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
+
     <!-- Preference activity side margins -->
     <dimen name="preference_screen_side_margin">0dp</dimen>
     <!-- Preference activity side margins negative-->
     <dimen name="preference_screen_side_margin_negative">0dp</dimen>
     <!-- Preference widget area width (to the left of the text) -->
-    <dimen name="preference_widget_width">56dp</dimen>
+    <dimen name="preference_widget_width">8dp</dimen>
 
     <!-- The platform's desired minimum size for a dialog's width when it
          is along the major axis (that is the screen is landscape).  This may

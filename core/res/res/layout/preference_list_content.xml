@@ -36,8 +36,6 @@
             android:layout_height="match_parent"
             android:layout_marginRight="@dimen/preference_screen_side_margin_negative"
             android:layout_marginLeft="@dimen/preference_screen_side_margin"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="32dp"
             android:layout_weight="10">
 
             <ListView android:id="@android:id/list"
@@ -61,33 +59,9 @@
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="20"
-                android:layout_marginLeft="@dimen/preference_screen_side_margin"
-                android:layout_marginRight="@dimen/preference_screen_side_margin"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:background="?attr/detailsElementBackground"
                 android:orientation="vertical"
                 android:visibility="gone" >
 
-            <!-- Breadcrumb inserted here -->
-            <android.app.FragmentBreadCrumbs
-                android:id="@android:id/title"
-                android:layout_height="72dip"
-                android:layout_width="match_parent"
-                android:paddingTop="16dip"
-                android:paddingBottom="8dip"
-                android:gravity="center_vertical|left"
-                android:layout_marginLeft="48dip"
-                android:layout_marginRight="48dip"
-                />
-
-            <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dip"
-                    android:paddingLeft="32dip"
-                    android:paddingRight="32dip"
-                    android:src="#404040"
-                />
             <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
                     android:layout_width="match_parent"
                     android:layout_height="0dip"

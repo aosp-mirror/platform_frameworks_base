@@ -132,11 +132,26 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     /**
      * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
-     * this extra can also be specify to supply a Bundle of arguments to pass
+     * this extra can also be specified to supply a Bundle of arguments to pass
      * to that fragment when it is instantiated during the initial creation
      * of PreferenceActivity.
      */
     public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":android:show_fragment_args";
+
+    /**
+     * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
+     * this extra can also be specify to supply the title to be shown for
+     * that fragment.
+     */
+    public static final String EXTRA_SHOW_FRAGMENT_TITLE = ":android:show_fragment_title";
+
+    /**
+     * When starting this activity and using {@link #EXTRA_SHOW_FRAGMENT},
+     * this extra can also be specify to supply the short title to be shown for
+     * that fragment.
+     */
+    public static final String EXTRA_SHOW_FRAGMENT_SHORT_TITLE
+            = ":android:show_fragment_short_title";
 
     /**
      * When starting this activity, the invoking Intent can contain this extra
@@ -488,7 +503,12 @@ public abstract class PreferenceActivity extends ListActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(com.android.internal.R.layout.preference_list_content);
+        if (getResources().getConfiguration().isLayoutSizeAtLeast(
+                Configuration.SCREENLAYOUT_SIZE_LARGE)) {
+            setContentView(com.android.internal.R.layout.preference_list_content_large);
+        } else {
+            setContentView(com.android.internal.R.layout.preference_list_content);
+        }
 
         mListFooter = (FrameLayout)findViewById(com.android.internal.R.id.list_footer);
         mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs_frame);
@@ -496,6 +516,8 @@ public abstract class PreferenceActivity extends ListActivity implements
         mSinglePane = hidingHeaders || !onIsMultiPane();
         String initialFragment = getIntent().getStringExtra(EXTRA_SHOW_FRAGMENT);
         Bundle initialArguments = getIntent().getBundleExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS);
+        int initialTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_TITLE, 0);
+        int initialShortTitle = getIntent().getIntExtra(EXTRA_SHOW_FRAGMENT_SHORT_TITLE, 0);
 
         if (savedInstanceState != null) {
             // We are restarting from a previous saved state; used that to
@@ -516,6 +538,12 @@ public abstract class PreferenceActivity extends ListActivity implements
                 // new fragment mode, but don't need to compute and show
                 // the headers.
                 switchToHeader(initialFragment, initialArguments);
+                if (initialTitle != 0) {
+                    CharSequence initialTitleStr = getText(initialTitle);
+                    CharSequence initialShortTitleStr = initialShortTitle != 0
+                            ? getText(initialShortTitle) : null;
+                    showBreadCrumbs(initialTitleStr, initialShortTitleStr);
+                }
 
             } else {
                 // We need to try to build the headers.
@@ -557,7 +585,12 @@ public abstract class PreferenceActivity extends ListActivity implements
         } else {
             // If there are no headers, we are in the old "just show a screen
             // of preferences" mode.
-            setContentView(com.android.internal.R.layout.preference_list_content_single);
+            if (getResources().getConfiguration().isLayoutSizeAtLeast(
+                    Configuration.SCREENLAYOUT_SIZE_LARGE)) {
+                setContentView(com.android.internal.R.layout.preference_list_content_single_large);
+            } else {
+                setContentView(com.android.internal.R.layout.preference_list_content_single);
+            }
             mListFooter = (FrameLayout) findViewById(com.android.internal.R.id.list_footer);
             mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs);
             mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
@@ -942,7 +975,8 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     /**
      * Called when the user selects an item in the header list.  The default
-     * implementation will call either {@link #startWithFragment(String, Bundle, Fragment, int)}
+     * implementation will call either
+     * {@link #startWithFragment(String, Bundle, Fragment, int, int, int)}
      * or {@link #switchToHeader(Header)} as appropriate.
      *
      * @param header The header that was selected.
@@ -951,7 +985,14 @@ public abstract class PreferenceActivity extends ListActivity implements
     public void onHeaderClick(Header header, int position) {
         if (header.fragment != null) {
             if (mSinglePane) {
-                startWithFragment(header.fragment, header.fragmentArguments, null, 0);
+                int titleRes = header.breadCrumbTitleRes;
+                int shortTitleRes = header.breadCrumbShortTitleRes;
+                if (titleRes == 0) {
+                    titleRes = header.titleRes;
+                    shortTitleRes = 0;
+                }
+                startWithFragment(header.fragment, header.fragmentArguments, null, 0,
+                        titleRes, shortTitleRes);
             } else {
                 switchToHeader(header);
             }
@@ -961,7 +1002,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
-     * Called by {@link #startWithFragment(String, Bundle, Fragment, int)} when
+     * Called by {@link #startWithFragment(String, Bundle, Fragment, int, int, int)} when
      * in single-pane mode, to build an Intent to launch a new activity showing
      * the selected fragment.  The default implementation constructs an Intent
      * that re-launches the current activity with the appropriate arguments to
@@ -969,18 +1010,32 @@ public abstract class PreferenceActivity extends ListActivity implements
      * 
      * @param fragmentName The name of the fragment to display.
      * @param args Optional arguments to supply to the fragment.
+     * @param titleRes Optional resource ID of title to show for this item.
+     * @param titleRes Optional resource ID of short title to show for this item.
      * @return Returns an Intent that can be launched to display the given
      * fragment.
      */
-    public Intent onBuildStartFragmentIntent(String fragmentName, Bundle args) {
+    public Intent onBuildStartFragmentIntent(String fragmentName, Bundle args,
+            int titleRes, int shortTitleRes) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClass(this, getClass());
         intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
         intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT_TITLE, titleRes);
+        intent.putExtra(EXTRA_SHOW_FRAGMENT_SHORT_TITLE, shortTitleRes);
         intent.putExtra(EXTRA_NO_HEADERS, true);
         return intent;
     }
     
+    /**
+     * Like {@link #startWithFragment(String, Bundle, Fragment, int, int, int)}
+     * but uses a 0 titleRes.
+     */
+    public void startWithFragment(String fragmentName, Bundle args,
+            Fragment resultTo, int resultRequestCode) {
+        startWithFragment(fragmentName, args, resultTo, resultRequestCode, 0, 0);
+    }
+
     /**
      * Start a new instance of this activity, showing only the given
      * preference fragment.  When launched in this mode, the header list
@@ -993,10 +1048,14 @@ public abstract class PreferenceActivity extends ListActivity implements
      * the activity launch.
      * @param resultRequestCode If resultTo is non-null, this is the request
      * code in which to report the result.
+     * @param titleRes Resource ID of string to display for the title of
+     * this set of preferences.
+     * @param titleRes Resource ID of string to display for the short title of
+     * this set of preferences.
      */
     public void startWithFragment(String fragmentName, Bundle args,
-            Fragment resultTo, int resultRequestCode) {
-        Intent intent = onBuildStartFragmentIntent(fragmentName, args);
+            Fragment resultTo, int resultRequestCode, int titleRes, int shortTitleRes) {
+        Intent intent = onBuildStartFragmentIntent(fragmentName, args, titleRes, shortTitleRes);
         if (resultTo == null) {
             startActivity(intent);
         } else {
@@ -1013,16 +1072,16 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mFragmentBreadCrumbs == null) {
             View crumbs = findViewById(android.R.id.title);
             // For screens with a different kind of title, don't create breadcrumbs.
-            if (!(crumbs instanceof FragmentBreadCrumbs)) return;
-            mFragmentBreadCrumbs = (FragmentBreadCrumbs) findViewById(android.R.id.title);
+            try {
+                mFragmentBreadCrumbs = (FragmentBreadCrumbs)crumbs;
+            } catch (ClassCastException e) {
+                return;
+            }
             if (mFragmentBreadCrumbs == null) {
-                mFragmentBreadCrumbs = new FragmentBreadCrumbs(this);
-                ActionBar actionBar = getActionBar();
-                if (actionBar != null) {
-                    actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM,
-                            ActionBar.DISPLAY_SHOW_TITLE | ActionBar.DISPLAY_SHOW_CUSTOM);
-                    actionBar.setCustomView(mFragmentBreadCrumbs);
+                if (title != null) {
+                    setTitle(title);
                 }
+                return;
             }
             mFragmentBreadCrumbs.setMaxVisible(2);
             mFragmentBreadCrumbs.setActivity(this);
@@ -1190,7 +1249,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     public void startPreferencePanel(String fragmentClass, Bundle args, int titleRes,
             CharSequence titleText, Fragment resultTo, int resultRequestCode) {
         if (mSinglePane) {
-            startWithFragment(fragmentClass, args, resultTo, resultRequestCode);
+            startWithFragment(fragmentClass, args, resultTo, resultRequestCode, titleRes, 0);
         } else {
             Fragment f = Fragment.instantiate(this, fragmentClass, args);
             if (resultTo != null) {
@@ -1236,7 +1295,8 @@ public abstract class PreferenceActivity extends ListActivity implements
     
     @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
-        startPreferencePanel(pref.getFragment(), pref.getExtras(), 0, pref.getTitle(), null, 0);
+        startPreferencePanel(pref.getFragment(), pref.getExtras(), pref.getTitleRes(),
+                pref.getTitle(), null, 0);
         return true;
     }
 

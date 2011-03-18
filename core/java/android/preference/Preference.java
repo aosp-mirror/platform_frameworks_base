@@ -89,6 +89,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
 
     private int mOrder = DEFAULT_ORDER;
     private CharSequence mTitle;
+    private int mTitleRes;
     private CharSequence mSummary;
     /**
      * mIconResId is overridden by mIcon, if mIcon is specified.
@@ -214,6 +215,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
                     break;
                     
                 case com.android.internal.R.styleable.Preference_title:
+                    mTitleRes = a.getResourceId(attr, 0);
                     mTitle = a.getString(attr);
                     break;
                     
@@ -582,6 +584,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      */
     public void setTitle(CharSequence title) {
         if (title == null && mTitle != null || title != null && !title.equals(mTitle)) {
+            mTitleRes = 0;
             mTitle = title;
             notifyChanged();
         }
@@ -595,8 +598,20 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      */
     public void setTitle(int titleResId) {
         setTitle(mContext.getString(titleResId));
+        mTitleRes = titleResId;
     }
     
+    /**
+     * Returns the title resource ID of this Preference.  If the title did
+     * not come from a resource, 0 is returned.
+     *
+     * @return The title resource.
+     * @see #setTitle(int)
+     */
+    public int getTitleRes() {
+        return mTitleRes;
+    }
+
     /**
      * Returns the title of this Preference.
      * 

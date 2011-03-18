@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/layout/list_content.xml
+**
+** Copyright 2011, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/headers"
+            android:orientation="vertical"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/preference_screen_side_margin_negative"
+            android:layout_marginLeft="@dimen/preference_screen_side_margin"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:layout_weight="10">
+
+            <ListView android:id="@android:id/list"
+                android:layout_width="match_parent"
+                android:layout_height="0px"
+                android:layout_weight="1"
+                android:drawSelectorOnTop="false"
+                android:cacheColorHint="@android:color/transparent"
+                android:listPreferredItemHeight="48dp"
+                android:scrollbarAlwaysDrawVerticalTrack="true" />
+
+            <FrameLayout android:id="@+id/list_footer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/prefs_frame"
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="20"
+                android:layout_marginLeft="@dimen/preference_screen_side_margin"
+                android:layout_marginRight="@dimen/preference_screen_side_margin"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="?attr/detailsElementBackground"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+            <!-- Breadcrumb inserted here -->
+            <android.app.FragmentBreadCrumbs
+                android:id="@android:id/title"
+                android:layout_height="72dip"
+                android:layout_width="match_parent"
+                android:paddingTop="16dip"
+                android:paddingBottom="8dip"
+                android:gravity="center_vertical|left"
+                android:layout_marginLeft="48dip"
+                android:layout_marginRight="48dip"
+                />
+
+            <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:paddingLeft="32dip"
+                    android:paddingRight="32dip"
+                    android:src="#404040"
+                />
+            <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:layout_marginTop="-1dip"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <RelativeLayout android:id="@+id/button_bar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_weight="0"
+        android:background="@android:drawable/bottom_bar"
+        android:visibility="gone">
+
+        <Button android:id="@+id/back_button"
+            android:layout_width="150dip"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:layout_alignParentLeft="true"
+            android:drawableLeft="@drawable/ic_btn_back"
+            android:drawablePadding="3dip"
+            android:text="@string/back_button_label"
+        />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true">
+
+            <Button android:id="@+id/skip_button"
+                android:layout_width="150dip"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dip"
+                android:text="@string/skip_button_label"
+                android:visibility="gone"
+            />
+
+            <Button android:id="@+id/next_button"
+                android:layout_width="150dip"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dip"
+                android:drawableRight="@drawable/ic_btn_next"
+                android:drawablePadding="3dip"
+                android:text="@string/next_button_label"
+            />
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>
