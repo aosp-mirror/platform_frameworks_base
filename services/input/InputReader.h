@@ -216,6 +216,10 @@ private:
     virtual InputDispatcherInterface* getDispatcher() { return mDispatcher.get(); }
     virtual EventHubInterface* getEventHub() { return mEventHub.get(); }
 
+    // The event queue.
+    static const int EVENT_BUFFER_SIZE = 256;
+    RawEvent mEventBuffer[EVENT_BUFFER_SIZE];
+
     // This reader/writer lock guards the list of input devices.
     // The writer lock must be held whenever the list of input devices is modified
     //   and then promptly released.
@@ -228,16 +232,15 @@ private:
     KeyedVector<int32_t, InputDevice*> mDevices;
 
     // low-level input event decoding and device management
-    void process(const RawEvent* rawEvent);
+    void processEvents(const RawEvent* rawEvents, size_t count);
 
     void addDevice(int32_t deviceId);
     void removeDevice(int32_t deviceId);
-    void configureExcludedDevices();
-
-    void consumeEvent(const RawEvent* rawEvent);
+    void processEventsForDevice(int32_t deviceId, const RawEvent* rawEvents, size_t count);
     void timeoutExpired(nsecs_t when);
 
     void handleConfigurationChanged(nsecs_t when);
+    void configureExcludedDevices();
 
     // state management for all devices
     Mutex mStateLock;
@@ -251,12 +254,12 @@ private:
     InputConfiguration mInputConfiguration;
     void updateInputConfiguration();
 
-    nsecs_t mDisableVirtualKeysTimeout;
+    nsecs_t mDisableVirtualKeysTimeout; // only accessed by reader thread
     virtual void disableVirtualKeysUntil(nsecs_t time);
     virtual bool shouldDropVirtualKey(nsecs_t now,
             InputDevice* device, int32_t keyCode, int32_t scanCode);
 
-    nsecs_t mNextTimeout;
+    nsecs_t mNextTimeout; // only accessed by reader thread
     virtual void requestTimeoutAtTime(nsecs_t when);
 
     // state queries
@@ -301,7 +304,7 @@ public:
     void addMapper(InputMapper* mapper);
     void configure();
     void reset();
-    void process(const RawEvent* rawEvent);
+    void process(const RawEvent* rawEvents, size_t count);
     void timeoutExpired(nsecs_t when);
 
     void getDeviceInfo(InputDeviceInfo* outDeviceInfo);
