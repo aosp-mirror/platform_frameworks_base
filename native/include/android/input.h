@@ -657,7 +657,8 @@ int64_t AMotionEvent_getHistoricalEventTime(AInputEvent* motion_event,
  * and views.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float AMotionEvent_getHistoricalRawX(const AInputEvent* motion_event, size_t pointer_index);
+float AMotionEvent_getHistoricalRawX(const AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index);
 
 /* Get the historical raw Y coordinate of this event for the given pointer index that
  * occurred between this event and the previous motion event.
@@ -666,7 +667,8 @@ float AMotionEvent_getHistoricalRawX(const AInputEvent* motion_event, size_t poi
  * and views.
  * Whole numbers are pixels; the value may have a fraction for input devices
  * that are sub-pixel precise. */
-float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event, size_t pointer_index);
+float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event, size_t pointer_index,
+        size_t history_index);
 
 /* Get the historical X coordinate of this event for the given pointer index that
  * occurred between this event and the previous motion event.
