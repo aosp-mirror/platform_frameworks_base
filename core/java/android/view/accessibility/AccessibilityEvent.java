@@ -159,7 +159,12 @@ public final class AccessibilityEvent implements Parcelable {
      *
      * @see #getBeforeText()
      * @see #getText()
+     * </br>
+     * Note: This constant is no longer needed since there
+     *       is no limit on the length of text that is contained
+     *       in an accessibility event anymore.
      */
+    @Deprecated
     public static final int MAX_TEXT_LENGTH = 500;
 
     /**
