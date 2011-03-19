@@ -127,9 +127,11 @@ EventHub::EventHub(void) :
         mError(NO_INIT), mBuiltInKeyboardId(-1), mNextDeviceId(1),
         mOpeningDevices(0), mClosingDevices(0),
         mOpened(false), mNeedToSendFinishedDeviceScan(false),
-        mInputBufferIndex(0), mInputBufferCount(0), mInputFdIndex(0) {
+        mInputFdIndex(1) {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
+
     memset(mSwitches, 0, sizeof(mSwitches));
+    mNumCpus = sysconf(_SC_NPROCESSORS_ONLN);
 }
 
 EventHub::~EventHub(void) {
@@ -445,17 +447,10 @@ EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
     return NULL;
 }
 
-bool EventHub::getEvent(int timeoutMillis, RawEvent* outEvent) {
-    outEvent->deviceId = 0;
-    outEvent->type = 0;
-    outEvent->scanCode = 0;
-    outEvent->keyCode = 0;
-    outEvent->flags = 0;
-    outEvent->value = 0;
-    outEvent->when = 0;
-
-    // Note that we only allow one caller to getEvent(), so don't need
+size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) {
+    // Note that we only allow one caller to getEvents(), so don't need
     // to do locking here...  only when adding/removing devices.
+    assert(bufferSize >= 1);
 
     if (!mOpened) {
         mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
@@ -463,99 +458,62 @@ bool EventHub::getEvent(int timeoutMillis, RawEvent* outEvent) {
         mNeedToSendFinishedDeviceScan = true;
     }
 
+    struct input_event readBuffer[bufferSize];
+
+    RawEvent* event = buffer;
+    size_t capacity = bufferSize;
     for (;;) {
+        nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+
         // Report any devices that had last been added/removed.
-        if (mClosingDevices != NULL) {
+        while (mClosingDevices) {
             Device* device = mClosingDevices;
             LOGV("Reporting device closed: id=%d, name=%s\n",
                  device->id, device->path.string());
             mClosingDevices = device->next;
-            if (device->id == mBuiltInKeyboardId) {
-                outEvent->deviceId = 0;
-            } else {
-                outEvent->deviceId = device->id;
-            }
-            outEvent->type = DEVICE_REMOVED;
-            outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
+            event->when = now;
+            event->deviceId = device->id == mBuiltInKeyboardId ? 0 : device->id;
+            event->type = DEVICE_REMOVED;
+            event += 1;
             delete device;
             mNeedToSendFinishedDeviceScan = true;
-            return true;
+            if (--capacity == 0) {
+                break;
+            }
         }
 
-        if (mOpeningDevices != NULL) {
+        while (mOpeningDevices != NULL) {
             Device* device = mOpeningDevices;
             LOGV("Reporting device opened: id=%d, name=%s\n",
                  device->id, device->path.string());
             mOpeningDevices = device->next;
-            if (device->id == mBuiltInKeyboardId) {
-                outEvent->deviceId = 0;
-            } else {
-                outEvent->deviceId = device->id;
-            }
-            outEvent->type = DEVICE_ADDED;
-            outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
+            event->when = now;
+            event->deviceId = device->id == mBuiltInKeyboardId ? 0 : device->id;
+            event->type = DEVICE_ADDED;
+            event += 1;
             mNeedToSendFinishedDeviceScan = true;
-            return true;
+            if (--capacity == 0) {
+                break;
+            }
         }
 
         if (mNeedToSendFinishedDeviceScan) {
             mNeedToSendFinishedDeviceScan = false;
-            outEvent->type = FINISHED_DEVICE_SCAN;
-            outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
-            return true;
+            event->when = now;
+            event->type = FINISHED_DEVICE_SCAN;
+            event += 1;
+            if (--capacity == 0) {
+                break;
+            }
         }
 
         // Grab the next input event.
+        // mInputFdIndex is initially 1 because index 0 is used for inotify.
         bool deviceWasRemoved = false;
-        for (;;) {
-            // Consume buffered input events, if any.
-            if (mInputBufferIndex < mInputBufferCount) {
-                const struct input_event& iev = mInputBufferData[mInputBufferIndex++];
-                const Device* device = mDevices[mInputFdIndex];
-
-                LOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, v=%d", device->path.string(),
-                     (int) iev.time.tv_sec, (int) iev.time.tv_usec, iev.type, iev.code, iev.value);
-                if (device->id == mBuiltInKeyboardId) {
-                    outEvent->deviceId = 0;
-                } else {
-                    outEvent->deviceId = device->id;
-                }
-                outEvent->type = iev.type;
-                outEvent->scanCode = iev.code;
-                outEvent->flags = 0;
-                if (iev.type == EV_KEY) {
-                    outEvent->keyCode = AKEYCODE_UNKNOWN;
-                    if (device->keyMap.haveKeyLayout()) {
-                        status_t err = device->keyMap.keyLayoutMap->mapKey(iev.code,
-                                &outEvent->keyCode, &outEvent->flags);
-                        LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
-                                iev.code, outEvent->keyCode, outEvent->flags, err);
-                    }
-                } else {
-                    outEvent->keyCode = iev.code;
-                }
-                outEvent->value = iev.value;
-
-                // Use an event timestamp in the same timebase as
-                // java.lang.System.nanoTime() and android.os.SystemClock.uptimeMillis()
-                // as expected by the rest of the system.
-                outEvent->when = systemTime(SYSTEM_TIME_MONOTONIC);
-                return true;
-            }
-
-            // Finish reading all events from devices identified in previous poll().
-            // This code assumes that mInputDeviceIndex is initially 0 and that the
-            // revents member of pollfd is initialized to 0 when the device is first added.
-            // Since mFds[0] is used for inotify, we process regular events starting at index 1.
-            mInputFdIndex += 1;
-            if (mInputFdIndex >= mFds.size()) {
-                break;
-            }
-
+        while (mInputFdIndex < mFds.size()) {
             const struct pollfd& pfd = mFds[mInputFdIndex];
             if (pfd.revents & POLLIN) {
-                int32_t readSize = read(pfd.fd, mInputBufferData,
-                        sizeof(struct input_event) * INPUT_BUFFER_SIZE);
+                int32_t readSize = read(pfd.fd, readBuffer, sizeof(struct input_event) * capacity);
                 if (readSize < 0) {
                     if (errno == ENODEV) {
                         deviceWasRemoved = true;
@@ -566,11 +524,43 @@ bool EventHub::getEvent(int timeoutMillis, RawEvent* outEvent) {
                     }
                 } else if ((readSize % sizeof(struct input_event)) != 0) {
                     LOGE("could not get event (wrong size: %d)", readSize);
+                } else if (readSize == 0) { // eof
+                    deviceWasRemoved = true;
+                    break;
                 } else {
-                    mInputBufferCount = size_t(readSize) / sizeof(struct input_event);
-                    mInputBufferIndex = 0;
+                    const Device* device = mDevices[mInputFdIndex];
+                    int32_t deviceId = device->id == mBuiltInKeyboardId ? 0 : device->id;
+
+                    size_t count = size_t(readSize) / sizeof(struct input_event);
+                    for (size_t i = 0; i < count; i++) {
+                        const struct input_event& iev = readBuffer[i];
+                        LOGV("%s got: t0=%d, t1=%d, type=%d, code=%d, value=%d",
+                                device->path.string(),
+                                (int) iev.time.tv_sec, (int) iev.time.tv_usec,
+                                iev.type, iev.code, iev.value);
+
+                        event->when = now;
+                        event->deviceId = deviceId;
+                        event->type = iev.type;
+                        event->scanCode = iev.code;
+                        event->value = iev.value;
+                        event->keyCode = AKEYCODE_UNKNOWN;
+                        event->flags = 0;
+                        if (iev.type == EV_KEY && device->keyMap.haveKeyLayout()) {
+                            status_t err = device->keyMap.keyLayoutMap->mapKey(iev.code,
+                                        &event->keyCode, &event->flags);
+                            LOGV("iev.code=%d keyCode=%d flags=0x%08x err=%d\n",
+                                    iev.code, event->keyCode, event->flags, err);
+                        }
+                        event += 1;
+                    }
+                    capacity -= count;
+                    if (capacity == 0) {
+                        break;
+                    }
                 }
             }
+            mInputFdIndex += 1;
         }
 
         // Handle the case where a device has been removed but INotify has not yet noticed.
@@ -586,9 +576,15 @@ bool EventHub::getEvent(int timeoutMillis, RawEvent* outEvent) {
         if(mFds[0].revents & POLLIN) {
             readNotify(mFds[0].fd);
             mFds.editItemAt(0).revents = 0;
+            mInputFdIndex = mFds.size();
             continue; // report added or removed devices immediately
         }
 #endif
+
+        // Return now if we have collected any events, otherwise poll.
+        if (event != buffer) {
+            break;
+        }
 
         // Poll for events.  Mind the wake lock dance!
         // We hold a wake lock at all times except during poll().  This works due to some
@@ -608,19 +604,36 @@ bool EventHub::getEvent(int timeoutMillis, RawEvent* outEvent) {
         acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
 
         if (pollResult == 0) {
-            // Timed out.
-            return false;
+            break; // timed out
         }
         if (pollResult < 0) {
+            // Sleep after errors to avoid locking up the system.
+            // Hopefully the error is transient.
             if (errno != EINTR) {
                 LOGW("poll failed (errno=%d)\n", errno);
                 usleep(100000);
             }
+        } else {
+            // On an SMP system, it is possible for the framework to read input events
+            // faster than the kernel input device driver can produce a complete packet.
+            // Because poll() wakes up as soon as the first input event becomes available,
+            // the framework will often end up reading one event at a time until the
+            // packet is complete.  Instead of one call to read() returning 71 events,
+            // it could take 71 calls to read() each returning 1 event.
+            //
+            // Sleep for a short period of time after waking up from the poll() to give
+            // the kernel time to finish writing the entire packet of input events.
+            if (mNumCpus > 1) {
+                usleep(250);
+            }
         }
 
         // Prepare to process all of the FDs we just polled.
-        mInputFdIndex = 0;
+        mInputFdIndex = 1;
     }
+
+    // All done, return the number of events we read.
+    return event - buffer;
 }
 
 /*
