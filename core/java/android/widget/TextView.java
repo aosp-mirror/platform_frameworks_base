@@ -7898,9 +7898,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 text = getHint();
             }
             if (!TextUtils.isEmpty(text)) {
-                if (text.length() > AccessibilityEvent.MAX_TEXT_LENGTH) {
-                    text = text.subSequence(0, AccessibilityEvent.MAX_TEXT_LENGTH + 1);
-                }
                 event.getText().add(text);
             }
         } else {
