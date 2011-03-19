@@ -37,6 +37,7 @@ struct fields_t {
     jclass bitmapClazz;
     jfieldID nativeBitmap;
     jmethodID createBitmapMethod;
+    jmethodID createScaledBitmapMethod;
     jclass configClazz;
     jmethodID createConfigMethod;
 };
@@ -219,12 +220,14 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                         SkBitmap::kRGB_565_Config);
 
     size_t width, height;
+    bool swapWidthAndHeight = false;
     if (videoFrame->mRotationAngle == 90 || videoFrame->mRotationAngle == 270) {
-        width = videoFrame->mDisplayHeight;
-        height = videoFrame->mDisplayWidth;
+        width = videoFrame->mHeight;
+        height = videoFrame->mWidth;
+        swapWidthAndHeight = true;
     } else {
-        width = videoFrame->mDisplayWidth;
-        height = videoFrame->mDisplayHeight;
+        width = videoFrame->mWidth;
+        height = videoFrame->mHeight;
     }
 
     jobject jBitmap = env->CallStaticObjectMethod(
@@ -240,10 +243,29 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     bitmap->lockPixels();
     rotate((uint16_t*)bitmap->getPixels(),
            (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
-           videoFrame->mDisplayWidth,
-           videoFrame->mDisplayHeight,
+           videoFrame->mWidth,
+           videoFrame->mHeight,
            videoFrame->mRotationAngle);
     bitmap->unlockPixels();
+
+    if (videoFrame->mDisplayWidth  != videoFrame->mWidth ||
+        videoFrame->mDisplayHeight != videoFrame->mHeight) {
+        size_t displayWidth = videoFrame->mDisplayWidth;
+        size_t displayHeight = videoFrame->mDisplayHeight;
+        if (swapWidthAndHeight) {
+            displayWidth = videoFrame->mDisplayHeight;
+            displayHeight = videoFrame->mDisplayWidth;
+        }
+        LOGV("Bitmap dimension is scaled from %dx%d to %dx%d",
+                width, height, displayWidth, displayHeight);
+        jobject scaledBitmap = env->CallStaticObjectMethod(fields.bitmapClazz,
+                                    fields.createScaledBitmapMethod,
+                                    jBitmap,
+                                    displayWidth,
+                                    displayHeight,
+                                    true);
+        return scaledBitmap;
+    }
 
     return jBitmap;
 }
@@ -350,6 +372,15 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
     if (fields.createBitmapMethod == NULL) {
         jniThrowException(env, "java/lang/RuntimeException",
                 "Can't find Bitmap.createBitmap(int, int, Config)  method");
+        return;
+    }
+    fields.createScaledBitmapMethod =
+            env->GetStaticMethodID(fields.bitmapClazz, "createScaledBitmap",
+                    "(Landroid/graphics/Bitmap;IIZ)"
+                    "Landroid/graphics/Bitmap;");
+    if (fields.createScaledBitmapMethod == NULL) {
+        jniThrowException(env, "java/lang/RuntimeException",
+                "Can't find Bitmap.createScaledBitmap(Bitmap, int, int, boolean)  method");
         return;
     }
     fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "I");
