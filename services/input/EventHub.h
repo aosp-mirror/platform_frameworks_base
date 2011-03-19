@@ -157,6 +157,8 @@ public:
         // Sent when all added/removed devices from the most recent scan have been reported.
         // This event is always sent at least once.
         FINISHED_DEVICE_SCAN = 0x30000000,
+
+        FIRST_SYNTHETIC_EVENT = DEVICE_ADDED,
     };
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const = 0;
@@ -181,7 +183,7 @@ public:
     virtual void addExcludedDevice(const char* deviceName) = 0;
 
     /*
-     * Wait for the next event to become available and return it.
+     * Wait for events to become available and returns them.
      * After returning, the EventHub holds onto a wake lock until the next call to getEvent.
      * This ensures that the device will not go to sleep while the event is being processed.
      * If the device needs to remain awake longer than that, then the caller is responsible
@@ -190,9 +192,9 @@ public:
      * The timeout is advisory only.  If the device is asleep, it will not wake just to
      * service the timeout.
      *
-     * Returns true if an event was obtained, false if the timeout expired.
+     * Returns the number of events obtained, or 0 if the timeout expired.
      */
-    virtual bool getEvent(int timeoutMillis, RawEvent* outEvent) = 0;
+    virtual size_t getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) = 0;
 
     /*
      * Query current input state.
@@ -249,7 +251,7 @@ public:
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
-    virtual bool getEvent(int timeoutMillis, RawEvent* outEvent);
+    virtual size_t getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize);
 
     virtual bool hasLed(int32_t deviceId, int32_t led) const;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on);
@@ -336,11 +338,11 @@ private:
     // device ids that report particular switches.
     int32_t mSwitches[SW_MAX + 1];
 
-    static const int INPUT_BUFFER_SIZE = 64;
-    struct input_event mInputBufferData[INPUT_BUFFER_SIZE];
-    size_t mInputBufferIndex;
-    size_t mInputBufferCount;
+    // The index of the next file descriptor that needs to be read.
     size_t mInputFdIndex;
+
+    // Set to the number of CPUs.
+    int32_t mNumCpus;
 };
 
 }; // namespace android

@@ -622,14 +622,14 @@ private:
         mExcludedDevices.add(String8(deviceName));
     }
 
-    virtual bool getEvent(int timeoutMillis, RawEvent* outEvent) {
+    virtual size_t getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) {
         if (mEvents.empty()) {
-            return false;
+            return 0;
         }
 
-        *outEvent = *mEvents.begin();
+        *buffer = *mEvents.begin();
         mEvents.erase(mEvents.begin());
-        return true;
+        return 1;
     }
 
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t scanCode) const {
@@ -1445,7 +1445,7 @@ TEST_F(InputDeviceTest, WhenMappersAreRegistered_DeviceIsNotIgnoredAndForwardsRe
 
     // Event handling.
     RawEvent event;
-    mDevice->process(&event);
+    mDevice->process(&event, 1);
 
     ASSERT_NO_FATAL_FAILURE(mapper1->assertProcessWasCalled());
     ASSERT_NO_FATAL_FAILURE(mapper2->assertProcessWasCalled());

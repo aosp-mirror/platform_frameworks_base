@@ -250,15 +250,11 @@ void InputReader::loopOnce() {
         timeoutMillis = toMillisecondTimeoutDelay(now, mNextTimeout);
     }
 
-    RawEvent rawEvent;
-    if (mEventHub->getEvent(timeoutMillis, &rawEvent)) {
-#if DEBUG_RAW_EVENTS
-        LOGD("Input event: device=%d type=0x%04x scancode=0x%04x keycode=0x%04x value=0x%04x",
-                rawEvent.deviceId, rawEvent.type, rawEvent.scanCode, rawEvent.keyCode,
-                rawEvent.value);
-#endif
-        process(&rawEvent);
-    } else {
+    size_t count = mEventHub->getEvents(timeoutMillis, mEventBuffer, EVENT_BUFFER_SIZE);
+    if (count) {
+        processEvents(mEventBuffer, count);
+    }
+    if (!count || timeoutMillis == 0) {
         nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
 #if DEBUG_RAW_EVENTS
         LOGD("Timeout expired, latency=%0.3fms", (now - mNextTimeout) * 0.000001f);
@@ -268,23 +264,41 @@ void InputReader::loopOnce() {
     }
 }
 
-void InputReader::process(const RawEvent* rawEvent) {
-    switch (rawEvent->type) {
-    case EventHubInterface::DEVICE_ADDED:
-        addDevice(rawEvent->deviceId);
-        break;
-
-    case EventHubInterface::DEVICE_REMOVED:
-        removeDevice(rawEvent->deviceId);
-        break;
-
-    case EventHubInterface::FINISHED_DEVICE_SCAN:
-        handleConfigurationChanged(rawEvent->when);
-        break;
-
-    default:
-        consumeEvent(rawEvent);
-        break;
+void InputReader::processEvents(const RawEvent* rawEvents, size_t count) {
+    for (const RawEvent* rawEvent = rawEvents; count;) {
+        int32_t type = rawEvent->type;
+        size_t batchSize = 1;
+        if (type < EventHubInterface::FIRST_SYNTHETIC_EVENT) {
+            int32_t deviceId = rawEvent->deviceId;
+            while (batchSize < count) {
+                if (rawEvent[batchSize].type >= EventHubInterface::FIRST_SYNTHETIC_EVENT
+                        || rawEvent[batchSize].deviceId != deviceId) {
+                    break;
+                }
+                batchSize += 1;
+            }
+#if DEBUG_RAW_EVENTS
+            LOGD("BatchSize: %d Count: %d", batchSize, count);
+#endif
+            processEventsForDevice(deviceId, rawEvent, batchSize);
+        } else {
+            switch (rawEvent->type) {
+            case EventHubInterface::DEVICE_ADDED:
+                addDevice(rawEvent->deviceId);
+                break;
+            case EventHubInterface::DEVICE_REMOVED:
+                removeDevice(rawEvent->deviceId);
+                break;
+            case EventHubInterface::FINISHED_DEVICE_SCAN:
+                handleConfigurationChanged(rawEvent->when);
+                break;
+            default:
+                assert(false); // can't happen
+                break;
+            }
+        }
+        count -= batchSize;
+        rawEvent += batchSize;
     }
 }
 
@@ -405,9 +419,8 @@ InputDevice* InputReader::createDevice(int32_t deviceId, const String8& name, ui
     return device;
 }
 
-void InputReader::consumeEvent(const RawEvent* rawEvent) {
-    int32_t deviceId = rawEvent->deviceId;
-
+void InputReader::processEventsForDevice(int32_t deviceId,
+        const RawEvent* rawEvents, size_t count) {
     { // acquire device registry reader lock
         RWLock::AutoRLock _rl(mDeviceRegistryLock);
 
@@ -423,7 +436,7 @@ void InputReader::consumeEvent(const RawEvent* rawEvent) {
             return;
         }
 
-        device->process(rawEvent);
+        device->process(rawEvents, count);
     } // release device registry reader lock
 }
 
@@ -785,11 +798,25 @@ void InputDevice::reset() {
     }
 }
 
-void InputDevice::process(const RawEvent* rawEvent) {
+void InputDevice::process(const RawEvent* rawEvents, size_t count) {
+    // Process all of the events in order for each mapper.
+    // We cannot simply ask each mapper to process them in bulk because mappers may
+    // have side-effects that must be interleaved.  For example, joystick movement events and
+    // gamepad button presses are handled by different mappers but they should be dispatched
+    // in the order received.
     size_t numMappers = mMappers.size();
-    for (size_t i = 0; i < numMappers; i++) {
-        InputMapper* mapper = mMappers[i];
-        mapper->process(rawEvent);
+    for (const RawEvent* rawEvent = rawEvents; count--; rawEvent++) {
+#if DEBUG_RAW_EVENTS
+        LOGD("Input event: device=%d type=0x%04x scancode=0x%04x "
+                "keycode=0x%04x value=0x%04x flags=0x%08x",
+                rawEvent->deviceId, rawEvent->type, rawEvent->scanCode, rawEvent->keyCode,
+                rawEvent->value, rawEvent->flags);
+#endif
+
+        for (size_t i = 0; i < numMappers; i++) {
+            InputMapper* mapper = mMappers[i];
+            mapper->process(rawEvent);
+        }
     }
 }
 
