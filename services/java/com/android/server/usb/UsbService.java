@@ -17,9 +17,11 @@
 package com.android.server.usb;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbAccessory;
@@ -101,34 +103,39 @@ public class UsbService extends IUsbManager.Stub {
     private final UsbDeviceSettingsManager mDeviceManager;
     private final boolean mHasUsbAccessory;
 
+    private final void readCurrentAccessoryLocked() {
+        if (mHasUsbAccessory) {
+            String[] strings = nativeGetAccessoryStrings();
+            if (strings != null) {
+                mCurrentAccessory = new UsbAccessory(strings);
+                Log.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
+                if (mSystemReady) {
+                    mDeviceManager.accessoryAttached(mCurrentAccessory);
+                }
+            } else {
+                Log.e(TAG, "nativeGetAccessoryStrings failed");
+            }
+        }
+    }
+
     /*
      * Handles USB function enable/disable events (device mode)
      */
     private final void functionEnabledLocked(String function, boolean enabled) {
-        boolean enteringAccessoryMode =
-            (mHasUsbAccessory && enabled && UsbManager.USB_FUNCTION_ACCESSORY.equals(function));
-
         if (enabled) {
             if (!mEnabledFunctions.contains(function)) {
                 mEnabledFunctions.add(function);
             }
             mDisabledFunctions.remove(function);
+
+            if (UsbManager.USB_FUNCTION_ACCESSORY.equals(function)) {
+                readCurrentAccessoryLocked();
+            }
         } else {
             if (!mDisabledFunctions.contains(function)) {
                 mDisabledFunctions.add(function);
             }
             mEnabledFunctions.remove(function);
-        }
-
-        if (enteringAccessoryMode) {
-            String[] strings = nativeGetAccessoryStrings();
-            if (strings != null) {
-                mCurrentAccessory = new UsbAccessory(strings);
-                Log.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
-                mDeviceManager.accessoryAttached(mCurrentAccessory);
-            } else {
-                Log.e(TAG, "nativeGetAccessoryStrings failed");
-            }
         }
     }
 
@@ -182,23 +189,38 @@ public class UsbService extends IUsbManager.Stub {
         }
     };
 
+   private final BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            // handle accessories attached at boot time
+            synchronized (mLock) {
+                if (mCurrentAccessory != null) {
+                    mDeviceManager.accessoryAttached(mCurrentAccessory);
+                }
+            }
+        }
+    };
+
     public UsbService(Context context) {
         mContext = context;
         mDeviceManager = new UsbDeviceSettingsManager(context);
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
 
-        init();  // set initial status
+        synchronized (mLock) {
+            init();  // set initial status
 
-        if (mConfiguration >= 0) {
-            mUEventObserver.startObserving(USB_CONNECTED_MATCH);
-            mUEventObserver.startObserving(USB_CONFIGURATION_MATCH);
-            mUEventObserver.startObserving(USB_FUNCTIONS_MATCH);
+            // Watch for USB configuration changes
+            if (mConfiguration >= 0) {
+                mUEventObserver.startObserving(USB_CONNECTED_MATCH);
+                mUEventObserver.startObserving(USB_CONFIGURATION_MATCH);
+                mUEventObserver.startObserving(USB_FUNCTIONS_MATCH);
+            }
         }
     }
 
     private final void init() {
         char[] buffer = new char[1024];
+        boolean inAccessoryMode = false;
 
         // Read initial USB state (device mode)
         mConfiguration = -1;
@@ -218,8 +240,10 @@ public class UsbService extends IUsbManager.Stub {
         } catch (Exception e) {
             Slog.e(TAG, "" , e);
         }
-        if (mConfiguration < 0)
+        if (mConfiguration < 0) {
+            // This may happen in the emulator or devices without USB device mode support
             return;
+        }
 
         // Read initial list of enabled and disabled functions (device mode)
         try {
@@ -233,9 +257,13 @@ public class UsbService extends IUsbManager.Stub {
                 String functionName = files[i].getName();
                 if (value == 1) {
                     mEnabledFunctions.add(functionName);
-                    // adb is enabled/disabled automatically by the adbd daemon,
-                    // so don't treat it as a default function
-                    if (!UsbManager.USB_FUNCTION_ADB.equals(functionName)) {
+                if (UsbManager.USB_FUNCTION_ACCESSORY.equals(functionName)) {
+                        // The USB accessory driver is on by default, but it might have been
+                        // enabled before the USB service has initialized.
+                        inAccessoryMode = true;
+                    } else if (!UsbManager.USB_FUNCTION_ADB.equals(functionName)) {
+                        // adb is enabled/disabled automatically by the adbd daemon,
+                        // so don't treat it as a default function.
                         mDefaultFunctions.add(functionName);
                     }
                 } else {
@@ -247,11 +275,33 @@ public class UsbService extends IUsbManager.Stub {
         } catch (Exception e) {
             Slog.e(TAG, "" , e);
         }
+
+        // handle the case where an accessory switched the driver to accessory mode
+        // before the framework finished booting
+        if (inAccessoryMode) {
+            readCurrentAccessoryLocked();
+
+            // FIXME - if we booted in accessory mode, then we have no way to figure out
+            // which functions are enabled by default.
+            // For now, assume that MTP or mass storage are the only possibilities
+            if (mDisabledFunctions.contains(UsbManager.USB_FUNCTION_MTP)) {
+                mDefaultFunctions.add(UsbManager.USB_FUNCTION_MTP);
+            } else if (mDisabledFunctions.contains(UsbManager.USB_FUNCTION_MASS_STORAGE)) {
+                mDefaultFunctions.add(UsbManager.USB_FUNCTION_MASS_STORAGE);
+            }
+        }
     }
 
     public void systemReady() {
         synchronized (mLock) {
             update(false);
+            if (mCurrentAccessory != null) {
+                Log.d(TAG, "accessoryAttached at systemReady");
+                // its still too early to handle accessories, so add a BOOT_COMPLETED receiver
+                // to handle this later.
+                mContext.registerReceiver(mBootCompletedReceiver,
+                        new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+            }
             mSystemReady = true;
         }
     }
@@ -338,20 +388,18 @@ public class UsbService extends IUsbManager.Stub {
                         if (mConnected != mLastConnected || mConfiguration != mLastConfiguration) {
                             if (mConnected == 0) {
                                 // make sure accessory mode is off, and restore default functions
-                                if (UsbManager.setFunctionEnabled(
+                                if (mCurrentAccessory != null && UsbManager.setFunctionEnabled(
                                         UsbManager.USB_FUNCTION_ACCESSORY, false)) {
                                     Log.d(TAG, "exited USB accessory mode");
 
                                     int count = mDefaultFunctions.size();
                                     for (int i = 0; i < count; i++) {
                                         String function = mDefaultFunctions.get(i);
-                                        if (UsbManager.setFunctionEnabled(function, true)) {
+                                        if (!UsbManager.setFunctionEnabled(function, true)) {
                                             Log.e(TAG, "could not reenable function " + function);
                                         }
                                     }
-                                }
 
-                                if (mCurrentAccessory != null) {
                                     mDeviceManager.accessoryDetached(mCurrentAccessory);
                                     mCurrentAccessory = null;
                                 }
