@@ -811,7 +811,7 @@ status_t Layer::ClientRef::setToken(const sp<UserClient>& uc,
 
     { // scope for strong mUserClient reference
         sp<UserClient> userClient(mUserClient.promote());
-        if (mUserClient != 0 && mControlBlock != 0) {
+        if (userClient != 0 && mControlBlock != 0) {
             mControlBlock->setStatus(NO_INIT);
         }
     }
