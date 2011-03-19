@@ -636,6 +636,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     timerSet(RS_TIMER_INTERNAL);
 
     if (!rsdHalInit(this, 0, 0)) {
+        LOGE("Hal init failed");
         return false;
     }
     mHal.funcs.setPriority(this, mThreadPriority);
@@ -650,6 +651,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     }
 
     if (mError != RS_ERROR_NONE) {
+        LOGE("Errors during thread init");
         return false;
     }
 

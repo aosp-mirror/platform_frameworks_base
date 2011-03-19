@@ -111,7 +111,8 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
     rsc->mHal.funcs = FunctionTable;
 
     RsHal *dc = (RsHal *)calloc(1, sizeof(RsHal));
-    if (!rsc->mHal.drv) {
+    if (!dc) {
+        LOGE("Calloc for driver hal failed.");
         return false;
     }
     rsc->mHal.drv = dc;
