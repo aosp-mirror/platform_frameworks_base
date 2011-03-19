@@ -1426,25 +1426,23 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     } else {
         // TODO: Handle the AA case
         for (int i = 0; i < count; i += 4) {
-            const float left = fmin(points[i], points[i + 1]);
-            const float right = fmax(points[i], points[i + 1]);
-            const float top = fmin(points[i + 2], points[i + 3]);
-            const float bottom = fmax(points[i + 2], points[i + 3]);
+            TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
+            TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
 
-            if (!quickReject(left, top, right, bottom)) {
-                TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
-                TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
+            generatedVerticesCount += 2;
 
-                generatedVerticesCount += 2;
+            const float left = fmin(points[i], points[i + 2]);
+            const float right = fmax(points[i], points[i + 2]);
+            const float top = fmin(points[i + 1], points[i + 3]);
+            const float bottom = fmax(points[i + 1], points[i + 3]);
 
-                dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-            }
+            dirtyLayer(left, top,
+                    right == left ? left + 1 : right, bottom == top ? top + 1 : bottom,
+                    *mSnapshot->transform);
         }
 
-        if (generatedVerticesCount > 0) {
-            glLineWidth(1.0f);
-            glDrawArrays(GL_LINES, 0, generatedVerticesCount);
-        }
+        glLineWidth(1.0f);
+        glDrawArrays(GL_LINES, 0, generatedVerticesCount);
     }
 }
 
