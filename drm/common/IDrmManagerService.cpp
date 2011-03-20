@@ -37,6 +37,63 @@
 
 using namespace android;
 
+static void writeDecrptHandleToParcelData(
+        const DecryptHandle* handle, Parcel* data) {
+    data->writeInt32(handle->decryptId);
+    data->writeString8(handle->mimeType);
+    data->writeInt32(handle->decryptApiType);
+    data->writeInt32(handle->status);
+
+    int size = handle->copyControlVector.size();
+    data->writeInt32(size);
+    for(int i = 0; i < size; i++) {
+        data->writeInt32(handle->copyControlVector.keyAt(i));
+        data->writeInt32(handle->copyControlVector.valueAt(i));
+    }
+
+    if (NULL != handle->decryptInfo) {
+        data->writeInt32(handle->decryptInfo->decryptBufferLength);
+    } else {
+        data->writeInt32(INVALID_BUFFER_LENGTH);
+    }
+}
+
+static void readDecryptHandleFromParcelData(
+        DecryptHandle* handle, const Parcel& data) {
+    if (0 == data.dataAvail()) {
+        return;
+    }
+
+    handle->decryptId = data.readInt32();
+    handle->mimeType = data.readString8();
+    handle->decryptApiType = data.readInt32();
+    handle->status = data.readInt32();
+
+    int size = data.readInt32();
+    for (int i = 0; i < size; i ++) {
+        handle->copyControlVector.add(
+                (DrmCopyControl)data.readInt32(), data.readInt32());
+    }
+
+    handle->decryptInfo = NULL;
+    const int bufferLen = data.readInt32();
+    if (INVALID_BUFFER_LENGTH != bufferLen) {
+        handle->decryptInfo = new DecryptInfo();
+        handle->decryptInfo->decryptBufferLength = bufferLen;
+    }
+}
+
+static void clearDecryptHandle(DecryptHandle* handle) {
+    if (handle == NULL) {
+        return;
+    }
+    if (handle->decryptInfo) {
+        delete handle->decryptInfo;
+        handle->decryptInfo = NULL;
+    }
+    handle->copyControlVector.clear();
+}
+
 int BpDrmManagerService::addUniqueId(int uniqueId) {
     LOGV("add uniqueid");
     Parcel data, reply;
@@ -344,16 +401,7 @@ status_t BpDrmManagerService::consumeRights(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
-
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(action);
     data.writeInt32(static_cast< int>(reserve));
@@ -370,16 +418,7 @@ status_t BpDrmManagerService::setPlaybackStatus(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
-
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(playbackStatus);
     data.writeInt64(position);
@@ -560,15 +599,7 @@ DecryptHandle* BpDrmManagerService::openDecryptSession(
     DecryptHandle* handle = NULL;
     if (0 != reply.dataAvail()) {
         handle = new DecryptHandle();
-        handle->decryptId = reply.readInt32();
-        handle->mimeType = reply.readString8();
-        handle->decryptApiType = reply.readInt32();
-        handle->status = reply.readInt32();
-        handle->decryptInfo = NULL;
-        if (0 != reply.dataAvail()) {
-            handle->decryptInfo = new DecryptInfo();
-            handle->decryptInfo->decryptBufferLength = reply.readInt32();
-        }
+        readDecryptHandleFromParcelData(handle, reply);
     }
     return handle;
 }
@@ -586,15 +617,7 @@ DecryptHandle* BpDrmManagerService::openDecryptSession(int uniqueId, const char*
     DecryptHandle* handle = NULL;
     if (0 != reply.dataAvail()) {
         handle = new DecryptHandle();
-        handle->decryptId = reply.readInt32();
-        handle->mimeType = reply.readString8();
-        handle->decryptApiType = reply.readInt32();
-        handle->status = reply.readInt32();
-        handle->decryptInfo = NULL;
-        if (0 != reply.dataAvail()) {
-            handle->decryptInfo = new DecryptInfo();
-            handle->decryptInfo->decryptBufferLength = reply.readInt32();
-        }
+        readDecryptHandleFromParcelData(handle, reply);
     } else {
         LOGV("no decryptHandle is generated in service side");
     }
@@ -608,16 +631,7 @@ status_t BpDrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* d
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
-
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
     remote()->transact(CLOSE_DECRYPT_SESSION, data, &reply);
 
@@ -633,16 +647,8 @@ status_t BpDrmManagerService::initializeDecryptUnit(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
     data.writeInt32(decryptUnitId);
 
     data.writeInt32(headerInfo->length);
@@ -661,16 +667,7 @@ status_t BpDrmManagerService::decrypt(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
-
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(decryptUnitId);
     data.writeInt32((*decBuffer)->length);
@@ -703,16 +700,7 @@ status_t BpDrmManagerService::finalizeDecryptUnit(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
-
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(decryptUnitId);
 
@@ -730,16 +718,7 @@ ssize_t BpDrmManagerService::pread(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    data.writeInt32(decryptHandle->decryptId);
-    data.writeString8(decryptHandle->mimeType);
-    data.writeInt32(decryptHandle->decryptApiType);
-    data.writeInt32(decryptHandle->status);
-
-    if (NULL != decryptHandle->decryptInfo) {
-        data.writeInt32(decryptHandle->decryptInfo->decryptBufferLength);
-    } else {
-        data.writeInt32(INVALID_BUFFER_LENGTH);
-    }
+    writeDecrptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(numBytes);
     data.writeInt64(offset);
@@ -1064,24 +1043,14 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle handle;
-        handle.decryptId = data.readInt32();
-        handle.mimeType = data.readString8();
-        handle.decryptApiType = data.readInt32();
-        handle.status = data.readInt32();
-        handle.decryptInfo = NULL;
-
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle.decryptInfo = new DecryptInfo();
-            handle.decryptInfo->decryptBufferLength = bufferLength;
-        }
+        readDecryptHandleFromParcelData(&handle, data);
 
         const status_t status
             = consumeRights(uniqueId, &handle, data.readInt32(),
                 static_cast<bool>(data.readInt32()));
         reply->writeInt32(status);
 
-        delete handle.decryptInfo; handle.decryptInfo = NULL;
+        clearDecryptHandle(&handle);
         return DRM_NO_ERROR;
     }
 
@@ -1093,23 +1062,13 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle handle;
-        handle.decryptId = data.readInt32();
-        handle.mimeType = data.readString8();
-        handle.decryptApiType = data.readInt32();
-        handle.status = data.readInt32();
-        handle.decryptInfo = NULL;
-
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle.decryptInfo = new DecryptInfo();
-            handle.decryptInfo->decryptBufferLength = bufferLength;
-        }
+        readDecryptHandleFromParcelData(&handle, data);
 
         const status_t status
             = setPlaybackStatus(uniqueId, &handle, data.readInt32(), data.readInt64());
         reply->writeInt32(status);
 
-        delete handle.decryptInfo; handle.decryptInfo = NULL;
+        clearDecryptHandle(&handle);
         return DRM_NO_ERROR;
     }
 
@@ -1270,16 +1229,10 @@ status_t BnDrmManagerService::onTransact(
             = openDecryptSession(uniqueId, fd, data.readInt64(), data.readInt64());
 
         if (NULL != handle) {
-            reply->writeInt32(handle->decryptId);
-            reply->writeString8(handle->mimeType);
-            reply->writeInt32(handle->decryptApiType);
-            reply->writeInt32(handle->status);
-            if (NULL != handle->decryptInfo) {
-                reply->writeInt32(handle->decryptInfo->decryptBufferLength);
-                delete handle->decryptInfo; handle->decryptInfo = NULL;
-            }
+            writeDecrptHandleToParcelData(handle, reply);
+            clearDecryptHandle(handle);
+            delete handle; handle = NULL;
         }
-        delete handle; handle = NULL;
         return DRM_NO_ERROR;
     }
 
@@ -1294,18 +1247,13 @@ status_t BnDrmManagerService::onTransact(
         DecryptHandle* handle = openDecryptSession(uniqueId, uri.string());
 
         if (NULL != handle) {
-            reply->writeInt32(handle->decryptId);
-            reply->writeString8(handle->mimeType);
-            reply->writeInt32(handle->decryptApiType);
-            reply->writeInt32(handle->status);
-            if (NULL != handle->decryptInfo) {
-                reply->writeInt32(handle->decryptInfo->decryptBufferLength);
-                delete handle->decryptInfo; handle->decryptInfo = NULL;
-            }
+            writeDecrptHandleToParcelData(handle, reply);
+
+            clearDecryptHandle(handle);
+            delete handle; handle = NULL;
         } else {
             LOGV("NULL decryptHandle is returned");
         }
-        delete handle; handle = NULL;
         return DRM_NO_ERROR;
     }
 
@@ -1317,17 +1265,7 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle* handle = new DecryptHandle();
-        handle->decryptId = data.readInt32();
-        handle->mimeType = data.readString8();
-        handle->decryptApiType = data.readInt32();
-        handle->status = data.readInt32();
-        handle->decryptInfo = NULL;
-
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle->decryptInfo = new DecryptInfo();
-            handle->decryptInfo->decryptBufferLength = bufferLength;
-        }
+        readDecryptHandleFromParcelData(handle, data);
 
         const status_t status = closeDecryptSession(uniqueId, handle);
         reply->writeInt32(status);
@@ -1342,17 +1280,8 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle handle;
-        handle.decryptId = data.readInt32();
-        handle.mimeType = data.readString8();
-        handle.decryptApiType = data.readInt32();
-        handle.status = data.readInt32();
-        handle.decryptInfo = NULL;
+        readDecryptHandleFromParcelData(&handle, data);
 
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle.decryptInfo = new DecryptInfo();
-            handle.decryptInfo->decryptBufferLength = bufferLength;
-        }
         const int decryptUnitId = data.readInt32();
 
         //Filling Header info
@@ -1364,7 +1293,7 @@ status_t BnDrmManagerService::onTransact(
             = initializeDecryptUnit(uniqueId, &handle, decryptUnitId, headerInfo);
         reply->writeInt32(status);
 
-        delete handle.decryptInfo; handle.decryptInfo = NULL;
+        clearDecryptHandle(&handle);
         delete headerInfo; headerInfo = NULL;
         return DRM_NO_ERROR;
     }
@@ -1377,17 +1306,8 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle handle;
-        handle.decryptId = data.readInt32();
-        handle.mimeType = data.readString8();
-        handle.decryptApiType = data.readInt32();
-        handle.status = data.readInt32();
-        handle.decryptInfo = NULL;
+        readDecryptHandleFromParcelData(&handle, data);
 
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle.decryptInfo = new DecryptInfo();
-            handle.decryptInfo->decryptBufferLength = bufferLength;
-        }
         const int decryptUnitId = data.readInt32();
         const int decBufferSize = data.readInt32();
 
@@ -1414,7 +1334,7 @@ status_t BnDrmManagerService::onTransact(
         reply->writeInt32(size);
         reply->write(decBuffer->data, size);
 
-        delete handle.decryptInfo; handle.decryptInfo = NULL;
+        clearDecryptHandle(&handle);
         delete encBuffer; encBuffer = NULL;
         delete decBuffer; decBuffer = NULL;
         delete [] buffer; buffer = NULL;
@@ -1430,22 +1350,12 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle handle;
-        handle.decryptId = data.readInt32();
-        handle.mimeType = data.readString8();
-        handle.decryptApiType = data.readInt32();
-        handle.status = data.readInt32();
-        handle.decryptInfo = NULL;
-
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle.decryptInfo = new DecryptInfo();
-            handle.decryptInfo->decryptBufferLength = bufferLength;
-        }
+        readDecryptHandleFromParcelData(&handle, data);
 
         const status_t status = finalizeDecryptUnit(uniqueId, &handle, data.readInt32());
         reply->writeInt32(status);
 
-        delete handle.decryptInfo; handle.decryptInfo = NULL;
+        clearDecryptHandle(&handle);
         return DRM_NO_ERROR;
     }
 
@@ -1457,17 +1367,7 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         DecryptHandle handle;
-        handle.decryptId = data.readInt32();
-        handle.mimeType = data.readString8();
-        handle.decryptApiType = data.readInt32();
-        handle.status = data.readInt32();
-        handle.decryptInfo = NULL;
-
-        const int bufferLength = data.readInt32();
-        if (INVALID_BUFFER_LENGTH != bufferLength) {
-            handle.decryptInfo = new DecryptInfo();
-            handle.decryptInfo->decryptBufferLength = bufferLength;
-        }
+        readDecryptHandleFromParcelData(&handle, data);
 
         const int numBytes = data.readInt32();
         char* buffer = new char[numBytes];
@@ -1480,7 +1380,7 @@ status_t BnDrmManagerService::onTransact(
             reply->write(buffer, result);
         }
 
-        delete handle.decryptInfo; handle.decryptInfo = NULL;
+        clearDecryptHandle(&handle);
         delete [] buffer, buffer = NULL;
         return DRM_NO_ERROR;
     }
