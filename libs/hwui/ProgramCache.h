@@ -71,7 +71,9 @@ namespace uirenderer {
 #define PROGRAM_BITMAP_WRAPT_SHIFT 11
 
 #define PROGRAM_GRADIENT_TYPE_SHIFT 33
-#define PROGRAM_MODULATE 35
+#define PROGRAM_MODULATE_SHIFT 35
+
+#define PROGRAM_IS_POINT_SHIFT 36
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -135,6 +137,9 @@ struct ProgramDescription {
     SkXfermode::Mode framebufferMode;
     bool swapSrcDst;
 
+    bool isPoint;
+    float pointSize;
+
     /**
      * Resets this description. All fields are reset back to the default
      * values they hold after building a new instance.
@@ -162,6 +167,9 @@ struct ProgramDescription {
 
         framebufferMode = SkXfermode::kClear_Mode;
         swapSrcDst = false;
+
+        isPoint = false;
+        pointSize = 0.0f;
     }
 
     /**
@@ -223,7 +231,8 @@ struct ProgramDescription {
         }
         key |= (framebufferMode & PROGRAM_MAX_XFERMODE) << PROGRAM_XFERMODE_FRAMEBUFFER_SHIFT;
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
-        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE;
+        if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
+        if (isPoint) key |= programid(0x1) << PROGRAM_IS_POINT_SHIFT;
         return key;
     }
 

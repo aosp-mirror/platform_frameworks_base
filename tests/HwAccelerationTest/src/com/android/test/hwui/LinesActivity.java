@@ -16,6 +16,7 @@
 
 package com.android.test.hwui;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -29,13 +30,26 @@ import android.view.View;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class LinesActivity extends Activity {
+    private ObjectAnimator mAnimator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(new ColorDrawable(0xffffffff));
         final LinesView view = new LinesView(this);
-        //view.setAlpha(0.80f);
         setContentView(view);
+
+        mAnimator = ObjectAnimator.ofFloat(view, "offset", 0.0f, 15.0f);
+        mAnimator.setDuration(1500);
+        mAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        mAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        mAnimator.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAnimator.cancel();
     }
 
     public static class LinesView extends View {
@@ -49,6 +63,8 @@ public class LinesActivity extends Activity {
         private final float[] mPoints;
         private final Paint mAlphaPaint;
         private final Paint mHairLinePaint;
+
+        private float mOffset;
 
         public LinesView(Context c) {
             super(c);
@@ -89,11 +105,16 @@ public class LinesActivity extends Activity {
                     352.0f, 400.0f, 352.0f, 500.0f
             };
         }
+        
+        public void setOffset(float offset) {
+            mOffset = offset;
+            invalidate();
+        }
 
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-
+            
             canvas.save();
             canvas.translate(100.0f, 20.0f);
 
@@ -103,6 +124,12 @@ public class LinesActivity extends Activity {
 
             mLargePaint.setShader(mShader);
             canvas.drawLine(42.0f, 0.0f, 222.0f, 400.0f, mLargePaint);
+            for (int x = 0; x < 20; x++) {
+                for (int y = 0; y < 20; y++) {
+                    canvas.drawPoint(500.0f + x * (15.0f + mOffset),
+                            y * (15.0f + mOffset), mLargePaint);
+                }
+            }
             mLargePaint.setShader(null);
 
             canvas.drawLines(mPoints, mAlphaPaint);
@@ -120,6 +147,7 @@ public class LinesActivity extends Activity {
 
             canvas.restore();
 
+            canvas.save();
             canvas.scale(10.0f, 10.0f);
             canvas.drawLine(50.0f, 40.0f, 10.0f, 40.0f, mSmallPaint);
             canvas.drawLine(10.0f, 50.0f, 50.0f, 50.0f, mSmallPaint);

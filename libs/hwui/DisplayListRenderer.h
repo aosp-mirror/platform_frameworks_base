@@ -89,6 +89,7 @@ public:
         DrawArc,
         DrawPath,
         DrawLines,
+        DrawPoints,
         DrawText,
         ResetShader,
         SetupShader,
@@ -264,6 +265,7 @@ public:
             float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
     void drawPath(SkPath* path, SkPaint* paint);
     void drawLines(float* points, int count, SkPaint* paint);
+    void drawPoints(float* points, int count, SkPaint* paint);
     void drawText(const char* text, int bytesCount, int count, float x, float y, SkPaint* paint);
 
     void resetShader();

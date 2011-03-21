@@ -879,6 +879,11 @@ void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
     mDescription.hasAlpha8Texture = isAlpha8;
 }
 
+void OpenGLRenderer::setupDrawPoint(float pointSize) {
+    mDescription.isPoint = true;
+    mDescription.pointSize = pointSize;
+}
+
 void OpenGLRenderer::setupDrawColor(int color) {
     setupDrawColor(color, (color >> 24) & 0xFF);
 }
@@ -985,6 +990,11 @@ void OpenGLRenderer::setupDrawModelView(float left, float top, float right, floa
         mCaches.currentProgram->set(mOrthoMatrix, mModelView, mIdentity);
         if (mTrackDirtyRegions && dirty) dirtyLayer(left, top, right, bottom);
     }
+}
+
+void OpenGLRenderer::setupDrawPointUniforms() {
+    int slot = mCaches.currentProgram->getUniform("pointSize");
+    glUniform1f(slot, mDescription.pointSize);
 }
 
 void OpenGLRenderer::setupDrawColorUniforms() {
@@ -1444,6 +1454,48 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         glLineWidth(1.0f);
         glDrawArrays(GL_LINES, 0, generatedVerticesCount);
     }
+}
+
+void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    // TODO: The paint's cap style defines whether the points are square or circular
+    // TODO: Handle AA for round points
+
+    // A stroke width of 0 has a special meaningin Skia:
+    // it draws an unscaled 1px point
+    const bool isHairLine = paint->getStrokeWidth() == 0.0f;
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    int verticesCount = count >> 1;
+    int generatedVerticesCount = 0;
+
+    TextureVertex pointsData[verticesCount];
+    TextureVertex* vertex = &pointsData[0];
+
+    setupDraw();
+    setupDrawPoint(isHairLine ? 1.0f : paint->getStrokeWidth());
+    setupDrawColor(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(mode);
+    setupDrawProgram();
+    setupDrawModelViewIdentity();
+    setupDrawColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawPointUniforms();
+    setupDrawShaderIdentityUniforms();
+    setupDrawMesh(vertex);
+
+    for (int i = 0; i < count; i += 2) {
+        TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
+        generatedVerticesCount++;
+    }
+
+    glDrawArrays(GL_POINTS, 0, generatedVerticesCount);
 }
 
 void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
