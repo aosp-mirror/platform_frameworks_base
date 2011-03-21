@@ -27,9 +27,12 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
     // prepared and not prepared.
     // When the video is not prepared, we will have to save the seekTo time,
     // and use it when prepared to play.
-    protected static final int STATE_NOTPREPARED        = 0;
-    protected static final int STATE_PREPARED           = 1;
-
+    // NOTE: these values are in sync with VideoLayerAndroid.h in webkit side.
+    // Please keep them in sync when changed.
+    static final int STATE_INITIALIZED        = 0;
+    static final int STATE_NOTPREPARED        = 1;
+    static final int STATE_PREPARED           = 2;
+    static final int STATE_PLAYING            = 3;
     protected int mCurrentState;
 
     protected HTML5VideoViewProxy mProxy;
@@ -121,7 +124,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
     // Every time we start a new Video, we create a VideoView and a MediaPlayer
     public void init(int videoLayerId, int position, boolean autoStart) {
         mPlayer = new MediaPlayer();
-        mCurrentState = STATE_NOTPREPARED;
+        mCurrentState = STATE_INITIALIZED;
         mProxy = null;
         mVideoLayerId = videoLayerId;
         mSaveSeekTime = position;
@@ -190,12 +193,22 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        mCurrentState = STATE_NOTPREPARED;
     }
 
 
     // Common code
     public int getVideoLayerId() {
         return mVideoLayerId;
+    }
+
+
+    public int getCurrentState() {
+        if (mPlayer.isPlaying()) {
+            return STATE_PLAYING;
+        } else {
+            return mCurrentState;
+        }
     }
 
     private static final class TimeupdateTask extends TimerTask {
