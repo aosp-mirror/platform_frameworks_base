@@ -44,6 +44,17 @@ enum {
 };
 
 /**
+ * copy control settings used in DecryptHandle::copyControlVector
+ */
+enum DrmCopyControl {
+    DRM_COPY_CONTROL_BASE = 1000,
+    // the key used to set the value for HDCP
+    // if the associated value is 1, then HDCP is required
+    // otherwise, HDCP is not required
+    DRM_COPY_CONTROL_HDCP = DRM_COPY_CONTROL_BASE
+};
+
+/**
  * Defines DRM Buffer
  */
 class DrmBuffer {
@@ -280,6 +291,11 @@ public:
      * e.g. size of memory to be allocated to get the decrypted content.
      */
     DecryptInfo* decryptInfo;
+    /**
+     * Defines a vector for the copy control settings sent from the DRM plugin
+     * to the player
+     */
+    KeyedVector<DrmCopyControl, int> copyControlVector;
 
 public:
     DecryptHandle():
