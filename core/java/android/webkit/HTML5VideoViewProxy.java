@@ -105,12 +105,12 @@ class HTML5VideoViewProxy extends Handler
 
                 int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 if (layer != 0 && surfTexture != null && currentVideoLayerId != -1) {
-                    boolean readyToUseSurfTex =
-                        mHTML5VideoView.getReadyToUseSurfTex();
+                    int playerState = mHTML5VideoView.getCurrentState();
                     boolean foundInTree = nativeSendSurfaceTexture(surfTexture,
                             layer, currentVideoLayerId, textureName,
-                            readyToUseSurfTex);
-                    if (readyToUseSurfTex && !foundInTree) {
+                            playerState);
+                    if (playerState == HTML5VideoView.STATE_PREPARED
+                            && !foundInTree) {
                         mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
                         mHTML5VideoView.deleteSurfaceTexture();
                     }
@@ -228,6 +228,9 @@ class HTML5VideoViewProxy extends Handler
                     mHTML5VideoView.isFullScreenMode() &&
                     mHTML5VideoView.getAutostart() )
                 mHTML5VideoView.start();
+            if (mBaseLayer != 0) {
+                setBaseLayer(mBaseLayer);
+            }
         }
 
         public static void end() {
@@ -668,5 +671,5 @@ class HTML5VideoViewProxy extends Handler
     private native void nativeOnTimeupdate(int position, int nativePointer);
     private native static boolean nativeSendSurfaceTexture(SurfaceTexture texture,
             int baseLayer, int videoLayerId, int textureName,
-            boolean updateTexture);
+            int playerState);
 }
