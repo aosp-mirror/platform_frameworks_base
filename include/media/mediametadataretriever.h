@@ -62,7 +62,11 @@ public:
     MediaMetadataRetriever();
     ~MediaMetadataRetriever();
     void disconnect();
-    status_t setDataSource(const char* dataSourceUrl);
+
+    status_t setDataSource(
+            const char *dataSourceUrl,
+            const KeyedVector<String8, String8> *headers = NULL);
+
     status_t setDataSource(int fd, int64_t offset, int64_t length);
     sp<IMemory> getFrameAtTime(int64_t timeUs, int option);
     sp<IMemory> extractAlbumArt();

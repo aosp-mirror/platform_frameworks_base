@@ -35,7 +35,8 @@ void MidiMetadataRetriever::clearMetadataValues()
     mMetadataValues[0][0] = '\0';
 }
 
-status_t MidiMetadataRetriever::setDataSource(const char *url)
+status_t MidiMetadataRetriever::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *headers)
 {
     LOGV("setDataSource: %s", url? url: "NULL pointer");
     Mutex::Autolock lock(mLock);
@@ -43,8 +44,7 @@ status_t MidiMetadataRetriever::setDataSource(const char *url)
     if (mMidiPlayer == 0) {
         mMidiPlayer = new MidiFile();
     }
-    // TODO: support headers in MetadataRetriever interface!
-    return mMidiPlayer->setDataSource(url, NULL /* headers */);
+    return mMidiPlayer->setDataSource(url, headers);
 }
 
 status_t MidiMetadataRetriever::setDataSource(int fd, int64_t offset, int64_t length)

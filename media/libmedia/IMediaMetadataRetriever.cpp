@@ -20,6 +20,7 @@
 #include <binder/Parcel.h>
 #include <SkBitmap.h>
 #include <media/IMediaMetadataRetriever.h>
+#include <utils/String8.h>
 
 // The binder is supposed to propagate the scheduler group across
 // the binder interface so that remote calls are executed with
@@ -102,11 +103,24 @@ public:
         remote()->transact(DISCONNECT, data, &reply);
     }
 
-    status_t setDataSource(const char* srcUrl)
+    status_t setDataSource(
+            const char *srcUrl, const KeyedVector<String8, String8> *headers)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMediaMetadataRetriever::getInterfaceDescriptor());
         data.writeCString(srcUrl);
+
+        if (headers == NULL) {
+            data.writeInt32(0);
+        } else {
+            // serialize the headers
+            data.writeInt32(headers->size());
+            for (size_t i = 0; i < headers->size(); ++i) {
+                data.writeString8(headers->keyAt(i));
+                data.writeString8(headers->valueAt(i));
+            }
+        }
+
         remote()->transact(SET_DATA_SOURCE_URL, data, &reply);
         return reply.readInt32();
     }
@@ -188,7 +202,18 @@ status_t BnMediaMetadataRetriever::onTransact(
         case SET_DATA_SOURCE_URL: {
             CHECK_INTERFACE(IMediaMetadataRetriever, data, reply);
             const char* srcUrl = data.readCString();
-            reply->writeInt32(setDataSource(srcUrl));
+
+            KeyedVector<String8, String8> headers;
+            int32_t numHeaders = data.readInt32();
+            for (int i = 0; i < numHeaders; ++i) {
+                String8 key = data.readString8();
+                String8 value = data.readString8();
+                headers.add(key, value);
+            }
+
+            reply->writeInt32(
+                    setDataSource(srcUrl, numHeaders > 0 ? &headers : NULL));
+
             return NO_ERROR;
         } break;
         case SET_DATA_SOURCE_FD: {
