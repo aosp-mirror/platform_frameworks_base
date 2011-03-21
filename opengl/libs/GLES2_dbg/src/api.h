@@ -15,12 +15,18 @@
  */
 
 #define EXTEND_Debug_glCopyTexImage2D \
-    void * pixels = malloc(width * height * 4); \
-    getGLTraceThreadSpecific()->gl.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); \
     DbgContext * const dbg = getDbgContextThreadSpecific(); \
-    const unsigned compressed = dbg->Compress(pixels, width * height * 4); \
-    msg.set_data(dbg->lzf_buf, compressed); \
-    free(pixels);
+    GLint readFormat, readType; \
+    dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat); \
+    dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType); \
+    unsigned readSize = GetBytesPerPixel(readFormat, readType) * width * height; \
+    void * readData = dbg->GetReadPixelsBuffer(readSize); \
+    dbg->hooks->gl.glReadPixels(x, y, width, height, readFormat, readType, readData); \
+    const unsigned compressedSize = dbg->CompressReadPixelBuffer(); \
+    msg.set_data(dbg->lzf_buf, compressedSize); \
+    msg.set_data_type(msg.ReferencedImage); \
+    msg.set_pixel_format(readFormat); \
+    msg.set_pixel_type(readType);
 
 #define EXTEND_Debug_glCopyTexSubImage2D EXTEND_Debug_glCopyTexImage2D
 
@@ -31,3 +37,14 @@
             data->append(string[i]); \
         else \
             data->append(string[i], length[i]);
+
+#define EXTEND_Debug_glTexImage2D \
+    if (pixels) { \
+        DbgContext * const dbg = getDbgContextThreadSpecific(); \
+        const unsigned size = GetBytesPerPixel(format, type) * width * height; \
+        assert(0 < size); \
+        unsigned compressedSize = dbg->Compress(pixels, size); \
+        msg.set_data(dbg->lzf_buf, compressedSize); \
+    }
+
+#define EXTEND_Debug_glTexSubImage2D EXTEND_Debug_glTexImage2D

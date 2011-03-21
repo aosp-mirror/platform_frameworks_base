@@ -471,6 +471,7 @@ bool Message_Prop_IsValid(int value) {
   switch(value) {
     case 0:
     case 1:
+    case 2:
       return true;
     default:
       return false;
@@ -480,6 +481,7 @@ bool Message_Prop_IsValid(int value) {
 #ifndef _MSC_VER
 const Message_Prop Message::Capture;
 const Message_Prop Message::TimeMode;
+const Message_Prop Message::ExpectResponse;
 const Message_Prop Message::Prop_MIN;
 const Message_Prop Message::Prop_MAX;
 const int Message::Prop_ARRAYSIZE;

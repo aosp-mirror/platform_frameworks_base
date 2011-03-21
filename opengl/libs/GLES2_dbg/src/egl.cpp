@@ -19,7 +19,6 @@
 EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         EGLDisplay dpy;
         EGLSurface draw;
@@ -35,7 +34,6 @@ EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
     msg.set_arg0(reinterpret_cast<int>(dpy));
     msg.set_arg1(reinterpret_cast<int>(draw));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_eglSwapBuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_eglSwapBuffers);
     return static_cast<EGLBoolean>(reinterpret_cast<int>(ret));
 }

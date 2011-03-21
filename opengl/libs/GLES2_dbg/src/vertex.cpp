@@ -70,7 +70,7 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
         case glesv2debugger::Message_Function_SKIP:
             return;
         case glesv2debugger::Message_Function_SETPROP:
-            SetProp(cmd);
+            SetProp(dbg, cmd);
             Receive(cmd);
             break;
         default:
@@ -135,7 +135,7 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
         case glesv2debugger::Message_Function_SKIP:
             return;
         case glesv2debugger::Message_Function_SETPROP:
-            SetProp(cmd);
+            SetProp(dbg, cmd);
             Receive(cmd);
             break;
         default:
@@ -223,7 +223,7 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
         case glesv2debugger::Message_Function_SKIP:
             return;
         case glesv2debugger::Message_Function_SETPROP:
-            SetProp(cmd);
+            SetProp(dbg, cmd);
             Receive(cmd);
             break;
         default:

@@ -56,6 +56,26 @@ using namespace com::android;
 namespace android
 {
 
+struct GLFunctionBitfield
+{
+    unsigned char field [24]; // 8 * 24 = 192
+    
+    void Bit(const glesv2debugger::Message_Function function, bool bit)
+    {
+        const unsigned byte = function / 8, mask = 1 << (function % 8);
+        if (bit)
+            field[byte] |= mask;
+        else
+            field[byte] &= ~mask;
+    }
+    
+    bool Bit(const glesv2debugger::Message_Function function) const
+    {
+        const unsigned byte = function / 8, mask = 1 << (function % 8);
+        return field[byte] & mask;
+    }
+};
+
 struct DbgContext {
 private:
     unsigned lzf_bufSize;
@@ -71,7 +91,9 @@ public:
     const unsigned version; // 0 is GLES1, 1 is GLES2
     const gl_hooks_t * const hooks;
     const unsigned MAX_VERTEX_ATTRIBS;
-
+    
+    GLFunctionBitfield expectResponse;
+    
     struct VertexAttrib {
         GLenum type; // element data type
         unsigned size; // number of data per element
@@ -140,9 +162,9 @@ unsigned GetBytesPerPixel(const GLenum format, const GLenum type);
 
 // every Debug_gl* function calls this to send message to client and possibly receive commands
 int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
-                  const bool expectResponse, const glesv2debugger::Message_Function function);
+                  const glesv2debugger::Message_Function function);
 
 void Receive(glesv2debugger::Message & cmd);
 float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd);
-void SetProp(const glesv2debugger::Message & cmd);
+void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd);
 }; // namespace android {

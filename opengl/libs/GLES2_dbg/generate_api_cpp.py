@@ -31,11 +31,11 @@ def generate_api(lines):
     externs = []
     i = 0
     # these have been hand written
-    skipFunctions = ["glTexImage2D", "glTexSubImage2D", "glReadPixels",
-"glDrawArrays", "glDrawElements"]
+    skipFunctions = ["glReadPixels", "glDrawArrays", "glDrawElements"]
     
     # these have an EXTEND_Debug_* macro for getting data
-    extendFunctions = ["glCopyTexImage2D", "glCopyTexSubImage2D", "glShaderSource"]
+    extendFunctions = ["glCopyTexImage2D", "glCopyTexSubImage2D", "glShaderSource",
+"glTexImage2D", "glTexSubImage2D"]
     
     # these also needs to be forwarded to DbgContext
     contextFunctions = ["glUseProgram", "glEnableVertexAttribArray", "glDisableVertexAttribArray", 
@@ -67,8 +67,7 @@ def generate_api(lines):
                     externs.append(extern)
                 
             print "%s Debug_%s(%s)\n{" % (returnType, functionName, RemoveAnnotation(parameterList))
-            print """    glesv2debugger::Message msg;
-    const bool expectResponse = false;"""
+            print "    glesv2debugger::Message msg;"
     
             if parameterList == "void":
                 parameters = []
@@ -159,8 +158,8 @@ def generate_api(lines):
                 print getData
             if functionName in extendFunctions:
                 print "    EXTEND_Debug_%s;" % (functionName) 
-            print "    int * ret = MessageLoop(caller, msg, expectResponse,"
-            print "                            glesv2debugger::Message_Function_%s);" % (functionName)
+            print "    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_%s);"\
+                % (functionName)
             if returnType != "void":
                 if returnType == "GLboolean":
                     print "    return static_cast<GLboolean>(reinterpret_cast<int>(ret));"

@@ -185,7 +185,7 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
     return t;
 }
 
-void SetProp(const glesv2debugger::Message & cmd)
+void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd)
 {
     switch (cmd.prop()) {
     case glesv2debugger::Message_Prop_Capture:
@@ -196,19 +196,24 @@ void SetProp(const glesv2debugger::Message & cmd)
         LOGD("SetProp Message_Prop_TimeMode %d", cmd.arg0());
         timeMode = cmd.arg0();
         break;
+    case glesv2debugger::Message_Prop_ExpectResponse:
+        LOGD("SetProp Message_Prop_ExpectResponse %d=%d", cmd.arg0(), cmd.arg1());
+        dbg->expectResponse.Bit((glesv2debugger::Message_Function)cmd.arg0(), cmd.arg1());
+        break;
     default:
         assert(0);
     }
 }
 
 int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
-                  const bool expectResponse, const glesv2debugger::Message_Function function)
+                  const glesv2debugger::Message_Function function)
 {
     DbgContext * const dbg = getDbgContextThreadSpecific();
     const int * ret = 0;
     glesv2debugger::Message cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
+    const bool expectResponse = dbg->expectResponse.Bit(function);
     msg.set_expect_response(expectResponse);
     msg.set_function(function);
     if (!expectResponse)
@@ -235,7 +240,7 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
         case glesv2debugger::Message_Function_SKIP:
             return const_cast<int *>(ret);
         case glesv2debugger::Message_Function_SETPROP:
-            SetProp(cmd);
+            SetProp(dbg, cmd);
             Receive(cmd);
             break;
         default:
