@@ -198,18 +198,21 @@ void NuPlayer::Renderer::signalAudioSinkChanged() {
 }
 
 void NuPlayer::Renderer::onDrainAudioQueue() {
-    uint32_t numFramesPlayed;
-    CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed), (status_t)OK);
 
-    ssize_t numFramesAvailableToWrite =
-        mAudioSink->frameCount() - (mNumFramesWritten - numFramesPlayed);
+    for (;;) {
+        uint32_t numFramesPlayed;
+        CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed), (status_t)OK);
 
-    CHECK_GE(numFramesAvailableToWrite, 0);
+        ssize_t numFramesAvailableToWrite =
+            mAudioSink->frameCount() - (mNumFramesWritten - numFramesPlayed);
 
-    size_t numBytesAvailableToWrite =
-        numFramesAvailableToWrite * mAudioSink->frameSize();
+        size_t numBytesAvailableToWrite =
+            numFramesAvailableToWrite * mAudioSink->frameSize();
 
-    while (numBytesAvailableToWrite > 0) {
+        if (numBytesAvailableToWrite == 0) {
+            break;
+        }
+
         if (mAudioQueue.empty()) {
             break;
         }
@@ -264,10 +267,10 @@ void NuPlayer::Renderer::onDrainAudioQueue() {
         if (entry->mOffset == entry->mBuffer->size()) {
             entry->mNotifyConsumed->post();
             mAudioQueue.erase(mAudioQueue.begin());
+
             entry = NULL;
         }
 
-        numBytesAvailableToWrite -= copy;
         mNumFramesWritten += copy / mAudioSink->frameSize();
     }
 
