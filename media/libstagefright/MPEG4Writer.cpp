@@ -232,7 +232,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
       mEstimatedMoovBoxSize(0),
       mInterleaveDurationUs(1000000) {
 
-    mFd = open(filename, O_CREAT | O_LARGEFILE | O_TRUNC);
+    mFd = open(filename, O_CREAT | O_LARGEFILE | O_TRUNC | O_RDWR);
     if (mFd >= 0) {
         mInitCheck = OK;
     }
