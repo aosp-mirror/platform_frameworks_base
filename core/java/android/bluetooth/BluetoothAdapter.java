@@ -628,7 +628,7 @@ public final class BluetoothAdapter {
     public boolean cancelDiscovery() {
         if (getState() != STATE_ON) return false;
         try {
-            mService.cancelDiscovery();
+            return mService.cancelDiscovery();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }

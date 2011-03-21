@@ -242,15 +242,15 @@ done:
 #endif
 }
 
-static void stopDiscoveryNative(JNIEnv *env, jobject object) {
+static jboolean stopDiscoveryNative(JNIEnv *env, jobject object) {
     LOGV(__FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     DBusMessage *msg = NULL;
     DBusMessage *reply = NULL;
     DBusError err;
     const char *name;
-    jstring ret;
     native_data_t *nat;
+    jboolean ret = JNI_FALSE;
 
     dbus_error_init(&err);
 
@@ -280,11 +280,16 @@ static void stopDiscoveryNative(JNIEnv *env, jobject object) {
         } else {
             LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
         }
+        goto done;
     }
 
+    ret = JNI_TRUE;
 done:
     if (msg) dbus_message_unref(msg);
     if (reply) dbus_message_unref(reply);
+    return ret;
+#else
+    return JNI_FALSE;
 #endif
 }
 
