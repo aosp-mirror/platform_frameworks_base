@@ -96,11 +96,12 @@ static int send_line(int fd, const char* line) {
     return 0;
 }
 
-static int is_ascii(char *line) {
-    for (;;line++) {
-        if (*line == 0) return 1;
-        if (*line >> 7) return 0;
-    }
+static void mask_eighth_bit(char *line)
+{
+   for (;;line++) {
+     if (0 == *line) return;
+     *line &= 0x7F;
+   }
 }
 
 static const char* get_line(int fd, char *buf, int len, int timeout_ms,
@@ -164,16 +165,15 @@ again:
 
     *bufit = NULL;
 
-    // Simple validation. Must be all ASCII.
-    // (we sometimes send non-ASCII UTF-8 in address book, but should
-    // never receive non-ASCII UTF-8).
-    // This was added because of the BMW 2005 E46 which sends binary junk.
-    if (is_ascii(buf)) {
-        IF_LOGV() LOG(LOG_VERBOSE, "Bluetooth AT recv", "%s", buf);
-    } else {
-        LOGW("Ignoring invalid AT command: %s", buf);
-        buf[0] = NULL;
-    }
+    // According to ITU V.250 section 5.1, IA5 7 bit chars are used, 
+    //   the eighth bit or higher bits are ignored if they exists
+    // We mask out only eighth bit, no higher bit, since we do char
+    // string here, not wide char.
+    // We added this processing due to 2 real world problems.
+    // 1 BMW 2005 E46 which sends binary junk
+    // 2 Audi 2010 A3, dial command use 0xAD (soft-hyphen) as number 
+    //   formater, which was rejected by the AT handler
+    mask_eighth_bit(buf);
 
     return buf;
 }
