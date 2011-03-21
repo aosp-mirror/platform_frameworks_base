@@ -100,6 +100,8 @@ bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors,
         dst = (char*)dst + dstBitmap.rowBytes();
     }
 
+    dstBitmap.notifyPixelsChanged();
+
     env->ReleaseIntArrayElements(srcColors, const_cast<jint*>(array),
                                  JNI_ABORT);
     return true;
@@ -524,6 +526,7 @@ static void Bitmap_setPixel(JNIEnv* env, jobject, const SkBitmap* bitmap,
     }
 
     proc(bitmap->getAddr(x, y), &color, 1, x, y);
+    bitmap->notifyPixelsChanged();
 }
 
 static void Bitmap_setPixels(JNIEnv* env, jobject, const SkBitmap* bitmap,
