@@ -57,6 +57,12 @@ namespace android
 {
 
 struct DbgContext {
+private:
+    unsigned lzf_bufSize;
+    
+public:
+    char * lzf_buf;
+    
     const unsigned version; // 0 is GLES1, 1 is GLES2
     const gl_hooks_t * const hooks;
     const unsigned MAX_VERTEX_ATTRIBS;
@@ -93,7 +99,8 @@ struct DbgContext {
     ~DbgContext();
 
     void Fetch(const unsigned index, std::string * const data) const;
-
+    unsigned Compress(const void * in_data, unsigned in_len); // compressed to lzf_buf
+    
     void glUseProgram(GLuint program);
     void glEnableVertexAttribArray(GLuint index);
     void glDisableVertexAttribArray(GLuint index);

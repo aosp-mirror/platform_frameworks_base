@@ -13,7 +13,7 @@ LOCAL_SRC_FILES:= 	       \
 	EGL/hooks.cpp 	       \
 	EGL/Loader.cpp 	       \
 #
-LOCAL_STATIC_LIBRARIES += libGLESv2_dbg libprotobuf-cpp-2.3.0-lite
+LOCAL_STATIC_LIBRARIES += libGLESv2_dbg libprotobuf-cpp-2.3.0-lite liblzf
 LOCAL_SHARED_LIBRARIES += libcutils libutils libstlport
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
