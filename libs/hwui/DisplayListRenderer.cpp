@@ -53,6 +53,7 @@ const char* DisplayList::OP_NAMES[] = {
     "DrawArc",
     "DrawPath",
     "DrawLines",
+    "DrawPoints",
     "DrawText",
     "ResetShader",
     "SetupShader",
@@ -441,6 +442,13 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 renderer.drawLines(points, count, getPaint());
             }
             break;
+            case DrawPoints: {
+                int count = 0;
+                float* points = getFloats(count);
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+                renderer.drawPoints(points, count, getPaint());
+            }
+            break;
             case DrawText: {
                 getText(&text);
                 int count = getInt();
@@ -783,6 +791,12 @@ void DisplayListRenderer::drawPath(SkPath* path, SkPaint* paint) {
 
 void DisplayListRenderer::drawLines(float* points, int count, SkPaint* paint) {
     addOp(DisplayList::DrawLines);
+    addFloats(points, count);
+    addPaint(paint);
+}
+
+void DisplayListRenderer::drawPoints(float* points, int count, SkPaint* paint) {
+    addOp(DisplayList::DrawPoints);
     addFloats(points, count);
     addPaint(paint);
 }

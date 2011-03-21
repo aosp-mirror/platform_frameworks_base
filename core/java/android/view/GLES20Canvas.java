@@ -773,18 +773,23 @@ class GLES20Canvas extends HardwareCanvas {
     public void drawPoint(float x, float y, Paint paint) {
         mPoint[0] = x;
         mPoint[1] = y;
-        drawPoints(mPoint, 0, 1, paint);
-    }
-
-    @Override
-    public void drawPoints(float[] pts, int offset, int count, Paint paint) {
-        // TODO: Implement
+        drawPoints(mPoint, 0, 2, paint);
     }
 
     @Override
     public void drawPoints(float[] pts, Paint paint) {
-        drawPoints(pts, 0, pts.length / 2, paint);
+        drawPoints(pts, 0, pts.length, paint);
     }
+
+    @Override
+    public void drawPoints(float[] pts, int offset, int count, Paint paint) {
+        int modifiers = setupModifiers(paint);
+        nDrawPoints(mRenderer, pts, offset, count, paint.mNativePaint);
+        if (modifiers != MODIFIER_NONE) nResetModifiers(mRenderer, modifiers);
+    }
+
+    private static native void nDrawPoints(int renderer, float[] points,
+            int offset, int count, int paint);
 
     @Override
     public void drawPosText(char[] text, int index, int count, float[] pos, Paint paint) {

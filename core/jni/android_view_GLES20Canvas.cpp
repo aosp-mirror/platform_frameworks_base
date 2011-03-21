@@ -366,6 +366,13 @@ static void android_view_GLES20Canvas_drawRects(JNIEnv* env, jobject clazz,
     }
 }
 
+static void android_view_GLES20Canvas_drawPoints(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, jfloatArray points, jint offset, jint count, SkPaint* paint) {
+    jfloat* storage = env->GetFloatArrayElements(points, NULL);
+    renderer->drawPoints(storage + offset, count, paint);
+    env->ReleaseFloatArrayElements(points, storage, 0);
+}
+
 static void android_view_GLES20Canvas_drawPath(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, SkPath* path, SkPaint* paint) {
     renderer->drawPath(path, paint);
@@ -374,9 +381,7 @@ static void android_view_GLES20Canvas_drawPath(JNIEnv* env, jobject clazz,
 static void android_view_GLES20Canvas_drawLines(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, jfloatArray points, jint offset, jint count, SkPaint* paint) {
     jfloat* storage = env->GetFloatArrayElements(points, NULL);
-
     renderer->drawLines(storage + offset, count, paint);
-
     env->ReleaseFloatArrayElements(points, storage, 0);
 }
 
@@ -645,6 +650,7 @@ static JNINativeMethod gMethods[] = {
     { "nDrawCircle",        "(IFFFI)V",        (void*) android_view_GLES20Canvas_drawCircle },
     { "nDrawOval",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawOval },
     { "nDrawArc",           "(IFFFFFFZI)V",    (void*) android_view_GLES20Canvas_drawArc },
+    { "nDrawPoints",        "(I[FIII)V",       (void*) android_view_GLES20Canvas_drawPoints },
 
     { "nDrawPath",          "(III)V",          (void*) android_view_GLES20Canvas_drawPath },
     { "nDrawLines",         "(I[FIII)V",       (void*) android_view_GLES20Canvas_drawLines },

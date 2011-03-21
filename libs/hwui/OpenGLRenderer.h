@@ -119,6 +119,7 @@ public:
             float startAngle, float sweepAngle, bool useCenter, SkPaint* paint);
     virtual void drawPath(SkPath* path, SkPaint* paint);
     virtual void drawLines(float* points, int count, SkPaint* paint);
+    virtual void drawPoints(float* points, int count, SkPaint* paint);
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             SkPaint* paint);
 
@@ -424,6 +425,7 @@ private:
      * Various methods to setup OpenGL rendering.
      */
     void setupDrawWithTexture(bool isAlpha8 = false);
+    void setupDrawPoint(float pointSize);
     void setupDrawColor(int color);
     void setupDrawColor(int color, int alpha);
     void setupDrawColor(float r, float g, float b, float a);
@@ -442,6 +444,7 @@ private:
             bool ignoreTransform = false, bool ignoreModelView = false);
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,
             bool ignoreTransform = false);
+    void setupDrawPointUniforms();
     void setupDrawColorUniforms();
     void setupDrawPureColorUniforms();
     void setupDrawShaderIdentityUniforms();
