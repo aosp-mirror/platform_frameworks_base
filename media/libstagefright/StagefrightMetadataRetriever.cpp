@@ -231,6 +231,14 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     frame->mData = new uint8_t[frame->mSize];
     frame->mRotationAngle = rotationAngle;
 
+    int32_t displayWidth, displayHeight;
+    if (meta->findInt32(kKeyDisplayWidth, &displayWidth)) {
+        frame->mDisplayWidth = displayWidth;
+    }
+    if (meta->findInt32(kKeyDisplayHeight, &displayHeight)) {
+        frame->mDisplayHeight = displayHeight;
+    }
+
     int32_t srcFormat;
     CHECK(meta->findInt32(kKeyColorFormat, &srcFormat));
 
@@ -465,7 +473,7 @@ void StagefrightMetadataRetriever::parseMetaData() {
     }
 
     if (numTracks == 1 && hasAudio && audioBitrate >= 0) {
-        sprintf(tmp, "%ld", audioBitrate);
+        sprintf(tmp, "%d", audioBitrate);
         mMetaData.add(METADATA_KEY_BITRATE, String8(tmp));
     } else {
         off64_t sourceSize;
