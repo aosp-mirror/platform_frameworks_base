@@ -18,10 +18,11 @@
 #ifndef ANDROID_IMEDIAMETADATARETRIEVER_H
 #define ANDROID_IMEDIAMETADATARETRIEVER_H
 
-#include <utils/RefBase.h>
 #include <binder/IInterface.h>
 #include <binder/Parcel.h>
 #include <binder/IMemory.h>
+#include <utils/KeyedVector.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
@@ -30,7 +31,11 @@ class IMediaMetadataRetriever: public IInterface
 public:
     DECLARE_META_INTERFACE(MediaMetadataRetriever);
     virtual void            disconnect() = 0;
-    virtual status_t        setDataSource(const char* srcUrl) = 0;
+
+    virtual status_t        setDataSource(
+            const char *srcUrl,
+            const KeyedVector<String8, String8> *headers = NULL) = 0;
+
     virtual status_t        setDataSource(int fd, int64_t offset, int64_t length) = 0;
     virtual sp<IMemory>     getFrameAtTime(int64_t timeUs, int option) = 0;
     virtual sp<IMemory>     extractAlbumArt() = 0;

@@ -120,7 +120,8 @@ static sp<MediaMetadataRetrieverBase> createRetriever(player_type playerType)
     return p;
 }
 
-status_t MetadataRetrieverClient::setDataSource(const char *url)
+status_t MetadataRetrieverClient::setDataSource(
+        const char *url, const KeyedVector<String8, String8> *headers)
 {
     LOGV("setDataSource(%s)", url);
     Mutex::Autolock lock(mLock);
@@ -131,7 +132,7 @@ status_t MetadataRetrieverClient::setDataSource(const char *url)
     LOGV("player type = %d", playerType);
     sp<MediaMetadataRetrieverBase> p = createRetriever(playerType);
     if (p == NULL) return NO_INIT;
-    status_t ret = p->setDataSource(url);
+    status_t ret = p->setDataSource(url, headers);
     if (ret == NO_ERROR) mRetriever = p;
     return ret;
 }

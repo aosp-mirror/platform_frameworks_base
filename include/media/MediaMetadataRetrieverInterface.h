@@ -30,7 +30,11 @@ class MediaMetadataRetrieverBase : public RefBase
 public:
                         MediaMetadataRetrieverBase() {}
     virtual             ~MediaMetadataRetrieverBase() {}
-    virtual status_t    setDataSource(const char *url) = 0;
+
+    virtual status_t    setDataSource(
+            const char *url,
+            const KeyedVector<String8, String8> *headers = NULL) = 0;
+
     virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) = 0;
     virtual VideoFrame* getFrameAtTime(int64_t timeUs, int option) = 0;
     virtual MediaAlbumArt* extractAlbumArt() = 0;

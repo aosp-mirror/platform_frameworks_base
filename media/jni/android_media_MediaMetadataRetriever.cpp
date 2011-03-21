@@ -76,32 +76,123 @@ static void setRetriever(JNIEnv* env, jobject thiz, int retriever)
     env->SetIntField(thiz, fields.context, retriever);
 }
 
-static void android_media_MediaMetadataRetriever_setDataSource(JNIEnv *env, jobject thiz, jstring path)
-{
+static void
+android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
+        JNIEnv *env, jobject thiz, jstring path, jobject headers) {
     LOGV("setDataSource");
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
-        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
-        return;
-    }
-    if (!path) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "Null pointer");
+        jniThrowException(
+                env,
+                "java/lang/IllegalStateException", "No retriever available");
+
         return;
     }
 
-    const char *pathStr = env->GetStringUTFChars(path, NULL);
+    if (!path) {
+        jniThrowException(
+                env, "java/lang/IllegalArgumentException", "Null pointer");
+
+        return;
+    }
+
+    const char *tmp = env->GetStringUTFChars(path, NULL);
     if (!pathStr) {  // OutOfMemoryError exception already thrown
         return;
     }
 
+    String8 pathStr = tmp;
+
+    env->ReleaseStringUTFChars(path, tmp);
+    tmp = NULL;
+
     // Don't let somebody trick us in to reading some random block of memory
-    if (strncmp("mem://", pathStr, 6) == 0) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid pathname");
+    if (strncmp("mem://", pathStr.string(), 6) == 0) {
+        jniThrowException(
+                env, "java/lang/IllegalArgumentException", "Invalid pathname");
         return;
     }
 
-    process_media_retriever_call(env, retriever->setDataSource(pathStr), "java/lang/RuntimeException", "setDataSource failed");
-    env->ReleaseStringUTFChars(path, pathStr);
+    // headers is a Map<String, String>.
+    // We build a similar KeyedVector out of it.
+    KeyedVector<String8, String8> headersVector;
+    if (headers) {
+        // Get the Map's entry Set.
+        jclass mapClass = env->FindClass("java/util/Map");
+
+        jmethodID entrySet =
+            env->GetMethodID(mapClass, "entrySet", "()Ljava/util/Set;");
+
+        jobject set = env->CallObjectMethod(headers, entrySet);
+        // Obtain an iterator over the Set
+        jclass setClass = env->FindClass("java/util/Set");
+
+        jmethodID iterator =
+            env->GetMethodID(setClass, "iterator", "()Ljava/util/Iterator;");
+
+        jobject iter = env->CallObjectMethod(set, iterator);
+        // Get the Iterator method IDs
+        jclass iteratorClass = env->FindClass("java/util/Iterator");
+        jmethodID hasNext = env->GetMethodID(iteratorClass, "hasNext", "()Z");
+
+        jmethodID next =
+            env->GetMethodID(iteratorClass, "next", "()Ljava/lang/Object;");
+
+        // Get the Entry class method IDs
+        jclass entryClass = env->FindClass("java/util/Map$Entry");
+
+        jmethodID getKey =
+            env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
+
+        jmethodID getValue =
+            env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
+
+        // Iterate over the entry Set
+        while (env->CallBooleanMethod(iter, hasNext)) {
+            jobject entry = env->CallObjectMethod(iter, next);
+            jstring key = (jstring) env->CallObjectMethod(entry, getKey);
+            jstring value = (jstring) env->CallObjectMethod(entry, getValue);
+
+            const char* keyStr = env->GetStringUTFChars(key, NULL);
+            if (!keyStr) {  // Out of memory
+                return;
+            }
+
+            const char* valueStr = env->GetStringUTFChars(value, NULL);
+            if (!valueStr) {  // Out of memory
+                return;
+            }
+
+            headersVector.add(String8(keyStr), String8(valueStr));
+
+            env->DeleteLocalRef(entry);
+            env->ReleaseStringUTFChars(key, keyStr);
+            env->DeleteLocalRef(key);
+            env->ReleaseStringUTFChars(value, valueStr);
+            env->DeleteLocalRef(value);
+      }
+
+      env->DeleteLocalRef(entryClass);
+      env->DeleteLocalRef(iteratorClass);
+      env->DeleteLocalRef(iter);
+      env->DeleteLocalRef(setClass);
+      env->DeleteLocalRef(set);
+      env->DeleteLocalRef(mapClass);
+    }
+
+    process_media_retriever_call(
+            env,
+            retriever->setDataSource(
+                pathStr.string(), headers ? &headersVector : NULL),
+
+            "java/lang/RuntimeException",
+            "setDataSource failed");
+}
+
+static void android_media_MediaMetadataRetriever_setDataSource(
+        JNIEnv *env, jobject thiz, jstring path) {
+    android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
+            env, thiz, path, NULL);
 }
 
 static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
@@ -388,6 +479,7 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 // JNI mapping between Java methods and native methods
 static JNINativeMethod nativeMethods[] = {
         {"setDataSource",   "(Ljava/lang/String;)V", (void *)android_media_MediaMetadataRetriever_setDataSource},
+        {"setDataSource",   "(Ljava/lang/String;Ljava/util/Map;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders},
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},

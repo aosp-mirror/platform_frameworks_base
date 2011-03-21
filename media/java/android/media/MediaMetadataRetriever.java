@@ -26,6 +26,8 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.util.Map;
+
 /**
  * MediaMetadataRetriever class provides a unified interface for retrieving
  * frame and meta data from an input media file.
@@ -56,7 +58,19 @@ public class MediaMetadataRetriever
      * @throws IllegalArgumentException If the path is invalid.
      */
     public native void setDataSource(String path) throws IllegalArgumentException;
-    
+
+    /**
+     * Sets the data source (URI) to use. Call this
+     * method before the rest of the methods in this class. This method may be
+     * time-consuming.
+     *
+     * @param uri The URI of the input media.
+     * @param headers the headers to be sent together with the request for the data
+     * @throws IllegalArgumentException If the URI is invalid.
+     */
+    public native void setDataSource(String uri, Map<String, String> headers)
+        throws IllegalArgumentException;
+
     /**
      * Sets the data source (FileDescriptor) to use.  It is the caller's
      * responsibility to close the file descriptor. It is safe to do so as soon

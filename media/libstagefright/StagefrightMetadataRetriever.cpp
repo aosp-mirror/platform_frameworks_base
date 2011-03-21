@@ -48,7 +48,8 @@ StagefrightMetadataRetriever::~StagefrightMetadataRetriever() {
     mClient.disconnect();
 }
 
-status_t StagefrightMetadataRetriever::setDataSource(const char *uri) {
+status_t StagefrightMetadataRetriever::setDataSource(
+        const char *uri, const KeyedVector<String8, String8> *headers) {
     LOGV("setDataSource(%s)", uri);
 
     mParsedMetaData = false;
@@ -56,7 +57,7 @@ status_t StagefrightMetadataRetriever::setDataSource(const char *uri) {
     delete mAlbumArt;
     mAlbumArt = NULL;
 
-    mSource = DataSource::CreateFromURI(uri);
+    mSource = DataSource::CreateFromURI(uri, headers);
 
     if (mSource == NULL) {
         return UNKNOWN_ERROR;
