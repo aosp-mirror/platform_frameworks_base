@@ -546,12 +546,13 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
     }
 
     if (loopStart >= loopEnd ||
-        loopEnd - loopStart > cblk->frameCount) {
+        loopEnd - loopStart > cblk->frameCount ||
+        cblk->server > loopStart) {
         LOGE("setLoop invalid value: loopStart %d, loopEnd %d, loopCount %d, framecount %d, user %d", loopStart, loopEnd, loopCount, cblk->frameCount, cblk->user);
         return BAD_VALUE;
     }
 
-    if ((mSharedBuffer != 0) && (loopEnd   > cblk->frameCount)) {
+    if ((mSharedBuffer != 0) && (loopEnd > cblk->frameCount)) {
         LOGE("setLoop invalid value: loop markers beyond data: loopStart %d, loopEnd %d, framecount %d",
             loopStart, loopEnd, cblk->frameCount);
         return BAD_VALUE;
@@ -824,6 +825,12 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
     audioBuffer->size = 0;
 
     uint32_t framesAvail = cblk->framesAvailable();
+
+    cblk->lock.lock();
+    if (cblk->flags & CBLK_INVALID_MSK) {
+        goto create_new_track;
+    }
+    cblk->lock.unlock();
 
     if (framesAvail == 0) {
         cblk->lock.lock();
@@ -1148,6 +1155,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
              fromStart ? "start()" : "obtainBuffer()");
 
         cblk->flags |= CBLK_RESTORING_ON;
+
         // signal old cblk condition so that other threads waiting for available buffers stop
         // waiting now
         cblk->cv.broadcast();
@@ -1167,10 +1175,20 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
                                false);
 
         if (result == NO_ERROR) {
+            // restore write index and set other indexes to reflect empty buffer status
+            mCblk->user = cblk->user;
+            mCblk->server = cblk->user;
+            mCblk->userBase = cblk->user;
+            mCblk->serverBase = cblk->user;
+            // restore loop: this is not guaranteed to succeed if new frame count is not
+            // compatible with loop length
+            setLoop_l(cblk->loopStart, cblk->loopEnd, cblk->loopCount);
             if (!fromStart) {
                 mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
             }
-            result = mAudioTrack->start();
+            if (mActive) {
+                result = mAudioTrack->start();
+            }
             if (fromStart && result == NO_ERROR) {
                 mNewPosition = mCblk->server + mUpdatePeriod;
             }
