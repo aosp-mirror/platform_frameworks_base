@@ -98,11 +98,11 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
     }
 
     const char *tmp = env->GetStringUTFChars(path, NULL);
-    if (!pathStr) {  // OutOfMemoryError exception already thrown
+    if (!tmp) {  // OutOfMemoryError exception already thrown
         return;
     }
 
-    String8 pathStr = tmp;
+    String8 pathStr(tmp);
 
     env->ReleaseStringUTFChars(path, tmp);
     tmp = NULL;
