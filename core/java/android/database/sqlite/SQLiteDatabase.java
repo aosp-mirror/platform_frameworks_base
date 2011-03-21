@@ -230,8 +230,22 @@ public class SQLiteDatabase extends SQLiteClosable {
     private static int sQueryLogTimeInMillis = 0;  // lazily initialized
     private static final int QUERY_LOG_SQL_LENGTH = 64;
     private static final String COMMIT_SQL = "COMMIT;";
+    private static final String BEGIN_SQL = "BEGIN;";
     private final Random mRandom = new Random();
+    /** the last non-commit/rollback sql statement in a transaction */
+    // guarded by 'this'
     private String mLastSqlStatement = null;
+
+    synchronized String getLastSqlStatement() {
+        return mLastSqlStatement;
+    }
+
+    synchronized void setLastSqlStatement(String sql) {
+        mLastSqlStatement = sql;
+    }
+
+    /** guarded by {@link #mLock} */
+    private long mTransStartTime;
 
     // String prefix for slow database query EventLog records that show
     // lock acquistions of the database.
@@ -386,11 +400,16 @@ public class SQLiteDatabase extends SQLiteClosable {
      *
      * @see #unlock()
      */
-    /* package */ void lock() {
-        lock(false);
+    /* package */ void lock(String sql) {
+        lock(sql, false);
     }
+
+    /* pachage */ void lock() {
+        lock(null, false);
+    }
+
     private static final long LOCK_WAIT_PERIOD = 30L;
-    private void lock(boolean forced) {
+    private void lock(String sql, boolean forced) {
         // make sure this method is NOT being called from a 'synchronized' method
         if (Thread.holdsLock(this)) {
             Log.w(TAG, "don't lock() while in a synchronized method");
@@ -398,6 +417,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         verifyDbIsOpen();
         if (!forced && !mLockingEnabled) return;
         boolean done = false;
+        long timeStart = SystemClock.uptimeMillis();
         while (!done) {
             try {
                 // wait for 30sec to acquire the lock
@@ -419,6 +439,9 @@ public class SQLiteDatabase extends SQLiteClosable {
                 mLockAcquiredWallTime = SystemClock.elapsedRealtime();
                 mLockAcquiredThreadTime = Debug.threadCpuTimeNanos();
             }
+        }
+        if (sql != null) {
+            logTimeStat(sql, timeStart, GET_LOCK_LOG_PREFIX);
         }
     }
     private static class DatabaseReentrantLock extends ReentrantLock {
@@ -444,7 +467,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @see #unlockForced()
      */
     private void lockForced() {
-        lock(true);
+        lock(null, true);
+    }
+
+    private void lockForced(String sql) {
+        lock(sql, true);
     }
 
     /**
@@ -612,7 +639,7 @@ public class SQLiteDatabase extends SQLiteClosable {
     private void beginTransaction(SQLiteTransactionListener transactionListener,
             boolean exclusive) {
         verifyDbIsOpen();
-        lockForced();
+        lockForced(BEGIN_SQL);
         boolean ok = false;
         try {
             // If this thread already had the lock then get out
@@ -635,6 +662,7 @@ public class SQLiteDatabase extends SQLiteClosable {
             } else {
                 execSQL("BEGIN IMMEDIATE;");
             }
+            mTransStartTime = SystemClock.uptimeMillis();
             mTransactionListener = transactionListener;
             mTransactionIsSuccessful = true;
             mInnerTransactionIsSuccessful = false;
@@ -698,6 +726,8 @@ public class SQLiteDatabase extends SQLiteClosable {
                         Log.i(TAG, "PRAGMA wal_Checkpoint done");
                     }
                 }
+                // log the transaction time to the Eventlog.
+                logTimeStat(getLastSqlStatement(), mTransStartTime, COMMIT_SQL);
             } else {
                 try {
                     execSQL("ROLLBACK;");
@@ -1855,24 +1885,11 @@ public class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException if the SQL string is invalid
      */
     public void execSQL(String sql) throws SQLException {
-        int stmtType = DatabaseUtils.getSqlStatementType(sql);
-        if (stmtType == DatabaseUtils.STATEMENT_ATTACH) {
+        if (DatabaseUtils.getSqlStatementType(sql) == DatabaseUtils.STATEMENT_ATTACH) {
             disableWriteAheadLogging();
-        }
-        long timeStart = SystemClock.uptimeMillis();
-        logTimeStat(mLastSqlStatement, timeStart, GET_LOCK_LOG_PREFIX);
-        executeSql(sql, null);
-
-        if (stmtType == DatabaseUtils.STATEMENT_ATTACH) {
             mHasAttachedDbs = true;
         }
-        // Log commit statements along with the most recently executed
-        // SQL statement for disambiguation.
-        if (stmtType == DatabaseUtils.STATEMENT_COMMIT) {
-            logTimeStat(mLastSqlStatement, timeStart, COMMIT_SQL);
-        } else {
-            logTimeStat(sql, timeStart, null);
-        }
+        executeSql(sql, null);
     }
 
     /**
@@ -1926,19 +1943,15 @@ public class SQLiteDatabase extends SQLiteClosable {
     }
 
     private int executeSql(String sql, Object[] bindArgs) throws SQLException {
-        long timeStart = SystemClock.uptimeMillis();
-        int n;
         SQLiteStatement statement = new SQLiteStatement(this, sql, bindArgs);
         try {
-            n = statement.executeUpdateDelete();
+            return statement.executeUpdateDelete();
         } catch (SQLiteDatabaseCorruptException e) {
             onCorruption();
             throw e;
         } finally {
             statement.close();
         }
-        logTimeStat(sql, timeStart);
-        return n;
     }
 
     @Override
@@ -2027,12 +2040,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         logTimeStat(sql, beginMillis, null);
     }
 
-    /* package */ void logTimeStat(String sql, long beginMillis, String prefix) {
-        // Keep track of the last statement executed here, as this is
-        // the common funnel through which all methods of hitting
-        // libsqlite eventually flow.
-        mLastSqlStatement = sql;
-
+    private void logTimeStat(String sql, long beginMillis, String prefix) {
         // Sample fast queries in proportion to the time taken.
         // Quantize the % first, so the logged sampling probability
         // exactly equals the actual sampling rate for this query.
@@ -2059,7 +2067,6 @@ public class SQLiteDatabase extends SQLiteClosable {
         if (prefix != null) {
             sql = prefix + sql;
         }
-
         if (sql.length() > QUERY_LOG_SQL_LENGTH) sql = sql.substring(0, QUERY_LOG_SQL_LENGTH);
 
         // ActivityThread.currentPackageName() only returns non-null if the

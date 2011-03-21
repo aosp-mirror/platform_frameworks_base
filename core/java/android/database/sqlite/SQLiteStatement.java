@@ -80,7 +80,8 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public int executeUpdateDelete() {
         try {
-            long timeStart = acquireAndLock(WRITE);
+            saveSqlAsLastSqlStatement();
+            acquireAndLock(WRITE);
             int numChanges = 0;
             if ((mStatementType & STATEMENT_DONT_PREPARE) > 0) {
                 // since the statement doesn't have to be prepared,
@@ -90,7 +91,6 @@ public class SQLiteStatement extends SQLiteProgram
             } else {
                 numChanges = native_execute();
             }
-            mDatabase.logTimeStat(mSql, timeStart);
             return numChanges;
         } finally {
             releaseAndUnlock();
@@ -108,15 +108,22 @@ public class SQLiteStatement extends SQLiteProgram
      */
     public long executeInsert() {
         try {
-            long timeStart = acquireAndLock(WRITE);
-            long lastInsertedRowId = native_executeInsert();
-            mDatabase.logTimeStat(mSql, timeStart);
-            return lastInsertedRowId;
+            saveSqlAsLastSqlStatement();
+            acquireAndLock(WRITE);
+            return native_executeInsert();
         } finally {
             releaseAndUnlock();
         }
     }
 
+    private void saveSqlAsLastSqlStatement() {
+        if (((mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
+                DatabaseUtils.STATEMENT_UPDATE) ||
+                (mStatementType & SQLiteProgram.STATEMENT_TYPE_MASK) ==
+                DatabaseUtils.STATEMENT_BEGIN) {
+            mDatabase.setLastSqlStatement(mSql);
+        }
+    }
     /**
      * Execute a statement that returns a 1 by 1 table with a numeric value.
      * For example, SELECT COUNT(*) FROM table;
@@ -199,7 +206,7 @@ public class SQLiteStatement extends SQLiteProgram
      *   <li>if the SQL statement is an update, start transaction if not already in one.
      *   otherwise, get lock on the database</li>
      *   <li>acquire reference on this object</li>
-     *   <li>and then return the current time _before_ the database lock was acquired</li>
+     *   <li>and then return the current time _after_ the database lock was acquired</li>
      * </ul>
      * <p>
      * This method removes the duplicate code from the other public
@@ -243,7 +250,7 @@ public class SQLiteStatement extends SQLiteProgram
         }
         // do I have database lock? if not, grab it.
         if (!mDatabase.isDbLockedByCurrentThread()) {
-            mDatabase.lock();
+            mDatabase.lock(mSql);
             mState = LOCK_ACQUIRED;
         }
 

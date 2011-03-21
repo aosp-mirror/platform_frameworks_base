@@ -70,9 +70,8 @@ public class SQLiteQuery extends SQLiteProgram {
      */
     /* package */ int fillWindow(CursorWindow window,
             int maxRead, int lastPos) {
+        mDatabase.lock(mSql);
         long timeStart = SystemClock.uptimeMillis();
-        mDatabase.lock();
-        mDatabase.logTimeStat(mSql, timeStart, SQLiteDatabase.GET_LOCK_LOG_PREFIX);
         try {
             acquireReference();
             try {

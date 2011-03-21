@@ -241,7 +241,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
         mColumnNameMap = null;
         mQuery = query;
 
-        query.mDatabase.lock();
+        query.mDatabase.lock(query.mSql);
         try {
             // Setup the list of columns
             int columnCount = mQuery.columnCountLocked();
@@ -419,7 +419,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 // since we need to use a different database connection handle,
                 // re-compile the query
                 try {
-                    db.lock();
+                    db.lock(mQuery.mSql);
                 } catch (IllegalStateException e) {
                     // for backwards compatibility, just return false
                     Log.w(TAG, "requery() failed " + e.getMessage(), e);
