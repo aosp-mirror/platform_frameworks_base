@@ -26,6 +26,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/AudioSource.h>
 #include <media/stagefright/AMRWriter.h>
+#include <media/stagefright/AACWriter.h>
 #include <media/stagefright/CameraSource.h>
 #include <media/stagefright/VideoSourceDownSampler.h>
 #include <media/stagefright/CameraSourceTimeLapse.h>
@@ -872,15 +873,21 @@ sp<MediaSource> StagefrightRecorder::createAudioSource() {
 }
 
 status_t StagefrightRecorder::startAACRecording() {
-    CHECK(mOutputFormat == OUTPUT_FORMAT_AAC_ADIF ||
-          mOutputFormat == OUTPUT_FORMAT_AAC_ADTS);
+    // FIXME:
+    // Add support for OUTPUT_FORMAT_AAC_ADIF
+    CHECK(mOutputFormat == OUTPUT_FORMAT_AAC_ADTS);
 
     CHECK(mAudioEncoder == AUDIO_ENCODER_AAC);
     CHECK(mAudioSource != AUDIO_SOURCE_CNT);
 
-    CHECK(0 == "AACWriter is not implemented yet");
+    mWriter = new AACWriter(mOutputFd);
+    status_t status = startRawAudioRecording();
+    if (status != OK) {
+        mWriter.clear();
+        mWriter = NULL;
+    }
 
-    return OK;
+    return status;
 }
 
 status_t StagefrightRecorder::startAMRRecording() {
@@ -902,6 +909,16 @@ status_t StagefrightRecorder::startAMRRecording() {
         }
     }
 
+    mWriter = new AMRWriter(mOutputFd);
+    status_t status = startRawAudioRecording();
+    if (status != OK) {
+        mWriter.clear();
+        mWriter = NULL;
+    }
+    return status;
+}
+
+status_t StagefrightRecorder::startRawAudioRecording() {
     if (mAudioSource >= AUDIO_SOURCE_CNT) {
         LOGE("Invalid audio source: %d", mAudioSource);
         return BAD_VALUE;
@@ -917,7 +934,7 @@ status_t StagefrightRecorder::startAMRRecording() {
         return UNKNOWN_ERROR;
     }
 
-    mWriter = new AMRWriter(mOutputFd);
+    CHECK(mWriter != 0);
     mWriter->addSource(audioEncoder);
 
     if (mMaxFileDurationUs != 0) {
