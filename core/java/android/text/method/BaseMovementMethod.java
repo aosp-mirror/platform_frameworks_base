@@ -164,6 +164,9 @@ public class BaseMovementMethod implements MovementMethod {
                 if (KeyEvent.metaStateHasNoModifiers(movementMetaState)) {
                     return left(widget, buffer);
                 } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
+                        KeyEvent.META_CTRL_ON)) {
+                    return leftWord(widget, buffer);
+                } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
                         KeyEvent.META_ALT_ON)) {
                     return lineStart(widget, buffer);
                 }
@@ -172,6 +175,9 @@ public class BaseMovementMethod implements MovementMethod {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (KeyEvent.metaStateHasNoModifiers(movementMetaState)) {
                     return right(widget, buffer);
+                } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
+                        KeyEvent.META_CTRL_ON)) {
+                    return rightWord(widget, buffer);
                 } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
                         KeyEvent.META_ALT_ON)) {
                     return lineEnd(widget, buffer);
@@ -217,12 +223,18 @@ public class BaseMovementMethod implements MovementMethod {
             case KeyEvent.KEYCODE_MOVE_HOME:
                 if (KeyEvent.metaStateHasNoModifiers(movementMetaState)) {
                     return home(widget, buffer);
+                } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
+                        KeyEvent.META_CTRL_ON)) {
+                    return top(widget, buffer);
                 }
                 break;
 
             case KeyEvent.KEYCODE_MOVE_END:
                 if (KeyEvent.metaStateHasNoModifiers(movementMetaState)) {
                     return end(widget, buffer);
+                } else if (KeyEvent.metaStateHasModifiers(movementMetaState,
+                        KeyEvent.META_CTRL_ON)) {
+                    return bottom(widget, buffer);
                 }
                 break;
         }
@@ -346,6 +358,16 @@ public class BaseMovementMethod implements MovementMethod {
      * @return True if the event was handled.
      */
     protected boolean lineEnd(TextView widget, Spannable buffer) {
+        return false;
+    }
+
+    /** {@hide} */
+    protected boolean leftWord(TextView widget, Spannable buffer) {
+        return false;
+    }
+
+    /** {@hide} */
+    protected boolean rightWord(TextView widget, Spannable buffer) {
         return false;
     }
 
