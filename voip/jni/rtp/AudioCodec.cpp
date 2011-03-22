@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <string.h>
+#include <strings.h>
 
 #include "AudioCodec.h"
 
