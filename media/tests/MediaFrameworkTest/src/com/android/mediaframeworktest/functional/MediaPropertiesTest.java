@@ -30,6 +30,7 @@ import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import com.android.mediaframeworktest.VideoEditorHelper;
+import com.android.mediaframeworktest.MediaProfileReader;
 
 public class MediaPropertiesTest extends
     ActivityInstrumentationTestCase<MediaFrameworkTest> {
@@ -465,11 +466,17 @@ public class MediaPropertiesTest extends
         final String videoItemFilename = INPUT_FILE_PATH +
             "WMV_V7_640x480_15fps_512Kbps_wma_V9_44khz_48Kbps_s_1_30.wmv";
         boolean flagForException = false;
-        try {
-            new MediaVideoItem(mVideoEditor, "m1", videoItemFilename,
-                MediaItem.RENDERING_MODE_BLACK_BORDER);
-        } catch (IllegalArgumentException e) {
+        if (MediaProfileReader.getWMVEnable() == false) {
             flagForException = true;
+        } else {
+            try {
+                new MediaVideoItem(mVideoEditor, "m1", videoItemFilename,
+                    MediaItem.RENDERING_MODE_BLACK_BORDER);
+            } catch (IllegalArgumentException e) {
+                flagForException = true;
+            } catch (IOException e) {
+                flagForException = true;
+            }
         }
         assertTrue("Media Properties for a WMV File -- Unsupported file type",
             flagForException);
