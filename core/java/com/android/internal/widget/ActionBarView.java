@@ -416,6 +416,21 @@ public class ActionBarView extends ViewGroup {
         }
     }
 
+    public void setIcon(Drawable icon) {
+        mIcon = icon;
+        if (icon != null &&
+                ((mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) == 0 || mLogo == null)) {
+            mIconView.setImageDrawable(icon);
+        }
+    }
+
+    public void setLogo(Drawable logo) {
+        mLogo = logo;
+        if (logo != null && (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0) {
+            mIconView.setImageDrawable(logo);
+        }
+    }
+
     public void setNavigationMode(int mode) {
         final int oldMode = mNavigationMode;
         if (mode != oldMode) {
