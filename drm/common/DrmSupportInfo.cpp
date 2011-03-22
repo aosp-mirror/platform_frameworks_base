@@ -15,6 +15,7 @@
  */
 
 #include <drm/DrmSupportInfo.h>
+#include <strings.h>
 
 using namespace android;
 
@@ -152,4 +153,3 @@ String8& DrmSupportInfo::MimeTypeIterator::next() {
     mIndex++;
     return value;
 }
-
