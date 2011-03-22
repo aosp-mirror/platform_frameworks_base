@@ -188,7 +188,7 @@ int main(int argc, char **argv)
 	useData.memflag = VO_IMF_USERMEMOPERATOR;
 	useData.memData = (VO_PTR)(&moper);
 	// open encoder dll;
-	handle = dlopen("/data/local/tmp/libvoAACEncv7.so", RTLD_NOW);
+	handle = dlopen("libstagefright.so", RTLD_NOW);
 	if(handle == 0)
 	{
 		printf("open dll error......");
