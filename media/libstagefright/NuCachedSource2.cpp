@@ -135,6 +135,10 @@ size_t PageCache::releaseFromStart(size_t maxBytes) {
 void PageCache::copy(size_t from, void *data, size_t size) {
     LOGV("copy from %d size %d", from, size);
 
+    if (size == 0) {
+        return;
+    }
+
     CHECK_LE(from + size, mTotalSize);
 
     size_t offset = 0;
