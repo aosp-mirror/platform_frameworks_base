@@ -508,7 +508,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         notifyDataAvailability(null);
     }
 
-    private void gotoIdleAndNotifyDataConnection(String reason) {
+    protected void gotoIdleAndNotifyDataConnection(String reason) {
         if (DBG) log("gotoIdleAndNotifyDataConnection: reason=" + reason);
         setState(State.IDLE);
         notifyDataConnection(reason);
@@ -665,20 +665,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         if (retryAfterDisconnected(reason)) {
           trySetupData(reason);
       }
-    }
-
-    /**
-     * Called when EVENT_RESET_DONE is received so goto
-     * IDLE state and send notifications to those interested.
-     */
-    @Override
-    protected void onResetDone(AsyncResult ar) {
-      if (DBG) log("EVENT_RESET_DONE");
-      String reason = null;
-      if (ar.userObj instanceof String) {
-          reason = (String) ar.userObj;
-      }
-      gotoIdleAndNotifyDataConnection(reason);
     }
 
     /**

@@ -441,7 +441,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onRadioOffOrNotAvailable();
     protected abstract void onDataSetupComplete(AsyncResult ar);
     protected abstract void onDisconnectDone(int connId, AsyncResult ar);
-    protected abstract void onResetDone(AsyncResult ar);
     protected abstract void onVoiceCallStarted();
     protected abstract void onVoiceCallEnded();
     protected abstract void onCleanUpConnection(boolean tearDown, int apnId, String reason);
@@ -514,9 +513,10 @@ public abstract class DataConnectionTracker extends Handler {
                 onSetInternalDataEnabled(enabled);
                 break;
             }
-            case EVENT_RESET_DONE:
+            case EVENT_RESET_DONE: {
                 onResetDone((AsyncResult) msg.obj);
                 break;
+            }
             case CMD_SET_DATA_ENABLE: {
                 log("CMD_SET_DATA_ENABLE msg=" + msg);
                 boolean enabled = (msg.arg1 == ENABLED) ? true : false;
@@ -601,6 +601,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract boolean isApnTypeAvailable(String type);
 
     protected abstract void setState(State s);
+
+    protected abstract void gotoIdleAndNotifyDataConnection(String reason);
 
     protected LinkProperties getLinkProperties(String apnType) {
         int id = apnTypeToId(apnType);
@@ -870,6 +872,22 @@ public abstract class DataConnectionTracker extends Handler {
      * To be overridden.
      */
     protected void onEnableNewApn() {
+    }
+
+    /**
+     * Called when EVENT_RESET_DONE is received so goto
+     * IDLE state and send notifications to those interested.
+     *
+     * TODO - currently unused.  Needs to be hooked into DataConnection cleanup
+     * TODO - needs to pass some notion of which connection is reset..
+     */
+    protected void onResetDone(AsyncResult ar) {
+        if (DBG) log("EVENT_RESET_DONE");
+        String reason = null;
+        if (ar.userObj instanceof String) {
+            reason = (String) ar.userObj;
+        }
+        gotoIdleAndNotifyDataConnection(reason);
     }
 
     /**

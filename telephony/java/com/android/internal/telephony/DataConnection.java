@@ -219,6 +219,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
 
     //***** Member Variables
+    protected ApnSetting mApn;
     protected int mTag;
     protected PhoneBase phone;
     protected int cid;
@@ -429,11 +430,12 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected void clearSettings() {
         if (DBG) log("clearSettings");
 
-        this.createTime = -1;
-        this.lastFailTime = -1;
-        this.lastFailCause = FailCause.NONE;
+        createTime = -1;
+        lastFailTime = -1;
+        lastFailCause = FailCause.NONE;
 
         mLinkProperties = new LinkProperties();
+        mApn = null;
     }
 
     /**
@@ -1086,5 +1088,12 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      */
     public FailCause getLastFailCause() {
         return lastFailCause;
+    }
+
+    /**
+     * @return the current ApnSetting
+     */
+    public ApnSetting getApn() {
+        return mApn;
     }
 }
