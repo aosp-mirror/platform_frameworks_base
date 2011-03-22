@@ -501,7 +501,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         final boolean hardwareAccelerated = 
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
 
-        if (attrs != null && hardwareAccelerated) {
+        if (hardwareAccelerated) {
             // Only enable hardware acceleration if we are not in the system process
             // The window manager creates ViewRoots to display animated preview windows
             // of launching apps and we don't want those to be hardware accelerated
