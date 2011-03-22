@@ -570,12 +570,11 @@ setParameter_Exit:
 
 static jint
 android_media_AudioEffect_native_getParameter(JNIEnv *env,
-        jobject thiz, int psize, jbyteArray pJavaParam,
-        jintArray pJavaValueSize, jbyteArray pJavaValue) {
+        jobject thiz, jint psize, jbyteArray pJavaParam,
+        jint vsize, jbyteArray pJavaValue) {
     // retrieve the AudioEffect object
     jbyte* lpParam = NULL;
     jbyte* lpValue = NULL;
-    jbyte* lpValueSize = NULL;
     jint lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
     effect_param_t *p;
     int voffset;
@@ -589,7 +588,7 @@ android_media_AudioEffect_native_getParameter(JNIEnv *env,
         return AUDIOEFFECT_ERROR_NO_INIT;
     }
 
-    if (psize == 0 || pJavaValueSize == NULL || pJavaParam == NULL || pJavaValue == NULL) {
+    if (psize == 0 || vsize == 0 || pJavaParam == NULL || pJavaValue == NULL) {
         return AUDIOEFFECT_ERROR_BAD_VALUE;
     }
 
@@ -607,26 +606,18 @@ android_media_AudioEffect_native_getParameter(JNIEnv *env,
         goto getParameter_Exit;
     }
 
-    // get the pointer for the value size from the java array
-    lpValueSize = (jbyte *) env->GetPrimitiveArrayCritical(pJavaValueSize, NULL);
-    if (lpValueSize == NULL) {
-        LOGE("getParameter: Error retrieving value size pointer");
-        goto getParameter_Exit;
-    }
-
     voffset = ((psize - 1) / sizeof(int) + 1) * sizeof(int);
-    p = (effect_param_t *) malloc(sizeof(effect_param_t) + voffset
-            + lpValueSize[0]);
+    p = (effect_param_t *) malloc(sizeof(effect_param_t) + voffset + vsize);
     memcpy(p->data, lpParam, psize);
     p->psize = psize;
-    p->vsize = lpValueSize[0];
+    p->vsize = vsize;
 
     lStatus = lpAudioEffect->getParameter(p);
     if (lStatus == NO_ERROR) {
         lStatus = p->status;
         if (lStatus == NO_ERROR) {
             memcpy(lpValue, p->data + voffset, p->vsize);
-            lpValueSize[0] = p->vsize;
+            vsize = p->vsize;
         }
     }
 
@@ -640,19 +631,18 @@ getParameter_Exit:
     if (lpValue != NULL) {
         env->ReleasePrimitiveArrayCritical(pJavaValue, lpValue, 0);
     }
-    if (lpValueSize != NULL) {
-        env->ReleasePrimitiveArrayCritical(pJavaValueSize, lpValueSize, 0);
-    }
 
+    if (lStatus == NO_ERROR) {
+        return vsize;
+    }
     return translateError(lStatus);
 }
 
 static jint android_media_AudioEffect_native_command(JNIEnv *env, jobject thiz,
-        jint cmdCode, jint cmdSize, jbyteArray jCmdData, jintArray jReplySize,
+        jint cmdCode, jint cmdSize, jbyteArray jCmdData, jint replySize,
         jbyteArray jReplyData) {
     jbyte* pCmdData = NULL;
     jbyte* pReplyData = NULL;
-    jint* pReplySize = NULL;
     jint lStatus = AUDIOEFFECT_ERROR_BAD_VALUE;
 
     // retrieve the AudioEffect object
@@ -665,7 +655,7 @@ static jint android_media_AudioEffect_native_command(JNIEnv *env, jobject thiz,
         return AUDIOEFFECT_ERROR_NO_INIT;
     }
 
-    if ((cmdSize != 0 && jCmdData == NULL) || (jReplySize != NULL && jReplyData == NULL)) {
+    if ((cmdSize != 0 && jCmdData == NULL) || (replySize != 0 && jReplyData == NULL)) {
         return AUDIOEFFECT_ERROR_BAD_VALUE;
     }
 
@@ -678,17 +668,8 @@ static jint android_media_AudioEffect_native_command(JNIEnv *env, jobject thiz,
         }
     }
 
-    // get the pointer for the reply size from the java array
-    if (jReplySize != NULL) {
-        pReplySize = (jint *) env->GetPrimitiveArrayCritical(jReplySize, NULL);
-        if (pReplySize == NULL) {
-            LOGE("setParameter: Error retrieving reply pointer");
-            goto command_Exit;
-        }
-    }
-
     // get the pointer for the reply from the java array
-    if (pReplySize != NULL && pReplySize[0] != 0 && jReplyData != NULL) {
+    if (replySize != 0 && jReplyData != NULL) {
         pReplyData = (jbyte *) env->GetPrimitiveArrayCritical(jReplyData, NULL);
         if (pReplyData == NULL) {
             LOGE("setParameter: Error retrieving reply pointer");
@@ -699,7 +680,7 @@ static jint android_media_AudioEffect_native_command(JNIEnv *env, jobject thiz,
     lStatus = translateError(lpAudioEffect->command((uint32_t)cmdCode,
                                                     (uint32_t)cmdSize,
                                                     pCmdData,
-                                                    (uint32_t *)pReplySize,
+                                                    (uint32_t *)&replySize,
                                                     pReplyData));
 
 command_Exit:
@@ -710,10 +691,10 @@ command_Exit:
     if (pReplyData != NULL) {
         env->ReleasePrimitiveArrayCritical(jReplyData, pReplyData, 0);
     }
-    if (pReplySize != NULL) {
-        env->ReleasePrimitiveArrayCritical(jReplySize, pReplySize, 0);
-    }
 
+    if (lStatus == NO_ERROR) {
+        return replySize;
+    }
     return lStatus;
 }
 
@@ -803,8 +784,8 @@ static JNINativeMethod gMethods[] = {
     {"native_getEnabled",    "()Z",      (void *)android_media_AudioEffect_native_getEnabled},
     {"native_hasControl",    "()Z",      (void *)android_media_AudioEffect_native_hasControl},
     {"native_setParameter",  "(I[BI[B)I",  (void *)android_media_AudioEffect_native_setParameter},
-    {"native_getParameter",  "(I[B[I[B)I",  (void *)android_media_AudioEffect_native_getParameter},
-    {"native_command",       "(II[B[I[B)I", (void *)android_media_AudioEffect_native_command},
+    {"native_getParameter",  "(I[BI[B)I",  (void *)android_media_AudioEffect_native_getParameter},
+    {"native_command",       "(II[BI[B)I", (void *)android_media_AudioEffect_native_command},
     {"native_query_effects", "()[Ljava/lang/Object;", (void *)android_media_AudioEffect_native_queryEffects},
 };
 
