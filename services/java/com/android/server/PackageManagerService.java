@@ -537,12 +537,12 @@ class PackageManagerService extends IPackageManager.Stub {
                 }
                 case MCS_GIVE_UP: {
                     if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_giveup too many retries");
-                    HandlerParams params = mPendingInstalls.remove(0);
+                    mPendingInstalls.remove(0);
                     break;
                 }
                 case SEND_PENDING_BROADCAST : {
                     String packages[];
-                    ArrayList components[];
+                    ArrayList<String> components[];
                     int size = 0;
                     int uids[];
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
@@ -574,8 +574,7 @@ class PackageManagerService extends IPackageManager.Stub {
                     }
                     // Send broadcasts
                     for (int i = 0; i < size; i++) {
-                        sendPackageChangedBroadcast(packages[i], true,
-                                (ArrayList<String>)components[i], uids[i]);
+                        sendPackageChangedBroadcast(packages[i], true, components[i], uids[i]);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
@@ -2430,7 +2429,8 @@ class PackageManagerService extends IPackageManager.Stub {
     /**
      * @deprecated
      */
-    public void querySyncProviders(List outNames, List outInfo) {
+    @Deprecated
+    public void querySyncProviders(List<String> outNames, List<ProviderInfo> outInfo) {
         synchronized (mPackages) {
             Iterator<Map.Entry<String, PackageParser.Provider>> i
                 = mProviders.entrySet().iterator();
@@ -3122,7 +3122,6 @@ class PackageManagerService extends IPackageManager.Stub {
         
         final long scanFileTime = scanFile.lastModified();
         final boolean forceDex = (scanMode&SCAN_FORCE_DEX) != 0;
-        final boolean scanFileNewer = forceDex || scanFileTime != pkgSetting.timeStamp;
         pkg.applicationInfo.processName = fixProcessName(
                 pkg.applicationInfo.packageName,
                 pkg.applicationInfo.processName,
@@ -3619,19 +3618,6 @@ class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    // Return the path of the directory that will contain the native binaries
-    // of a given installed package. This is relative to the data path.
-    //
-    private File getNativeBinaryDirForPackage(PackageParser.Package pkg) {
-        final String nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
-        if (nativeLibraryDir != null) {
-            return new File(nativeLibraryDir);
-        } else {
-            // Fall back for old packages
-            return new File(pkg.applicationInfo.dataDir, LIB_DIR_NAME);
-        }
-    }
-
     void removePackageLI(PackageParser.Package pkg, boolean chatty) {
         if (DEBUG_INSTALL) {
             if (chatty)
@@ -3744,10 +3730,8 @@ class PackageManagerService extends IPackageManager.Stub {
             r = null;
             for (i=0; i<N; i++) {
                 PackageParser.Permission p = pkg.permissions.get(i);
-                boolean tree = false;
                 BasePermission bp = mSettings.mPermissions.get(p.info.name);
                 if (bp == null) {
-                    tree = true;
                     bp = mSettings.mPermissionTrees.get(p.info.name);
                 }
                 if (bp != null && bp.perm == p) {
@@ -4031,19 +4015,20 @@ class PackageManagerService extends IPackageManager.Stub {
     
     private final class ActivityIntentResolver
             extends IntentResolver<PackageParser.ActivityIntentInfo, ResolveInfo> {
-        public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
+        public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
+                boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
             return super.queryIntent(intent, resolvedType, defaultOnly);
         }
 
-        public List queryIntent(Intent intent, String resolvedType, int flags) {
+        public List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags) {
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
-        public List queryIntentForPackage(Intent intent, String resolvedType, int flags,
-                                          ArrayList<PackageParser.Activity> packageActivities) {
+        public List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
+                int flags, ArrayList<PackageParser.Activity> packageActivities) {
             if (packageActivities == null) {
                 return null;
             }
@@ -4206,19 +4191,20 @@ class PackageManagerService extends IPackageManager.Stub {
 
     private final class ServiceIntentResolver
             extends IntentResolver<PackageParser.ServiceIntentInfo, ResolveInfo> {
-        public List queryIntent(Intent intent, String resolvedType, boolean defaultOnly) {
+        public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
+                boolean defaultOnly) {
             mFlags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
             return super.queryIntent(intent, resolvedType, defaultOnly);
         }
 
-        public List queryIntent(Intent intent, String resolvedType, int flags) {
+        public List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags) {
             mFlags = flags;
             return super.queryIntent(intent, resolvedType,
                 (flags&PackageManager.MATCH_DEFAULT_ONLY) != 0);
         }
 
-        public List queryIntentForPackage(Intent intent, String resolvedType, int flags,
-                                          ArrayList<PackageParser.Service> packageServices) {
+        public List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
+                int flags, ArrayList<PackageParser.Service> packageServices) {
             if (packageServices == null) {
                 return null;
             }
@@ -5756,11 +5742,6 @@ class PackageManagerService extends IPackageManager.Stub {
         boolean deletedPkg = true;
         boolean updatedSettings = false;
 
-        String oldInstallerPackageName = null;
-        synchronized (mPackages) {
-            oldInstallerPackageName = mSettings.getInstallerPackageName(pkgName);
-        }
-
         long origUpdateTime;
         if (pkg.mExtras != null) {
             origUpdateTime = ((PackageSetting)pkg.mExtras).lastUpdateTime;
@@ -6076,7 +6057,6 @@ class PackageManagerService extends IPackageManager.Stub {
     }
 
     private int setPermissionsLI(PackageParser.Package newPackage) {
-        String pkgName = newPackage.packageName;
         int retCode = 0;
         // TODO Gross hack but fix later. Ideally move this to be a post installation
         // check after alloting uid.
@@ -6752,14 +6732,12 @@ class PackageManagerService extends IPackageManager.Stub {
         return new ArrayList<PackageInfo>();
     }
 
-    int getUidTargetSdkVersionLockedLP(int uid) {
+    private int getUidTargetSdkVersionLockedLP(int uid) {
         Object obj = mSettings.getUserIdLP(uid);
         if (obj instanceof SharedUserSetting) {
-            SharedUserSetting sus = (SharedUserSetting)obj;
-            final int N = sus.packages.size();
+            final SharedUserSetting sus = (SharedUserSetting) obj;
             int vers = Build.VERSION_CODES.CUR_DEVELOPMENT;
-            Iterator<PackageSetting> it = sus.packages.iterator();
-            int i=0;
+            final Iterator<PackageSetting> it = sus.packages.iterator();
             while (it.hasNext()) {
                 PackageSetting ps = it.next();
                 if (ps.pkg != null) {
@@ -6769,7 +6747,7 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             return vers;
         } else if (obj instanceof PackageSetting) {
-            PackageSetting ps = (PackageSetting)obj;
+            final PackageSetting ps = (PackageSetting) obj;
             if (ps.pkg != null) {
                 return ps.pkg.applicationInfo.targetSdkVersion;
             }
@@ -8178,19 +8156,6 @@ class PackageManagerService extends IPackageManager.Stub {
             if(p != null) {
                 p.setInstallerPackageName(installerPkgName);
             }
-        }
-
-        String getInstallerPackageName(String pkgName) {
-            PackageSetting p = mPackages.get(pkgName);
-            return (p == null) ? null : p.getInstallerPackageName();
-        }
-
-        int getInstallStatus(String pkgName) {
-            PackageSetting p = mPackages.get(pkgName);
-            if(p != null) {
-                return p.getInstallStatus();
-            }
-            return -1;
         }
 
         SharedUserSetting getSharedUserLP(String name,
