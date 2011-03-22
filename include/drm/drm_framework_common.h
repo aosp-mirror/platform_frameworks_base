@@ -297,6 +297,12 @@ public:
      */
     KeyedVector<DrmCopyControl, int> copyControlVector;
 
+    /**
+     * Defines a vector for any extra data the DRM plugin wants to send
+     * to the native code
+     */
+    KeyedVector<String8, String8> extendedData;
+
 public:
     DecryptHandle():
             decryptId(INVALID_VALUE),
