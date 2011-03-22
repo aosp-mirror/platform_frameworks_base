@@ -141,10 +141,20 @@ public abstract class FragmentTransaction {
 
     /**
      * Set specific animation resources to run for the fragments that are
-     * entering and exiting in this transaction.
+     * entering and exiting in this transaction. These animations will not be
+     * played when popping the back stack.
      */
     public abstract FragmentTransaction setCustomAnimations(int enter, int exit);
-    
+
+    /**
+     * Set specific animation resources to run for the fragments that are
+     * entering and exiting in this transaction. The <code>popEnter</code>
+     * and <code>popExit</code> animations will be played for enter/exit
+     * operations specifically when popping the back stack.
+     */
+    public abstract FragmentTransaction setCustomAnimations(int enter, int exit,
+            int popEnter, int popExit);
+
     /**
      * Select a standard transition animation for this transaction.  May be
      * one of {@link #TRANSIT_NONE}, {@link #TRANSIT_FRAGMENT_OPEN},
