@@ -24,6 +24,6 @@
     <item android:state_focused="true"  android:state_enabled="false"                              android:drawable="@drawable/list_selector_background_disabled" />
     <item android:state_focused="true"                                android:state_pressed="true" android:drawable="@drawable/list_selector_background_transition" />
     <item android:state_focused="false"                               android:state_pressed="true" android:drawable="@drawable/list_selector_background_transition" />
-    <item android:state_focused="true"                                                             android:drawable="@drawable/list_selector_background_focused" />
+    <item android:state_focused="true"                                                             android:drawable="@drawable/list_selector_background_focus" />
     
 </selector>
