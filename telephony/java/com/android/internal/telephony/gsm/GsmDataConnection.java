@@ -36,8 +36,6 @@ public class GsmDataConnection extends DataConnection {
     private static final String LOG_TAG = "GSM";
 
     //***** Instance Variables
-    private ApnSetting apn;
-
     protected int mProfileId = RILConstants.DATA_PROFILE_DEFAULT;
     protected String mActiveApnType = Phone.APN_TYPE_DEFAULT;
     //***** Constructor
@@ -74,13 +72,13 @@ public class GsmDataConnection extends DataConnection {
     @Override
     protected
     void onConnect(ConnectionParams cp) {
-        apn = cp.apn;
+        mApn = cp.apn;
 
-        if (DBG) log("Connecting to carrier: '" + apn.carrier
-                + "' APN: '" + apn.apn
-                + "' proxy: '" + apn.proxy + "' port: '" + apn.port);
+        if (DBG) log("Connecting to carrier: '" + mApn.carrier
+                + "' APN: '" + mApn.apn
+                + "' proxy: '" + mApn.proxy + "' port: '" + mApn.port);
 
-        setHttpProxy (apn.proxy, apn.port);
+        setHttpProxy (mApn.proxy, mApn.port);
 
         createTime = -1;
         lastFailTime = -1;
@@ -90,23 +88,23 @@ public class GsmDataConnection extends DataConnection {
         Message msg = obtainMessage(EVENT_SETUP_DATA_CONNECTION_DONE, cp);
         msg.obj = cp;
 
-        int authType = apn.authType;
+        int authType = mApn.authType;
         if (authType == -1) {
-            authType = (apn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
+            authType = (mApn.user != null) ? RILConstants.SETUP_DATA_AUTH_PAP_CHAP :
                 RILConstants.SETUP_DATA_AUTH_NONE;
         }
 
         String protocol;
         if (phone.getServiceState().getRoaming()) {
-            protocol = apn.roamingProtocol;
+            protocol = mApn.roamingProtocol;
         } else {
-            protocol = apn.protocol;
+            protocol = mApn.protocol;
         }
 
         phone.mCM.setupDataCall(
                 Integer.toString(RILConstants.SETUP_DATA_TECH_GSM),
                 Integer.toString(mProfileId),
-                apn.apn, apn.user, apn.password,
+                mApn.apn, mApn.user, mApn.password,
                 Integer.toString(authType),
                 protocol, msg);
     }
@@ -129,14 +127,8 @@ public class GsmDataConnection extends DataConnection {
     }
 
     @Override
-    protected void clearSettings() {
-        super.clearSettings();
-        apn = null;
-    }
-
-    @Override
     public String toString() {
-        return "State=" + getCurrentState().getName() + " Apn=" + apn +
+        return "State=" + getCurrentState().getName() + " Apn=" + mApn +
                " create=" + createTime + " lastFail=" + lastFailTime +
                " lastFailCause=" + lastFailCause;
     }
@@ -150,11 +142,12 @@ public class GsmDataConnection extends DataConnection {
             // Do not apply the race condition workaround for MMS APN
             // if Proxy is an IP-address.
             // Otherwise, the default APN will not be restored anymore.
-            if (!apn.types[0].equals(Phone.APN_TYPE_MMS)
-                || !isIpAddress(apn.mmsProxy)) {
+            if (!mApn.types[0].equals(Phone.APN_TYPE_MMS)
+                || !isIpAddress(mApn.mmsProxy)) {
                 log(String.format(
                         "isDnsOk: return false apn.types[0]=%s APN_TYPE_MMS=%s isIpAddress(%s)=%s",
-                        apn.types[0], Phone.APN_TYPE_MMS, apn.mmsProxy, isIpAddress(apn.mmsProxy)));
+                        mApn.types[0], Phone.APN_TYPE_MMS, mApn.mmsProxy,
+                        isIpAddress(mApn.mmsProxy)));
                 return false;
             }
         }
@@ -166,15 +159,11 @@ public class GsmDataConnection extends DataConnection {
         Log.d(LOG_TAG, "[" + getName() + "] " + s);
     }
 
-    public ApnSetting getApn() {
-        return this.apn;
-    }
-
     private void setHttpProxy(String httpProxy, String httpPort) {
 
         if (DBG) log("set http proxy for"
                 + "' APN: '" + mActiveApnType
-                + "' proxy: '" + apn.proxy + "' port: '" + apn.port);
+                + "' proxy: '" + mApn.proxy + "' port: '" + mApn.port);
         if(TextUtils.equals(mActiveApnType, Phone.APN_TYPE_DEFAULT)) {
             if (httpProxy == null || httpProxy.length() == 0) {
                 phone.setSystemProperty("net.gprs.http-proxy", null);
@@ -205,6 +194,6 @@ public class GsmDataConnection extends DataConnection {
     private boolean isIpAddress(String address) {
         if (address == null) return false;
 
-        return Patterns.IP_ADDRESS.matcher(apn.mmsProxy).matches();
+        return Patterns.IP_ADDRESS.matcher(address).matches();
     }
 }
