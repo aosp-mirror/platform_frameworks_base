@@ -51,6 +51,13 @@ static void writeDecrptHandleToParcelData(
         data->writeInt32(handle->copyControlVector.valueAt(i));
     }
 
+    size = handle->extendedData.size();
+    data->writeInt32(size);
+    for(int i = 0; i < size; i++) {
+        data->writeString8(handle->extendedData.keyAt(i));
+        data->writeString8(handle->extendedData.valueAt(i));
+    }
+
     if (NULL != handle->decryptInfo) {
         data->writeInt32(handle->decryptInfo->decryptBufferLength);
     } else {
@@ -71,8 +78,16 @@ static void readDecryptHandleFromParcelData(
 
     int size = data.readInt32();
     for (int i = 0; i < size; i ++) {
-        handle->copyControlVector.add(
-                (DrmCopyControl)data.readInt32(), data.readInt32());
+        DrmCopyControl key = (DrmCopyControl)data.readInt32();
+        int value = data.readInt32();
+        handle->copyControlVector.add(key, value);
+    }
+
+    size = data.readInt32();
+    for (int i = 0; i < size; i ++) {
+        String8 key = data.readString8();
+        String8 value = data.readString8();
+        handle->extendedData.add(key, value);
     }
 
     handle->decryptInfo = NULL;
