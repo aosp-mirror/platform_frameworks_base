@@ -36,6 +36,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <assert.h>
+#include <strings.h>
 
 using namespace android;
 
@@ -1764,4 +1765,3 @@ int AssetManager::ZipSet::getIndex(const String8& zip) const
 
     return mZipPath.size()-1;
 }
-
