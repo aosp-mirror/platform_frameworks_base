@@ -65,6 +65,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
     // The spec says the timer should fire every 250 ms or less.
     private static final int TIMEUPDATE_PERIOD = 250;  // ms
 
+    protected boolean mPauseDuringPreparing;
     // common Video control FUNCTIONS:
     public void start() {
         if (mCurrentState == STATE_PREPARED) {
@@ -83,8 +84,9 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
     public void pause() {
         if (mCurrentState == STATE_PREPARED && mPlayer.isPlaying()) {
             mPlayer.pause();
+        } else if (mCurrentState == STATE_NOTPREPARED) {
+            mPauseDuringPreparing = true;
         }
-
         // Delete the Timer to stop it since there is no stop call.
         if (mTimer != null) {
             mTimer.purge();
@@ -133,6 +135,10 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         return mAutostart;
     }
 
+    public boolean getPauseDuringPreparing() {
+        return mPauseDuringPreparing;
+    }
+
     // Every time we start a new Video, we create a VideoView and a MediaPlayer
     public void init(int videoLayerId, int position, boolean autoStart) {
         mPlayer = new MediaPlayer();
@@ -142,6 +148,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         mSaveSeekTime = position;
         mAutostart = autoStart;
         mTimer = null;
+        mPauseDuringPreparing = false;
     }
 
     protected HTML5VideoView() {
@@ -242,15 +249,17 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         if (mProxy != null) {
             mProxy.onPrepared(mp);
         }
+        if (mPauseDuringPreparing) {
+            pauseAndDispatch(mProxy);
+            mPauseDuringPreparing = false;
+        }
     }
 
     // Pause the play and update the play/pause button
     public void pauseAndDispatch(HTML5VideoViewProxy proxy) {
-        if (isPlaying()) {
-            pause();
-            if (proxy != null) {
-                proxy.dispatchOnPaused();
-            }
+        pause();
+        if (proxy != null) {
+            proxy.dispatchOnPaused();
         }
     }
 
