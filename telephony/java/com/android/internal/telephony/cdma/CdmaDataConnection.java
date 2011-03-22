@@ -67,6 +67,7 @@ public class CdmaDataConnection extends DataConnection {
     protected void onConnect(ConnectionParams cp) {
         if (DBG) log("CdmaDataConnection Connecting...");
 
+        mApn = cp.apn;
         createTime = -1;
         lastFailTime = -1;
         lastFailCause = FailCause.NONE;

@@ -757,20 +757,19 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
 
-        GsmDataConnection pdp = apnContext.getDataConnection();
-        if (tearDown && pdp!=null) {
+        GsmDataConnection conn = apnContext.getDataConnection();
+        if (conn != null) {
             apnContext.setState(State.DISCONNECTING);
-            Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
-            pdp.disconnect(msg);
-            return;
-        } else if (pdp != null) {
-            pdp.clearSettings();
+            if (tearDown ) {
+                Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
+                conn.disconnect(msg);
+            } else {
+                conn.resetSynchronously();
+                apnContext.setState(State.IDLE);
+                mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
+            }
         }
 
-        if (!tearDown) {
-            apnContext.setState(State.IDLE);
-            mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-        }
         if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
            mApnContexts.remove(apnContext.getApnType());
         }
@@ -1036,7 +1035,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     // TODO: For multiple Active APNs not exactly sure how to do this.
-    private void gotoIdleAndNotifyDataConnection(String reason) {
+    protected void gotoIdleAndNotifyDataConnection(String reason) {
         if (DBG) log("gotoIdleAndNotifyDataConnection: reason=" + reason);
         notifyDataConnection(reason);
         mActiveApn = null;
@@ -1526,19 +1525,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
             trySetupData(apnContext);
         }
-    }
-
-    /**
-     * Called when EVENT_RESET_DONE is received.
-     */
-    @Override
-    protected void onResetDone(AsyncResult ar) {
-        if (DBG) log("EVENT_RESET_DONE");
-        String reason = null;
-        if (ar.userObj instanceof String) {
-            reason = (String) ar.userObj;
-        }
-        gotoIdleAndNotifyDataConnection(reason);
     }
 
     protected void onPollPdp() {
