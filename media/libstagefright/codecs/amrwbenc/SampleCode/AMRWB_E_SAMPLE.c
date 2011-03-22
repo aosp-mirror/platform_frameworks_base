@@ -129,7 +129,7 @@ int encode(
 	useData.memData = (VO_PTR)(&moper);
 
 #ifdef LINUX
-	handle = dlopen("/data/local/tmp/voAMRWBEnc.so", RTLD_NOW);
+	handle = dlopen("libstagefright.so", RTLD_NOW);
 	if(handle == 0)
 	{
 		printf("open dll error......");

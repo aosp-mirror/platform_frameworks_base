@@ -1,26 +1,26 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := 	AMRWB_E_SAMPLE.c
-	
-LOCAL_SRC_FILES += 	\
-	../../../Common/cmnMemory.c 
+LOCAL_SRC_FILES := \
+    AMRWB_E_SAMPLE.c \
+    ../../common/cmnMemory.c
 
-LOCAL_MODULE := TestvoAMRWBEnc
+LOCAL_MODULE_TAGS := debug
+LOCAL_MODULE := AMRWBEncTest
 
 LOCAL_ARM_MODE := arm
 
-LOCAL_STATIC_LIBRARIES := 
+LOCAL_CFLAGS := $(VO_CFLAGS)
 
-LOCAL_SHARED_LIBRARIES := libvoAMRWBEnc
+LOCAL_SHARED_LIBRARIES := \
+    libstagefright \
+    libdl
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/ \
-	$(LOCAL_PATH)/../../../Common \
-	$(LOCAL_PATH)/../../../Include \
+    $(LOCAL_PATH)/ \
+    $(LOCAL_PATH)/../../common \
+    $(LOCAL_PATH)/../../common/include
 
-LOCAL_CFLAGS := $(VO_CFLAGS)
-	
 include $(BUILD_EXECUTABLE)
 
 
