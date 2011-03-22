@@ -20,8 +20,8 @@
 
 #include "include/M3UParser.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
-#include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaErrors.h>
 
 namespace android {
@@ -306,6 +306,29 @@ status_t M3UParser::parseStreamInf(
     return OK;
 }
 
+// Find the next occurence of the character "what" at or after "offset",
+// but ignore occurences between quotation marks.
+// Return the index of the occurrence or -1 if not found.
+static ssize_t FindNextUnquoted(
+        const AString &line, char what, size_t offset) {
+    CHECK_NE((int)what, (int)'"');
+
+    bool quoted = false;
+    while (offset < line.size()) {
+        char c = line.c_str()[offset];
+
+        if (c == '"') {
+            quoted = !quoted;
+        } else if (c == what && !quoted) {
+            return offset;
+        }
+
+        ++offset;
+    }
+
+    return -1;
+}
+
 // static
 status_t M3UParser::parseCipherInfo(
         const AString &line, sp<AMessage> *meta, const AString &baseURI) {
@@ -318,7 +341,7 @@ status_t M3UParser::parseCipherInfo(
     size_t offset = colonPos + 1;
 
     while (offset < line.size()) {
-        ssize_t end = line.find(",", offset);
+        ssize_t end = FindNextUnquoted(line, ',', offset);
         if (end < 0) {
             end = line.size();
         }
