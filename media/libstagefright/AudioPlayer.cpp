@@ -280,6 +280,26 @@ void AudioPlayer::AudioCallback(int event, void *info) {
     buffer->size = numBytesWritten;
 }
 
+uint32_t AudioPlayer::getNumFramesPendingPlayout() const {
+    uint32_t numFramesPlayedOut;
+    status_t err;
+
+    if (mAudioSink != NULL) {
+        err = mAudioSink->getPosition(&numFramesPlayedOut);
+    } else {
+        err = mAudioTrack->getPosition(&numFramesPlayedOut);
+    }
+
+    if (err != OK || mNumFramesPlayed < numFramesPlayedOut) {
+        return 0;
+    }
+
+    // mNumFramesPlayed is the number of frames submitted
+    // to the audio sink for playback, but not all of them
+    // may have played out by now.
+    return mNumFramesPlayed - numFramesPlayedOut;
+}
+
 size_t AudioPlayer::fillBuffer(void *data, size_t size) {
     if (mNumFramesPlayed == 0) {
         LOGV("AudioCallback");
@@ -342,7 +362,34 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
 
             if (err != OK) {
                 if (mObserver && !mReachedEOS) {
-                    mObserver->postAudioEOS();
+                    // We don't want to post EOS right away but only
+                    // after all frames have actually been played out.
+
+                    // These are the number of frames submitted to the
+                    // AudioTrack that you haven't heard yet.
+                    uint32_t numFramesPendingPlayout =
+                        getNumFramesPendingPlayout();
+
+                    // These are the number of frames we're going to
+                    // submit to the AudioTrack by returning from this
+                    // callback.
+                    uint32_t numAdditionalFrames = size_done / mFrameSize;
+
+                    numFramesPendingPlayout += numAdditionalFrames;
+
+                    int64_t timeToCompletionUs =
+                        (1000000ll * numFramesPendingPlayout) / mSampleRate;
+
+                    LOGV("total number of frames played: %lld (%lld us)",
+                            (mNumFramesPlayed + numAdditionalFrames),
+                            1000000ll * (mNumFramesPlayed + numAdditionalFrames)
+                                / mSampleRate);
+
+                    LOGV("%d frames left to play, %lld us (%.2f secs)",
+                         numFramesPendingPlayout,
+                         timeToCompletionUs, timeToCompletionUs / 1E6);
+
+                    mObserver->postAudioEOS(timeToCompletionUs + mLatencyUs);
                 }
 
                 mReachedEOS = true;

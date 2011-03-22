@@ -1513,12 +1513,12 @@ void AwesomePlayer::postVideoLagEvent_l() {
     mQueue.postEventWithDelay(mVideoLagEvent, 1000000ll);
 }
 
-void AwesomePlayer::postCheckAudioStatusEvent_l() {
+void AwesomePlayer::postCheckAudioStatusEvent_l(int64_t delayUs) {
     if (mAudioStatusEventPending) {
         return;
     }
     mAudioStatusEventPending = true;
-    mQueue.postEvent(mCheckAudioStatusEvent);
+    mQueue.postEventWithDelay(mCheckAudioStatusEvent, delayUs);
 }
 
 void AwesomePlayer::onCheckAudioStatus() {
@@ -1810,12 +1810,12 @@ uint32_t AwesomePlayer::flags() const {
     return mExtractorFlags;
 }
 
-void AwesomePlayer::postAudioEOS() {
-    postCheckAudioStatusEvent_l();
+void AwesomePlayer::postAudioEOS(int64_t delayUs) {
+    postCheckAudioStatusEvent_l(delayUs);
 }
 
 void AwesomePlayer::postAudioSeekComplete() {
-    postCheckAudioStatusEvent_l();
+    postCheckAudioStatusEvent_l(0 /* delayUs */);
 }
 
 }  // namespace android

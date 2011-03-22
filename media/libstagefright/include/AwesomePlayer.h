@@ -93,7 +93,7 @@ struct AwesomePlayer {
     // This is a mask of MediaExtractor::Flags.
     uint32_t flags() const;
 
-    void postAudioEOS();
+    void postAudioEOS(int64_t delayUs = 0ll);
     void postAudioSeekComplete();
 
 private:
@@ -203,7 +203,7 @@ private:
     void postVideoEvent_l(int64_t delayUs = -1);
     void postBufferingEvent_l();
     void postStreamDoneEvent_l(status_t status);
-    void postCheckAudioStatusEvent_l();
+    void postCheckAudioStatusEvent_l(int64_t delayUs);
     void postVideoLagEvent_l();
     status_t play_l();
 
