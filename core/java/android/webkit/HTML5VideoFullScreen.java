@@ -209,9 +209,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
                 // which happens when the video view is detached from its parent
                 // view. This happens in the WebChromeClient before this method
                 // is invoked.
-                mTimer.cancel();
-                mTimer = null;
-
                 pauseAndDispatch(mProxy);
 
                 mLayout.removeView(getSurfaceView());
