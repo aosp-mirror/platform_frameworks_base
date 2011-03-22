@@ -889,23 +889,24 @@ public class ActionBarImpl extends ActionBar {
         return mTabs.get(index);
     }
 
-    /**
-     * This fragment is added when we're keeping a back stack in a tab switch
-     * transaction. We use it to change the selected tab in the action bar view
-     * when we back out.
-     */
-    private class SwitchSelectedTabViewFragment extends Fragment {
-        private int mSelectedTabIndex;
 
-        public SwitchSelectedTabViewFragment(int oldSelectedTab) {
-            mSelectedTabIndex = oldSelectedTab;
-        }
+    @Override
+    public void setIcon(int resId) {
+        mActionView.setIcon(mContext.getResources().getDrawable(resId));
+    }
 
-        @Override
-        public void onDetach() {
-            if (mSelectedTabIndex >= 0 && mSelectedTabIndex < getTabCount()) {
-                mActionView.setTabSelected(mSelectedTabIndex);
-            }
-        }
+    @Override
+    public void setIcon(Drawable icon) {
+        mActionView.setIcon(icon);
+    }
+
+    @Override
+    public void setLogo(int resId) {
+        mActionView.setLogo(mContext.getResources().getDrawable(resId));
+    }
+
+    @Override
+    public void setLogo(Drawable logo) {
+        mActionView.setLogo(logo);
     }
 }

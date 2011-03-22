@@ -160,6 +160,66 @@ public abstract class ActionBar {
     public abstract void setCustomView(int resId);
 
     /**
+     * Set the icon to display in the 'home' section of the action bar.
+     * The action bar will use an icon specified by its style or the
+     * activity icon by default.
+     *
+     * Whether the home section shows an icon or logo is controlled
+     * by the display option {@link #DISPLAY_USE_LOGO}.
+     *
+     * @param resId Resource ID of a drawable to show as an icon.
+     *
+     * @see #setDisplayUseLogoEnabled(boolean)
+     * @see #setDisplayShowHomeEnabled(boolean)
+     */
+    public abstract void setIcon(int resId);
+
+    /**
+     * Set the icon to display in the 'home' section of the action bar.
+     * The action bar will use an icon specified by its style or the
+     * activity icon by default.
+     *
+     * Whether the home section shows an icon or logo is controlled
+     * by the display option {@link #DISPLAY_USE_LOGO}.
+     *
+     * @param icon Drawable to show as an icon.
+     *
+     * @see #setDisplayUseLogoEnabled(boolean)
+     * @see #setDisplayShowHomeEnabled(boolean)
+     */
+    public abstract void setIcon(Drawable icon);
+
+    /**
+     * Set the logo to display in the 'home' section of the action bar.
+     * The action bar will use a logo specified by its style or the
+     * activity logo by default.
+     *
+     * Whether the home section shows an icon or logo is controlled
+     * by the display option {@link #DISPLAY_USE_LOGO}.
+     *
+     * @param resId Resource ID of a drawable to show as a logo.
+     *
+     * @see #setDisplayUseLogoEnabled(boolean)
+     * @see #setDisplayShowHomeEnabled(boolean)
+     */
+    public abstract void setLogo(int resId);
+
+    /**
+     * Set the logo to display in the 'home' section of the action bar.
+     * The action bar will use a logo specified by its style or the
+     * activity logo by default.
+     *
+     * Whether the home section shows an icon or logo is controlled
+     * by the display option {@link #DISPLAY_USE_LOGO}.
+     *
+     * @param logo Drawable to show as a logo.
+     *
+     * @see #setDisplayUseLogoEnabled(boolean)
+     * @see #setDisplayShowHomeEnabled(boolean)
+     */
+    public abstract void setLogo(Drawable logo);
+
+    /**
      * Set the adapter and navigation callback for list navigation mode.
      *
      * The supplied adapter will provide views for the expanded list as well as
