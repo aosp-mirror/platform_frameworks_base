@@ -20,7 +20,9 @@ public class HTML5VideoInline extends HTML5VideoView{
     // Video control FUNCTIONS:
     @Override
     public void start() {
-        super.start();
+        if (!getPauseDuringPreparing()) {
+            super.start();
+        }
     }
 
     HTML5VideoInline(int videoLayerId, int position,
