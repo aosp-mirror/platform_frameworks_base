@@ -207,9 +207,8 @@ class RILRequest {
  */
 public final class RIL extends BaseCommands implements CommandsInterface {
     static final String LOG_TAG = "RILJ";
-    private static final boolean DBG = false;
-    static final boolean RILJ_LOGD = Config.LOGD;
-    static final boolean RILJ_LOGV = DBG ? Config.LOGD : Config.LOGV;
+    static final boolean RILJ_LOGD = true;
+    static final boolean RILJ_LOGV = false; // STOP SHIP if true
 
     /**
      * Wake lock timeout should be longer than the longest timeout in
@@ -2069,7 +2068,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 if (RILJ_LOGD) Log.d(LOG_TAG, "Radio ON @ init; reset to OFF");
                 setRadioPower(false, null);
             } else {
-                if (DBG) Log.d(LOG_TAG, "Radio OFF @ init");
+                if (RILJ_LOGD) Log.d(LOG_TAG, "Radio OFF @ init");
                 setRadioState(newState);
                 setPreferredNetworkType(mNetworkMode, null);
             }
@@ -2366,7 +2365,10 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_GET_IMSI:
             case RIL_REQUEST_GET_IMEI:
             case RIL_REQUEST_GET_IMEISV:
-                return "";
+                if (!RILJ_LOGV) {
+                    // If not versbose logging just return and don't display IMSI and IMEI, IMEISV
+                    return "";
+                }
         }
 
         StringBuilder sb;
