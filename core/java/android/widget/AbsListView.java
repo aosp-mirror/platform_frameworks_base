@@ -4529,8 +4529,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Otherwise resurrects the selection and returns true if resurrected.
      */
     boolean resurrectSelectionIfNeeded() {
-        if (mSelectedPosition < 0) {
-            return resurrectSelection();
+        if (mSelectedPosition < 0 && resurrectSelection()) {
+            updateSelectorState();
+            return true;
         }
         return false;
     }
