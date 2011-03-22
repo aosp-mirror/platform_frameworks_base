@@ -68,6 +68,14 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
     // common Video control FUNCTIONS:
     public void start() {
         if (mCurrentState == STATE_PREPARED) {
+            // When replaying the same video, there is no onPrepared call.
+            // Therefore, the timer should be set up here.
+            if (mTimer == null)
+            {
+                mTimer = new Timer();
+                mTimer.schedule(new TimeupdateTask(mProxy), TIMEUPDATE_PERIOD,
+                        TIMEUPDATE_PERIOD);
+            }
             mPlayer.start();
         }
     }
@@ -76,8 +84,12 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         if (mCurrentState == STATE_PREPARED && mPlayer.isPlaying()) {
             mPlayer.pause();
         }
+
+        // Delete the Timer to stop it since there is no stop call.
         if (mTimer != null) {
             mTimer.purge();
+            mTimer.cancel();
+            mTimer = null;
         }
     }
 
@@ -129,6 +141,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         mVideoLayerId = videoLayerId;
         mSaveSeekTime = position;
         mAutostart = autoStart;
+        mTimer = null;
     }
 
     protected HTML5VideoView() {
@@ -153,8 +166,6 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         // When switching players, surface texture will be reused.
         mUri = uri;
         mHeaders = generateHeaders(uri, proxy);
-
-        mTimer = new Timer();
     }
 
     // Listeners setup FUNCTIONS:
@@ -228,11 +239,9 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
     public void onPrepared(MediaPlayer mp) {
         mCurrentState = STATE_PREPARED;
         seekTo(mSaveSeekTime);
-        if (mProxy != null)
+        if (mProxy != null) {
             mProxy.onPrepared(mp);
-
-        mTimer.schedule(new TimeupdateTask(mProxy), TIMEUPDATE_PERIOD, TIMEUPDATE_PERIOD);
-
+        }
     }
 
     // Pause the play and update the play/pause button
