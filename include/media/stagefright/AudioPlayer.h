@@ -108,6 +108,8 @@ private:
 
     void reset();
 
+    uint32_t getNumFramesPendingPlayout() const;
+
     AudioPlayer(const AudioPlayer &);
     AudioPlayer &operator=(const AudioPlayer &);
 };
