@@ -987,7 +987,7 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Gotovo"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Isključivanje memorije USB..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Isključivanje USB memorije..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Isključivanje SD kartice..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Brisanje memorije USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Brisanje SD kartice..."</string>
