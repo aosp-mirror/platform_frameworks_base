@@ -1214,8 +1214,10 @@
         <item name="android:textColor">?textColorPrimary</item>
     </style>
 
+    <!-- This style is for smaller screens; values-xlarge defines a version
+         for larger screens. -->
     <style name="TextAppearance.Holo.Widget.TabWidget">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@android:color/tab_indicator_text</item>
     </style>
@@ -1664,6 +1666,9 @@
         <item name="android:button">@android:drawable/btn_star_holo_dark</item>
     </style>
 
+    <!-- The holo style for smaller screens actually uses the non-holo layout,
+         which is more compact.  values-xlarge defines an alternative version
+         for the real holo look on a large screen. -->
     <style name="Widget.Holo.TabWidget" parent="Widget.TabWidget">
         <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.TabWidget</item>
         <item name="android:tabStripLeft">@null</item>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!-- Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,24 +15,32 @@
 -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="0dp"
-    android:layout_height="58dp"
-    android:layout_weight="1"
-    android:layout_marginLeft="-3dip"
-    android:layout_marginRight="-3dip"
-    android:paddingBottom="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="56dip"
+    android:layout_weight="0"
+    android:layout_marginLeft="0dip"
+    android:layout_marginRight="0dip"
     android:background="@android:drawable/tab_indicator_holo">
+
+    <View android:id="@+id/tab_indicator_left_spacer"
+        android:layout_width="16dip"
+        android:layout_height="0dip" />
 
     <ImageView android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:layout_toRightOf="@id/tab_indicator_left_spacer"
+        android:paddingRight="8dip" />
 
     <TextView android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/icon"
+        android:paddingLeft="0dip"
+        android:paddingRight="16dip"
         style="?android:attr/tabWidgetStyle" />
-    
+
 </RelativeLayout>
