@@ -244,7 +244,11 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
             Receive(cmd);
             break;
         default:
-            assert(0); //GenerateCall(msg, cmd);
+            ret = GenerateCall(dbg, cmd, msg, ret);
+            msg.set_expect_response(expectResponse);
+            if (!expectResponse)
+                cmd.set_function(cmd.SKIP);
+            Send(msg, cmd);
             break;
         }
     }
