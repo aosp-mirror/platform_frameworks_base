@@ -57,7 +57,6 @@ public final class NfcAdapterExtras {
 
     // protected by NfcAdapterExtras.class, and final after first construction
     private static INfcAdapterExtras sService;
-    private static boolean sIsInitialized = false;
     private static NfcAdapterExtras sSingleton;
     private static NfcExecutionEnvironment sEmbeddedEe;
     private static CardEmulationRoute sRouteOff;
@@ -74,14 +73,22 @@ public final class NfcAdapterExtras {
      */
     public static NfcAdapterExtras get(NfcAdapter adapter) {
         synchronized(NfcAdapterExtras.class) {
-            if (!sIsInitialized) {
-               sIsInitialized = true;
-               sService = adapter.getNfcAdapterExtrasInterface();
-               sEmbeddedEe = new NfcExecutionEnvironment(sService);
-               sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
-               sRouteOnWhenScreenOn = new CardEmulationRoute(
-                       CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON, sEmbeddedEe);
-               sSingleton = new NfcAdapterExtras();
+            if (sSingleton == null) {
+                try {
+                    sService = adapter.getNfcAdapterExtrasInterface();
+                    sEmbeddedEe = new NfcExecutionEnvironment(sService);
+                    sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
+                    sRouteOnWhenScreenOn = new CardEmulationRoute(
+                            CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON, sEmbeddedEe);
+                    sSingleton = new NfcAdapterExtras();
+                } finally {
+                    if (sSingleton == null) {
+                        sService = null;
+                        sEmbeddedEe = null;
+                        sRouteOff = null;
+                        sRouteOnWhenScreenOn = null;
+                    }
+                }
             }
             return sSingleton;
         }
