@@ -1442,7 +1442,7 @@ public abstract class PackageManager {
      * {@link Intent#resolveActivity} finds an activity if a class has not
      * been explicitly specified.
      *
-     * <p><em>Note: if using an implicit Intent (without an explicit ComponentName
+     * <p><em>Note:</em> if using an implicit Intent (without an explicit ComponentName
      * specified), be sure to consider whether to set the {@link #MATCH_DEFAULT_ONLY}
      * only flag.  You need to do so to resolve the activity in the same way
      * that {@link android.content.Context#startActivity(Intent)} and
