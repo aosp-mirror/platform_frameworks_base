@@ -42,7 +42,7 @@ class FontRenderer;
 class Font {
 public:
     enum Style {
-        kFakeBold
+        kFakeBold = 1
     };
 
     ~Font();
