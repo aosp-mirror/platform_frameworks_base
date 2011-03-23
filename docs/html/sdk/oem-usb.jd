@@ -33,14 +33,17 @@ use the <a href="{@docRoot}sdk/win-usb.html">Google USB Driver</a>, instead of a
     <th>OEM</th>
     <th>Driver URL</th></tr>
 <tr><td>Acer</td>	<td><a
-href="http://www.acer.com/worldwide/support/mobile.html">http://www.acer.com/worldwide/support/
-mobile.html</a>
+href="http://www.acer.com/worldwide/support/mobile.html">http://www.acer.com/worldwide/support/mobile.html</a>
     </td></tr>
-
-<tr><td>Dell</td>	<td>
+  <tr>
+    <td>Asus</td>
+    <td><a href="http://support.asus.com/download/">http://support.asus.com/download/</a></td>
+  </tr>
+  <tr><td>
+       Dell
+    </td>	<td>
       <a
-href="http://support.dell.com/support/downloads/index.aspx?c=us&cs=19&l=en&s=dhs&~ck=anavml">http://
-support.dell.com/support/downloads/index.aspx?c=us&cs=19&l=en&s=dhs&~ck=anavml</a>  </td></tr>
+href="http://support.dell.com/support/downloads/index.aspx?c=us&cs=19&l=en&s=dhs&~ck=anavml">http://support.dell.com/support/downloads/index.aspx?c=us&cs=19&l=en&s=dhs&~ck=anavml</a>  </td></tr>
 
 <tr><td>Foxconn</td>	<td><a
 href="http://drivers.cmcs.com.tw/">http://drivers.cmcs.com.tw/</a></td>
@@ -56,17 +59,14 @@ href="http://www.fmworld.net/product/phone/sp/android/develop/">http://www.fmwor
   <tr><td>
        Garmin-Asus
     </td>	<td><a
-href="https://www.garminasus.com/en_US/support/pcsync/">https://www.garminasus.com/en_US/support/
-pcsync/</a></td>
+href="https://www.garminasus.com/en_US/support/pcsync/">https://www.garminasus.com/en_US/support/pcsync/</a></td>
 </tr><tr><td>HTC</td>	<td><a href="http://www.htc.com">http://www.htc.com </a> <br>Click on the
 support tab to select your products/device.  Different regions will have different links.</td>
 </tr>
 <tr><td>Huawei</td>	<td><a
-href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&
-directoryId=20&treeId=0</a></td>
+href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0</a></td>
 </tr><tr><td>KT Tech</td>	<td><a
-href="http://www.kttech.co.kr/cscenter/download05.asp">http://www.kttech.co.kr/cscenter/download05.
-asp</a> for EV-S100(Take)</td>
+href="http://www.kttech.co.kr/cscenter/download05.asp">http://www.kttech.co.kr/cscenter/download05.asp</a> for EV-S100(Take)</td>
 </tr>
   <tr>
     <td>
@@ -76,26 +76,19 @@ asp</a> for EV-S100(Take)</td>
     </td>
   </tr>
   <tr><td>LGE</td>	<td><a
-href="http://www.lg.com/us/mobile-phones/mobile-support/mobile-lg-mobile-phone-support.jsp">http://
-www.lg.com/us/mobile-phones/mobile-support/mobile-lg-mobile-phone-support.jsp</a></td>
+href="http://www.lg.com/us/mobile-phones/mobile-support/mobile-lg-mobile-phone-support.jsp">http://www.lg.com/us/mobile-phones/mobile-support/mobile-lg-mobile-phone-support.jsp</a></td>
 </tr><tr><td>Motorola</td>	<td><a
-href="http://developer.motorola.com/docstools/USB_Drivers/">http://developer.motorola.com/docstools/
-USB_Drivers/</a></td>
+href="http://developer.motorola.com/docstools/USB_Drivers/">http://developer.motorola.com/docstools/USB_Drivers/</a></td>
 </tr><tr><td>Pantech</td>	<td><a
-href="http://www.isky.co.kr/cs/software/software.sky?fromUrl=index">http://www.isky.co.kr/cs/
-software/software.sky?fromUrl=index</a></td>
+href="http://www.isky.co.kr/cs/software/software.sky?fromUrl=index">http://www.isky.co.kr/cs/software/software.sky?fromUrl=index</a></td>
 </tr><tr><td>Samsung</td>	<td><a
-href="http://www.samsung.com/us/support/downloads">http://www.samsung.com/us/support/downloads</a></
-td>
+href="http://www.samsung.com/us/support/downloads">http://www.samsung.com/us/support/downloads</a></td>
 </tr><tr><td>Sharp</td>	<td><a
 href="http://k-tai.sharp.co.jp/support/">http://k-tai.sharp.co.jp/support/</a></td>
 </tr><tr><td>SK Telesys</td>	<td><a
-href="http://www.sk-w.com/service/wDownload/wDownload.jsp">http://www.sk-w.com/service/wDownload/
-wDownload.jsp</a></td></tr><tr>
+href="http://www.sk-w.com/service/wDownload/wDownload.jsp">http://www.sk-w.com/service/wDownload/wDownload.jsp</a></td></tr><tr>
 <td>Sony Ericsson</td>	<td><a
-href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/android">http://developer.
-sonyericsson.com/wportal/devworld/search-downloads/android</a></td></tr><tr>
+href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/android">http://developer.sonyericsson.com/wportal/devworld/search-downloads/android</a></td></tr><tr>
 <td>ZTE</td>	<td><a
-href="http://www.zte.com.cn/cn/products/mobile/services_support/index.jsp">http://www.zte.com.cn/cn/
-products/mobile/services_support/index.jsp</a></td></tr>
+href="http://www.zte.com.cn/cn/products/mobile/services_support/index.jsp">http://www.zte.com.cn/cn/products/mobile/services_support/index.jsp</a></td></tr>
 </table>
