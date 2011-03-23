@@ -109,7 +109,7 @@ class HTML5VideoViewProxy extends Handler
                     boolean foundInTree = nativeSendSurfaceTexture(surfTexture,
                             layer, currentVideoLayerId, textureName,
                             playerState);
-                    if (playerState == HTML5VideoView.STATE_PREPARED
+                    if (playerState >= HTML5VideoView.STATE_PREPARED
                             && !foundInTree) {
                         mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
                         mHTML5VideoView.deleteSurfaceTexture();
