@@ -21,7 +21,7 @@
     const unsigned compressed = dbg->Compress(pixels, width * height * 4); \
     msg.set_data(dbg->lzf_buf, compressed); \
     free(pixels);
-    
+
 #define EXTEND_Debug_glCopyTexSubImage2D EXTEND_Debug_glCopyTexImage2D
 
 #define EXTEND_Debug_glShaderSource \

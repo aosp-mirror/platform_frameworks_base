@@ -59,14 +59,19 @@ namespace android
 struct DbgContext {
 private:
     unsigned lzf_bufSize;
-    
+
+    // used as buffer and reference frame for ReadPixels; malloc/free
+    unsigned * lzf_ref [2];
+    unsigned lzf_readIndex; // 0 or 1
+    unsigned lzf_refSize, lzf_refBufSize; // bytes
+
 public:
-    char * lzf_buf;
-    
+    char * lzf_buf; // auto malloc/free; output of lzf_compress
+
     const unsigned version; // 0 is GLES1, 1 is GLES2
     const gl_hooks_t * const hooks;
     const unsigned MAX_VERTEX_ATTRIBS;
-    
+
     struct VertexAttrib {
         GLenum type; // element data type
         unsigned size; // number of data per element
@@ -100,7 +105,12 @@ public:
 
     void Fetch(const unsigned index, std::string * const data) const;
     unsigned Compress(const void * in_data, unsigned in_len); // compressed to lzf_buf
-    
+    void * GetReadPixelsBuffer(const unsigned size);
+    bool IsReadPixelBuffer(const void * const ptr)  {
+        return ptr == lzf_ref[lzf_readIndex];
+    }
+    unsigned CompressReadPixelBuffer();
+
     void glUseProgram(GLuint program);
     void glEnableVertexAttribArray(GLuint index);
     void glDisableVertexAttribArray(GLuint index);

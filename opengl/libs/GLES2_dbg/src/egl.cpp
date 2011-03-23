@@ -23,7 +23,7 @@ EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
     struct : public FunctionCall {
         EGLDisplay dpy;
         EGLSurface draw;
-        
+
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
             msg.set_time(-1);
             return reinterpret_cast<const int *>(true);
@@ -31,10 +31,10 @@ EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
     } caller;
     caller.dpy = dpy;
     caller.draw = draw;
-    
+
     msg.set_arg0(reinterpret_cast<int>(dpy));
     msg.set_arg1(reinterpret_cast<int>(draw));
-    
+
     int * ret = MessageLoop(caller, msg, expectResponse,
                             glesv2debugger::Message_Function_eglSwapBuffers);
     return static_cast<EGLBoolean>(reinterpret_cast<int>(ret));
