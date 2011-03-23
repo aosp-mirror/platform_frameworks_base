@@ -60,6 +60,7 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        mTestUtils.disable(adapter);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("enable iteration " + (i + 1) + " of " + iterations);
@@ -78,7 +79,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
+        mTestUtils.undiscoverable(adapter);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("discoverable iteration " + (i + 1) + " of " + iterations);
@@ -99,7 +102,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
+        mTestUtils.stopScan(adapter);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("scan iteration " + (i + 1) + " of " + iterations);
@@ -116,7 +121,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
     public void testEnablePan() {
         int iterations = BluetoothTestRunner.sEnablePanIterations;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
+        mTestUtils.disablePan(adapter);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("testEnablePan iteration " + (i + 1) + " of "
@@ -141,13 +148,15 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sPairAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
+        mTestUtils.unpair(adapter, device);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("pair iteration " + (i + 1) + " of " + iterations);
-            mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                    BluetoothTestRunner.sPairPin);
+            mTestUtils.pair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                    BluetoothTestRunner.sDevicePairPin);
             mTestUtils.unpair(adapter, device);
         }
         mTestUtils.disable(adapter);
@@ -162,13 +171,15 @@ public class BluetoothStressTest extends InstrumentationTestCase {
     public void testAcceptPair() {
         int iterations = BluetoothTestRunner.sPairIterations;
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sPairAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
+        mTestUtils.unpair(adapter, device);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("acceptPair iteration " + (i + 1) + " of " + iterations);
-            mTestUtils.acceptPair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                    BluetoothTestRunner.sPairPin);
+            mTestUtils.acceptPair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                    BluetoothTestRunner.sDevicePairPin);
             mTestUtils.unpair(adapter, device);
         }
         mTestUtils.disable(adapter);
@@ -187,15 +198,20 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sA2dpAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
-        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                BluetoothTestRunner.sPairPin);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                BluetoothTestRunner.sDevicePairPin);
+        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.A2DP, null);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("connectA2dp iteration " + (i + 1) + " of " + iterations);
-            mTestUtils.connectProfile(adapter, device, BluetoothProfile.A2DP);
-            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.A2DP);
+            mTestUtils.connectProfile(adapter, device, BluetoothProfile.A2DP,
+                    String.format("connectA2dp(device=%s)", device));
+            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.A2DP,
+                    String.format("disconnectA2dp(device=%s)", device));
         }
 
         mTestUtils.unpair(adapter, device);
@@ -215,15 +231,20 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sHeadsetAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
-        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                BluetoothTestRunner.sPairPin);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                BluetoothTestRunner.sDevicePairPin);
+        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET, null);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("connectHeadset iteration " + (i + 1) + " of " + iterations);
-            mTestUtils.connectProfile(adapter, device, BluetoothProfile.HEADSET);
-            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET);
+            mTestUtils.connectProfile(adapter, device, BluetoothProfile.HEADSET,
+                    String.format("connectHeadset(device=%s)", device));
+            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET,
+                    String.format("disconnectHeadset(device=%s)", device));
         }
 
         mTestUtils.unpair(adapter, device);
@@ -243,15 +264,20 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sInputAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
-        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                BluetoothTestRunner.sPairPin);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                BluetoothTestRunner.sDevicePairPin);
+        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE, null);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("connectInput iteration " + (i + 1) + " of " + iterations);
-            mTestUtils.connectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE);
-            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE);
+            mTestUtils.connectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE,
+                    String.format("connectInput(device=%s)", device));
+            mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.INPUT_DEVICE,
+                    String.format("disconnectInput(device=%s)", device));
         }
 
         mTestUtils.unpair(adapter, device);
@@ -271,10 +297,12 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sPanAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
-        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                BluetoothTestRunner.sPairPin);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                BluetoothTestRunner.sDevicePairPin);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("connectPan iteration " + (i + 1) + " of " + iterations);
@@ -299,11 +327,14 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sPanAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
+        mTestUtils.disablePan(adapter);
         mTestUtils.enablePan(adapter);
-        mTestUtils.acceptPair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                BluetoothTestRunner.sPairPin);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.acceptPair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                BluetoothTestRunner.sDevicePairPin);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("incomingPanConnection iteration " + (i + 1) + " of "
@@ -330,11 +361,15 @@ public class BluetoothStressTest extends InstrumentationTestCase {
         }
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sHeadsetAddress);
+        BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
+        mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
-        mTestUtils.pair(adapter, device, BluetoothTestRunner.sPairPasskey,
-                BluetoothTestRunner.sPairPin);
-        mTestUtils.connectProfile(adapter, device, BluetoothProfile.HEADSET);
+        mTestUtils.unpair(adapter, device);
+        mTestUtils.pair(adapter, device, BluetoothTestRunner.sDevicePairPasskey,
+                BluetoothTestRunner.sDevicePairPin);
+        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET, null);
+        mTestUtils.connectProfile(adapter, device, BluetoothProfile.HEADSET, null);
+        mTestUtils.stopSco(adapter, device);
 
         for (int i = 0; i < iterations; i++) {
             mTestUtils.writeOutput("startStopSco iteration " + (i + 1) + " of " + iterations);
@@ -342,7 +377,7 @@ public class BluetoothStressTest extends InstrumentationTestCase {
             mTestUtils.stopSco(adapter, device);
         }
 
-        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET);
+        mTestUtils.disconnectProfile(adapter, device, BluetoothProfile.HEADSET, null);
         mTestUtils.unpair(adapter, device);
         mTestUtils.disable(adapter);
     }
