@@ -375,25 +375,30 @@ public class CatService extends Handler implements AppInterface {
 
     private void encodeOptionalTags(CommandDetails cmdDet,
             ResultCode resultCode, Input cmdInput, ByteArrayOutputStream buf) {
-        switch (AppInterface.CommandType.fromInt(cmdDet.typeOfCommand)) {
-            case GET_INKEY:
-                // ETSI TS 102 384,27.22.4.2.8.4.2.
-                // If it is a response for GET_INKEY command and the response timeout
-                // occured, then add DURATION TLV for variable timeout case.
-                if ((resultCode.value() == ResultCode.NO_RESPONSE_FROM_USER.value()) &&
-                    (cmdInput != null) && (cmdInput.duration != null)) {
-                    getInKeyResponse(buf, cmdInput);
-                }
-                break;
-            case PROVIDE_LOCAL_INFORMATION:
-                if ((cmdDet.commandQualifier == CommandParamsFactory.LANGUAGE_SETTING) &&
-                    (resultCode.value() == ResultCode.OK.value())) {
-                    getPliResponse(buf);
-                }
-                break;
-            default:
-                CatLog.d(this, "encodeOptionalTags() Unsupported Cmd:" + cmdDet.typeOfCommand);
-                break;
+        CommandType cmdType = AppInterface.CommandType.fromInt(cmdDet.typeOfCommand);
+        if (cmdType != null) {
+            switch (cmdType) {
+                case GET_INKEY:
+                    // ETSI TS 102 384,27.22.4.2.8.4.2.
+                    // If it is a response for GET_INKEY command and the response timeout
+                    // occured, then add DURATION TLV for variable timeout case.
+                    if ((resultCode.value() == ResultCode.NO_RESPONSE_FROM_USER.value()) &&
+                        (cmdInput != null) && (cmdInput.duration != null)) {
+                        getInKeyResponse(buf, cmdInput);
+                    }
+                    break;
+                case PROVIDE_LOCAL_INFORMATION:
+                    if ((cmdDet.commandQualifier == CommandParamsFactory.LANGUAGE_SETTING) &&
+                        (resultCode.value() == ResultCode.OK.value())) {
+                        getPliResponse(buf);
+                    }
+                    break;
+                default:
+                    CatLog.d(this, "encodeOptionalTags() Unsupported Cmd:" + cmdDet.typeOfCommand);
+                    break;
+            }
+        } else {
+            CatLog.d(this, "encodeOptionalTags() bad Cmd:" + cmdDet.typeOfCommand);
         }
     }
 
