@@ -17,12 +17,12 @@
 package android.drm;
 
 /**
- * This is an entity class which wraps the result of communication between device
- * and online DRM server.
- *
- * As a result of {@link DrmManagerClient#processDrmInfo(DrmInfo)} an instance of DrmInfoStatus
- * would be returned. This class holds {@link ProcessedData}, which could be used to instantiate
- * {@link DrmRights#DrmRights(ProcessedData, String)} in license acquisition.
+ * An entity class that wraps the result of communication between a device and an online DRM
+ * server. Specifically, when the {@link DrmManagerClient#processDrmInfo processDrmInfo()} method
+ * is called, an instance of <code>DrmInfoStatus</code> is returned.
+ *<p>
+ * This class contains the {@link ProcessedData} object, which can be used to instantiate a
+ * {@link DrmRights} object during license acquisition.
  *
  */
 public class DrmInfoStatus {
@@ -30,18 +30,30 @@ public class DrmInfoStatus {
     public static final int STATUS_OK = 1;
     public static final int STATUS_ERROR = 2;
 
+    /**
+    * The status of the communication.
+    */
     public final int statusCode;
+    /**
+    * The type of DRM information processed.
+    */
     public final int infoType;
+    /**
+    * The MIME type of the content.
+    */
     public final String mimeType;
+    /**
+    * The processed data.
+    */
     public final ProcessedData data;
 
     /**
-     * constructor to create DrmInfoStatus object with given parameters
+     * Creates a <code>DrmInfoStatus</code> object with the specified parameters.
      *
-     * @param _statusCode Status of the communication
-     * @param _infoType Type of the DRM information processed
-     * @param _data The processed data
-     * @param _mimeType MIME type
+     * @param _statusCode The status of the communication.
+     * @param _infoType The type of the DRM information processed.
+     * @param _data The processed data.
+     * @param _mimeType The MIME type.
      */
     public DrmInfoStatus(int _statusCode, int _infoType, ProcessedData _data, String _mimeType) {
         statusCode = _statusCode;
