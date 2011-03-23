@@ -1786,22 +1786,6 @@ public class AccountManagerService
         }
     }
 
-    private String getMetaValue(String key) {
-        synchronized (mCacheLock) {
-            final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-            Cursor c = db.query(TABLE_META,
-                    new String[]{META_VALUE}, META_KEY + "=?", new String[]{key}, null, null, null);
-            try {
-                if (c.moveToNext()) {
-                    return c.getString(0);
-                }
-                return null;
-            } finally {
-                c.close();
-            }
-        }
-    }
-
     public IBinder onBind(Intent intent) {
         return asBinder();
     }
