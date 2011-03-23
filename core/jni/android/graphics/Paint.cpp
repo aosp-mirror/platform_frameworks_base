@@ -393,9 +393,36 @@ public:
         return count;
     }
  
-    static int getTextWidths__StringII_F(JNIEnv* env, jobject clazz, SkPaint* paint, jstring text, int start, int end, jfloatArray widths) {
+    static int getTextWidths__StringII_F(JNIEnv* env, jobject clazz, SkPaint* paint, jstring text,
+            int start, int end, jfloatArray widths) {
         const jchar* textArray = env->GetStringChars(text, NULL);
         int count = dotextwidths(env, paint, textArray + start, end - start, widths);
+        env->ReleaseStringChars(text, textArray);
+        return count;
+    }
+
+    static int doTextGlyphs(JNIEnv* env, SkPaint* paint, const jchar* text, jint start, jint count,
+            jint contextCount, jint flags, jcharArray glyphs) {
+        jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
+        HB_ShaperItem shaperItem;
+        HB_FontRec font;
+        FontData fontData;
+        RunAdvanceDescription::shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, text,
+                start, count, contextCount, flags);
+
+        int glyphCount = shaperItem.num_glyphs;
+        for (int i = 0; i < glyphCount; i++) {
+            glyphsArray[i] = (jchar) shaperItem.glyphs[i];
+        }
+        return glyphCount;
+    }
+
+    static int getTextGlyphs__StringIIIII_C(JNIEnv* env, jobject clazz, SkPaint* paint,
+            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
+            jcharArray glyphs) {
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        int count = doTextGlyphs(env, paint, textArray + contextStart, start - contextStart,
+                end - start, contextEnd - contextStart, flags, glyphs);
         env->ReleaseStringChars(text, textArray);
         return count;
     }
@@ -725,6 +752,8 @@ static JNINativeMethod methods[] = {
         SkPaintGlue::getTextRunAdvances___CIIIII_FI},
     {"native_getTextRunAdvances","(ILjava/lang/String;IIIII[FI)F",
         (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FI},
+    {"native_getTextGlyphs","(ILjava/lang/String;IIIII[C)I",
+        (void*) SkPaintGlue::getTextGlyphs__StringIIIII_C},
     {"native_getTextRunCursor", "(I[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
     {"native_getTextRunCursor", "(ILjava/lang/String;IIIII)I",
         (void*) SkPaintGlue::getTextRunCursor__String},

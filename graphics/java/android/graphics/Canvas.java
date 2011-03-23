@@ -1330,6 +1330,29 @@ public class Canvas {
     }
 
     /**
+     * Draw the glyphs, with origin at (x,y), using the specified paint. The
+     * origin is interpreted based on the Align setting in the paint.
+     *
+     * @param glyphs The glyphs to be drawn
+     * @param x      The x-coordinate of the origin of the text being drawn
+     * @param y      The y-coordinate of the origin of the text being drawn
+     * @param paint  The paint used for the text (e.g. color, size, style)
+     *
+     * @hide
+     *
+     * Used only for BiDi / RTL Tests
+     */
+    public void drawGlyphs(char[] glyphs, int index, int count, float x, float y,
+                         Paint paint) {
+        if ((index | count | (index + count) |
+            (glyphs.length - index - count)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        native_drawGlyphs(mNativeCanvas, glyphs, index, count, x, y, paint.mBidiFlags,
+                paint.mNativePaint);
+    }
+
+    /**
      * Draw the text, with origin at (x,y), using the specified paint. The
      * origin is interpreted based on the Align setting in the paint.
      *
@@ -1722,7 +1745,9 @@ public class Canvas {
     private static native void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
                                                float y, int flags, int paint);
-
+    private static native void native_drawGlyphs(int nativeCanvas, char[] glyphs,
+                                               int index, int count, float x,
+                                               float y, int flags, int paint);
     private static native void native_drawTextRun(int nativeCanvas, String text,
             int start, int end, int contextStart, int contextEnd,
             float x, float y, int flags, int paint);

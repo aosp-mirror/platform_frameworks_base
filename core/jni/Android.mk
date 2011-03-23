@@ -93,6 +93,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/DrawFilter.cpp \
 	android/graphics/CreateJavaOutputStreamAdaptor.cpp \
 	android/graphics/Graphics.cpp \
+	android/graphics/HarfbuzzSkia.cpp \
 	android/graphics/Interpolator.cpp \
 	android/graphics/LayerRasterizer.cpp \
 	android/graphics/MaskFilter.cpp \
@@ -174,6 +175,7 @@ LOCAL_C_INCLUDES += \
 	external/icu4c/i18n \
 	external/icu4c/common \
 	external/jpeg \
+	external/harfbuzz/src \
 	frameworks/opt/emoji
 
 LOCAL_SHARED_LIBRARIES := \
@@ -206,6 +208,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libjpeg \
 	libnfc_ndef \
 	libusbhost \
+	libharfbuzz \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

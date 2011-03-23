@@ -755,6 +755,27 @@ public:
         env->ReleaseStringChars(text, textArray);
     }
 
+    static void drawGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
+                                         jcharArray glyphs, int index, int count,
+                                         jfloat x, jfloat y, int flags, SkPaint* paint) {
+        jchar* glyphArray = env->GetCharArrayElements(glyphs, NULL);
+
+        // TODO: need to suppress this code after the GL renderer is modified for not
+        // copying the paint
+
+        // Save old text encoding
+        SkPaint::TextEncoding oldEncoding = paint->getTextEncoding();
+        // Define Glyph encoding
+        paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+
+        TextLayout::drawText(paint, glyphArray + index, count, flags, x, y, canvas);
+
+        // Get back old encoding
+        paint->setTextEncoding(oldEncoding);
+
+        env->ReleaseCharArrayElements(glyphs, glyphArray, JNI_ABORT);
+    }
+
     static void drawTextRun___CIIIIFFIPaint(
         JNIEnv* env, jobject, SkCanvas* canvas, jcharArray text, int index,
         int count, int contextIndex, int contextCount,
@@ -946,6 +967,8 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawText___CIIFFIPaint},
     {"native_drawText","(ILjava/lang/String;IIFFII)V",
         (void*) SkCanvasGlue::drawText__StringIIFFIPaint},
+    {"native_drawGlyphs","(I[CIIFFII)V",
+        (void*) SkCanvasGlue::drawGlyphs___CIIFFIPaint},
     {"native_drawTextRun","(I[CIIIIFFII)V",
         (void*) SkCanvasGlue::drawTextRun___CIIIIFFIPaint},
     {"native_drawTextRun","(ILjava/lang/String;IIIIFFII)V",
