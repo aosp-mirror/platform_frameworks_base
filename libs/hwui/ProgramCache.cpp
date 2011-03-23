@@ -42,7 +42,7 @@ const char* gVS_Header_Attributes_TexCoords =
 const char* gVS_Header_Uniforms =
         "uniform mat4 transform;\n";
 const char* gVS_Header_Uniforms_IsPoint =
-        "uniform float pointSize;\n";
+        "uniform mediump float pointSize;\n";
 const char* gVS_Header_Uniforms_HasGradient[3] = {
         // Linear
         "uniform mat4 screenSpace;\n",
@@ -53,7 +53,7 @@ const char* gVS_Header_Uniforms_HasGradient[3] = {
 };
 const char* gVS_Header_Uniforms_HasBitmap =
         "uniform mat4 textureTransform;\n"
-        "uniform vec2 textureDimension;\n";
+        "uniform mediump vec2 textureDimension;\n";
 const char* gVS_Header_Varyings_HasTexture =
         "varying vec2 outTexCoords;\n";
 const char* gVS_Header_Varyings_HasBitmap =
