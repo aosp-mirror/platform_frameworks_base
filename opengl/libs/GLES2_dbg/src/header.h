@@ -56,21 +56,18 @@ using namespace com::android;
 namespace android
 {
 
-struct GLFunctionBitfield
-{
+struct GLFunctionBitfield {
     unsigned char field [24]; // 8 * 24 = 192
-    
-    void Bit(const glesv2debugger::Message_Function function, bool bit)
-    {
+
+    void Bit(const glesv2debugger::Message_Function function, bool bit) {
         const unsigned byte = function / 8, mask = 1 << (function % 8);
         if (bit)
             field[byte] |= mask;
         else
             field[byte] &= ~mask;
     }
-    
-    bool Bit(const glesv2debugger::Message_Function function) const
-    {
+
+    bool Bit(const glesv2debugger::Message_Function function) const {
         const unsigned byte = function / 8, mask = 1 << (function % 8);
         return field[byte] & mask;
     }
@@ -78,7 +75,8 @@ struct GLFunctionBitfield
 
 struct DbgContext {
 private:
-    unsigned lzf_bufSize;
+    static const unsigned int LZF_CHUNK_SIZE = 256 * 1024;
+    char * lzf_buf; // malloc / free; for lzf chunk compression
 
     // used as buffer and reference frame for ReadPixels; malloc/free
     unsigned * lzf_ref [2];
@@ -86,14 +84,12 @@ private:
     unsigned lzf_refSize, lzf_refBufSize; // bytes
 
 public:
-    char * lzf_buf; // auto malloc/free; output of lzf_compress
-
     const unsigned version; // 0 is GLES1, 1 is GLES2
     const gl_hooks_t * const hooks;
     const unsigned MAX_VERTEX_ATTRIBS;
-    
+
     GLFunctionBitfield expectResponse;
-    
+
     struct VertexAttrib {
         GLenum type; // element data type
         unsigned size; // number of data per element
@@ -122,21 +118,23 @@ public:
     GLuint program;
     unsigned maxAttrib; // number of slots used by program
 
-    DbgContext(const unsigned version, const gl_hooks_t * const hooks, const unsigned MAX_VERTEX_ATTRIBS);
+    DbgContext(const unsigned version, const gl_hooks_t * const hooks,
+               const unsigned MAX_VERTEX_ATTRIBS);
     ~DbgContext();
 
     void Fetch(const unsigned index, std::string * const data) const;
-    unsigned Compress(const void * in_data, unsigned in_len); // compressed to lzf_buf
+    void Compress(const void * in_data, unsigned in_len, std::string * const outStr);
     void * GetReadPixelsBuffer(const unsigned size);
     bool IsReadPixelBuffer(const void * const ptr)  {
         return ptr == lzf_ref[lzf_readIndex];
     }
-    unsigned CompressReadPixelBuffer();
+    void CompressReadPixelBuffer(std::string * const outStr);
 
     void glUseProgram(GLuint program);
     void glEnableVertexAttribArray(GLuint index);
     void glDisableVertexAttribArray(GLuint index);
-    void glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr);
+    void glVertexAttribPointer(GLuint indx, GLint size, GLenum type,
+                               GLboolean normalized, GLsizei stride, const GLvoid* ptr);
     void glBindBuffer(GLenum target, GLuint buffer);
     void glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
     void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data);
@@ -148,7 +146,8 @@ DbgContext * getDbgContextThreadSpecific();
 #define DBGCONTEXT(ctx) DbgContext * const ctx = getDbgContextThreadSpecific();
 
 struct FunctionCall {
-    virtual const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) = 0;
+    virtual const int * operator()(gl_hooks_t::gl_t const * const _c,
+                                   glesv2debugger::Message & msg) = 0;
     virtual ~FunctionCall() {}
 };
 
@@ -168,5 +167,5 @@ void Receive(glesv2debugger::Message & cmd);
 float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd);
 void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd);
 const int * GenerateCall(DbgContext * const dbg, const glesv2debugger::Message & cmd,
-                  glesv2debugger::Message & msg, const int * const prevRet);
+                         glesv2debugger::Message & msg, const int * const prevRet);
 }; // namespace android {

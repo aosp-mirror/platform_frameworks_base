@@ -39,7 +39,6 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
     msg.set_arg6(reinterpret_cast<int>(pixels));
 
     const unsigned size = width * height * GetBytesPerPixel(format, type);
-    unsigned compressed = 0;
     if (!expectResponse)
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
     Send(msg, cmd);
@@ -56,13 +55,12 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
             if (dbg->IsReadPixelBuffer(pixels)) {
-                compressed = dbg->CompressReadPixelBuffer();
+                dbg->CompressReadPixelBuffer(msg.mutable_data());
                 msg.set_data_type(msg.ReferencedImage);
             } else {
-                compressed = dbg->Compress(pixels, size);
+                dbg->Compress(pixels, size, msg.mutable_data());
                 msg.set_data_type(msg.NonreferencedImage);
             }
-            msg.set_data(dbg->lzf_buf, compressed);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
             Send(msg, cmd);
