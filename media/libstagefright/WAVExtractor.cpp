@@ -425,6 +425,11 @@ bool SniffWAV(
         return false;
     }
 
+    sp<MediaExtractor> extractor = new WAVExtractor(source);
+    if (extractor->countTracks() == 0) {
+        return false;
+    }
+
     *mimeType = MEDIA_MIMETYPE_CONTAINER_WAV;
     *confidence = 0.3f;
 
