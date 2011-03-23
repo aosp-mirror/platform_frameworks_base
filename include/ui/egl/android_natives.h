@@ -291,9 +291,6 @@ struct ANativeWindow
     void* reserved_proc[2];
 };
 
-// Backwards compatibility...  please switch to ANativeWindow.
-typedef struct ANativeWindow android_native_window_t;
-
 /*
  *  native_window_set_usage(..., usage)
  *  Sets the intended usage flags for the next buffers
