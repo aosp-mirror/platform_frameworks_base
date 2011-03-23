@@ -1409,10 +1409,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (TextUtils.isEmpty(interfaceName)) return;
         for (InetAddress gateway : p.getGateways()) {
 
-            if (!NetworkUtils.addDefaultRoute(interfaceName, gateway) && DBG) {
-                NetworkInfo networkInfo = nt.getNetworkInfo();
-                log("addDefaultRoute for " + networkInfo.getTypeName() +
-                        " (" + interfaceName + "), GatewayAddr=" + gateway.getHostAddress());
+            if (NetworkUtils.addHostRoute(interfaceName, gateway, null) &&
+                    NetworkUtils.addDefaultRoute(interfaceName, gateway)) {
+                if (DBG) {
+                    NetworkInfo networkInfo = nt.getNetworkInfo();
+                    log("addDefaultRoute for " + networkInfo.getTypeName() +
+                            " (" + interfaceName + "), GatewayAddr=" + gateway.getHostAddress());
+                }
             }
         }
     }
@@ -1424,10 +1427,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         String interfaceName = p.getInterfaceName();
 
         if (interfaceName != null) {
-            if ((NetworkUtils.removeDefaultRoute(interfaceName) >= 0) && DBG) {
-                NetworkInfo networkInfo = nt.getNetworkInfo();
-                log("removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
-                        interfaceName + ")");
+            if (NetworkUtils.removeDefaultRoute(interfaceName) >= 0) {
+                if (DBG) {
+                    NetworkInfo networkInfo = nt.getNetworkInfo();
+                    log("removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
+                            interfaceName + ")");
+                }
             }
         }
     }
