@@ -305,6 +305,14 @@ public class SensorEvent {
      * positive in the counter-clockwise direction).
      * </p>
      * 
+     * <h4>{@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE Sensor.TYPE_AMBIENT_TEMPERATURE}:
+     * </h4>
+     *
+     * <ul>
+     * <p>
+     * values[0]: ambient (room) temperature in degree Celsius.
+     * </ul>
+     *
      * @see SensorEvent
      * @see GeomagneticField
      */
