@@ -19,70 +19,69 @@ package android.drm;
 import java.util.HashMap;
 
 /**
- * This is an entity class which would be passed to caller in
- * {@link DrmManagerClient.OnErrorListener#onError(DrmManagerClient, DrmErrorEvent)}
+ * An entity class that is passed to the
+ * {@link DrmManagerClient.OnErrorListener#onError onError()} callback.
  *
  */
 public class DrmErrorEvent extends DrmEvent {
     /**
-     * TYPE_RIGHTS_NOT_INSTALLED, when something went wrong installing the rights.
+     * Something went wrong installing the rights.
      */
     public static final int TYPE_RIGHTS_NOT_INSTALLED = 2001;
     /**
-     * TYPE_RIGHTS_RENEWAL_NOT_ALLOWED, when the server rejects renewal of rights.
+     * The server rejected the renewal of rights.
      */
     public static final int TYPE_RIGHTS_RENEWAL_NOT_ALLOWED = 2002;
     /**
-     * TYPE_NOT_SUPPORTED, when answer from server can not be handled by the native agent.
+     * Response from the server cannot be handled by the DRM plug-in (agent).
      */
     public static final int TYPE_NOT_SUPPORTED = 2003;
     /**
-     * TYPE_OUT_OF_MEMORY, when memory allocation fail during renewal.
-     * Can in the future perhaps be used to trigger garbage collector.
+     * Memory allocation failed during renewal. Can in the future perhaps be used to trigger 
+     * garbage collector.
      */
     public static final int TYPE_OUT_OF_MEMORY = 2004;
     /**
-     * TYPE_NO_INTERNET_CONNECTION, when the Internet connection is missing and no attempt
-     * can be made to renew rights.
+     * An Internet connection is not available and no attempt can be made to renew rights.
      */
     public static final int TYPE_NO_INTERNET_CONNECTION = 2005;
     /**
-     * TYPE_PROCESS_DRM_INFO_FAILED, when failed to process DrmInfo.
+     * Failed to process {@link DrmInfo}. This error event is sent when a
+     * {@link DrmManagerClient#processDrmInfo processDrmInfo()} call fails.
      */
     public static final int TYPE_PROCESS_DRM_INFO_FAILED = 2006;
     /**
-     * TYPE_REMOVE_ALL_RIGHTS_FAILED, when failed to remove all the rights objects
-     * associated with all DRM schemes.
+     * Failed to remove all the rights objects associated with all DRM schemes.
      */
     public static final int TYPE_REMOVE_ALL_RIGHTS_FAILED = 2007;
     /**
-     * TYPE_ACQUIRE_DRM_INFO_FAILED, when failed to acquire DrmInfo.
+     * Failed to acquire {@link DrmInfo}. This error event is sent when an
+     * {@link DrmManagerClient#acquireDrmInfo acquireDrmInfo()} call fails.
      */
     public static final int TYPE_ACQUIRE_DRM_INFO_FAILED = 2008;
 
     /**
-     * constructor to create DrmErrorEvent object with given parameters
+     * Creates a <code>DrmErrorEvent</code> object with the specified parameters.
      *
-     * @param uniqueId Unique session identifier
-     * @param type Type of the event. It could be one of the types defined above
-     * @param message Message description
+     * @param uniqueId Unique session identifier.
+     * @param type Type of the event. Could be any of the event types defined above.
+     * @param message Message description.
      */
     public DrmErrorEvent(int uniqueId, int type, String message) {
         super(uniqueId, type, message);
     }
 
     /**
-     * constructor to create DrmErrorEvent object with given parameters
+     * Creates a <code>DrmErrorEvent</code> object with the specified parameters.
      *
-     * @param uniqueId Unique session identifier
-     * @param type Type of the event. It could be one of the types defined above
-     * @param message Message description
+     * @param uniqueId Unique session identifier.
+     * @param type Type of the event. Could be any of the event types defined above.
+     * @param message Message description.
      * @param attributes Attributes for extensible information. Could be any
-     * information provided by the plugin
+     * information provided by the plug-in.
      */
     public DrmErrorEvent(int uniqueId, int type, String message,
                             HashMap<String, Object> attributes) {
         super(uniqueId, type, message, attributes);
     }
 }
-

@@ -19,58 +19,56 @@ package android.drm;
 import java.util.HashMap;
 
 /**
- * This is an entity class which would be passed to caller in
- * {@link DrmManagerClient.OnInfoListener#onInfo(DrmManagerClient, DrmInfoEvent)}
+ * An entity class that is passed to the 
+ * {@link DrmManagerClient.OnInfoListener#onInfo onInfo()} callback.
  *
  */
 public class DrmInfoEvent extends DrmEvent {
     /**
-     * TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT, when registration has been already done
-     * by another account ID.
+     * The registration has already been done by another account ID.
      */
     public static final int TYPE_ALREADY_REGISTERED_BY_ANOTHER_ACCOUNT = 1;
     /**
-     * TYPE_REMOVE_RIGHTS, when the rights needs to be removed completely.
+     * The rights need to be removed completely.
      */
     public static final int TYPE_REMOVE_RIGHTS = 2;
     /**
-     * TYPE_RIGHTS_INSTALLED, when the rights are downloaded and installed ok.
+     * The rights have been successfully downloaded and installed.
      */
     public static final int TYPE_RIGHTS_INSTALLED = 3;
     /**
-     * TYPE_WAIT_FOR_RIGHTS, rights object is on it's way to phone,
-     * wait before calling checkRights again.
+     * The rights object is being delivered to the device. You must wait before
+     * calling {@link DrmManagerClient#acquireRights acquireRights()} again.
      */
     public static final int TYPE_WAIT_FOR_RIGHTS = 4;
     /**
-     * TYPE_ACCOUNT_ALREADY_REGISTERED, when registration has been
-     * already done for the given account.
+     * The registration has already been done for the given account.
      */
     public static final int TYPE_ACCOUNT_ALREADY_REGISTERED = 5;
     /**
-     * TYPE_RIGHTS_REMOVED, when the rights has been removed.
+     * The rights have been removed.
      */
     public static final int TYPE_RIGHTS_REMOVED = 6;
 
     /**
-     * constructor to create DrmInfoEvent object with given parameters
+     * Creates a <code>DrmInfoEvent</code> object with the specified parameters.
      *
-     * @param uniqueId Unique session identifier
-     * @param type Type of the event. It could be one of the types defined above
-     * @param message Message description
+     * @param uniqueId Unique session identifier.
+     * @param type Type of the event. Could be any of the event types defined above.
+     * @param message Message description.
      */
     public DrmInfoEvent(int uniqueId, int type, String message) {
         super(uniqueId, type, message);
     }
 
     /**
-     * constructor to create DrmInfoEvent object with given parameters
+     * Creates a <code>DrmInfoEvent</code> object with the specified parameters.
      *
-     * @param uniqueId Unique session identifier
-     * @param type Type of the event. It could be one of the types defined above
-     * @param message Message description
+     * @param uniqueId Unique session identifier.
+     * @param type Type of the event. Could be any of the event types defined above.
+     * @param message Message description.
      * @param attributes Attributes for extensible information. Could be any
-     * information provided by the plugin
+     * information provided by the plug-in.
      */
     public DrmInfoEvent(int uniqueId, int type, String message,
                             HashMap<String, Object> attributes) {

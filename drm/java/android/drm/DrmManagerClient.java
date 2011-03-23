@@ -35,18 +35,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Interface of DRM Framework.
- * Java application will instantiate this class
- * to access DRM agent through DRM Framework.
+ * The main programming interface for the DRM framework. An application must instantiate this class
+ * to access DRM agents through the DRM framework.
  *
  */
 public class DrmManagerClient {
     /**
-     * Constant field signifies the success or no error occurred
+     * Indicates that a request was successful or that no error occurred.
      */
     public static final int ERROR_NONE = 0;
     /**
-     * Constant field signifies that error occurred and the reason is not known
+     * Indicates that an error occurred and the reason is not known.
      */
     public static final int ERROR_UNKNOWN = -2000;
 
@@ -58,43 +57,45 @@ public class DrmManagerClient {
     }
 
     /**
-     * Interface definition of a callback to be invoked to communicate
-     * some info and/or warning about DrmManagerClient.
+     * Interface definition for a callback that receives status messages and warnings
+     * during registration and rights acquisition.
      */
     public interface OnInfoListener {
         /**
-         * Called to indicate an info or a warning.
+         * Called when the DRM framework sends status or warning information during registration
+         * and rights acquisition.
          *
-         * @param client DrmManagerClient instance
-         * @param event instance which wraps reason and necessary information
+         * @param client The <code>DrmManagerClient</code> instance.
+         * @param event The {@link DrmInfoEvent} instance that wraps the status information or 
+         * warnings.
          */
         public void onInfo(DrmManagerClient client, DrmInfoEvent event);
     }
 
     /**
-     * Interface definition of a callback to be invoked to communicate
-     * the result of time consuming APIs asynchronously
+     * Interface definition for a callback that receives information
+     * about DRM processing events.
      */
     public interface OnEventListener {
         /**
-         * Called to indicate the result of asynchronous APIs.
+         * Called when the DRM framework sends information about a DRM processing request.
          *
-         * @param client DrmManagerClient instance
-         * @param event instance which wraps type and message
+         * @param client The <code>DrmManagerClient</code> instance.
+         * @param event The {@link DrmEvent} instance that wraps the information being
+         * conveyed, such as the information type and message.
          */
         public void onEvent(DrmManagerClient client, DrmEvent event);
     }
 
     /**
-     * Interface definition of a callback to be invoked to communicate
-     * the error occurred
+     * Interface definition for a callback that receives information about DRM framework errors.
      */
     public interface OnErrorListener {
         /**
-         * Called to indicate the error occurred.
+         * Called when the DRM framework sends error information.
          *
-         * @param client DrmManagerClient instance
-         * @param event instance which wraps error type and message
+         * @param client The <code>DrmManagerClient</code> instance.
+         * @param event The {@link DrmErrorEvent} instance that wraps the error type and message.
          */
         public void onError(DrmManagerClient client, DrmErrorEvent event);
     }
@@ -231,9 +232,9 @@ public class DrmManagerClient {
     }
 
     /**
-     * To instantiate DrmManagerClient
+     * Creates a <code>DrmManagerClient</code>.
      *
-     * @param context context of the caller
+     * @param context Context of the caller.
      */
     public DrmManagerClient(Context context) {
         mContext = context;
@@ -257,10 +258,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Register a callback to be invoked when the caller required to receive
-     * supplementary information.
+     * Registers an {@link DrmManagerClient.OnInfoListener} callback, which is invoked when the 
+     * DRM framework sends status or warning information during registration or rights acquisition.
      *
-     * @param infoListener
+     * @param infoListener Interface definition for the callback.
      */
     public synchronized void setOnInfoListener(OnInfoListener infoListener) {
         if (null != infoListener) {
@@ -269,10 +270,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Register a callback to be invoked when the caller required to receive
-     * the result of asynchronous APIs.
+     * Registers an {@link DrmManagerClient.OnEventListener} callback, which is invoked when the 
+     * DRM framework sends information about DRM processing.
      *
-     * @param eventListener
+     * @param eventListener Interface definition for the callback.
      */
     public synchronized void setOnEventListener(OnEventListener eventListener) {
         if (null != eventListener) {
@@ -281,10 +282,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Register a callback to be invoked when the caller required to receive
-     * error result of asynchronous APIs.
+     * Registers an {@link DrmManagerClient.OnErrorListener} callback, which is invoked when 
+     * the DRM framework sends error information.
      *
-     * @param errorListener
+     * @param errorListener Interface definition for the callback.
      */
     public synchronized void setOnErrorListener(OnErrorListener errorListener) {
         if (null != errorListener) {
@@ -293,9 +294,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Retrieves informations about all the plug-ins registered with DrmFramework.
+     * Retrieves information about all the DRM plug-ins (agents) that are registered with
+     * the DRM framework.
      *
-     * @return Array of DrmEngine plug-in strings
+     * @return A <code>String</code> array of DRM plug-in descriptions.
      */
     public String[] getAvailableDrmEngines() {
         DrmSupportInfo[] supportInfos = _getAllSupportInfo(mUniqueId);
@@ -310,12 +312,13 @@ public class DrmManagerClient {
     }
 
     /**
-     * Get constraints information evaluated from DRM content
+     * Retrieves constraint information for rights-protected content.
      *
-     * @param path Content path from where DRM constraints would be retrieved.
-     * @param action Actions defined in {@link DrmStore.Action}
-     * @return ContentValues instance in which constraints key-value pairs are embedded
-     *         or null in case of failure
+     * @param path Path to the content from which you are retrieving DRM constraints.
+     * @param action Action defined in {@link DrmStore.Action}.
+     *
+     * @return A {@link android.content.ContentValues} instance that contains
+     * key-value pairs representing the constraints. Null in case of failure.
      */
     public ContentValues getConstraints(String path, int action) {
         if (null == path || path.equals("") || !DrmStore.Action.isValid(action)) {
@@ -325,11 +328,12 @@ public class DrmManagerClient {
     }
 
    /**
-    * Get metadata information from DRM content
+    * Retrieves metadata information for rights-protected content.
     *
-    * @param path Content path from where DRM metadata would be retrieved.
-    * @return ContentValues instance in which metadata key-value pairs are embedded
-    *         or null in case of failure
+    * @param path Path to the content from which you are retrieving metadata information.
+    *
+    * @return A {@link android.content.ContentValues} instance that contains
+    * key-value pairs representing the metadata. Null in case of failure.
     */
     public ContentValues getMetadata(String path) {
         if (null == path || path.equals("")) {
@@ -339,12 +343,13 @@ public class DrmManagerClient {
     }
 
     /**
-     * Get constraints information evaluated from DRM content
+     * Retrieves constraint information for rights-protected content.
      *
-     * @param uri Content URI from where DRM constraints would be retrieved.
-     * @param action Actions defined in {@link DrmStore.Action}
-     * @return ContentValues instance in which constraints key-value pairs are embedded
-     *         or null in case of failure
+     * @param uri URI for the content from which you are retrieving DRM constraints.
+     * @param action Action defined in {@link DrmStore.Action}.
+     *
+     * @return A {@link android.content.ContentValues} instance that contains
+     * key-value pairs representing the constraints. Null in case of failure.
      */
     public ContentValues getConstraints(Uri uri, int action) {
         if (null == uri || Uri.EMPTY == uri) {
@@ -354,11 +359,12 @@ public class DrmManagerClient {
     }
 
    /**
-    * Get metadata information from DRM content
+    * Retrieves metadata information for rights-protected content.
     *
-    * @param uri Content URI from where DRM metadata would be retrieved.
-    * @return ContentValues instance in which metadata key-value pairs are embedded
-    *         or null in case of failure
+    * @param uri URI for the content from which you are retrieving metadata information.
+    *
+    * @return A {@link android.content.ContentValues} instance that contains
+    * key-value pairs representing the constraints. Null in case of failure.
     */
     public ContentValues getMetadata(Uri uri) {
         if (null == uri || Uri.EMPTY == uri) {
@@ -368,18 +374,19 @@ public class DrmManagerClient {
     }
 
     /**
-     * Save DRM rights to specified rights path
-     * and make association with content path.
+     * Saves rights to a specified path and associates that path with the content path.
+     * 
+     * <p class="note"><strong>Note:</strong> For OMA or WM-DRM, <code>rightsPath</code> and
+     * <code>contentPath</code> can be null.</p>
      *
-     * <p class="note">In case of OMA or WM-DRM, rightsPath and contentPath could be null.</p>
+     * @param drmRights The {@link DrmRights} to be saved.
+     * @param rightsPath File path where rights will be saved.
+     * @param contentPath File path where content is saved.
      *
-     * @param drmRights DrmRights to be saved
-     * @param rightsPath File path where rights to be saved
-     * @param contentPath File path where content was saved
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
-     * @throws IOException if failed to save rights information in the given path
+     * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
+     *
+     * @throws IOException If the call failed to save rights information at the given
+     * <code>rightsPath</code>.
      */
     public int saveRights(
             DrmRights drmRights, String rightsPath, String contentPath) throws IOException {
@@ -393,9 +400,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Install new DRM Engine Plug-in at the runtime
+     * Installs a new DRM plug-in (agent) at runtime.
      *
-     * @param engineFilePath Path of the plug-in file to be installed
+     * @param engineFilePath File path to the plug-in file to be installed.
+     *
      * {@hide}
      */
     public void installDrmEngine(String engineFilePath) {
@@ -407,13 +415,12 @@ public class DrmManagerClient {
     }
 
     /**
-     * Check whether the given mimetype or path can be handled.
+     * Checks whether the given MIME type or path can be handled.
      *
-     * @param path Path of the content to be handled
-     * @param mimeType Mimetype of the object to be handled
-     * @return
-     *        true - if the given mimeType or path can be handled
-     *        false - cannot be handled.
+     * @param path Path of the content to be handled.
+     * @param mimeType MIME type of the object to be handled.
+     *
+     * @return True if the given MIME type or path can be handled; false if they cannot be handled.
      */
     public boolean canHandle(String path, String mimeType) {
         if ((null == path || path.equals("")) && (null == mimeType || mimeType.equals(""))) {
@@ -423,13 +430,12 @@ public class DrmManagerClient {
     }
 
     /**
-     * Check whether the given mimetype or uri can be handled.
+     * Checks whether the given MIME type or URI can be handled.
      *
-     * @param uri Content URI of the data to be handled.
-     * @param mimeType Mimetype of the object to be handled
-     * @return
-     *        true - if the given mimeType or path can be handled
-     *        false - cannot be handled.
+     * @param uri URI for the content to be handled.
+     * @param mimeType MIME type of the object to be handled
+     *
+     * @return True if the given MIME type or URI can be handled; false if they cannot be handled.
      */
     public boolean canHandle(Uri uri, String mimeType) {
         if ((null == uri || Uri.EMPTY == uri) && (null == mimeType || mimeType.equals(""))) {
@@ -439,12 +445,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Executes given drm information based on its type
+     * Processes the given DRM information based on the information type.
      *
-     * @param drmInfo Information needs to be processed
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
+     * @param drmInfo The {@link DrmInfo} to be processed.
+     * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
      */
     public int processDrmInfo(DrmInfo drmInfo) {
         if (null == drmInfo || !drmInfo.isValid()) {
@@ -459,10 +463,12 @@ public class DrmManagerClient {
     }
 
     /**
-     * Retrieves necessary information for register, unregister or rights acquisition.
+     * Retrieves information for registering, unregistering, or acquiring rights.
      *
-     * @param drmInfoRequest Request information to retrieve drmInfo
-     * @return DrmInfo Instance as a result of processing given input
+     * @param drmInfoRequest The {@link DrmInfoRequest} that specifies the type of DRM
+     * information being retrieved.
+     *
+     * @return A {@link DrmInfo} instance.
      */
     public DrmInfo acquireDrmInfo(DrmInfoRequest drmInfoRequest) {
         if (null == drmInfoRequest || !drmInfoRequest.isValid()) {
@@ -472,17 +478,18 @@ public class DrmManagerClient {
     }
 
     /**
-     * Executes given DrmInfoRequest and returns the rights information asynchronously.
-     * This is a utility API which consists of {@link #acquireDrmInfo(DrmInfoRequest)}
-     * and {@link #processDrmInfo(DrmInfo)}.
-     * It can be used if selected DRM agent can work with this combined sequences.
-     * In case of some DRM schemes, such as OMA DRM, application needs to invoke
-     * {@link #acquireDrmInfo(DrmInfoRequest)} and {@link #processDrmInfo(DrmInfo)}, separately.
+     * Processes a given {@link DrmInfoRequest} and returns the rights information asynchronously.
+     *<p>
+     * This is a utility method that consists of an
+     * {@link #acquireDrmInfo(DrmInfoRequest) acquireDrmInfo()} and a
+     * {@link #processDrmInfo(DrmInfo) processDrmInfo()} method call. This utility method can be 
+     * used only if the selected DRM plug-in (agent) supports this sequence of calls. Some DRM
+     * agents, such as OMA, do not support this utility method, in which case an application must
+     * invoke {@link #acquireDrmInfo(DrmInfoRequest) acquireDrmInfo()} and
+     * {@link #processDrmInfo(DrmInfo) processDrmInfo()} separately.
      *
-     * @param drmInfoRequest Request information to retrieve drmInfo
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
+     * @param drmInfoRequest The {@link DrmInfoRequest} used to acquire the rights.
+     * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
      */
     public int acquireRights(DrmInfoRequest drmInfoRequest) {
         DrmInfo drmInfo = acquireDrmInfo(drmInfoRequest);
@@ -493,14 +500,14 @@ public class DrmManagerClient {
     }
 
     /**
-     * Retrieves the type of the protected object (content, rights, etc..)
-     * using specified path or mimetype. At least one parameter should be non null
-     * to retrieve DRM object type
+     * Retrieves the type of rights-protected object (for example, content object, rights
+     * object, and so on) using the specified path or MIME type. At least one parameter must
+     * be specified to retrieve the DRM object type.
      *
-     * @param path Path of the content or null.
-     * @param mimeType Mimetype of the content or null.
-     * @return Type of the DRM content.
-     * @see DrmStore.DrmObjectType
+     * @param path Path to the content or null.
+     * @param mimeType MIME type of the content or null.
+     * 
+     * @return An <code>int</code> that corresponds to a {@link DrmStore.DrmObjectType}.
      */
     public int getDrmObjectType(String path, String mimeType) {
         if ((null == path || path.equals("")) && (null == mimeType || mimeType.equals(""))) {
@@ -510,14 +517,14 @@ public class DrmManagerClient {
     }
 
     /**
-     * Retrieves the type of the protected object (content, rights, etc..)
-     * using specified uri or mimetype. At least one parameter should be non null
-     * to retrieve DRM object type
+     * Retrieves the type of rights-protected object (for example, content object, rights
+     * object, and so on) using the specified URI or MIME type. At least one parameter must
+     * be specified to retrieve the DRM object type.
      *
-     * @param uri The content URI of the data
-     * @param mimeType Mimetype of the content or null.
-     * @return Type of the DRM content.
-     * @see DrmStore.DrmObjectType
+     * @param uri URI for the content or null.
+     * @param mimeType MIME type of the content or null.
+     * 
+     * @return An <code>int</code> that corresponds to a {@link DrmStore.DrmObjectType}.
      */
     public int getDrmObjectType(Uri uri, String mimeType) {
         if ((null == uri || Uri.EMPTY == uri) && (null == mimeType || mimeType.equals(""))) {
@@ -534,10 +541,11 @@ public class DrmManagerClient {
     }
 
     /**
-     * Retrieves the mime type embedded inside the original content
+     * Retrieves the MIME type embedded in the original content.
      *
-     * @param path Path of the protected content
-     * @return Mimetype of the original content, such as "video/mpeg"
+     * @param path Path to the rights-protected content.
+     *
+     * @return The MIME type of the original content, such as <code>video/mpeg</code>.
      */
     public String getOriginalMimeType(String path) {
         if (null == path || path.equals("")) {
@@ -547,10 +555,11 @@ public class DrmManagerClient {
     }
 
     /**
-     * Retrieves the mime type embedded inside the original content
+     * Retrieves the MIME type embedded in the original content.
      *
-     * @param uri The content URI of the data
-     * @return Mimetype of the original content, such as "video/mpeg"
+     * @param uri URI of the rights-protected content.
+     *
+     * @return MIME type of the original content, such as <code>video/mpeg</code>.
      */
     public String getOriginalMimeType(Uri uri) {
         if (null == uri || Uri.EMPTY == uri) {
@@ -560,22 +569,22 @@ public class DrmManagerClient {
     }
 
     /**
-     * Check whether the given content has valid rights or not
+     * Checks whether the given content has valid rights.
      *
-     * @param path Path of the protected content
-     * @return Status of the rights for the protected content
-     * @see DrmStore.RightsStatus
+     * @param path Path to the rights-protected content.
+     *
+     * @return An <code>int</code> representing the {@link DrmStore.RightsStatus} of the content.
      */
     public int checkRightsStatus(String path) {
         return checkRightsStatus(path, DrmStore.Action.DEFAULT);
     }
 
     /**
-     * Check whether the given content has valid rights or not
+     * Check whether the given content has valid rights.
      *
-     * @param uri The content URI of the data
-     * @return Status of the rights for the protected content
-     * @see DrmStore.RightsStatus
+     * @param uri URI of the rights-protected content.
+     *
+     * @return An <code>int</code> representing the {@link DrmStore.RightsStatus} of the content.
      */
     public int checkRightsStatus(Uri uri) {
         if (null == uri || Uri.EMPTY == uri) {
@@ -585,12 +594,13 @@ public class DrmManagerClient {
     }
 
     /**
-     * Check whether the given content has valid rights or not for specified action.
+     * Checks whether the given rights-protected content has valid rights for the specified
+     * {@link DrmStore.Action}.
      *
-     * @param path Path of the protected content
-     * @param action Action to perform
-     * @return Status of the rights for the protected content
-     * @see DrmStore.RightsStatus
+     * @param path Path to the rights-protected content.
+     * @param action The {@link DrmStore.Action} to perform.
+     *
+     * @return An <code>int</code> representing the {@link DrmStore.RightsStatus} of the content.
      */
     public int checkRightsStatus(String path, int action) {
         if (null == path || path.equals("") || !DrmStore.Action.isValid(action)) {
@@ -600,12 +610,13 @@ public class DrmManagerClient {
     }
 
     /**
-     * Check whether the given content has valid rights or not for specified action.
+     * Checks whether the given rights-protected content has valid rights for the specified
+     * {@link DrmStore.Action}.
      *
-     * @param uri The content URI of the data
-     * @param action Action to perform
-     * @return Status of the rights for the protected content
-     * @see DrmStore.RightsStatus
+     * @param uri URI for the rights-protected content.
+     * @param action The {@link DrmStore.Action} to perform.
+     *
+     * @return An <code>int</code> representing the {@link DrmStore.RightsStatus} of the content.
      */
     public int checkRightsStatus(Uri uri, int action) {
         if (null == uri || Uri.EMPTY == uri) {
@@ -615,12 +626,11 @@ public class DrmManagerClient {
     }
 
     /**
-     * Removes the rights associated with the given protected content
+     * Removes the rights associated with the given rights-protected content.
      *
-     * @param path Path of the protected content
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
+     * @param path Path to the rights-protected content.
+     *
+     * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
      */
     public int removeRights(String path) {
         if (null == path || path.equals("")) {
@@ -630,12 +640,11 @@ public class DrmManagerClient {
     }
 
     /**
-     * Removes the rights associated with the given protected content
+     * Removes the rights associated with the given rights-protected content.
      *
-     * @param uri The content URI of the data
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
+     * @param uri URI for the rights-protected content.
+     *
+     * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
      */
     public int removeRights(Uri uri) {
         if (null == uri || Uri.EMPTY == uri) {
@@ -645,12 +654,10 @@ public class DrmManagerClient {
     }
 
     /**
-     * Removes all the rights information of every plug-in associated with
-     * DRM framework. Will be used in master reset
+     * Removes all the rights information of every DRM plug-in (agent) associated with
+     * the DRM framework. Will be used during a master reset.
      *
-     * @return
-     *     ERROR_NONE for success
-     *     ERROR_UNKNOWN for failure
+     * @return ERROR_NONE for success; ERROR_UNKNOWN for failure.
      */
     public int removeAllRights() {
         int result = ERROR_UNKNOWN;
@@ -662,13 +669,14 @@ public class DrmManagerClient {
     }
 
     /**
-     * This API is for Forward Lock based DRM scheme.
-     * Each time the application tries to download a new DRM file
-     * which needs to be converted, then the application has to
-     * begin with calling this API.
+     * Initiates a new conversion session. An application must initiate a conversion session
+     * with this method each time it downloads a rights-protected file that needs to be converted.
+     *<p>
+     * This method applies only to forward-locking (copy protection) DRM schemes.
      *
-     * @param mimeType Description/MIME type of the input data packet
-     * @return convert ID which will be used for maintaining convert session.
+     * @param mimeType MIME type of the input data packet.
+     *
+     * @return A convert ID that is used used to maintain the conversion session.
      */
     public int openConvertSession(String mimeType) {
         if (null == mimeType || mimeType.equals("")) {
@@ -678,16 +686,17 @@ public class DrmManagerClient {
     }
 
     /**
-     * Accepts and converts the input data which is part of DRM file.
-     * The resultant converted data and the status is returned in the DrmConvertedInfo
-     * object. This method will be called each time there are new block
-     * of data received by the application.
+     * Converts the input data (content) that is part of a rights-protected file. The converted
+     * data and status is returned in a {@link DrmConvertedStatus} object. This method should be
+     * called each time there is a new block of data received by the application.
      *
-     * @param convertId Handle for the convert session
-     * @param inputData Input Data which need to be converted
-     * @return Return object contains the status of the data conversion,
-     *         the output converted data and offset. In this case the
-     *         application will ignore the offset information.
+     * @param convertId Handle for the conversion session.
+     * @param inputData Input data that needs to be converted.
+     *
+     * @return A {@link DrmConvertedStatus} object that contains the status of the data conversion,
+     * the converted data, and offset for the header and body signature. An application can 
+     * ignore the offset because it is only relevant to the
+     * {@link #closeConvertSession closeConvertSession()} method.
      */
     public DrmConvertedStatus convertData(int convertId, byte[] inputData) {
         if (null == inputData || 0 >= inputData.length) {
@@ -697,16 +706,15 @@ public class DrmManagerClient {
     }
 
     /**
-     * Informs the Drm Agent when there is no more data which need to be converted
-     * or when an error occurs. Upon successful conversion of the complete data,
-     * the agent will inform that where the header and body signature
-     * should be added. This signature appending is needed to integrity
-     * protect the converted file.
+     * Informs the DRM plug-in (agent) that there is no more data to convert or that an error 
+     * has occurred. Upon successful conversion of the data, the DRM agent will provide an offset
+     * value indicating where the header and body signature should be added. Appending the 
+     * signature is necessary to protect the integrity of the converted file.
      *
-     * @param convertId Handle for the convert session
-     * @return Return object contains the status of the data conversion,
-     *     the header and body signature data. It also informs
-     *     the application on which offset these signature data should be appended.
+     * @param convertId Handle for the conversion session.
+     *
+     * @return A {@link DrmConvertedStatus} object that contains the status of the data conversion,
+     * the converted data, and the offset for the header and body signature.
      */
     public DrmConvertedStatus closeConvertSession(int convertId) {
         return _closeConvertSession(mUniqueId, convertId);

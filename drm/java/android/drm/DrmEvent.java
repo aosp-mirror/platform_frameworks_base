@@ -19,22 +19,26 @@ package android.drm;
 import java.util.HashMap;
 
 /**
- * This is the base class which would be used to notify the caller
- * about any event occurred in DRM framework.
+ * A base class that is used to send asynchronous event information from the DRM framework.
  *
  */
 public class DrmEvent {
     /**
-     * Constant field signifies that all the rights information associated with
-     * all DRM schemes are removed successfully
+     * All of the rights information associated with all DRM schemes have been successfully removed.
      */
     public static final int TYPE_ALL_RIGHTS_REMOVED = 1001;
     /**
-     * Constant field signifies that given information is processed successfully
+     * The given DRM information has been successfully processed.
      */
     public static final int TYPE_DRM_INFO_PROCESSED = 1002;
-
+    /**
+     * The key that is used in the <code>attributes</code> HashMap to pass the return status.
+     */
     public static final String DRM_INFO_STATUS_OBJECT = "drm_info_status_object";
+    /**
+     * The key that is used in the <code>attributes</code> HashMap to pass the
+     * {@link DrmInfo} object.
+     */
     public static final String DRM_INFO_OBJECT = "drm_info_object";
 
     private final int mUniqueId;
@@ -44,12 +48,12 @@ public class DrmEvent {
     private HashMap<String, Object> mAttributes = new HashMap<String, Object>();
 
     /**
-     * constructor for DrmEvent class
+     * Creates a <code>DrmEvent</code> object with the specified parameters.
      *
-     * @param uniqueId Unique session identifier
-     * @param type Type of information
-     * @param message Message description
-     * @param attributes Attributes for extensible information
+     * @param uniqueId Unique session identifier.
+     * @param type Type of information.
+     * @param message Message description.
+     * @param attributes Attributes for extensible information.
      */
     protected DrmEvent(int uniqueId, int type, String message,
                             HashMap<String, Object> attributes) {
@@ -66,11 +70,11 @@ public class DrmEvent {
     }
 
     /**
-     * constructor for DrmEvent class
+     * Creates a <code>DrmEvent</code> object with the specified parameters.
      *
-     * @param uniqueId Unique session identifier
-     * @param type Type of information
-     * @param message Message description
+     * @param uniqueId Unique session identifier.
+     * @param type Type of information.
+     * @param message Message description.
      */
     protected DrmEvent(int uniqueId, int type, String message) {
         mUniqueId = uniqueId;
@@ -82,40 +86,39 @@ public class DrmEvent {
     }
 
     /**
-     * Returns the Unique Id associated with this object
+     * Retrieves the unique session identifier associated with this object.
      *
-     * @return Unique Id
+     * @return The unique session identifier.
      */
     public int getUniqueId() {
         return mUniqueId;
     }
 
     /**
-     * Returns the Type of information associated with this object
+     * Retrieves the type of information that is associated with this object.
      *
-     * @return Type of information
+     * @return The type of information.
      */
     public int getType() {
         return mType;
     }
 
     /**
-     * Returns the message description associated with this object
+     * Retrieves the message description associated with this object.
      *
-     * @return message description
+     * @return The message description.
      */
     public String getMessage() {
         return mMessage;
     }
 
     /**
-     * Returns the attribute corresponding to the specified key
+     * Retrieves the attribute associated with the specified key.
      *
-     * @return one of the attributes or null if no mapping for
-     * the key is found
+     * @return One of the attributes or null if no mapping for
+     * the key is found.
      */
     public Object getAttribute(String key) {
         return mAttributes.get(key);
     }
 }
-

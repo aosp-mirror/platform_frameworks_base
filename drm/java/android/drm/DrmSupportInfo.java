@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * This is an entity class which wraps the capability of each plug-in,
- * such as mimetype's and file suffixes it could handle.
- *
- * Plug-in developer could return the capability of the plugin by passing
- * {@link DrmSupportInfo} instance.
+ * An entity class that wraps the capability of each DRM plug-in (agent),
+ * such as the MIME type and file suffix the DRM plug-in can handle.
+ *<p>
+ * Plug-in developers can expose the capability of their plug-in by passing an instance of this
+ * class to an application.
  *
  */
 public class DrmSupportInfo {
@@ -33,47 +33,47 @@ public class DrmSupportInfo {
     private String mDescription = "";
 
     /**
-     * Add the mime-type to the support info such that respective plug-in is
-     * capable of handling the given mime-type.
+     * Adds the specified MIME type to the list of MIME types this DRM plug-in supports.
      *
-     * @param mimeType MIME type
+     * @param mimeType MIME type that can be handles by this DRM plug-in.
      */
     public void addMimeType(String mimeType) {
         mMimeTypeList.add(mimeType);
     }
 
     /**
-     * Add the file suffix to the support info such that respective plug-in is
-     * capable of handling the given file suffix.
+     * Adds the specified file suffix to the list of file suffixes this DRM plug-in supports.
      *
-     * @param fileSuffix File suffix which can be handled
+     * @param fileSuffix File suffix that can be handled by this DRM plug-in.
      */
     public void addFileSuffix(String fileSuffix) {
         mFileSuffixList.add(fileSuffix);
     }
 
     /**
-     * Returns the iterator to walk to through mime types of this object
+     * Retrieves an iterator object that you can use to iterate over the MIME types that 
+     * this DRM plug-in supports.
      *
-     * @return Iterator object
+     * @return The iterator object
      */
     public Iterator<String> getMimeTypeIterator() {
         return mMimeTypeList.iterator();
     }
 
     /**
-     * Returns the iterator to walk to through file suffixes of this object
+     * Retrieves an iterator object that you can use to iterate over the file suffixes that
+     * this DRM plug-in supports.
      *
-     * @return Iterator object
+     * @return The iterator object.
      */
     public Iterator<String> getFileSuffixIterator() {
         return mFileSuffixList.iterator();
     }
 
     /**
-     * Set the unique description about the plugin
+     * Sets a description for the DRM plug-in (agent).
      *
-     * @param description Unique description
+     * @param description Unique description of plug-in.
      */
     public void setDescription(String description) {
         if (null != description) {
@@ -82,30 +82,28 @@ public class DrmSupportInfo {
     }
 
     /**
-     * Returns the unique description associated with the plugin
+     * Retrieves the DRM plug-in (agent) description.
      *
-     * @return Unique description
+     * @return The plug-in description.
      */
     public String getDescriprition() {
         return mDescription;
     }
 
     /**
-     * Overridden hash code implementation
+     * Overridden hash code implementation.
      *
-     * @return Hash code value
+     * @return The hash code value.
      */
     public int hashCode() {
         return mFileSuffixList.hashCode() + mMimeTypeList.hashCode() + mDescription.hashCode();
     }
 
     /**
-     * Overridden equals implementation
+     * Overridden <code>equals</code> implementation.
      *
-     * @param object The object to be compared
-     * @return
-     *     true if equal
-     *     false if not equal
+     * @param object The object to be compared.
+     * @return True if equal; false if not equal.
      */
     public boolean equals(Object object) {
         boolean result = false;
@@ -119,12 +117,10 @@ public class DrmSupportInfo {
     }
 
     /**
-     * Returns whether given mime-type is supported or not
+     * Determines whether a given MIME type is supported.
      *
-     * @param mimeType MIME type
-     * @return
-     *     true if mime type is supported
-     *     false if mime type is not supported
+     * @param mimeType MIME type.
+     * @return True if Mime type is supported; false if MIME type is not supported.
      */
     /* package */ boolean isSupportedMimeType(String mimeType) {
         if (null != mimeType && !mimeType.equals("")) {
@@ -139,12 +135,10 @@ public class DrmSupportInfo {
     }
 
     /**
-     * Returns whether given file suffix is supported or not
+     * Determines whether a given file suffix is supported.
      *
-     * @param fileSuffix File suffix
-     * @return
-     *     true - if file suffix is supported
-     *     false - if file suffix is not supported
+     * @param fileSuffix File suffix.
+     * @return True if file suffix is supported; false if file suffix is not supported.
      */
     /* package */ boolean isSupportedFileSuffix(String fileSuffix) {
         return mFileSuffixList.contains(fileSuffix);
