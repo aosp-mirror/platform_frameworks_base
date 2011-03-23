@@ -146,7 +146,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         // So in full screen, we reset the MediaPlayer
         mPlayer.reset();
         setMediaController(new MediaController(mProxy.getContext()));
-
+        mPlayer.setScreenOnWhilePlaying(true);
         prepareDataAndDisplayMode(mProxy);
     }
 
