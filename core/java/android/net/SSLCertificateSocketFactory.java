@@ -17,18 +17,12 @@
 package android.net;
 
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
@@ -40,7 +34,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.harmony.xnet.provider.jsse.OpenSSLContextImpl;
@@ -128,7 +121,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
-     * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
+     * @param cache The {@link SSLSessionCache} to use, or null for no cache.
      * @return a new SSLSocketFactory with the specified parameters
      */
     public static SSLSocketFactory getDefault(int handshakeTimeoutMillis, SSLSessionCache cache) {
@@ -144,7 +137,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
-     * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
+     * @param cache The {@link SSLSessionCache} to use, or null for no cache.
      * @return an insecure SSLSocketFactory with the specified parameters
      */
     public static SSLSocketFactory getInsecure(int handshakeTimeoutMillis, SSLSessionCache cache) {
@@ -157,12 +150,11 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @param handshakeTimeoutMillis to use for SSL connection handshake, or 0
      *         for none.  The socket timeout is reset to 0 after the handshake.
-     * @param cache The {@link SSLClientSessionCache} to use, or null for no cache.
+     * @param cache The {@link SSLSessionCache} to use, or null for no cache.
      * @return a new SocketFactory with the specified parameters
      */
     public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(
-            int handshakeTimeoutMillis,
-            SSLSessionCache cache) {
+            int handshakeTimeoutMillis, SSLSessionCache cache) {
         return new org.apache.http.conn.ssl.SSLSocketFactory(
                 new SSLCertificateSocketFactory(handshakeTimeoutMillis, cache, true));
     }
