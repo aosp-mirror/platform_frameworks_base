@@ -51,10 +51,11 @@ import android.media.videoeditor.ExtractAudioWaveformProgressListener;
 
 import android.os.Debug;
 import android.util.Log;
-
+import com.android.mediaframeworktest.MediaFrameworkPerfTestRunner;
 import com.android.mediaframeworktest.MediaFrameworkTest;
 import android.test.suitebuilder.annotation.LargeTest;
 import com.android.mediaframeworktest.VideoEditorHelper;
+import com.android.mediaframeworktest.MediaTestUtil;
 
 /**
  * Junit / Instrumentation - performance measurement for media player and
@@ -63,7 +64,7 @@ import com.android.mediaframeworktest.VideoEditorHelper;
 public class VideoEditorStressTest
         extends ActivityInstrumentationTestCase<MediaFrameworkTest> {
 
-    private final String TAG = "VideoEditorPerformance";
+    private final String TAG = "VideoEditorStressTest";
 
     private final String PROJECT_LOCATION = VideoEditorHelper.PROJECT_LOCATION_COMMON;
 
@@ -86,12 +87,17 @@ public class VideoEditorStressTest
     private final String PROJECT_CLASS_NAME =
         "android.media.videoeditor.VideoEditorImpl";
     private VideoEditor mVideoEditor;
+    private MediaTestUtil mMediaTestUtil;
     private VideoEditorHelper mVideoEditorHelper;
 
     @Override
     protected void setUp() throws Exception {
         // setup for each test case.
         super.setUp();
+        getActivity();
+        mMediaTestUtil = new MediaTestUtil(
+            "/sdcard/VideoEditorMediaServerMemoryLog.txt",
+             this.getName(), "mediaserver");
         mVideoEditorHelper = new VideoEditorHelper();
         // Create a random String which will be used as project path, where all
         // project related files will be stored.
@@ -102,6 +108,12 @@ public class VideoEditorStressTest
 
     @Override
     protected void tearDown() throws Exception {
+        final String[] loggingInfo = new String[1];
+        mMediaTestUtil.getMemorySummary();
+        loggingInfo[0] = "\n" +this.getName();
+        writeTimingInfo(loggingInfo);
+        loggingInfo[0] = " diff :  " + (AfterNativeMemory - BeginNativeMemory);
+        writeTimingInfo(loggingInfo);
         mVideoEditorHelper.destroyVideoEditor(mVideoEditor);
         // Clean the directory created as project path
         mVideoEditorHelper.deleteProject(new File(mVideoEditor.getPath()));
@@ -131,6 +143,7 @@ public class VideoEditorStressTest
         System.gc();
         Thread.sleep(2500);
         BeginNativeMemory = Debug.getNativeHeapAllocatedSize();
+        mMediaTestUtil.getStartMemoryLog();
     }
     private void getAfterMemory_updateLog(String[] loggingInfo, boolean when,
         int iteration)
@@ -146,6 +159,7 @@ public class VideoEditorStressTest
                 "\t " + (AfterNativeMemory - BeginNativeMemory);
         }
         writeTimingInfo(loggingInfo);
+        mMediaTestUtil.getMemoryLog();
     }
 
     /**
@@ -170,7 +184,6 @@ public class VideoEditorStressTest
         writeTestCaseHeader("testStressAddRemoveVideoItem");
         int i = 0;
         getBeginMemory();
-
         for ( i = 0; i < 50; i++) {
             if (i % 4 == 0) {
                 final MediaVideoItem mediaItem1 = new MediaVideoItem(mVideoEditor,
@@ -203,7 +216,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for ( i = 0; i < 50; i++) {
             if (i % 4 == 0) {
                 mVideoEditor.removeMediaItem("m1" + i);
@@ -273,7 +285,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for ( i = 0; i < 50; i++) {
             if (i % 4 == 0) {
                 mVideoEditor.removeMediaItem("m1"+i);
@@ -387,7 +398,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for ( i = 0; i < 50; i++) {
             if (i % 4 == 0) {
                 mVideoEditor.removeTransition("transCF" + i);
@@ -551,7 +561,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for ( i = 0; i < 50; i++) {
             if (i % 5 == 0) {
                 mediaItem1.removeEffect("effect1"+i);
@@ -773,15 +782,14 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for ( i = 0; i < 50; i++) {
             mVideoEditor.removeMediaItem("m3" + i);
             if (i % 10 == 0) {
                 getAfterMemory_updateLog(loggingInfo, true, i);
             }
         }
-            mVideoEditor.removeMediaItem("m2");
-            mVideoEditor.removeMediaItem("m1");
+        mVideoEditor.removeMediaItem("m2");
+        mVideoEditor.removeMediaItem("m1");
         getAfterMemory_updateLog(loggingInfo, true, i);
     }
 
@@ -879,7 +887,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for( i=0; i<10; i++){
             final VideoEditor mVideoEditor1b =
                 VideoEditorFactory.load(projectPath[i], true);
@@ -986,7 +993,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         mVideoEditor.removeMediaItem("m2");
         mVideoEditor.removeMediaItem("m1");
 
@@ -1063,7 +1069,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         for ( i = 0; i < 10; i++) {
             MediaImageItem m2 = (MediaImageItem)mVideoEditor.getMediaItem("m2"+i);
             MediaVideoItem m1 = (MediaVideoItem)mVideoEditor.getMediaItem("m1"+i);
@@ -1129,7 +1134,6 @@ public class VideoEditorStressTest
         getAfterMemory_updateLog(loggingInfo, false, i);
 
         /** Remove items and check for memory leak if any */
-        getBeginMemory();
         mVideoEditor.removeMediaItem("mediaItem1");
 
         getAfterMemory_updateLog(loggingInfo, true, i);
