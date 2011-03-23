@@ -177,25 +177,25 @@ class PackageSettingBase extends GrantedPermissions {
         installStatus = base.installStatus;
     }
 
-    boolean enableComponentLP(String componentClassName) {
+    boolean enableComponentLPw(String componentClassName) {
         boolean changed = disabledComponents.remove(componentClassName);
         changed |= enabledComponents.add(componentClassName);
         return changed;
     }
 
-    boolean disableComponentLP(String componentClassName) {
+    boolean disableComponentLPw(String componentClassName) {
         boolean changed = enabledComponents.remove(componentClassName);
         changed |= disabledComponents.add(componentClassName);
         return changed;
     }
 
-    boolean restoreComponentLP(String componentClassName) {
+    boolean restoreComponentLPw(String componentClassName) {
         boolean changed = enabledComponents.remove(componentClassName);
         changed |= disabledComponents.remove(componentClassName);
         return changed;
     }
 
-    int currentEnabledStateLP(String componentName) {
+    int getCurrentEnabledStateLPr(String componentName) {
         if (enabledComponents.contains(componentName)) {
             return COMPONENT_ENABLED_STATE_ENABLED;
         } else if (disabledComponents.contains(componentName)) {
