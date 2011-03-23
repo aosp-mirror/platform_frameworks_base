@@ -17,13 +17,11 @@
 package android.drm;
 
 /**
- * This is an entity class which wraps the status of the conversion, the converted
- * data/checksum data and the offset. Offset is going to be used in the case of close
- * session where the agent will inform where the header and body signature should be added
- *
- * As a result of {@link DrmManagerClient#convertData(int, byte [])} and
- * {@link DrmManagerClient#closeConvertSession(int)} an instance of DrmConvertedStatus
- * would be returned.
+ * An entity class that wraps converted data, conversion status, and the
+ * offset for appending the header and body signature to the converted data. An instance of this
+ * class is returned by the {@link DrmManagerClient#convertData convertData()} and
+ * {@link DrmManagerClient#closeConvertSession closeConvertSession()} methods. The offset is provided only when a
+ * conversion session is closed by calling {@link DrmManagerClient#closeConvertSession closeConvertSession()}.
  *
  */
 public class DrmConvertedStatus {
@@ -32,16 +30,19 @@ public class DrmConvertedStatus {
     public static final int STATUS_INPUTDATA_ERROR = 2;
     public static final int STATUS_ERROR = 3;
 
+    /** Status code for the conversion.*/
     public final int statusCode;
+    /** Converted data.*/
     public final byte[] convertedData;
+    /** Offset value for the body and header signature.*/
     public final int offset;
 
     /**
-     * constructor to create DrmConvertedStatus object with given parameters
+     * Creates a <code>DrmConvertedStatus</code> object with the specified parameters.
      *
-     * @param _statusCode Status of the conversion
-     * @param _convertedData Converted data/checksum data
-     * @param _offset Offset value
+     * @param _statusCode Conversion status.
+     * @param _convertedData Converted data.
+     * @param _offset Offset value for appending the header and body signature.
      */
     public DrmConvertedStatus(int _statusCode, byte[] _convertedData, int _offset) {
         statusCode = _statusCode;

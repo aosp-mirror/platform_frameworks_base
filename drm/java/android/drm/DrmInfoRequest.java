@@ -20,30 +20,37 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * This is an entity class used to pass required parameters to get
- * the necessary information to communicate with online DRM server
- *
- * An instance of this class is passed to {@link DrmManagerClient#acquireDrmInfo(DrmInfoRequest)}
- * to get the instance of {@link DrmInfo}
+ * An entity class that is used to pass information to an online DRM server. An instance of this
+ * class is passed to the {@link DrmManagerClient#acquireDrmInfo acquireDrmInfo()} method to get an
+ * instance of a {@link DrmInfo}.
  *
  */
 public class DrmInfoRequest {
     // Changes in following constants should be in sync with DrmInfoRequest.h
     /**
-     * Constants defines the type of {@link DrmInfoRequest}
+     * Acquires DRM server registration information.
      */
     public static final int TYPE_REGISTRATION_INFO = 1;
+    /**
+    * Acquires information for unregistering the DRM server.
+    */
     public static final int TYPE_UNREGISTRATION_INFO = 2;
+    /**
+    * Acquires rights information.
+    */
     public static final int TYPE_RIGHTS_ACQUISITION_INFO = 3;
+    /**
+    * Acquires the progress of the rights acquisition.
+    */
     public static final int TYPE_RIGHTS_ACQUISITION_PROGRESS_INFO = 4;
 
     /**
-     * Key to pass the unique id for the account or the user
+     * Key that is used to pass the unique session ID for the account or the user.
      */
     public static final String ACCOUNT_ID = "account_id";
 
     /**
-     * Key to pass the unique id used for subscription
+     * Key that is used to pass the unique session ID for the subscription.
      */
     public static final String SUBSCRIPTION_ID = "subscription_id";
 
@@ -52,10 +59,10 @@ public class DrmInfoRequest {
     private final HashMap<String, Object> mRequestInformation = new HashMap<String, Object>();
 
     /**
-     * constructor to create DrmInfoRequest object with type and mimetype
+     * Creates a <code>DrmInfoRequest</code> object with type and MIME type.
      *
-     * @param infoType Type of information
-     * @param mimeType MIME type
+     * @param infoType Type of information.
+     * @param mimeType MIME type.
      */
     public DrmInfoRequest(int infoType, String mimeType) {
         mInfoType = infoType;
@@ -63,56 +70,60 @@ public class DrmInfoRequest {
     }
 
     /**
-     * Returns the mimetype associated with this object
+     * Retrieves the MIME type associated with this object.
      *
-     * @return MIME type
+     * @return The MIME type.
      */
     public String getMimeType() {
         return mMimeType;
     }
 
     /**
-     * Returns Information type associated with this instance
+     * Retrieves the information type associated with this object.
      *
-     * @return Information type
+     * @return The information type.
      */
     public int getInfoType() {
         return mInfoType;
     }
 
     /**
-     * Adds optional information as <key, value> pair to this object.
+     * Adds optional information as key-value pairs to this object.
      *
-     * @param key Key to add
-     * @param value Value to add
+     * @param key The key to add.
+     * @param value The value to add.
      */
     public void put(String key, Object value) {
         mRequestInformation.put(key, value);
     }
 
     /**
-     * Retrieves the value of given key, if not found returns null
+     * Retrieves the value of a given key.
      *
-     * @param key Key whose value to be retrieved
-     * @return The value or null
+     * @param key The key whose value is being retrieved.
+     *
+     * @return The value of the key that is being retrieved. Returns null if the key cannot be
+     * found.
      */
     public Object get(String key) {
         return mRequestInformation.get(key);
     }
 
     /**
-     * Returns Iterator object to walk through the keys associated with this instance
+     * Retrieves an iterator object that you can use to iterate over the keys associated with
+     * this <code>DrmInfoRequest</code> object.
      *
-     * @return Iterator object
+     * @return The iterator object.
      */
     public Iterator<String> keyIterator() {
         return mRequestInformation.keySet().iterator();
     }
 
     /**
-     * Returns Iterator object to walk through the values associated with this instance
+     * Retrieves an iterator object that you can use to iterate over the values associated with
+     * this <code>DrmInfoRequest</code> object.
      *
-     * @return Iterator object
+     * @return The iterator object.
      */
     public Iterator<Object> iterator() {
         return mRequestInformation.values().iterator();

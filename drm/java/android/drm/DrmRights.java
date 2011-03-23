@@ -20,14 +20,16 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * This is an entity class which wraps the license information which was
- * retrieved from the online DRM server.
- *
- * Caller can instantiate {@link DrmRights} by
- * invoking {@link DrmRights#DrmRights(ProcessedData, String)}
- * constructor by using the result of {@link DrmManagerClient#processDrmInfo(DrmInfo)} interface.
- * Caller can also instantiate {@link DrmRights} using the file path
- * which contains rights information.
+ * An entity class that wraps the license information retrieved from the online DRM server.
+ *<p>
+ * A caller can instantiate a {@link DrmRights} object by first invoking the
+ * {@link DrmManagerClient#processDrmInfo(DrmInfo)} method and then using the resulting
+ * {@link ProcessedData} object to invoke the {@link DrmRights#DrmRights(ProcessedData, String)}
+ * constructor.
+ *<p>
+ * A caller can also instantiate a {@link DrmRights} object by using the
+ * {@link DrmRights#DrmRights(String, String)} constructor, which takes a path to a file
+ * containing rights information instead of a <code>ProcessedData</code>.
  *
  */
 public class DrmRights {
@@ -37,10 +39,10 @@ public class DrmRights {
     private String mSubscriptionId = "";
 
     /**
-     * constructor to create DrmRights object with given parameters
+     * Creates a <code>DrmRights</code> object with the given parameters.
      *
-     * @param rightsFilePath Path of the file containing rights data
-     * @param mimeType MIME type
+     * @param rightsFilePath Path to the file containing rights information.
+     * @param mimeType MIME type.
      */
     public DrmRights(String rightsFilePath, String mimeType) {
         File file = new File(rightsFilePath);
@@ -48,11 +50,11 @@ public class DrmRights {
     }
 
     /**
-     * constructor to create DrmRights object with given parameters
+     * Creates a <code>DrmRights</code> object with the given parameters.
      *
-     * @param rightsFilePath Path of the file containing rights data
-     * @param mimeType MIME type
-     * @param accountId Account Id of the user
+     * @param rightsFilePath Path to the file containing rights information.
+     * @param mimeType MIME type.
+     * @param accountId Account ID of the user.
      */
     public DrmRights(String rightsFilePath, String mimeType, String accountId) {
         this(rightsFilePath, mimeType);
@@ -63,12 +65,12 @@ public class DrmRights {
     }
 
     /**
-     * constructor to create DrmRights object with given parameters
+     * Creates a <code>DrmRights</code> object with the given parameters.
      *
-     * @param rightsFilePath Path of the file containing rights data
-     * @param mimeType MIME type
-     * @param accountId Account Id of the user
-     * @param subscriptionId Subscription Id of the user
+     * @param rightsFilePath Path to the file containing rights information.
+     * @param mimeType MIME type.
+     * @param accountId Account ID of the user.
+     * @param subscriptionId Subscription ID of the user.
      */
     public DrmRights(
             String rightsFilePath, String mimeType, String accountId, String subscriptionId) {
@@ -84,10 +86,10 @@ public class DrmRights {
     }
 
     /**
-     * constructor to create DrmRights object with given parameters
+     * Creates a <code>DrmRights</code> object with the given parameters.
      *
-     * @param rightsFile File containing rights data
-     * @param mimeType MIME type
+     * @param rightsFile File containing rights information.
+     * @param mimeType MIME type.
      */
     public DrmRights(File rightsFile, String mimeType) {
         instantiate(rightsFile, mimeType);
@@ -104,16 +106,20 @@ public class DrmRights {
     }
 
     /**
-     * constructor to create DrmRights object with given parameters
-     * The user can pass String or binary data<p>
-     * Usage:<p>
-     *        i)  String(e.g. data is instance of String):<br>
-     *            - new DrmRights(data.getBytes(), mimeType)<p>
-     *        ii) Binary data<br>
-     *            - new DrmRights(binaryData[], mimeType)<br>
+     * Creates a <code>DrmRights</code> object with the given parameters.
+     *<p>
+     * The application can pass the processed data as a <code>String</code> or as binary data.
+     *<p>
+     * The following code snippet shows how to pass the processed data as a <code>String</code>:
+     *<p>
+     * new DrmRights(data.getBytes(), mimeType)
+     *<p>
+     * The following code snippet shows how to pass the processed data as binary data:
+     *<p>
+     * new DrmRights(binaryData[], mimeType)
      *
-     * @param data Processed data
-     * @param mimeType MIME type
+     * @param data A {@link ProcessedData} object.
+     * @param mimeType The MIME type.
      */
     public DrmRights(ProcessedData data, String mimeType) {
         mData = data.getData();
@@ -132,47 +138,45 @@ public class DrmRights {
     }
 
     /**
-     * Returns the rights data associated with this object
+     * Retrieves the rights data associated with this <code>DrmRights</code> object.
      *
-     * @return Rights data
+     * @return A <code>byte</code> array representing the rights data.
      */
     public byte[] getData() {
         return mData;
     }
 
     /**
-     * Returns the mimetype associated with this object
+     * Retrieves the MIME type associated with this <code>DrmRights</code> object.
      *
-     * @return MIME type
+     * @return The MIME type.
      */
     public String getMimeType() {
         return mMimeType;
     }
 
     /**
-     * Returns the account-id associated with this object
+     * Retrieves the account ID associated with this <code>DrmRights</code> object.
      *
-     * @return Account Id
+     * @return The account ID.
      */
     public String getAccountId() {
         return mAccountId;
     }
 
     /**
-     * Returns the subscription-id associated with this object
+     * Retrieves the subscription ID associated with this <code>DrmRights</code> object.
      *
-     * @return Subscription Id
+     * @return The subscription ID.
      */
     public String getSubscriptionId() {
         return mSubscriptionId;
     }
 
     /**
-     * Returns whether this instance is valid or not
+     * Determines whether this instance is valid or not.
      *
-     * @return
-     *     true if valid
-     *     false if invalid
+     * @return True if valid; false if invalid.
      */
     /*package*/ boolean isValid() {
         return (null != mMimeType && !mMimeType.equals("")

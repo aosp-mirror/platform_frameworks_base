@@ -17,11 +17,11 @@
 package android.drm;
 
 /**
- * This is an entity class which wraps the result of transaction between
- * device and online DRM server by using {@link DrmManagerClient#processDrmInfo(DrmInfo)}
+ * An entity class that wraps the result of a 
+ * {@link DrmManagerClient#processDrmInfo(DrmInfo) processDrmInfo()}
+ * transaction between a device and a DRM server.
  *
- * In license acquisition scenario this class would hold the binary data
- * of rights information.
+ * In a license acquisition scenario this class holds the rights information in binary form.
  *
  */
 public class ProcessedData {
@@ -30,10 +30,10 @@ public class ProcessedData {
     private String mSubscriptionId = "";
 
     /**
-     * constructor to create ProcessedData object with given parameters
+     * Creates a <code>ProcessedData</code> object with the given parameters.
      *
-     * @param data Rights data
-     * @param accountId Account Id of the user
+     * @param data Rights data.
+     * @param accountId Account ID of the user.
      */
     /* package */ ProcessedData(byte[] data, String accountId) {
         mData = data;
@@ -41,11 +41,11 @@ public class ProcessedData {
     }
 
     /**
-     * constructor to create ProcessedData object with given parameters
+     * Creates a <code>ProcessedData</code> object with the given parameters.
      *
-     * @param data Rights data
-     * @param accountId Account Id of the user
-     * @param subscriptionId Subscription Id of the user
+     * @param data Rights data.
+     * @param accountId Account ID of the user.
+     * @param subscriptionId Subscription ID of the user.
      */
     /* package */ ProcessedData(byte[] data, String accountId, String subscriptionId) {
         mData = data;
@@ -54,27 +54,27 @@ public class ProcessedData {
     }
 
     /**
-     * Returns the processed data as a result.
+     * Retrieves the processed data.
      *
-     * @return Rights data associated
+     * @return The rights data.
      */
     public byte[] getData() {
         return mData;
     }
 
     /**
-     * Returns the account-id associated with this object
+     * Retrieves the account ID associated with this object.
      *
-     * @return Account Id associated
+     * @return The account ID of the user.
      */
     public String getAccountId() {
         return mAccountId;
     }
 
     /**
-     * Returns the subscription-id associated with this object
+     * Returns the subscription ID associated with this object.
      *
-     * @return Subscription Id associated
+     * @return The subscription ID of the user.
      */
     public String getSubscriptionId() {
         return mSubscriptionId;

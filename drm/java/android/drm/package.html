@@ -1,0 +1,85 @@
+<HTML>
+<BODY>
+<p>Provides classes for managing DRM content and determining the capabilities of DRM plugins
+(agents). Common uses of the DRM API include:</p>
+<ul>
+  <li>Determining which DRM plug-ins (agents) are installed on a device.</li>
+  <li>Retrieving information about specific plug-ins, such as the MIME types and file suffixes
+  they support.</li>
+  <li>Registering a user or a device with an online DRM service.</li>
+  <li>Retrieving license constraints for rights-protected content.</li>
+  <li>Checking whether a user has the proper rights to play or use rights-protected
+  content.</li>
+  <li>Associating rights-protected content with its license so you can use the
+  {@link android.media.MediaPlayer} API to play the content.</li>
+</ul>
+
+<h2>DRM Overview</h2>
+
+<p>The Android platform provides an extensible DRM framework that lets applications manage
+rights-protected content according to the license constraints that are associated with the
+content. The DRM framework supports many DRM schemes; which DRM schemes a device supports
+is up to the device manufacturer.</p>
+
+<p>The Android DRM framework is implemented in two architectural layers (see figure below):</p>
+<ul>
+  <li>A DRM framework API, which is exposed to applications through the Android
+application framework and runs through the Dalvik VM for standard applications.</li>
+  <li>A native code DRM manager, which implements the DRM framework and exposes an
+interface for DRM plug-ins (agents) to handle rights management and decryption for various
+DRM schemes.</li>
+</ul>
+
+<img src="../../../images/drm_arch.png" alt="DRM architecture diagram" border="0"/>
+
+<p>For application developers, the DRM framework offers an abstract, unified API that
+simplifies the management of rights-protected content. The API hides the complexity of DRM
+operations and allows a consistent operation mode for both rights-protected and unprotected content
+across a variety of DRM schemes. For device manufacturers, content owners, and Internet digital
+media providers the DRM framework’s plugin architecture provides a means of adding support for a
+specific DRM scheme to the Android system.</p>
+
+<h2>Using the DRM API</h2>
+
+<p>In a typical DRM session, an Android application uses the DRM framework API to
+instantiate a {@link android.drm.DrmManagerClient}. The application calls various methods
+on the DRM client to query rights and perform other DRM-related tasks. Each
+{@link android.drm.DrmManagerClient} instance has its own unique ID, so the DRM manager is able to
+differentiate callers.</p>
+
+<p>Although each DRM plug-in may require a different sequence
+of API calls, the general call sequence for an application is as follows:</p>
+
+<ul>
+  <li>Register the device with an online DRM service.
+    <p>You can do this by first using the {@link android.drm.DrmManagerClient#acquireDrmInfo
+acquireDrmInfo()} method to acquire the registration information, and then using the {@link
+android.drm.DrmManagerClient#processDrmInfo processDrmInfo()} method to process the
+registration information.</p>
+  </li>
+  <li>Acquire the license that's associated with the rights-protected content.
+    <p>You can do this by first using the {@link android.drm.DrmManagerClient#acquireDrmInfo
+acquireDrmInfo()} method to acquire the license information, and then using the {@link
+android.drm.DrmManagerClient#processDrmInfo processDrmInfo()} method to process the
+license information. You can also use the {@link
+android.drm.DrmManagerClient#acquireRights acquireRights()} method.</p>
+  </li>
+  <li>Extract constraint information from the license.
+    <p>You can use the {@link android.drm.DrmManagerClient#getConstraints getConstraints()}
+    method to do this.</p>
+  </li>
+  <li>Associate the rights-protected content with its license.
+    <p>You can use the {@link android.drm.DrmManagerClient#saveRights saveRights()} method
+    to do this.</p>
+  </li>
+</ul>
+
+<p>After you make an association between the rights-protected content and its license,
+the DRM manager automatically handles rights management for that content. Specifically, the
+DRM manager will handle all further licensing checks when you attempt to play the content using
+the {@link android.media.MediaPlayer} API.</p>
+
+<p>To learn how to use the DRM API with a specific DRM plug-in, see the documentation provided
+by the plug-in developer.</p>
+</BODY>
+</HTML>
