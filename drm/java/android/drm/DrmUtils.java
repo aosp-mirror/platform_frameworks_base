@@ -28,9 +28,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * The utility class used in the DRM Framework. This inclueds APIs for file operations
- * and ExtendedMetadataParser for parsing extended metadata BLOB in DRM constraints.
- *
+ * A utility class that provides operations for parsing extended metadata embedded in
+ * DRM constraint information. If a DRM scheme has specific constraints beyond the standard
+ * constraints, the constraints will show up in the
+ * {@link DrmStore.ConstraintsColumns#EXTENDED_METADATA} key. You can use
+ * {@link DrmUtils.ExtendedMetadataParser} to iterate over those values.
  */
 public class DrmUtils {
     /* Should be used when we need to read from local file */
@@ -99,13 +101,10 @@ public class DrmUtils {
     }
 
     /**
-     * Get an instance of ExtendedMetadataParser to be used for parsing
-     * extended metadata BLOB in DRM constraints. <br>
+     * Gets an instance of {@link DrmUtils.ExtendedMetadataParser}, which can be used to parse
+     * extended metadata embedded in DRM constraint information.
      *
-     * extendedMetadata BLOB is retrieved by specifing
-     * key DrmStore.ConstraintsColumns.EXTENDED_METADATA.
-     *
-     * @param extendedMetadata BLOB in which key-value pairs of extended metadata are embedded.
+     * @param extendedMetadata Object in which key-value pairs of extended metadata are embedded.
      *
      */
     public static ExtendedMetadataParser getExtendedMetadataParser(byte[] extendedMetadata) {
@@ -113,9 +112,10 @@ public class DrmUtils {
     }
 
     /**
-     * Utility parser to parse the extended meta-data embedded inside DRM constraints<br><br>
-     *
-     * Usage example<br>
+     * Utility that parses extended metadata embedded in DRM constraint information.
+     *<p>
+     * Usage example:
+     *<p>
      * byte[] extendedMetadata<br>
      * &nbsp;&nbsp;&nbsp;&nbsp; =
      *         constraints.getAsByteArray(DrmStore.ConstraintsColumns.EXTENDED_METADATA);<br>
