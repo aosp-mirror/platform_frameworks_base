@@ -983,6 +983,13 @@ class GLES20Canvas extends HardwareCanvas {
         if (b.getConfig() == Bitmap.Config.ALPHA_8) {
             return setupModifiers(paint);
         }
+
+        final ColorFilter filter = paint.getColorFilter();
+        if (filter != null) {
+            nSetupColorFilter(mRenderer, filter.nativeColorFilter);
+            return MODIFIER_COLOR_FILTER;
+        }
+
         return MODIFIER_NONE;
     }
 
@@ -1016,7 +1023,7 @@ class GLES20Canvas extends HardwareCanvas {
             nSetupColorFilter(mRenderer, filter.nativeColorFilter);
             return MODIFIER_COLOR_FILTER;
         }
-        return MODIFIER_NONE;        
+        return MODIFIER_NONE;
     }
 
     private static native void nSetupShader(int renderer, int shader);
