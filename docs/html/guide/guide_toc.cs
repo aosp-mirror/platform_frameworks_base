@@ -699,6 +699,9 @@
       </li>
       </ul>
       <ul>
+      <li><a href="<?cs var:toroot ?>guide/practices/design/accessibility.html">
+            <span class="en">Designing for Accessibility</span>
+          </a> <span class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>
           </a></li>
