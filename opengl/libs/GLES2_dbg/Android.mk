@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     src/api.cpp \
+    src/caller.cpp \
     src/dbgcontext.cpp \
     src/debugger_message.pb.cpp \
     src/egl.cpp \

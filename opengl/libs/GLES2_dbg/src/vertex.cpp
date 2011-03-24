@@ -27,7 +27,7 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = false;
+    const bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glReadPixels);
     msg.set_expect_response(expectResponse);
     msg.set_function(glesv2debugger::Message_Function_glReadPixels);
     msg.set_arg0(x);
@@ -74,7 +74,11 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             Receive(cmd);
             break;
         default:
-            assert(0); //GenerateCall(msg, cmd);
+            GenerateCall(dbg, cmd, msg, NULL);
+            msg.set_expect_response(expectResponse);
+            if (!expectResponse)
+                cmd.set_function(cmd.SKIP);
+            Send(msg, cmd);
             break;
         }
     }
@@ -86,7 +90,7 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = false;
+    const bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glDrawArrays);
     msg.set_expect_response(expectResponse);
     msg.set_function(glesv2debugger::Message_Function_glDrawArrays);
     msg.set_arg0(mode);
@@ -139,7 +143,11 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             Receive(cmd);
             break;
         default:
-            assert(0); //GenerateCall(msg, cmd);
+            GenerateCall(dbg, cmd, msg, NULL);
+            msg.set_expect_response(expectResponse);
+            if (!expectResponse)
+                cmd.set_function(cmd.SKIP);
+            Send(msg, cmd);
             break;
         }
     }
@@ -163,7 +171,7 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = false;
+    const bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glDrawElements);
     msg.set_expect_response(expectResponse);
     msg.set_function(glesv2debugger::Message_Function_glDrawElements);
     msg.set_arg0(mode);
@@ -227,7 +235,11 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             Receive(cmd);
             break;
         default:
-            assert(0); //GenerateCall(msg, cmd);
+            GenerateCall(dbg, cmd, msg, NULL);
+            msg.set_expect_response(expectResponse);
+            if (!expectResponse)
+                cmd.set_function(cmd.SKIP);
+            Send(msg, cmd);
             break;
         }
     }

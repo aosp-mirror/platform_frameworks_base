@@ -167,4 +167,6 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
 void Receive(glesv2debugger::Message & cmd);
 float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd);
 void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd);
+const int * GenerateCall(DbgContext * const dbg, const glesv2debugger::Message & cmd,
+                  glesv2debugger::Message & msg, const int * const prevRet);
 }; // namespace android {
