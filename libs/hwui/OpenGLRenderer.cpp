@@ -1099,7 +1099,9 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
 
     setupDraw();
     setupDrawWithTexture(true);
-    setupDrawAlpha8Color(paint->getColor(), alpha);
+    if (paint) {
+        setupDrawAlpha8Color(paint->getColor(), alpha);
+    }
     setupDrawColorFilter();
     setupDrawShader();
     setupDrawBlending(true, mode);
