@@ -3009,7 +3009,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
             // We need to write one type chunk for each configuration for
             // which we have entries in this type.
-            const size_t NC = t->getUniqueConfigs().size();
+            const size_t NC = t != NULL ? t->getUniqueConfigs().size() : 0;
             
             const size_t typeSize = sizeof(ResTable_type) + sizeof(uint32_t)*N;
             
