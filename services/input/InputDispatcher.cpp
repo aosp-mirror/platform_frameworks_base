@@ -48,6 +48,9 @@
 // Log debug messages about the app switch latency optimization.
 #define DEBUG_APP_SWITCH 0
 
+// Log debug messages about hover events.
+#define DEBUG_HOVER 0
+
 #include "InputDispatcher.h"
 
 #include <cutils/log.h>
@@ -115,7 +118,9 @@ static bool isValidMotionAction(int32_t action, size_t pointerCount) {
     case AMOTION_EVENT_ACTION_CANCEL:
     case AMOTION_EVENT_ACTION_MOVE:
     case AMOTION_EVENT_ACTION_OUTSIDE:
+    case AMOTION_EVENT_ACTION_HOVER_ENTER:
     case AMOTION_EVENT_ACTION_HOVER_MOVE:
+    case AMOTION_EVENT_ACTION_HOVER_EXIT:
     case AMOTION_EVENT_ACTION_SCROLL:
         return true;
     case AMOTION_EVENT_ACTION_POINTER_DOWN:
@@ -185,7 +190,8 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mFocusedWindow(NULL),
     mFocusedApplication(NULL),
     mCurrentInputTargetsValid(false),
-    mInputTargetWaitCause(INPUT_TARGET_WAIT_CAUSE_NONE) {
+    mInputTargetWaitCause(INPUT_TARGET_WAIT_CAUSE_NONE),
+    mLastHoverWindow(NULL) {
     mLooper = new Looper(false);
 
     mInboundQueue.headSentinel.refCount = -1;
@@ -837,10 +843,11 @@ bool InputDispatcher::dispatchMotionLocked(
     bool conflictingPointerActions = false;
     if (! mCurrentInputTargetsValid) {
         int32_t injectionResult;
+        const MotionSample* splitBatchAfterSample = NULL;
         if (isPointerEvent) {
             // Pointer event.  (eg. touchscreen)
             injectionResult = findTouchedWindowTargetsLocked(currentTime,
-                    entry, nextWakeupTime, &conflictingPointerActions);
+                    entry, nextWakeupTime, &conflictingPointerActions, &splitBatchAfterSample);
         } else {
             // Non touch event.  (eg. trackball)
             injectionResult = findFocusedWindowTargetsLocked(currentTime,
@@ -857,6 +864,41 @@ bool InputDispatcher::dispatchMotionLocked(
 
         addMonitoringTargetsLocked();
         commitTargetsLocked();
+
+        // Unbatch the event if necessary by splitting it into two parts after the
+        // motion sample indicated by splitBatchAfterSample.
+        if (splitBatchAfterSample && splitBatchAfterSample->next) {
+#if DEBUG_BATCHING
+            uint32_t originalSampleCount = entry->countSamples();
+#endif
+            MotionSample* nextSample = splitBatchAfterSample->next;
+            MotionEntry* nextEntry = mAllocator.obtainMotionEntry(nextSample->eventTime,
+                    entry->deviceId, entry->source, entry->policyFlags,
+                    entry->action, entry->flags, entry->metaState, entry->edgeFlags,
+                    entry->xPrecision, entry->yPrecision, entry->downTime,
+                    entry->pointerCount, entry->pointerIds, nextSample->pointerCoords);
+            if (nextSample != entry->lastSample) {
+                nextEntry->firstSample.next = nextSample->next;
+                nextEntry->lastSample = entry->lastSample;
+            }
+            mAllocator.freeMotionSample(nextSample);
+
+            entry->lastSample = const_cast<MotionSample*>(splitBatchAfterSample);
+            entry->lastSample->next = NULL;
+
+            if (entry->injectionState) {
+                nextEntry->injectionState = entry->injectionState;
+                entry->injectionState->refCount += 1;
+            }
+
+#if DEBUG_BATCHING
+            LOGD("Split batch of %d samples into two parts, first part has %d samples, "
+                    "second part has %d samples.", originalSampleCount,
+                    entry->countSamples(), nextEntry->countSamples());
+#endif
+
+            mInboundQueue.enqueueAtHead(nextEntry);
+        }
     }
 
     // Dispatch the motion.
@@ -1107,7 +1149,8 @@ int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
 
     // Success!  Output targets.
     injectionResult = INPUT_EVENT_INJECTION_SUCCEEDED;
-    addWindowTargetLocked(mFocusedWindow, InputTarget::FLAG_FOREGROUND, BitSet32(0));
+    addWindowTargetLocked(mFocusedWindow,
+            InputTarget::FLAG_FOREGROUND | InputTarget::FLAG_DISPATCH_AS_IS, BitSet32(0));
 
     // Done.
 Failed:
@@ -1124,7 +1167,8 @@ Unresponsive:
 }
 
 int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
-        const MotionEntry* entry, nsecs_t* nextWakeupTime, bool* outConflictingPointerActions) {
+        const MotionEntry* entry, nsecs_t* nextWakeupTime, bool* outConflictingPointerActions,
+        const MotionSample** outSplitBatchAfterSample) {
     enum InjectionPermission {
         INJECTION_PERMISSION_UNKNOWN,
         INJECTION_PERMISSION_GRANTED,
@@ -1167,14 +1211,19 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     // Update the touch state as needed based on the properties of the touch event.
     int32_t injectionResult = INPUT_EVENT_INJECTION_PENDING;
     InjectionPermission injectionPermission = INJECTION_PERMISSION_UNKNOWN;
+    const InputWindow* newHoverWindow = NULL;
 
     bool isSplit = mTouchState.split;
     bool wrongDevice = mTouchState.down
             && (mTouchState.deviceId != entry->deviceId
                     || mTouchState.source != entry->source);
-    if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
-            || maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
+    bool isHoverAction = (maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
+            || maskedAction == AMOTION_EVENT_ACTION_HOVER_EXIT);
+    bool newGesture = (maskedAction == AMOTION_EVENT_ACTION_DOWN
+            || maskedAction == AMOTION_EVENT_ACTION_SCROLL
+            || isHoverAction);
+    if (newGesture) {
         bool down = maskedAction == AMOTION_EVENT_ACTION_DOWN;
         if (wrongDevice && !down) {
             mTempTouchState.copyFrom(mTouchState);
@@ -1197,19 +1246,18 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         goto Failed;
     }
 
-    if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-            || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)
-            || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
-            || maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
+    if (newGesture || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)) {
         /* Case 1: New splittable pointer going down, or need target for hover or scroll. */
 
+        const MotionSample* sample = &entry->firstSample;
         int32_t pointerIndex = getMotionEventActionPointerIndex(action);
-        int32_t x = int32_t(entry->firstSample.pointerCoords[pointerIndex].
+        int32_t x = int32_t(sample->pointerCoords[pointerIndex].
                 getAxisValue(AMOTION_EVENT_AXIS_X));
-        int32_t y = int32_t(entry->firstSample.pointerCoords[pointerIndex].
+        int32_t y = int32_t(sample->pointerCoords[pointerIndex].
                 getAxisValue(AMOTION_EVENT_AXIS_Y));
         const InputWindow* newTouchedWindow = NULL;
         const InputWindow* topErrorWindow = NULL;
+        bool isTouchModal = false;
 
         // Traverse windows from front to back to find touched window and outside targets.
         size_t numWindows = mWindows.size();
@@ -1225,7 +1273,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
             if (window->visible) {
                 if (! (flags & InputWindow::FLAG_NOT_TOUCHABLE)) {
-                    bool isTouchModal = (flags & (InputWindow::FLAG_NOT_FOCUSABLE
+                    isTouchModal = (flags & (InputWindow::FLAG_NOT_FOCUSABLE
                             | InputWindow::FLAG_NOT_TOUCH_MODAL)) == 0;
                     if (isTouchModal || window->touchableRegionContainsPoint(x, y)) {
                         if (! screenWasOff || flags & InputWindow::FLAG_TOUCHABLE_WHEN_WAKING) {
@@ -1237,7 +1285,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
                 if (maskedAction == AMOTION_EVENT_ACTION_DOWN
                         && (flags & InputWindow::FLAG_WATCH_OUTSIDE_TOUCH)) {
-                    int32_t outsideTargetFlags = InputTarget::FLAG_OUTSIDE;
+                    int32_t outsideTargetFlags = InputTarget::FLAG_DISPATCH_AS_OUTSIDE;
                     if (isWindowObscuredAtPointLocked(window, x, y)) {
                         outsideTargetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
                     }
@@ -1290,12 +1338,34 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         }
 
         // Set target flags.
-        int32_t targetFlags = InputTarget::FLAG_FOREGROUND;
+        int32_t targetFlags = InputTarget::FLAG_FOREGROUND | InputTarget::FLAG_DISPATCH_AS_IS;
         if (isSplit) {
             targetFlags |= InputTarget::FLAG_SPLIT;
         }
         if (isWindowObscuredAtPointLocked(newTouchedWindow, x, y)) {
             targetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
+        }
+
+        // Update hover state.
+        if (isHoverAction) {
+            newHoverWindow = newTouchedWindow;
+
+            // Ensure all subsequent motion samples are also within the touched window.
+            // Set *outSplitBatchAfterSample to the sample before the first one that is not
+            // within the touched window.
+            if (!isTouchModal) {
+                while (sample->next) {
+                    if (!newHoverWindow->touchableRegionContainsPoint(
+                            sample->next->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
+                            sample->next->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y))) {
+                        *outSplitBatchAfterSample = sample;
+                        break;
+                    }
+                    sample = sample->next;
+                }
+            }
+        } else if (maskedAction == AMOTION_EVENT_ACTION_SCROLL) {
+            newHoverWindow = mLastHoverWindow;
         }
 
         // Update the temporary touch state.
@@ -1316,6 +1386,29 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 #endif
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
             goto Failed;
+        }
+    }
+
+    if (newHoverWindow != mLastHoverWindow) {
+        // Split the batch here so we send exactly one sample as part of ENTER or EXIT.
+        *outSplitBatchAfterSample = &entry->firstSample;
+
+        // Let the previous window know that the hover sequence is over.
+        if (mLastHoverWindow) {
+#if DEBUG_HOVER
+            LOGD("Sending hover exit event to window %s.", mLastHoverWindow->name.string());
+#endif
+            mTempTouchState.addOrUpdateWindow(mLastHoverWindow,
+                    InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT, BitSet32(0));
+        }
+
+        // Let the new window know that the hover sequence is starting.
+        if (newHoverWindow) {
+#if DEBUG_HOVER
+            LOGD("Sending hover enter event to window %s.", newHoverWindow->name.string());
+#endif
+            mTempTouchState.addOrUpdateWindow(newHoverWindow,
+                    InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER, BitSet32(0));
         }
     }
 
@@ -1385,7 +1478,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                 const InputWindow* window = & mWindows[i];
                 if (window->layoutParamsType == InputWindow::TYPE_WALLPAPER) {
                     mTempTouchState.addOrUpdateWindow(window,
-                            InputTarget::FLAG_WINDOW_IS_OBSCURED, BitSet32(0));
+                            InputTarget::FLAG_WINDOW_IS_OBSCURED
+                                    | InputTarget::FLAG_DISPATCH_AS_IS,
+                            BitSet32(0));
                 }
             }
         }
@@ -1400,8 +1495,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
                 touchedWindow.pointerIds);
     }
 
-    // Drop the outside touch window since we will not care about them in the next iteration.
-    mTempTouchState.removeOutsideTouchWindows();
+    // Drop the outside or hover touch windows since we will not care about them
+    // in the next iteration.
+    mTempTouchState.filterNonAsIsTouchWindows();
 
 Failed:
     // Check injection permission once and for all.
@@ -1418,7 +1514,7 @@ Failed:
         if (!wrongDevice) {
             if (maskedAction == AMOTION_EVENT_ACTION_UP
                     || maskedAction == AMOTION_EVENT_ACTION_CANCEL
-                    || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+                    || isHoverAction) {
                 // All pointers up or canceled.
                 mTouchState.reset();
             } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
@@ -1455,6 +1551,9 @@ Failed:
                 // Save changes to touch state as-is for all other actions.
                 mTouchState.copyFrom(mTempTouchState);
             }
+
+            // Update hover state.
+            mLastHoverWindow = newHoverWindow;
         }
     } else {
 #if DEBUG_FOCUS
@@ -1720,10 +1819,36 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
         }
     }
 
+    // Enqueue dispatch entries for the requested modes.
+    enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT);
+    enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_OUTSIDE);
+    enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER);
+    enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_IS);
+
+    // If the outbound queue was previously empty, start the dispatch cycle going.
+    if (wasEmpty) {
+        activateConnectionLocked(connection.get());
+        startDispatchCycleLocked(currentTime, connection);
+    }
+}
+
+void InputDispatcher::enqueueDispatchEntryLocked(
+        const sp<Connection>& connection, EventEntry* eventEntry, const InputTarget* inputTarget,
+        bool resumeWithAppendedMotionSample, int32_t dispatchMode) {
+    int32_t inputTargetFlags = inputTarget->flags;
+    if (!(inputTargetFlags & dispatchMode)) {
+        return;
+    }
+    inputTargetFlags = (inputTargetFlags & ~InputTarget::FLAG_DISPATCH_MASK) | dispatchMode;
+
     // This is a new event.
     // Enqueue a new dispatch entry onto the outbound queue for this connection.
     DispatchEntry* dispatchEntry = mAllocator.obtainDispatchEntry(eventEntry, // increments ref
-            inputTarget->flags, inputTarget->xOffset, inputTarget->yOffset);
+            inputTargetFlags, inputTarget->xOffset, inputTarget->yOffset);
     if (dispatchEntry->hasForegroundTarget()) {
         incrementPendingForegroundDispatchesLocked(eventEntry);
     }
@@ -1744,12 +1869,6 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 
     // Enqueue the dispatch entry.
     connection->outboundQueue.enqueueAtTail(dispatchEntry);
-
-    // If the outbound queue was previously empty, start the dispatch cycle going.
-    if (wasEmpty) {
-        activateConnectionLocked(connection.get());
-        startDispatchCycleLocked(currentTime, connection);
-    }
 }
 
 void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
@@ -1768,12 +1887,9 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     // Mark the dispatch entry as in progress.
     dispatchEntry->inProgress = true;
 
-    // Update the connection's input state.
-    EventEntry* eventEntry = dispatchEntry->eventEntry;
-    connection->inputState.trackEvent(eventEntry);
-
     // Publish the event.
     status_t status;
+    EventEntry* eventEntry = dispatchEntry->eventEntry;
     switch (eventEntry->type) {
     case EventEntry::TYPE_KEY: {
         KeyEntry* keyEntry = static_cast<KeyEntry*>(eventEntry);
@@ -1781,6 +1897,9 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         // Apply target flags.
         int32_t action = keyEntry->action;
         int32_t flags = keyEntry->flags;
+
+        // Update the connection's input state.
+        connection->inputState.trackKey(keyEntry, action);
 
         // Publish the key event.
         status = connection->inputPublisher.publishKeyEvent(keyEntry->deviceId, keyEntry->source,
@@ -1803,8 +1922,12 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         // Apply target flags.
         int32_t action = motionEntry->action;
         int32_t flags = motionEntry->flags;
-        if (dispatchEntry->targetFlags & InputTarget::FLAG_OUTSIDE) {
+        if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_OUTSIDE) {
             action = AMOTION_EVENT_ACTION_OUTSIDE;
+        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT) {
+            action = AMOTION_EVENT_ACTION_HOVER_EXIT;
+        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER) {
+            action = AMOTION_EVENT_ACTION_HOVER_ENTER;
         }
         if (dispatchEntry->targetFlags & InputTarget::FLAG_WINDOW_IS_OBSCURED) {
             flags |= AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED;
@@ -1829,6 +1952,9 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             yOffset = 0.0f;
         }
 
+        // Update the connection's input state.
+        connection->inputState.trackMotion(motionEntry, action);
+
         // Publish the motion event and the first motion sample.
         status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
                 motionEntry->source, action, flags, motionEntry->edgeFlags, motionEntry->metaState,
@@ -1845,31 +1971,34 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             return;
         }
 
-        // Append additional motion samples.
-        MotionSample* nextMotionSample = firstMotionSample->next;
-        for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
-            status = connection->inputPublisher.appendMotionSample(
-                    nextMotionSample->eventTime, nextMotionSample->pointerCoords);
-            if (status == NO_MEMORY) {
+        if (action == AMOTION_EVENT_ACTION_MOVE
+                || action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+            // Append additional motion samples.
+            MotionSample* nextMotionSample = firstMotionSample->next;
+            for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
+                status = connection->inputPublisher.appendMotionSample(
+                        nextMotionSample->eventTime, nextMotionSample->pointerCoords);
+                if (status == NO_MEMORY) {
 #if DEBUG_DISPATCH_CYCLE
                     LOGD("channel '%s' ~ Shared memory buffer full.  Some motion samples will "
                             "be sent in the next dispatch cycle.",
                             connection->getInputChannelName());
 #endif
-                break;
+                    break;
+                }
+                if (status != OK) {
+                    LOGE("channel '%s' ~ Could not append motion sample "
+                            "for a reason other than out of memory, status=%d",
+                            connection->getInputChannelName(), status);
+                    abortBrokenDispatchCycleLocked(currentTime, connection);
+                    return;
+                }
             }
-            if (status != OK) {
-                LOGE("channel '%s' ~ Could not append motion sample "
-                        "for a reason other than out of memory, status=%d",
-                        connection->getInputChannelName(), status);
-                abortBrokenDispatchCycleLocked(currentTime, connection);
-                return;
-            }
-        }
 
-        // Remember the next motion sample that we could not dispatch, in case we ran out
-        // of space in the shared memory buffer.
-        dispatchEntry->tailMotionSample = nextMotionSample;
+            // Remember the next motion sample that we could not dispatch, in case we ran out
+            // of space in the shared memory buffer.
+            dispatchEntry->tailMotionSample = nextMotionSample;
+        }
         break;
     }
 
@@ -2199,6 +2328,11 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
                 splitPointerCoords);
     }
 
+    if (originalMotionEntry->injectionState) {
+        splitMotionEntry->injectionState = originalMotionEntry->injectionState;
+        splitMotionEntry->injectionState->refCount += 1;
+    }
+
     return splitMotionEntry;
 }
 
@@ -2406,6 +2540,29 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                             || motionEntry->isInjected()) {
                         // The motion event is not compatible with this move.
                         continue;
+                    }
+
+                    if (action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+                        if (!mLastHoverWindow) {
+#if DEBUG_BATCHING
+                            LOGD("Not streaming hover move because there is no "
+                                    "last hovered window.");
+#endif
+                            goto NoBatchingOrStreaming;
+                        }
+
+                        const InputWindow* hoverWindow = findTouchedWindowAtLocked(
+                                pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
+                                pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
+                        if (mLastHoverWindow != hoverWindow) {
+#if DEBUG_BATCHING
+                            LOGD("Not streaming hover move because the last hovered window "
+                                    "is '%s' but the currently hovered window is '%s'.",
+                                    mLastHoverWindow->name.string(),
+                                    hoverWindow ? hoverWindow->name.string() : "<null>");
+#endif
+                            goto NoBatchingOrStreaming;
+                        }
                     }
 
                     // Hurray!  This foreground target is currently dispatching a move event
@@ -2686,6 +2843,11 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
             oldFocusedWindowChannel = mFocusedWindow->inputChannel;
             mFocusedWindow = NULL;
         }
+        sp<InputChannel> oldLastHoverWindowChannel;
+        if (mLastHoverWindow) {
+            oldLastHoverWindowChannel = mLastHoverWindow->inputChannel;
+            mLastHoverWindow = NULL;
+        }
 
         mWindows.clear();
 
@@ -2734,6 +2896,12 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
                         InputState::CANCEL_POINTER_EVENTS, "touched window was removed");
                 mTouchState.windows.removeAt(i);
             }
+        }
+
+        // Recover the last hovered window.
+        if (oldLastHoverWindowChannel != NULL) {
+            mLastHoverWindow = getWindowLocked(oldLastHoverWindowChannel);
+            oldLastHoverWindowChannel.clear();
         }
 
 #if DEBUG_FOCUS
@@ -2845,7 +3013,8 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
                 mTouchState.windows.removeAt(i);
 
                 int32_t newTargetFlags = oldTargetFlags
-                        & (InputTarget::FLAG_FOREGROUND | InputTarget::FLAG_SPLIT);
+                        & (InputTarget::FLAG_FOREGROUND
+                                | InputTarget::FLAG_SPLIT | InputTarget::FLAG_DISPATCH_AS_IS);
                 mTouchState.addOrUpdateWindow(toWindow, newTargetFlags, pointerIds);
 
                 found = true;
@@ -3533,6 +3702,10 @@ void InputDispatcher::Allocator::releaseMotionEntry(MotionEntry* entry) {
     }
 }
 
+void InputDispatcher::Allocator::freeMotionSample(MotionSample* sample) {
+    mMotionSamplePool.free(sample);
+}
+
 void InputDispatcher::Allocator::releaseDispatchEntry(DispatchEntry* entry) {
     releaseEventEntry(entry->eventEntry);
     mDispatchEntryPool.free(entry);
@@ -3588,22 +3761,19 @@ bool InputDispatcher::InputState::isNeutral() const {
     return mKeyMementos.isEmpty() && mMotionMementos.isEmpty();
 }
 
-void InputDispatcher::InputState::trackEvent(
-        const EventEntry* entry) {
+void InputDispatcher::InputState::trackEvent(const EventEntry* entry, int32_t action) {
     switch (entry->type) {
     case EventEntry::TYPE_KEY:
-        trackKey(static_cast<const KeyEntry*>(entry));
+        trackKey(static_cast<const KeyEntry*>(entry), action);
         break;
 
     case EventEntry::TYPE_MOTION:
-        trackMotion(static_cast<const MotionEntry*>(entry));
+        trackMotion(static_cast<const MotionEntry*>(entry), action);
         break;
     }
 }
 
-void InputDispatcher::InputState::trackKey(
-        const KeyEntry* entry) {
-    int32_t action = entry->action;
+void InputDispatcher::InputState::trackKey(const KeyEntry* entry, int32_t action) {
     for (size_t i = 0; i < mKeyMementos.size(); i++) {
         KeyMemento& memento = mKeyMementos.editItemAt(i);
         if (memento.deviceId == entry->deviceId
@@ -3638,17 +3808,18 @@ Found:
     }
 }
 
-void InputDispatcher::InputState::trackMotion(
-        const MotionEntry* entry) {
-    int32_t action = entry->action & AMOTION_EVENT_ACTION_MASK;
+void InputDispatcher::InputState::trackMotion(const MotionEntry* entry, int32_t action) {
+    int32_t actionMasked = action & AMOTION_EVENT_ACTION_MASK;
     for (size_t i = 0; i < mMotionMementos.size(); i++) {
         MotionMemento& memento = mMotionMementos.editItemAt(i);
         if (memento.deviceId == entry->deviceId
                 && memento.source == entry->source) {
-            switch (action) {
+            switch (actionMasked) {
             case AMOTION_EVENT_ACTION_UP:
             case AMOTION_EVENT_ACTION_CANCEL:
+            case AMOTION_EVENT_ACTION_HOVER_ENTER:
             case AMOTION_EVENT_ACTION_HOVER_MOVE:
+            case AMOTION_EVENT_ACTION_HOVER_EXIT:
                 mMotionMementos.removeAt(i);
                 return;
 
@@ -3669,7 +3840,11 @@ void InputDispatcher::InputState::trackMotion(
     }
 
 Found:
-    if (action == AMOTION_EVENT_ACTION_DOWN) {
+    switch (actionMasked) {
+    case AMOTION_EVENT_ACTION_DOWN:
+    case AMOTION_EVENT_ACTION_HOVER_ENTER:
+    case AMOTION_EVENT_ACTION_HOVER_MOVE:
+    case AMOTION_EVENT_ACTION_HOVER_EXIT:
         mMotionMementos.push();
         MotionMemento& memento = mMotionMementos.editTop();
         memento.deviceId = entry->deviceId;
@@ -3678,6 +3853,7 @@ Found:
         memento.yPrecision = entry->yPrecision;
         memento.downTime = entry->downTime;
         memento.setPointers(entry);
+        memento.hovering = actionMasked != AMOTION_EVENT_ACTION_DOWN;
     }
 }
 
@@ -3710,7 +3886,10 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
         if (shouldCancelMotion(memento, options)) {
             outEvents.push(allocator->obtainMotionEntry(currentTime,
                     memento.deviceId, memento.source, 0,
-                    AMOTION_EVENT_ACTION_CANCEL, 0, 0, 0,
+                    memento.hovering
+                            ? AMOTION_EVENT_ACTION_HOVER_EXIT
+                            : AMOTION_EVENT_ACTION_CANCEL,
+                    0, 0, 0,
                     memento.xPrecision, memento.yPrecision, memento.downTime,
                     memento.pointerCount, memento.pointerIds, memento.pointerCoords));
             mMotionMementos.removeAt(i);
@@ -3876,12 +4055,15 @@ void InputDispatcher::TouchState::addOrUpdateWindow(const InputWindow* window,
     touchedWindow.channel = window->inputChannel;
 }
 
-void InputDispatcher::TouchState::removeOutsideTouchWindows() {
+void InputDispatcher::TouchState::filterNonAsIsTouchWindows() {
     for (size_t i = 0 ; i < windows.size(); ) {
-        if (windows[i].targetFlags & InputTarget::FLAG_OUTSIDE) {
-            windows.removeAt(i);
-        } else {
+        TouchedWindow& window = windows.editItemAt(i);
+        if (window.targetFlags & InputTarget::FLAG_DISPATCH_AS_IS) {
+            window.targetFlags &= ~InputTarget::FLAG_DISPATCH_MASK;
+            window.targetFlags |= InputTarget::FLAG_DISPATCH_AS_IS;
             i += 1;
+        } else {
+            windows.removeAt(i);
         }
     }
 }

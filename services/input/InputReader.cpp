@@ -1605,8 +1605,15 @@ void CursorInputMapper::sync(nsecs_t when) {
             motionEventAction, 0, metaState, motionEventEdgeFlags,
             1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
 
-    mAccumulator.clear();
+    // Send hover move after UP to tell the application that the mouse is hovering now.
+    if (motionEventAction == AMOTION_EVENT_ACTION_UP
+            && mPointerController != NULL) {
+        getDispatcher()->notifyMotion(when, getDeviceId(), mSource, policyFlags,
+                AMOTION_EVENT_ACTION_HOVER_MOVE, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
+                1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
+    }
 
+    // Send scroll events.
     if (vscroll != 0 || hscroll != 0) {
         pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_VSCROLL, vscroll);
         pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_HSCROLL, hscroll);
@@ -1615,6 +1622,8 @@ void CursorInputMapper::sync(nsecs_t when) {
                 AMOTION_EVENT_ACTION_SCROLL, 0, metaState, AMOTION_EVENT_EDGE_FLAG_NONE,
                 1, &pointerId, &pointerCoords, mXPrecision, mYPrecision, downTime);
     }
+
+    mAccumulator.clear();
 }
 
 int32_t CursorInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {

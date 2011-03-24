@@ -147,6 +147,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "events")
     private float mLastTouchDownY;
 
+    // Child which last received ACTION_HOVER_ENTER and ACTION_HOVER_MOVE.
+    private View mHoveredChild;
+
     /**
      * Internal flags.
      *
@@ -1140,13 +1143,50 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** @hide */
     @Override
-    public boolean dispatchGenericMotionEvent(MotionEvent event) {
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            // Send the event to the child under the pointer.
+    protected boolean dispatchHoverEvent(MotionEvent event) {
+        // Send the hover enter or hover move event to the view group first.
+        // If it handles the event then a hovered child should receive hover exit.
+        boolean handled = false;
+        final boolean interceptHover;
+        final int action = event.getAction();
+        if (action == MotionEvent.ACTION_HOVER_EXIT) {
+            interceptHover = true;
+        } else {
+            handled = super.dispatchHoverEvent(event);
+            interceptHover = handled;
+        }
+
+        // Send successive hover events to the hovered child as long as the pointer
+        // remains within the child's bounds.
+        MotionEvent eventNoHistory = event;
+        if (mHoveredChild != null) {
+            final float x = event.getX();
+            final float y = event.getY();
+
+            if (interceptHover
+                    || !isTransformedTouchPointInView(x, y, mHoveredChild, null)) {
+                // Pointer exited the child.
+                // Send it a hover exit with only the most recent coordinates.  We could
+                // try to find the exact point in history when the pointer left the view
+                // but it is not worth the effort.
+                eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
+                handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, mHoveredChild);
+                eventNoHistory.setAction(action);
+
+                mHoveredChild = null;
+            } else if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                // Pointer is still within the child.
+                handled |= dispatchTransformedGenericPointerEvent(event, mHoveredChild);
+            }
+        }
+
+        // Find a new hovered child if needed.
+        if (!interceptHover && mHoveredChild == null
+                && (action == MotionEvent.ACTION_HOVER_ENTER
+                        || action == MotionEvent.ACTION_HOVER_MOVE)) {
             final int childrenCount = mChildrenCount;
             if (childrenCount != 0) {
                 final View[] children = mChildren;
@@ -1155,49 +1195,119 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                 for (int i = childrenCount - 1; i >= 0; i--) {
                     final View child = children[i];
-                    if ((child.mViewFlags & VISIBILITY_MASK) != VISIBLE
-                            && child.getAnimation() == null) {
-                        // Skip invisible child unless it is animating.
+                    if (!canViewReceivePointerEvents(child)
+                            || !isTransformedTouchPointInView(x, y, child, null)) {
                         continue;
                     }
 
-                    if (!isTransformedTouchPointInView(x, y, child, null)) {
-                        // Scroll point is out of child's bounds.
-                        continue;
-                    }
+                    // Found the hovered child.
+                    mHoveredChild = child;
+                    if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                        // Pointer was moving within the view group and entered the child.
+                        // Send it a hover enter and hover move with only the most recent
+                        // coordinates.  We could try to find the exact point in history when
+                        // the pointer entered the view but it is not worth the effort.
+                        eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                        eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
+                        handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, child);
+                        eventNoHistory.setAction(action);
 
-                    final float offsetX = mScrollX - child.mLeft;
-                    final float offsetY = mScrollY - child.mTop;
-                    final boolean handled;
-                    if (!child.hasIdentityMatrix()) {
-                        MotionEvent transformedEvent = MotionEvent.obtain(event);
-                        transformedEvent.offsetLocation(offsetX, offsetY);
-                        transformedEvent.transform(child.getInverseMatrix());
-                        handled = child.dispatchGenericMotionEvent(transformedEvent);
-                        transformedEvent.recycle();
-                    } else {
-                        event.offsetLocation(offsetX, offsetY);
-                        handled = child.dispatchGenericMotionEvent(event);
-                        event.offsetLocation(-offsetX, -offsetY);
+                        handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, child);
+                    } else { /* must be ACTION_HOVER_ENTER */
+                        // Pointer entered the child.
+                        handled |= dispatchTransformedGenericPointerEvent(event, child);
                     }
-
-                    if (handled) {
-                        return true;
-                    }
+                    break;
                 }
             }
-
-            // No child handled the event.  Send it to this view group.
-            return super.dispatchGenericMotionEvent(event);
         }
 
+        // Recycle the copy of the event that we made.
+        if (eventNoHistory != event) {
+            eventNoHistory.recycle();
+        }
+
+        // Send hover exit to the view group.  If there was a child, we will already have
+        // sent the hover exit to it.
+        if (action == MotionEvent.ACTION_HOVER_EXIT) {
+            handled |= super.dispatchHoverEvent(event);
+        }
+
+        // Done.
+        return handled;
+    }
+
+    private static MotionEvent obtainMotionEventNoHistoryOrSelf(MotionEvent event) {
+        if (event.getHistorySize() == 0) {
+            return event;
+        }
+        return MotionEvent.obtainNoHistory(event);
+    }
+
+    /** @hide */
+    @Override
+    protected boolean dispatchGenericPointerEvent(MotionEvent event) {
+        // Send the event to the child under the pointer.
+        final int childrenCount = mChildrenCount;
+        if (childrenCount != 0) {
+            final View[] children = mChildren;
+            final float x = event.getX();
+            final float y = event.getY();
+
+            for (int i = childrenCount - 1; i >= 0; i--) {
+                final View child = children[i];
+                if (!canViewReceivePointerEvents(child)
+                        || !isTransformedTouchPointInView(x, y, child, null)) {
+                    continue;
+                }
+
+                if (dispatchTransformedGenericPointerEvent(event, child)) {
+                    return true;
+                }
+            }
+        }
+
+        // No child handled the event.  Send it to this view group.
+        return super.dispatchGenericPointerEvent(event);
+    }
+
+    /** @hide */
+    @Override
+    protected boolean dispatchGenericFocusedEvent(MotionEvent event) {
         // Send the event to the focused child or to this view group if it has focus.
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
-            return super.dispatchGenericMotionEvent(event);
+            return super.dispatchGenericFocusedEvent(event);
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
             return mFocused.dispatchGenericMotionEvent(event);
         }
         return false;
+    }
+
+    /**
+     * Dispatches a generic pointer event to a child, taking into account
+     * transformations that apply to the child.
+     *
+     * @param event The event to send.
+     * @param child The view to send the event to.
+     * @return {@code true} if the child handled the event.
+     */
+    private boolean dispatchTransformedGenericPointerEvent(MotionEvent event, View child) {
+        final float offsetX = mScrollX - child.mLeft;
+        final float offsetY = mScrollY - child.mTop;
+
+        boolean handled;
+        if (!child.hasIdentityMatrix()) {
+            MotionEvent transformedEvent = MotionEvent.obtain(event);
+            transformedEvent.offsetLocation(offsetX, offsetY);
+            transformedEvent.transform(child.getInverseMatrix());
+            handled = child.dispatchGenericMotionEvent(transformedEvent);
+            transformedEvent.recycle();
+        } else {
+            event.offsetLocation(offsetX, offsetY);
+            handled = child.dispatchGenericMotionEvent(event);
+            event.offsetLocation(-offsetX, -offsetY);
+        }
+        return handled;
     }
 
     /**
@@ -1213,8 +1323,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int actionMasked = action & MotionEvent.ACTION_MASK;
 
         // Handle an initial down.
-        if (actionMasked == MotionEvent.ACTION_DOWN
-                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+        if (actionMasked == MotionEvent.ACTION_DOWN) {
             // Throw away all previous state when starting a new touch gesture.
             // The framework may have dropped the up or cancel event for the previous gesture
             // due to an app switch, ANR, or some other state change.
@@ -1268,14 +1377,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                     for (int i = childrenCount - 1; i >= 0; i--) {
                         final View child = children[i];
-                        if ((child.mViewFlags & VISIBILITY_MASK) != VISIBLE
-                                && child.getAnimation() == null) {
-                            // Skip invisible child unless it is animating.
-                            continue;
-                        }
-
-                        if (!isTransformedTouchPointInView(x, y, child, null)) {
-                            // New pointer is out of child's bounds.
+                        if (!canViewReceivePointerEvents(child)
+                                || !isTransformedTouchPointInView(x, y, child, null)) {
                             continue;
                         }
 
@@ -1473,6 +1576,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             predecessor = target;
             target = next;
         }
+    }
+
+    /**
+     * Returns true if a child view can receive pointer events.
+     * @hide
+     */
+    private static boolean canViewReceivePointerEvents(View child) {
+        return (child.mViewFlags & VISIBILITY_MASK) == VISIBLE
+                || child.getAnimation() != null;
     }
 
     /**
@@ -3244,6 +3356,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mTransition.removeChild(this, view);
         }
 
+        if (view == mHoveredChild) {
+            mHoveredChild = null;
+        }
+
         boolean clearChildFocus = false;
         if (view == mFocused) {
             view.clearFocusForRemoval();
@@ -3307,6 +3423,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final OnHierarchyChangeListener onHierarchyChangeListener = mOnHierarchyChangeListener;
         final boolean notifyListener = onHierarchyChangeListener != null;
         final View focused = mFocused;
+        final View hoveredChild = mHoveredChild;
         final boolean detach = mAttachInfo != null;
         View clearChildFocus = null;
 
@@ -3318,6 +3435,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (mTransition != null) {
                 mTransition.removeChild(this, view);
+            }
+
+            if (view == hoveredChild) {
+                mHoveredChild = null;
             }
 
             if (view == focused) {
@@ -3377,6 +3498,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final OnHierarchyChangeListener listener = mOnHierarchyChangeListener;
         final boolean notify = listener != null;
         final View focused = mFocused;
+        final View hoveredChild = mHoveredChild;
         final boolean detach = mAttachInfo != null;
         View clearChildFocus = null;
 
@@ -3387,6 +3509,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (mTransition != null) {
                 mTransition.removeChild(this, view);
+            }
+
+            if (view == hoveredChild) {
+                mHoveredChild = null;
             }
 
             if (view == focused) {

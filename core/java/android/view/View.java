@@ -1623,6 +1623,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private static final int AWAKEN_SCROLL_BARS_ON_ATTACH = 0x08000000;
 
     /**
+     * Indicates that the view has received HOVER_ENTER.  Cleared on HOVER_EXIT.
+     * @hide
+     */
+    private static final int HOVERED              = 0x10000000;
+
+    /**
      * Indicates that pivotX or pivotY were explicitly set and we should not assume the center
      * for transform operations
      *
@@ -4643,20 +4649,78 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>
      * Generic motion events with source class {@link InputDevice#SOURCE_CLASS_POINTER}
      * are delivered to the view under the pointer.  All other generic motion events are
-     * delivered to the focused view.
+     * delivered to the focused view.  Hover events are handled specially and are delivered
+     * to {@link #onHoverEvent}.
      * </p>
      *
      * @param event The motion event to be dispatched.
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        final int source = event.getSource();
+        if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            final int action = event.getAction();
+            if (action == MotionEvent.ACTION_HOVER_ENTER
+                    || action == MotionEvent.ACTION_HOVER_MOVE
+                    || action == MotionEvent.ACTION_HOVER_EXIT) {
+                if (dispatchHoverEvent(event)) {
+                    return true;
+                }
+            } else if (dispatchGenericPointerEvent(event)) {
+                return true;
+            }
+        } else if (dispatchGenericFocusedEvent(event)) {
+            return true;
+        }
+
         //noinspection SimplifiableIfStatement
         if (mOnGenericMotionListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnGenericMotionListener.onGenericMotion(this, event)) {
             return true;
         }
-
         return onGenericMotionEvent(event);
+    }
+
+    /**
+     * Dispatch a hover event.
+     * <p>
+     * Do not call this method directly.  Call {@link #dispatchGenericMotionEvent} instead.
+     * </p>
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     * @hide
+     */
+    protected boolean dispatchHoverEvent(MotionEvent event) {
+        return onHoverEvent(event);
+    }
+
+    /**
+     * Dispatch a generic motion event to the view under the first pointer.
+     * <p>
+     * Do not call this method directly.  Call {@link #dispatchGenericMotionEvent} instead.
+     * </p>
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     * @hide
+     */
+    protected boolean dispatchGenericPointerEvent(MotionEvent event) {
+        return false;
+    }
+
+    /**
+     * Dispatch a generic motion event to the currently focused view.
+     * <p>
+     * Do not call this method directly.  Call {@link #dispatchGenericMotionEvent} instead.
+     * </p>
+     *
+     * @param event The motion event to be dispatched.
+     * @return True if the event was handled by the view, false otherwise.
+     * @hide
+     */
+    protected boolean dispatchGenericFocusedEvent(MotionEvent event) {
+        return false;
     }
 
     /**
@@ -5223,12 +5287,89 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * </code>
      *
      * @param event The generic motion event being processed.
-     *
-     * @return Return true if you have consumed the event, false if you haven't.
-     * The default implementation always returns false.
+     * @return True if the event was handled, false otherwise.
      */
     public boolean onGenericMotionEvent(MotionEvent event) {
         return false;
+    }
+
+    /**
+     * Implement this method to handle hover events.
+     * <p>
+     * Hover events are pointer events with action {@link MotionEvent#ACTION_HOVER_ENTER},
+     * {@link MotionEvent#ACTION_HOVER_MOVE}, or {@link MotionEvent#ACTION_HOVER_EXIT}.
+     * </p><p>
+     * The view receives hover enter as the pointer enters the bounds of the view and hover
+     * exit as the pointer exits the bound of the view or just before the pointer goes down
+     * (which implies that {@link #onTouchEvent} will be called soon).
+     * </p><p>
+     * If the view would like to handle the hover event itself and prevent its children
+     * from receiving hover, it should return true from this method.  If this method returns
+     * true and a child has already received a hover enter event, the child will
+     * automatically receive a hover exit event.
+     * </p><p>
+     * The default implementation sets the hovered state of the view if the view is
+     * clickable.
+     * </p>
+     *
+     * @param event The motion event that describes the hover.
+     * @return True if this view handled the hover event and does not want its children
+     * to receive the hover event.
+     */
+    public boolean onHoverEvent(MotionEvent event) {
+        final int viewFlags = mViewFlags;
+
+        if (((viewFlags & CLICKABLE) != CLICKABLE &&
+                (viewFlags & LONG_CLICKABLE) != LONG_CLICKABLE)) {
+            // Nothing to do if the view is not clickable.
+            return false;
+        }
+
+        if ((viewFlags & ENABLED_MASK) == DISABLED) {
+            // A disabled view that is clickable still consumes the hover events, it just doesn't
+            // respond to them.
+            return true;
+        }
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_HOVER_ENTER:
+                setHovered(true);
+                break;
+
+            case MotionEvent.ACTION_HOVER_EXIT:
+                setHovered(false);
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if the view is currently hovered.
+     *
+     * @return True if the view is currently hovered.
+     */
+    public boolean isHovered() {
+        return (mPrivateFlags & HOVERED) != 0;
+    }
+
+    /**
+     * Sets whether the view is currently hovered.
+     *
+     * @param hovered True if the view is hovered.
+     */
+    public void setHovered(boolean hovered) {
+        if (hovered) {
+            if ((mPrivateFlags & HOVERED) == 0) {
+                mPrivateFlags |= HOVERED;
+                refreshDrawableState();
+            }
+        } else {
+            if ((mPrivateFlags & HOVERED) != 0) {
+                mPrivateFlags &= ~HOVERED;
+                refreshDrawableState();
+            }
+        }
     }
 
     /**
@@ -9882,6 +10023,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             // windows to better match their app.
             viewStateIndex |= VIEW_STATE_ACCELERATED;
         }
+        if ((privateFlags & HOVERED) != 0) viewStateIndex |= VIEW_STATE_PRESSED; // temporary
 
         drawableState = VIEW_STATE_SETS[viewStateIndex];
 

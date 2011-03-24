@@ -297,6 +297,14 @@ enum {
      * may not be the window currently touched.
      */
     AMOTION_EVENT_ACTION_SCROLL = 8,
+
+    /* The pointer is not down but has entered the boundaries of a window or view.
+     */
+    AMOTION_EVENT_ACTION_HOVER_ENTER = 9,
+
+    /* The pointer is not down but has exited the boundaries of a window or view.
+     */
+    AMOTION_EVENT_ACTION_HOVER_EXIT = 10,
 };
 
 /*

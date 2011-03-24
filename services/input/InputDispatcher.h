@@ -86,20 +86,40 @@ enum {
 struct InputTarget {
     enum {
         /* This flag indicates that the event is being delivered to a foreground application. */
-        FLAG_FOREGROUND = 0x01,
-
-        /* This flag indicates that a MotionEvent with AMOTION_EVENT_ACTION_DOWN falls outside
-         * of the area of this target and so should instead be delivered as an
-         * AMOTION_EVENT_ACTION_OUTSIDE to this target. */
-        FLAG_OUTSIDE = 0x02,
+        FLAG_FOREGROUND = 1 << 0,
 
         /* This flag indicates that the target of a MotionEvent is partly or wholly
          * obscured by another visible window above it.  The motion event should be
          * delivered with flag AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED. */
-        FLAG_WINDOW_IS_OBSCURED = 0x04,
+        FLAG_WINDOW_IS_OBSCURED = 1 << 1,
 
         /* This flag indicates that a motion event is being split across multiple windows. */
-        FLAG_SPLIT = 0x08,
+        FLAG_SPLIT = 1 << 2,
+
+        /* This flag indicates that the event should be sent as is.
+         * Should always be set unless the event is to be transmuted. */
+        FLAG_DISPATCH_AS_IS = 1 << 8,
+
+        /* This flag indicates that a MotionEvent with AMOTION_EVENT_ACTION_DOWN falls outside
+         * of the area of this target and so should instead be delivered as an
+         * AMOTION_EVENT_ACTION_OUTSIDE to this target. */
+        FLAG_DISPATCH_AS_OUTSIDE = 1 << 9,
+
+        /* This flag indicates that a hover sequence is starting in the given window.
+         * The event is transmuted into ACTION_HOVER_ENTER. */
+        FLAG_DISPATCH_AS_HOVER_ENTER = 1 << 10,
+
+        /* This flag indicates that a hover event happened outside of a window which handled
+         * previous hover events, signifying the end of the current hover sequence for that
+         * window.
+         * The event is transmuted into ACTION_HOVER_ENTER. */
+        FLAG_DISPATCH_AS_HOVER_EXIT = 1 << 11,
+
+        /* Mask for all dispatch modes. */
+        FLAG_DISPATCH_MASK = FLAG_DISPATCH_AS_IS
+                | FLAG_DISPATCH_AS_OUTSIDE
+                | FLAG_DISPATCH_AS_HOVER_ENTER
+                | FLAG_DISPATCH_AS_HOVER_EXIT,
     };
 
     // The input channel to be targeted.
@@ -567,6 +587,7 @@ private:
         void releaseConfigurationChangedEntry(ConfigurationChangedEntry* entry);
         void releaseKeyEntry(KeyEntry* entry);
         void releaseMotionEntry(MotionEntry* entry);
+        void freeMotionSample(MotionSample* sample);
         void releaseDispatchEntry(DispatchEntry* entry);
         void releaseCommandEntry(CommandEntry* entry);
 
@@ -608,13 +629,13 @@ private:
         bool isNeutral() const;
 
         // Records tracking information for an event that has just been published.
-        void trackEvent(const EventEntry* entry);
+        void trackEvent(const EventEntry* entry, int32_t action);
 
         // Records tracking information for a key event that has just been published.
-        void trackKey(const KeyEntry* entry);
+        void trackKey(const KeyEntry* entry, int32_t action);
 
         // Records tracking information for a motion event that has just been published.
-        void trackMotion(const MotionEntry* entry);
+        void trackMotion(const MotionEntry* entry, int32_t action);
 
         // Synthesizes cancelation events for the current state and resets the tracked state.
         void synthesizeCancelationEvents(nsecs_t currentTime, Allocator* allocator,
@@ -645,6 +666,7 @@ private:
             uint32_t pointerCount;
             int32_t pointerIds[MAX_POINTERS];
             PointerCoords pointerCoords[MAX_POINTERS];
+            bool hovering;
 
             void setPointers(const MotionEntry* entry);
         };
@@ -839,7 +861,7 @@ private:
         void reset();
         void copyFrom(const TouchState& other);
         void addOrUpdateWindow(const InputWindow* window, int32_t targetFlags, BitSet32 pointerIds);
-        void removeOutsideTouchWindows();
+        void filterNonAsIsTouchWindows();
         const InputWindow* getFirstForegroundWindow();
     };
 
@@ -882,6 +904,9 @@ private:
     bool mInputTargetWaitTimeoutExpired;
     sp<InputApplicationHandle> mInputTargetWaitApplication;
 
+    // Contains the last window which received a hover event.
+    const InputWindow* mLastHoverWindow;
+
     // Finding targets for input events.
     void resetTargetsLocked();
     void commitTargetsLocked();
@@ -896,7 +921,8 @@ private:
     int32_t findFocusedWindowTargetsLocked(nsecs_t currentTime, const EventEntry* entry,
             nsecs_t* nextWakeupTime);
     int32_t findTouchedWindowTargetsLocked(nsecs_t currentTime, const MotionEntry* entry,
-            nsecs_t* nextWakeupTime, bool* outConflictingPointerActions);
+            nsecs_t* nextWakeupTime, bool* outConflictingPointerActions,
+            const MotionSample** outSplitBatchAfterSample);
 
     void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
             BitSet32 pointerIds);
@@ -915,6 +941,9 @@ private:
     void prepareDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             EventEntry* eventEntry, const InputTarget* inputTarget,
             bool resumeWithAppendedMotionSample);
+    void enqueueDispatchEntryLocked(const sp<Connection>& connection,
+            EventEntry* eventEntry, const InputTarget* inputTarget,
+            bool resumeWithAppendedMotionSample, int32_t dispatchMode);
     void startDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection);
     void finishDispatchCycleLocked(nsecs_t currentTime, const sp<Connection>& connection,
             bool handled);
