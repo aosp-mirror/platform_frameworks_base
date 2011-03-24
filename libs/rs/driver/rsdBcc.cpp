@@ -522,7 +522,7 @@ void rsdScriptDestroy(const Context *dc, Script *script) {
     if (drv->mFieldAddress) {
         for (size_t ct=0; ct < drv->mFieldCount; ct++) {
             if (drv->mFieldIsObject[ct]) {
-                rsiClearObject((ObjectBase **)drv->mFieldAddress[ct]);
+                rsiClearObject((ObjectBase **)&drv->mFieldAddress[ct]);
             }
         }
         delete [] drv->mFieldAddress;
