@@ -1,0 +1,352 @@
+page.title=Designing for Accessibility
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Quickview</h2>
+  <ul>
+    <li>To make your application more accessible, you should make sure your UI is navigable
+using a directional controller and your widgets provide content descriptions</li>
+    <li>If you implement a custom view, you should ensure that it delivers the appropriate
+accessibility events during user interaction</li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#Navigation">Allow Navigation with a Directional Controller</a>
+      <ol>
+        <li><a href="#FocusOrder">Controlling focus order</a></li>
+        <li><a href="#ClickingDpad">Clicking with the a directional controller</a></li>
+      </ol>
+    </li>
+    <li><a href="#LabelInputs">Label Your Input Widgets</a></li>
+    <li><a href="#UiBestPractices">Follow Android UI Best Practices</a></li>
+    <li><a href="#CustomViews">Send Accessibility Events from Custom View Components</a></li>
+    <li><a href="#Test">Test Your Application’s Accessibility</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.view.accessibility.AccessibilityEvent}</li>
+    <li>{@link android.view.accessibility.AccessibilityEventSource}</li>
+  </ol>
+
+  <h2>Related samples</h2>
+  <ol>
+    <li><a
+href="{@docRoot}resources/samples/AccessibilityService/index.html">Accessibility Service</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+
+<p>Many Android users have disabilities that require them to interact with their Android devices in
+different ways.  These include users who have visual, physical or aging-related disabilities that
+prevent them from fully using or seeing a touchscreen.</p>
+
+<p>Android provides an accessibility layer that helps these users navigate their Android-powered
+devices more easily.  Android's accessibility services provide things like text-to-speech, haptic
+feedback and trackball/D-pad navigation that augment the user experience.</p>
+
+<p>Your application should follow the guidelines in this document to ensure that it provides a
+good experience for users with disabilities.</p>
+
+<p>Following these two basic rules will solve most access-related problems:</p>
+
+<ul>
+<li>Make all of your user interface controls accessible with a trackball or directional
+controller (d-pad).</li>
+<li>Label your {@link android.widget.ImageButton}, {@link android.widget.EditText}, and other input
+widgets using the <a href="{@docRoot}reference/android/view/View#attr_android:contentDescription"
+>{@code android:contentDescription}</a> attribute.</li>
+</ul>
+
+
+
+<h2 id="Navigation">Allow Navigation with a Directional Controller</h2>
+
+<p>Many Android devices come with some sort of directional controller, such as:</p>
+<ul>
+<li>A clickable trackball that users can move in any direction</li>
+<li>A clickable D-pad that allows users to navigate in four directions.</li>
+<li>Arrow keys and an OK button that’s equivalent to clicking a trackball or d-pad.</li>
+</ul>
+
+<p>All of these directional controllers allow users to navigate the screen without using the
+touchscreen. On some devices, a user can also navigate to the top or bottom of a list by holding
+down the <em>alt</em> key while pressing a discrete key for up or down.</p>
+
+<p>A directional controller is the primary means of navigation for users with visual or some
+physical impairments (and also for users without impairments when using devices that don't
+have a touchscreen). You should verify that all UI controls in your application are
+accessible without using the touchscreen and that clicking with the center button (or OK button) has
+the same effect as touching the controls on the touchscreen.</p>
+
+<p>A UI control (also called a "widget") is accessible using directional controls when it's
+"focusable" property is "true." This means that users can focus on the widget using the directional
+controls and then interact with it. Widgets provided by the Android APIs are focusable by default
+and visually indicate focus by changing the widget visual appearance in some way.</p>
+
+<p>Android provides several APIs that let you control whether a widget is focusable and even
+request that a widget be given focus. Such methods include:</p>
+
+<ul>
+  <li>{@link android.view.View#setFocusable setFocusable()}</li>
+  <li>{@link android.view.View#isFocusable isFocusable()}</li>
+  <li>{@link android.view.View#requestFocus requestFocus()}</li>
+</ul>
+
+<p>When working with a view that is not focusable by default, you can make it focusable from the XML
+layout file by setting the <a href="{@docRoot}reference/android/view/View#attr_android:focusable"
+>{@code android:focusable}</a> attribute to {@code "true"}.</p>
+
+
+
+<h3 id="FocusOrder">Controlling focus order</h3>
+
+<p>When the user navigates in any direction using the directional controls, focus is passed from one
+view to another, as determined by the focus ordering. The ordering of the focus movement is based on
+an algorithm which finds the nearest neighbor in a given direction. In rare cases, the default
+algorithm may not match the order that you intended for your UI. In these situations, you can
+provide explicit overrides to the ordering using the following XML attributes in the layout
+file:</p>
+
+<dl>
+ <dt><a href="{@docRoot}reference/android/view/View#attr_android:nextFocusDown"
+>{@code android:nextFocusDown}</a></dt>
+  <dd>Defines the next view to receive focus when the user navigates down.</dd>
+ <a><a href="{@docRoot}reference/android/view/View#attr_android:nextFocusLeft"
+>{@code android:nextFocusLeft}</a></dt>
+  <dd>Defines the next view to receive focus when the user navigates left.</dd>
+ <dt><a href="{@docRoot}reference/android/view/View#attr_android:nextFocusRight"
+>{@code android:nextFocusRight}</a></dt>
+  <dd>Defines the next view to receive focus when the user navigates right.</dd>
+ <dt><a href="{@docRoot}reference/android/view/View#attr_android:nextFocusUp"
+>{@code android:nextFocusUp}</a></dt>
+  <dd>Defines the next view to receive focus when the user navigates up.</dd>
+</dl>
+
+<p>For example, here is an XML layout that contains a focusable {@link android.widget.TextView}.
+While the {@link android.widget.TextView} is located to the right of the {@link
+android.widget.EditText}, it can now be reached by pressing the down arrow when focus is on the
+{@link android.widget.EditText}: </p>
+
+<pre>
+&lt;LinearLayout android:orientation="horizontal"
+              ... &gt;
+    &lt;EditText android:id="@+id/edit"
+              android:nextFocusDown=”@+id/text”
+              ... /&gt;
+    &lt;TextView android:id="@+id/text"
+              android:focusable=”true”
+              android:text="Hello, I am a focusable TextView"
+              android:nextFocusUp=”@id/edit”
+              ... /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>When modifying this ordering, be sure that the navigation works as expected in all directions
+from each widget and when navigating in reverse (to get back to where you came from).</p>
+
+<p>You can also modify the focus ordering at runtime, using methods in the {@link
+android.view.View} class, such as {@link android.view.View#setNextFocusDownId
+setNextFocusDownId()} and  {@link android.view.View#setNextFocusRightId
+setNextFocusRightId()}.</p>
+
+
+<h3 id="ClickingDpad">Clicking with the a directional controller</h3>
+
+<p>On most devices, clicking a view using a directional controller sends a {@link
+android.view.KeyEvent} with {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER} to the view currently
+in focus. Make sure this event has the same effect as touching the view on the touchscreen. All
+standard Android views already handle {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER}
+appropriately.</p>
+
+<p>If possible, also treat the {@link android.view.KeyEvent#KEYCODE_ENTER} event the same as
+{@link android.view.KeyEvent#KEYCODE_DPAD_CENTER}.  That makes interaction much easier from a full
+keyboard.</p>
+
+
+
+
+<h2 id="LabelInputs">Label Your Input Widgets</h2>
+
+<p>Many input widgets rely on visual cues to inform the user of their meaning.  For example, a
+notepad application might use an {@link android.widget.ImageButton} with a picture of a plus sign to
+indicate that the user can add a new note.  Or, an {@link android.widget.EditText} may have
+a label near it that indicates its purpose.  When a visually impaired user accesses your
+application, these visual cues are often useless.</p>
+
+<p>To provide textual information about these widgets (as an alternative to the visual cues), you
+should use the <a href="{@docRoot}reference/android/view/View#attr_android:contentDescription"
+>{@code android:contentDescription}</a> attribute. The text you provide in this attribute
+is not visible on the screen, but if a user has enabled accessibility speech tools then the
+description in this attribute is read aloud to the user.</p>
+
+<p>You should set the <a
+href="{@docRoot}reference/android/view/View#attr_android:contentDescription" >{@code
+android:contentDescription}</a> attribute on every {@link android.widget.ImageButton}, {@link
+android.widget.EditText}, {@link android.widget.CheckBox}, and on any other input widgets that might
+benefit users with extra information.</p>
+
+<p>For example, the following {@link android.widget.ImageButton} sets the content description for
+the plus button to the {@code add_note} string resource, which might be defined in English as
+“Add note":</p>
+
+<pre>
+&lt;ImageButton
+    android:id=”@+id/add_entry_button”
+    android:src=”@drawable/plus”
+    android:contentDescription=”@string/add_note”/&gt;
+</pre>
+
+<p>This way, when using speech accessibility tools, the user hears "Add note" when focused on
+this widget.</p>
+
+
+
+<h2 id="UiBestPractices">Follow Android UI Best Practices</h2>
+
+<p>You can make it easier for users to learn how to use your application by developing a user
+interface that complies with Android's standard interaction patterns, instead of creating your own
+or using interaction patterns from another platform. This consistency is especially important for
+many disabled users, as they may have less contextual information available to try to understand
+your application’s interface.</p>
+
+<p>Specifically, you should:</p>
+
+<ul>
+<li>Use the platform's built-in widgets and layouts whenever possible, as these views provide
+accessibility support by default.</li>
+<li>Use the <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a> as an
+alternative to complex touchscreen tasks.</li>
+<li>Make sure the BACK button correctly moves the user back one logical step in the <a
+href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">task's back stack</a> or the
+activity's back stack of fragments (when <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html#Transactions">performing fragment
+transactions</a>), as appropriate.</li>
+</ul>
+
+
+
+<h2 id="CustomViews">Send Accessibility Events from Custom View Components</h2>
+
+<p>If your application requires that you create a <a
+href="{@docRoot}guide/topics/ui/custom-components.html">custom view component</a>, you may need to
+do some additional work to ensure that your view is accessible.  Specifically, you should make sure
+that your view implements the {@link android.view.accessibility.AccessibilityEventSource}
+interface and emits {@link android.view.accessibility.AccessibilityEvent}s at the proper times,
+and that each {@link android.view.accessibility.AccessibilityEvent} contains relevant information
+about the state of the view.</p>
+
+<p>Events are emitted whenever something notable happens in the user interface.  Currently, there
+are five types of accessibility events that a view should send to the system as the user interacts
+with it:</p>
+
+<dl>
+<dt>{@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CLICKED}</dt>
+<dd>Indicates that the user clicked on the view (for example, the user selects a button).</dd>
+
+<dt>{@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_LONG_CLICKED}</dt>
+<dd>Indicates that the user performed a long press on the view. </dd>
+
+<dt>{@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_SELECTED}</dt>
+<dd>Indicates that the user selected an item from within the view. This is usually used in the
+context of an {@link android.widget.AdapterView}.</dd>
+
+<dt>{@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_FOCUSED}</dt>
+<dd>Indicates that the user moved the focus to the view.</dd>
+
+<dt>{@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED}</dt>
+<dd>Indicates that the text or contents of the view changed.</dd>
+</dl>
+
+
+<p>The basic {@link android.view.View} class implements {@link
+android.view.accessibility.AccessibilityEventSource} and emits these events at the proper time in
+the standard cases.  Your custom view should extend from {@link android.view.View} (or one of its
+subclasses) to take advantage of these default implementations.</p>
+
+<p>Depending on the specifics of your custom view, your view may need to emit one of these events at
+a different time than the default {@link android.view.View} implementation.  To do so, simply call
+{@link android.view.accessibility.AccessibilityEventSource#sendAccessibilityEvent
+sendAccessibilityEvent()} with the specific event type at the correct time.</p>
+
+<p>For example, say you are implementing a custom slider bar that allows the user to select a
+numeric value by pressing the left or right arrows.  This view should emit an event of type {@link
+android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} whenever the slider value
+changes:</p>
+
+<pre>
+&#64;Override
+public boolean onKeyUp (int keyCode, KeyEvent event) {
+  if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+    mCurrentValue--;
+    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+    return true;
+  }
+  ...
+}
+</pre>
+
+<p>Each {@link android.view.accessibility.AccessibilityEvent} has a set of required properties that
+describe the current state of the view.  These properties include things like the view’s class name,
+text and checked state.  The specific properties required for each event type are described in the
+{@link android.view.accessibility.AccessibilityEvent} documentation.  The {@link android.view.View}
+implementation will fill in default values for these properties. Most of these values, like the
+class name and event timestamp, will not need to be changed. However, depending on the specifics of
+your custom view, you may want to provide a different value for one or more of the properties.  For
+example, your view may have additional state information that you want to add to the event text.</p>
+
+<p>The {@link android.view.View#dispatchPopulateAccessibilityEvent
+dispatchPopulateAccessibilityEvent()} method in {@link android.view.View} provides a hook for making
+changes to the {@link android.view.accessibility.AccessibilityEvent} object before it is
+emitted.</p>
+
+<p>In the above slider bar example, the view should add the current value of the slider bar to the
+text of the event:</p>
+
+<pre>
+&#64;Override
+public boolean dispatchPopulateAccessibilityEvent(final AccessibilityEvent event) {
+  super.dispatchPopulateAccessibilityEvent(event);
+  if (!isShown()) {
+    return false;
+  }
+  CharSequence text = String.valueOf(mCurrentValue);
+  if (text.length() > AccessibilityEvent.MAX_TEXT_LENGTH) {
+    text = text.subSequence(0, AccessiblityEvent.MAX_TEXT_LENGTH);
+  }
+  event.getText().add(text);
+  return true;
+}
+</pre>
+
+
+<h2 id="Test">Test Your Application’s Accessibility</h2>
+
+<p>You can simulate the experience for many users by enabling an accessibility service that speaks
+as you move around the screen.  One such service is <a
+href="https://market.android.com/details?id=com.google.android.marvin.talkback">TalkBack</a>, by the
+<a href="http://code.google.com/p/eyes-free/">Eyes-Free Project</a>.  It comes preinstalled on many
+Android-powered devices, but is also available for free from <a
+href="https://market.android.com/details?id=com.google.android.marvin.talkback">Android
+Market</a>.</p>
+
+<p>This service requires that you have a text-to-speech engine installed on your phone.  You can
+verify if you have one installed in the <strong>Text-to-speech</strong> settings menu by selecting
+<strong>Listen to an example</strong>. If you do not hear anything spoken, install the required
+voice data by selecting <strong>Install voice data</strong>.</p>
+
+<p>Once text-to-speech is functioning correctly, you can enable TalkBack (or another accessibility
+service) in the <strong>Accessibility</strong> settings menu.  Enable both
+<strong>Accessibility</strong> and <strong>TalkBack</strong>.  As you navigate about the device, you
+should now hear spoken feedback.</p>
+
+<p>You can now attempt to use your application as a blind user would.  As you move around using only
+the directional controller, make sure that the spoken feedback you hear makes sense and is
+sufficient to navigate the application without any visual cues.</p>
