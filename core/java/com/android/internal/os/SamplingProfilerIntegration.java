@@ -20,7 +20,8 @@ import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
-import dalvik.system.SamplingProfiler;
+import dalvik.system.profiler.AsciiHprofWriter;
+import dalvik.system.profiler.SamplingProfiler;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -162,7 +163,7 @@ public class SamplingProfilerIntegration {
         try {
             out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
             generateSnapshotHeader(name, packageInfo, out);
-            new SamplingProfiler.AsciiHprofWriter(INSTANCE.getHprofData(), out).write();
+            new AsciiHprofWriter(INSTANCE.getHprofData(), out).write();
             if (out.checkError()) {
                 throw new IOException();
             }

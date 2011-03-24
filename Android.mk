@@ -315,7 +315,6 @@ fwbase_dirs_to_document := \
 fwbase_dirs_to_document += core/config/sdk
 
 # include definition of libcore_to_document
-# These are relative to libcore
 include $(LOCAL_PATH)/../../libcore/Docs.mk
 
 non_base_dirs := \
@@ -324,8 +323,7 @@ non_base_dirs := \
 # These are relative to frameworks/base
 dirs_to_document := \
 	$(fwbase_dirs_to_document) \
-	$(non_base_dirs) \
-	$(addprefix ../../libcore/, $(libcore_to_document))
+	$(non_base_dirs)
 
 html_dirs := \
 	$(FRAMEWORKS_BASE_SUBDIRS) \
@@ -334,7 +332,8 @@ html_dirs := \
 # These are relative to frameworks/base
 framework_docs_LOCAL_SRC_FILES := \
 	$(call find-other-java-files, $(dirs_to_document)) \
-	$(call find-other-html-files, $(html_dirs))
+	$(call find-other-html-files, $(html_dirs)) \
+	$(addprefix ../../libcore/, $(call libcore_to_document, $(LOCAL_PATH)/../../libcore))
 
 # This is used by ide.mk as the list of source files that are
 # always included.
