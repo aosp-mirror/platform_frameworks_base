@@ -1975,7 +1975,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void setPadding(int left, int top, int right, int bottom) {
         super.setPadding(left, top, right, bottom);
 
-        if ((mPaddingLeft | mPaddingTop | mPaddingRight | mPaddingRight) != 0) {
+        if ((mPaddingLeft | mPaddingTop | mPaddingRight | mPaddingBottom) != 0) {
             mGroupFlags |= FLAG_PADDING_NOT_NULL;
         } else {
             mGroupFlags &= ~FLAG_PADDING_NOT_NULL;
