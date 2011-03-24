@@ -7216,8 +7216,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags &= ~DRAWN;
             mPrivateFlags |= INVALIDATED;
             mPrivateFlags &= ~DRAWING_CACHE_VALID;
-            if (mParent != null && mAttachInfo != null && mAttachInfo.mHardwareAccelerated) {
-                mParent.invalidateChild(this, null);
+            if (mParent != null && mAttachInfo != null) {
+                if (mAttachInfo.mHardwareAccelerated) {
+                    mParent.invalidateChild(this, null);
+                } else {
+                    final Rect r = mAttachInfo.mTmpInvalRect;
+                    r.set(0, 0, mRight - mLeft, mBottom - mTop);
+                    // Don't call invalidate -- we don't want to internally scroll
+                    // our own bounds
+                    mParent.invalidateChild(this, r);
+                }
             }
         }
     }
