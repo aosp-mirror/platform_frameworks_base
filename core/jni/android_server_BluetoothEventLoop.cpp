@@ -373,7 +373,6 @@ static int register_agent(native_data_t *nat,
     }
     dbus_message_append_args(msg, DBUS_TYPE_OBJECT_PATH, &agent_path,
                              DBUS_TYPE_STRING, &capabilities,
-                             DBUS_TYPE_BOOLEAN, &oob,
                              DBUS_TYPE_INVALID);
 
     dbus_error_init(&err);
