@@ -29,6 +29,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -156,13 +157,16 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                                 // create in response to this bind
                                 factory.onDataSetChanged();
                             }
-                        } catch (Exception e) {
+                        } catch (RemoteException e) {
                             Log.e(TAG, "Error notifying factory of data set changed in " +
                                         "onServiceConnected(): " + e.getMessage());
 
                             // Return early to prevent anything further from being notified
                             // (effectively nothing has changed)
                             return;
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Error notifying factory of data set changed in " +
+                                    "onServiceConnected(): " + e.getMessage());
                         }
 
                         // Request meta data so that we have up to date data when calling back to
@@ -777,7 +781,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 tmpMetaData.count = count;
                 tmpMetaData.setLoadingViewTemplates(loadingView, firstView);
             }
-        } catch (Exception e) {
+        } catch(RemoteException e) {
             processException("updateMetaData", e);
         }
     }
@@ -792,11 +796,14 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         try {
             remoteViews = factory.getViewAt(position);
             itemId = factory.getItemId(position);
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Error in updateRemoteViews(" + position + "): " + e.getMessage());
 
             // Return early to prevent additional work in re-centering the view cache, and
             // swapping from the loading view
+            return;
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error in updateRemoteViews(" + position + "): " + e.getMessage());
             return;
         }
 
@@ -971,17 +978,19 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         return getCount() <= 0;
     }
 
-
     private void onNotifyDataSetChanged() {
         // Complete the actual notifyDataSetChanged() call initiated earlier
         IRemoteViewsFactory factory = mServiceConnection.getRemoteViewsFactory();
         try {
             factory.onDataSetChanged();
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Error in updateNotifyDataSetChanged(): " + e.getMessage());
 
             // Return early to prevent from further being notified (since nothing has
             // changed)
+            return;
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Error in updateNotifyDataSetChanged(): " + e.getMessage());
             return;
         }
 
