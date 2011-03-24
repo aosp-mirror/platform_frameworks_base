@@ -25,13 +25,13 @@ import com.android.internal.widget.ActionBarView;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -44,7 +44,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 
@@ -92,60 +91,34 @@ public class ActionBarImpl extends ActionBar {
 
     final Handler mHandler = new Handler();
 
-    private Animator mCurrentAnim;
+    private Animator mCurrentShowAnim;
+    private Animator mCurrentModeAnim;
     private boolean mShowHideAnimationEnabled;
+    boolean mWasHiddenBeforeMode;
 
     private static final TimeInterpolator sFadeOutInterpolator = new DecelerateInterpolator();
 
     final AnimatorListener[] mAfterAnimation = new AnimatorListener[] {
-            new AnimatorListener() { // NORMAL_VIEW
-                @Override
-                public void onAnimationStart(Animator animation) {
-                }
-
+            new AnimatorListenerAdapter() { // NORMAL_VIEW
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     if (mLowerContextView != null) {
                         mLowerContextView.removeAllViews();
                     }
-                    mCurrentAnim = null;
+                    mCurrentModeAnim = null;
                     hideAllExcept(NORMAL_VIEW);
                 }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-                }
             },
-            new AnimatorListener() { // CONTEXT_VIEW
-                @Override
-                public void onAnimationStart(Animator animation) {
-                }
-
+            new AnimatorListenerAdapter() { // CONTEXT_VIEW
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mCurrentAnim = null;
+                    mCurrentModeAnim = null;
                     hideAllExcept(CONTEXT_VIEW);
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
                 }
             }
     };
 
-    final AnimatorListener mHideListener = new AnimatorListener() {
-        @Override
-        public void onAnimationStart(Animator animation) {
-        }
-
+    final AnimatorListener mHideListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
             if (mContentView != null) {
@@ -153,35 +126,15 @@ public class ActionBarImpl extends ActionBar {
             }
             mContainerView.setVisibility(View.GONE);
             mContainerView.setTransitioning(false);
-            mCurrentAnim = null;
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
+            mCurrentShowAnim = null;
         }
     };
 
-    final AnimatorListener mShowListener = new AnimatorListener() {
-        @Override
-        public void onAnimationStart(Animator animation) {
-        }
-
+    final AnimatorListener mShowListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
-            mCurrentAnim = null;
+            mCurrentShowAnim = null;
             mContainerView.requestLayout();
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
         }
     };
 
@@ -229,8 +182,8 @@ public class ActionBarImpl extends ActionBar {
      */
     public void setShowHideAnimationEnabled(boolean enabled) {
         mShowHideAnimationEnabled = enabled;
-        if (!enabled && mCurrentAnim != null) {
-            mCurrentAnim.end();
+        if (!enabled && mCurrentShowAnim != null) {
+            mCurrentShowAnim.end();
         }
     }
 
@@ -370,6 +323,7 @@ public class ActionBarImpl extends ActionBar {
         mUpperContextView.killMode();
         ActionMode mode = new ActionModeImpl(callback);
         if (callback.onCreateActionMode(mode, mode.getMenu())) {
+            mWasHiddenBeforeMode = !isShowing();
             mode.invalidate();
             mUpperContextView.initForMode(mode);
             animateTo(CONTEXT_VIEW);
@@ -378,7 +332,6 @@ public class ActionBarImpl extends ActionBar {
                 mLowerContextView.setVisibility(View.VISIBLE);
             }
             mActionMode = mode;
-            show();
             return mode;
         }
         return null;
@@ -498,10 +451,15 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void show() {
-        if (mCurrentAnim != null) {
-            mCurrentAnim.end();
+        show(true);
+    }
+
+    void show(boolean markHiddenBeforeMode) {
+        if (mCurrentShowAnim != null) {
+            mCurrentShowAnim.end();
         }
         if (mContainerView.getVisibility() == View.VISIBLE) {
+            if (markHiddenBeforeMode) mWasHiddenBeforeMode = false;
             return;
         }
         mContainerView.setVisibility(View.VISIBLE);
@@ -517,7 +475,7 @@ public class ActionBarImpl extends ActionBar {
                 b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
             }
             anim.addListener(mShowListener);
-            mCurrentAnim = anim;
+            mCurrentShowAnim = anim;
             anim.start();
         } else {
             mShowListener.onAnimationEnd(null);
@@ -526,8 +484,8 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void hide() {
-        if (mCurrentAnim != null) {
-            mCurrentAnim.end();
+        if (mCurrentShowAnim != null) {
+            mCurrentShowAnim.end();
         }
         if (mContainerView.getVisibility() == View.GONE) {
             return;
@@ -545,7 +503,7 @@ public class ActionBarImpl extends ActionBar {
                         -mContainerView.getHeight()));
             }
             anim.addListener(mHideListener);
-            mCurrentAnim = anim;
+            mCurrentShowAnim = anim;
             anim.start();
         } else {
             mHideListener.onAnimationEnd(null);
@@ -556,13 +514,17 @@ public class ActionBarImpl extends ActionBar {
         return mContainerView.getVisibility() == View.VISIBLE;
     }
 
-    private long animateTo(int viewIndex) {
-        show();
+    long animateTo(int viewIndex) {
+        show(false);
+        if (mCurrentModeAnim != null) {
+            mCurrentModeAnim.end();
+        }
 
         AnimatorSet set = new AnimatorSet();
 
         final View targetChild = mContainerView.getChildAt(viewIndex);
         targetChild.setVisibility(View.VISIBLE);
+        targetChild.setAlpha(0);
         AnimatorSet.Builder b = set.play(ObjectAnimator.ofFloat(targetChild, "alpha", 1));
 
         final int count = mContainerView.getChildCount();
@@ -581,7 +543,7 @@ public class ActionBarImpl extends ActionBar {
 
         set.addListener(mAfterAnimation[viewIndex]);
 
-        mCurrentAnim = set;
+        mCurrentModeAnim = set;
         set.start();
         return set.getDuration();
     }
@@ -636,6 +598,10 @@ public class ActionBarImpl extends ActionBar {
                 mLowerContextView.setVisibility(View.GONE);
             }
             mActionMode = null;
+
+            if (mWasHiddenBeforeMode) {
+                hide();
+            }
         }
 
         @Override
