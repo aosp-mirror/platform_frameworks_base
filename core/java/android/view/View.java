@@ -7323,8 +7323,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean post(Runnable action) {
         Handler handler;
-        if (mAttachInfo != null) {
-            handler = mAttachInfo.mHandler;
+        AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
             ViewRoot.getRunQueue().post(action);
@@ -7352,8 +7353,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean postDelayed(Runnable action, long delayMillis) {
         Handler handler;
-        if (mAttachInfo != null) {
-            handler = mAttachInfo.mHandler;
+        AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
             ViewRoot.getRunQueue().postDelayed(action, delayMillis);
@@ -7375,8 +7377,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean removeCallbacks(Runnable action) {
         Handler handler;
-        if (mAttachInfo != null) {
-            handler = mAttachInfo.mHandler;
+        AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
+            handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
             ViewRoot.getRunQueue().removeCallbacks(action);
@@ -7423,11 +7426,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public void postInvalidateDelayed(long delayMilliseconds) {
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
-        if (mAttachInfo != null) {
+        AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
             Message msg = Message.obtain();
             msg.what = AttachInfo.INVALIDATE_MSG;
             msg.obj = this;
-            mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
+            attachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
         }
     }
 
@@ -7447,7 +7451,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         // We try only with the AttachInfo because there's no point in invalidating
         // if we are not attached to our window
-        if (mAttachInfo != null) {
+        AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo != null) {
             final AttachInfo.InvalidateInfo info = AttachInfo.InvalidateInfo.acquire();
             info.target = this;
             info.left = left;
@@ -7458,7 +7463,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             final Message msg = Message.obtain();
             msg.what = AttachInfo.INVALIDATE_RECT_MSG;
             msg.obj = info;
-            mAttachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
+            attachInfo.mHandler.sendMessageDelayed(msg, delayMilliseconds);
         }
     }
 
