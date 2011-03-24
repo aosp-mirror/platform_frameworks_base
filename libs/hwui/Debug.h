@@ -26,7 +26,7 @@
 // Turn on to enable memory usage summary on each frame
 #define DEBUG_MEMORY_USAGE 0
 
-// Turn on to enable layers debugging when renderered as regions
+// Turn on to enable layers debugging when rendered as regions
 #define DEBUG_LAYERS_AS_REGIONS 0
 
 // Turn on to display debug info about vertex/fragment shaders
@@ -35,7 +35,7 @@
 // Turn on to display info about layers
 #define DEBUG_LAYERS 0
 
-// Turn on to display debug infor about 9patch objects
+// Turn on to display debug info about 9patch objects
 #define DEBUG_PATCHES 0
 // Turn on to display vertex and tex coords data about 9patch objects
 // This flag requires DEBUG_PATCHES to be turned on

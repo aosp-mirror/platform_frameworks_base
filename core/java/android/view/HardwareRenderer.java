@@ -20,7 +20,7 @@ package android.view;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.os.SystemClock;
+import android.os.*;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -256,6 +256,7 @@ public abstract class HardwareRenderer {
 
     @SuppressWarnings({"deprecation"})
     static abstract class GlRenderer extends HardwareRenderer {
+        // These values are not exposed in our EGL APIs
         private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
         private static final int EGL_SURFACE_TYPE = 0x3033;
         private static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
@@ -290,7 +291,7 @@ public abstract class HardwareRenderer {
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
             mTranslucent = translucent;
-            final String dirtyProperty = System.getProperty(RENDER_DIRTY_REGIONS_PROPERTY, "true");
+            final String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
             //noinspection PointlessBooleanExpression,ConstantConditions
             mDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
         }
