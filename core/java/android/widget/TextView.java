@@ -128,7 +128,6 @@ import android.widget.RemoteViews.RemoteView;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -3979,13 +3978,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mPreDrawState != PREDRAW_NOT_REGISTERED) {
             observer.removeOnPreDrawListener(this);
             mPreDrawState = PREDRAW_NOT_REGISTERED;
-        }
-        // No need to create the controller, as getXXController would.
-        if (mInsertionPointCursorController != null) {
-            observer.removeOnTouchModeChangeListener(mInsertionPointCursorController);
-        }
-        if (mSelectionModifierCursorController != null) {
-            observer.removeOnTouchModeChangeListener(mSelectionModifierCursorController);
         }
 
         if (mError != null) {
@@ -9221,6 +9213,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onDetached() {
+            final ViewTreeObserver observer = getViewTreeObserver();
+            observer.removeOnTouchModeChangeListener(this);
+
             if (mHandle != null) mHandle.onDetached();
         }
     }
@@ -9349,6 +9344,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void onDetached() {
+            final ViewTreeObserver observer = getViewTreeObserver();
+            observer.removeOnTouchModeChangeListener(this);
+
             if (mStartHandle != null) mStartHandle.onDetached();
             if (mEndHandle != null) mEndHandle.onDetached();
         }
