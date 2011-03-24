@@ -58,6 +58,7 @@ import java.util.ArrayList;
  * which is normally hidden.
  */
 public class ActionBarImpl extends ActionBar {
+    private static final String TAG = "ActionBarImpl";
     private static final int NORMAL_VIEW = 0;
     private static final int CONTEXT_VIEW = 1;
 
@@ -478,6 +479,8 @@ public class ActionBarImpl extends ActionBar {
             mCurrentShowAnim = anim;
             anim.start();
         } else {
+            mContainerView.setAlpha(1);
+            mContainerView.setTranslationY(0);
             mShowListener.onAnimationEnd(null);
         }
     }
