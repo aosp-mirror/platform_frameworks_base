@@ -502,6 +502,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 (attrs.flags & WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) != 0;
 
         if (hardwareAccelerated) {
+            if (!HardwareRenderer.isAvailable()) {
+                mAttachInfo.mHardwareAccelerationRequested = true;
+                return;
+            }
+
             // Only enable hardware acceleration if we are not in the system process
             // The window manager creates ViewRoots to display animated preview windows
             // of launching apps and we don't want those to be hardware accelerated
@@ -524,8 +529,6 @@ public final class ViewRoot extends Handler implements ViewParent,
                 mAttachInfo.mHardwareRenderer = HardwareRenderer.createGlRenderer(2, translucent);
                 mAttachInfo.mHardwareAccelerated = mAttachInfo.mHardwareAccelerationRequested
                         = mAttachInfo.mHardwareRenderer != null;
-            } else if (HardwareRenderer.isAvailable()) {
-                mAttachInfo.mHardwareAccelerationRequested = true;
             }
         }
     }
