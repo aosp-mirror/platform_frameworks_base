@@ -13,15 +13,20 @@
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  */
- 
+
 #include "header.h"
+
+extern "C" {
+#include "liblzf/lzf.h"
+}
 
 namespace android
 {
 
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
                        const unsigned MAX_VERTEX_ATTRIBS)
-        : version(version), hooks(hooks)
+        : lzf_buf(NULL), lzf_bufSize(0)
+        , version(version), hooks(hooks)
         , MAX_VERTEX_ATTRIBS(MAX_VERTEX_ATTRIBS)
         , vertexAttribs(new VertexAttrib[MAX_VERTEX_ATTRIBS])
         , hasNonVBOAttribs(false), indexBuffers(NULL), indexBuffer(NULL)
@@ -33,6 +38,7 @@ DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
 DbgContext::~DbgContext()
 {
     delete vertexAttribs;
+    free(lzf_buf);
 }
 
 DbgContext * CreateDbgContext(const unsigned version, const gl_hooks_t * const hooks)
@@ -63,11 +69,24 @@ void DbgContext::Fetch(const unsigned index, std::string * const data) const
     }
 }
 
+unsigned DbgContext::Compress(const void * in_data, unsigned in_len)
+{
+    if (lzf_bufSize < in_len + 256) {
+        lzf_bufSize = in_len + 256;
+        lzf_buf = (char *)realloc(lzf_buf, lzf_bufSize);
+    }
+    unsigned compressedSize = lzf_compress((const char *)in_data,
+                              in_len, lzf_buf, lzf_bufSize);
+    LOGD("DbgContext::lzf_compress in=%u out=%u", in_len, compressedSize);
+    assert (0 < compressedSize);
+    return compressedSize;
+}
+
 void DbgContext::glUseProgram(GLuint program)
 {
     while (GLenum error = hooks->gl.glGetError())
         LOGD("DbgContext::glUseProgram: before glGetError() = 0x%.4X", error);
-        
+
     this->program = program;
 
     GLint activeAttributes = 0;
@@ -107,7 +126,7 @@ void DbgContext::glUseProgram(GLuint program)
             maxAttrib = slot;
     }
     delete name;
-    
+
     while (GLenum error = hooks->gl.glGetError())
         LOGD("DbgContext::glUseProgram: after glGetError() = 0x%.4X", error);
 }

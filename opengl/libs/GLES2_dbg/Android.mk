@@ -16,6 +16,7 @@ LOCAL_C_INCLUDES :=	\
     $(LOCAL_PATH)/../ \
     external/stlport/stlport \
     external/protobuf/src \
+    external \
     bionic
 
 #LOCAL_CFLAGS += -O0 -g -DDEBUG -UNDEBUG

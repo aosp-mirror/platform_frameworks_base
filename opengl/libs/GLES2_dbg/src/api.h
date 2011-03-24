@@ -17,7 +17,9 @@
 #define EXTEND_Debug_glCopyTexImage2D \
     void * pixels = malloc(width * height * 4); \
     getGLTraceThreadSpecific()->gl.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels); \
-    msg.set_data(pixels, width * height * 4); \
+    DbgContext * const dbg = getDbgContextThreadSpecific(); \
+    const unsigned compressed = dbg->Compress(pixels, width * height * 4); \
+    msg.set_data(dbg->lzf_buf, compressed); \
     free(pixels);
     
 #define EXTEND_Debug_glCopyTexSubImage2D EXTEND_Debug_glCopyTexImage2D

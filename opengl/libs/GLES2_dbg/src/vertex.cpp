@@ -19,8 +19,6 @@
 namespace android
 {
 bool capture; // capture after each glDraw*
-
-void * RLEEncode(const void * pixels, const unsigned bytesPerPixel, const unsigned count, unsigned * encodedSize);
 }
 
 void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels)
@@ -39,8 +37,9 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
     msg.set_arg4(format);
     msg.set_arg5(type);
     msg.set_arg6(reinterpret_cast<int>(pixels));
-    //void * data = NULL;
-    //unsigned encodedSize = 0;
+    
+    const unsigned size = width * height * GetBytesPerPixel(format, type);
+    unsigned compressed = 0;
     if (!expectResponse)
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
     Send(msg, cmd);
@@ -56,21 +55,11 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             msg.set_function(glesv2debugger::Message_Function_glReadPixels);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            //data = RLEEncode(pixels, GetBytesPerPixel(format, type), width * height, &encodedSize);
-            msg.set_data(pixels, width * height * GetBytesPerPixel(format, type));
-            //msg.set_data(data, encodedSize);
-            //free(data);
-            c0 = systemTime(timeMode);
+            compressed = dbg->Compress(pixels, size);
+            msg.set_data(dbg->lzf_buf, compressed);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
-            t = Send(msg, cmd);
-            msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
-            msg.set_clock(t);
-            // time is total send time in seconds, clock is msg serialization time in seconds
-            msg.clear_data();
-            msg.set_expect_response(false);
-            msg.set_type(glesv2debugger::Message_Type_AfterCall);
-            //Send(msg, cmd);
+            Send(msg, cmd);
             break;
         case glesv2debugger::Message_Function_SKIP:
             return;
@@ -129,8 +118,8 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
-                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
+//                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+//                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
                 pixels = malloc(viewport[2] * viewport[3] * 4);
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
                                    readFormat, readType, pixels);
@@ -215,8 +204,8 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
-                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
+//                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
+//                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
                 pixels = malloc(viewport[2] * viewport[3] * 4);
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
                                    readFormat, readType, pixels);

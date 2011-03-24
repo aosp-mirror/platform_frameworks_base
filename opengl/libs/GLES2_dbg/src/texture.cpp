@@ -50,89 +50,11 @@ unsigned GetBytesPerPixel(const GLenum format, const GLenum type)
         return 0;
     }
 }
-
-#define USE_RLE 0
-#if USE_RLE
-export template<typename T>
-void * RLEEncode(const void * pixels, unsigned count, unsigned * encodedSize)
-{
-    // first is a byte indicating data size [1,2,4] bytes
-    // then an unsigned indicating decompressed size
-    // then a byte of header: MSB == 1 indicates run, else literal
-    // LSB7 is run or literal length (actual length - 1)
-
-    const T * data = (T *)pixels;
-    unsigned bufferSize = sizeof(T) * count / 2 + 8;
-    unsigned char * buffer = (unsigned char *)malloc(bufferSize);
-    buffer[0] = sizeof(T);
-    unsigned bufferWritten = 1; // number of bytes written
-    *(unsigned *)(buffer + bufferWritten) = count;
-    bufferWritten += sizeof(count);
-    while (count) {
-        unsigned char run = 1;
-        bool repeat = true;
-        for (run = 1; run < count; run++)
-            if (data[0] != data[run]) {
-                repeat = false;
-                break;
-            } else if (run > 126)
-                break;
-        if (!repeat) {
-            // find literal length
-            for (run = 1; run < count; run++)
-                if (data[run - 1] == data[run])
-                    break;
-                else if (run > 126)
-                    break;
-            unsigned bytesToWrite = 1 + sizeof(T) * run;
-            if (bufferWritten + bytesToWrite > bufferSize) {
-                bufferSize += sizeof(T) * run + 256;
-                buffer = (unsigned char *)realloc(buffer, bufferSize);
-            }
-            buffer[bufferWritten++] = run - 1;
-            for (unsigned i = 0; i < run; i++) {
-                *(T *)(buffer + bufferWritten) = *data;
-                bufferWritten += sizeof(T);
-                data++;
-            }
-            count -= run;
-        } else {
-            unsigned bytesToWrite = 1 + sizeof(T);
-            if (bufferWritten + bytesToWrite > bufferSize) {
-                bufferSize += 256;
-                buffer = (unsigned char *)realloc(buffer, bufferSize);
-            }
-            buffer[bufferWritten++] = (run - 1) | 0x80;
-            *(T *)(buffer + bufferWritten) = data[0];
-            bufferWritten += sizeof(T);
-            data += run;
-            count -= run;
-        }
-    }
-    if (encodedSize)
-        *encodedSize = bufferWritten;
-    return buffer;
-}
-
-void * RLEEncode(const void * pixels, const unsigned bytesPerPixel, const unsigned count, unsigned * encodedSize)
-{
-    switch (bytesPerPixel) {
-    case 4:
-        return RLEEncode<int>(pixels, count, encodedSize);
-    case 2:
-        return RLEEncode<short>(pixels, count, encodedSize);
-    case 1:
-        return RLEEncode<char>(pixels, count, encodedSize);
-    default:
-        assert(0);
-        return NULL;
-    }
-}
-#endif
 }; // namespace android
 
 void Debug_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
 {
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg;
     const bool expectResponse = false;
     struct : public FunctionCall {
@@ -179,27 +101,19 @@ void Debug_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
 
         unsigned bytesPerPixel = GetBytesPerPixel(format, type);
         assert(0 < bytesPerPixel);
-
 //        LOGD("GLESv2_dbg: glTexImage2D width=%d height=%d level=%d bytesPerPixel=%d",
 //             width, height, level, bytesPerPixel);
-#if USE_RLE
-        unsigned encodedSize = 0;
-        void * data = RLEEncode(pixels, bytesPerPixel, width * height, &encodedSize);
-        msg.set_data(data, encodedSize);
-        free(data);
-        if (encodedSize > bytesPerPixel * width * height)
-            LOGD("GLESv2_dbg: glTexImage2D sending data encodedSize=%d size=%d", encodedSize, bytesPerPixel * width * height);
-#else
-        msg.set_data(pixels, bytesPerPixel * width * height);
-#endif
+        unsigned compressedSize = dbg->Compress(pixels, bytesPerPixel * width * height);
+        msg.set_data(dbg->lzf_buf, compressedSize);
     }
-    
+
     int * ret = MessageLoop(caller, msg, expectResponse,
                             glesv2debugger::Message_Function_glTexImage2D);
 }
 
 void Debug_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels)
 {
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg;
     const bool expectResponse = false;
     struct : public FunctionCall {
@@ -244,22 +158,12 @@ void Debug_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     if (pixels) {
         unsigned bytesPerPixel = GetBytesPerPixel(format, type);
         assert(0 < bytesPerPixel);
-
 //        LOGD("GLESv2_dbg: glTexSubImage2D width=%d height=%d level=%d bytesPerPixel=%d",
 //             width, height, level, bytesPerPixel);
-
-#if USE_RLE
-        unsigned encodedSize = 0;
-        void * data = RLEEncode(pixels, bytesPerPixel, width * height, &encodedSize);
-        msg.set_data(data, encodedSize);
-        free(data);
-        if (encodedSize > bytesPerPixel * width * height)
-            LOGD("GLESv2_dbg: glTexImage2D sending data encodedSize=%d size=%d", encodedSize, bytesPerPixel * width * height);
-#else
-        msg.set_data(pixels, bytesPerPixel * width * height);
-#endif
+        unsigned compressedSize = dbg->Compress(pixels, bytesPerPixel * width * height);
+        msg.set_data(dbg->lzf_buf, compressedSize);
     }
-    
+
     int * ret = MessageLoop(caller, msg, expectResponse,
                             glesv2debugger::Message_Function_glTexSubImage2D);
 }
