@@ -1222,6 +1222,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         case 7: // RADIO_TECHNOLOGY_EVDO_0
         case 8: // RADIO_TECHNOLOGY_EVDO_A
         case 12: // RADIO_TECHNOLOGY_EVDO_B
+        case 13: // RADIO_TECHNOLOGY_EHRPD
             retVal = ServiceState.STATE_IN_SERVICE;
             break;
         default:
