@@ -93,7 +93,9 @@ void DisplayList::clearResources() {
     mPaints.clear();
 
     for (size_t i = 0; i < mPaths.size(); i++) {
-        delete mPaths.itemAt(i);
+        SkPath* path = mPaths.itemAt(i);
+        caches.pathCache.remove(path);
+        delete path;
     }
     mPaths.clear();
 

@@ -89,8 +89,11 @@ struct ShapeCacheEntry {
         join = SkPaint::kDefault_Join;
         cap = SkPaint::kDefault_Cap;
         style = SkPaint::kFill_Style;
-        miter = 4.0f;
-        strokeWidth = 1.0f;
+        float v = 4.0f;
+        miter = *(uint32_t*) &v;
+        v = 1.0f;
+        strokeWidth = *(uint32_t*) &v;
+        pathEffect = NULL;
     }
 
     ShapeCacheEntry(const ShapeCacheEntry& entry):
