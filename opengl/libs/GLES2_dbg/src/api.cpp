@@ -25,7 +25,6 @@ template<typename T> static T FromInt(const int & t) { STATIC_ASSERT(sizeof(T) =
 void Debug_glActiveTexture(GLenum texture)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum texture;
 
@@ -38,14 +37,12 @@ void Debug_glActiveTexture(GLenum texture)
 
     msg.set_arg0(texture);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glActiveTexture);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glActiveTexture);
 }
 
 void Debug_glAttachShader(GLuint program, GLuint shader)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLuint shader;
@@ -61,14 +58,12 @@ void Debug_glAttachShader(GLuint program, GLuint shader)
     msg.set_arg0(program);
     msg.set_arg1(shader);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glAttachShader);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glAttachShader);
 }
 
 void Debug_glBindAttribLocation(GLuint program, GLuint index, const GLchar* name)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLuint index;
@@ -89,14 +84,12 @@ void Debug_glBindAttribLocation(GLuint program, GLuint index, const GLchar* name
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(name), strlen(name) * sizeof(GLchar));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBindAttribLocation);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBindAttribLocation);
 }
 
 void Debug_glBindBuffer(GLenum target, GLuint buffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLuint buffer;
@@ -113,14 +106,12 @@ void Debug_glBindBuffer(GLenum target, GLuint buffer)
     msg.set_arg0(target);
     msg.set_arg1(buffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBindBuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBindBuffer);
 }
 
 void Debug_glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLuint framebuffer;
@@ -136,14 +127,12 @@ void Debug_glBindFramebuffer(GLenum target, GLuint framebuffer)
     msg.set_arg0(target);
     msg.set_arg1(framebuffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBindFramebuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBindFramebuffer);
 }
 
 void Debug_glBindRenderbuffer(GLenum target, GLuint renderbuffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLuint renderbuffer;
@@ -159,14 +148,12 @@ void Debug_glBindRenderbuffer(GLenum target, GLuint renderbuffer)
     msg.set_arg0(target);
     msg.set_arg1(renderbuffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBindRenderbuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBindRenderbuffer);
 }
 
 void Debug_glBindTexture(GLenum target, GLuint texture)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLuint texture;
@@ -182,14 +169,12 @@ void Debug_glBindTexture(GLenum target, GLuint texture)
     msg.set_arg0(target);
     msg.set_arg1(texture);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBindTexture);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBindTexture);
 }
 
 void Debug_glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLclampf red;
         GLclampf green;
@@ -211,14 +196,12 @@ void Debug_glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf al
     msg.set_arg2(ToInt(blue));
     msg.set_arg3(ToInt(alpha));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBlendColor);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBlendColor);
 }
 
 void Debug_glBlendEquation( GLenum mode )
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum mode;
 
@@ -231,14 +214,12 @@ void Debug_glBlendEquation( GLenum mode )
 
     msg.set_arg0(mode);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBlendEquation);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBlendEquation);
 }
 
 void Debug_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum modeRGB;
         GLenum modeAlpha;
@@ -254,14 +235,12 @@ void Debug_glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha)
     msg.set_arg0(modeRGB);
     msg.set_arg1(modeAlpha);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBlendEquationSeparate);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBlendEquationSeparate);
 }
 
 void Debug_glBlendFunc(GLenum sfactor, GLenum dfactor)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum sfactor;
         GLenum dfactor;
@@ -277,14 +256,12 @@ void Debug_glBlendFunc(GLenum sfactor, GLenum dfactor)
     msg.set_arg0(sfactor);
     msg.set_arg1(dfactor);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBlendFunc);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBlendFunc);
 }
 
 void Debug_glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum srcRGB;
         GLenum dstRGB;
@@ -306,14 +283,12 @@ void Debug_glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GL
     msg.set_arg2(srcAlpha);
     msg.set_arg3(dstAlpha);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBlendFuncSeparate);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBlendFuncSeparate);
 }
 
 void Debug_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLsizeiptr size;
@@ -338,14 +313,12 @@ void Debug_glBufferData(GLenum target, GLsizeiptr size, const GLvoid* data, GLen
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(data), size * sizeof(char));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBufferData);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBufferData);
 }
 
 void Debug_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLintptr offset;
@@ -370,14 +343,12 @@ void Debug_glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, cons
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(data), size * sizeof(char));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glBufferSubData);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glBufferSubData);
 }
 
 GLenum Debug_glCheckFramebufferStatus(GLenum target)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
 
@@ -391,15 +362,13 @@ GLenum Debug_glCheckFramebufferStatus(GLenum target)
 
     msg.set_arg0(target);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCheckFramebufferStatus);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCheckFramebufferStatus);
     return reinterpret_cast<GLenum>(ret);
 }
 
 void Debug_glClear(GLbitfield mask)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLbitfield mask;
 
@@ -412,14 +381,12 @@ void Debug_glClear(GLbitfield mask)
 
     msg.set_arg0(mask);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glClear);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glClear);
 }
 
 void Debug_glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLclampf red;
         GLclampf green;
@@ -441,14 +408,12 @@ void Debug_glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf al
     msg.set_arg2(ToInt(blue));
     msg.set_arg3(ToInt(alpha));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glClearColor);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glClearColor);
 }
 
 void Debug_glClearDepthf(GLclampf depth)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLclampf depth;
 
@@ -461,14 +426,12 @@ void Debug_glClearDepthf(GLclampf depth)
 
     msg.set_arg0(ToInt(depth));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glClearDepthf);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glClearDepthf);
 }
 
 void Debug_glClearStencil(GLint s)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint s;
 
@@ -481,14 +444,12 @@ void Debug_glClearStencil(GLint s)
 
     msg.set_arg0(s);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glClearStencil);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glClearStencil);
 }
 
 void Debug_glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLboolean red;
         GLboolean green;
@@ -510,14 +471,12 @@ void Debug_glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean
     msg.set_arg2(blue);
     msg.set_arg3(alpha);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glColorMask);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glColorMask);
 }
 
 void Debug_glCompileShader(GLuint shader)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
 
@@ -530,15 +489,13 @@ void Debug_glCompileShader(GLuint shader)
 
     msg.set_arg0(shader);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCompileShader);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCompileShader);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLint level;
@@ -573,15 +530,13 @@ void Debug_glCompressedTexImage2D(GLenum target, GLint level, GLenum internalfor
     msg.set_arg7(ToInt(data));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCompressedTexImage2D);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCompressedTexImage2D);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLint level;
@@ -619,14 +574,12 @@ void Debug_glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, 
     msg.set_arg8(ToInt(data));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCompressedTexSubImage2D);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCompressedTexSubImage2D);
 }
 
 void Debug_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLint level;
@@ -661,14 +614,12 @@ void Debug_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, G
     msg.set_arg7(border);
 
     EXTEND_Debug_glCopyTexImage2D;
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCopyTexImage2D);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCopyTexImage2D);
 }
 
 void Debug_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLint level;
@@ -703,14 +654,12 @@ void Debug_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint 
     msg.set_arg7(height);
 
     EXTEND_Debug_glCopyTexSubImage2D;
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCopyTexSubImage2D);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCopyTexSubImage2D);
 }
 
 GLuint Debug_glCreateProgram(void)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
@@ -721,15 +670,13 @@ GLuint Debug_glCreateProgram(void)
     } caller;
 
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCreateProgram);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCreateProgram);
     return reinterpret_cast<GLuint>(ret);
 }
 
 GLuint Debug_glCreateShader(GLenum type)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum type;
 
@@ -743,15 +690,13 @@ GLuint Debug_glCreateShader(GLenum type)
 
     msg.set_arg0(type);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCreateShader);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCreateShader);
     return reinterpret_cast<GLuint>(ret);
 }
 
 void Debug_glCullFace(GLenum mode)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum mode;
 
@@ -764,14 +709,12 @@ void Debug_glCullFace(GLenum mode)
 
     msg.set_arg0(mode);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glCullFace);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCullFace);
 }
 
 void Debug_glDeleteBuffers(GLsizei n, const GLuint* buffers)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         const GLuint* buffers;
@@ -790,14 +733,12 @@ void Debug_glDeleteBuffers(GLsizei n, const GLuint* buffers)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(buffers), n * sizeof(GLuint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDeleteBuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDeleteBuffers);
 }
 
 void Debug_glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         const GLuint* framebuffers;
@@ -815,14 +756,12 @@ void Debug_glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(framebuffers), n * sizeof(GLuint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDeleteFramebuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDeleteFramebuffers);
 }
 
 void Debug_glDeleteProgram(GLuint program)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
 
@@ -835,14 +774,12 @@ void Debug_glDeleteProgram(GLuint program)
 
     msg.set_arg0(program);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDeleteProgram);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDeleteProgram);
 }
 
 void Debug_glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         const GLuint* renderbuffers;
@@ -860,14 +797,12 @@ void Debug_glDeleteRenderbuffers(GLsizei n, const GLuint* renderbuffers)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(renderbuffers), n * sizeof(GLuint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDeleteRenderbuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDeleteRenderbuffers);
 }
 
 void Debug_glDeleteShader(GLuint shader)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
 
@@ -880,14 +815,12 @@ void Debug_glDeleteShader(GLuint shader)
 
     msg.set_arg0(shader);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDeleteShader);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDeleteShader);
 }
 
 void Debug_glDeleteTextures(GLsizei n, const GLuint* textures)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         const GLuint* textures;
@@ -905,14 +838,12 @@ void Debug_glDeleteTextures(GLsizei n, const GLuint* textures)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(textures), n * sizeof(GLuint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDeleteTextures);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDeleteTextures);
 }
 
 void Debug_glDepthFunc(GLenum func)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum func;
 
@@ -925,14 +856,12 @@ void Debug_glDepthFunc(GLenum func)
 
     msg.set_arg0(func);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDepthFunc);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDepthFunc);
 }
 
 void Debug_glDepthMask(GLboolean flag)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLboolean flag;
 
@@ -945,14 +874,12 @@ void Debug_glDepthMask(GLboolean flag)
 
     msg.set_arg0(flag);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDepthMask);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDepthMask);
 }
 
 void Debug_glDepthRangef(GLclampf zNear, GLclampf zFar)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLclampf zNear;
         GLclampf zFar;
@@ -968,14 +895,12 @@ void Debug_glDepthRangef(GLclampf zNear, GLclampf zFar)
     msg.set_arg0(ToInt(zNear));
     msg.set_arg1(ToInt(zFar));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDepthRangef);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDepthRangef);
 }
 
 void Debug_glDetachShader(GLuint program, GLuint shader)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLuint shader;
@@ -991,14 +916,12 @@ void Debug_glDetachShader(GLuint program, GLuint shader)
     msg.set_arg0(program);
     msg.set_arg1(shader);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDetachShader);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDetachShader);
 }
 
 void Debug_glDisable(GLenum cap)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum cap;
 
@@ -1011,14 +934,12 @@ void Debug_glDisable(GLenum cap)
 
     msg.set_arg0(cap);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDisable);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDisable);
 }
 
 void Debug_glDisableVertexAttribArray(GLuint index)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint index;
 
@@ -1032,14 +953,12 @@ void Debug_glDisableVertexAttribArray(GLuint index)
 
     msg.set_arg0(index);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glDisableVertexAttribArray);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glDisableVertexAttribArray);
 }
 
 void Debug_glEnable(GLenum cap)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum cap;
 
@@ -1052,14 +971,12 @@ void Debug_glEnable(GLenum cap)
 
     msg.set_arg0(cap);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glEnable);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glEnable);
 }
 
 void Debug_glEnableVertexAttribArray(GLuint index)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint index;
 
@@ -1073,14 +990,12 @@ void Debug_glEnableVertexAttribArray(GLuint index)
 
     msg.set_arg0(index);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glEnableVertexAttribArray);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glEnableVertexAttribArray);
 }
 
 void Debug_glFinish(void)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
@@ -1090,14 +1005,12 @@ void Debug_glFinish(void)
     } caller;
 
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glFinish);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glFinish);
 }
 
 void Debug_glFlush(void)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
@@ -1107,14 +1020,12 @@ void Debug_glFlush(void)
     } caller;
 
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glFlush);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glFlush);
 }
 
 void Debug_glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum attachment;
@@ -1136,14 +1047,12 @@ void Debug_glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum re
     msg.set_arg2(renderbuffertarget);
     msg.set_arg3(renderbuffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glFramebufferRenderbuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glFramebufferRenderbuffer);
 }
 
 void Debug_glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum attachment;
@@ -1168,14 +1077,12 @@ void Debug_glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum texta
     msg.set_arg3(texture);
     msg.set_arg4(level);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glFramebufferTexture2D);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glFramebufferTexture2D);
 }
 
 void Debug_glFrontFace(GLenum mode)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum mode;
 
@@ -1188,14 +1095,12 @@ void Debug_glFrontFace(GLenum mode)
 
     msg.set_arg0(mode);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glFrontFace);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glFrontFace);
 }
 
 void Debug_glGenBuffers(GLsizei n, GLuint* buffers)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         GLuint* buffers;
@@ -1215,14 +1120,12 @@ void Debug_glGenBuffers(GLsizei n, GLuint* buffers)
     msg.set_arg1(ToInt(buffers));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGenBuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGenBuffers);
 }
 
 void Debug_glGenerateMipmap(GLenum target)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
 
@@ -1235,14 +1138,12 @@ void Debug_glGenerateMipmap(GLenum target)
 
     msg.set_arg0(target);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGenerateMipmap);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGenerateMipmap);
 }
 
 void Debug_glGenFramebuffers(GLsizei n, GLuint* framebuffers)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         GLuint* framebuffers;
@@ -1262,14 +1163,12 @@ void Debug_glGenFramebuffers(GLsizei n, GLuint* framebuffers)
     msg.set_arg1(ToInt(framebuffers));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGenFramebuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGenFramebuffers);
 }
 
 void Debug_glGenRenderbuffers(GLsizei n, GLuint* renderbuffers)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         GLuint* renderbuffers;
@@ -1289,14 +1188,12 @@ void Debug_glGenRenderbuffers(GLsizei n, GLuint* renderbuffers)
     msg.set_arg1(ToInt(renderbuffers));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGenRenderbuffers);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGenRenderbuffers);
 }
 
 void Debug_glGenTextures(GLsizei n, GLuint* textures)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         GLuint* textures;
@@ -1316,15 +1213,13 @@ void Debug_glGenTextures(GLsizei n, GLuint* textures)
     msg.set_arg1(ToInt(textures));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGenTextures);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGenTextures);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLuint index;
@@ -1357,15 +1252,13 @@ void Debug_glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsi
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(name), strlen(name) * sizeof(GLchar));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetActiveAttrib);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetActiveAttrib);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLuint index;
@@ -1398,15 +1291,13 @@ void Debug_glGetActiveUniform(GLuint program, GLuint index, GLsizei bufsize, GLs
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(name), strlen(name) * sizeof(GLchar));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetActiveUniform);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetActiveUniform);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei* count, GLuint* shaders)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLsizei maxcount;
@@ -1429,14 +1320,12 @@ void Debug_glGetAttachedShaders(GLuint program, GLsizei maxcount, GLsizei* count
     msg.set_arg3(ToInt(shaders));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetAttachedShaders);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetAttachedShaders);
 }
 
 int Debug_glGetAttribLocation(GLuint program, const GLchar* name)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         const GLchar* name;
@@ -1455,8 +1344,7 @@ int Debug_glGetAttribLocation(GLuint program, const GLchar* name)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(name), strlen(name) * sizeof(GLchar));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetAttribLocation);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetAttribLocation);
     return reinterpret_cast<int>(ret);
 }
 
@@ -1464,7 +1352,6 @@ int Debug_glGetAttribLocation(GLuint program, const GLchar* name)
 void Debug_glGetBooleanv(GLenum pname, GLboolean* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum pname;
         GLboolean* params;
@@ -1481,15 +1368,13 @@ void Debug_glGetBooleanv(GLenum pname, GLboolean* params)
     msg.set_arg1(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetBooleanv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetBooleanv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -1509,14 +1394,12 @@ void Debug_glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetBufferParameteriv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetBufferParameteriv);
 }
 
 GLenum Debug_glGetError(void)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
@@ -1527,8 +1410,7 @@ GLenum Debug_glGetError(void)
     } caller;
 
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetError);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetError);
     return reinterpret_cast<GLenum>(ret);
 }
 
@@ -1536,7 +1418,6 @@ GLenum Debug_glGetError(void)
 void Debug_glGetFloatv(GLenum pname, GLfloat* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum pname;
         GLfloat* params;
@@ -1553,15 +1434,13 @@ void Debug_glGetFloatv(GLenum pname, GLfloat* params)
     msg.set_arg1(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetFloatv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetFloatv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum attachment;
@@ -1584,15 +1463,13 @@ void Debug_glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachmen
     msg.set_arg3(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetFramebufferAttachmentParameteriv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetFramebufferAttachmentParameteriv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetIntegerv(GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum pname;
         GLint* params;
@@ -1609,14 +1486,12 @@ void Debug_glGetIntegerv(GLenum pname, GLint* params)
     msg.set_arg1(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetIntegerv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetIntegerv);
 }
 
 void Debug_glGetProgramiv(GLuint program, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLenum pname;
@@ -1639,15 +1514,13 @@ void Debug_glGetProgramiv(GLuint program, GLenum pname, GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetProgramiv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetProgramiv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLsizei bufsize;
@@ -1673,15 +1546,13 @@ void Debug_glGetProgramInfoLog(GLuint program, GLsizei bufsize, GLsizei* length,
     msg.set_arg3(ToInt(infolog));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetProgramInfoLog);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetProgramInfoLog);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -1701,14 +1572,12 @@ void Debug_glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* para
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetRenderbufferParameteriv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetRenderbufferParameteriv);
 }
 
 void Debug_glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
         GLenum pname;
@@ -1731,15 +1600,13 @@ void Debug_glGetShaderiv(GLuint shader, GLenum pname, GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetShaderiv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetShaderiv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
         GLsizei bufsize;
@@ -1765,15 +1632,13 @@ void Debug_glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length, G
     msg.set_arg3(ToInt(infolog));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetShaderInfoLog);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetShaderInfoLog);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum shadertype;
         GLenum precisiontype;
@@ -1796,15 +1661,13 @@ void Debug_glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, G
     msg.set_arg3(ToInt(precision));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetShaderPrecisionFormat);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetShaderPrecisionFormat);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
         GLsizei bufsize;
@@ -1830,15 +1693,13 @@ void Debug_glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, GL
     msg.set_arg3(ToInt(source));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetShaderSource);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetShaderSource);
 }
 
 // FIXME: this function has pointers, it should be hand written
 const GLubyte* Debug_glGetString(GLenum name)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum name;
 
@@ -1853,8 +1714,7 @@ const GLubyte* Debug_glGetString(GLenum name)
     msg.set_arg0(name);
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetString);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetString);
     return reinterpret_cast<const GLubyte*>(ret);
 }
 
@@ -1862,7 +1722,6 @@ const GLubyte* Debug_glGetString(GLenum name)
 void Debug_glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -1882,15 +1741,13 @@ void Debug_glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetTexParameterfv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetTexParameterfv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetTexParameteriv(GLenum target, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -1910,15 +1767,13 @@ void Debug_glGetTexParameteriv(GLenum target, GLenum pname, GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetTexParameteriv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetTexParameteriv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetUniformfv(GLuint program, GLint location, GLfloat* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLint location;
@@ -1938,15 +1793,13 @@ void Debug_glGetUniformfv(GLuint program, GLint location, GLfloat* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetUniformfv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetUniformfv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetUniformiv(GLuint program, GLint location, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         GLint location;
@@ -1966,14 +1819,12 @@ void Debug_glGetUniformiv(GLuint program, GLint location, GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetUniformiv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetUniformiv);
 }
 
 int Debug_glGetUniformLocation(GLuint program, const GLchar* name)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
         const GLchar* name;
@@ -1992,8 +1843,7 @@ int Debug_glGetUniformLocation(GLuint program, const GLchar* name)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(name), strlen(name) * sizeof(GLchar));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetUniformLocation);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetUniformLocation);
     return reinterpret_cast<int>(ret);
 }
 
@@ -2001,7 +1851,6 @@ int Debug_glGetUniformLocation(GLuint program, const GLchar* name)
 void Debug_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint index;
         GLenum pname;
@@ -2021,15 +1870,13 @@ void Debug_glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetVertexAttribfv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetVertexAttribfv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint index;
         GLenum pname;
@@ -2049,15 +1896,13 @@ void Debug_glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetVertexAttribiv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetVertexAttribiv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** pointer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint index;
         GLenum pname;
@@ -2077,14 +1922,12 @@ void Debug_glGetVertexAttribPointerv(GLuint index, GLenum pname, GLvoid** pointe
     msg.set_arg2(ToInt(pointer));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glGetVertexAttribPointerv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glGetVertexAttribPointerv);
 }
 
 void Debug_glHint(GLenum target, GLenum mode)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum mode;
@@ -2100,14 +1943,12 @@ void Debug_glHint(GLenum target, GLenum mode)
     msg.set_arg0(target);
     msg.set_arg1(mode);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glHint);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glHint);
 }
 
 GLboolean Debug_glIsBuffer(GLuint buffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint buffer;
 
@@ -2121,15 +1962,13 @@ GLboolean Debug_glIsBuffer(GLuint buffer)
 
     msg.set_arg0(buffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsBuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsBuffer);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 GLboolean Debug_glIsEnabled(GLenum cap)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum cap;
 
@@ -2143,15 +1982,13 @@ GLboolean Debug_glIsEnabled(GLenum cap)
 
     msg.set_arg0(cap);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsEnabled);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsEnabled);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 GLboolean Debug_glIsFramebuffer(GLuint framebuffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint framebuffer;
 
@@ -2165,15 +2002,13 @@ GLboolean Debug_glIsFramebuffer(GLuint framebuffer)
 
     msg.set_arg0(framebuffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsFramebuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsFramebuffer);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 GLboolean Debug_glIsProgram(GLuint program)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
 
@@ -2187,15 +2022,13 @@ GLboolean Debug_glIsProgram(GLuint program)
 
     msg.set_arg0(program);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsProgram);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsProgram);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 GLboolean Debug_glIsRenderbuffer(GLuint renderbuffer)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint renderbuffer;
 
@@ -2209,15 +2042,13 @@ GLboolean Debug_glIsRenderbuffer(GLuint renderbuffer)
 
     msg.set_arg0(renderbuffer);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsRenderbuffer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsRenderbuffer);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 GLboolean Debug_glIsShader(GLuint shader)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
 
@@ -2231,15 +2062,13 @@ GLboolean Debug_glIsShader(GLuint shader)
 
     msg.set_arg0(shader);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsShader);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsShader);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 GLboolean Debug_glIsTexture(GLuint texture)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint texture;
 
@@ -2253,15 +2082,13 @@ GLboolean Debug_glIsTexture(GLuint texture)
 
     msg.set_arg0(texture);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glIsTexture);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glIsTexture);
     return static_cast<GLboolean>(reinterpret_cast<int>(ret));
 }
 
 void Debug_glLineWidth(GLfloat width)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLfloat width;
 
@@ -2274,14 +2101,12 @@ void Debug_glLineWidth(GLfloat width)
 
     msg.set_arg0(ToInt(width));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glLineWidth);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glLineWidth);
 }
 
 void Debug_glLinkProgram(GLuint program)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
 
@@ -2294,14 +2119,12 @@ void Debug_glLinkProgram(GLuint program)
 
     msg.set_arg0(program);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glLinkProgram);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glLinkProgram);
 }
 
 void Debug_glPixelStorei(GLenum pname, GLint param)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum pname;
         GLint param;
@@ -2317,14 +2140,12 @@ void Debug_glPixelStorei(GLenum pname, GLint param)
     msg.set_arg0(pname);
     msg.set_arg1(param);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glPixelStorei);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glPixelStorei);
 }
 
 void Debug_glPolygonOffset(GLfloat factor, GLfloat units)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLfloat factor;
         GLfloat units;
@@ -2340,14 +2161,12 @@ void Debug_glPolygonOffset(GLfloat factor, GLfloat units)
     msg.set_arg0(ToInt(factor));
     msg.set_arg1(ToInt(units));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glPolygonOffset);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glPolygonOffset);
 }
 
 void Debug_glReleaseShaderCompiler(void)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
@@ -2357,14 +2176,12 @@ void Debug_glReleaseShaderCompiler(void)
     } caller;
 
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glReleaseShaderCompiler);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glReleaseShaderCompiler);
 }
 
 void Debug_glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum internalformat;
@@ -2386,14 +2203,12 @@ void Debug_glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei w
     msg.set_arg2(width);
     msg.set_arg3(height);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glRenderbufferStorage);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glRenderbufferStorage);
 }
 
 void Debug_glSampleCoverage(GLclampf value, GLboolean invert)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLclampf value;
         GLboolean invert;
@@ -2409,14 +2224,12 @@ void Debug_glSampleCoverage(GLclampf value, GLboolean invert)
     msg.set_arg0(ToInt(value));
     msg.set_arg1(invert);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glSampleCoverage);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glSampleCoverage);
 }
 
 void Debug_glScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint x;
         GLint y;
@@ -2438,15 +2251,13 @@ void Debug_glScissor(GLint x, GLint y, GLsizei width, GLsizei height)
     msg.set_arg2(width);
     msg.set_arg3(height);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glScissor);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glScissor);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLsizei n;
         const GLuint* shaders;
@@ -2472,14 +2283,12 @@ void Debug_glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat,
     msg.set_arg4(length);
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glShaderBinary);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glShaderBinary);
 }
 
 void Debug_glShaderSource(GLuint shader, GLsizei count, const GLchar** string, const GLint* length)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint shader;
         GLsizei count;
@@ -2503,14 +2312,12 @@ void Debug_glShaderSource(GLuint shader, GLsizei count, const GLchar** string, c
 
     // FIXME: check for pointer usage
     EXTEND_Debug_glShaderSource;
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glShaderSource);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glShaderSource);
 }
 
 void Debug_glStencilFunc(GLenum func, GLint ref, GLuint mask)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum func;
         GLint ref;
@@ -2529,14 +2336,12 @@ void Debug_glStencilFunc(GLenum func, GLint ref, GLuint mask)
     msg.set_arg1(ref);
     msg.set_arg2(mask);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glStencilFunc);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glStencilFunc);
 }
 
 void Debug_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum face;
         GLenum func;
@@ -2558,14 +2363,12 @@ void Debug_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mas
     msg.set_arg2(ref);
     msg.set_arg3(mask);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glStencilFuncSeparate);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glStencilFuncSeparate);
 }
 
 void Debug_glStencilMask(GLuint mask)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint mask;
 
@@ -2578,14 +2381,12 @@ void Debug_glStencilMask(GLuint mask)
 
     msg.set_arg0(mask);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glStencilMask);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glStencilMask);
 }
 
 void Debug_glStencilMaskSeparate(GLenum face, GLuint mask)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum face;
         GLuint mask;
@@ -2601,14 +2402,12 @@ void Debug_glStencilMaskSeparate(GLenum face, GLuint mask)
     msg.set_arg0(face);
     msg.set_arg1(mask);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glStencilMaskSeparate);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glStencilMaskSeparate);
 }
 
 void Debug_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum fail;
         GLenum zfail;
@@ -2627,14 +2426,12 @@ void Debug_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass)
     msg.set_arg1(zfail);
     msg.set_arg2(zpass);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glStencilOp);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glStencilOp);
 }
 
 void Debug_glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zpass)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum face;
         GLenum fail;
@@ -2656,14 +2453,56 @@ void Debug_glStencilOpSeparate(GLenum face, GLenum fail, GLenum zfail, GLenum zp
     msg.set_arg2(zfail);
     msg.set_arg3(zpass);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glStencilOpSeparate);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glStencilOpSeparate);
+}
+
+void Debug_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
+{
+    glesv2debugger::Message msg;
+    struct : public FunctionCall {
+        GLenum target;
+        GLint level;
+        GLint internalformat;
+        GLsizei width;
+        GLsizei height;
+        GLint border;
+        GLenum format;
+        GLenum type;
+        const GLvoid* pixels;
+
+        const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
+            _c->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+            return 0;
+        }
+    } caller;
+    caller.target = target;
+    caller.level = level;
+    caller.internalformat = internalformat;
+    caller.width = width;
+    caller.height = height;
+    caller.border = border;
+    caller.format = format;
+    caller.type = type;
+    caller.pixels = pixels;
+
+    msg.set_arg0(target);
+    msg.set_arg1(level);
+    msg.set_arg2(internalformat);
+    msg.set_arg3(width);
+    msg.set_arg4(height);
+    msg.set_arg5(border);
+    msg.set_arg6(format);
+    msg.set_arg7(type);
+    msg.set_arg8(ToInt(pixels));
+
+    // FIXME: check for pointer usage
+    EXTEND_Debug_glTexImage2D;
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexImage2D);
 }
 
 void Debug_glTexParameterf(GLenum target, GLenum pname, GLfloat param)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -2682,15 +2521,13 @@ void Debug_glTexParameterf(GLenum target, GLenum pname, GLfloat param)
     msg.set_arg1(pname);
     msg.set_arg2(ToInt(param));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glTexParameterf);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexParameterf);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -2710,14 +2547,12 @@ void Debug_glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glTexParameterfv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexParameterfv);
 }
 
 void Debug_glTexParameteri(GLenum target, GLenum pname, GLint param)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -2736,15 +2571,13 @@ void Debug_glTexParameteri(GLenum target, GLenum pname, GLint param)
     msg.set_arg1(pname);
     msg.set_arg2(param);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glTexParameteri);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexParameteri);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glTexParameteriv(GLenum target, GLenum pname, const GLint* params)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLenum target;
         GLenum pname;
@@ -2764,14 +2597,56 @@ void Debug_glTexParameteriv(GLenum target, GLenum pname, const GLint* params)
     msg.set_arg2(ToInt(params));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glTexParameteriv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexParameteriv);
+}
+
+void Debug_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels)
+{
+    glesv2debugger::Message msg;
+    struct : public FunctionCall {
+        GLenum target;
+        GLint level;
+        GLint xoffset;
+        GLint yoffset;
+        GLsizei width;
+        GLsizei height;
+        GLenum format;
+        GLenum type;
+        const GLvoid* pixels;
+
+        const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
+            _c->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+            return 0;
+        }
+    } caller;
+    caller.target = target;
+    caller.level = level;
+    caller.xoffset = xoffset;
+    caller.yoffset = yoffset;
+    caller.width = width;
+    caller.height = height;
+    caller.format = format;
+    caller.type = type;
+    caller.pixels = pixels;
+
+    msg.set_arg0(target);
+    msg.set_arg1(level);
+    msg.set_arg2(xoffset);
+    msg.set_arg3(yoffset);
+    msg.set_arg4(width);
+    msg.set_arg5(height);
+    msg.set_arg6(format);
+    msg.set_arg7(type);
+    msg.set_arg8(ToInt(pixels));
+
+    // FIXME: check for pointer usage
+    EXTEND_Debug_glTexSubImage2D;
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexSubImage2D);
 }
 
 void Debug_glUniform1f(GLint location, GLfloat x)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLfloat x;
@@ -2787,14 +2662,12 @@ void Debug_glUniform1f(GLint location, GLfloat x)
     msg.set_arg0(location);
     msg.set_arg1(ToInt(x));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform1f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform1f);
 }
 
 void Debug_glUniform1fv(GLint location, GLsizei count, const GLfloat* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -2815,14 +2688,12 @@ void Debug_glUniform1fv(GLint location, GLsizei count, const GLfloat* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 1*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform1fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform1fv);
 }
 
 void Debug_glUniform1i(GLint location, GLint x)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLint x;
@@ -2838,14 +2709,12 @@ void Debug_glUniform1i(GLint location, GLint x)
     msg.set_arg0(location);
     msg.set_arg1(x);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform1i);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform1i);
 }
 
 void Debug_glUniform1iv(GLint location, GLsizei count, const GLint* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -2866,14 +2735,12 @@ void Debug_glUniform1iv(GLint location, GLsizei count, const GLint* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 1*count * sizeof(GLint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform1iv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform1iv);
 }
 
 void Debug_glUniform2f(GLint location, GLfloat x, GLfloat y)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLfloat x;
@@ -2892,14 +2759,12 @@ void Debug_glUniform2f(GLint location, GLfloat x, GLfloat y)
     msg.set_arg1(ToInt(x));
     msg.set_arg2(ToInt(y));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform2f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform2f);
 }
 
 void Debug_glUniform2fv(GLint location, GLsizei count, const GLfloat* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -2920,14 +2785,12 @@ void Debug_glUniform2fv(GLint location, GLsizei count, const GLfloat* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 2*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform2fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform2fv);
 }
 
 void Debug_glUniform2i(GLint location, GLint x, GLint y)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLint x;
@@ -2946,14 +2809,12 @@ void Debug_glUniform2i(GLint location, GLint x, GLint y)
     msg.set_arg1(x);
     msg.set_arg2(y);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform2i);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform2i);
 }
 
 void Debug_glUniform2iv(GLint location, GLsizei count, const GLint* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -2974,14 +2835,12 @@ void Debug_glUniform2iv(GLint location, GLsizei count, const GLint* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 2*count * sizeof(GLint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform2iv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform2iv);
 }
 
 void Debug_glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLfloat x;
@@ -3003,14 +2862,12 @@ void Debug_glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z)
     msg.set_arg2(ToInt(y));
     msg.set_arg3(ToInt(z));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform3f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform3f);
 }
 
 void Debug_glUniform3fv(GLint location, GLsizei count, const GLfloat* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3031,14 +2888,12 @@ void Debug_glUniform3fv(GLint location, GLsizei count, const GLfloat* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 3*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform3fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform3fv);
 }
 
 void Debug_glUniform3i(GLint location, GLint x, GLint y, GLint z)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLint x;
@@ -3060,14 +2915,12 @@ void Debug_glUniform3i(GLint location, GLint x, GLint y, GLint z)
     msg.set_arg2(y);
     msg.set_arg3(z);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform3i);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform3i);
 }
 
 void Debug_glUniform3iv(GLint location, GLsizei count, const GLint* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3088,14 +2941,12 @@ void Debug_glUniform3iv(GLint location, GLsizei count, const GLint* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 3*count * sizeof(GLint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform3iv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform3iv);
 }
 
 void Debug_glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLfloat x;
@@ -3120,14 +2971,12 @@ void Debug_glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat 
     msg.set_arg3(ToInt(z));
     msg.set_arg4(ToInt(w));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform4f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform4f);
 }
 
 void Debug_glUniform4fv(GLint location, GLsizei count, const GLfloat* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3148,14 +2997,12 @@ void Debug_glUniform4fv(GLint location, GLsizei count, const GLfloat* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 4*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform4fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform4fv);
 }
 
 void Debug_glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLint x;
@@ -3180,14 +3027,12 @@ void Debug_glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w)
     msg.set_arg3(z);
     msg.set_arg4(w);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform4i);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform4i);
 }
 
 void Debug_glUniform4iv(GLint location, GLsizei count, const GLint* v)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3208,14 +3053,12 @@ void Debug_glUniform4iv(GLint location, GLsizei count, const GLint* v)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(v), 4*count * sizeof(GLint));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniform4iv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniform4iv);
 }
 
 void Debug_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3239,14 +3082,12 @@ void Debug_glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(value), 4*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniformMatrix2fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniformMatrix2fv);
 }
 
 void Debug_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3270,14 +3111,12 @@ void Debug_glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(value), 9*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniformMatrix3fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniformMatrix3fv);
 }
 
 void Debug_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint location;
         GLsizei count;
@@ -3301,14 +3140,12 @@ void Debug_glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(value), 16*count * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUniformMatrix4fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUniformMatrix4fv);
 }
 
 void Debug_glUseProgram(GLuint program)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
 
@@ -3322,14 +3159,12 @@ void Debug_glUseProgram(GLuint program)
 
     msg.set_arg0(program);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glUseProgram);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glUseProgram);
 }
 
 void Debug_glValidateProgram(GLuint program)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint program;
 
@@ -3342,14 +3177,12 @@ void Debug_glValidateProgram(GLuint program)
 
     msg.set_arg0(program);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glValidateProgram);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glValidateProgram);
 }
 
 void Debug_glVertexAttrib1f(GLuint indx, GLfloat x)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         GLfloat x;
@@ -3365,14 +3198,12 @@ void Debug_glVertexAttrib1f(GLuint indx, GLfloat x)
     msg.set_arg0(indx);
     msg.set_arg1(ToInt(x));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib1f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib1f);
 }
 
 void Debug_glVertexAttrib1fv(GLuint indx, const GLfloat* values)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         const GLfloat* values;
@@ -3390,14 +3221,12 @@ void Debug_glVertexAttrib1fv(GLuint indx, const GLfloat* values)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(values), 1 * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib1fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib1fv);
 }
 
 void Debug_glVertexAttrib2f(GLuint indx, GLfloat x, GLfloat y)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         GLfloat x;
@@ -3416,14 +3245,12 @@ void Debug_glVertexAttrib2f(GLuint indx, GLfloat x, GLfloat y)
     msg.set_arg1(ToInt(x));
     msg.set_arg2(ToInt(y));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib2f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib2f);
 }
 
 void Debug_glVertexAttrib2fv(GLuint indx, const GLfloat* values)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         const GLfloat* values;
@@ -3441,14 +3268,12 @@ void Debug_glVertexAttrib2fv(GLuint indx, const GLfloat* values)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(values), 2 * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib2fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib2fv);
 }
 
 void Debug_glVertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         GLfloat x;
@@ -3470,14 +3295,12 @@ void Debug_glVertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z)
     msg.set_arg2(ToInt(y));
     msg.set_arg3(ToInt(z));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib3f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib3f);
 }
 
 void Debug_glVertexAttrib3fv(GLuint indx, const GLfloat* values)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         const GLfloat* values;
@@ -3495,14 +3318,12 @@ void Debug_glVertexAttrib3fv(GLuint indx, const GLfloat* values)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(values), 3 * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib3fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib3fv);
 }
 
 void Debug_glVertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         GLfloat x;
@@ -3527,14 +3348,12 @@ void Debug_glVertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloa
     msg.set_arg3(ToInt(z));
     msg.set_arg4(ToInt(w));
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib4f);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib4f);
 }
 
 void Debug_glVertexAttrib4fv(GLuint indx, const GLfloat* values)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         const GLfloat* values;
@@ -3552,15 +3371,13 @@ void Debug_glVertexAttrib4fv(GLuint indx, const GLfloat* values)
 
     // FIXME: check for pointer usage
     msg.mutable_data()->assign(reinterpret_cast<const char *>(values), 4 * sizeof(GLfloat));
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttrib4fv);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttrib4fv);
 }
 
 // FIXME: this function has pointers, it should be hand written
 void Debug_glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLuint indx;
         GLint size;
@@ -3590,14 +3407,12 @@ void Debug_glVertexAttribPointer(GLuint indx, GLint size, GLenum type, GLboolean
     msg.set_arg5(ToInt(ptr));
 
     // FIXME: check for pointer usage
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glVertexAttribPointer);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glVertexAttribPointer);
 }
 
 void Debug_glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 {
     glesv2debugger::Message msg;
-    const bool expectResponse = false;
     struct : public FunctionCall {
         GLint x;
         GLint y;
@@ -3619,8 +3434,7 @@ void Debug_glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
     msg.set_arg2(width);
     msg.set_arg3(height);
 
-    int * ret = MessageLoop(caller, msg, expectResponse,
-                            glesv2debugger::Message_Function_glViewport);
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glViewport);
 }
 
 // FIXME: the following functions should be written by hand

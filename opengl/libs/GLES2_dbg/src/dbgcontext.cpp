@@ -32,10 +32,12 @@ DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
         , MAX_VERTEX_ATTRIBS(MAX_VERTEX_ATTRIBS)
         , vertexAttribs(new VertexAttrib[MAX_VERTEX_ATTRIBS])
         , hasNonVBOAttribs(false), indexBuffers(NULL), indexBuffer(NULL)
+        , program(0), maxAttrib(0)
 {
     lzf_ref[0] = lzf_ref[1] = NULL;
     for (unsigned i = 0; i < MAX_VERTEX_ATTRIBS; i++)
         vertexAttribs[i] = VertexAttrib();
+    memset(&expectResponse, 0, sizeof(expectResponse));
 }
 
 DbgContext::~DbgContext()
@@ -60,6 +62,39 @@ void DestroyDbgContext(DbgContext * const dbg)
     delete dbg;
 }
 
+unsigned GetBytesPerPixel(const GLenum format, const GLenum type)
+{
+    switch (type) {
+    case GL_UNSIGNED_SHORT_5_6_5:
+        return 2;
+    case GL_UNSIGNED_SHORT_4_4_4_4:
+        return 2;
+    case GL_UNSIGNED_SHORT_5_5_5_1:
+        return 2;
+    case GL_UNSIGNED_BYTE:
+        break;
+    default:
+        assert(0);
+    }
+
+    switch (format) {
+    case GL_ALPHA:
+        return 1;
+    case GL_LUMINANCE:
+        return 1;
+        break;
+    case GL_LUMINANCE_ALPHA:
+        return 2;
+    case GL_RGB:
+        return 3;
+    case GL_RGBA:
+        return 4;
+    default:
+        assert(0);
+        return 0;
+    }
+}
+
 void DbgContext::Fetch(const unsigned index, std::string * const data) const
 {
     // VBO data is already on client, just send user pointer data
@@ -76,8 +111,8 @@ void DbgContext::Fetch(const unsigned index, std::string * const data) const
 
 unsigned DbgContext::Compress(const void * in_data, unsigned in_len)
 {
-    if (lzf_bufSize < in_len + 256) {
-        lzf_bufSize = in_len + 256;
+    if (lzf_bufSize < in_len * 1.05f) {
+        lzf_bufSize = in_len * 1.05f;
         lzf_buf = (char *)realloc(lzf_buf, lzf_bufSize);
     }
     unsigned compressedSize = lzf_compress((const char *)in_data,
@@ -88,13 +123,17 @@ unsigned DbgContext::Compress(const void * in_data, unsigned in_len)
 
 void * DbgContext::GetReadPixelsBuffer(const unsigned size)
 {
-    if (lzf_refSize < size) {
-        lzf_refSize = size;
-        lzf_refBufSize = lzf_refSize + 64;
+    if (lzf_refBufSize < size + 8) {
+        lzf_refBufSize = size + 8;
         lzf_ref[0] = (unsigned *)realloc(lzf_ref[0], lzf_refBufSize);
-        memset(lzf_ref[0], 0, lzf_refSize);
+        memset(lzf_ref[0], 0, lzf_refBufSize);
         lzf_ref[1] = (unsigned *)realloc(lzf_ref[1], lzf_refBufSize);
-        memset(lzf_ref[1], 0, lzf_refSize);
+        memset(lzf_ref[1], 0, lzf_refBufSize);
+    }
+    if (lzf_refSize != size) // need to clear unused ref to maintain consistency
+    { // since ref and src are swapped each time
+        memset((char *)lzf_ref[0] + lzf_refSize, 0, lzf_refBufSize - lzf_refSize);
+        memset((char *)lzf_ref[1] + lzf_refSize, 0, lzf_refBufSize - lzf_refSize);
     }
     lzf_refSize = size;
     lzf_readIndex ^= 1;

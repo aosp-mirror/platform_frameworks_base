@@ -134,6 +134,7 @@ message Message
     {
         Capture = 0; // arg0 = true | false
         TimeMode = 1; // arg0 = SYSTEM_TIME_* in utils/Timers.h
+        ExpectResponse = 2; // arg0 = enum Function, arg1 = true/false
     };
     optional Prop prop = 21; // used with SETPROP, value in arg0
     optional float clock = 22; // wall clock in seconds

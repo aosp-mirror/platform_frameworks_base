@@ -8,7 +8,6 @@ LOCAL_SRC_FILES := \
     src/debugger_message.pb.cpp \
     src/egl.cpp \
     src/server.cpp \
-    src/texture.cpp \
     src/vertex.cpp
 
 LOCAL_C_INCLUDES :=	\

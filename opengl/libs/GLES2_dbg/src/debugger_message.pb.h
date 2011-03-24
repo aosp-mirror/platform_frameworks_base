@@ -254,11 +254,12 @@ const int Message_DataType_DataType_ARRAYSIZE = Message_DataType_DataType_MAX + 
 
 enum Message_Prop {
   Message_Prop_Capture = 0,
-  Message_Prop_TimeMode = 1
+  Message_Prop_TimeMode = 1,
+  Message_Prop_ExpectResponse = 2
 };
 bool Message_Prop_IsValid(int value);
 const Message_Prop Message_Prop_Prop_MIN = Message_Prop_Capture;
-const Message_Prop Message_Prop_Prop_MAX = Message_Prop_TimeMode;
+const Message_Prop Message_Prop_Prop_MAX = Message_Prop_ExpectResponse;
 const int Message_Prop_Prop_ARRAYSIZE = Message_Prop_Prop_MAX + 1;
 
 // ===================================================================
@@ -536,6 +537,7 @@ class Message : public ::google::protobuf::MessageLite {
   typedef Message_Prop Prop;
   static const Prop Capture = Message_Prop_Capture;
   static const Prop TimeMode = Message_Prop_TimeMode;
+  static const Prop ExpectResponse = Message_Prop_ExpectResponse;
   static inline bool Prop_IsValid(int value) {
     return Message_Prop_IsValid(value);
   }
