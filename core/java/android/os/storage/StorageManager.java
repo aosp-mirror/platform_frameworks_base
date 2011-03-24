@@ -527,4 +527,30 @@ public class StorageManager
 
         return null;
     }
+
+    /**
+     * Gets the state of a volume via its mountpoint.
+     * @hide
+     */
+    public String getVolumeState(String mountPoint) {
+        try {
+            return mMountService.getVolumeState(mountPoint);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get volume state", e);
+            return null;
+        }
+    }
+
+    /**
+     * Returns list of all mountable volumes.
+     * @hide
+     */
+    public String[] getVolumeList() {
+        try {
+            return mMountService.getVolumeList();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get volume list", e);
+            return null;
+        }
+    }
 }
