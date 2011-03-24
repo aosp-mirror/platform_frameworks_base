@@ -18,7 +18,7 @@ accessibility events during user interaction</li>
     <li><a href="#Navigation">Allow Navigation with a Directional Controller</a>
       <ol>
         <li><a href="#FocusOrder">Controlling focus order</a></li>
-        <li><a href="#ClickingDpad">Clicking with the a directional controller</a></li>
+        <li><a href="#ClickingDpad">Clicking with a directional controller</a></li>
       </ol>
     </li>
     <li><a href="#LabelInputs">Label Your Input Widgets</a></li>
@@ -157,7 +157,7 @@ setNextFocusDownId()} and  {@link android.view.View#setNextFocusRightId
 setNextFocusRightId()}.</p>
 
 
-<h3 id="ClickingDpad">Clicking with the a directional controller</h3>
+<h3 id="ClickingDpad">Clicking with a directional controller</h3>
 
 <p>On most devices, clicking a view using a directional controller sends a {@link
 android.view.KeyEvent} with {@link android.view.KeyEvent#KEYCODE_DPAD_CENTER} to the view currently
