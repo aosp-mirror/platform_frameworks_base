@@ -1,12 +1,6 @@
 page.title=In-app Billing
 @jd:body
 
-<style type="text/css">
-  #jd-content {
-    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
-  }
-</style>
-
 <div id="qv-wrapper">
 <div id="qv">
 
@@ -30,23 +24,23 @@ page.title=In-app Billing
 </div>
 
 <div class="special" style="margin-right:345px">
-  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+  <p>During the testing phase of the in-app billing release you cannot publish applications that implement in-app billing. You can only upload in-app billing applications as draft applications. For more information, see <a href="{@docRoot}guide/market/billing/billing_about.html">About this Release</a></p>
 </div>
 
 <p>In-app billing is an Android Market service that lets you sell digital content in your applications. You can use the service to sell a wide range of content, including downloadable content such as media files or photos, and virtual content such as game levels or potions.</p>
 
-<p>When you use the Android Market In-app Billing service to sell an item, Android Market handles all checkout details so your application never has to directly process any financial transactions. Android Market uses the same checkout service that is used for application purchases, so your users experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for in-app purchases is the same as the transaction fee for application purchases (30%).</p>
+<p>When you use the Android Market in-app billing service to sell an item, Android Market handles all checkout details so your application never has to directly process any financial transactions. Android Market uses the same checkout service that is used for application purchases, so your users experience a consistent and familiar purchase flow (see figure 1). Also, the transaction fee for in-app purchases is the same as the transaction fee for application purchases (30%).</p>
 
-<p>Any application that you publish through Android Market can implement in-app billing. No special account or registration is required other than an Android Market publisher account and a Google Checkout merchant account. Also, because the service uses no dedicated framework APIs, you can add in-app billing to any application that uses a minimum API level of 4 or higher.</p>
+<p>Any application that you publish through Android Market can implement in-app billing. No special account or registration is required other than an Android Market publisher account and a Google Checkout Merchant account. Also, because the service uses no dedicated framework APIs, you can add in-app billing to any application that uses a minimum API level of 4 or higher.</p>
 
 <p>To help you integrate in-app billing into your application, the Android SDK provides a sample application that demonstrates a simple implementation of in-app billing. The sample application contains examples of billing-related classes you can use to implement in-app billing in your application. It also contains examples of the database, user interface, and business logic you might use to implement in-app billing.</p>
 
 <p class="caution"><strong>Important</strong>: Although the sample application is a working example of how you can implement in-app billing, we <em>strongly recommend</em> that you modify and obfuscate the sample code before you use it in a production application. For more information, see <a href="{@docRoot}guide/market/billing/billing_best_practices.html">Security and Design</a>.</p>
 
-<div style="margin:2em 1em 1em 1em;">
-<img src="{@docRoot}images/billing_checkout_flow.png" style="text-align:left;" />
-<div style="margin:.25em 1.25em;padding:0"><strong>Figure 1.</strong> Applications initiate in-app billing requests through their own UI (first screen). Android Market responds to the request by providing the checkout user interface (middle screen). When checkout is complete, the application resumes.</div>
-</div>
+<img src="{@docRoot}images/billing_checkout_flow.png" height="382" id="figure1" />
+<p class="img-caption">
+  <strong>Figure 1.</strong> Applications initiate in-app billing requests through their own UI (first screen). Android Market responds to the request by providing the checkout user interface (middle screen). When checkout is complete, the application resumes.
+</p>
 
 <p>To learn more about the in-app billing service and start integrating in-app billing into your applications, read the following documents:</p>
 
