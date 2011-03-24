@@ -43,6 +43,7 @@ const char *MEDIA_MIMETYPE_CONTAINER_WAV = "audio/wav";
 const char *MEDIA_MIMETYPE_CONTAINER_OGG = "application/ogg";
 const char *MEDIA_MIMETYPE_CONTAINER_MATROSKA = "video/x-matroska";
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG2TS = "video/mp2ts";
+const char *MEDIA_MIMETYPE_CONTAINER_AVI = "video/avi";
 
 const char *MEDIA_MIMETYPE_CONTAINER_WVM = "video/wvm";
 
