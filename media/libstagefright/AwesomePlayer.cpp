@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define DEBUG_HDCP
+
 //#define LOG_NDEBUG 0
 #define LOG_TAG "AwesomePlayer"
 #include <utils/Log.h>
@@ -49,6 +51,8 @@
 
 #include <media/stagefright/foundation/ALooper.h>
 #include <media/stagefright/foundation/AMessage.h>
+
+#include <cutils/properties.h>
 
 #define USE_SURFACE_ALLOC 1
 #define FRAME_DROP_FREQ 0
@@ -1202,9 +1206,42 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
     //   (USE_SURFACE_ALLOC && (mSurface != 0) &&
     //   (mSurface->getFlags() & ISurfaceComposer::eProtectedByApp))
     // will be true, but that part is already handled by SurfaceFlinger.
+
+#ifdef DEBUG_HDCP
+    // For debugging, we allow a system property to control the protected usage.
+    // In case of uninitialized or unexpected property, we default to "DRM only".
+    bool setProtectionBit = false;
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("persist.sys.hdcp_checking", value, NULL)) {
+        if (!strcmp(value, "never")) {
+            // nop
+        } else if (!strcmp(value, "always")) {
+            setProtectionBit = true;
+        } else if (!strcmp(value, "drm-only")) {
+            if (mDecryptHandle != NULL) {
+                setProtectionBit = true;
+            }
+        // property value is empty, or unexpected value
+        } else {
+            if (mDecryptHandle != NULL) {
+                setProtectionBit = true;
+            }
+        }
+    // can' read property value
+    } else {
+        if (mDecryptHandle != NULL) {
+            setProtectionBit = true;
+        }
+    }
+    // note that usage bit is already cleared, so no need to clear it in the "else" case
+    if (setProtectionBit) {
+        flags |= OMXCodec::kEnableGrallocUsageProtected;
+    }
+#else
     if (mDecryptHandle != NULL) {
         flags |= OMXCodec::kEnableGrallocUsageProtected;
     }
+#endif
     LOGV("initVideoDecoder flags=0x%x", flags);
     mVideoSource = OMXCodec::Create(
             mClient.interface(), mVideoTrack->getFormat(),
