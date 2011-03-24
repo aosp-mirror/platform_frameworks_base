@@ -243,6 +243,15 @@ const Message_Type Message_Type_Type_MIN = Message_Type_BeforeCall;
 const Message_Type Message_Type_Type_MAX = Message_Type_Response;
 const int Message_Type_Type_ARRAYSIZE = Message_Type_Type_MAX + 1;
 
+enum Message_DataType {
+  Message_DataType_ReferencedImage = 0,
+  Message_DataType_NonreferencedImage = 1
+};
+bool Message_DataType_IsValid(int value);
+const Message_DataType Message_DataType_DataType_MIN = Message_DataType_ReferencedImage;
+const Message_DataType Message_DataType_DataType_MAX = Message_DataType_NonreferencedImage;
+const int Message_DataType_DataType_ARRAYSIZE = Message_DataType_DataType_MAX + 1;
+
 enum Message_Prop {
   Message_Prop_Capture = 0,
   Message_Prop_TimeMode = 1
@@ -511,6 +520,19 @@ class Message : public ::google::protobuf::MessageLite {
   static const int Type_ARRAYSIZE =
     Message_Type_Type_ARRAYSIZE;
   
+  typedef Message_DataType DataType;
+  static const DataType ReferencedImage = Message_DataType_ReferencedImage;
+  static const DataType NonreferencedImage = Message_DataType_NonreferencedImage;
+  static inline bool DataType_IsValid(int value) {
+    return Message_DataType_IsValid(value);
+  }
+  static const DataType DataType_MIN =
+    Message_DataType_DataType_MIN;
+  static const DataType DataType_MAX =
+    Message_DataType_DataType_MAX;
+  static const int DataType_ARRAYSIZE =
+    Message_DataType_DataType_ARRAYSIZE;
+  
   typedef Message_Prop Prop;
   static const Prop Capture = Message_Prop_Capture;
   static const Prop TimeMode = Message_Prop_TimeMode;
@@ -634,6 +656,27 @@ class Message : public ::google::protobuf::MessageLite {
   inline void set_data(const void* value, size_t size);
   inline ::std::string* mutable_data();
   
+  // optional .com.android.glesv2debugger.Message.DataType data_type = 23;
+  inline bool has_data_type() const;
+  inline void clear_data_type();
+  static const int kDataTypeFieldNumber = 23;
+  inline ::com::android::glesv2debugger::Message_DataType data_type() const;
+  inline void set_data_type(::com::android::glesv2debugger::Message_DataType value);
+  
+  // optional int32 pixel_format = 24;
+  inline bool has_pixel_format() const;
+  inline void clear_pixel_format();
+  static const int kPixelFormatFieldNumber = 24;
+  inline ::google::protobuf::int32 pixel_format() const;
+  inline void set_pixel_format(::google::protobuf::int32 value);
+  
+  // optional int32 pixel_type = 25;
+  inline bool has_pixel_type() const;
+  inline void clear_pixel_type();
+  static const int kPixelTypeFieldNumber = 25;
+  inline ::google::protobuf::int32 pixel_type() const;
+  inline void set_pixel_type(::google::protobuf::int32 value);
+  
   // optional float time = 11;
   inline bool has_time() const;
   inline void clear_time();
@@ -675,6 +718,9 @@ class Message : public ::google::protobuf::MessageLite {
   ::google::protobuf::int32 arg8_;
   ::std::string* data_;
   static const ::std::string _default_data_;
+  int data_type_;
+  ::google::protobuf::int32 pixel_format_;
+  ::google::protobuf::int32 pixel_type_;
   float time_;
   int prop_;
   float clock_;
@@ -682,7 +728,7 @@ class Message : public ::google::protobuf::MessageLite {
   friend void protobuf_AssignDesc_debugger_5fmessage_2eproto();
   friend void protobuf_ShutdownFile_debugger_5fmessage_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -973,52 +1019,101 @@ inline ::std::string* Message::mutable_data() {
   return data_;
 }
 
+// optional .com.android.glesv2debugger.Message.DataType data_type = 23;
+inline bool Message::has_data_type() const {
+  return _has_bit(15);
+}
+inline void Message::clear_data_type() {
+  data_type_ = 0;
+  _clear_bit(15);
+}
+inline ::com::android::glesv2debugger::Message_DataType Message::data_type() const {
+  return static_cast< ::com::android::glesv2debugger::Message_DataType >(data_type_);
+}
+inline void Message::set_data_type(::com::android::glesv2debugger::Message_DataType value) {
+  GOOGLE_DCHECK(::com::android::glesv2debugger::Message_DataType_IsValid(value));
+  _set_bit(15);
+  data_type_ = value;
+}
+
+// optional int32 pixel_format = 24;
+inline bool Message::has_pixel_format() const {
+  return _has_bit(16);
+}
+inline void Message::clear_pixel_format() {
+  pixel_format_ = 0;
+  _clear_bit(16);
+}
+inline ::google::protobuf::int32 Message::pixel_format() const {
+  return pixel_format_;
+}
+inline void Message::set_pixel_format(::google::protobuf::int32 value) {
+  _set_bit(16);
+  pixel_format_ = value;
+}
+
+// optional int32 pixel_type = 25;
+inline bool Message::has_pixel_type() const {
+  return _has_bit(17);
+}
+inline void Message::clear_pixel_type() {
+  pixel_type_ = 0;
+  _clear_bit(17);
+}
+inline ::google::protobuf::int32 Message::pixel_type() const {
+  return pixel_type_;
+}
+inline void Message::set_pixel_type(::google::protobuf::int32 value) {
+  _set_bit(17);
+  pixel_type_ = value;
+}
+
 // optional float time = 11;
 inline bool Message::has_time() const {
-  return _has_bit(15);
+  return _has_bit(18);
 }
 inline void Message::clear_time() {
   time_ = 0;
-  _clear_bit(15);
+  _clear_bit(18);
 }
 inline float Message::time() const {
   return time_;
 }
 inline void Message::set_time(float value) {
-  _set_bit(15);
+  _set_bit(18);
   time_ = value;
 }
 
 // optional .com.android.glesv2debugger.Message.Prop prop = 21;
 inline bool Message::has_prop() const {
-  return _has_bit(16);
+  return _has_bit(19);
 }
 inline void Message::clear_prop() {
   prop_ = 0;
-  _clear_bit(16);
+  _clear_bit(19);
 }
 inline ::com::android::glesv2debugger::Message_Prop Message::prop() const {
   return static_cast< ::com::android::glesv2debugger::Message_Prop >(prop_);
 }
 inline void Message::set_prop(::com::android::glesv2debugger::Message_Prop value) {
   GOOGLE_DCHECK(::com::android::glesv2debugger::Message_Prop_IsValid(value));
-  _set_bit(16);
+  _set_bit(19);
   prop_ = value;
 }
 
 // optional float clock = 22;
 inline bool Message::has_clock() const {
-  return _has_bit(17);
+  return _has_bit(20);
 }
 inline void Message::clear_clock() {
   clock_ = 0;
-  _clear_bit(17);
+  _clear_bit(20);
 }
 inline float Message::clock() const {
   return clock_;
 }
 inline void Message::set_clock(float value) {
-  _set_bit(17);
+  _set_bit(20);
   clock_ = value;
 }
 

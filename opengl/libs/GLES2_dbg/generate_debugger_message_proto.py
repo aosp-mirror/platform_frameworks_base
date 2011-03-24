@@ -118,7 +118,17 @@ message Message
     optional int32 arg6 = 18;
     optional int32 arg7 = 19;
     optional int32 arg8 = 20;
+
     optional bytes data = 10; // variable length data used for GL call
+    enum DataType
+    {
+        ReferencedImage = 0; // for image sourced from ReadPixels
+        NonreferencedImage = 1; // for image sourced from ReadPixels
+    };
+    optional DataType data_type = 23; // most data types can be inferred from function
+    optional int32 pixel_format = 24; // used for image data if format and type 
+    optional int32 pixel_type = 25;   //     cannot be determined from arg 
+    
     optional float time = 11; // duration of previous GL call (ms)
     enum Prop
     {

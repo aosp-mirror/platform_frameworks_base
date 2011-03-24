@@ -450,6 +450,23 @@ const Message_Type Message::Type_MIN;
 const Message_Type Message::Type_MAX;
 const int Message::Type_ARRAYSIZE;
 #endif  // _MSC_VER
+bool Message_DataType_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+      return true;
+    default:
+      return false;
+  }
+}
+
+#ifndef _MSC_VER
+const Message_DataType Message::ReferencedImage;
+const Message_DataType Message::NonreferencedImage;
+const Message_DataType Message::DataType_MIN;
+const Message_DataType Message::DataType_MAX;
+const int Message::DataType_ARRAYSIZE;
+#endif  // _MSC_VER
 bool Message_Prop_IsValid(int value) {
   switch(value) {
     case 0:
@@ -484,6 +501,9 @@ const int Message::kArg6FieldNumber;
 const int Message::kArg7FieldNumber;
 const int Message::kArg8FieldNumber;
 const int Message::kDataFieldNumber;
+const int Message::kDataTypeFieldNumber;
+const int Message::kPixelFormatFieldNumber;
+const int Message::kPixelTypeFieldNumber;
 const int Message::kTimeFieldNumber;
 const int Message::kPropFieldNumber;
 const int Message::kClockFieldNumber;
@@ -520,6 +540,9 @@ void Message::SharedCtor() {
   arg7_ = 0;
   arg8_ = 0;
   data_ = const_cast< ::std::string*>(&_default_data_);
+  data_type_ = 0;
+  pixel_format_ = 0;
+  pixel_type_ = 0;
   time_ = 0;
   prop_ = 0;
   clock_ = 0;
@@ -576,9 +599,12 @@ void Message::Clear() {
         data_->clear();
       }
     }
-    time_ = 0;
+    data_type_ = 0;
   }
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    pixel_format_ = 0;
+    pixel_type_ = 0;
+    time_ = 0;
     prop_ = 0;
     clock_ = 0;
   }
@@ -762,7 +788,7 @@ bool Message::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
                  input, &time_)));
-          _set_bit(15);
+          _set_bit(18);
         } else {
           goto handle_uninterpreted;
         }
@@ -877,6 +903,57 @@ bool Message::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
                  input, &clock_)));
+          _set_bit(20);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(184)) goto parse_data_type;
+        break;
+      }
+      
+      // optional .com.android.glesv2debugger.Message.DataType data_type = 23;
+      case 23: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_data_type:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::com::android::glesv2debugger::Message_DataType_IsValid(value)) {
+            set_data_type(static_cast< ::com::android::glesv2debugger::Message_DataType >(value));
+          }
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(192)) goto parse_pixel_format;
+        break;
+      }
+      
+      // optional int32 pixel_format = 24;
+      case 24: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_pixel_format:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &pixel_format_)));
+          _set_bit(16);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(200)) goto parse_pixel_type;
+        break;
+      }
+      
+      // optional int32 pixel_type = 25;
+      case 25: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_pixel_type:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &pixel_type_)));
           _set_bit(17);
         } else {
           goto handle_uninterpreted;
@@ -956,7 +1033,7 @@ void Message::SerializeWithCachedSizes(
   }
   
   // optional float time = 11;
-  if (_has_bit(15)) {
+  if (_has_bit(18)) {
     ::google::protobuf::internal::WireFormatLite::WriteFloat(11, this->time(), output);
   }
   
@@ -986,14 +1063,30 @@ void Message::SerializeWithCachedSizes(
   }
   
   // optional .com.android.glesv2debugger.Message.Prop prop = 21;
-  if (_has_bit(16)) {
+  if (_has_bit(19)) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       21, this->prop(), output);
   }
   
   // optional float clock = 22;
-  if (_has_bit(17)) {
+  if (_has_bit(20)) {
     ::google::protobuf::internal::WireFormatLite::WriteFloat(22, this->clock(), output);
+  }
+  
+  // optional .com.android.glesv2debugger.Message.DataType data_type = 23;
+  if (_has_bit(15)) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      23, this->data_type(), output);
+  }
+  
+  // optional int32 pixel_format = 24;
+  if (_has_bit(16)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(24, this->pixel_format(), output);
+  }
+  
+  // optional int32 pixel_type = 25;
+  if (_has_bit(17)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(25, this->pixel_type(), output);
   }
   
 }
@@ -1105,13 +1198,33 @@ int Message::ByteSize() const {
           this->data());
     }
     
+    // optional .com.android.glesv2debugger.Message.DataType data_type = 23;
+    if (has_data_type()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->data_type());
+    }
+    
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
+    // optional int32 pixel_format = 24;
+    if (has_pixel_format()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->pixel_format());
+    }
+    
+    // optional int32 pixel_type = 25;
+    if (has_pixel_type()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->pixel_type());
+    }
+    
     // optional float time = 11;
     if (has_time()) {
       total_size += 1 + 4;
     }
     
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional .com.android.glesv2debugger.Message.Prop prop = 21;
     if (has_prop()) {
       total_size += 2 +
@@ -1186,14 +1299,23 @@ void Message::MergeFrom(const Message& from) {
       set_data(from.data());
     }
     if (from._has_bit(15)) {
-      set_time(from.time());
+      set_data_type(from.data_type());
     }
   }
   if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from._has_bit(16)) {
-      set_prop(from.prop());
+      set_pixel_format(from.pixel_format());
     }
     if (from._has_bit(17)) {
+      set_pixel_type(from.pixel_type());
+    }
+    if (from._has_bit(18)) {
+      set_time(from.time());
+    }
+    if (from._has_bit(19)) {
+      set_prop(from.prop());
+    }
+    if (from._has_bit(20)) {
       set_clock(from.clock());
     }
   }
@@ -1228,6 +1350,9 @@ void Message::Swap(Message* other) {
     std::swap(arg7_, other->arg7_);
     std::swap(arg8_, other->arg8_);
     std::swap(data_, other->data_);
+    std::swap(data_type_, other->data_type_);
+    std::swap(pixel_format_, other->pixel_format_);
+    std::swap(pixel_type_, other->pixel_type_);
     std::swap(time_, other->time_);
     std::swap(prop_, other->prop_);
     std::swap(clock_, other->clock_);

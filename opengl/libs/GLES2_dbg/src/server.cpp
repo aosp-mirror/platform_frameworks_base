@@ -153,10 +153,9 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
         assert(msg.has_context_id() && msg.context_id() != 0);
     static std::string str;
     msg.SerializeToString(&str);
-    unsigned len = str.length();
-    len = htonl(len);
+    uint32_t len = htonl(str.length());
     int sent = -1;
-    sent = send(clientSock, (const char *)&len, sizeof(len), 0);
+    sent = send(clientSock, &len, sizeof(len), 0);
     if (sent != sizeof(len)) {
         LOGD("actual sent=%d expected=%d clientSock=%d", sent, sizeof(len), clientSock);
         Die("Failed to send message length");
@@ -182,7 +181,6 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
     } else
         Receive(cmd);
 
-    //LOGD("Message sent tid=%lu len=%d", pthread_self(), str.length());
     pthread_mutex_unlock(&mutex);
     return t;
 }

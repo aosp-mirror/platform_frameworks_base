@@ -37,7 +37,7 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
     msg.set_arg4(format);
     msg.set_arg5(type);
     msg.set_arg6(reinterpret_cast<int>(pixels));
-    
+
     const unsigned size = width * height * GetBytesPerPixel(format, type);
     unsigned compressed = 0;
     if (!expectResponse)
@@ -55,7 +55,13 @@ void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum 
             msg.set_function(glesv2debugger::Message_Function_glReadPixels);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            compressed = dbg->Compress(pixels, size);
+            if (dbg->IsReadPixelBuffer(pixels)) {
+                compressed = dbg->CompressReadPixelBuffer();
+                msg.set_data_type(msg.ReferencedImage);
+            } else {
+                compressed = dbg->Compress(pixels, size);
+                msg.set_data_type(msg.NonreferencedImage);
+            }
             msg.set_data(dbg->lzf_buf, compressed);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
@@ -120,10 +126,10 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
 //                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
 //                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
-                pixels = malloc(viewport[2] * viewport[3] * 4);
+                pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
+                                                  GetBytesPerPixel(readFormat, readType));
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
                                    readFormat, readType, pixels);
-                free(pixels);
             }
             break;
         case glesv2debugger::Message_Function_SKIP:
@@ -169,12 +175,14 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     std::string * const data = msg.mutable_data();
     if (GL_UNSIGNED_BYTE == type) {
         if (dbg->indexBuffer)
-            FetchIndexed(count, (unsigned char *)dbg->indexBuffer->data + (unsigned long)indices, data, dbg);
+            FetchIndexed(count, (unsigned char *)dbg->indexBuffer->data +
+                         (unsigned long)indices, data, dbg);
         else
             FetchIndexed(count, (unsigned char *)indices, data, dbg);
     } else if (GL_UNSIGNED_SHORT == type) {
         if (dbg->indexBuffer)
-            FetchIndexed(count, (unsigned short *)((char *)dbg->indexBuffer->data + (unsigned long)indices), data, dbg);
+            FetchIndexed(count, (unsigned short *)((char *)dbg->indexBuffer->data +
+                                                   (unsigned long)indices), data, dbg);
         else
             FetchIndexed(count, (unsigned short *)indices, data, dbg);
     } else
@@ -206,10 +214,10 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
 //                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
 //                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
-                pixels = malloc(viewport[2] * viewport[3] * 4);
+                pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
+                                                  GetBytesPerPixel(readFormat, readType));
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
                                    readFormat, readType, pixels);
-                free(pixels);
             }
             break;
         case glesv2debugger::Message_Function_SKIP:

@@ -16,7 +16,8 @@
 
 #include "header.h"
 
-extern "C" {
+extern "C"
+{
 #include "liblzf/lzf.h"
 }
 
@@ -26,11 +27,13 @@ namespace android
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
                        const unsigned MAX_VERTEX_ATTRIBS)
         : lzf_buf(NULL), lzf_bufSize(0)
+        , lzf_readIndex(0), lzf_refSize(0), lzf_refBufSize(0)
         , version(version), hooks(hooks)
         , MAX_VERTEX_ATTRIBS(MAX_VERTEX_ATTRIBS)
         , vertexAttribs(new VertexAttrib[MAX_VERTEX_ATTRIBS])
         , hasNonVBOAttribs(false), indexBuffers(NULL), indexBuffer(NULL)
 {
+    lzf_ref[0] = lzf_ref[1] = NULL;
     for (unsigned i = 0; i < MAX_VERTEX_ATTRIBS; i++)
         vertexAttribs[i] = VertexAttrib();
 }
@@ -39,6 +42,8 @@ DbgContext::~DbgContext()
 {
     delete vertexAttribs;
     free(lzf_buf);
+    free(lzf_ref[0]);
+    free(lzf_ref[1]);
 }
 
 DbgContext * CreateDbgContext(const unsigned version, const gl_hooks_t * const hooks)
@@ -76,10 +81,33 @@ unsigned DbgContext::Compress(const void * in_data, unsigned in_len)
         lzf_buf = (char *)realloc(lzf_buf, lzf_bufSize);
     }
     unsigned compressedSize = lzf_compress((const char *)in_data,
-                              in_len, lzf_buf, lzf_bufSize);
-    LOGD("DbgContext::lzf_compress in=%u out=%u", in_len, compressedSize);
+                                           in_len, lzf_buf, lzf_bufSize);
     assert (0 < compressedSize);
     return compressedSize;
+}
+
+void * DbgContext::GetReadPixelsBuffer(const unsigned size)
+{
+    if (lzf_refSize < size) {
+        lzf_refSize = size;
+        lzf_refBufSize = lzf_refSize + 64;
+        lzf_ref[0] = (unsigned *)realloc(lzf_ref[0], lzf_refBufSize);
+        memset(lzf_ref[0], 0, lzf_refSize);
+        lzf_ref[1] = (unsigned *)realloc(lzf_ref[1], lzf_refBufSize);
+        memset(lzf_ref[1], 0, lzf_refSize);
+    }
+    lzf_refSize = size;
+    lzf_readIndex ^= 1;
+    return lzf_ref[lzf_readIndex];
+}
+
+unsigned DbgContext::CompressReadPixelBuffer()
+{
+    unsigned * const ref = lzf_ref[lzf_readIndex ^ 1];
+    unsigned * const src = lzf_ref[lzf_readIndex];
+    for (unsigned i = 0; i < lzf_refSize / sizeof(*ref) + 1; i++)
+        ref[i] ^= src[i];
+    return Compress(ref, lzf_refSize);
 }
 
 void DbgContext::glUseProgram(GLuint program)
