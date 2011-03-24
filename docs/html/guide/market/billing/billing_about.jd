@@ -3,12 +3,6 @@ parent.title=In-app Billing
 parent.link=index.html
 @jd:body
 
-<style type="text/css">
-  #jd-content {
-    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
-  }
-</style>
-
 <div id="qv-wrapper">
 <div id="qv">
   <h2>In this document</h2>
@@ -31,15 +25,9 @@ parent.link=index.html
 </div>
 </div>
 
-<div class="special" style="margin-right:345px">
-  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
-</div>
+<p>The in-app billing release has now entered the testing phase. During this phase we are providing <a href="{@docRoot}guide/market/billing/index.html">documentation</a> and a <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a> that shows you how to implement in-app billing. You can use these resources to start designing and testing your in-app billing implementations.</p>
 
-<p>This documentation gives you an early look at the Android Market In-app Billing service. We are providing this documentation to help you get started designing your in-app billing implementation. </p>
-
-<p>In addition to this documentation, we are providing a <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a> that shows you how to implement in-app billing. Although you can compile the sample application, load it on a device, and run it, you cannot use it to make purchases at this time. In-app billing relies on version 2.3.0 (and higher) of the Android Market application, which may not be available yet.</p>
-
-<p>In the coming weeks we plan to launch the testing phase of the in-app billing release. Following the testing phase we will launch in-app billing to the general public (see table 1 for a summary of upcoming launch milestones).
+<p>Following the testing phase we will launch in-app billing to the general public (see table 1 for a summary launch milestones).
 
 <p class="table-caption"><strong>Table 1.</strong> Summary of launch milestones for in-app billing.</p>
 
@@ -47,29 +35,56 @@ parent.link=index.html
 
 <tr>
 <th>Release Phase</th>
-<th>Android Market Application</th>
+<th>Status</th>
 <th>Description</th>
 </tr>
 <tr>
   <td>Early Development</td>
-  <td>Version 2.3.0 not available</td>
-  <td>Provides an early look at documentation and sample application.</td>
+  <td>Completed</td>
+  <td>Provided an early look at the documentation and the sample application.</td>
 </tr>
 <tr>
   <td>Test Development</td>
-  <td>Version 2.3.0 available to developers and users</td>
-  <td>In-app billing service allows static testing with reserved product IDs. You cannot publish applications that use in-app billing.</td>
+  <td>In process</td>
+  <td>You can perform static testing with reserved product IDs and end-to-end testing with real product IDs. You cannot publish applications that use in-app billing.</td>
 </tr>
 <tr>
   <td>Final Release</td>
-  <td>Version 2.3.0 available to developers and users</td>
-  <td>In-app billing service allows end-to-end testing of in-app billing. You can publish applications that use in-app billing.</td>
+  <td>Coming soon</td>
+  <td>You can perform static testing with reserved product IDs and end-to-end testing with real product IDs. You can publish applications that use in-app billing.</td>
 </tr>
 
 </table>
 
-<p>During the testing phase we will release version 2.3.0 of the Android Market application. This will allow you to test your in-app billing implementation using the <a href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-static">reserved product IDs and test responses</a>. However, you will not be able to test end-to-end in-app purchases during the testing phase, and you will not be able to publish an application that uses in in-app billing. </p>
+<p>During the testing phase we are releasing version 2.3.4 of the Android Market application and version 5.0.12 of the MyApps application. To support in-app billing, devices running Android 3.0 must have version 5.0.12 (or higher) of the MyApps application. Devices running all other versions of Android must have version 2.3.4 (or higher) of the Android Market application. Table 2 summarizes these requirements.</p>
 
-<p>After the testing phase is complete, we will release in-app billing to the general public. This will enable you to perform end-to-end tests of your in-app billing implementation using your actual in-app products. You will also be able to publish applications that use in-app billing.</p>
+<p class="table-caption"><strong>Table 2.</strong> Summary of in-app billing requirements.</p>
 
-<p>This documentation may change in the coming weeks as we move from the preview phase to the testing phase of this beta release. Be sure to check this documentation frequently for updates.</p>
+<table>
+
+<tr>
+<th>If your device is running this...</th>
+<th>In-app billing requires this</th>
+</tr>
+<tr>
+  <td>Android 1.6</td>
+  <td>Android Market 2.3.4 (or higher)</td>
+</tr>
+<tr>
+  <td>Android 2.x</td>
+  <td>Android Market 2.3.4 (or higher)</td>
+</tr>
+<tr>
+  <td>Android 3.0</td>
+  <td>MyApps 5.0.12 (or higher)</td>
+</tr>
+
+</table>
+
+<p class="note"><strong>Note:</strong> To learn how to check the version of the Android Market application, see <a href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Android Market</a>. To learn about other requirements for in-app billing, see <a href="{@docRoot}guide/market/billing/billing_overview.html#billing-limitations">Requirements and Limitations.</a></p>
+
+<p>You can test your in-app billing implementation two ways during the testing phase: you can use the <a href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-static">reserved product IDs</a> to test static responses or you can use <a href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-real">your own product IDs</a> to test end-to-end in-app purchases. To perform end-to-end testing you need to upload your application as a draft application and add products to the application's product list.</p>
+
+<p>During the testing phase, you cannot publish applications that use in-app billing; you can only upload the applications as draft applications. After the testing phase is complete, we will launch in-app billing to the general public and you will be able to publish applications that use in-app billing.</p>
+
+<p>This documentation may change as we move from the testing phase to the final release. Be sure to check this documentation frequently for updates.</p>
