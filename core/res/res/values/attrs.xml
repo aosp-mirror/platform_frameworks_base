@@ -3817,6 +3817,7 @@
          <li>"state_rect"
          <li>"state_grow"
          <li>"state_move"
+         <li>"state_hovered"
          </ul>  -->
     <declare-styleable name="DrawableStates">
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
@@ -3866,6 +3867,9 @@
              ignored even if it specifies a solid color, since that optimization
              is not needed. -->
         <attr name="state_accelerated" format="boolean" />
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a pointer is hovering over the view. -->
+        <attr name="state_hovered" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewDrawableStates">
         <attr name="state_pressed" />
@@ -3875,6 +3879,7 @@
         <attr name="state_enabled" />
         <attr name="state_activated" />
         <attr name="state_accelerated" />
+        <attr name="state_hovered" />
     </declare-styleable>
     <!-- State array representing a menu item that is currently checked. -->
     <declare-styleable name="MenuItemCheckedState">

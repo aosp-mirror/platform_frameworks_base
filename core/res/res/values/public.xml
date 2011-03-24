@@ -1648,4 +1648,11 @@
   <eat-comment />
   <public type="attr" name="textCursorDrawable" id="0x01010362" />
   <public type="attr" name="resizeMode" />
+
+<!-- ===============================================================
+     Resources added in version 13 of the platform (Ice Cream Sandwich)
+     =============================================================== -->
+  <eat-comment />
+  <public type="attr" name="state_hovered" />
+
 </resources>
