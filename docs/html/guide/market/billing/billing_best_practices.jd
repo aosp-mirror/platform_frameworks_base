@@ -3,12 +3,6 @@ parent.title=In-app Billing
 parent.link=index.html
 @jd:body
 
-<style type="text/css">
-  #jd-content {
-    background:transparent url({@docRoot}assets/images/preliminary.png) repeat scroll 0 0;
-  }
-</style>
-
 <div id="qv-wrapper">
 <div id="qv">
   <h2>In this document</h2>
@@ -31,9 +25,10 @@ parent.link=index.html
 </div>
 
 <div class="special" style="margin-right:345px">
-  <p>This documentation provides an early look at the Android Market In-app Billing service. The documentation may change without notice.</p>
+  <p>During the testing phase of the in-app billing release you cannot publish applications that implement in-app billing. You can only upload in-app billing applications as draft applications. For more information, see <a href="{@docRoot}guide/market/billing/billing_about.html">About this Release</a></p>
 </div>
-<p>As you design your in-app billing implementation, be sure to follow the security and design guidelines that are discussed in this document. These guidelines are recommended best practices for anyone who is using the Android Market In-app Billing service and can be incorporated into any in-app billing implementation.</p>
+
+<p>As you design your in-app billing implementation, be sure to follow the security and design guidelines that are discussed in this document. These guidelines are recommended best practices for anyone who is using the Android Market in-app billing service and can be incorporated into any in-app billing implementation.</p>
 
 <h2>Security Best Practices</h2>
 
@@ -58,7 +53,7 @@ parent.link=index.html
 </ul>
 <p>Using these techniques can help reduce the attack surface of your application and help minimize attacks that can compromise your in-app billing implementation.</p>
 <div class="note">
-  <p><strong>Note:</strong> If you use Proguard to obfuscate your code, you must add the following line to your Proguard configuration file:</p>    
+  <p><strong>Note:</strong> If you use Proguard to obfuscate your code, you must add the following line to your Proguard configuration file:</p>
   <p><code>-keep class com.android.vending.billing.**</code></p>
 </div>
   
