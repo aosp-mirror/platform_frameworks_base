@@ -364,7 +364,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/market/billing/index.html">
             <span class="en">In-app Billing</span></a>
-          <span class="new">new!</span>
+          <span class="new">updated</span>
         </div>
         <ul>
           <li><a href="<?cs var:toroot?>guide/market/billing/billing_about.html">
