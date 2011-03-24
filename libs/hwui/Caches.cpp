@@ -17,6 +17,7 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 #include "Caches.h"
 #include "Properties.h"
@@ -69,30 +70,43 @@ Caches::~Caches() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::dumpMemoryUsage() {
-    LOGD("Current memory usage / total memory usage (bytes):");
-    LOGD("  TextureCache         %8d / %8d", textureCache.getSize(), textureCache.getMaxSize());
-    LOGD("  LayerCache           %8d / %8d", layerCache.getSize(), layerCache.getMaxSize());
-    LOGD("  GradientCache        %8d / %8d", gradientCache.getSize(), gradientCache.getMaxSize());
-    LOGD("  PathCache            %8d / %8d", pathCache.getSize(), pathCache.getMaxSize());
-    LOGD("  CircleShapeCache     %8d / %8d",
+    String8 stringLog;
+    dumpMemoryUsage(stringLog);
+    LOGD("%s", stringLog.string());
+    delete stringLog;
+}
+
+void Caches::dumpMemoryUsage(String8 &log) {
+    log.appendFormat("Current memory usage / total memory usage (bytes):\n");
+    log.appendFormat("  TextureCache         %8d / %8d\n",
+            textureCache.getSize(), textureCache.getMaxSize());
+    log.appendFormat("  LayerCache           %8d / %8d\n",
+            layerCache.getSize(), layerCache.getMaxSize());
+    log.appendFormat("  GradientCache        %8d / %8d\n",
+            gradientCache.getSize(), gradientCache.getMaxSize());
+    log.appendFormat("  PathCache            %8d / %8d\n",
+            pathCache.getSize(), pathCache.getMaxSize());
+    log.appendFormat("  CircleShapeCache     %8d / %8d\n",
             circleShapeCache.getSize(), circleShapeCache.getMaxSize());
-    LOGD("  OvalShapeCache       %8d / %8d",
+    log.appendFormat("  OvalShapeCache       %8d / %8d\n",
             ovalShapeCache.getSize(), ovalShapeCache.getMaxSize());
-    LOGD("  RoundRectShapeCache  %8d / %8d",
+    log.appendFormat("  RoundRectShapeCache  %8d / %8d\n",
             roundRectShapeCache.getSize(), roundRectShapeCache.getMaxSize());
-    LOGD("  RectShapeCache       %8d / %8d",
+    log.appendFormat("  RectShapeCache       %8d / %8d\n",
             rectShapeCache.getSize(), rectShapeCache.getMaxSize());
-    LOGD("  ArcShapeCache        %8d / %8d",
+    log.appendFormat("  ArcShapeCache        %8d / %8d\n",
             arcShapeCache.getSize(), arcShapeCache.getMaxSize());
-    LOGD("  TextDropShadowCache  %8d / %8d", dropShadowCache.getSize(),
+    log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
             dropShadowCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer.getFontRendererCount(); i++) {
         const uint32_t size = fontRenderer.getFontRendererSize(i);
-        LOGD("  FontRenderer %d       %8d / %8d", i, size, size);
+        log.appendFormat("  FontRenderer %d       %8d / %8d\n", i, size, size);
     }
-    LOGD("Other:");
-    LOGD("  FboCache             %8d / %8d", fboCache.getSize(), fboCache.getMaxSize());
-    LOGD("  PatchCache           %8d / %8d", patchCache.getSize(), patchCache.getMaxSize());
+    log.appendFormat("Other:");
+    log.appendFormat("  FboCache             %8d / %8d\n",
+            fboCache.getSize(), fboCache.getMaxSize());
+    log.appendFormat("  PatchCache           %8d / %8d\n",
+            patchCache.getSize(), patchCache.getMaxSize());
 
     uint32_t total = 0;
     total += textureCache.getSize();
@@ -109,9 +123,8 @@ void Caches::dumpMemoryUsage() {
         total += fontRenderer.getFontRendererSize(i);
     }
 
-    LOGD("Total memory usage:");
-    LOGD("  %d bytes, %.2f MB", total, total / 1024.0f / 1024.0f);
-    LOGD("\n");
+    log.appendFormat("Total memory usage:\n");
+    log.appendFormat("  %d bytes, %.2f MB\n", total, total / 1024.0f / 1024.0f);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,7 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 		FontRenderer.cpp \
 		GammaFontRenderer.cpp \
 		Caches.cpp \
+		DisplayListLogBuffer.cpp \
 		DisplayListRenderer.cpp \
 		FboCache.cpp \
 		GradientCache.cpp \

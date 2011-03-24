@@ -16,10 +16,15 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+
+#include "DisplayListLogBuffer.h"
 #include "DisplayListRenderer.h"
+#include <utils/String8.h>
+#include "Caches.h"
 
 namespace android {
 namespace uirenderer {
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Display list
@@ -63,6 +68,20 @@ const char* DisplayList::OP_NAMES[] = {
     "SetupShadow",
     "DrawGLFunction"
 };
+
+void DisplayList::outputLogBuffer(int fd) {
+    DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
+    if (logBuffer.isEmpty()) {
+        return;
+    }
+    String8 cachesLog;
+    Caches::getInstance().dumpMemoryUsage(cachesLog);
+    FILE *file = fdopen(fd, "a");
+    fprintf(file, "\nCaches:\n%s", cachesLog.string());
+    fprintf(file, "\nRecent DisplayList operations\n");
+    logBuffer.outputCommands(file, OP_NAMES);
+    fflush(file);
+}
 
 DisplayList::DisplayList(const DisplayListRenderer& recorder) {
     initFromDisplayListRenderer(recorder);
@@ -173,9 +192,11 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
     DISPLAY_LIST_LOGD("%sStart display list (%p)", (char*) indent + 2, this);
 #endif
 
+    DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
     int saveCount = renderer.getSaveCount() - 1;
     while (!mReader.eof()) {
         int op = mReader.readInt();
+        logBuffer.writeCommand(level, op);
 
         switch (op) {
             case DrawGLFunction: {

@@ -592,6 +592,19 @@ static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz
 }
 
 // ----------------------------------------------------------------------------
+// Logging
+// ----------------------------------------------------------------------------
+
+jfieldID gFileDescriptorField;
+
+static void
+android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor)
+{
+    int fd = env->GetIntField(javaFileDescriptor, gFileDescriptorField);
+    uirenderer::DisplayList::outputLogBuffer(fd);
+}
+
+// ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
@@ -690,6 +703,12 @@ static JNINativeMethod gMethods[] = {
 #endif
 };
 
+static JNINativeMethod gActivityThreadMethods[] = {
+    { "dumpGraphicsInfo",        "(Ljava/io/FileDescriptor;)V",
+                                               (void*) android_app_ActivityThread_dumpGraphics }
+};
+
+
 #ifdef USE_OPENGL_RENDERER
     #define FIND_CLASS(var, className) \
             var = env->FindClass(className); \
@@ -709,6 +728,21 @@ int register_android_view_GLES20Canvas(JNIEnv* env) {
     GET_METHOD_ID(gRectClassInfo.set, clazz, "set", "(IIII)V");
 
     return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+}
+
+const char* const kActivityThreadPathName = "android/app/ActivityThread";
+
+int register_android_app_ActivityThread(JNIEnv* env)
+{
+    jclass gFileDescriptorClass = env->FindClass("java/io/FileDescriptor");
+    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
+    gFileDescriptorField = env->GetFieldID(gFileDescriptorClass, "descriptor", "I");
+    LOG_FATAL_IF(gFileDescriptorField == NULL,
+                 "Unable to find descriptor field in java.io.FileDescriptor");
+
+    return AndroidRuntime::registerNativeMethods(
+            env, kActivityThreadPathName,
+            gActivityThreadMethods, NELEM(gActivityThreadMethods));
 }
 
 };
