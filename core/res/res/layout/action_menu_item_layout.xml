@@ -24,7 +24,8 @@
     android:paddingLeft="12dip"
     android:paddingRight="12dip"
     android:minWidth="64dip"
-    android:minHeight="?attr/actionBarSize">
+    android:minHeight="?attr/actionBarSize"
+    android:focusable="true">
     <ImageButton android:id="@+id/imageButton"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
@@ -34,7 +35,8 @@
                  android:paddingRight="4dip"
                  android:minHeight="56dip"
                  android:scaleType="center"
-                 android:background="@null" />
+                 android:background="@null"
+                 android:focusable="false" />
     <Button android:id="@+id/textButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,5 +47,6 @@
             android:textColor="?attr/actionMenuTextColor"
             android:background="@null"
             android:paddingLeft="4dip"
-            android:paddingRight="4dip" />
+            android:paddingRight="4dip"
+            android:focusable="false" />
 </com.android.internal.view.menu.ActionMenuItemView>

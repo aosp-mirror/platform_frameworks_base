@@ -56,6 +56,7 @@ public class ActionMenuItemView extends LinearLayout
         mTextButton = (Button) findViewById(com.android.internal.R.id.textButton);
         mImageButton.setOnClickListener(this);
         mTextButton.setOnClickListener(this);
+        setOnClickListener(this);
     }
 
     public MenuItemImpl getItemData() {
