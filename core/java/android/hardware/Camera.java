@@ -374,6 +374,12 @@ public class Camera {
      * The preview surface texture may not otherwise change while preview is
      * running.
      *
+     * The timestamps provided by {@link SurfaceTexture#getTimestamp()} for a
+     * SurfaceTexture set as the preview texture have an unspecified zero point,
+     * and cannot be directly compared between different cameras or different
+     * instances of the same camera, or across multiple runs of the same
+     * program.
+     *
      * @param surfaceTexture the {@link SurfaceTexture} to which the preview
      *     images are to be sent or null to remove the current preview surface
      *     texture

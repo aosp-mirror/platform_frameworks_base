@@ -153,7 +153,6 @@ public class SurfaceTexture {
      * the SurfaceTexture. Unless otherwise specified by the image source, timestamps cannot
      * generally be compared across SurfaceTexture instances, or across multiple program
      * invocations. It is mostly useful for determining time offsets between subsequent frames.
-     * @hide
      */
     public long getTimestamp() {
         return nativeGetTimestamp();
