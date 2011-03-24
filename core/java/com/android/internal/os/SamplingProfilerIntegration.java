@@ -20,13 +20,15 @@ import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
-import dalvik.system.profiler.AsciiHprofWriter;
+import dalvik.system.profiler.BinaryHprofWriter;
 import dalvik.system.profiler.SamplingProfiler;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -81,7 +83,8 @@ public class SamplingProfilerIntegration {
         }
     }
 
-    private static SamplingProfiler INSTANCE;
+    private static SamplingProfiler samplingProfiler;
+    private static long startMillis;
 
     /**
      * Is profiling enabled?
@@ -97,10 +100,16 @@ public class SamplingProfilerIntegration {
         if (!enabled) {
             return;
         }
+        if (samplingProfiler != null) {
+            Log.e(TAG, "SamplingProfilerIntegration already started at " + new Date(startMillis));
+            return;
+        }
+
         ThreadGroup group = Thread.currentThread().getThreadGroup();
         SamplingProfiler.ThreadSet threadSet = SamplingProfiler.newThreadGroupTheadSet(group);
-        INSTANCE = new SamplingProfiler(samplingProfilerDepth, threadSet);
-        INSTANCE.start(samplingProfilerMilliseconds);
+        samplingProfiler = new SamplingProfiler(samplingProfilerDepth, threadSet);
+        samplingProfiler.start(samplingProfilerMilliseconds);
+        startMillis = System.currentTimeMillis();
     }
 
     /**
@@ -108,6 +117,10 @@ public class SamplingProfilerIntegration {
      */
     public static void writeSnapshot(final String processName, final PackageInfo packageInfo) {
         if (!enabled) {
+            return;
+        }
+        if (samplingProfiler == null) {
+            Log.e(TAG, "SamplingProfilerIntegration is not started");
             return;
         }
 
@@ -138,8 +151,9 @@ public class SamplingProfilerIntegration {
             return;
         }
         writeSnapshotFile("zygote", null);
-        INSTANCE.shutdown();
-        INSTANCE = null;
+        samplingProfiler.shutdown();
+        samplingProfiler = null;
+        startMillis = 0;
     }
 
     /**
@@ -149,40 +163,44 @@ public class SamplingProfilerIntegration {
         if (!enabled) {
             return;
         }
-        INSTANCE.stop();
+        samplingProfiler.stop();
 
         /*
-         * We use the current time as a unique ID. We can't use a counter
-         * because processes restart. This could result in some overlap if
-         * we capture two snapshots in rapid succession.
+         * We use the global start time combined with the process name
+         * as a unique ID. We can't use a counter because processes
+         * restart. This could result in some overlap if we capture
+         * two snapshots in rapid succession.
          */
-        long start = System.currentTimeMillis();
         String name = processName.replaceAll(":", ".");
-        String path = SNAPSHOT_DIR + "/" + name + "-" +System.currentTimeMillis() + ".snapshot";
-        PrintStream out = null;
+        String path = SNAPSHOT_DIR + "/" + name + "-" + startMillis + ".snapshot";
+        long start = System.currentTimeMillis();
+        OutputStream outputStream = null;
         try {
-            out = new PrintStream(new BufferedOutputStream(new FileOutputStream(path)));
+            outputStream = new BufferedOutputStream(new FileOutputStream(path));
+            PrintStream out = new PrintStream(outputStream);
             generateSnapshotHeader(name, packageInfo, out);
-            new AsciiHprofWriter(INSTANCE.getHprofData(), out).write();
             if (out.checkError()) {
                 throw new IOException();
             }
+            BinaryHprofWriter.write(samplingProfiler.getHprofData(), outputStream);
         } catch (IOException e) {
             Log.e(TAG, "Error writing snapshot to " + path, e);
             return;
         } finally {
-            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(outputStream);
         }
         // set file readable to the world so that SamplingProfilerService
         // can put it to dropbox
         new File(path).setReadable(true, false);
 
         long elapsed = System.currentTimeMillis() - start;
-        Log.i(TAG, "Wrote snapshot for " + name + " in " + elapsed + "ms.");
+        Log.i(TAG, "Wrote snapshot " + path + " in " + elapsed + "ms.");
+        samplingProfiler.start(samplingProfilerMilliseconds);
     }
 
     /**
-     * generate header for snapshots, with the following format (like http header):
+     * generate header for snapshots, with the following format
+     * (like an HTTP header but without the \r):
      *
      * Version: <version number of profiler>\n
      * Process: <process name>\n
@@ -195,7 +213,7 @@ public class SamplingProfilerIntegration {
     private static void generateSnapshotHeader(String processName, PackageInfo packageInfo,
             PrintStream out) {
         // profiler version
-        out.println("Version: 2");
+        out.println("Version: 3");
         out.println("Process: " + processName);
         if (packageInfo != null) {
             out.println("Package: " + packageInfo.packageName);
