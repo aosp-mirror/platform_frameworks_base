@@ -34,6 +34,8 @@
 #include "SkRect.h"
 #include "SkTypeface.h"
 
+#include <utils/Log.h>
+
 extern "C" {
 #include "harfbuzz-shaper.h"
 }
@@ -43,20 +45,13 @@ extern "C" {
 
 namespace android {
 
-static HB_Fixed SkiaScalarToHarfbuzzFixed(SkScalar value)
-{
-    // HB_Fixed is a 26.6 fixed point format.
-    return value * 64;
-}
-
 static void setupPaintWithFontData(SkPaint* paint, FontData* data) {
-    paint->setAntiAlias(true);
-    paint->setSubpixelText(true);
-    paint->setHinting(SkPaint::kSlight_Hinting);
-    paint->setTextSize(SkFloatToScalar(data->textSize));
     paint->setTypeface(data->typeFace);
-    paint->setFakeBoldText(data->fakeBold);
-    paint->setTextSkewX(data->fakeItalic ? -SK_Scalar1/4 : 0);
+    paint->setTextSize(data->textSize);
+    paint->setTextSkewX(data->textSkewX);
+    paint->setTextScaleX(data->textScaleX);
+    paint->setFlags(data->flags);
+    paint->setHinting(data->hinting);
 }
 
 static HB_Bool stringToGlyphs(HB_Font hbFont, const HB_UChar16* characters, hb_uint32 length,
@@ -67,16 +62,13 @@ static HB_Bool stringToGlyphs(HB_Font hbFont, const HB_UChar16* characters, hb_u
     setupPaintWithFontData(&paint, data);
 
     paint.setTextEncoding(SkPaint::kUTF16_TextEncoding);
-    int numGlyphs = paint.textToGlyphs(characters, length * sizeof(uint16_t),
-            reinterpret_cast<uint16_t*>(glyphs));
+    uint16_t* skiaGlyphs = reinterpret_cast<uint16_t*>(glyphs);
+    int numGlyphs = paint.textToGlyphs(characters, length * sizeof(uint16_t), skiaGlyphs);
 
     // HB_Glyph is 32-bit, but Skia outputs only 16-bit numbers. So our
     // |glyphs| array needs to be converted.
     for (int i = numGlyphs - 1; i >= 0; --i) {
-        uint16_t value;
-        // We use a memcpy to avoid breaking strict aliasing rules.
-        memcpy(&value, reinterpret_cast<char*>(glyphs) + sizeof(uint16_t) * i, sizeof(value));
-        glyphs[i] = value;
+        glyphs[i] = skiaGlyphs[i];
     }
 
     *glyphsSize = numGlyphs;
@@ -97,16 +89,17 @@ static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 n
         return;
     for (unsigned i = 0; i < numGlyphs; ++i)
         glyphs16[i] = glyphs[i];
-    paint.getTextWidths(glyphs16, numGlyphs * sizeof(uint16_t), reinterpret_cast<SkScalar*>(advances));
+    SkScalar* scalarAdvances = reinterpret_cast<SkScalar*>(advances);
+    paint.getTextWidths(glyphs16, numGlyphs * sizeof(uint16_t), scalarAdvances);
 
     // The |advances| values which Skia outputs are SkScalars, which are floats
     // in Chromium. However, Harfbuzz wants them in 26.6 fixed point format.
     // These two formats are both 32-bits long.
     for (unsigned i = 0; i < numGlyphs; ++i) {
-        float value;
-        // We use a memcpy to avoid breaking strict aliasing rules.
-        memcpy(&value, reinterpret_cast<char*>(advances) + sizeof(float) * i, sizeof(value));
-        advances[i] = SkiaScalarToHarfbuzzFixed(value);
+        advances[i] = SkScalarToHBFixed(scalarAdvances[i]);
+#if DEBUG_ADVANCES
+        LOGD("glyphsToAdvances -- advances[%d]=%d", i, advances[i]);
+#endif
     }
     delete glyphs16;
 }
@@ -156,8 +149,8 @@ static HB_Error getOutlinePoint(HB_Font hbFont, HB_Glyph glyph, int flags, hb_ui
         return HB_Err_Invalid_SubTable;
     // Skia does let us get a single point from the path.
     path.getPoints(points, point + 1);
-    *xPos = SkiaScalarToHarfbuzzFixed(points[point].fX);
-    *yPos = SkiaScalarToHarfbuzzFixed(points[point].fY);
+    *xPos = SkScalarToHBFixed(points[point].fX);
+    *yPos = SkScalarToHBFixed(points[point].fY);
     *resultingNumPoints = numPoints;
     delete points;
 
@@ -176,12 +169,12 @@ static void getGlyphMetrics(HB_Font hbFont, HB_Glyph glyph, HB_GlyphMetrics* met
     SkRect bounds;
     paint.getTextWidths(&glyph16, sizeof(glyph16), &width, &bounds);
 
-    metrics->x = SkiaScalarToHarfbuzzFixed(bounds.fLeft);
-    metrics->y = SkiaScalarToHarfbuzzFixed(bounds.fTop);
-    metrics->width = SkiaScalarToHarfbuzzFixed(bounds.width());
-    metrics->height = SkiaScalarToHarfbuzzFixed(bounds.height());
+    metrics->x = SkScalarToHBFixed(bounds.fLeft);
+    metrics->y = SkScalarToHBFixed(bounds.fTop);
+    metrics->width = SkScalarToHBFixed(bounds.width());
+    metrics->height = SkScalarToHBFixed(bounds.height());
 
-    metrics->xOffset = SkiaScalarToHarfbuzzFixed(width);
+    metrics->xOffset = SkScalarToHBFixed(width);
     // We can't actually get the |y| correct because Skia doesn't export
     // the vertical advance. However, nor we do ever render vertical text at
     // the moment so it's unimportant.
@@ -199,7 +192,7 @@ static HB_Fixed getFontMetric(HB_Font hbFont, HB_FontMetric metric)
 
     switch (metric) {
     case HB_FontAscent:
-        return SkiaScalarToHarfbuzzFixed(-skiaMetrics.fAscent);
+        return SkScalarToHBFixed(-skiaMetrics.fAscent);
     // We don't support getting the rest of the metrics and Harfbuzz doesn't seem to need them.
     default:
         return 0;

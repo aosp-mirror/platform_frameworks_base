@@ -1534,6 +1534,48 @@ public class Paint {
     }
 
     /**
+     * Convenience overload that takes a char array instead of a
+     * String.
+     *
+     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @hide
+     */
+    public float getTextRunAdvancesICU(char[] chars, int index, int count,
+            int contextIndex, int contextCount, int flags, float[] advances,
+            int advancesIndex) {
+
+        if ((index | count | contextIndex | contextCount | advancesIndex
+                | (index - contextIndex)
+                | ((contextIndex + contextCount) - (index + count))
+                | (chars.length - (contextIndex + contextCount))
+                | (advances == null ? 0 :
+                    (advances.length - (advancesIndex + count)))) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
+        }
+
+        if (!mHasCompatScaling) {
+            return native_getTextRunAdvancesICU(mNativePaint, chars, index, count,
+                    contextIndex, contextCount, flags, advances, advancesIndex);
+        }
+
+        final float oldSize = getTextSize();
+        setTextSize(oldSize * mCompatScaling);
+        float res = native_getTextRunAdvancesICU(mNativePaint, chars, index, count,
+                contextIndex, contextCount, flags, advances, advancesIndex);
+        setTextSize(oldSize);
+
+        if (advances != null) {
+            for (int i = advancesIndex, e = i + count; i < e; i++) {
+                advances[i] *= mInvCompatScaling;
+            }
+        }
+        return res * mInvCompatScaling; // assume errors are not significant
+    }
+
+    /**
      * Convenience overload that takes a CharSequence instead of a
      * String.
      *
@@ -1563,6 +1605,41 @@ public class Paint {
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, start, end, buf, 0);
         float result = getTextRunAdvances(buf, start - contextStart, len,
+                0, contextLen, flags, advances, advancesIndex);
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
+    /**
+     * Convenience overload that takes a CharSequence instead of a
+     * String.
+     *
+     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @hide
+     */
+    public float getTextRunAdvancesICU(CharSequence text, int start, int end,
+            int contextStart, int contextEnd, int flags, float[] advances,
+            int advancesIndex) {
+
+        if (text instanceof String) {
+            return getTextRunAdvancesICU((String) text, start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex);
+        }
+        if (text instanceof SpannedString ||
+            text instanceof SpannableString) {
+            return getTextRunAdvancesICU(text.toString(), start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex);
+        }
+        if (text instanceof GraphicsOperations) {
+            return ((GraphicsOperations) text).getTextRunAdvancesICU(start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex, this);
+        }
+
+        int contextLen = contextEnd - contextStart;
+        int len = end - start;
+        char[] buf = TemporaryBuffer.obtain(contextLen);
+        TextUtils.getChars(text, start, end, buf, 0);
+        float result = getTextRunAdvancesICU(buf, start - contextStart, len,
                 0, contextLen, flags, advances, advancesIndex);
         TemporaryBuffer.recycle(buf);
         return result;
@@ -1626,6 +1703,44 @@ public class Paint {
 
         if (!mHasCompatScaling) {
             return native_getTextRunAdvances(mNativePaint, text, start, end,
+                    contextStart, contextEnd, flags, advances, advancesIndex);
+        }
+
+        final float oldSize = getTextSize();
+        setTextSize(oldSize * mCompatScaling);
+        float totalAdvance = native_getTextRunAdvances(mNativePaint, text, start, end,
+                contextStart, contextEnd, flags, advances, advancesIndex);
+        setTextSize(oldSize);
+
+        if (advances != null) {
+            for (int i = advancesIndex, e = i + (end - start); i < e; i++) {
+                advances[i] *= mInvCompatScaling;
+            }
+        }
+        return totalAdvance * mInvCompatScaling; // assume errors are insignificant
+    }
+
+    /**
+     * Temporary - DO NOT USE
+     *
+     * @hide
+     */
+    public float getTextRunAdvancesICU(String text, int start, int end, int contextStart,
+            int contextEnd, int flags, float[] advances, int advancesIndex) {
+
+        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
+                | (start - contextStart) | (contextEnd - end)
+                | (text.length() - contextEnd)
+                | (advances == null ? 0 :
+                    (advances.length - advancesIndex - (end - start)))) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
+        }
+
+        if (!mHasCompatScaling) {
+            return native_getTextRunAdvancesICU(mNativePaint, text, start, end,
                     contextStart, contextEnd, flags, advances, advancesIndex);
         }
 
@@ -1904,6 +2019,13 @@ public class Paint {
             char[] text, int index, int count, int contextIndex, int contextCount,
             int flags, float[] advances, int advancesIndex);
     private static native float native_getTextRunAdvances(int native_object,
+            String text, int start, int end, int contextStart, int contextEnd,
+            int flags, float[] advances, int advancesIndex);
+
+    private static native float native_getTextRunAdvancesICU(int native_object,
+            char[] text, int index, int count, int contextIndex, int contextCount,
+            int flags, float[] advances, int advancesIndex);
+    private static native float native_getTextRunAdvancesICU(int native_object,
             String text, int start, int end, int contextStart, int contextEnd,
             int flags, float[] advances, int advancesIndex);
 

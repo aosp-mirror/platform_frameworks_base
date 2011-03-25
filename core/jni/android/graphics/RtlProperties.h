@@ -45,7 +45,12 @@ static RtlDebugLevel readRtlDebugLevel() {
     return kRtlDebugDisabled;
 }
 
+// Define if we want to use Harfbuzz (1) or not (0)
 #define RTL_USE_HARFBUZZ 1
+
+// Define if we want (1) to have Advances debug values or not (0)
+#define DEBUG_ADVANCES 0
+
 
 } // namespace android
 #endif // ANDROID_RTL_PROPERTIES_H

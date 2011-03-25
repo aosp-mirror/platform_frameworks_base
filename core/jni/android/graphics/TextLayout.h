@@ -73,6 +73,14 @@ public:
                                    jint count, jint contextCount, jint dirFlags,
                                    jfloat* resultAdvances, jfloat& resultTotalAdvance);
 
+    static void getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint start,
+                                   jint count, jint contextCount, jint dirFlags,
+                                   jfloat* resultAdvances, jfloat& resultTotalAdvance);
+
+    static void getTextRunAdvancesHB(SkPaint* paint, const jchar* chars, jint start,
+                                   jint count, jint contextCount, jint dirFlags,
+                                   jfloat* resultAdvances, jfloat& resultTotalAdvance);
+
     static void drawText(SkPaint* paint, const jchar* text, jsize len,
                          jint bidiFlags, jfloat x, jfloat y, SkCanvas* canvas);
 
