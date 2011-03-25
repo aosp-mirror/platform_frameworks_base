@@ -266,8 +266,8 @@ public:
 
         jfloat totalAdvance = 0;
         for (size_t i = 0; i < count; i++) {
-            // Be careful: we need to use roundf() for doing the same way as Skia is doing
-            totalAdvance += outAdvances[i] = roundf(HB_FIXED_TO_FLOAT(shaperItem.advances[i]));
+            // Be careful: we need to use ceilf() for doing the same way as what Skia is doing
+            totalAdvance += outAdvances[i] = ceilf(HB_FIXED_TO_FLOAT(shaperItem.advances[i]));
 
 #if DEBUG_ADVANCES
             LOGD("hb-adv = %d - rebased = %f - total = %f", shaperItem.advances[i], outAdvances[i],
