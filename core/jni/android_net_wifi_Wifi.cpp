@@ -556,7 +556,7 @@ static jboolean android_net_wifi_setSuspendOptimizationsCommand(JNIEnv* env, job
     return doBooleanCommand(cmdstr, "OK");
 }
 
-static void android_net_wifi_enableBackgroundScan(JNIEnv* env, jobject clazz, jboolean enable)
+static void android_net_wifi_enableBackgroundScanCommand(JNIEnv* env, jobject clazz, jboolean enable)
 {
     //Note: BGSCAN-START and BGSCAN-STOP are documented in core/res/res/values/config.xml
     //and will need an update if the names are changed
@@ -567,6 +567,16 @@ static void android_net_wifi_enableBackgroundScan(JNIEnv* env, jobject clazz, jb
         doBooleanCommand("DRIVER BGSCAN-STOP", "OK");
     }
 }
+
+static void android_net_wifi_setScanIntervalCommand(JNIEnv* env, jobject clazz, jint scanInterval)
+{
+    char cmdstr[BUF_SIZE];
+
+    int numWritten = snprintf(cmdstr, sizeof(cmdstr), "SCAN_INTERVAL %d", scanInterval);
+
+    if(numWritten < (int)sizeof(cmdstr)) doBooleanCommand(cmdstr, "OK");
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -635,7 +645,8 @@ static JNINativeMethod gWifiMethods[] = {
         (void*) android_net_wifi_setSuspendOptimizationsCommand},
     { "setCountryCodeCommand", "(Ljava/lang/String;)Z",
         (void*) android_net_wifi_setCountryCodeCommand},
-    { "enableBackgroundScan", "(Z)V", (void*) android_net_wifi_enableBackgroundScan},
+    { "enableBackgroundScanCommand", "(Z)V", (void*) android_net_wifi_enableBackgroundScanCommand},
+    { "setScanIntervalCommand", "(I)V", (void*) android_net_wifi_setScanIntervalCommand},
 };
 
 int register_android_net_wifi_WifiManager(JNIEnv* env)

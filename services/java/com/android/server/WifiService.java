@@ -937,7 +937,7 @@ public class WifiService extends IWifiManager.Stub {
                 evaluateTrafficStatsPolling();
                 mWifiStateMachine.enableRssiPolling(true);
                 if (mBackgroundScanSupported) {
-                    mWifiStateMachine.enableBackgroundScan(false);
+                    mWifiStateMachine.enableBackgroundScanCommand(false);
                 }
                 mWifiStateMachine.enableAllNetworks();
                 updateWifiState();
@@ -949,7 +949,7 @@ public class WifiService extends IWifiManager.Stub {
                 evaluateTrafficStatsPolling();
                 mWifiStateMachine.enableRssiPolling(false);
                 if (mBackgroundScanSupported) {
-                    mWifiStateMachine.enableBackgroundScan(true);
+                    mWifiStateMachine.enableBackgroundScanCommand(true);
                 }
                 /*
                  * Set a timer to put Wi-Fi to sleep, but only if the screen is off

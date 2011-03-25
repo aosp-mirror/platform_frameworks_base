@@ -171,5 +171,7 @@ public class WifiNative {
      */
     public native static String waitForEvent();
 
-    public native static void enableBackgroundScan(boolean enable);
+    public native static void enableBackgroundScanCommand(boolean enable);
+
+    public native static void setScanIntervalCommand(int scanInterval);
 }
