@@ -176,4 +176,9 @@ public interface NetworkStateTracker {
      * Indicate tear down requested from connectivity
      */
     public void setTeardownRequested(boolean isRequested);
+
+    /**
+     * An external dependency has been met/unmet
+     */
+    public void setDependencyMet(boolean met);
 }

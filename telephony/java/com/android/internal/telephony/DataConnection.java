@@ -1097,4 +1097,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     public ApnSetting getApn() {
         return mApn;
     }
+
+    public int getCid() {
+        return cid;
+    }
 }

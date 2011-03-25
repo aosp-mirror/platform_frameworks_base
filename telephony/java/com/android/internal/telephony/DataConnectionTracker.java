@@ -28,6 +28,7 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncResult;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -122,6 +123,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_RESET_DONE = 38;
     public static final int CMD_SET_DATA_ENABLE = 39;
     public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = 40;
+    public static final int CMD_SET_DEPENDENCY_MET = 41;
 
     /***** Constants *****/
 
@@ -138,6 +140,8 @@ public abstract class DataConnectionTracker extends Handler {
 
     public static final int DISABLED = 0;
     public static final int ENABLED = 1;
+
+    public static final String APN_TYPE_KEY = "apnType";
 
     // responds to the setInternalDataEnabled call - used internally to turn off data
     // for example during emergency calls
@@ -541,6 +545,19 @@ public abstract class DataConnectionTracker extends Handler {
                 break;
             }
 
+            case CMD_SET_DEPENDENCY_MET: {
+                log("CMD_SET_DEPENDENCY_MET msg=" + msg);
+                boolean met = (msg.arg1 == ENABLED) ? true : false;
+                Bundle bundle = msg.getData();
+                if (bundle != null) {
+                    String apnType = (String)bundle.get(APN_TYPE_KEY);
+                    if (apnType != null) {
+                        onSetDependencyMet(apnType, met);
+                    }
+                }
+                break;
+            }
+
             default:
                 Log.e("DATA", "Unidentified event = " + msg.what);
                 break;
@@ -810,7 +827,7 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
-    private void setEnabled(int id, boolean enable) {
+    protected void setEnabled(int id, boolean enable) {
         if (DBG) {
             log("setEnabled(" + id + ", " + enable + ") with old state = " + dataEnabled[id]
                     + " and enabledCount = " + enabledCount);
@@ -821,7 +838,7 @@ public abstract class DataConnectionTracker extends Handler {
         sendMessage(msg);
     }
 
-    protected synchronized void onEnableApn(int apnId, int enabled) {
+    protected void onEnableApn(int apnId, int enabled) {
         if (DBG) {
             log("EVENT_APN_ENABLE_REQUEST apnId=" + apnId + ", apnType=" + apnIdToType(apnId) +
                     ", enabled=" + enabled + ", dataEnabled = " + dataEnabled[apnId] +
@@ -829,9 +846,11 @@ public abstract class DataConnectionTracker extends Handler {
                     isApnTypeActive(apnIdToType(apnId)));
         }
         if (enabled == ENABLED) {
-            if (!dataEnabled[apnId]) {
-                dataEnabled[apnId] = true;
-                enabledCount++;
+            synchronized (this) {
+                if (!dataEnabled[apnId]) {
+                    dataEnabled[apnId] = true;
+                    enabledCount++;
+                }
             }
             String type = apnIdToType(apnId);
             if (!isApnTypeActive(type)) {
@@ -842,12 +861,16 @@ public abstract class DataConnectionTracker extends Handler {
             }
         } else {
             // disable
-            if (dataEnabled[apnId]) {
-                dataEnabled[apnId] = false;
-                enabledCount--;
-                if (enabledCount == 0) {
-                    onCleanUpConnection(true, apnId, Phone.REASON_DATA_DISABLED);
+            boolean didDisable = false;
+            synchronized (this) {
+                if (dataEnabled[apnId]) {
+                    dataEnabled[apnId] = false;
+                    enabledCount--;
+                    didDisable = true;
                 }
+            }
+            if (didDisable && enabledCount == 0) {
+                onCleanUpConnection(true, apnId, Phone.REASON_DATA_DISABLED);
 
                 // send the disconnect msg manually, since the normal route wont send
                 // it (it's not enabled)
@@ -960,6 +983,10 @@ public abstract class DataConnectionTracker extends Handler {
             }
         }
     }
+
+    protected void onSetDependencyMet(String apnType, boolean met) {
+    }
+
 
     protected void resetAllRetryCounts() {
         for (DataConnection dc : mDataConnections.values()) {
