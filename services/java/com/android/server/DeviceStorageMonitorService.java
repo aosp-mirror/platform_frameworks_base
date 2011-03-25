@@ -56,7 +56,7 @@ import android.util.Slog;
  * settings parameter with a default value of 2MB), the free memory is
  * logged to the event log.
  */
-class DeviceStorageMonitorService extends Binder {
+public class DeviceStorageMonitorService extends Binder {
     private static final String TAG = "DeviceStorageMonitorService";
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
@@ -99,7 +99,7 @@ class DeviceStorageMonitorService extends Binder {
     /**
      * This string is used for ServiceManager access to this class.
      */
-    static final String SERVICE = "devicestoragemonitor";
+    public static final String SERVICE = "devicestoragemonitor";
 
     /**
     * Handler that checks the amount of disk space on the device and sends a

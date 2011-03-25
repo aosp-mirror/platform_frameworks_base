@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.pm.PackageManagerService;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -85,6 +86,9 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     private static final String TAG = "MountService";
 
     private static final String VOLD_TAG = "VoldConnector";
+
+    /** Maximum number of ASEC containers allowed to be mounted. */
+    private static final int MAX_CONTAINERS = 250;
 
     /*
      * Internal vold volume state constants
@@ -483,7 +487,6 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             }
         }
     };
-
     private final class MountServiceBinderListener implements IBinder.DeathRecipient {
         final IMountServiceListener mListener;
 
@@ -1087,8 +1090,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
          * amount of containers we'd ever expect to have. This keeps an
          * "asec list" from blocking a thread repeatedly.
          */
-        mConnector = new NativeDaemonConnector(this, "vold",
-                PackageManagerService.MAX_CONTAINERS * 2, VOLD_TAG);
+        mConnector = new NativeDaemonConnector(this, "vold", MAX_CONTAINERS * 2, VOLD_TAG);
         mReady = false;
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();

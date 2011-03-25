@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.pm;
 
 import android.content.pm.PackageStats;
-import android.net.LocalSocketAddress;
 import android.net.LocalSocket;
-import android.util.Config;
+import android.net.LocalSocketAddress;
 import android.util.Slog;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
-
 
 class Installer {
     private static final String TAG = "Installer";
-	InputStream mIn;
-	OutputStream mOut;
-	LocalSocket mSocket;
 
-	byte buf[] = new byte[1024];
-	int buflen = 0;
+    private static final boolean LOCAL_DEBUG = true;
+
+    InputStream mIn;
+
+    OutputStream mOut;
+
+    LocalSocket mSocket;
+
+    byte buf[] = new byte[1024];
+
+    int buflen = 0;
 
     private boolean connect() {
         if (mSocket != null) {
@@ -45,8 +48,8 @@ class Installer {
         try {
             mSocket = new LocalSocket();
 
-            LocalSocketAddress address = new LocalSocketAddress(
-                "installd", LocalSocketAddress.Namespace.RESERVED);
+            LocalSocketAddress address = new LocalSocketAddress("installd",
+                    LocalSocketAddress.Namespace.RESERVED);
 
             mSocket.connect(address);
 
@@ -59,112 +62,131 @@ class Installer {
         return true;
     }
 
-	private void disconnect() {
-        Slog.i(TAG,"disconnecting...");
-		try {
-			if (mSocket != null) mSocket.close();
-		} catch (IOException ex) { }
-		try {
-			if (mIn != null) mIn.close();
-		} catch (IOException ex) { }
-		try {
-			if (mOut != null) mOut.close();
-		} catch (IOException ex) { }
-		mSocket = null;
-		mIn = null;
-		mOut = null;
-	}
+    private void disconnect() {
+        Slog.i(TAG, "disconnecting...");
+        try {
+            if (mSocket != null)
+                mSocket.close();
+        } catch (IOException ex) {
+        }
+        try {
+            if (mIn != null)
+                mIn.close();
+        } catch (IOException ex) {
+        }
+        try {
+            if (mOut != null)
+                mOut.close();
+        } catch (IOException ex) {
+        }
+        mSocket = null;
+        mIn = null;
+        mOut = null;
+    }
 
-	private boolean readBytes(byte buffer[], int len) {
-		int off = 0, count;
-        if (len < 0) return false;
-		while (off != len) {
-			try {
-				count = mIn.read(buffer, off, len - off);
-				if (count <= 0) {
+    private boolean readBytes(byte buffer[], int len) {
+        int off = 0, count;
+        if (len < 0)
+            return false;
+        while (off != len) {
+            try {
+                count = mIn.read(buffer, off, len - off);
+                if (count <= 0) {
                     Slog.e(TAG, "read error " + count);
                     break;
                 }
-				off += count;
-			} catch (IOException ex) {
-                Slog.e(TAG,"read exception");
-				break;
-			}
-		}
-//        Slog.i(TAG, "read "+len+" bytes");
-		if (off == len) return true;
-		disconnect();
-		return false;
-	}
+                off += count;
+            } catch (IOException ex) {
+                Slog.e(TAG, "read exception");
+                break;
+            }
+        }
+        if (LOCAL_DEBUG) {
+            Slog.i(TAG, "read " + len + " bytes");
+        }
+        if (off == len)
+            return true;
+        disconnect();
+        return false;
+    }
 
-	private boolean readReply() {
-		int len;
-		buflen = 0;
-		if (!readBytes(buf, 2)) return false;
-		len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8);
-		if ((len < 1) || (len > 1024)) {
-            Slog.e(TAG,"invalid reply length ("+len+")");
-			disconnect();
-			return false;
-		}
-		if (!readBytes(buf, len)) return false;
-		buflen = len;
-		return true;
-	}
+    private boolean readReply() {
+        int len;
+        buflen = 0;
+        if (!readBytes(buf, 2))
+            return false;
+        len = (((int) buf[0]) & 0xff) | ((((int) buf[1]) & 0xff) << 8);
+        if ((len < 1) || (len > 1024)) {
+            Slog.e(TAG, "invalid reply length (" + len + ")");
+            disconnect();
+            return false;
+        }
+        if (!readBytes(buf, len))
+            return false;
+        buflen = len;
+        return true;
+    }
 
-	private boolean writeCommand(String _cmd) {
-		byte[] cmd = _cmd.getBytes();
-		int len = cmd.length;
-		if ((len < 1) || (len > 1024)) return false;
-		buf[0] = (byte) (len & 0xff);
-		buf[1] = (byte) ((len >> 8) & 0xff);
-		try {
-			mOut.write(buf, 0, 2);
-			mOut.write(cmd, 0, len);
-		} catch (IOException ex) {
-            Slog.e(TAG,"write error");
-			disconnect();
-			return false;
-		}
-		return true;
-	}
-		
-	private synchronized String transaction(String cmd) {
-		if (!connect()) {
+    private boolean writeCommand(String _cmd) {
+        byte[] cmd = _cmd.getBytes();
+        int len = cmd.length;
+        if ((len < 1) || (len > 1024))
+            return false;
+        buf[0] = (byte) (len & 0xff);
+        buf[1] = (byte) ((len >> 8) & 0xff);
+        try {
+            mOut.write(buf, 0, 2);
+            mOut.write(cmd, 0, len);
+        } catch (IOException ex) {
+            Slog.e(TAG, "write error");
+            disconnect();
+            return false;
+        }
+        return true;
+    }
+
+    private synchronized String transaction(String cmd) {
+        if (!connect()) {
             Slog.e(TAG, "connection failed");
             return "-1";
         }
 
         if (!writeCommand(cmd)) {
-                /* If installd died and restarted in the background
-                 * (unlikely but possible) we'll fail on the next
-                 * write (this one).  Try to reconnect and write
-                 * the command one more time before giving up.
-                 */
+            /*
+             * If installd died and restarted in the background (unlikely but
+             * possible) we'll fail on the next write (this one). Try to
+             * reconnect and write the command one more time before giving up.
+             */
             Slog.e(TAG, "write command failed? reconnect!");
             if (!connect() || !writeCommand(cmd)) {
                 return "-1";
             }
         }
-//        Slog.i(TAG,"send: '"+cmd+"'");
-		if (readReply()) {
+        if (LOCAL_DEBUG) {
+            Slog.i(TAG, "send: '" + cmd + "'");
+        }
+        if (readReply()) {
             String s = new String(buf, 0, buflen);
-//            Slog.i(TAG,"recv: '"+s+"'");
-			return s;
-		} else {
-//            Slog.i(TAG,"fail");
-			return "-1";
-		}
-	}
+            if (LOCAL_DEBUG) {
+                Slog.i(TAG, "recv: '" + s + "'");
+            }
+            return s;
+        } else {
+            if (LOCAL_DEBUG) {
+                Slog.i(TAG, "fail");
+            }
+            return "-1";
+        }
+    }
 
-	private int execute(String cmd) {
-		String res = transaction(cmd);
-		try {
-			return Integer.parseInt(res);
-		} catch (NumberFormatException ex) {
-			return -1;
-		}
-	}
+    private int execute(String cmd) {
+        String res = transaction(cmd);
+        try {
+            return Integer.parseInt(res);
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
 
     public int install(String name, int uid, int gid) {
         StringBuilder builder = new StringBuilder("install");
@@ -225,14 +247,14 @@ class Installer {
         builder.append(name);
         return execute(builder.toString());
     }
-    
+
     public int clearUserData(String name) {
         StringBuilder builder = new StringBuilder("rmuserdata");
         builder.append(' ');
         builder.append(name);
         return execute(builder.toString());
     }
-    
+
     public boolean ping() {
         if (execute("ping") < 0) {
             return false;
@@ -240,7 +262,7 @@ class Installer {
             return true;
         }
     }
-    
+
     public int freeCache(long freeStorageSize) {
         StringBuilder builder = new StringBuilder("freecache");
         builder.append(' ');
@@ -250,8 +272,8 @@ class Installer {
 
     /*
      * @param packagePathSuffix The name of the path relative to install
-     * directory. Say if the path name is /data/app/com.test-1.apk,
-     * the package suffix path will be com.test-1
+     * directory. Say if the path name is /data/app/com.test-1.apk, the package
+     * suffix path will be com.test-1
      */
     public int setForwardLockPerm(String packagePathSuffix, int gid) {
         StringBuilder builder = new StringBuilder("protect");
@@ -261,7 +283,7 @@ class Installer {
         builder.append(gid);
         return execute(builder.toString());
     }
-    
+
     public int getSizeInfo(String pkgName, String apkPath, String fwdLockApkPath,
             PackageStats pStats) {
         StringBuilder builder = new StringBuilder("getsize");
@@ -275,7 +297,7 @@ class Installer {
         String s = transaction(builder.toString());
         String res[] = s.split(" ");
 
-        if((res == null) || (res.length != 4)) {
+        if ((res == null) || (res.length != 4)) {
             return -1;
         }
         try {
@@ -286,7 +308,7 @@ class Installer {
         } catch (NumberFormatException e) {
             return -1;
         }
-    }    
+    }
 
     public int moveFiles() {
         return execute("movefiles");
