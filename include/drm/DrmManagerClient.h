@@ -368,7 +368,7 @@ public:
 
 private:
     int mUniqueId;
-    DrmManagerClientImpl* mDrmManagerClientImpl;
+    sp<DrmManagerClientImpl> mDrmManagerClientImpl;
 };
 
 };
