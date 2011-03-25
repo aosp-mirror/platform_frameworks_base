@@ -72,25 +72,78 @@ static char const * const gExtensionString  =
 
 // ----------------------------------------------------------------------------
 
-class egl_object_t {
-    static SortedVector<egl_object_t*> sObjects;
-    static Mutex sLock;
+class egl_object_t;
+struct egl_display_t;
+static egl_display_t* get_display(EGLDisplay dpy);
 
+struct egl_config_t {
+    egl_config_t() {}
+    egl_config_t(int impl, EGLConfig config)
+        : impl(impl), config(config), configId(0), implConfigId(0) { }
+    int         impl;           // the implementation this config is for
+    EGLConfig   config;         // the implementation's EGLConfig
+    EGLint      configId;       // our CONFIG_ID
+    EGLint      implConfigId;   // the implementation's CONFIG_ID
+    inline bool operator < (const egl_config_t& rhs) const {
+        if (impl < rhs.impl) return true;
+        if (impl > rhs.impl) return false;
+        return config < rhs.config;
+    }
+};
+
+struct egl_display_t {
+    enum { NOT_INITIALIZED, INITIALIZED, TERMINATED };
+
+    struct strings_t {
+        char const * vendor;
+        char const * version;
+        char const * clientApi;
+        char const * extensions;
+    };
+
+    struct DisplayImpl {
+        DisplayImpl() : dpy(EGL_NO_DISPLAY), config(0),
+                        state(NOT_INITIALIZED), numConfigs(0) { }
+        EGLDisplay  dpy;
+        EGLConfig*  config;
+        EGLint      state;
+        EGLint      numConfigs;
+        strings_t   queryString;
+    };
+
+    uint32_t        magic;
+    DisplayImpl     disp[IMPL_NUM_IMPLEMENTATIONS];
+    EGLint          numTotalConfigs;
+    egl_config_t*   configs;
+    uint32_t        refs;
+    Mutex           lock;
+
+    SortedVector<egl_object_t*> objects;
+
+    egl_display_t() : magic('_dpy'), numTotalConfigs(0), configs(0) { }
+    ~egl_display_t() { magic = 0; }
+    inline bool isReady() const { return (refs > 0); }
+    inline bool isValid() const { return magic == '_dpy'; }
+    inline bool isAlive() const { return isValid(); }
+};
+
+class egl_object_t {
+    egl_display_t *display;
             volatile int32_t  terminated;
     mutable volatile int32_t  count;
 
 public:
-    egl_object_t() : terminated(0), count(1) { 
-        Mutex::Autolock _l(sLock);
-        sObjects.add(this);
+    egl_object_t(EGLDisplay dpy) : display(get_display(dpy)), terminated(0), count(1) {
+        Mutex::Autolock _l(display->lock);
+        display->objects.add(this);
     }
 
     inline bool isAlive() const { return !terminated; }
 
 private:
     bool get() {
-        Mutex::Autolock _l(sLock);
-        if (egl_object_t::sObjects.indexOf(this) >= 0) {
+        Mutex::Autolock _l(display->lock);
+        if (display->objects.indexOf(this) >= 0) {
             android_atomic_inc(&count);
             return true;
         }
@@ -98,9 +151,9 @@ private:
     }
 
     bool put() {
-        Mutex::Autolock _l(sLock);
+        Mutex::Autolock _l(display->lock);
         if (android_atomic_dec(&count) == 1) {
-            sObjects.remove(this);
+            display->objects.remove(this);
             return true;
         }
         return false;
@@ -147,66 +200,13 @@ public:
     };
 };
 
-SortedVector<egl_object_t*> egl_object_t::sObjects;
-Mutex egl_object_t::sLock;
-
-
-struct egl_config_t {
-    egl_config_t() {}
-    egl_config_t(int impl, EGLConfig config)
-        : impl(impl), config(config), configId(0), implConfigId(0) { }
-    int         impl;           // the implementation this config is for
-    EGLConfig   config;         // the implementation's EGLConfig
-    EGLint      configId;       // our CONFIG_ID
-    EGLint      implConfigId;   // the implementation's CONFIG_ID
-    inline bool operator < (const egl_config_t& rhs) const {
-        if (impl < rhs.impl) return true;
-        if (impl > rhs.impl) return false;
-        return config < rhs.config;
-    }
-};
-
-struct egl_display_t {
-    enum { NOT_INITIALIZED, INITIALIZED, TERMINATED };
-    
-    struct strings_t {
-        char const * vendor;
-        char const * version;
-        char const * clientApi;
-        char const * extensions;
-    };
-
-    struct DisplayImpl {
-        DisplayImpl() : dpy(EGL_NO_DISPLAY), config(0),
-                        state(NOT_INITIALIZED), numConfigs(0) { }
-        EGLDisplay  dpy;
-        EGLConfig*  config;
-        EGLint      state;
-        EGLint      numConfigs;
-        strings_t   queryString;
-    };
-
-    uint32_t        magic;
-    DisplayImpl     disp[IMPL_NUM_IMPLEMENTATIONS];
-    EGLint          numTotalConfigs;
-    egl_config_t*   configs;
-    uint32_t        refs;
-    Mutex           lock;
-    
-    egl_display_t() : magic('_dpy'), numTotalConfigs(0), configs(0) { }
-    ~egl_display_t() { magic = 0; }
-    inline bool isReady() const { return (refs > 0); }
-    inline bool isValid() const { return magic == '_dpy'; }
-    inline bool isAlive() const { return isValid(); }
-};
-
 struct egl_surface_t : public egl_object_t
 {
     typedef egl_object_t::LocalRef<egl_surface_t, EGLSurface> Ref;
 
     egl_surface_t(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win,
             EGLSurface surface, int impl, egl_connection_t const* cnx)
-    : dpy(dpy), surface(surface), config(config), win(win), impl(impl), cnx(cnx) {
+      : egl_object_t(dpy), dpy(dpy), surface(surface), config(config), win(win), impl(impl), cnx(cnx) {
     }
     ~egl_surface_t() {
     }
@@ -224,8 +224,8 @@ struct egl_context_t : public egl_object_t
     
     egl_context_t(EGLDisplay dpy, EGLContext context, EGLConfig config,
             int impl, egl_connection_t const* cnx, int version) 
-    : dpy(dpy), context(context), config(config), read(0), draw(0), impl(impl),
-      cnx(cnx), version(version), dbg(NULL)
+    : egl_object_t(dpy), dpy(dpy), context(context), config(config), read(0), draw(0), 
+      impl(impl), cnx(cnx), version(version), dbg(NULL)
     {
     }
     ~egl_context_t()
@@ -250,7 +250,7 @@ struct egl_image_t : public egl_object_t
     typedef egl_object_t::LocalRef<egl_image_t, EGLImageKHR> Ref;
 
     egl_image_t(EGLDisplay dpy, EGLContext context)
-        : dpy(dpy), context(context)
+        : egl_object_t(dpy), dpy(dpy), context(context)
     {
         memset(images, 0, sizeof(images));
     }
@@ -264,7 +264,7 @@ struct egl_sync_t : public egl_object_t
     typedef egl_object_t::LocalRef<egl_sync_t, EGLSyncKHR> Ref;
 
     egl_sync_t(EGLDisplay dpy, EGLContext context, EGLSyncKHR sync)
-        : dpy(dpy), context(context), sync(sync)
+        : egl_object_t(dpy), dpy(dpy), context(context), sync(sync)
     {
     }
     EGLDisplay dpy;
