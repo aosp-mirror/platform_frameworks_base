@@ -575,7 +575,7 @@ void AwesomePlayer::onVideoLagUpdate() {
     int64_t audioTimeUs = mAudioPlayer->getMediaTimeUs();
     int64_t videoLateByUs = audioTimeUs - mVideoTimeUs;
 
-    if (videoLateByUs > 300000ll) {
+    if (!(mFlags & VIDEO_AT_EOS) && videoLateByUs > 300000ll) {
         LOGV("video late by %lld ms.", videoLateByUs / 1000ll);
 
         notifyListener_l(
@@ -1052,7 +1052,8 @@ status_t AwesomePlayer::getPosition(int64_t *positionUs) {
     }
     else if (mSeeking != NO_SEEK) {
         *positionUs = mSeekTimeUs;
-    } else if (mVideoSource != NULL) {
+    } else if (mVideoSource != NULL
+            && (mAudioPlayer == NULL || !(mFlags & VIDEO_AT_EOS))) {
         Mutex::Autolock autoLock(mMiscStateLock);
         *positionUs = mVideoTimeUs;
     } else if (mAudioPlayer != NULL) {
@@ -1092,6 +1093,14 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     if (mFlags & CACHE_UNDERRUN) {
         mFlags &= ~CACHE_UNDERRUN;
         play_l();
+    }
+
+    if ((mFlags & PLAYING) && mVideoSource != NULL && (mFlags & VIDEO_AT_EOS)) {
+        // Video playback completed before, there's no pending
+        // video event right now. In order for this new seek
+        // to be honored, we need to post one.
+
+        postVideoEvent_l();
     }
 
     mSeeking = SEEK;
@@ -1277,6 +1286,7 @@ void AwesomePlayer::finishSeekIfNecessary(int64_t videoTimeUs) {
 
         mAudioPlayer->seekTo(videoTimeUs < 0 ? mSeekTimeUs : videoTimeUs);
         mWatchForAudioSeekComplete = true;
+        mWatchForAudioEOS = true;
     } else if (!mSeekNotificationSent) {
         // If we're playing video only, report seek complete now,
         // otherwise audio player will notify us later.
@@ -1366,6 +1376,11 @@ void AwesomePlayer::onVideoEvent() {
                     LOGV("video stream ended while seeking!");
                 }
                 finishSeekIfNecessary(-1);
+
+                if (mAudioPlayer != NULL
+                        && !(mFlags & (AUDIO_RUNNING | SEEK_PREVIEW))) {
+                    startAudioPlayer_l();
+                }
 
                 mFlags |= VIDEO_AT_EOS;
                 postStreamDoneEvent_l(err);
