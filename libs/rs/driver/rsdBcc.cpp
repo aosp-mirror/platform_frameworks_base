@@ -522,7 +522,11 @@ void rsdScriptDestroy(const Context *dc, Script *script) {
     if (drv->mFieldAddress) {
         for (size_t ct=0; ct < drv->mFieldCount; ct++) {
             if (drv->mFieldIsObject[ct]) {
-                rsiClearObject((ObjectBase **)&drv->mFieldAddress[ct]);
+                // The field address can be NULL if the script-side has
+                // optimized the corresponding global variable away.
+                if (drv->mFieldAddress[ct]) {
+                    rsiClearObject((ObjectBase **)drv->mFieldAddress[ct]);
+                }
             }
         }
         delete [] drv->mFieldAddress;
