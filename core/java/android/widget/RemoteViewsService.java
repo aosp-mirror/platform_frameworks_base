@@ -138,34 +138,87 @@ public abstract class RemoteViewsService extends Service {
             return mIsCreated;
         }
         public synchronized void onDataSetChanged() {
-            mFactory.onDataSetChanged();
+            try {
+                mFactory.onDataSetChanged();
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
         }
         public synchronized int getCount() {
-            return mFactory.getCount();
+            int count = 0;
+            try {
+                count = mFactory.getCount();
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
+            return count;
         }
         public synchronized RemoteViews getViewAt(int position) {
-            RemoteViews rv = mFactory.getViewAt(position);
-            rv.setIsWidgetCollectionChild(true);
+            RemoteViews rv = null;
+            try {
+                rv = mFactory.getViewAt(position);
+                if (rv != null) {
+                    rv.setIsWidgetCollectionChild(true);
+                }
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
             return rv;
         }
         public synchronized RemoteViews getLoadingView() {
-            return mFactory.getLoadingView();
+            RemoteViews rv = null;
+            try {
+                rv = mFactory.getLoadingView();
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
+            return rv;
         }
         public synchronized int getViewTypeCount() {
-            return mFactory.getViewTypeCount();
+            int count = 0;
+            try {
+                count = mFactory.getViewTypeCount();
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
+            return count;
         }
         public synchronized long getItemId(int position) {
-            return mFactory.getItemId(position);
+            long id = 0;
+            try {
+                id = mFactory.getItemId(position);
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
+            return id;
         }
         public synchronized boolean hasStableIds() {
-            return mFactory.hasStableIds();
+            boolean hasStableIds = false;
+            try {
+                hasStableIds = mFactory.hasStableIds();
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
+            return hasStableIds;
         }
         public void onDestroy(Intent intent) {
             synchronized (sLock) {
                 Intent.FilterComparison fc = new Intent.FilterComparison(intent);
                 if (RemoteViewsService.sRemoteViewFactories.containsKey(fc)) {
                     RemoteViewsFactory factory = RemoteViewsService.sRemoteViewFactories.get(fc);
-                    factory.onDestroy();
+                    try {
+                        factory.onDestroy();
+                    } catch (Exception ex) {
+                        Thread t = Thread.currentThread();
+                        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+                    }
                     RemoteViewsService.sRemoteViewFactories.remove(fc);
                 }
             }

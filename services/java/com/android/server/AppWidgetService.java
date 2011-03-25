@@ -541,7 +541,9 @@ class AppWidgetService extends IAppWidgetService.Stub
                     IRemoteViewsFactory.Stub.asInterface(service);
                 try {
                     cb.onDestroy(intent);
-                } catch (Exception e) {
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                } catch (RuntimeException e) {
                     e.printStackTrace();
                 }
                 mContext.unbindService(this);
