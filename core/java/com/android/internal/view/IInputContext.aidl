@@ -17,7 +17,6 @@
 package com.android.internal.view;
 
 import android.os.Bundle;
-import android.text.style.CorrectionSpan;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -74,6 +73,4 @@ import com.android.internal.view.IInputContextCallback;
 
     void getSelectedText(int flags, int seq, IInputContextCallback callback);
 
-    void setCorrectionSpan(in IBinder token, in CorrectionSpan correctionSpan, int start,
-            int end, int flags);
 }

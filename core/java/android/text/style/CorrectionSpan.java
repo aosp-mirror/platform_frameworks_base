@@ -22,23 +22,21 @@ import android.os.Parcelable;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Locale;
 
+/**
+ * Sets correction candidates of words under this span.
+ */
 public class CorrectionSpan implements ParcelableSpan {
 
-    /**
-     * Flag for the default value.
-     */
-    public static final int FLAG_DEFAULT = 0x0000;
     /**
      * Flag for indicating that the input is verbatim. TextView refers to this flag to determine
      * how it displays a word with CorrectionSpan.
      */
     public static final int FLAG_VERBATIM = 0x0001;
 
-    private static final int SUGGESTS_MAX_SIZE = 5;
+    private static final int SUGGESTIONS_MAX_SIZE = 5;
 
     /*
      * TODO: Needs to check the validity and add a feature that TextView will change
@@ -48,7 +46,7 @@ public class CorrectionSpan implements ParcelableSpan {
      */
 
     private final int mFlags;
-    private final List<CharSequence> mSuggests = new ArrayList<CharSequence>();
+    private final String[] mSuggestions;
     private final String mLocaleString;
     private final String mOriginalString;
     /*
@@ -58,35 +56,33 @@ public class CorrectionSpan implements ParcelableSpan {
 
     /**
      * @param context Context for the application
-     * @param suggests Suggests for the string under the span
+     * @param suggestions Suggestions for the string under the span
      * @param flags Additional flags indicating how this span is handled in TextView
      */
-    public CorrectionSpan(Context context, List<CharSequence> suggests, int flags) {
-        this(context, null, suggests, flags, null);
+    public CorrectionSpan(Context context, String[] suggestions, int flags) {
+        this(context, null, suggestions, flags, null);
     }
 
     /**
      * @param locale Locale of the suggestions
-     * @param suggests Suggests for the string under the span
+     * @param suggestions Suggestions for the string under the span
      * @param flags Additional flags indicating how this span is handled in TextView
      */
-    public CorrectionSpan(Locale locale, List<CharSequence> suggests, int flags) {
-        this(null, locale, suggests, flags, null);
+    public CorrectionSpan(Locale locale, String[] suggestions, int flags) {
+        this(null, locale, suggestions, flags, null);
     }
 
     /**
      * @param context Context for the application
      * @param locale locale Locale of the suggestions
-     * @param suggests suggests Suggests for the string under the span
+     * @param suggestions Suggestions for the string under the span
      * @param flags Additional flags indicating how this span is handled in TextView
-     * @param originalString originalString for suggests
+     * @param originalString originalString for suggestions
      */
-    public CorrectionSpan(Context context, Locale locale, List<CharSequence> suggests, int flags,
+    public CorrectionSpan(Context context, Locale locale, String[] suggestions, int flags,
             String originalString) {
-        final int N = Math.min(SUGGESTS_MAX_SIZE, suggests.size());
-        for (int i = 0; i < N; ++i) {
-            mSuggests.add(suggests.get(i));
-        }
+        final int N = Math.min(SUGGESTIONS_MAX_SIZE, suggestions.length);
+        mSuggestions = Arrays.copyOf(suggestions, N);
         mFlags = flags;
         if (context != null && locale == null) {
             mLocaleString = context.getResources().getConfiguration().locale.toString();
@@ -97,7 +93,7 @@ public class CorrectionSpan implements ParcelableSpan {
     }
 
     public CorrectionSpan(Parcel src) {
-        src.readList(mSuggests, null);
+        mSuggestions = src.readStringArray();
         mFlags = src.readInt();
         mLocaleString = src.readString();
         mOriginalString = src.readString();
@@ -106,8 +102,8 @@ public class CorrectionSpan implements ParcelableSpan {
     /**
      * @return suggestions
      */
-    public List<CharSequence> getSuggests() {
-        return new ArrayList<CharSequence>(mSuggests);
+    public String[] getSuggestions() {
+        return Arrays.copyOf(mSuggestions, mSuggestions.length);
     }
 
     /**
@@ -135,7 +131,7 @@ public class CorrectionSpan implements ParcelableSpan {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeList(mSuggests);
+        dest.writeStringArray(mSuggestions);
         dest.writeInt(mFlags);
         dest.writeString(mLocaleString);
         dest.writeString(mOriginalString);

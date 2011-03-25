@@ -17,10 +17,8 @@
 package com.android.internal.view;
 
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.text.style.CorrectionSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -253,7 +251,7 @@ public class InputConnectionWrapper implements InputConnection {
         }
         return value;
     }
-    
+
     public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
         ExtractedText value = null;
         try {
@@ -410,16 +408,6 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean performPrivateCommand(String action, Bundle data) {
         try {
             mIInputContext.performPrivateCommand(action, data);
-            return true;
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-    @Override
-    public boolean setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
-            int end, int flags) {
-        try {
-            mIInputContext.setCorrectionSpan(token, correctionSpan, start, end, flags);
             return true;
         } catch (RemoteException e) {
             return false;

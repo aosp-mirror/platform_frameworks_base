@@ -8331,19 +8331,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sLastCutOrCopyTime = SystemClock.uptimeMillis();
     }
 
-    public boolean setCorrectionSpan(IBinder token, CorrectionSpan span, int start, int end,
-            int flags) {
-        if (getWindowToken() != token || !(mText instanceof Spannable)) return false;
-        Spannable spannable = (Spannable)mText;
-        CorrectionSpan[] spans = spannable.getSpans(start, end, CorrectionSpan.class);
-        final int N = spans.length;
-        for (int i = 0; i < N; ++i) {
-            spannable.removeSpan(spans[i]);
-        }
-        spannable.setSpan(span, start, end, flags);
-        return true;
-    }
-
     /**
      * An ActionMode Callback class that is used to provide actions while in text selection mode.
      *

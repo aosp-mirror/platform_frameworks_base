@@ -146,13 +146,4 @@ public class EditableInputConnection extends BaseInputConnection {
 
         return success;
     }
-
-    @Override
-    public boolean setCorrectionSpan(IBinder token, CorrectionSpan correctionSpan, int start,
-            int end, int flags) {
-        mTextView.beginBatchEdit();
-        boolean retval = mTextView.setCorrectionSpan(token, correctionSpan, start, end, flags);
-        mTextView.endBatchEdit();
-        return retval;
-    }
 }
