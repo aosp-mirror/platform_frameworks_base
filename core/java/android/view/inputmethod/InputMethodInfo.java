@@ -322,7 +322,12 @@ public final class InputMethodInfo implements Parcelable {
         InputMethodInfo obj = (InputMethodInfo) o;
         return mId.equals(obj.mId);
     }
-    
+
+    @Override
+    public int hashCode() {
+        return mId.hashCode();
+    }
+
     /**
      * Used to package this object into a {@link Parcel}.
      * 
