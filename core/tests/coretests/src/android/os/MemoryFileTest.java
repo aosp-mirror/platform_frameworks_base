@@ -20,13 +20,11 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MemoryFileTest extends AndroidTestCase {
@@ -99,6 +97,25 @@ public class MemoryFileTest extends AndroidTestCase {
         compareBuffers(testString, buffer, testString.length);
 
         file.close();
+    }
+
+    // http://code.google.com/p/android/issues/detail?id=11415
+    public void testOutputStreamAdvances() throws IOException {
+        MemoryFile file = new MemoryFile("MemoryFileTest", 10);
+
+        OutputStream os = file.getOutputStream();
+        os.write(new byte[] { 1, 2, 3, 4, 5 });
+        os.write(new byte[] { -1, -1, 6, 7, 8, -1 }, 2, 3);
+        os.write(9);
+        try {
+            os.write(new byte[] { -1, -1 });
+            fail();
+        } catch (IndexOutOfBoundsException expected) {
+        }
+
+        byte[] copy = new byte[file.length()];
+        file.readBytes(copy, 0, 0, file.length());
+        assertEquals("[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]", Arrays.toString(copy));
     }
 
     // Tests for the IndexOutOfBoundsException cases in read().
