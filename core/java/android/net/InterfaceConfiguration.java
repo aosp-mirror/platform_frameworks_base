@@ -51,6 +51,24 @@ public class InterfaceConfiguration implements Parcelable {
             append(addr & 0xff);
     }
 
+    /**
+     * This function determines if the interface is up and has a valid IP
+     * configuration (IP address has a non zero octet).
+     *
+     * Note: It is supposed to be quick and hence should not initiate
+     * any network activity
+     */
+    public boolean isActive() {
+        try {
+            if(interfaceFlags.contains("up")) {
+                if (ipAddr != 0) return true;
+            }
+        } catch (NullPointerException e) {
+            return false;
+        }
+        return false;
+    }
+
     /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
