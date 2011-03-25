@@ -6041,7 +6041,6 @@ public class WebView extends AbsoluteLayout
         if (shouldForwardTouchEvent()) {
             if (removeEvents) {
                 mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
-                mTouchEventQueue.ignoreCurrentlyMissingEvents();
             }
             TouchEventData ted = new TouchEventData();
             ted.mIds = new int[1];
@@ -6058,6 +6057,12 @@ public class WebView extends AbsoluteLayout
             ted.mSequence = mTouchEventQueue.nextTouchSequence();
             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
             mPreventDefault = PREVENT_DEFAULT_IGNORE;
+
+            if (removeEvents) {
+                // Mark this after sending the message above; we should
+                // be willing to ignore the cancel event that we just sent.
+                mTouchEventQueue.ignoreCurrentlyMissingEvents();
+            }
         }
     }
 
@@ -7251,17 +7256,18 @@ public class WebView extends AbsoluteLayout
          * been queued will also be processed in their proper order.
          *
          * @param ted Touch data to be processed in order.
+         * @return true if the event was processed before returning, false if it was just enqueued.
          */
-        public void enqueueTouchEvent(TouchEventData ted) {
+        public boolean enqueueTouchEvent(TouchEventData ted) {
             if (ted.mSequence < mLastHandledTouchSequence) {
                 // Stale event and we already moved on; drop it. (Should not be common.)
                 Log.w(LOGTAG, "Stale touch event " + MotionEvent.actionToString(ted.mAction) +
                         " received from webcore; ignoring");
-                return;
+                return false;
             }
 
             if (dropStaleGestures(ted.mMotionEvent, ted.mSequence)) {
-                return;
+                return false;
             }
 
             if (mLastHandledTouchSequence + 1 == ted.mSequence) {
@@ -7283,6 +7289,7 @@ public class WebView extends AbsoluteLayout
                 QueuedTouch qd = obtainQueuedTouch().set(ted);
                 mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
             }
+            return true;
         }
 
         /**
@@ -7839,11 +7846,11 @@ public class WebView extends AbsoluteLayout
                     }
                     TouchEventData ted = (TouchEventData) msg.obj;
 
-                    // WebCore is responding to us; remove pending timeout.
-                    // It will be re-posted when needed.
-                    removeMessages(PREVENT_DEFAULT_TIMEOUT);
-
-                    mTouchEventQueue.enqueueTouchEvent(ted);
+                    if (mTouchEventQueue.enqueueTouchEvent(ted)) {
+                        // WebCore is responding to us; remove pending timeout.
+                        // It will be re-posted when needed.
+                        removeMessages(PREVENT_DEFAULT_TIMEOUT);
+                    }
                     break;
 
                 case REQUEST_KEYBOARD:
