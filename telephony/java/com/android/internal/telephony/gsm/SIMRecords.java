@@ -478,6 +478,11 @@ public final class SIMRecords extends IccRecords {
 
         // Length = length of MCC + length of MNC
         // length of mcc = 3 (TS 23.003 Section 2.2)
+        if (SystemProperties.getInt(com.android.internal.telephony.TelephonyProperties
+                .PROPERTY_NETWORK_LTE_ON_CDMA, 0) == 1) {
+            Log.e(LOG_TAG, "getSIMOperatorNumeric: STOPSHIP bad numeric operators in lte");
+            return SystemProperties.get("ro.cdma.home.operator.numeric", "310004");
+        }
         return imsi.substring(0, 3 + mncLength);
     }
 
