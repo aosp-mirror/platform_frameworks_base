@@ -219,6 +219,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 break;
             case ServiceState.RADIO_TECHNOLOGY_EHRPD:
                 ret = "CDMA - eHRPD";
+                break;
             default:
                 if (DBG) {
                     Log.e(LOG_TAG, " [CdmaLteServiceStateTracker] Wrong network."
