@@ -29,8 +29,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libhardware \
     libhardware_legacy \
-    libsurfaceflinger_client \
     libskia \
+    libgui \
     libui
 
 LOCAL_C_INCLUDES := \

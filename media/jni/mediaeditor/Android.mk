@@ -55,7 +55,7 @@ LOCAL_SHARED_LIBRARIES := \
     libbinder \
     libstagefright \
     libstagefright_omx \
-    libsurfaceflinger_client \
+    libgui \
     libvideoeditorplayer
 
 

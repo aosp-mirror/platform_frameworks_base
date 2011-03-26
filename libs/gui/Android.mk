@@ -10,7 +10,15 @@ LOCAL_SRC_FILES:= \
 	SensorEventQueue.cpp \
 	SensorManager.cpp \
 	SurfaceTexture.cpp \
-	SurfaceTextureClient.cpp
+	SurfaceTextureClient.cpp \
+	ISurfaceComposer.cpp \
+	ISurface.cpp \
+	ISurfaceComposerClient.cpp \
+	IGraphicBufferAlloc.cpp \
+	LayerState.cpp \
+	SharedBufferStack.cpp \
+	Surface.cpp \
+	SurfaceComposerClient.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
@@ -21,7 +29,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libui \
 	libEGL \
 	libGLESv2 \
-	libsurfaceflinger_client
 
 
 LOCAL_MODULE:= libgui

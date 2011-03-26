@@ -22,7 +22,7 @@ LOCAL_SHARED_LIBRARIES := \
     libskia \
     libui \
     libcutils \
-    libsurfaceflinger_client \
+    libgui \
     libstagefright \
     libcamera_client \
     libsqlite \

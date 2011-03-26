@@ -70,7 +70,6 @@ LOCAL_SHARED_LIBRARIES := \
         libui             \
         libsonivox        \
         libvorbisidec     \
-        libsurfaceflinger_client \
         libstagefright_yuv \
         libcamera_client \
         libdrmframework  \

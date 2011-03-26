@@ -31,8 +31,7 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libandroid_runtime    			\
 	libstagefright        			\
 	libstagefright_omx    			\
-	libstagefright_foundation               \
-	libsurfaceflinger_client                \
+	libstagefright_foundation       \
 	libgui
 
 LOCAL_STATIC_LIBRARIES := \

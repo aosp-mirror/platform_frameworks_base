@@ -8,7 +8,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
     libui \
-    libsurfaceflinger_client
+    libgui
 
 LOCAL_MODULE:= test-resize
 
