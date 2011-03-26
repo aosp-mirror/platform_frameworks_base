@@ -818,6 +818,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 result.add(apn);
             } while (cursor.moveToNext());
         }
+        if (DBG) log("createApnList: X result=" + result);
         return result;
     }
 
@@ -1604,6 +1605,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         if (operator != null) {
             String selection = "numeric = '" + operator + "'";
+            if (DBG) log("createAllApnList: selection=" + selection);
 
             Cursor cursor = mPhone.getContext().getContentResolver().query(
                     Telephony.Carriers.CONTENT_URI, null, selection, null, null);
@@ -1617,18 +1619,19 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (mAllApns.isEmpty()) {
-            if (DBG) log("No APN found for carrier: " + operator);
+            if (DBG) log("createAllApnList: No APN found for carrier: " + operator);
             mPreferredApn = null;
             // TODO: What is the right behaviour?
             //notifyNoData(GsmDataConnection.FailCause.MISSING_UNKNOWN_APN);
         } else {
             mPreferredApn = getPreferredApn();
-            log("Get PreferredAPN");
             if (mPreferredApn != null && !mPreferredApn.numeric.equals(operator)) {
                 mPreferredApn = null;
                 setPreferredApn(-1);
             }
+            if (DBG) log("createAllApnList: mPreferredApn=" + mPreferredApn);
         }
+        if (DBG) log("createAllApnList: X mAllApns=" + mAllApns);
     }
 
     /** Return the id for a new data connection */
@@ -1687,6 +1690,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (requestedApnType.equals(Phone.APN_TYPE_DUN)) {
             ApnSetting dun = fetchDunApn();
             if (dun != null) apnList.add(dun);
+            if (DBG) log("buildWaitingApns: X added APN_TYPE_DUN apnList=" + apnList);
             return apnList;
         }
 
@@ -1697,10 +1701,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 log("Preferred APN:" + operator + ":"
                         + mPreferredApn.numeric + ":" + mPreferredApn);
                 if (mPreferredApn.numeric.equals(operator)) {
-                    log("Waiting APN set to preferred APN");
                     apnList.add(mPreferredApn);
+                    if (DBG) log("buildWaitingApns: X added preferred apnList=" + apnList);
                     return apnList;
                 } else {
+                    if (DBG) log("buildWaitingApns: no preferred APN");
                     setPreferredApn(-1);
                     mPreferredApn = null;
                 }
@@ -1714,6 +1719,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 }
             }
         }
+        if (DBG) log("buildWaitingApns: X apnList=" + apnList);
         return apnList;
     }
 
