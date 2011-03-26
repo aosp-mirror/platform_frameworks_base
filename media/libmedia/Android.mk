@@ -38,7 +38,7 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat \
-        libsurfaceflinger_client libcamera_client libstagefright_foundation \
+        libcamera_client libstagefright_foundation \
         libgui
 
 LOCAL_MODULE:= libmedia

@@ -13,7 +13,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libbinder \
 	libhardware \
-	libsurfaceflinger_client \
 	libui \
 	libgui
 

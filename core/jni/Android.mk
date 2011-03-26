@@ -187,7 +187,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libnetutils \
 	libui \
 	libgui \
-	libsurfaceflinger_client \
 	libcamera_client \
 	libskia \
 	libsqlite \

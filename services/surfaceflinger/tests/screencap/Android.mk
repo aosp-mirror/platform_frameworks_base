@@ -10,7 +10,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libskia \
     libui \
-    libsurfaceflinger_client
+    libgui
 
 LOCAL_MODULE:= test-screencap
 

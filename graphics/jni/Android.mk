@@ -19,7 +19,7 @@ LOCAL_SHARED_LIBRARIES := \
         libskia \
         libutils \
         libui \
-        libsurfaceflinger_client
+        libgui
 
 LOCAL_STATIC_LIBRARIES :=
 

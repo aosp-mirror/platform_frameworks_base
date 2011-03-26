@@ -34,7 +34,7 @@ LOCAL_SHARED_LIBRARIES := \
     libui \
     libinput \
     libskia \
-    libsurfaceflinger_client \
+    libgui \
     libusbhost
 
 ifeq ($(TARGET_SIMULATOR),true)

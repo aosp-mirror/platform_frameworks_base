@@ -9,7 +9,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libbinder \
     libui \
-    libsurfaceflinger_client
+    libgui
 
 LOCAL_MODULE:= test-surface
 

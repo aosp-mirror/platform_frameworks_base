@@ -9,6 +9,7 @@ LOCAL_MODULE := SurfaceTexture_test
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := \
+    Surface_test.cpp \
     SurfaceTextureClient_test.cpp \
     SurfaceTexture_test.cpp \
 
@@ -20,7 +21,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libgui \
 	libstlport \
-	libsurfaceflinger_client \
 	libui \
 	libutils \
 

@@ -19,7 +19,7 @@ LOCAL_SHARED_LIBRARIES += \
                 libutils \
                 libui \
                 libcamera_client \
-                libsurfaceflinger_client
+                libgui
 
 # Disable it because the ISurface interface may change, and before we have a
 # chance to fix this test, we don't want to break normal builds.

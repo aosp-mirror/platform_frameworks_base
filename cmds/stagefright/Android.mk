@@ -8,7 +8,7 @@ LOCAL_SRC_FILES:=       \
 
 LOCAL_SHARED_LIBRARIES := \
 	libstagefright libmedia libutils libbinder libstagefright_foundation \
-        libskia libsurfaceflinger_client libgui
+        libskia libgui
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \
@@ -107,7 +107,7 @@ LOCAL_SRC_FILES:=         \
         stream.cpp    \
 
 LOCAL_SHARED_LIBRARIES := \
-	libstagefright liblog libutils libbinder libsurfaceflinger_client \
+	libstagefright liblog libutils libbinder libgui \
         libstagefright_foundation libmedia
 
 LOCAL_C_INCLUDES:= \
@@ -132,7 +132,7 @@ LOCAL_SRC_FILES:=         \
 
 LOCAL_SHARED_LIBRARIES := \
 	libstagefright liblog libutils libbinder libstagefright_foundation \
-        libmedia libsurfaceflinger_client libcutils libui
+        libmedia libgui libcutils libui
 
 LOCAL_C_INCLUDES:= \
 	$(JNI_H_INCLUDE) \

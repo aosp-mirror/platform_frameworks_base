@@ -1,22 +1,9 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= \
-	ISurfaceComposer.cpp \
-	ISurface.cpp \
-	ISurfaceComposerClient.cpp \
-	IGraphicBufferAlloc.cpp \
-	LayerState.cpp \
-	SharedBufferStack.cpp \
-	Surface.cpp \
-	SurfaceComposerClient.cpp
+LOCAL_SRC_FILES:=
 
-LOCAL_SHARED_LIBRARIES := \
-	libcutils \
-	libutils \
-	libbinder \
-	libhardware \
-	libui
+LOCAL_SHARED_LIBRARIES := 
 
 LOCAL_MODULE:= libsurfaceflinger_client
 

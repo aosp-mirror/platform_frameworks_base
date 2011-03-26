@@ -15,7 +15,6 @@ shared_libraries := \
     libhardware \
     libhardware_legacy \
     libui \
-    libsurfaceflinger_client \
     libskia \
     libstlport \
     libinput
