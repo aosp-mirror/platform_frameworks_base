@@ -102,26 +102,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     //useful for debugging
     boolean mFailNextConnect = false;
 
-    /**
-     * allApns holds all apns for this sim spn, retrieved from
-     * the Carrier DB.
-     *
-     * Create once after simcard info is loaded
-     */
-    private ArrayList<ApnSetting> mAllApns = null;
-
-    private ApnSetting mPreferredApn = null;
-
-    /** Convert an ApnType string to Id (TODO: Use "enumeration" instead of String for ApnType) */
-    private HashMap<String, Integer> mApnToDataConnectionId =
-                                    new HashMap<String, Integer>();
-
-    /** Phone.APN_TYPE_* ===> ApnContext */
-    private ConcurrentHashMap<String, ApnContext> mApnContexts;
-
-    /** Is packet service restricted by network */
-    private boolean mIsPsRestricted = false;
-
     //***** Constants
 
     private static final int POLL_PDP_MILLIS = 5 * 1000;
@@ -318,7 +298,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return null;
     }
 
+    @Override
+    protected void setState(State s) {
+        if (DBG) log("setState should not be used in GSM" + s);
+    }
+
     // Return state of specific apn type
+    @Override
     public synchronized State getState(String apnType) {
         ApnContext apnContext = mApnContexts.get(apnType);
         if (apnContext != null) {
@@ -609,11 +595,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         return trySetupData(apnContext);
 
-    }
-
-    @Override
-    protected void setState(State s) {
-        if (DBG) log("setState should not be used in GSM" + s);
     }
 
     private boolean trySetupData(ApnContext apnContext) {

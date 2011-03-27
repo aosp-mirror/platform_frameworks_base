@@ -42,6 +42,7 @@ import com.android.internal.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -244,8 +245,25 @@ public abstract class DataConnectionTracker extends Handler {
     protected HashMap<Integer, DataConnection> mDataConnections =
         new HashMap<Integer, DataConnection>();
 
+    /** Convert an ApnType string to Id (TODO: Use "enumeration" instead of String for ApnType) */
+    protected HashMap<String, Integer> mApnToDataConnectionId =
+                                    new HashMap<String, Integer>();
+
+    /** Phone.APN_TYPE_* ===> ApnContext */
+    protected ConcurrentHashMap<String, ApnContext> mApnContexts;
+
     /* Currently active APN */
     protected ApnSetting mActiveApn;
+
+    /** allApns holds all apns */
+    protected ArrayList<ApnSetting> mAllApns = null;
+
+    /** preferred apn */
+    protected ApnSetting mPreferredApn = null;
+
+    /** Is packet service restricted by network */
+    protected boolean mIsPsRestricted = false;
+
 
     protected BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
     {
@@ -340,11 +358,6 @@ public abstract class DataConnectionTracker extends Handler {
         return mActivity;
     }
 
-    public State getState() {
-        // TODO: reimplement to use apnType better yet REMOVE.
-        return mState;
-    }
-
     /**
      * @return the data connections
      */
@@ -386,16 +399,7 @@ public abstract class DataConnectionTracker extends Handler {
         return result;
     }
 
-    private String getActiveApnType() {
-        String result;
-        if (mActiveApn != null) {
-            result = apnIdToType(mActiveApn.id);
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
+    /** TODO: See if we can remove */
     public String getActiveApnString() {
         String result = null;
         if (mActiveApn != null) {
@@ -430,10 +434,19 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
-
+    // abstract methods
     protected abstract String getActionIntentReconnectAlarm();
+    protected abstract void startNetStatPoll();
+    protected abstract void stopNetStatPoll();
+    protected abstract void restartRadio();
+    protected abstract void log(String s);
+    protected abstract void loge(String s);
+    protected abstract boolean isDataAllowed();
+    protected abstract boolean isApnTypeAvailable(String type);
+    public    abstract State getState(String apnType);
+    protected abstract void setState(State s);
+    protected abstract void gotoIdleAndNotifyDataConnection(String reason);
 
-    // abstract handler methods
     protected abstract boolean onTrySetupData(String reason);
     protected abstract void onRoamingOff();
     protected abstract void onRoamingOn();
@@ -542,16 +555,6 @@ public abstract class DataConnectionTracker extends Handler {
         return result;
     }
 
-    protected abstract void startNetStatPoll();
-
-    protected abstract void stopNetStatPoll();
-
-    protected abstract void restartRadio();
-
-    protected abstract void log(String s);
-
-    protected abstract void loge(String s);
-
     protected int apnTypeToId(String type) {
         if (TextUtils.equals(type, Phone.APN_TYPE_DEFAULT)) {
             return APN_DEFAULT_ID;
@@ -597,12 +600,6 @@ public abstract class DataConnectionTracker extends Handler {
             return Phone.APN_TYPE_DEFAULT;
         }
     }
-
-    protected abstract boolean isApnTypeAvailable(String type);
-
-    protected abstract void setState(State s);
-
-    protected abstract void gotoIdleAndNotifyDataConnection(String reason);
 
     protected LinkProperties getLinkProperties(String apnType) {
         int id = apnTypeToId(apnType);
@@ -724,13 +721,12 @@ public abstract class DataConnectionTracker extends Handler {
         return possible;
     }
 
-    protected abstract boolean isDataAllowed();
-
     public boolean isApnTypeEnabled(String apnType) {
         if (apnType == null) {
-            apnType = getActiveApnType();
+            return false;
+        } else {
+            return isApnIdEnabled(apnTypeToId(apnType));
         }
-        return isApnIdEnabled(apnTypeToId(apnType));
     }
 
     protected synchronized boolean isApnIdEnabled(int id) {

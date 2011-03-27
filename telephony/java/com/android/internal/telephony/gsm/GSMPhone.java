@@ -312,7 +312,7 @@ public class GSMPhone extends PhoneBase {
                 mDataConnection.isApnTypeActive(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else { /* mSST.gprsState == ServiceState.STATE_IN_SERVICE */
-            switch (mDataConnection.getState()) {
+            switch (mDataConnection.getState(apnType)) {
                 case FAILED:
                 case IDLE:
                     ret = DataState.DISCONNECTED;
