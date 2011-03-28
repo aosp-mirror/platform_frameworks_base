@@ -28,16 +28,6 @@
 
 namespace android {
 
-/**
- *  The size of image for display.
- */
-typedef struct image_rect_struct
-{
-  uint32_t width;      /* Image width */
-  uint32_t height;     /* Image height */
-} image_rect_type;
-
-
 typedef void (*notify_callback)(int32_t msgType,
                                 int32_t ext1,
                                 int32_t ext2,
@@ -90,9 +80,6 @@ public:
     /** Set the ANativeWindow to which preview frames are sent */
     virtual status_t setPreviewWindow(const sp<ANativeWindow>& buf) = 0;
 
-    /** Return the IMemoryHeap for the raw image heap */
-    virtual sp<IMemoryHeap>         getRawHeap() const = 0;
-
     /** Set the notification and data callbacks */
     virtual void setCallbacks(notify_callback notify_cb,
                               data_callback data_cb,
@@ -143,47 +130,6 @@ public:
      * Returns true if preview is enabled.
      */
     virtual bool        previewEnabled() = 0;
-
-    /**
-     * Retrieve the total number of available buffers from camera hal for passing
-     * video frame data in a recording session. Must be called again if a new
-     * recording session is started.
-     *
-     * This method should be called after startRecording(), since
-     * the some camera hal may choose to allocate the video buffers only after
-     * recording is started.
-     *
-     * Some camera hal may not implement this method, and 0 can be returned to
-     * indicate that this feature is not available.
-     *
-     * @return the number of video buffers that camera hal makes available.
-     *      Zero (0) is returned to indicate that camera hal does not support
-     *      this feature.
-     */
-    virtual int32_t     getNumberOfVideoBuffers() const { return 0; }
-
-    /**
-     * Retrieve the video buffer corresponding to the given index in a
-     * recording session. Must be called again if a new recording session
-     * is started.
-     *
-     * It allows a client to retrieve all video buffers that camera hal makes
-     * available to passing video frame data by calling this method with all
-     * valid index values. The valid index value ranges from 0 to n, where
-     * n = getNumberOfVideoBuffers() - 1. With an index outside of the valid
-     * range, 0 must be returned. This method should be called after
-     * startRecording().
-     *
-     * The video buffers should NOT be modified/released by camera hal
-     * until stopRecording() is called and all outstanding video buffers
-     * previously sent out via CAMERA_MSG_VIDEO_FRAME have been released
-     * via releaseVideoBuffer().
-     *
-     * @param index an index to retrieve the corresponding video buffer.
-     *
-     * @return the video buffer corresponding to the given index.
-     */
-    virtual sp<IMemory> getVideoBuffer(int32_t index) const { return 0; }
 
     /**
      * Request the camera hal to store meta data or real YUV data in

@@ -666,20 +666,6 @@ void CameraService::Client::releaseRecordingFrame(const sp<IMemory>& mem) {
     mHardware->releaseRecordingFrame(mem);
 }
 
-int32_t CameraService::Client::getNumberOfVideoBuffers() const {
-    LOG1("getNumberOfVideoBuffers");
-    Mutex::Autolock lock(mLock);
-    if (checkPidAndHardware() != NO_ERROR) return 0;
-    return mHardware->getNumberOfVideoBuffers();
-}
-
-sp<IMemory> CameraService::Client::getVideoBuffer(int32_t index) const {
-    LOG1("getVideoBuffer: %d", index);
-    Mutex::Autolock lock(mLock);
-    if (checkPidAndHardware() != NO_ERROR) return 0;
-    return mHardware->getVideoBuffer(index);
-}
-
 status_t CameraService::Client::storeMetaDataInBuffers(bool enabled)
 {
     LOG1("storeMetaDataInBuffers: %s", enabled? "true": "false");
@@ -938,7 +924,7 @@ void CameraService::Client::notifyCallback(int32_t msgType, int32_t ext1,
     switch (msgType) {
         case CAMERA_MSG_SHUTTER:
             // ext1 is the dimension of the yuv picture.
-            client->handleShutter((image_rect_type *)ext1);
+            client->handleShutter();
             break;
         default:
             client->handleGenericNotify(msgType, ext1, ext2);
@@ -997,9 +983,7 @@ void CameraService::Client::dataCallbackTimestamp(nsecs_t timestamp,
 }
 
 // snapshot taken callback
-// "size" is the width and height of yuv picture for registerBuffer.
-// If it is NULL, use the picture size from parameters.
-void CameraService::Client::handleShutter(image_rect_type *size) {
+void CameraService::Client::handleShutter(void) {
     if (mPlayShutterSound) {
         mCameraService->playSound(SOUND_SHUTTER);
     }

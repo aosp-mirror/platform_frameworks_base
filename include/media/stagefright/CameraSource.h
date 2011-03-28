@@ -99,34 +99,6 @@ public:
     virtual sp<MetaData> getFormat();
 
     /**
-     * Retrieve the total number of video buffers available from
-     * this source.
-     *
-     * This method is useful if these video buffers are used
-     * for passing video frame data to other media components,
-     * such as OMX video encoders, in order to eliminate the
-     * memcpy of the data.
-     *
-     * @return the total numbner of video buffers. Returns 0 to
-     *      indicate that this source does not make the video
-     *      buffer information availalble.
-     */
-    size_t getNumberOfVideoBuffers() const;
-
-    /**
-     * Retrieve the individual video buffer available from
-     * this source.
-     *
-     * @param index the index corresponding to the video buffer.
-     *      Valid range of the index is [0, n], where n =
-     *      getNumberOfVideoBuffers() - 1.
-     *
-     * @return the video buffer corresponding to the given index.
-     *      If index is out of range, 0 should be returned.
-     */
-    sp<IMemory> getVideoBuffer(size_t index) const;
-
-    /**
      * Tell whether this camera source stores meta data or real YUV
      * frame data in video buffers.
      *
