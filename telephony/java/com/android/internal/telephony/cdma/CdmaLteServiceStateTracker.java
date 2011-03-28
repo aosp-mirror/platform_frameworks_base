@@ -152,17 +152,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 pollStateDone();
                 break;
 
-            case SIM_NOT_READY:
-            case SIM_LOCKED_OR_ABSENT:
-            case SIM_READY:
-                log("Radio Technology Change ongoing, setting SS to off");
-                newSS.setStateOff();
-                newCellLoc.setStateInvalid();
-                setSignalStrengthDefaultValues();
-                mGotCountryCode = false;
-                // NOTE: pollStateDone() is not needed in this case
-                break;
-
             default:
                 // Issue all poll-related commands at once, then count
                 // down the responses which are allowed to arrive
