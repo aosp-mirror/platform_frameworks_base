@@ -249,16 +249,19 @@ android_glBlendColor__FFFF
 static void
 android_glBlendEquation__I
   (JNIEnv *_env, jobject _this, jint mode) {
-    _env->ThrowNew(UOEClass,
-        "glBlendEquation");
+    glBlendEquation(
+        (GLenum)mode
+    );
 }
 
 /* void glBlendEquationSeparate ( GLenum modeRGB, GLenum modeAlpha ) */
 static void
 android_glBlendEquationSeparate__II
   (JNIEnv *_env, jobject _this, jint modeRGB, jint modeAlpha) {
-    _env->ThrowNew(UOEClass,
-        "glBlendEquationSeparate");
+    glBlendEquationSeparate(
+        (GLenum)modeRGB,
+        (GLenum)modeAlpha
+    );
 }
 
 /* void glBlendFunc ( GLenum sfactor, GLenum dfactor ) */
@@ -275,8 +278,12 @@ android_glBlendFunc__II
 static void
 android_glBlendFuncSeparate__IIII
   (JNIEnv *_env, jobject _this, jint srcRGB, jint dstRGB, jint srcAlpha, jint dstAlpha) {
-    _env->ThrowNew(UOEClass,
-        "glBlendFuncSeparate");
+    glBlendFuncSeparate(
+        (GLenum)srcRGB,
+        (GLenum)dstRGB,
+        (GLenum)srcAlpha,
+        (GLenum)dstAlpha
+    );
 }
 
 /* void glBufferData ( GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage ) */
@@ -1643,16 +1650,69 @@ android_glGetBooleanv__ILjava_nio_IntBuffer_2
 static void
 android_glGetBufferParameteriv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
-    _env->ThrowNew(UOEClass,
-        "glGetBufferParameteriv");
+    jint _exception = 0;
+    GLint *params_base = (GLint *) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    if (!params_ref) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "params == null");
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "offset < 0");
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(params_ref) - offset;
+    if (_remaining < 1) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "length - offset < 1");
+        goto exit;
+    }
+    params_base = (GLint *)
+        _env->GetPrimitiveArrayCritical(params_ref, (jboolean *)0);
+    params = params_base + offset;
+
+    glGetBufferParameteriv(
+        (GLenum)target,
+        (GLenum)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (params_base) {
+        _env->ReleasePrimitiveArrayCritical(params_ref, params_base,
+            _exception ? JNI_ABORT: 0);
+    }
 }
 
 /* void glGetBufferParameteriv ( GLenum target, GLenum pname, GLint *params ) */
 static void
 android_glGetBufferParameteriv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
-    _env->ThrowNew(UOEClass,
-        "glGetBufferParameteriv");
+    jint _exception = 0;
+    jarray _array = (jarray) 0;
+    jint _remaining;
+    GLint *params = (GLint *) 0;
+
+    params = (GLint *)getPointer(_env, params_buf, &_array, &_remaining);
+    if (_remaining < 1) {
+        _exception = 1;
+        _env->ThrowNew(IAEClass, "remaining() < 1");
+        goto exit;
+    }
+    glGetBufferParameteriv(
+        (GLenum)target,
+        (GLenum)pname,
+        (GLint *)params
+    );
+
+exit:
+    if (_array) {
+        releasePointer(_env, _array, params, _exception ? JNI_FALSE : JNI_TRUE);
+    }
 }
 
 /* GLenum glGetError ( void ) */

@@ -31,28 +31,12 @@ glDrawTexfvOES check coords 5
 glDrawTexivOES check coords 5
 glDrawTexsvOES check coords 5
 glDrawTexxvOES check coords 5
-glBindFramebufferOES unsupported
-glBindRenderbufferOES unsupported
-glBlendEquation unsupported
-glBlendEquationSeparate unsupported
-glBlendFuncSeparate unsupported
-glCheckFramebufferStatusOES unsupported return 0
-glDeleteFramebuffersOES unsupported
-glDeleteRenderbuffersOES unsupported
-glFramebufferRenderbufferOES unsupported
-glFramebufferStorageOES unsupported
-glFramebufferTexture2DOES unsupported
-glGenFramebuffersOES unsupported
-glGenRenderbuffersOES unsupported
-glGenerateMipmapOES unsupported
-glGetBufferParameter unsupported
-glGetFramebufferAttachmentParameterivOES unsupported
-glGetRenderbufferParameterivOES unsupported
-glGetTexGen unsupported
-glIsFramebufferOES unsupported return JNI_FALSE
-glIsRenderbufferOES unsupported return JNI_FALSE
-glRenderbufferStorageOES unsupported return false
-glTexGen unsupported
-glTexGenf unsupported
-glTexGeni unsupported
-glTexGenx unsupported
+glDeleteFramebuffersOES check framebuffers n
+glDeleteRenderbuffersOES check renderbuffers n
+glGenFramebuffersOES check framebuffers n
+glGenRenderbuffersOES check renderbuffers n
+glGetBufferParameter check params 1
+glGetFramebufferAttachmentParameterivOES check params 1
+glGetRenderbufferParameterivOES check params 1
+glGetTexGen ifcheck params 1 pname GL_TEXTURE_GEN_MODE ifcheck params 4 pname GL_OBJECT_PLANE,GL_EYE_PLANE
+
