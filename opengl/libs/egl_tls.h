@@ -14,23 +14,27 @@
  ** limitations under the License.
  */
 
-#ifndef _GLESV2_DBG_H_
-#define _GLESV2_DBG_H_
+#ifndef ANDROID_EGL_TLS_H
+#define ANDROID_EGL_TLS_H
 
-#include <pthread.h>
+#include <EGL/egl.h>
+
+#include "glesv2dbg.h"
 
 namespace android
 {
-struct DbgContext;
+struct tls_t {
+    tls_t() : error(EGL_SUCCESS), ctx(0), logCallWithNoContext(EGL_TRUE), dbg(0) { }
+    ~tls_t() {
+        if (dbg)
+            DestroyDbgContext(dbg);
+    }
 
-DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
-                              const unsigned version, const gl_hooks_t * const hooks);
+    EGLint      error;
+    EGLContext  ctx;
+    EGLBoolean  logCallWithNoContext;
+    DbgContext* dbg;
+};
+}
 
-void DestroyDbgContext(DbgContext * const dbg);
-
-void StartDebugServer(unsigned short port); // create and bind socket if haven't already
-void StopDebugServer(); // close socket if open
-
-}; // namespace android
-
-#endif // #ifndef _GLESV2_DBG_H_
+#endif

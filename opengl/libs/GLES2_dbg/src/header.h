@@ -14,6 +14,9 @@
  ** limitations under the License.
  */
 
+#ifndef ANDROID_GLES2_DBG_HEADER_H
+#define ANDROID_GLES2_DBG_HEADER_H
+
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
@@ -24,9 +27,7 @@
 
 #include <cutils/log.h>
 #include <utils/Timers.h>
-#include <../../../libcore/include/StaticAssert.h>
 
-#define EGL_TRACE 1
 #include "hooks.h"
 
 #include "glesv2dbg.h"
@@ -38,8 +39,6 @@
 
 using namespace android;
 using namespace com::android;
-
-#define API_ENTRY(_api) Debug_##_api
 
 #ifndef __location__
 #define __HIERALLOC_STRING_0__(s)   #s
@@ -141,9 +140,7 @@ public:
     void glDeleteBuffers(GLsizei n, const GLuint *buffers);
 };
 
-
 DbgContext * getDbgContextThreadSpecific();
-#define DBGCONTEXT(ctx) DbgContext * const ctx = getDbgContextThreadSpecific();
 
 struct FunctionCall {
     virtual const int * operator()(gl_hooks_t::gl_t const * const _c,
@@ -169,3 +166,5 @@ void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd);
 const int * GenerateCall(DbgContext * const dbg, const glesv2debugger::Message & cmd,
                          glesv2debugger::Message & msg, const int * const prevRet);
 }; // namespace android {
+
+#endif // #ifndef ANDROID_GLES2_DBG_HEADER_H
