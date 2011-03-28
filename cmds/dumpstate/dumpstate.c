@@ -114,6 +114,15 @@ static void dumpstate() {
     run_command("WIFI NETWORKS", 20,
             "su", "root", "wpa_cli", "list_networks", NULL);
 
+    property_get("dhcp.wlan0.gateway", network, "");
+    if (network[0])
+        run_command("PING GATEWAY", 10, "su", "root", "ping", "-c", "3", "-i", ".5", network, NULL);
+    property_get("dhcp.wlan0.dns1", network, "");
+    if (network[0])
+        run_command("PING DNS1", 10, "su", "root", "ping", "-c", "3", "-i", ".5", network, NULL);
+    property_get("dhcp.wlan0.dns2", network, "");
+    if (network[0])
+        run_command("PING DNS2", 10, "su", "root", "ping", "-c", "3", "-i", ".5", network, NULL);
 #ifdef FWDUMP_bcm4329
     run_command("DUMP WIFI STATUS", 20,
             "su", "root", "dhdutil", "-i", "wlan0", "dump", NULL);
