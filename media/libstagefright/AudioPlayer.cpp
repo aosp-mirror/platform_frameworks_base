@@ -452,6 +452,10 @@ int64_t AudioPlayer::getMediaTimeUs() {
     Mutex::Autolock autoLock(mLock);
 
     if (mPositionTimeMediaUs < 0 || mPositionTimeRealUs < 0) {
+        if (mSeeking) {
+            return mSeekTimeUs;
+        }
+
         return 0;
     }
 
@@ -477,6 +481,7 @@ status_t AudioPlayer::seekTo(int64_t time_us) {
     Mutex::Autolock autoLock(mLock);
 
     mSeeking = true;
+    mPositionTimeRealUs = mPositionTimeMediaUs = -1;
     mReachedEOS = false;
     mSeekTimeUs = time_us;
 
