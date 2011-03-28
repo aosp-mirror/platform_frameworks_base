@@ -46,6 +46,8 @@ public class Movie {
     public static native Movie decodeByteArray(byte[] data, int offset,
                                                int length);
 
+    private static native void nativeDestructor(int nativeMovie);
+
     public static Movie decodeFile(String pathName) {
         InputStream is;
         try {
@@ -55,6 +57,15 @@ public class Movie {
             return null;
         }
         return decodeTempStream(is);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            nativeDestructor(mNativeMovie);
+        } finally {
+            super.finalize();
+        }
     }
 
     private static Movie decodeTempStream(InputStream is) {
