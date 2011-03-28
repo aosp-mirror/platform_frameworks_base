@@ -192,6 +192,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     public void dispose() {
+        cleanUpAllConnections(false, null);
+
         super.dispose();
 
         //Unregister for all events
@@ -1791,7 +1793,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     public void handleMessage (Message msg) {
         if (DBG) log("GSMDataConnTrack handleMessage "+msg);
 
-        if (!mPhone.mIsTheCurrentActivePhone) {
+        if (!mPhone.mIsTheCurrentActivePhone || mIsDisposed) {
             log("Ignore GSM msgs since GSM phone is inactive");
             return;
         }

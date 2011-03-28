@@ -247,6 +247,9 @@ public abstract class DataConnectionTracker extends Handler {
     /* Currently active APN */
     protected ApnSetting mActiveApn;
 
+    /* Once disposed dont handle any messages */
+    protected boolean mIsDisposed = false;
+
     protected BroadcastReceiver mIntentReceiver = new BroadcastReceiver ()
     {
         @Override
@@ -327,6 +330,7 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     public void dispose() {
+        mIsDisposed = true;
         mPhone.getContext().unregisterReceiver(this.mIntentReceiver);
     }
 
