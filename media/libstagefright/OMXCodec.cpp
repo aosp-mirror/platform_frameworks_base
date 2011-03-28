@@ -1912,6 +1912,11 @@ OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
 }
 
 void OMXCodec::on_message(const omx_message &msg) {
+    if (mState == ERROR) {
+        LOGW("Dropping OMX message - we're in ERROR state.");
+        return;
+    }
+
     switch (msg.type) {
         case omx_message::EVENT:
         {
