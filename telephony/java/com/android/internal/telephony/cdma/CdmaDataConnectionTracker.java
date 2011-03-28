@@ -118,6 +118,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     public void dispose() {
+        cleanUpConnection(false, null);
+
         super.dispose();
 
         // Unregister from all events
@@ -861,7 +863,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     @Override
     public void handleMessage (Message msg) {
 
-        if (!mPhone.mIsTheCurrentActivePhone) {
+        if (!mPhone.mIsTheCurrentActivePhone || mIsDisposed) {
             log("Ignore CDMA msgs since CDMA phone is inactive");
             return;
         }
