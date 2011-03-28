@@ -117,9 +117,14 @@ static int usb_device_added(const char *devname, void* client_data) {
     jintArray endpointArray = env->NewIntArray(length);
     env->SetIntArrayRegion(endpointArray, 0, length, endpointValues.array());
 
+    jstring deviceName = env->NewStringUTF(devname);
     env->CallVoidMethod(thiz, method_usbDeviceAdded,
-            env->NewStringUTF(devname), vendorId, productId, deviceClass,
+            deviceName, vendorId, productId, deviceClass,
             deviceSubClass, protocol, interfaceArray, endpointArray);
+
+    env->DeleteLocalRef(interfaceArray);
+    env->DeleteLocalRef(endpointArray);
+    env->DeleteLocalRef(deviceName);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 
     return 0;
@@ -129,7 +134,9 @@ static int usb_device_removed(const char *devname, void* client_data) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     jobject thiz = (jobject)client_data;
 
+    jstring deviceName = env->NewStringUTF(devname);
     env->CallVoidMethod(thiz, method_usbDeviceRemoved, env->NewStringUTF(devname));
+    env->DeleteLocalRef(deviceName);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return 0;
 }
