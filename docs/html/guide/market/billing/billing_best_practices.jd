@@ -24,11 +24,7 @@ parent.link=index.html
 </div>
 </div>
 
-<div class="special" style="margin-right:345px">
-  <p>During the testing phase of the in-app billing release you cannot publish applications that implement in-app billing. You can only upload in-app billing applications as draft applications. For more information, see <a href="{@docRoot}guide/market/billing/billing_about.html">About this Release</a></p>
-</div>
-
-<p>As you design your in-app billing implementation, be sure to follow the security and design guidelines that are discussed in this document. These guidelines are recommended best practices for anyone who is using the Android Market in-app billing service and can be incorporated into any in-app billing implementation.</p>
+<p>As you design your in-app billing implementation, be sure to follow the security and design guidelines that are discussed in this document. These guidelines are recommended best practices for anyone who is using Android Market's in-app billing service.</p>
 
 <h2>Security Best Practices</h2>
 
