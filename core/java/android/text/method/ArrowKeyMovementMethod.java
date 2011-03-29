@@ -17,13 +17,22 @@
 package android.text.method;
 
 import android.graphics.Rect;
+import android.text.CharSequenceIterator;
+import android.text.Editable;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.Spanned;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.util.MathUtils;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+
+import java.text.BreakIterator;
+import java.text.CharacterIterator;
 
 /**
  * A movement method that provides cursor movement and selection.
@@ -193,6 +202,20 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         }
     }
 
+    /** {@hide} */
+    @Override
+    protected boolean leftWord(TextView widget, Spannable buffer) {
+        mWordIterator.setCharSequence(buffer);
+        return Selection.moveToPreceding(buffer, mWordIterator, isSelecting(buffer));
+    }
+
+    /** {@hide} */
+    @Override
+    protected boolean rightWord(TextView widget, Spannable buffer) {
+        mWordIterator.setCharSequence(buffer);
+        return Selection.moveToFollowing(buffer, mWordIterator, isSelecting(buffer));
+    }
+
     @Override
     protected boolean home(TextView widget, Spannable buffer) {
         return lineStart(widget, buffer);
@@ -205,7 +228,8 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
 
     @Override
     public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
-        int initialScrollX = -1, initialScrollY = -1;
+        int initialScrollX = -1;
+        int initialScrollY = -1;
         final int action = event.getAction();
 
         if (action == MotionEvent.ACTION_UP) {
@@ -220,7 +244,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
               boolean cap = isSelecting(buffer);
               if (cap) {
                   int offset = widget.getOffset((int) event.getX(), (int) event.getY());
-                  
+
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
 
                   // Disallow intercepting of the touch events, so that
@@ -308,6 +332,103 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         return sInstance;
     }
 
+    /**
+     * Walks through cursor positions at word boundaries. Internally uses
+     * {@link BreakIterator#getWordInstance()}, and caches {@link CharSequence}
+     * for performance reasons.
+     */
+    private static class WordIterator implements Selection.PositionIterator {
+        private CharSequence mCurrent;
+        private boolean mCurrentDirty = false;
+
+        private BreakIterator mIterator;
+
+        private TextWatcher mWatcher = new TextWatcher() {
+            /** {@inheritDoc} */
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // ignored
+            }
+
+            /** {@inheritDoc} */
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mCurrentDirty = true;
+            }
+
+            /** {@inheritDoc} */
+            public void afterTextChanged(Editable s) {
+                // ignored
+            }
+        };
+
+        public void setCharSequence(CharSequence incoming) {
+            if (mIterator == null) {
+                mIterator = BreakIterator.getWordInstance();
+            }
+
+            // when incoming is different object, move listeners to new sequence
+            // and mark as dirty so we reload contents.
+            if (mCurrent != incoming) {
+                if (mCurrent instanceof Editable) {
+                    ((Editable) mCurrent).removeSpan(mWatcher);
+                }
+
+                if (incoming instanceof Editable) {
+                    ((Editable) incoming).setSpan(
+                            mWatcher, 0, incoming.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                }
+
+                mCurrent = incoming;
+                mCurrentDirty = true;
+            }
+
+            if (mCurrentDirty) {
+                final CharacterIterator charIterator = new CharSequenceIterator(mCurrent);
+                mIterator.setText(charIterator);
+
+                mCurrentDirty = false;
+            }
+        }
+
+        private boolean isValidOffset(int offset) {
+            return offset >= 0 && offset < mCurrent.length();
+        }
+
+        private boolean isLetterOrDigit(int offset) {
+            if (isValidOffset(offset)) {
+                return Character.isLetterOrDigit(mCurrent.charAt(offset));
+            } else {
+                return false;
+            }
+        }
+
+        /** {@inheritDoc} */
+        public int preceding(int offset) {
+            // always round cursor index into valid string index
+            offset = MathUtils.constrain(offset, 0, mCurrent.length() - 1);
+
+            do {
+                offset = mIterator.preceding(offset);
+                if (isLetterOrDigit(offset)) break;
+            } while (isValidOffset(offset));
+
+            return offset;
+        }
+
+        /** {@inheritDoc} */
+        public int following(int offset) {
+            // always round cursor index into valid string index
+            offset = MathUtils.constrain(offset, 0, mCurrent.length() - 1);
+
+            do {
+                offset = mIterator.following(offset);
+                if (isLetterOrDigit(offset - 1)) break;
+            } while (isValidOffset(offset));
+
+            return offset;
+        }
+    }
+
+    private WordIterator mWordIterator = new WordIterator();
 
     private static final Object LAST_TAP_DOWN = new Object();
     private static ArrowKeyMovementMethod sInstance;

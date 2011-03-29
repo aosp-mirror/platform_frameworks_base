@@ -16,6 +16,11 @@
 
 package android.text;
 
+import android.util.Log;
+
+import java.text.BreakIterator;
+import java.text.CharacterIterator;
+
 
 /**
  * Utility class for manipulating cursors and selections in CharSequences.
@@ -38,7 +43,7 @@ public class Selection {
         else
             return -1;
     }
-   
+
     /**
      * Return the offset of the selection edge or cursor, or -1 if
      * there is no selection or cursor.
@@ -57,7 +62,7 @@ public class Selection {
     // private static int pin(int value, int min, int max) {
     //     return value < min ? 0 : (value > max ? max : value);
     // }
-   
+
     /**
      * Set the selection anchor to <code>start</code> and the selection edge
      * to <code>stop</code>.
@@ -69,7 +74,7 @@ public class Selection {
 
         int ostart = getSelectionStart(text);
         int oend = getSelectionEnd(text);
-    
+
         if (ostart != start || oend != stop) {
             text.setSpan(SELECTION_START, start, start,
                          Spanned.SPAN_POINT_POINT|Spanned.SPAN_INTERMEDIATE);
@@ -357,6 +362,42 @@ public class Selection {
         return true;
     }
 
+    /** {@hide} */
+    public static interface PositionIterator {
+        public static final int DONE = BreakIterator.DONE;
+
+        public int preceding(int position);
+        public int following(int position);
+    }
+
+    /** {@hide} */
+    public static boolean moveToPreceding(
+            Spannable text, PositionIterator iter, boolean extendSelection) {
+        final int offset = iter.preceding(getSelectionEnd(text));
+        if (offset != PositionIterator.DONE) {
+            if (extendSelection) {
+                extendSelection(text, offset);
+            } else {
+                setSelection(text, offset);
+            }
+        }
+        return true;
+    }
+
+    /** {@hide} */
+    public static boolean moveToFollowing(
+            Spannable text, PositionIterator iter, boolean extendSelection) {
+        final int offset = iter.following(getSelectionEnd(text));
+        if (offset != PositionIterator.DONE) {
+            if (extendSelection) {
+                extendSelection(text, offset);
+            } else {
+                setSelection(text, offset);
+            }
+        }
+        return true;
+    }
+
     private static int findEdge(Spannable text, Layout layout, int dir) {
         int pt = getSelectionEnd(text);
         int line = layout.getLineForOffset(pt);
@@ -419,7 +460,7 @@ public class Selection {
 
     private static final class START implements NoCopySpan { }
     private static final class END implements NoCopySpan { }
-    
+
     /*
      * Public constants
      */
